@@ -68,5 +68,15 @@
 ### Git
 
 - One logical change per commit.
-- Commit messages: imperative mood, lowercase, no period. Example: `add emotion picker grid component`
-- Branch naming: `issue-{number}-short-description`
+- **Commit messages**: conventional commits, lowercase, no period.
+  Format: `type(scope): description`
+  Types: `feat`, `fix`, `chore`, `docs`, `test`, `quality`
+  Scope is optional, matches label scopes: `core`, `ui`, `db`, `api`, `auth`, `facility`
+  Examples: `feat(ui): add emotion picker grid component`, `fix(db): correct seed data validation`
+- **Branch naming**: `type/issueNumber-description`
+  Examples: `feat/12-path-timeline-view`, `fix/42-emotion-picker-crash`
+- **PR titles**: same format as commit messages.
+- **PR body**: start with `Resolves #N` (or `Closes #N`), list key files changed, include implementation notes when relevant.
+- **Labels**: apply one species label (`feat`, `fix`, `bug`, `chore`, `docs`, `test`, `quality`) and one or more scope labels (`core`, `ui`, `db`, `api`, `auth`, `facility`).
+- **Issue titles**: `[Type] Description` (e.g. `[Feat] Path timeline view`, `[Bug] Emotion picker crash`).
+- Always check if the build and linting pass before opening a PR.
