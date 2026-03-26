@@ -35,17 +35,28 @@ export class LocalProvider implements DataProvider {
     try {
       const raw = localStorage.getItem(STORAGE_KEY)
       if (!raw) {
-        const seed = this.fromSeed()
-        this.writeToStorage(seed)
-        return seed
+        // Return seed in-memory only; the DataProvider mounts a useEffect to
+        // persist via persistIfNeeded() after the first render. This keeps
+        // load() side-effect-free and safe for StrictMode double-invocation.
+        return this.fromSeed()
       }
       return JSON.parse(raw) as Store
     } catch {
-      // Corrupt or unreadable storage — fall back to seed.
-      const seed = this.fromSeed()
-      this.writeToStorage(seed)
-      return seed
+      // Corrupt or unreadable storage — fall back to seed (no write; same as above).
+      return this.fromSeed()
     }
+  }
+
+  /**
+   * Write the current in-memory store to localStorage only if the key is
+   * absent. Safe to call multiple times (e.g. StrictMode double-effect) because
+   * the second call will find the key already present and return immediately.
+   * Call this post-mount (useEffect) — never during construction or render.
+   */
+  persistIfNeeded(): void {
+    if (typeof window === "undefined") return
+    if (localStorage.getItem(STORAGE_KEY) !== null) return
+    this.writeToStorage(this.store)
   }
 
   private fromSeed(): Store {
@@ -80,7 +91,7 @@ export class LocalProvider implements DataProvider {
     return this.store
   }
 
-  reset(): Store {
+  async reset(): Promise<Store> {
     const seed = this.fromSeed()
     this.mutate(seed)
     return seed

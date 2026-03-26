@@ -12,9 +12,9 @@ import { useDataProvider } from "@/lib/data/provider-context"
 export function ResetDataButton() {
   const { provider, setStore } = useDataProvider()
 
-  const handleReset = () => {
+  const handleReset = async () => {
     if (!window.confirm("Reset all data to seed? This cannot be undone.")) return
-    const snapshot = provider.reset()
+    const snapshot = await provider.reset()
     setStore(snapshot)
   }
 

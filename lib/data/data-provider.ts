@@ -35,7 +35,7 @@ export interface DataProvider {
   getStore(): Store
 
   /** Overwrite store with seed data and return the new snapshot. */
-  reset(): Store
+  reset(): Promise<Store>
 
   // Pebbles
   listPebbles(): Promise<Pebble[]>
