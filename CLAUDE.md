@@ -101,7 +101,7 @@ When creating a PR, you MUST follow this checklist:
 2. **PR title**: use conventional commits format `type(scope): description`.
 3. **PR body**: start with `Resolves #N` (or `Closes #N`), list key files changed, include implementation notes.
 4. **Labels and milestone**:
-   - If the PR resolves an issue, propose inheriting the same labels and milestone from that issue and ask the user to confirm.
+   - If the PR resolves an issue, propose inheriting the same labels and milestone from that issue and ask the user to confirm (except if the issue is labelled with `bug`, the PR will be labelled with `fix`).
    - If the PR does not resolve an issue, ask the user which species label, scope label(s), and milestone to apply.
-   - Never create a PR without labels and a milestone.
+   - Never create a PR without labels and a milestone (except if user confirmed there's no milestone).
 5. **Build and lint**: always run `npm run build` and `npm run lint` and confirm they pass before opening the PR.
