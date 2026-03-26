@@ -67,7 +67,8 @@ export default function RootLayout({
               {children}
             </main>
           </ThemeProvider>
-        </DataProvider>      </body>
+        </DataProvider>
+      </body>
     </html>
   );
 }
