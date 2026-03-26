@@ -28,7 +28,8 @@ export class LocalProvider implements DataProvider {
 
   private load(): Store {
     // localStorage is not available during SSR — return an empty store so the
-    // server render is consistent. The client will hydrate in useEffect.
+    // server render is consistent. The client will initialize the store from
+    // localStorage (or seed data) when this runs in the browser.
     if (typeof window === "undefined") return EMPTY_STORE
 
     try {
