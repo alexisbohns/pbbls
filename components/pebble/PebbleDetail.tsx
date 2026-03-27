@@ -1,5 +1,5 @@
 import type { Pebble, Soul } from "@/lib/types"
-import { EMOTIONS, DOMAINS, CARD_TYPES } from "@/lib/config"
+import { EMOTIONS, DOMAINS, CARD_TYPES, POSITIVENESS_SIGNS, POSITIVENESS_LABELS } from "@/lib/config"
 
 type PebbleDetailProps = {
   pebble: Pebble
@@ -14,22 +14,6 @@ const dateTimeFormatter = new Intl.DateTimeFormat("en-US", {
   hour: "numeric",
   minute: "numeric",
 })
-
-const positivenessSigns: Record<number, string> = {
-  [-2]: "−−",
-  [-1]: "−",
-  [0]: "~",
-  [1]: "+",
-  [2]: "++",
-}
-
-const positivenessLabels: Record<number, string> = {
-  [-2]: "Very negative",
-  [-1]: "Negative",
-  [0]: "Neutral",
-  [1]: "Positive",
-  [2]: "Very positive",
-}
 
 function IntensityDots({ intensity }: { intensity: 1 | 2 | 3 }) {
   const filled = "●".repeat(intensity)
@@ -46,8 +30,8 @@ function IntensityDots({ intensity }: { intensity: 1 | 2 | 3 }) {
 }
 
 function PositivenessIndicator({ value }: { value: number }) {
-  const sign = positivenessSigns[value] ?? "~"
-  const label = positivenessLabels[value] ?? "Neutral"
+  const sign = POSITIVENESS_SIGNS[value] ?? "~"
+  const label = POSITIVENESS_LABELS[value] ?? "Neutral"
   return (
     <abbr title={`Positiveness: ${label}`} className="text-sm font-medium no-underline">
       {sign}
