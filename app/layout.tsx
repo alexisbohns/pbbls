@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
-import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { DataProvider } from "@/components/layout/DataProvider";
-import { ResetDataButton } from "@/components/layout/ResetDataButton";
+import { Sidebar } from "@/components/layout/Sidebar";
+import { BottomNav } from "@/components/layout/BottomNav";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -33,39 +32,16 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-background text-foreground">
+      <body className="h-full bg-background text-foreground">
         <DataProvider>
           <ThemeProvider>
-            <header className="border-b border-border">
-              <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-                <nav aria-label="Main navigation">
-                  <ul className="flex items-center gap-4 text-sm font-medium">
-                    <li>
-                      <Link href="/path" className="hover:text-primary">
-                        Path
-                      </Link>
-                    </li>
-                    <li>
-                      <Link href="/record" className="hover:text-primary">
-                        Record
-                      </Link>
-                    </li>
-                    <li>
-                      <Link href="/collections" className="hover:text-primary">
-                        Collections
-                      </Link>
-                    </li>
-                  </ul>
-                </nav>
-                <div className="flex items-center gap-1">
-                  <ResetDataButton />
-                  <ThemeToggle />
-                </div>
-              </div>
-            </header>
-            <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8">
-              {children}
-            </main>
+            <div className="flex h-full">
+              <Sidebar />
+              <main className="flex-1 overflow-y-auto px-4 py-8 pb-20 md:pb-8">
+                <div className="mx-auto max-w-5xl">{children}</div>
+              </main>
+            </div>
+            <BottomNav />
           </ThemeProvider>
         </DataProvider>
       </body>
