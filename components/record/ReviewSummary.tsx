@@ -2,27 +2,15 @@
 
 import type { RecordFormData } from "@/components/record/RecordStepper"
 import { useSouls } from "@/lib/data/useSouls"
-import {
-  EMOTIONS,
-  DOMAINS,
-  CARD_TYPES,
-  POSITIVENESS_SIGNS,
-  POSITIVENESS_LABELS,
-} from "@/lib/config"
+import { EMOTIONS, DOMAINS, CARD_TYPES } from "@/lib/config"
+import { IntensityDots, PositivenessIndicator } from "@/components/pebble/PebbleIndicators"
+import { Badge } from "@/components/ui/badge"
+import { shortDateTimeFormatter } from "@/lib/utils/formatters"
 import type { Soul } from "@/lib/types"
 
 type ReviewSummaryProps = {
   data: RecordFormData
 }
-
-const dateTimeFormatter = new Intl.DateTimeFormat("en-US", {
-  weekday: "short",
-  year: "numeric",
-  month: "short",
-  day: "numeric",
-  hour: "numeric",
-  minute: "numeric",
-})
 
 export function ReviewSummary({ data }: ReviewSummaryProps) {
   const { souls } = useSouls()
@@ -34,12 +22,7 @@ export function ReviewSummary({ data }: ReviewSummaryProps) {
     .filter((s): s is Soul => s !== undefined)
 
   const filledCards = data.cards.filter((c) => c.value.trim() !== "")
-  const formattedDate = dateTimeFormatter.format(new Date(data.happened_at))
-
-  const intensityFilled = "●".repeat(data.intensity)
-  const intensityEmpty = "○".repeat(3 - data.intensity)
-  const positSign = POSITIVENESS_SIGNS[data.positiveness] ?? "~"
-  const positLabel = POSITIVENESS_LABELS[data.positiveness] ?? "Neutral"
+  const formattedDate = shortDateTimeFormatter.format(new Date(data.happened_at))
 
   return (
     <section aria-labelledby="review-heading" className="space-y-3">
@@ -78,19 +61,8 @@ export function ReviewSummary({ data }: ReviewSummaryProps) {
         {/* Intensity & Positiveness */}
         <dt className="text-muted-foreground">Intensity</dt>
         <dd className="flex items-center gap-3">
-          <abbr
-            title={`Intensity: ${data.intensity} of 3`}
-            className="tracking-wide no-underline"
-          >
-            {intensityFilled}
-            {intensityEmpty}
-          </abbr>
-          <abbr
-            title={`Positiveness: ${positLabel}`}
-            className="font-medium no-underline"
-          >
-            {positSign}
-          </abbr>
+          <IntensityDots intensity={data.intensity} />
+          <PositivenessIndicator value={data.positiveness} />
         </dd>
 
         {/* Souls */}
@@ -99,12 +71,7 @@ export function ReviewSummary({ data }: ReviewSummaryProps) {
             <dt className="text-muted-foreground">Souls</dt>
             <dd className="flex flex-wrap gap-1.5">
               {matchedSouls.map((soul) => (
-                <span
-                  key={soul.id}
-                  className="rounded-full border border-border px-2 py-0.5 text-xs font-medium"
-                >
-                  {soul.name}
-                </span>
+                <Badge key={soul.id} variant="outline">{soul.name}</Badge>
               ))}
             </dd>
           </>
@@ -116,12 +83,7 @@ export function ReviewSummary({ data }: ReviewSummaryProps) {
             <dt className="text-muted-foreground">Domains</dt>
             <dd className="flex flex-wrap gap-1.5">
               {domains.map((domain) => (
-                <span
-                  key={domain.id}
-                  className="rounded-full border border-border px-2 py-0.5 text-xs font-medium"
-                >
-                  {domain.name}
-                </span>
+                <Badge key={domain.id} variant="outline">{domain.name}</Badge>
               ))}
             </dd>
           </>

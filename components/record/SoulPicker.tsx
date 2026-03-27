@@ -1,8 +1,11 @@
 "use client"
 
-import { useCallback, useRef, useState } from "react"
+import { useMemo, useRef, useState } from "react"
 import { Plus, Search, X } from "lucide-react"
 import { useSouls } from "@/lib/data/useSouls"
+import { useComboboxFilter } from "@/lib/hooks/useComboboxFilter"
+import { useComboboxKeyboard } from "@/lib/hooks/useComboboxKeyboard"
+import { useComboboxSelection } from "@/lib/hooks/useComboboxSelection"
 import { cn } from "@/lib/utils"
 
 type SoulPickerProps = {
@@ -13,119 +16,51 @@ type SoulPickerProps = {
 export function SoulPicker({ value, onChange }: SoulPickerProps) {
   const { souls, addSoul } = useSouls()
   const [query, setQuery] = useState("")
-  const [isAdding, setIsAdding] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
   const inputRef = useRef<HTMLInputElement>(null)
   const listboxId = "soul-listbox"
 
-  const trimmed = query.trim()
-  const lowerQuery = trimmed.toLowerCase()
+  const { filteredSouls, showAddOption, optionCount, addOptionIndex, trimmed } =
+    useComboboxFilter(souls, value, query)
 
-  const filteredSouls = trimmed
-    ? souls.filter((s) => s.name.toLowerCase().includes(lowerQuery))
-    : souls
+  const clearQuery = () => setQuery("")
+  const resetActive = () => setActiveIndex(-1)
 
-  const exactMatch = souls.some(
-    (s) => s.name.toLowerCase() === lowerQuery,
-  )
-  const showAddOption = trimmed.length > 0 && !exactMatch
+  const { toggle, handleAdd, activateOption, isAdding } = useComboboxSelection({
+    value,
+    onChange,
+    addSoul,
+    filteredSouls,
+    showAddOption,
+    addOptionIndex,
+    trimmed,
+    onQueryClear: clearQuery,
+    onActiveReset: resetActive,
+  })
 
-  // Build the list of options: filtered souls + optional "Add" row
-  const optionCount = filteredSouls.length + (showAddOption ? 1 : 0)
-  const addOptionIndex = filteredSouls.length // index of the "Add" option
-
-  const selectedSouls = souls.filter((s) => value.includes(s.id))
-
-  const toggle = useCallback(
-    (id: string) => {
-      onChange(
-        value.includes(id) ? value.filter((v) => v !== id) : [...value, id],
-      )
-    },
-    [value, onChange],
-  )
-
-  const handleAdd = useCallback(async () => {
-    if (isAdding || !trimmed) return
-    setIsAdding(true)
-    try {
-      const soul = await addSoul({ name: trimmed })
-      onChange([...value, soul.id])
+  const handleKeyDown = useComboboxKeyboard({
+    optionCount,
+    activeIndex,
+    setActiveIndex,
+    showAddOption,
+    onActivate: activateOption,
+    onAdd: () => void handleAdd(),
+    onClear: () => {
       setQuery("")
       setActiveIndex(-1)
-    } finally {
-      setIsAdding(false)
+    },
+  })
+
+  const activeDescendant = useMemo(() => {
+    if (activeIndex >= 0 && activeIndex < filteredSouls.length) {
+      return `soul-option-${filteredSouls[activeIndex].id}`
     }
-  }, [addSoul, isAdding, onChange, trimmed, value])
-
-  const activateOption = useCallback(
-    (index: number) => {
-      if (index === addOptionIndex && showAddOption) {
-        void handleAdd()
-      } else if (index >= 0 && index < filteredSouls.length) {
-        toggle(filteredSouls[index].id)
-      }
-    },
-    [addOptionIndex, filteredSouls, handleAdd, showAddOption, toggle],
-  )
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (optionCount === 0) return
-
-      switch (e.key) {
-        case "ArrowDown": {
-          e.preventDefault()
-          setActiveIndex((prev) =>
-            prev < optionCount - 1 ? prev + 1 : 0,
-          )
-          break
-        }
-        case "ArrowUp": {
-          e.preventDefault()
-          setActiveIndex((prev) =>
-            prev > 0 ? prev - 1 : optionCount - 1,
-          )
-          break
-        }
-        case "Enter": {
-          e.preventDefault()
-          if (activeIndex >= 0) {
-            activateOption(activeIndex)
-          } else if (showAddOption) {
-            void handleAdd()
-          }
-          break
-        }
-        case "Escape": {
-          e.preventDefault()
-          setQuery("")
-          setActiveIndex(-1)
-          break
-        }
-        case "Home": {
-          e.preventDefault()
-          setActiveIndex(0)
-          break
-        }
-        case "End": {
-          e.preventDefault()
-          setActiveIndex(optionCount - 1)
-          break
-        }
-      }
-    },
-    [activeIndex, activateOption, handleAdd, optionCount, showAddOption],
-  )
-
-  const activeDescendant =
-    activeIndex >= 0 && activeIndex < filteredSouls.length
-      ? `soul-option-${filteredSouls[activeIndex].id}`
-      : activeIndex === addOptionIndex && showAddOption
-        ? "soul-option-add"
-        : undefined
+    if (activeIndex === addOptionIndex && showAddOption) return "soul-option-add"
+    return undefined
+  }, [activeIndex, filteredSouls, addOptionIndex, showAddOption])
 
   const expanded = optionCount > 0
+  const selectedSouls = souls.filter((s) => value.includes(s.id))
 
   return (
     <fieldset>

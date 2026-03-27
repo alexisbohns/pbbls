@@ -2,7 +2,7 @@
 
 import { useMemo } from "react"
 import type { Pebble, Soul } from "@/lib/types"
-import { EMOTIONS } from "@/lib/config"
+import { useLookupMaps } from "@/lib/data/useLookupMaps"
 import { groupPebblesByDate } from "@/lib/utils/group-pebbles-by-date"
 import { PebbleCard } from "@/components/path/PebbleCard"
 
@@ -13,16 +13,7 @@ type PebbleTimelineProps = {
 
 export function PebbleTimeline({ pebbles, souls }: PebbleTimelineProps) {
   const groups = useMemo(() => groupPebblesByDate(pebbles), [pebbles])
-
-  const emotionMap = useMemo(
-    () => new Map(EMOTIONS.map((e) => [e.id, e])),
-    [],
-  )
-
-  const soulMap = useMemo(
-    () => new Map(souls.map((s) => [s.id, s])),
-    [souls],
-  )
+  const { emotionMap, soulMap } = useLookupMaps(souls)
 
   return (
     <ol className="flex flex-col gap-8">

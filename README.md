@@ -28,7 +28,31 @@ Open http://localhost:3000. On first launch, seed data is loaded automatically.
 
 ## Architecture
 
-to-do
+```
+app/                    → Routes (thin page shells)
+  layout.tsx            → Root layout: DataProvider + ThemeProvider + nav
+  path/                 → Timeline view
+  record/               → Multi-step pebble creation
+  pebble/[id]/          → Pebble detail
+  collections/          → Collection list + detail
+  error.tsx             → Global error boundary
+
+components/
+  layout/               → Sidebar, BottomNav, EmptyState, NotFoundCard, providers
+  record/               → RecordStepper, TimePicker, EmotionPicker, SoulPicker, etc.
+  pebble/               → PebbleDetail, PebbleIndicators
+  path/                 → PebbleTimeline, PebbleCard, PathEmptyState
+  collections/          → CollectionList, CollectionCard, ModeBadge, etc.
+  ui/                   → shadcn/ui primitives (Button, Badge, Input, AlertDialog, Card)
+
+lib/
+  types.ts              → Domain entity types (Pebble, Soul, Collection)
+  config/               → Static configs (emotions, domains, card types, navigation)
+  data/                 → DataProvider interface, LocalProvider, hooks
+  hooks/                → Reusable hooks (useRecordForm, useStepNavigation, useCombobox*)
+  utils/                → Utilities (formatters, group-pebbles-by-date)
+  seed/                 → Seed data with dev-mode validation
+```
 
 ## Data flow
 
