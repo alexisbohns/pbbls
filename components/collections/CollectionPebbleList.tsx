@@ -1,8 +1,7 @@
 "use client"
 
-import { useMemo } from "react"
 import type { Pebble, Soul } from "@/lib/types"
-import { EMOTIONS } from "@/lib/config"
+import { useLookupMaps } from "@/lib/data/useLookupMaps"
 import { PebbleCard } from "@/components/path/PebbleCard"
 
 type CollectionPebbleListProps = {
@@ -14,15 +13,7 @@ export function CollectionPebbleList({
   pebbles,
   souls,
 }: CollectionPebbleListProps) {
-  const emotionMap = useMemo(
-    () => new Map(EMOTIONS.map((e) => [e.id, e])),
-    [],
-  )
-
-  const soulMap = useMemo(
-    () => new Map(souls.map((s) => [s.id, s])),
-    [souls],
-  )
+  const { emotionMap, soulMap } = useLookupMaps(souls)
 
   return (
     <ul className="flex flex-col gap-2">

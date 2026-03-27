@@ -1,9 +1,10 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { usePebbles } from "@/lib/data/usePebbles"
 import type { PebbleCard } from "@/lib/types"
+import { useRecordForm } from "@/lib/hooks/useRecordForm"
+import { useStepNavigation } from "@/lib/hooks/useStepNavigation"
 import { Button } from "@/components/ui/button"
 import { RecordStep1 } from "@/components/record/RecordStep1"
 import { RecordStep2 } from "@/components/record/RecordStep2"
@@ -42,57 +43,15 @@ const STEPS: StepConfig[] = [
   { label: "Cards & Review", Component: RecordStep3, canAdvance: () => true },
 ]
 
-const INITIAL_DATA: RecordFormData = {
-  name: "",
-  description: "",
-  happened_at: new Date().toISOString(),
-  intensity: 2,
-  positiveness: 0,
-  emotion_id: "",
-  soul_ids: [],
-  domain_ids: [],
-  cards: [],
-}
-
 export function RecordStepper() {
   const router = useRouter()
-  const { addPebble } = usePebbles()
-  const [currentStep, setCurrentStep] = useState(0)
-  const [formData, setFormData] = useState<RecordFormData>(INITIAL_DATA)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
 
-  const totalSteps = STEPS.length
-  const isFirstStep = currentStep === 0
-  const isLastStep = currentStep === totalSteps - 1
+  const { formData, handleUpdate, handleSave, saving, error } = useRecordForm(
+    (pebbleId) => router.push(`/pebble/${pebbleId}`),
+  )
 
-  const handleUpdate = useCallback((patch: Partial<RecordFormData>) => {
-    setFormData((prev) => ({ ...prev, ...patch }))
-  }, [])
-
-  const goBack = useCallback(() => {
-    if (!isFirstStep) setCurrentStep((s) => s - 1)
-  }, [isFirstStep])
-
-  const goNext = useCallback(() => {
-    if (!isLastStep) setCurrentStep((s) => s + 1)
-  }, [isLastStep])
-
-  const handleSave = useCallback(async () => {
-    if (saving) return
-    setSaving(true)
-    setError(null)
-    try {
-      const pebble = await addPebble(formData)
-      router.push(`/pebble/${pebble.id}`)
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Something went wrong. Please try again."
-      setError(message)
-    } finally {
-      setSaving(false)
-    }
-  }, [addPebble, formData, router, saving])
+  const { currentStep, isFirstStep, isLastStep, goBack, goNext } =
+    useStepNavigation(STEPS.length)
 
   const canAdvance = STEPS[currentStep].canAdvance(formData)
 
@@ -105,9 +64,9 @@ export function RecordStepper() {
     }
   }, [canAdvance, isLastStep, handleSave, goNext])
 
+  // Keyboard shortcuts: Enter to advance, Escape to go back
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      // Don't capture keyboard shortcuts when an input/textarea/select is focused
       const tag = (e.target as HTMLElement).tagName
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || tag === "BUTTON") return
 
@@ -131,15 +90,15 @@ export function RecordStepper() {
       {/* Step indicator */}
       <div className="space-y-2">
         <p className="text-sm text-muted-foreground" aria-live="polite">
-          Step {currentStep + 1} of {totalSteps}
+          Step {currentStep + 1} of {STEPS.length}
           <span className="sr-only">: {STEPS[currentStep].label}</span>
         </p>
         <div
           role="progressbar"
           aria-valuenow={currentStep + 1}
           aria-valuemin={1}
-          aria-valuemax={totalSteps}
-          aria-label={`Step ${currentStep + 1} of ${totalSteps}`}
+          aria-valuemax={STEPS.length}
+          aria-label={`Step ${currentStep + 1} of ${STEPS.length}`}
           className="flex gap-1.5"
         >
           {STEPS.map((step, i) => (

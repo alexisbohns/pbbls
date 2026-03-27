@@ -1,42 +1,12 @@
 import type { Pebble, Soul } from "@/lib/types"
-import { EMOTIONS, DOMAINS, CARD_TYPES, POSITIVENESS_SIGNS, POSITIVENESS_LABELS } from "@/lib/config"
+import { EMOTIONS, DOMAINS, CARD_TYPES } from "@/lib/config"
+import { IntensityDots, PositivenessIndicator } from "@/components/pebble/PebbleIndicators"
+import { Badge } from "@/components/ui/badge"
+import { dateTimeFormatter } from "@/lib/utils/formatters"
 
 type PebbleDetailProps = {
   pebble: Pebble
   souls: Soul[]
-}
-
-const dateTimeFormatter = new Intl.DateTimeFormat("en-US", {
-  weekday: "long",
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-  hour: "numeric",
-  minute: "numeric",
-})
-
-function IntensityDots({ intensity }: { intensity: 1 | 2 | 3 }) {
-  const filled = "●".repeat(intensity)
-  const empty = "○".repeat(3 - intensity)
-  return (
-    <abbr
-      title={`Intensity: ${intensity} of 3`}
-      className="text-sm tracking-wide no-underline"
-    >
-      {filled}
-      {empty}
-    </abbr>
-  )
-}
-
-function PositivenessIndicator({ value }: { value: number }) {
-  const sign = POSITIVENESS_SIGNS[value] ?? "~"
-  const label = POSITIVENESS_LABELS[value] ?? "Neutral"
-  return (
-    <abbr title={`Positiveness: ${label}`} className="text-sm font-medium no-underline">
-      {sign}
-    </abbr>
-  )
 }
 
 export function PebbleDetail({ pebble, souls }: PebbleDetailProps) {
@@ -88,11 +58,8 @@ export function PebbleDetail({ pebble, souls }: PebbleDetailProps) {
           </h2>
           <ul className="mt-2 flex flex-wrap gap-2" role="list">
             {matchedSouls.map((soul) => (
-              <li
-                key={soul.id}
-                className="rounded-full border border-border px-2.5 py-0.5 text-xs font-medium"
-              >
-                {soul.name}
+              <li key={soul.id}>
+                <Badge variant="outline">{soul.name}</Badge>
               </li>
             ))}
           </ul>
@@ -107,12 +74,8 @@ export function PebbleDetail({ pebble, souls }: PebbleDetailProps) {
           </h2>
           <ul className="mt-2 flex flex-wrap gap-2" role="list">
             {domains.map((domain) => (
-              <li
-                key={domain.id}
-                className="rounded-full border border-border px-2.5 py-0.5 text-xs font-medium"
-                aria-label={`${domain.name}: ${domain.label}`}
-              >
-                {domain.name}
+              <li key={domain.id}>
+                <Badge variant="outline">{domain.name}</Badge>
               </li>
             ))}
           </ul>

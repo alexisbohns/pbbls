@@ -1,49 +1,12 @@
 import Link from "next/link"
 import type { Pebble, Emotion } from "@/lib/types"
+import { IntensityDots, PositivenessIndicator } from "@/components/pebble/PebbleIndicators"
+import { timeFormatter } from "@/lib/utils/formatters"
 
 type PebbleCardProps = {
   pebble: Pebble
   emotion: Emotion | undefined
   soulNames: string[]
-}
-
-const timeFormatter = new Intl.DateTimeFormat("en-US", {
-  hour: "numeric",
-  minute: "numeric",
-})
-
-const positivenessSigns: Record<number, string> = {
-  [-2]: "−−",
-  [-1]: "−",
-  [0]: "~",
-  [1]: "+",
-  [2]: "++",
-}
-
-function IntensityDots({ intensity }: { intensity: 1 | 2 | 3 }) {
-  const filled = "●".repeat(intensity)
-  const empty = "○".repeat(3 - intensity)
-  return (
-    <abbr
-      title={`Intensity: ${intensity} of 3`}
-      className="text-xs tracking-wide no-underline"
-    >
-      {filled}
-      {empty}
-    </abbr>
-  )
-}
-
-function PositivenessIndicator({ value }: { value: number }) {
-  const sign = positivenessSigns[value] ?? "~"
-  return (
-    <abbr
-      title={`Positiveness: ${value}`}
-      className="text-xs font-medium no-underline"
-    >
-      {sign}
-    </abbr>
-  )
 }
 
 export function PebbleCard({ pebble, emotion, soulNames }: PebbleCardProps) {
@@ -65,14 +28,13 @@ export function PebbleCard({ pebble, emotion, soulNames }: PebbleCardProps) {
                 backgroundColor: `${emotion.color}20`,
                 color: emotion.color,
               }}
-              aria-label={`Emotion: ${emotion.name}`}
             >
               {emotion.name}
             </span>
           )}
 
-          <IntensityDots intensity={pebble.intensity} />
-          <PositivenessIndicator value={pebble.positiveness} />
+          <IntensityDots intensity={pebble.intensity} size="xs" />
+          <PositivenessIndicator value={pebble.positiveness} size="xs" />
 
           <time dateTime={pebble.happened_at}>{time}</time>
 

@@ -2,21 +2,10 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Route, CirclePlus, FolderOpen } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { NAV_ITEMS } from "@/lib/config/navigation"
 import { ThemeToggle } from "@/components/layout/ThemeToggle"
 import { ResetDataButton } from "@/components/layout/ResetDataButton"
-
-const navItems: ReadonlyArray<{
-  href: string
-  label: string
-  icon: typeof Route
-  primary?: true
-}> = [
-  { href: "/path", label: "Path", icon: Route },
-  { href: "/record", label: "Record", icon: CirclePlus, primary: true },
-  { href: "/collections", label: "Collections", icon: FolderOpen },
-]
 
 export function Sidebar() {
   const pathname = usePathname()
@@ -29,7 +18,7 @@ export function Sidebar() {
 
       <nav aria-label="Main navigation" className="flex-1 px-2 py-2">
         <ul className="flex flex-col gap-1">
-          {navItems.map(({ href, label, icon: Icon, primary }) => {
+          {NAV_ITEMS.map(({ href, label, icon: Icon, primary }) => {
             const isActive = pathname.startsWith(href)
             return (
               <li key={href}>

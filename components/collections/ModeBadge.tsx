@@ -1,4 +1,5 @@
 import type { Collection } from "@/lib/types"
+import { Badge } from "@/components/ui/badge"
 
 const MODE_META: Record<
   NonNullable<Collection["mode"]>,
@@ -15,11 +16,8 @@ export function ModeBadge({ mode }: { mode: Collection["mode"] }) {
   const { emoji, label } = MODE_META[mode]
 
   return (
-    <span
-      className="rounded-full border border-border px-2 py-0.5 text-xs font-medium"
-      aria-label={`Mode: ${label}`}
-    >
+    <Badge variant="outline" aria-label={`Mode: ${label}`}>
       <span aria-hidden="true">{emoji}</span> {label}
-    </span>
+    </Badge>
   )
 }
