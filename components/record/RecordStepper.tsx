@@ -60,6 +60,7 @@ export function RecordStepper() {
   const [currentStep, setCurrentStep] = useState(0)
   const [formData, setFormData] = useState<RecordFormData>(INITIAL_DATA)
   const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const totalSteps = STEPS.length
   const isFirstStep = currentStep === 0
@@ -80,9 +81,14 @@ export function RecordStepper() {
   const handleSave = useCallback(async () => {
     if (saving) return
     setSaving(true)
+    setError(null)
     try {
       const pebble = await addPebble(formData)
       router.push(`/pebble/${pebble.id}`)
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Something went wrong. Please try again."
+      setError(message)
     } finally {
       setSaving(false)
     }
@@ -149,6 +155,13 @@ export function RecordStepper() {
 
       {/* Active step */}
       <ActiveStep data={formData} onUpdate={handleUpdate} />
+
+      {/* Error message */}
+      {error && (
+        <p role="alert" className="text-sm text-destructive">
+          {error}
+        </p>
+      )}
 
       {/* Navigation */}
       <nav className="flex items-center justify-between" aria-label="Step navigation">
