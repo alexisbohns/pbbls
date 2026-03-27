@@ -26,11 +26,21 @@ export type RecordStepProps = {
   onUpdate: (patch: Partial<RecordFormData>) => void
 }
 
-const STEPS = [
-  { label: "Time, Intensity & Emotion", Component: RecordStep1 },
-  { label: "Souls & Domains", Component: RecordStep2 },
-  { label: "Cards & Review", Component: RecordStep3 },
-] as const
+type StepConfig = {
+  label: string
+  Component: React.ComponentType<RecordStepProps>
+  canAdvance: (data: RecordFormData) => boolean
+}
+
+const STEPS: StepConfig[] = [
+  {
+    label: "Time, Intensity & Emotion",
+    Component: RecordStep1,
+    canAdvance: (data) => data.happened_at !== "" && data.emotion_id !== "",
+  },
+  { label: "Souls & Domains", Component: RecordStep2, canAdvance: () => true },
+  { label: "Cards & Review", Component: RecordStep3, canAdvance: () => true },
+]
 
 const INITIAL_DATA: RecordFormData = {
   name: "",
@@ -78,19 +88,22 @@ export function RecordStepper() {
     }
   }, [addPebble, formData, router, saving])
 
+  const canAdvance = STEPS[currentStep].canAdvance(formData)
+
   const handleAdvance = useCallback(() => {
+    if (!canAdvance) return
     if (isLastStep) {
       void handleSave()
     } else {
       goNext()
     }
-  }, [isLastStep, handleSave, goNext])
+  }, [canAdvance, isLastStep, handleSave, goNext])
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
       // Don't capture keyboard shortcuts when an input/textarea/select is focused
       const tag = (e.target as HTMLElement).tagName
-      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return
+      if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || tag === "BUTTON") return
 
       if (e.key === "Enter") {
         e.preventDefault()
@@ -152,7 +165,7 @@ export function RecordStepper() {
             {saving ? "Saving\u2026" : "Save pebble"}
           </Button>
         ) : (
-          <Button onClick={goNext}>Next</Button>
+          <Button onClick={goNext} disabled={!canAdvance}>Next</Button>
         )}
       </nav>
     </div>
