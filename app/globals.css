@@ -7,6 +7,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-alt: var(--surface-alt);
   --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
@@ -48,9 +50,97 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* ============================================================
+   DEFAULT — Blush Quartz (Light)
+   Dusty rose, soft clay, dried petals — warm pink grounded in stone
+   ============================================================ */
 :root {
+  --background: #F8F0F0;
+  --foreground: #2E2024;
+  --surface: #F0E4E4;
+  --surface-alt: #E8D8DA;
+  --card: #F8F0F0;
+  --card-foreground: #2E2024;
+  --popover: #F8F0F0;
+  --popover-foreground: #2E2024;
+  --primary: #C07A7A;
+  --primary-foreground: #F8F0F0;
+  --secondary: #F0E4E4;
+  --secondary-foreground: #2E2024;
+  --muted: #F0E4E4;
+  --muted-foreground: #7A5E64;
+  --accent: #E8D8DA;
+  --accent-foreground: #2E2024;
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: #FAF0F0;
+  --border: #E0D0D2;
+  --input: #E0D0D2;
+  --ring: #C07A7A;
+  --chart-1: #C07A7A;
+  --chart-2: #D4A0A0;
+  --chart-3: #A06060;
+  --chart-4: #7A5E64;
+  --chart-5: #E8D8DA;
+  --radius: 0.625rem;
+  --sidebar: #F0E4E4;
+  --sidebar-foreground: #2E2024;
+  --sidebar-primary: #C07A7A;
+  --sidebar-primary-foreground: #F8F0F0;
+  --sidebar-accent: #E8D8DA;
+  --sidebar-accent-foreground: #2E2024;
+  --sidebar-border: #E0D0D2;
+  --sidebar-ring: #C07A7A;
+}
+
+/* ============================================================
+   DEFAULT — Blush Quartz (Dark)
+   ============================================================ */
+.dark {
+  --background: oklch(0.15 0.02 10);
+  --foreground: oklch(0.90 0.015 10);
+  --surface: oklch(0.19 0.02 10);
+  --surface-alt: oklch(0.23 0.025 10);
+  --card: oklch(0.19 0.02 10);
+  --card-foreground: oklch(0.90 0.015 10);
+  --popover: oklch(0.17 0.02 10);
+  --popover-foreground: oklch(0.90 0.015 10);
+  --primary: oklch(0.68 0.10 10);
+  --primary-foreground: oklch(0.15 0.02 10);
+  --secondary: oklch(0.23 0.025 10);
+  --secondary-foreground: oklch(0.80 0.015 10);
+  --muted: oklch(0.21 0.015 10);
+  --muted-foreground: oklch(0.58 0.025 10);
+  --accent: oklch(0.28 0.03 10);
+  --accent-foreground: oklch(0.85 0.015 10);
+  --destructive: oklch(0.55 0.15 25);
+  --destructive-foreground: oklch(0.95 0.01 25);
+  --border: oklch(0.27 0.02 10);
+  --input: oklch(0.25 0.02 10);
+  --ring: oklch(0.68 0.10 10);
+  --chart-1: oklch(0.68 0.10 10);
+  --chart-2: oklch(0.60 0.08 25);
+  --chart-3: oklch(0.55 0.06 340);
+  --chart-4: oklch(0.58 0.05 300);
+  --chart-5: oklch(0.62 0.07 40);
+  --sidebar: oklch(0.13 0.02 10);
+  --sidebar-foreground: oklch(0.85 0.015 10);
+  --sidebar-primary: oklch(0.68 0.10 10);
+  --sidebar-primary-foreground: oklch(0.13 0.02 10);
+  --sidebar-accent: oklch(0.21 0.025 10);
+  --sidebar-accent-foreground: oklch(0.85 0.015 10);
+  --sidebar-border: oklch(0.24 0.02 10);
+  --sidebar-ring: oklch(0.68 0.10 10);
+}
+
+/* ============================================================
+   Stoic Rock (Light)
+   Pure achromatic — white, black, gray. The original default.
+   ============================================================ */
+.stoic-rock {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
+  --surface: oklch(0.97 0 0);
+  --surface-alt: oklch(0.94 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -64,6 +154,7 @@
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -72,7 +163,6 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
@@ -83,9 +173,14 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-.dark {
+/* ============================================================
+   Stoic Rock (Dark)
+   ============================================================ */
+.stoic-rock.dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
+  --surface: oklch(0.205 0 0);
+  --surface-alt: oklch(0.269 0 0);
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
@@ -99,6 +194,7 @@
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
   --destructive: oklch(0.704 0.191 22.216);
+  --destructive-foreground: oklch(0.985 0 0);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
@@ -115,6 +211,249 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.556 0 0);
+}
+
+/* ============================================================
+   Cave Pigment (Light)
+   Ochre, charcoal, chalk — colors ground from earth and stone
+   ============================================================ */
+.cave-pigment {
+  --background: #F5F0E8;
+  --foreground: #2C2418;
+  --surface: #EDE6D8;
+  --surface-alt: #E8DFD0;
+  --card: #F5F0E8;
+  --card-foreground: #2C2418;
+  --popover: #F5F0E8;
+  --popover-foreground: #2C2418;
+  --primary: #C4723A;
+  --primary-foreground: #F5F0E8;
+  --secondary: #EDE6D8;
+  --secondary-foreground: #2C2418;
+  --muted: #EDE6D8;
+  --muted-foreground: #6B5D4F;
+  --accent: #E8DFD0;
+  --accent-foreground: #2C2418;
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: #FAF0E8;
+  --border: #DED6C8;
+  --input: #DED6C8;
+  --ring: #C4723A;
+  --chart-1: #C4723A;
+  --chart-2: #D4A070;
+  --chart-3: #A05A2A;
+  --chart-4: #6B5D4F;
+  --chart-5: #E8DFD0;
+  --sidebar: #EDE6D8;
+  --sidebar-foreground: #2C2418;
+  --sidebar-primary: #C4723A;
+  --sidebar-primary-foreground: #F5F0E8;
+  --sidebar-accent: #E8DFD0;
+  --sidebar-accent-foreground: #2C2418;
+  --sidebar-border: #DED6C8;
+  --sidebar-ring: #C4723A;
+}
+
+/* ============================================================
+   Cave Pigment (Dark)
+   ============================================================ */
+.cave-pigment.dark {
+  --background: oklch(0.16 0.015 65);
+  --foreground: oklch(0.90 0.015 70);
+  --surface: oklch(0.20 0.015 65);
+  --surface-alt: oklch(0.24 0.018 65);
+  --card: oklch(0.20 0.015 65);
+  --card-foreground: oklch(0.90 0.015 70);
+  --popover: oklch(0.18 0.015 65);
+  --popover-foreground: oklch(0.90 0.015 70);
+  --primary: oklch(0.68 0.12 55);
+  --primary-foreground: oklch(0.16 0.015 65);
+  --secondary: oklch(0.24 0.018 65);
+  --secondary-foreground: oklch(0.80 0.015 70);
+  --muted: oklch(0.22 0.012 65);
+  --muted-foreground: oklch(0.60 0.02 70);
+  --accent: oklch(0.30 0.025 65);
+  --accent-foreground: oklch(0.85 0.015 70);
+  --destructive: oklch(0.55 0.15 25);
+  --destructive-foreground: oklch(0.95 0.01 25);
+  --border: oklch(0.28 0.018 65);
+  --input: oklch(0.26 0.015 65);
+  --ring: oklch(0.68 0.12 55);
+  --chart-1: oklch(0.68 0.12 55);
+  --chart-2: oklch(0.58 0.06 90);
+  --chart-3: oklch(0.62 0.08 145);
+  --chart-4: oklch(0.55 0.05 230);
+  --chart-5: oklch(0.60 0.07 30);
+  --sidebar: oklch(0.14 0.015 65);
+  --sidebar-foreground: oklch(0.85 0.015 70);
+  --sidebar-primary: oklch(0.68 0.12 55);
+  --sidebar-primary-foreground: oklch(0.14 0.015 65);
+  --sidebar-accent: oklch(0.22 0.02 65);
+  --sidebar-accent-foreground: oklch(0.85 0.015 70);
+  --sidebar-border: oklch(0.25 0.015 65);
+  --sidebar-ring: oklch(0.68 0.12 55);
+}
+
+/* ============================================================
+   Dusk Stone (Light)
+   Cooler geological tones — slate, lichen, twilight on granite
+   ============================================================ */
+.dusk-stone {
+  --background: #F0EEF0;
+  --foreground: #1E1E24;
+  --surface: #E6E2E6;
+  --surface-alt: #DCD8DE;
+  --card: #F0EEF0;
+  --card-foreground: #1E1E24;
+  --popover: #F0EEF0;
+  --popover-foreground: #1E1E24;
+  --primary: #7A6AA0;
+  --primary-foreground: #F0EEF0;
+  --secondary: #E6E2E6;
+  --secondary-foreground: #1E1E24;
+  --muted: #E6E2E6;
+  --muted-foreground: #5A5A66;
+  --accent: #DCD8DE;
+  --accent-foreground: #1E1E24;
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: #F0EEF0;
+  --border: #D2CED6;
+  --input: #D2CED6;
+  --ring: #7A6AA0;
+  --chart-1: #7A6AA0;
+  --chart-2: #A090C0;
+  --chart-3: #5A4A80;
+  --chart-4: #5A5A66;
+  --chart-5: #DCD8DE;
+  --sidebar: #E6E2E6;
+  --sidebar-foreground: #1E1E24;
+  --sidebar-primary: #7A6AA0;
+  --sidebar-primary-foreground: #F0EEF0;
+  --sidebar-accent: #DCD8DE;
+  --sidebar-accent-foreground: #1E1E24;
+  --sidebar-border: #D2CED6;
+  --sidebar-ring: #7A6AA0;
+}
+
+/* ============================================================
+   Dusk Stone (Dark)
+   ============================================================ */
+.dusk-stone.dark {
+  --background: oklch(0.14 0.015 280);
+  --foreground: oklch(0.90 0.01 280);
+  --surface: oklch(0.18 0.015 280);
+  --surface-alt: oklch(0.22 0.018 280);
+  --card: oklch(0.18 0.015 280);
+  --card-foreground: oklch(0.90 0.01 280);
+  --popover: oklch(0.16 0.015 280);
+  --popover-foreground: oklch(0.90 0.01 280);
+  --primary: oklch(0.65 0.10 285);
+  --primary-foreground: oklch(0.14 0.015 280);
+  --secondary: oklch(0.22 0.018 280);
+  --secondary-foreground: oklch(0.80 0.01 280);
+  --muted: oklch(0.20 0.012 280);
+  --muted-foreground: oklch(0.58 0.02 280);
+  --accent: oklch(0.27 0.025 280);
+  --accent-foreground: oklch(0.85 0.01 280);
+  --destructive: oklch(0.55 0.15 25);
+  --destructive-foreground: oklch(0.95 0.01 25);
+  --border: oklch(0.26 0.018 280);
+  --input: oklch(0.24 0.015 280);
+  --ring: oklch(0.65 0.10 285);
+  --chart-1: oklch(0.65 0.10 285);
+  --chart-2: oklch(0.58 0.06 60);
+  --chart-3: oklch(0.60 0.07 160);
+  --chart-4: oklch(0.55 0.06 10);
+  --chart-5: oklch(0.62 0.05 220);
+  --sidebar: oklch(0.12 0.015 280);
+  --sidebar-foreground: oklch(0.85 0.01 280);
+  --sidebar-primary: oklch(0.65 0.10 285);
+  --sidebar-primary-foreground: oklch(0.12 0.015 280);
+  --sidebar-accent: oklch(0.20 0.02 280);
+  --sidebar-accent-foreground: oklch(0.85 0.01 280);
+  --sidebar-border: oklch(0.23 0.015 280);
+  --sidebar-ring: oklch(0.65 0.10 285);
+}
+
+/* ============================================================
+   Moss Pool (Light)
+   Mint, sage, verdigris — still water over mossy river stones
+   ============================================================ */
+.moss-pool {
+  --background: #EFF5F2;
+  --foreground: #1A2822;
+  --surface: #E2ECE6;
+  --surface-alt: #D6E4DC;
+  --card: #EFF5F2;
+  --card-foreground: #1A2822;
+  --popover: #EFF5F2;
+  --popover-foreground: #1A2822;
+  --primary: #5A9A80;
+  --primary-foreground: #EFF5F2;
+  --secondary: #E2ECE6;
+  --secondary-foreground: #1A2822;
+  --muted: #E2ECE6;
+  --muted-foreground: #4E6A5C;
+  --accent: #D6E4DC;
+  --accent-foreground: #1A2822;
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: #F0FAF5;
+  --border: #CEDCD4;
+  --input: #CEDCD4;
+  --ring: #5A9A80;
+  --chart-1: #5A9A80;
+  --chart-2: #80BAA0;
+  --chart-3: #3A7A60;
+  --chart-4: #4E6A5C;
+  --chart-5: #D6E4DC;
+  --sidebar: #E2ECE6;
+  --sidebar-foreground: #1A2822;
+  --sidebar-primary: #5A9A80;
+  --sidebar-primary-foreground: #EFF5F2;
+  --sidebar-accent: #D6E4DC;
+  --sidebar-accent-foreground: #1A2822;
+  --sidebar-border: #CEDCD4;
+  --sidebar-ring: #5A9A80;
+}
+
+/* ============================================================
+   Moss Pool (Dark)
+   ============================================================ */
+.moss-pool.dark {
+  --background: oklch(0.14 0.02 165);
+  --foreground: oklch(0.90 0.015 165);
+  --surface: oklch(0.18 0.02 165);
+  --surface-alt: oklch(0.22 0.025 165);
+  --card: oklch(0.18 0.02 165);
+  --card-foreground: oklch(0.90 0.015 165);
+  --popover: oklch(0.16 0.02 165);
+  --popover-foreground: oklch(0.90 0.015 165);
+  --primary: oklch(0.68 0.10 165);
+  --primary-foreground: oklch(0.14 0.02 165);
+  --secondary: oklch(0.22 0.025 165);
+  --secondary-foreground: oklch(0.80 0.015 165);
+  --muted: oklch(0.20 0.015 165);
+  --muted-foreground: oklch(0.58 0.025 165);
+  --accent: oklch(0.27 0.03 165);
+  --accent-foreground: oklch(0.85 0.015 165);
+  --destructive: oklch(0.55 0.15 25);
+  --destructive-foreground: oklch(0.95 0.01 25);
+  --border: oklch(0.26 0.02 165);
+  --input: oklch(0.24 0.02 165);
+  --ring: oklch(0.68 0.10 165);
+  --chart-1: oklch(0.68 0.10 165);
+  --chart-2: oklch(0.60 0.07 180);
+  --chart-3: oklch(0.55 0.06 130);
+  --chart-4: oklch(0.58 0.05 200);
+  --chart-5: oklch(0.62 0.08 90);
+  --sidebar: oklch(0.12 0.02 165);
+  --sidebar-foreground: oklch(0.85 0.015 165);
+  --sidebar-primary: oklch(0.68 0.10 165);
+  --sidebar-primary-foreground: oklch(0.12 0.02 165);
+  --sidebar-accent: oklch(0.20 0.025 165);
+  --sidebar-accent-foreground: oklch(0.85 0.015 165);
+  --sidebar-border: oklch(0.23 0.02 165);
+  --sidebar-ring: oklch(0.68 0.10 165);
 }
 
 @layer base {

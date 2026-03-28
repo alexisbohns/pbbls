@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
+import { ColorWorldProvider } from "@/components/layout/ColorWorldProvider";
 import { DataProvider } from "@/components/layout/DataProvider";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -33,16 +35,25 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="h-full bg-background text-foreground">
+        <Script
+          id="color-world-init"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `try{var w=localStorage.getItem("pbbls-color-world");if(w&&w!=="blush-quartz"){document.documentElement.classList.add(w)}}catch(e){}`,
+          }}
+        />
         <DataProvider>
-          <ThemeProvider>
-            <div className="flex h-full">
-              <Sidebar />
-              <main className="flex-1 overflow-y-auto px-4 py-8 pb-20 md:pb-8">
-                <div className="mx-auto max-w-5xl">{children}</div>
-              </main>
-            </div>
-            <BottomNav />
-          </ThemeProvider>
+          <ColorWorldProvider>
+            <ThemeProvider>
+              <div className="flex h-full">
+                <Sidebar />
+                <main className="flex-1 overflow-y-auto px-4 py-8 pb-20 md:pb-8">
+                  <div className="mx-auto max-w-5xl">{children}</div>
+                </main>
+              </div>
+              <BottomNav />
+            </ThemeProvider>
+          </ColorWorldProvider>
         </DataProvider>
       </body>
     </html>
