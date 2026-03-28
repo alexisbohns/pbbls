@@ -1,6 +1,6 @@
 "use client"
 
-import type { RecordFormData } from "@/components/record/RecordStepper"
+import type { RecordFormData } from "@/components/record/types"
 import { useSouls } from "@/lib/data/useSouls"
 import { EMOTIONS, DOMAINS, CARD_TYPES } from "@/lib/config"
 import { IntensityDots, PositivenessIndicator } from "@/components/pebble/PebbleIndicators"
@@ -34,6 +34,22 @@ export function ReviewSummary({ data }: ReviewSummaryProps) {
       </h2>
 
       <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm">
+        {/* Name */}
+        {data.name.trim() !== "" && (
+          <>
+            <dt className="text-muted-foreground">Name</dt>
+            <dd>{data.name}</dd>
+          </>
+        )}
+
+        {/* Description */}
+        {data.description.trim() !== "" && (
+          <>
+            <dt className="text-muted-foreground">Description</dt>
+            <dd>{data.description}</dd>
+          </>
+        )}
+
         {/* Date */}
         <dt className="text-muted-foreground">When</dt>
         <dd>

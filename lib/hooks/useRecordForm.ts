@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react"
 import { usePebbles } from "@/lib/data/usePebbles"
-import type { RecordFormData } from "@/components/record/RecordStepper"
+import type { RecordFormData } from "@/components/record/types"
 
 const INITIAL_DATA: RecordFormData = {
   name: "",
@@ -29,7 +29,11 @@ export function useRecordForm(onSaveSuccess: (pebbleId: string) => void) {
     setSaving(true)
     setError(null)
     try {
-      const pebble = await addPebble(formData)
+      const cleanedData = {
+        ...formData,
+        cards: formData.cards.filter((c) => c.value.trim() !== ""),
+      }
+      const pebble = await addPebble(cleanedData)
       onSaveSuccess(pebble.id)
     } catch (err) {
       const message =
