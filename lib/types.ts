@@ -1,6 +1,13 @@
 // Re-export static config types for convenience
 export type { Emotion, Domain, CardType } from "./config"
 
+export type ColorWorld =
+  | "blush-quartz"
+  | "stoic-rock"
+  | "cave-pigment"
+  | "dusk-stone"
+  | "moss-pool"
+
 export type PebbleCard = {
   species_id: string
   value: string
