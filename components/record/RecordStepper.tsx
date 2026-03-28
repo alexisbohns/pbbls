@@ -1,47 +1,41 @@
 "use client"
 
-import { useCallback, useEffect } from "react"
+import { useCallback, useEffect, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import type { PebbleCard } from "@/lib/types"
+import { CARD_TYPES } from "@/lib/config"
 import { useRecordForm } from "@/lib/hooks/useRecordForm"
 import { useStepNavigation } from "@/lib/hooks/useStepNavigation"
 import { Button } from "@/components/ui/button"
-import { RecordStep1 } from "@/components/record/RecordStep1"
-import { RecordStep2 } from "@/components/record/RecordStep2"
-import { RecordStep3 } from "@/components/record/RecordStep3"
+import type { RecordStepProps, StepConfig } from "@/components/record/types"
+import { StepDateTime } from "@/components/record/StepDateTime"
+import { StepName } from "@/components/record/StepName"
+import { StepDescription } from "@/components/record/StepDescription"
+import { StepIntensity } from "@/components/record/StepIntensity"
+import { StepEmotion } from "@/components/record/StepEmotion"
+import { StepSouls } from "@/components/record/StepSouls"
+import { StepDomains } from "@/components/record/StepDomains"
+import { StepCardPicker } from "@/components/record/StepCardPicker"
+import { StepCardFiller } from "@/components/record/StepCardFiller"
+import { StepSummary } from "@/components/record/StepSummary"
 
-export type RecordFormData = {
-  name: string
-  description: string
-  happened_at: string
-  intensity: 1 | 2 | 3
-  positiveness: -2 | -1 | 0 | 1 | 2
-  emotion_id: string
-  soul_ids: string[]
-  domain_ids: string[]
-  cards: PebbleCard[]
-}
-
-export type RecordStepProps = {
-  data: RecordFormData
-  onUpdate: (patch: Partial<RecordFormData>) => void
-}
-
-type StepConfig = {
-  label: string
-  Component: React.ComponentType<RecordStepProps>
-  canAdvance: (data: RecordFormData) => boolean
-}
-
-const STEPS: StepConfig[] = [
-  {
-    label: "Time, Intensity & Emotion",
-    Component: RecordStep1,
-    canAdvance: (data) => data.happened_at !== "" && data.emotion_id !== "",
-  },
-  { label: "Souls & Domains", Component: RecordStep2, canAdvance: () => true },
-  { label: "Cards & Review", Component: RecordStep3, canAdvance: () => true },
+const FIXED_STEPS: StepConfig[] = [
+  { label: "Date and time", Component: StepDateTime, canAdvance: (d) => d.happened_at !== "" },
+  { label: "Name", Component: StepName, canAdvance: (d) => d.name.trim() !== "" },
+  { label: "Description", Component: StepDescription, canAdvance: () => true },
+  { label: "Intensity & Positiveness", Component: StepIntensity, canAdvance: () => true },
+  { label: "Emotion", Component: StepEmotion, canAdvance: (d) => d.emotion_id !== "" },
+  { label: "Souls", Component: StepSouls, canAdvance: () => true },
+  { label: "Domains", Component: StepDomains, canAdvance: () => true },
+  { label: "Cards", Component: StepCardPicker, canAdvance: () => true },
 ]
+
+function makeCardFillerStep(cardTypeId: string, label: string): StepConfig {
+  function CardFillerStep(props: RecordStepProps) {
+    return <StepCardFiller cardTypeId={cardTypeId} {...props} />
+  }
+  CardFillerStep.displayName = `StepCardFiller_${cardTypeId}`
+  return { label, Component: CardFillerStep, canAdvance: () => true }
+}
 
 export function RecordStepper() {
   const router = useRouter()
@@ -50,10 +44,23 @@ export function RecordStepper() {
     (pebbleId) => router.push(`/pebble/${pebbleId}`),
   )
 
-  const { currentStep, isFirstStep, isLastStep, goBack, goNext } =
-    useStepNavigation(STEPS.length)
+  const steps = useMemo(() => {
+    const selectedIds = new Set(formData.cards.map((c) => c.species_id))
+    const cardFillerSteps = CARD_TYPES
+      .filter((ct) => selectedIds.has(ct.id))
+      .map((ct) => makeCardFillerStep(ct.id, `${ct.name} card`))
 
-  const canAdvance = STEPS[currentStep].canAdvance(formData)
+    return [
+      ...FIXED_STEPS,
+      ...cardFillerSteps,
+      { label: "Summary", Component: StepSummary, canAdvance: () => true } satisfies StepConfig,
+    ]
+  }, [formData.cards])
+
+  const { currentStep, isFirstStep, isLastStep, goBack, goNext } =
+    useStepNavigation(steps.length)
+
+  const canAdvance = steps[currentStep].canAdvance(formData)
 
   const handleAdvance = useCallback(() => {
     if (!canAdvance) return
@@ -83,25 +90,25 @@ export function RecordStepper() {
     return () => window.removeEventListener("keydown", onKeyDown)
   }, [handleAdvance, goBack])
 
-  const { Component: ActiveStep } = STEPS[currentStep]
+  const { Component: ActiveStep } = steps[currentStep]
 
   return (
     <div className="space-y-6">
       {/* Step indicator */}
       <div className="space-y-2">
         <p className="text-sm text-muted-foreground" aria-live="polite">
-          Step {currentStep + 1} of {STEPS.length}
-          <span className="sr-only">: {STEPS[currentStep].label}</span>
+          Step {currentStep + 1} of {steps.length}
+          <span className="sr-only">: {steps[currentStep].label}</span>
         </p>
         <div
           role="progressbar"
           aria-valuenow={currentStep + 1}
           aria-valuemin={1}
-          aria-valuemax={STEPS.length}
-          aria-label={`Step ${currentStep + 1} of ${STEPS.length}`}
+          aria-valuemax={steps.length}
+          aria-label={`Step ${currentStep + 1} of ${steps.length}`}
           className="flex gap-1.5"
         >
-          {STEPS.map((step, i) => (
+          {steps.map((step, i) => (
             <div
               key={step.label}
               className={`h-1.5 flex-1 rounded-full transition-colors ${
