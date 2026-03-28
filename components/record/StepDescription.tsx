@@ -19,7 +19,7 @@ export function StepDescription({ data, onUpdate }: RecordStepProps) {
           placeholder="A bit more context…"
           value={data.description}
           onChange={(e) => onUpdate({ description: e.target.value })}
-          className="w-full resize-none rounded-lg border border-input bg-transparent px-3 py-2 text-sm outline-none field-sizing-content min-h-20 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+          className="w-full resize-none rounded-lg border border-input bg-transparent px-3 py-2 text-base outline-none field-sizing-content min-h-20 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 md:text-sm"
           autoFocus
         />
       </div>

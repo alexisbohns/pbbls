@@ -55,30 +55,32 @@ export function TimePicker({ value, onChange }: TimePickerProps) {
   return (
     <fieldset>
       <legend className="text-sm font-medium">When</legend>
-      <div className="mt-2 flex flex-wrap items-end gap-3">
-        <div className="flex flex-col gap-1">
+      <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_auto]">
+        <div>
           <label htmlFor="record-date" className="sr-only">
             Date
           </label>
           <Input
             id="record-date"
             type="date"
+            className="h-11 w-full text-base md:h-8 md:text-sm"
             value={dateValue}
             onChange={handleDateChange}
           />
         </div>
-        <div className="flex flex-col gap-1">
+        <div>
           <label htmlFor="record-time" className="sr-only">
             Time
           </label>
           <Input
             id="record-time"
             type="time"
+            className="h-11 w-full text-base md:h-8 md:text-sm"
             value={timeValue}
             onChange={handleTimeChange}
           />
         </div>
-        <Button variant="outline" size="sm" onClick={handleNow}>
+        <Button variant="outline" className="h-11 sm:h-8" onClick={handleNow}>
           Now
         </Button>
       </div>

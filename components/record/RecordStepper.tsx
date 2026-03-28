@@ -44,8 +44,13 @@ export function RecordStepper() {
     (pebbleId) => router.push(`/pebble/${pebbleId}`),
   )
 
+  // Derive step list only when the set of selected card types changes,
+  // not when card text values change (which would remount the textarea).
+  const selectedCardTypeIds = formData.cards.map((c) => c.species_id).join(",")
+
   const steps = useMemo(() => {
-    const selectedIds = new Set(formData.cards.map((c) => c.species_id))
+    const ids = selectedCardTypeIds.split(",").filter(Boolean)
+    const selectedIds = new Set(ids)
     const cardFillerSteps = CARD_TYPES
       .filter((ct) => selectedIds.has(ct.id))
       .map((ct) => makeCardFillerStep(ct.id, `${ct.name} card`))
@@ -55,7 +60,7 @@ export function RecordStepper() {
       ...cardFillerSteps,
       { label: "Summary", Component: StepSummary, canAdvance: () => true } satisfies StepConfig,
     ]
-  }, [formData.cards])
+  }, [selectedCardTypeIds])
 
   const { currentStep, isFirstStep, isLastStep, goBack, goNext } =
     useStepNavigation(steps.length)
@@ -132,7 +137,7 @@ export function RecordStepper() {
       {/* Navigation */}
       <nav className="flex items-center justify-between" aria-label="Step navigation">
         {!isFirstStep ? (
-          <Button variant="ghost" onClick={goBack}>
+          <Button variant="ghost" className="h-11 px-4 md:h-8 md:px-2.5" onClick={goBack}>
             Back
           </Button>
         ) : (
@@ -140,11 +145,11 @@ export function RecordStepper() {
         )}
 
         {isLastStep ? (
-          <Button onClick={() => void handleSave()} disabled={saving}>
+          <Button className="h-11 px-4 md:h-8 md:px-2.5" onClick={() => void handleSave()} disabled={saving}>
             {saving ? "Saving\u2026" : "Save pebble"}
           </Button>
         ) : (
-          <Button onClick={goNext} disabled={!canAdvance}>Next</Button>
+          <Button className="h-11 px-4 md:h-8 md:px-2.5" onClick={goNext} disabled={!canAdvance}>Next</Button>
         )}
       </nav>
     </div>

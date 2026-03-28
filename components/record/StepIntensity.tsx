@@ -12,7 +12,7 @@ export function StepIntensity({ data, onUpdate }: RecordStepProps) {
         How intense was it? Was it positive or negative?
       </p>
 
-      <div className="flex flex-wrap gap-6">
+      <div className="flex flex-col gap-6 sm:flex-row sm:flex-wrap">
         <IntensityPicker
           value={data.intensity}
           onChange={(intensity) => onUpdate({ intensity })}

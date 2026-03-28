@@ -47,7 +47,7 @@ export default function RootLayout({
             <ThemeProvider>
               <div className="flex h-full">
                 <Sidebar />
-                <main className="flex-1 overflow-y-auto px-4 py-8 pb-20 md:pb-8">
+                <main className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-8 pb-20 md:pb-8">
                   <div className="mx-auto max-w-5xl">{children}</div>
                 </main>
               </div>
