@@ -493,3 +493,10 @@
     touch-action: manipulation;
   }
 }
+
+/* Hide install prompts when running as installed PWA */
+@media (display-mode: standalone) {
+  [data-install-prompt] {
+    display: none !important;
+  }
+}
