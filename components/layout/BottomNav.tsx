@@ -7,11 +7,17 @@ import { NAV_ITEMS } from "@/lib/config/navigation"
 
 export function BottomNav() {
   const pathname = usePathname()
+  const hidden = pathname.startsWith("/record")
 
   return (
     <nav
       aria-label="Main navigation"
-      className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background md:hidden"
+      aria-hidden={hidden}
+      className={cn(
+        "fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background md:hidden",
+        "transition-transform duration-300 ease-in-out motion-reduce:transition-none",
+        hidden && "translate-y-full",
+      )}
     >
       <ul className="flex items-center justify-around py-2">
         {NAV_ITEMS.map(({ href, label, icon: Icon, primary }) => {
@@ -28,6 +34,7 @@ export function BottomNav() {
                   primary && !isActive && "text-primary",
                 )}
                 aria-current={isActive ? "page" : undefined}
+                tabIndex={hidden ? -1 : undefined}
               >
                 <Icon className={cn("size-5", primary && "size-6")} />
                 {label}
