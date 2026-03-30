@@ -68,7 +68,7 @@ export default function RootLayout({
           <ColorWorldProvider>
             <ThemeProvider>
               <ThemeColorSync />
-              <div className="flex h-full">
+              <div className="flex h-full pl-[var(--safe-area-left)] pr-[var(--safe-area-right)]">
                 <Sidebar />
                 <MainContent>{children}</MainContent>
               </div>
