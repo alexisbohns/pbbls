@@ -21,7 +21,10 @@ const geistMono = Geist_Mono({
 });
 
 export const viewport: Viewport = {
-  themeColor: "#F8F0F0",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F8F0F0" },
+    { media: "(prefers-color-scheme: dark)", color: "#2B1F21" },
+  ],
   viewportFit: "cover",
 };
 
@@ -61,7 +64,8 @@ export default function RootLayout({
           id="color-world-init"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
-            __html: `try{var w=localStorage.getItem("pbbls-color-world");if(w&&w!=="blush-quartz"){document.documentElement.classList.add(w)}}catch(e){}`,
+            // Color map must stay in sync with lib/config/color-worlds.ts
+            __html: `try{var w=localStorage.getItem("pbbls-color-world");if(w&&w!=="blush-quartz"){document.documentElement.classList.add(w);var m={"stoic-rock":{l:"#FFFFFF",d:"#252525"},"cave-pigment":{l:"#F5F0E8",d:"#2B2518"},"dusk-stone":{l:"#F0EEF0",d:"#211F2B"},"moss-pool":{l:"#EFF5F2",d:"#192B22"}};var c=m[w];if(c){var ml=document.querySelector('meta[name="theme-color"][media*="light"]');var md=document.querySelector('meta[name="theme-color"][media*="dark"]');if(ml)ml.setAttribute("content",c.l);if(md)md.setAttribute("content",c.d)}}}catch(e){}`,
           }}
         />
         <DataProvider>
