@@ -465,6 +465,8 @@
   }
   html {
     @apply font-sans;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
     -webkit-user-select: none;
     user-select: none;
     -webkit-tap-highlight-color: transparent;

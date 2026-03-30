@@ -14,7 +14,7 @@ export function MainContent({ children }: MainContentProps) {
   return (
     <main
       className={cn(
-        "min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-8 md:pb-8",
+        "min-w-0 flex-1 touch-pan-y overflow-x-hidden overflow-y-auto px-4 py-8 md:pb-8",
         "transition-[padding-bottom] duration-300 ease-in-out motion-reduce:transition-none",
         hideBottomNav ? "pb-8" : "pb-20",
       )}
