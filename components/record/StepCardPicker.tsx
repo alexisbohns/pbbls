@@ -27,7 +27,7 @@ export function StepCardPicker({ data, onUpdate }: RecordStepProps) {
           return (
             <li key={type.id}>
               <label
-                className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-colors ${
+                className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-all duration-100 active:scale-[0.98] ${
                   checked
                     ? "border-primary bg-primary/5"
                     : "border-border"

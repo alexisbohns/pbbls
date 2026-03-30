@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { NAV_ITEMS } from "@/lib/config/navigation"
 import { ThemeToggle } from "@/components/layout/ThemeToggle"
+import { HapticsToggle } from "@/components/layout/HapticsToggle"
 import { ResetDataButton } from "@/components/layout/ResetDataButton"
 
 export function Sidebar() {
@@ -45,6 +46,7 @@ export function Sidebar() {
       <div className="flex items-center gap-1 border-t border-border px-4 py-3">
         <ResetDataButton />
         <ThemeToggle />
+        <HapticsToggle />
       </div>
     </aside>
   )

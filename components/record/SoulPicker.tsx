@@ -79,7 +79,7 @@ export function SoulPicker({ value, onChange }: SoulPickerProps) {
                 type="button"
                 aria-label={`Remove ${soul.name}`}
                 onClick={() => toggle(soul.id)}
-                className="rounded-full p-0.5 text-muted-foreground hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
+                className="rounded-full p-0.5 text-muted-foreground transition-all duration-75 hover:text-foreground active:scale-90 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
               >
                 <X className="size-3" aria-hidden="true" />
               </button>
@@ -138,7 +138,7 @@ export function SoulPicker({ value, onChange }: SoulPickerProps) {
                 onClick={() => toggle(soul.id)}
                 onPointerEnter={() => setActiveIndex(i)}
                 className={cn(
-                  "flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm",
+                  "flex cursor-pointer items-center gap-2 px-3 py-1.5 text-sm transition-colors duration-75",
                   active && "bg-muted",
                   selected && "font-medium",
                 )}
