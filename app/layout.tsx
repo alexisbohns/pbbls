@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { ColorWorldProvider } from "@/components/layout/ColorWorldProvider";
 import { ThemeColorSync } from "@/components/layout/ThemeColorSync";
 import { DataProvider } from "@/components/layout/DataProvider";
+import { SerwistRegistration } from "@/components/layout/SerwistRegistration";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { MainContent } from "@/components/layout/MainContent";
@@ -64,18 +65,20 @@ export default function RootLayout({
             __html: `try{var w=localStorage.getItem("pbbls-color-world");if(w&&w!=="blush-quartz"){document.documentElement.classList.add(w)}}catch(e){}`,
           }}
         />
-        <DataProvider>
-          <ColorWorldProvider>
-            <ThemeProvider>
-              <ThemeColorSync />
-              <div className="flex h-full">
-                <Sidebar />
-                <MainContent>{children}</MainContent>
-              </div>
-              <BottomNav />
-            </ThemeProvider>
-          </ColorWorldProvider>
-        </DataProvider>
+        <SerwistRegistration>
+          <DataProvider>
+            <ColorWorldProvider>
+              <ThemeProvider>
+                <ThemeColorSync />
+                <div className="flex h-full">
+                  <Sidebar />
+                  <MainContent>{children}</MainContent>
+                </div>
+                <BottomNav />
+              </ThemeProvider>
+            </ColorWorldProvider>
+          </DataProvider>
+        </SerwistRegistration>
       </body>
     </html>
   );
