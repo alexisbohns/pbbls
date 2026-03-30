@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { ColorWorldProvider } from "@/components/layout/ColorWorldProvider";
 import { ThemeColorSync } from "@/components/layout/ThemeColorSync";
 import { DataProvider } from "@/components/layout/DataProvider";
+import { SerwistRegistration } from "@/components/layout/SerwistRegistration";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { MainContent } from "@/components/layout/MainContent";
@@ -68,18 +69,20 @@ export default function RootLayout({
             __html: `try{var w=localStorage.getItem("pbbls-color-world");if(w&&w!=="blush-quartz"){document.documentElement.classList.add(w);var m={"stoic-rock":{l:"#FFFFFF",d:"#252525"},"cave-pigment":{l:"#F5F0E8",d:"#2B2518"},"dusk-stone":{l:"#F0EEF0",d:"#211F2B"},"moss-pool":{l:"#EFF5F2",d:"#192B22"}};var c=m[w];if(c){var ml=document.querySelector('meta[name="theme-color"][media*="light"]');var md=document.querySelector('meta[name="theme-color"][media*="dark"]');if(ml)ml.setAttribute("content",c.l);if(md)md.setAttribute("content",c.d)}}}catch(e){}`,
           }}
         />
-        <DataProvider>
-          <ColorWorldProvider>
-            <ThemeProvider>
-              <ThemeColorSync />
-              <div className="flex h-full pl-[var(--safe-area-left)] pr-[var(--safe-area-right)]">
-                <Sidebar />
-                <MainContent>{children}</MainContent>
-              </div>
-              <BottomNav />
-            </ThemeProvider>
-          </ColorWorldProvider>
-        </DataProvider>
+        <SerwistRegistration>
+          <DataProvider>
+            <ColorWorldProvider>
+              <ThemeProvider>
+                <ThemeColorSync />
+                <div className="flex h-full pl-[var(--safe-area-left)] pr-[var(--safe-area-right)]">
+                  <Sidebar />
+                  <MainContent>{children}</MainContent>
+                </div>
+                <BottomNav />
+              </ThemeProvider>
+            </ColorWorldProvider>
+          </DataProvider>
+        </SerwistRegistration>
       </body>
     </html>
   );
