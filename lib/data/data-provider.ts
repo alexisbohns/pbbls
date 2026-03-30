@@ -9,6 +9,7 @@ export type Store = {
   pebbles: Pebble[]
   souls: Soul[]
   collections: Collection[]
+  pebbles_count: number
 }
 
 // ---------------------------------------------------------------------------
@@ -36,6 +37,10 @@ export interface DataProvider {
 
   /** Overwrite store with seed data and return the new snapshot. */
   reset(): Promise<Store>
+
+  // Pebbles counter
+  getPebblesCount(): Promise<number>
+  incrementPebblesCount(): Promise<number>
 
   // Pebbles
   listPebbles(): Promise<Pebble[]>

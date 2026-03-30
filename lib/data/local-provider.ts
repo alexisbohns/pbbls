@@ -13,7 +13,7 @@ import { SEED_PEBBLES, SEED_SOULS, SEED_COLLECTIONS } from "@/lib/seed/seed-data
 
 const STORAGE_KEY = "pbbls:store"
 
-const EMPTY_STORE: Store = { pebbles: [], souls: [], collections: [] }
+const EMPTY_STORE: Store = { pebbles: [], souls: [], collections: [], pebbles_count: 0 }
 
 export class LocalProvider implements DataProvider {
   private store: Store
@@ -40,7 +40,12 @@ export class LocalProvider implements DataProvider {
         // load() side-effect-free and safe for StrictMode double-invocation.
         return this.fromSeed()
       }
-      return JSON.parse(raw) as Store
+      const parsed = JSON.parse(raw) as Store
+      // Migration: backfill pebbles_count for existing users.
+      if (parsed.pebbles_count === undefined) {
+        parsed.pebbles_count = parsed.pebbles.length
+      }
+      return parsed
     } catch {
       // Corrupt or unreadable storage — fall back to seed (no write; same as above).
       return this.fromSeed()
@@ -65,6 +70,7 @@ export class LocalProvider implements DataProvider {
       pebbles: SEED_PEBBLES.map((p) => ({ ...p, created_at: now, updated_at: now })),
       souls: SEED_SOULS.map((s) => ({ ...s, created_at: now, updated_at: now })),
       collections: SEED_COLLECTIONS.map((c) => ({ ...c, created_at: now, updated_at: now })),
+      pebbles_count: SEED_PEBBLES.length,
     }
   }
 
@@ -98,6 +104,20 @@ export class LocalProvider implements DataProvider {
   }
 
   // ---------------------------------------------------------------------------
+  // Pebbles counter
+  // ---------------------------------------------------------------------------
+
+  async getPebblesCount(): Promise<number> {
+    return this.store.pebbles_count
+  }
+
+  async incrementPebblesCount(): Promise<number> {
+    const next = this.store.pebbles_count + 1
+    this.mutate({ ...this.store, pebbles_count: next })
+    return next
+  }
+
+  // ---------------------------------------------------------------------------
   // Pebbles
   // ---------------------------------------------------------------------------
 
@@ -117,7 +137,11 @@ export class LocalProvider implements DataProvider {
       created_at: now,
       updated_at: now,
     }
-    this.mutate({ ...this.store, pebbles: [...this.store.pebbles, pebble] })
+    this.mutate({
+      ...this.store,
+      pebbles: [...this.store.pebbles, pebble],
+      pebbles_count: this.store.pebbles_count + 1,
+    })
     return pebble
   }
 
