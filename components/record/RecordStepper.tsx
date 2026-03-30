@@ -98,7 +98,7 @@ export function RecordStepper() {
   const { Component: ActiveStep } = steps[currentStep]
 
   return (
-    <div className="space-y-6">
+    <div className="touch-manipulation space-y-6">
       {/* Step indicator */}
       <div className="space-y-2">
         <p className="text-sm text-muted-foreground" aria-live="polite">
