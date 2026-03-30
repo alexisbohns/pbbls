@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { CARD_TYPES } from "@/lib/config"
 import { useRecordForm } from "@/lib/hooks/useRecordForm"
 import { useStepNavigation } from "@/lib/hooks/useStepNavigation"
+import { useHaptics } from "@/lib/hooks/useHaptics"
 import { Button } from "@/components/ui/button"
 import type { RecordStepProps, StepConfig } from "@/components/record/types"
 import { StepDateTime } from "@/components/record/StepDateTime"
@@ -40,6 +41,8 @@ function makeCardFillerStep(cardTypeId: string, label: string): StepConfig {
 export function RecordStepper() {
   const router = useRouter()
 
+  const { vibrate } = useHaptics()
+
   const { formData, handleUpdate, handleSave, saving, error } = useRecordForm(
     (pebbleId) => router.push(`/pebble/${pebbleId}`),
   )
@@ -70,11 +73,13 @@ export function RecordStepper() {
   const handleAdvance = useCallback(() => {
     if (!canAdvance) return
     if (isLastStep) {
+      vibrate([10, 50, 20])
       void handleSave()
     } else {
+      vibrate(10)
       goNext()
     }
-  }, [canAdvance, isLastStep, handleSave, goNext])
+  }, [canAdvance, isLastStep, handleSave, goNext, vibrate])
 
   // Keyboard shortcuts: Enter to advance, Escape to go back
   useEffect(() => {

@@ -13,7 +13,7 @@ export function CollectionCard({ collection }: CollectionCardProps) {
     <article>
       <Link
         href={`/collections/${collection.id}`}
-        className="block rounded-lg border border-border px-4 py-3 transition-colors hover:bg-muted/50 focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+        className="block rounded-lg border border-border px-4 py-3 transition-all duration-100 hover:bg-muted/50 active:scale-[0.98] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
       >
         <h3 className="text-sm font-medium">{collection.name}</h3>
 

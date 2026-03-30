@@ -27,7 +27,7 @@ export function BottomNav() {
               <Link
                 href={href}
                 className={cn(
-                  "flex flex-col items-center gap-0.5 px-3 py-1 text-xs font-medium transition-colors",
+                  "flex flex-col items-center gap-0.5 px-3 py-1 text-xs font-medium transition-opacity duration-75 active:opacity-70",
                   isActive
                     ? "text-foreground"
                     : "text-muted-foreground",

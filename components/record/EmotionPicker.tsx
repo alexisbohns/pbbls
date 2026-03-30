@@ -89,7 +89,7 @@ export function EmotionPicker({ value, onChange }: EmotionPickerProps) {
                 tabIndex={i === focusableIdx ? 0 : -1}
                 onClick={() => onChange(emotion.id)}
                 className={cn(
-                  "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+                  "flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-100 active:scale-[0.97] outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
                   selected
                     ? "ring-2 ring-current"
                     : "bg-muted/50 hover:bg-muted"

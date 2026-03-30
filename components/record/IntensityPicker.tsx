@@ -63,7 +63,7 @@ export function IntensityPicker({ value, onChange }: IntensityPickerProps) {
               tabIndex={selected ? 0 : -1}
               onClick={() => onChange(level.value)}
               className={cn(
-                "rounded-full transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+                "rounded-full transition-all duration-100 active:scale-90 outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
                 level.size,
                 selected
                   ? "bg-primary"

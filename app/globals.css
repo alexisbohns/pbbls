@@ -478,4 +478,13 @@
     -webkit-user-select: text;
     user-select: text;
   }
+
+  /* Fast touch response: remove double-tap-zoom delay on interactive elements */
+  button,
+  a,
+  [role="radio"],
+  [role="option"],
+  [aria-pressed] {
+    touch-action: manipulation;
+  }
 }
