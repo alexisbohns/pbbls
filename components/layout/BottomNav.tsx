@@ -14,7 +14,7 @@ export function BottomNav() {
       aria-label="Main navigation"
       aria-hidden={hidden}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background md:hidden",
+        "fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background pb-[var(--safe-area-bottom)] md:hidden",
         "transition-transform duration-300 ease-in-out motion-reduce:transition-none",
         hidden && "translate-y-full",
       )}

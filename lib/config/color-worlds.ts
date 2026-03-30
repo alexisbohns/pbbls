@@ -13,3 +13,9 @@ export const COLOR_WORLDS: ColorWorldConfig[] = [
   { id: "dusk-stone", label: "Dusk Stone", background: { light: "#F0EEF0", dark: "#211F2B" } },
   { id: "moss-pool", label: "Moss Pool", background: { light: "#EFF5F2", dark: "#192B22" } },
 ]
+
+/** Returns { light, dark } background hex values for a given color world ID. */
+export function getColorWorldBackground(id: string): { light: string; dark: string } {
+  const config = COLOR_WORLDS.find((w) => w.id === id)
+  return config?.background ?? COLOR_WORLDS[0].background
+}
