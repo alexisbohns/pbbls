@@ -1,7 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo } from "react"
-import { useRouter } from "next/navigation"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { CARD_TYPES } from "@/lib/config"
 import { useRecordForm } from "@/lib/hooks/useRecordForm"
 import { useStepNavigation } from "@/lib/hooks/useStepNavigation"
@@ -18,6 +17,7 @@ import { StepDomains } from "@/components/record/StepDomains"
 import { StepCardPicker } from "@/components/record/StepCardPicker"
 import { StepCardFiller } from "@/components/record/StepCardFiller"
 import { StepSummary } from "@/components/record/StepSummary"
+import { RecordCelebration } from "@/components/record/RecordCelebration"
 
 const FIXED_STEPS: StepConfig[] = [
   { label: "Date and time", Component: StepDateTime, canAdvance: (d) => d.happened_at !== "" },
@@ -39,12 +39,12 @@ function makeCardFillerStep(cardTypeId: string, label: string): StepConfig {
 }
 
 export function RecordStepper() {
-  const router = useRouter()
+  const [savedPebbleId, setSavedPebbleId] = useState<string | null>(null)
 
   const { vibrate } = useHaptics()
 
   const { formData, handleUpdate, handleSave, saving, error } = useRecordForm(
-    (pebbleId) => router.push(`/pebble/${pebbleId}`),
+    (pebbleId) => setSavedPebbleId(pebbleId),
   )
 
   // Derive step list only when the set of selected card types changes,
@@ -101,6 +101,10 @@ export function RecordStepper() {
   }, [handleAdvance, goBack])
 
   const { Component: ActiveStep } = steps[currentStep]
+
+  if (savedPebbleId) {
+    return <RecordCelebration pebbleId={savedPebbleId} />
+  }
 
   return (
     <div className="touch-manipulation space-y-6">
