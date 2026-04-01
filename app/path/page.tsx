@@ -5,6 +5,7 @@ import { useSouls } from "@/lib/data/useSouls"
 import { PebbleTimeline } from "@/components/path/PebbleTimeline"
 import { PathEmptyState } from "@/components/path/PathEmptyState"
 import { PebblesCounter } from "@/components/path/PebblesCounter"
+import { GamificationStats } from "@/components/path/GamificationStats"
 
 export default function PathPage() {
   const { pebbles, loading: pebblesLoading } = usePebbles()
@@ -17,6 +18,7 @@ export default function PathPage() {
       <h1 className="mb-6 text-2xl font-semibold">Path</h1>
 
       <PebblesCounter />
+      <GamificationStats />
 
       {loading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
