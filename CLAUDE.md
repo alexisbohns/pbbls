@@ -105,3 +105,13 @@ When creating a PR, you MUST follow this checklist:
    - If the PR does not resolve an issue, ask the user which species label, scope label(s), and milestone to apply.
    - Never create a PR without labels and a milestone (except if user confirmed there's no milestone).
 5. **Build and lint**: always run `npm run build` and `npm run lint` and confirm they pass before opening the PR.
+
+# Product Architecture Map (Arkaik)
+
+Pebbles' product architecture is described in an Arkaik ProjectBundle JSON file at `docs/arkaik/bundle.json`. This map is the source of truth for all screens, flows, data models, and API endpoints in the product.
+
+**Whenever your work changes the product architecture** — adding a screen, creating a route, defining a model, wiring an endpoint, removing a feature, or changing a feature's status — **update the map as part of the same change.**
+
+Don't wait to be asked. Use the `arkaik` skill (`.claude/skills/arkaik/`) which explains the schema, the surgical update patterns, and includes a validation script to run before saving.
+
+Keep changes surgical: only touch the nodes and edges affected by your work. Never regenerate the full map unless bootstrapping from scratch.
