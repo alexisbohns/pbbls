@@ -6,7 +6,7 @@ import { useRecordForm } from "@/lib/hooks/useRecordForm"
 import { useStepNavigation } from "@/lib/hooks/useStepNavigation"
 import { useHaptics } from "@/lib/hooks/useHaptics"
 import { Button } from "@/components/ui/button"
-import type { RecordStepProps, StepConfig } from "@/components/record/types"
+import type { CelebrationData, RecordStepProps, StepConfig } from "@/components/record/types"
 import { StepDateTime } from "@/components/record/StepDateTime"
 import { StepName } from "@/components/record/StepName"
 import { StepDescription } from "@/components/record/StepDescription"
@@ -39,12 +39,12 @@ function makeCardFillerStep(cardTypeId: string, label: string): StepConfig {
 }
 
 export function RecordStepper() {
-  const [savedPebbleId, setSavedPebbleId] = useState<string | null>(null)
+  const [celebrationData, setCelebrationData] = useState<CelebrationData | null>(null)
 
   const { vibrate } = useHaptics()
 
   const { formData, handleUpdate, handleSave, saving, error } = useRecordForm(
-    (pebbleId) => setSavedPebbleId(pebbleId),
+    (data) => setCelebrationData(data),
   )
 
   // Derive step list only when the set of selected card types changes,
@@ -102,8 +102,15 @@ export function RecordStepper() {
 
   const { Component: ActiveStep } = steps[currentStep]
 
-  if (savedPebbleId) {
-    return <RecordCelebration pebbleId={savedPebbleId} />
+  if (celebrationData) {
+    return (
+      <RecordCelebration
+        pebbleId={celebrationData.pebbleId}
+        karmaDelta={celebrationData.karmaDelta}
+        bounceBefore={celebrationData.bounceBefore}
+        bounceAfter={celebrationData.bounceAfter}
+      />
+    )
   }
 
   return (

@@ -1,6 +1,8 @@
 import { useCallback, useState } from "react"
 import { usePebbles } from "@/lib/data/usePebbles"
-import type { RecordFormData } from "@/components/record/types"
+import { useDataProvider } from "@/lib/data/provider-context"
+import { computeKarmaDelta } from "@/lib/data/karma"
+import type { RecordFormData, CelebrationData } from "@/components/record/types"
 
 const INITIAL_DATA: RecordFormData = {
   name: "",
@@ -14,8 +16,9 @@ const INITIAL_DATA: RecordFormData = {
   cards: [],
 }
 
-export function useRecordForm(onSaveSuccess: (pebbleId: string) => void) {
+export function useRecordForm(onSaveSuccess: (data: CelebrationData) => void) {
   const { addPebble } = usePebbles()
+  const { store } = useDataProvider()
   const [formData, setFormData] = useState<RecordFormData>(INITIAL_DATA)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -33,8 +36,15 @@ export function useRecordForm(onSaveSuccess: (pebbleId: string) => void) {
         ...formData,
         cards: formData.cards.filter((c) => c.value.trim() !== ""),
       }
+      const bounceBefore = store.bounce
+      const karmaDelta = computeKarmaDelta(cleanedData)
       const pebble = await addPebble(cleanedData)
-      onSaveSuccess(pebble.id)
+      onSaveSuccess({
+        pebbleId: pebble.id,
+        karmaDelta,
+        bounceBefore,
+        bounceAfter: store.bounce,
+      })
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Something went wrong. Please try again."
@@ -42,7 +52,7 @@ export function useRecordForm(onSaveSuccess: (pebbleId: string) => void) {
     } finally {
       setSaving(false)
     }
-  }, [addPebble, formData, onSaveSuccess, saving])
+  }, [addPebble, formData, onSaveSuccess, saving, store.bounce])
 
   return { formData, handleUpdate, handleSave, saving, error }
 }

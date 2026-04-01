@@ -22,3 +22,10 @@ export type StepConfig = {
   Component: React.ComponentType<RecordStepProps>
   canAdvance: (data: RecordFormData) => boolean
 }
+
+export type CelebrationData = {
+  pebbleId: string
+  karmaDelta: number
+  bounceBefore: number
+  bounceAfter: number
+}
