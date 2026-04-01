@@ -10,6 +10,8 @@ export type Store = {
   souls: Soul[]
   collections: Collection[]
   pebbles_count: number
+  bounce: number
+  bounce_window: string[]
 }
 
 // ---------------------------------------------------------------------------
@@ -41,6 +43,10 @@ export interface DataProvider {
   // Pebbles counter
   getPebblesCount(): Promise<number>
   incrementPebblesCount(): Promise<number>
+
+  // Bounce
+  getBounce(): Promise<number>
+  refreshBounce(): Promise<number>
 
   // Pebbles
   listPebbles(): Promise<Pebble[]>
