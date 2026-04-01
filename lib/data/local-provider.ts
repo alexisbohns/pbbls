@@ -11,6 +11,7 @@ import type {
 import type { Pebble, Soul, Collection, KarmaEvent } from "@/lib/types"
 import { SEED_PEBBLES, SEED_SOULS, SEED_COLLECTIONS } from "@/lib/seed/seed-data"
 import { refreshBounceWindow, decayBounceWindow, todayLocal } from "@/lib/data/bounce-levels"
+import { computeKarmaDelta } from "@/lib/data/karma"
 
 const STORAGE_KEY = "pbbls:store"
 
@@ -231,8 +232,9 @@ export class LocalProvider implements DataProvider {
       created_at: now,
       updated_at: now,
     }
+    const karmaDelta = computeKarmaDelta(input)
     const karmaEvent: KarmaEvent = {
-      delta: 1,
+      delta: karmaDelta,
       reason: "pebble_created",
       ref_id: pebble.id,
       created_at: now,
@@ -241,7 +243,7 @@ export class LocalProvider implements DataProvider {
       ...this.store,
       pebbles: [...this.store.pebbles, pebble],
       pebbles_count: this.store.pebbles_count + 1,
-      karma: this.store.karma + 1,
+      karma: this.store.karma + karmaDelta,
       karma_log: [...this.store.karma_log, karmaEvent],
     })
     await this.refreshBounce()
