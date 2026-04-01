@@ -8,7 +8,7 @@ import type {
   CreateCollectionInput,
   UpdateCollectionInput,
 } from "@/lib/data/data-provider"
-import type { Pebble, Soul, Collection } from "@/lib/types"
+import type { Pebble, Soul, Collection, KarmaEvent } from "@/lib/types"
 import { SEED_PEBBLES, SEED_SOULS, SEED_COLLECTIONS } from "@/lib/seed/seed-data"
 import { refreshBounceWindow, decayBounceWindow, todayLocal } from "@/lib/data/bounce-levels"
 
@@ -19,6 +19,8 @@ const EMPTY_STORE: Store = {
   souls: [],
   collections: [],
   pebbles_count: 0,
+  karma: 0,
+  karma_log: [],
   bounce: 0,
   bounce_window: [],
 }
@@ -52,6 +54,16 @@ export class LocalProvider implements DataProvider {
       // Migration: backfill pebbles_count for existing users.
       if (parsed.pebbles_count === undefined) {
         parsed.pebbles_count = parsed.pebbles.length
+      }
+      // Migration: backfill karma for existing users.
+      if (parsed.karma === undefined) {
+        parsed.karma = parsed.pebbles.length
+        parsed.karma_log = parsed.pebbles.map((p: Pebble) => ({
+          delta: 1,
+          reason: "pebble_created",
+          ref_id: p.id,
+          created_at: p.created_at,
+        }))
       }
       // Migration: backfill bounce fields for existing users.
       if (parsed.bounce === undefined) {
@@ -95,11 +107,20 @@ export class LocalProvider implements DataProvider {
     // Deduplicate in case offsets collapse (unlikely but safe).
     const bounceWindow = [...new Set(seedDates)].filter((d) => d <= today)
 
+    const pebbles = SEED_PEBBLES.map((p) => ({ ...p, created_at: now, updated_at: now }))
+
     return {
-      pebbles: SEED_PEBBLES.map((p) => ({ ...p, created_at: now, updated_at: now })),
+      pebbles,
       souls: SEED_SOULS.map((s) => ({ ...s, created_at: now, updated_at: now })),
       collections: SEED_COLLECTIONS.map((c) => ({ ...c, created_at: now, updated_at: now })),
       pebbles_count: SEED_PEBBLES.length,
+      karma: SEED_PEBBLES.length,
+      karma_log: pebbles.map((p) => ({
+        delta: 1,
+        reason: "pebble_created",
+        ref_id: p.id,
+        created_at: p.created_at,
+      })),
       bounce: refreshBounceWindow(bounceWindow).bounce,
       bounce_window: bounceWindow,
     }
@@ -149,6 +170,34 @@ export class LocalProvider implements DataProvider {
   }
 
   // ---------------------------------------------------------------------------
+  // Karma
+  // ---------------------------------------------------------------------------
+
+  async getKarma(): Promise<number> {
+    return this.store.karma
+  }
+
+  async incrementKarma(
+    delta: number,
+    reason: string,
+    refId?: string,
+  ): Promise<number> {
+    const event: KarmaEvent = {
+      delta,
+      reason,
+      ...(refId !== undefined && { ref_id: refId }),
+      created_at: new Date().toISOString(),
+    }
+    const next = this.store.karma + delta
+    this.mutate({
+      ...this.store,
+      karma: next,
+      karma_log: [...this.store.karma_log, event],
+    })
+    return next
+  }
+
+  // ---------------------------------------------------------------------------
   // Bounce
   // ---------------------------------------------------------------------------
 
@@ -182,10 +231,18 @@ export class LocalProvider implements DataProvider {
       created_at: now,
       updated_at: now,
     }
+    const karmaEvent: KarmaEvent = {
+      delta: 1,
+      reason: "pebble_created",
+      ref_id: pebble.id,
+      created_at: now,
+    }
     this.mutate({
       ...this.store,
       pebbles: [...this.store.pebbles, pebble],
       pebbles_count: this.store.pebbles_count + 1,
+      karma: this.store.karma + 1,
+      karma_log: [...this.store.karma_log, karmaEvent],
     })
     await this.refreshBounce()
     return pebble

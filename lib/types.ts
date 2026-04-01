@@ -43,3 +43,10 @@ export type Collection = {
   created_at: string
   updated_at: string
 }
+
+export type KarmaEvent = {
+  delta: number
+  reason: string
+  ref_id?: string
+  created_at: string
+}

@@ -1,4 +1,4 @@
-import type { Pebble, Soul, Collection } from "@/lib/types"
+import type { Pebble, Soul, Collection, KarmaEvent } from "@/lib/types"
 
 // ---------------------------------------------------------------------------
 // Store snapshot — the in-memory representation of all persisted data.
@@ -10,6 +10,8 @@ export type Store = {
   souls: Soul[]
   collections: Collection[]
   pebbles_count: number
+  karma: number
+  karma_log: KarmaEvent[]
   bounce: number
   bounce_window: string[]
 }
@@ -43,6 +45,10 @@ export interface DataProvider {
   // Pebbles counter
   getPebblesCount(): Promise<number>
   incrementPebblesCount(): Promise<number>
+
+  // Karma
+  getKarma(): Promise<number>
+  incrementKarma(delta: number, reason: string, refId?: string): Promise<number>
 
   // Bounce
   getBounce(): Promise<number>
