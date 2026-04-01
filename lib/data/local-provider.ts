@@ -10,10 +10,18 @@ import type {
 } from "@/lib/data/data-provider"
 import type { Pebble, Soul, Collection } from "@/lib/types"
 import { SEED_PEBBLES, SEED_SOULS, SEED_COLLECTIONS } from "@/lib/seed/seed-data"
+import { refreshBounceWindow, decayBounceWindow, todayLocal } from "@/lib/data/bounce-levels"
 
 const STORAGE_KEY = "pbbls:store"
 
-const EMPTY_STORE: Store = { pebbles: [], souls: [], collections: [], pebbles_count: 0 }
+const EMPTY_STORE: Store = {
+  pebbles: [],
+  souls: [],
+  collections: [],
+  pebbles_count: 0,
+  bounce: 0,
+  bounce_window: [],
+}
 
 export class LocalProvider implements DataProvider {
   private store: Store
@@ -45,6 +53,15 @@ export class LocalProvider implements DataProvider {
       if (parsed.pebbles_count === undefined) {
         parsed.pebbles_count = parsed.pebbles.length
       }
+      // Migration: backfill bounce fields for existing users.
+      if (parsed.bounce === undefined) {
+        parsed.bounce = 0
+        parsed.bounce_window = []
+      }
+      // Lazy decay: prune expired dates and recompute level on app open.
+      const decayed = decayBounceWindow(parsed.bounce_window)
+      parsed.bounce = decayed.bounce
+      parsed.bounce_window = decayed.bounce_window
       return parsed
     } catch {
       // Corrupt or unreadable storage — fall back to seed (no write; same as above).
@@ -66,11 +83,25 @@ export class LocalProvider implements DataProvider {
 
   private fromSeed(): Store {
     const now = new Date().toISOString()
+
+    // Seed bounce with ~5 recent dates so demo users see the mechanic.
+    const today = todayLocal()
+    const seedDates: string[] = []
+    for (const offset of [0, 2, 4, 7, 9]) {
+      const d = new Date()
+      d.setDate(d.getDate() - offset)
+      seedDates.push(d.toLocaleDateString("en-CA"))
+    }
+    // Deduplicate in case offsets collapse (unlikely but safe).
+    const bounceWindow = [...new Set(seedDates)].filter((d) => d <= today)
+
     return {
       pebbles: SEED_PEBBLES.map((p) => ({ ...p, created_at: now, updated_at: now })),
       souls: SEED_SOULS.map((s) => ({ ...s, created_at: now, updated_at: now })),
       collections: SEED_COLLECTIONS.map((c) => ({ ...c, created_at: now, updated_at: now })),
       pebbles_count: SEED_PEBBLES.length,
+      bounce: refreshBounceWindow(bounceWindow).bounce,
+      bounce_window: bounceWindow,
     }
   }
 
@@ -118,6 +149,20 @@ export class LocalProvider implements DataProvider {
   }
 
   // ---------------------------------------------------------------------------
+  // Bounce
+  // ---------------------------------------------------------------------------
+
+  async getBounce(): Promise<number> {
+    return this.store.bounce
+  }
+
+  async refreshBounce(): Promise<number> {
+    const { bounce, bounce_window } = refreshBounceWindow(this.store.bounce_window)
+    this.mutate({ ...this.store, bounce, bounce_window })
+    return bounce
+  }
+
+  // ---------------------------------------------------------------------------
   // Pebbles
   // ---------------------------------------------------------------------------
 
@@ -142,6 +187,7 @@ export class LocalProvider implements DataProvider {
       pebbles: [...this.store.pebbles, pebble],
       pebbles_count: this.store.pebbles_count + 1,
     })
+    await this.refreshBounce()
     return pebble
   }
 
