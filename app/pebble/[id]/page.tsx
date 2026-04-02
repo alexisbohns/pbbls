@@ -15,9 +15,9 @@ export default function PebbleDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
-  const { pebble, loading: pebbleLoading } = usePebble(id)
+  const { pebble, loading: pebbleLoading, updatePebble } = usePebble(id)
   const { souls, loading: soulsLoading } = useSouls()
-  const { collections, loading: collectionsLoading } = useCollections()
+  const { collections, loading: collectionsLoading, updateCollection } = useCollections()
   const { marks, loading: marksLoading } = useMarks()
 
   const loading = pebbleLoading || soulsLoading || collectionsLoading || marksLoading
@@ -45,7 +45,11 @@ export default function PebbleDetailPage({
           pebble={pebble}
           souls={souls}
           collections={matchedCollections}
+          allCollections={collections}
+          marks={marks}
           mark={mark}
+          onUpdatePebble={updatePebble}
+          onUpdateCollection={updateCollection}
         />
       ) : (
         <PebbleNotFound />

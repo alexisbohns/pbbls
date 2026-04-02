@@ -1,8 +1,13 @@
 import type { Pebble, Soul, Collection, Mark } from "@/lib/types"
+import type { UpdatePebbleInput, UpdateCollectionInput } from "@/lib/data/data-provider"
 import { EMOTIONS, DOMAINS, CARD_TYPES } from "@/lib/config"
 import { IntensityDots, PositivenessIndicator } from "@/components/pebble/PebbleIndicators"
 import { DetailSection } from "@/components/pebble/DetailSection"
 import { GlyphPreview } from "@/components/glyphs/GlyphPreview"
+import { SoulSheet } from "@/components/pebble/SoulSheet"
+import { DomainSheet } from "@/components/pebble/DomainSheet"
+import { CollectionSheet } from "@/components/pebble/CollectionSheet"
+import { GlyphSheet } from "@/components/pebble/GlyphSheet"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
@@ -12,16 +17,30 @@ type PebbleDetailProps = {
   pebble: Pebble
   souls: Soul[]
   collections: Collection[]
+  allCollections: Collection[]
+  marks: Mark[]
   mark: Mark | undefined
+  onUpdatePebble: (input: UpdatePebbleInput) => Promise<Pebble>
+  onUpdateCollection: (id: string, input: UpdateCollectionInput) => Promise<Collection>
 }
 
-export function PebbleDetail({ pebble, souls, collections, mark }: PebbleDetailProps) {
+export function PebbleDetail({
+  pebble,
+  souls,
+  collections,
+  allCollections,
+  marks,
+  mark,
+  onUpdatePebble,
+  onUpdateCollection,
+}: PebbleDetailProps) {
   const emotion = EMOTIONS.find((e) => e.id === pebble.emotion_id)
   const domains = DOMAINS.filter((d) => pebble.domain_ids.includes(d.id))
   const matchedSouls = pebble.soul_ids
     .map((id) => souls.find((s) => s.id === id))
     .filter((s): s is Soul => s !== undefined)
 
+  const linkedCollectionIds = collections.map((c) => c.id)
   const formattedDate = dateTimeFormatter.format(new Date(pebble.happened_at))
 
   return (
@@ -67,7 +86,17 @@ export function PebbleDetail({ pebble, souls, collections, mark }: PebbleDetailP
       )}
 
       {/* Glyph */}
-      <DetailSection id="glyph" title="Glyph">
+      <DetailSection
+        id="glyph"
+        title="Glyph"
+        addTrigger={
+          <GlyphSheet
+            marks={marks}
+            selectedMarkId={pebble.mark_id}
+            onSave={(markId) => void onUpdatePebble({ mark_id: markId })}
+          />
+        }
+      >
         {mark && (
           <GlyphPreview
             mark={mark}
@@ -77,7 +106,16 @@ export function PebbleDetail({ pebble, souls, collections, mark }: PebbleDetailP
       </DetailSection>
 
       {/* Souls */}
-      <DetailSection id="souls" title="Souls">
+      <DetailSection
+        id="souls"
+        title="Souls"
+        addTrigger={
+          <SoulSheet
+            value={pebble.soul_ids}
+            onSave={(ids) => void onUpdatePebble({ soul_ids: ids })}
+          />
+        }
+      >
         {matchedSouls.length > 0 && (
           <ul className="mt-2 flex flex-wrap gap-2" role="list">
             {matchedSouls.map((soul) => (
@@ -90,7 +128,18 @@ export function PebbleDetail({ pebble, souls, collections, mark }: PebbleDetailP
       </DetailSection>
 
       {/* Collections */}
-      <DetailSection id="collections" title="Collections">
+      <DetailSection
+        id="collections"
+        title="Collections"
+        addTrigger={
+          <CollectionSheet
+            pebbleId={pebble.id}
+            allCollections={allCollections}
+            linkedIds={linkedCollectionIds}
+            onUpdateCollection={onUpdateCollection}
+          />
+        }
+      >
         {collections.length > 0 && (
           <ul className="mt-2 flex flex-wrap gap-2" role="list">
             {collections.map((collection) => (
@@ -103,7 +152,16 @@ export function PebbleDetail({ pebble, souls, collections, mark }: PebbleDetailP
       </DetailSection>
 
       {/* Domains */}
-      <DetailSection id="domains" title="Domains">
+      <DetailSection
+        id="domains"
+        title="Domains"
+        addTrigger={
+          <DomainSheet
+            value={pebble.domain_ids}
+            onSave={(ids) => void onUpdatePebble({ domain_ids: ids })}
+          />
+        }
+      >
         {domains.length > 0 && (
           <ul className="mt-2 flex flex-wrap gap-2" role="list">
             {domains.map((domain) => (
