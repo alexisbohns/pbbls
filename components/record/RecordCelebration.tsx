@@ -3,6 +3,7 @@
 import { useEffect } from "react"
 import Link from "next/link"
 import { motion, useReducedMotion } from "framer-motion"
+import { useRive } from "@rive-app/react-canvas"
 import { usePebblesCount } from "@/lib/data/usePebblesCount"
 import { useHaptics } from "@/lib/hooks/useHaptics"
 import { Button } from "@/components/ui/button"
@@ -26,12 +27,33 @@ export function RecordCelebration({
 
   const leveledUp = bounceAfter > bounceBefore
 
+  const { rive, RiveComponent } = useRive(
+    prefersReducedMotion
+      ? null
+      : {
+          src: "/animations/pebbles-stack.riv",
+          autoplay: false,
+        }
+  )
+
   useEffect(() => {
     vibrate(leveledUp ? [50, 100, 50, 100, 50] : [50, 100, 50])
   }, [vibrate, leveledUp])
 
+  useEffect(() => {
+    if (rive) {
+      rive.play()
+    }
+  }, [rive])
+
   return (
     <section aria-label="Celebration" className="flex flex-col items-center gap-8 py-12 text-center">
+      {!prefersReducedMotion && (
+        <div className="h-48 w-48" aria-hidden="true">
+          <RiveComponent className="size-full" />
+        </div>
+      )}
+
       <div className="flex flex-col items-center gap-3">
         <motion.div
           initial={prefersReducedMotion ? false : { scale: 0.8, opacity: 0 }}
