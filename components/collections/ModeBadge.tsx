@@ -1,7 +1,7 @@
 import type { Collection } from "@/lib/types"
 import { Badge } from "@/components/ui/badge"
 
-const MODE_META: Record<
+export const MODE_META: Record<
   NonNullable<Collection["mode"]>,
   { emoji: string; label: string }
 > = {
