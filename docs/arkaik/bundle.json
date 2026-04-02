@@ -145,6 +145,33 @@
       "platforms": ["web", "ios", "android"]
     },
     {
+      "id": "V-glyphs-list",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Glyphs",
+      "description": "Browse all user-created glyphs (carved marks on pebble shapes).",
+      "status": "idea",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "V-glyph-detail",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Glyph Detail",
+      "description": "View a single glyph with full SVG preview and metadata.",
+      "status": "idea",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "V-glyph-carve",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Carve Glyph",
+      "description": "Draw a new glyph on a pebble surface using the carve editor.",
+      "status": "idea",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
       "id": "V-bounce-tempo",
       "project_id": "pebbles",
       "species": "view",
@@ -386,6 +413,36 @@
       }
     },
     {
+      "id": "F-manage-glyphs",
+      "project_id": "pebbles",
+      "species": "flow",
+      "title": "Manage Glyphs",
+      "description": "Browse, carve, and view glyphs (custom marks on pebble shapes).",
+      "status": "idea",
+      "platforms": ["web", "ios", "android"],
+      "metadata": {
+        "playlist": {
+          "entries": [
+            { "type": "view", "view_id": "V-glyphs-list" },
+            {
+              "type": "junction",
+              "label": "Glyph action?",
+              "cases": [
+                {
+                  "label": "View glyph",
+                  "entries": [{ "type": "view", "view_id": "V-glyph-detail" }]
+                },
+                {
+                  "label": "Carve glyph",
+                  "entries": [{ "type": "view", "view_id": "V-glyph-carve" }]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
       "id": "F-weekly-wrap",
       "project_id": "pebbles",
       "species": "flow",
@@ -550,6 +607,42 @@
       "species": "data-model",
       "title": "Achievement",
       "description": "Unlockable reward earned through collecting and engagement.",
+      "status": "idea",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "DM-mark",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "Mark",
+      "description": "A user-drawn glyph on a pebble shape, stored as SVG strokes.",
+      "status": "idea",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "API-get-marks",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "GET /marks",
+      "description": "Retrieve all user marks (glyphs).",
+      "status": "idea",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "API-create-mark",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "POST /marks",
+      "description": "Create a new mark (glyph).",
+      "status": "idea",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "API-delete-mark",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "DELETE /marks/:id",
+      "description": "Delete a mark (glyph) by ID.",
       "status": "idea",
       "platforms": ["web", "ios", "android"]
     },
@@ -852,6 +945,18 @@
     { "id": "e-API-get-monthly-cairn-DM-pebble", "project_id": "pebbles", "source_id": "API-get-monthly-cairn", "target_id": "DM-pebble", "edge_type": "queries" },
     { "id": "e-API-register-DM-user", "project_id": "pebbles", "source_id": "API-register", "target_id": "DM-user", "edge_type": "queries" },
     { "id": "e-API-login-DM-user", "project_id": "pebbles", "source_id": "API-login", "target_id": "DM-user", "edge_type": "queries" },
-    { "id": "e-API-get-collection-rise-DM-collection", "project_id": "pebbles", "source_id": "API-get-collection-rise", "target_id": "DM-collection", "edge_type": "queries" }
+    { "id": "e-API-get-collection-rise-DM-collection", "project_id": "pebbles", "source_id": "API-get-collection-rise", "target_id": "DM-collection", "edge_type": "queries" },
+    { "id": "e-V-home-F-manage-glyphs", "project_id": "pebbles", "source_id": "V-home", "target_id": "F-manage-glyphs", "edge_type": "composes" },
+    { "id": "e-F-manage-glyphs-V-glyphs-list", "project_id": "pebbles", "source_id": "F-manage-glyphs", "target_id": "V-glyphs-list", "edge_type": "composes" },
+    { "id": "e-F-manage-glyphs-V-glyph-detail", "project_id": "pebbles", "source_id": "F-manage-glyphs", "target_id": "V-glyph-detail", "edge_type": "composes" },
+    { "id": "e-F-manage-glyphs-V-glyph-carve", "project_id": "pebbles", "source_id": "F-manage-glyphs", "target_id": "V-glyph-carve", "edge_type": "composes" },
+    { "id": "e-V-glyphs-list-API-get-marks", "project_id": "pebbles", "source_id": "V-glyphs-list", "target_id": "API-get-marks", "edge_type": "calls" },
+    { "id": "e-V-glyph-carve-API-create-mark", "project_id": "pebbles", "source_id": "V-glyph-carve", "target_id": "API-create-mark", "edge_type": "calls" },
+    { "id": "e-V-glyph-detail-API-delete-mark", "project_id": "pebbles", "source_id": "V-glyph-detail", "target_id": "API-delete-mark", "edge_type": "calls" },
+    { "id": "e-V-glyphs-list-DM-mark", "project_id": "pebbles", "source_id": "V-glyphs-list", "target_id": "DM-mark", "edge_type": "displays" },
+    { "id": "e-V-glyph-detail-DM-mark", "project_id": "pebbles", "source_id": "V-glyph-detail", "target_id": "DM-mark", "edge_type": "displays" },
+    { "id": "e-API-get-marks-DM-mark", "project_id": "pebbles", "source_id": "API-get-marks", "target_id": "DM-mark", "edge_type": "queries" },
+    { "id": "e-API-create-mark-DM-mark", "project_id": "pebbles", "source_id": "API-create-mark", "target_id": "DM-mark", "edge_type": "queries" },
+    { "id": "e-API-delete-mark-DM-mark", "project_id": "pebbles", "source_id": "API-delete-mark", "target_id": "DM-mark", "edge_type": "queries" }
   ]
 }

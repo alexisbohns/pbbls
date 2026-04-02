@@ -1,9 +1,10 @@
 "use client"
 
-import { use, useMemo } from "react"
+import { use, useMemo, useCallback } from "react"
 import Link from "next/link"
-import type { Pebble } from "@/lib/types"
+import type { Pebble, Collection } from "@/lib/types"
 import { useCollection } from "@/lib/data/useCollection"
+import { useCollections } from "@/lib/data/useCollections"
 import { usePebbles } from "@/lib/data/usePebbles"
 import { useSouls } from "@/lib/data/useSouls"
 import { CollectionDetailHeader } from "@/components/collections/CollectionDetailHeader"
@@ -17,6 +18,7 @@ export default function CollectionDetailPage({
 }) {
   const { id } = use(params)
   const { collection, loading: collectionLoading } = useCollection(id)
+  const { updateCollection } = useCollections()
   const { pebbles, loading: pebblesLoading } = usePebbles()
   const { souls, loading: soulsLoading } = useSouls()
 
@@ -29,6 +31,23 @@ export default function CollectionDetailPage({
       .map((pid) => pebbleMap.get(pid))
       .filter((p): p is Pebble => p != null)
   }, [collection, pebbles])
+
+  const handleEdit = useCallback(
+    async (data: { name: string; mode?: Collection["mode"] }) => {
+      await updateCollection(id, data)
+    },
+    [id, updateCollection],
+  )
+
+  const handleRemovePebble = useCallback(
+    async (pebbleId: string) => {
+      if (!collection) return
+      await updateCollection(id, {
+        pebble_ids: collection.pebble_ids.filter((pid) => pid !== pebbleId),
+      })
+    },
+    [id, collection, updateCollection],
+  )
 
   return (
     <section>
@@ -48,13 +67,18 @@ export default function CollectionDetailPage({
           <CollectionDetailHeader
             collection={collection}
             pebbleCount={resolvedPebbles.length}
+            onEdit={handleEdit}
           />
           {resolvedPebbles.length === 0 ? (
             <p className="py-10 text-center text-sm text-muted-foreground">
               No pebbles in this collection yet.
             </p>
           ) : (
-            <CollectionPebbleList pebbles={resolvedPebbles} souls={souls} />
+            <CollectionPebbleList
+              pebbles={resolvedPebbles}
+              souls={souls}
+              onRemove={handleRemovePebble}
+            />
           )}
         </>
       ) : (

@@ -82,14 +82,14 @@ export function CarveEditor({ onSaved }: CarveEditorProps) {
   if (saved) {
     return (
       <motion.section
-        aria-label="Mark saved"
+        aria-label="Glyph saved"
         className="flex flex-col items-center gap-6 py-8"
         initial={prefersReducedMotion ? false : { scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
       >
         <p className="text-lg font-medium" aria-live="polite">
-          Mark saved
+          Glyph saved
         </p>
         <svg
           viewBox={shape.viewBox}
@@ -122,7 +122,7 @@ export function CarveEditor({ onSaved }: CarveEditorProps) {
           onClick={handleNewMark}
           className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
         >
-          Create another mark
+          Create another glyph
         </button>
       </motion.section>
     )
