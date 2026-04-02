@@ -322,7 +322,12 @@ export class LocalProvider implements DataProvider {
 
   async deleteSoul(id: string): Promise<void> {
     const souls = this.store.souls.filter((s) => s.id !== id)
-    this.mutate({ ...this.store, souls })
+    // Cascade: remove the deleted soul from all pebbles
+    const pebbles = this.store.pebbles.map((p) => ({
+      ...p,
+      soul_ids: p.soul_ids.filter((sid) => sid !== id),
+    }))
+    this.mutate({ ...this.store, souls, pebbles })
   }
 
   // ---------------------------------------------------------------------------
