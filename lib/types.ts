@@ -50,3 +50,18 @@ export type KarmaEvent = {
   ref_id?: string
   created_at: string
 }
+
+export type MarkStroke = {
+  d: string
+  width: number
+}
+
+export type Mark = {
+  id: string
+  name?: string
+  shape_id: string
+  strokes: MarkStroke[]
+  viewBox: string
+  created_at: string
+  updated_at: string
+}

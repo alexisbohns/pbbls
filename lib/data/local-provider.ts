@@ -7,8 +7,10 @@ import type {
   UpdateSoulInput,
   CreateCollectionInput,
   UpdateCollectionInput,
+  CreateMarkInput,
+  UpdateMarkInput,
 } from "@/lib/data/data-provider"
-import type { Pebble, Soul, Collection, KarmaEvent } from "@/lib/types"
+import type { Pebble, Soul, Collection, KarmaEvent, Mark } from "@/lib/types"
 import { SEED_PEBBLES, SEED_SOULS, SEED_COLLECTIONS } from "@/lib/seed/seed-data"
 import { refreshBounceWindow, decayBounceWindow, todayLocal } from "@/lib/data/bounce-levels"
 import { computeKarmaDelta } from "@/lib/data/karma"
@@ -19,6 +21,7 @@ const EMPTY_STORE: Store = {
   pebbles: [],
   souls: [],
   collections: [],
+  marks: [],
   pebbles_count: 0,
   karma: 0,
   karma_log: [],
@@ -65,6 +68,10 @@ export class LocalProvider implements DataProvider {
           ref_id: p.id,
           created_at: p.created_at,
         }))
+      }
+      // Migration: backfill marks for existing users.
+      if (parsed.marks === undefined) {
+        parsed.marks = []
       }
       // Migration: backfill bounce fields for existing users.
       if (parsed.bounce === undefined) {
@@ -114,6 +121,7 @@ export class LocalProvider implements DataProvider {
       pebbles,
       souls: SEED_SOULS.map((s) => ({ ...s, created_at: now, updated_at: now })),
       collections: SEED_COLLECTIONS.map((c) => ({ ...c, created_at: now, updated_at: now })),
+      marks: [],
       pebbles_count: SEED_PEBBLES.length,
       karma: SEED_PEBBLES.length,
       karma_log: pebbles.map((p) => ({
@@ -358,5 +366,48 @@ export class LocalProvider implements DataProvider {
   async deleteCollection(id: string): Promise<void> {
     const collections = this.store.collections.filter((c) => c.id !== id)
     this.mutate({ ...this.store, collections })
+  }
+
+  // ---------------------------------------------------------------------------
+  // Marks
+  // ---------------------------------------------------------------------------
+
+  async listMarks(): Promise<Mark[]> {
+    return this.store.marks
+  }
+
+  async getMark(id: string): Promise<Mark | undefined> {
+    return this.store.marks.find((m) => m.id === id)
+  }
+
+  async createMark(input: CreateMarkInput): Promise<Mark> {
+    const now = new Date().toISOString()
+    const mark: Mark = {
+      ...input,
+      id: crypto.randomUUID(),
+      created_at: now,
+      updated_at: now,
+    }
+    this.mutate({ ...this.store, marks: [...this.store.marks, mark] })
+    return mark
+  }
+
+  async updateMark(id: string, input: UpdateMarkInput): Promise<Mark> {
+    const idx = this.store.marks.findIndex((m) => m.id === id)
+    if (idx === -1) throw new Error(`Mark not found: ${id}`)
+    const updated: Mark = {
+      ...this.store.marks[idx],
+      ...input,
+      updated_at: new Date().toISOString(),
+    }
+    const marks = [...this.store.marks]
+    marks[idx] = updated
+    this.mutate({ ...this.store, marks })
+    return updated
+  }
+
+  async deleteMark(id: string): Promise<void> {
+    const marks = this.store.marks.filter((m) => m.id !== id)
+    this.mutate({ ...this.store, marks })
   }
 }
