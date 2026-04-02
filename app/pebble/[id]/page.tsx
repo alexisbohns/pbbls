@@ -4,6 +4,8 @@ import { use } from "react"
 import Link from "next/link"
 import { usePebble } from "@/lib/data/usePebble"
 import { useSouls } from "@/lib/data/useSouls"
+import { useCollections } from "@/lib/data/useCollections"
+import { useMarks } from "@/lib/data/useMarks"
 import { PebbleDetail } from "@/components/pebble/PebbleDetail"
 import { PebbleNotFound } from "@/components/pebble/PebbleNotFound"
 
@@ -15,8 +17,15 @@ export default function PebbleDetailPage({
   const { id } = use(params)
   const { pebble, loading: pebbleLoading } = usePebble(id)
   const { souls, loading: soulsLoading } = useSouls()
+  const { collections, loading: collectionsLoading } = useCollections()
+  const { marks, loading: marksLoading } = useMarks()
 
-  const loading = pebbleLoading || soulsLoading
+  const loading = pebbleLoading || soulsLoading || collectionsLoading || marksLoading
+
+  const matchedCollections = collections.filter((c) =>
+    c.pebble_ids.includes(id),
+  )
+  const mark = pebble ? marks.find((m) => m.id === pebble.mark_id) : undefined
 
   return (
     <section>
@@ -32,7 +41,12 @@ export default function PebbleDetailPage({
       {loading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : pebble ? (
-        <PebbleDetail pebble={pebble} souls={souls} />
+        <PebbleDetail
+          pebble={pebble}
+          souls={souls}
+          collections={matchedCollections}
+          mark={mark}
+        />
       ) : (
         <PebbleNotFound />
       )}

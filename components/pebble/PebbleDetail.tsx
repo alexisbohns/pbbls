@@ -1,15 +1,21 @@
-import type { Pebble, Soul } from "@/lib/types"
+import type { Pebble, Soul, Collection, Mark } from "@/lib/types"
 import { EMOTIONS, DOMAINS, CARD_TYPES } from "@/lib/config"
 import { IntensityDots, PositivenessIndicator } from "@/components/pebble/PebbleIndicators"
+import { DetailSection } from "@/components/pebble/DetailSection"
+import { GlyphPreview } from "@/components/glyphs/GlyphPreview"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Plus } from "lucide-react"
 import { dateTimeFormatter } from "@/lib/utils/formatters"
 
 type PebbleDetailProps = {
   pebble: Pebble
   souls: Soul[]
+  collections: Collection[]
+  mark: Mark | undefined
 }
 
-export function PebbleDetail({ pebble, souls }: PebbleDetailProps) {
+export function PebbleDetail({ pebble, souls, collections, mark }: PebbleDetailProps) {
   const emotion = EMOTIONS.find((e) => e.id === pebble.emotion_id)
   const domains = DOMAINS.filter((d) => pebble.domain_ids.includes(d.id))
   const matchedSouls = pebble.soul_ids
@@ -25,7 +31,7 @@ export function PebbleDetail({ pebble, souls }: PebbleDetailProps) {
         <h1 className="text-2xl font-semibold">{pebble.name}</h1>
 
         <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-          {emotion && (
+          {emotion ? (
             <span
               className="rounded-full px-2.5 py-0.5 text-sm font-medium"
               style={{
@@ -36,6 +42,16 @@ export function PebbleDetail({ pebble, souls }: PebbleDetailProps) {
             >
               {emotion.name}
             </span>
+          ) : (
+            <Button
+              variant="ghost"
+              size="xs"
+              aria-label="Add emotion"
+              disabled
+            >
+              <Plus data-icon="inline-start" />
+              Emotion
+            </Button>
           )}
 
           <IntensityDots intensity={pebble.intensity} />
@@ -50,12 +66,19 @@ export function PebbleDetail({ pebble, souls }: PebbleDetailProps) {
         <p className="mt-4 text-sm text-foreground">{pebble.description}</p>
       )}
 
+      {/* Glyph */}
+      <DetailSection id="glyph" title="Glyph">
+        {mark && (
+          <GlyphPreview
+            mark={mark}
+            className="mt-2 h-20 w-20"
+          />
+        )}
+      </DetailSection>
+
       {/* Souls */}
-      {matchedSouls.length > 0 && (
-        <section className="mt-6" aria-labelledby="souls-heading">
-          <h2 id="souls-heading" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Souls
-          </h2>
+      <DetailSection id="souls" title="Souls">
+        {matchedSouls.length > 0 && (
           <ul className="mt-2 flex flex-wrap gap-2" role="list">
             {matchedSouls.map((soul) => (
               <li key={soul.id}>
@@ -63,15 +86,25 @@ export function PebbleDetail({ pebble, souls }: PebbleDetailProps) {
               </li>
             ))}
           </ul>
-        </section>
-      )}
+        )}
+      </DetailSection>
+
+      {/* Collections */}
+      <DetailSection id="collections" title="Collections">
+        {collections.length > 0 && (
+          <ul className="mt-2 flex flex-wrap gap-2" role="list">
+            {collections.map((collection) => (
+              <li key={collection.id}>
+                <Badge variant="outline">{collection.name}</Badge>
+              </li>
+            ))}
+          </ul>
+        )}
+      </DetailSection>
 
       {/* Domains */}
-      {domains.length > 0 && (
-        <section className="mt-6" aria-labelledby="domains-heading">
-          <h2 id="domains-heading" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Domains
-          </h2>
+      <DetailSection id="domains" title="Domains">
+        {domains.length > 0 && (
           <ul className="mt-2 flex flex-wrap gap-2" role="list">
             {domains.map((domain) => (
               <li key={domain.id}>
@@ -79,15 +112,12 @@ export function PebbleDetail({ pebble, souls }: PebbleDetailProps) {
               </li>
             ))}
           </ul>
-        </section>
-      )}
+        )}
+      </DetailSection>
 
       {/* Cards */}
-      {pebble.cards.length > 0 && (
-        <section className="mt-6" aria-labelledby="cards-heading">
-          <h2 id="cards-heading" className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Cards
-          </h2>
+      <DetailSection id="cards" title="Cards">
+        {pebble.cards.length > 0 && (
           <ol className="mt-3 space-y-4" role="list">
             {pebble.cards.map((card, index) => {
               const cardType = CARD_TYPES.find((c) => c.id === card.species_id)
@@ -104,8 +134,8 @@ export function PebbleDetail({ pebble, souls }: PebbleDetailProps) {
               )
             })}
           </ol>
-        </section>
-      )}
+        )}
+      </DetailSection>
     </article>
   )
 }
