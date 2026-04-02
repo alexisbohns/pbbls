@@ -5,6 +5,7 @@
 // ---------------------------------------------------------------------------
 
 import type { CreatePebbleInput } from "@/lib/data/data-provider"
+import type { Pebble } from "@/lib/types"
 
 /**
  * Compute the karma delta for a pebble based on enrichment depth.
@@ -18,7 +19,7 @@ import type { CreatePebbleInput } from "@/lib/data/data-provider"
  *
  * // TODO: account for instants (issue #66 follow-up)
  */
-export function computeKarmaDelta(pebble: CreatePebbleInput): number {
+export function computeKarmaDelta(pebble: CreatePebbleInput | Pebble): number {
   let delta = 1
 
   if (pebble.description?.trim()) delta += 1
