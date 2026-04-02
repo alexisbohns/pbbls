@@ -32,7 +32,7 @@ export function AddSoulForm({ onAdd }: AddSoulFormProps) {
       <Input
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="New soul name\u2026"
+        placeholder="New soul name…"
         aria-label="New soul name"
         disabled={submitting}
         className="flex-1"
