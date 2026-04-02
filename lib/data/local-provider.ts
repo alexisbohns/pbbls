@@ -261,14 +261,37 @@ export class LocalProvider implements DataProvider {
   async updatePebble(id: string, input: UpdatePebbleInput): Promise<Pebble> {
     const idx = this.store.pebbles.findIndex((p) => p.id === id)
     if (idx === -1) throw new Error(`Pebble not found: ${id}`)
+    const prev = this.store.pebbles[idx]
     const updated: Pebble = {
-      ...this.store.pebbles[idx],
+      ...prev,
       ...input,
       updated_at: new Date().toISOString(),
     }
     const pebbles = [...this.store.pebbles]
     pebbles[idx] = updated
-    this.mutate({ ...this.store, pebbles })
+
+    // Recompute karma: award the difference between old and new enrichment.
+    const karmaBefore = computeKarmaDelta(prev)
+    const karmaAfter = computeKarmaDelta(updated)
+    const diff = karmaAfter - karmaBefore
+
+    if (diff !== 0) {
+      const karmaEvent: KarmaEvent = {
+        delta: diff,
+        reason: "pebble_enriched",
+        ref_id: id,
+        created_at: updated.updated_at,
+      }
+      this.mutate({
+        ...this.store,
+        pebbles,
+        karma: this.store.karma + diff,
+        karma_log: [...this.store.karma_log, karmaEvent],
+      })
+    } else {
+      this.mutate({ ...this.store, pebbles })
+    }
+
     return updated
   }
 

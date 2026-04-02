@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import type { ReactNode, ReactElement } from "react"
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
@@ -6,9 +6,10 @@ type DetailSectionProps = {
   id: string
   title: string
   children?: ReactNode
+  addTrigger?: ReactElement
 }
 
-export function DetailSection({ id, title, children }: DetailSectionProps) {
+export function DetailSection({ id, title, children, addTrigger }: DetailSectionProps) {
   const headingId = `${id}-heading`
 
   return (
@@ -20,14 +21,16 @@ export function DetailSection({ id, title, children }: DetailSectionProps) {
         >
           {title}
         </h2>
-        <Button
-          variant="ghost"
-          size="icon-xs"
-          aria-label={`Add ${title.toLowerCase()}`}
-          disabled
-        >
-          <Plus />
-        </Button>
+        {addTrigger ?? (
+          <Button
+            variant="ghost"
+            size="icon-xs"
+            aria-label={`Add ${title.toLowerCase()}`}
+            disabled
+          >
+            <Plus />
+          </Button>
+        )}
       </div>
       {children}
     </section>
