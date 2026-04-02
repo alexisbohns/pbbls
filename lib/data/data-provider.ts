@@ -1,4 +1,4 @@
-import type { Pebble, Soul, Collection, KarmaEvent } from "@/lib/types"
+import type { Pebble, Soul, Collection, KarmaEvent, Mark } from "@/lib/types"
 
 // ---------------------------------------------------------------------------
 // Store snapshot — the in-memory representation of all persisted data.
@@ -9,6 +9,7 @@ export type Store = {
   pebbles: Pebble[]
   souls: Soul[]
   collections: Collection[]
+  marks: Mark[]
   pebbles_count: number
   karma: number
   karma_log: KarmaEvent[]
@@ -28,6 +29,9 @@ export type UpdateSoulInput = Partial<Omit<Soul, "id" | "created_at" | "updated_
 
 export type CreateCollectionInput = Omit<Collection, "id" | "created_at" | "updated_at">
 export type UpdateCollectionInput = Partial<Omit<Collection, "id" | "created_at" | "updated_at">>
+
+export type CreateMarkInput = Omit<Mark, "id" | "created_at" | "updated_at">
+export type UpdateMarkInput = Partial<Omit<Mark, "id" | "created_at" | "updated_at">>
 
 // ---------------------------------------------------------------------------
 // DataProvider interface — designed for a Supabase swap: keep this interface,
@@ -74,4 +78,11 @@ export interface DataProvider {
   createCollection(input: CreateCollectionInput): Promise<Collection>
   updateCollection(id: string, input: UpdateCollectionInput): Promise<Collection>
   deleteCollection(id: string): Promise<void>
+
+  // Marks
+  listMarks(): Promise<Mark[]>
+  getMark(id: string): Promise<Mark | undefined>
+  createMark(input: CreateMarkInput): Promise<Mark>
+  updateMark(id: string, input: UpdateMarkInput): Promise<Mark>
+  deleteMark(id: string): Promise<void>
 }
