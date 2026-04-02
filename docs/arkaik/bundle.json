@@ -123,7 +123,7 @@
       "species": "view",
       "title": "Souls Directory",
       "description": "Browse and manage all souls (people in your life).",
-      "status": "idea",
+      "status": "live",
       "platforms": ["web", "ios", "android"]
     },
     {
@@ -132,7 +132,7 @@
       "species": "view",
       "title": "Soul Detail",
       "description": "View a soul's profile and all linked pebbles.",
-      "status": "idea",
+      "status": "live",
       "platforms": ["web", "ios", "android"]
     },
     {
@@ -141,7 +141,7 @@
       "species": "view",
       "title": "Add Soul",
       "description": "Create a new soul entry for someone in your life.",
-      "status": "idea",
+      "status": "live",
       "platforms": ["web", "ios", "android"]
     },
     {
@@ -361,7 +361,7 @@
       "species": "flow",
       "title": "Manage Souls",
       "description": "Browse, add, and view souls linked to your pebbles.",
-      "status": "idea",
+      "status": "live",
       "platforms": ["web", "ios", "android"],
       "metadata": {
         "playlist": {
