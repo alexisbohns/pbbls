@@ -14,6 +14,7 @@ import type { CreatePebbleInput } from "@/lib/data/data-provider"
  * +1 per card with non-empty value
  * +1 if at least one soul attached
  * +1 if at least one domain attached
+ * +1 if a glyph is attached
  *
  * // TODO: account for instants (issue #66 follow-up)
  */
@@ -24,6 +25,7 @@ export function computeKarmaDelta(pebble: CreatePebbleInput): number {
   delta += pebble.cards.filter((c) => c.value.trim()).length
   if (pebble.soul_ids.length > 0) delta += 1
   if (pebble.domain_ids.length > 0) delta += 1
+  if (pebble.mark_id) delta += 1
 
   return delta
 }

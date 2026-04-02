@@ -11,6 +11,7 @@ type CarveToolbarProps = {
   onWidthChange: (width: number) => void
   onSave: () => void
   saving: boolean
+  showSave?: boolean
 }
 
 const WIDTH_OPTIONS = [
@@ -27,6 +28,7 @@ export function CarveToolbar({
   onWidthChange,
   onSave,
   saving,
+  showSave = true,
 }: CarveToolbarProps) {
   return (
     <nav
@@ -81,17 +83,21 @@ export function CarveToolbar({
         ))}
       </div>
 
-      <div className="flex-1" />
+      {showSave && (
+        <>
+          <div className="flex-1" />
 
-      <Button
-        onClick={onSave}
-        disabled={strokeCount === 0 || saving}
-        aria-label="Save mark"
-        className="h-11 px-4 md:h-8 md:px-2.5"
-      >
-        <Check className="mr-1.5 h-4 w-4" />
-        {saving ? "Saving\u2026" : "Save mark"}
-      </Button>
+          <Button
+            onClick={onSave}
+            disabled={strokeCount === 0 || saving}
+            aria-label="Save mark"
+            className="h-11 px-4 md:h-8 md:px-2.5"
+          >
+            <Check className="mr-1.5 h-4 w-4" />
+            {saving ? "Saving\u2026" : "Save mark"}
+          </Button>
+        </>
+      )}
     </nav>
   )
 }

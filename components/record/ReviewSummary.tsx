@@ -2,9 +2,11 @@
 
 import type { RecordFormData } from "@/components/record/types"
 import { useSouls } from "@/lib/data/useSouls"
+import { useMarks } from "@/lib/data/useMarks"
 import { EMOTIONS, DOMAINS, CARD_TYPES } from "@/lib/config"
 import { IntensityDots, PositivenessIndicator } from "@/components/pebble/PebbleIndicators"
 import { Badge } from "@/components/ui/badge"
+import { GlyphPreview } from "@/components/glyphs/GlyphPreview"
 import { shortDateTimeFormatter } from "@/lib/utils/formatters"
 import type { Soul } from "@/lib/types"
 
@@ -14,8 +16,10 @@ type ReviewSummaryProps = {
 
 export function ReviewSummary({ data }: ReviewSummaryProps) {
   const { souls } = useSouls()
+  const { marks } = useMarks()
 
   const emotion = EMOTIONS.find((e) => e.id === data.emotion_id)
+  const selectedMark = data.mark_id ? marks.find((m) => m.id === data.mark_id) : undefined
   const domains = DOMAINS.filter((d) => data.domain_ids.includes(d.id))
   const matchedSouls = data.soul_ids
     .map((id) => souls.find((s) => s.id === id))
@@ -101,6 +105,19 @@ export function ReviewSummary({ data }: ReviewSummaryProps) {
               {domains.map((domain) => (
                 <Badge key={domain.id} variant="outline">{domain.name}</Badge>
               ))}
+            </dd>
+          </>
+        )}
+
+        {/* Glyph */}
+        {selectedMark && (
+          <>
+            <dt className="text-muted-foreground">Glyph</dt>
+            <dd>
+              <GlyphPreview
+                mark={selectedMark}
+                className="h-10 w-10"
+              />
             </dd>
           </>
         )}

@@ -6,7 +6,7 @@
     "root_node_id": "V-home",
     "metadata": { "view_card_variant": "large" },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-04-01T00:00:00.000Z"
+    "updated_at": "2026-04-02T00:00:00.000Z"
   },
   "nodes": [
     {
@@ -172,6 +172,15 @@
       "platforms": ["web", "ios", "android"]
     },
     {
+      "id": "V-glyph-attach",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Attach Glyph",
+      "description": "Draw a new glyph or select an existing one to attach to a pebble during recording.",
+      "status": "development",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
       "id": "V-bounce-tempo",
       "project_id": "pebbles",
       "species": "view",
@@ -318,6 +327,12 @@
               "if_false": []
             },
             { "type": "view", "view_id": "V-domain-attach" },
+            {
+              "type": "condition",
+              "label": "Attach a glyph?",
+              "if_true": [{ "type": "view", "view_id": "V-glyph-attach" }],
+              "if_false": []
+            },
             {
               "type": "condition",
               "label": "Add cards or thoughts?",
@@ -843,6 +858,7 @@
     { "id": "e-F-record-pebble-V-emotion-pearl", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-emotion-pearl", "edge_type": "composes" },
     { "id": "e-F-record-pebble-V-soul-link", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-soul-link", "edge_type": "composes" },
     { "id": "e-F-record-pebble-V-domain-attach", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-domain-attach", "edge_type": "composes" },
+    { "id": "e-F-record-pebble-V-glyph-attach", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-glyph-attach", "edge_type": "composes" },
     { "id": "e-F-record-pebble-V-cards-thoughts", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-cards-thoughts", "edge_type": "composes" },
     { "id": "e-F-record-pebble-V-pebble-detail", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-pebble-detail", "edge_type": "composes" },
 
@@ -957,6 +973,9 @@
     { "id": "e-V-glyph-detail-DM-mark", "project_id": "pebbles", "source_id": "V-glyph-detail", "target_id": "DM-mark", "edge_type": "displays" },
     { "id": "e-API-get-marks-DM-mark", "project_id": "pebbles", "source_id": "API-get-marks", "target_id": "DM-mark", "edge_type": "queries" },
     { "id": "e-API-create-mark-DM-mark", "project_id": "pebbles", "source_id": "API-create-mark", "target_id": "DM-mark", "edge_type": "queries" },
-    { "id": "e-API-delete-mark-DM-mark", "project_id": "pebbles", "source_id": "API-delete-mark", "target_id": "DM-mark", "edge_type": "queries" }
+    { "id": "e-API-delete-mark-DM-mark", "project_id": "pebbles", "source_id": "API-delete-mark", "target_id": "DM-mark", "edge_type": "queries" },
+    { "id": "e-V-glyph-attach-DM-mark", "project_id": "pebbles", "source_id": "V-glyph-attach", "target_id": "DM-mark", "edge_type": "displays" },
+    { "id": "e-V-glyph-attach-API-get-marks", "project_id": "pebbles", "source_id": "V-glyph-attach", "target_id": "API-get-marks", "edge_type": "calls" },
+    { "id": "e-V-glyph-attach-API-create-mark", "project_id": "pebbles", "source_id": "V-glyph-attach", "target_id": "API-create-mark", "edge_type": "calls" }
   ]
 }
