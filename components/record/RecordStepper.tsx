@@ -14,6 +14,7 @@ import { StepIntensity } from "@/components/record/StepIntensity"
 import { StepEmotion } from "@/components/record/StepEmotion"
 import { StepSouls } from "@/components/record/StepSouls"
 import { StepDomains } from "@/components/record/StepDomains"
+import { StepGlyph } from "@/components/record/StepGlyph"
 import { StepCardPicker } from "@/components/record/StepCardPicker"
 import { StepCardFiller } from "@/components/record/StepCardFiller"
 import { StepSummary } from "@/components/record/StepSummary"
@@ -27,6 +28,7 @@ const FIXED_STEPS: StepConfig[] = [
   { label: "Emotion", Component: StepEmotion, canAdvance: (d) => d.emotion_id !== "" },
   { label: "Souls", Component: StepSouls, canAdvance: () => true },
   { label: "Domains", Component: StepDomains, canAdvance: () => true },
+  { label: "Glyph", Component: StepGlyph, canAdvance: () => true },
   { label: "Cards", Component: StepCardPicker, canAdvance: () => true },
 ]
 
