@@ -6,7 +6,7 @@
     "root_node_id": "V-home",
     "metadata": { "view_card_variant": "large" },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-04-02T00:00:00.000Z"
+    "updated_at": "2026-04-02T12:00:00.000Z"
   },
   "nodes": [
     {
@@ -840,6 +840,15 @@
       "description": "Retrieve rise progression for a collection.",
       "status": "idea",
       "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "V-mechanic-sheet",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Mechanic Sheet",
+      "description": "Informational dialog explaining a gamification mechanic (pebbles, bounce, or karma).",
+      "status": "development",
+      "platforms": ["web", "ios", "android"]
     }
   ],
   "edges": [
@@ -976,6 +985,8 @@
     { "id": "e-API-delete-mark-DM-mark", "project_id": "pebbles", "source_id": "API-delete-mark", "target_id": "DM-mark", "edge_type": "queries" },
     { "id": "e-V-glyph-attach-DM-mark", "project_id": "pebbles", "source_id": "V-glyph-attach", "target_id": "DM-mark", "edge_type": "displays" },
     { "id": "e-V-glyph-attach-API-get-marks", "project_id": "pebbles", "source_id": "V-glyph-attach", "target_id": "API-get-marks", "edge_type": "calls" },
-    { "id": "e-V-glyph-attach-API-create-mark", "project_id": "pebbles", "source_id": "V-glyph-attach", "target_id": "API-create-mark", "edge_type": "calls" }
+    { "id": "e-V-glyph-attach-API-create-mark", "project_id": "pebbles", "source_id": "V-glyph-attach", "target_id": "API-create-mark", "edge_type": "calls" },
+    { "id": "e-V-home-V-mechanic-sheet", "project_id": "pebbles", "source_id": "V-home", "target_id": "V-mechanic-sheet", "edge_type": "composes" },
+    { "id": "e-V-mechanic-sheet-DM-bounce", "project_id": "pebbles", "source_id": "V-mechanic-sheet", "target_id": "DM-bounce", "edge_type": "displays" }
   ]
 }
