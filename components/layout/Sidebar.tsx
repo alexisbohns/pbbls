@@ -10,9 +10,10 @@ import { ResetDataButton } from "@/components/layout/ResetDataButton"
 
 export function Sidebar() {
   const pathname = usePathname()
+  const hidden = pathname.startsWith("/onboarding")
 
   return (
-    <aside className="hidden w-56 shrink-0 border-r border-border md:flex md:flex-col">
+    <aside className={cn("hidden w-56 shrink-0 border-r border-border md:flex md:flex-col", hidden && "md:hidden")}>
       <div className="flex h-14 items-center px-4 text-lg font-semibold">
         pbbls
       </div>
