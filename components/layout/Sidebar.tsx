@@ -19,7 +19,7 @@ export function Sidebar() {
 
       <nav aria-label="Main navigation" className="flex-1 px-2 py-2">
         <ul className="flex flex-col gap-1">
-          {NAV_ITEMS.map(({ href, label, icon: Icon, primary }) => {
+          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
             const isActive = pathname.startsWith(href)
             return (
               <li key={href}>
@@ -28,9 +28,8 @@ export function Sidebar() {
                   className={cn(
                     "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                     isActive
-                      ? "bg-muted text-foreground"
+                      ? "bg-muted text-primary"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                    primary && !isActive && "text-primary hover:text-primary",
                   )}
                   aria-current={isActive ? "page" : undefined}
                 >

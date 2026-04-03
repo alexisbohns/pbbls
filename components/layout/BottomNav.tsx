@@ -20,23 +20,22 @@ export function BottomNav() {
       )}
     >
       <ul className="flex items-center justify-around py-2">
-        {NAV_ITEMS.map(({ href, label, icon: Icon, primary }) => {
+        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
           const isActive = pathname.startsWith(href)
           return (
-            <li key={href}>
+            <li key={href} className="flex-1 flex justify-center">
               <Link
                 href={href}
                 className={cn(
                   "flex flex-col items-center gap-0.5 px-3 py-1 text-xs font-medium transition-opacity duration-75 active:opacity-70",
                   isActive
-                    ? "text-foreground"
+                    ? "text-primary"
                     : "text-muted-foreground",
-                  primary && !isActive && "text-primary",
                 )}
                 aria-current={isActive ? "page" : undefined}
                 tabIndex={hidden ? -1 : undefined}
               >
-                <Icon className={cn("size-5", primary && "size-6")} />
+                <Icon className="size-5" />
                 {label}
               </Link>
             </li>
