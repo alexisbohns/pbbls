@@ -6,7 +6,7 @@
     "root_node_id": "V-landing",
     "metadata": { "view_card_variant": "large" },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-04-03T12:00:00.000Z"
+    "updated_at": "2026-04-04T12:00:00.000Z"
   },
   "nodes": [
     {
@@ -79,6 +79,15 @@
       "title": "Shape Emotion Pearl",
       "description": "Sculpt a nuanced emotion pearl for the pebble.",
       "status": "idea",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "V-instant-attach",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Attach Instants",
+      "description": "Capture or select photos to attach as instants to the pebble during recording.",
+      "status": "development",
       "platforms": ["web", "ios", "android"]
     },
     {
@@ -347,6 +356,12 @@
             { "type": "view", "view_id": "V-pebble-record" },
             { "type": "view", "view_id": "V-pebble-intensity" },
             { "type": "view", "view_id": "V-emotion-pearl" },
+            {
+              "type": "condition",
+              "label": "Attach instants?",
+              "if_true": [{ "type": "view", "view_id": "V-instant-attach" }],
+              "if_false": []
+            },
             {
               "type": "condition",
               "label": "Link a soul?",
@@ -662,6 +677,15 @@
       "platforms": ["web", "ios", "android"]
     },
     {
+      "id": "DM-instant",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "Instant",
+      "description": "A compressed photo attached to a pebble, stored as a base64 JPEG data URI.",
+      "status": "development",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
       "id": "DM-mark",
       "project_id": "pebbles",
       "species": "data-model",
@@ -937,6 +961,7 @@
     { "id": "e-F-record-pebble-V-pebble-record", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-pebble-record", "edge_type": "composes" },
     { "id": "e-F-record-pebble-V-pebble-intensity", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-pebble-intensity", "edge_type": "composes" },
     { "id": "e-F-record-pebble-V-emotion-pearl", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-emotion-pearl", "edge_type": "composes" },
+    { "id": "e-F-record-pebble-V-instant-attach", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-instant-attach", "edge_type": "composes" },
     { "id": "e-F-record-pebble-V-soul-link", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-soul-link", "edge_type": "composes" },
     { "id": "e-F-record-pebble-V-domain-attach", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-domain-attach", "edge_type": "composes" },
     { "id": "e-F-record-pebble-V-glyph-attach", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-glyph-attach", "edge_type": "composes" },
@@ -1060,6 +1085,8 @@
     { "id": "e-API-get-marks-DM-mark", "project_id": "pebbles", "source_id": "API-get-marks", "target_id": "DM-mark", "edge_type": "queries" },
     { "id": "e-API-create-mark-DM-mark", "project_id": "pebbles", "source_id": "API-create-mark", "target_id": "DM-mark", "edge_type": "queries" },
     { "id": "e-API-delete-mark-DM-mark", "project_id": "pebbles", "source_id": "API-delete-mark", "target_id": "DM-mark", "edge_type": "queries" },
+    { "id": "e-V-instant-attach-DM-instant", "project_id": "pebbles", "source_id": "V-instant-attach", "target_id": "DM-instant", "edge_type": "displays" },
+    { "id": "e-V-pebble-detail-DM-instant", "project_id": "pebbles", "source_id": "V-pebble-detail", "target_id": "DM-instant", "edge_type": "displays" },
     { "id": "e-V-glyph-attach-DM-mark", "project_id": "pebbles", "source_id": "V-glyph-attach", "target_id": "DM-mark", "edge_type": "displays" },
     { "id": "e-V-glyph-attach-API-get-marks", "project_id": "pebbles", "source_id": "V-glyph-attach", "target_id": "API-get-marks", "edge_type": "calls" },
     { "id": "e-V-glyph-attach-API-create-mark", "project_id": "pebbles", "source_id": "V-glyph-attach", "target_id": "API-create-mark", "edge_type": "calls" },

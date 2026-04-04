@@ -105,6 +105,23 @@ export function PebbleDetail({
         )}
       </DetailSection>
 
+      {/* Instants */}
+      {pebble.instants.length > 0 && (
+        <DetailSection id="instants" title="Instants">
+          <ul className="mt-2 grid grid-cols-3 gap-2" role="list" aria-label="Photo instants">
+            {pebble.instants.map((uri, i) => (
+              <li key={i}>
+                <img
+                  src={uri}
+                  alt={`Instant ${i + 1}`}
+                  className="aspect-square w-full rounded-lg object-cover"
+                />
+              </li>
+            ))}
+          </ul>
+        </DetailSection>
+      )}
+
       {/* Souls */}
       <DetailSection
         id="souls"

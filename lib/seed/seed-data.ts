@@ -60,6 +60,7 @@ export const SEED_PEBBLES: SeedPebble[] = [
     emotion_id: "serenity",
     soul_ids: [],
     domain_ids: ["zoe", "eudaimonia"],
+    instants: [],
     cards: [
       { species_id: "feelings", value: "Calm and grounded. A rare quiet start." },
       { species_id: "free", value: "I should do this more often." },
@@ -75,6 +76,7 @@ export const SEED_PEBBLES: SeedPebble[] = [
     emotion_id: "anger",
     soul_ids: ["soul-mia"],
     domain_ids: ["philia", "asphaleia"],
+    instants: [],
     cards: [
       { species_id: "feelings", value: "Frustrated and defensive. Then guilty for raising my voice." },
       { species_id: "thoughts", value: "She's right that we need a plan. I was reacting, not listening." },
@@ -91,6 +93,7 @@ export const SEED_PEBBLES: SeedPebble[] = [
     emotion_id: "gratitude",
     soul_ids: ["soul-luna"],
     domain_ids: ["philia"],
+    instants: [],
     cards: [
       { species_id: "free", value: "Small moments like this are everything." },
     ],
@@ -105,6 +108,7 @@ export const SEED_PEBBLES: SeedPebble[] = [
     emotion_id: "pride",
     soul_ids: ["soul-lucas", "soul-papa"],
     domain_ids: ["time", "eudaimonia", "asphaleia"],
+    instants: [],
     cards: [
       { species_id: "feelings", value: "Proud but also nervous. Now expectations are higher." },
       { species_id: "thoughts", value: "Two years of work led here. Lucas was the first I told." },
@@ -120,6 +124,7 @@ export const SEED_PEBBLES: SeedPebble[] = [
     emotion_id: "anxiety",
     soul_ids: [],
     domain_ids: ["zoe", "eudaimonia"],
+    instants: [],
     cards: [
       { species_id: "feelings", value: "Chest tight, mind racing. Classic anxiety spiral." },
       { species_id: "thoughts", value: "What if I'm not good enough? What if they find out?" },
@@ -136,6 +141,7 @@ export const SEED_PEBBLES: SeedPebble[] = [
     emotion_id: "joy",
     soul_ids: ["soul-mia"],
     domain_ids: ["eudaimonia"],
+    instants: [],
     cards: [
       { species_id: "free", value: "Patience pays off. Mia said it's the best bread she's had." },
     ],
@@ -150,6 +156,7 @@ export const SEED_PEBBLES: SeedPebble[] = [
     emotion_id: "excitement",
     soul_ids: ["soul-lucas"],
     domain_ids: ["zoe", "philia", "eudaimonia"],
+    instants: [],
     cards: [
       { species_id: "feelings", value: "Alive. Exhausted but deeply happy." },
       { species_id: "thoughts", value: "We talked about starting something together. Felt like old times." },
@@ -165,6 +172,7 @@ export const SEED_PEBBLES: SeedPebble[] = [
     emotion_id: "pride",
     soul_ids: [],
     domain_ids: ["time", "eudaimonia"],
+    instants: [],
     cards: [
       { species_id: "feelings", value: "Relief more than joy. We cut so many corners." },
       { species_id: "behaviour", value: "Celebrated with the team. Wrote a retro doc the next morning." },
@@ -180,6 +188,7 @@ export const SEED_PEBBLES: SeedPebble[] = [
     emotion_id: "nostalgia",
     soul_ids: ["soul-papa"],
     domain_ids: ["philia"],
+    instants: [],
     cards: [
       { species_id: "feelings", value: "Warm and melancholic. Miss her but grateful for those summers." },
       { species_id: "free", value: "Sent the photo to Papa. He replied with a heart emoji. That's a lot from him." },
@@ -195,6 +204,7 @@ export const SEED_PEBBLES: SeedPebble[] = [
     emotion_id: "awe",
     soul_ids: ["soul-dr-roux"],
     domain_ids: ["zoe", "eudaimonia"],
+    instants: [],
     cards: [
       { species_id: "thoughts", value: "The anxiety isn't about competence — it's about belonging. I've felt this since school." },
       { species_id: "behaviour", value: "Homework: notice when the pattern activates and name it. 'There's the visitor again.'" },

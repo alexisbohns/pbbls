@@ -10,6 +10,7 @@ export type RecordFormData = {
   soul_ids: string[]
   domain_ids: string[]
   mark_id?: string
+  instants: string[]
   cards: PebbleCard[]
 }
 

@@ -14,6 +14,7 @@ const INITIAL_DATA: RecordFormData = {
   soul_ids: [],
   domain_ids: [],
   mark_id: undefined,
+  instants: [],
   cards: [],
 }
 
