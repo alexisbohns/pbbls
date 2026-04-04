@@ -122,6 +122,23 @@ export function ReviewSummary({ data }: ReviewSummaryProps) {
           </>
         )}
 
+        {/* Instants */}
+        {data.instants.length > 0 && (
+          <>
+            <dt className="text-muted-foreground">Instants</dt>
+            <dd className="flex gap-2">
+              {data.instants.map((uri, i) => (
+                <img
+                  key={i}
+                  src={uri}
+                  alt={`Instant ${i + 1}`}
+                  className="size-10 rounded object-cover"
+                />
+              ))}
+            </dd>
+          </>
+        )}
+
         {/* Cards */}
         <dt className="text-muted-foreground">Cards</dt>
         <dd>

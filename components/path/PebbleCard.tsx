@@ -1,5 +1,6 @@
 import Link from "next/link"
 import type { Pebble, Emotion } from "@/lib/types"
+import { Camera } from "lucide-react"
 import { IntensityDots, PositivenessIndicator } from "@/components/pebble/PebbleIndicators"
 import { timeFormatter } from "@/lib/utils/formatters"
 
@@ -37,6 +38,15 @@ export function PebbleCard({ pebble, emotion, soulNames }: PebbleCardProps) {
           <PositivenessIndicator value={pebble.positiveness} size="xs" />
 
           <time dateTime={pebble.happened_at}>{time}</time>
+
+          {pebble.instants.length > 0 && (
+            <abbr
+              title={`${pebble.instants.length} instant${pebble.instants.length > 1 ? "s" : ""}`}
+              className="no-underline"
+            >
+              <Camera className="size-3.5" aria-hidden="true" />
+            </abbr>
+          )}
 
           {soulNames.length > 0 && (
             <span>

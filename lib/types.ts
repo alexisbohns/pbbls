@@ -24,6 +24,7 @@ export type Pebble = {
   soul_ids: string[]
   domain_ids: string[]
   mark_id?: string
+  instants: string[]
   cards: PebbleCard[]
   created_at: string
   updated_at: string

@@ -110,6 +110,10 @@ export class LocalProvider implements DataProvider {
       if (parsed.marks === undefined) {
         parsed.marks = []
       }
+      // Migration: backfill instants for existing pebbles.
+      for (const p of parsed.pebbles) {
+        if (!p.instants) p.instants = []
+      }
       // Migration: backfill bounce fields for existing users.
       if (parsed.bounce === undefined) {
         parsed.bounce = 0
