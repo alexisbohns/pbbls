@@ -22,7 +22,7 @@ export function MainContent({ children }: MainContentProps) {
         "transition-[padding-bottom] duration-300 ease-in-out motion-reduce:transition-none",
         isFullScreen
           ? "flex flex-col"
-          : "px-4 pt-[calc(2rem+var(--safe-area-top))] pb-8 md:pb-8",
+          : "px-4 pt-[calc(4rem+var(--safe-area-top))] md:pt-[calc(2rem+var(--safe-area-top))] pb-8 md:pb-8",
         !isFullScreen && (
           hideBottomNav
             ? "pb-[calc(2rem+var(--safe-area-bottom))]"
