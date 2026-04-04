@@ -65,6 +65,9 @@ export interface DataProvider {
   /** Return the current in-memory store snapshot. */
   getStore(): Store
 
+  /** Re-read the content store after a session change (login/register/logout). */
+  reloadStore(): Store
+
   /** Overwrite store with seed data and return the new snapshot. */
   reset(): Promise<Store>
 

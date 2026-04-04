@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { AuthGate } from "@/components/auth/AuthGate"
 import { OnboardingGate } from "@/components/onboarding/OnboardingGate"
 
 interface MainContentProps {
@@ -31,6 +32,7 @@ export function MainContent({ children }: MainContentProps) {
         ),
       )}
     >
+      {!isLanding && !isAuth && <AuthGate />}
       {!isLanding && !isAuth && <OnboardingGate />}
       {isFullScreen ? children : <div className="mx-auto max-w-5xl">{children}</div>}
     </main>
