@@ -527,12 +527,21 @@
       }
     },
     {
-      "id": "DM-user",
+      "id": "DM-account",
       "project_id": "pebbles",
       "species": "data-model",
-      "title": "User",
-      "description": "User account with profile, preferences, and privacy settings.",
-      "status": "idea",
+      "title": "Account",
+      "description": "User account with username and hashed password credentials.",
+      "status": "development",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "DM-profile",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "Profile",
+      "description": "User profile with display name, onboarding state, and color world preference.",
+      "status": "development",
       "platforms": ["web", "ios", "android"]
     },
     {
@@ -820,7 +829,7 @@
       "species": "api-endpoint",
       "title": "POST /auth/register",
       "description": "Register a new user account.",
-      "status": "idea",
+      "status": "development",
       "platforms": ["web", "ios", "android"]
     },
     {
@@ -829,7 +838,43 @@
       "species": "api-endpoint",
       "title": "POST /auth/login",
       "description": "Authenticate an existing user.",
-      "status": "idea",
+      "status": "development",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "API-logout",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "POST /auth/logout",
+      "description": "End the current user session.",
+      "status": "development",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "API-get-session",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "GET /auth/session",
+      "description": "Retrieve the current session.",
+      "status": "development",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "API-get-profile",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "GET /profile",
+      "description": "Retrieve the current user profile.",
+      "status": "development",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "API-update-profile",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "PATCH /profile",
+      "description": "Update the current user profile.",
+      "status": "development",
       "platforms": ["web", "ios", "android"]
     },
     {
@@ -944,7 +989,7 @@
     { "id": "e-V-weekly-cairn-DM-pebble", "project_id": "pebbles", "source_id": "V-weekly-cairn", "target_id": "DM-pebble", "edge_type": "displays" },
     { "id": "e-V-monthly-cairn-DM-cairn", "project_id": "pebbles", "source_id": "V-monthly-cairn", "target_id": "DM-cairn", "edge_type": "displays" },
     { "id": "e-V-monthly-cairn-DM-pebble", "project_id": "pebbles", "source_id": "V-monthly-cairn", "target_id": "DM-pebble", "edge_type": "displays" },
-    { "id": "e-V-profile-DM-user", "project_id": "pebbles", "source_id": "V-profile", "target_id": "DM-user", "edge_type": "displays" },
+    { "id": "e-V-profile-DM-profile", "project_id": "pebbles", "source_id": "V-profile", "target_id": "DM-profile", "edge_type": "displays" },
     { "id": "e-V-profile-DM-bounce", "project_id": "pebbles", "source_id": "V-profile", "target_id": "DM-bounce", "edge_type": "displays" },
 
     { "id": "e-API-create-pebble-DM-pebble", "project_id": "pebbles", "source_id": "API-create-pebble", "target_id": "DM-pebble", "edge_type": "queries" },
@@ -968,8 +1013,13 @@
     { "id": "e-API-get-weekly-cairn-DM-pebble", "project_id": "pebbles", "source_id": "API-get-weekly-cairn", "target_id": "DM-pebble", "edge_type": "queries" },
     { "id": "e-API-get-monthly-cairn-DM-cairn", "project_id": "pebbles", "source_id": "API-get-monthly-cairn", "target_id": "DM-cairn", "edge_type": "queries" },
     { "id": "e-API-get-monthly-cairn-DM-pebble", "project_id": "pebbles", "source_id": "API-get-monthly-cairn", "target_id": "DM-pebble", "edge_type": "queries" },
-    { "id": "e-API-register-DM-user", "project_id": "pebbles", "source_id": "API-register", "target_id": "DM-user", "edge_type": "queries" },
-    { "id": "e-API-login-DM-user", "project_id": "pebbles", "source_id": "API-login", "target_id": "DM-user", "edge_type": "queries" },
+    { "id": "e-API-register-DM-account", "project_id": "pebbles", "source_id": "API-register", "target_id": "DM-account", "edge_type": "queries" },
+    { "id": "e-API-register-DM-profile", "project_id": "pebbles", "source_id": "API-register", "target_id": "DM-profile", "edge_type": "queries" },
+    { "id": "e-API-login-DM-account", "project_id": "pebbles", "source_id": "API-login", "target_id": "DM-account", "edge_type": "queries" },
+    { "id": "e-API-logout-DM-account", "project_id": "pebbles", "source_id": "API-logout", "target_id": "DM-account", "edge_type": "queries" },
+    { "id": "e-API-get-session-DM-account", "project_id": "pebbles", "source_id": "API-get-session", "target_id": "DM-account", "edge_type": "queries" },
+    { "id": "e-API-get-profile-DM-profile", "project_id": "pebbles", "source_id": "API-get-profile", "target_id": "DM-profile", "edge_type": "queries" },
+    { "id": "e-API-update-profile-DM-profile", "project_id": "pebbles", "source_id": "API-update-profile", "target_id": "DM-profile", "edge_type": "queries" },
     { "id": "e-API-get-collection-rise-DM-collection", "project_id": "pebbles", "source_id": "API-get-collection-rise", "target_id": "DM-collection", "edge_type": "queries" },
     { "id": "e-V-home-F-manage-glyphs", "project_id": "pebbles", "source_id": "V-home", "target_id": "F-manage-glyphs", "edge_type": "composes" },
     { "id": "e-F-manage-glyphs-V-glyphs-list", "project_id": "pebbles", "source_id": "F-manage-glyphs", "target_id": "V-glyphs-list", "edge_type": "composes" },
