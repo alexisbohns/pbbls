@@ -3,12 +3,21 @@
     "id": "pebbles",
     "title": "Pebbles",
     "description": "Pebbles is an atomic diary app allowing to record memories and enrich them with emotions, instants, thoughts, related to people and get weekly and monthly wraps.",
-    "root_node_id": "V-home",
+    "root_node_id": "V-landing",
     "metadata": { "view_card_variant": "large" },
     "created_at": "2026-04-01T00:00:00.000Z",
     "updated_at": "2026-04-03T12:00:00.000Z"
   },
   "nodes": [
+    {
+      "id": "V-landing",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Landing",
+      "description": "Public landing page with app branding, login button, and create-account link. Redirects authenticated users to the home view.",
+      "status": "development",
+      "platforms": ["web", "ios", "android"]
+    },
     {
       "id": "V-home",
       "project_id": "pebbles",
@@ -1037,6 +1046,9 @@
     { "id": "e-V-glyph-attach-API-get-marks", "project_id": "pebbles", "source_id": "V-glyph-attach", "target_id": "API-get-marks", "edge_type": "calls" },
     { "id": "e-V-glyph-attach-API-create-mark", "project_id": "pebbles", "source_id": "V-glyph-attach", "target_id": "API-create-mark", "edge_type": "calls" },
     { "id": "e-V-home-V-mechanic-sheet", "project_id": "pebbles", "source_id": "V-home", "target_id": "V-mechanic-sheet", "edge_type": "composes" },
-    { "id": "e-V-mechanic-sheet-DM-bounce", "project_id": "pebbles", "source_id": "V-mechanic-sheet", "target_id": "DM-bounce", "edge_type": "displays" }
+    { "id": "e-V-mechanic-sheet-DM-bounce", "project_id": "pebbles", "source_id": "V-mechanic-sheet", "target_id": "DM-bounce", "edge_type": "displays" },
+    { "id": "e-V-landing-V-home", "project_id": "pebbles", "source_id": "V-landing", "target_id": "V-home", "edge_type": "navigates" },
+    { "id": "e-V-landing-API-login", "project_id": "pebbles", "source_id": "V-landing", "target_id": "API-login", "edge_type": "calls" },
+    { "id": "e-V-landing-API-register", "project_id": "pebbles", "source_id": "V-landing", "target_id": "API-register", "edge_type": "calls" }
   ]
 }
