@@ -113,6 +113,7 @@ export interface DataProvider {
   login(input: LoginInput): Promise<Session>
   logout(): Promise<void>
   getSession(): Session | null
+  getAccount(): Promise<Account | undefined>
   getProfile(): Promise<Profile | undefined>
   updateProfile(input: UpdateProfileInput): Promise<Profile>
 }

@@ -603,6 +603,13 @@ export class LocalProvider implements DataProvider {
     return this.session
   }
 
+  async getAccount(): Promise<Account | undefined> {
+    if (!this.session) return undefined
+    return this.authStore.accounts.find(
+      (a) => a.id === this.session!.account_id,
+    )
+  }
+
   async getProfile(): Promise<Profile | undefined> {
     if (!this.session) return undefined
     return this.authStore.profiles.find(

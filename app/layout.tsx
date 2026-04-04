@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { ColorWorldProvider } from "@/components/layout/ColorWorldProvider";
 import { ThemeColorSync } from "@/components/layout/ThemeColorSync";
 import { DataProvider } from "@/components/layout/DataProvider";
+import { AuthProvider } from "@/components/layout/AuthProvider";
 import { SerwistRegistration } from "@/components/layout/SerwistRegistration";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { BottomNav } from "@/components/layout/BottomNav";
@@ -93,6 +94,7 @@ export default function RootLayout({
         />
         <SerwistRegistration>
           <DataProvider>
+            <AuthProvider>
             <ColorWorldProvider>
               <ThemeProvider>
                 <ThemeColorSync />
@@ -103,6 +105,7 @@ export default function RootLayout({
                 <BottomNav />
               </ThemeProvider>
             </ColorWorldProvider>
+            </AuthProvider>
           </DataProvider>
         </SerwistRegistration>
       </body>
