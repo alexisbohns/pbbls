@@ -2,87 +2,57 @@
 
 import { useCallback, useMemo } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { InlineDatePicker } from "@/components/record/InlineDatePicker"
+import { TimeStepPicker } from "@/components/record/TimeStepPicker"
 
 type TimePickerProps = {
   value: string
   onChange: (iso: string) => void
 }
 
-function toLocalDate(iso: string): string {
-  const d = new Date(iso)
-  const year = d.getFullYear()
-  const month = String(d.getMonth() + 1).padStart(2, "0")
-  const day = String(d.getDate()).padStart(2, "0")
-  return `${year}-${month}-${day}`
-}
-
-function toLocalTime(iso: string): string {
-  const d = new Date(iso)
-  const hours = String(d.getHours()).padStart(2, "0")
-  const minutes = String(d.getMinutes()).padStart(2, "0")
-  return `${hours}:${minutes}`
+function roundToQuarterHour(date: Date): Date {
+  const d = new Date(date)
+  d.setMinutes(Math.round(d.getMinutes() / 15) * 15, 0, 0)
+  return d
 }
 
 export function TimePicker({ value, onChange }: TimePickerProps) {
-  const dateValue = useMemo(() => toLocalDate(value), [value])
-  const timeValue = useMemo(() => toLocalTime(value), [value])
+  const dateObj = useMemo(() => new Date(value), [value])
 
   const handleDateChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const [year, month, day] = e.target.value.split("-").map(Number)
-      const d = new Date(value)
-      d.setFullYear(year, month - 1, day)
-      onChange(d.toISOString())
+    (date: Date) => {
+      const next = new Date(dateObj)
+      next.setFullYear(date.getFullYear(), date.getMonth(), date.getDate())
+      onChange(next.toISOString())
     },
-    [value, onChange]
+    [dateObj, onChange]
   )
 
   const handleTimeChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const [hours, minutes] = e.target.value.split(":").map(Number)
-      const d = new Date(value)
-      d.setHours(hours, minutes)
-      onChange(d.toISOString())
+    (date: Date) => {
+      const next = new Date(dateObj)
+      next.setHours(date.getHours(), date.getMinutes(), 0, 0)
+      onChange(next.toISOString())
     },
-    [value, onChange]
+    [dateObj, onChange]
   )
 
   const handleNow = useCallback(() => {
-    onChange(new Date().toISOString())
+    onChange(roundToQuarterHour(new Date()).toISOString())
   }, [onChange])
 
   return (
     <fieldset>
       <legend className="text-sm font-medium">When</legend>
-      <div className="mt-2 grid grid-cols-1 gap-3 sm:grid-cols-[1fr_1fr_auto]">
-        <div>
-          <label htmlFor="record-date" className="sr-only">
-            Date
-          </label>
-          <Input
-            id="record-date"
-            type="date"
-            className="h-11 w-full text-base md:h-8 md:text-sm"
-            value={dateValue}
-            onChange={handleDateChange}
-          />
+      <div className="mt-2 space-y-4">
+        <InlineDatePicker value={dateObj} onChange={handleDateChange} />
+
+        <div className="flex items-center justify-center gap-3">
+          <TimeStepPicker value={dateObj} onChange={handleTimeChange} />
+          <Button variant="outline" className="h-11 md:h-8" onClick={handleNow}>
+            Now
+          </Button>
         </div>
-        <div>
-          <label htmlFor="record-time" className="sr-only">
-            Time
-          </label>
-          <Input
-            id="record-time"
-            type="time"
-            className="h-11 w-full text-base md:h-8 md:text-sm"
-            value={timeValue}
-            onChange={handleTimeChange}
-          />
-        </div>
-        <Button variant="outline" className="h-11 sm:h-8" onClick={handleNow}>
-          Now
-        </Button>
       </div>
     </fieldset>
   )
