@@ -1,14 +1,21 @@
 "use client"
 
-import { useEffect } from "react"
+import { useCallback, useEffect } from "react"
 import { ONBOARDING_STEPS } from "@/lib/config/onboarding-steps"
 import { useOnboarding } from "@/lib/hooks/useOnboarding"
+import { useAuth } from "@/lib/data/auth-context"
 import { useHaptics } from "@/lib/hooks/useHaptics"
 import { Button } from "@/components/ui/button"
 import { OnboardingScreen } from "@/components/onboarding/OnboardingScreen"
 import { cn } from "@/lib/utils"
 
 export function OnboardingStepper() {
+  const { updateProfile } = useAuth()
+
+  const handleComplete = useCallback(async () => {
+    await updateProfile({ onboarding_completed: true })
+  }, [updateProfile])
+
   const {
     currentStep,
     isFirstStep,
@@ -18,7 +25,7 @@ export function OnboardingStepper() {
     next,
     skip,
     complete,
-  } = useOnboarding(ONBOARDING_STEPS)
+  } = useOnboarding(ONBOARDING_STEPS, handleComplete)
 
   const { vibrate } = useHaptics()
 
