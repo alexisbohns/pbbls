@@ -1,6 +1,7 @@
 import type {
   DataProvider,
   Store,
+  AuthStore,
   CreatePebbleInput,
   UpdatePebbleInput,
   CreateSoulInput,
@@ -10,12 +11,33 @@ import type {
   CreateMarkInput,
   UpdateMarkInput,
 } from "@/lib/data/data-provider"
-import type { Pebble, Soul, Collection, KarmaEvent, Mark } from "@/lib/types"
+import type {
+  Pebble,
+  Soul,
+  Collection,
+  KarmaEvent,
+  Mark,
+  Account,
+  Profile,
+  Session,
+  RegisterInput,
+  LoginInput,
+  UpdateProfileInput,
+} from "@/lib/types"
+import { hashPassword, verifyPassword } from "@/lib/data/password"
 import { SEED_PEBBLES, SEED_SOULS, SEED_COLLECTIONS } from "@/lib/seed/seed-data"
 import { refreshBounceWindow, decayBounceWindow, todayLocal } from "@/lib/data/bounce-levels"
 import { computeKarmaDelta } from "@/lib/data/karma"
 
 const STORAGE_KEY = "pbbls:store"
+const AUTH_STORAGE_KEY = "pbbls:auth"
+const SESSION_STORAGE_KEY = "pbbls:session"
+const ONBOARDING_LEGACY_KEY = "pebbles_onboarding_completed"
+
+const EMPTY_AUTH_STORE: AuthStore = {
+  accounts: [],
+  profiles: [],
+}
 
 const EMPTY_STORE: Store = {
   pebbles: [],
@@ -31,9 +53,13 @@ const EMPTY_STORE: Store = {
 
 export class LocalProvider implements DataProvider {
   private store: Store
+  private authStore: AuthStore
+  private session: Session | null
 
   constructor() {
     this.store = this.load()
+    this.authStore = this.loadAuth()
+    this.session = this.loadSession()
   }
 
   // ---------------------------------------------------------------------------
@@ -148,6 +174,59 @@ export class LocalProvider implements DataProvider {
   private mutate(store: Store): void {
     this.store = store
     this.writeToStorage(store)
+  }
+
+  // ---------------------------------------------------------------------------
+  // Auth storage helpers
+  // ---------------------------------------------------------------------------
+
+  private loadAuth(): AuthStore {
+    if (typeof window === "undefined") return EMPTY_AUTH_STORE
+    try {
+      const raw = localStorage.getItem(AUTH_STORAGE_KEY)
+      if (!raw) return EMPTY_AUTH_STORE
+      return JSON.parse(raw) as AuthStore
+    } catch {
+      return EMPTY_AUTH_STORE
+    }
+  }
+
+  private loadSession(): Session | null {
+    if (typeof window === "undefined") return null
+    try {
+      const raw = localStorage.getItem(SESSION_STORAGE_KEY)
+      if (!raw) return null
+      return JSON.parse(raw) as Session
+    } catch {
+      return null
+    }
+  }
+
+  private writeAuthToStorage(authStore: AuthStore): void {
+    if (typeof window === "undefined") return
+    try {
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authStore))
+    } catch {
+      console.warn("[LocalProvider] Could not write auth to localStorage.")
+    }
+  }
+
+  private writeSessionToStorage(session: Session | null): void {
+    if (typeof window === "undefined") return
+    try {
+      if (session) {
+        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session))
+      } else {
+        localStorage.removeItem(SESSION_STORAGE_KEY)
+      }
+    } catch {
+      console.warn("[LocalProvider] Could not write session to localStorage.")
+    }
+  }
+
+  private mutateAuth(authStore: AuthStore): void {
+    this.authStore = authStore
+    this.writeAuthToStorage(authStore)
   }
 
   // ---------------------------------------------------------------------------
@@ -437,5 +516,117 @@ export class LocalProvider implements DataProvider {
   async deleteMark(id: string): Promise<void> {
     const marks = this.store.marks.filter((m) => m.id !== id)
     this.mutate({ ...this.store, marks })
+  }
+
+  // ---------------------------------------------------------------------------
+  // Auth
+  // ---------------------------------------------------------------------------
+
+  async register(input: RegisterInput): Promise<Session> {
+    const existing = this.authStore.accounts.find(
+      (a) => a.username === input.username,
+    )
+    if (existing) throw new Error("Username already taken")
+
+    const now = new Date().toISOString()
+    const passwordHash = await hashPassword(input.password)
+
+    const account: Account = {
+      id: crypto.randomUUID(),
+      username: input.username,
+      password_hash: passwordHash,
+      created_at: now,
+    }
+
+    // Migrate the legacy onboarding flag into the new profile if it exists.
+    const legacyOnboarding =
+      typeof window !== "undefined" &&
+      localStorage.getItem(ONBOARDING_LEGACY_KEY) === "true"
+
+    const profile: Profile = {
+      id: crypto.randomUUID(),
+      account_id: account.id,
+      display_name: input.username,
+      onboarding_completed: legacyOnboarding,
+      color_world: "blush-quartz",
+      created_at: now,
+      updated_at: now,
+    }
+
+    this.mutateAuth({
+      accounts: [...this.authStore.accounts, account],
+      profiles: [...this.authStore.profiles, profile],
+    })
+
+    const session: Session = {
+      account_id: account.id,
+      profile_id: profile.id,
+      created_at: now,
+    }
+    this.session = session
+    this.writeSessionToStorage(session)
+
+    return session
+  }
+
+  async login(input: LoginInput): Promise<Session> {
+    const account = this.authStore.accounts.find(
+      (a) => a.username === input.username,
+    )
+    if (!account) throw new Error("Invalid username or password")
+
+    const valid = await verifyPassword(input.password, account.password_hash)
+    if (!valid) throw new Error("Invalid username or password")
+
+    const profile = this.authStore.profiles.find(
+      (p) => p.account_id === account.id,
+    )
+    if (!profile) throw new Error("Profile not found")
+
+    const session: Session = {
+      account_id: account.id,
+      profile_id: profile.id,
+      created_at: new Date().toISOString(),
+    }
+    this.session = session
+    this.writeSessionToStorage(session)
+
+    return session
+  }
+
+  async logout(): Promise<void> {
+    this.session = null
+    this.writeSessionToStorage(null)
+  }
+
+  getSession(): Session | null {
+    return this.session
+  }
+
+  async getProfile(): Promise<Profile | undefined> {
+    if (!this.session) return undefined
+    return this.authStore.profiles.find(
+      (p) => p.id === this.session!.profile_id,
+    )
+  }
+
+  async updateProfile(input: UpdateProfileInput): Promise<Profile> {
+    if (!this.session) throw new Error("No active session")
+
+    const idx = this.authStore.profiles.findIndex(
+      (p) => p.id === this.session!.profile_id,
+    )
+    if (idx === -1) throw new Error("Profile not found")
+
+    const updated: Profile = {
+      ...this.authStore.profiles[idx],
+      ...input,
+      updated_at: new Date().toISOString(),
+    }
+    const profiles = [...this.authStore.profiles]
+    profiles[idx] = updated
+    this.mutateAuth({ ...this.authStore, profiles })
+
+    return updated
   }
 }
