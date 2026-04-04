@@ -10,26 +10,28 @@ interface MainContentProps {
 
 export function MainContent({ children }: MainContentProps) {
   const pathname = usePathname()
+  const isLanding = pathname === "/"
   const isOnboarding = pathname.startsWith("/onboarding")
-  const hideBottomNav = pathname.startsWith("/record") || isOnboarding
+  const isFullScreen = isLanding || isOnboarding
+  const hideBottomNav = pathname.startsWith("/record") || isFullScreen
 
   return (
     <main
       className={cn(
         "min-w-0 flex-1 touch-pan-y overflow-x-hidden overflow-y-auto",
         "transition-[padding-bottom] duration-300 ease-in-out motion-reduce:transition-none",
-        isOnboarding
+        isFullScreen
           ? "flex flex-col"
           : "px-4 pt-[calc(2rem+var(--safe-area-top))] pb-8 md:pb-8",
-        !isOnboarding && (
+        !isFullScreen && (
           hideBottomNav
             ? "pb-[calc(2rem+var(--safe-area-bottom))]"
             : "pb-[calc(5rem+var(--safe-area-bottom))]"
         ),
       )}
     >
-      <OnboardingGate />
-      {isOnboarding ? children : <div className="mx-auto max-w-5xl">{children}</div>}
+      {!isLanding && <OnboardingGate />}
+      {isFullScreen ? children : <div className="mx-auto max-w-5xl">{children}</div>}
     </main>
   )
 }
