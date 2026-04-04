@@ -19,6 +19,15 @@ export type RecordStepProps = {
   onUpdate: (patch: Partial<RecordFormData>) => void
 }
 
+export type StepComposer = {
+  /** Field key in RecordFormData (or card species id for card fillers) */
+  field: string
+  /** Placeholder text shown in the composer textarea */
+  placeholder: string
+  /** "input" for single-line, "textarea" for multi-line */
+  mode: "input" | "textarea"
+}
+
 export type StepConfig = {
   label: string
   Component: React.ComponentType<RecordStepProps>
@@ -27,6 +36,8 @@ export type StepConfig = {
     data: RecordFormData,
     onUpdate: (patch: Partial<RecordFormData>) => void,
   ) => Promise<void> | void
+  /** When set, the step's text input renders inside the bottom bar as a composer */
+  composer?: StepComposer
 }
 
 export type CelebrationData = {
