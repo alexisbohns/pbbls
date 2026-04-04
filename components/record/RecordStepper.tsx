@@ -132,7 +132,7 @@ export function RecordStepper() {
   }
 
   return (
-    <div className="touch-manipulation">
+    <div className="flex min-h-dvh touch-manipulation flex-col">
       {/* Top bar: close button + progress */}
       <div className="flex items-center gap-3">
         <Button
@@ -168,7 +168,7 @@ export function RecordStepper() {
       </div>
 
       {/* Active step */}
-      <div className="space-y-6 pb-[calc(5rem+var(--safe-area-bottom))] pt-6">
+      <div className="flex-1 space-y-6 pt-6">
         <ActiveStep data={formData} onUpdate={handleUpdate} />
 
         {/* Error message */}
@@ -179,9 +179,9 @@ export function RecordStepper() {
         )}
       </div>
 
-      {/* Bottom-anchored navigation — fixed with keyboard offset for mobile */}
+      {/* Bottom navigation — sticky so it never overlaps content, with keyboard offset */}
       <nav
-        className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-border bg-background px-4 pb-[calc(0.75rem+var(--safe-area-bottom))] pt-3 transition-transform duration-100"
+        className="sticky bottom-0 z-40 flex items-center gap-3 border-t border-border bg-background px-4 pb-[calc(0.75rem+var(--safe-area-bottom))] pt-3 transition-transform duration-100"
         style={keyboardOffset > 0 ? { transform: `translateY(-${keyboardOffset}px)` } : undefined}
         aria-label="Step navigation"
       >
