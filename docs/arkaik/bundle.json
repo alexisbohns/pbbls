@@ -311,8 +311,8 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Profile",
-      "description": "User profile with stats, bounce tempo, and public/private toggle.",
-      "status": "idea",
+      "description": "User profile page displaying account info with logout functionality.",
+      "status": "development",
       "platforms": ["web", "ios", "android"]
     },
     {

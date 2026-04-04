@@ -2,14 +2,17 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { CircleUser } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { NAV_ITEMS } from "@/lib/config/navigation"
+import { useAuth } from "@/lib/data/auth-context"
 import { ThemeToggle } from "@/components/layout/ThemeToggle"
 import { HapticsToggle } from "@/components/layout/HapticsToggle"
 import { ResetDataButton } from "@/components/layout/ResetDataButton"
 
 export function Sidebar() {
   const pathname = usePathname()
+  const { isAuthenticated } = useAuth()
   const hidden = pathname === "/" || pathname.startsWith("/onboarding")
 
   return (
@@ -44,6 +47,22 @@ export function Sidebar() {
       </nav>
 
       <div className="flex items-center gap-1 border-t border-border px-4 py-3">
+        {isAuthenticated && (
+          <Link
+            href="/profile"
+            className={cn(
+              "inline-flex size-8 items-center justify-center rounded-lg transition-colors",
+              pathname.startsWith("/profile")
+                ? "bg-muted text-primary"
+                : "text-muted-foreground hover:bg-muted hover:text-foreground",
+            )}
+            aria-label="Profile"
+            aria-current={pathname.startsWith("/profile") ? "page" : undefined}
+          >
+            <CircleUser className="size-4" />
+          </Link>
+        )}
+        <div className="flex-1" />
         <ResetDataButton />
         <ThemeToggle />
         <HapticsToggle />
