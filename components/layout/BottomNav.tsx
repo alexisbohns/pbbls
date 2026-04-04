@@ -7,7 +7,7 @@ import { NAV_ITEMS } from "@/lib/config/navigation"
 
 export function BottomNav() {
   const pathname = usePathname()
-  const hidden = pathname === "/" || pathname.startsWith("/record") || pathname.startsWith("/onboarding")
+  const hidden = pathname === "/" || pathname.startsWith("/record") || pathname.startsWith("/onboarding") || pathname === "/login" || pathname === "/register"
 
   return (
     <nav

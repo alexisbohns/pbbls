@@ -10,7 +10,7 @@ export function MobileHeader() {
   const pathname = usePathname()
   const { isAuthenticated } = useAuth()
   const hidden =
-    pathname.startsWith("/record") || pathname.startsWith("/onboarding")
+    pathname.startsWith("/record") || pathname.startsWith("/onboarding") || pathname === "/login" || pathname === "/register"
 
   return (
     <header
