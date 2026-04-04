@@ -9,7 +9,7 @@ export function OnboardingGate() {
   const router = useRouter()
 
   useEffect(() => {
-    if (pathname === "/" || pathname.startsWith("/onboarding")) return
+    if (pathname === "/" || pathname.startsWith("/onboarding") || pathname === "/login" || pathname === "/register") return
     if (!isOnboardingCompleted()) {
       router.replace("/onboarding")
     }

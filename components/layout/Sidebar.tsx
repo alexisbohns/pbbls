@@ -13,7 +13,7 @@ import { ResetDataButton } from "@/components/layout/ResetDataButton"
 export function Sidebar() {
   const pathname = usePathname()
   const { isAuthenticated } = useAuth()
-  const hidden = pathname === "/" || pathname.startsWith("/onboarding")
+  const hidden = pathname === "/" || pathname.startsWith("/onboarding") || pathname === "/login" || pathname === "/register"
 
   return (
     <aside className={cn("hidden w-56 shrink-0 border-r border-border md:flex md:flex-col", hidden && "md:hidden")}>

@@ -12,7 +12,8 @@ export function MainContent({ children }: MainContentProps) {
   const pathname = usePathname()
   const isLanding = pathname === "/"
   const isOnboarding = pathname.startsWith("/onboarding")
-  const isFullScreen = isLanding || isOnboarding
+  const isAuth = pathname === "/login" || pathname === "/register"
+  const isFullScreen = isLanding || isOnboarding || isAuth
   const hideBottomNav = pathname.startsWith("/record") || isFullScreen
 
   return (
@@ -30,7 +31,7 @@ export function MainContent({ children }: MainContentProps) {
         ),
       )}
     >
-      {!isLanding && <OnboardingGate />}
+      {!isLanding && !isAuth && <OnboardingGate />}
       {isFullScreen ? children : <div className="mx-auto max-w-5xl">{children}</div>}
     </main>
   )

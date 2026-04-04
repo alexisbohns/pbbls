@@ -19,6 +19,24 @@
       "platforms": ["web", "ios", "android"]
     },
     {
+      "id": "V-login",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Login",
+      "description": "Login page with username and password form. Redirects to path or onboarding based on profile completion status.",
+      "status": "development",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "V-register",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Register",
+      "description": "Registration page with username, password, and confirm password form. Auto-logs in and redirects to onboarding on success.",
+      "status": "development",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
       "id": "V-home",
       "project_id": "pebbles",
       "species": "view",
@@ -1047,8 +1065,12 @@
     { "id": "e-V-glyph-attach-API-create-mark", "project_id": "pebbles", "source_id": "V-glyph-attach", "target_id": "API-create-mark", "edge_type": "calls" },
     { "id": "e-V-home-V-mechanic-sheet", "project_id": "pebbles", "source_id": "V-home", "target_id": "V-mechanic-sheet", "edge_type": "composes" },
     { "id": "e-V-mechanic-sheet-DM-bounce", "project_id": "pebbles", "source_id": "V-mechanic-sheet", "target_id": "DM-bounce", "edge_type": "displays" },
-    { "id": "e-V-landing-V-home", "project_id": "pebbles", "source_id": "V-landing", "target_id": "V-home", "edge_type": "navigates" },
-    { "id": "e-V-landing-API-login", "project_id": "pebbles", "source_id": "V-landing", "target_id": "API-login", "edge_type": "calls" },
-    { "id": "e-V-landing-API-register", "project_id": "pebbles", "source_id": "V-landing", "target_id": "API-register", "edge_type": "calls" }
+    { "id": "e-V-landing-V-home", "project_id": "pebbles", "source_id": "V-landing", "target_id": "V-home", "edge_type": "composes" },
+    { "id": "e-V-landing-V-login", "project_id": "pebbles", "source_id": "V-landing", "target_id": "V-login", "edge_type": "composes" },
+    { "id": "e-V-landing-V-register", "project_id": "pebbles", "source_id": "V-landing", "target_id": "V-register", "edge_type": "composes" },
+    { "id": "e-V-login-V-register", "project_id": "pebbles", "source_id": "V-login", "target_id": "V-register", "edge_type": "composes" },
+    { "id": "e-V-register-V-login", "project_id": "pebbles", "source_id": "V-register", "target_id": "V-login", "edge_type": "composes" },
+    { "id": "e-V-login-API-login", "project_id": "pebbles", "source_id": "V-login", "target_id": "API-login", "edge_type": "calls" },
+    { "id": "e-V-register-API-register", "project_id": "pebbles", "source_id": "V-register", "target_id": "API-register", "edge_type": "calls" }
   ]
 }
