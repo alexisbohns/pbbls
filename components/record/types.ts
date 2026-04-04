@@ -23,6 +23,10 @@ export type StepConfig = {
   label: string
   Component: React.ComponentType<RecordStepProps>
   canAdvance: (data: RecordFormData) => boolean
+  onAdvance?: (
+    data: RecordFormData,
+    onUpdate: (patch: Partial<RecordFormData>) => void,
+  ) => Promise<void> | void
 }
 
 export type CelebrationData = {

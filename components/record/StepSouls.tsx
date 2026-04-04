@@ -6,7 +6,7 @@ import { SoulPicker } from "@/components/record/SoulPicker"
 export function StepSouls({ data, onUpdate }: RecordStepProps) {
   return (
     <fieldset className="space-y-6">
-      <legend className="text-lg font-semibold">Souls</legend>
+      <legend className="sr-only">Souls</legend>
       <p className="text-sm text-muted-foreground">
         Who was involved?
       </p>

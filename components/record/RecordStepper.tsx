@@ -1,6 +1,8 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
+import { useRouter } from "next/navigation"
+import { ArrowLeft, X } from "lucide-react"
 import { CARD_TYPES } from "@/lib/config"
 import { useRecordForm } from "@/lib/hooks/useRecordForm"
 import { useStepNavigation } from "@/lib/hooks/useStepNavigation"
@@ -15,7 +17,7 @@ import { StepEmotion } from "@/components/record/StepEmotion"
 import { StepInstants } from "@/components/record/StepInstants"
 import { StepSouls } from "@/components/record/StepSouls"
 import { StepDomains } from "@/components/record/StepDomains"
-import { StepGlyph } from "@/components/record/StepGlyph"
+import { StepGlyph, getGlyphPendingSave } from "@/components/record/StepGlyph"
 import { StepCardPicker } from "@/components/record/StepCardPicker"
 import { StepCardFiller } from "@/components/record/StepCardFiller"
 import { StepSummary } from "@/components/record/StepSummary"
@@ -30,7 +32,12 @@ const FIXED_STEPS: StepConfig[] = [
   { label: "Instants", Component: StepInstants, canAdvance: () => true },
   { label: "Souls", Component: StepSouls, canAdvance: () => true },
   { label: "Domains", Component: StepDomains, canAdvance: () => true },
-  { label: "Glyph", Component: StepGlyph, canAdvance: () => true },
+  {
+    label: "Glyph",
+    Component: StepGlyph,
+    canAdvance: () => true,
+    onAdvance: async () => { await getGlyphPendingSave()?.() },
+  },
   { label: "Cards", Component: StepCardPicker, canAdvance: () => true },
 ]
 
@@ -43,6 +50,7 @@ function makeCardFillerStep(cardTypeId: string, label: string): StepConfig {
 }
 
 export function RecordStepper() {
+  const router = useRouter()
   const [celebrationData, setCelebrationData] = useState<CelebrationData | null>(null)
 
   const { vibrate } = useHaptics()
@@ -65,7 +73,7 @@ export function RecordStepper() {
     return [
       ...FIXED_STEPS,
       ...cardFillerSteps,
-      { label: "Summary", Component: StepSummary, canAdvance: () => true } satisfies StepConfig,
+      { label: "Summary", Component: StepSummary, canAdvance: () => true } as StepConfig,
     ]
   }, [selectedCardTypeIds])
 
@@ -74,8 +82,12 @@ export function RecordStepper() {
 
   const canAdvance = steps[currentStep].canAdvance(formData)
 
-  const handleAdvance = useCallback(() => {
+  const handleAdvance = useCallback(async () => {
     if (!canAdvance) return
+    const step = steps[currentStep]
+    if (step.onAdvance) {
+      await step.onAdvance(formData, handleUpdate)
+    }
     if (isLastStep) {
       vibrate([10, 50, 20])
       void handleSave()
@@ -83,7 +95,7 @@ export function RecordStepper() {
       vibrate(10)
       goNext()
     }
-  }, [canAdvance, isLastStep, handleSave, goNext, vibrate])
+  }, [canAdvance, isLastStep, handleSave, goNext, vibrate, steps, currentStep, formData, handleUpdate])
 
   // Keyboard shortcuts: Enter to advance, Escape to go back
   useEffect(() => {
@@ -93,7 +105,7 @@ export function RecordStepper() {
 
       if (e.key === "Enter") {
         e.preventDefault()
-        handleAdvance()
+        void handleAdvance()
       } else if (e.key === "Escape") {
         e.preventDefault()
         goBack()
@@ -118,29 +130,38 @@ export function RecordStepper() {
   }
 
   return (
-    <div className="touch-manipulation space-y-6">
-      {/* Step indicator */}
-      <div className="space-y-2">
-        <p className="text-sm text-muted-foreground" aria-live="polite">
-          Step {currentStep + 1} of {steps.length}
-          <span className="sr-only">: {steps[currentStep].label}</span>
-        </p>
-        <div
-          role="progressbar"
-          aria-valuenow={currentStep + 1}
-          aria-valuemin={1}
-          aria-valuemax={steps.length}
-          aria-label={`Step ${currentStep + 1} of ${steps.length}`}
-          className="flex gap-1.5"
+    <div className="touch-manipulation space-y-6 pb-[calc(4rem+var(--safe-area-bottom))]">
+      {/* Top bar: close button + progress */}
+      <div className="flex items-center gap-3">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => router.push("/path")}
+          aria-label="Close record flow"
         >
-          {steps.map((step, i) => (
-            <div
-              key={step.label}
-              className={`h-1.5 flex-1 rounded-full transition-colors ${
-                i <= currentStep ? "bg-primary" : "bg-muted"
-              }`}
-            />
-          ))}
+          <X className="size-4" />
+        </Button>
+        <div className="flex-1 space-y-1">
+          <p className="sr-only" aria-live="polite">
+            Step {currentStep + 1} of {steps.length}: {steps[currentStep].label}
+          </p>
+          <div
+            role="progressbar"
+            aria-valuenow={currentStep + 1}
+            aria-valuemin={1}
+            aria-valuemax={steps.length}
+            aria-label={`Step ${currentStep + 1} of ${steps.length}`}
+            className="flex gap-1.5"
+          >
+            {steps.map((step, i) => (
+              <div
+                key={step.label}
+                className={`h-1.5 flex-1 rounded-full transition-colors ${
+                  i <= currentStep ? "bg-primary" : "bg-muted"
+                }`}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
@@ -154,23 +175,25 @@ export function RecordStepper() {
         </p>
       )}
 
-      {/* Navigation */}
-      <nav className="flex items-center justify-between" aria-label="Step navigation">
-        {!isFirstStep ? (
-          <Button variant="ghost" className="h-11 px-4 md:h-8 md:px-2.5" onClick={goBack}>
+      {/* Bottom-anchored navigation */}
+      <nav
+        className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-border bg-background px-4 pb-[var(--safe-area-bottom)] pt-3"
+        aria-label="Step navigation"
+      >
+        {!isFirstStep && (
+          <Button variant="outline" className="h-11 px-4 md:h-9 md:px-2.5" onClick={goBack}>
+            <ArrowLeft data-icon="inline-start" className="size-4" />
             Back
           </Button>
-        ) : (
-          <span />
         )}
 
-        {isLastStep ? (
-          <Button className="h-11 px-4 md:h-8 md:px-2.5" onClick={() => void handleSave()} disabled={saving}>
-            {saving ? "Saving\u2026" : "Save pebble"}
-          </Button>
-        ) : (
-          <Button className="h-11 px-4 md:h-8 md:px-2.5" onClick={goNext} disabled={!canAdvance}>Next</Button>
-        )}
+        <Button
+          className="h-11 flex-1 px-4 md:h-9 md:px-2.5"
+          onClick={() => void handleAdvance()}
+          disabled={!canAdvance || saving}
+        >
+          {isLastStep ? (saving ? "Saving\u2026" : "Save pebble") : "Next"}
+        </Button>
       </nav>
     </div>
   )

@@ -5,10 +5,7 @@ import type { RecordStepProps } from "@/components/record/types"
 export function StepDescription({ data, onUpdate }: RecordStepProps) {
   return (
     <fieldset className="space-y-6">
-      <legend className="text-lg font-semibold">Description</legend>
-      <p className="text-sm text-muted-foreground">
-        Add some details if you want.
-      </p>
+      <legend className="text-lg font-semibold">What do you want to remember?</legend>
 
       <div>
         <label htmlFor="pebble-description" className="sr-only">

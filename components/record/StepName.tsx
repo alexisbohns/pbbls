@@ -6,10 +6,7 @@ import { Input } from "@/components/ui/input"
 export function StepName({ data, onUpdate }: RecordStepProps) {
   return (
     <fieldset className="space-y-6">
-      <legend className="text-lg font-semibold">Name</legend>
-      <p className="text-sm text-muted-foreground">
-        Give this pebble a short name.
-      </p>
+      <legend className="text-lg font-semibold">What happened?</legend>
 
       <div>
         <label htmlFor="pebble-name" className="sr-only">
