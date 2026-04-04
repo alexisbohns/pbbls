@@ -57,14 +57,25 @@ export class LocalProvider implements DataProvider {
   private session: Session | null
 
   constructor() {
-    this.store = this.load()
     this.authStore = this.loadAuth()
     this.session = this.loadSession()
+    this.store = this.load()
   }
 
   // ---------------------------------------------------------------------------
   // Internal helpers
   // ---------------------------------------------------------------------------
+
+  /**
+   * Return the localStorage key for content data. When a session is active the
+   * key is scoped to the profile so each account has its own pebbles, souls,
+   * collections, etc. Falls back to the unscoped key when no session exists.
+   */
+  private getStorageKey(): string {
+    return this.session?.profile_id
+      ? `${STORAGE_KEY}:${this.session.profile_id}`
+      : STORAGE_KEY
+  }
 
   private load(): Store {
     // localStorage is not available during SSR — return an empty store so the
@@ -73,7 +84,7 @@ export class LocalProvider implements DataProvider {
     if (typeof window === "undefined") return EMPTY_STORE
 
     try {
-      const raw = localStorage.getItem(STORAGE_KEY)
+      const raw = localStorage.getItem(this.getStorageKey())
       if (!raw) {
         // Return seed in-memory only; the DataProvider mounts a useEffect to
         // persist via persistIfNeeded() after the first render. This keeps
@@ -123,7 +134,7 @@ export class LocalProvider implements DataProvider {
    */
   persistIfNeeded(): void {
     if (typeof window === "undefined") return
-    if (localStorage.getItem(STORAGE_KEY) !== null) return
+    if (localStorage.getItem(this.getStorageKey()) !== null) return
     this.writeToStorage(this.store)
   }
 
@@ -164,7 +175,7 @@ export class LocalProvider implements DataProvider {
   private writeToStorage(store: Store): void {
     if (typeof window === "undefined") return
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(store))
+      localStorage.setItem(this.getStorageKey(), JSON.stringify(store))
     } catch {
       console.warn("[LocalProvider] Could not write to localStorage.")
     }
@@ -229,11 +240,36 @@ export class LocalProvider implements DataProvider {
     this.writeAuthToStorage(authStore)
   }
 
+  /**
+   * Copy unscoped `pbbls:store` data to a profile-scoped key on first
+   * login/register so existing pebbles are not lost. No-op if the scoped key
+   * already exists or there is no unscoped data to migrate.
+   */
+  private migrateUnscopedData(profileId: string): void {
+    if (typeof window === "undefined") return
+    const scopedKey = `${STORAGE_KEY}:${profileId}`
+    if (localStorage.getItem(scopedKey) !== null) return
+    const unscopedData = localStorage.getItem(STORAGE_KEY)
+    if (!unscopedData) return
+    localStorage.setItem(scopedKey, unscopedData)
+    localStorage.removeItem(STORAGE_KEY)
+  }
+
   // ---------------------------------------------------------------------------
   // DataProvider public API
   // ---------------------------------------------------------------------------
 
   getStore(): Store {
+    return this.store
+  }
+
+  /**
+   * Re-read the content store from localStorage using the current session's
+   * storage key. Call this after login/register/logout to switch to the
+   * correct per-profile data.
+   */
+  reloadStore(): Store {
+    this.store = this.load()
     return this.store
   }
 
@@ -565,6 +601,7 @@ export class LocalProvider implements DataProvider {
     }
     this.session = session
     this.writeSessionToStorage(session)
+    this.migrateUnscopedData(profile.id)
 
     return session
   }
@@ -590,6 +627,7 @@ export class LocalProvider implements DataProvider {
     }
     this.session = session
     this.writeSessionToStorage(session)
+    this.migrateUnscopedData(profile.id)
 
     return session
   }

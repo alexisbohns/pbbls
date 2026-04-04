@@ -23,7 +23,7 @@ import type {
  * automatically logged in.
  */
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const { provider } = useDataProvider()
+  const { provider, setStore } = useDataProvider()
 
   const [user, setUser] = useState<Account | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
@@ -55,6 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(
     async (input: LoginInput) => {
       await provider.login(input)
+      setStore(provider.reloadStore())
       const [account, prof] = await Promise.all([
         provider.getAccount(),
         provider.getProfile(),
@@ -62,12 +63,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(account ?? null)
       setProfile(prof ?? null)
     },
-    [provider],
+    [provider, setStore],
   )
 
   const register = useCallback(
     async (input: RegisterInput) => {
       await provider.register(input)
+      setStore(provider.reloadStore())
       const [account, prof] = await Promise.all([
         provider.getAccount(),
         provider.getProfile(),
@@ -75,14 +77,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(account ?? null)
       setProfile(prof ?? null)
     },
-    [provider],
+    [provider, setStore],
   )
 
   const logout = useCallback(async () => {
     await provider.logout()
+    setStore(provider.reloadStore())
     setUser(null)
     setProfile(null)
-  }, [provider])
+  }, [provider, setStore])
 
   const updateProfileFn = useCallback(
     async (input: UpdateProfileInput): Promise<Profile> => {
