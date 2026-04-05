@@ -1,12 +1,10 @@
 "use client"
 
-import { useCallback, useMemo, useState } from "react"
-import { Check } from "lucide-react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { PEBBLE_SHAPES } from "@/lib/config"
 import type { MarkStroke } from "@/lib/types"
 import { useMarks } from "@/lib/data/useMarks"
 import { useHaptics } from "@/lib/hooks/useHaptics"
-import { Button } from "@/components/ui/button"
 import { DrawingCanvas } from "@/components/carve/DrawingCanvas"
 import { CarveToolbar } from "@/components/carve/CarveToolbar"
 import { StampPicker } from "@/components/carve/StampPicker"
@@ -15,6 +13,11 @@ import { MarkSelector } from "@/components/record/MarkSelector"
 import type { RecordStepProps } from "@/components/record/types"
 
 type Mode = "draw" | "select"
+
+// Module-level ref so onAdvance can trigger save without prop threading.
+// Safe because only one StepGlyph instance exists at a time.
+let pendingSave: (() => Promise<void>) | null = null
+export function getGlyphPendingSave() { return pendingSave }
 
 export function StepGlyph({ data, onUpdate }: RecordStepProps) {
   const { marks, addMark } = useMarks()
@@ -79,6 +82,12 @@ export function StepGlyph({ data, onUpdate }: RecordStepProps) {
       setSaving(false)
     }
   }, [saving, strokes, addMark, shape, vibrate, onUpdate])
+
+  // Expose pending save for the onAdvance hook in RecordStepper
+  useEffect(() => {
+    pendingSave = strokes.length > 0 && !confirmed ? handleConfirmDrawing : null
+    return () => { pendingSave = null }
+  }, [strokes, confirmed, handleConfirmDrawing])
 
   const handleDrawAgain = useCallback(() => {
     setStrokes([])
@@ -213,15 +222,6 @@ export function StepGlyph({ data, onUpdate }: RecordStepProps) {
               />
 
               <StampPicker onSelect={handleStampSelect} />
-
-              <Button
-                onClick={() => void handleConfirmDrawing()}
-                disabled={strokes.length === 0 || saving}
-                className="h-11 w-full px-4 md:h-8 md:px-2.5"
-              >
-                <Check className="mr-1.5 h-4 w-4" />
-                {saving ? "Saving\u2026" : "Confirm glyph"}
-              </Button>
             </>
           )}
         </div>

@@ -1,5 +1,6 @@
 "use client"
 
+import { Check } from "lucide-react"
 import { CARD_TYPES } from "@/lib/config"
 import type { RecordStepProps } from "@/components/record/types"
 
@@ -21,13 +22,13 @@ export function StepCardPicker({ data, onUpdate }: RecordStepProps) {
         Pick the reflection cards you want to fill.
       </p>
 
-      <ul className="space-y-2" role="group" aria-label="Card types">
+      <ul className="grid grid-cols-2 gap-2" role="group" aria-label="Card types">
         {CARD_TYPES.map((type) => {
           const checked = selectedIds.has(type.id)
           return (
             <li key={type.id}>
               <label
-                className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-sm transition-all duration-100 active:scale-[0.98] ${
+                className={`flex cursor-pointer flex-col gap-1 rounded-lg border p-3 text-sm transition-all duration-100 active:scale-[0.98] ${
                   checked
                     ? "border-primary bg-primary/5"
                     : "border-border"
@@ -37,12 +38,13 @@ export function StepCardPicker({ data, onUpdate }: RecordStepProps) {
                   type="checkbox"
                   checked={checked}
                   onChange={() => toggle(type.id)}
-                  className="size-4 accent-primary"
+                  className="sr-only"
                 />
-                <span className="flex-1">
+                <span className="flex items-center justify-between">
                   <span className="font-medium">{type.name}</span>
-                  <span className="ml-2 text-muted-foreground">{type.prompt}</span>
+                  {checked && <Check className="size-4 text-primary" />}
                 </span>
+                <span className="text-xs text-muted-foreground">{type.prompt}</span>
               </label>
             </li>
           )
