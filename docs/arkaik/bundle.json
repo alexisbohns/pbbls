@@ -127,12 +127,21 @@
       "platforms": ["web", "ios", "android"]
     },
     {
-      "id": "V-record-revelation",
+      "id": "V-pebble-revelation",
       "project_id": "pebbles",
       "species": "view",
-      "title": "Record Revelation",
+      "title": "Pebble Revelation",
       "description": "Intermediate screen after save that reveals the generated pebble SVG visual for the first time, before transitioning to celebration.",
-      "status": "idea",
+      "status": "development",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "V-record-celebration",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Record Celebration",
+      "description": "Celebration screen after revelation that confirms the pebble was saved, before navigating to the detail view.",
+      "status": "development",
       "platforms": ["web", "ios", "android"]
     },
     {
@@ -390,8 +399,9 @@
               "if_true": [{ "type": "view", "view_id": "V-cards-thoughts" }],
               "if_false": []
             },
-            { "type": "view", "view_id": "V-pebble-detail" },
-            { "type": "view", "view_id": "V-record-revelation" }
+            { "type": "view", "view_id": "V-pebble-revelation" },
+            { "type": "view", "view_id": "V-record-celebration" },
+            { "type": "view", "view_id": "V-pebble-detail" }
           ]
         }
       }
@@ -955,6 +965,24 @@
       "description": "Informational dialog explaining a gamification mechanic (pebbles, bounce, or karma).",
       "status": "development",
       "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "V-pebble-visual",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Pebble Visual",
+      "description": "Reusable SVG visual component rendering a pebble's generated glyph at multiple tiers (thumbnail, detail, revelation).",
+      "status": "development",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "DM-pebble-engine",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "Pebble Engine",
+      "description": "Pure TypeScript rendering engine that generates SVG pebble visuals from pebble data; designed for extraction as @pebbles/engine.",
+      "status": "development",
+      "platforms": ["web", "ios", "android"]
     }
   ],
   "edges": [
@@ -977,7 +1005,8 @@
     { "id": "e-F-record-pebble-V-glyph-attach", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-glyph-attach", "edge_type": "composes" },
     { "id": "e-F-record-pebble-V-cards-thoughts", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-cards-thoughts", "edge_type": "composes" },
     { "id": "e-F-record-pebble-V-pebble-detail", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-pebble-detail", "edge_type": "composes" },
-    { "id": "e-F-record-pebble-V-record-revelation", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-record-revelation", "edge_type": "composes" },
+    { "id": "e-F-record-pebble-V-pebble-revelation", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-pebble-revelation", "edge_type": "composes" },
+    { "id": "e-F-record-pebble-V-record-celebration", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-record-celebration", "edge_type": "composes" },
 
     { "id": "e-F-onboarding-V-onboarding-welcome", "project_id": "pebbles", "source_id": "F-onboarding", "target_id": "V-onboarding-welcome", "edge_type": "composes" },
     { "id": "e-F-onboarding-V-onboarding-collect", "project_id": "pebbles", "source_id": "F-onboarding", "target_id": "V-onboarding-collect", "edge_type": "composes" },
@@ -1109,6 +1138,11 @@
     { "id": "e-V-login-V-register", "project_id": "pebbles", "source_id": "V-login", "target_id": "V-register", "edge_type": "composes" },
     { "id": "e-V-register-V-login", "project_id": "pebbles", "source_id": "V-register", "target_id": "V-login", "edge_type": "composes" },
     { "id": "e-V-login-API-login", "project_id": "pebbles", "source_id": "V-login", "target_id": "API-login", "edge_type": "calls" },
-    { "id": "e-V-register-API-register", "project_id": "pebbles", "source_id": "V-register", "target_id": "API-register", "edge_type": "calls" }
+    { "id": "e-V-register-API-register", "project_id": "pebbles", "source_id": "V-register", "target_id": "API-register", "edge_type": "calls" },
+
+    { "id": "e-V-pebble-revelation-V-pebble-visual", "project_id": "pebbles", "source_id": "V-pebble-revelation", "target_id": "V-pebble-visual", "edge_type": "composes" },
+    { "id": "e-V-pebble-detail-V-pebble-visual", "project_id": "pebbles", "source_id": "V-pebble-detail", "target_id": "V-pebble-visual", "edge_type": "composes" },
+    { "id": "e-V-timeline-V-pebble-visual", "project_id": "pebbles", "source_id": "V-timeline", "target_id": "V-pebble-visual", "edge_type": "composes" },
+    { "id": "e-V-pebble-visual-DM-pebble-engine", "project_id": "pebbles", "source_id": "V-pebble-visual", "target_id": "DM-pebble-engine", "edge_type": "displays" }
   ]
 }
