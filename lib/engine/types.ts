@@ -39,7 +39,7 @@ export type RenderTier = "thumbnail" | "detail"
 
 // ── Render output ─────────────────────────────────────────────────
 
-export type RenderOutput = {
+export type EngineOutput = {
   svg: string
   viewBox: string
 }
