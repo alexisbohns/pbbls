@@ -1,103 +1,61 @@
-import type { PebbleParams, RenderTier, EngineOutput, Rect, VeinParams } from "./types"
-import { createPRNG } from "./prng"
-import { generateShape } from "./shape"
-import { generateSurface } from "./surface"
-import { allocateZones } from "./zones"
-import { generateVeins } from "./veins"
-import { renderFossil } from "./fossil"
-import { renderGlyph } from "./glyph"
+import type { PebbleParams, RenderTier, EngineOutput } from "./types"
+import { getTemplate } from "./templates"
+import { renderGlyphPaths } from "./glyph"
 
-// ── Constants ──────────────────────────────────────────────────────
+// ── Regex patterns ───────────────────────────────────────────────
 
-/** Padding ratio applied to the shape bounding box for the SVG viewBox. */
-const VIEWBOX_PAD = 0.15
+/** Matches the inner content of <g id="glyph">...</g>. */
+const GLYPH_RE = /(<g id="glyph">)[\s\S]*?(<\/g>\s*<\/g>)/
 
-// ── Pipeline ──────────────────────────────────────────────────────
+/**
+ * Matches only the fossil `<path>` element (self-closing).
+ * Decorative strokes (Vector 16, 17, etc.) are left intact — they
+ * should always be visible regardless of the retroactive flag.
+ */
+const FOSSIL_RE = /\s*<path id="fossil"[^>]*\/>/
+
+// ── Pipeline ─────────────────────────────────────────────────────
 
 /**
  * Render a complete pebble as a self-contained SVG string.
  *
- * Orchestrates all engine modules in a fixed sequence so the PRNG
- * produces identical output for identical inputs:
- *
- *   seed → shape → zones → surface → veins → fossil → glyph → SVG
+ * Composes a doodle pebble by selecting a hand-drawn template based
+ * on intensity and positiveness, swapping in the user's glyph,
+ * toggling fossil visibility, and recolouring to the emotion colour.
  *
  * Pure function — no DOM or React dependencies.
  */
 export function renderPebble(
   params: PebbleParams,
-  seed: number,
-  tier: RenderTier,
+  _seed: number,
+  _tier: RenderTier,
 ): EngineOutput {
-  // 1. Create deterministic PRNG
-  const rng = createPRNG(seed)
+  const template = getTemplate(params.intensity, params.positiveness)
+  let svg = template.svg
 
-  // 2. Generate base shape from intensity
-  const shape = generateShape(rng, params.intensity)
-
-  // 3. Compute padded viewBox rect
-  const bw = shape.bbox.maxX - shape.bbox.minX
-  const bh = shape.bbox.maxY - shape.bbox.minY
-  const padX = bw * VIEWBOX_PAD
-  const padY = bh * VIEWBOX_PAD
-
-  const viewBoxRect: Rect = {
-    x: shape.bbox.minX - padX,
-    y: shape.bbox.minY - padY,
-    width: bw + padX * 2,
-    height: bh + padY * 2,
+  // 1. Replace placeholder glyph with user's mark (or empty it)
+  if (params.glyph && params.glyph.strokes.length > 0) {
+    const glyphContent = renderGlyphPaths(params.glyph, template.glyphZone)
+    svg = svg.replace(GLYPH_RE, `$1${glyphContent}$2`)
+  } else {
+    svg = svg.replace(GLYPH_RE, "$1$2")
   }
 
-  const viewBox = `${viewBoxRect.x} ${viewBoxRect.y} ${viewBoxRect.width} ${viewBoxRect.height}`
-
-  // 4. Allocate zones for glyph and fossil (pure, no PRNG)
-  const zones = allocateZones(
-    shape.bbox,
-    params.glyph !== null,
-    params.retroactive,
-  )
-
-  // 5. Generate surface treatment (gradients, filters)
-  const surface = generateSurface(params.positiveness, rng, viewBoxRect, tier)
-
-  // 6. Generate veins
-  const veinParams: VeinParams = {
-    emotionColor: params.emotionColor,
-    intensity: params.intensity,
-    bounds: shape.bbox,
-    exclusionZones: zones.exclusionZones,
-    shapePath: shape.path,
+  // 2. Remove fossil region when not retroactive
+  if (!params.retroactive) {
+    svg = svg.replace(FOSSIL_RE, "")
   }
-  const veins = generateVeins(rng, veinParams)
 
-  // 7. Render fossil (no-op when not retroactive)
-  const fossilSvg = zones.fossilZone
-    ? renderFossil(rng, zones.fossilZone, params.retroactive)
-    : ""
+  // 3. Recolour all strokes and fills from black to emotion colour
+  svg = recolor(svg, params.emotionColor)
 
-  // 8. Render glyph (no PRNG dependency)
-  const glyphSvg =
-    params.glyph && zones.glyphZone
-      ? renderGlyph(params.glyph, zones.glyphZone)
-      : ""
+  return { svg, viewBox: template.viewBox }
+}
 
-  // 9. Assemble final SVG
-  const filterAttr = surface.filterRef ? ` filter="${surface.filterRef}"` : ""
+// ── Helpers ──────────────────────────────────────────────────────
 
-  const svg = [
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}">`,
-    `<defs>`,
-    surface.defs,
-    veins.defs,
-    `</defs>`,
-    `<path d="${shape.path}" fill="${surface.fill}"${filterAttr}/>`,
-    `<g clip-path="url(#${veins.clipId})">`,
-    ...veins.paths,
-    `</g>`,
-    fossilSvg,
-    glyphSvg,
-    `</svg>`,
-  ].join("")
-
-  return { svg, viewBox }
+function recolor(svg: string, color: string): string {
+  return svg
+    .replaceAll('stroke="black"', `stroke="${color}"`)
+    .replaceAll('fill="black"', `fill="${color}"`)
 }
