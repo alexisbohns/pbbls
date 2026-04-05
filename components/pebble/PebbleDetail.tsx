@@ -11,6 +11,7 @@ import { GlyphSheet } from "@/components/pebble/GlyphSheet"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
+import { PebbleVisual } from "@/components/pebble/PebbleVisual"
 import { dateTimeFormatter } from "@/lib/utils/formatters"
 
 type PebbleDetailProps = {
@@ -47,6 +48,13 @@ export function PebbleDetail({
     <article>
       {/* Header */}
       <header>
+        <PebbleVisual
+          pebble={pebble}
+          mark={mark}
+          tier="detail"
+          className="size-[160px] mx-auto mb-4"
+        />
+
         <h1 className="text-2xl font-semibold">{pebble.name}</h1>
 
         <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
