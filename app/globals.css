@@ -500,3 +500,7 @@
     display: none !important;
   }
 }
+
+.pbbls-visual {
+  @apply h-full;
+}
