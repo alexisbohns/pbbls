@@ -86,6 +86,14 @@ export type VeinOutput = {
   clipId: string
 }
 
+// ── Zone allocation ─────────────────────────────────────────────
+
+export type ZoneAllocation = {
+  glyphZone: Rect | null
+  fossilZone: Rect | null
+  exclusionZones: Rect[]
+}
+
 // ── PebbleParams (engine input contract) ──────────────────────────
 
 export type PebbleParams = {
