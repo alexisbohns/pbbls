@@ -18,6 +18,14 @@ export type Rect = {
   height: number
 }
 
+// ── Shape output ─────────────────────────────────────────────────
+
+export type ShapeOutput = {
+  path: string
+  bbox: BBox
+  vertices: Point[]
+}
+
 // ── Glyph (mark rendering data) ───────────────────────────────────
 
 export type Glyph = {
