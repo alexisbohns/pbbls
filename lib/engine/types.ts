@@ -44,6 +44,28 @@ export type RenderOutput = {
   viewBox: string
 }
 
+// ── Filter definition ────────────────────────────────────────────
+
+export type FilterDef = {
+  /** Unique filter ID for referencing in style attributes. */
+  id: string
+  /** Complete <filter>...</filter> SVG element string. */
+  svg: string
+}
+
+// ── Surface output ──────────────────────────────────────────────
+
+export type SurfaceOutput = {
+  /** SVG string fragments for a <defs> block (gradients + filters). */
+  defs: string
+  /** Fill attribute value (e.g. "url(#grad-1234)" or a solid color). */
+  fill: string
+  /** CSS filter reference (e.g. "url(#turb-1234)"). Null when filters are skipped. */
+  filterRef: string | null
+  /** Edge noise magnitude [0, 1] for downstream shape displacement. */
+  edgeNoise: number
+}
+
 // ── PebbleParams (engine input contract) ──────────────────────────
 
 export type PebbleParams = {
