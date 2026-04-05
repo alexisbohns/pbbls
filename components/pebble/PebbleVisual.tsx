@@ -29,7 +29,7 @@ export function PebbleVisual({
       data-slot="pebble-visual"
       role="img"
       aria-label={`Pebble: ${pebble.name}, ${emotionName}, intensity ${pebble.intensity}`}
-      className={cn(className)}
+      className={cn("overflow-hidden", className)}
       dangerouslySetInnerHTML={{ __html: svg }}
     />
   )
