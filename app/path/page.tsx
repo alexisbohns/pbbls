@@ -14,7 +14,7 @@ export default function PathPage() {
 
   return (
     <section>
-      <h1 className="mb-6 text-2xl font-semibold">Path</h1>
+      <h1 className="mb-6 font-heading text-2xl font-semibold">Path</h1>
 
       <GamificationBlocks />
 
