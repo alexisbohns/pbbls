@@ -5,6 +5,9 @@ export { polarToCartesian, displacePoint, bezierSmooth, openBezierPath } from ".
 export { generateShape } from "./shape"
 export { turbulenceFilter, specularFilter } from "./filters"
 export { generateSurface } from "./surface"
+export { allocateZones } from "./zones"
+export { renderFossil } from "./fossil"
+export { renderGlyph } from "./glyph"
 export { generateVeins } from "./veins"
 export type {
   PebbleParams,
@@ -17,6 +20,7 @@ export type {
   Rect,
   FilterDef,
   SurfaceOutput,
+  ZoneAllocation,
   VeinParams,
   VeinOutput,
 } from "./types"
