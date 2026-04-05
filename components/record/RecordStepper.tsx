@@ -9,7 +9,7 @@ import { useStepNavigation } from "@/lib/hooks/useStepNavigation"
 import { useHaptics } from "@/lib/hooks/useHaptics"
 import { useKeyboardOffset } from "@/lib/hooks/useKeyboardOffset"
 import { Button } from "@/components/ui/button"
-import type { CelebrationData, RecordFormData, RecordStepProps, StepConfig } from "@/components/record/types"
+import type { CelebrationData, RevelationData, RecordFormData, RecordStepProps, StepConfig } from "@/components/record/types"
 import { StepDateTime } from "@/components/record/StepDateTime"
 import { StepName } from "@/components/record/StepName"
 import { StepDescription } from "@/components/record/StepDescription"
@@ -22,6 +22,7 @@ import { StepGlyph, getGlyphPendingSave } from "@/components/record/StepGlyph"
 import { StepCardPicker } from "@/components/record/StepCardPicker"
 import { StepCardFiller } from "@/components/record/StepCardFiller"
 import { StepSummary } from "@/components/record/StepSummary"
+import { PebbleRevelation } from "@/components/record/PebbleRevelation"
 import { RecordCelebration } from "@/components/record/RecordCelebration"
 import { RecordComposer } from "@/components/record/RecordComposer"
 
@@ -95,13 +96,18 @@ function makeComposerPatch(field: string, value: string, data: RecordFormData): 
 
 export function RecordStepper() {
   const router = useRouter()
+  const [revelationData, setRevelationData] = useState<RevelationData | null>(null)
+  const [savedData, setSavedData] = useState<CelebrationData | null>(null)
   const [celebrationData, setCelebrationData] = useState<CelebrationData | null>(null)
 
   const { vibrate } = useHaptics()
   const keyboardOffset = useKeyboardOffset()
 
   const { formData, handleUpdate, handleSave, saving, error } = useRecordForm(
-    (data) => setCelebrationData(data),
+    (data) => {
+      setSavedData(data)
+      setRevelationData({ pebbleId: data.pebbleId, pebbleName: data.pebbleName })
+    },
   )
 
   // Derive step list only when the set of selected card types changes,
@@ -164,6 +170,16 @@ export function RecordStepper() {
   }, [handleAdvance, goBack])
 
   const { Component: ActiveStep } = steps[currentStep]
+
+  if (revelationData && savedData && !celebrationData) {
+    return (
+      <PebbleRevelation
+        pebbleId={revelationData.pebbleId}
+        pebbleName={revelationData.pebbleName}
+        onContinue={() => setCelebrationData(savedData)}
+      />
+    )
+  }
 
   if (celebrationData) {
     return (

@@ -43,6 +43,7 @@ export function useRecordForm(onSaveSuccess: (data: CelebrationData) => void) {
       const pebble = await addPebble(cleanedData)
       onSaveSuccess({
         pebbleId: pebble.id,
+        pebbleName: formData.name,
         karmaDelta,
         bounceBefore,
         bounceAfter: store.bounce,
