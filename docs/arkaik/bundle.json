@@ -6,7 +6,7 @@
     "root_node_id": "V-landing",
     "metadata": { "view_card_variant": "large" },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-04-04T12:00:00.000Z"
+    "updated_at": "2026-04-05T12:00:00.000Z"
   },
   "nodes": [
     {
@@ -123,6 +123,15 @@
       "species": "view",
       "title": "Pebble Detail",
       "description": "Full view of a recorded pebble with all enrichments.",
+      "status": "idea",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "V-record-revelation",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Record Revelation",
+      "description": "Intermediate screen after save that reveals the generated pebble SVG visual for the first time, before transitioning to celebration.",
       "status": "idea",
       "platforms": ["web", "ios", "android"]
     },
@@ -381,7 +390,8 @@
               "if_true": [{ "type": "view", "view_id": "V-cards-thoughts" }],
               "if_false": []
             },
-            { "type": "view", "view_id": "V-pebble-detail" }
+            { "type": "view", "view_id": "V-pebble-detail" },
+            { "type": "view", "view_id": "V-record-revelation" }
           ]
         }
       }
@@ -967,6 +977,7 @@
     { "id": "e-F-record-pebble-V-glyph-attach", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-glyph-attach", "edge_type": "composes" },
     { "id": "e-F-record-pebble-V-cards-thoughts", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-cards-thoughts", "edge_type": "composes" },
     { "id": "e-F-record-pebble-V-pebble-detail", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-pebble-detail", "edge_type": "composes" },
+    { "id": "e-F-record-pebble-V-record-revelation", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-record-revelation", "edge_type": "composes" },
 
     { "id": "e-F-onboarding-V-onboarding-welcome", "project_id": "pebbles", "source_id": "F-onboarding", "target_id": "V-onboarding-welcome", "edge_type": "composes" },
     { "id": "e-F-onboarding-V-onboarding-collect", "project_id": "pebbles", "source_id": "F-onboarding", "target_id": "V-onboarding-collect", "edge_type": "composes" },

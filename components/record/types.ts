@@ -40,8 +40,14 @@ export type StepConfig = {
   composer?: StepComposer
 }
 
+export type RevelationData = {
+  pebbleId: string
+  pebbleName: string
+}
+
 export type CelebrationData = {
   pebbleId: string
+  pebbleName: string
   karmaDelta: number
   bounceBefore: number
   bounceAfter: number
