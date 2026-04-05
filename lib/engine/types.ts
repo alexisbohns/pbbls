@@ -66,6 +66,26 @@ export type SurfaceOutput = {
   edgeNoise: number
 }
 
+// ── Vein output ─────────────────────────────────────────────────
+
+export type VeinParams = {
+  emotionColor: string
+  intensity: 1 | 2 | 3
+  bounds: BBox
+  exclusionZones: Rect[]
+  /** Pebble shape SVG path string, used to build a clip path. */
+  shapePath: string
+}
+
+export type VeinOutput = {
+  /** SVG <clipPath> element string for a <defs> block. */
+  defs: string
+  /** Individual <path> element strings, each a complete vein with stroke attributes. */
+  paths: string[]
+  /** Clip path ID for the consumer to apply to a <g> wrapping the veins. */
+  clipId: string
+}
+
 // ── PebbleParams (engine input contract) ──────────────────────────
 
 export type PebbleParams = {
