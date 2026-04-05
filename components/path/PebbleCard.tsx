@@ -52,8 +52,8 @@ export function PebbleCard({ pebble, emotion, mark, soulNames }: PebbleCardProps
         href={`/pebble/${pebble.id}`}
         className={
           isLarge
-            ? "flex flex-col items-center gap-3 rounded-xl border border-border px-4 py-4 transition-all duration-100 hover:bg-muted/50 active:scale-[0.98] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-            : "flex items-center gap-3 rounded-lg border border-border px-4 py-3 transition-all duration-100 hover:bg-muted/50 active:scale-[0.98] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+            ? "flex flex-col items-center gap-3 rounded-xl px-4 py-7 transition-all duration-100 bg-muted/30 hover:bg-muted/50 active:scale-[0.98] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+            : "flex items-center gap-3 rounded-lg px-4 py-3 transition-all duration-100 bg-muted/20 bg-muted/30 hover:bg-muted/50 active:scale-[0.98] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
         }
       >
         {isLarge ? (

@@ -21,7 +21,7 @@ export function PebbleTimeline({ pebbles, souls }: PebbleTimelineProps) {
     <ol className="flex flex-col gap-8">
       {groups.map((group) => (
         <li key={group.dateKey}>
-          <h2 className="mb-3 font-heading text-sm font-semibold text-muted-foreground">
+          <h2 className="mb-4 mt-5 font-heading text-sm font-semibold text-muted-foreground text-center">
             {group.label}
           </h2>
           <ul className="flex flex-col gap-3">

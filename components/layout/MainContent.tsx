@@ -34,7 +34,7 @@ export function MainContent({ children }: MainContentProps) {
     >
       {!isLanding && !isAuth && <AuthGate />}
       {!isLanding && !isAuth && <OnboardingGate />}
-      {isFullScreen ? children : <div className="mx-auto max-w-5xl">{children}</div>}
+      {isFullScreen ? children : <div className="mx-auto max-w-md">{children}</div>}
     </main>
   )
 }
