@@ -12,7 +12,7 @@ type DoodleTemplate = {
 
 const HIGH_NEGATIVE: DoodleTemplate = {
   viewBox: "0 0 242 283",
-  glyphZone: { x: 12, y: 81, width: 163, height: 109 },
+  glyphZone: { x: 14, y: 56, width: 160, height: 160 },
   svg: `<svg viewBox="0 0 242 283" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g id="high-negative">
 <path id="pebble-outline" d="M19.6737 233.246C2.50303 223.065 -5.75034 43.4833 16.4935 6.83802C18.479 3.56706 25.6771 2.49788 36.3421 3.21052C40.0435 3.45785 54.8698 17.2155 60.7738 22.8271C61.8795 23.8779 63.7549 23.375 64.2974 21.9493C66.1417 17.1028 70.3261 8.65741 76.6792 10.1978C140.347 25.6348 232.046 83.1449 238.22 115.409C241.414 132.104 199.776 268.339 181.337 278.837C172.57 283.828 157.025 255.337 120.238 244.476C114.081 242.658 111.043 231.447 109.977 226.424C109.712 225.177 108.416 224.412 107.211 224.827C88.0688 231.426 33.0871 243.934 19.9949 233.466C19.8855 233.379 19.7942 233.317 19.6737 233.246Z" stroke="black" stroke-width="6" stroke-linecap="round"/>
@@ -41,7 +41,7 @@ const HIGH_NEGATIVE: DoodleTemplate = {
 
 const HIGH_NEUTRAL: DoodleTemplate = {
   viewBox: "0 0 230 275",
-  glyphZone: { x: 14, y: 115, width: 164, height: 106 },
+  glyphZone: { x: 16, y: 88, width: 160, height: 160 },
   svg: `<svg viewBox="0 0 230 275" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g id="high-neutral">
 <g id="glyph-wrapper">
@@ -71,7 +71,7 @@ const HIGH_NEUTRAL: DoodleTemplate = {
 
 const HIGH_POSITIVE: DoodleTemplate = {
   viewBox: "0 0 251 314",
-  glyphZone: { x: 31, y: 99, width: 163, height: 108 },
+  glyphZone: { x: 33, y: 73, width: 160, height: 160 },
   svg: `<svg viewBox="0 0 251 314" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g id="high-positive">
 <path id="pebble-outline" d="M235.859 97.4165C264.882 138.302 233.669 257.137 195.037 294.441C133.309 354.047 -2.15051 229.89 3.15136 152.36C5.73507 114.578 31.1877 17.8903 80.2926 4.81493C133.474 -9.34588 211.383 62.9378 235.859 97.4165Z" stroke="black" stroke-width="6"/>
@@ -105,7 +105,7 @@ const HIGH_POSITIVE: DoodleTemplate = {
 
 const LOW_NEGATIVE: DoodleTemplate = {
   viewBox: "0 0 245 172",
-  glyphZone: { x: 30, y: 43, width: 140, height: 97 },
+  glyphZone: { x: 30, y: 22, width: 140, height: 140 },
   svg: `<svg viewBox="0 0 245 172" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g id="low-negative">
 <path id="pebble-outline" d="M4.14129 141.476C-2.67362 129.026 22.8025 25.0264 33.694 20.0682C52.9764 11.2903 93.7745 4.71814 104.931 3.03443C106.543 2.79116 108.013 3.89742 108.275 5.5063L109.548 13.2943C109.8 14.8374 111.195 15.9282 112.753 15.8006L151.699 12.6112C152.411 12.5529 153.08 12.7213 153.657 13.1436C163.051 20.0226 246.654 82.0689 241.802 108.026C236.902 134.246 170.438 165.012 164.262 167.819C163.926 167.971 163.656 168.034 163.288 168.052C154.007 168.494 22.0461 174.186 4.14129 141.476Z" stroke="black" stroke-width="6" stroke-linejoin="round"/>
@@ -133,7 +133,7 @@ const LOW_NEGATIVE: DoodleTemplate = {
 
 const LOW_NEUTRAL: DoodleTemplate = {
   viewBox: "0 0 233 174",
-  glyphZone: { x: 22, y: 36, width: 138, height: 98 },
+  glyphZone: { x: 21, y: 15, width: 140, height: 140 },
   svg: `<svg viewBox="0 0 233 174" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g id="low-neutral">
 <path id="pebble-outline" d="M13.0049 147.547C-2.06107 120.023 -0.645222 33.3266 20.8963 12.588C43.533 -9.20514 125.671 9.758 189.147 33.5503C246.505 55.0498 240.042 146.037 189.147 161.553C146.505 174.552 27.9586 174.865 13.0049 147.547Z" stroke="black" stroke-width="6"/>
@@ -161,7 +161,7 @@ const LOW_NEUTRAL: DoodleTemplate = {
 
 const LOW_POSITIVE: DoodleTemplate = {
   viewBox: "0 0 252 189",
-  glyphZone: { x: 41, y: 45, width: 138, height: 98 },
+  glyphZone: { x: 40, y: 24, width: 140, height: 140 },
   svg: `<svg viewBox="0 0 252 189" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g id="low-positive">
 <path id="pebble-outline" d="M9.94578 142.45C-5.12009 114.926 4.14034 48 39.4985 21.0417C107.737 -30.9855 261.739 38.5387 247.462 114.927C232.969 192.468 48.9944 213.786 9.94578 142.45Z" stroke="black" stroke-width="6"/>
@@ -189,7 +189,7 @@ const LOW_POSITIVE: DoodleTemplate = {
 
 const MEDIUM_NEGATIVE: DoodleTemplate = {
   viewBox: "0 0 248 243",
-  glyphZone: { x: 20, y: 60, width: 154, height: 98 },
+  glyphZone: { x: 22, y: 34, width: 150, height: 150 },
   svg: `<svg viewBox="0 0 248 243" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g id="medium-negative">
 <g id="glyph-wrapper">
@@ -218,7 +218,7 @@ const MEDIUM_NEGATIVE: DoodleTemplate = {
 
 const MEDIUM_NEUTRAL: DoodleTemplate = {
   viewBox: "0 0 264 208",
-  glyphZone: { x: 22, y: 55, width: 153, height: 102 },
+  glyphZone: { x: 24, y: 31, width: 150, height: 150 },
   svg: `<svg viewBox="0 0 264 208" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g id="medium-neutral">
 <path id="pebble-outline" d="M233.091 179.968C185.591 205.968 44.0369 218.651 25.0911 179.968C7.81414 144.692 -10.6761 69.9692 17.6454 33.9702C45.9667 -2.02875 194.591 -8.52929 220.091 24.4715C251.207 64.7396 285.193 151.449 233.091 179.968Z" stroke="black" stroke-width="6"/>
@@ -247,7 +247,7 @@ const MEDIUM_NEUTRAL: DoodleTemplate = {
 
 const MEDIUM_POSITIVE: DoodleTemplate = {
   viewBox: "0 0 252 252",
-  glyphZone: { x: 35, y: 89, width: 136, height: 117 },
+  glyphZone: { x: 28, y: 73, width: 150, height: 150 },
   svg: `<svg viewBox="0 0 252 252" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g id="medium-positive">
 <path id="pebble-outline" d="M9.7517 205.314C-14.3228 161.333 30.4907 46.9309 73.1968 14.3702C141.435 -37.6572 261.545 101.403 247.268 177.791C232.775 255.332 48.8 276.651 9.7517 205.314Z" stroke="black" stroke-width="6"/>

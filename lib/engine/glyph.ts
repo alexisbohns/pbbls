@@ -1,5 +1,10 @@
 import type { Rect, Glyph } from "./types"
 
+// ── Constants ─────────────────────────────────────────────────────
+
+/** Stroke width matching the pebble outline (always 6px, unscaled). */
+const STROKE_WIDTH = 6
+
 // ── ViewBox parsing ────────────────────────────────────────────────
 
 function parseViewBox(vb: string): { x: number; y: number; w: number; h: number } {
@@ -12,9 +17,11 @@ function parseViewBox(vb: string): { x: number; y: number; w: number; h: number 
 /**
  * Scale, centre, and render a user-drawn glyph (mark) within a zone.
  *
- * Returns SVG path elements wrapped in a `<g>` with the appropriate
- * transform. Strokes use `stroke="black"` so the downstream recolor
- * step can apply the emotion colour uniformly.
+ * The glyph is uniformly scaled to fit the zone while preserving its
+ * aspect ratio. Strokes use `vector-effect="non-scaling-stroke"` so
+ * the stroke width stays constant at 6px (matching the pebble outline)
+ * regardless of the transform scale. Strokes use `stroke="black"` so
+ * the downstream recolor step can apply the emotion colour uniformly.
  *
  * Pure function — no PRNG, DOM, or React dependencies.
  */
@@ -36,7 +43,8 @@ export function renderGlyphPaths(
   const paths = glyph.strokes.map(
     (stroke) =>
       `<path d="${stroke.d}" stroke="black" ` +
-      `stroke-width="${stroke.width}" fill="none" ` +
+      `stroke-width="${STROKE_WIDTH}" fill="none" ` +
+      `vector-effect="non-scaling-stroke" ` +
       `stroke-linecap="round" stroke-linejoin="round"/>`,
   )
 
