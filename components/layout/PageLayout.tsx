@@ -19,7 +19,7 @@ export function PageLayout({ sidebar, children }: PageLayoutProps) {
   return (
     <div className="flex-column items-start md:flex gap-6 px-4 md:px-6 pt-4 md:pt-8">
       <aside className="flex justify-end sticky top-4 w-full">
-        <div className="w-full md:max-w-[200px]">
+        <div className="w-full md:max-w-[200px] flex flex-col">
           {sidebar}
         </div>
       </aside>

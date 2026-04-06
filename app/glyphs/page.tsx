@@ -6,12 +6,13 @@ import { GlyphList } from "@/components/glyphs/GlyphList"
 import { GlyphsEmptyState } from "@/components/glyphs/GlyphsEmptyState"
 import { PageLayout } from "@/components/layout/PageLayout"
 import { PathProfileCard } from "@/components/path/PathProfileCard"
+import { BackPath } from "@/components/ui/BackPath"
 
 export default function GlyphsPage() {
   const { marks, loading } = useMarks()
 
   return (
-    <PageLayout sidebar={<PathProfileCard />}>
+    <PageLayout sidebar={<><BackPath /><PathProfileCard /></>}>
       <section>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Glyphs</h1>

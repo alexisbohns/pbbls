@@ -8,6 +8,7 @@ import { ProfileCard } from "@/components/profile/ProfileCard"
 import { LogoutButton } from "@/components/profile/LogoutButton"
 import { PageLayout } from "@/components/layout/PageLayout"
 import { PathProfileCard } from "@/components/path/PathProfileCard"
+import { BackPath } from "@/components/ui/BackPath"
 import { NAV_ITEMS } from "@/lib/config/navigation"
 
 const PROFILE_NAV = NAV_ITEMS.filter(
@@ -48,7 +49,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <PageLayout sidebar={<PathProfileCard />}>
+    <PageLayout sidebar={<><BackPath /><PathProfileCard /></>}>
       <section>
         <h1 className="mb-6 text-2xl font-semibold">Profile</h1>
         <div className="space-y-6">
