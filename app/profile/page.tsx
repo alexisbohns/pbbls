@@ -6,6 +6,9 @@ import { ChevronRight } from "lucide-react"
 import { useAuth } from "@/lib/data/auth-context"
 import { ProfileCard } from "@/components/profile/ProfileCard"
 import { LogoutButton } from "@/components/profile/LogoutButton"
+import { PageLayout } from "@/components/layout/PageLayout"
+import { PathProfileCard } from "@/components/path/PathProfileCard"
+import { BackPath } from "@/components/ui/BackPath"
 import { NAV_ITEMS } from "@/lib/config/navigation"
 
 const PROFILE_NAV = NAV_ITEMS.filter(
@@ -23,29 +26,34 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <section>
-        <h1 className="mb-6 text-2xl font-semibold">Profile</h1>
-        <p className="text-sm text-muted-foreground">Loading…</p>
-      </section>
+      <PageLayout sidebar={<PathProfileCard />}>
+        <section>
+          <h1 className="mb-6 text-2xl font-semibold">Profile</h1>
+          <p className="text-sm text-muted-foreground">Loading…</p>
+        </section>
+      </PageLayout>
     )
   }
 
   if (!isAuthenticated || !user || !profile) {
     return (
-      <section>
-        <h1 className="mb-6 text-2xl font-semibold">Profile</h1>
-        <p className="text-sm text-muted-foreground">
-          Sign in to view your profile.
-        </p>
-      </section>
+      <PageLayout sidebar={<PathProfileCard />}>
+        <section>
+          <h1 className="mb-6 text-2xl font-semibold">Profile</h1>
+          <p className="text-sm text-muted-foreground">
+            Sign in to view your profile.
+          </p>
+        </section>
+      </PageLayout>
     )
   }
 
   return (
-    <section>
-      <h1 className="mb-6 text-2xl font-semibold">Profile</h1>
-      <div className="space-y-6">
-        <ProfileCard user={user} profile={profile} />
+    <PageLayout sidebar={<><BackPath /><PathProfileCard /></>}>
+      <section>
+        <h1 className="mb-6 text-2xl font-semibold">Profile</h1>
+        <div className="space-y-6">
+          <ProfileCard user={user} profile={profile} />
 
         <nav aria-label="App sections">
           <ul className="divide-y divide-border rounded-xl border border-border">
@@ -67,8 +75,9 @@ export default function ProfilePage() {
           </ul>
         </nav>
 
-        <LogoutButton onLogout={handleLogout} />
-      </div>
-    </section>
+          <LogoutButton onLogout={handleLogout} />
+        </div>
+      </section>
+    </PageLayout>
   )
 }

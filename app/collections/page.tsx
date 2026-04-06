@@ -7,7 +7,10 @@ import { CollectionList } from "@/components/collections/CollectionList"
 import { CollectionsEmptyState } from "@/components/collections/CollectionsEmptyState"
 import { CollectionFormDialog } from "@/components/collections/CollectionFormDialog"
 import { Button } from "@/components/ui/button"
+import { PageLayout } from "@/components/layout/PageLayout"
+import { PathProfileCard } from "@/components/path/PathProfileCard"
 import type { Collection } from "@/lib/types"
+import { BackPath } from "@/components/ui/BackPath"
 
 export default function CollectionsPage() {
   const { collections, loading, addCollection } = useCollections()
@@ -20,7 +23,8 @@ export default function CollectionsPage() {
   )
 
   return (
-    <section>
+    <PageLayout sidebar={<><BackPath /><PathProfileCard /></>}>
+      <section>
       <div className="mb-6 flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Collections</h1>
         <CollectionFormDialog
@@ -43,6 +47,7 @@ export default function CollectionsPage() {
       ) : (
         <CollectionList collections={collections} />
       )}
-    </section>
+      </section>
+    </PageLayout>
   )
 }

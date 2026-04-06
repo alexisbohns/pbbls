@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button";
+import { PageLayout } from "@/components/layout/PageLayout";
 
 export default function OfflinePage() {
   return (
-    <section className="flex flex-col items-center justify-center gap-4 py-20 text-center">
+    <PageLayout>
+      <section className="flex flex-col items-center justify-center gap-4 py-20 text-center">
       <h1 className="text-2xl font-semibold">You&apos;re offline</h1>
       <p className="text-sm text-muted-foreground">
         This page isn&apos;t available offline. Connect to the internet and try
@@ -11,6 +13,7 @@ export default function OfflinePage() {
       <Button variant="outline" render={<a href="/path" />}>
         Go to timeline
       </Button>
-    </section>
+      </section>
+    </PageLayout>
   );
 }

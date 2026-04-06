@@ -10,6 +10,7 @@ import { useSouls } from "@/lib/data/useSouls"
 import { CollectionDetailHeader } from "@/components/collections/CollectionDetailHeader"
 import { CollectionPebbleList } from "@/components/collections/CollectionPebbleList"
 import { CollectionNotFound } from "@/components/collections/CollectionNotFound"
+import { PageLayout } from "@/components/layout/PageLayout"
 
 export default function CollectionDetailPage({
   params,
@@ -50,7 +51,8 @@ export default function CollectionDetailPage({
   )
 
   return (
-    <section>
+    <PageLayout>
+      <section>
       <nav className="mb-6">
         <Link
           href="/collections"
@@ -84,6 +86,7 @@ export default function CollectionDetailPage({
       ) : (
         <CollectionNotFound />
       )}
-    </section>
+      </section>
+    </PageLayout>
   )
 }

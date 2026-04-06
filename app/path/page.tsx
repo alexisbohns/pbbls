@@ -5,7 +5,8 @@ import { usePebbles } from "@/lib/data/usePebbles"
 import { useSouls } from "@/lib/data/useSouls"
 import { PebbleTimeline } from "@/components/path/PebbleTimeline"
 import { PathEmptyState } from "@/components/path/PathEmptyState"
-import { PathLayout } from "@/components/path/PathLayout"
+import { PathProfileCard } from "@/components/path/PathProfileCard"
+import { PageLayout } from "@/components/layout/PageLayout"
 import { QuickPebbleEditor } from "@/components/path/QuickPebbleEditor"
 import { PebbleSheet } from "@/components/path/PebbleSheet"
 
@@ -17,7 +18,7 @@ export default function PathPage() {
   const loading = pebblesLoading || soulsLoading
 
   return (
-    <PathLayout>
+    <PageLayout sidebar={<PathProfileCard />}>
       <QuickPebbleEditor />
 
       {loading ? (
@@ -36,6 +37,6 @@ export default function PathPage() {
         pebbleId={selectedPebbleId}
         onClose={() => setSelectedPebbleId(null)}
       />
-    </PathLayout>
+    </PageLayout>
   )
 }

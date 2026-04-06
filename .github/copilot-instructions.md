@@ -1,4 +1,4 @@
-# Copilot Instructions for pbbls
+# Project Guidelines
 
 ## Before you start
 
@@ -16,6 +16,7 @@
 - UI primitives live in `components/ui/` (shadcn/ui). Do not duplicate them.
 - Domain components live in feature folders: `components/path/`, `components/pebble/`, `components/record/`, etc.
 - Hooks encapsulate data access. Components never call the provider directly.
+- Sidebar is customizable per page by passing the sidebar prop: `<PageLayout sidebar={<PathProfileCard />}>...</PageLayout>`
 
 ### File & Naming Conventions
 
@@ -33,7 +34,7 @@
 ### Accessibility
 
 - All interactive elements must be keyboard-navigable.
-- Use semantic HTML elements like `button` for interaction, `nav` for navigation, `main` for main content, `section` for sections, `h1`–`h6` for headings, `ul`/`ol` for lists even if it's a grid of cards, `article` for standalone content (ie. a pebble card), abbriviations like `abbr` for emotion icons, etc.
+- Use semantic HTML elements like `button` for interaction, `nav` for navigation, `main` for main content, `section` for sections, `h1`–`h6` for headings, `ul`/`ol` for lists even if it's a grid of cards, `article` for standalone content (ie. a pebble card), abbreviations like `abbr` for emotion icons, etc.
 - Images and icons must have meaningful `alt` text or `aria-label`.
 - Use `aria-live` regions for dynamic content updates.
 - Color is never the sole indicator — always pair with text or icons.
@@ -65,18 +66,51 @@
 - Always consider edge cases and error handling, even if it's just logging for now.
 - Always check if the build and linting pass before ending your work.
 
-### Git
+## Git Conventions
+
+### Commits
 
 - One logical change per commit.
-- **Commit messages**: conventional commits, lowercase, no period.
+- Conventional commits format, lowercase, no period.
   Format: `type(scope): description`
   Types: `feat`, `fix`, `chore`, `docs`, `test`, `quality`
   Scope is optional, matches label scopes: `core`, `ui`, `db`, `api`, `auth`, `facility`
   Examples: `feat(ui): add emotion picker grid component`, `fix(db): correct seed data validation`
-- **Branch naming**: `type/issueNumber-description`
-  Examples: `feat/12-path-timeline-view`, `fix/42-emotion-picker-crash`
-- **PR titles**: same format as commit messages.
-- **PR body**: start with `Resolves #N` (or `Closes #N`), list key files changed, include implementation notes when relevant.
-- **Labels**: apply one species label (`feat`, `fix`, `bug`, `chore`, `docs`, `test`, `quality`) and one or more scope labels (`core`, `ui`, `db`, `api`, `auth`, `facility`).
-- **Issue titles**: `[Type] Description` (e.g. `[Feat] Path timeline view`, `[Bug] Emotion picker crash`).
-- Always check if the build and linting pass before opening a PR.
+
+### Branches
+
+- Format: `type/issueNumber-description`
+- Examples: `feat/12-path-timeline-view`, `fix/42-emotion-picker-crash`
+- The branch MUST be created with the correct naming before any commit is made.
+
+### Labels
+
+- Apply one species label: `feat`, `fix`, `bug`, `chore`, `docs`, `test`, `quality`
+- Apply one or more scope labels: `core`, `ui`, `db`, `api`, `auth`, `facility`
+
+### Issue titles
+
+- Format: `[Type] Description` (e.g. `[Feat] Path timeline view`, `[Bug] Emotion picker crash`)
+
+## PR Workflow Checklist
+
+When creating a PR, you MUST follow this checklist:
+
+1. **Branch name**: verify it matches `type/issueNumber-description` before pushing.
+2. **PR title**: use conventional commits format `type(scope): description`.
+3. **PR body**: start with `Resolves #N` (or `Closes #N`), list key files changed, include implementation notes.
+4. **Labels and milestone**:
+   - If the PR resolves an issue, propose inheriting the same labels and milestone from that issue and ask the user to confirm (except if the issue is labelled with `bug`, the PR will be labelled with `fix`).
+   - If the PR does not resolve an issue, ask the user which species label, scope label(s), and milestone to apply.
+   - Never create a PR without labels and a milestone (except if user confirmed there's no milestone).
+5. **Build and lint**: always run `npm run build` and `npm run lint` and confirm they pass before opening the PR.
+
+# Product Architecture Map (Arkaik)
+
+Pebbles' product architecture is described in an Arkaik ProjectBundle JSON file at `docs/arkaik/bundle.json`. This map is the source of truth for all screens, flows, data models, and API endpoints in the product.
+
+**Whenever your work changes the product architecture** — adding a screen, creating a route, defining a model, wiring an endpoint, removing a feature, or changing a feature's status — **update the map as part of the same change.**
+
+Don't wait to be asked. Use the `arkaik` skill (`.claude/skills/arkaik/`) which explains the schema, the surgical update patterns, and includes a validation script to run before saving.
+
+Keep changes surgical: only touch the nodes and edges affected by your work. Never regenerate the full map unless bootstrapping from scratch.
