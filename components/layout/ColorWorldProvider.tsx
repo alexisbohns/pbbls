@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState } from "react"
+import { createContext, useContext, useEffect, useSyncExternalStore } from "react"
 import type { ColorWorld } from "@/lib/types"
 
 const COLOR_WORLDS: ColorWorld[] = [
@@ -14,15 +14,6 @@ const COLOR_WORLDS: ColorWorld[] = [
 const DEFAULT_COLOR_WORLD: ColorWorld = "blush-quartz"
 const STORAGE_KEY = "pbbls-color-world"
 
-function getStoredColorWorld(): ColorWorld {
-  if (typeof window === "undefined") return DEFAULT_COLOR_WORLD
-  const stored = localStorage.getItem(STORAGE_KEY)
-  if (stored && COLOR_WORLDS.includes(stored as ColorWorld)) {
-    return stored as ColorWorld
-  }
-  return DEFAULT_COLOR_WORLD
-}
-
 interface ColorWorldContextValue {
   colorWorld: ColorWorld
   setColorWorld: (world: ColorWorld) => void
@@ -33,22 +24,63 @@ const ColorWorldContext = createContext<ColorWorldContextValue>({
   setColorWorld: () => {},
 })
 
+// ──────────────────────────────────────────────────────────────────────────
+// External store for color world persistence
+// ──────────────────────────────────────────────────────────────────────────
+
+function subscribe(callback: () => void) {
+  // Listen for storage changes from other tabs
+  window.addEventListener("storage", callback)
+  return () => window.removeEventListener("storage", callback)
+}
+
+function getSnapshot(): ColorWorld {
+  // Read from localStorage
+  const stored = localStorage.getItem(STORAGE_KEY)
+  if (stored && COLOR_WORLDS.includes(stored as ColorWorld)) {
+    return stored as ColorWorld
+  }
+  return DEFAULT_COLOR_WORLD
+}
+
+function getServerSnapshot(): ColorWorld {
+  // On server, always return default
+  return DEFAULT_COLOR_WORLD
+}
+
 export function ColorWorldProvider({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const [colorWorld, setColorWorld] = useState<ColorWorld>(getStoredColorWorld)
+  // Use useSyncExternalStore to safely subscribe to localStorage
+  const colorWorld = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot,
+  )
 
-  // Apply class to <html> and persist whenever colorWorld changes
+  const setColorWorld = (world: ColorWorld) => {
+    localStorage.setItem(STORAGE_KEY, world)
+
+    // Apply class to <html>
+    const root = document.documentElement
+    COLOR_WORLDS.forEach((w) => root.classList.remove(w))
+    if (world !== DEFAULT_COLOR_WORLD) {
+      root.classList.add(world)
+    }
+
+    // Notify listeners (for cross-tab sync)
+    window.dispatchEvent(new StorageEvent("storage", { key: STORAGE_KEY }))
+  }
+
+  // Apply class to <html> when colorWorld changes (after hydration)
   useEffect(() => {
     const root = document.documentElement
     COLOR_WORLDS.forEach((w) => root.classList.remove(w))
-    // blush-quartz is the :root default — no class needed
     if (colorWorld !== DEFAULT_COLOR_WORLD) {
       root.classList.add(colorWorld)
     }
-    localStorage.setItem(STORAGE_KEY, colorWorld)
   }, [colorWorld])
 
   return (

@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { Geist, Geist_Mono, Ysabeau } from "next/font/google";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { ColorWorldProvider } from "@/components/layout/ColorWorldProvider";
@@ -89,15 +88,17 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${ysabeau.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="h-full bg-background text-foreground">
-        <Script
-          id="color-world-init"
-          strategy="beforeInteractive"
+      <head>
+        {/* Runs before hydration to apply the saved color-world class and
+            update theme-color meta tags — prevents flash of wrong theme.
+            Color map must stay in sync with lib/config/color-worlds.ts */}
+        <script
           dangerouslySetInnerHTML={{
-            // Color map must stay in sync with lib/config/color-worlds.ts
             __html: `try{var w=localStorage.getItem("pbbls-color-world");if(w&&w!=="blush-quartz"){document.documentElement.classList.add(w);var m={"stoic-rock":{l:"#FFFFFF",d:"#252525"},"cave-pigment":{l:"#F5F0E8",d:"#2B2518"},"dusk-stone":{l:"#F0EEF0",d:"#211F2B"},"moss-pool":{l:"#EFF5F2",d:"#192B22"}};var c=m[w];if(c){var ml=document.querySelector('meta[name="theme-color"][media*="light"]');var md=document.querySelector('meta[name="theme-color"][media*="dark"]');if(ml)ml.setAttribute("content",c.l);if(md)md.setAttribute("content",c.d)}}}catch(e){}`,
           }}
         />
+      </head>
+      <body className="h-full bg-background text-foreground">
         <SerwistRegistration>
           <DataProvider>
             <AuthProvider>
