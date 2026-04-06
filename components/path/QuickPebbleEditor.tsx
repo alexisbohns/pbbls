@@ -10,6 +10,7 @@ import {
   CalendarDays,
   Check,
   Plus,
+  Search,
 } from "lucide-react"
 import { usePebbles } from "@/lib/data/usePebbles"
 import { useSouls } from "@/lib/data/useSouls"
@@ -24,14 +25,6 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover"
-import {
-  Combobox,
-  ComboboxInput,
-  ComboboxContent,
-  ComboboxList,
-  ComboboxItem,
-  ComboboxEmpty,
-} from "@/components/ui/combobox"
 import {
   Dialog,
   DialogContent,
@@ -84,10 +77,18 @@ export function QuickPebbleEditor() {
   const [dateOpen, setDateOpen] = useState(false)
   const [tempDate, setTempDate] = useState(() => new Date())
 
-  // Soul combobox search state
+  // Search state for emotion and soul popovers
+  const [emotionQuery, setEmotionQuery] = useState("")
   const [soulQuery, setSoulQuery] = useState("")
 
   const selectedEmotion = EMOTIONS.find((e) => e.id === emotionId)
+
+  // Filter emotions by search query
+  const filteredEmotions = useMemo(() => {
+    if (!emotionQuery.trim()) return EMOTIONS
+    const q = emotionQuery.toLowerCase()
+    return EMOTIONS.filter((e) => e.name.toLowerCase().includes(q))
+  }, [emotionQuery])
 
   const intensityLabel = INTENSITY_OPTIONS.find((o) => o.value === intensity)?.label ?? "Small"
   const valenceLabel = VALENCE_OPTIONS.find((o) => o.value === valence)?.label ?? "neutral"
@@ -285,24 +286,14 @@ export function QuickPebbleEditor() {
       {/* Footer: pickers + submit */}
       <div className="mt-2 flex items-center justify-between">
         <div className="flex items-center gap-1">
-          {/* Emotion combobox */}
-          <Combobox<string>
-            value={emotionId || null}
-            onValueChange={(value) => {
-              if (value !== null) setEmotionId(value)
-            }}
-          >
+          {/* Emotion popover with search */}
+          <Popover onOpenChange={(open) => { if (!open) setEmotionQuery("") }}>
             <PopoverTrigger
-              render={
-                <button
-                  type="button"
-                  className={cn(
-                    "flex items-center gap-1 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                    emotionId && "text-foreground",
-                  )}
-                  aria-label={selectedEmotion ? `Emotion: ${selectedEmotion.name}` : "Pick emotion"}
-                />
-              }
+              className={cn(
+                "flex items-center gap-1 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+                emotionId && "text-foreground",
+              )}
+              aria-label={selectedEmotion ? `Emotion: ${selectedEmotion.name}` : "Pick emotion"}
             >
               <Heart className="size-4" aria-hidden />
               {selectedEmotion && (
@@ -314,23 +305,50 @@ export function QuickPebbleEditor() {
                 </span>
               )}
             </PopoverTrigger>
-            <ComboboxContent align="start">
-              <ComboboxInput placeholder="Search emotions…" />
-              <ComboboxList>
-                {EMOTIONS.map((emotion) => (
-                  <ComboboxItem key={emotion.id} value={emotion.id}>
-                    <span
-                      className="size-3 rounded-full shrink-0"
-                      style={{ backgroundColor: emotion.color }}
-                      aria-hidden
-                    />
-                    {emotion.name}
-                  </ComboboxItem>
-                ))}
-              </ComboboxList>
-              <ComboboxEmpty>No emotions found</ComboboxEmpty>
-            </ComboboxContent>
-          </Combobox>
+            <PopoverContent align="start" className="min-w-[200px] p-2">
+              <div className="flex items-center gap-2 border-b border-border pb-2 mb-1">
+                <Search className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+                <input
+                  type="text"
+                  value={emotionQuery}
+                  onChange={(e) => setEmotionQuery(e.target.value)}
+                  placeholder="Search emotions…"
+                  className="h-7 w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                />
+              </div>
+              <div className="max-h-[200px] overflow-y-auto">
+                {filteredEmotions.map((emotion) => {
+                  const selected = emotionId === emotion.id
+                  return (
+                    <button
+                      key={emotion.id}
+                      type="button"
+                      onClick={() => setEmotionId(emotion.id)}
+                      className={cn(
+                        "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none transition-colors hover:bg-muted",
+                        selected && "font-medium",
+                      )}
+                    >
+                      <span className="size-4 shrink-0 flex items-center justify-center">
+                        {selected && <Check className="size-4" />}
+                      </span>
+                      <span
+                        className="size-3 rounded-full shrink-0"
+                        style={{ backgroundColor: emotion.color }}
+                        aria-hidden
+                      />
+                      {emotion.name}
+                    </button>
+                  )
+                })}
+                {filteredEmotions.length === 0 && (
+                  <p className="px-2 py-4 text-center text-sm text-muted-foreground">
+                    No emotions found
+                  </p>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
 
           {/* Domain popover */}
           <Popover>
