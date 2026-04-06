@@ -38,10 +38,9 @@ export function PathProfileCard() {
   return (
     <Link
       href="/profile"
-      className="block rounded-xl transition-colors hover:bg-muted/50 focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+      className="block rounded-xl transition-colors bg-muted md:bg-muted/50 hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
       aria-label={`${profile.display_name}'s profile`}
     >
-      {/* Mobile: horizontal compact bar */}
       <div className="flex items-center gap-3 px-4 py-3 md:hidden">
         <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
           <CircleUser className="size-5 text-muted-foreground" aria-hidden />
@@ -53,7 +52,6 @@ export function PathProfileCard() {
         </div>
       </div>
 
-      {/* Desktop: vertical card */}
       <div className="hidden md:block space-y-4 p-4">
         <div className="flex items-center gap-3">
           <div className="w-full">

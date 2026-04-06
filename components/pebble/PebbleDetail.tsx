@@ -55,7 +55,7 @@ export function PebbleDetail({
           className="size-[160px] mx-auto mb-4"
         />
 
-        <h1 className="text-2xl font-semibold">{pebble.name}</h1>
+        <h1 className="text-2xl font-heading font-semibold text-muted-foreground text-center">{pebble.name}</h1>
 
         <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
           {emotion ? (

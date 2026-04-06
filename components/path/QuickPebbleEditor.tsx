@@ -6,7 +6,7 @@ import {
   Heart,
   Layers,
   Users,
-  ArrowUpCircle,
+  ArrowUp,
   CalendarDays,
   Check,
   Plus,
@@ -474,7 +474,7 @@ export function QuickPebbleEditor() {
             aria-label="Create pebble"
             className="size-8 rounded-full"
           >
-            <ArrowUpCircle className="size-5" aria-hidden />
+            <ArrowUp className="size-5" aria-hidden />
           </Button>
         </div>
       </div>
