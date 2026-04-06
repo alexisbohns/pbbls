@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
 import {
   Heart,
@@ -8,13 +8,30 @@ import {
   Users,
   ArrowUpCircle,
   CalendarDays,
+  Check,
+  Plus,
 } from "lucide-react"
 import { usePebbles } from "@/lib/data/usePebbles"
+import { useSouls } from "@/lib/data/useSouls"
 import { useDataProvider } from "@/lib/data/provider-context"
 import { computeKarmaDelta } from "@/lib/data/karma"
 import { EMOTIONS } from "@/lib/config/emotions"
+import { DOMAINS } from "@/lib/config/domains"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover"
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxContent,
+  ComboboxList,
+  ComboboxItem,
+  ComboboxEmpty,
+} from "@/components/ui/combobox"
 import {
   Dialog,
   DialogContent,
@@ -23,9 +40,6 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog"
-import { EmotionPicker } from "@/components/record/EmotionPicker"
-import { DomainPicker } from "@/components/record/DomainPicker"
-import { SoulPicker } from "@/components/record/SoulPicker"
 import { InlineDatePicker } from "@/components/record/InlineDatePicker"
 import { TimeStepPicker } from "@/components/record/TimeStepPicker"
 import { cn } from "@/lib/utils"
@@ -54,6 +68,7 @@ function isNow(dateStr: string): boolean {
 export function QuickPebbleEditor() {
   const router = useRouter()
   const { addPebble } = usePebbles()
+  const { souls, addSoul } = useSouls()
   const { provider } = useDataProvider()
 
   const [name, setName] = useState("")
@@ -65,18 +80,29 @@ export function QuickPebbleEditor() {
   const [soulIds, setSoulIds] = useState<string[]>([])
   const [mode, setMode] = useState<EditorMode>("quick")
 
+  // Date picker dialog state (kept as Dialog — too large for popover)
   const [dateOpen, setDateOpen] = useState(false)
-  const [emotionOpen, setEmotionOpen] = useState(false)
-  const [domainOpen, setDomainOpen] = useState(false)
-  const [soulOpen, setSoulOpen] = useState(false)
-
-  // Temp state for pickers (commit on save)
-  const [tempEmotionId, setTempEmotionId] = useState("")
-  const [tempDomainIds, setTempDomainIds] = useState<string[]>([])
-  const [tempSoulIds, setTempSoulIds] = useState<string[]>([])
   const [tempDate, setTempDate] = useState(() => new Date())
 
+  // Soul combobox search state
+  const [soulQuery, setSoulQuery] = useState("")
+
   const selectedEmotion = EMOTIONS.find((e) => e.id === emotionId)
+
+  const intensityLabel = INTENSITY_OPTIONS.find((o) => o.value === intensity)?.label ?? "Small"
+  const valenceLabel = VALENCE_OPTIONS.find((o) => o.value === valence)?.label ?? "neutral"
+
+  // Filter souls by search query
+  const filteredSouls = useMemo(() => {
+    if (!soulQuery.trim()) return souls
+    const q = soulQuery.toLowerCase()
+    return souls.filter((s) => s.name.toLowerCase().includes(q))
+  }, [souls, soulQuery])
+
+  const canAddNewSoul = useMemo(() => {
+    if (!soulQuery.trim()) return false
+    return !souls.some((s) => s.name.toLowerCase() === soulQuery.trim().toLowerCase())
+  }, [souls, soulQuery])
 
   const resetForm = useCallback(() => {
     setName("")
@@ -140,6 +166,26 @@ export function QuickPebbleEditor() {
     })
   }, [])
 
+  const toggleDomain = useCallback((id: string) => {
+    setDomainIds((prev) =>
+      prev.includes(id) ? prev.filter((d) => d !== id) : [...prev, id],
+    )
+  }, [])
+
+  const toggleSoul = useCallback((id: string) => {
+    setSoulIds((prev) =>
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id],
+    )
+  }, [])
+
+  const handleAddSoul = useCallback(async () => {
+    const trimmed = soulQuery.trim()
+    if (!trimmed) return
+    const soul = await addSoul({ name: trimmed })
+    setSoulIds((prev) => [...prev, soul.id])
+    setSoulQuery("")
+  }, [soulQuery, addSoul])
+
   const dateLabel = isNow(happenedAt) ? "Now" : new Intl.DateTimeFormat(undefined, {
     month: "short",
     day: "numeric",
@@ -153,7 +199,8 @@ export function QuickPebbleEditor() {
       aria-label="Quick pebble editor"
     >
       {/* Header: date, intensity, valence */}
-      <div className="mb-2 flex flex-wrap items-center gap-2">
+      <div className="mb-2 flex flex-wrap items-center gap-1">
+        {/* Date button (opens Dialog) */}
         <button
           type="button"
           onClick={() => {
@@ -166,37 +213,59 @@ export function QuickPebbleEditor() {
           {dateLabel}
         </button>
 
-        {INTENSITY_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={() => setIntensity(opt.value)}
-            className={cn(
-              "rounded-md px-2 py-1 text-xs font-medium transition-colors",
-              intensity === opt.value
-                ? "bg-foreground/10 text-foreground"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground",
-            )}
+        {/* Intensity popover */}
+        <Popover>
+          <PopoverTrigger
+            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
-            {opt.label}
-          </button>
-        ))}
+            {intensityLabel}
+          </PopoverTrigger>
+          <PopoverContent align="start">
+            {INTENSITY_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setIntensity(opt.value)}
+                className={cn(
+                  "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none transition-colors hover:bg-muted",
+                  intensity === opt.value && "font-medium",
+                )}
+              >
+                <span className="size-4 shrink-0 flex items-center justify-center">
+                  {intensity === opt.value && <Check className="size-4" />}
+                </span>
+                {opt.label}
+              </button>
+            ))}
+          </PopoverContent>
+        </Popover>
 
-        {VALENCE_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            type="button"
-            onClick={() => setValence(opt.value)}
-            className={cn(
-              "rounded-md px-2 py-1 text-xs font-medium transition-colors",
-              valence === opt.value
-                ? "bg-foreground/10 text-foreground"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground",
-            )}
+        {/* Valence popover */}
+        <Popover>
+          <PopoverTrigger
+            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
-            {opt.label}
-          </button>
-        ))}
+            {valenceLabel}
+          </PopoverTrigger>
+          <PopoverContent align="start">
+            {VALENCE_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                type="button"
+                onClick={() => setValence(opt.value)}
+                className={cn(
+                  "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none transition-colors hover:bg-muted",
+                  valence === opt.value && "font-medium",
+                )}
+              >
+                <span className="size-4 shrink-0 flex items-center justify-center">
+                  {valence === opt.value && <Check className="size-4" />}
+                </span>
+                {opt.label}
+              </button>
+            ))}
+          </PopoverContent>
+        </Popover>
       </div>
 
       {/* Body: name input */}
@@ -216,61 +285,156 @@ export function QuickPebbleEditor() {
       {/* Footer: pickers + submit */}
       <div className="mt-2 flex items-center justify-between">
         <div className="flex items-center gap-1">
-          {/* Emotion picker */}
-          <button
-            type="button"
-            onClick={() => {
-              setTempEmotionId(emotionId)
-              setEmotionOpen(true)
+          {/* Emotion combobox */}
+          <Combobox<string>
+            value={emotionId || null}
+            onValueChange={(value) => {
+              if (value !== null) setEmotionId(value)
             }}
-            className={cn(
-              "flex items-center gap-1 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-              emotionId && "text-foreground",
-            )}
-            aria-label={selectedEmotion ? `Emotion: ${selectedEmotion.name}` : "Pick emotion"}
           >
-            <Heart className="size-4" aria-hidden />
-            {selectedEmotion && (
-              <span
-                className="rounded-full px-1.5 py-0.5 text-xs font-medium"
-                style={{ backgroundColor: `${selectedEmotion.color}20`, color: selectedEmotion.color }}
-              >
-                {selectedEmotion.name}
-              </span>
-            )}
-          </button>
+            <PopoverTrigger
+              render={
+                <button
+                  type="button"
+                  className={cn(
+                    "flex items-center gap-1 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+                    emotionId && "text-foreground",
+                  )}
+                  aria-label={selectedEmotion ? `Emotion: ${selectedEmotion.name}` : "Pick emotion"}
+                />
+              }
+            >
+              <Heart className="size-4" aria-hidden />
+              {selectedEmotion && (
+                <span
+                  className="rounded-full px-1.5 py-0.5 text-xs font-medium"
+                  style={{ backgroundColor: `${selectedEmotion.color}20`, color: selectedEmotion.color }}
+                >
+                  {selectedEmotion.name}
+                </span>
+              )}
+            </PopoverTrigger>
+            <ComboboxContent align="start">
+              <ComboboxInput placeholder="Search emotions…" />
+              <ComboboxList>
+                {EMOTIONS.map((emotion) => (
+                  <ComboboxItem key={emotion.id} value={emotion.id}>
+                    <span
+                      className="size-3 rounded-full shrink-0"
+                      style={{ backgroundColor: emotion.color }}
+                      aria-hidden
+                    />
+                    {emotion.name}
+                  </ComboboxItem>
+                ))}
+              </ComboboxList>
+              <ComboboxEmpty>No emotions found</ComboboxEmpty>
+            </ComboboxContent>
+          </Combobox>
 
-          {/* Domain picker */}
-          <button
-            type="button"
-            onClick={() => {
-              setTempDomainIds(domainIds)
-              setDomainOpen(true)
-            }}
-            className={cn(
-              "rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-              domainIds.length > 0 && "text-foreground",
-            )}
-            aria-label={domainIds.length > 0 ? `${domainIds.length} domain(s) selected` : "Pick domains"}
-          >
-            <Layers className="size-4" aria-hidden />
-          </button>
+          {/* Domain popover */}
+          <Popover>
+            <PopoverTrigger
+              className={cn(
+                "rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+                domainIds.length > 0 && "text-foreground",
+              )}
+              aria-label={domainIds.length > 0 ? `${domainIds.length} domain(s) selected` : "Pick domains"}
+            >
+              <Layers className="size-4" aria-hidden />
+            </PopoverTrigger>
+            <PopoverContent align="start" className="min-w-[180px]">
+              {DOMAINS.map((domain) => {
+                const selected = domainIds.includes(domain.id)
+                return (
+                  <button
+                    key={domain.id}
+                    type="button"
+                    onClick={() => toggleDomain(domain.id)}
+                    className={cn(
+                      "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none transition-colors hover:bg-muted",
+                      selected && "font-medium",
+                    )}
+                    aria-pressed={selected}
+                  >
+                    <span className="size-4 shrink-0 flex items-center justify-center">
+                      {selected && <Check className="size-4" />}
+                    </span>
+                    <span className="flex flex-col items-start">
+                      <span>{domain.name}</span>
+                      <span className="text-xs text-muted-foreground">{domain.label}</span>
+                    </span>
+                  </button>
+                )
+              })}
+            </PopoverContent>
+          </Popover>
 
-          {/* Soul picker */}
-          <button
-            type="button"
-            onClick={() => {
-              setTempSoulIds(soulIds)
-              setSoulOpen(true)
-            }}
-            className={cn(
-              "rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-              soulIds.length > 0 && "text-foreground",
-            )}
-            aria-label={soulIds.length > 0 ? `${soulIds.length} soul(s) selected` : "Pick souls"}
-          >
-            <Users className="size-4" aria-hidden />
-          </button>
+          {/* Souls combobox */}
+          <Popover>
+            <PopoverTrigger
+              className={cn(
+                "rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+                soulIds.length > 0 && "text-foreground",
+              )}
+              aria-label={soulIds.length > 0 ? `${soulIds.length} soul(s) selected` : "Pick souls"}
+            >
+              <Users className="size-4" aria-hidden />
+            </PopoverTrigger>
+            <PopoverContent align="start" className="min-w-[200px] p-2">
+              <div className="flex items-center gap-2 border-b border-border pb-2 mb-1">
+                <input
+                  type="text"
+                  value={soulQuery}
+                  onChange={(e) => setSoulQuery(e.target.value)}
+                  placeholder="Search souls…"
+                  className="h-7 w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && canAddNewSoul) {
+                      e.preventDefault()
+                      void handleAddSoul()
+                    }
+                  }}
+                />
+              </div>
+              <div className="max-h-[200px] overflow-y-auto">
+                {filteredSouls.map((soul) => {
+                  const selected = soulIds.includes(soul.id)
+                  return (
+                    <button
+                      key={soul.id}
+                      type="button"
+                      onClick={() => toggleSoul(soul.id)}
+                      className={cn(
+                        "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none transition-colors hover:bg-muted",
+                        selected && "font-medium",
+                      )}
+                    >
+                      <span className="size-4 shrink-0 flex items-center justify-center">
+                        {selected && <Check className="size-4" />}
+                      </span>
+                      {soul.name}
+                    </button>
+                  )
+                })}
+                {canAddNewSoul && (
+                  <button
+                    type="button"
+                    onClick={() => void handleAddSoul()}
+                    className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground"
+                  >
+                    <Plus className="size-4 shrink-0" />
+                    Add &quot;{soulQuery.trim()}&quot;
+                  </button>
+                )}
+                {filteredSouls.length === 0 && !canAddNewSoul && (
+                  <p className="px-2 py-4 text-center text-sm text-muted-foreground">
+                    No souls found
+                  </p>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
         </div>
 
         <div className="flex items-center gap-1">
@@ -297,7 +461,7 @@ export function QuickPebbleEditor() {
         </div>
       </div>
 
-      {/* Date picker dialog */}
+      {/* Date picker dialog (kept as Dialog — calendar is too large for popover) */}
       <Dialog open={dateOpen} onOpenChange={setDateOpen}>
         <DialogContent>
           <DialogHeader>
@@ -321,87 +485,6 @@ export function QuickPebbleEditor() {
               onClick={() => {
                 setHappenedAt(tempDate.toISOString())
                 setDateOpen(false)
-              }}
-            >
-              Done
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Emotion picker dialog */}
-      <Dialog
-        open={emotionOpen}
-        onOpenChange={(open) => {
-          setEmotionOpen(open)
-          if (open) setTempEmotionId(emotionId)
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Emotion</DialogTitle>
-          </DialogHeader>
-          <EmotionPicker value={tempEmotionId} onChange={setTempEmotionId} />
-          <DialogFooter>
-            <DialogClose>Cancel</DialogClose>
-            <Button
-              onClick={() => {
-                setEmotionId(tempEmotionId)
-                setEmotionOpen(false)
-              }}
-            >
-              Done
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Domain picker dialog */}
-      <Dialog
-        open={domainOpen}
-        onOpenChange={(open) => {
-          setDomainOpen(open)
-          if (open) setTempDomainIds(domainIds)
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Domains</DialogTitle>
-          </DialogHeader>
-          <DomainPicker value={tempDomainIds} onChange={setTempDomainIds} />
-          <DialogFooter>
-            <DialogClose>Cancel</DialogClose>
-            <Button
-              onClick={() => {
-                setDomainIds(tempDomainIds)
-                setDomainOpen(false)
-              }}
-            >
-              Done
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Soul picker dialog */}
-      <Dialog
-        open={soulOpen}
-        onOpenChange={(open) => {
-          setSoulOpen(open)
-          if (open) setTempSoulIds(soulIds)
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Souls</DialogTitle>
-          </DialogHeader>
-          <SoulPicker value={tempSoulIds} onChange={setTempSoulIds} />
-          <DialogFooter>
-            <DialogClose>Cancel</DialogClose>
-            <Button
-              onClick={() => {
-                setSoulIds(tempSoulIds)
-                setSoulOpen(false)
               }}
             >
               Done
