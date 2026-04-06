@@ -51,12 +51,12 @@ function SheetContent({
         data-slot="sheet-content"
         className={cn(
           // Shared
-          "fixed z-50 bg-popover text-popover-foreground ring-1 ring-foreground/10 outline-none overflow-y-auto",
+          "fixed z-50 bg-popover text-popover-foreground ring-1 ring-foreground/10 outline-none",
           // Mobile: bottom sheet
-          "inset-x-0 bottom-0 max-h-[85dvh] rounded-t-2xl p-4 pt-2",
+          "inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto rounded-t-2xl p-4 pt-2",
           "translate-y-full data-open:translate-y-0 transition-transform duration-200 ease-out",
-          // Desktop: side sheet from right
-          "md:inset-y-0 md:right-0 md:left-auto md:bottom-auto md:max-h-none md:w-[420px] md:rounded-t-none md:rounded-l-2xl md:p-6",
+          // Desktop: side sheet from right — full height, scrollable
+          "md:top-0 md:bottom-0 md:right-0 md:left-auto md:max-h-none md:h-full md:w-[420px] md:overflow-y-auto md:rounded-t-none md:rounded-l-2xl md:p-6",
           "md:translate-y-0 md:translate-x-full md:data-open:translate-x-0",
           className
         )}
