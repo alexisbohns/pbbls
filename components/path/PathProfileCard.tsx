@@ -20,7 +20,7 @@ function StatItem({
     <div className="flex items-center gap-1.5">
       <Icon className="size-3.5 text-muted-foreground" aria-hidden />
       <span className="text-sm font-semibold">{value}</span>
-      <span className="text-xs text-muted-foreground hidden md:inline">{label}</span>
+      <span className="text-xs text-muted-foreground">{label}</span>
     </div>
   )
 }
@@ -43,10 +43,10 @@ export function PathProfileCard() {
     >
       {/* Mobile: horizontal compact bar */}
       <div className="flex items-center gap-3 px-4 py-3 md:hidden">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-muted">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
           <CircleUser className="size-5 text-muted-foreground" aria-hidden />
         </div>
-        <div className="flex flex-1 items-center justify-between gap-3">
+        <div className="flex flex-1 items-center justify-end gap-3">
           <StatItem icon={Stone} value={pebblesCount} label="pebbles" />
           <StatItem icon={CirclePile} value={bounce} label="bounce" />
           <StatItem icon={Sparkle} value={karma} label="karma" />
@@ -56,16 +56,16 @@ export function PathProfileCard() {
       {/* Desktop: vertical card */}
       <div className="hidden md:block space-y-4 p-4">
         <div className="flex items-center gap-3">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted">
-            <CircleUser className="size-6 text-muted-foreground" aria-hidden />
-          </div>
-          <div className="min-w-0">
+          <div className="w-full">
             <p className="text-sm font-semibold truncate">{profile.display_name}</p>
             <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
           </div>
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+            <CircleUser className="size-6 text-muted-foreground" aria-hidden />
+          </div>
         </div>
 
-        <div className="flex items-center justify-between gap-2">
+        <div className="flex flex-col items-start justify-between gap-2">
           <StatItem icon={Stone} value={pebblesCount} label={pebblesCount === 1 ? "pebble" : "pebbles"} />
           <StatItem icon={CirclePile} value={bounce} label="bounce" />
           <StatItem icon={Sparkle} value={karma} label="karma" />
