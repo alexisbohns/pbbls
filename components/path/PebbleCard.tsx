@@ -1,4 +1,3 @@
-import Link from "next/link"
 import type { Pebble, Emotion, Mark } from "@/lib/types"
 import { PebbleVisual } from "@/components/pebble/PebbleVisual"
 import { IntensityDots, PositivenessIndicator } from "@/components/pebble/PebbleIndicators"
@@ -9,6 +8,7 @@ type PebbleCardProps = {
   emotion: Emotion | undefined
   mark?: Mark
   soulNames: string[]
+  onSelect?: (id: string) => void
 }
 
 function EmotionBadge({ emotion }: { emotion: Emotion }) {
@@ -41,20 +41,22 @@ function MetadataRow({
   )
 }
 
-export function PebbleCard({ pebble, emotion, mark, soulNames }: PebbleCardProps) {
+export function PebbleCard({ pebble, emotion, mark, soulNames, onSelect }: PebbleCardProps) {
   const time = timeFormatter.format(new Date(pebble.happened_at))
   const isLarge = pebble.intensity === 3
   const firstInstant = pebble.instants[0] ?? null
 
   return (
     <article>
-      <Link
-        href={`/pebble/${pebble.id}`}
+      <button
+        type="button"
+        onClick={() => onSelect?.(pebble.id)}
         className={
           isLarge
-            ? "flex flex-col items-center gap-3 rounded-xl px-4 py-7 transition-all duration-100 bg-muted/30 hover:bg-muted/50 active:scale-[0.98] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-            : "flex items-center gap-3 rounded-lg px-4 py-3 transition-all duration-100 bg-muted/20 bg-muted/30 hover:bg-muted/50 active:scale-[0.98] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+            ? "flex w-full flex-col items-center gap-3 rounded-xl px-4 py-7 text-left transition-all duration-100 bg-muted/30 hover:bg-muted/50 active:scale-[0.98] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+            : "flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-all duration-100 bg-muted/20 bg-muted/30 hover:bg-muted/50 active:scale-[0.98] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
         }
+        aria-label={`${pebble.name}, ${time}`}
       >
         {isLarge ? (
           <>
@@ -131,7 +133,7 @@ export function PebbleCard({ pebble, emotion, mark, soulNames }: PebbleCardProps
             )}
           </>
         )}
-      </Link>
+      </button>
     </article>
   )
 }

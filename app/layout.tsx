@@ -6,9 +6,6 @@ import { ThemeColorSync } from "@/components/layout/ThemeColorSync";
 import { DataProvider } from "@/components/layout/DataProvider";
 import { AuthProvider } from "@/components/layout/AuthProvider";
 import { SerwistRegistration } from "@/components/layout/SerwistRegistration";
-import { Sidebar } from "@/components/layout/Sidebar";
-import { BottomNav } from "@/components/layout/BottomNav";
-import { MobileHeader } from "@/components/layout/MobileHeader";
 import { MainContent } from "@/components/layout/MainContent";
 import "./globals.css";
 
@@ -105,12 +102,9 @@ export default function RootLayout({
             <ColorWorldProvider>
               <ThemeProvider>
                 <ThemeColorSync />
-                <MobileHeader />
                 <div className="flex h-full pl-[var(--safe-area-left)] pr-[var(--safe-area-right)]">
-                  <Sidebar />
                   <MainContent>{children}</MainContent>
                 </div>
-                <BottomNav />
               </ThemeProvider>
             </ColorWorldProvider>
             </AuthProvider>

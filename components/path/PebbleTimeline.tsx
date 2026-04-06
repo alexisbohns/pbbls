@@ -10,9 +10,10 @@ import { PebbleCard } from "@/components/path/PebbleCard"
 type PebbleTimelineProps = {
   pebbles: Pebble[]
   souls: Soul[]
+  onSelectPebble?: (id: string) => void
 }
 
-export function PebbleTimeline({ pebbles, souls }: PebbleTimelineProps) {
+export function PebbleTimeline({ pebbles, souls, onSelectPebble }: PebbleTimelineProps) {
   const groups = useMemo(() => groupPebblesByDate(pebbles), [pebbles])
   const { marks } = useMarks()
   const { emotionMap, soulMap, markMap } = useLookupMaps(souls, marks)
@@ -34,6 +35,7 @@ export function PebbleTimeline({ pebbles, souls }: PebbleTimelineProps) {
                   soulNames={pebble.soul_ids
                     .map((id) => soulMap.get(id)?.name)
                     .filter((name): name is string => name != null)}
+                  onSelect={onSelectPebble}
                 />
               </li>
             ))}
