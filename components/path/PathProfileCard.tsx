@@ -41,20 +41,9 @@ export function PathProfileCard() {
       className="block rounded-xl transition-colors bg-muted md:bg-muted/50 hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
       aria-label={`${profile.display_name}'s profile`}
     >
-      <div className="flex items-center gap-3 px-4 py-3 md:hidden">
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-muted">
-          <CircleUser className="size-5 text-muted-foreground" aria-hidden />
-        </div>
-        <div className="flex flex-1 items-center justify-end gap-3">
-          <StatItem icon={Stone} value={pebblesCount} label="pebbles" />
-          <StatItem icon={CirclePile} value={bounce} label="bounce" />
-          <StatItem icon={Sparkle} value={karma} label="karma" />
-        </div>
-      </div>
-
-      <div className="hidden md:block space-y-4 p-4">
-        <div className="flex items-center gap-3">
-          <div className="w-full">
+      <div className="flex gap-2 px-4 py-3 md:flex-col md:space-y-4 p-4 justify-between items-center md:items-stretch">
+        <div className="flex items-center md:gap-3">
+          <div className="hidden md:flex md:flex-col md:w-full">
             <p className="text-sm font-semibold truncate">{profile.display_name}</p>
             <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
           </div>
@@ -63,7 +52,7 @@ export function PathProfileCard() {
           </div>
         </div>
 
-        <div className="flex flex-col items-start justify-between gap-2">
+        <div className="flex md:flex-col items-start justify-between gap-2">
           <StatItem icon={Stone} value={pebblesCount} label={pebblesCount === 1 ? "pebble" : "pebbles"} />
           <StatItem icon={CirclePile} value={bounce} label="bounce" />
           <StatItem icon={Sparkle} value={karma} label="karma" />

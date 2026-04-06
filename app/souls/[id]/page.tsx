@@ -8,6 +8,7 @@ import { useSouls } from "@/lib/data/useSouls"
 import { SoulDetailHeader } from "@/components/souls/SoulDetailHeader"
 import { SoulPebbleList } from "@/components/souls/SoulPebbleList"
 import { SoulNotFound } from "@/components/souls/SoulNotFound"
+import { PageLayout } from "@/components/layout/PageLayout"
 
 export default function SoulDetailPage({
   params,
@@ -31,7 +32,8 @@ export default function SoulDetailPage({
   }
 
   return (
-    <section>
+    <PageLayout>
+      <section>
       <nav className="mb-6">
         <Link
           href="/souls"
@@ -61,6 +63,7 @@ export default function SoulDetailPage({
       ) : (
         <SoulNotFound />
       )}
-    </section>
+      </section>
+    </PageLayout>
   )
 }

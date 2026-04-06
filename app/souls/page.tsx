@@ -6,6 +6,8 @@ import { usePebbles } from "@/lib/data/usePebbles"
 import { AddSoulForm } from "@/components/souls/AddSoulForm"
 import { SoulList } from "@/components/souls/SoulList"
 import { SoulsEmptyState } from "@/components/souls/SoulsEmptyState"
+import { PageLayout } from "@/components/layout/PageLayout"
+import { PathProfileCard } from "@/components/path/PathProfileCard"
 
 export default function SoulsPage() {
   const { souls, loading: soulsLoading, addSoul, removeSoul } = useSouls()
@@ -28,7 +30,8 @@ export default function SoulsPage() {
   }
 
   return (
-    <section>
+    <PageLayout sidebar={<PathProfileCard />}>
+      <section>
       <h1 className="mb-6 text-2xl font-semibold">Souls</h1>
 
       <AddSoulForm onAdd={handleAdd} />
@@ -44,6 +47,7 @@ export default function SoulsPage() {
           onDelete={removeSoul}
         />
       )}
-    </section>
+      </section>
+    </PageLayout>
   )
 }

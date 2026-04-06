@@ -8,6 +8,7 @@ import { useCollections } from "@/lib/data/useCollections"
 import { useMarks } from "@/lib/data/useMarks"
 import { PebbleDetail } from "@/components/pebble/PebbleDetail"
 import { PebbleNotFound } from "@/components/pebble/PebbleNotFound"
+import { PageLayout } from "@/components/layout/PageLayout"
 
 export default function PebbleDetailPage({
   params,
@@ -28,7 +29,8 @@ export default function PebbleDetailPage({
   const mark = pebble ? marks.find((m) => m.id === pebble.mark_id) : undefined
 
   return (
-    <section>
+    <PageLayout>
+      <section>
       <nav className="mb-6">
         <Link
           href="/path"
@@ -54,6 +56,7 @@ export default function PebbleDetailPage({
       ) : (
         <PebbleNotFound />
       )}
-    </section>
+      </section>
+    </PageLayout>
   )
 }

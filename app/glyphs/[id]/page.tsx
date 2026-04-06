@@ -7,6 +7,7 @@ import { useMark } from "@/lib/data/useMark"
 import { useMarks } from "@/lib/data/useMarks"
 import { GlyphDetail } from "@/components/glyphs/GlyphDetail"
 import { GlyphNotFound } from "@/components/glyphs/GlyphNotFound"
+import { PageLayout } from "@/components/layout/PageLayout"
 
 export default function GlyphDetailPage({
   params,
@@ -24,7 +25,8 @@ export default function GlyphDetailPage({
   }
 
   return (
-    <section>
+    <PageLayout>
+      <section>
       <nav className="mb-6">
         <Link
           href="/glyphs"
@@ -41,6 +43,7 @@ export default function GlyphDetailPage({
       ) : (
         <GlyphNotFound />
       )}
-    </section>
+      </section>
+    </PageLayout>
   )
 }

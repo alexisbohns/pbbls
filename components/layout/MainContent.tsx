@@ -16,7 +16,8 @@ export function MainContent({ children }: MainContentProps) {
   const isAuth = pathname === "/login" || pathname === "/register"
   const isFullScreen = isLanding || isOnboarding || isAuth
   const isRecord = pathname.startsWith("/record")
-  const isPath = pathname === "/path"
+  const isCarve = pathname.startsWith("/carve")
+  const isImmersive = isRecord || isCarve
 
   return (
     <main
@@ -24,22 +25,14 @@ export function MainContent({ children }: MainContentProps) {
         "min-w-0 flex-1 touch-pan-y overflow-x-hidden overflow-y-auto",
         isFullScreen
           ? "flex flex-col"
-          : isRecord
+          : isImmersive
             ? "px-4 pt-[calc(2rem+var(--safe-area-top))] pb-[calc(2rem+var(--safe-area-bottom))]"
-            : isPath
-              ? "pt-[var(--safe-area-top)] pb-[calc(2rem+var(--safe-area-bottom))]"
-              : "px-4 pt-[calc(2rem+var(--safe-area-top))] pb-[calc(2rem+var(--safe-area-bottom))]",
+            : "pt-[var(--safe-area-top)] pb-[calc(2rem+var(--safe-area-bottom))]",
       )}
     >
       {!isLanding && !isAuth && <AuthGate />}
       {!isLanding && !isAuth && <OnboardingGate />}
-      {isFullScreen ? (
-        children
-      ) : isPath ? (
-        children
-      ) : (
-        <div className="mx-auto max-w-md">{children}</div>
-      )}
+      {children}
     </main>
   )
 }
