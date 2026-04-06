@@ -18,6 +18,7 @@
 - UI primitives live in `components/ui/` (shadcn/ui). Do not duplicate them.
 - Domain components live in feature folders: `components/path/`, `components/pebble/`, `components/record/`, etc.
 - Hooks encapsulate data access. Components never call the provider directly.
+- Sidebar is customizable per page by passing the sidebar prop: `<PageLayout sidebar={<PathProfileCard />}>...</PageLayout>`
 
 ### File & Naming Conventions
 
