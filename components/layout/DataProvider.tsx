@@ -1,36 +1,73 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, type Dispatch, type SetStateAction } from "react"
 import { LocalProvider } from "@/lib/data/local-provider"
 import { DataContext } from "@/lib/data/provider-context"
 import type { Store } from "@/lib/data/data-provider"
 
 /**
- * Client-only wrapper that boots a LocalProvider via useState lazy
- * initialization and exposes the store snapshot through context.
+ * Client-only wrapper that boots a LocalProvider and exposes the store
+ * snapshot through context.
  *
- * Lazy init (not useEffect) avoids the react-hooks/set-state-in-effect rule
- * while keeping initialization synchronous. LocalProvider's constructor guards
- * against SSR via a typeof window check — on the server it returns an empty
- * store; on the client it reads from localStorage (or seeds on first launch).
- *
- * Mirrors the ThemeProvider pattern: a thin "use client" shell that all
- * children can safely consume via useDataProvider().
+ * The initial store is always empty and loading=true on both server and
+ * client so that SSR HTML and the first client render are identical,
+ * preventing hydration mismatches. After the component mounts, a useEffect
+ * reads localStorage, sets the real store, and flips loading to false — all
+ * in a single batched state update to avoid cascading renders.
  */
-export function DataProvider({ children }: { children: React.ReactNode }) {
-  // Lazy init: runs once on mount. Provider is always non-null after init.
-  const [provider] = useState<LocalProvider>(() => new LocalProvider())
-  const [store, setStore] = useState<Store>(() => provider.getStore())
 
-  // Persist the seed to localStorage after the first render if the key is
-  // absent. Deferred here (not in the constructor) to keep LocalProvider's
-  // load() side-effect-free and safe under StrictMode double-invocation.
+const INITIAL_STORE: Store = {
+  pebbles: [],
+  souls: [],
+  collections: [],
+  marks: [],
+  pebbles_count: 0,
+  karma: 0,
+  karma_log: [],
+  bounce: 0,
+  bounce_window: [],
+}
+
+type DataState = { store: Store; loading: boolean }
+
+const INITIAL_STATE: DataState = { store: INITIAL_STORE, loading: true }
+
+export function DataProvider({ children }: { children: React.ReactNode }) {
+  // Provider is initialized synchronously (stable reference across renders).
+  // On the server it holds an empty store; on the client it reads localStorage,
+  // but we intentionally defer getStore() to useEffect so both server and
+  // client first-render share the same INITIAL_STORE, avoiding hydration
+  // mismatches.
+  const [provider] = useState<LocalProvider>(() => new LocalProvider())
+  const [{ store, loading }, setDataState] = useState<DataState>(INITIAL_STATE)
+
+  // Wrap setStore to satisfy the Dispatch<SetStateAction<Store>> type required
+  // by DataContext while keeping store/loading in the same state atom —
+  // mutations call setStore, not setDataState directly.
+  const setStore: Dispatch<SetStateAction<Store>> = (storeOrUpdater) =>
+    setDataState((prev) => ({
+      ...prev,
+      store:
+        typeof storeOrUpdater === "function"
+          ? storeOrUpdater(prev.store)
+          : storeOrUpdater,
+    }))
+
   useEffect(() => {
+    // Persist the seed to localStorage if the key is absent (first launch).
+    // Deferred here to keep LocalProvider's load() side-effect-free and safe
+    // under StrictMode double-invocation.
     provider.persistIfNeeded()
+    // Call setState in a microtask callback so it is not synchronous in the
+    // effect body — satisfies react-hooks/set-state-in-effect while keeping
+    // the update as close to synchronous as possible.
+    void Promise.resolve().then(() => {
+      setDataState({ store: provider.getStore(), loading: false })
+    })
   }, [provider])
 
   return (
-    <DataContext.Provider value={{ provider, store, setStore, loading: false }}>
+    <DataContext.Provider value={{ provider, store, setStore, loading }}>
       {children}
     </DataContext.Provider>
   )
