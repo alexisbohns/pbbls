@@ -1,10 +1,10 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { ArrowLeft, X } from "lucide-react"
 import { CARD_TYPES } from "@/lib/config"
-import { useRecordForm } from "@/lib/hooks/useRecordForm"
+import { useRecordForm, parseRecordPrefill } from "@/lib/hooks/useRecordForm"
 import { useStepNavigation } from "@/lib/hooks/useStepNavigation"
 import { useHaptics } from "@/lib/hooks/useHaptics"
 import { useKeyboardOffset } from "@/lib/hooks/useKeyboardOffset"
@@ -96,6 +96,7 @@ function makeComposerPatch(field: string, value: string, data: RecordFormData): 
 
 export function RecordStepper() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [revelationData, setRevelationData] = useState<RevelationData | null>(null)
   const [savedData, setSavedData] = useState<CelebrationData | null>(null)
   const [celebrationData, setCelebrationData] = useState<CelebrationData | null>(null)
@@ -103,11 +104,14 @@ export function RecordStepper() {
   const { vibrate } = useHaptics()
   const keyboardOffset = useKeyboardOffset()
 
+  const prefill = useMemo(() => parseRecordPrefill(searchParams), [searchParams])
+
   const { formData, handleUpdate, handleSave, saving, error } = useRecordForm(
     (data) => {
       setSavedData(data)
       setRevelationData({ pebbleId: data.pebbleId, pebbleName: data.pebbleName })
     },
+    prefill,
   )
 
   // Derive step list only when the set of selected card types changes,
