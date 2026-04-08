@@ -19,7 +19,8 @@ export type Pebble = {
   description?: string
   happened_at: string
   intensity: 1 | 2 | 3
-  positiveness: -2 | -1 | 0 | 1 | 2
+  positiveness: -1 | 0 | 1
+  visibility: "private" | "public"
   emotion_id: string
   soul_ids: string[]
   domain_ids: string[]

@@ -114,6 +114,13 @@ export class LocalProvider implements DataProvider {
       for (const p of parsed.pebbles) {
         if (!p.instants) p.instants = []
       }
+      // Migration: clamp positiveness from 5-level to 3-level and add visibility.
+      for (const p of parsed.pebbles) {
+        const raw = p.positiveness as number
+        if (raw <= -2) p.positiveness = -1
+        if (raw >= 2) p.positiveness = 1
+        if (!p.visibility) p.visibility = "private"
+      }
       // Migration: backfill bounce fields for existing users.
       if (parsed.bounce === undefined) {
         parsed.bounce = 0

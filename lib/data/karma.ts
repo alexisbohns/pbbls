@@ -22,7 +22,7 @@ export function computeKarmaDelta(pebble: CreatePebbleInput | Pebble): number {
   let delta = 1
 
   if (pebble.description?.trim()) delta += 1
-  delta += pebble.cards.filter((c) => c.value.trim()).length
+  if (pebble.cards?.length) delta += pebble.cards.filter((c) => c.value.trim()).length
   if (pebble.soul_ids.length > 0) delta += 1
   if (pebble.domain_ids.length > 0) delta += 1
   if (pebble.mark_id) delta += 1
