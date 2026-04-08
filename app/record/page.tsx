@@ -1,15 +1,20 @@
 "use client"
 
-import { Suspense } from "react"
-import { RecordStepper } from "@/components/record/RecordStepper"
+import { useState } from "react"
+import { QuickPebbleEditor } from "@/components/path/QuickPebbleEditor"
+import { PebbleSheet } from "@/components/path/PebbleSheet"
 
 export default function RecordPage() {
+  const [selectedPebbleId, setSelectedPebbleId] = useState<string | null>(null)
+
   return (
-    <section>
+    <section className="mx-auto max-w-lg px-4 py-8">
       <h1 className="sr-only">Record a pebble</h1>
-      <Suspense>
-        <RecordStepper />
-      </Suspense>
+      <QuickPebbleEditor onPebbleCreated={setSelectedPebbleId} />
+      <PebbleSheet
+        pebbleId={selectedPebbleId}
+        onClose={() => setSelectedPebbleId(null)}
+      />
     </section>
   )
 }

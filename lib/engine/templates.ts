@@ -292,7 +292,7 @@ const INTENSITY_MAP: Record<1 | 2 | 3, IntensityKey> = {
   3: "high",
 }
 
-function toSentiment(positiveness: -2 | -1 | 0 | 1 | 2): SentimentKey {
+function toSentiment(positiveness: -1 | 0 | 1): SentimentKey {
   if (positiveness < 0) return "negative"
   if (positiveness > 0) return "positive"
   return "neutral"
@@ -300,7 +300,7 @@ function toSentiment(positiveness: -2 | -1 | 0 | 1 | 2): SentimentKey {
 
 export function getTemplate(
   intensity: 1 | 2 | 3,
-  positiveness: -2 | -1 | 0 | 1 | 2,
+  positiveness: -1 | 0 | 1,
 ): DoodleTemplate {
   return TEMPLATES[INTENSITY_MAP[intensity]][toSentiment(positiveness)]
 }

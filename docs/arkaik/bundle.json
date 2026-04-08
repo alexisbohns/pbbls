@@ -6,7 +6,7 @@
     "root_node_id": "V-landing",
     "metadata": { "view_card_variant": "large" },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-04-05T12:00:00.000Z"
+    "updated_at": "2026-04-08T21:00:00Z"
   },
   "nodes": [
     {
@@ -60,8 +60,9 @@
       "species": "view",
       "title": "Record Pebble",
       "description": "Capture a new memory with title and quick context.",
-      "status": "idea",
-      "platforms": ["web", "ios", "android"]
+      "status": "archived",
+      "platforms": ["web", "ios", "android"],
+      "metadata": { "stage": "deprecated" }
     },
     {
       "id": "V-pebble-intensity",
@@ -69,8 +70,9 @@
       "species": "view",
       "title": "Set Intensity & Valence",
       "description": "Adjust the intensity and emotional valence of a pebble.",
-      "status": "idea",
-      "platforms": ["web", "ios", "android"]
+      "status": "archived",
+      "platforms": ["web", "ios", "android"],
+      "metadata": { "stage": "deprecated" }
     },
     {
       "id": "V-emotion-pearl",
@@ -78,8 +80,9 @@
       "species": "view",
       "title": "Shape Emotion Pearl",
       "description": "Sculpt a nuanced emotion pearl for the pebble.",
-      "status": "idea",
-      "platforms": ["web", "ios", "android"]
+      "status": "archived",
+      "platforms": ["web", "ios", "android"],
+      "metadata": { "stage": "deprecated" }
     },
     {
       "id": "V-instant-attach",
@@ -87,8 +90,9 @@
       "species": "view",
       "title": "Attach Instants",
       "description": "Capture or select photos to attach as instants to the pebble during recording.",
-      "status": "development",
-      "platforms": ["web", "ios", "android"]
+      "status": "archived",
+      "platforms": ["web", "ios", "android"],
+      "metadata": { "stage": "deprecated" }
     },
     {
       "id": "V-soul-link",
@@ -96,8 +100,9 @@
       "species": "view",
       "title": "Link Soul",
       "description": "Associate one or more souls (people) with the pebble.",
-      "status": "idea",
-      "platforms": ["web", "ios", "android"]
+      "status": "archived",
+      "platforms": ["web", "ios", "android"],
+      "metadata": { "stage": "deprecated" }
     },
     {
       "id": "V-domain-attach",
@@ -105,8 +110,9 @@
       "species": "view",
       "title": "Attach Domain",
       "description": "Map the pebble to a life domain on the revisited Maslow pyramid.",
-      "status": "idea",
-      "platforms": ["web", "ios", "android"]
+      "status": "archived",
+      "platforms": ["web", "ios", "android"],
+      "metadata": { "stage": "deprecated" }
     },
     {
       "id": "V-cards-thoughts",
@@ -114,7 +120,17 @@
       "species": "view",
       "title": "Add Cards & Thoughts",
       "description": "Enrich the pebble with media cards and scoped written thoughts.",
-      "status": "idea",
+      "status": "archived",
+      "platforms": ["web", "ios", "android"],
+      "metadata": { "stage": "deprecated" }
+    },
+    {
+      "id": "V-quick-pebble-editor",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Quick Pebble Editor",
+      "description": "Single-page pebble creation editor (V2) combining all enrichment steps inline; embedded on /path and standalone on /record, with collection assignment support.",
+      "status": "live",
       "platforms": ["web", "ios", "android"]
     },
     {
@@ -132,8 +148,9 @@
       "species": "view",
       "title": "Pebble Revelation",
       "description": "Intermediate screen after save that reveals the generated pebble SVG visual for the first time, before transitioning to celebration.",
-      "status": "development",
-      "platforms": ["web", "ios", "android"]
+      "status": "archived",
+      "platforms": ["web", "ios", "android"],
+      "metadata": { "stage": "deprecated" }
     },
     {
       "id": "V-record-celebration",
@@ -141,8 +158,9 @@
       "species": "view",
       "title": "Record Celebration",
       "description": "Celebration screen after revelation that confirms the pebble was saved, before navigating to the detail view.",
-      "status": "development",
-      "platforms": ["web", "ios", "android"]
+      "status": "archived",
+      "platforms": ["web", "ios", "android"],
+      "metadata": { "stage": "deprecated" }
     },
     {
       "id": "V-collections-list",
@@ -231,8 +249,9 @@
       "species": "view",
       "title": "Attach Glyph",
       "description": "Draw a new glyph or select an existing one to attach to a pebble during recording.",
-      "status": "development",
-      "platforms": ["web", "ios", "android"]
+      "status": "archived",
+      "platforms": ["web", "ios", "android"],
+      "metadata": { "stage": "deprecated" }
     },
     {
       "id": "V-bounce-tempo",
@@ -365,42 +384,13 @@
       "project_id": "pebbles",
       "species": "flow",
       "title": "Record Pebble",
-      "description": "Core flow to capture a new pebble with all enrichments.",
-      "status": "idea",
+      "description": "Core flow to capture a new pebble via the single-page Quick Pebble V2 editor with all enrichments inline.",
+      "status": "live",
       "platforms": ["web", "ios", "android"],
       "metadata": {
         "playlist": {
           "entries": [
-            { "type": "view", "view_id": "V-pebble-record" },
-            { "type": "view", "view_id": "V-pebble-intensity" },
-            { "type": "view", "view_id": "V-emotion-pearl" },
-            {
-              "type": "condition",
-              "label": "Attach instants?",
-              "if_true": [{ "type": "view", "view_id": "V-instant-attach" }],
-              "if_false": []
-            },
-            {
-              "type": "condition",
-              "label": "Link a soul?",
-              "if_true": [{ "type": "view", "view_id": "V-soul-link" }],
-              "if_false": []
-            },
-            { "type": "view", "view_id": "V-domain-attach" },
-            {
-              "type": "condition",
-              "label": "Attach a glyph?",
-              "if_true": [{ "type": "view", "view_id": "V-glyph-attach" }],
-              "if_false": []
-            },
-            {
-              "type": "condition",
-              "label": "Add cards or thoughts?",
-              "if_true": [{ "type": "view", "view_id": "V-cards-thoughts" }],
-              "if_false": []
-            },
-            { "type": "view", "view_id": "V-pebble-revelation" },
-            { "type": "view", "view_id": "V-record-celebration" },
+            { "type": "view", "view_id": "V-quick-pebble-editor" },
             { "type": "view", "view_id": "V-pebble-detail" }
           ]
         }
@@ -611,8 +601,8 @@
       "project_id": "pebbles",
       "species": "data-model",
       "title": "Pebble",
-      "description": "A single recorded memory with intensity, valence, and timestamp.",
-      "status": "idea",
+      "description": "A single recorded memory with intensity, 3-level positiveness, visibility, and timestamp.",
+      "status": "development",
       "platforms": ["web", "ios", "android"]
     },
     {
@@ -996,6 +986,7 @@
     { "id": "e-V-home-V-profile", "project_id": "pebbles", "source_id": "V-home", "target_id": "V-profile", "edge_type": "composes" },
     { "id": "e-V-home-V-settings", "project_id": "pebbles", "source_id": "V-home", "target_id": "V-settings", "edge_type": "composes" },
 
+    { "id": "e-F-record-pebble-V-quick-pebble-editor", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-quick-pebble-editor", "edge_type": "composes" },
     { "id": "e-F-record-pebble-V-pebble-record", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-pebble-record", "edge_type": "composes" },
     { "id": "e-F-record-pebble-V-pebble-intensity", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-pebble-intensity", "edge_type": "composes" },
     { "id": "e-F-record-pebble-V-emotion-pearl", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-emotion-pearl", "edge_type": "composes" },
@@ -1143,6 +1134,18 @@
     { "id": "e-V-pebble-revelation-V-pebble-visual", "project_id": "pebbles", "source_id": "V-pebble-revelation", "target_id": "V-pebble-visual", "edge_type": "composes" },
     { "id": "e-V-pebble-detail-V-pebble-visual", "project_id": "pebbles", "source_id": "V-pebble-detail", "target_id": "V-pebble-visual", "edge_type": "composes" },
     { "id": "e-V-timeline-V-pebble-visual", "project_id": "pebbles", "source_id": "V-timeline", "target_id": "V-pebble-visual", "edge_type": "composes" },
-    { "id": "e-V-pebble-visual-DM-pebble-engine", "project_id": "pebbles", "source_id": "V-pebble-visual", "target_id": "DM-pebble-engine", "edge_type": "displays" }
+    { "id": "e-V-pebble-visual-DM-pebble-engine", "project_id": "pebbles", "source_id": "V-pebble-visual", "target_id": "DM-pebble-engine", "edge_type": "displays" },
+
+    { "id": "e-V-quick-pebble-editor-API-create-pebble", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "API-create-pebble", "edge_type": "calls" },
+    { "id": "e-V-quick-pebble-editor-API-get-souls", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "API-get-souls", "edge_type": "calls" },
+    { "id": "e-V-quick-pebble-editor-API-get-marks", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "API-get-marks", "edge_type": "calls" },
+    { "id": "e-V-quick-pebble-editor-API-get-collections", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "API-get-collections", "edge_type": "calls" },
+    { "id": "e-V-quick-pebble-editor-DM-pebble", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "DM-pebble", "edge_type": "displays" },
+    { "id": "e-V-quick-pebble-editor-DM-emotion-pearl", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "DM-emotion-pearl", "edge_type": "displays" },
+    { "id": "e-V-quick-pebble-editor-DM-soul", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "DM-soul", "edge_type": "displays" },
+    { "id": "e-V-quick-pebble-editor-DM-domain", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "DM-domain", "edge_type": "displays" },
+    { "id": "e-V-quick-pebble-editor-DM-instant", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "DM-instant", "edge_type": "displays" },
+    { "id": "e-V-quick-pebble-editor-DM-mark", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "DM-mark", "edge_type": "displays" },
+    { "id": "e-V-quick-pebble-editor-DM-collection", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "DM-collection", "edge_type": "displays" }
   ]
 }

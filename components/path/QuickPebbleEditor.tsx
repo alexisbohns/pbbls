@@ -1,24 +1,27 @@
 "use client"
 
-import { useCallback, useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useCallback, useMemo, useRef, useState } from "react"
 import {
-  Heart,
-  Layers,
-  Users,
-  ArrowUp,
   CalendarDays,
   Check,
+  Compass,
+  Fingerprint,
+  Image,
+  Layers,
+  Lock,
+  Globe,
   Plus,
   Search,
+  Users,
+  X,
 } from "lucide-react"
 import { usePebbles } from "@/lib/data/usePebbles"
 import { useSouls } from "@/lib/data/useSouls"
-import { useDataProvider } from "@/lib/data/provider-context"
-import { computeKarmaDelta } from "@/lib/data/karma"
+import { useCollections } from "@/lib/data/useCollections"
+import { useMarks } from "@/lib/data/useMarks"
+import { compressImage } from "@/lib/utils/image-compress"
 import { EMOTIONS } from "@/lib/config/emotions"
 import { DOMAINS } from "@/lib/config/domains"
-import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
   Popover,
@@ -33,67 +36,77 @@ import {
   DialogFooter,
   DialogClose,
 } from "@/components/ui/dialog"
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetClose,
+} from "@/components/ui/sheet"
 import { InlineDatePicker } from "@/components/record/InlineDatePicker"
 import { TimeStepPicker } from "@/components/record/TimeStepPicker"
+import { ValenceIntensityGrid } from "@/components/record/ValenceIntensityGrid"
+import { CustomizationTile } from "@/components/record/CustomizationTile"
+import { GlyphPreview } from "@/components/glyphs/GlyphPreview"
 import { cn } from "@/lib/utils"
 
 type Intensity = 1 | 2 | 3
 type Valence = -1 | 0 | 1
-type EditorMode = "quick" | "normal"
 
-const INTENSITY_OPTIONS: { value: Intensity; label: string }[] = [
-  { value: 1, label: "Small" },
-  { value: 2, label: "Medium" },
-  { value: 3, label: "Huge" },
-]
-
-const VALENCE_OPTIONS: { value: Valence; label: string }[] = [
-  { value: 1, label: "highlight" },
-  { value: 0, label: "neutral" },
-  { value: -1, label: "lowlight" },
-]
+type QuickPebbleEditorProps = {
+  onPebbleCreated?: (pebbleId: string) => void
+}
 
 function isNow(dateStr: string): boolean {
   const diff = Math.abs(Date.now() - new Date(dateStr).getTime())
   return diff < 60_000
 }
 
-export function QuickPebbleEditor() {
-  const router = useRouter()
+export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
   const { addPebble } = usePebbles()
   const { souls, addSoul } = useSouls()
-  const { provider } = useDataProvider()
+  const { collections, updateCollection } = useCollections()
+  const { marks } = useMarks()
 
+  // Form state
   const [name, setName] = useState("")
+  const [description, setDescription] = useState("")
   const [happenedAt, setHappenedAt] = useState(() => new Date().toISOString())
-  const [intensity, setIntensity] = useState<Intensity>(1)
+  const [intensity, setIntensity] = useState<Intensity>(2)
   const [valence, setValence] = useState<Valence>(0)
   const [emotionId, setEmotionId] = useState("")
   const [domainIds, setDomainIds] = useState<string[]>([])
   const [soulIds, setSoulIds] = useState<string[]>([])
-  const [mode, setMode] = useState<EditorMode>("quick")
+  const [markId, setMarkId] = useState<string | undefined>(undefined)
+  const [collectionIds, setCollectionIds] = useState<string[]>([])
+  const [instant, setInstant] = useState<string | undefined>(undefined)
+  const [visibility, setVisibility] = useState<"private" | "public">("private")
+  const [saving, setSaving] = useState(false)
 
-  // Date picker dialog state (kept as Dialog — too large for popover)
+  // Dialog/sheet state
   const [dateOpen, setDateOpen] = useState(false)
   const [tempDate, setTempDate] = useState(() => new Date())
+  const [glyphOpen, setGlyphOpen] = useState(false)
+  const [localMarkId, setLocalMarkId] = useState<string | undefined>(undefined)
+  const [soulsOpen, setSoulsOpen] = useState(false)
 
-  // Search state for emotion and soul popovers
+  // Search state
   const [emotionQuery, setEmotionQuery] = useState("")
   const [soulQuery, setSoulQuery] = useState("")
 
-  const selectedEmotion = EMOTIONS.find((e) => e.id === emotionId)
+  // File input ref
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Filter emotions by search query
+  const selectedEmotion = EMOTIONS.find((e) => e.id === emotionId)
+  const selectedDomains = DOMAINS.filter((d) => domainIds.includes(d.id))
+  const selectedMark = marks.find((m) => m.id === markId)
+
   const filteredEmotions = useMemo(() => {
     if (!emotionQuery.trim()) return EMOTIONS
     const q = emotionQuery.toLowerCase()
     return EMOTIONS.filter((e) => e.name.toLowerCase().includes(q))
   }, [emotionQuery])
 
-  const intensityLabel = INTENSITY_OPTIONS.find((o) => o.value === intensity)?.label ?? "Small"
-  const valenceLabel = VALENCE_OPTIONS.find((o) => o.value === valence)?.label ?? "neutral"
-
-  // Filter souls by search query
   const filteredSouls = useMemo(() => {
     if (!soulQuery.trim()) return souls
     const q = soulQuery.toLowerCase()
@@ -107,53 +120,63 @@ export function QuickPebbleEditor() {
 
   const resetForm = useCallback(() => {
     setName("")
+    setDescription("")
     setHappenedAt(new Date().toISOString())
-    setIntensity(1)
+    setIntensity(2)
     setValence(0)
     setEmotionId("")
     setDomainIds([])
     setSoulIds([])
+    setMarkId(undefined)
+    setCollectionIds([])
+    setInstant(undefined)
+    setVisibility("private")
   }, [])
 
   const handleSubmit = useCallback(async () => {
-    if (!name.trim()) return
+    if (!name.trim() || saving) return
+    setSaving(true)
 
-    const finalHappenedAt = isNow(happenedAt) ? new Date().toISOString() : happenedAt
+    try {
+      const finalHappenedAt = isNow(happenedAt) ? new Date().toISOString() : happenedAt
 
-    if (mode === "normal") {
-      const params = new URLSearchParams()
-      params.set("prefill", "1")
-      params.set("name", name.trim())
-      params.set("happened_at", finalHappenedAt)
-      params.set("intensity", String(intensity))
-      params.set("positiveness", String(valence))
-      if (emotionId) params.set("emotion_id", emotionId)
-      if (domainIds.length > 0) params.set("domain_ids", domainIds.join(","))
-      if (soulIds.length > 0) params.set("soul_ids", soulIds.join(","))
-      router.push(`/record?${params.toString()}`)
-      return
+      const input = {
+        name: name.trim(),
+        description: description.trim(),
+        happened_at: finalHappenedAt,
+        intensity,
+        positiveness: valence,
+        visibility,
+        emotion_id: emotionId || "serenity",
+        soul_ids: soulIds,
+        domain_ids: domainIds,
+        mark_id: markId,
+        instants: instant ? [instant] : [],
+        cards: [],
+      }
+
+      const pebble = await addPebble(input)
+
+      // Add pebble to selected collections
+      for (const collId of collectionIds) {
+        const coll = collections.find((c) => c.id === collId)
+        if (coll) {
+          await updateCollection(collId, {
+            pebble_ids: [...coll.pebble_ids, pebble.id],
+          })
+        }
+      }
+
+      resetForm()
+      onPebbleCreated?.(pebble.id)
+    } finally {
+      setSaving(false)
     }
-
-    const input = {
-      name: name.trim(),
-      happened_at: finalHappenedAt,
-      intensity,
-      positiveness: valence as -2 | -1 | 0 | 1 | 2,
-      emotion_id: emotionId || "serenity",
-      soul_ids: soulIds,
-      domain_ids: domainIds,
-      instants: [],
-      cards: [],
-    }
-
-    const karmaDelta = computeKarmaDelta(input)
-    await addPebble(input)
-    await provider.incrementPebblesCount()
-    await provider.incrementKarma(karmaDelta, "quick pebble")
-    await provider.refreshBounce()
-
-    resetForm()
-  }, [name, happenedAt, intensity, valence, emotionId, domainIds, soulIds, mode, addPebble, provider, resetForm, router])
+  }, [
+    name, description, happenedAt, intensity, valence, visibility,
+    emotionId, soulIds, domainIds, markId, collectionIds, instant,
+    saving, addPebble, collections, updateCollection, resetForm, onPebbleCreated,
+  ])
 
   const handleDateChange = useCallback((date: Date) => {
     setTempDate(date)
@@ -187,94 +210,61 @@ export function QuickPebbleEditor() {
     setSoulQuery("")
   }, [soulQuery, addSoul])
 
-  const dateLabel = isNow(happenedAt) ? "Now" : new Intl.DateTimeFormat(undefined, {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date(happenedAt))
+  const toggleCollection = useCallback((id: string) => {
+    setCollectionIds((prev) =>
+      prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id],
+    )
+  }, [])
+
+  const handleFileChange = useCallback(async (files: FileList | null) => {
+    if (!files || files.length === 0) return
+    const compressed = await compressImage(files[0])
+    setInstant(compressed)
+  }, [])
+
+  const dateLabel = isNow(happenedAt)
+    ? "Now"
+    : new Intl.DateTimeFormat(undefined, {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      }).format(new Date(happenedAt))
 
   return (
     <section
-      className="rounded-xl border border bg-card p-3"
-      aria-label="Quick pebble editor"
+      className="rounded-xl border bg-card p-4"
+      aria-label="Pebble editor"
     >
-      {/* Header: date, intensity, valence */}
-      <div className="mb-2 flex flex-wrap items-center gap-1">
-        {/* Date button (opens Dialog) */}
+      {/* Header: date + intensity/valence grid */}
+      <div className="mb-3 flex items-center justify-between">
         <button
           type="button"
           onClick={() => {
             setTempDate(new Date(happenedAt))
             setDateOpen(true)
           }}
-          className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <CalendarDays className="size-3.5" aria-hidden />
           {dateLabel}
         </button>
 
-        {/* Intensity popover */}
-        <Popover>
-          <PopoverTrigger
-            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            {intensityLabel}
-          </PopoverTrigger>
-          <PopoverContent align="start">
-            {INTENSITY_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setIntensity(opt.value)}
-                className={cn(
-                  "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none transition-colors hover:bg-muted",
-                  intensity === opt.value && "font-medium",
-                )}
-              >
-                <span className="size-4 shrink-0 flex items-center justify-center">
-                  {intensity === opt.value && <Check className="size-4" />}
-                </span>
-                {opt.label}
-              </button>
-            ))}
-          </PopoverContent>
-        </Popover>
-
-        {/* Valence popover */}
-        <Popover>
-          <PopoverTrigger
-            className="inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            {valenceLabel}
-          </PopoverTrigger>
-          <PopoverContent align="start">
-            {VALENCE_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setValence(opt.value)}
-                className={cn(
-                  "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none transition-colors hover:bg-muted",
-                  valence === opt.value && "font-medium",
-                )}
-              >
-                <span className="size-4 shrink-0 flex items-center justify-center">
-                  {valence === opt.value && <Check className="size-4" />}
-                </span>
-                {opt.label}
-              </button>
-            ))}
-          </PopoverContent>
-        </Popover>
+        <ValenceIntensityGrid
+          intensity={intensity}
+          valence={valence}
+          onIntensityChange={setIntensity}
+          onValenceChange={setValence}
+        />
       </div>
 
-      {/* Body: name input */}
-      <Input
+      {/* Title input — heading font for WYSIWYG preview */}
+      <input
+        type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="What happened?"
-        className="border-none bg-transparent px-0 shadow-none focus-visible:ring-0 focus-visible:border-transparent"
+        className="mb-2 w-full border-none bg-transparent font-heading text-xl font-semibold text-foreground outline-none placeholder:text-muted-foreground/50"
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault()
@@ -283,203 +273,306 @@ export function QuickPebbleEditor() {
         }}
       />
 
-      {/* Footer: pickers + submit */}
-      <div className="mt-2 flex items-center justify-between">
-        <div className="flex items-center gap-1">
-          {/* Emotion popover with search */}
-          <Popover onOpenChange={(open) => { if (!open) setEmotionQuery("") }}>
-            <PopoverTrigger
-              className={cn(
-                "flex items-center gap-1 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                emotionId && "text-foreground",
-              )}
-              aria-label={selectedEmotion ? `Emotion: ${selectedEmotion.name}` : "Pick emotion"}
-            >
-              <Heart className="size-4" aria-hidden />
-              {selectedEmotion && (
-                <span
-                  className="rounded-full px-1.5 py-0.5 text-xs font-medium"
-                  style={{ backgroundColor: `${selectedEmotion.color}20`, color: selectedEmotion.color }}
+      {/* Qualification pills: domain + emotion */}
+      <div className="mb-3 flex items-center gap-2">
+        {/* Domain pill */}
+        <Popover>
+          <PopoverTrigger
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+              domainIds.length > 0
+                ? "border border-border bg-background text-foreground"
+                : "border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-muted-foreground/50",
+            )}
+            aria-label={domainIds.length > 0 ? `Domains: ${selectedDomains.map((d) => d.name).join(", ")}` : "Pick domains"}
+          >
+            <Compass className="size-3.5" aria-hidden />
+            {selectedDomains.length > 0
+              ? selectedDomains.map((d) => d.name).join(", ")
+              : "Domain"}
+          </PopoverTrigger>
+          <PopoverContent align="start" className="min-w-[180px]">
+            {DOMAINS.map((domain) => {
+              const selected = domainIds.includes(domain.id)
+              return (
+                <button
+                  key={domain.id}
+                  type="button"
+                  onClick={() => toggleDomain(domain.id)}
+                  aria-pressed={selected}
+                  className={cn(
+                    "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none transition-colors hover:bg-muted",
+                    selected && "font-medium",
+                  )}
                 >
-                  {selectedEmotion.name}
-                </span>
-              )}
-            </PopoverTrigger>
-            <PopoverContent align="start" className="min-w-[200px] p-2">
-              <div className="flex items-center gap-2 border-b border-border pb-2 mb-1">
-                <Search className="size-4 shrink-0 text-muted-foreground" aria-hidden />
-                <input
-                  type="text"
-                  value={emotionQuery}
-                  onChange={(e) => setEmotionQuery(e.target.value)}
-                  placeholder="Search emotions…"
-                  className="h-7 w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-                />
-              </div>
-              <div className="max-h-[200px] overflow-y-auto">
-                {filteredEmotions.map((emotion) => {
-                  const selected = emotionId === emotion.id
-                  return (
-                    <button
-                      key={emotion.id}
-                      type="button"
-                      onClick={() => setEmotionId(emotion.id)}
-                      className={cn(
-                        "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none transition-colors hover:bg-muted",
-                        selected && "font-medium",
-                      )}
-                    >
-                      <span className="size-4 shrink-0 flex items-center justify-center">
-                        {selected && <Check className="size-4" />}
-                      </span>
-                      <span
-                        className="size-3 rounded-full shrink-0"
-                        style={{ backgroundColor: emotion.color }}
-                        aria-hidden
-                      />
-                      {emotion.name}
-                    </button>
-                  )
-                })}
-                {filteredEmotions.length === 0 && (
-                  <p className="px-2 py-4 text-center text-sm text-muted-foreground">
-                    No emotions found
-                  </p>
-                )}
-              </div>
-            </PopoverContent>
-          </Popover>
+                  <span className="flex size-4 shrink-0 items-center justify-center">
+                    {selected && <Check className="size-4" />}
+                  </span>
+                  <span className="flex flex-col items-start">
+                    <span>{domain.name}</span>
+                    <span className="text-xs text-muted-foreground">{domain.label}</span>
+                  </span>
+                </button>
+              )
+            })}
+          </PopoverContent>
+        </Popover>
 
-          {/* Domain popover */}
-          <Popover>
-            <PopoverTrigger
-              className={cn(
-                "rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                domainIds.length > 0 && "text-foreground",
-              )}
-              aria-label={domainIds.length > 0 ? `${domainIds.length} domain(s) selected` : "Pick domains"}
-            >
-              <Layers className="size-4" aria-hidden />
-            </PopoverTrigger>
-            <PopoverContent align="start" className="min-w-[180px]">
-              {DOMAINS.map((domain) => {
-                const selected = domainIds.includes(domain.id)
+        {/* Emotion pill */}
+        <Popover onOpenChange={(open) => { if (!open) setEmotionQuery("") }}>
+          <PopoverTrigger
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+              emotionId
+                ? "border border-border bg-background text-foreground"
+                : "border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-muted-foreground/50",
+            )}
+            aria-label={selectedEmotion ? `Emotion: ${selectedEmotion.name}` : "Pick emotion"}
+          >
+            {selectedEmotion ? (
+              <>
+                <span
+                  className="size-2.5 rounded-full shrink-0"
+                  style={{ backgroundColor: selectedEmotion.color }}
+                  aria-hidden
+                />
+                {selectedEmotion.name}
+              </>
+            ) : (
+              <>
+                <span className="size-2.5 rounded-full shrink-0 border border-dashed border-muted-foreground/30" aria-hidden />
+                Emotion
+              </>
+            )}
+          </PopoverTrigger>
+          <PopoverContent align="start" className="min-w-[200px] p-2">
+            <div className="flex items-center gap-2 border-b border-border pb-2 mb-1">
+              <Search className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+              <input
+                type="text"
+                value={emotionQuery}
+                onChange={(e) => setEmotionQuery(e.target.value)}
+                placeholder="Search emotions…"
+                className="h-7 w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              />
+            </div>
+            <div className="max-h-[200px] overflow-y-auto">
+              {filteredEmotions.map((emotion) => {
+                const selected = emotionId === emotion.id
                 return (
                   <button
-                    key={domain.id}
+                    key={emotion.id}
                     type="button"
-                    onClick={() => toggleDomain(domain.id)}
+                    onClick={() => setEmotionId(emotion.id)}
                     className={cn(
                       "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none transition-colors hover:bg-muted",
                       selected && "font-medium",
                     )}
-                    aria-pressed={selected}
                   >
-                    <span className="size-4 shrink-0 flex items-center justify-center">
+                    <span className="flex size-4 shrink-0 items-center justify-center">
                       {selected && <Check className="size-4" />}
                     </span>
-                    <span className="flex flex-col items-start">
-                      <span>{domain.name}</span>
-                      <span className="text-xs text-muted-foreground">{domain.label}</span>
-                    </span>
+                    <span
+                      className="size-3 rounded-full shrink-0"
+                      style={{ backgroundColor: emotion.color }}
+                      aria-hidden
+                    />
+                    {emotion.name}
                   </button>
                 )
               })}
-            </PopoverContent>
-          </Popover>
-
-          {/* Souls combobox */}
-          <Popover>
-            <PopoverTrigger
-              className={cn(
-                "rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
-                soulIds.length > 0 && "text-foreground",
+              {filteredEmotions.length === 0 && (
+                <p className="px-2 py-4 text-center text-sm text-muted-foreground">
+                  No emotions found
+                </p>
               )}
-              aria-label={soulIds.length > 0 ? `${soulIds.length} soul(s) selected` : "Pick souls"}
-            >
-              <Users className="size-4" aria-hidden />
-            </PopoverTrigger>
-            <PopoverContent align="start" className="min-w-[200px] p-2">
-              <div className="flex items-center gap-2 border-b border-border pb-2 mb-1">
-                <input
-                  type="text"
-                  value={soulQuery}
-                  onChange={(e) => setSoulQuery(e.target.value)}
-                  placeholder="Search souls…"
-                  className="h-7 w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && canAddNewSoul) {
-                      e.preventDefault()
-                      void handleAddSoul()
-                    }
-                  }}
-                />
-              </div>
-              <div className="max-h-[200px] overflow-y-auto">
-                {filteredSouls.map((soul) => {
-                  const selected = soulIds.includes(soul.id)
-                  return (
-                    <button
-                      key={soul.id}
-                      type="button"
-                      onClick={() => toggleSoul(soul.id)}
-                      className={cn(
-                        "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none transition-colors hover:bg-muted",
-                        selected && "font-medium",
-                      )}
-                    >
-                      <span className="size-4 shrink-0 flex items-center justify-center">
-                        {selected && <Check className="size-4" />}
-                      </span>
-                      {soul.name}
-                    </button>
-                  )
-                })}
-                {canAddNewSoul && (
-                  <button
-                    type="button"
-                    onClick={() => void handleAddSoul()}
-                    className="flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground"
-                  >
-                    <Plus className="size-4 shrink-0" />
-                    Add &quot;{soulQuery.trim()}&quot;
-                  </button>
-                )}
-                {filteredSouls.length === 0 && !canAddNewSoul && (
-                  <p className="px-2 py-4 text-center text-sm text-muted-foreground">
-                    No souls found
-                  </p>
-                )}
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        <div className="flex items-center gap-1">
-          {/* Mode toggle */}
-          <button
-            type="button"
-            onClick={() => setMode((m) => (m === "quick" ? "normal" : "quick"))}
-            className="rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            {mode === "quick" ? "Quick" : "Normal"}
-          </button>
-
-          {/* Submit */}
-          <Button
-            variant="default"
-            size="icon"
-            disabled={!name.trim()}
-            onClick={() => void handleSubmit()}
-            aria-label="Create pebble"
-            className="size-8 rounded-full"
-          >
-            <ArrowUp className="size-5" aria-hidden />
-          </Button>
-        </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
 
-      {/* Date picker dialog (kept as Dialog — calendar is too large for popover) */}
+      {/* Description textarea */}
+      <textarea
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+        placeholder="What was that awesome?"
+        className="mb-4 w-full resize-none border-none bg-transparent text-sm text-foreground outline-none field-sizing-content placeholder:text-muted-foreground/50"
+        rows={1}
+      />
+
+      {/* Customization tiles: glyph, collection, souls, photo */}
+      <div className="mb-4 grid grid-cols-4 gap-2">
+        {/* Glyph tile */}
+        <CustomizationTile
+          icon={Fingerprint}
+          filled={!!selectedMark}
+          onClick={() => {
+            setLocalMarkId(markId)
+            setGlyphOpen(true)
+          }}
+          ariaLabel={selectedMark ? "Change glyph" : "Add glyph"}
+        >
+          {selectedMark && (
+            <GlyphPreview mark={selectedMark} className="size-full p-2" />
+          )}
+        </CustomizationTile>
+
+        {/* Collection tile */}
+        <Popover>
+          <PopoverTrigger
+            className={cn(
+              "relative flex aspect-square items-center justify-center rounded-xl transition-all duration-100 outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95 overflow-hidden",
+              collectionIds.length > 0
+                ? "border border-border bg-muted/50"
+                : "border border-dashed border-muted-foreground/30 hover:border-muted-foreground/50 hover:bg-muted/30",
+            )}
+            aria-label={collectionIds.length > 0 ? `${collectionIds.length} collection(s) selected` : "Add to collection"}
+          >
+            {collectionIds.length > 0 ? (
+              <span className="text-xs font-medium text-muted-foreground">
+                {collectionIds.length}
+              </span>
+            ) : (
+              <Layers className="size-5 text-muted-foreground/50" aria-hidden />
+            )}
+          </PopoverTrigger>
+          <PopoverContent align="start" className="min-w-[180px]">
+            {collections.length === 0 ? (
+              <p className="px-2 py-4 text-center text-sm text-muted-foreground">
+                No collections yet
+              </p>
+            ) : (
+              collections.map((coll) => {
+                const selected = collectionIds.includes(coll.id)
+                return (
+                  <button
+                    key={coll.id}
+                    type="button"
+                    onClick={() => toggleCollection(coll.id)}
+                    aria-pressed={selected}
+                    className={cn(
+                      "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none transition-colors hover:bg-muted",
+                      selected && "font-medium",
+                    )}
+                  >
+                    <span className="flex size-4 shrink-0 items-center justify-center">
+                      {selected && <Check className="size-4" />}
+                    </span>
+                    {coll.name}
+                  </button>
+                )
+              })
+            )}
+          </PopoverContent>
+        </Popover>
+
+        {/* Souls tile */}
+        <CustomizationTile
+          icon={Users}
+          filled={soulIds.length > 0}
+          onClick={() => {
+            setSoulQuery("")
+            setSoulsOpen(true)
+          }}
+          ariaLabel={soulIds.length > 0 ? `${soulIds.length} soul(s) selected` : "Add souls"}
+        >
+          {soulIds.length > 0 && (
+            <span className="text-xs font-medium text-muted-foreground">
+              {soulIds.length}
+            </span>
+          )}
+        </CustomizationTile>
+
+        {/* Photo tile */}
+        <CustomizationTile
+          icon={Image}
+          filled={!!instant}
+          onClick={() => {
+            if (instant) {
+              setInstant(undefined)
+            } else {
+              fileInputRef.current?.click()
+            }
+          }}
+          ariaLabel={instant ? "Remove photo" : "Add photo"}
+        >
+          {instant && (
+            <img
+              src={instant}
+              alt="Uploaded photo"
+              className="size-full object-cover"
+            />
+          )}
+        </CustomizationTile>
+      </div>
+
+      {/* Hidden file input for photo upload */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        aria-hidden="true"
+        tabIndex={-1}
+        onChange={(e) => {
+          void handleFileChange(e.target.files)
+          e.target.value = ""
+        }}
+      />
+
+      {/* Footer: privacy picker + save button */}
+      <div className="flex items-center justify-between">
+        <Popover>
+          <PopoverTrigger
+            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            aria-label={`Visibility: ${visibility}`}
+          >
+            {visibility === "private" ? (
+              <Lock className="size-3.5" aria-hidden />
+            ) : (
+              <Globe className="size-3.5" aria-hidden />
+            )}
+            {visibility === "private" ? "Private" : "Public"}
+          </PopoverTrigger>
+          <PopoverContent align="start" className="min-w-[140px]">
+            <button
+              type="button"
+              onClick={() => setVisibility("private")}
+              className={cn(
+                "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none transition-colors hover:bg-muted",
+                visibility === "private" && "font-medium",
+              )}
+            >
+              <Lock className="size-4 shrink-0" />
+              Private
+            </button>
+            <button
+              type="button"
+              onClick={() => setVisibility("public")}
+              className={cn(
+                "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none transition-colors hover:bg-muted",
+                visibility === "public" && "font-medium",
+              )}
+            >
+              <Globe className="size-4 shrink-0" />
+              Public
+            </button>
+          </PopoverContent>
+        </Popover>
+
+        <Button
+          variant="default"
+          size="icon"
+          disabled={!name.trim() || saving}
+          onClick={() => void handleSubmit()}
+          aria-label="Save pebble"
+          className="size-9 rounded-full"
+        >
+          <Check className="size-5" aria-hidden />
+        </Button>
+      </div>
+
+      {/* Date picker dialog */}
       <Dialog open={dateOpen} onOpenChange={setDateOpen}>
         <DialogContent>
           <DialogHeader>
@@ -510,6 +603,159 @@ export function QuickPebbleEditor() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Glyph picker dialog */}
+      <Dialog
+        open={glyphOpen}
+        onOpenChange={(open) => {
+          setGlyphOpen(open)
+          if (open) setLocalMarkId(markId)
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Glyph</DialogTitle>
+          </DialogHeader>
+
+          {marks.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No glyphs yet. Carve one from the Glyphs page.
+            </p>
+          ) : (
+            <ul
+              role="radiogroup"
+              aria-label="Glyphs"
+              className="grid grid-cols-4 gap-2"
+            >
+              {marks.map((mark) => {
+                const selected = localMarkId === mark.id
+                return (
+                  <li key={mark.id}>
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={selected}
+                      aria-label={mark.name ?? `Glyph ${mark.id.slice(0, 4)}`}
+                      onClick={() => setLocalMarkId((prev) => (prev === mark.id ? undefined : mark.id))}
+                      className={cn(
+                        "flex size-16 items-center justify-center rounded-lg border p-1 transition-all duration-100 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-95",
+                        selected
+                          ? "border-primary bg-primary/10 ring-2 ring-primary"
+                          : "border-input hover:bg-muted",
+                      )}
+                    >
+                      <GlyphPreview mark={mark} className="size-full" />
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+
+          <DialogFooter>
+            <DialogClose>Cancel</DialogClose>
+            <Button
+              onClick={() => {
+                setMarkId(localMarkId)
+                setGlyphOpen(false)
+              }}
+            >
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Souls picker sheet */}
+      <Sheet open={soulsOpen} onOpenChange={setSoulsOpen}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>Souls</SheetTitle>
+          </SheetHeader>
+          <div className="flex items-center gap-2 border-b border-border pb-2 mb-3">
+            <Search className="size-4 shrink-0 text-muted-foreground" aria-hidden />
+            <input
+              type="text"
+              value={soulQuery}
+              onChange={(e) => setSoulQuery(e.target.value)}
+              placeholder="Search souls…"
+              className="h-8 w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && canAddNewSoul) {
+                  e.preventDefault()
+                  void handleAddSoul()
+                }
+              }}
+            />
+          </div>
+
+          {/* Selected chips */}
+          {soulIds.length > 0 && (
+            <ul className="mb-3 flex flex-wrap gap-1.5" role="list" aria-label="Selected souls">
+              {soulIds.map((id) => {
+                const soul = souls.find((s) => s.id === id)
+                if (!soul) return null
+                return (
+                  <li key={id}>
+                    <button
+                      type="button"
+                      onClick={() => toggleSoul(id)}
+                      className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
+                      aria-label={`Remove ${soul.name}`}
+                    >
+                      {soul.name}
+                      <X className="size-3" aria-hidden />
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+
+          <div className="max-h-[300px] overflow-y-auto">
+            {filteredSouls.map((soul) => {
+              const selected = soulIds.includes(soul.id)
+              return (
+                <button
+                  key={soul.id}
+                  type="button"
+                  onClick={() => toggleSoul(soul.id)}
+                  className={cn(
+                    "flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm outline-none transition-colors hover:bg-muted",
+                    selected && "font-medium",
+                  )}
+                >
+                  <span className="flex size-4 shrink-0 items-center justify-center">
+                    {selected && <Check className="size-4" />}
+                  </span>
+                  {soul.name}
+                </button>
+              )
+            })}
+            {canAddNewSoul && (
+              <button
+                type="button"
+                onClick={() => void handleAddSoul()}
+                className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground"
+              >
+                <Plus className="size-4 shrink-0" />
+                Add &quot;{soulQuery.trim()}&quot;
+              </button>
+            )}
+            {filteredSouls.length === 0 && !canAddNewSoul && (
+              <p className="px-2 py-4 text-center text-sm text-muted-foreground">
+                No souls found
+              </p>
+            )}
+          </div>
+
+          <div className="mt-4 flex justify-end">
+            <SheetClose aria-label="Done">
+              Done
+            </SheetClose>
+          </div>
+        </SheetContent>
+      </Sheet>
     </section>
   )
 }

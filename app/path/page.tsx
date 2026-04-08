@@ -19,7 +19,7 @@ export default function PathPage() {
 
   return (
     <PageLayout sidebar={<PathProfileCard />}>
-      <QuickPebbleEditor />
+      <QuickPebbleEditor onPebbleCreated={setSelectedPebbleId} />
 
       {loading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
