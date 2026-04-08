@@ -7,17 +7,17 @@ import { useCollections } from "@/lib/data/useCollections"
 import { useMarks } from "@/lib/data/useMarks"
 import { PebbleDetail } from "@/components/pebble/PebbleDetail"
 import {
-  Sheet,
-  SheetContent,
-  SheetClose,
-} from "@/components/ui/sheet"
+  Dialog,
+  DialogContent,
+  DialogClose,
+} from "@/components/ui/dialog"
 
-type PebbleSheetProps = {
+type PebblePeekProps = {
   pebbleId: string | null
   onClose: () => void
 }
 
-export function PebbleSheet({ pebbleId, onClose }: PebbleSheetProps) {
+export function PebblePeek({ pebbleId, onClose }: PebblePeekProps) {
   const open = pebbleId !== null
   const id = pebbleId ?? ""
 
@@ -34,17 +34,17 @@ export function PebbleSheet({ pebbleId, onClose }: PebbleSheetProps) {
   const mark = pebble ? marks.find((m) => m.id === pebble.mark_id) : undefined
 
   return (
-    <Sheet
+    <Dialog
       open={open}
       onOpenChange={(nextOpen) => {
         if (!nextOpen) onClose()
       }}
     >
-      <SheetContent>
-        <div className="flex justify-end mb-2">
-          <SheetClose variant="ghost" size="icon-sm" aria-label="Close">
+      <DialogContent className="max-w-lg max-h-[85dvh] overflow-y-auto">
+        <div className="flex justify-end">
+          <DialogClose variant="ghost" size="icon-sm" aria-label="Close">
             <X className="size-4" />
-          </SheetClose>
+          </DialogClose>
         </div>
 
         {loading ? (
@@ -63,7 +63,7 @@ export function PebbleSheet({ pebbleId, onClose }: PebbleSheetProps) {
         ) : (
           <p className="text-sm text-muted-foreground">Pebble not found.</p>
         )}
-      </SheetContent>
-    </Sheet>
+      </DialogContent>
+    </Dialog>
   )
 }
