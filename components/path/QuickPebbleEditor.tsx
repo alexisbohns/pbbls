@@ -196,7 +196,7 @@ export function QuickPebbleEditor() {
 
   return (
     <section
-      className="rounded-xl border border-border/50 bg-card p-3"
+      className="rounded-xl border border bg-card p-3"
       aria-label="Quick pebble editor"
     >
       {/* Header: date, intensity, valence */}

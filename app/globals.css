@@ -64,7 +64,7 @@
   --foreground: #2E2024;
   --surface: #F0E4E4;
   --surface-alt: #E8D8DA;
-  --card: #F8F0F0;
+  --card: #FFFFFF;
   --card-foreground: #2E2024;
   --popover: #F8F0F0;
   --popover-foreground: #2E2024;
@@ -78,7 +78,7 @@
   --accent-foreground: #2E2024;
   --destructive: oklch(0.577 0.245 27.325);
   --destructive-foreground: #FAF0F0;
-  --border: #E0D0D2;
+  --border: #F0E4E4;
   --input: #E0D0D2;
   --ring: #C07A7A;
   --chart-1: #C07A7A;

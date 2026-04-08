@@ -53,8 +53,8 @@ export function PebbleCard({ pebble, emotion, mark, soulNames, onSelect }: Pebbl
         onClick={() => onSelect?.(pebble.id)}
         className={
           isLarge
-            ? "flex w-full flex-col items-center gap-3 rounded-xl px-4 py-7 text-left transition-all duration-100 bg-white/40 hover:bg-white/60 border border-muted active:scale-[0.98] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-            : "flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left transition-all duration-100 bg-white/40 hover:bg-white/60 border border-muted active:scale-[0.98] focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+            ? "flex w-full flex-col items-center gap-3 rounded-xl px-4 py-7 text-left transition-all duration-100 bg-card hover:bg-card/50 border active:scale-[0.98] focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+            : "flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left transition-all duration-100 bg-card hover:bg-card/50 border active:scale-[0.98] focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
         }
         aria-label={`${pebble.name}, ${time}`}
       >
