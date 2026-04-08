@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   CalendarDays,
   Check,
@@ -15,7 +15,11 @@ import {
   Users,
   X,
 } from "lucide-react"
+import { motion, useReducedMotion } from "framer-motion"
 import { usePebbles } from "@/lib/data/usePebbles"
+import { usePebblesCount } from "@/lib/data/usePebblesCount"
+import { useBounce } from "@/lib/data/useBounce"
+import { todayLocal } from "@/lib/data/bounce-levels"
 import { useSouls } from "@/lib/data/useSouls"
 import { useCollections } from "@/lib/data/useCollections"
 import { useMarks } from "@/lib/data/useMarks"
@@ -67,6 +71,15 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
   const { souls, addSoul } = useSouls()
   const { collections, updateCollection } = useCollections()
   const { marks } = useMarks()
+  const { pebblesCount, loading: countLoading } = usePebblesCount()
+  const { bounceWindow, loading: bounceLoading } = useBounce()
+  const prefersReducedMotion = useReducedMotion()
+
+  // Collapse state
+  const [expanded, setExpanded] = useState(false)
+  const sectionRef = useRef<HTMLElement>(null)
+  const titleInputRef = useRef<HTMLInputElement>(null)
+  const hasAutoExpanded = useRef(false)
 
   // Form state
   const [name, setName] = useState("")
@@ -96,6 +109,23 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
 
   // File input ref
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Auto-expand: new users (<5 pebbles) or no pebble created today
+  const shouldAutoExpand = useMemo(() => {
+    if (countLoading || bounceLoading) return false
+    if (pebblesCount < 5) return true
+    return !bounceWindow.includes(todayLocal())
+  }, [pebblesCount, countLoading, bounceWindow, bounceLoading])
+
+  useEffect(() => {
+    if (hasAutoExpanded.current) return
+    if (countLoading || bounceLoading) return
+    hasAutoExpanded.current = true
+    if (shouldAutoExpand) {
+      setExpanded(true)
+      requestAnimationFrame(() => titleInputRef.current?.focus())
+    }
+  }, [shouldAutoExpand, countLoading, bounceLoading])
 
   const selectedEmotion = EMOTIONS.find((e) => e.id === emotionId)
   const selectedDomains = DOMAINS.filter((d) => domainIds.includes(d.id))
@@ -168,6 +198,8 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
       }
 
       resetForm()
+      setExpanded(false)
+      titleInputRef.current?.blur()
       onPebbleCreated?.(pebble.id)
     } finally {
       setSaving(false)
@@ -222,6 +254,35 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
     setInstant(compressed)
   }, [])
 
+  // Focus tracking — expand on focus, collapse on blur when empty
+  const handleFocusCapture = useCallback(() => {
+    if (!expanded) setExpanded(true)
+  }, [expanded])
+
+  const handleBlurCapture = useCallback(() => {
+    // rAF lets the browser settle focus after portal transitions
+    requestAnimationFrame(() => {
+      const active = document.activeElement
+      if (active && sectionRef.current?.contains(active)) return
+      if (active instanceof HTMLElement) {
+        const inPortal = active.closest(
+          '[data-slot="popover-content"], [data-slot="popover-positioner"], [data-slot="dialog-content"], [data-slot="sheet-content"], [role="dialog"]',
+        )
+        if (inPortal) return
+      }
+      if (!name.trim()) setExpanded(false)
+    })
+  }, [name])
+
+  // Collapse/expand animation
+  const collapsibleVariants = {
+    expanded: { height: "auto", opacity: 1 },
+    collapsed: { height: 0, opacity: 0 },
+  }
+  const collapsibleTransition = prefersReducedMotion
+    ? { duration: 0 }
+    : { height: { duration: 0.25, ease: "easeInOut" }, opacity: { duration: 0.15 } }
+
   const dateLabel = isNow(happenedAt)
     ? "Now"
     : new Intl.DateTimeFormat(undefined, {
@@ -233,38 +294,55 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
 
   return (
     <section
-      className="rounded-xl border bg-card p-4"
+      ref={sectionRef}
+      className={cn("rounded-xl border bg-card transition-[padding] duration-200", expanded ? "p-4" : "px-4 py-3")}
       aria-label="Pebble editor"
+      onFocusCapture={handleFocusCapture}
+      onBlurCapture={handleBlurCapture}
     >
-      {/* Header: date + intensity/valence grid */}
-      <div className="mb-3 flex items-center justify-between">
-        <button
-          type="button"
-          onClick={() => {
-            setTempDate(new Date(happenedAt))
-            setDateOpen(true)
-          }}
-          className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
-          <CalendarDays className="size-3.5" aria-hidden />
-          {dateLabel}
-        </button>
+      {/* Collapsible: header row above title */}
+      <motion.div
+        initial={false}
+        animate={expanded ? "expanded" : "collapsed"}
+        variants={collapsibleVariants}
+        transition={collapsibleTransition}
+        style={{ overflow: "hidden" }}
+        aria-hidden={!expanded}
+      >
+        {/* Header: date + intensity/valence grid */}
+        <div className="mb-3 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => {
+              setTempDate(new Date(happenedAt))
+              setDateOpen(true)
+            }}
+            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <CalendarDays className="size-3.5" aria-hidden />
+            {dateLabel}
+          </button>
 
-        <ValenceIntensityGrid
-          intensity={intensity}
-          valence={valence}
-          onIntensityChange={setIntensity}
-          onValenceChange={setValence}
-        />
-      </div>
+          <ValenceIntensityGrid
+            intensity={intensity}
+            valence={valence}
+            onIntensityChange={setIntensity}
+            onValenceChange={setValence}
+          />
+        </div>
+      </motion.div>
 
-      {/* Title input — heading font for WYSIWYG preview */}
+      {/* Title input — always visible */}
       <input
+        ref={titleInputRef}
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="What happened?"
-        className="mb-2 w-full border-none bg-transparent font-heading text-xl font-semibold text-foreground outline-none placeholder:text-muted-foreground/50"
+        className={cn(
+          "w-full border-none bg-transparent font-heading text-xl font-semibold text-foreground outline-none placeholder:text-muted-foreground/50",
+          expanded && "mb-2",
+        )}
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault()
@@ -273,6 +351,15 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
         }}
       />
 
+      {/* Collapsible: content below title */}
+      <motion.div
+        initial={false}
+        animate={expanded ? "expanded" : "collapsed"}
+        variants={collapsibleVariants}
+        transition={collapsibleTransition}
+        style={{ overflow: "hidden" }}
+        aria-hidden={!expanded}
+      >
       {/* Qualification pills: domain + emotion */}
       <div className="mb-3 flex items-center gap-2">
         {/* Domain pill */}
@@ -571,6 +658,7 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
           <Check className="size-5" aria-hidden />
         </Button>
       </div>
+      </motion.div>
 
       {/* Date picker dialog */}
       <Dialog open={dateOpen} onOpenChange={setDateOpen}>
