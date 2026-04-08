@@ -13,12 +13,12 @@ export function useOnboarding(
 
   const complete = useCallback(async () => {
     await onComplete()
-    router.push("/record")
+    router.push("/path")
   }, [onComplete, router])
 
   const skip = useCallback(async () => {
     await onComplete()
-    router.push("/record")
+    router.push("/path")
   }, [onComplete, router])
 
   return {
