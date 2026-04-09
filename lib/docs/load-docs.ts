@@ -23,6 +23,14 @@ export function getDocsSlugs(): string[] {
   return getDocsManifest().pages.map((p) => p.slug)
 }
 
+function stringifyDates(obj: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(obj)) {
+    out[key] = value instanceof Date ? value.toISOString().split("T")[0] : value
+  }
+  return out
+}
+
 export function getDocPage(slug: string, locale: DocsLocale): DocsPageContent {
   const filePath = path.join(docsDir, slug, `${locale}.md`)
   const raw = fs.readFileSync(filePath, "utf-8")
@@ -30,7 +38,7 @@ export function getDocPage(slug: string, locale: DocsLocale): DocsPageContent {
   const result = processor.processSync(content)
 
   return {
-    frontmatter: data as DocsPageContent["frontmatter"],
+    frontmatter: stringifyDates(data) as DocsPageContent["frontmatter"],
     html: String(result),
   }
 }
