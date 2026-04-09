@@ -86,6 +86,8 @@ export type Profile = {
   display_name: string
   onboarding_completed: boolean
   color_world: ColorWorld
+  terms_accepted_at: string | null
+  privacy_accepted_at: string | null
   created_at: string
   updated_at: string
 }
@@ -96,7 +98,12 @@ export type Session = {
   created_at: string
 }
 
-export type RegisterInput = { username: string; password: string }
+export type RegisterInput = {
+  username: string
+  password: string
+  terms_accepted: boolean
+  privacy_accepted: boolean
+}
 export type LoginInput = { username: string; password: string }
 export type UpdateProfileInput = Partial<
   Omit<Profile, "id" | "account_id" | "created_at" | "updated_at">
