@@ -207,7 +207,19 @@ export class LocalProvider implements DataProvider {
     try {
       const raw = localStorage.getItem(AUTH_STORAGE_KEY)
       if (!raw) return EMPTY_AUTH_STORE
-      return JSON.parse(raw) as AuthStore
+      const parsed = JSON.parse(raw) as AuthStore
+
+      // Backfill consent fields for profiles created before this feature
+      for (const profile of parsed.profiles) {
+        if (profile.terms_accepted_at === undefined) {
+          profile.terms_accepted_at = null
+        }
+        if (profile.privacy_accepted_at === undefined) {
+          profile.privacy_accepted_at = null
+        }
+      }
+
+      return parsed
     } catch {
       return EMPTY_AUTH_STORE
     }
@@ -570,6 +582,12 @@ export class LocalProvider implements DataProvider {
   // ---------------------------------------------------------------------------
 
   async register(input: RegisterInput): Promise<Session> {
+    if (!input.terms_accepted || !input.privacy_accepted) {
+      throw new Error(
+        "You must accept the Terms of Service and Privacy Policy.",
+      )
+    }
+
     const existing = this.authStore.accounts.find(
       (a) => a.username === input.username,
     )
@@ -596,6 +614,8 @@ export class LocalProvider implements DataProvider {
       display_name: input.username,
       onboarding_completed: legacyOnboarding,
       color_world: "blush-quartz",
+      terms_accepted_at: input.terms_accepted ? now : null,
+      privacy_accepted_at: input.privacy_accepted ? now : null,
       created_at: now,
       updated_at: now,
     }
