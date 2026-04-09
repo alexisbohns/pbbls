@@ -1,0 +1,36 @@
+{
+  "$schema": "docs-manifest-v1",
+  "locales": ["en", "fr"],
+  "pages": [
+    {
+      "slug": "legal-notice",
+      "category": "legal",
+      "order": 1,
+      "titles": {
+        "en": "Legal Notice",
+        "fr": "Mentions légales"
+      },
+      "path": "docs/legal-notice/"
+    },
+    {
+      "slug": "terms",
+      "category": "legal",
+      "order": 2,
+      "titles": {
+        "en": "Terms of Service",
+        "fr": "Conditions générales d'utilisation"
+      },
+      "path": "docs/terms/"
+    },
+    {
+      "slug": "privacy",
+      "category": "legal",
+      "order": 3,
+      "titles": {
+        "en": "Privacy Policy",
+        "fr": "Politique de confidentialité"
+      },
+      "path": "docs/privacy/"
+    }
+  ]
+}
