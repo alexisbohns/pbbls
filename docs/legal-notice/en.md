@@ -13,16 +13,16 @@ last_updated: 2026-04-09
 
 ## Publisher
 
-Pebbles
-Publisher Director: Alexis Bohn
-Address: [adresse]
-Telephone: [téléphone]
-Email: hello@bohns.design
+* Pebbles
+* Publisher Director: Alexis Bohn
+* Address: [adresse]
+* Telephone: [téléphone]
+* Email: hello@bohns.design
 
 ## Publication Director
 
-Alexis Bohn
-Email: hello@bohns.design
+* Alexis Bohn
+* Email: hello@bohns.design
 
 ## Hosting Provider
 
@@ -41,12 +41,12 @@ For more information on the use of source code, please consult the GitHub reposi
 ## Contact
 
 For any questions or complaints, you can contact us at:
-Email: hello@bohns.design
+* Email: hello@bohns.design
 
 ## Related Documents
 
-- [Privacy Policy](./privacy-policy.md)
-- [Terms of Service](./terms-of-service.md)
+* [Privacy Policy](./privacy-policy.md)
+* [Terms of Service](./terms-of-service.md)
 
 ---
 

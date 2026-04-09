@@ -17,23 +17,15 @@ Pebbles fonctionne comme une application locale et personnelle. Nous ne profilon
 
 Cette politique de confidentialité est conforme au Règlement Général sur la Protection des Données (RGPD) et aux lignes directrices de la Commission Nationale de l'Informatique et des Libertés (CNIL).
 
----
-
 ## 1. Responsable du Traitement et Coordonnées
 
-**Responsable du traitement :** Alexis Bohn, fondatrice et développeuse de Pebbles
-
-**Localisation :** France
-
-**Email :** hello@bohns.design
-
-**Adresse postale :** [adresse]
-
-**Téléphone :** [téléphone]
+- **Responsable du traitement :** Alexis Bohn, fondatrice et développeuse de Pebbles
+- **Localisation :** France
+- **Email :** hello@bohns.design
+- **Adresse postale :** [adresse]
+- **Téléphone :** [téléphone]
 
 Alexis Bohn agit en tant que responsable du traitement au sens de l'article 4(7) du RGPD et est responsable du respect de cette politique.
-
----
 
 ## 2. Données Collectées
 
@@ -73,8 +65,6 @@ Pour fonctionner et assurer votre sécurité, nous traitons :
 
 Si vous enregistrez les noms de personnes qui vous sont chères (vos "souls"), ces noms sont stockés dans votre compte Pebbles. Pebbles ne contacte jamais ces personnes et ne partagent jamais leurs données avec elles.
 
----
-
 ## 3. Fondements Juridiques du Traitement
 
 Conformément à l'article 6 du RGPD, nous traitons vos données sur les fondements suivants :
@@ -106,8 +96,6 @@ Nous utilisons vos données sur la base de notre intérêt légitime pour :
 
 Nous traitons vos données si la loi l'exige, notamment en cas de demande d'autorité judiciaire ou administrative.
 
----
-
 ## 4. Données à Caractère Sensible et Santé
 
 ### 4.1 Qualification
@@ -132,8 +120,6 @@ Si vous autorisez Pebbles à accéder aux données de santé via HealthKit (Appl
 - Elles ne seront jamais partagées avec des tiers sans votre consentement.
 - Vous pouvez révoquer l'accès à tout moment dans les paramètres d'Apple.
 
----
-
 ## 5. Accès Thérapeute et Données Partagées
 
 ### 5.1 Contrôle d'Accès
@@ -151,8 +137,6 @@ Si vous travaillez avec un thérapeute, vous pouvez partager votre compte Pebble
 ### 5.3 Droit de Retrait
 
 Vous pouvez révoquer l'accès thérapeute à tout moment sans affecter votre compte Pebbles.
-
----
 
 ## 6. Sous-Traitants et Partenaires
 
@@ -172,8 +156,6 @@ Conformément à l'article 28 du RGPD, nous travaillons avec les sous-traitants 
 - **Données transmises :** Seules les données d'événements anonymisées (sans identifiants personnels comme votre nom, email ou noms de souls).
 - **Engagement :** Google ne conserve pas vos données à long terme.
 
----
-
 ## 7. Transferts Internationaux de Données
 
 ### 7.1 Transferts Intracommunautaires
@@ -189,8 +171,6 @@ Si vous activez les fonctionnalités IA avec Google Gemma, vos données anonymis
 ### 7.3 Polices de Caractères
 
 Nos polices de caractères sont auto-hébergées en UE. Aucun transfert vers des CDN externes.
-
----
 
 ## 8. Durée de Conservation des Données
 
@@ -218,8 +198,6 @@ Nos polices de caractères sont auto-hébergées en UE. Aucun transfert vers des
 
 - Les données supprimées peuvent persister dans nos sauvegardes pour 90 jours.
 - Après 90 jours, aucune trace ne subsiste.
-
----
 
 ## 9. Vos Droits et Comment les Exercer
 
@@ -265,11 +243,9 @@ Nous traiterons votre demande dans les 30 jours. Si votre demande est complexe, 
 
 Si vous estimez que nous violons vos droits, vous pouvez déposer une plainte auprès de la CNIL :
 
-**Commission Nationale de l'Informatique et des Libertés (CNIL)**
-**Adresse :** 3 Place de Fontenoy, 75007 Paris, France
-**Site web :** https://www.cnil.fr
-
----
+- **Commission Nationale de l'Informatique et des Libertés (CNIL)**
+- **Adresse :** 3 Place de Fontenoy, 75007 Paris, France
+- **Site web :** https://www.cnil.fr
 
 ## 10. Utilisateurs Mineurs
 
@@ -294,8 +270,6 @@ Les demandes doivent être envoyées à hello@bohns.design avec preuve de l'auto
 
 À partir de 15 ans, vous pouvez consentir seul à l'utilisation de Pebbles.
 
----
-
 ## 11. Sécurité des Données
 
 ### 11.1 Mesures Techniques
@@ -314,8 +288,6 @@ Les demandes doivent être envoyées à hello@bohns.design avec preuve de l'auto
 ### 11.3 Responsabilité Utilisateur
 
 Vous êtes responsable de la confidentialité de votre mot de passe. Ne partagez jamais vos identifiants de connexion. Si vous pensez que votre compte est compromis, contactez immédiatement hello@bohns.design.
-
----
 
 ## 12. Fonctionnalités IA et Données Anonymisées
 
@@ -340,8 +312,6 @@ Si vous incluez des informations personnelles directement dans le texte de vos �
 
 Les fonctionnalités IA sont entièrement optionnelles. Vous pouvez les désactiver à tout moment via vos paramètres.
 
----
-
 ## 13. Cookies et Suivi
 
 ### 13.1 Cookies Strictement Nécessaires
@@ -361,8 +331,6 @@ Pebbles n'utilise :
 - Aucun cookie de publicité ou de ciblage.
 - Aucun cookie tiers.
 
----
-
 ## 14. Communications et Notifications
 
 ### 14.1 Emails Transactionnels
@@ -380,15 +348,11 @@ Nous ne vous envoyons pas d'emails marketing ou de newsletters sans votre consen
 
 Les notifications push sur mobile sont envoyées pour maintenir votre engagement quotidien, uniquement si vous les avez activées. Vous pouvez les désactiver dans vos paramètres ou dans les paramètres de votre appareil.
 
----
-
 ## 15. Modifications de Cette Politique
 
 Nous pouvons mettre à jour cette politique de confidentialité de temps en temps pour refléter les changements dans nos pratiques, la technologie, la législation ou d'autres facteurs. Nous vous notifierons de tout changement matériel en vous envoyant un email ou en affichant une notification sur Pebbles.
 
 Votre utilisation continue de Pebbles après une telle notification constitue votre acceptation des modifications.
-
----
 
 ## 16. Documents Connexes
 
@@ -396,22 +360,20 @@ Veuillez consulter également :
 - [Mentions Légales](./mentions-legales.md) : informations légales sur l'éditeur et l'hébergement.
 - [Conditions Générales d'Utilisation](./conditions-generales-utilisation.md) : conditions d'utilisation de Pebbles.
 
----
-
 ## 17. Contact et Support
 
 Pour toute question, demande ou préoccupation concernant cette politique de confidentialité ou vos données personnelles :
 
-**Alexis Bohn**
-**Email :** hello@bohns.design
-**Adresse postale :** [adresse]
-**Téléphone :** [téléphone]
+- **Alexis Bohn**
+- **Email :** hello@bohns.design
+- **Adresse postale :** [adresse]
+- **Téléphone :** [téléphone]
 
 ---
 
-**Version :** 1.0.0
-**Date d'entrée en vigueur :** 9 avril 2026
-**Dernière mise à jour :** 9 avril 2026
+- **Version :** 1.0.0
+- **Date d'entrée en vigueur :** 9 avril 2026
+- **Dernière mise à jour :** 9 avril 2026
 
 ---
 
