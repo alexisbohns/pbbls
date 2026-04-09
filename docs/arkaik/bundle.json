@@ -375,7 +375,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Profile",
-      "description": "User profile page displaying account info, appearance settings, and logout functionality.",
+      "description": "User profile page displaying account info, appearance settings, legal document links, and logout functionality.",
       "status": "development",
       "platforms": ["web", "ios", "android"]
     },
