@@ -6,6 +6,7 @@ import { ChevronRight } from "lucide-react"
 import { useAuth } from "@/lib/data/auth-context"
 import { ProfileCard } from "@/components/profile/ProfileCard"
 import { LogoutButton } from "@/components/profile/LogoutButton"
+import { AppearanceSection } from "@/components/profile/AppearanceSection"
 import { PageLayout } from "@/components/layout/PageLayout"
 import { PathProfileCard } from "@/components/path/PathProfileCard"
 import { BackPath } from "@/components/ui/BackPath"
@@ -74,6 +75,8 @@ export default function ProfilePage() {
             })}
           </ul>
         </nav>
+
+          <AppearanceSection />
 
           <LogoutButton onLogout={handleLogout} />
         </div>
