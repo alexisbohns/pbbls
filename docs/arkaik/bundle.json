@@ -32,7 +32,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Register",
-      "description": "Registration page with username, password, and confirm password form. Auto-logs in and redirects to onboarding on success.",
+      "description": "Registration page with username, password, confirm password, and consent checkboxes (terms + privacy). Auto-logs in and redirects to onboarding on success.",
       "status": "development",
       "platforms": ["web", "ios", "android"]
     },
@@ -592,7 +592,7 @@
       "project_id": "pebbles",
       "species": "data-model",
       "title": "Profile",
-      "description": "User profile with display name, onboarding state, and color world preference.",
+      "description": "User profile with display name, onboarding state, color world preference, and consent timestamps (terms + privacy).",
       "status": "development",
       "platforms": ["web", "ios", "android"]
     },

@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/data/auth-context"
 import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 
 export default function RegisterPage() {
@@ -14,6 +15,8 @@ export default function RegisterPage() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const [termsAccepted, setTermsAccepted] = useState(false)
+  const [privacyAccepted, setPrivacyAccepted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -39,9 +42,19 @@ export default function RegisterPage() {
       return
     }
 
+    if (!termsAccepted || !privacyAccepted) {
+      setError("You must accept the Terms of Service and Privacy Policy.")
+      return
+    }
+
     setSubmitting(true)
     try {
-      await register({ username: username.trim(), password })
+      await register({
+        username: username.trim(),
+        password,
+        terms_accepted: termsAccepted,
+        privacy_accepted: privacyAccepted,
+      })
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Something went wrong."
@@ -108,13 +121,65 @@ export default function RegisterPage() {
           />
         </div>
 
+        <div className="flex items-start gap-2 text-left">
+          <Checkbox
+            id="register-terms"
+            checked={termsAccepted}
+            onCheckedChange={(checked) => setTermsAccepted(checked)}
+            disabled={submitting}
+            required
+          />
+          <label
+            htmlFor="register-terms"
+            className="text-sm text-muted-foreground"
+          >
+            I accept the{" "}
+            <Link
+              href="/docs/terms"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-4 hover:text-foreground"
+            >
+              Terms of Service
+            </Link>
+          </label>
+        </div>
+
+        <div className="flex items-start gap-2 text-left">
+          <Checkbox
+            id="register-privacy"
+            checked={privacyAccepted}
+            onCheckedChange={(checked) => setPrivacyAccepted(checked)}
+            disabled={submitting}
+            required
+          />
+          <label
+            htmlFor="register-privacy"
+            className="text-sm text-muted-foreground"
+          >
+            I accept the{" "}
+            <Link
+              href="/docs/privacy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline underline-offset-4 hover:text-foreground"
+            >
+              Privacy Policy
+            </Link>
+          </label>
+        </div>
+
         {error && (
           <p role="alert" className="text-sm text-destructive">
             {error}
           </p>
         )}
 
-        <Button type="submit" size="lg" disabled={submitting}>
+        <Button
+          type="submit"
+          size="lg"
+          disabled={submitting || !termsAccepted || !privacyAccepted}
+        >
           {submitting ? "Creating account\u2026" : "Create account"}
         </Button>
       </form>
