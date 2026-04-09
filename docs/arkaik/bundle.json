@@ -592,7 +592,7 @@
       "project_id": "pebbles",
       "species": "data-model",
       "title": "Profile",
-      "description": "User profile with display name, onboarding state, color world preference, and consent timestamps (terms + privacy).",
+      "description": "User profile with display name, onboarding state, color world preference, and consent timestamps (terms_accepted_at, privacy_accepted_at).",
       "status": "development",
       "platforms": ["web", "ios", "android"]
     },
@@ -991,6 +991,49 @@
       "description": "Individual documentation page rendering localized markdown content (privacy policy, terms, legal notice, credits). Supports locale switching and embed mode.",
       "status": "development",
       "platforms": ["web", "ios"]
+    },
+    {
+      "id": "V-docs-legal-notice",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Legal Notice",
+      "description": "Individual legal notice page rendered from localized markdown. Accessible without authentication.",
+      "status": "development",
+      "platforms": ["web", "ios"]
+    },
+    {
+      "id": "V-docs-terms",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Terms of Service",
+      "description": "Individual terms of service page rendered from localized markdown. Accessible without authentication.",
+      "status": "development",
+      "platforms": ["web", "ios"]
+    },
+    {
+      "id": "V-docs-privacy",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Privacy Policy",
+      "description": "Individual privacy policy page rendered from localized markdown. Accessible without authentication.",
+      "status": "development",
+      "platforms": ["web", "ios"]
+    },
+    {
+      "id": "F-legal-consent",
+      "project_id": "pebbles",
+      "species": "flow",
+      "title": "Legal Consent",
+      "description": "Registration consent flow: user accepts terms and privacy policy during signup via checkboxes linking to legal documents.",
+      "status": "development",
+      "platforms": ["web", "ios", "android"],
+      "metadata": {
+        "playlist": {
+          "entries": [
+            { "type": "view", "view_id": "V-register" }
+          ]
+        }
+      }
     }
   ],
   "edges": [
@@ -1165,6 +1208,15 @@
     { "id": "e-V-quick-pebble-editor-DM-instant", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "DM-instant", "edge_type": "displays" },
     { "id": "e-V-quick-pebble-editor-DM-mark", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "DM-mark", "edge_type": "displays" },
     { "id": "e-V-quick-pebble-editor-DM-collection", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "DM-collection", "edge_type": "displays" },
-    { "id": "e-V-docs-index-V-docs-slug", "project_id": "pebbles", "source_id": "V-docs-index", "target_id": "V-docs-slug", "edge_type": "composes" }
+    { "id": "e-V-docs-index-V-docs-slug", "project_id": "pebbles", "source_id": "V-docs-index", "target_id": "V-docs-slug", "edge_type": "composes" },
+    { "id": "e-V-register-V-docs-terms", "project_id": "pebbles", "source_id": "V-register", "target_id": "V-docs-terms", "edge_type": "composes" },
+    { "id": "e-V-register-V-docs-privacy", "project_id": "pebbles", "source_id": "V-register", "target_id": "V-docs-privacy", "edge_type": "composes" },
+    { "id": "e-V-profile-V-docs-legal-notice", "project_id": "pebbles", "source_id": "V-profile", "target_id": "V-docs-legal-notice", "edge_type": "composes" },
+    { "id": "e-V-profile-V-docs-terms", "project_id": "pebbles", "source_id": "V-profile", "target_id": "V-docs-terms", "edge_type": "composes" },
+    { "id": "e-V-profile-V-docs-privacy", "project_id": "pebbles", "source_id": "V-profile", "target_id": "V-docs-privacy", "edge_type": "composes" },
+    { "id": "e-V-docs-index-V-docs-legal-notice", "project_id": "pebbles", "source_id": "V-docs-index", "target_id": "V-docs-legal-notice", "edge_type": "composes" },
+    { "id": "e-V-docs-index-V-docs-terms", "project_id": "pebbles", "source_id": "V-docs-index", "target_id": "V-docs-terms", "edge_type": "composes" },
+    { "id": "e-V-docs-index-V-docs-privacy", "project_id": "pebbles", "source_id": "V-docs-index", "target_id": "V-docs-privacy", "edge_type": "composes" },
+    { "id": "e-F-legal-consent-V-register", "project_id": "pebbles", "source_id": "F-legal-consent", "target_id": "V-register", "edge_type": "composes" }
   ]
 }
