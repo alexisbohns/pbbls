@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Ysabeau } from "next/font/google";
+import "@fontsource-variable/ysabeau";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { ColorWorldProvider } from "@/components/layout/ColorWorldProvider";
 import { ThemeColorSync } from "@/components/layout/ThemeColorSync";
@@ -8,21 +8,6 @@ import { AuthProvider } from "@/components/layout/AuthProvider";
 import { SerwistRegistration } from "@/components/layout/SerwistRegistration";
 import { MainContent } from "@/components/layout/MainContent";
 import "./globals.css";
-
-const geistSans = Geist({
-  variable: "--font-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const ysabeau = Ysabeau({
-  variable: "--font-ysabeau",
-  subsets: ["latin"],
-});
 
 export const viewport: Viewport = {
   themeColor: [
@@ -82,7 +67,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${ysabeau.variable} h-full antialiased`}
+      className="h-full antialiased"
       suppressHydrationWarning
     >
       <head>
