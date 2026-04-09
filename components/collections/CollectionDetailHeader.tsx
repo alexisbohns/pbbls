@@ -1,5 +1,6 @@
 import { Pencil } from "lucide-react"
 import type { Collection } from "@/lib/types"
+import { pluralize } from "@/lib/utils/formatters"
 import { ModeBadge } from "@/components/collections/ModeBadge"
 import { CollectionFormDialog } from "@/components/collections/CollectionFormDialog"
 import { Button } from "@/components/ui/button"
@@ -39,9 +40,7 @@ export function CollectionDetailHeader({
 
       <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
         <ModeBadge mode={collection.mode} />
-        <span>
-          {pebbleCount} {pebbleCount === 1 ? "pebble" : "pebbles"}
-        </span>
+        <span>{pluralize(pebbleCount, "pebble")}</span>
       </div>
     </header>
   )

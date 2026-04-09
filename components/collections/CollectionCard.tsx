@@ -1,6 +1,7 @@
 import Link from "next/link"
 import type { Collection } from "@/lib/types"
 import { ModeBadge } from "@/components/collections/ModeBadge"
+import { pluralize } from "@/lib/utils/formatters"
 
 type CollectionCardProps = {
   collection: Collection
@@ -19,9 +20,7 @@ export function CollectionCard({ collection }: CollectionCardProps) {
 
         <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <ModeBadge mode={collection.mode} />
-          <span>
-            {count} {count === 1 ? "pebble" : "pebbles"}
-          </span>
+          <span>{pluralize(count, "pebble")}</span>
         </div>
       </Link>
     </article>
