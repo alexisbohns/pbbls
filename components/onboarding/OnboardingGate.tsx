@@ -11,7 +11,7 @@ export function OnboardingGate() {
 
   useEffect(() => {
     if (isLoading) return
-    if (pathname === "/" || pathname.startsWith("/onboarding") || pathname === "/login" || pathname === "/register") return
+    if (pathname === "/" || pathname.startsWith("/onboarding") || pathname === "/login" || pathname === "/register" || pathname.startsWith("/docs")) return
     if (profile && !profile.onboarding_completed) {
       router.replace("/onboarding")
     }

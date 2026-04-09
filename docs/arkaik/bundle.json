@@ -6,7 +6,7 @@
     "root_node_id": "V-landing",
     "metadata": { "view_card_variant": "large" },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-04-08T21:00:00Z"
+    "updated_at": "2026-04-09T00:00:00Z"
   },
   "nodes": [
     {
@@ -973,6 +973,24 @@
       "description": "Pure TypeScript rendering engine that generates SVG pebble visuals from pebble data; designed for extraction as @pebbles/engine.",
       "status": "development",
       "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "V-docs-index",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Docs Index",
+      "description": "Public documentation index listing all legal and support pages grouped by category. Supports locale switching (EN/FR) and embed mode for iOS webview.",
+      "status": "development",
+      "platforms": ["web", "ios"]
+    },
+    {
+      "id": "V-docs-slug",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Docs Page",
+      "description": "Individual documentation page rendering localized markdown content (privacy policy, terms, legal notice, credits). Supports locale switching and embed mode.",
+      "status": "development",
+      "platforms": ["web", "ios"]
     }
   ],
   "edges": [
@@ -1146,6 +1164,7 @@
     { "id": "e-V-quick-pebble-editor-DM-domain", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "DM-domain", "edge_type": "displays" },
     { "id": "e-V-quick-pebble-editor-DM-instant", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "DM-instant", "edge_type": "displays" },
     { "id": "e-V-quick-pebble-editor-DM-mark", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "DM-mark", "edge_type": "displays" },
-    { "id": "e-V-quick-pebble-editor-DM-collection", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "DM-collection", "edge_type": "displays" }
+    { "id": "e-V-quick-pebble-editor-DM-collection", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "DM-collection", "edge_type": "displays" },
+    { "id": "e-V-docs-index-V-docs-slug", "project_id": "pebbles", "source_id": "V-docs-index", "target_id": "V-docs-slug", "edge_type": "composes" }
   ]
 }
