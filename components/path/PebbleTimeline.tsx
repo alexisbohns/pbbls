@@ -27,7 +27,7 @@ export function PebbleTimeline({ pebbles, souls, onSelectPebble }: PebbleTimelin
           </h2>
           <ul className="flex flex-col gap-3">
             {group.pebbles.map((pebble) => (
-              <li key={pebble.id}>
+              <li key={pebble.id} id={`pebble-${pebble.id}`}>
                 <PebbleCard
                   pebble={pebble}
                   emotion={emotionMap.get(pebble.emotion_id)}
