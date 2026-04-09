@@ -31,6 +31,16 @@
         "fr": "Politique de confidentialité"
       },
       "path": "docs/privacy/"
+    },
+    {
+      "slug": "credits",
+      "category": "legal",
+      "order": 4,
+      "titles": {
+        "en": "Credits",
+        "fr": "Crédits"
+      },
+      "path": "docs/credits/"
     }
   ]
 }
