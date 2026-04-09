@@ -1,5 +1,6 @@
 "use client"
 
+import { useCallback } from "react"
 import { X } from "lucide-react"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { cn } from "@/lib/utils"
@@ -8,6 +9,7 @@ import { usePebble } from "@/lib/data/usePebble"
 import { useSouls } from "@/lib/data/useSouls"
 import { useCollections } from "@/lib/data/useCollections"
 import { useMarks } from "@/lib/data/useMarks"
+import { VisibilityPicker } from "@/components/record/VisibilityPicker"
 import { PebbleDetail } from "@/components/pebble/PebbleDetail"
 
 type PebblePeekProps = {
@@ -20,7 +22,7 @@ export function PebblePeek({ pebbleId, onClose }: PebblePeekProps) {
   const id = pebbleId ?? ""
 
   const { pebble, loading: pebbleLoading, updatePebble } = usePebble(id)
-  const { souls, loading: soulsLoading } = useSouls()
+  const { souls, loading: soulsLoading, addSoul } = useSouls()
   const { collections, loading: collectionsLoading, updateCollection } = useCollections()
   const { marks, loading: marksLoading } = useMarks()
 
@@ -30,6 +32,16 @@ export function PebblePeek({ pebbleId, onClose }: PebblePeekProps) {
     c.pebble_ids.includes(id),
   )
   const mark = pebble ? marks.find((m) => m.id === pebble.mark_id) : undefined
+
+  const handleAddSoul = useCallback(
+    async (name: string) => {
+      const soul = await addSoul({ name })
+      if (pebble) {
+        await updatePebble({ soul_ids: [...pebble.soul_ids, soul.id] })
+      }
+    },
+    [addSoul, updatePebble, pebble],
+  )
 
   return (
     <DialogPrimitive.Root
@@ -56,7 +68,16 @@ export function PebblePeek({ pebbleId, onClose }: PebblePeekProps) {
           {/* Mobile drag handle */}
           <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-muted-foreground/30 md:hidden" aria-hidden />
 
-          <div className="flex justify-end">
+          {/* Top bar: visibility badge + close button */}
+          <div className="flex items-center justify-between">
+            {pebble ? (
+              <VisibilityPicker
+                value={pebble.visibility}
+                onChange={(v) => void updatePebble({ visibility: v })}
+              />
+            ) : (
+              <div />
+            )}
             <DialogPrimitive.Close
               render={<Button variant="ghost" size="icon-sm" />}
               aria-label="Close"
@@ -77,6 +98,7 @@ export function PebblePeek({ pebbleId, onClose }: PebblePeekProps) {
               mark={mark}
               onUpdatePebble={updatePebble}
               onUpdateCollection={updateCollection}
+              onAddSoul={handleAddSoul}
             />
           ) : (
             <p className="text-sm text-muted-foreground">Pebble not found.</p>

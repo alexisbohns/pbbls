@@ -1,6 +1,6 @@
 "use client"
 
-import { use } from "react"
+import { use, useCallback } from "react"
 import Link from "next/link"
 import { usePebble } from "@/lib/data/usePebble"
 import { useSouls } from "@/lib/data/useSouls"
@@ -17,7 +17,7 @@ export default function PebbleDetailPage({
 }) {
   const { id } = use(params)
   const { pebble, loading: pebbleLoading, updatePebble } = usePebble(id)
-  const { souls, loading: soulsLoading } = useSouls()
+  const { souls, loading: soulsLoading, addSoul } = useSouls()
   const { collections, loading: collectionsLoading, updateCollection } = useCollections()
   const { marks, loading: marksLoading } = useMarks()
 
@@ -27,6 +27,16 @@ export default function PebbleDetailPage({
     c.pebble_ids.includes(id),
   )
   const mark = pebble ? marks.find((m) => m.id === pebble.mark_id) : undefined
+
+  const handleAddSoul = useCallback(
+    async (name: string) => {
+      const soul = await addSoul({ name })
+      if (pebble) {
+        await updatePebble({ soul_ids: [...pebble.soul_ids, soul.id] })
+      }
+    },
+    [addSoul, updatePebble, pebble],
+  )
 
   return (
     <PageLayout>
@@ -52,6 +62,7 @@ export default function PebbleDetailPage({
           mark={mark}
           onUpdatePebble={updatePebble}
           onUpdateCollection={updateCollection}
+          onAddSoul={handleAddSoul}
         />
       ) : (
         <PebbleNotFound />

@@ -26,7 +26,7 @@ function SheetOverlay({
     <DialogPrimitive.Backdrop
       data-slot="sheet-overlay"
       className={cn(
-        "fixed inset-0 z-50 bg-black/10 supports-backdrop-filter:backdrop-blur-xs transition-opacity duration-200 data-open:opacity-100 data-closed:opacity-0",
+        "fixed inset-0 z-[60] bg-black/10 supports-backdrop-filter:backdrop-blur-xs transition-opacity duration-200 data-open:opacity-100 data-closed:opacity-0",
         className
       )}
       {...props}
@@ -51,7 +51,7 @@ function SheetContent({
         data-slot="sheet-content"
         className={cn(
           // Shared
-          "fixed z-50 bg-popover text-popover-foreground ring-1 ring-foreground/10 outline-none",
+          "fixed z-[60] bg-popover text-popover-foreground ring-1 ring-foreground/10 outline-none",
           // Mobile: bottom sheet
           "inset-x-0 bottom-0 max-h-[85dvh] overflow-y-auto rounded-t-2xl p-4 pt-2",
           "translate-y-full data-open:translate-y-0 transition-transform duration-200 ease-out",
