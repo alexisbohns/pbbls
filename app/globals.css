@@ -504,3 +504,32 @@
 .pbbls-visual {
   @apply h-full;
 }
+
+.prose {
+  @apply flex flex-col gap-4;
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading;
+  }
+
+  h1 {
+    @apply text-2xl font-bold;
+  }
+
+  h2 {
+    @apply text-xl font-semibold mt-5;
+  }
+
+  p, ul, li {
+    @apply text-muted-foreground leading-relaxed;
+  }
+
+  li {
+    @apply ml-3 pl-3;
+    list-style-type: "✻";
+
+    &::marker {
+      @apply text-accent;
+    }
+  }
+}

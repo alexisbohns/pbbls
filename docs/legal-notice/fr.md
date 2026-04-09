@@ -11,16 +11,16 @@ last_updated: 2026-04-09
 
 ## Éditeur
 
-Pebbles
-Responsable de la publication : Alexis Bohn
-Adresse : [adresse]
-Téléphone : [téléphone]
-Email : hello@bohns.design
+* Pebbles
+* Responsable de la publication : Alexis Bohn
+* Adresse : [adresse]
+* Téléphone : [téléphone]
+* Email : hello@bohns.design
 
 ## Directeur de la publication
 
-Alexis Bohn
-Email : hello@bohns.design
+* Alexis Bohn
+* Email : hello@bohns.design
 
 ## Hébergeur
 
@@ -39,12 +39,12 @@ Pour plus d'informations sur l'utilisation du code source, veuillez consulter le
 ## Contact
 
 Pour toute question ou réclamation, vous pouvez nous contacter à :
-Email : hello@bohns.design
+* Email : hello@bohns.design
 
 ## Documents connexes
 
-- [Politique de confidentialité](./politique-de-confidentialite.md)
-- [Conditions générales d'utilisation](./conditions-generales-utilisation.md)
+* [Politique de confidentialité](./politique-de-confidentialite.md)
+* [Conditions générales d'utilisation](./conditions-generales-utilisation.md)
 
 ---
 

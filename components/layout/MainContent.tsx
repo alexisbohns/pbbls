@@ -14,6 +14,7 @@ export function MainContent({ children }: MainContentProps) {
   const isLanding = pathname === "/"
   const isOnboarding = pathname.startsWith("/onboarding")
   const isAuth = pathname === "/login" || pathname === "/register"
+  const isDocs = pathname.startsWith("/docs")
   const isFullScreen = isLanding || isOnboarding || isAuth
   const isRecord = pathname.startsWith("/record")
   const isCarve = pathname.startsWith("/carve")
@@ -30,8 +31,8 @@ export function MainContent({ children }: MainContentProps) {
             : "pt-[var(--safe-area-top)] pb-[calc(2rem+var(--safe-area-bottom))]",
       )}
     >
-      {!isLanding && !isAuth && <AuthGate />}
-      {!isLanding && !isAuth && <OnboardingGate />}
+      {!isLanding && !isAuth && !isDocs && <AuthGate />}
+      {!isLanding && !isAuth && !isDocs && <OnboardingGate />}
       {children}
     </main>
   )

@@ -27,15 +27,11 @@ This privacy policy complies with the General Data Protection Regulation (GDPR) 
 
 ## 1. Data Controller and Contact Information
 
-**Data Controller :** Alexis Bohn, founder and developer of Pebbles
-
-**Location :** France
-
-**Email :** hello@bohns.design
-
-**Postal Address :** [address]
-
-**Telephone :** [telephone]
+- **Data Controller :** Alexis Bohn, founder and developer of Pebbles
+- **Location :** France
+- **Email :** hello@bohns.design
+- **Postal Address :** [address]
+- **Telephone :** [telephone]
 
 Alexis Bohn acts as the data controller within the meaning of Article 4(7) of the GDPR and is responsible for compliance with this policy.
 
@@ -408,16 +404,16 @@ Please also consult:
 
 For any questions, requests, or concerns about this privacy policy or your personal data:
 
-**Alexis Bohn**
-**Email :** hello@bohns.design
-**Postal Address :** [address]
-**Telephone :** [telephone]
+- **Alexis Bohn**
+- **Email :** hello@bohns.design
+- **Postal Address :** [address]
+- **Telephone :** [telephone]
 
 ---
 
-**Version :** 1.0.0
-**Effective Date :** April 9, 2026
-**Last Updated :** April 9, 2026
+- **Version :** 1.0.0
+- **Effective Date :** April 9, 2026
+- **Last Updated :** April 9, 2026
 
 ---
 
