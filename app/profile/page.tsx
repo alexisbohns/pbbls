@@ -7,6 +7,7 @@ import { useAuth } from "@/lib/data/auth-context"
 import { ProfileCard } from "@/components/profile/ProfileCard"
 import { LogoutButton } from "@/components/profile/LogoutButton"
 import { AppearanceSection } from "@/components/profile/AppearanceSection"
+import { LegalSection } from "@/components/profile/LegalSection"
 import { PageLayout } from "@/components/layout/PageLayout"
 import { PathProfileCard } from "@/components/path/PathProfileCard"
 import { BackPath } from "@/components/ui/BackPath"
@@ -77,6 +78,8 @@ export default function ProfilePage() {
         </nav>
 
           <AppearanceSection />
+
+          <LegalSection />
 
           <LogoutButton onLogout={handleLogout} />
         </div>
