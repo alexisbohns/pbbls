@@ -45,15 +45,15 @@ export function LandingPage() {
   if (isLoading || isAuthenticated) return null
 
   return (
-    <section className="flex min-h-full flex-col items-center justify-center px-6 text-center">
-      <h1 className="text-5xl font-heading font-bold tracking-tight">
-        pbbls
+    <section className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
+      <h1 className="text-2xl font-heading font-bold tracking-tight">
+        Pebbles
       </h1>
       <p className="mt-3 max-w-sm text-lg text-muted-foreground">
-        Collect meaningful moments, one pebble at a time.
+        Collect meaningful moments.
       </p>
 
-      <ul className="mt-10 flex max-w-sm flex-col gap-3 text-left">
+      <ul className="mt-10 flex max-w-sm flex-col gap-3 text-left border rounded-lg p-6 bg-card">
         {FEATURES.map((feature) => (
           <li key={feature.title} className="flex items-start gap-3">
             <feature.icon
