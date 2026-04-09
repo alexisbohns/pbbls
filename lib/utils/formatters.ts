@@ -24,6 +24,24 @@ export const timeFormatter = new Intl.DateTimeFormat("en-US", {
   minute: "numeric",
 })
 
+/** Peek date: "SUNDAY 5 APRIL · 10:00" */
+export function formatPeekDate(date: Date): string {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).formatToParts(date)
+
+  const weekday = parts.find((p) => p.type === "weekday")?.value ?? ""
+  const day = parts.find((p) => p.type === "day")?.value ?? ""
+  const month = parts.find((p) => p.type === "month")?.value ?? ""
+
+  const hours = String(date.getHours()).padStart(2, "0")
+  const minutes = String(date.getMinutes()).padStart(2, "0")
+
+  return `${weekday} ${day} ${month} · ${hours}:${minutes}`.toUpperCase()
+}
+
 /** Pluralize a word based on count: pluralize(3, "pebble") → "3 pebbles" */
 export function pluralize(count: number, singular: string, plural?: string): string {
   const word = count === 1 ? singular : (plural ?? `${singular}s`)
