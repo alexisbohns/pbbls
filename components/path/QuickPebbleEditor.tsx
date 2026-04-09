@@ -78,7 +78,7 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
   // Collapse state
   const [expanded, setExpanded] = useState(false)
   const sectionRef = useRef<HTMLElement>(null)
-  const titleInputRef = useRef<HTMLInputElement>(null)
+  const titleInputRef = useRef<HTMLTextAreaElement>(null)
   const hasAutoExpanded = useRef(false)
 
   // Form state
@@ -333,16 +333,16 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
       </motion.div>
 
       {/* Title input — always visible */}
-      <input
+      <textarea
         ref={titleInputRef}
-        type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
         placeholder="What happened?"
         className={cn(
-          "w-full border-none bg-transparent font-heading text-xl font-semibold text-foreground outline-none placeholder:text-muted-foreground/50",
+          "w-full resize-none border-none bg-transparent font-heading text-xl font-semibold text-foreground outline-none field-sizing-content placeholder:text-muted-foreground/50",
           expanded && "mb-2",
         )}
+        rows={1}
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey) {
             e.preventDefault()
