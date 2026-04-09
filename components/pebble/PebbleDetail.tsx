@@ -1,6 +1,7 @@
 import type { Pebble, Soul, Collection, Mark } from "@/lib/types"
 import type { UpdatePebbleInput, UpdateCollectionInput } from "@/lib/data/data-provider"
 import { EMOTIONS, DOMAINS, CARD_TYPES } from "@/lib/config"
+import { EmotionBadge } from "@/components/ui/EmotionBadge"
 import { IntensityDots, PositivenessIndicator } from "@/components/pebble/PebbleIndicators"
 import { DetailSection } from "@/components/pebble/DetailSection"
 import { GlyphPreview } from "@/components/glyphs/GlyphPreview"
@@ -8,7 +9,7 @@ import { SoulSheet } from "@/components/pebble/SoulSheet"
 import { DomainSheet } from "@/components/pebble/DomainSheet"
 import { CollectionSheet } from "@/components/pebble/CollectionSheet"
 import { GlyphSheet } from "@/components/pebble/GlyphSheet"
-import { Badge } from "@/components/ui/badge"
+import { TagList } from "@/components/ui/TagList"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
 import { PebbleVisual } from "@/components/pebble/PebbleVisual"
@@ -59,16 +60,7 @@ export function PebbleDetail({
 
         <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
           {emotion ? (
-            <span
-              className="rounded-full px-2.5 py-0.5 text-sm font-medium"
-              style={{
-                backgroundColor: `${emotion.color}20`,
-                color: emotion.color,
-              }}
-              aria-label={`Emotion: ${emotion.name}`}
-            >
-              {emotion.name}
-            </span>
+            <EmotionBadge emotion={emotion} size="md" />
           ) : (
             <Button
               variant="ghost"
@@ -141,15 +133,7 @@ export function PebbleDetail({
           />
         }
       >
-        {matchedSouls.length > 0 && (
-          <ul className="mt-2 flex flex-wrap gap-2" role="list">
-            {matchedSouls.map((soul) => (
-              <li key={soul.id}>
-                <Badge variant="outline">{soul.name}</Badge>
-              </li>
-            ))}
-          </ul>
-        )}
+        <TagList items={matchedSouls} />
       </DetailSection>
 
       {/* Collections */}
@@ -165,15 +149,7 @@ export function PebbleDetail({
           />
         }
       >
-        {collections.length > 0 && (
-          <ul className="mt-2 flex flex-wrap gap-2" role="list">
-            {collections.map((collection) => (
-              <li key={collection.id}>
-                <Badge variant="outline">{collection.name}</Badge>
-              </li>
-            ))}
-          </ul>
-        )}
+        <TagList items={collections} />
       </DetailSection>
 
       {/* Domains */}
@@ -187,15 +163,7 @@ export function PebbleDetail({
           />
         }
       >
-        {domains.length > 0 && (
-          <ul className="mt-2 flex flex-wrap gap-2" role="list">
-            {domains.map((domain) => (
-              <li key={domain.id}>
-                <Badge variant="outline">{domain.name}</Badge>
-              </li>
-            ))}
-          </ul>
-        )}
+        <TagList items={domains} />
       </DetailSection>
 
       {/* Cards */}

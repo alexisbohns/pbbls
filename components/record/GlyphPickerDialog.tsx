@@ -1,60 +1,45 @@
 "use client"
 
 import { useState, useCallback } from "react"
-import { Plus } from "lucide-react"
 import type { Mark } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
-  DialogClose,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogFooter,
+  DialogClose,
 } from "@/components/ui/dialog"
 import { GlyphPickerGrid } from "@/components/glyphs/GlyphPickerGrid"
 
-type GlyphSheetProps = {
+type GlyphPickerDialogProps = {
+  open: boolean
+  onOpenChange: (open: boolean) => void
   marks: Mark[]
   selectedMarkId: string | undefined
   onSave: (markId: string | undefined) => void
 }
 
-export function GlyphSheet({ marks, selectedMarkId, onSave }: GlyphSheetProps) {
-  const [open, setOpen] = useState(false)
+export function GlyphPickerDialog({
+  open,
+  onOpenChange,
+  marks,
+  selectedMarkId,
+  onSave,
+}: GlyphPickerDialogProps) {
   const [localMarkId, setLocalMarkId] = useState<string | undefined>(selectedMarkId)
 
   const handleOpenChange = useCallback(
     (nextOpen: boolean) => {
-      setOpen(nextOpen)
+      onOpenChange(nextOpen)
       if (nextOpen) setLocalMarkId(selectedMarkId)
     },
-    [selectedMarkId],
+    [selectedMarkId, onOpenChange],
   )
-
-  const handleSelect = useCallback((id: string | undefined) => {
-    setLocalMarkId(id)
-  }, [])
-
-  const handleSave = useCallback(() => {
-    onSave(localMarkId)
-    setOpen(false)
-  }, [localMarkId, onSave])
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger
-        render={
-          <Button
-            variant="ghost"
-            size="icon-xs"
-            aria-label="Add glyph"
-          >
-            <Plus />
-          </Button>
-        }
-      />
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Glyph</DialogTitle>
@@ -63,12 +48,19 @@ export function GlyphSheet({ marks, selectedMarkId, onSave }: GlyphSheetProps) {
         <GlyphPickerGrid
           marks={marks}
           selectedMarkId={localMarkId}
-          onSelect={handleSelect}
+          onSelect={setLocalMarkId}
         />
 
         <DialogFooter>
           <DialogClose>Cancel</DialogClose>
-          <Button onClick={handleSave}>Save</Button>
+          <Button
+            onClick={() => {
+              onSave(localMarkId)
+              onOpenChange(false)
+            }}
+          >
+            Save
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

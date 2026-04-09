@@ -5,17 +5,7 @@ import { PEBBLE_SHAPES } from "@/lib/config"
 import type { Mark } from "@/lib/types"
 import { GlyphPreview } from "@/components/glyphs/GlyphPreview"
 import { Button } from "@/components/ui/button"
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
 
 type GlyphDetailProps = {
   mark: Mark
@@ -53,31 +43,18 @@ export function GlyphDetail({ mark, onDelete }: GlyphDetailProps) {
       </div>
 
       <div className="mt-8 flex justify-center">
-        <AlertDialog>
-          <AlertDialogTrigger
-            render={
-              <Button variant="outline" size="sm">
-                <Trash2 className="size-4" aria-hidden="true" />
-                Delete glyph
-              </Button>
-            }
-          />
-          <AlertDialogContent size="sm">
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete this glyph?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. The glyph will be permanently
-                removed.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction variant="destructive" onClick={onDelete}>
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <ConfirmDialog
+          trigger={
+            <Button variant="outline" size="sm">
+              <Trash2 className="size-4" aria-hidden="true" />
+              Delete glyph
+            </Button>
+          }
+          title="Delete this glyph?"
+          description="This action cannot be undone. The glyph will be permanently removed."
+          confirmLabel="Delete"
+          onConfirm={onDelete}
+        />
       </div>
     </article>
   )

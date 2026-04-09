@@ -5,6 +5,7 @@ import { Pencil } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { Soul } from "@/lib/types"
+import { pluralize } from "@/lib/utils/formatters"
 
 type SoulDetailHeaderProps = {
   soul: Soul
@@ -83,7 +84,7 @@ export function SoulDetailHeader({
       )}
 
       <p className="mt-2 text-sm text-muted-foreground">
-        {pebbleCount} {pebbleCount === 1 ? "pebble" : "pebbles"}
+        {pluralize(pebbleCount, "pebble")}
       </p>
     </header>
   )

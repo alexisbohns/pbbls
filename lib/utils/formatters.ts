@@ -23,3 +23,9 @@ export const timeFormatter = new Intl.DateTimeFormat("en-US", {
   hour: "numeric",
   minute: "numeric",
 })
+
+/** Pluralize a word based on count: pluralize(3, "pebble") → "3 pebbles" */
+export function pluralize(count: number, singular: string, plural?: string): string {
+  const word = count === 1 ? singular : (plural ?? `${singular}s`)
+  return `${count} ${word}`
+}
