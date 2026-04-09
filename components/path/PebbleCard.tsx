@@ -1,6 +1,7 @@
 import type { Pebble, Emotion, Mark } from "@/lib/types"
 import { PebbleVisual } from "@/components/pebble/PebbleVisual"
 import { IntensityDots, PositivenessIndicator } from "@/components/pebble/PebbleIndicators"
+import { EmotionBadge } from "@/components/ui/EmotionBadge"
 import { timeFormatter } from "@/lib/utils/formatters"
 
 type PebbleCardProps = {
@@ -9,20 +10,6 @@ type PebbleCardProps = {
   mark?: Mark
   soulNames: string[]
   onSelect?: (id: string) => void
-}
-
-function EmotionBadge({ emotion }: { emotion: Emotion }) {
-  return (
-    <span
-      className="rounded-full px-2 py-0.5 text-xs font-medium"
-      style={{
-        backgroundColor: `${emotion.color}20`,
-        color: emotion.color,
-      }}
-    >
-      {emotion.name}
-    </span>
-  )
 }
 
 function MetadataRow({
@@ -109,7 +96,6 @@ export function PebbleCard({ pebble, emotion, mark, soulNames, onSelect }: Pebbl
 
               <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 {emotion && <EmotionBadge emotion={emotion} />}
-
                 <IntensityDots intensity={pebble.intensity} size="xs" />
                 <PositivenessIndicator value={pebble.positiveness} size="xs" />
 

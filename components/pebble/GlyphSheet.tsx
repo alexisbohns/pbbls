@@ -3,7 +3,6 @@
 import { useState, useCallback } from "react"
 import { Plus } from "lucide-react"
 import type { Mark } from "@/lib/types"
-import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -14,7 +13,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { GlyphPreview } from "@/components/glyphs/GlyphPreview"
+import { GlyphPickerGrid } from "@/components/glyphs/GlyphPickerGrid"
 
 type GlyphSheetProps = {
   marks: Mark[]
@@ -34,8 +33,8 @@ export function GlyphSheet({ marks, selectedMarkId, onSave }: GlyphSheetProps) {
     [selectedMarkId],
   )
 
-  const handleSelect = useCallback((id: string) => {
-    setLocalMarkId((prev) => (prev === id ? undefined : id))
+  const handleSelect = useCallback((id: string | undefined) => {
+    setLocalMarkId(id)
   }, [])
 
   const handleSave = useCallback(() => {
@@ -61,40 +60,11 @@ export function GlyphSheet({ marks, selectedMarkId, onSave }: GlyphSheetProps) {
           <DialogTitle>Glyph</DialogTitle>
         </DialogHeader>
 
-        {marks.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No glyphs yet. Carve one from the Carve page.
-          </p>
-        ) : (
-          <ul
-            role="radiogroup"
-            aria-label="Glyphs"
-            className="grid grid-cols-4 gap-2"
-          >
-            {marks.map((mark) => {
-              const selected = localMarkId === mark.id
-              return (
-                <li key={mark.id}>
-                  <button
-                    type="button"
-                    role="radio"
-                    aria-checked={selected}
-                    aria-label={mark.name ?? `Glyph ${mark.id.slice(0, 4)}`}
-                    onClick={() => handleSelect(mark.id)}
-                    className={cn(
-                      "flex size-16 items-center justify-center rounded-lg border p-1 transition-all duration-100 outline-none focus-visible:ring-3 focus-visible:ring-ring/50 active:scale-95",
-                      selected
-                        ? "border-primary bg-primary/10 ring-2 ring-primary"
-                        : "border-input hover:bg-muted",
-                    )}
-                  >
-                    <GlyphPreview mark={mark} className="size-full" />
-                  </button>
-                </li>
-              )
-            })}
-          </ul>
-        )}
+        <GlyphPickerGrid
+          marks={marks}
+          selectedMarkId={localMarkId}
+          onSelect={handleSelect}
+        />
 
         <DialogFooter>
           <DialogClose>Cancel</DialogClose>
