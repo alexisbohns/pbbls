@@ -109,7 +109,7 @@ When creating a PR, you MUST follow this checklist:
 
 # Product Architecture Map (Arkaik)
 
-Pebbles' product architecture is described in an Arkaik ProjectBundle JSON file at `apps/web/docs/arkaik/bundle.json`. This map is the source of truth for all screens, flows, data models, and API endpoints in the product.
+Pebbles' product architecture is described in an Arkaik ProjectBundle JSON file at `docs/arkaik/bundle.json`. This map is the source of truth for all screens, flows, data models, and API endpoints in the product.
 
 **Whenever your work changes the product architecture** — adding a screen, creating a route, defining a model, wiring an endpoint, removing a feature, or changing a feature's status — **update the map as part of the same change.**
 

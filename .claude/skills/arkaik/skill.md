@@ -17,7 +17,7 @@ You are maintaining an **Arkaik ProjectBundle** — a JSON file that describes t
 product architecture of Pebbles as a graph of nodes (screens, flows, data models,
 API endpoints) and edges (relationships between them).
 
-The map lives at `apps/web/docs/arkaik/bundle.json` in the repository. If it
+The map lives at `docs/arkaik/bundle.json` in the repository. If it
 doesn't exist at that path yet, check the project root and `docs/` for any
 `*arkaik*.json` file. If you find one elsewhere, use it where it is — don't move
 files without the user's approval.
