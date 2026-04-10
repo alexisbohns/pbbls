@@ -40,7 +40,7 @@ begin
   if p_snaps_count > 0 then
     delta := delta + 1;
   end if;
-  return delta;
+  return least(delta, 10);
 end;
 $$ language plpgsql immutable;
 
