@@ -1,0 +1,11 @@
+{
+  "name": "@pbbls/shared",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "echo 'placeholder — no build step yet'",
+    "lint": "echo 'placeholder — no lint step yet'"
+  }
+}
