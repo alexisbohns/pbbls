@@ -13,8 +13,8 @@
 - Build small, composable, single-responsibility components.
 - Each component does one thing. If it needs a second responsibility, split it.
 - Avoid duplicating components — reuse and compose instead (ie. a status badge with only an icon and another with icon + text should be the same component with a variant prop).
-- UI primitives live in `components/ui/` (shadcn/ui). Do not duplicate them.
-- Domain components live in feature folders: `components/path/`, `components/pebble/`, `components/record/`, etc.
+- UI primitives live in `apps/web/components/ui/` (shadcn/ui). Do not duplicate them.
+- Domain components live in feature folders: `apps/web/components/path/`, `apps/web/components/pebble/`, `apps/web/components/record/`, etc.
 - Hooks encapsulate data access. Components never call the provider directly.
 - Sidebar is customizable per page by passing the sidebar prop: `<PageLayout sidebar={<PathProfileCard />}>...</PageLayout>`
 
@@ -28,7 +28,7 @@
 ### TypeScript
 
 - Strict mode. No `any`. No type assertions unless absolutely necessary.
-- Define types in `lib/types.ts` for domain entities.
+- Define types in `apps/web/lib/types.ts` for domain entities.
 - Props types are defined inline or co-located with the component, not in `types.ts`.
 
 ### Accessibility
@@ -107,7 +107,7 @@ When creating a PR, you MUST follow this checklist:
 
 # Product Architecture Map (Arkaik)
 
-Pebbles' product architecture is described in an Arkaik ProjectBundle JSON file at `docs/arkaik/bundle.json`. This map is the source of truth for all screens, flows, data models, and API endpoints in the product.
+Pebbles' product architecture is described in an Arkaik ProjectBundle JSON file at `apps/web/docs/arkaik/bundle.json`. This map is the source of truth for all screens, flows, data models, and API endpoints in the product.
 
 **Whenever your work changes the product architecture** — adding a screen, creating a route, defining a model, wiring an endpoint, removing a feature, or changing a feature's status — **update the map as part of the same change.**
 
