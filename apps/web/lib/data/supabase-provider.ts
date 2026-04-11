@@ -386,6 +386,144 @@ export class SupabaseProvider implements DataProvider {
   }
 
   // ---------------------------------------------------------------------------
+  // Mount sync — fetch from Supabase, push offline items, replace local
+  // ---------------------------------------------------------------------------
+
+  async syncFromSupabase(): Promise<Store> {
+    try {
+      // Fetch all user data from Supabase in parallel
+      const [
+        pebblesRes,
+        soulsRes,
+        collectionsRes,
+        collectionPebblesRes,
+        glyphsRes,
+        karmaRes,
+        bounceRes,
+      ] = await Promise.all([
+        this.supabase.from("v_pebbles_full").select("*"),
+        this.supabase.from("souls").select("*").eq("user_id", this.userId),
+        this.supabase.from("collections").select("*").eq("user_id", this.userId),
+        this.supabase.from("collection_pebbles").select("*"),
+        this.supabase.from("glyphs").select("*").eq("user_id", this.userId),
+        this.supabase.from("v_karma_summary").select("*").eq("user_id", this.userId).single(),
+        this.supabase.from("v_bounce").select("*").eq("user_id", this.userId).single(),
+      ])
+
+      // Parse remote pebbles from the denormalized view
+      const remotePebbles: Pebble[] = (pebblesRes.data ?? []).map((row: Record<string, unknown>) => ({
+        id: row.id as string,
+        name: row.name as string,
+        description: (row.description as string) ?? undefined,
+        happened_at: row.happened_at as string,
+        intensity: row.intensity as 1 | 2 | 3,
+        positiveness: row.positiveness as -1 | 0 | 1,
+        visibility: (row.visibility as string) as "private" | "public",
+        emotion_id: row.emotion_id as string,
+        soul_ids: ((row.souls as Array<{ id: string }>) ?? []).map((s) => s.id),
+        domain_ids: ((row.domains as Array<{ id: string }>) ?? []).map((d) => d.id),
+        mark_id: (row.glyph_id as string) ?? undefined,
+        instants: [], // snaps not yet mapped to instants
+        cards: ((row.cards as Array<{ species_id: string; value: string }>) ?? []).map((c) => ({
+          species_id: c.species_id,
+          value: c.value,
+        })),
+        created_at: row.created_at as string,
+        updated_at: row.updated_at as string,
+      }))
+
+      const remoteSouls: Soul[] = (soulsRes.data ?? []).map((row: Record<string, unknown>) => ({
+        id: row.id as string,
+        name: row.name as string,
+        created_at: row.created_at as string,
+        updated_at: row.updated_at as string,
+      }))
+
+      // Build collection pebble_ids from join table
+      const cpMap = new Map<string, string[]>()
+      for (const row of collectionPebblesRes.data ?? []) {
+        const cid = (row as Record<string, string>).collection_id
+        const pid = (row as Record<string, string>).pebble_id
+        const arr = cpMap.get(cid) ?? []
+        arr.push(pid)
+        cpMap.set(cid, arr)
+      }
+
+      const remoteCollections: Collection[] = (collectionsRes.data ?? []).map((row: Record<string, unknown>) => ({
+        id: row.id as string,
+        name: row.name as string,
+        mode: (row.mode as "stack" | "pack" | "track") ?? undefined,
+        pebble_ids: cpMap.get(row.id as string) ?? [],
+        created_at: row.created_at as string,
+        updated_at: row.updated_at as string,
+      }))
+
+      const remoteMarks: Mark[] = (glyphsRes.data ?? []).map((row: Record<string, unknown>) => ({
+        id: row.id as string,
+        name: (row.name as string) ?? undefined,
+        shape_id: row.shape_id as string,
+        strokes: row.strokes as Mark["strokes"],
+        viewBox: row.view_box as string,
+        created_at: row.created_at as string,
+        updated_at: row.updated_at as string,
+      }))
+
+      // Push local-only items (created offline)
+      const remoteIds = {
+        pebbles: new Set(remotePebbles.map((p) => p.id)),
+        souls: new Set(remoteSouls.map((s) => s.id)),
+        collections: new Set(remoteCollections.map((c) => c.id)),
+        marks: new Set(remoteMarks.map((m) => m.id)),
+      }
+
+      for (const pebble of this.store.pebbles) {
+        if (!remoteIds.pebbles.has(pebble.id)) {
+          this.pushPebbleCreate(pebble, pebble as unknown as CreatePebbleInput)
+        }
+      }
+      for (const soul of this.store.souls) {
+        if (!remoteIds.souls.has(soul.id)) {
+          this.pushSoulCreate(soul)
+        }
+      }
+      for (const collection of this.store.collections) {
+        if (!remoteIds.collections.has(collection.id)) {
+          this.pushCollectionCreate(collection)
+        }
+      }
+      for (const mark of this.store.marks) {
+        if (!remoteIds.marks.has(mark.id)) {
+          this.pushMarkCreate(mark)
+        }
+      }
+
+      // Build new store from Supabase data
+      const karma = (karmaRes.data as Record<string, unknown>)?.total_karma as number ?? 0
+      const pebblesCount = (karmaRes.data as Record<string, unknown>)?.pebbles_count as number ?? 0
+      const bounce = (bounceRes.data as Record<string, unknown>)?.bounce_level as number ?? 0
+
+      const newStore: Store = {
+        pebbles: remotePebbles,
+        souls: remoteSouls,
+        collections: remoteCollections,
+        marks: remoteMarks,
+        pebbles_count: pebblesCount,
+        karma,
+        karma_log: [], // karma_log is not synced — it's derived from karma_events server-side
+        bounce,
+        bounce_window: [], // bounce_window is not synced — computed server-side
+      }
+
+      this.mutate(newStore)
+      return newStore
+    } catch (err) {
+      console.warn("[SupabaseProvider] syncFromSupabase failed:", err)
+      // Keep local data on failure
+      return this.store
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // Background push — fire-and-forget to Supabase
   // ---------------------------------------------------------------------------
 
