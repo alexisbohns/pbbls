@@ -31,9 +31,8 @@ export function MainContent({ children }: MainContentProps) {
             : "pt-[var(--safe-area-top)] pb-[calc(2rem+var(--safe-area-bottom))]",
       )}
     >
-      {!isLanding && !isAuth && !isDocs && <AuthGate />}
       {!isLanding && !isAuth && !isDocs && <OnboardingGate />}
-      {children}
+      <AuthGate>{children}</AuthGate>
     </main>
   )
 }
