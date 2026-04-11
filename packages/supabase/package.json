@@ -5,7 +5,7 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
-    "build": "echo 'placeholder — no build step yet'",
+    "build": "tsc --noEmit",
     "lint": "echo 'placeholder — no lint step yet'",
     "db:start": "supabase start",
     "db:stop": "supabase stop",
