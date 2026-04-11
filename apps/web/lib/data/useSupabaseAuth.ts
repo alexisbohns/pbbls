@@ -153,6 +153,19 @@ export function useSupabaseAuth(): AuthContextValue {
     if (error) throw new Error(error.message)
   }, [])
 
+  const signInWithGoogle = useCallback(async () => {
+    const supabase = getSupabase()
+    if (!supabase) throw new Error("Supabase client not available")
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    })
+    if (error) throw new Error(error.message)
+  }, [])
+
   const logout = useCallback(async () => {
     const supabase = getSupabase()
     if (!supabase) throw new Error("Supabase client not available")
@@ -191,6 +204,7 @@ export function useSupabaseAuth(): AuthContextValue {
     login,
     register,
     signInWithApple,
+    signInWithGoogle,
     logout,
     updateProfile,
   }
