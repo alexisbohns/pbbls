@@ -58,49 +58,32 @@ export type UpdateMarkInput = Partial<Omit<Mark, "id" | "created_at" | "updated_
 // ---------------------------------------------------------------------------
 
 export interface DataProvider {
-  /** Return the current in-memory store snapshot. */
   getStore(): Store
-
-  /** Re-read the content store after a session change (login/register/logout). */
-  reloadStore(): Store
-
-  /** Overwrite store with seed data and return the new snapshot. */
+  loadFromSupabase(): Promise<Store>
   reset(): Promise<Store>
 
-  // Pebbles counter
   getPebblesCount(): Promise<number>
-  incrementPebblesCount(): Promise<number>
-
-  // Karma
   getKarma(): Promise<number>
-  incrementKarma(delta: number, reason: string, refId?: string): Promise<number>
-
-  // Bounce
   getBounce(): Promise<number>
-  refreshBounce(): Promise<number>
 
-  // Pebbles
   listPebbles(): Promise<Pebble[]>
   getPebble(id: string): Promise<Pebble | undefined>
   createPebble(input: CreatePebbleInput): Promise<Pebble>
   updatePebble(id: string, input: UpdatePebbleInput): Promise<Pebble>
   deletePebble(id: string): Promise<void>
 
-  // Souls
   listSouls(): Promise<Soul[]>
   getSoul(id: string): Promise<Soul | undefined>
   createSoul(input: CreateSoulInput): Promise<Soul>
   updateSoul(id: string, input: UpdateSoulInput): Promise<Soul>
   deleteSoul(id: string): Promise<void>
 
-  // Collections
   listCollections(): Promise<Collection[]>
   getCollection(id: string): Promise<Collection | undefined>
   createCollection(input: CreateCollectionInput): Promise<Collection>
   updateCollection(id: string, input: UpdateCollectionInput): Promise<Collection>
   deleteCollection(id: string): Promise<void>
 
-  // Marks
   listMarks(): Promise<Mark[]>
   getMark(id: string): Promise<Mark | undefined>
   createMark(input: CreateMarkInput): Promise<Mark>
