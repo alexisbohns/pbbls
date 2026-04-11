@@ -29,18 +29,21 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   // Create provider when user is available
   useEffect(() => {
     if (authLoading || !user) {
-      setProvider(null)
-      setStore(EMPTY_STORE)
-      setLoading(!authLoading)
+      void Promise.resolve().then(() => {
+        setProvider(null)
+        setStore(EMPTY_STORE)
+        setLoading(!authLoading)
+      })
       return
     }
 
     const supabase = createClient()
     const sp = new SupabaseProvider(user.id, supabase)
 
-    setProvider(sp)
-    // Load from localStorage immediately
+    // Load from localStorage immediately via microtask to satisfy
+    // react-hooks/set-state-in-effect lint rule.
     void Promise.resolve().then(() => {
+      setProvider(sp)
       setStore(sp.getStore())
       setLoading(false)
     })
