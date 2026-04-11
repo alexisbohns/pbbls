@@ -53,6 +53,10 @@ export function useSupabaseAuth(): AuthContextValue {
         if (!cancelled) setProfile(data as Profile | null)
       }
       if (!cancelled) setIsLoading(false)
+    }).catch(() => {
+      // getUser() can reject on network failures. Always clear the loading
+      // state so the app doesn't get stuck on a blank screen.
+      if (!cancelled) setIsLoading(false)
     })
 
     const {
@@ -68,19 +72,25 @@ export function useSupabaseAuth(): AuthContextValue {
         return
       }
 
-      setUser({
-        id: session.user.id,
-        email: session.user.email ?? "",
-        created_at: session.user.created_at,
-      })
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .maybeSingle()
-      if (!cancelled) {
-        setProfile(data as Profile | null)
-        setIsLoading(false)
+      try {
+        setUser({
+          id: session.user.id,
+          email: session.user.email ?? "",
+          created_at: session.user.created_at,
+        })
+        const { data } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("user_id", session.user.id)
+          .maybeSingle()
+        if (!cancelled) {
+          setProfile(data as Profile | null)
+          setIsLoading(false)
+        }
+      } catch {
+        // Profile fetch failed — still mark loading as done so the app
+        // doesn't get stuck on a blank screen.
+        if (!cancelled) setIsLoading(false)
       }
     })
 

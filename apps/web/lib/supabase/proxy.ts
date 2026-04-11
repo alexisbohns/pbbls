@@ -44,7 +44,14 @@ export async function updateSession(request: NextRequest) {
   // IMPORTANT: getClaims validates the JWT signature against Supabase's
   // public keys and refreshes the token if expired. This is what keeps the
   // session alive across navigations.
-  await supabase.auth.getClaims()
+  // Wrap in try/catch: getClaims() rethrows non-auth errors (e.g. network
+  // failures). Without this guard a transient Supabase outage would crash
+  // every request instead of passing through with the existing cookies.
+  try {
+    await supabase.auth.getClaims()
+  } catch {
+    // Pass through with existing cookies — the client will handle the error.
+  }
 
   return supabaseResponse
 }
