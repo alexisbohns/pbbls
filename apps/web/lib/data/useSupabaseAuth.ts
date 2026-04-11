@@ -59,7 +59,7 @@ export function useSupabaseAuth(): AuthContextValue {
         .from("profiles")
         .select("*")
         .eq("user_id", userId)
-        .single()
+        .maybeSingle()
 
       if (error || !data) return null
       return data as Profile
