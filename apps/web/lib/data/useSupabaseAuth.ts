@@ -33,18 +33,22 @@ export function useSupabaseAuth(): AuthContextValue {
 
     let cancelled = false
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    // Use getUser() instead of getSession() — it validates the token with
+    // the Supabase Auth server and refreshes if expired. getSession() only
+    // reads from cookies without validation, which can return stale/invalid
+    // tokens that cause 401 on subsequent API calls.
+    supabase.auth.getUser().then(async ({ data: { user: supabaseUser } }) => {
       if (cancelled) return
-      if (session?.user) {
+      if (supabaseUser) {
         setUser({
-          id: session.user.id,
-          email: session.user.email ?? "",
-          created_at: session.user.created_at,
+          id: supabaseUser.id,
+          email: supabaseUser.email ?? "",
+          created_at: supabaseUser.created_at,
         })
         const { data } = await supabase
           .from("profiles")
           .select("*")
-          .eq("user_id", session.user.id)
+          .eq("user_id", supabaseUser.id)
           .maybeSingle()
         if (!cancelled) setProfile(data as Profile | null)
       }
