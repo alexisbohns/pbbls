@@ -52,9 +52,8 @@ export type CreateMarkInput = Omit<Mark, "id" | "created_at" | "updated_at">
 export type UpdateMarkInput = Partial<Omit<Mark, "id" | "created_at" | "updated_at">>
 
 // ---------------------------------------------------------------------------
-// DataProvider interface — designed for a Supabase swap: keep this interface,
-// replace the implementation. All mutation methods return Promises so the
-// contract stays async even though LocalProvider resolves synchronously.
+// DataProvider interface — implemented by SupabaseProvider.
+// All mutation methods return Promises to match async Supabase calls.
 // ---------------------------------------------------------------------------
 
 export interface DataProvider {

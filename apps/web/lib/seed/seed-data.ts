@@ -4,7 +4,7 @@ import { DOMAINS } from "@/lib/config/domains"
 import { CARD_TYPES } from "@/lib/config/card-types"
 
 // ---------------------------------------------------------------------------
-// Seed types — timestamps are injected by LocalProvider at hydration time,
+// Seed types — timestamps are injected at hydration time,
 // so they are intentionally omitted from these constants.
 // ---------------------------------------------------------------------------
 
