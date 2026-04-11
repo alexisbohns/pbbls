@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
 
 // Singleton client — created once on first browser-side call.
@@ -35,19 +35,16 @@ export function useSupabaseAuth(): AuthContextValue {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [isLoading, setIsLoading] = useState(() => getSupabase() !== null)
 
+  // Track the current user ID to avoid redundant state updates when
+  // onAuthStateChange fires with the same user (e.g. TOKEN_REFRESHED).
+  // Without this, every event creates a new Account object reference,
+  // triggering downstream effects (DataProvider recreates SupabaseProvider,
+  // which syncs and can overwrite local data).
+  const currentUserIdRef = useRef<string | null>(null)
+
   // -----------------------------------------------------------------------
   // Helpers
   // -----------------------------------------------------------------------
-
-  /** Map a Supabase user to our Account type. */
-  const toAccount = useCallback(
-    (supabaseUser: { id: string; email?: string; created_at: string }): Account => ({
-      id: supabaseUser.id,
-      email: supabaseUser.email ?? "",
-      created_at: supabaseUser.created_at,
-    }),
-    [],
-  )
 
   /** Fetch the profile row for a given user ID. */
   const fetchProfile = useCallback(
@@ -67,6 +64,31 @@ export function useSupabaseAuth(): AuthContextValue {
     [],
   )
 
+  /** Update user state only if the user ID actually changed. */
+  const updateUserState = useCallback(
+    async (supabaseUser: { id: string; email?: string; created_at: string }) => {
+      if (currentUserIdRef.current === supabaseUser.id) return
+      currentUserIdRef.current = supabaseUser.id
+      const account: Account = {
+        id: supabaseUser.id,
+        email: supabaseUser.email ?? "",
+        created_at: supabaseUser.created_at,
+      }
+      setUser(account)
+      const prof = await fetchProfile(supabaseUser.id)
+      setProfile(prof)
+    },
+    [fetchProfile],
+  )
+
+  /** Clear user state. */
+  const clearUserState = useCallback(() => {
+    if (currentUserIdRef.current === null) return
+    currentUserIdRef.current = null
+    setUser(null)
+    setProfile(null)
+  }, [])
+
   // -----------------------------------------------------------------------
   // Auth state listener
   // -----------------------------------------------------------------------
@@ -78,29 +100,27 @@ export function useSupabaseAuth(): AuthContextValue {
     // Check for existing session on mount
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       if (session?.user) {
-        setUser(toAccount(session.user))
-        const prof = await fetchProfile(session.user.id)
-        setProfile(prof)
+        await updateUserState(session.user)
       }
       setIsLoading(false)
     })
 
-    // Listen for auth state changes (login, logout, token refresh)
+    // Listen for auth state changes (login, logout, token refresh).
+    // Only update React state when the user identity changes — skip
+    // TOKEN_REFRESHED events for the same user to prevent downstream
+    // effects from re-running (DataProvider, sync, etc.).
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
-        setUser(toAccount(session.user))
-        const prof = await fetchProfile(session.user.id)
-        setProfile(prof)
+        await updateUserState(session.user)
       } else {
-        setUser(null)
-        setProfile(null)
+        clearUserState()
       }
     })
 
     return () => subscription.unsubscribe()
-  }, [toAccount, fetchProfile])
+  }, [updateUserState, clearUserState])
 
   // -----------------------------------------------------------------------
   // Auth actions

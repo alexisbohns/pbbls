@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { DataContext } from "@/lib/data/provider-context"
 import { LocalProvider } from "@/lib/data/local-provider"
 import { SupabaseProvider } from "@/lib/data/supabase-provider"
@@ -18,31 +18,49 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   const [store, setStore] = useState<Store>(EMPTY_STORE)
   const [loading, setLoading] = useState(true)
 
-  // Create provider when user is available
+  // Track which user ID the current provider belongs to, so we only
+  // recreate the SupabaseProvider when the actual identity changes —
+  // not on every user object reference change.
+  const activeUserIdRef = useRef<string | null>(null)
+
   useEffect(() => {
-    if (authLoading || !user) {
+    if (authLoading) {
+      return
+    }
+
+    if (!user) {
+      // Not authenticated — use fallback provider
+      const wasAuthenticated = activeUserIdRef.current !== null
+      activeUserIdRef.current = null
       void Promise.resolve().then(() => {
-        setProvider(fallbackProvider)
-        setStore(EMPTY_STORE)
-        setLoading(!authLoading)
+        if (wasAuthenticated) {
+          setProvider(fallbackProvider)
+          setStore(EMPTY_STORE)
+        }
+        setLoading(false)
       })
       return
     }
 
+    // Same user as before — don't recreate provider
+    if (activeUserIdRef.current === user.id) {
+      return
+    }
+
+    activeUserIdRef.current = user.id
     const supabase = createClient()
     const sp = new SupabaseProvider(user.id, supabase)
+    const userId = user.id
 
-    // Load from localStorage immediately via microtask to satisfy
-    // react-hooks/set-state-in-effect lint rule.
     void Promise.resolve().then(() => {
       setProvider(sp)
       setStore(sp.getStore())
       setLoading(false)
     })
 
-    // Sync from Supabase in background
+    // Sync from Supabase in background — only apply if still the active user
     sp.syncFromSupabase().then((freshStore) => {
-      setStore(freshStore)
+      if (activeUserIdRef.current === userId) setStore(freshStore)
     }).catch(() => {
       // Sync failed — keep localStorage data
     })
