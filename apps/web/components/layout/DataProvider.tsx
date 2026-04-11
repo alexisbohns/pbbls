@@ -1,11 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { DataContext } from "@/lib/data/provider-context"
+import { LocalProvider } from "@/lib/data/local-provider"
 import { SupabaseProvider } from "@/lib/data/supabase-provider"
 import { useAuth } from "@/lib/data/auth-context"
 import { createClient } from "@/lib/supabase/client"
-import type { Store } from "@/lib/data/data-provider"
+import type { DataProvider as DataProviderInterface, Store } from "@/lib/data/data-provider"
 
 const EMPTY_STORE: Store = {
   pebbles: [],
@@ -19,10 +20,13 @@ const EMPTY_STORE: Store = {
   bounce_window: [],
 }
 
+// Fallback provider for unauthenticated state — safe to call methods on.
+const fallbackProvider = new LocalProvider()
+
 export function DataProvider({ children }: { children: React.ReactNode }) {
   const { user, isLoading: authLoading } = useAuth()
 
-  const [provider, setProvider] = useState<SupabaseProvider | null>(null)
+  const [provider, setProvider] = useState<DataProviderInterface>(fallbackProvider)
   const [store, setStore] = useState<Store>(EMPTY_STORE)
   const [loading, setLoading] = useState(true)
 
@@ -30,7 +34,7 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (authLoading || !user) {
       void Promise.resolve().then(() => {
-        setProvider(null)
+        setProvider(fallbackProvider)
         setStore(EMPTY_STORE)
         setLoading(!authLoading)
       })
@@ -56,25 +60,15 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     })
   }, [user, authLoading])
 
-  if (!provider) {
-    return (
-      <DataContext.Provider value={{
-        provider: null as unknown as SupabaseProvider,
-        store: EMPTY_STORE,
-        setStore: () => {},
-        loading: authLoading,
-      }}>
-        {children}
-      </DataContext.Provider>
-    )
-  }
-
-  const wrappedSetStore = (storeOrUpdater: Store | ((prev: Store) => Store)) => {
-    setStore((prev) => {
-      const next = typeof storeOrUpdater === "function" ? storeOrUpdater(prev) : storeOrUpdater
-      return next
-    })
-  }
+  const wrappedSetStore = useCallback(
+    (storeOrUpdater: Store | ((prev: Store) => Store)) => {
+      setStore((prev) => {
+        const next = typeof storeOrUpdater === "function" ? storeOrUpdater(prev) : storeOrUpdater
+        return next
+      })
+    },
+    [],
+  )
 
   return (
     <DataContext.Provider value={{ provider, store, setStore: wrappedSetStore, loading }}>

@@ -401,10 +401,10 @@ export class SupabaseProvider implements DataProvider {
         karmaRes,
         bounceRes,
       ] = await Promise.all([
-        this.supabase.from("v_pebbles_full").select("*"),
+        this.supabase.from("v_pebbles_full").select("*").eq("user_id", this.userId),
         this.supabase.from("souls").select("*").eq("user_id", this.userId),
         this.supabase.from("collections").select("*").eq("user_id", this.userId),
-        this.supabase.from("collection_pebbles").select("*"),
+        this.supabase.from("collection_pebbles").select("*, collections!inner(user_id)").eq("collections.user_id", this.userId),
         this.supabase.from("glyphs").select("*").eq("user_id", this.userId),
         this.supabase.from("v_karma_summary").select("*").eq("user_id", this.userId).single(),
         this.supabase.from("v_bounce").select("*").eq("user_id", this.userId).single(),
@@ -529,7 +529,12 @@ export class SupabaseProvider implements DataProvider {
 
   private async safePush(label: string, fn: () => PromiseLike<unknown>): Promise<void> {
     try {
-      await fn()
+      const result = await fn()
+      // Supabase client returns { error } instead of throwing
+      if (result && typeof result === "object" && "error" in result) {
+        const { error } = result as { error: unknown }
+        if (error) console.warn(`[SupabaseProvider] ${label} failed:`, error)
+      }
     } catch (err) {
       console.warn(`[SupabaseProvider] ${label} failed:`, err)
     }
