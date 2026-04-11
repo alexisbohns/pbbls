@@ -82,18 +82,18 @@ export default function RootLayout({
       </head>
       <body className="bg-background text-foreground">
         <SerwistRegistration>
-          <DataProvider>
-            <AuthProvider>
-            <ColorWorldProvider>
-              <ThemeProvider>
-                <ThemeColorSync />
-                <div className="flex h-full pl-[var(--safe-area-left)] pr-[var(--safe-area-right)]">
-                  <MainContent>{children}</MainContent>
-                </div>
-              </ThemeProvider>
-            </ColorWorldProvider>
-            </AuthProvider>
-          </DataProvider>
+          <AuthProvider>
+            <DataProvider>
+              <ColorWorldProvider>
+                <ThemeProvider>
+                  <ThemeColorSync />
+                  <div className="flex h-full pl-[var(--safe-area-left)] pr-[var(--safe-area-right)]">
+                    <MainContent>{children}</MainContent>
+                  </div>
+                </ThemeProvider>
+              </ColorWorldProvider>
+            </DataProvider>
+          </AuthProvider>
         </SerwistRegistration>
       </body>
     </html>

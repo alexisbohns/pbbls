@@ -1,22 +1,14 @@
 "use client"
 
-import { useState, useEffect, type Dispatch, type SetStateAction } from "react"
-import { LocalProvider } from "@/lib/data/local-provider"
+import { useState, useEffect, useCallback } from "react"
 import { DataContext } from "@/lib/data/provider-context"
-import type { Store } from "@/lib/data/data-provider"
+import { LocalProvider } from "@/lib/data/local-provider"
+import { SupabaseProvider } from "@/lib/data/supabase-provider"
+import { useAuth } from "@/lib/data/auth-context"
+import { createClient } from "@/lib/supabase/client"
+import type { DataProvider as DataProviderInterface, Store } from "@/lib/data/data-provider"
 
-/**
- * Client-only wrapper that boots a LocalProvider and exposes the store
- * snapshot through context.
- *
- * The initial store is always empty and loading=true on both server and
- * client so that SSR HTML and the first client render are identical,
- * preventing hydration mismatches. After the component mounts, a useEffect
- * reads localStorage, sets the real store, and flips loading to false — all
- * in a single batched state update to avoid cascading renders.
- */
-
-const INITIAL_STORE: Store = {
+const EMPTY_STORE: Store = {
   pebbles: [],
   souls: [],
   collections: [],
@@ -28,46 +20,58 @@ const INITIAL_STORE: Store = {
   bounce_window: [],
 }
 
-type DataState = { store: Store; loading: boolean }
-
-const INITIAL_STATE: DataState = { store: INITIAL_STORE, loading: true }
+// Fallback provider for unauthenticated state — safe to call methods on.
+const fallbackProvider = new LocalProvider()
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
-  // Provider is initialized synchronously (stable reference across renders).
-  // On the server it holds an empty store; on the client it reads localStorage,
-  // but we intentionally defer getStore() to useEffect so both server and
-  // client first-render share the same INITIAL_STORE, avoiding hydration
-  // mismatches.
-  const [provider] = useState<LocalProvider>(() => new LocalProvider())
-  const [{ store, loading }, setDataState] = useState<DataState>(INITIAL_STATE)
+  const { user, isLoading: authLoading } = useAuth()
 
-  // Wrap setStore to satisfy the Dispatch<SetStateAction<Store>> type required
-  // by DataContext while keeping store/loading in the same state atom —
-  // mutations call setStore, not setDataState directly.
-  const setStore: Dispatch<SetStateAction<Store>> = (storeOrUpdater) =>
-    setDataState((prev) => ({
-      ...prev,
-      store:
-        typeof storeOrUpdater === "function"
-          ? storeOrUpdater(prev.store)
-          : storeOrUpdater,
-    }))
+  const [provider, setProvider] = useState<DataProviderInterface>(fallbackProvider)
+  const [store, setStore] = useState<Store>(EMPTY_STORE)
+  const [loading, setLoading] = useState(true)
 
+  // Create provider when user is available
   useEffect(() => {
-    // Persist the seed to localStorage if the key is absent (first launch).
-    // Deferred here to keep LocalProvider's load() side-effect-free and safe
-    // under StrictMode double-invocation.
-    provider.persistIfNeeded()
-    // Call setState in a microtask callback so it is not synchronous in the
-    // effect body — satisfies react-hooks/set-state-in-effect while keeping
-    // the update as close to synchronous as possible.
+    if (authLoading || !user) {
+      void Promise.resolve().then(() => {
+        setProvider(fallbackProvider)
+        setStore(EMPTY_STORE)
+        setLoading(!authLoading)
+      })
+      return
+    }
+
+    const supabase = createClient()
+    const sp = new SupabaseProvider(user.id, supabase)
+
+    // Load from localStorage immediately via microtask to satisfy
+    // react-hooks/set-state-in-effect lint rule.
     void Promise.resolve().then(() => {
-      setDataState({ store: provider.getStore(), loading: false })
+      setProvider(sp)
+      setStore(sp.getStore())
+      setLoading(false)
     })
-  }, [provider])
+
+    // Sync from Supabase in background
+    sp.syncFromSupabase().then((freshStore) => {
+      setStore(freshStore)
+    }).catch(() => {
+      // Sync failed — keep localStorage data
+    })
+  }, [user, authLoading])
+
+  const wrappedSetStore = useCallback(
+    (storeOrUpdater: Store | ((prev: Store) => Store)) => {
+      setStore((prev) => {
+        const next = typeof storeOrUpdater === "function" ? storeOrUpdater(prev) : storeOrUpdater
+        return next
+      })
+    },
+    [],
+  )
 
   return (
-    <DataContext.Provider value={{ provider, store, setStore, loading }}>
+    <DataContext.Provider value={{ provider, store, setStore: wrappedSetStore, loading }}>
       {children}
     </DataContext.Provider>
   )
