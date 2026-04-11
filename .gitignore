@@ -60,3 +60,4 @@ public/sw.js
 public/sw.js.map
 
 certificates
+apps/web/package-lock.json
