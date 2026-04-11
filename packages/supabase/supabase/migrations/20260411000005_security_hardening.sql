@@ -1,6 +1,10 @@
 -- Migration: Security Hardening
 -- Pin search_path on security definer functions, restrict karma helper,
 -- filter views to current user, and drop overly permissive RLS policy.
+--
+-- NOTE: Function bodies below are copied from migrations _000003 and _000004
+-- with `set search_path = public` appended. Do not edit the originals —
+-- create new migrations for any future logic changes.
 
 -- ============================================================
 -- 1. compute_karma_delta — pin search_path, revoke from roles
