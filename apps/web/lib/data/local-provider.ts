@@ -20,9 +20,6 @@ import type {
   Account,
   Profile,
   Session,
-  RegisterInput,
-  LoginInput,
-  UpdateProfileInput,
 } from "@/lib/types"
 import { SEED_PEBBLES, SEED_SOULS, SEED_COLLECTIONS } from "@/lib/seed/seed-data"
 import { refreshBounceWindow, decayBounceWindow, todayLocal } from "@/lib/data/bounce-levels"
@@ -31,8 +28,6 @@ import { computeKarmaDelta } from "@/lib/data/karma"
 const STORAGE_KEY = "pbbls:store"
 const AUTH_STORAGE_KEY = "pbbls:auth"
 const SESSION_STORAGE_KEY = "pbbls:session"
-const ONBOARDING_LEGACY_KEY = "pebbles_onboarding_completed"
-
 const EMPTY_AUTH_STORE: AuthStore = {
   accounts: [],
   profiles: [],

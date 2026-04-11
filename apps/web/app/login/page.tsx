@@ -2,7 +2,7 @@
 
 import { useState, useEffect, type FormEvent } from "react"
 import Link from "next/link"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/data/auth-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,11 +11,16 @@ export default function LoginPage() {
   const { login, signInWithApple, profile, isAuthenticated, isLoading } =
     useAuth()
   const router = useRouter()
-  const searchParams = useSearchParams()
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null
+    const params = new URLSearchParams(window.location.search)
+    return params.get("error") === "auth_callback_failed"
+      ? "Sign-in failed. Please try again."
+      : null
+  })
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
@@ -23,13 +28,6 @@ export default function LoginPage() {
       router.replace(profile?.onboarding_completed ? "/path" : "/onboarding")
     }
   }, [isLoading, isAuthenticated, profile, router])
-
-  // Show error from OAuth callback failure
-  useEffect(() => {
-    if (searchParams.get("error") === "auth_callback_failed") {
-      setError("Sign-in failed. Please try again.")
-    }
-  }, [searchParams])
 
   if (isLoading || isAuthenticated) return null
 

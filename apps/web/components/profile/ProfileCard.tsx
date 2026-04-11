@@ -24,8 +24,8 @@ export function ProfileCard({ user, profile }: ProfileCardProps) {
       <CardContent>
         <dl className="space-y-3 text-sm">
           <div>
-            <dt className="text-muted-foreground">Username</dt>
-            <dd className="font-medium">@{user.username}</dd>
+            <dt className="text-muted-foreground">Email</dt>
+            <dd className="font-medium">{user.email}</dd>
           </div>
           <div>
             <dt className="text-muted-foreground">Member since</dt>
