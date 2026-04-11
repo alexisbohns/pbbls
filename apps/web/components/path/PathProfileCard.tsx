@@ -45,7 +45,7 @@ export function PathProfileCard() {
         <div className="flex items-center md:gap-3">
           <div className="hidden md:flex md:flex-col md:w-full">
             <p className="text-sm font-semibold truncate">{profile.display_name}</p>
-            <p className="text-xs text-muted-foreground truncate">@{user.username}</p>
+            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
           </div>
           <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-card">
             <CircleUser className="size-6 text-muted-foreground" aria-hidden />

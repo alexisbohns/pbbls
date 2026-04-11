@@ -20,11 +20,7 @@ import type {
   Account,
   Profile,
   Session,
-  RegisterInput,
-  LoginInput,
-  UpdateProfileInput,
 } from "@/lib/types"
-import { hashPassword, verifyPassword } from "@/lib/data/password"
 import { SEED_PEBBLES, SEED_SOULS, SEED_COLLECTIONS } from "@/lib/seed/seed-data"
 import { refreshBounceWindow, decayBounceWindow, todayLocal } from "@/lib/data/bounce-levels"
 import { computeKarmaDelta } from "@/lib/data/karma"
@@ -32,8 +28,6 @@ import { computeKarmaDelta } from "@/lib/data/karma"
 const STORAGE_KEY = "pbbls:store"
 const AUTH_STORAGE_KEY = "pbbls:auth"
 const SESSION_STORAGE_KEY = "pbbls:session"
-const ONBOARDING_LEGACY_KEY = "pebbles_onboarding_completed"
-
 const EMPTY_AUTH_STORE: AuthStore = {
   accounts: [],
   profiles: [],
@@ -578,131 +572,35 @@ export class LocalProvider implements DataProvider {
   }
 
   // ---------------------------------------------------------------------------
-  // Auth
+  // Auth — now handled by Supabase Auth (useSupabaseAuth hook).
+  // Stubs kept to satisfy the DataProvider interface.
   // ---------------------------------------------------------------------------
 
-  async register(input: RegisterInput): Promise<Session> {
-    if (!input.terms_accepted || !input.privacy_accepted) {
-      throw new Error(
-        "You must accept the Terms of Service and Privacy Policy.",
-      )
-    }
-
-    const existing = this.authStore.accounts.find(
-      (a) => a.username === input.username,
-    )
-    if (existing) throw new Error("Username already taken")
-
-    const now = new Date().toISOString()
-    const passwordHash = await hashPassword(input.password)
-
-    const account: Account = {
-      id: crypto.randomUUID(),
-      username: input.username,
-      password_hash: passwordHash,
-      created_at: now,
-    }
-
-    // Migrate the legacy onboarding flag into the new profile if it exists.
-    const legacyOnboarding =
-      typeof window !== "undefined" &&
-      localStorage.getItem(ONBOARDING_LEGACY_KEY) === "true"
-
-    const profile: Profile = {
-      id: crypto.randomUUID(),
-      account_id: account.id,
-      display_name: input.username,
-      onboarding_completed: legacyOnboarding,
-      color_world: "blush-quartz",
-      terms_accepted_at: input.terms_accepted ? now : null,
-      privacy_accepted_at: input.privacy_accepted ? now : null,
-      created_at: now,
-      updated_at: now,
-    }
-
-    this.mutateAuth({
-      accounts: [...this.authStore.accounts, account],
-      profiles: [...this.authStore.profiles, profile],
-    })
-
-    const session: Session = {
-      account_id: account.id,
-      profile_id: profile.id,
-      created_at: now,
-    }
-    this.session = session
-    this.writeSessionToStorage(session)
-    this.migrateUnscopedData(profile.id)
-
-    return session
+  async register(): Promise<Session> {
+    throw new Error("Auth is handled by Supabase — use useSupabaseAuth")
   }
 
-  async login(input: LoginInput): Promise<Session> {
-    const account = this.authStore.accounts.find(
-      (a) => a.username === input.username,
-    )
-    if (!account) throw new Error("Invalid username or password")
-
-    const valid = await verifyPassword(input.password, account.password_hash)
-    if (!valid) throw new Error("Invalid username or password")
-
-    const profile = this.authStore.profiles.find(
-      (p) => p.account_id === account.id,
-    )
-    if (!profile) throw new Error("Profile not found")
-
-    const session: Session = {
-      account_id: account.id,
-      profile_id: profile.id,
-      created_at: new Date().toISOString(),
-    }
-    this.session = session
-    this.writeSessionToStorage(session)
-    this.migrateUnscopedData(profile.id)
-
-    return session
+  async login(): Promise<Session> {
+    throw new Error("Auth is handled by Supabase — use useSupabaseAuth")
   }
 
   async logout(): Promise<void> {
-    this.session = null
-    this.writeSessionToStorage(null)
+    throw new Error("Auth is handled by Supabase — use useSupabaseAuth")
   }
 
   getSession(): Session | null {
-    return this.session
+    return null
   }
 
   async getAccount(): Promise<Account | undefined> {
-    if (!this.session) return undefined
-    return this.authStore.accounts.find(
-      (a) => a.id === this.session!.account_id,
-    )
+    return undefined
   }
 
   async getProfile(): Promise<Profile | undefined> {
-    if (!this.session) return undefined
-    return this.authStore.profiles.find(
-      (p) => p.id === this.session!.profile_id,
-    )
+    return undefined
   }
 
-  async updateProfile(input: UpdateProfileInput): Promise<Profile> {
-    if (!this.session) throw new Error("No active session")
-
-    const idx = this.authStore.profiles.findIndex(
-      (p) => p.id === this.session!.profile_id,
-    )
-    if (idx === -1) throw new Error("Profile not found")
-
-    const updated: Profile = {
-      ...this.authStore.profiles[idx],
-      ...input,
-      updated_at: new Date().toISOString(),
-    }
-    const profiles = [...this.authStore.profiles]
-    profiles[idx] = updated
-    this.mutateAuth({ ...this.authStore, profiles })
-
-    return updated
+  async updateProfile(): Promise<Profile> {
+    throw new Error("Auth is handled by Supabase — use useSupabaseAuth")
   }
 }
