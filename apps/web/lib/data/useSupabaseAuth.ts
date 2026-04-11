@@ -37,8 +37,11 @@ export function useSupabaseAuth(): AuthContextValue {
     // the Supabase Auth server and refreshes if expired. getSession() only
     // reads from cookies without validation, which can return stale/invalid
     // tokens that cause 401 on subsequent API calls.
-    supabase.auth.getUser().then(async ({ data: { user: supabaseUser } }) => {
+    supabase.auth.getUser().then(async ({ data: { user: supabaseUser }, error }) => {
       if (cancelled) return
+      if (error) {
+        console.warn("[auth] getUser() failed on mount:", error.message)
+      }
       if (supabaseUser) {
         setUser({
           id: supabaseUser.id,

@@ -23,11 +23,14 @@ export async function createServerSupabaseClient() {
           for (const { name, value, options } of cookiesToSet) {
             cookieStore.set(name, value, options)
           }
-        } catch {
-          // setAll is called by supabase-ssr to persist refreshed tokens.
+        } catch (error) {
           // In Server Components the cookie store is read-only, so the
-          // set call throws — safely ignored since the middleware or
-          // Route Handler will handle the write on the next request.
+          // set call throws. This is expected and safe — the Route Handler
+          // (e.g. /auth/callback) will handle the write.
+          // Log a warning so cookie failures in Route Handlers are visible.
+          if (process.env.NODE_ENV === "development") {
+            console.warn("[supabase/server] setAll failed:", error)
+          }
         }
       },
     },
