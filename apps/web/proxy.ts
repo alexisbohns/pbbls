@@ -32,7 +32,12 @@ export async function proxy(request: NextRequest) {
   // Refresh the session — this reads the auth cookies, checks if the access
   // token is expired, and refreshes it using the refresh token if needed.
   // The updated tokens are written back via the setAll callback above.
-  await supabase.auth.getUser()
+  // Wrapped in try/catch so a failed token refresh doesn't crash the request.
+  try {
+    await supabase.auth.getUser()
+  } catch {
+    // Token refresh failed — pass through with existing cookies.
+  }
 
   return supabaseResponse
 }
