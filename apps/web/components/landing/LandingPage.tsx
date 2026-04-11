@@ -6,8 +6,20 @@ import { useRouter } from "next/navigation"
 import { Clock, Sparkles, Route } from "lucide-react"
 import { useAuth } from "@/lib/data/auth-context"
 import { Button } from "@/components/ui/button"
+import { SEED_PEBBLES } from "@/lib/seed/seed-data"
+import { EMOTIONS } from "@/lib/config/emotions"
 
 import type { LucideIcon } from "lucide-react"
+
+const PREVIEW_PEBBLE_IDS = ["pbl-sunrise", "pbl-luna-purr", "pbl-bread"]
+const PREVIEW_PEBBLES = SEED_PEBBLES.filter((p) =>
+  PREVIEW_PEBBLE_IDS.includes(p.id),
+).map((p) => {
+  const emotion = EMOTIONS.find(
+    (e) => e.name.toLowerCase() === p.emotion_id,
+  )
+  return { id: p.id, name: p.name, emotion }
+})
 
 const FEATURES: ReadonlyArray<{
   icon: LucideIcon
@@ -66,6 +78,29 @@ export function LandingPage() {
                 {feature.description}
               </p>
             </div>
+          </li>
+        ))}
+      </ul>
+
+      <ul className="mt-8 flex max-w-sm flex-col gap-2 w-full" aria-label="Example pebbles">
+        {PREVIEW_PEBBLES.map((p) => (
+          <li
+            key={p.id}
+            className="flex items-center gap-3 rounded-md border bg-card px-4 py-3"
+          >
+            {p.emotion && (
+              <span
+                className="size-3 shrink-0 rounded-full"
+                style={{ backgroundColor: p.emotion.color }}
+                aria-hidden="true"
+              />
+            )}
+            <span className="text-sm font-medium">{p.name}</span>
+            {p.emotion && (
+              <span className="ml-auto text-xs text-muted-foreground">
+                {p.emotion.name}
+              </span>
+            )}
           </li>
         ))}
       </ul>
