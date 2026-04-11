@@ -2,82 +2,69 @@
 
 import { useState, useEffect, useCallback, useRef } from "react"
 import { DataContext } from "@/lib/data/provider-context"
-import { LocalProvider } from "@/lib/data/local-provider"
 import { SupabaseProvider } from "@/lib/data/supabase-provider"
 import { useAuth } from "@/lib/data/auth-context"
 import { createClient } from "@/lib/supabase/client"
-import { EMPTY_STORE, type DataProvider as DataProviderInterface, type Store } from "@/lib/data/data-provider"
-
-// Fallback provider for unauthenticated state — safe to call methods on.
-const fallbackProvider = new LocalProvider()
+import { EMPTY_STORE, type Store } from "@/lib/data/data-provider"
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
   const { user, isLoading: authLoading } = useAuth()
 
-  const [provider, setProvider] = useState<DataProviderInterface>(fallbackProvider)
+  const [provider, setProvider] = useState<SupabaseProvider | null>(null)
   const [store, setStore] = useState<Store>(EMPTY_STORE)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
 
-  // Track which user ID the current provider belongs to, so we only
-  // recreate the SupabaseProvider when the actual identity changes —
-  // not on every user object reference change.
   const activeUserIdRef = useRef<string | null>(null)
 
-  useEffect(() => {
-    if (authLoading) {
-      return
+  const loadData = useCallback(async (userId: string) => {
+    activeUserIdRef.current = userId
+    setLoading(true)
+    setError(null)
+
+    try {
+      const supabase = createClient()
+      const sp = new SupabaseProvider(userId, supabase)
+      const freshStore = await sp.loadFromSupabase()
+
+      if (activeUserIdRef.current !== userId) return
+      setProvider(sp)
+      setStore(freshStore)
+    } catch (err) {
+      if (activeUserIdRef.current !== userId) return
+      setError(err instanceof Error ? err : new Error("Failed to load data"))
+      setProvider(null)
+      setStore(EMPTY_STORE)
+    } finally {
+      if (activeUserIdRef.current === userId) setLoading(false)
     }
+  }, [])
+
+  useEffect(() => {
+    if (authLoading) return
 
     if (!user) {
-      // Not authenticated — use fallback provider
-      const wasAuthenticated = activeUserIdRef.current !== null
       activeUserIdRef.current = null
       void Promise.resolve().then(() => {
-        if (wasAuthenticated) {
-          setProvider(fallbackProvider)
-          setStore(EMPTY_STORE)
-        }
+        setProvider(null)
+        setStore(EMPTY_STORE)
         setLoading(false)
+        setError(null)
       })
       return
     }
 
-    // Same user as before — don't recreate provider
-    if (activeUserIdRef.current === user.id) {
-      return
-    }
+    if (activeUserIdRef.current === user.id) return
 
-    activeUserIdRef.current = user.id
-    const supabase = createClient()
-    const sp = new SupabaseProvider(user.id, supabase)
-    const userId = user.id
+    void loadData(user.id)
+  }, [user, authLoading, loadData])
 
-    void Promise.resolve().then(() => {
-      setProvider(sp)
-      setStore(sp.getStore())
-      setLoading(false)
-    })
-
-    // Sync from Supabase in background — only apply if still the active user
-    sp.syncFromSupabase().then((freshStore) => {
-      if (activeUserIdRef.current === userId) setStore(freshStore)
-    }).catch(() => {
-      // Sync failed — keep localStorage data
-    })
-  }, [user, authLoading])
-
-  const wrappedSetStore = useCallback(
-    (storeOrUpdater: Store | ((prev: Store) => Store)) => {
-      setStore((prev) => {
-        const next = typeof storeOrUpdater === "function" ? storeOrUpdater(prev) : storeOrUpdater
-        return next
-      })
-    },
-    [],
-  )
+  const refreshStore = useCallback(() => {
+    if (user) void loadData(user.id)
+  }, [user, loadData])
 
   return (
-    <DataContext.Provider value={{ provider, store, setStore: wrappedSetStore, loading }}>
+    <DataContext.Provider value={{ provider, store, setStore, loading, error, refreshStore }}>
       {children}
     </DataContext.Provider>
   )
