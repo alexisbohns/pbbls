@@ -406,8 +406,8 @@ export class SupabaseProvider implements DataProvider {
         this.supabase.from("collections").select("*").eq("user_id", this.userId),
         this.supabase.from("collection_pebbles").select("*, collections!inner(user_id)").eq("collections.user_id", this.userId),
         this.supabase.from("glyphs").select("*").eq("user_id", this.userId),
-        this.supabase.from("v_karma_summary").select("*").eq("user_id", this.userId).single(),
-        this.supabase.from("v_bounce").select("*").eq("user_id", this.userId).single(),
+        this.supabase.from("v_karma_summary").select("*").eq("user_id", this.userId).maybeSingle(),
+        this.supabase.from("v_bounce").select("*").eq("user_id", this.userId).maybeSingle(),
       ])
 
       // Parse remote pebbles from the denormalized view
