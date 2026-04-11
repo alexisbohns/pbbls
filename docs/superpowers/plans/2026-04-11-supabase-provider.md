@@ -1,0 +1,1036 @@
+# SupabaseProvider Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Replace `LocalProvider` with a local-first `SupabaseProvider` that reads/writes from localStorage instantly and syncs to Supabase in the background.
+
+**Architecture:** `SupabaseProvider` implements `DataProvider`. All reads come from an in-memory `Store` backed by localStorage. All writes mutate the in-memory store, persist to localStorage, then fire-and-forget push to Supabase. On every mount, the provider fetches the full state from Supabase, pushes any local-only items, then replaces local state with the fresh Supabase data.
+
+**Tech Stack:** Supabase JS client (`@supabase/ssr`), localStorage, existing `DataProvider` interface
+
+**Note on testing:** This project has no test infrastructure yet (V1). Steps focus on implementation with build/lint verification.
+
+---
+
+## File Structure
+
+| File | Action | Responsibility |
+|---|---|---|
+| `apps/web/lib/data/data-provider.ts` | Modify | Remove auth methods from interface, remove `AuthStore` type |
+| `apps/web/lib/data/supabase-provider.ts` | Create | `SupabaseProvider` class — local-first with background Supabase sync |
+| `apps/web/components/layout/DataProvider.tsx` | Rewrite | Use `SupabaseProvider` when authenticated, depend on auth context |
+| `apps/web/app/layout.tsx` | Modify | Reorder providers: `AuthProvider` > `DataProvider` |
+| `apps/web/lib/data/local-provider.ts` | Modify | Remove auth methods (interface no longer requires them) |
+
+---
+
+### Task 1: Clean up DataProvider interface — remove auth methods
+
+**Files:**
+- Modify: `apps/web/lib/data/data-provider.ts`
+- Modify: `apps/web/lib/data/local-provider.ts`
+
+Auth is handled by `useSupabaseAuth` since PR #226. The `DataProvider` interface still has auth methods that are dead code. Remove them to simplify the interface before implementing `SupabaseProvider`.
+
+- [ ] **Step 1: Remove auth methods and types from `data-provider.ts`**
+
+Remove from imports: `Account`, `Profile`, `Session`, `RegisterInput`, `LoginInput`, `UpdateProfileInput`.
+
+Remove the `AuthStore` type entirely.
+
+Remove these methods from the `DataProvider` interface:
+```typescript
+// Remove these:
+register(input: RegisterInput): Promise<Session>
+login(input: LoginInput): Promise<Session>
+logout(): Promise<void>
+getSession(): Session | null
+getAccount(): Promise<Account | undefined>
+getProfile(): Promise<Profile | undefined>
+updateProfile(input: UpdateProfileInput): Promise<Profile>
+```
+
+The resulting interface should only have: `getStore`, `reloadStore`, `reset`, pebble counter methods, karma methods, bounce methods, and CRUD for pebbles/souls/collections/marks.
+
+- [ ] **Step 2: Remove auth stubs from `local-provider.ts`**
+
+Remove the entire auth section at the bottom of the file (the stubs that throw "Auth is handled by Supabase"). Also remove the auth-related imports: `Account`, `Profile`, `Session` from `@/lib/types`, and `AuthStore` from `@/lib/data/data-provider`.
+
+Remove the auth storage helpers: `loadAuth`, `loadSession`, `writeAuthToStorage`, `writeSessionToStorage`, `mutateAuth`, `migrateUnscopedData`.
+
+Remove the auth storage constants: `AUTH_STORAGE_KEY`, `SESSION_STORAGE_KEY`.
+
+Remove the `EMPTY_AUTH_STORE` constant.
+
+Remove the `authStore` and `session` fields from the class, and their initialization from the constructor.
+
+The class should only have: `store` field, content storage methods, and CRUD implementations.
+
+- [ ] **Step 3: Verify no other files import `AuthStore` from data-provider**
+
+Run: `grep -r "AuthStore" apps/web/ --include="*.ts" --include="*.tsx"`
+
+If any files reference it, update them. The only expected consumer was `LocalProvider`.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add apps/web/lib/data/data-provider.ts apps/web/lib/data/local-provider.ts
+git commit -m "chore(db): remove auth methods from DataProvider interface"
+```
+
+---
+
+### Task 2: Create SupabaseProvider — core class with localStorage
+
+**Files:**
+- Create: `apps/web/lib/data/supabase-provider.ts`
+
+This task creates the provider with localStorage read/write only (no Supabase sync yet). It implements the full `DataProvider` interface using the same in-memory `Store` pattern as `LocalProvider`.
+
+- [ ] **Step 1: Create `supabase-provider.ts` with core structure**
+
+```typescript
+import type { SupabaseClient } from "@supabase/supabase-js"
+import type {
+  DataProvider,
+  Store,
+  CreatePebbleInput,
+  UpdatePebbleInput,
+  CreateSoulInput,
+  UpdateSoulInput,
+  CreateCollectionInput,
+  UpdateCollectionInput,
+  CreateMarkInput,
+  UpdateMarkInput,
+} from "@/lib/data/data-provider"
+import type {
+  Pebble,
+  Soul,
+  Collection,
+  KarmaEvent,
+  Mark,
+} from "@/lib/types"
+import { computeKarmaDelta } from "@/lib/data/karma"
+
+const STORAGE_KEY = "pbbls:store"
+
+const EMPTY_STORE: Store = {
+  pebbles: [],
+  souls: [],
+  collections: [],
+  marks: [],
+  pebbles_count: 0,
+  karma: 0,
+  karma_log: [],
+  bounce: 0,
+  bounce_window: [],
+}
+
+export class SupabaseProvider implements DataProvider {
+  private store: Store
+  private readonly userId: string
+  private readonly supabase: SupabaseClient
+
+  constructor(userId: string, supabase: SupabaseClient) {
+    this.userId = userId
+    this.supabase = supabase
+    this.store = this.loadFromLocalStorage()
+  }
+
+  // ---------------------------------------------------------------------------
+  // localStorage helpers
+  // ---------------------------------------------------------------------------
+
+  private getStorageKey(): string {
+    return `${STORAGE_KEY}:${this.userId}`
+  }
+
+  private loadFromLocalStorage(): Store {
+    if (typeof window === "undefined") return EMPTY_STORE
+    try {
+      const raw = localStorage.getItem(this.getStorageKey())
+      if (!raw) return EMPTY_STORE
+      return JSON.parse(raw) as Store
+    } catch {
+      return EMPTY_STORE
+    }
+  }
+
+  private saveToLocalStorage(): void {
+    if (typeof window === "undefined") return
+    try {
+      localStorage.setItem(this.getStorageKey(), JSON.stringify(this.store))
+    } catch {
+      console.warn("[SupabaseProvider] Could not write to localStorage.")
+    }
+  }
+
+  private mutate(store: Store): void {
+    this.store = store
+    this.saveToLocalStorage()
+  }
+
+  // ---------------------------------------------------------------------------
+  // DataProvider — store access
+  // ---------------------------------------------------------------------------
+
+  getStore(): Store {
+    return this.store
+  }
+
+  reloadStore(): Store {
+    this.store = this.loadFromLocalStorage()
+    return this.store
+  }
+
+  async reset(): Promise<Store> {
+    this.mutate(EMPTY_STORE)
+    return EMPTY_STORE
+  }
+
+  // ---------------------------------------------------------------------------
+  // Pebbles counter
+  // ---------------------------------------------------------------------------
+
+  async getPebblesCount(): Promise<number> {
+    return this.store.pebbles_count
+  }
+
+  async incrementPebblesCount(): Promise<number> {
+    const next = this.store.pebbles_count + 1
+    this.mutate({ ...this.store, pebbles_count: next })
+    return next
+  }
+
+  // ---------------------------------------------------------------------------
+  // Karma
+  // ---------------------------------------------------------------------------
+
+  async getKarma(): Promise<number> {
+    return this.store.karma
+  }
+
+  async incrementKarma(
+    delta: number,
+    reason: string,
+    refId?: string,
+  ): Promise<number> {
+    const event: KarmaEvent = {
+      delta,
+      reason,
+      ...(refId !== undefined && { ref_id: refId }),
+      created_at: new Date().toISOString(),
+    }
+    const next = this.store.karma + delta
+    this.mutate({
+      ...this.store,
+      karma: next,
+      karma_log: [...this.store.karma_log, event],
+    })
+    return next
+  }
+
+  // ---------------------------------------------------------------------------
+  // Bounce
+  // ---------------------------------------------------------------------------
+
+  async getBounce(): Promise<number> {
+    return this.store.bounce
+  }
+
+  async refreshBounce(): Promise<number> {
+    // Bounce is computed server-side from pebble dates.
+    // Locally we just return the cached value; sync updates it.
+    return this.store.bounce
+  }
+
+  // ---------------------------------------------------------------------------
+  // Pebbles
+  // ---------------------------------------------------------------------------
+
+  async listPebbles(): Promise<Pebble[]> {
+    return this.store.pebbles
+  }
+
+  async getPebble(id: string): Promise<Pebble | undefined> {
+    return this.store.pebbles.find((p) => p.id === id)
+  }
+
+  async createPebble(input: CreatePebbleInput): Promise<Pebble> {
+    const now = new Date().toISOString()
+    const pebble: Pebble = {
+      ...input,
+      id: crypto.randomUUID(),
+      created_at: now,
+      updated_at: now,
+    }
+    const karmaDelta = computeKarmaDelta(input)
+    const karmaEvent: KarmaEvent = {
+      delta: karmaDelta,
+      reason: "pebble_created",
+      ref_id: pebble.id,
+      created_at: now,
+    }
+    this.mutate({
+      ...this.store,
+      pebbles: [...this.store.pebbles, pebble],
+      pebbles_count: this.store.pebbles_count + 1,
+      karma: this.store.karma + karmaDelta,
+      karma_log: [...this.store.karma_log, karmaEvent],
+    })
+    this.pushPebbleCreate(pebble, input)
+    return pebble
+  }
+
+  async updatePebble(id: string, input: UpdatePebbleInput): Promise<Pebble> {
+    const idx = this.store.pebbles.findIndex((p) => p.id === id)
+    if (idx === -1) throw new Error(`Pebble not found: ${id}`)
+    const prev = this.store.pebbles[idx]
+    const updated: Pebble = {
+      ...prev,
+      ...input,
+      updated_at: new Date().toISOString(),
+    }
+    const pebbles = [...this.store.pebbles]
+    pebbles[idx] = updated
+
+    const karmaBefore = computeKarmaDelta(prev)
+    const karmaAfter = computeKarmaDelta(updated)
+    const diff = karmaAfter - karmaBefore
+
+    if (diff !== 0) {
+      const karmaEvent: KarmaEvent = {
+        delta: diff,
+        reason: "pebble_enriched",
+        ref_id: id,
+        created_at: updated.updated_at,
+      }
+      this.mutate({
+        ...this.store,
+        pebbles,
+        karma: this.store.karma + diff,
+        karma_log: [...this.store.karma_log, karmaEvent],
+      })
+    } else {
+      this.mutate({ ...this.store, pebbles })
+    }
+
+    this.pushPebbleUpdate(id, input)
+    return updated
+  }
+
+  async deletePebble(id: string): Promise<void> {
+    const pebbles = this.store.pebbles.filter((p) => p.id !== id)
+    const collections = this.store.collections.map((c) => ({
+      ...c,
+      pebble_ids: c.pebble_ids.filter((pid) => pid !== id),
+    }))
+    this.mutate({ ...this.store, pebbles, collections })
+    this.pushPebbleDelete(id)
+  }
+
+  // ---------------------------------------------------------------------------
+  // Souls
+  // ---------------------------------------------------------------------------
+
+  async listSouls(): Promise<Soul[]> {
+    return this.store.souls
+  }
+
+  async getSoul(id: string): Promise<Soul | undefined> {
+    return this.store.souls.find((s) => s.id === id)
+  }
+
+  async createSoul(input: CreateSoulInput): Promise<Soul> {
+    const now = new Date().toISOString()
+    const soul: Soul = {
+      ...input,
+      id: crypto.randomUUID(),
+      created_at: now,
+      updated_at: now,
+    }
+    this.mutate({ ...this.store, souls: [...this.store.souls, soul] })
+    this.pushSoulCreate(soul)
+    return soul
+  }
+
+  async updateSoul(id: string, input: UpdateSoulInput): Promise<Soul> {
+    const idx = this.store.souls.findIndex((s) => s.id === id)
+    if (idx === -1) throw new Error(`Soul not found: ${id}`)
+    const updated: Soul = {
+      ...this.store.souls[idx],
+      ...input,
+      updated_at: new Date().toISOString(),
+    }
+    const souls = [...this.store.souls]
+    souls[idx] = updated
+    this.mutate({ ...this.store, souls })
+    this.pushSoulUpdate(id, input)
+    return updated
+  }
+
+  async deleteSoul(id: string): Promise<void> {
+    const souls = this.store.souls.filter((s) => s.id !== id)
+    const pebbles = this.store.pebbles.map((p) => ({
+      ...p,
+      soul_ids: p.soul_ids.filter((sid) => sid !== id),
+    }))
+    this.mutate({ ...this.store, souls, pebbles })
+    this.pushSoulDelete(id)
+  }
+
+  // ---------------------------------------------------------------------------
+  // Collections
+  // ---------------------------------------------------------------------------
+
+  async listCollections(): Promise<Collection[]> {
+    return this.store.collections
+  }
+
+  async getCollection(id: string): Promise<Collection | undefined> {
+    return this.store.collections.find((c) => c.id === id)
+  }
+
+  async createCollection(input: CreateCollectionInput): Promise<Collection> {
+    const now = new Date().toISOString()
+    const collection: Collection = {
+      ...input,
+      id: crypto.randomUUID(),
+      created_at: now,
+      updated_at: now,
+    }
+    this.mutate({
+      ...this.store,
+      collections: [...this.store.collections, collection],
+    })
+    this.pushCollectionCreate(collection)
+    return collection
+  }
+
+  async updateCollection(
+    id: string,
+    input: UpdateCollectionInput,
+  ): Promise<Collection> {
+    const idx = this.store.collections.findIndex((c) => c.id === id)
+    if (idx === -1) throw new Error(`Collection not found: ${id}`)
+    const updated: Collection = {
+      ...this.store.collections[idx],
+      ...input,
+      updated_at: new Date().toISOString(),
+    }
+    const collections = [...this.store.collections]
+    collections[idx] = updated
+    this.mutate({ ...this.store, collections })
+    this.pushCollectionUpdate(id, input)
+    return updated
+  }
+
+  async deleteCollection(id: string): Promise<void> {
+    const collections = this.store.collections.filter((c) => c.id !== id)
+    this.mutate({ ...this.store, collections })
+    this.pushCollectionDelete(id)
+  }
+
+  // ---------------------------------------------------------------------------
+  // Marks (mapped to DB "glyphs")
+  // ---------------------------------------------------------------------------
+
+  async listMarks(): Promise<Mark[]> {
+    return this.store.marks
+  }
+
+  async getMark(id: string): Promise<Mark | undefined> {
+    return this.store.marks.find((m) => m.id === id)
+  }
+
+  async createMark(input: CreateMarkInput): Promise<Mark> {
+    const now = new Date().toISOString()
+    const mark: Mark = {
+      ...input,
+      id: crypto.randomUUID(),
+      created_at: now,
+      updated_at: now,
+    }
+    this.mutate({ ...this.store, marks: [...this.store.marks, mark] })
+    this.pushMarkCreate(mark)
+    return mark
+  }
+
+  async updateMark(id: string, input: UpdateMarkInput): Promise<Mark> {
+    const idx = this.store.marks.findIndex((m) => m.id === id)
+    if (idx === -1) throw new Error(`Mark not found: ${id}`)
+    const updated: Mark = {
+      ...this.store.marks[idx],
+      ...input,
+      updated_at: new Date().toISOString(),
+    }
+    const marks = [...this.store.marks]
+    marks[idx] = updated
+    this.mutate({ ...this.store, marks })
+    this.pushMarkUpdate(id, input)
+    return updated
+  }
+
+  async deleteMark(id: string): Promise<void> {
+    const marks = this.store.marks.filter((m) => m.id !== id)
+    this.mutate({ ...this.store, marks })
+    this.pushMarkDelete(id)
+  }
+
+  // ---------------------------------------------------------------------------
+  // Background push stubs — implemented in Task 3
+  // ---------------------------------------------------------------------------
+
+  private pushPebbleCreate(_pebble: Pebble, _input: CreatePebbleInput): void {}
+  private pushPebbleUpdate(_id: string, _input: UpdatePebbleInput): void {}
+  private pushPebbleDelete(_id: string): void {}
+  private pushSoulCreate(_soul: Soul): void {}
+  private pushSoulUpdate(_id: string, _input: UpdateSoulInput): void {}
+  private pushSoulDelete(_id: string): void {}
+  private pushCollectionCreate(_collection: Collection): void {}
+  private pushCollectionUpdate(_id: string, _input: UpdateCollectionInput): void {}
+  private pushCollectionDelete(_id: string): void {}
+  private pushMarkCreate(_mark: Mark): void {}
+  private pushMarkUpdate(_id: string, _input: UpdateMarkInput): void {}
+  private pushMarkDelete(_id: string): void {}
+}
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add apps/web/lib/data/supabase-provider.ts
+git commit -m "feat(db): add SupabaseProvider with localStorage read/write"
+```
+
+---
+
+### Task 3: Add background push methods
+
+**Files:**
+- Modify: `apps/web/lib/data/supabase-provider.ts`
+
+Replace the push stubs with fire-and-forget Supabase calls. Each method catches errors and logs them — the local write already succeeded.
+
+- [ ] **Step 1: Add a push helper and implement all push methods**
+
+Add this helper at the top of the push section:
+
+```typescript
+  // ---------------------------------------------------------------------------
+  // Background push — fire-and-forget to Supabase
+  // ---------------------------------------------------------------------------
+
+  private async safePush(label: string, fn: () => Promise<unknown>): Promise<void> {
+    try {
+      await fn()
+    } catch (err) {
+      console.warn(`[SupabaseProvider] ${label} failed:`, err)
+    }
+  }
+```
+
+Replace all push stubs with implementations:
+
+```typescript
+  private pushPebbleCreate(_pebble: Pebble, input: CreatePebbleInput): void {
+    void this.safePush("pushPebbleCreate", () =>
+      this.supabase.rpc("create_pebble", {
+        payload: {
+          name: input.name,
+          description: input.description ?? null,
+          happened_at: input.happened_at,
+          intensity: input.intensity,
+          positiveness: input.positiveness,
+          visibility: input.visibility,
+          emotion_id: input.emotion_id,
+          soul_ids: input.soul_ids,
+          domain_ids: input.domain_ids,
+          cards: input.cards.map((c, i) => ({
+            species_id: c.species_id,
+            value: c.value,
+            sort_order: i,
+          })),
+        },
+      }),
+    )
+  }
+
+  private pushPebbleUpdate(id: string, input: UpdatePebbleInput): void {
+    void this.safePush("pushPebbleUpdate", () =>
+      this.supabase.rpc("update_pebble", {
+        p_pebble_id: id,
+        payload: {
+          ...(input.name !== undefined && { name: input.name }),
+          ...(input.description !== undefined && { description: input.description }),
+          ...(input.happened_at !== undefined && { happened_at: input.happened_at }),
+          ...(input.intensity !== undefined && { intensity: input.intensity }),
+          ...(input.positiveness !== undefined && { positiveness: input.positiveness }),
+          ...(input.visibility !== undefined && { visibility: input.visibility }),
+          ...(input.emotion_id !== undefined && { emotion_id: input.emotion_id }),
+          ...(input.soul_ids !== undefined && { soul_ids: input.soul_ids }),
+          ...(input.domain_ids !== undefined && { domain_ids: input.domain_ids }),
+          ...(input.cards !== undefined && {
+            cards: input.cards.map((c, i) => ({
+              species_id: c.species_id,
+              value: c.value,
+              sort_order: i,
+            })),
+          }),
+        },
+      }),
+    )
+  }
+
+  private pushPebbleDelete(id: string): void {
+    void this.safePush("pushPebbleDelete", () =>
+      this.supabase.rpc("delete_pebble", { p_pebble_id: id }),
+    )
+  }
+
+  private pushSoulCreate(soul: Soul): void {
+    void this.safePush("pushSoulCreate", () =>
+      this.supabase.from("souls").insert({
+        id: soul.id,
+        user_id: this.userId,
+        name: soul.name,
+      }),
+    )
+  }
+
+  private pushSoulUpdate(id: string, input: UpdateSoulInput): void {
+    void this.safePush("pushSoulUpdate", () =>
+      this.supabase.from("souls").update({
+        ...(input.name !== undefined && { name: input.name }),
+      }).eq("id", id),
+    )
+  }
+
+  private pushSoulDelete(id: string): void {
+    void this.safePush("pushSoulDelete", () =>
+      this.supabase.from("souls").delete().eq("id", id),
+    )
+  }
+
+  private pushCollectionCreate(collection: Collection): void {
+    void this.safePush("pushCollectionCreate", async () => {
+      await this.supabase.from("collections").insert({
+        id: collection.id,
+        user_id: this.userId,
+        name: collection.name,
+        mode: collection.mode ?? null,
+      })
+      if (collection.pebble_ids.length > 0) {
+        await this.supabase.from("collection_pebbles").insert(
+          collection.pebble_ids.map((pid) => ({
+            collection_id: collection.id,
+            pebble_id: pid,
+          })),
+        )
+      }
+    })
+  }
+
+  private pushCollectionUpdate(id: string, input: UpdateCollectionInput): void {
+    void this.safePush("pushCollectionUpdate", async () => {
+      const updates: Record<string, unknown> = {}
+      if (input.name !== undefined) updates.name = input.name
+      if (input.mode !== undefined) updates.mode = input.mode
+      if (Object.keys(updates).length > 0) {
+        await this.supabase.from("collections").update(updates).eq("id", id)
+      }
+      if (input.pebble_ids !== undefined) {
+        await this.supabase.from("collection_pebbles").delete().eq("collection_id", id)
+        if (input.pebble_ids.length > 0) {
+          await this.supabase.from("collection_pebbles").insert(
+            input.pebble_ids.map((pid) => ({
+              collection_id: id,
+              pebble_id: pid,
+            })),
+          )
+        }
+      }
+    })
+  }
+
+  private pushCollectionDelete(id: string): void {
+    void this.safePush("pushCollectionDelete", () =>
+      this.supabase.from("collections").delete().eq("id", id),
+    )
+  }
+
+  private pushMarkCreate(mark: Mark): void {
+    void this.safePush("pushMarkCreate", () =>
+      this.supabase.from("glyphs").insert({
+        id: mark.id,
+        user_id: this.userId,
+        name: mark.name ?? null,
+        shape_id: mark.shape_id,
+        strokes: mark.strokes,
+        view_box: mark.viewBox,
+      }),
+    )
+  }
+
+  private pushMarkUpdate(id: string, input: UpdateMarkInput): void {
+    void this.safePush("pushMarkUpdate", () => {
+      const updates: Record<string, unknown> = {}
+      if (input.name !== undefined) updates.name = input.name
+      if (input.shape_id !== undefined) updates.shape_id = input.shape_id
+      if (input.strokes !== undefined) updates.strokes = input.strokes
+      if (input.viewBox !== undefined) updates.view_box = input.viewBox
+      return this.supabase.from("glyphs").update(updates).eq("id", id)
+    })
+  }
+
+  private pushMarkDelete(id: string): void {
+    void this.safePush("pushMarkDelete", () =>
+      this.supabase.from("glyphs").delete().eq("id", id),
+    )
+  }
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add apps/web/lib/data/supabase-provider.ts
+git commit -m "feat(db): add background push methods to SupabaseProvider"
+```
+
+---
+
+### Task 4: Add mount sync — fetch from Supabase and reconcile
+
+**Files:**
+- Modify: `apps/web/lib/data/supabase-provider.ts`
+
+This is the key sync method. On mount it fetches everything from Supabase, pushes local-only items, then replaces local state.
+
+- [ ] **Step 1: Add `syncFromSupabase` method**
+
+Add this public method to `SupabaseProvider`:
+
+```typescript
+  // ---------------------------------------------------------------------------
+  // Mount sync — fetch from Supabase, push offline items, replace local
+  // ---------------------------------------------------------------------------
+
+  async syncFromSupabase(): Promise<Store> {
+    try {
+      // Fetch all user data from Supabase in parallel
+      const [
+        pebblesRes,
+        soulsRes,
+        collectionsRes,
+        collectionPebblesRes,
+        glyphsRes,
+        karmaRes,
+        bounceRes,
+      ] = await Promise.all([
+        this.supabase.from("v_pebbles_full").select("*"),
+        this.supabase.from("souls").select("*").eq("user_id", this.userId),
+        this.supabase.from("collections").select("*").eq("user_id", this.userId),
+        this.supabase.from("collection_pebbles").select("*"),
+        this.supabase.from("glyphs").select("*").eq("user_id", this.userId),
+        this.supabase.from("v_karma_summary").select("*").eq("user_id", this.userId).single(),
+        this.supabase.from("v_bounce").select("*").eq("user_id", this.userId).single(),
+      ])
+
+      // Parse remote pebbles from the denormalized view
+      const remotePebbles: Pebble[] = (pebblesRes.data ?? []).map((row: Record<string, unknown>) => ({
+        id: row.id as string,
+        name: row.name as string,
+        description: (row.description as string) ?? undefined,
+        happened_at: row.happened_at as string,
+        intensity: row.intensity as 1 | 2 | 3,
+        positiveness: row.positiveness as -1 | 0 | 1,
+        visibility: (row.visibility as string) as "private" | "public",
+        emotion_id: row.emotion_id as string,
+        soul_ids: ((row.souls as Array<{ id: string }>) ?? []).map((s) => s.id),
+        domain_ids: ((row.domains as Array<{ id: string }>) ?? []).map((d) => d.id),
+        mark_id: (row.glyph_id as string) ?? undefined,
+        instants: [], // snaps not yet mapped to instants
+        cards: ((row.cards as Array<{ species_id: string; value: string }>) ?? []).map((c) => ({
+          species_id: c.species_id,
+          value: c.value,
+        })),
+        created_at: row.created_at as string,
+        updated_at: row.updated_at as string,
+      }))
+
+      const remoteSouls: Soul[] = (soulsRes.data ?? []).map((row: Record<string, unknown>) => ({
+        id: row.id as string,
+        name: row.name as string,
+        created_at: row.created_at as string,
+        updated_at: row.updated_at as string,
+      }))
+
+      // Build collection pebble_ids from join table
+      const cpMap = new Map<string, string[]>()
+      for (const row of collectionPebblesRes.data ?? []) {
+        const cid = (row as Record<string, string>).collection_id
+        const pid = (row as Record<string, string>).pebble_id
+        const arr = cpMap.get(cid) ?? []
+        arr.push(pid)
+        cpMap.set(cid, arr)
+      }
+
+      const remoteCollections: Collection[] = (collectionsRes.data ?? []).map((row: Record<string, unknown>) => ({
+        id: row.id as string,
+        name: row.name as string,
+        mode: (row.mode as "stack" | "pack" | "track") ?? undefined,
+        pebble_ids: cpMap.get(row.id as string) ?? [],
+        created_at: row.created_at as string,
+        updated_at: row.updated_at as string,
+      }))
+
+      const remoteMarks: Mark[] = (glyphsRes.data ?? []).map((row: Record<string, unknown>) => ({
+        id: row.id as string,
+        name: (row.name as string) ?? undefined,
+        shape_id: row.shape_id as string,
+        strokes: row.strokes as Mark["strokes"],
+        viewBox: row.view_box as string,
+        created_at: row.created_at as string,
+        updated_at: row.updated_at as string,
+      }))
+
+      // Push local-only items (created offline)
+      const remoteIds = {
+        pebbles: new Set(remotePebbles.map((p) => p.id)),
+        souls: new Set(remoteSouls.map((s) => s.id)),
+        collections: new Set(remoteCollections.map((c) => c.id)),
+        marks: new Set(remoteMarks.map((m) => m.id)),
+      }
+
+      for (const pebble of this.store.pebbles) {
+        if (!remoteIds.pebbles.has(pebble.id)) {
+          this.pushPebbleCreate(pebble, pebble as unknown as CreatePebbleInput)
+        }
+      }
+      for (const soul of this.store.souls) {
+        if (!remoteIds.souls.has(soul.id)) {
+          this.pushSoulCreate(soul)
+        }
+      }
+      for (const collection of this.store.collections) {
+        if (!remoteIds.collections.has(collection.id)) {
+          this.pushCollectionCreate(collection)
+        }
+      }
+      for (const mark of this.store.marks) {
+        if (!remoteIds.marks.has(mark.id)) {
+          this.pushMarkCreate(mark)
+        }
+      }
+
+      // Build new store from Supabase data
+      const karma = (karmaRes.data as Record<string, unknown>)?.total_karma as number ?? 0
+      const pebblesCount = (karmaRes.data as Record<string, unknown>)?.pebbles_count as number ?? 0
+      const bounce = (bounceRes.data as Record<string, unknown>)?.bounce_level as number ?? 0
+
+      const newStore: Store = {
+        pebbles: remotePebbles,
+        souls: remoteSouls,
+        collections: remoteCollections,
+        marks: remoteMarks,
+        pebbles_count: pebblesCount,
+        karma,
+        karma_log: [], // karma_log is not synced — it's derived from karma_events server-side
+        bounce,
+        bounce_window: [], // bounce_window is not synced — computed server-side
+      }
+
+      this.mutate(newStore)
+      return newStore
+    } catch (err) {
+      console.warn("[SupabaseProvider] syncFromSupabase failed:", err)
+      // Keep local data on failure
+      return this.store
+    }
+  }
+```
+
+- [ ] **Step 2: Commit**
+
+```bash
+git add apps/web/lib/data/supabase-provider.ts
+git commit -m "feat(db): add mount sync to SupabaseProvider"
+```
+
+---
+
+### Task 5: Rewrite DataProvider.tsx and reorder layout
+
+**Files:**
+- Modify: `apps/web/components/layout/DataProvider.tsx`
+- Modify: `apps/web/app/layout.tsx`
+
+Wire `SupabaseProvider` into the component tree.
+
+- [ ] **Step 1: Rewrite `DataProvider.tsx`**
+
+```typescript
+"use client"
+
+import { useState, useEffect } from "react"
+import { DataContext } from "@/lib/data/provider-context"
+import { SupabaseProvider } from "@/lib/data/supabase-provider"
+import { useAuth } from "@/lib/data/auth-context"
+import { createClient } from "@/lib/supabase/client"
+import type { Store } from "@/lib/data/data-provider"
+
+const EMPTY_STORE: Store = {
+  pebbles: [],
+  souls: [],
+  collections: [],
+  marks: [],
+  pebbles_count: 0,
+  karma: 0,
+  karma_log: [],
+  bounce: 0,
+  bounce_window: [],
+}
+
+export function DataProvider({ children }: { children: React.ReactNode }) {
+  const { user, isLoading: authLoading } = useAuth()
+
+  const [provider, setProvider] = useState<SupabaseProvider | null>(null)
+  const [store, setStore] = useState<Store>(EMPTY_STORE)
+  const [loading, setLoading] = useState(true)
+
+  // Create provider when user is available
+  useEffect(() => {
+    if (authLoading || !user) {
+      setProvider(null)
+      setStore(EMPTY_STORE)
+      setLoading(!authLoading)
+      return
+    }
+
+    const supabase = createClient()
+    const sp = new SupabaseProvider(user.id, supabase)
+
+    setProvider(sp)
+    // Load from localStorage immediately
+    void Promise.resolve().then(() => {
+      setStore(sp.getStore())
+      setLoading(false)
+    })
+
+    // Sync from Supabase in background
+    sp.syncFromSupabase().then((freshStore) => {
+      setStore(freshStore)
+    }).catch(() => {
+      // Sync failed — keep localStorage data
+    })
+  }, [user, authLoading])
+
+  if (!provider) {
+    return (
+      <DataContext.Provider value={{
+        provider: null as unknown as SupabaseProvider,
+        store: EMPTY_STORE,
+        setStore: () => {},
+        loading: authLoading,
+      }}>
+        {children}
+      </DataContext.Provider>
+    )
+  }
+
+  const wrappedSetStore = (storeOrUpdater: Store | ((prev: Store) => Store)) => {
+    setStore((prev) => {
+      const next = typeof storeOrUpdater === "function" ? storeOrUpdater(prev) : storeOrUpdater
+      return next
+    })
+  }
+
+  return (
+    <DataContext.Provider value={{ provider, store, setStore: wrappedSetStore, loading }}>
+      {children}
+    </DataContext.Provider>
+  )
+}
+```
+
+- [ ] **Step 2: Reorder providers in `layout.tsx`**
+
+Change the provider tree from:
+
+```tsx
+<DataProvider>
+  <AuthProvider>
+```
+
+To:
+
+```tsx
+<AuthProvider>
+  <DataProvider>
+```
+
+And close them in reverse order. The full body becomes:
+
+```tsx
+<body className="bg-background text-foreground">
+  <SerwistRegistration>
+    <AuthProvider>
+      <DataProvider>
+        <ColorWorldProvider>
+          <ThemeProvider>
+            <ThemeColorSync />
+            <div className="flex h-full pl-[var(--safe-area-left)] pr-[var(--safe-area-right)]">
+              <MainContent>{children}</MainContent>
+            </div>
+          </ThemeProvider>
+        </ColorWorldProvider>
+      </DataProvider>
+    </AuthProvider>
+  </SerwistRegistration>
+</body>
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add apps/web/components/layout/DataProvider.tsx apps/web/app/layout.tsx
+git commit -m "feat(db): wire SupabaseProvider into DataProvider and reorder layout"
+```
+
+---
+
+### Task 6: Build and lint verification
+
+- [ ] **Step 1: Run the build**
+
+Run from repo root:
+```bash
+npx turbo build
+```
+
+Expected: build succeeds.
+
+- [ ] **Step 2: Run the linter**
+
+```bash
+npx turbo lint
+```
+
+Expected: 0 errors (pre-existing warnings are OK).
+
+- [ ] **Step 3: Fix any errors**
+
+Common issues:
+- Import paths for removed types (`AuthStore`, `Session` from data-provider)
+- Type mismatches between `Mark` (app) and `glyphs` (DB) field names (`viewBox` vs `view_box`)
+- `provider: null as unknown as SupabaseProvider` in DataProvider — may need adjustment if `useDataProvider()` is called when not authenticated
+
+After fixing, re-run build and lint.
+
+- [ ] **Step 4: Commit if fixes needed**
+
+```bash
+git add -A
+git commit -m "fix(db): resolve build and lint errors from SupabaseProvider migration"
+```
