@@ -32,7 +32,7 @@ All commands run from this package directory (`packages/supabase/`):
 
 ## Type Generation
 
-Generated types live in `types/database.ts` and are committed to the repo. The web app imports them via `import type { Database } from "@pbbls/supabase"`.
+Generated types live in `types/database.ts` and are committed to the repo. The web app will import them via `import type { Database } from "@pbbls/supabase"` once the dependency is wired.
 
 **When to regenerate:** after creating or modifying migration files.
 
@@ -54,7 +54,7 @@ After creating a Supabase project on the dashboard:
 ## Status
 
 - Infrastructure initialized, CLI configured
+- Database schema deployed (reference tables, core tables, views, RPC functions, auth trigger)
 - Generated TypeScript types from database schema
-- Will provide the Supabase client initialization and typed queries
-- Will replace `apps/web/lib/data/local-provider.ts` as the `DataProvider` backend
-- Must implement the `DataProvider` interface defined in `apps/web/lib/data/data-provider.ts`
+- `SupabaseProvider` implemented in `apps/web/lib/data/supabase-provider.ts`
+- Type generation pipeline: modify migration → `db:reset` → `db:types` → commit

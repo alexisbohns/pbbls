@@ -54,6 +54,7 @@ lib/
   engine/         → Glyph generation engine (rendering, templates, params)
   utils/          → Utility functions (formatters, group-pebbles-by-date, image-compress, simplify-path)
   seed/           → Seed/fixture data for development
+  supabase/       → Supabase client initialization (browser + server)
 docs/             → Documentation content (markdown pages with i18n, Arkaik architecture bundle)
 public/           → PWA manifest, app icons, iOS splash screens
 scripts/          → Build scripts (splash screen generation)
@@ -61,11 +62,12 @@ scripts/          → Build scripts (splash screen generation)
 
 ## Data layer
 
-- **Data hooks** live in `lib/data/` — they wrap the `DataProvider` interface: `usePebbles`, `useSouls`, `useCollections`, `useMarks`, `useKarma`, `useBounce`, `useLookupMaps`.
+- **Data hooks** live in `lib/data/` — they wrap the `DataProvider` interface: `usePebbles`, `useSouls`, `useCollections`, `useMarks`, `useKarma`, `useBounce`, `useLookupMaps`, `useSupabaseAuth`, `useReset`.
 - **Non-data hooks** live in `lib/hooks/` — UI logic with no data dependency: `useStepNavigation`, `useHaptics`, `useComboboxFilter`, `usePebbleVisual`, etc.
 - Components never call the provider directly — always go through hooks.
 - **Static configs** (emotions, domains, card types, color worlds, pebble shapes, positiveness, navigation) live in `lib/config/` and are imported directly — they do not go through the provider.
 - **Business logic** for gamification lives in `lib/data/bounce-levels.ts` (streak mechanic) and `lib/data/karma.ts` (karma computation). Both are pure functions.
+- **Providers**: `LocalProvider` handles localStorage for anonymous/offline use. `SupabaseProvider` adds background sync to Supabase for authenticated users. `DataProvider.tsx` switches between them based on auth state.
 
 ## Component patterns
 

@@ -13,7 +13,7 @@ pbbls/
     ios/         ← iOS app (placeholder)
   packages/
     shared/      ← Shared types & utilities (placeholder)
-    supabase/    ← Supabase client & types (placeholder)
+    supabase/    ← Supabase client, types & migrations
   turbo.json     ← Turborepo task configuration
   package.json   ← Workspace root
 ```
@@ -37,7 +37,7 @@ Open https://localhost:3000. On first launch, seed data is loaded automatically.
 
 ## Web app (`apps/web/`)
 
-The web app is a local-first MVP built with Next.js (App Router), React, Tailwind CSS, and shadcn/ui. All data lives in `localStorage` — there is no backend yet. The DataProvider interface is designed for a future Supabase migration.
+The web app is a local-first PWA built with Next.js (App Router), React, Tailwind CSS, and shadcn/ui. Data is stored in localStorage with background sync to Supabase for authenticated users. The DataProvider interface abstracts the storage layer — `LocalProvider` for anonymous/offline use, `SupabaseProvider` for authenticated users.
 
 See [`apps/web/`](apps/web/) for the full web app documentation.
 
@@ -83,11 +83,11 @@ apps/web/
 ### Data flow
 
 ```
-localStorage (JSON)
+in-memory Store (React context)
 ↕
-LocalProvider (implements DataProvider)
-↕
-React hooks (usePebbles, useSouls, useCollections)
+LocalProvider (localStorage) ──or── SupabaseProvider (localStorage + Supabase sync)
+↕                                   ↕
+React hooks (usePebbles, etc.)      Background push/pull to Supabase
 ↕
 Page components → UI
 ```
@@ -98,7 +98,7 @@ Page components → UI
 |-------------|--------|
 | Framework   | Next.js (App Router) |
 | UI          | React + Tailwind CSS + shadcn/ui |
-| Storage     | localStorage (Supabase planned) |
+| Storage     | localStorage + Supabase (local-first) |
 | Theming     | next-themes |
 | Monorepo    | Turborepo + npm workspaces |
 
