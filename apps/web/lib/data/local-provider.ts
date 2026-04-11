@@ -1,7 +1,6 @@
 import type {
   DataProvider,
   Store,
-  AuthStore,
   CreatePebbleInput,
   UpdatePebbleInput,
   CreateSoulInput,
@@ -11,27 +10,12 @@ import type {
   CreateMarkInput,
   UpdateMarkInput,
 } from "@/lib/data/data-provider"
-import type {
-  Pebble,
-  Soul,
-  Collection,
-  KarmaEvent,
-  Mark,
-  Account,
-  Profile,
-  Session,
-} from "@/lib/types"
+import type { Pebble, Soul, Collection, KarmaEvent, Mark } from "@/lib/types"
 import { SEED_PEBBLES, SEED_SOULS, SEED_COLLECTIONS } from "@/lib/seed/seed-data"
 import { refreshBounceWindow, decayBounceWindow, todayLocal } from "@/lib/data/bounce-levels"
 import { computeKarmaDelta } from "@/lib/data/karma"
 
 const STORAGE_KEY = "pbbls:store"
-const AUTH_STORAGE_KEY = "pbbls:auth"
-const SESSION_STORAGE_KEY = "pbbls:session"
-const EMPTY_AUTH_STORE: AuthStore = {
-  accounts: [],
-  profiles: [],
-}
 
 const EMPTY_STORE: Store = {
   pebbles: [],
@@ -47,29 +31,14 @@ const EMPTY_STORE: Store = {
 
 export class LocalProvider implements DataProvider {
   private store: Store
-  private authStore: AuthStore
-  private session: Session | null
 
   constructor() {
-    this.authStore = this.loadAuth()
-    this.session = this.loadSession()
     this.store = this.load()
   }
 
   // ---------------------------------------------------------------------------
   // Internal helpers
   // ---------------------------------------------------------------------------
-
-  /**
-   * Return the localStorage key for content data. When a session is active the
-   * key is scoped to the profile so each account has its own pebbles, souls,
-   * collections, etc. Falls back to the unscoped key when no session exists.
-   */
-  private getStorageKey(): string {
-    return this.session?.profile_id
-      ? `${STORAGE_KEY}:${this.session.profile_id}`
-      : STORAGE_KEY
-  }
 
   private load(): Store {
     // localStorage is not available during SSR — return an empty store so the
@@ -78,7 +47,7 @@ export class LocalProvider implements DataProvider {
     if (typeof window === "undefined") return EMPTY_STORE
 
     try {
-      const raw = localStorage.getItem(this.getStorageKey())
+      const raw = localStorage.getItem(STORAGE_KEY)
       if (!raw) {
         // Return seed in-memory only; the DataProvider mounts a useEffect to
         // persist via persistIfNeeded() after the first render. This keeps
@@ -139,7 +108,7 @@ export class LocalProvider implements DataProvider {
    */
   persistIfNeeded(): void {
     if (typeof window === "undefined") return
-    if (localStorage.getItem(this.getStorageKey()) !== null) return
+    if (localStorage.getItem(STORAGE_KEY) !== null) return
     this.writeToStorage(this.store)
   }
 
@@ -180,7 +149,7 @@ export class LocalProvider implements DataProvider {
   private writeToStorage(store: Store): void {
     if (typeof window === "undefined") return
     try {
-      localStorage.setItem(this.getStorageKey(), JSON.stringify(store))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(store))
     } catch {
       console.warn("[LocalProvider] Could not write to localStorage.")
     }
@@ -190,86 +159,6 @@ export class LocalProvider implements DataProvider {
   private mutate(store: Store): void {
     this.store = store
     this.writeToStorage(store)
-  }
-
-  // ---------------------------------------------------------------------------
-  // Auth storage helpers
-  // ---------------------------------------------------------------------------
-
-  private loadAuth(): AuthStore {
-    if (typeof window === "undefined") return EMPTY_AUTH_STORE
-    try {
-      const raw = localStorage.getItem(AUTH_STORAGE_KEY)
-      if (!raw) return EMPTY_AUTH_STORE
-      const parsed = JSON.parse(raw) as AuthStore
-
-      // Backfill consent fields for profiles created before this feature
-      for (const profile of parsed.profiles) {
-        if (profile.terms_accepted_at === undefined) {
-          profile.terms_accepted_at = null
-        }
-        if (profile.privacy_accepted_at === undefined) {
-          profile.privacy_accepted_at = null
-        }
-      }
-
-      return parsed
-    } catch {
-      return EMPTY_AUTH_STORE
-    }
-  }
-
-  private loadSession(): Session | null {
-    if (typeof window === "undefined") return null
-    try {
-      const raw = localStorage.getItem(SESSION_STORAGE_KEY)
-      if (!raw) return null
-      return JSON.parse(raw) as Session
-    } catch {
-      return null
-    }
-  }
-
-  private writeAuthToStorage(authStore: AuthStore): void {
-    if (typeof window === "undefined") return
-    try {
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authStore))
-    } catch {
-      console.warn("[LocalProvider] Could not write auth to localStorage.")
-    }
-  }
-
-  private writeSessionToStorage(session: Session | null): void {
-    if (typeof window === "undefined") return
-    try {
-      if (session) {
-        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session))
-      } else {
-        localStorage.removeItem(SESSION_STORAGE_KEY)
-      }
-    } catch {
-      console.warn("[LocalProvider] Could not write session to localStorage.")
-    }
-  }
-
-  private mutateAuth(authStore: AuthStore): void {
-    this.authStore = authStore
-    this.writeAuthToStorage(authStore)
-  }
-
-  /**
-   * Copy unscoped `pbbls:store` data to a profile-scoped key on first
-   * login/register so existing pebbles are not lost. No-op if the scoped key
-   * already exists or there is no unscoped data to migrate.
-   */
-  private migrateUnscopedData(profileId: string): void {
-    if (typeof window === "undefined") return
-    const scopedKey = `${STORAGE_KEY}:${profileId}`
-    if (localStorage.getItem(scopedKey) !== null) return
-    const unscopedData = localStorage.getItem(STORAGE_KEY)
-    if (!unscopedData) return
-    localStorage.setItem(scopedKey, unscopedData)
-    localStorage.removeItem(STORAGE_KEY)
   }
 
   // ---------------------------------------------------------------------------
@@ -571,36 +460,4 @@ export class LocalProvider implements DataProvider {
     this.mutate({ ...this.store, marks })
   }
 
-  // ---------------------------------------------------------------------------
-  // Auth — now handled by Supabase Auth (useSupabaseAuth hook).
-  // Stubs kept to satisfy the DataProvider interface.
-  // ---------------------------------------------------------------------------
-
-  async register(): Promise<Session> {
-    throw new Error("Auth is handled by Supabase — use useSupabaseAuth")
-  }
-
-  async login(): Promise<Session> {
-    throw new Error("Auth is handled by Supabase — use useSupabaseAuth")
-  }
-
-  async logout(): Promise<void> {
-    throw new Error("Auth is handled by Supabase — use useSupabaseAuth")
-  }
-
-  getSession(): Session | null {
-    return null
-  }
-
-  async getAccount(): Promise<Account | undefined> {
-    return undefined
-  }
-
-  async getProfile(): Promise<Profile | undefined> {
-    return undefined
-  }
-
-  async updateProfile(): Promise<Profile> {
-    throw new Error("Auth is handled by Supabase — use useSupabaseAuth")
-  }
 }

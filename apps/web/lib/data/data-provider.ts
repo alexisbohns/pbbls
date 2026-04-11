@@ -4,12 +4,6 @@ import type {
   Collection,
   KarmaEvent,
   Mark,
-  Account,
-  Profile,
-  Session,
-  RegisterInput,
-  LoginInput,
-  UpdateProfileInput,
 } from "@/lib/types"
 
 // ---------------------------------------------------------------------------
@@ -27,16 +21,6 @@ export type Store = {
   karma_log: KarmaEvent[]
   bounce: number
   bounce_window: string[]
-}
-
-// ---------------------------------------------------------------------------
-// Auth store — persisted separately from content data so auth maps cleanly
-// to Supabase Auth while content maps to Supabase DB tables.
-// ---------------------------------------------------------------------------
-
-export type AuthStore = {
-  accounts: Account[]
-  profiles: Profile[]
 }
 
 // ---------------------------------------------------------------------------
@@ -110,13 +94,4 @@ export interface DataProvider {
   createMark(input: CreateMarkInput): Promise<Mark>
   updateMark(id: string, input: UpdateMarkInput): Promise<Mark>
   deleteMark(id: string): Promise<void>
-
-  // Auth
-  register(input: RegisterInput): Promise<Session>
-  login(input: LoginInput): Promise<Session>
-  logout(): Promise<void>
-  getSession(): Session | null
-  getAccount(): Promise<Account | undefined>
-  getProfile(): Promise<Profile | undefined>
-  updateProfile(input: UpdateProfileInput): Promise<Profile>
 }
