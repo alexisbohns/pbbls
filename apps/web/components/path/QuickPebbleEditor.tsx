@@ -347,6 +347,7 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
           ariaLabel={instant ? "Remove photo" : "Add photo"}
         >
           {instant && (
+            /* eslint-disable-next-line @next/next/no-img-element -- base64 data URL, next/image optimization not applicable */
             <img
               src={instant}
               alt="Uploaded photo"

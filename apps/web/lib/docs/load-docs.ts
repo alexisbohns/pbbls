@@ -11,8 +11,8 @@ const docsDir = path.join(process.cwd(), "docs")
 
 const processor = unified()
   .use(remarkParse)
-  .use(remarkRehype, { allowDangerousHtml: true })
-  .use(rehypeStringify, { allowDangerousHtml: true })
+  .use(remarkRehype)
+  .use(rehypeStringify)
 
 export function getDocsManifest(): DocsManifest {
   const raw = fs.readFileSync(path.join(docsDir, "index.json"), "utf-8")

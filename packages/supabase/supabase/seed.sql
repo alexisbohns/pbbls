@@ -1,2 +1,7 @@
--- Seed data for local development
--- Add INSERT statements here to populate the local database after migrations
+-- Seed data for local development.
+--
+-- Reference data (emotions, domains, card_types, pebble_shapes) is inserted
+-- by the migration 20260411000000_reference_tables.sql because it is immutable
+-- production data, not dev-only seed data.
+--
+-- Add development-only INSERT statements below (e.g., test users, sample pebbles).

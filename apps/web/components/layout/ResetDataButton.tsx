@@ -3,15 +3,10 @@
 import { RotateCcw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
-import { useDataProvider } from "@/lib/data/provider-context"
+import { useReset } from "@/lib/data/useReset"
 
 export function ResetDataButton() {
-  const { provider, setStore } = useDataProvider()
-
-  const handleReset = async () => {
-    const snapshot = await provider.reset()
-    setStore(snapshot)
-  }
+  const { reset } = useReset()
 
   return (
     <ConfirmDialog
@@ -23,7 +18,7 @@ export function ResetDataButton() {
       title="Reset all data?"
       description="This will replace your pebbles, souls, and collections with the original seed data. This cannot be undone."
       confirmLabel="Reset data"
-      onConfirm={handleReset}
+      onConfirm={reset}
     />
   )
 }

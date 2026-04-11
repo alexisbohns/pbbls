@@ -66,6 +66,7 @@ export function PebbleCard({ pebble, emotion, mark, soulNames, onSelect }: Pebbl
             </time>
 
             {firstInstant && (
+              /* eslint-disable-next-line @next/next/no-img-element -- base64 data URL, next/image optimization not applicable */
               <img
                 src={firstInstant}
                 alt={`Instant photo for ${pebble.name}`}
@@ -111,6 +112,7 @@ export function PebbleCard({ pebble, emotion, mark, soulNames, onSelect }: Pebbl
             </div>
 
             {firstInstant && (
+              /* eslint-disable-next-line @next/next/no-img-element -- base64 data URL, next/image optimization not applicable */
               <img
                 src={firstInstant}
                 alt={`Instant photo for ${pebble.name}`}

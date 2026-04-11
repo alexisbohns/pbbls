@@ -1,4 +1,4 @@
-import type { PebbleParams, RenderTier, EngineOutput } from "./types"
+import type { PebbleParams, EngineOutput } from "./types"
 import { getTemplate } from "./templates"
 import { renderGlyphPaths } from "./glyph"
 
@@ -27,8 +27,6 @@ const FOSSIL_RE = /\s*<path id="fossil"[^>]*\/>/
  */
 export function renderPebble(
   params: PebbleParams,
-  _seed: number,
-  _tier: RenderTier,
 ): EngineOutput {
   const template = getTemplate(params.intensity, params.positiveness)
   let svg = template.svg

@@ -2,5 +2,8 @@
   "name": "@pbbls/ios",
   "version": "0.0.0",
   "private": true,
-  "scripts": {}
+  "scripts": {
+    "build": "echo 'placeholder — no build step yet'",
+    "lint": "echo 'placeholder — no lint step yet'"
+  }
 }

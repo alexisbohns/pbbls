@@ -46,8 +46,14 @@ next-env.d.ts
 # vscode
 .vscode/*
 
+# mcp config (may contain project refs)
+.mcp.json
+
 # superpowers
 .superpowers/
+
+# agent skills cache
+.agents/
 
 # serwist
 public/sw.js

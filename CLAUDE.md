@@ -36,7 +36,7 @@
 ### Accessibility
 
 - All interactive elements must be keyboard-navigable.
-- Use semantic HTML elements like `button` for interaction, `nav` for navigation, `main` for main content, `section` for sections, `h1`–`h6` for headings, `ul`/`ol` for lists even if it's a grid of cards, `article` for standalone content (ie. a pebble card), abbriviations like `abbr` for emotion icons, etc.
+- Use semantic HTML elements like `button` for interaction, `nav` for navigation, `main` for main content, `section` for sections, `h1`–`h6` for headings, `ul`/`ol` for lists even if it's a grid of cards, `article` for standalone content (ie. a pebble card), abbreviations like `abbr` for emotion icons, etc.
 - Images and icons must have meaningful `alt` text or `aria-label`.
 - Use `aria-live` regions for dynamic content updates.
 - Color is never the sole indicator — always pair with text or icons.

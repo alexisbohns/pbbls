@@ -23,6 +23,18 @@ export type Store = {
   bounce_window: string[]
 }
 
+export const EMPTY_STORE: Store = {
+  pebbles: [],
+  souls: [],
+  collections: [],
+  marks: [],
+  pebbles_count: 0,
+  karma: 0,
+  karma_log: [],
+  bounce: 0,
+  bounce_window: [],
+}
+
 // ---------------------------------------------------------------------------
 // Input types — omit server-generated fields so callers never touch them.
 // ---------------------------------------------------------------------------
