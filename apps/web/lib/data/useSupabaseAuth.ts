@@ -3,14 +3,6 @@
 import { useState, useEffect, useCallback } from "react"
 import { createClient } from "@/lib/supabase/client"
 
-// Singleton client — created once on first browser-side call.
-let supabaseInstance: ReturnType<typeof createClient> | null = null
-
-function getSupabase() {
-  if (typeof window === "undefined") return null
-  if (!supabaseInstance) supabaseInstance = createClient()
-  return supabaseInstance
-}
 import type {
   Account,
   Profile,
@@ -20,135 +12,112 @@ import type {
 } from "@/lib/types"
 import type { AuthContextValue } from "@/lib/data/auth-context"
 
-/**
- * Manages Supabase auth state and exposes it in the shape expected by
- * AuthContext. Drop-in replacement for the old LocalProvider-based auth
- * logic in AuthProvider.
- *
- * During SSR/SSG the Supabase client is not created (no env vars available),
- * so all auth state is null/loading and actions are no-ops until the
- * component mounts in the browser.
- */
-export function useSupabaseAuth(): AuthContextValue {
+let supabaseInstance: ReturnType<typeof createClient> | null = null
 
+function getSupabase() {
+  if (typeof window === "undefined") return null
+  if (!supabaseInstance) supabaseInstance = createClient()
+  return supabaseInstance
+}
+
+export function useSupabaseAuth(): AuthContextValue {
   const [user, setUser] = useState<Account | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [isLoading, setIsLoading] = useState(() => getSupabase() !== null)
-
-  // -----------------------------------------------------------------------
-  // Helpers
-  // -----------------------------------------------------------------------
-
-  /** Map a Supabase user to our Account type. */
-  const toAccount = useCallback(
-    (supabaseUser: { id: string; email?: string; created_at: string }): Account => ({
-      id: supabaseUser.id,
-      email: supabaseUser.email ?? "",
-      created_at: supabaseUser.created_at,
-    }),
-    [],
-  )
-
-  /** Fetch the profile row for a given user ID. */
-  const fetchProfile = useCallback(
-    async (userId: string): Promise<Profile | null> => {
-      const supabase = getSupabase()
-      if (!supabase) return null
-
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", userId)
-        .single()
-
-      if (error || !data) return null
-      return data as Profile
-    },
-    [],
-  )
-
-  // -----------------------------------------------------------------------
-  // Auth state listener
-  // -----------------------------------------------------------------------
+  // Always start as true on both server and client to avoid hydration mismatch.
+  // The client-side effect sets it to false after session check.
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const supabase = getSupabase()
     if (!supabase) return
 
-    // Check for existing session on mount
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        setUser(toAccount(session.user))
-        const prof = await fetchProfile(session.user.id)
-        setProfile(prof)
+    let cancelled = false
+
+    // Use getUser() instead of getSession() — it validates the token with
+    // the Supabase Auth server and refreshes if expired. getSession() only
+    // reads from cookies without validation, which can return stale/invalid
+    // tokens that cause 401 on subsequent API calls.
+    supabase.auth.getUser().then(async ({ data: { user: supabaseUser } }) => {
+      if (cancelled) return
+      if (supabaseUser) {
+        setUser({
+          id: supabaseUser.id,
+          email: supabaseUser.email ?? "",
+          created_at: supabaseUser.created_at,
+        })
+        const { data } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("user_id", supabaseUser.id)
+          .maybeSingle()
+        if (!cancelled) setProfile(data as Profile | null)
       }
-      setIsLoading(false)
+      if (!cancelled) setIsLoading(false)
     })
 
-    // Listen for auth state changes (login, logout, token refresh)
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session?.user) {
-        setUser(toAccount(session.user))
-        const prof = await fetchProfile(session.user.id)
-        setProfile(prof)
-      } else {
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT") return
+      if (cancelled) return
+
+      if (event === "SIGNED_OUT" || !session?.user) {
         setUser(null)
         setProfile(null)
+        return
       }
+
+      setUser({
+        id: session.user.id,
+        email: session.user.email ?? "",
+        created_at: session.user.created_at,
+      })
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("user_id", session.user.id)
+        .maybeSingle()
+      if (!cancelled) setProfile(data as Profile | null)
     })
 
-    return () => subscription.unsubscribe()
-  }, [toAccount, fetchProfile])
+    return () => {
+      cancelled = true
+      subscription.unsubscribe()
+    }
+  }, [])
 
-  // -----------------------------------------------------------------------
-  // Auth actions
-  // -----------------------------------------------------------------------
+  const login = useCallback(async (input: LoginInput) => {
+    const supabase = getSupabase()
+    if (!supabase) throw new Error("Supabase client not available")
+    const { error } = await supabase.auth.signInWithPassword({
+      email: input.email,
+      password: input.password,
+    })
+    if (error) throw new Error(error.message)
+  }, [])
 
-  const login = useCallback(
-    async (input: LoginInput) => {
-      const supabase = getSupabase()
-      if (!supabase) throw new Error("Supabase client not available")
-
-      const { error } = await supabase.auth.signInWithPassword({
-        email: input.email,
-        password: input.password,
-      })
-      if (error) throw new Error(error.message)
-    },
-    [],
-  )
-
-  const register = useCallback(
-    async (input: RegisterInput) => {
-      const supabase = getSupabase()
-      if (!supabase) throw new Error("Supabase client not available")
-
-      const { error } = await supabase.auth.signUp({
-        email: input.email,
-        password: input.password,
-        options: {
-          data: {
-            terms_accepted_at: input.terms_accepted ? new Date().toISOString() : null,
-            privacy_accepted_at: input.privacy_accepted ? new Date().toISOString() : null,
-          },
+  const register = useCallback(async (input: RegisterInput) => {
+    const supabase = getSupabase()
+    if (!supabase) throw new Error("Supabase client not available")
+    const { error } = await supabase.auth.signUp({
+      email: input.email,
+      password: input.password,
+      options: {
+        data: {
+          terms_accepted_at: input.terms_accepted ? new Date().toISOString() : null,
+          privacy_accepted_at: input.privacy_accepted ? new Date().toISOString() : null,
         },
-      })
-      if (error) throw new Error(error.message)
-    },
-    [],
-  )
+      },
+    })
+    if (error) throw new Error(error.message)
+  }, [])
 
   const signInWithApple = useCallback(async () => {
     const supabase = getSupabase()
     if (!supabase) throw new Error("Supabase client not available")
-
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "apple",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     })
     if (error) throw new Error(error.message)
   }, [])
@@ -156,12 +125,9 @@ export function useSupabaseAuth(): AuthContextValue {
   const signInWithGoogle = useCallback(async () => {
     const supabase = getSupabase()
     if (!supabase) throw new Error("Supabase client not available")
-
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-      },
+      options: { redirectTo: `${window.location.origin}/auth/callback` },
     })
     if (error) throw new Error(error.message)
   }, [])
@@ -169,7 +135,6 @@ export function useSupabaseAuth(): AuthContextValue {
   const logout = useCallback(async () => {
     const supabase = getSupabase()
     if (!supabase) throw new Error("Supabase client not available")
-
     const { error } = await supabase.auth.signOut()
     if (error) throw new Error(error.message)
   }, [])
@@ -179,16 +144,13 @@ export function useSupabaseAuth(): AuthContextValue {
       const supabase = getSupabase()
       if (!supabase) throw new Error("Supabase client not available")
       if (!user) throw new Error("Not authenticated")
-
       const { data, error } = await supabase
         .from("profiles")
         .update(input)
         .eq("user_id", user.id)
         .select()
         .single()
-
       if (error) throw new Error(error.message)
-
       const updated = data as Profile
       setProfile(updated)
       return updated

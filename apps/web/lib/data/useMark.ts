@@ -12,6 +12,7 @@ export function useMark(id: string) {
   const updateMark = async (
     input: UpdateMarkInput,
   ): Promise<Mark> => {
+    if (!provider) throw new Error("Not authenticated")
     const updated = await provider.updateMark(id, input)
     setStore(provider.getStore())
     return updated

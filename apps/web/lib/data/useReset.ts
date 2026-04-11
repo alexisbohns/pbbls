@@ -5,6 +5,7 @@ export function useReset(): { reset: () => Promise<Store> } {
   const { provider, setStore } = useDataProvider()
 
   const reset = async (): Promise<Store> => {
+    if (!provider) throw new Error("Not authenticated")
     const snapshot = await provider.reset()
     setStore(snapshot)
     return snapshot

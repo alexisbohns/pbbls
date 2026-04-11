@@ -10,6 +10,7 @@ export function useSoul(id: string) {
   const soul = store.souls.find((s) => s.id === id)
 
   const updateSoul = async (input: UpdateSoulInput): Promise<Soul> => {
+    if (!provider) throw new Error("Not authenticated")
     const updated = await provider.updateSoul(id, input)
     setStore(provider.getStore())
     return updated

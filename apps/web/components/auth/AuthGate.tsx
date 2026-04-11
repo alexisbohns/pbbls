@@ -15,17 +15,30 @@ const PROTECTED_PREFIXES = [
   "/profile",
 ]
 
-export function AuthGate() {
+interface AuthGateProps {
+  children: React.ReactNode
+}
+
+export function AuthGate({ children }: AuthGateProps) {
   const pathname = usePathname()
   const router = useRouter()
   const { isAuthenticated, isLoading } = useAuth()
 
+  const isProtected = PROTECTED_PREFIXES.some(
+    (p) => pathname === p || pathname.startsWith(p + "/"),
+  )
+
   useEffect(() => {
     if (isLoading) return
-    if (!isAuthenticated && PROTECTED_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"))) {
+    if (!isAuthenticated && isProtected) {
       router.replace("/")
     }
-  }, [pathname, router, isAuthenticated, isLoading])
+  }, [pathname, router, isAuthenticated, isLoading, isProtected])
 
-  return null
+  // While auth is loading or redirect is in progress, show nothing on protected routes.
+  if (isProtected && (isLoading || !isAuthenticated)) {
+    return null
+  }
+
+  return <>{children}</>
 }

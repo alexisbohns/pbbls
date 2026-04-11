@@ -1,65 +1,70 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { DataContext } from "@/lib/data/provider-context"
-import { LocalProvider } from "@/lib/data/local-provider"
 import { SupabaseProvider } from "@/lib/data/supabase-provider"
 import { useAuth } from "@/lib/data/auth-context"
 import { createClient } from "@/lib/supabase/client"
-import { EMPTY_STORE, type DataProvider as DataProviderInterface, type Store } from "@/lib/data/data-provider"
-
-// Fallback provider for unauthenticated state — safe to call methods on.
-const fallbackProvider = new LocalProvider()
+import { EMPTY_STORE, type Store } from "@/lib/data/data-provider"
 
 export function DataProvider({ children }: { children: React.ReactNode }) {
   const { user, isLoading: authLoading } = useAuth()
 
-  const [provider, setProvider] = useState<DataProviderInterface>(fallbackProvider)
+  const [provider, setProvider] = useState<SupabaseProvider | null>(null)
   const [store, setStore] = useState<Store>(EMPTY_STORE)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
 
-  // Create provider when user is available
+  const activeUserIdRef = useRef<string | null>(null)
+
+  const loadData = useCallback(async (userId: string) => {
+    activeUserIdRef.current = userId
+    setLoading(true)
+    setError(null)
+
+    try {
+      const supabase = createClient()
+      const sp = new SupabaseProvider(userId, supabase)
+      const freshStore = await sp.loadFromSupabase()
+
+      if (activeUserIdRef.current !== userId) return
+      setProvider(sp)
+      setStore(freshStore)
+    } catch (err) {
+      if (activeUserIdRef.current !== userId) return
+      setError(err instanceof Error ? err : new Error("Failed to load data"))
+      setProvider(null)
+      setStore(EMPTY_STORE)
+    } finally {
+      if (activeUserIdRef.current === userId) setLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
-    if (authLoading || !user) {
+    if (authLoading) return
+
+    if (!user) {
+      activeUserIdRef.current = null
       void Promise.resolve().then(() => {
-        setProvider(fallbackProvider)
+        setProvider(null)
         setStore(EMPTY_STORE)
-        setLoading(!authLoading)
+        setLoading(false)
+        setError(null)
       })
       return
     }
 
-    const supabase = createClient()
-    const sp = new SupabaseProvider(user.id, supabase)
+    if (activeUserIdRef.current === user.id) return
 
-    // Load from localStorage immediately via microtask to satisfy
-    // react-hooks/set-state-in-effect lint rule.
-    void Promise.resolve().then(() => {
-      setProvider(sp)
-      setStore(sp.getStore())
-      setLoading(false)
-    })
+    void loadData(user.id)
+  }, [user, authLoading, loadData])
 
-    // Sync from Supabase in background
-    sp.syncFromSupabase().then((freshStore) => {
-      setStore(freshStore)
-    }).catch(() => {
-      // Sync failed — keep localStorage data
-    })
-  }, [user, authLoading])
-
-  const wrappedSetStore = useCallback(
-    (storeOrUpdater: Store | ((prev: Store) => Store)) => {
-      setStore((prev) => {
-        const next = typeof storeOrUpdater === "function" ? storeOrUpdater(prev) : storeOrUpdater
-        return next
-      })
-    },
-    [],
-  )
+  const refreshStore = useCallback(() => {
+    if (user) void loadData(user.id)
+  }, [user, loadData])
 
   return (
-    <DataContext.Provider value={{ provider, store, setStore: wrappedSetStore, loading }}>
+    <DataContext.Provider value={{ provider, store, setStore, loading, error, refreshStore }}>
       {children}
     </DataContext.Provider>
   )
