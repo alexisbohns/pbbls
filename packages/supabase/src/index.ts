@@ -1,1 +1,1 @@
-// Placeholder for Supabase client and types
+export type * from "../types/database"

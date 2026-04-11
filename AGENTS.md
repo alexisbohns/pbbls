@@ -7,3 +7,12 @@ This version has breaking changes — APIs, conventions, and file structure may 
 # Instructions
 
 Read `.github/copilot-instructions.md`
+
+# Database Migrations
+
+After creating or modifying migration files in `packages/supabase/supabase/migrations/`, you must regenerate the TypeScript types and commit the updated file:
+
+```bash
+npm run db:types --workspace=packages/supabase
+git add packages/supabase/types/database.ts
+```
