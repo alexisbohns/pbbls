@@ -16,12 +16,8 @@ import type {
   Pebble,
   Soul,
   Collection,
-  KarmaEvent,
   Mark,
 } from "@/lib/types"
-import { computeKarmaDelta } from "@/lib/data/karma"
-
-const STORAGE_KEY = "pbbls:store"
 
 export class SupabaseProvider implements DataProvider {
   private store: Store
@@ -31,53 +27,127 @@ export class SupabaseProvider implements DataProvider {
   constructor(userId: string, supabase: SupabaseClient) {
     this.userId = userId
     this.supabase = supabase
-    this.store = this.loadFromLocalStorage()
+    this.store = EMPTY_STORE
   }
-
-  // ---------------------------------------------------------------------------
-  // localStorage helpers
-  // ---------------------------------------------------------------------------
-
-  private getStorageKey(): string {
-    return `${STORAGE_KEY}:${this.userId}`
-  }
-
-  private loadFromLocalStorage(): Store {
-    if (typeof window === "undefined") return EMPTY_STORE
-    try {
-      const raw = localStorage.getItem(this.getStorageKey())
-      if (!raw) return EMPTY_STORE
-      return JSON.parse(raw) as Store
-    } catch {
-      return EMPTY_STORE
-    }
-  }
-
-  private saveToLocalStorage(): void {
-    if (typeof window === "undefined") return
-    try {
-      localStorage.setItem(this.getStorageKey(), JSON.stringify(this.store))
-    } catch {
-      console.warn("[SupabaseProvider] Could not write to localStorage.")
-    }
-  }
-
-  private mutate(store: Store): void {
-    this.store = store
-    this.saveToLocalStorage()
-  }
-
-  // ---------------------------------------------------------------------------
-  // DataProvider — store access
-  // ---------------------------------------------------------------------------
 
   getStore(): Store {
     return this.store
   }
 
-  reloadStore(): Store {
-    this.store = this.loadFromLocalStorage()
-    return this.store
+  private mutate(store: Store): void {
+    this.store = store
+  }
+
+  private unwrap<T>(result: { data: T; error: unknown }): T {
+    if (result.error) {
+      const err = result.error as { message?: string }
+      throw new Error(err.message ?? "Supabase request failed")
+    }
+    return result.data
+  }
+
+  // ---------------------------------------------------------------------------
+  // Load all data from Supabase
+  // ---------------------------------------------------------------------------
+
+  async loadFromSupabase(): Promise<Store> {
+    const [
+      pebblesRes,
+      soulsRes,
+      collectionsRes,
+      collectionPebblesRes,
+      glyphsRes,
+      karmaRes,
+      bounceRes,
+    ] = await Promise.all([
+      this.supabase.from("v_pebbles_full").select("*").eq("user_id", this.userId),
+      this.supabase.from("souls").select("*").eq("user_id", this.userId),
+      this.supabase.from("collections").select("*").eq("user_id", this.userId),
+      this.supabase.from("collection_pebbles").select("*, collections!inner(user_id)").eq("collections.user_id", this.userId),
+      this.supabase.from("glyphs").select("*").eq("user_id", this.userId),
+      this.supabase.from("v_karma_summary").select("*").eq("user_id", this.userId).maybeSingle(),
+      this.supabase.from("v_bounce").select("*").eq("user_id", this.userId).maybeSingle(),
+    ])
+
+    if (pebblesRes.error) throw new Error(`Failed to load pebbles: ${pebblesRes.error.message}`)
+    if (soulsRes.error) throw new Error(`Failed to load souls: ${soulsRes.error.message}`)
+    if (collectionsRes.error) throw new Error(`Failed to load collections: ${collectionsRes.error.message}`)
+    if (glyphsRes.error) throw new Error(`Failed to load glyphs: ${glyphsRes.error.message}`)
+
+    const pebbles: Pebble[] = (pebblesRes.data ?? []).map((row: Record<string, unknown>) => ({
+      id: row.id as string,
+      name: row.name as string,
+      description: (row.description as string) ?? undefined,
+      happened_at: row.happened_at as string,
+      intensity: row.intensity as 1 | 2 | 3,
+      positiveness: row.positiveness as -1 | 0 | 1,
+      visibility: (row.visibility as string) as "private" | "public",
+      emotion_id: row.emotion_id as string,
+      soul_ids: ((row.souls as Array<{ id: string }>) ?? []).map((s) => s.id),
+      domain_ids: ((row.domains as Array<{ id: string }>) ?? []).map((d) => d.id),
+      mark_id: (row.glyph_id as string) ?? undefined,
+      instants: [],
+      cards: ((row.cards as Array<{ species_id: string; value: string }>) ?? []).map((c) => ({
+        species_id: c.species_id,
+        value: c.value,
+      })),
+      created_at: row.created_at as string,
+      updated_at: row.updated_at as string,
+    }))
+
+    const souls: Soul[] = (soulsRes.data ?? []).map((row: Record<string, unknown>) => ({
+      id: row.id as string,
+      name: row.name as string,
+      created_at: row.created_at as string,
+      updated_at: row.updated_at as string,
+    }))
+
+    const cpMap = new Map<string, string[]>()
+    for (const row of collectionPebblesRes.data ?? []) {
+      const cid = (row as Record<string, string>).collection_id
+      const pid = (row as Record<string, string>).pebble_id
+      const arr = cpMap.get(cid) ?? []
+      arr.push(pid)
+      cpMap.set(cid, arr)
+    }
+
+    const collections: Collection[] = (collectionsRes.data ?? []).map((row: Record<string, unknown>) => ({
+      id: row.id as string,
+      name: row.name as string,
+      mode: (row.mode as "stack" | "pack" | "track") ?? undefined,
+      pebble_ids: cpMap.get(row.id as string) ?? [],
+      created_at: row.created_at as string,
+      updated_at: row.updated_at as string,
+    }))
+
+    const marks: Mark[] = (glyphsRes.data ?? []).map((row: Record<string, unknown>) => ({
+      id: row.id as string,
+      name: (row.name as string) ?? undefined,
+      shape_id: row.shape_id as string,
+      strokes: row.strokes as Mark["strokes"],
+      viewBox: row.view_box as string,
+      created_at: row.created_at as string,
+      updated_at: row.updated_at as string,
+    }))
+
+    const karma = (karmaRes.data as Record<string, unknown>)?.total_karma as number ?? 0
+    const pebblesCount = (karmaRes.data as Record<string, unknown>)?.pebbles_count as number ?? 0
+    const bounce = (bounceRes.data as Record<string, unknown>)?.bounce_level as number ?? 0
+
+    const newStore: Store = {
+      pebbles,
+      souls,
+      collections,
+      marks,
+      pebbles_count: pebblesCount,
+      karma,
+      karma_log: [],
+      bounce,
+      bounce_window: [],
+    }
+
+    this.mutate(newStore)
+    return newStore
   }
 
   async reset(): Promise<Store> {
@@ -86,602 +156,253 @@ export class SupabaseProvider implements DataProvider {
   }
 
   // ---------------------------------------------------------------------------
-  // Pebbles counter
+  // Read helpers
   // ---------------------------------------------------------------------------
 
-  async getPebblesCount(): Promise<number> {
-    return this.store.pebbles_count
-  }
-
-  async incrementPebblesCount(): Promise<number> {
-    const next = this.store.pebbles_count + 1
-    this.mutate({ ...this.store, pebbles_count: next })
-    return next
-  }
-
-  // ---------------------------------------------------------------------------
-  // Karma
-  // ---------------------------------------------------------------------------
-
-  async getKarma(): Promise<number> {
-    return this.store.karma
-  }
-
-  async incrementKarma(
-    delta: number,
-    reason: string,
-    refId?: string,
-  ): Promise<number> {
-    const event: KarmaEvent = {
-      delta,
-      reason,
-      ...(refId !== undefined && { ref_id: refId }),
-      created_at: new Date().toISOString(),
-    }
-    const next = this.store.karma + delta
-    this.mutate({
-      ...this.store,
-      karma: next,
-      karma_log: [...this.store.karma_log, event],
-    })
-    return next
-  }
+  async getPebblesCount(): Promise<number> { return this.store.pebbles_count }
+  async getKarma(): Promise<number> { return this.store.karma }
+  async getBounce(): Promise<number> { return this.store.bounce }
+  async listPebbles(): Promise<Pebble[]> { return this.store.pebbles }
+  async getPebble(id: string): Promise<Pebble | undefined> { return this.store.pebbles.find((p) => p.id === id) }
+  async listSouls(): Promise<Soul[]> { return this.store.souls }
+  async getSoul(id: string): Promise<Soul | undefined> { return this.store.souls.find((s) => s.id === id) }
+  async listCollections(): Promise<Collection[]> { return this.store.collections }
+  async getCollection(id: string): Promise<Collection | undefined> { return this.store.collections.find((c) => c.id === id) }
+  async listMarks(): Promise<Mark[]> { return this.store.marks }
+  async getMark(id: string): Promise<Mark | undefined> { return this.store.marks.find((m) => m.id === id) }
 
   // ---------------------------------------------------------------------------
-  // Bounce
+  // Pebble mutations — Supabase first, then reload full store
   // ---------------------------------------------------------------------------
-
-  async getBounce(): Promise<number> {
-    return this.store.bounce
-  }
-
-  async refreshBounce(): Promise<number> {
-    // Bounce is computed server-side from pebble dates.
-    // Locally we just return the cached value; sync updates it.
-    return this.store.bounce
-  }
-
-  // ---------------------------------------------------------------------------
-  // Pebbles
-  // ---------------------------------------------------------------------------
-
-  async listPebbles(): Promise<Pebble[]> {
-    return this.store.pebbles
-  }
-
-  async getPebble(id: string): Promise<Pebble | undefined> {
-    return this.store.pebbles.find((p) => p.id === id)
-  }
 
   async createPebble(input: CreatePebbleInput): Promise<Pebble> {
-    const now = new Date().toISOString()
-    const pebble: Pebble = {
-      ...input,
-      id: crypto.randomUUID(),
-      created_at: now,
-      updated_at: now,
-    }
-    const karmaDelta = computeKarmaDelta(input)
-    const karmaEvent: KarmaEvent = {
-      delta: karmaDelta,
-      reason: "pebble_created",
-      ref_id: pebble.id,
-      created_at: now,
-    }
-    this.mutate({
-      ...this.store,
-      pebbles: [...this.store.pebbles, pebble],
-      pebbles_count: this.store.pebbles_count + 1,
-      karma: this.store.karma + karmaDelta,
-      karma_log: [...this.store.karma_log, karmaEvent],
+    const result = await this.supabase.rpc("create_pebble", {
+      payload: {
+        name: input.name,
+        description: input.description ?? null,
+        happened_at: input.happened_at,
+        intensity: input.intensity,
+        positiveness: input.positiveness,
+        visibility: input.visibility,
+        emotion_id: input.emotion_id,
+        soul_ids: input.soul_ids,
+        domain_ids: input.domain_ids,
+        cards: input.cards.map((c, i) => ({
+          species_id: c.species_id,
+          value: c.value,
+          sort_order: i,
+        })),
+      },
     })
-    this.pushPebbleCreate(pebble, input)
-    return pebble
+    const pebbleId = this.unwrap(result) as string
+    await this.loadFromSupabase()
+    return this.store.pebbles.find((p) => p.id === pebbleId)!
   }
 
   async updatePebble(id: string, input: UpdatePebbleInput): Promise<Pebble> {
-    const idx = this.store.pebbles.findIndex((p) => p.id === id)
-    if (idx === -1) throw new Error(`Pebble not found: ${id}`)
-    const prev = this.store.pebbles[idx]
-    const updated: Pebble = {
-      ...prev,
-      ...input,
-      updated_at: new Date().toISOString(),
-    }
-    const pebbles = [...this.store.pebbles]
-    pebbles[idx] = updated
-
-    const karmaBefore = computeKarmaDelta(prev)
-    const karmaAfter = computeKarmaDelta(updated)
-    const diff = karmaAfter - karmaBefore
-
-    if (diff !== 0) {
-      const karmaEvent: KarmaEvent = {
-        delta: diff,
-        reason: "pebble_enriched",
-        ref_id: id,
-        created_at: updated.updated_at,
-      }
-      this.mutate({
-        ...this.store,
-        pebbles,
-        karma: this.store.karma + diff,
-        karma_log: [...this.store.karma_log, karmaEvent],
-      })
-    } else {
-      this.mutate({ ...this.store, pebbles })
-    }
-
-    this.pushPebbleUpdate(id, input)
+    const result = await this.supabase.rpc("update_pebble", {
+      p_pebble_id: id,
+      payload: {
+        ...(input.name !== undefined && { name: input.name }),
+        ...(input.description !== undefined && { description: input.description }),
+        ...(input.happened_at !== undefined && { happened_at: input.happened_at }),
+        ...(input.intensity !== undefined && { intensity: input.intensity }),
+        ...(input.positiveness !== undefined && { positiveness: input.positiveness }),
+        ...(input.visibility !== undefined && { visibility: input.visibility }),
+        ...(input.emotion_id !== undefined && { emotion_id: input.emotion_id }),
+        ...(input.soul_ids !== undefined && { soul_ids: input.soul_ids }),
+        ...(input.domain_ids !== undefined && { domain_ids: input.domain_ids }),
+        ...(input.cards !== undefined && {
+          cards: input.cards.map((c, i) => ({
+            species_id: c.species_id,
+            value: c.value,
+            sort_order: i,
+          })),
+        }),
+      },
+    })
+    this.unwrap(result)
+    await this.loadFromSupabase()
+    const updated = this.store.pebbles.find((p) => p.id === id)
+    if (!updated) throw new Error(`Pebble not found after update: ${id}`)
     return updated
   }
 
   async deletePebble(id: string): Promise<void> {
-    const pebbles = this.store.pebbles.filter((p) => p.id !== id)
-    const collections = this.store.collections.map((c) => ({
-      ...c,
-      pebble_ids: c.pebble_ids.filter((pid) => pid !== id),
-    }))
-    this.mutate({ ...this.store, pebbles, collections })
-    this.pushPebbleDelete(id)
+    const result = await this.supabase.rpc("delete_pebble", { p_pebble_id: id })
+    this.unwrap(result)
+    await this.loadFromSupabase()
   }
 
   // ---------------------------------------------------------------------------
-  // Souls
+  // Soul mutations
   // ---------------------------------------------------------------------------
-
-  async listSouls(): Promise<Soul[]> {
-    return this.store.souls
-  }
-
-  async getSoul(id: string): Promise<Soul | undefined> {
-    return this.store.souls.find((s) => s.id === id)
-  }
 
   async createSoul(input: CreateSoulInput): Promise<Soul> {
-    const now = new Date().toISOString()
-    const soul: Soul = {
-      ...input,
-      id: crypto.randomUUID(),
-      created_at: now,
-      updated_at: now,
+    const result = await this.supabase
+      .from("souls")
+      .insert({ user_id: this.userId, name: input.name })
+      .select()
+      .single()
+    const soul = this.unwrap(result) as Record<string, unknown>
+    const created: Soul = {
+      id: soul.id as string,
+      name: soul.name as string,
+      created_at: soul.created_at as string,
+      updated_at: soul.updated_at as string,
     }
-    this.mutate({ ...this.store, souls: [...this.store.souls, soul] })
-    this.pushSoulCreate(soul)
-    return soul
+    this.mutate({ ...this.store, souls: [...this.store.souls, created] })
+    return created
   }
 
   async updateSoul(id: string, input: UpdateSoulInput): Promise<Soul> {
-    const idx = this.store.souls.findIndex((s) => s.id === id)
-    if (idx === -1) throw new Error(`Soul not found: ${id}`)
+    const result = await this.supabase
+      .from("souls")
+      .update({ ...(input.name !== undefined && { name: input.name }) })
+      .eq("id", id)
+      .select()
+      .single()
+    const soul = this.unwrap(result) as Record<string, unknown>
     const updated: Soul = {
-      ...this.store.souls[idx],
-      ...input,
-      updated_at: new Date().toISOString(),
+      id: soul.id as string,
+      name: soul.name as string,
+      created_at: soul.created_at as string,
+      updated_at: soul.updated_at as string,
     }
-    const souls = [...this.store.souls]
-    souls[idx] = updated
+    const souls = this.store.souls.map((s) => (s.id === id ? updated : s))
     this.mutate({ ...this.store, souls })
-    this.pushSoulUpdate(id, input)
     return updated
   }
 
   async deleteSoul(id: string): Promise<void> {
+    this.unwrap(await this.supabase.from("souls").delete().eq("id", id))
     const souls = this.store.souls.filter((s) => s.id !== id)
     const pebbles = this.store.pebbles.map((p) => ({
       ...p,
       soul_ids: p.soul_ids.filter((sid) => sid !== id),
     }))
     this.mutate({ ...this.store, souls, pebbles })
-    this.pushSoulDelete(id)
   }
 
   // ---------------------------------------------------------------------------
-  // Collections
+  // Collection mutations
   // ---------------------------------------------------------------------------
-
-  async listCollections(): Promise<Collection[]> {
-    return this.store.collections
-  }
-
-  async getCollection(id: string): Promise<Collection | undefined> {
-    return this.store.collections.find((c) => c.id === id)
-  }
 
   async createCollection(input: CreateCollectionInput): Promise<Collection> {
-    const now = new Date().toISOString()
-    const collection: Collection = {
-      ...input,
-      id: crypto.randomUUID(),
-      created_at: now,
-      updated_at: now,
+    const result = await this.supabase
+      .from("collections")
+      .insert({ user_id: this.userId, name: input.name, mode: input.mode ?? null })
+      .select()
+      .single()
+    const col = this.unwrap(result) as Record<string, unknown>
+
+    if (input.pebble_ids.length > 0) {
+      this.unwrap(await this.supabase.from("collection_pebbles").insert(
+        input.pebble_ids.map((pid) => ({ collection_id: col.id as string, pebble_id: pid })),
+      ))
     }
-    this.mutate({
-      ...this.store,
-      collections: [...this.store.collections, collection],
-    })
-    this.pushCollectionCreate(collection)
-    return collection
+
+    const created: Collection = {
+      id: col.id as string,
+      name: col.name as string,
+      mode: (col.mode as "stack" | "pack" | "track") ?? undefined,
+      pebble_ids: input.pebble_ids,
+      created_at: col.created_at as string,
+      updated_at: col.updated_at as string,
+    }
+    this.mutate({ ...this.store, collections: [...this.store.collections, created] })
+    return created
   }
 
-  async updateCollection(
-    id: string,
-    input: UpdateCollectionInput,
-  ): Promise<Collection> {
-    const idx = this.store.collections.findIndex((c) => c.id === id)
-    if (idx === -1) throw new Error(`Collection not found: ${id}`)
+  async updateCollection(id: string, input: UpdateCollectionInput): Promise<Collection> {
+    const updates: Record<string, unknown> = {}
+    if (input.name !== undefined) updates.name = input.name
+    if (input.mode !== undefined) updates.mode = input.mode
+    if (Object.keys(updates).length > 0) {
+      this.unwrap(await this.supabase.from("collections").update(updates).eq("id", id).select().single())
+    }
+    if (input.pebble_ids !== undefined) {
+      this.unwrap(await this.supabase.from("collection_pebbles").delete().eq("collection_id", id))
+      if (input.pebble_ids.length > 0) {
+        this.unwrap(await this.supabase.from("collection_pebbles").insert(
+          input.pebble_ids.map((pid) => ({ collection_id: id, pebble_id: pid })),
+        ))
+      }
+    }
+
+    const prev = this.store.collections.find((c) => c.id === id)
+    if (!prev) throw new Error(`Collection not found: ${id}`)
     const updated: Collection = {
-      ...this.store.collections[idx],
+      ...prev,
       ...input,
       updated_at: new Date().toISOString(),
     }
-    const collections = [...this.store.collections]
-    collections[idx] = updated
+    const collections = this.store.collections.map((c) => (c.id === id ? updated : c))
     this.mutate({ ...this.store, collections })
-    this.pushCollectionUpdate(id, input)
     return updated
   }
 
   async deleteCollection(id: string): Promise<void> {
+    this.unwrap(await this.supabase.from("collections").delete().eq("id", id))
     const collections = this.store.collections.filter((c) => c.id !== id)
     this.mutate({ ...this.store, collections })
-    this.pushCollectionDelete(id)
   }
 
   // ---------------------------------------------------------------------------
-  // Marks (mapped to DB "glyphs")
+  // Mark mutations (DB table: glyphs)
   // ---------------------------------------------------------------------------
-
-  async listMarks(): Promise<Mark[]> {
-    return this.store.marks
-  }
-
-  async getMark(id: string): Promise<Mark | undefined> {
-    return this.store.marks.find((m) => m.id === id)
-  }
 
   async createMark(input: CreateMarkInput): Promise<Mark> {
-    const now = new Date().toISOString()
-    const mark: Mark = {
-      ...input,
-      id: crypto.randomUUID(),
-      created_at: now,
-      updated_at: now,
+    const result = await this.supabase
+      .from("glyphs")
+      .insert({
+        user_id: this.userId,
+        name: input.name ?? null,
+        shape_id: input.shape_id,
+        strokes: input.strokes,
+        view_box: input.viewBox,
+      })
+      .select()
+      .single()
+    const row = this.unwrap(result) as Record<string, unknown>
+    const created: Mark = {
+      id: row.id as string,
+      name: (row.name as string) ?? undefined,
+      shape_id: row.shape_id as string,
+      strokes: row.strokes as Mark["strokes"],
+      viewBox: row.view_box as string,
+      created_at: row.created_at as string,
+      updated_at: row.updated_at as string,
     }
-    this.mutate({ ...this.store, marks: [...this.store.marks, mark] })
-    this.pushMarkCreate(mark)
-    return mark
+    this.mutate({ ...this.store, marks: [...this.store.marks, created] })
+    return created
   }
 
   async updateMark(id: string, input: UpdateMarkInput): Promise<Mark> {
-    const idx = this.store.marks.findIndex((m) => m.id === id)
-    if (idx === -1) throw new Error(`Mark not found: ${id}`)
+    const updates: Record<string, unknown> = {}
+    if (input.name !== undefined) updates.name = input.name
+    if (input.shape_id !== undefined) updates.shape_id = input.shape_id
+    if (input.strokes !== undefined) updates.strokes = input.strokes
+    if (input.viewBox !== undefined) updates.view_box = input.viewBox
+    const result = await this.supabase.from("glyphs").update(updates).eq("id", id).select().single()
+    const row = this.unwrap(result) as Record<string, unknown>
     const updated: Mark = {
-      ...this.store.marks[idx],
-      ...input,
-      updated_at: new Date().toISOString(),
+      id: row.id as string,
+      name: (row.name as string) ?? undefined,
+      shape_id: row.shape_id as string,
+      strokes: row.strokes as Mark["strokes"],
+      viewBox: row.view_box as string,
+      created_at: row.created_at as string,
+      updated_at: row.updated_at as string,
     }
-    const marks = [...this.store.marks]
-    marks[idx] = updated
+    const marks = this.store.marks.map((m) => (m.id === id ? updated : m))
     this.mutate({ ...this.store, marks })
-    this.pushMarkUpdate(id, input)
     return updated
   }
 
   async deleteMark(id: string): Promise<void> {
+    this.unwrap(await this.supabase.from("glyphs").delete().eq("id", id))
     const marks = this.store.marks.filter((m) => m.id !== id)
     this.mutate({ ...this.store, marks })
-    this.pushMarkDelete(id)
-  }
-
-  // ---------------------------------------------------------------------------
-  // Mount sync — fetch from Supabase, push offline items, replace local
-  // ---------------------------------------------------------------------------
-
-  async syncFromSupabase(): Promise<Store> {
-    try {
-      // Fetch all user data from Supabase in parallel
-      const [
-        pebblesRes,
-        soulsRes,
-        collectionsRes,
-        collectionPebblesRes,
-        glyphsRes,
-        karmaRes,
-        bounceRes,
-      ] = await Promise.all([
-        this.supabase.from("v_pebbles_full").select("*").eq("user_id", this.userId),
-        this.supabase.from("souls").select("*").eq("user_id", this.userId),
-        this.supabase.from("collections").select("*").eq("user_id", this.userId),
-        this.supabase.from("collection_pebbles").select("*, collections!inner(user_id)").eq("collections.user_id", this.userId),
-        this.supabase.from("glyphs").select("*").eq("user_id", this.userId),
-        this.supabase.from("v_karma_summary").select("*").eq("user_id", this.userId).maybeSingle(),
-        this.supabase.from("v_bounce").select("*").eq("user_id", this.userId).maybeSingle(),
-      ])
-
-      // Parse remote pebbles from the denormalized view
-      const remotePebbles: Pebble[] = (pebblesRes.data ?? []).map((row: Record<string, unknown>) => ({
-        id: row.id as string,
-        name: row.name as string,
-        description: (row.description as string) ?? undefined,
-        happened_at: row.happened_at as string,
-        intensity: row.intensity as 1 | 2 | 3,
-        positiveness: row.positiveness as -1 | 0 | 1,
-        visibility: (row.visibility as string) as "private" | "public",
-        emotion_id: row.emotion_id as string,
-        soul_ids: ((row.souls as Array<{ id: string }>) ?? []).map((s) => s.id),
-        domain_ids: ((row.domains as Array<{ id: string }>) ?? []).map((d) => d.id),
-        mark_id: (row.glyph_id as string) ?? undefined,
-        instants: [], // snaps not yet mapped to instants
-        cards: ((row.cards as Array<{ species_id: string; value: string }>) ?? []).map((c) => ({
-          species_id: c.species_id,
-          value: c.value,
-        })),
-        created_at: row.created_at as string,
-        updated_at: row.updated_at as string,
-      }))
-
-      const remoteSouls: Soul[] = (soulsRes.data ?? []).map((row: Record<string, unknown>) => ({
-        id: row.id as string,
-        name: row.name as string,
-        created_at: row.created_at as string,
-        updated_at: row.updated_at as string,
-      }))
-
-      // Build collection pebble_ids from join table
-      const cpMap = new Map<string, string[]>()
-      for (const row of collectionPebblesRes.data ?? []) {
-        const cid = (row as Record<string, string>).collection_id
-        const pid = (row as Record<string, string>).pebble_id
-        const arr = cpMap.get(cid) ?? []
-        arr.push(pid)
-        cpMap.set(cid, arr)
-      }
-
-      const remoteCollections: Collection[] = (collectionsRes.data ?? []).map((row: Record<string, unknown>) => ({
-        id: row.id as string,
-        name: row.name as string,
-        mode: (row.mode as "stack" | "pack" | "track") ?? undefined,
-        pebble_ids: cpMap.get(row.id as string) ?? [],
-        created_at: row.created_at as string,
-        updated_at: row.updated_at as string,
-      }))
-
-      const remoteMarks: Mark[] = (glyphsRes.data ?? []).map((row: Record<string, unknown>) => ({
-        id: row.id as string,
-        name: (row.name as string) ?? undefined,
-        shape_id: row.shape_id as string,
-        strokes: row.strokes as Mark["strokes"],
-        viewBox: row.view_box as string,
-        created_at: row.created_at as string,
-        updated_at: row.updated_at as string,
-      }))
-
-      // Push local-only items (created offline)
-      const remoteIds = {
-        pebbles: new Set(remotePebbles.map((p) => p.id)),
-        souls: new Set(remoteSouls.map((s) => s.id)),
-        collections: new Set(remoteCollections.map((c) => c.id)),
-        marks: new Set(remoteMarks.map((m) => m.id)),
-      }
-
-      for (const pebble of this.store.pebbles) {
-        if (!remoteIds.pebbles.has(pebble.id)) {
-          this.pushPebbleCreate(pebble, pebble as unknown as CreatePebbleInput)
-        }
-      }
-      for (const soul of this.store.souls) {
-        if (!remoteIds.souls.has(soul.id)) {
-          this.pushSoulCreate(soul)
-        }
-      }
-      for (const collection of this.store.collections) {
-        if (!remoteIds.collections.has(collection.id)) {
-          this.pushCollectionCreate(collection)
-        }
-      }
-      for (const mark of this.store.marks) {
-        if (!remoteIds.marks.has(mark.id)) {
-          this.pushMarkCreate(mark)
-        }
-      }
-
-      // Build new store from Supabase data
-      const karma = (karmaRes.data as Record<string, unknown>)?.total_karma as number ?? 0
-      const pebblesCount = (karmaRes.data as Record<string, unknown>)?.pebbles_count as number ?? 0
-      const bounce = (bounceRes.data as Record<string, unknown>)?.bounce_level as number ?? 0
-
-      const newStore: Store = {
-        pebbles: remotePebbles,
-        souls: remoteSouls,
-        collections: remoteCollections,
-        marks: remoteMarks,
-        pebbles_count: pebblesCount,
-        karma,
-        karma_log: [], // karma_log is not synced — it's derived from karma_events server-side
-        bounce,
-        bounce_window: [], // bounce_window is not synced — computed server-side
-      }
-
-      this.mutate(newStore)
-      return newStore
-    } catch (err) {
-      console.warn("[SupabaseProvider] syncFromSupabase failed:", err)
-      // Keep local data on failure
-      return this.store
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Background push — fire-and-forget to Supabase
-  // ---------------------------------------------------------------------------
-
-  private async safePush(label: string, fn: () => PromiseLike<unknown>): Promise<void> {
-    try {
-      const result = await fn()
-      // Supabase client returns { error } instead of throwing
-      if (result && typeof result === "object" && "error" in result) {
-        const { error } = result as { error: unknown }
-        if (error) console.warn(`[SupabaseProvider] ${label} failed:`, error)
-      }
-    } catch (err) {
-      console.warn(`[SupabaseProvider] ${label} failed:`, err)
-    }
-  }
-
-  private pushPebbleCreate(_pebble: Pebble, input: CreatePebbleInput): void {
-    void this.safePush("pushPebbleCreate", () =>
-      this.supabase.rpc("create_pebble", {
-        payload: {
-          name: input.name,
-          description: input.description ?? null,
-          happened_at: input.happened_at,
-          intensity: input.intensity,
-          positiveness: input.positiveness,
-          visibility: input.visibility,
-          emotion_id: input.emotion_id,
-          soul_ids: input.soul_ids,
-          domain_ids: input.domain_ids,
-          cards: input.cards.map((c, i) => ({
-            species_id: c.species_id,
-            value: c.value,
-            sort_order: i,
-          })),
-        },
-      }),
-    )
-  }
-
-  private pushPebbleUpdate(id: string, input: UpdatePebbleInput): void {
-    void this.safePush("pushPebbleUpdate", () =>
-      this.supabase.rpc("update_pebble", {
-        p_pebble_id: id,
-        payload: {
-          ...(input.name !== undefined && { name: input.name }),
-          ...(input.description !== undefined && { description: input.description }),
-          ...(input.happened_at !== undefined && { happened_at: input.happened_at }),
-          ...(input.intensity !== undefined && { intensity: input.intensity }),
-          ...(input.positiveness !== undefined && { positiveness: input.positiveness }),
-          ...(input.visibility !== undefined && { visibility: input.visibility }),
-          ...(input.emotion_id !== undefined && { emotion_id: input.emotion_id }),
-          ...(input.soul_ids !== undefined && { soul_ids: input.soul_ids }),
-          ...(input.domain_ids !== undefined && { domain_ids: input.domain_ids }),
-          ...(input.cards !== undefined && {
-            cards: input.cards.map((c, i) => ({
-              species_id: c.species_id,
-              value: c.value,
-              sort_order: i,
-            })),
-          }),
-        },
-      }),
-    )
-  }
-
-  private pushPebbleDelete(id: string): void {
-    void this.safePush("pushPebbleDelete", () =>
-      this.supabase.rpc("delete_pebble", { p_pebble_id: id }),
-    )
-  }
-
-  private pushSoulCreate(soul: Soul): void {
-    void this.safePush("pushSoulCreate", () =>
-      this.supabase.from("souls").insert({
-        id: soul.id,
-        user_id: this.userId,
-        name: soul.name,
-      }),
-    )
-  }
-
-  private pushSoulUpdate(id: string, input: UpdateSoulInput): void {
-    void this.safePush("pushSoulUpdate", () =>
-      this.supabase.from("souls").update({
-        ...(input.name !== undefined && { name: input.name }),
-      }).eq("id", id),
-    )
-  }
-
-  private pushSoulDelete(id: string): void {
-    void this.safePush("pushSoulDelete", () =>
-      this.supabase.from("souls").delete().eq("id", id),
-    )
-  }
-
-  private pushCollectionCreate(collection: Collection): void {
-    void this.safePush("pushCollectionCreate", async () => {
-      await this.supabase.from("collections").insert({
-        id: collection.id,
-        user_id: this.userId,
-        name: collection.name,
-        mode: collection.mode ?? null,
-      })
-      if (collection.pebble_ids.length > 0) {
-        await this.supabase.from("collection_pebbles").insert(
-          collection.pebble_ids.map((pid) => ({
-            collection_id: collection.id,
-            pebble_id: pid,
-          })),
-        )
-      }
-    })
-  }
-
-  private pushCollectionUpdate(id: string, input: UpdateCollectionInput): void {
-    void this.safePush("pushCollectionUpdate", async () => {
-      const updates: Record<string, unknown> = {}
-      if (input.name !== undefined) updates.name = input.name
-      if (input.mode !== undefined) updates.mode = input.mode
-      if (Object.keys(updates).length > 0) {
-        await this.supabase.from("collections").update(updates).eq("id", id)
-      }
-      if (input.pebble_ids !== undefined) {
-        await this.supabase.from("collection_pebbles").delete().eq("collection_id", id)
-        if (input.pebble_ids.length > 0) {
-          await this.supabase.from("collection_pebbles").insert(
-            input.pebble_ids.map((pid) => ({
-              collection_id: id,
-              pebble_id: pid,
-            })),
-          )
-        }
-      }
-    })
-  }
-
-  private pushCollectionDelete(id: string): void {
-    void this.safePush("pushCollectionDelete", () =>
-      this.supabase.from("collections").delete().eq("id", id),
-    )
-  }
-
-  private pushMarkCreate(mark: Mark): void {
-    void this.safePush("pushMarkCreate", () =>
-      this.supabase.from("glyphs").insert({
-        id: mark.id,
-        user_id: this.userId,
-        name: mark.name ?? null,
-        shape_id: mark.shape_id,
-        strokes: mark.strokes,
-        view_box: mark.viewBox,
-      }),
-    )
-  }
-
-  private pushMarkUpdate(id: string, input: UpdateMarkInput): void {
-    void this.safePush("pushMarkUpdate", () => {
-      const updates: Record<string, unknown> = {}
-      if (input.name !== undefined) updates.name = input.name
-      if (input.shape_id !== undefined) updates.shape_id = input.shape_id
-      if (input.strokes !== undefined) updates.strokes = input.strokes
-      if (input.viewBox !== undefined) updates.view_box = input.viewBox
-      return this.supabase.from("glyphs").update(updates).eq("id", id)
-    })
-  }
-
-  private pushMarkDelete(id: string): void {
-    void this.safePush("pushMarkDelete", () =>
-      this.supabase.from("glyphs").delete().eq("id", id),
-    )
   }
 }
