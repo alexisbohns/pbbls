@@ -91,6 +91,13 @@ export type Profile = {
   updated_at: string
 }
 
+/** @deprecated Supabase manages sessions internally. Kept for DataProvider/LocalProvider compat. */
+export type Session = {
+  account_id: string
+  profile_id: string
+  created_at: string
+}
+
 export type RegisterInput = {
   email: string
   password: string
