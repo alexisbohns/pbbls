@@ -158,6 +158,11 @@ export class LocalProvider implements DataProvider {
     return this.store
   }
 
+  async loadFromSupabase(): Promise<Store> {
+    // LocalProvider does not support Supabase — return current store as-is.
+    return this.store
+  }
+
   /**
    * Re-read the content store from localStorage using the current session's
    * storage key. Call this after login/register/logout to switch to the

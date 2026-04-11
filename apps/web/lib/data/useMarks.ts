@@ -8,6 +8,7 @@ export function useMarks() {
   const { provider, store, setStore, loading } = useDataProvider()
 
   const addMark = async (input: CreateMarkInput): Promise<Mark> => {
+    if (!provider) throw new Error("Not authenticated")
     const mark = await provider.createMark(input)
     setStore(provider.getStore())
     return mark
@@ -17,12 +18,14 @@ export function useMarks() {
     id: string,
     input: UpdateMarkInput,
   ): Promise<Mark> => {
+    if (!provider) throw new Error("Not authenticated")
     const mark = await provider.updateMark(id, input)
     setStore(provider.getStore())
     return mark
   }
 
   const removeMark = async (id: string): Promise<void> => {
+    if (!provider) throw new Error("Not authenticated")
     await provider.deleteMark(id)
     setStore(provider.getStore())
   }

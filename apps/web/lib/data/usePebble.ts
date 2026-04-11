@@ -14,6 +14,7 @@ export function usePebble(id: string) {
   const updatePebble = async (
     input: UpdatePebbleInput,
   ): Promise<Pebble> => {
+    if (!provider) throw new Error("Not authenticated")
     const updated = await provider.updatePebble(id, input)
     setStore(provider.getStore())
     return updated

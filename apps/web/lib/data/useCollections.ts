@@ -10,6 +10,7 @@ export function useCollections() {
   const addCollection = async (
     input: CreateCollectionInput,
   ): Promise<Collection> => {
+    if (!provider) throw new Error("Not authenticated")
     const collection = await provider.createCollection(input)
     setStore(provider.getStore())
     return collection
@@ -19,12 +20,14 @@ export function useCollections() {
     id: string,
     input: UpdateCollectionInput,
   ): Promise<Collection> => {
+    if (!provider) throw new Error("Not authenticated")
     const collection = await provider.updateCollection(id, input)
     setStore(provider.getStore())
     return collection
   }
 
   const removeCollection = async (id: string): Promise<void> => {
+    if (!provider) throw new Error("Not authenticated")
     await provider.deleteCollection(id)
     setStore(provider.getStore())
   }
