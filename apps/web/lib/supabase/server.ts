@@ -27,10 +27,8 @@ export async function createServerSupabaseClient() {
           // In Server Components the cookie store is read-only, so the
           // set call throws. This is expected and safe — the Route Handler
           // (e.g. /auth/callback) will handle the write.
-          // Log a warning so cookie failures in Route Handlers are visible.
-          if (process.env.NODE_ENV === "development") {
-            console.warn("[supabase/server] setAll failed:", error)
-          }
+          // Log a warning so cookie failures are visible in all environments.
+          console.warn("[supabase/server] setAll failed:", error)
         }
       },
     },

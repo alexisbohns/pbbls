@@ -33,58 +33,47 @@ export function useSupabaseAuth(): AuthContextValue {
 
     let cancelled = false
 
-    // Use getUser() instead of getSession() — it validates the token with
-    // the Supabase Auth server and refreshes if expired. getSession() only
-    // reads from cookies without validation, which can return stale/invalid
-    // tokens that cause 401 on subsequent API calls.
-    supabase.auth.getUser().then(async ({ data: { user: supabaseUser }, error }) => {
-      if (cancelled) return
-      if (error) {
-        console.warn("[auth] getUser() failed on mount:", error.message)
-      }
-      if (supabaseUser) {
-        setUser({
-          id: supabaseUser.id,
-          email: supabaseUser.email ?? "",
-          created_at: supabaseUser.created_at,
-        })
-        const { data } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("user_id", supabaseUser.id)
-          .maybeSingle()
-        if (!cancelled) setProfile(data as Profile | null)
-      }
-      if (!cancelled) setIsLoading(false)
-    }).catch((err: unknown) => {
-      if (cancelled) return
-      console.warn("[auth] getUser() rejected:", err)
-      setIsLoading(false)
-    })
-
+    // onAuthStateChange is the primary driver of auth state.
+    // It fires INITIAL_SESSION on mount (with current session from cookies)
+    // and SIGNED_IN / SIGNED_OUT on auth changes.
+    //
+    // CRITICAL: This callback must be synchronous. The Supabase client holds
+    // an internal lock during initialization and waits for async callbacks
+    // to complete. If we await a database call here, the database call waits
+    // for the lock → deadlock. Profile fetching is fire-and-forget.
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT") return
+    } = supabase.auth.onAuthStateChange((event, session) => {
       if (cancelled) return
 
       if (event === "SIGNED_OUT" || !session?.user) {
         setUser(null)
         setProfile(null)
+        setIsLoading(false)
         return
       }
 
+      // Set auth state synchronously — unblocks rendering immediately
       setUser({
         id: session.user.id,
         email: session.user.email ?? "",
         created_at: session.user.created_at,
       })
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("user_id", session.user.id)
-        .maybeSingle()
-      if (!cancelled) setProfile(data as Profile | null)
+      setIsLoading(false)
+
+      // Profile fetch is fire-and-forget — must NOT block this callback
+      // or it deadlocks the Supabase client's internal auth lock.
+      Promise.resolve(
+        supabase
+          .from("profiles")
+          .select("*")
+          .eq("user_id", session.user.id)
+          .maybeSingle(),
+      ).then(({ data }) => {
+        if (!cancelled) setProfile(data as Profile | null)
+      }).catch(() => {
+        // Profile fetch failed — app continues without profile data
+      })
     })
 
     return () => {
