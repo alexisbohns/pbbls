@@ -23,7 +23,9 @@ function getSupabase() {
 export function useSupabaseAuth(): AuthContextValue {
   const [user, setUser] = useState<Account | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
-  const [isLoading, setIsLoading] = useState(() => getSupabase() !== null)
+  // Always start as true on both server and client to avoid hydration mismatch.
+  // The client-side effect sets it to false after session check.
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     const supabase = getSupabase()

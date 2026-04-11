@@ -54,7 +54,10 @@ export function LandingPage() {
     }
   }, [isLoading, isAuthenticated, router])
 
-  if (isLoading || isAuthenticated) return null
+  // Don't hide during loading — the landing page should render immediately
+  // for unauthenticated visitors. Authenticated users get redirected via
+  // the useEffect above; a brief flash is acceptable.
+  if (isAuthenticated) return null
 
   return (
     <section className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
