@@ -386,19 +386,170 @@ export class SupabaseProvider implements DataProvider {
   }
 
   // ---------------------------------------------------------------------------
-  // Background push stubs — implemented in Task 3
+  // Background push — fire-and-forget to Supabase
   // ---------------------------------------------------------------------------
 
-  private pushPebbleCreate(_pebble: Pebble, _input: CreatePebbleInput): void {}
-  private pushPebbleUpdate(_id: string, _input: UpdatePebbleInput): void {}
-  private pushPebbleDelete(_id: string): void {}
-  private pushSoulCreate(_soul: Soul): void {}
-  private pushSoulUpdate(_id: string, _input: UpdateSoulInput): void {}
-  private pushSoulDelete(_id: string): void {}
-  private pushCollectionCreate(_collection: Collection): void {}
-  private pushCollectionUpdate(_id: string, _input: UpdateCollectionInput): void {}
-  private pushCollectionDelete(_id: string): void {}
-  private pushMarkCreate(_mark: Mark): void {}
-  private pushMarkUpdate(_id: string, _input: UpdateMarkInput): void {}
-  private pushMarkDelete(_id: string): void {}
+  private async safePush(label: string, fn: () => PromiseLike<unknown>): Promise<void> {
+    try {
+      await fn()
+    } catch (err) {
+      console.warn(`[SupabaseProvider] ${label} failed:`, err)
+    }
+  }
+
+  private pushPebbleCreate(_pebble: Pebble, input: CreatePebbleInput): void {
+    void this.safePush("pushPebbleCreate", () =>
+      this.supabase.rpc("create_pebble", {
+        payload: {
+          name: input.name,
+          description: input.description ?? null,
+          happened_at: input.happened_at,
+          intensity: input.intensity,
+          positiveness: input.positiveness,
+          visibility: input.visibility,
+          emotion_id: input.emotion_id,
+          soul_ids: input.soul_ids,
+          domain_ids: input.domain_ids,
+          cards: input.cards.map((c, i) => ({
+            species_id: c.species_id,
+            value: c.value,
+            sort_order: i,
+          })),
+        },
+      }),
+    )
+  }
+
+  private pushPebbleUpdate(id: string, input: UpdatePebbleInput): void {
+    void this.safePush("pushPebbleUpdate", () =>
+      this.supabase.rpc("update_pebble", {
+        p_pebble_id: id,
+        payload: {
+          ...(input.name !== undefined && { name: input.name }),
+          ...(input.description !== undefined && { description: input.description }),
+          ...(input.happened_at !== undefined && { happened_at: input.happened_at }),
+          ...(input.intensity !== undefined && { intensity: input.intensity }),
+          ...(input.positiveness !== undefined && { positiveness: input.positiveness }),
+          ...(input.visibility !== undefined && { visibility: input.visibility }),
+          ...(input.emotion_id !== undefined && { emotion_id: input.emotion_id }),
+          ...(input.soul_ids !== undefined && { soul_ids: input.soul_ids }),
+          ...(input.domain_ids !== undefined && { domain_ids: input.domain_ids }),
+          ...(input.cards !== undefined && {
+            cards: input.cards.map((c, i) => ({
+              species_id: c.species_id,
+              value: c.value,
+              sort_order: i,
+            })),
+          }),
+        },
+      }),
+    )
+  }
+
+  private pushPebbleDelete(id: string): void {
+    void this.safePush("pushPebbleDelete", () =>
+      this.supabase.rpc("delete_pebble", { p_pebble_id: id }),
+    )
+  }
+
+  private pushSoulCreate(soul: Soul): void {
+    void this.safePush("pushSoulCreate", () =>
+      this.supabase.from("souls").insert({
+        id: soul.id,
+        user_id: this.userId,
+        name: soul.name,
+      }),
+    )
+  }
+
+  private pushSoulUpdate(id: string, input: UpdateSoulInput): void {
+    void this.safePush("pushSoulUpdate", () =>
+      this.supabase.from("souls").update({
+        ...(input.name !== undefined && { name: input.name }),
+      }).eq("id", id),
+    )
+  }
+
+  private pushSoulDelete(id: string): void {
+    void this.safePush("pushSoulDelete", () =>
+      this.supabase.from("souls").delete().eq("id", id),
+    )
+  }
+
+  private pushCollectionCreate(collection: Collection): void {
+    void this.safePush("pushCollectionCreate", async () => {
+      await this.supabase.from("collections").insert({
+        id: collection.id,
+        user_id: this.userId,
+        name: collection.name,
+        mode: collection.mode ?? null,
+      })
+      if (collection.pebble_ids.length > 0) {
+        await this.supabase.from("collection_pebbles").insert(
+          collection.pebble_ids.map((pid) => ({
+            collection_id: collection.id,
+            pebble_id: pid,
+          })),
+        )
+      }
+    })
+  }
+
+  private pushCollectionUpdate(id: string, input: UpdateCollectionInput): void {
+    void this.safePush("pushCollectionUpdate", async () => {
+      const updates: Record<string, unknown> = {}
+      if (input.name !== undefined) updates.name = input.name
+      if (input.mode !== undefined) updates.mode = input.mode
+      if (Object.keys(updates).length > 0) {
+        await this.supabase.from("collections").update(updates).eq("id", id)
+      }
+      if (input.pebble_ids !== undefined) {
+        await this.supabase.from("collection_pebbles").delete().eq("collection_id", id)
+        if (input.pebble_ids.length > 0) {
+          await this.supabase.from("collection_pebbles").insert(
+            input.pebble_ids.map((pid) => ({
+              collection_id: id,
+              pebble_id: pid,
+            })),
+          )
+        }
+      }
+    })
+  }
+
+  private pushCollectionDelete(id: string): void {
+    void this.safePush("pushCollectionDelete", () =>
+      this.supabase.from("collections").delete().eq("id", id),
+    )
+  }
+
+  private pushMarkCreate(mark: Mark): void {
+    void this.safePush("pushMarkCreate", () =>
+      this.supabase.from("glyphs").insert({
+        id: mark.id,
+        user_id: this.userId,
+        name: mark.name ?? null,
+        shape_id: mark.shape_id,
+        strokes: mark.strokes,
+        view_box: mark.viewBox,
+      }),
+    )
+  }
+
+  private pushMarkUpdate(id: string, input: UpdateMarkInput): void {
+    void this.safePush("pushMarkUpdate", () => {
+      const updates: Record<string, unknown> = {}
+      if (input.name !== undefined) updates.name = input.name
+      if (input.shape_id !== undefined) updates.shape_id = input.shape_id
+      if (input.strokes !== undefined) updates.strokes = input.strokes
+      if (input.viewBox !== undefined) updates.view_box = input.viewBox
+      return this.supabase.from("glyphs").update(updates).eq("id", id)
+    })
+  }
+
+  private pushMarkDelete(id: string): void {
+    void this.safePush("pushMarkDelete", () =>
+      this.supabase.from("glyphs").delete().eq("id", id),
+    )
+  }
 }
