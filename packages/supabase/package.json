@@ -16,6 +16,7 @@
     "db:diff": "supabase db diff",
     "db:migration:new": "supabase migration new",
     "db:migration:list": "supabase migration list",
-    "db:link": "supabase link"
+    "db:link": "supabase link",
+    "db:types": "supabase gen types typescript --local > types/database.ts"
   }
 }
