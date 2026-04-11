@@ -6,19 +6,7 @@ import { LocalProvider } from "@/lib/data/local-provider"
 import { SupabaseProvider } from "@/lib/data/supabase-provider"
 import { useAuth } from "@/lib/data/auth-context"
 import { createClient } from "@/lib/supabase/client"
-import type { DataProvider as DataProviderInterface, Store } from "@/lib/data/data-provider"
-
-const EMPTY_STORE: Store = {
-  pebbles: [],
-  souls: [],
-  collections: [],
-  marks: [],
-  pebbles_count: 0,
-  karma: 0,
-  karma_log: [],
-  bounce: 0,
-  bounce_window: [],
-}
+import { EMPTY_STORE, type DataProvider as DataProviderInterface, type Store } from "@/lib/data/data-provider"
 
 // Fallback provider for unauthenticated state — safe to call methods on.
 const fallbackProvider = new LocalProvider()

@@ -16,6 +16,29 @@ const eslintConfig = defineConfig([
     "public/sw.js",
     "public/sw.js.map",
   ]),
+  {
+    rules: {
+      "@typescript-eslint/no-explicit-any": "error",
+      "no-restricted-imports": ["error", {
+        patterns: [
+          {
+            group: ["@/lib/data/local-provider"],
+            message: "Import data hooks from @/lib/data/ instead. Only DataProvider.tsx may import providers directly.",
+          },
+          {
+            group: ["@/lib/data/supabase-provider"],
+            message: "Import data hooks from @/lib/data/ instead. Only DataProvider.tsx may import providers directly.",
+          },
+        ],
+      }],
+    },
+  },
+  {
+    files: ["components/layout/DataProvider.tsx"],
+    rules: {
+      "no-restricted-imports": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

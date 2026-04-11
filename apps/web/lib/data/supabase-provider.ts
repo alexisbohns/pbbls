@@ -1,15 +1,16 @@
 import type { SupabaseClient } from "@supabase/supabase-js"
-import type {
-  DataProvider,
-  Store,
-  CreatePebbleInput,
-  UpdatePebbleInput,
-  CreateSoulInput,
-  UpdateSoulInput,
-  CreateCollectionInput,
-  UpdateCollectionInput,
-  CreateMarkInput,
-  UpdateMarkInput,
+import {
+  EMPTY_STORE,
+  type DataProvider,
+  type Store,
+  type CreatePebbleInput,
+  type UpdatePebbleInput,
+  type CreateSoulInput,
+  type UpdateSoulInput,
+  type CreateCollectionInput,
+  type UpdateCollectionInput,
+  type CreateMarkInput,
+  type UpdateMarkInput,
 } from "@/lib/data/data-provider"
 import type {
   Pebble,
@@ -21,18 +22,6 @@ import type {
 import { computeKarmaDelta } from "@/lib/data/karma"
 
 const STORAGE_KEY = "pbbls:store"
-
-const EMPTY_STORE: Store = {
-  pebbles: [],
-  souls: [],
-  collections: [],
-  marks: [],
-  pebbles_count: 0,
-  karma: 0,
-  karma_log: [],
-  bounce: 0,
-  bounce_window: [],
-}
 
 export class SupabaseProvider implements DataProvider {
   private store: Store
