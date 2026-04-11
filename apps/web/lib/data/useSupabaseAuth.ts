@@ -1,7 +1,8 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
+import { withTimeout } from "@/lib/utils/with-timeout"
 
 import type {
   Account,
@@ -26,6 +27,25 @@ export function useSupabaseAuth(): AuthContextValue {
   // Always start as true on both server and client to avoid hydration mismatch.
   // The client-side effect sets it to false after session check.
   const [isLoading, setIsLoading] = useState(true)
+
+  // Dev-only watchdog: warns if auth stays in loading state too long,
+  // which indicates a hang (deadlock, network issue, missing callback).
+  const isLoadingRef = useRef(true)
+  useEffect(() => {
+    isLoadingRef.current = isLoading
+  }, [isLoading])
+  useEffect(() => {
+    if (process.env.NODE_ENV !== "development") return
+    const id = setTimeout(() => {
+      if (isLoadingRef.current) {
+        console.warn(
+          "[auth] still loading 5s after mount — possible deadlock or network hang. " +
+          "Check: is onAuthStateChange firing? Is the Supabase URL reachable?",
+        )
+      }
+    }, 5000)
+    return () => clearTimeout(id)
+  }, [])
 
   useEffect(() => {
     const supabase = getSupabase()
@@ -63,16 +83,18 @@ export function useSupabaseAuth(): AuthContextValue {
 
       // Profile fetch is fire-and-forget — must NOT block this callback
       // or it deadlocks the Supabase client's internal auth lock.
-      Promise.resolve(
+      withTimeout(
         supabase
           .from("profiles")
           .select("*")
           .eq("user_id", session.user.id)
           .maybeSingle(),
+        10000,
+        "profile fetch",
       ).then(({ data }) => {
         if (!cancelled) setProfile(data as Profile | null)
-      }).catch(() => {
-        // Profile fetch failed — app continues without profile data
+      }).catch((err) => {
+        console.warn("[auth] profile fetch failed:", (err as Error).message)
       })
     })
 
@@ -141,13 +163,16 @@ export function useSupabaseAuth(): AuthContextValue {
       if (!supabase) throw new Error("Supabase client not available")
       if (!user) throw new Error("Not authenticated")
 
-      // Use maybeSingle so a missing row returns null instead of throwing
-      const { data, error } = await supabase
-        .from("profiles")
-        .update(input)
-        .eq("user_id", user.id)
-        .select()
-        .maybeSingle()
+      const { data, error } = await withTimeout(
+        supabase
+          .from("profiles")
+          .update(input)
+          .eq("user_id", user.id)
+          .select()
+          .maybeSingle(),
+        10000,
+        "profile update",
+      )
       if (error) throw new Error(error.message)
 
       let updated: Profile
@@ -155,11 +180,15 @@ export function useSupabaseAuth(): AuthContextValue {
         updated = data as Profile
       } else {
         // Profile row does not exist — create it with the provided fields
-        const { data: inserted, error: insertError } = await supabase
-          .from("profiles")
-          .insert({ user_id: user.id, display_name: "Pebbler", ...input })
-          .select()
-          .single()
+        const { data: inserted, error: insertError } = await withTimeout(
+          supabase
+            .from("profiles")
+            .insert({ user_id: user.id, display_name: "Pebbler", ...input })
+            .select()
+            .single(),
+          10000,
+          "profile insert",
+        )
         if (insertError) throw new Error(insertError.message)
         updated = inserted as Profile
       }
