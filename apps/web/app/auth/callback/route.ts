@@ -33,6 +33,22 @@ export async function GET(request: Request) {
     .eq("user_id", user.id)
     .maybeSingle()
 
+  if (!profile) {
+    // Trigger may not have fired — create the profile row server-side.
+    const fullName = user.user_metadata?.full_name as string | undefined
+    const { error: insertError } = await supabase
+      .from("profiles")
+      .insert({
+        user_id: user.id,
+        display_name: fullName ?? "Pebbler",
+      })
+    if (insertError) {
+      // Log but don't fail — trigger might have created the row between
+      // our SELECT and INSERT (race condition)
+      console.warn("[auth/callback] profile insert failed:", insertError.message)
+    }
+  }
+
   const destination = profile?.onboarding_completed ? "/path" : "/onboarding"
   return NextResponse.redirect(`${origin}${destination}`)
 }
