@@ -5,29 +5,34 @@ export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get("code")
 
-  if (code) {
-    const supabase = await createServerSupabaseClient()
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
-
-    if (!error) {
-      // Check if user needs onboarding
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
-      if (user) {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("onboarding_completed")
-          .eq("user_id", user.id)
-          .single()
-
-        const destination = profile?.onboarding_completed ? "/path" : "/onboarding"
-        return NextResponse.redirect(`${origin}${destination}`)
-      }
-    }
+  if (!code) {
+    console.error("[auth/callback] No code parameter in callback URL")
+    return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`)
   }
 
-  // If something went wrong, redirect to login with error
-  return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`)
+  const supabase = await createServerSupabaseClient()
+  const { error } = await supabase.auth.exchangeCodeForSession(code)
+
+  if (error) {
+    console.error("[auth/callback] exchangeCodeForSession failed:", error.message)
+    return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`)
+  }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    console.error("[auth/callback] getUser() returned null after successful code exchange")
+    return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`)
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("onboarding_completed")
+    .eq("user_id", user.id)
+    .maybeSingle()
+
+  const destination = profile?.onboarding_completed ? "/path" : "/onboarding"
+  return NextResponse.redirect(`${origin}${destination}`)
 }

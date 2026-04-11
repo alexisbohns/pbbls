@@ -8,7 +8,6 @@ export function SerwistRegistration({ children }: { children: React.ReactNode })
       swUrl="/sw.js"
       disable={process.env.NODE_ENV === "development"}
       reloadOnOnline
-      cacheOnNavigation
     >
       {children}
     </SerwistProvider>
