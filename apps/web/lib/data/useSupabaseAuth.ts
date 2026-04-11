@@ -56,6 +56,10 @@ export function useSupabaseAuth(): AuthContextValue {
         if (!cancelled) setProfile(data as Profile | null)
       }
       if (!cancelled) setIsLoading(false)
+    }).catch((err: unknown) => {
+      if (cancelled) return
+      console.warn("[auth] getUser() rejected:", err)
+      setIsLoading(false)
     })
 
     const {
@@ -147,14 +151,30 @@ export function useSupabaseAuth(): AuthContextValue {
       const supabase = getSupabase()
       if (!supabase) throw new Error("Supabase client not available")
       if (!user) throw new Error("Not authenticated")
+
+      // Use maybeSingle so a missing row returns null instead of throwing
       const { data, error } = await supabase
         .from("profiles")
         .update(input)
         .eq("user_id", user.id)
         .select()
-        .single()
+        .maybeSingle()
       if (error) throw new Error(error.message)
-      const updated = data as Profile
+
+      let updated: Profile
+      if (data) {
+        updated = data as Profile
+      } else {
+        // Profile row does not exist — create it with the provided fields
+        const { data: inserted, error: insertError } = await supabase
+          .from("profiles")
+          .insert({ user_id: user.id, display_name: "Pebbler", ...input })
+          .select()
+          .single()
+        if (insertError) throw new Error(insertError.message)
+        updated = inserted as Profile
+      }
+
       setProfile(updated)
       return updated
     },

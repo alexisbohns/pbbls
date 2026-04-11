@@ -12,12 +12,20 @@ export function useOnboarding(
   const router = useRouter()
 
   const complete = useCallback(async () => {
-    await onComplete()
+    try {
+      await onComplete()
+    } catch (err) {
+      console.error("[onboarding] Failed to complete:", err)
+    }
     router.push("/path")
   }, [onComplete, router])
 
   const skip = useCallback(async () => {
-    await onComplete()
+    try {
+      await onComplete()
+    } catch (err) {
+      console.error("[onboarding] Failed to skip:", err)
+    }
     router.push("/path")
   }, [onComplete, router])
 
