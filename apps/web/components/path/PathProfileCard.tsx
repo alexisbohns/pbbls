@@ -1,9 +1,8 @@
 "use client"
 
 import Link from "next/link"
-import { CircleUser, Stone, CirclePile, Sparkle } from "lucide-react"
+import { CircleUser, CirclePile, Sparkle } from "lucide-react"
 import { useAuth } from "@/lib/data/auth-context"
-import { usePebblesCount } from "@/lib/data/usePebblesCount"
 import { useBounce } from "@/lib/data/useBounce"
 import { useKarma } from "@/lib/data/useKarma"
 
@@ -27,11 +26,10 @@ function StatItem({
 
 export function PathProfileCard() {
   const { user, profile, isAuthenticated, isLoading: authLoading } = useAuth()
-  const { pebblesCount, loading: countLoading } = usePebblesCount()
   const { bounce, loading: bounceLoading } = useBounce()
   const { karma, loading: karmaLoading } = useKarma()
 
-  const loading = authLoading || countLoading || bounceLoading || karmaLoading
+  const loading = authLoading || bounceLoading || karmaLoading
 
   if (loading || !isAuthenticated || !user || !profile) return null
 

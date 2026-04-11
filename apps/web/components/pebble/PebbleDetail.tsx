@@ -134,6 +134,7 @@ export function PebbleDetail({
 
       {/* Single photo */}
       {pebble.instants[0] && (
+        /* eslint-disable-next-line @next/next/no-img-element -- base64 data URL, next/image optimization not applicable */
         <img
           src={pebble.instants[0]}
           alt="Pebble photo"

@@ -3,7 +3,7 @@
 import { useMemo } from "react"
 
 import type { Mark, Pebble } from "@/lib/types"
-import { hashUUID, renderPebble, toPebbleParams } from "@/lib/engine"
+import { renderPebble, toPebbleParams } from "@/lib/engine"
 import type { RenderTier } from "@/lib/engine"
 
 type UsePebbleVisualResult = {
@@ -23,8 +23,7 @@ export function usePebbleVisual(
   /* eslint-disable react-hooks/exhaustive-deps */
   return useMemo(() => {
     const params = toPebbleParams(pebble, mark)
-    const seed = hashUUID(pebble.id)
-    return renderPebble(params, seed, tier)
+    return renderPebble(params)
   }, [
     pebble.id,
     pebble.intensity,
