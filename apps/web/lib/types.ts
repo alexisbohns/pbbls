@@ -75,14 +75,13 @@ export type Mark = {
 
 export type Account = {
   id: string
-  username: string
-  password_hash: string
+  email: string
   created_at: string
 }
 
 export type Profile = {
   id: string
-  account_id: string
+  user_id: string
   display_name: string
   onboarding_completed: boolean
   color_world: ColorWorld
@@ -92,19 +91,13 @@ export type Profile = {
   updated_at: string
 }
 
-export type Session = {
-  account_id: string
-  profile_id: string
-  created_at: string
-}
-
 export type RegisterInput = {
-  username: string
+  email: string
   password: string
   terms_accepted: boolean
   privacy_accepted: boolean
 }
-export type LoginInput = { username: string; password: string }
+export type LoginInput = { email: string; password: string }
 export type UpdateProfileInput = Partial<
-  Omit<Profile, "id" | "account_id" | "created_at" | "updated_at">
+  Omit<Profile, "id" | "user_id" | "created_at" | "updated_at">
 >

@@ -21,10 +21,11 @@ export type AuthContextValue = {
   profile: Profile | null
   /** Convenience flag — equivalent to `user !== null`. */
   isAuthenticated: boolean
-  /** True while the initial session is being rehydrated from localStorage. */
+  /** True while the initial session is being rehydrated. */
   isLoading: boolean
   login(input: LoginInput): Promise<void>
   register(input: RegisterInput): Promise<void>
+  signInWithApple(): Promise<void>
   logout(): Promise<void>
   updateProfile(input: UpdateProfileInput): Promise<Profile>
 }
