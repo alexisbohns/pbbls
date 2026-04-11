@@ -18,7 +18,7 @@ export async function createServerSupabaseClient() {
       getAll() {
         return cookieStore.getAll()
       },
-      setAll(cookiesToSet) {
+      setAll(cookiesToSet, _headers) {
         try {
           for (const { name, value, options } of cookiesToSet) {
             cookieStore.set(name, value, options)
@@ -26,8 +26,8 @@ export async function createServerSupabaseClient() {
         } catch {
           // setAll is called by supabase-ssr to persist refreshed tokens.
           // In Server Components the cookie store is read-only, so the
-          // set call throws — safely ignored since the middleware or
-          // Route Handler will handle the write on the next request.
+          // set call throws — safely ignored since the proxy refreshes
+          // the session on every request.
         }
       },
     },

@@ -64,6 +64,7 @@ export function useSupabaseAuth(): AuthContextValue {
       if (event === "SIGNED_OUT" || !session?.user) {
         setUser(null)
         setProfile(null)
+        setIsLoading(false)
         return
       }
 
@@ -77,7 +78,10 @@ export function useSupabaseAuth(): AuthContextValue {
         .select("*")
         .eq("user_id", session.user.id)
         .maybeSingle()
-      if (!cancelled) setProfile(data as Profile | null)
+      if (!cancelled) {
+        setProfile(data as Profile | null)
+        setIsLoading(false)
+      }
     })
 
     return () => {
