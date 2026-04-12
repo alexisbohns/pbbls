@@ -61,10 +61,11 @@ final class SupabaseService {
     /// Sign in with email + password. On success, the `.signedIn` event flows
     /// through `authStateChanges` and `session` becomes non-nil.
     func signIn(email: String, password: String) async {
+        self.authError = nil
         do {
             try await client.auth.signIn(email: email, password: password)
         } catch {
-            logger.error("signIn failed: \(error.localizedDescription, privacy: .public)")
+            logger.error("signIn failed: \(error.localizedDescription, privacy: .private)")
             self.authError = error.localizedDescription
         }
     }
@@ -74,6 +75,7 @@ final class SupabaseService {
     /// `handle_new_user` DB trigger does not copy them into `public.profiles`
     /// — this mirrors web behavior and will be fixed in a separate `fix(db)` issue.
     func signUp(email: String, password: String) async {
+        self.authError = nil
         let now = ISO8601DateFormatter().string(from: Date())
         do {
             try await client.auth.signUp(
@@ -85,7 +87,7 @@ final class SupabaseService {
                 ]
             )
         } catch {
-            logger.error("signUp failed: \(error.localizedDescription, privacy: .public)")
+            logger.error("signUp failed: \(error.localizedDescription, privacy: .private)")
             self.authError = error.localizedDescription
         }
     }
@@ -96,7 +98,7 @@ final class SupabaseService {
         do {
             try await client.auth.signOut()
         } catch {
-            logger.error("signOut failed: \(error.localizedDescription, privacy: .public)")
+            logger.error("signOut failed: \(error.localizedDescription, privacy: .private)")
         }
     }
 }
