@@ -36,6 +36,9 @@ targets:
     deploymentTarget: "17.0"
     sources:
       - path: Pebbles
+    configFiles:
+      Debug: Config/Secrets.xcconfig
+      Release: Config/Secrets.xcconfig
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: app.pbbls.ios
@@ -45,11 +48,7 @@ targets:
         CODE_SIGN_STYLE: Automatic
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ENABLE_PREVIEWS: YES
-      configs:
-        Debug:
-          baseConfig: Config/Secrets.xcconfig
-        Release:
-          baseConfig: Config/Secrets.xcconfig
+        TARGETED_DEVICE_FAMILY: "1"
     dependencies:
       - package: Supabase
         product: Supabase
