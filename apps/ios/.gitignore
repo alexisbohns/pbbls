@@ -1,0 +1,17 @@
+# XcodeGen output
+*.xcodeproj
+*.xcworkspace
+
+# Build artifacts
+build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+
+# SwiftPM
+.swiftpm/
+.build/
+Package.resolved
+
+# Secrets
+Config/Secrets.xcconfig
