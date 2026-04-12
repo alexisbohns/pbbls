@@ -3,7 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "echo 'placeholder — no build step yet'",
-    "lint": "echo 'placeholder — no lint step yet'"
+    "generate": "xcodegen generate",
+    "build": "xcodegen generate && xcodebuild -scheme Pebbles -destination 'generic/platform=iOS Simulator' build",
+    "lint": "swiftlint",
+    "test": "xcodegen generate && xcodebuild test -scheme Pebbles -destination 'platform=iOS Simulator,name=iPhone 17'"
   }
 }

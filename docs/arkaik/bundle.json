@@ -6,7 +6,7 @@
     "root_node_id": "V-landing",
     "metadata": { "view_card_variant": "large" },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-04-10T00:00:00Z"
+    "updated_at": "2026-04-12T12:45:28Z"
   },
   "nodes": [
     {
@@ -1034,6 +1034,23 @@
           ]
         }
       }
+    },
+    {
+      "id": "F-ios-app-shell",
+      "project_id": "pebbles",
+      "species": "flow",
+      "title": "iOS App Shell",
+      "description": "Native iOS app shell initialized in PR #200. A two-tab SwiftUI TabView (Path, Profile) serving as the v1 bootstrap — placeholder views, Supabase SDK wired via environment injection, no features yet. Will be fleshed out as feature PRs land.",
+      "status": "development",
+      "platforms": ["ios"],
+      "metadata": {
+        "playlist": {
+          "entries": [
+            { "type": "view", "view_id": "V-home" },
+            { "type": "view", "view_id": "V-profile" }
+          ]
+        }
+      }
     }
   ],
   "edges": [
@@ -1217,6 +1234,8 @@
     { "id": "e-V-docs-index-V-docs-legal-notice", "project_id": "pebbles", "source_id": "V-docs-index", "target_id": "V-docs-legal-notice", "edge_type": "composes" },
     { "id": "e-V-docs-index-V-docs-terms", "project_id": "pebbles", "source_id": "V-docs-index", "target_id": "V-docs-terms", "edge_type": "composes" },
     { "id": "e-V-docs-index-V-docs-privacy", "project_id": "pebbles", "source_id": "V-docs-index", "target_id": "V-docs-privacy", "edge_type": "composes" },
-    { "id": "e-F-legal-consent-V-register", "project_id": "pebbles", "source_id": "F-legal-consent", "target_id": "V-register", "edge_type": "composes" }
+    { "id": "e-F-legal-consent-V-register", "project_id": "pebbles", "source_id": "F-legal-consent", "target_id": "V-register", "edge_type": "composes" },
+    { "id": "e-F-ios-app-shell-V-home", "project_id": "pebbles", "source_id": "F-ios-app-shell", "target_id": "V-home", "edge_type": "composes" },
+    { "id": "e-F-ios-app-shell-V-profile", "project_id": "pebbles", "source_id": "F-ios-app-shell", "target_id": "V-profile", "edge_type": "composes" }
   ]
 }
