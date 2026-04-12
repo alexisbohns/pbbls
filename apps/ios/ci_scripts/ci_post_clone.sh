@@ -16,3 +16,11 @@ EOF
 # Generate Pebbles.xcodeproj from project.yml
 cd "$CI_PRIMARY_REPOSITORY_PATH/apps/ios"
 xcodegen generate
+
+# Resolve Swift Package dependencies so Xcode Cloud's build step finds Package.resolved.
+# Xcode Cloud disables automatic SPM resolution during the build phase and requires
+# Package.resolved to exist at <project>/project.xcworkspace/xcshareddata/swiftpm/.
+xcodebuild -resolvePackageDependencies \
+  -project Pebbles.xcodeproj \
+  -scheme Pebbles \
+  -clonedSourcePackagesDirPath SourcePackages
