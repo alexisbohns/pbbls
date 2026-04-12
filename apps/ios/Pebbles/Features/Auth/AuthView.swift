@@ -86,8 +86,8 @@ struct AuthView: View {
     }
 
     private func submit() {
+        isSubmitting = true
         Task {
-            isSubmitting = true
             switch mode {
             case .login:
                 await supabase.signIn(email: email, password: password)
