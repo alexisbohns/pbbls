@@ -18,6 +18,9 @@ struct AuthView: View {
     @State private var email = ""
     @State private var password = ""
     @State private var isSubmitting = false
+    @State private var termsAccepted = false
+    @State private var privacyAccepted = false
+    @State private var presentedLegalDoc: LegalDoc?
 
     var body: some View {
         VStack(spacing: 24) {
@@ -45,6 +48,23 @@ struct AuthView: View {
                     .textFieldStyle(.roundedBorder)
             }
 
+            if mode == .signup {
+                VStack(alignment: .leading, spacing: 12) {
+                    ConsentCheckbox(
+                        isChecked: $termsAccepted,
+                        prefix: "I accept the ",
+                        linkText: "Terms of Service",
+                        onLinkTap: { presentedLegalDoc = .terms }
+                    )
+                    ConsentCheckbox(
+                        isChecked: $privacyAccepted,
+                        prefix: "I accept the ",
+                        linkText: "Privacy Policy",
+                        onLinkTap: { presentedLegalDoc = .privacy }
+                    )
+                }
+            }
+
             if let error = supabase.authError {
                 Text(error)
                     .font(.footnote)
@@ -66,8 +86,16 @@ struct AuthView: View {
             Spacer()
         }
         .padding(.horizontal, 24)
-        .onChange(of: mode) { _, _ in
+        .sheet(item: $presentedLegalDoc) { doc in
+            LegalDocumentSheet(url: doc.url)
+                .ignoresSafeArea()
+        }
+        .onChange(of: mode) { _, newMode in
             supabase.authError = nil
+            if newMode == .login {
+                termsAccepted = false
+                privacyAccepted = false
+            }
         }
         .onChange(of: email) { _, _ in
             if supabase.authError != nil { supabase.authError = nil }
@@ -82,6 +110,10 @@ struct AuthView: View {
               email.contains("@"),
               password.count >= 6
         else { return false }
+
+        if mode == .signup {
+            return termsAccepted && privacyAccepted
+        }
         return true
     }
 
