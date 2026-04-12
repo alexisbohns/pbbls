@@ -27,12 +27,33 @@ final class SupabaseService {
     /// Cleared on successful auth, on mode toggle, and as the user edits the form.
     var authError: String?
 
-    fileprivate let logger = Logger(subsystem: "app.pbbls.ios", category: "auth")
+    private let logger = Logger(subsystem: "app.pbbls.ios", category: "auth")
 
     init() {
         self.client = SupabaseClient(
             supabaseURL: AppEnvironment.supabaseURL,
             supabaseKey: AppEnvironment.supabaseAnonKey
         )
+    }
+
+    /// Subscribes to Supabase's auth state stream and keeps `session` +
+    /// `isInitializing` in sync for the lifetime of the app.
+    ///
+    /// This function never returns under normal operation. Call it exactly
+    /// once from `RootView.task { }`.
+    ///
+    /// CRITICAL: do not `await` any Supabase SDK call from inside this
+    /// loop. The SDK holds an internal lock while delivering events, and
+    /// awaiting a Supabase call from inside the callback deadlocks the
+    /// client. Mutate state synchronously only.
+    func start() async {
+        for await (event, session) in client.auth.authStateChanges {
+            self.session = session
+            self.isInitializing = false
+            if event == .signedIn {
+                self.authError = nil
+            }
+        }
+        logger.error("authStateChanges stream ended unexpectedly")
     }
 }
