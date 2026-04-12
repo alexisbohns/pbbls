@@ -1,0 +1,87 @@
+name: Pebbles
+options:
+  bundleIdPrefix: app.pbbls
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+
+configs:
+  Debug: debug
+  Release: release
+
+settings:
+  base:
+    DEVELOPMENT_TEAM: 256Z7G8WLM
+    SWIFT_VERSION: "5.9"
+    IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+    TARGETED_DEVICE_FAMILY: "1"
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+  configs:
+    Debug:
+      SWIFT_ACTIVE_COMPILATION_CONDITIONS: DEBUG
+      SWIFT_OPTIMIZATION_LEVEL: "-Onone"
+    Release:
+      SWIFT_OPTIMIZATION_LEVEL: "-O"
+
+packages:
+  Supabase:
+    url: https://github.com/supabase/supabase-swift
+    from: "2.0.0"
+
+targets:
+  Pebbles:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: Pebbles
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.pbbls.ios
+        PRODUCT_NAME: Pebbles
+        INFOPLIST_FILE: Pebbles/Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Pebbles/Pebbles.entitlements
+        CODE_SIGN_STYLE: Automatic
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_PREVIEWS: YES
+      configs:
+        Debug:
+          baseConfig: Config/Secrets.xcconfig
+        Release:
+          baseConfig: Config/Secrets.xcconfig
+    dependencies:
+      - package: Supabase
+        product: Supabase
+
+  PebblesTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: PebblesTests
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.pbbls.ios.tests
+        GENERATE_INFOPLIST_FILE: YES
+    dependencies:
+      - target: Pebbles
+
+schemes:
+  Pebbles:
+    build:
+      targets:
+        Pebbles: all
+        PebblesTests: [test]
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets:
+        - PebblesTests
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
