@@ -11,6 +11,7 @@ import os
 /// The client initializer performs no network I/O, so creating this during app
 /// launch is safe on the main thread.
 @Observable
+@MainActor
 final class SupabaseService {
     let client: SupabaseClient
 
@@ -55,5 +56,47 @@ final class SupabaseService {
             }
         }
         logger.error("authStateChanges stream ended unexpectedly")
+    }
+
+    /// Sign in with email + password. On success, the `.signedIn` event flows
+    /// through `authStateChanges` and `session` becomes non-nil.
+    func signIn(email: String, password: String) async {
+        do {
+            try await client.auth.signIn(email: email, password: password)
+        } catch {
+            logger.error("signIn failed: \(error.localizedDescription, privacy: .public)")
+            self.authError = error.localizedDescription
+        }
+    }
+
+    /// Sign up with email + password. Consent timestamps are captured now and
+    /// passed through `auth.users.raw_user_meta_data`. Note: the current
+    /// `handle_new_user` DB trigger does not copy them into `public.profiles`
+    /// — this mirrors web behavior and will be fixed in a separate `fix(db)` issue.
+    func signUp(email: String, password: String) async {
+        let now = ISO8601DateFormatter().string(from: Date())
+        do {
+            try await client.auth.signUp(
+                email: email,
+                password: password,
+                data: [
+                    "terms_accepted_at":   .string(now),
+                    "privacy_accepted_at": .string(now),
+                ]
+            )
+        } catch {
+            logger.error("signUp failed: \(error.localizedDescription, privacy: .public)")
+            self.authError = error.localizedDescription
+        }
+    }
+
+    /// Sign out. Failures are logged but never surfaced as alerts — the local
+    /// token is wiped regardless and the stream will emit `.signedOut`.
+    func signOut() async {
+        do {
+            try await client.auth.signOut()
+        } catch {
+            logger.error("signOut failed: \(error.localizedDescription, privacy: .public)")
+        }
     }
 }
