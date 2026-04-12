@@ -82,8 +82,8 @@ final class SupabaseService {
                 email: email,
                 password: password,
                 data: [
-                    "terms_accepted_at":   .string(now),
-                    "privacy_accepted_at": .string(now),
+                    "terms_accepted_at": .string(now),
+                    "privacy_accepted_at": .string(now)
                 ]
             )
         } catch {
