@@ -6,6 +6,6 @@
     "generate": "xcodegen generate",
     "build": "xcodegen generate && xcodebuild -scheme Pebbles -destination 'generic/platform=iOS Simulator' build",
     "lint": "swiftlint",
-    "test": "xcodegen generate && xcodebuild test -scheme Pebbles -destination 'platform=iOS Simulator,name=iPhone 15'"
+    "test": "xcodegen generate && xcodebuild test -scheme Pebbles -destination 'platform=iOS Simulator,name=iPhone 17'"
   }
 }
