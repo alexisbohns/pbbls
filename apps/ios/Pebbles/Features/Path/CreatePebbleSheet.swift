@@ -175,11 +175,16 @@ struct CreatePebbleSheet: View {
 
     private func save() async {
         guard draft.isValid else { return }
+        guard let userId = supabase.session?.user.id else {
+            logger.error("create pebble aborted: no current session")
+            self.saveError = "You're signed out. Please sign in again."
+            return
+        }
         isSaving = true
         saveError = nil
 
         do {
-            let payload = PebbleInsert(from: draft)
+            let payload = PebbleInsert(from: draft, userId: userId)
 
             let inserted: Pebble = try await supabase.client
                 .from("pebbles")
