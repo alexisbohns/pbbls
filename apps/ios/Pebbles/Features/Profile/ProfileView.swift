@@ -1,33 +1,120 @@
 import SwiftUI
+import os
+
+/// Discriminator for which explainer sheet is currently presented.
+/// Driving sheets by an optional enum is the idiomatic SwiftUI pattern —
+/// it guarantees a single sheet presentation per state transition.
+private enum ProfileSheet: String, Identifiable {
+    case karma
+    case bounce
+    var id: String { rawValue }
+}
 
 struct ProfileView: View {
     @Environment(SupabaseService.self) private var supabase
 
+    @State private var karma: KarmaSummary?
+    @State private var bounce: BounceSummary?
+    @State private var isLoading = true
+    @State private var presentedSheet: ProfileSheet?
+    @State private var presentedLegalDoc: LegalDoc?
+
+    private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile")
+
     var body: some View {
         NavigationStack {
-            VStack(spacing: 24) {
-                Text("Profile")
-                    .foregroundStyle(.secondary)
-
-                Spacer()
-
-                Button(role: .destructive) {
-                    Task {
-                        await supabase.signOut()
+            List {
+                Section("Stats") {
+                    ProfileStatRow(
+                        title: "Karma",
+                        systemImage: "sparkles",
+                        value: karma?.totalKarma
+                    ) {
+                        presentedSheet = .karma
                     }
-                } label: {
-                    Text("Log out")
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
+                    ProfileStatRow(
+                        title: "Bounce",
+                        systemImage: "arrow.up.right",
+                        value: bounce?.bounceLevel
+                    ) {
+                        presentedSheet = .bounce
+                    }
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.red)
-                .padding(.horizontal, 24)
-                .padding(.bottom, 24)
+
+                Section("Lists") {
+                    NavigationLink {
+                        CollectionsListView()
+                    } label: {
+                        Label("Collections", systemImage: "square.stack.3d.up")
+                    }
+                    NavigationLink {
+                        SoulsListView()
+                    } label: {
+                        Label("Souls", systemImage: "person.2")
+                    }
+                    NavigationLink {
+                        GlyphsListView()
+                    } label: {
+                        Label("Glyphs", systemImage: "scribble")
+                    }
+                }
+
+                Section("Legal") {
+                    ProfileNavRow(title: "Terms", systemImage: "doc.text") {
+                        presentedLegalDoc = .terms
+                    }
+                    ProfileNavRow(title: "Privacy", systemImage: "lock.shield") {
+                        presentedLegalDoc = .privacy
+                    }
+                }
+
+                Section {
+                    Button(role: .destructive) {
+                        Task { await supabase.signOut() }
+                    } label: {
+                        Text("Log out")
+                            .frame(maxWidth: .infinity)
+                    }
+                }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
             .navigationTitle("Profile")
+            .task { await loadStats() }
+            .sheet(item: $presentedSheet) { sheet in
+                switch sheet {
+                case .karma:  KarmaExplainerSheet()
+                case .bounce: BounceExplainerSheet()
+                }
+            }
+            .sheet(item: $presentedLegalDoc) { doc in
+                LegalDocumentSheet(url: doc.url)
+                    .ignoresSafeArea()
+            }
         }
+    }
+
+    private func loadStats() async {
+        do {
+            async let karmaResult: KarmaSummary = supabase.client
+                .from("v_karma_summary")
+                .select("total_karma, pebbles_count")
+                .single()
+                .execute()
+                .value
+
+            async let bounceResult: BounceSummary = supabase.client
+                .from("v_bounce")
+                .select("bounce_level, active_days")
+                .single()
+                .execute()
+                .value
+
+            self.karma = try await karmaResult
+            self.bounce = try await bounceResult
+        } catch {
+            logger.error("profile stats fetch failed: \(error.localizedDescription, privacy: .private)")
+            // Graceful degradation: karma/bounce stay nil, rows show "—".
+        }
+        self.isLoading = false
     }
 }
 
