@@ -168,7 +168,7 @@
       "species": "view",
       "title": "Collections",
       "description": "Browse and manage all pebble collections.",
-      "status": "idea",
+      "status": "development",
       "platforms": ["web", "ios", "android"]
     },
     {
@@ -222,7 +222,7 @@
       "species": "view",
       "title": "Glyphs",
       "description": "Browse all user-created glyphs (carved marks on pebble shapes).",
-      "status": "idea",
+      "status": "development",
       "platforms": ["web", "ios", "android"]
     },
     {
