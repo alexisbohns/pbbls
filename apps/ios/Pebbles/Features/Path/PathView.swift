@@ -6,6 +6,7 @@ struct PathView: View {
     @State private var pebbles: [Pebble] = []
     @State private var isLoading = true
     @State private var loadError: String?
+    @State private var isPresentingCreate = false
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "path")
 
@@ -15,6 +16,11 @@ struct PathView: View {
                 .navigationTitle("Path")
         }
         .task { await load() }
+        .sheet(isPresented: $isPresentingCreate) {
+            CreatePebbleSheet { newPebble in
+                handleCreated(newPebble)
+            }
+        }
     }
 
     @ViewBuilder
@@ -24,15 +30,33 @@ struct PathView: View {
         } else if let loadError {
             Text(loadError).foregroundStyle(.secondary)
         } else {
-            List(pebbles) { pebble in
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(pebble.name).font(.body)
-                    Text(pebble.happenedAt, style: .date)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
+            List {
+                Section {
+                    Button {
+                        isPresentingCreate = true
+                    } label: {
+                        Label("Record a pebble", systemImage: "plus.circle.fill")
+                            .font(.headline)
+                    }
+                }
+
+                Section("Path") {
+                    ForEach(pebbles) { pebble in
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(pebble.name).font(.body)
+                            Text(pebble.happenedAt, style: .date)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
             }
         }
+    }
+
+    private func handleCreated(_ pebble: Pebble) {
+        pebbles.append(pebble)
+        pebbles.sort { $0.happenedAt > $1.happenedAt }
     }
 
     private func load() async {
