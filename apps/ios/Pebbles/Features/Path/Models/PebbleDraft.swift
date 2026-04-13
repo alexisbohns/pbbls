@@ -7,11 +7,11 @@ struct PebbleDraft {
     var happenedAt: Date = Date()         // mandatory, "now" by default
     var name: String = ""                 // mandatory
     var description: String = ""          // optional
-    var emotionId: UUID? = nil            // mandatory
-    var domainId: UUID? = nil             // mandatory
-    var valence: Valence? = nil           // mandatory
-    var soulId: UUID? = nil               // optional
-    var collectionId: UUID? = nil         // optional
+    var emotionId: UUID?                  // mandatory
+    var domainId: UUID?                   // mandatory
+    var valence: Valence?                 // mandatory
+    var soulId: UUID?                     // optional
+    var collectionId: UUID?               // optional
     var visibility: Visibility = .private // mandatory
 
     /// True when every mandatory field is set. Drives the Save button's disabled state.
