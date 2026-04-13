@@ -102,11 +102,16 @@ Option A was chosen. The iOS app has exactly one screen that needs these lists. 
 
 `PathView` already calls `supabase.client.from("pebbles")...` directly via `@Environment(SupabaseService.self)`. `CreatePebbleSheet` follows the same pattern. The `apps/ios/CLAUDE.md` says: *"When a test needs to fake Supabase, extract a `SupabaseServicing` protocol at that moment — not before."*
 
-### 8. Trust Row Level Security — do not filter by user_id in the client
+### 8. RLS scopes reads but checks writes — `user_id` must be set explicitly on insert
 
-The `souls` and `collections` table policies (`packages/supabase/supabase/migrations/20260411000001_core_tables.sql:175-184`) already enforce `user_id = auth.uid()` on select. The client does not pass a user_id; the database scopes results automatically. The same applies to insert: we do not pass `user_id` in the payload (the policy requires `user_id = auth.uid()` on insert, which the auth trigger handles).
+RLS policies have two different effects depending on the operation:
 
-This is the canonical Supabase pattern: trust RLS, do not duplicate it in client code.
+- **Reads (`select`):** RLS *filters* results. Every row that fails the policy is invisible to the client, so we do not need to pass `user_id` in `.eq()` filters. The `souls` and `collections` policies (`packages/supabase/supabase/migrations/20260411000001_core_tables.sql:175-184`) scope the result set automatically.
+- **Writes (`insert` / `update`):** RLS *checks* the row but does not *set* any column. The `pebbles_insert` policy `with check (user_id = auth.uid())` requires `user_id` to already be present in the payload and to equal the current user's id. There is no auth trigger filling it in for us — the only auth trigger (`migrations/...000004_auth_trigger.sql`) creates a `profiles` row on signup and nothing else.
+
+The client therefore reads `user_id` from the cached session (`supabase.session?.user.id`) and includes it in the `PebbleInsert` payload. The join tables (`pebble_domains`, `pebble_souls`, `collection_pebbles`) have no `user_id` column at all — they are scoped via parent join in their RLS policies — so they receive only the foreign-key columns.
+
+This split (filter on read, check on write) is the canonical Supabase pattern. Forgetting it produces "new row violates row-level security policy" errors on every insert.
 
 ## File layout
 
@@ -235,17 +240,10 @@ The only input is the `onCreated` closure. `SupabaseService` is pulled from `@En
    ```
 3. User fills `draft`. Each field bound via `$draft.field`. Save button disabled when `!draft.isValid`.
 4. Save tapped. `isSaving = true`.
-5. Insert pebble:
+5. Resolve the current user id from the cached session, then insert the pebble:
    ```swift
-   let payload = [
-       "name": draft.name,
-       "description": draft.description.isEmpty ? nil : draft.description,
-       "happened_at": ISO8601DateFormatter().string(from: draft.happenedAt),
-       "intensity": draft.valence!.intensity,
-       "positiveness": draft.valence!.positiveness,
-       "visibility": draft.visibility.rawValue,
-       "emotion_id": draft.emotionId!.uuidString,
-   ]
+   guard let userId = supabase.session?.user.id else { /* surface error, abort */ }
+   let payload = PebbleInsert(from: draft, userId: userId)
    let inserted: Pebble = try await supabase.client
        .from("pebbles")
        .insert(payload)
