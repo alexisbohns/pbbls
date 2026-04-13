@@ -1,15 +1,59 @@
 import SwiftUI
+import os
 
 struct PathView: View {
+    @Environment(SupabaseService.self) private var supabase
+    @State private var pebbles: [Pebble] = []
+    @State private var isLoading = true
+    @State private var loadError: String?
+
+    private let logger = Logger(subsystem: "app.pbbls.ios", category: "path")
+
     var body: some View {
         NavigationStack {
-            Text("Path")
-                .foregroundStyle(.secondary)
+            content
                 .navigationTitle("Path")
+        }
+        .task { await load() }
+    }
+
+    @ViewBuilder
+    private var content: some View {
+        if isLoading {
+            ProgressView()
+        } else if let loadError {
+            Text(loadError).foregroundStyle(.secondary)
+        } else {
+            List(pebbles) { pebble in
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(pebble.name).font(.body)
+                    Text(pebble.happenedAt, style: .date)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    private func load() async {
+        do {
+            let result: [Pebble] = try await supabase.client
+                .from("pebbles")
+                .select("id, name, happened_at")
+                .order("happened_at", ascending: false)
+                .execute()
+                .value
+            self.pebbles = result
+            self.isLoading = false
+        } catch {
+            logger.error("path fetch failed: \(error.localizedDescription, privacy: .private)")
+            self.loadError = "Couldn't load your pebbles."
+            self.isLoading = false
         }
     }
 }
 
 #Preview {
     PathView()
+        .environment(SupabaseService())
 }
