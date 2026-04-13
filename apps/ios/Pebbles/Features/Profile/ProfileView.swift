@@ -15,7 +15,6 @@ struct ProfileView: View {
 
     @State private var karma: KarmaSummary?
     @State private var bounce: BounceSummary?
-    @State private var isLoading = true
     @State private var presentedSheet: ProfileSheet?
     @State private var presentedLegalDoc: LegalDoc?
 
@@ -93,28 +92,31 @@ struct ProfileView: View {
     }
 
     private func loadStats() async {
+        async let karmaResult: KarmaSummary = supabase.client
+            .from("v_karma_summary")
+            .select("total_karma, pebbles_count")
+            .single()
+            .execute()
+            .value
+
+        async let bounceResult: BounceSummary = supabase.client
+            .from("v_bounce")
+            .select("bounce_level, active_days")
+            .single()
+            .execute()
+            .value
+
         do {
-            async let karmaResult: KarmaSummary = supabase.client
-                .from("v_karma_summary")
-                .select("total_karma, pebbles_count")
-                .single()
-                .execute()
-                .value
-
-            async let bounceResult: BounceSummary = supabase.client
-                .from("v_bounce")
-                .select("bounce_level, active_days")
-                .single()
-                .execute()
-                .value
-
             self.karma = try await karmaResult
+        } catch {
+            logger.error("karma fetch failed: \(error.localizedDescription, privacy: .private)")
+        }
+
+        do {
             self.bounce = try await bounceResult
         } catch {
-            logger.error("profile stats fetch failed: \(error.localizedDescription, privacy: .private)")
-            // Graceful degradation: karma/bounce stay nil, rows show "—".
+            logger.error("bounce fetch failed: \(error.localizedDescription, privacy: .private)")
         }
-        self.isLoading = false
     }
 }
 
