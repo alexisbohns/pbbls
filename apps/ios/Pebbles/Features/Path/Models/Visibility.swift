@@ -1,6 +1,6 @@
 import Foundation
 
-enum Visibility: String, CaseIterable, Identifiable, Hashable {
+enum Visibility: String, CaseIterable, Identifiable, Hashable, Decodable {
     case `private` = "private"
     case `public` = "public"
 

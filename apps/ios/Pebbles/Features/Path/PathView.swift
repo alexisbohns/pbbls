@@ -7,6 +7,7 @@ struct PathView: View {
     @State private var isLoading = true
     @State private var loadError: String?
     @State private var isPresentingCreate = false
+    @State private var selectedPebbleId: UUID?
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "path")
 
@@ -20,6 +21,9 @@ struct PathView: View {
             CreatePebbleSheet { newPebble in
                 handleCreated(newPebble)
             }
+        }
+        .sheet(item: $selectedPebbleId) { id in
+            PebbleDetailSheet(pebbleId: id)
         }
     }
 
@@ -42,12 +46,17 @@ struct PathView: View {
 
                 Section("Path") {
                     ForEach(pebbles) { pebble in
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(pebble.name).font(.body)
-                            Text(pebble.happenedAt, style: .date)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                        Button {
+                            selectedPebbleId = pebble.id
+                        } label: {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(pebble.name).font(.body)
+                                Text(pebble.happenedAt, style: .date)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
+                        .buttonStyle(.plain)
                     }
                 }
             }
