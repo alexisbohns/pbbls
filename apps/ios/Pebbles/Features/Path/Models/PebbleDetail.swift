@@ -1,12 +1,5 @@
 import Foundation
 
-// MARK: - Decodable conformance for shared types
-
-// `Visibility` is a String-backed enum without an explicit Decodable conformance.
-// Swift synthesizes Decodable for RawRepresentable enums only when the conformance
-// is declared — so we declare it here to keep Visibility.swift untouched.
-extension Visibility: Decodable {}
-
 // MARK: - Ref types (detail-view-local; intentionally not reusing the picker models)
 
 struct EmotionRef: Decodable, Hashable, Identifiable {
