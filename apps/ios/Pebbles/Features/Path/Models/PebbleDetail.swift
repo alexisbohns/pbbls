@@ -1,6 +1,16 @@
 import Foundation
+import os
 
-// MARK: - Ref types (detail-view-local; intentionally not reusing the picker models)
+// MARK: - Ref types
+//
+// `EmotionRef` and `DomainRef` exist because the PostgREST select in
+// `PebbleDetailSheet.load()` restricts columns to what the detail UI actually
+// renders:
+//     emotion:emotions(id, name, color)
+//     pebble_domains(domain:domains(id, name))
+// Reusing the full `Emotion`/`Domain` models would fail to decode the missing
+// `slug`/`label` fields. `Soul` and `PebbleCollection` are reused directly
+// because their full shapes match the detail select.
 
 struct EmotionRef: Decodable, Hashable, Identifiable {
     let id: UUID
@@ -9,16 +19,6 @@ struct EmotionRef: Decodable, Hashable, Identifiable {
 }
 
 struct DomainRef: Decodable, Hashable, Identifiable {
-    let id: UUID
-    let name: String
-}
-
-struct SoulRef: Decodable, Hashable, Identifiable {
-    let id: UUID
-    let name: String
-}
-
-struct CollectionRef: Decodable, Hashable, Identifiable {
     let id: UUID
     let name: String
 }
@@ -38,8 +38,8 @@ struct PebbleDetail: Identifiable, Decodable, Hashable {
     let visibility: Visibility
     let emotion: EmotionRef
     let domains: [DomainRef]
-    let souls: [SoulRef]
-    let collections: [CollectionRef]
+    let souls: [Soul]
+    let collections: [PebbleCollection]
 
     /// Derived from `intensity` + `positiveness`. DB remains source of truth.
     var valence: Valence {
@@ -53,7 +53,10 @@ struct PebbleDetail: Identifiable, Decodable, Hashable {
         case (1, 1):  return .highlightSmall
         case (1, 2):  return .highlightMedium
         case (1, 3):  return .highlightLarge
-        default:      return .neutralMedium // DB has CHECK constraints; this is defensive only
+        default:
+            Logger(subsystem: "app.pbbls.ios", category: "pebble-detail")
+                .warning("unexpected (positiveness, intensity) pair: (\(positiveness, privacy: .public), \(intensity, privacy: .public)) — falling back to .neutralMedium")
+            return .neutralMedium
         }
     }
 
@@ -74,8 +77,8 @@ struct PebbleDetail: Identifiable, Decodable, Hashable {
     }
 
     private struct DomainWrapper: Decodable { let domain: DomainRef }
-    private struct SoulWrapper: Decodable { let soul: SoulRef }
-    private struct CollectionWrapper: Decodable { let collection: CollectionRef }
+    private struct SoulWrapper: Decodable { let soul: Soul }
+    private struct CollectionWrapper: Decodable { let collection: PebbleCollection }
 
     init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
