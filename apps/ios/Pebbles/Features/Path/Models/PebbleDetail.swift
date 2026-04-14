@@ -55,7 +55,11 @@ struct PebbleDetail: Identifiable, Decodable, Hashable {
         case (1, 3):  return .highlightLarge
         default:
             Logger(subsystem: "app.pbbls.ios", category: "pebble-detail")
-                .warning("unexpected (positiveness, intensity) pair: (\(positiveness, privacy: .public), \(intensity, privacy: .public)) — falling back to .neutralMedium")
+                .warning("""
+                    unexpected (positiveness, intensity) pair: \
+                    (\(positiveness, privacy: .public), \(intensity, privacy: .public)) \
+                    — falling back to .neutralMedium
+                    """)
             return .neutralMedium
         }
     }
@@ -81,23 +85,24 @@ struct PebbleDetail: Identifiable, Decodable, Hashable {
     private struct CollectionWrapper: Decodable { let collection: PebbleCollection }
 
     init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        self.id = try c.decode(UUID.self, forKey: .id)
-        self.name = try c.decode(String.self, forKey: .name)
-        self.description = try c.decodeIfPresent(String.self, forKey: .description)
-        self.happenedAt = try c.decode(Date.self, forKey: .happenedAt)
-        self.intensity = try c.decode(Int.self, forKey: .intensity)
-        self.positiveness = try c.decode(Int.self, forKey: .positiveness)
-        self.visibility = try c.decode(Visibility.self, forKey: .visibility)
-        self.emotion = try c.decode(EmotionRef.self, forKey: .emotion)
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try container.decode(UUID.self, forKey: .id)
+        self.name = try container.decode(String.self, forKey: .name)
+        self.description = try container.decodeIfPresent(String.self, forKey: .description)
+        self.happenedAt = try container.decode(Date.self, forKey: .happenedAt)
+        self.intensity = try container.decode(Int.self, forKey: .intensity)
+        self.positiveness = try container.decode(Int.self, forKey: .positiveness)
+        self.visibility = try container.decode(Visibility.self, forKey: .visibility)
+        self.emotion = try container.decode(EmotionRef.self, forKey: .emotion)
 
-        let domainWrappers = try c.decodeIfPresent([DomainWrapper].self, forKey: .pebbleDomains) ?? []
+        let domainWrappers = try container.decodeIfPresent([DomainWrapper].self, forKey: .pebbleDomains) ?? []
         self.domains = domainWrappers.map(\.domain)
 
-        let soulWrappers = try c.decodeIfPresent([SoulWrapper].self, forKey: .pebbleSouls) ?? []
+        let soulWrappers = try container.decodeIfPresent([SoulWrapper].self, forKey: .pebbleSouls) ?? []
         self.souls = soulWrappers.map(\.soul)
 
-        let collectionWrappers = try c.decodeIfPresent([CollectionWrapper].self, forKey: .collectionPebbles) ?? []
+        let collectionWrappers = try container
+            .decodeIfPresent([CollectionWrapper].self, forKey: .collectionPebbles) ?? []
         self.collections = collectionWrappers.map(\.collection)
     }
 }

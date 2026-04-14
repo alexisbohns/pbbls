@@ -122,13 +122,13 @@ struct PebbleDetailSheet: View {
 // Returns nil on malformed input; the view falls back to `.secondary`.
 private extension Color {
     init?(hex: String) {
-        var s = hex.trimmingCharacters(in: .whitespacesAndNewlines)
-        if s.hasPrefix("#") { s.removeFirst() }
-        guard s.count == 6, let value = UInt32(s, radix: 16) else { return nil }
-        let r = Double((value >> 16) & 0xFF) / 255.0
-        let g = Double((value >> 8) & 0xFF) / 255.0
-        let b = Double(value & 0xFF) / 255.0
-        self = Color(red: r, green: g, blue: b)
+        var sanitized = hex.trimmingCharacters(in: .whitespacesAndNewlines)
+        if sanitized.hasPrefix("#") { sanitized.removeFirst() }
+        guard sanitized.count == 6, let value = UInt32(sanitized, radix: 16) else { return nil }
+        let red = Double((value >> 16) & 0xFF) / 255.0
+        let green = Double((value >> 8) & 0xFF) / 255.0
+        let blue = Double(value & 0xFF) / 255.0
+        self = Color(red: red, green: green, blue: blue)
     }
 }
 

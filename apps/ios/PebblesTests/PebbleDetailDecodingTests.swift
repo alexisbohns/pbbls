@@ -23,7 +23,7 @@ struct PebbleDetailDecodingTests {
         return decoder
     }
 
-    private let fullJSON = """
+    private let fullJSON = Data("""
     {
       "id": "11111111-1111-1111-1111-111111111111",
       "name": "Shipped the thing",
@@ -47,7 +47,7 @@ struct PebbleDetailDecodingTests {
         { "collection": { "id": "55555555-5555-5555-5555-555555555555", "name": "Wins" } }
       ]
     }
-    """.data(using: .utf8)!
+    """.utf8)
 
     @Test("decodes a full row with one of each relation")
     func decodesFullRow() throws {
@@ -73,7 +73,7 @@ struct PebbleDetailDecodingTests {
 
     @Test("empty join arrays decode as empty")
     func decodesEmptyRelations() throws {
-        let json = """
+        let json = Data("""
         {
           "id": "11111111-1111-1111-1111-111111111111",
           "name": "Quiet moment",
@@ -91,7 +91,7 @@ struct PebbleDetailDecodingTests {
           "pebble_souls": [],
           "collection_pebbles": []
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let detail = try makeDecoder().decode(PebbleDetail.self, from: json)
 
@@ -104,7 +104,7 @@ struct PebbleDetailDecodingTests {
 
     @Test("multiple domains flatten cleanly")
     func decodesMultipleDomains() throws {
-        let json = """
+        let json = Data("""
         {
           "id": "11111111-1111-1111-1111-111111111111",
           "name": "Cross-domain moment",
@@ -125,7 +125,7 @@ struct PebbleDetailDecodingTests {
           "pebble_souls": [],
           "collection_pebbles": []
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let detail = try makeDecoder().decode(PebbleDetail.self, from: json)
 
