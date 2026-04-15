@@ -123,12 +123,16 @@ function monochromeStrokes(svgInner: string): string {
 
 /**
  * Prefix IDs on path/element attributes to namespace layers.
- * Adds `id="<prefix>:stroke-N"` to each <path>.
+ * Strips any existing `id="…"` from the matched tag first, then adds
+ * `id="<prefix>:stroke-N"`. This handles both raw SVG paths (no id) and
+ * pre-namespaced glyph paths from createGlyphArtwork (which already writes
+ * `id="glyph:stroke-N"` and would otherwise duplicate the attribute).
  */
 function namespaceIds(svgInner: string, prefix: string): string {
   let index = 0;
-  return svgInner.replace(/<path\b/g, () => {
-    return `<path id="${prefix}:stroke-${index++}"`;
+  return svgInner.replace(/<path\b([^>]*)>/g, (_match, attrs: string) => {
+    const stripped = attrs.replace(/\s*id="[^"]*"/, "");
+    return `<path id="${prefix}:stroke-${index++}"${stripped}>`;
   });
 }
 
