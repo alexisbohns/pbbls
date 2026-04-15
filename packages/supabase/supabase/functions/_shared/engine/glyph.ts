@@ -2,7 +2,10 @@
  * Pebble Engine · Glyph Normalization
  *
  * Takes raw strokes from the carve editor and produces a normalized
- * square SVG artwork. Runs CLIENT-SIDE (carve editor save flow).
+ * square SVG artwork. Runs SERVER-SIDE in the Supabase Edge Function
+ * compositor. Pure function with no DOM/network dependencies, so it can
+ * also be reused client-side (e.g. in a future carve editor) without
+ * modification.
  *
  * Responsibilities:
  * - Compute bounding box of all strokes
