@@ -162,7 +162,7 @@ function extractPointsFromPath(d: string): Point[] {
  */
 export function computeStrokesBoundingBox(
   strokes: Stroke[],
-  defaultStrokeWidth = DEFAULT_STROKE_WIDTH
+  defaultWidth = DEFAULT_STROKE_WIDTH
 ): BoundingBox {
   let minX = Infinity;
   let minY = Infinity;
@@ -170,7 +170,7 @@ export function computeStrokesBoundingBox(
   let maxY = -Infinity;
 
   for (const stroke of strokes) {
-    const halfWidth = (stroke.width ?? defaultStrokeWidth) / 2;
+    const halfWidth = (stroke.width ?? defaultWidth) / 2;
     const points = extractPointsFromPath(stroke.d);
 
     for (const p of points) {
