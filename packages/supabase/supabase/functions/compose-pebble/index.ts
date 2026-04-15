@@ -45,6 +45,7 @@ serve(async (req: Request) => {
     return json({ error: "invalid body: not JSON" }, 400);
   }
   if (!body || typeof body !== "object" || !("payload" in body)) {
+    console.error("compose-pebble: invalid body — missing payload");
     return json({ error: "invalid body: missing payload" }, 400);
   }
 

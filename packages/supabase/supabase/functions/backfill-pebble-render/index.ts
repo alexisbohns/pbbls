@@ -26,6 +26,13 @@ serve(async (req: Request) => {
     return json({ error: "method not allowed" }, 405);
   }
 
+  // Refuse to serve if SERVICE_ROLE is unset — constantTimeEqual("", "") would
+  // otherwise return true and anyone presenting no bearer would be let through.
+  if (!SERVICE_ROLE) {
+    console.error("backfill-pebble-render: SUPABASE_SERVICE_ROLE_KEY not set");
+    return json({ error: "service unavailable" }, 503);
+  }
+
   // Bearer check: constant-time compare against the service role key.
   const auth = req.headers.get("Authorization") ?? "";
   const presented = auth.startsWith("Bearer ") ? auth.slice(7) : "";
@@ -42,6 +49,7 @@ serve(async (req: Request) => {
     return json({ error: "invalid body" }, 400);
   }
   if (!body || typeof body.pebble_id !== "string") {
+    console.error("backfill-pebble-render: invalid pebble_id");
     return json({ error: "invalid pebble_id" }, 400);
   }
 
