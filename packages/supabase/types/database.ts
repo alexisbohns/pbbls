@@ -7,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.5"
-  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -141,24 +136,35 @@ export type Database = {
       }
       domains: {
         Row: {
+          default_glyph_id: string | null
           id: string
           label: string
           name: string
           slug: string
         }
         Insert: {
+          default_glyph_id?: string | null
           id?: string
           label: string
           name: string
           slug: string
         }
         Update: {
+          default_glyph_id?: string | null
           id?: string
           label?: string
           name?: string
           slug?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "domains_default_glyph_id_fkey"
+            columns: ["default_glyph_id"]
+            isOneToOne: false
+            referencedRelation: "glyphs"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       emotions: {
         Row: {
@@ -186,30 +192,30 @@ export type Database = {
           created_at: string
           id: string
           name: string | null
-          shape_id: string
+          shape_id: string | null
           strokes: Json
           updated_at: string
-          user_id: string
+          user_id: string | null
           view_box: string
         }
         Insert: {
           created_at?: string
           id?: string
           name?: string | null
-          shape_id: string
+          shape_id?: string | null
           strokes?: Json
           updated_at?: string
-          user_id: string
+          user_id?: string | null
           view_box: string
         }
         Update: {
           created_at?: string
           id?: string
           name?: string | null
-          shape_id?: string
+          shape_id?: string | null
           strokes?: Json
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
           view_box?: string
         }
         Relationships: [
@@ -433,6 +439,9 @@ export type Database = {
           intensity: number
           name: string
           positiveness: number
+          render_manifest: Json | null
+          render_svg: string | null
+          render_version: string | null
           updated_at: string
           user_id: string
           visibility: string
@@ -447,6 +456,9 @@ export type Database = {
           intensity: number
           name: string
           positiveness: number
+          render_manifest?: Json | null
+          render_svg?: string | null
+          render_version?: string | null
           updated_at?: string
           user_id: string
           visibility?: string
@@ -461,6 +473,9 @@ export type Database = {
           intensity?: number
           name?: string
           positiveness?: number
+          render_manifest?: Json | null
+          render_svg?: string | null
+          render_version?: string | null
           updated_at?: string
           user_id?: string
           visibility?: string
@@ -877,3 +892,4 @@ export const Constants = {
     Enums: {},
   },
 } as const
+
