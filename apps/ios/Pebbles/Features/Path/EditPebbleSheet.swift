@@ -78,6 +78,8 @@ struct EditPebbleSheet: View {
         }
     }
 
+    // Five parallel queries (detail + four reference lists) push this just past the default limit.
+    // swiftlint:disable:next function_body_length
     private func load() async {
         isLoading = true
         loadError = nil
