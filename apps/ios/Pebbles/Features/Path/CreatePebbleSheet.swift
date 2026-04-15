@@ -2,7 +2,7 @@ import SwiftUI
 import os
 
 struct CreatePebbleSheet: View {
-    let onCreated: (Pebble) -> Void
+    let onCreated: () -> Void
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(\.dismiss) private var dismiss
@@ -113,28 +113,17 @@ struct CreatePebbleSheet: View {
 
     private func save() async {
         guard draft.isValid else { return }
-        guard let userId = supabase.session?.user.id else {
-            logger.error("create pebble aborted: no current session")
-            self.saveError = "You're signed out. Please sign in again."
-            return
-        }
         isSaving = true
         saveError = nil
 
         do {
-            let payload = PebbleInsert(from: draft, userId: userId)
+            let payload = PebbleCreatePayload(from: draft)
 
-            let inserted: Pebble = try await supabase.client
-                .from("pebbles")
-                .insert(payload)
-                .select()
-                .single()
+            _ = try await supabase.client
+                .rpc("create_pebble", params: CreatePebbleParams(payload: payload))
                 .execute()
-                .value
 
-            try await insertJoinRows(for: inserted.id)
-
-            onCreated(inserted)
+            onCreated()
             dismiss()
         } catch {
             logger.error("create pebble failed: \(error.localizedDescription, privacy: .private)")
@@ -142,78 +131,14 @@ struct CreatePebbleSheet: View {
             self.isSaving = false
         }
     }
-
-    private func insertJoinRows(for pebbleId: UUID) async throws {
-        // Domain is mandatory — always one row.
-        async let domainInsert: Void = insertPebbleDomain(pebbleId: pebbleId, domainId: draft.domainId!)
-
-        // Soul is optional.
-        async let soulInsert: Void = {
-            if let soulId = draft.soulId {
-                try await insertPebbleSoul(pebbleId: pebbleId, soulId: soulId)
-            }
-        }()
-
-        // Collection is optional.
-        async let collectionInsert: Void = {
-            if let collectionId = draft.collectionId {
-                try await insertCollectionPebble(collectionId: collectionId, pebbleId: pebbleId)
-            }
-        }()
-
-        _ = try await (domainInsert, soulInsert, collectionInsert)
-    }
-
-    private func insertPebbleDomain(pebbleId: UUID, domainId: UUID) async throws {
-        _ = try await supabase.client
-            .from("pebble_domains")
-            .insert(PebbleDomainRow(pebbleId: pebbleId, domainId: domainId))
-            .execute()
-    }
-
-    private func insertPebbleSoul(pebbleId: UUID, soulId: UUID) async throws {
-        _ = try await supabase.client
-            .from("pebble_souls")
-            .insert(PebbleSoulRow(pebbleId: pebbleId, soulId: soulId))
-            .execute()
-    }
-
-    private func insertCollectionPebble(collectionId: UUID, pebbleId: UUID) async throws {
-        _ = try await supabase.client
-            .from("collection_pebbles")
-            .insert(CollectionPebbleRow(collectionId: collectionId, pebbleId: pebbleId))
-            .execute()
-    }
 }
 
-private struct PebbleDomainRow: Encodable {
-    let pebbleId: UUID
-    let domainId: UUID
-    enum CodingKeys: String, CodingKey {
-        case pebbleId = "pebble_id"
-        case domainId = "domain_id"
-    }
-}
-
-private struct PebbleSoulRow: Encodable {
-    let pebbleId: UUID
-    let soulId: UUID
-    enum CodingKeys: String, CodingKey {
-        case pebbleId = "pebble_id"
-        case soulId = "soul_id"
-    }
-}
-
-private struct CollectionPebbleRow: Encodable {
-    let collectionId: UUID
-    let pebbleId: UUID
-    enum CodingKeys: String, CodingKey {
-        case collectionId = "collection_id"
-        case pebbleId = "pebble_id"
-    }
+/// Wrapper matching the `create_pebble(payload jsonb)` RPC signature.
+private struct CreatePebbleParams: Encodable {
+    let payload: PebbleCreatePayload
 }
 
 #Preview {
-    CreatePebbleSheet { _ in }
+    CreatePebbleSheet(onCreated: {})
         .environment(SupabaseService())
 }

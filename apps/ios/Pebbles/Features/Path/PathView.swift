@@ -18,9 +18,9 @@ struct PathView: View {
         }
         .task { await load() }
         .sheet(isPresented: $isPresentingCreate) {
-            CreatePebbleSheet { newPebble in
-                handleCreated(newPebble)
-            }
+            CreatePebbleSheet(onCreated: {
+                Task { await load() }
+            })
         }
         .sheet(item: $selectedPebbleId) { id in
             EditPebbleSheet(pebbleId: id, onSaved: {
@@ -63,11 +63,6 @@ struct PathView: View {
                 }
             }
         }
-    }
-
-    private func handleCreated(_ pebble: Pebble) {
-        pebbles.append(pebble)
-        pebbles.sort { $0.happenedAt > $1.happenedAt }
     }
 
     private func load() async {
