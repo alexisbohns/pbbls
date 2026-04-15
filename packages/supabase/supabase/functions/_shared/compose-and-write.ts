@@ -48,7 +48,17 @@ export async function composeAndWriteRender(
 
   if (loadError || !pebble) {
     console.error("compose-and-write: load pebble failed:", loadError);
-    throw new Error(`load pebble failed: ${loadError?.message ?? "not found"}`);
+    // PostgREST's .single() returns PGRST116 ("0 rows") when the pebble
+    // doesn't exist. Normalize that to a "pebble not found" string so
+    // callers (e.g. backfill-pebble-render) can map it to a 404.
+    // deno-lint-ignore no-explicit-any
+    const err = loadError as any;
+    const isNotFound = !pebble || err?.code === "PGRST116";
+    throw new Error(
+      isNotFound
+        ? `pebble not found: ${pebbleId}`
+        : `load pebble failed: ${err?.message ?? "unknown"}`,
+    );
   }
 
   // ── Resolve glyph strokes per the priority rule ──────────────────────
