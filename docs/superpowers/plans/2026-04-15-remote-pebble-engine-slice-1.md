@@ -14,22 +14,32 @@
 
 **Branch:** `feat/261-remote-pebble-engine-slice-1` (already checked out, spec already committed)
 
-**Prerequisites before starting Phase 1:**
-- **@alexisbohns provides the 18 domain fallback glyph stroke payloads** (one per domain) as JSON blobs matching the `{ d: string, strokeWidth?: number }[]` Stroke shape, with `view_box = "0 0 200 200"`. Place them in a local `domain-glyph-seeds.json` file for the migration to reference.
-- **@alexisbohns provides the 9 shape SVG files** (small/medium/large × lowlight/neutral/highlight) as complete `<svg …>…</svg>` strings matching the POC layout config canvas sizes (small 250×200, medium 260×260, large 260×310). Place them in a local `shape-seeds/` directory with filenames matching `{size}-{valence}.svg`.
+**Prerequisites — all satisfied:**
+
+- **Seed files are in place:**
+  - `docs/seeds/domain-glyph-seed.json` — flat object `{slug: Stroke[]}` with 18 keys: `community, currentevents, dating, education, family, fitness, friends, health, hobbies, identity, money, partner, selfcare, spirituality, tasks, travel, weather, work`. Each stroke is `{d: string, width: number}` — **note the field is `width`, not `strokeWidth`**. This matches the legacy webapp stroke format already in the DB.
+  - `docs/seeds/shape-seeds/{size}-{valence}.svg` — 9 files, one per combination. Viewboxes: small 250×200, medium 260×260, large 260×310. Paths use `stroke="black"` and `stroke-width="6"` — the engine's `monochromeStrokes` and `stripFills` normalize these on compose.
+
+- **18 domain `(slug, name, label)` tuples** provided by @alexisbohns and hardcoded into the migration (Task 1.1). They upsert idempotently via `ON CONFLICT (slug) DO NOTHING` so the remote DB's existing rows are untouched; local dev (which has the outdated 5-Greek-domain seed from `20260411000000_reference_tables.sql`) gets the 18 fresh-inserted alongside. A later chore can drop the 5 Greek rows if they're confirmed dead; slice 1 does not touch them.
+
+- **Stroke type deviation from the POC:** the POC's `types.ts` used `strokeWidth?: number`. The real DB format (and the seed JSON) uses `width: number`. The port in Task 2.2 renames the field to `width` so the engine reads from the DB without a normalization step. This is the only intentional deviation from verbatim porting.
+
 - **Local Supabase is running.** Run `cd packages/supabase && npm run db:start` and confirm no errors. If Docker is in a corrupted state (per project memory), reset it before starting.
+
 - **Deno is available** via the Supabase CLI bundle (run `supabase --version` to confirm ≥ 1.180.0 which ships with a Deno runtime).
 
 ---
 
 ## Phase 1: Database migration
 
-### Task 1.1: Draft the migration skeleton
+### Task 1.1: Write the schema + domain upsert part of the migration
 
 **Files:**
 - Create: `packages/supabase/supabase/migrations/20260415000001_remote_pebble_engine.sql`
 
-- [ ] **Step 1: Create the migration file with schema + RLS changes, seed placeholders commented**
+This task writes everything in the migration **except** the glyph seeds and the domain→glyph link (those go in Task 1.2, driven by a generated SQL chunk from `docs/seeds/domain-glyph-seed.json`).
+
+- [ ] **Step 1: Create the migration file with schema changes, RLS update, and the 18-domain upsert**
 
 ```sql
 -- Migration: Remote Pebble Engine slice 1
@@ -37,14 +47,19 @@
 --
 -- Adds server-side pebble rendering infrastructure:
 --   - glyphs: allow system-owned (NULL user_id) and shapeless (NULL shape_id) rows
+--   - glyphs RLS: readable when system-owned (NULL user_id)
 --   - domains: FK to a default system glyph used as iOS fallback
---   - pebbles: render_svg, render_manifest, render_version columns written by the
---     compose-pebble edge function
---   - Seeds 18 system glyph rows (one per domain) and links each domain to its
---     default_glyph_id.
+--   - pebbles: render_svg, render_manifest, render_version columns written by
+--     the compose-pebble edge function
+--   - Upserts the 18 canonical domains (matches the remote DB, idempotent)
+--   - Seeds 18 system glyph rows keyed by domain slug
+--   - Links each domain to its default_glyph_id
 --
--- The seed strokes are opinionated per-domain placeholders supplied by the product
--- designer; see `docs/superpowers/specs/2026-04-15-remote-pebble-engine-slice-1-design.md`.
+-- Idempotency: every INSERT uses ON CONFLICT DO NOTHING or WHERE NOT EXISTS so
+-- re-running against a database that already has some/all of these rows is a
+-- safe no-op. The remote DB already has the 18 domains (added out-of-band);
+-- local dev currently has 5 outdated Greek-slug domains from
+-- 20260411000000_reference_tables.sql which coexist untouched.
 
 -- ============================================================
 -- 1. Relax glyphs constraints
@@ -61,8 +76,7 @@ drop policy if exists "glyphs_select" on public.glyphs;
 create policy "glyphs_select" on public.glyphs
   for select using (user_id = auth.uid() or user_id is null);
 
--- Insert/update/delete policies stay user-scoped and should already exist from
--- the security_hardening migration. Do not relax them here.
+-- Insert/update/delete policies stay user-scoped. Do not relax them here.
 
 -- ============================================================
 -- 3. domains: default_glyph_id FK
@@ -81,45 +95,67 @@ alter table public.pebbles
   add column render_version text;
 
 -- ============================================================
--- 5. Seed 18 system glyphs (one per domain)
+-- 5. Upsert the 18 canonical domains (idempotent)
 -- ============================================================
--- Each glyph row is inserted with a fixed UUID so the seed is idempotent.
--- Strokes are provided per domain; view_box is always "0 0 200 200".
---
--- Replace the <STROKES_FOR_*> placeholders with the JSON array supplied by the
--- designer (domain-glyph-seeds.json). Each entry is a JSON array of objects
--- shaped { d: string, strokeWidth?: number }.
+-- The remote DB already has these rows (added out-of-band, with their own
+-- UUIDs). Running this INSERT against remote is a no-op thanks to the
+-- ON CONFLICT (slug) clause — existing rows keep their current IDs, names,
+-- and labels. On a fresh local DB this creates all 18 rows so the seed step
+-- below can JOIN on slug.
 
--- PLACEHOLDER: fill in before running. Each INSERT looks like:
--- insert into public.glyphs (id, user_id, name, shape_id, strokes, view_box)
--- values (
---   '00000000-0000-0000-0000-000000000001', NULL, 'domain:work', NULL,
---   '[{"d":"M 20 100 Q 100 20 180 100 T 340 100","strokeWidth":3}]'::jsonb,
---   '0 0 200 200'
--- );
-
--- (All 18 inserts go here; see Task 1.2 for the full block.)
+insert into public.domains (slug, name, label) values
+  ('community',     'Community',    'Those who share my culture or values'),
+  ('currentevents', 'Events',       'Things that happen in life'),
+  ('dating',        'Dating',       'Meeting new people'),
+  ('education',     'Education',    'Learning new things'),
+  ('family',        'Family',       'Those who are part of me by blood or soul'),
+  ('fitness',       'Sport',        'Fitness and physical activities'),
+  ('friends',       'Friends',      'Relationships'),
+  ('health',        'Health',       'Health & body'),
+  ('hobbies',       'Passions',     'Self-actualization'),
+  ('identity',      'Identity',     'Actualization of Me, myself and I'),
+  ('money',         'Finance',      'Security & comfort'),
+  ('partner',       'Partner',      'Partner or soulmate'),
+  ('selfcare',      'Self Care',    'Taking care of myself'),
+  ('spirituality',  'Spirituality', 'Faith and religion'),
+  ('tasks',         'Tasks',        'Things I have to do'),
+  ('travel',        'Travel',       'Vacations or adventures across the world'),
+  ('weather',       'Weather',      'Seasons, sun or snow, thunder or rain'),
+  ('work',          'Work',         'Recognition & community')
+on conflict (slug) do nothing;
 
 -- ============================================================
--- 6. Link each domain to its default glyph
+-- 6. Seed 18 system glyphs by slug (filled in by Task 1.2)
 -- ============================================================
--- Uses domain slug as the stable join key because domain UUIDs are
--- deterministic but domain_glyph UUIDs were chosen above.
---
--- (Fill in after the 18 INSERTs are in place.)
+-- PLACEHOLDER — Task 1.2 appends a WITH … INSERT block here that seeds one
+-- row per domain slug, reading stroke arrays from docs/seeds/domain-glyph-seed.json.
+
+-- ============================================================
+-- 7. Link each domain to its default glyph (filled in by Task 1.2)
+-- ============================================================
+-- PLACEHOLDER — Task 1.2 appends an UPDATE here that sets
+-- domains.default_glyph_id by matching on slug.
 ```
 
-- [ ] **Step 2: Commit the skeleton**
+- [ ] **Step 2: Verify `domains.slug` has a unique constraint** (required for `ON CONFLICT (slug)`)
+
+```bash
+grep -A 10 "create table public.domains" packages/supabase/supabase/migrations/20260411000000_reference_tables.sql
+```
+
+Expected: the `slug` column has `text unique not null` or similar. If it doesn't, the `ON CONFLICT (slug)` clause will fail. Confirm before running.
+
+- [ ] **Step 3: Commit the schema half of the migration**
 
 ```bash
 git add packages/supabase/supabase/migrations/20260415000001_remote_pebble_engine.sql
 git commit -m "$(cat <<'EOF'
-feat(db): scaffold remote pebble engine migration (#261)
+feat(db): remote pebble engine schema + 18-domain upsert (#261)
 
-Schema changes for slice 1: nullable glyphs.user_id + shape_id, relaxed
-glyphs SELECT policy for system rows, domains.default_glyph_id FK, and
-render output columns on pebbles. Seed placeholder left for the 18
-domain fallback glyphs — filled in the next commit.
+Nullable glyphs.user_id + shape_id, relaxed glyphs SELECT policy for
+system rows, domains.default_glyph_id FK, render columns on pebbles,
+and an idempotent upsert of the 18 canonical domains matching the
+remote DB. Glyph seed rows + domain link come in the next commit.
 
 Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
 EOF
@@ -128,65 +164,113 @@ EOF
 
 ---
 
-### Task 1.2: Fill in the 18 system glyph seeds
+### Task 1.2: Generate and paste the 18 system glyph seed SQL
 
 **Files:**
 - Modify: `packages/supabase/supabase/migrations/20260415000001_remote_pebble_engine.sql`
 
-**Prerequisite:** The 18 stroke payloads must be available (from `domain-glyph-seeds.json` or directly from Alexis).
+The glyph seed SQL is generated from `docs/seeds/domain-glyph-seed.json` using a Python one-liner so the inline JSON payloads are escape-safe via `$json$...$json$` dollar-quoting.
 
-- [ ] **Step 1: List the 18 domain slugs**
+- [ ] **Step 1: Generate the glyph seed SQL block**
 
-```bash
-cat packages/supabase/supabase/migrations/20260411000000_reference_tables.sql | grep -A 40 "insert into public.domains"
-```
-
-Copy the exact list of 18 domain slugs into scratch memory.
-
-- [ ] **Step 2: Generate 18 fixed UUIDs for the glyph rows**
-
-Use any deterministic method. One option:
+Run from the repo root:
 
 ```bash
-python3 -c "import uuid; [print(uuid.uuid5(uuid.NAMESPACE_DNS, f'pbbls.domain-glyph.{s}')) for s in ['work','health','relationships']]"
-```
+python3 <<'PY'
+import json
+from pathlib import Path
 
-(Replace the slug list with the full 18.)
+data = json.load(open("docs/seeds/domain-glyph-seed.json"))
+rows = []
+for slug in sorted(data.keys()):
+    strokes_json = json.dumps(data[slug], separators=(",", ":"))
+    rows.append(f"  ('{slug}', $json${strokes_json}$json$::jsonb)")
+values_block = ",\n".join(rows)
 
-Record the resulting `(slug → uuid)` mapping.
+sql = f"""-- ============================================================
+-- 6. Seed 18 system glyphs by slug
+-- ============================================================
+-- Idempotent: skips any slug that already has a system glyph.
 
-- [ ] **Step 3: Replace the seed placeholder block in the migration**
-
-Replace the `-- PLACEHOLDER` block with 18 concrete INSERT statements. Template for each:
-
-```sql
-insert into public.glyphs (id, user_id, name, shape_id, strokes, view_box)
-values (
-  '<fixed uuid from step 2>'::uuid,
-  NULL,
-  'domain:<slug>',
-  NULL,
-  '<stroke json array from domain-glyph-seeds.json>'::jsonb,
+with seeds(slug, strokes) as (
+  values
+{values_block}
+)
+insert into public.glyphs (user_id, name, shape_id, strokes, view_box)
+select
+  null,
+  'domain:' || s.slug,
+  null,
+  s.strokes,
   '0 0 200 200'
+from seeds s
+where not exists (
+  select 1 from public.glyphs g
+  where g.user_id is null
+    and g.name = 'domain:' || s.slug
 );
+
+-- ============================================================
+-- 7. Link each domain to its default glyph
+-- ============================================================
+-- Idempotent: only sets default_glyph_id when it is currently null or differs.
+
+update public.domains d
+set default_glyph_id = g.id
+from public.glyphs g
+where g.user_id is null
+  and g.name = 'domain:' || d.slug
+  and (d.default_glyph_id is null or d.default_glyph_id <> g.id);
+"""
+
+Path("/tmp/slice1-glyph-seed.sql").write_text(sql)
+print("Wrote /tmp/slice1-glyph-seed.sql")
+print(f"Rows: {len(rows)}")
+PY
 ```
 
-Repeat for all 18 domains.
+Expected: `Rows: 18`. Inspect `/tmp/slice1-glyph-seed.sql` — each row should look like `('community', $json$[{"d":"…","width":6},…]$json$::jsonb)`.
 
-- [ ] **Step 4: Add the 18 domain UPDATEs at the bottom**
+- [ ] **Step 2: Append the generated SQL to the migration**
 
-```sql
-update public.domains set default_glyph_id = '<glyph uuid>'::uuid where slug = '<slug>';
+Replace the two PLACEHOLDER blocks (`-- 6. Seed 18 system glyphs` and `-- 7. Link each domain`) at the bottom of `20260415000001_remote_pebble_engine.sql` with the content of `/tmp/slice1-glyph-seed.sql`.
+
+One-liner:
+
+```bash
+MIGRATION=packages/supabase/supabase/migrations/20260415000001_remote_pebble_engine.sql
+# Delete lines from "-- 6. Seed 18 system glyphs" to EOF, then append generated SQL
+python3 <<PY
+from pathlib import Path
+p = Path("$MIGRATION")
+original = p.read_text()
+marker = "-- ============================================================\n-- 6. Seed 18 system glyphs"
+idx = original.index(marker)
+generated = Path("/tmp/slice1-glyph-seed.sql").read_text()
+p.write_text(original[:idx] + generated)
+PY
 ```
 
-Repeat for all 18 domains.
+- [ ] **Step 3: Sanity-check the resulting migration**
 
-- [ ] **Step 5: Commit**
+```bash
+wc -l packages/supabase/supabase/migrations/20260415000001_remote_pebble_engine.sql
+grep -c "'domain:" packages/supabase/supabase/migrations/20260415000001_remote_pebble_engine.sql
+```
+
+Expected: file is ≥ 100 lines, 18 occurrences of `'domain:'`.
+
+- [ ] **Step 4: Commit**
 
 ```bash
 git add packages/supabase/supabase/migrations/20260415000001_remote_pebble_engine.sql
 git commit -m "$(cat <<'EOF'
-feat(db): seed 18 domain fallback glyphs (#261)
+feat(db): seed 18 system fallback glyphs keyed by domain slug (#261)
+
+Generated from docs/seeds/domain-glyph-seed.json via a Python chunk
+that dollar-quotes each stroke payload. Idempotent via WHERE NOT EXISTS
+on (user_id is null, name = 'domain:<slug>'). Also links each domain's
+default_glyph_id to the matching seed row.
 
 Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
 EOF
@@ -229,10 +313,16 @@ supabase db execute "select count(*) from public.glyphs where user_id is null;"
 Expected: 18.
 
 ```bash
-supabase db execute "select count(*) from public.domains where default_glyph_id is not null;"
+supabase db execute "select count(distinct slug) from public.domains where slug in ('community','currentevents','dating','education','family','fitness','friends','health','hobbies','identity','money','partner','selfcare','spirituality','tasks','travel','weather','work');"
 ```
 
-Expected: 18.
+Expected: 18. (On local dev there may additionally be the 5 legacy Greek-slug rows — they coexist.)
+
+```bash
+supabase db execute "select count(*) from public.domains where default_glyph_id is not null and slug in ('community','currentevents','dating','education','family','fitness','friends','health','hobbies','identity','money','partner','selfcare','spirituality','tasks','travel','weather','work');"
+```
+
+Expected: 18. (Legacy Greek-slug rows will have `default_glyph_id = NULL`, which is fine — they're not in slice 1's scope.)
 
 - [ ] **Step 3: Regenerate database.ts**
 
@@ -359,21 +449,31 @@ EOF
 
 ---
 
-### Task 2.2: Port `types.ts` from the POC
+### Task 2.2: Port `types.ts` from the POC (with the `width` field rename)
 
 **Files:**
 - Modify: `packages/supabase/supabase/functions/_shared/engine/types.ts`
 
-The source of truth is the `types.ts` block in issue #260 (the POC output).
+The source of truth is the `types.ts` block in issue #260 (the POC output), **with one intentional deviation**: the `Stroke` interface uses `width`, not `strokeWidth`, to match the legacy DB format and the seed JSON at `docs/seeds/domain-glyph-seed.json`. Every downstream consumer (the engine, compose-and-write, the smoke test) reads `stroke.width` as a result.
 
-- [ ] **Step 1: Replace the stub with the full POC types**
+- [ ] **Step 1: Replace the stub with the POC types + `width` rename**
 
-Open `_shared/engine/types.ts` and replace it with the full `Types.ts` block from issue #260, **with these adaptations for Deno**:
+Open `_shared/engine/types.ts` and replace the stub with the POC's full type set, but change the `Stroke` interface:
 
-1. Imports use `.ts` extensions where referenced.
-2. The file exports everything the POC types file exports: `PebbleSize`, `PebbleValence`, `Point`, `BoundingBox`, `Stroke`, `GlyphArtwork`, `GlyphSlot`, `CanvasSize`, `PebbleLayoutConfig`, `PebbleEngineInput`, `AnimationManifestLayer`, `AnimationManifest`, `PebbleEngineOutput`.
+```typescript
+/** A single stroke as stored in the glyphs table (jsonb).
+ *  Field is `width` to match the legacy DB format and docs/seeds/domain-glyph-seed.json.
+ *  The POC called this `strokeWidth`; the port renames it to match reality. */
+export interface Stroke {
+  d: string;
+  /** Optional stroke width override. Defaults to engine config. */
+  width?: number;
+}
+```
 
-Reference the POC body: issue 260, under `### Types.ts`.
+The rest of the POC `types.ts` block is copied verbatim with Deno `.ts` import extensions. Exports: `PebbleSize`, `PebbleValence`, `Point`, `BoundingBox`, `Stroke`, `GlyphArtwork`, `GlyphSlot`, `CanvasSize`, `PebbleLayoutConfig`, `PebbleEngineInput`, `AnimationManifestLayer`, `AnimationManifest`, `PebbleEngineOutput`.
+
+Reference the POC body: issue #260, under `### Types.ts`.
 
 - [ ] **Step 2: Verify the file type-checks**
 
@@ -398,18 +498,22 @@ EOF
 
 ---
 
-### Task 2.3: Port `glyph.ts` (createGlyphArtwork)
+### Task 2.3: Port `glyph.ts` (createGlyphArtwork) — read `stroke.width`
 
 **Files:**
 - Modify: `packages/supabase/supabase/functions/_shared/engine/glyph.ts`
 
-- [ ] **Step 1: Replace the stub with the full POC implementation**
+- [ ] **Step 1: Replace the stub with the POC implementation, renaming `strokeWidth` → `width`**
 
-Open `_shared/engine/glyph.ts` and replace with the POC `glyph.ts` body (issue #260, under `### Glyph.ts`), **with these Deno adaptations**:
+Open `_shared/engine/glyph.ts` and replace with the POC `glyph.ts` body (issue #260, under `### Glyph.ts`), with these adaptations:
 
 1. Import path: `import type { Stroke, BoundingBox, GlyphArtwork, Point } from "./types.ts";`
-2. All exported functions: `computeStrokesBoundingBox`, `createGlyphArtwork`.
-3. No DOM, no browser APIs. Pure function.
+2. Rename every `stroke.strokeWidth` read to `stroke.width`. Specifically:
+   - In `computeStrokesBoundingBox`: `const halfWidth = (stroke.strokeWidth ?? defaultStrokeWidth) / 2;` becomes `const halfWidth = (stroke.width ?? defaultStrokeWidth) / 2;`
+   - In `createGlyphArtwork`: `const sw = stroke.strokeWidth ?? defaultSW;` becomes `const sw = stroke.width ?? defaultSW;`
+3. Rename every option name `defaultStrokeWidth` (function parameter) to `defaultWidth` for consistency. The `DEFAULT_STROKE_WIDTH` module constant can stay — it's internal naming.
+4. Exports: `computeStrokesBoundingBox`, `createGlyphArtwork`.
+5. No DOM, no browser APIs. Pure function.
 
 - [ ] **Step 2: deno check**
 
@@ -577,60 +681,73 @@ EOF
 
 ---
 
-### Task 2.7: Drop the 9 shape SVG constants
+### Task 2.7: Generate the 9 shape TS constants from `docs/seeds/shape-seeds/`
 
 **Files:**
-- Create: `packages/supabase/supabase/functions/_shared/engine/shapes/small-lowlight.ts`
-- Create: `packages/supabase/supabase/functions/_shared/engine/shapes/small-neutral.ts`
-- Create: `packages/supabase/supabase/functions/_shared/engine/shapes/small-highlight.ts`
-- Create: `packages/supabase/supabase/functions/_shared/engine/shapes/medium-lowlight.ts`
-- Create: `packages/supabase/supabase/functions/_shared/engine/shapes/medium-neutral.ts`
-- Create: `packages/supabase/supabase/functions/_shared/engine/shapes/medium-highlight.ts`
-- Create: `packages/supabase/supabase/functions/_shared/engine/shapes/large-lowlight.ts`
-- Create: `packages/supabase/supabase/functions/_shared/engine/shapes/large-neutral.ts`
-- Create: `packages/supabase/supabase/functions/_shared/engine/shapes/large-highlight.ts`
+- Create: `packages/supabase/supabase/functions/_shared/engine/shapes/{size}-{valence}.ts` × 9
 
-**Prerequisite:** The 9 shape SVG files from `shape-seeds/` must be available (from Alexis).
+- [ ] **Step 1: Sanity-check that no shape SVG contains a backtick character**
 
-- [ ] **Step 1: Create each of the 9 files from the same template**
+Template literals break on unescaped backticks. Quick check:
 
-Template (repeat 9 times, swapping filename and the SVG string):
-
-`_shared/engine/shapes/medium-neutral.ts`:
-
-```typescript
-/**
- * Pebble shape — medium size, neutral valence.
- * Canvas: 260×260 (per POC layout config).
- * Source: designer-supplied SVG committed with slice 1 of #261.
- */
-export const shape: string = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 260" width="260" height="260">
-  <!-- paste the full <path>, <g>, etc. contents from shape-seeds/medium-neutral.svg -->
-</svg>`;
+```bash
+grep -l '`' docs/seeds/shape-seeds/*.svg || echo "no backticks found"
 ```
 
-Create the 9 files. The `<!-- paste … -->` placeholder is replaced with the real SVG content. No other logic in these files.
+Expected: `no backticks found`. If a file contains a backtick, it has to be escaped in the generated TS (`\``). None should, but verify first.
 
-- [ ] **Step 2: deno check all 9**
+- [ ] **Step 2: Also check for `${` which would trigger template-string interpolation**
+
+```bash
+grep -l '\${' docs/seeds/shape-seeds/*.svg || echo "no \${ found"
+```
+
+Expected: `no ${ found`. SVG path data shouldn't contain `${` either.
+
+- [ ] **Step 3: Generate the 9 TS files with a shell loop**
+
+```bash
+SHAPES_DIR=packages/supabase/supabase/functions/_shared/engine/shapes
+for svg in docs/seeds/shape-seeds/*.svg; do
+  name=$(basename "$svg" .svg)  # e.g. "medium-neutral"
+  out="$SHAPES_DIR/$name.ts"
+  content=$(cat "$svg")
+  cat > "$out" <<EOF
+/**
+ * Pebble shape — $name.
+ * Canvas dimensions come from the SVG's viewBox; do not hand-edit this file.
+ * Source: docs/seeds/shape-seeds/$name.svg (committed to the repo).
+ */
+export const shape: string = \`$content\`;
+EOF
+done
+ls $SHAPES_DIR/*.ts
+```
+
+Expected: 10 files in the shapes directory (9 shape files + `index.ts` stub from Task 2.1).
+
+- [ ] **Step 4: deno check all 9**
 
 ```bash
 cd packages/supabase/supabase/functions
-for f in _shared/engine/shapes/*.ts; do deno check "$f" || exit 1; done
+for f in _shared/engine/shapes/{small,medium,large}-{lowlight,neutral,highlight}.ts; do
+  deno check "$f" || exit 1
+done
 ```
 
-Expected: all 9 type-check (they're just a single string export each).
+Expected: all 9 type-check. If any fail (e.g., because a file contained a backtick after all), fix the offending file by hand-escaping the backtick and re-run.
 
-- [ ] **Step 3: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
-git add packages/supabase/supabase/functions/_shared/engine/shapes
+git add packages/supabase/supabase/functions/_shared/engine/shapes/{small,medium,large}-{lowlight,neutral,highlight}.ts
 git commit -m "$(cat <<'EOF'
-feat(api): add 9 pebble shape SVG constants (#261)
+feat(api): add 9 pebble shape SVG constants from docs/seeds (#261)
 
+Generated from docs/seeds/shape-seeds/*.svg via a shell loop.
 Small / medium / large × lowlight / neutral / highlight, bundled as
-inline TypeScript strings in _shared/engine/shapes/. Assets versioned
-alongside the engine so render_version captures the full rendering
-contract.
+inline TypeScript template literals. Assets are versioned alongside
+the engine so render_version captures the full rendering contract.
 
 Co-Authored-By: Claude Opus 4.6 (1M context) <noreply@anthropic.com>
 EOF
@@ -720,8 +837,8 @@ const SIZES: PebbleSize[] = ["small", "medium", "large"];
 const VALENCES: PebbleValence[] = ["lowlight", "neutral", "highlight"];
 
 const SYNTHETIC_STROKES: Stroke[] = [
-  { d: "M 20 100 Q 100 20 180 100 T 340 100", strokeWidth: 3 },
-  { d: "M 50 50 L 150 150", strokeWidth: 3 },
+  { d: "M 20 100 Q 100 20 180 100 T 340 100", width: 3 },
+  { d: "M 50 50 L 150 150", width: 3 },
 ];
 
 function assert(cond: boolean, msg: string): void {
@@ -1775,7 +1892,7 @@ func decodesRenderColumns() throws {
     }
     """.data(using: .utf8)!
 
-    let decoded = try JSONDecoder().pebbleDetailDecoder().decode(PebbleDetail.self, from: json)
+    let decoded = try makeDecoder().decode(PebbleDetail.self, from: json)
 
     #expect(decoded.renderSvg == "<svg/>")
     #expect(decoded.renderVersion == "0.1.0")
@@ -1798,14 +1915,14 @@ func decodesLegacy() throws {
     }
     """.data(using: .utf8)!
 
-    let decoded = try JSONDecoder().pebbleDetailDecoder().decode(PebbleDetail.self, from: json)
+    let decoded = try makeDecoder().decode(PebbleDetail.self, from: json)
 
     #expect(decoded.renderSvg == nil)
     #expect(decoded.renderVersion == nil)
 }
 ```
 
-Note: the helper `.pebbleDetailDecoder()` is used in existing tests in this file — mirror that pattern. If it doesn't exist, use a plain `JSONDecoder()` with `.iso8601` date strategy.
+Note: `makeDecoder()` is a private helper in `PebbleDetailDecodingTests.swift` (verified line 8) that sets the ISO8601 `dateDecodingStrategy`. Reuse it — don't duplicate.
 
 - [ ] **Step 3: Run the tests**
 
