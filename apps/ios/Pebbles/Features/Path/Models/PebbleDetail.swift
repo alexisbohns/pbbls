@@ -4,7 +4,7 @@ import os
 // MARK: - Ref types
 //
 // `EmotionRef` and `DomainRef` exist because the PostgREST select in
-// `PebbleDetailSheet.load()` restricts columns to what the detail UI actually
+// `EditPebbleSheet.load()` restricts columns to what the edit UI actually
 // renders:
 //     emotion:emotions(id, name, color)
 //     pebble_domains(domain:domains(id, name))

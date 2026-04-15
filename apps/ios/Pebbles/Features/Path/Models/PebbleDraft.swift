@@ -22,3 +22,27 @@ struct PebbleDraft {
         && valence != nil
     }
 }
+
+extension PebbleDraft {
+    /// Build a prefilled draft from a fetched `PebbleDetail`.
+    /// Used by `EditPebbleSheet` to populate the form with the pebble's current values.
+    ///
+    /// Notes:
+    /// - `description` defaults to empty string when the detail has no description.
+    /// - `domainId` takes the first (and only expected) domain from `detail.domains`.
+    ///   If `detail.domains` is unexpectedly empty, `domainId` stays nil and
+    ///   `draft.isValid` will return false.
+    /// - `soulId` / `collectionId` take the first element when present, nil otherwise.
+    /// - `valence` is derived from `(positiveness, intensity)` by `PebbleDetail.valence`.
+    init(from detail: PebbleDetail) {
+        self.happenedAt = detail.happenedAt
+        self.name = detail.name
+        self.description = detail.description ?? ""
+        self.emotionId = detail.emotion.id
+        self.domainId = detail.domains.first?.id
+        self.valence = detail.valence
+        self.soulId = detail.souls.first?.id
+        self.collectionId = detail.collections.first?.id
+        self.visibility = detail.visibility
+    }
+}

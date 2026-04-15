@@ -23,7 +23,9 @@ struct PathView: View {
             }
         }
         .sheet(item: $selectedPebbleId) { id in
-            PebbleDetailSheet(pebbleId: id)
+            EditPebbleSheet(pebbleId: id, onSaved: {
+                Task { await load() }
+            })
         }
     }
 
