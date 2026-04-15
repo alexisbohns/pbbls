@@ -12,6 +12,10 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "
 /**
  * Builds a supabase-js client that forwards the caller's JWT.
  * Use this when calling RPCs that depend on `auth.uid()`.
+ *
+ * If no Authorization header is present on the request, the client
+ * operates as the anonymous user (anon key only). Callers are expected
+ * to reject unauthenticated requests before invoking this factory.
  */
 export function createAuthForwardedClient(req: Request): SupabaseClient {
   const auth = req.headers.get("Authorization") ?? "";

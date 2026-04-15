@@ -80,7 +80,7 @@ export async function composeAndWriteRender(
     if (defaultGlyphId) {
       const { data: domainGlyph, error: domainGlyphError } = await admin
         .from("glyphs")
-        .select("strokes, view_box")
+        .select("strokes")
         .eq("id", defaultGlyphId)
         .single();
       if (domainGlyphError) {
