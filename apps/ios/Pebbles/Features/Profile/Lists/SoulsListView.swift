@@ -6,6 +6,7 @@ struct SoulsListView: View {
     @State private var items: [Soul] = []
     @State private var isLoading = true
     @State private var loadError: String?
+    @State private var isPresentingCreate = false
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.souls")
 
@@ -13,7 +14,22 @@ struct SoulsListView: View {
         content
             .navigationTitle("Souls")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        isPresentingCreate = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .accessibilityLabel("Add soul")
+                }
+            }
             .task { await load() }
+            .sheet(isPresented: $isPresentingCreate) {
+                CreateSoulSheet(onCreated: {
+                    Task { await load() }
+                })
+            }
     }
 
     @ViewBuilder
@@ -41,6 +57,8 @@ struct SoulsListView: View {
     }
 
     private func load() async {
+        isLoading = true
+        loadError = nil
         do {
             let result: [Soul] = try await supabase.client
                 .from("souls")
