@@ -40,6 +40,11 @@ struct PebbleDetail: Identifiable, Decodable, Hashable {
     let domains: [DomainRef]
     let souls: [Soul]
     let collections: [PebbleCollection]
+    let renderSvg: String?
+    let renderVersion: String?
+    // renderManifest is intentionally not stored on PebbleDetail in slice 1 —
+    // the animation consumer lives in a later slice. We still decode it as an
+    // opaque placeholder so the field doesn't break decoding when present.
 
     /// Derived from `intensity` + `positiveness`. DB remains source of truth.
     var valence: Valence {
@@ -78,6 +83,8 @@ struct PebbleDetail: Identifiable, Decodable, Hashable {
         case pebbleDomains = "pebble_domains"
         case pebbleSouls = "pebble_souls"
         case collectionPebbles = "collection_pebbles"
+        case renderSvg = "render_svg"
+        case renderVersion = "render_version"
     }
 
     private struct DomainWrapper: Decodable { let domain: DomainRef }
@@ -104,5 +111,8 @@ struct PebbleDetail: Identifiable, Decodable, Hashable {
         let collectionWrappers = try container
             .decodeIfPresent([CollectionWrapper].self, forKey: .collectionPebbles) ?? []
         self.collections = collectionWrappers.map(\.collection)
+
+        self.renderSvg = try container.decodeIfPresent(String.self, forKey: .renderSvg)
+        self.renderVersion = try container.decodeIfPresent(String.self, forKey: .renderVersion)
     }
 }

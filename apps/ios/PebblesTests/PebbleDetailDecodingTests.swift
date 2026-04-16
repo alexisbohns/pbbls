@@ -133,4 +133,52 @@ struct PebbleDetailDecodingTests {
         #expect(detail.visibility == .public)
         #expect(detail.valence == .lowlightMedium)
     }
+
+    @Test("decodes render columns when present")
+    func decodesRenderColumns() throws {
+        let json = """
+        {
+          "id": "550e8400-e29b-41d4-a716-446655440000",
+          "name": "test",
+          "happened_at": "2026-04-15T12:00:00Z",
+          "intensity": 2,
+          "positiveness": 0,
+          "visibility": "private",
+          "emotion": {"id": "550e8400-e29b-41d4-a716-446655440001", "name": "joy", "color": "#fff"},
+          "pebble_domains": [],
+          "pebble_souls": [],
+          "collection_pebbles": [],
+          "render_svg": "<svg/>",
+          "render_version": "0.1.0"
+        }
+        """.data(using: .utf8)!
+
+        let decoded = try makeDecoder().decode(PebbleDetail.self, from: json)
+
+        #expect(decoded.renderSvg == "<svg/>")
+        #expect(decoded.renderVersion == "0.1.0")
+    }
+
+    @Test("decodes when render columns are absent (legacy pebble)")
+    func decodesLegacy() throws {
+        let json = """
+        {
+          "id": "550e8400-e29b-41d4-a716-446655440000",
+          "name": "legacy",
+          "happened_at": "2026-04-15T12:00:00Z",
+          "intensity": 2,
+          "positiveness": 0,
+          "visibility": "private",
+          "emotion": {"id": "550e8400-e29b-41d4-a716-446655440001", "name": "joy", "color": "#fff"},
+          "pebble_domains": [],
+          "pebble_souls": [],
+          "collection_pebbles": []
+        }
+        """.data(using: .utf8)!
+
+        let decoded = try makeDecoder().decode(PebbleDetail.self, from: json)
+
+        #expect(decoded.renderSvg == nil)
+        #expect(decoded.renderVersion == nil)
+    }
 }
