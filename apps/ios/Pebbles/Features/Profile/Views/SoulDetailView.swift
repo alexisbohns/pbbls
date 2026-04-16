@@ -17,6 +17,7 @@ struct SoulDetailView: View {
     @State private var isLoading = true
     @State private var loadError: String?
     @State private var selectedPebbleId: UUID?
+    @State private var isPresentingEdit = false
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.soul.detail")
 
@@ -29,7 +30,20 @@ struct SoulDetailView: View {
         content
             .navigationTitle(soul.name)
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button("Edit") {
+                        isPresentingEdit = true
+                    }
+                }
+            }
             .task { await load() }
+            .sheet(isPresented: $isPresentingEdit) {
+                EditSoulSheet(soul: soul, onSaved: {
+                    Task { await reloadSoul() }
+                    onChanged()
+                })
+            }
             .sheet(item: $selectedPebbleId) { id in
                 EditPebbleSheet(pebbleId: id, onSaved: {
                     Task { await load() }
@@ -68,6 +82,22 @@ struct SoulDetailView: View {
                 }
                 .buttonStyle(.plain)
             }
+        }
+    }
+
+    private func reloadSoul() async {
+        do {
+            let refreshed: Soul = try await supabase.client
+                .from("souls")
+                .select("id, name")
+                .eq("id", value: soul.id)
+                .single()
+                .execute()
+                .value
+            self.soul = refreshed
+        } catch {
+            logger.error("soul reload failed: \(error.localizedDescription, privacy: .private)")
+            // Leave stale state; next navigation will refresh.
         }
     }
 
