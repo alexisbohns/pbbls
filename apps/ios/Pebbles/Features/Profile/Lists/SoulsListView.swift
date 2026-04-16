@@ -62,11 +62,6 @@ struct SoulsListView: View {
             } message: { message in
                 Text(message)
             }
-            .navigationDestination(for: Soul.self) { soul in
-                SoulDetailView(soul: soul, onChanged: {
-                    Task { await load() }
-                })
-            }
     }
 
     @ViewBuilder
@@ -89,7 +84,11 @@ struct SoulsListView: View {
         } else {
             List {
                 ForEach(items) { soul in
-                    NavigationLink(value: soul) {
+                    NavigationLink {
+                        SoulDetailView(soul: soul, onChanged: {
+                            Task { await load() }
+                        })
+                    } label: {
                         Text(soul.name)
                     }
                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
