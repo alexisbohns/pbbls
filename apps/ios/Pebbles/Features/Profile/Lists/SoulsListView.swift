@@ -7,6 +7,8 @@ struct SoulsListView: View {
     @State private var isLoading = true
     @State private var loadError: String?
     @State private var isPresentingCreate = false
+    @State private var pendingDeletion: Soul?
+    @State private var deleteError: String?
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.souls")
 
@@ -29,6 +31,36 @@ struct SoulsListView: View {
                 CreateSoulSheet(onCreated: {
                     Task { await load() }
                 })
+            }
+            .confirmationDialog(
+                pendingDeletion.map { "Delete \($0.name)?" } ?? "",
+                isPresented: Binding(
+                    get: { pendingDeletion != nil },
+                    set: { if !$0 { pendingDeletion = nil } }
+                ),
+                titleVisibility: .visible,
+                presenting: pendingDeletion
+            ) { soul in
+                Button("Delete", role: .destructive) {
+                    Task { await delete(soul) }
+                }
+                Button("Cancel", role: .cancel) {
+                    pendingDeletion = nil
+                }
+            } message: { _ in
+                Text("Linked pebbles stay; only the soul and its links are removed.")
+            }
+            .alert(
+                "Couldn't delete",
+                isPresented: Binding(
+                    get: { deleteError != nil },
+                    set: { if !$0 { deleteError = nil } }
+                ),
+                presenting: deleteError
+            ) { _ in
+                Button("OK", role: .cancel) { deleteError = nil }
+            } message: { message in
+                Text(message)
             }
             .navigationDestination(for: Soul.self) { soul in
                 SoulDetailView(soul: soul, onChanged: {
@@ -55,9 +87,18 @@ struct SoulsListView: View {
                 description: Text("People and beings you tag on your pebbles will appear here.")
             )
         } else {
-            List(items) { soul in
-                NavigationLink(value: soul) {
-                    Text(soul.name)
+            List {
+                ForEach(items) { soul in
+                    NavigationLink(value: soul) {
+                        Text(soul.name)
+                    }
+                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                        Button(role: .destructive) {
+                            pendingDeletion = soul
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                    }
                 }
             }
         }
@@ -79,6 +120,21 @@ struct SoulsListView: View {
             self.loadError = "Something went wrong. Please try again."
         }
         self.isLoading = false
+    }
+
+    private func delete(_ soul: Soul) async {
+        pendingDeletion = nil
+        do {
+            try await supabase.client
+                .from("souls")
+                .delete()
+                .eq("id", value: soul.id)
+                .execute()
+            await load()
+        } catch {
+            logger.error("delete soul failed: \(error.localizedDescription, privacy: .private)")
+            deleteError = "Something went wrong. Please try again."
+        }
     }
 }
 
