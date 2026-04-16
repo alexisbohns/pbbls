@@ -106,7 +106,7 @@ struct CreateSoulSheet: View {
                     Section {
                         Text(saveError)
                             .font(.footnote)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.red)
                     }
                 }
             }
@@ -543,7 +543,7 @@ struct EditSoulSheet: View {
                     Section {
                         Text(saveError)
                             .font(.footnote)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.red)
                     }
                 }
             }

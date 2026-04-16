@@ -31,7 +31,7 @@ struct CreateSoulSheet: View {
                     Section {
                         Text(saveError)
                             .font(.footnote)
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(.red)
                     }
                 }
             }
