@@ -40,6 +40,8 @@ struct SoulDetailView: View {
             .task { await load() }
             .sheet(isPresented: $isPresentingEdit) {
                 EditSoulSheet(soul: soul, onSaved: {
+                    // Refresh this view's header and the parent list independently;
+                    // neither blocks the other.
                     Task { await reloadSoul() }
                     onChanged()
                 })
