@@ -30,6 +30,11 @@ struct SoulsListView: View {
                     Task { await load() }
                 })
             }
+            .navigationDestination(for: Soul.self) { soul in
+                SoulDetailView(soul: soul, onChanged: {
+                    Task { await load() }
+                })
+            }
     }
 
     @ViewBuilder
@@ -51,7 +56,9 @@ struct SoulsListView: View {
             )
         } else {
             List(items) { soul in
-                Text(soul.name)
+                NavigationLink(value: soul) {
+                    Text(soul.name)
+                }
             }
         }
     }
