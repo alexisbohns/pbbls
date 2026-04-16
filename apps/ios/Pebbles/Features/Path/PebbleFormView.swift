@@ -13,9 +13,20 @@ struct PebbleFormView: View {
     let souls: [Soul]
     let collections: [PebbleCollection]
     let saveError: String?
+    var renderSvg: String? = nil
 
     var body: some View {
         Form {
+            if let svg = renderSvg {
+                PebbleRenderView(svg: svg)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 260)
+                    .padding(.vertical)
+                    // Form rows add insets and a card background; strip both so the artwork spans edge-to-edge.
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+            }
+
             Section {
                 DatePicker(
                     "When",

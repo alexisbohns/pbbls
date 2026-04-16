@@ -61,3 +61,6 @@ public/sw.js.map
 
 certificates
 deno.lock
+
+# supabase local state
+.branches/
