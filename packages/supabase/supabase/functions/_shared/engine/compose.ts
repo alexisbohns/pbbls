@@ -175,15 +175,22 @@ export function composePebble(input: PebbleEngineInput): PebbleEngineOutput {
   }
 
   // ── Process glyph layer ─────────────────────────────────
+  // Flatten the glyph placement into a single <g transform> instead of a
+  // nested <svg viewBox>. SVGView (iOS) doesn't handle nested <svg> elements
+  // with their own viewBox correctly, so we compute the viewBox→slot scale
+  // ourselves and apply it as part of the transform chain.
   const glyphInner = extractSvgInner(glyphSvg);
   const glyphViewBox = extractViewBox(glyphSvg) || "0 0 200 200";
   const glyphClean = namespaceIds(monochromeStrokes(stripFills(glyphInner)), "glyph");
 
+  const vbParts = glyphViewBox.split(" ").map(Number);
+  const vbWidth = vbParts[2] || 200;
+  const vbHeight = vbParts[3] || 200;
+  const slotScale = Math.min(glyphSlot.size / vbWidth, glyphSlot.size / vbHeight);
+
   const glyphLayer = [
-    `  <g id="layer:glyph" transform="translate(${glyphSlot.x}, ${glyphSlot.y})">`,
-    `    <svg viewBox="${glyphViewBox}" width="${glyphSlot.size}" height="${glyphSlot.size}" overflow="hidden">`,
-    `      ${glyphClean}`,
-    `    </svg>`,
+    `  <g id="layer:glyph" transform="translate(${glyphSlot.x}, ${glyphSlot.y}) scale(${Math.round(slotScale * 1000) / 1000})">`,
+    `    ${glyphClean}`,
     `  </g>`,
   ].join("\n");
 
