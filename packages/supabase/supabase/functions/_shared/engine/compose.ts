@@ -181,7 +181,7 @@ export function composePebble(input: PebbleEngineInput): PebbleEngineOutput {
 
   const glyphLayer = [
     `  <g id="layer:glyph" transform="translate(${glyphSlot.x}, ${glyphSlot.y})">`,
-    `    <svg viewBox="${glyphViewBox}" width="${glyphSlot.size}" height="${glyphSlot.size}" overflow="visible">`,
+    `    <svg viewBox="${glyphViewBox}" width="${glyphSlot.size}" height="${glyphSlot.size}" overflow="hidden">`,
     `      ${glyphClean}`,
     `    </svg>`,
     `  </g>`,
