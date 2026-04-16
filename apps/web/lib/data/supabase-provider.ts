@@ -18,6 +18,23 @@ import type {
   Collection,
   Mark,
 } from "@/lib/types"
+import { withTimeout } from "@/lib/utils/with-timeout"
+
+// Edge-function response shared by compose-pebble and recompose-pebble. On
+// compose failure the server still returns pebble_id (soft-success), so we
+// accept the render fields as optional and fall back to the local engine in
+// PebbleVisual when they're missing.
+type ComposeResponse = {
+  pebble_id?: string
+  render_svg?: string
+  render_manifest?: unknown
+  render_version?: string
+  error?: string
+}
+
+type ComposeRequest =
+  | { payload: Record<string, unknown> }
+  | { pebble_id: string }
 
 export class SupabaseProvider implements DataProvider {
   private store: Store
@@ -91,6 +108,9 @@ export class SupabaseProvider implements DataProvider {
         species_id: c.species_id,
         value: c.value,
       })),
+      render_svg: (row.render_svg as string) ?? undefined,
+      render_manifest: row.render_manifest ?? undefined,
+      render_version: (row.render_version as string) ?? undefined,
       created_at: row.created_at as string,
       updated_at: row.updated_at as string,
     }))
@@ -176,27 +196,37 @@ export class SupabaseProvider implements DataProvider {
   // ---------------------------------------------------------------------------
 
   async createPebble(input: CreatePebbleInput): Promise<Pebble> {
-    const result = await this.supabase.rpc("create_pebble", {
-      payload: {
-        name: input.name,
-        description: input.description ?? null,
-        happened_at: input.happened_at,
-        intensity: input.intensity,
-        positiveness: input.positiveness,
-        visibility: input.visibility,
-        emotion_id: input.emotion_id,
-        soul_ids: input.soul_ids,
-        domain_ids: input.domain_ids,
-        cards: input.cards.map((c, i) => ({
-          species_id: c.species_id,
-          value: c.value,
-          sort_order: i,
-        })),
-      },
-    })
-    const pebbleId = this.unwrap(result) as string
+    // Invoke the compose-pebble edge function instead of calling create_pebble
+    // directly. The edge function forwards the same payload into the RPC and
+    // then runs the shared compose engine, writing render_svg / render_manifest
+    // / render_version back to the row. Mirrors the iOS CreatePebbleSheet flow,
+    // including the soft-success path where compose failed but the pebble row
+    // was created.
+    const payload = {
+      name: input.name,
+      description: input.description ?? null,
+      happened_at: input.happened_at,
+      intensity: input.intensity,
+      positiveness: input.positiveness,
+      visibility: input.visibility,
+      emotion_id: input.emotion_id,
+      soul_ids: input.soul_ids,
+      domain_ids: input.domain_ids,
+      cards: input.cards.map((c, i) => ({
+        species_id: c.species_id,
+        value: c.value,
+        sort_order: i,
+      })),
+    }
+
+    const { pebbleId, softError } = await this.invokeCompose("compose-pebble", { payload })
+    if (!pebbleId) throw new Error(softError ?? "compose-pebble failed")
+    if (softError) console.warn("[compose-pebble] soft-success:", softError)
+
     await this.loadFromSupabase()
-    return this.store.pebbles.find((p) => p.id === pebbleId)!
+    const created = this.store.pebbles.find((p) => p.id === pebbleId)
+    if (!created) throw new Error(`Pebble not found after create: ${pebbleId}`)
+    return created
   }
 
   async updatePebble(id: string, input: UpdatePebbleInput): Promise<Pebble> {
@@ -222,10 +252,73 @@ export class SupabaseProvider implements DataProvider {
       },
     })
     this.unwrap(result)
+
+    // Re-compose so the saved render_svg stays in sync with visual-affecting
+    // edits (intensity, valence, emotion, glyph). The update already landed,
+    // so compose failures are logged and swallowed — PebbleVisual's local
+    // engine fallback handles display until the next successful compose.
+    try {
+      const { softError } = await this.invokeCompose("recompose-pebble", { pebble_id: id })
+      if (softError) console.warn("[recompose-pebble] soft-success:", softError)
+    } catch (err) {
+      console.warn("[recompose-pebble] failed:", err)
+    }
+
     await this.loadFromSupabase()
     const updated = this.store.pebbles.find((p) => p.id === id)
     if (!updated) throw new Error(`Pebble not found after update: ${id}`)
     return updated
+  }
+
+  // ---------------------------------------------------------------------------
+  // Edge function invocation shared by create + update paths
+  // ---------------------------------------------------------------------------
+  //
+  // The compose edge functions use a "soft-success" pattern: on compose
+  // failure after the pebble was created/updated, they respond with a 5xx
+  // whose body still includes pebble_id. supabase-js wraps non-2xx responses
+  // in a FunctionsHttpError whose body is consumed lazily via context.response;
+  // we clone + parse it to recover that pebble_id so callers can distinguish
+  // "nothing happened" (hard failure) from "pebble exists, render didn't"
+  // (soft failure).
+
+  private async invokeCompose(
+    fn: "compose-pebble" | "recompose-pebble",
+    body: ComposeRequest,
+  ): Promise<{ pebbleId: string | null; softError: string | null }> {
+    const invocation = this.supabase.functions.invoke<ComposeResponse>(fn, { body })
+    const { data, error } = await withTimeout(invocation, 10_000, fn)
+
+    if (!error && data?.pebble_id) {
+      return { pebbleId: data.pebble_id, softError: null }
+    }
+
+    const softPebbleId = await this.extractSoftPebbleId(error)
+    if (softPebbleId) {
+      const softError =
+        (data?.error as string | undefined) ??
+        (error instanceof Error ? error.message : `${fn} returned non-2xx`)
+      return { pebbleId: softPebbleId, softError }
+    }
+
+    const message =
+      (data?.error as string | undefined) ??
+      (error instanceof Error ? error.message : `${fn} failed`)
+    throw new Error(message)
+  }
+
+  private async extractSoftPebbleId(error: unknown): Promise<string | null> {
+    if (!error || typeof error !== "object") return null
+    const ctx = (error as { context?: { response?: Response } }).context
+    const response = ctx?.response
+    if (!response) return null
+    try {
+      const body = (await response.clone().json()) as ComposeResponse
+      return body.pebble_id ?? null
+    } catch (err) {
+      console.warn("extractSoftPebbleId: failed to parse error body:", err)
+      return null
+    }
   }
 
   async deletePebble(id: string): Promise<void> {

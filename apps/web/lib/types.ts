@@ -27,6 +27,13 @@ export type Pebble = {
   mark_id?: string
   instants: string[]
   cards: PebbleCard[]
+  // Server-composed render — produced by the compose-pebble / recompose-pebble
+  // edge functions. Absent for legacy pebbles or when the compose step failed
+  // (soft-success path); in that case the webapp falls back to the local
+  // engine render in PebbleVisual.
+  render_svg?: string
+  render_manifest?: unknown
+  render_version?: string
   created_at: string
   updated_at: string
 }

@@ -13,17 +13,49 @@ type PebbleVisualProps = {
   className?: string
 }
 
-export function PebbleVisual({
+// Split into two variants so the local engine (usePebbleVisual) only runs for
+// pebbles without a server render — React hooks can't be called conditionally,
+// so we branch at the component level instead of inside the hook.
+export function PebbleVisual(props: PebbleVisualProps) {
+  return props.pebble.render_svg
+    ? <ServerRenderedVisual {...props} renderSvg={props.pebble.render_svg} />
+    : <LocalRenderedVisual {...props} />
+}
+
+function ServerRenderedVisual({
+  pebble,
+  className,
+  renderSvg,
+}: PebbleVisualProps & { renderSvg: string }) {
+  const emotion = EMOTIONS.find((e) => e.id === pebble.emotion_id)
+  const svg = emotion?.color
+    ? renderSvg.replaceAll("currentColor", emotion.color)
+    : renderSvg
+  return <SvgHost pebble={pebble} emotionName={emotion?.name} className={className} svg={svg} />
+}
+
+function LocalRenderedVisual({
   pebble,
   mark = null,
   tier = "thumbnail",
   className,
 }: PebbleVisualProps) {
   const { svg } = usePebbleVisual(pebble, mark, tier)
+  const emotion = EMOTIONS.find((e) => e.id === pebble.emotion_id)
+  return <SvgHost pebble={pebble} emotionName={emotion?.name} className={className} svg={svg} />
+}
 
-  const emotionName =
-    EMOTIONS.find((e) => e.id === pebble.emotion_id)?.name ?? "Unknown"
-
+function SvgHost({
+  pebble,
+  emotionName = "Unknown",
+  className,
+  svg,
+}: {
+  pebble: Pebble
+  emotionName?: string
+  className?: string
+  svg: string
+}) {
   return (
     <div
       data-slot="pebble-visual"
