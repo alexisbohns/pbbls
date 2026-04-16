@@ -88,6 +88,7 @@ struct EditPebbleSheet: View {
                 .from("pebbles")
                 .select("""
                     id, name, description, happened_at, intensity, positiveness, visibility,
+                    render_svg, render_version,
                     emotion:emotions(id, name, color),
                     pebble_domains(domain:domains(id, name)),
                     pebble_souls(soul:souls(id, name)),
