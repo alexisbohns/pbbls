@@ -28,6 +28,9 @@ packages:
   Supabase:
     url: https://github.com/supabase/supabase-swift
     from: "2.0.0"
+  SVGView:
+    url: https://github.com/exyte/SVGView
+    from: "1.0.4"
 
 targets:
   Pebbles:
@@ -52,6 +55,8 @@ targets:
     dependencies:
       - package: Supabase
         product: Supabase
+      - package: SVGView
+        product: SVGView
 
   PebblesTests:
     type: bundle.unit-test

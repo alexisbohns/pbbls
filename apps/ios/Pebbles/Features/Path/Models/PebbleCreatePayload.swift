@@ -30,11 +30,17 @@ struct PebbleCreatePayload: Encodable {
         case collectionIds = "collection_ids"
     }
 
+    private static let iso8601: ISO8601DateFormatter = {
+        let f = ISO8601DateFormatter()
+        f.formatOptions = [.withInternetDateTime]
+        return f
+    }()
+
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(name, forKey: .name)
         try container.encode(description, forKey: .description)
-        try container.encode(happenedAt, forKey: .happenedAt)
+        try container.encode(Self.iso8601.string(from: happenedAt), forKey: .happenedAt)
         try container.encode(intensity, forKey: .intensity)
         try container.encode(positiveness, forKey: .positiveness)
         try container.encode(visibility, forKey: .visibility)

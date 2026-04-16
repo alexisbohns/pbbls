@@ -1,8 +1,9 @@
+import Supabase
 import SwiftUI
 import os
 
 struct CreatePebbleSheet: View {
-    let onCreated: () -> Void
+    let onCreated: (UUID) -> Void
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(\.dismiss) private var dismiss
@@ -116,29 +117,58 @@ struct CreatePebbleSheet: View {
         isSaving = true
         saveError = nil
 
+        let payload = PebbleCreatePayload(from: draft)
+        let requestBody = ComposePebbleRequest(payload: payload)
+
         do {
-            let payload = PebbleCreatePayload(from: draft)
-
-            _ = try await supabase.client
-                .rpc("create_pebble", params: CreatePebbleParams(payload: payload))
-                .execute()
-
-            onCreated()
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let response: ComposePebbleResponse = try await supabase.client.functions
+                .invoke(
+                    "compose-pebble",
+                    options: FunctionInvokeOptions(body: requestBody),
+                    decoder: decoder
+                )
+            onCreated(response.pebbleId)
             dismiss()
+        } catch let functionsError as FunctionsError {
+            // Attempt soft-success: edge function returned 5xx but pebble was
+            // inserted — extract pebble_id from the error body so we can still
+            // advance to the detail sheet.
+            if let pebbleId = softSuccessPebbleId(from: functionsError) {
+                logger.warning("compose-pebble returned 5xx but pebble_id found — advancing to detail sheet")
+                onCreated(pebbleId)
+                dismiss()
+            } else {
+                logger.error("compose-pebble failed: \(functionsError.localizedDescription, privacy: .private)")
+                self.saveError = "Couldn't save your pebble. Please try again."
+                self.isSaving = false
+            }
         } catch {
             logger.error("create pebble failed: \(error.localizedDescription, privacy: .private)")
             self.saveError = "Couldn't save your pebble. Please try again."
             self.isSaving = false
         }
     }
+
+    /// Tries to extract a `pebble_id` UUID from the raw error body of a
+    /// `FunctionsError.httpError`. Returns `nil` if the body is absent,
+    /// unparseable, or missing the `pebble_id` key.
+    private func softSuccessPebbleId(from error: FunctionsError) -> UUID? {
+        guard case let .httpError(_, data) = error, !data.isEmpty else { return nil }
+        struct Partial: Decodable { let pebbleId: UUID; enum CodingKeys: String, CodingKey { case pebbleId = "pebble_id" } }
+        return try? JSONDecoder().decode(Partial.self, from: data).pebbleId
+    }
 }
 
-/// Wrapper matching the `create_pebble(payload jsonb)` RPC signature.
-private struct CreatePebbleParams: Encodable {
+/// Wrapper matching the compose-pebble edge function body shape.
+/// The function expects `{ "payload": {...} }` where `payload` mirrors
+/// the create_pebble RPC payload.
+private struct ComposePebbleRequest: Encodable {
     let payload: PebbleCreatePayload
 }
 
 #Preview {
-    CreatePebbleSheet(onCreated: {})
+    CreatePebbleSheet(onCreated: { _ in })
         .environment(SupabaseService())
 }
