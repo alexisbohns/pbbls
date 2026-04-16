@@ -8,7 +8,6 @@ import os
 ///   so renames reflect without popping the stack (local state is updated in Task 3).
 /// - Tapping a pebble opens the existing `EditPebbleSheet`, matching `PathView` UX.
 struct SoulDetailView: View {
-    let initialSoul: Soul
     let onChanged: () -> Void
 
     @Environment(SupabaseService.self) private var supabase
@@ -22,7 +21,6 @@ struct SoulDetailView: View {
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.soul.detail")
 
     init(soul: Soul, onChanged: @escaping () -> Void) {
-        self.initialSoul = soul
         self.onChanged = onChanged
         self._soul = State(initialValue: soul)
     }
