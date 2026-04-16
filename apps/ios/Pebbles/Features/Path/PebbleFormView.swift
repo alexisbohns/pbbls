@@ -13,8 +13,8 @@ struct PebbleFormView: View {
     let souls: [Soul]
     let collections: [PebbleCollection]
     let saveError: String?
-    var renderSvg: String? = nil
-    var strokeColor: String? = nil
+    var renderSvg: String?
+    var strokeColor: String?
 
     var body: some View {
         Form {

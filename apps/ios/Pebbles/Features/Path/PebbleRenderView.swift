@@ -7,7 +7,7 @@ import SVGView
 /// later slice. Fills width and scales to fit; aspect ratio is preserved.
 struct PebbleRenderView: View {
     let svg: String
-    var strokeColor: String? = nil
+    var strokeColor: String?
 
     private var coloredSvg: String {
         guard let color = strokeColor else { return svg }
