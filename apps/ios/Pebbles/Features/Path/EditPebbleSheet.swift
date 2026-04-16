@@ -22,6 +22,7 @@ struct EditPebbleSheet: View {
     @State private var domains: [Domain] = []
     @State private var souls: [Soul] = []
     @State private var collections: [PebbleCollection] = []
+    @State private var renderSvg: String?
 
     @State private var isLoading = true
     @State private var loadError: String?
@@ -73,7 +74,8 @@ struct EditPebbleSheet: View {
                 domains: domains,
                 souls: souls,
                 collections: collections,
-                saveError: saveError
+                saveError: saveError,
+                renderSvg: renderSvg
             )
         }
     }
@@ -132,6 +134,7 @@ struct EditPebbleSheet: View {
             self.souls = loadedSouls
             self.collections = loadedCollections
             self.draft = PebbleDraft(from: detail)
+            self.renderSvg = detail.renderSvg
             self.isLoading = false
         } catch {
             logger.error("edit pebble load failed: \(error.localizedDescription, privacy: .private)")
