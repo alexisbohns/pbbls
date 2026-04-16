@@ -8,6 +8,7 @@ struct PathView: View {
     @State private var loadError: String?
     @State private var isPresentingCreate = false
     @State private var selectedPebbleId: UUID?
+    @State private var presentedDetailPebbleId: UUID?
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "path")
 
@@ -18,7 +19,8 @@ struct PathView: View {
         }
         .task { await load() }
         .sheet(isPresented: $isPresentingCreate) {
-            CreatePebbleSheet(onCreated: {
+            CreatePebbleSheet(onCreated: { newPebbleId in
+                presentedDetailPebbleId = newPebbleId
                 Task { await load() }
             })
         }
@@ -26,6 +28,9 @@ struct PathView: View {
             EditPebbleSheet(pebbleId: id, onSaved: {
                 Task { await load() }
             })
+        }
+        .sheet(item: $presentedDetailPebbleId) { id in
+            PebbleDetailSheet(pebbleId: id)
         }
     }
 
