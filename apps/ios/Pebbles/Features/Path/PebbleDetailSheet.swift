@@ -50,7 +50,7 @@ struct PebbleDetailSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     if let svg = detail.renderSvg {
-                        PebbleRenderView(svg: svg)
+                        PebbleRenderView(svg: svg, strokeColor: detail.emotion.color)
                             .frame(maxWidth: .infinity)
                             .frame(height: 260)
                             .padding(.vertical)
