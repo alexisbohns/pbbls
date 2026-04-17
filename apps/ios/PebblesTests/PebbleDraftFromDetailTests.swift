@@ -15,7 +15,7 @@ struct PebbleDraftFromDetailTests {
         domains: [DomainRef] = [DomainRef(id: UUID(), name: "Work")],
         souls: [Soul] = [],
         collections: [PebbleCollection] = []
-    ) -> PebbleDetail {
+    ) throws -> PebbleDetail {
         // Build JSON and decode — mirrors how PebbleDetail is actually constructed.
         // PebbleDetail has a custom init(from: Decoder), so we can't memberwise-construct it.
         let emotionJSON: [String: Any] = [
@@ -41,7 +41,7 @@ struct PebbleDraftFromDetailTests {
         ]
         if let description { root["description"] = description }
 
-        let data = try! JSONSerialization.data(withJSONObject: root)
+        let data = try JSONSerialization.data(withJSONObject: root)
         let decoder = JSONDecoder()
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime]
@@ -53,17 +53,17 @@ struct PebbleDraftFromDetailTests {
             }
             return d
         }
-        return try! decoder.decode(PebbleDetail.self, from: data)
+        return try decoder.decode(PebbleDetail.self, from: data)
     }
 
     @Test("populates all fields from a fully-populated detail")
-    func fullyPopulated() {
+    func fullyPopulated() throws {
         let emotionId = UUID()
         let domainId = UUID()
         let soulId = UUID()
         let collectionId = UUID()
 
-        let detail = makeDetail(
+        let detail = try makeDetail(
             name: "Shipped",
             description: "Finally.",
             positiveness: 1,
@@ -89,37 +89,37 @@ struct PebbleDraftFromDetailTests {
     }
 
     @Test("maps nil description to empty string")
-    func nilDescription() {
-        let detail = makeDetail(description: nil)
+    func nilDescription() throws {
+        let detail = try makeDetail(description: nil)
         let draft = PebbleDraft(from: detail)
         #expect(draft.description == "")
     }
 
     @Test("leaves soulId nil when no souls")
-    func noSouls() {
-        let detail = makeDetail(souls: [])
+    func noSouls() throws {
+        let detail = try makeDetail(souls: [])
         let draft = PebbleDraft(from: detail)
         #expect(draft.soulId == nil)
     }
 
     @Test("leaves collectionId nil when no collections")
-    func noCollections() {
-        let detail = makeDetail(collections: [])
+    func noCollections() throws {
+        let detail = try makeDetail(collections: [])
         let draft = PebbleDraft(from: detail)
         #expect(draft.collectionId == nil)
     }
 
     @Test("leaves domainId nil and draft invalid when domains is empty")
-    func emptyDomains() {
-        let detail = makeDetail(domains: [])
+    func emptyDomains() throws {
+        let detail = try makeDetail(domains: [])
         let draft = PebbleDraft(from: detail)
         #expect(draft.domainId == nil)
         #expect(draft.isValid == false)
     }
 
     @Test("derives valence from positiveness and intensity pair")
-    func valenceMapping() {
-        let detail = makeDetail(positiveness: -1, intensity: 2)
+    func valenceMapping() throws {
+        let detail = try makeDetail(positiveness: -1, intensity: 2)
         let draft = PebbleDraft(from: detail)
         #expect(draft.valence == .lowlightMedium)
     }
