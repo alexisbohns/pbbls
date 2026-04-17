@@ -107,6 +107,7 @@ struct CollectionsListView: View {
     }
 
     private func delete(_ collection: Collection) async {
+        // Dismiss the dialog immediately; failures surface via the separate deleteError alert.
         pendingDeletion = nil
         do {
             try await supabase.client
@@ -149,5 +150,12 @@ private struct CollectionRow: View {
         case 1: return "1 pebble"
         default: return "\(collection.pebbleCount) pebbles"
         }
+    }
+}
+
+#Preview {
+    NavigationStack {
+        CollectionsListView()
+            .environment(SupabaseService())
     }
 }
