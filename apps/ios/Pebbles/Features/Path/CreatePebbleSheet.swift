@@ -156,8 +156,7 @@ struct CreatePebbleSheet: View {
     /// unparseable, or missing the `pebble_id` key.
     private func softSuccessPebbleId(from error: FunctionsError) -> UUID? {
         guard case let .httpError(_, data) = error, !data.isEmpty else { return nil }
-        struct Partial: Decodable { let pebbleId: UUID; enum CodingKeys: String, CodingKey { case pebbleId = "pebble_id" } }
-        return try? JSONDecoder().decode(Partial.self, from: data).pebbleId
+        return try? JSONDecoder().decode(PebbleIdPartial.self, from: data).pebbleId
     }
 }
 
@@ -166,6 +165,16 @@ struct CreatePebbleSheet: View {
 /// the create_pebble RPC payload.
 private struct ComposePebbleRequest: Encodable {
     let payload: PebbleCreatePayload
+}
+
+/// Partial decoder for the compose-pebble soft-success response body.
+/// Used by `softSuccessPebbleId(from:)` to extract `pebble_id` out of an
+/// `httpError` payload when the render itself failed.
+private struct PebbleIdPartial: Decodable {
+    let pebbleId: UUID
+    enum CodingKeys: String, CodingKey {
+        case pebbleId = "pebble_id"
+    }
 }
 
 #Preview {
