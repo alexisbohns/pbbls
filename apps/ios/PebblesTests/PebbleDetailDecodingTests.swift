@@ -136,7 +136,7 @@ struct PebbleDetailDecodingTests {
 
     @Test("decodes render columns when present")
     func decodesRenderColumns() throws {
-        let json = """
+        let json = Data("""
         {
           "id": "550e8400-e29b-41d4-a716-446655440000",
           "name": "test",
@@ -151,7 +151,7 @@ struct PebbleDetailDecodingTests {
           "render_svg": "<svg/>",
           "render_version": "0.1.0"
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let decoded = try makeDecoder().decode(PebbleDetail.self, from: json)
 
@@ -161,7 +161,7 @@ struct PebbleDetailDecodingTests {
 
     @Test("decodes when render columns are absent (legacy pebble)")
     func decodesLegacy() throws {
-        let json = """
+        let json = Data("""
         {
           "id": "550e8400-e29b-41d4-a716-446655440000",
           "name": "legacy",
@@ -174,7 +174,7 @@ struct PebbleDetailDecodingTests {
           "pebble_souls": [],
           "collection_pebbles": []
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let decoded = try makeDecoder().decode(PebbleDetail.self, from: json)
 

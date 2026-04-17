@@ -7,14 +7,14 @@ struct ComposePebbleResponseDecodingTests {
 
     @Test("decodes a successful compose response")
     func decodesSuccess() throws {
-        let json = """
+        let json = Data("""
         {
           "pebble_id": "550e8400-e29b-41d4-a716-446655440000",
           "render_svg": "<svg xmlns=\\"http://www.w3.org/2000/svg\\"></svg>",
           "render_manifest": [{"type":"glyph","delay":0,"duration":800}],
           "render_version": "0.1.0"
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let decoded = try JSONDecoder().decode(ComposePebbleResponse.self, from: json)
 
@@ -25,12 +25,12 @@ struct ComposePebbleResponseDecodingTests {
 
     @Test("decodes a soft-success 5xx response (render fields null)")
     func decodesSoftFailure() throws {
-        let json = """
+        let json = Data("""
         {
           "pebble_id": "550e8400-e29b-41d4-a716-446655440000",
           "error": "compose failed: engine exploded"
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let decoded = try JSONDecoder().decode(ComposePebbleResponse.self, from: json)
 
