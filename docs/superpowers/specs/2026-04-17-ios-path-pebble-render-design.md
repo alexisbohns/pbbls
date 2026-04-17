@@ -33,22 +33,23 @@ Extend the Path query to pull SVG + emotion color in a single round-trip:
 
 ```swift
 .from("pebbles")
-.select("id, name, happened_at, render_svg, emotion:emotions(color)")
+.select("id, name, happened_at, render_svg, emotion:emotions(id, name, color)")
 .order("happened_at", ascending: false)
 ```
 
-The `Pebble` struct used by `PathView` gains two optional fields:
+The `Pebble` struct used by `PathView` gains two optional fields and a custom decoder for the nested emotion relation:
 
 ```swift
 struct Pebble: Identifiable, Decodable, Hashable {
     let id: UUID
     let name: String
     let happenedAt: Date
-    let renderSvg: String?      // nil when compose-pebble failed
-    let emotionColor: String?   // nil if the emotion row has no color
-    // nested decoding helper for `emotion:emotions(color)` → emotionColor
+    let renderSvg: String?   // nil when compose-pebble failed (soft-success)
+    let emotion: EmotionRef? // nil if the pebble's emotion_id is null
 }
 ```
+
+`EmotionRef` is already defined in `PebbleDetail.swift` (id, name, color) for the detail sheet's restricted select. Reusing it here keeps the two screens consistent and avoids a parallel single-field struct. The select mirrors `EditPebbleSheet`'s `emotion:emotions(id, name, color)` exactly.
 
 Rationale: one round-trip beats lazy per-row loading. The list is short (pre-pagination), and rendering rows piecemeal as SVG strings stream in would feel janky.
 
