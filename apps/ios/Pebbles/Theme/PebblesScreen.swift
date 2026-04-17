@@ -4,13 +4,10 @@ private struct PebblesScreen: ViewModifier {
     func body(content: Content) -> some View {
         content
             .tint(Color.pebblesAccent)
-            .foregroundStyle(Color.pebblesForeground)
+            .foregroundStyle(Color.pebblesMutedForeground)
             .scrollContentBackground(.hidden)
             .background(Color.pebblesBackground)
             .toolbarBackground(Color.pebblesBackground, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
-            .toolbarBackground(Color.pebblesBackground, for: .tabBar)
-            .toolbarBackground(.visible, for: .tabBar)
     }
 }
 
