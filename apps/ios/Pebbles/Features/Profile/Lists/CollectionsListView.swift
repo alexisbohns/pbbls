@@ -8,6 +8,7 @@ struct CollectionsListView: View {
     @State private var loadError: String?
     @State private var pendingDeletion: Collection?
     @State private var deleteError: String?
+    @State private var isPresentingCreate = false
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.collections")
 
@@ -15,6 +16,21 @@ struct CollectionsListView: View {
         content
             .navigationTitle("Collections")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        isPresentingCreate = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .accessibilityLabel("Add collection")
+                }
+            }
+            .sheet(isPresented: $isPresentingCreate) {
+                CreateCollectionSheet(onCreated: {
+                    Task { await load() }
+                })
+            }
             .task { await load() }
             .refreshable { await load() }
             .confirmationDialog(
