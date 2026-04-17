@@ -51,6 +51,7 @@ struct SoulDetailView: View {
                     Task { await load() }
                 })
             }
+            .pebblesScreen()
     }
 
     @ViewBuilder

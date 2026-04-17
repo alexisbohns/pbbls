@@ -62,6 +62,7 @@ struct SoulsListView: View {
             } message: { message in
                 Text(message)
             }
+            .pebblesScreen()
     }
 
     @ViewBuilder
