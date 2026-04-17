@@ -62,6 +62,7 @@ struct CreateCollectionSheet: View {
                     }
                 }
             }
+            .pebblesScreen()
         }
     }
 

@@ -63,6 +63,7 @@ struct EditSoulSheet: View {
                     }
                 }
             }
+            .pebblesScreen()
         }
     }
 

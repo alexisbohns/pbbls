@@ -33,6 +33,7 @@ struct CollectionsListView: View {
                 })
             }
             .refreshable { await load() }
+            .pebblesScreen()
             .confirmationDialog(
                 pendingDeletion.map { "Delete \($0.name)?" } ?? "",
                 isPresented: Binding(

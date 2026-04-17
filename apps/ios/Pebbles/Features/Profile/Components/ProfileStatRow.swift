@@ -14,7 +14,6 @@ struct ProfileStatRow: View {
         Button(action: action) {
             HStack {
                 Label(title, systemImage: systemImage)
-                    .foregroundStyle(.primary)
                 Spacer()
                 Text(valueText)
                     .foregroundStyle(.secondary)

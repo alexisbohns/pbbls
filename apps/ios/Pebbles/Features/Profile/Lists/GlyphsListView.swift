@@ -14,6 +14,7 @@ struct GlyphsListView: View {
             .navigationTitle("Glyphs")
             .navigationBarTitleDisplayMode(.inline)
             .task { await load() }
+            .pebblesScreen()
     }
 
     @ViewBuilder

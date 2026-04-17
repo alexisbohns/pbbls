@@ -77,6 +77,7 @@ struct ProfileView: View {
                 }
             }
             .navigationTitle("Profile")
+            .pebblesScreen()
             .task { await loadStats() }
             .sheet(item: $presentedSheet) { sheet in
                 switch sheet {

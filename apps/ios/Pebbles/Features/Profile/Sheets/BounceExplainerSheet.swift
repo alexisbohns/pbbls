@@ -24,6 +24,7 @@ struct BounceExplainerSheet: View {
                     Button("Done") { dismiss() }
                 }
             }
+            .pebblesScreen()
         }
     }
 }

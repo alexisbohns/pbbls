@@ -33,6 +33,7 @@ struct PebbleDetailSheet: View {
                         Button("Done") { dismiss() }
                     }
                 }
+                .pebblesScreen()
         }
         .task { await load() }
     }

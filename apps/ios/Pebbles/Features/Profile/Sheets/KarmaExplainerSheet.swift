@@ -23,6 +23,7 @@ struct KarmaExplainerSheet: View {
                     Button("Done") { dismiss() }
                 }
             }
+            .pebblesScreen()
         }
     }
 }

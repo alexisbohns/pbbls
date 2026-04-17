@@ -12,7 +12,6 @@ struct ProfileNavRow: View {
         Button(action: action) {
             HStack {
                 Label(title, systemImage: systemImage)
-                    .foregroundStyle(.primary)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.footnote.weight(.semibold))
