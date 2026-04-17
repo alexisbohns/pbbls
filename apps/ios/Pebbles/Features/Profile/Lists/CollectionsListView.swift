@@ -6,9 +6,9 @@ struct CollectionsListView: View {
     @State private var items: [Collection] = []
     @State private var isLoading = true
     @State private var loadError: String?
+    @State private var isPresentingCreate = false
     @State private var pendingDeletion: Collection?
     @State private var deleteError: String?
-    @State private var isPresentingCreate = false
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.collections")
 
@@ -26,12 +26,12 @@ struct CollectionsListView: View {
                     .accessibilityLabel("Add collection")
                 }
             }
+            .task { await load() }
             .sheet(isPresented: $isPresentingCreate) {
                 CreateCollectionSheet(onCreated: {
                     Task { await load() }
                 })
             }
-            .task { await load() }
             .refreshable { await load() }
             .confirmationDialog(
                 pendingDeletion.map { "Delete \($0.name)?" } ?? "",
