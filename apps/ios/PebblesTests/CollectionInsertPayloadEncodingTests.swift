@@ -9,7 +9,8 @@ struct CollectionInsertPayloadEncodingTests {
 
     private func encode(_ payload: CollectionInsertPayload) throws -> [String: Any] {
         let data = try JSONEncoder().encode(payload)
-        return try JSONSerialization.jsonObject(with: data, options: [.fragmentsAllowed]) as! [String: Any]
+        let object = try JSONSerialization.jsonObject(with: data, options: [.fragmentsAllowed])
+        return try #require(object as? [String: Any])
     }
 
     @Test("encodes user_id as snake_case and name verbatim")
@@ -35,7 +36,8 @@ struct CollectionInsertPayloadEncodingTests {
         let data = try JSONEncoder().encode(payload)
         let raw = String(data: data, encoding: .utf8) ?? ""
         #expect(raw.contains("\"mode\":null"))
-        let json = try JSONSerialization.jsonObject(with: data) as! [String: Any]
+        let object = try JSONSerialization.jsonObject(with: data)
+        let json = try #require(object as? [String: Any])
         #expect(json["mode"] is NSNull)
     }
 

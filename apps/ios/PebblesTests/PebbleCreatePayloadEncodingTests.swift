@@ -14,7 +14,8 @@ struct PebbleCreatePayloadEncodingTests {
             try c.encode(formatter.string(from: date))
         }
         let data = try encoder.encode(payload)
-        return try JSONSerialization.jsonObject(with: data) as! [String: Any]
+        let object = try JSONSerialization.jsonObject(with: data)
+        return try #require(object as? [String: Any])
     }
 
     private func makeValidDraft(
