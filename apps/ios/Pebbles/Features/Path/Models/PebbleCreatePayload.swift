@@ -31,9 +31,9 @@ struct PebbleCreatePayload: Encodable {
     }
 
     private static let iso8601: ISO8601DateFormatter = {
-        let f = ISO8601DateFormatter()
-        f.formatOptions = [.withInternetDateTime]
-        return f
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter
     }()
 
     func encode(to encoder: Encoder) throws {

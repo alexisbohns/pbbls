@@ -23,9 +23,9 @@ struct PebbleDraftFromDetailTests {
             "name": "Joy",
             "color": "#FFD166"
         ]
-        let domainsJSON = domains.map { d in ["domain": ["id": d.id.uuidString, "name": d.name]] }
-        let soulsJSON = souls.map { s in ["soul": ["id": s.id.uuidString, "name": s.name]] }
-        let collectionsJSON = collections.map { c in ["collection": ["id": c.id.uuidString, "name": c.name]] }
+        let domainsJSON = domains.map { domain in ["domain": ["id": domain.id.uuidString, "name": domain.name]] }
+        let soulsJSON = souls.map { soul in ["soul": ["id": soul.id.uuidString, "name": soul.name]] }
+        let collectionsJSON = collections.map { coll in ["collection": ["id": coll.id.uuidString, "name": coll.name]] }
 
         var root: [String: Any] = [
             "id": UUID().uuidString,
@@ -46,12 +46,12 @@ struct PebbleDraftFromDetailTests {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime]
         decoder.dateDecodingStrategy = .custom { dec in
-            let c = try dec.singleValueContainer()
-            let s = try c.decode(String.self)
-            guard let d = formatter.date(from: s) else {
-                throw DecodingError.dataCorruptedError(in: c, debugDescription: "bad date")
+            let container = try dec.singleValueContainer()
+            let iso = try container.decode(String.self)
+            guard let date = formatter.date(from: iso) else {
+                throw DecodingError.dataCorruptedError(in: container, debugDescription: "bad date")
             }
-            return d
+            return date
         }
         return try decoder.decode(PebbleDetail.self, from: data)
     }

@@ -8,15 +8,15 @@ struct GroupPebblesByMonthTests {
     /// Fixed Gregorian calendar in UTC so tests are deterministic regardless of
     /// the machine running them.
     private var calendar: Calendar {
-        var c = Calendar(identifier: .gregorian)
-        c.timeZone = TimeZone(identifier: "UTC")!
-        return c
+        var gregorian = Calendar(identifier: .gregorian)
+        gregorian.timeZone = TimeZone(identifier: "UTC")!
+        return gregorian
     }
 
     private func date(_ iso: String) -> Date {
-        let f = ISO8601DateFormatter()
-        f.formatOptions = [.withInternetDateTime]
-        return f.date(from: iso)!
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter.date(from: iso)!
     }
 
     private func pebble(_ happened: String) throws -> Pebble {
@@ -28,9 +28,9 @@ struct GroupPebblesByMonthTests {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime]
         decoder.dateDecodingStrategy = .custom { dec in
-            let c = try dec.singleValueContainer()
-            let s = try c.decode(String.self)
-            return formatter.date(from: s)!
+            let container = try dec.singleValueContainer()
+            let iso = try container.decode(String.self)
+            return formatter.date(from: iso)!
         }
         return try decoder.decode(Pebble.self, from: json)
     }
@@ -43,9 +43,9 @@ struct GroupPebblesByMonthTests {
 
     @Test("pebbles in the same month group together")
     func sameMonth() throws {
-        let a = try pebble("2026-04-02T10:00:00Z")
-        let b = try pebble("2026-04-28T22:00:00Z")
-        let result = groupPebblesByMonth([a, b], calendar: calendar)
+        let early = try pebble("2026-04-02T10:00:00Z")
+        let late = try pebble("2026-04-28T22:00:00Z")
+        let result = groupPebblesByMonth([early, late], calendar: calendar)
         #expect(result.count == 1)
         #expect(result[0].value.count == 2)
     }
@@ -61,8 +61,8 @@ struct GroupPebblesByMonthTests {
         let expectedOrder: [(year: Int, month: Int)] = [
             (2026, 5), (2026, 4), (2026, 3)
         ]
-        for (i, expected) in expectedOrder.enumerated() {
-            let comps = calendar.dateComponents([.year, .month], from: result[i].key)
+        for (index, expected) in expectedOrder.enumerated() {
+            let comps = calendar.dateComponents([.year, .month], from: result[index].key)
             #expect(comps.year == expected.year)
             #expect(comps.month == expected.month)
         }

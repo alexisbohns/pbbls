@@ -10,8 +10,8 @@ struct PebbleUpdatePayloadEncodingTests {
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime]
         encoder.dateEncodingStrategy = .custom { date, enc in
-            var c = enc.singleValueContainer()
-            try c.encode(formatter.string(from: date))
+            var container = enc.singleValueContainer()
+            try container.encode(formatter.string(from: date))
         }
         let data = try encoder.encode(payload)
         let object = try JSONSerialization.jsonObject(with: data)
