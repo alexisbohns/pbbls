@@ -25,9 +25,9 @@ struct CollectionDetailView: View {
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.collection.detail")
 
     private static let monthFormatter: DateFormatter = {
-        let f = DateFormatter()
-        f.setLocalizedDateFormatFromTemplate("MMMM yyyy")
-        return f
+        let formatter = DateFormatter()
+        formatter.setLocalizedDateFormatFromTemplate("MMMM yyyy")
+        return formatter
     }()
 
     init(collection: Collection, onChanged: @escaping () -> Void) {
