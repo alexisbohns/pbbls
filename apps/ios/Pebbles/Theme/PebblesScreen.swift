@@ -1,10 +1,25 @@
 import SwiftUI
 
+/// Renders a `Label`'s icon in the Pebbles accent while letting the title
+/// inherit the ambient `foregroundStyle`. Cascades via the SwiftUI environment
+/// when applied through `.labelStyle(_:)` on a parent view.
+private struct PebblesLabelStyle: LabelStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        Label {
+            configuration.title
+        } icon: {
+            configuration.icon
+                .foregroundStyle(Color.pebblesAccent)
+        }
+    }
+}
+
 private struct PebblesScreen: ViewModifier {
     func body(content: Content) -> some View {
         content
             .tint(Color.pebblesAccent)
             .foregroundStyle(Color.pebblesMutedForeground)
+            .labelStyle(PebblesLabelStyle())
             .scrollContentBackground(.hidden)
             .background(Color.pebblesBackground)
             .toolbarBackground(Color.pebblesBackground, for: .navigationBar)
