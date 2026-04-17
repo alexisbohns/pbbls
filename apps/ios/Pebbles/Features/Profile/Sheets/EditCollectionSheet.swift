@@ -75,6 +75,7 @@ struct EditCollectionSheet: View {
                     }
                 }
             }
+            .pebblesScreen()
         }
     }
 

@@ -41,6 +41,7 @@ struct CreatePebbleSheet: View {
                         }
                     }
                 }
+                .pebblesScreen()
         }
         .task { await loadReferences() }
     }

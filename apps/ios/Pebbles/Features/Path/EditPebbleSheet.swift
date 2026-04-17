@@ -52,6 +52,7 @@ struct EditPebbleSheet: View {
                         }
                     }
                 }
+                .pebblesScreen()
         }
         .task { await load() }
     }
