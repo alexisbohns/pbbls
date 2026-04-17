@@ -21,7 +21,7 @@ Show each pebble's visual (the server-composed SVG, colored by the pebble's emot
 ## Current state (reference)
 
 - `apps/ios/Pebbles/Features/Path/PathView.swift` — Path list. Each row is a `Button` wrapping `VStack(name, date)`. Query selects `id, name, happened_at` only. `load()` is invoked from `.task` and after create/edit sheets dismiss.
-- `apps/ios/Pebbles/Features/Path/PebbleRenderView.swift` — SwiftUI view that takes `svg: String` + `strokeColor: String?`, replaces `currentColor` tokens, and renders via `SVGView` at a hardcoded `.frame(width: 260, height: 260)`.
+- `apps/ios/Pebbles/Features/Path/PebbleRenderView.swift` — SwiftUI view that takes `svg: String` + `strokeColor: String?`, replaces `currentColor` tokens, and renders via `SVGView` with `.aspectRatio(contentMode: .fit)`. The view does not set its own frame; call sites size it via `.frame(width:height:)`.
 - Emotion color is stored on `emotions.color` (hex string). It is not on `pebbles`; the Path query does not currently join emotions.
 - `pebbles.render_svg` is populated by the `compose-pebble` edge function on create. It can be `NULL` when compose failed (soft-success path).
 
@@ -70,19 +70,9 @@ Replace the current `VStack(name, date)` with an `HStack`:
 
 40pt matches the combined height of `.body` + `.caption` text, keeping rows compact (per option A confirmed during brainstorming).
 
-### 3. `PebbleRenderView` size parameter
+### 3. Sizing
 
-`PebbleRenderView` currently hardcodes `.frame(width: 260, height: 260)`. Add a `size: CGFloat` parameter with a default of `260` so existing call sites (Create/Edit/Detail sheets) remain unchanged. Path passes `size: 40`.
-
-```swift
-struct PebbleRenderView: View {
-    let svg: String
-    var strokeColor: String?
-    var size: CGFloat = 260
-    // ...
-    .frame(width: size, height: size)
-}
-```
+`PebbleRenderView` is already frame-agnostic — callers apply `.frame()`. Path applies `.frame(width: 40, height: 40)` at the call site. No change to `PebbleRenderView` itself.
 
 ### 4. Fallbacks
 
@@ -96,7 +86,6 @@ No new plumbing required. `PathView` already calls `load()` when the create and 
 ## Files to change
 
 - `apps/ios/Pebbles/Features/Path/PathView.swift` — update query, extend `Pebble` struct, refactor row to `HStack` with leading `PebbleRenderView`, handle fallbacks.
-- `apps/ios/Pebbles/Features/Path/PebbleRenderView.swift` — add `size: CGFloat = 260` parameter.
 
 ## Risks / open items
 
