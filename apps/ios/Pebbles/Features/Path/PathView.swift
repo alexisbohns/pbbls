@@ -16,6 +16,7 @@ struct PathView: View {
         NavigationStack {
             content
                 .navigationTitle("Path")
+                .pebblesScreen()
         }
         .task { await load() }
         .sheet(isPresented: $isPresentingCreate) {

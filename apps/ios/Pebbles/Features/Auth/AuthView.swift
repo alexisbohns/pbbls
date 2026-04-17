@@ -103,6 +103,7 @@ struct AuthView: View {
         .onChange(of: password) { _, _ in
             if supabase.authError != nil { supabase.authError = nil }
         }
+        .pebblesScreen()
     }
 
     private var canSubmit: Bool {
