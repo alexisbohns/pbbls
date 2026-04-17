@@ -6,6 +6,7 @@ struct CollectionsListView: View {
     @State private var items: [Collection] = []
     @State private var isLoading = true
     @State private var loadError: String?
+    @State private var isPresentingCreate = false
     @State private var pendingDeletion: Collection?
     @State private var deleteError: String?
 
@@ -15,7 +16,22 @@ struct CollectionsListView: View {
         content
             .navigationTitle("Collections")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button {
+                        isPresentingCreate = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                    .accessibilityLabel("Add collection")
+                }
+            }
             .task { await load() }
+            .sheet(isPresented: $isPresentingCreate) {
+                CreateCollectionSheet(onCreated: {
+                    Task { await load() }
+                })
+            }
             .refreshable { await load() }
             .confirmationDialog(
                 pendingDeletion.map { "Delete \($0.name)?" } ?? "",
