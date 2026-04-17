@@ -10,7 +10,7 @@ struct CreateCollectionSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var name: String = ""
-    @State private var mode: CollectionMode? = nil
+    @State private var mode: CollectionMode?
     @State private var isSaving = false
     @State private var saveError: String?
 
