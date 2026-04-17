@@ -176,8 +176,8 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Collection Detail",
-      "description": "View pebbles within a specific collection.",
-      "status": "idea",
+      "description": "View a collection and its pebbles grouped by month; rename / re-mode / delete entry points.",
+      "status": "development",
       "platforms": ["web", "ios", "android"]
     },
     {
@@ -187,6 +187,15 @@
       "title": "Create Collection",
       "description": "Create a new collection to group pebbles.",
       "status": "idea",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "V-collection-edit",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Edit Collection",
+      "description": "Rename or re-mode an existing collection. Web renders inline on the detail page; iOS presents as a sheet.",
+      "status": "development",
       "platforms": ["web", "ios", "android"]
     },
     {
@@ -447,6 +456,10 @@
                 {
                   "label": "Create collection",
                   "entries": [{ "type": "view", "view_id": "V-collection-create" }]
+                },
+                {
+                  "label": "Edit collection",
+                  "entries": [{ "type": "view", "view_id": "V-collection-edit" }]
                 },
                 {
                   "label": "Track rise",
@@ -1116,6 +1129,7 @@
     { "id": "e-F-manage-collections-V-collections-list", "project_id": "pebbles", "source_id": "F-manage-collections", "target_id": "V-collections-list", "edge_type": "composes" },
     { "id": "e-F-manage-collections-V-collection-detail", "project_id": "pebbles", "source_id": "F-manage-collections", "target_id": "V-collection-detail", "edge_type": "composes" },
     { "id": "e-F-manage-collections-V-collection-create", "project_id": "pebbles", "source_id": "F-manage-collections", "target_id": "V-collection-create", "edge_type": "composes" },
+    { "id": "e-F-manage-collections-V-collection-edit", "project_id": "pebbles", "source_id": "F-manage-collections", "target_id": "V-collection-edit", "edge_type": "composes" },
     { "id": "e-F-manage-collections-V-collection-rise", "project_id": "pebbles", "source_id": "F-manage-collections", "target_id": "V-collection-rise", "edge_type": "composes" },
 
     { "id": "e-F-manage-souls-V-souls-list", "project_id": "pebbles", "source_id": "F-manage-souls", "target_id": "V-souls-list", "edge_type": "composes" },
@@ -1175,6 +1189,7 @@
     { "id": "e-V-collections-list-DM-collection", "project_id": "pebbles", "source_id": "V-collections-list", "target_id": "DM-collection", "edge_type": "displays" },
     { "id": "e-V-collection-detail-DM-collection", "project_id": "pebbles", "source_id": "V-collection-detail", "target_id": "DM-collection", "edge_type": "displays" },
     { "id": "e-V-collection-detail-DM-pebble", "project_id": "pebbles", "source_id": "V-collection-detail", "target_id": "DM-pebble", "edge_type": "displays" },
+    { "id": "e-V-collection-edit-DM-collection", "project_id": "pebbles", "source_id": "V-collection-edit", "target_id": "DM-collection", "edge_type": "displays" },
     { "id": "e-V-souls-list-DM-soul", "project_id": "pebbles", "source_id": "V-souls-list", "target_id": "DM-soul", "edge_type": "displays" },
     { "id": "e-V-soul-detail-DM-soul", "project_id": "pebbles", "source_id": "V-soul-detail", "target_id": "DM-soul", "edge_type": "displays" },
     { "id": "e-V-soul-detail-DM-pebble", "project_id": "pebbles", "source_id": "V-soul-detail", "target_id": "DM-pebble", "edge_type": "displays" },
