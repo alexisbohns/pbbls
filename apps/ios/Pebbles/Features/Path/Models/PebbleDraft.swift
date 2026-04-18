@@ -12,6 +12,7 @@ struct PebbleDraft {
     var valence: Valence?                 // mandatory
     var soulId: UUID?                     // optional
     var collectionId: UUID?               // optional
+    var glyphId: UUID?                    // optional — set via GlyphPickerSheet
     var visibility: Visibility = .private // mandatory
 
     /// True when every mandatory field is set. Drives the Save button's disabled state.
