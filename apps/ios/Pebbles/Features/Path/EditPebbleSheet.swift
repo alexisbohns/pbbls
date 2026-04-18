@@ -1,4 +1,5 @@
 import SwiftUI
+import Supabase
 import os
 
 /// Sheet for editing an existing pebble.
@@ -7,8 +8,8 @@ import os
 /// 1. `.task` loads the pebble detail + the four reference lists concurrently.
 /// 2. On load success, `draft` is prefilled via `PebbleDraft(from: detail)` and
 ///    `PebbleFormView` renders the form.
-/// 3. Save calls the `update_pebble` RPC with a `PebbleUpdatePayload` — all join
-///    rows are replaced atomically server-side in a single Postgres transaction.
+/// 3. Save calls the `compose-pebble-update` edge function which updates the row
+///    (via `update_pebble` RPC internally) and returns a fresh `render_svg`.
 /// 4. `onSaved()` notifies the parent (`PathView`) so it can refetch the list.
 struct EditPebbleSheet: View {
     let pebbleId: UUID
@@ -93,7 +94,7 @@ struct EditPebbleSheet: View {
                 .from("pebbles")
                 .select("""
                     id, name, description, happened_at, intensity, positiveness, visibility,
-                    render_svg, render_version,
+                    render_svg, render_version, glyph_id,
                     emotion:emotions(id, name, color),
                     pebble_domains(domain:domains(id, name)),
                     pebble_souls(soul:souls(id, name)),
@@ -152,15 +153,41 @@ struct EditPebbleSheet: View {
         isSaving = true
         saveError = nil
 
+        let payload = PebbleUpdatePayload(from: draft)
+        let requestBody = ComposePebbleUpdateRequest(pebbleId: pebbleId, payload: payload)
+
         do {
-            let payload = PebbleUpdatePayload(from: draft)
-
-            try await supabase.client
-                .rpc("update_pebble", params: UpdatePebbleParams(pPebbleId: pebbleId, payload: payload))
-                .execute()
-
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            let response: ComposePebbleResponse = try await supabase.client.functions
+                .invoke(
+                    "compose-pebble-update",
+                    options: FunctionInvokeOptions(body: requestBody),
+                    decoder: decoder
+                )
+            self.renderSvg = response.renderSvg ?? self.renderSvg
             onSaved()
             dismiss()
+        } catch let functionsError as FunctionsError {
+            // Soft-success: update succeeded but compose failed — the row was
+            // updated, so advance as if saved and rely on the parent's list
+            // refetch to eventually pick up a freshly composed render.
+            if case .httpError(let status, let data) = functionsError, status >= 500 {
+                let bodyString = String(data: data, encoding: .utf8) ?? "<non-utf8 body>"
+                logger.warning("compose-pebble-update returned \(status, privacy: .public) — advancing on soft-success. body=\(bodyString, privacy: .private)")
+                onSaved()
+                dismiss()
+            } else {
+                let bodyString: String
+                if case .httpError(_, let data) = functionsError {
+                    bodyString = String(data: data, encoding: .utf8) ?? "<non-utf8 body>"
+                } else {
+                    bodyString = "<non-http error>"
+                }
+                logger.error("compose-pebble-update failed: \(functionsError.localizedDescription, privacy: .private) body=\(bodyString, privacy: .private)")
+                self.saveError = "Couldn't save your changes. Please try again."
+                self.isSaving = false
+            }
         } catch {
             logger.error("update pebble failed: \(error.localizedDescription, privacy: .private)")
             self.saveError = "Couldn't save your changes. Please try again."
@@ -169,15 +196,14 @@ struct EditPebbleSheet: View {
     }
 }
 
-/// Wrapper matching the `update_pebble(p_pebble_id uuid, payload jsonb)` RPC signature.
-/// The Supabase Swift SDK's `.rpc(_:params:)` encodes this struct to the JSON body
-/// `{ "p_pebble_id": "...", "payload": {...} }`.
-private struct UpdatePebbleParams: Encodable {
-    let pPebbleId: UUID
+/// Body for the `compose-pebble-update` edge function.
+/// Shape: `{ "pebble_id": "...", "payload": { ... update_pebble payload ... } }`.
+private struct ComposePebbleUpdateRequest: Encodable {
+    let pebbleId: UUID
     let payload: PebbleUpdatePayload
 
     enum CodingKeys: String, CodingKey {
-        case pPebbleId = "p_pebble_id"
+        case pebbleId = "pebble_id"
         case payload
     }
 }

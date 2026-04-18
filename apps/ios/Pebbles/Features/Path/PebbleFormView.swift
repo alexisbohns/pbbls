@@ -1,4 +1,5 @@
 import SwiftUI
+import os
 
 /// The pebble `Form` body, shared by `CreatePebbleSheet` and `EditPebbleSheet`.
 ///
@@ -15,6 +16,11 @@ struct PebbleFormView: View {
     let saveError: String?
     var renderSvg: String?
     var strokeColor: String?
+
+    @State private var showPicker = false
+    @State private var selectedGlyph: Glyph?
+
+    @Environment(SupabaseService.self) private var supabase
 
     var body: some View {
         Form {
@@ -64,6 +70,41 @@ struct PebbleFormView: View {
                 }
             }
 
+            Section("Glyph") {
+                Button {
+                    showPicker = true
+                } label: {
+                    HStack(spacing: 12) {
+                        if let glyph = selectedGlyph {
+                            GlyphThumbnail(strokes: glyph.strokes, side: 32)
+                                .accessibilityHidden(true)
+                        } else {
+                            RoundedRectangle(cornerRadius: 6)
+                                .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [3]))
+                                .frame(width: 32, height: 32)
+                                .foregroundStyle(.secondary)
+                        }
+                        Text(glyphRowLabel)
+                            .foregroundStyle(selectedGlyph == nil ? .secondary : .primary)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                .buttonStyle(.plain)
+                .contextMenu {
+                    if draft.glyphId != nil {
+                        Button(role: .destructive) {
+                            draft.glyphId = nil
+                            selectedGlyph = nil
+                        } label: {
+                            Label("Remove glyph", systemImage: "trash")
+                        }
+                    }
+                }
+            }
+
             Section("Optional") {
                 Picker("Soul", selection: $draft.soulId) {
                     Text("None").tag(UUID?.none)
@@ -96,6 +137,41 @@ struct PebbleFormView: View {
                         .font(.callout)
                 }
             }
+        }
+        .sheet(isPresented: $showPicker) {
+            GlyphPickerSheet(
+                currentGlyphId: draft.glyphId,
+                onSelected: { glyphId in draft.glyphId = glyphId }
+            )
+        }
+        .task(id: draft.glyphId) { await loadSelectedGlyph() }
+    }
+
+    private var glyphRowLabel: String {
+        if draft.glyphId == nil { return "Carve or pick a glyph" }
+        if let name = selectedGlyph?.name { return name }
+        return "Untitled glyph"
+    }
+
+    private func loadSelectedGlyph() async {
+        guard let id = draft.glyphId else {
+            selectedGlyph = nil
+            return
+        }
+        if selectedGlyph?.id == id { return }
+        do {
+            let fetched: Glyph = try await supabase.client
+                .from("glyphs")
+                .select("id, name, strokes, view_box")
+                .eq("id", value: id)
+                .single()
+                .execute()
+                .value
+            self.selectedGlyph = fetched
+        } catch {
+            // Non-fatal: the row renders without a thumbnail until the refetch works.
+            Logger(subsystem: "app.pbbls.ios", category: "pebble-form")
+                .warning("glyph fetch for preview failed: \(error.localizedDescription, privacy: .private)")
         }
     }
 }

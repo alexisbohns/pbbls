@@ -20,6 +20,7 @@ struct PebbleUpdatePayload: Encodable {
     let domainIds: [UUID]
     let soulIds: [UUID]
     let collectionIds: [UUID]
+    let glyphId: UUID?
 
     enum CodingKeys: String, CodingKey {
         case name
@@ -32,14 +33,24 @@ struct PebbleUpdatePayload: Encodable {
         case domainIds = "domain_ids"
         case soulIds = "soul_ids"
         case collectionIds = "collection_ids"
+        case glyphId = "glyph_id"
     }
+
+    private static let iso8601: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter
+    }()
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(name, forKey: .name)
         // Explicit nil encoding so absent descriptions clear the field server-side.
         try container.encode(description, forKey: .description)
-        try container.encode(happenedAt, forKey: .happenedAt)
+        // Encode Date as an ISO8601 string so Postgres' timestamptz cast accepts
+        // it. The Supabase SDK's .functions.invoke() path uses an encoder whose
+        // default date strategy emits Double seconds — which Postgres rejects.
+        try container.encode(Self.iso8601.string(from: happenedAt), forKey: .happenedAt)
         try container.encode(intensity, forKey: .intensity)
         try container.encode(positiveness, forKey: .positiveness)
         try container.encode(visibility, forKey: .visibility)
@@ -47,6 +58,7 @@ struct PebbleUpdatePayload: Encodable {
         try container.encode(domainIds, forKey: .domainIds)
         try container.encode(soulIds, forKey: .soulIds)
         try container.encode(collectionIds, forKey: .collectionIds)
+        try container.encode(glyphId, forKey: .glyphId)
     }
 }
 
@@ -66,5 +78,6 @@ extension PebbleUpdatePayload {
         self.domainIds = [draft.domainId!]
         self.soulIds = draft.soulId.map { [$0] } ?? []
         self.collectionIds = draft.collectionId.map { [$0] } ?? []
+        self.glyphId = draft.glyphId
     }
 }
