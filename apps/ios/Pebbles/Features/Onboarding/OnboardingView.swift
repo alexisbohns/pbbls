@@ -38,18 +38,22 @@ struct OnboardingView: View {
                 }
             }
             .safeAreaInset(edge: .bottom) {
-                if currentIndex == steps.count - 1 {
-                    Button {
-                        onFinish()
-                    } label: {
-                        Text("Start your path")
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 8)
+                Group {
+                    if currentIndex == steps.count - 1 {
+                        Button {
+                            onFinish()
+                        } label: {
+                            Text("Start your path")
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 8)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 24)
+                        .transition(.opacity.combined(with: .move(edge: .bottom)))
                     }
-                    .buttonStyle(.borderedProminent)
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 24)
                 }
+                .animation(.easeInOut(duration: 0.2), value: currentIndex)
             }
             .pebblesScreen()
         }
