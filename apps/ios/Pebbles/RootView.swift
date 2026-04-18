@@ -34,6 +34,10 @@ struct RootView: View {
         .task {
             await supabase.start()
         }
+        // Relies on supabase.start() being kicked off in .task above.
+        // session?.user.id is nil when this observer is registered, so the
+        // first authStateChanges event delivers a real nil→id transition
+        // even for users already signed in from a prior launch.
         .onChange(of: supabase.session?.user.id) { _, newUserId in
             if newUserId != nil && !hasSeenOnboarding {
                 isPresentingOnboarding = true
