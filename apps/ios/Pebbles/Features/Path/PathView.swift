@@ -24,7 +24,7 @@ struct PathView: View {
                         } label: {
                             Image(systemName: "info.circle")
                         }
-                        .accessibilityLabel("How Pebbles works")
+                        .accessibilityLabel("Show how Pebbles works")
                     }
                 }
                 .pebblesScreen()
@@ -46,6 +46,8 @@ struct PathView: View {
         }
         .fullScreenCover(isPresented: $isPresentingOnboarding) {
             OnboardingView(steps: OnboardingSteps.all) {
+                // Replay is idempotent — only RootView's initial-gate
+                // closure writes @AppStorage("hasSeenOnboarding").
                 isPresentingOnboarding = false
             }
         }
