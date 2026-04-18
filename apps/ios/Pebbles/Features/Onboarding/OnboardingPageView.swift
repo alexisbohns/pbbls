@@ -59,5 +59,5 @@ struct OnboardingPageView: View {
 }
 
 #Preview("Long copy") {
-    OnboardingPageView(step: OnboardingSteps.all[2])
+    OnboardingPageView(step: OnboardingSteps.all[1])
 }
