@@ -7,6 +7,7 @@ import Foundation
 /// - `width`: stroke width in the glyph's 200x200 coordinate space. iOS-carved
 ///   strokes always use 6 per the issue constraint (no user-facing slider).
 struct GlyphStroke: Codable, Hashable {
+    // swiftlint:disable:next identifier_name
     let d: String
     let width: Double
 }
