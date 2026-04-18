@@ -20,10 +20,12 @@ struct GlyphService {
 
     private static let logger = Logger(subsystem: "app.pbbls.ios", category: "glyph-service")
 
-    /// Fetches the current user's glyphs. Excludes system glyphs (user_id is
-    /// null) — those are domain-default fallbacks, not personal carvings.
+    /// Fetches glyphs visible to the current user. In V1 this also includes
+    /// system glyphs (user_id is null) — the RLS policy allows them for
+    /// domain-default fallback reads elsewhere, and filtering them out
+    /// client-side would require adding user_id to the Glyph model.
+    /// Not blocking — deferred until the picker needs the distinction.
     func list() async throws -> [Glyph] {
-        // TODO: filter out system glyphs (user_id is null) once Supabase Swift SDK .not operator is confirmed
         let rows: [Glyph] = try await supabase.client
             .from("glyphs")
             .select("id, name, strokes, view_box")
