@@ -6,7 +6,7 @@
     "root_node_id": "V-landing",
     "metadata": { "view_card_variant": "large" },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-04-18T00:00:00Z"
+    "updated_at": "2026-04-18T12:00:00.000Z"
   },
   "nodes": [
     {
@@ -14,7 +14,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Landing",
-      "description": "Public landing page with app branding, login button, and create-account link. Redirects authenticated users to the home view.",
+      "description": "Public landing page with app branding, login button, and create-account link. Redirects authenticated users to the home view. iOS (PR #281) implements this as WelcomeView: persistent logo header, auto-advancing 3-step carousel, and two CTAs that push AuthView with the correct mode preselected.",
       "status": "development",
       "platforms": ["web", "ios", "android"]
     },
@@ -1267,8 +1267,8 @@
     { "id": "e-V-home-V-mechanic-sheet", "project_id": "pebbles", "source_id": "V-home", "target_id": "V-mechanic-sheet", "edge_type": "composes" },
     { "id": "e-V-mechanic-sheet-DM-bounce", "project_id": "pebbles", "source_id": "V-mechanic-sheet", "target_id": "DM-bounce", "edge_type": "displays" },
     { "id": "e-V-landing-V-home", "project_id": "pebbles", "source_id": "V-landing", "target_id": "V-home", "edge_type": "composes" },
-    { "id": "e-V-landing-V-login", "project_id": "pebbles", "source_id": "V-landing", "target_id": "V-login", "edge_type": "composes" },
-    { "id": "e-V-landing-V-register", "project_id": "pebbles", "source_id": "V-landing", "target_id": "V-register", "edge_type": "composes" },
+    { "id": "e-V-landing-V-login", "project_id": "pebbles", "source_id": "V-landing", "target_id": "V-login", "edge_type": "composes", "metadata": { "cta": "Log in", "ios_trigger": "AuthView(initialMode: .login)" } },
+    { "id": "e-V-landing-V-register", "project_id": "pebbles", "source_id": "V-landing", "target_id": "V-register", "edge_type": "composes", "metadata": { "cta": "Create an account", "ios_trigger": "AuthView(initialMode: .signup)" } },
     { "id": "e-V-login-V-register", "project_id": "pebbles", "source_id": "V-login", "target_id": "V-register", "edge_type": "composes" },
     { "id": "e-V-register-V-login", "project_id": "pebbles", "source_id": "V-register", "target_id": "V-login", "edge_type": "composes" },
     { "id": "e-V-login-API-login", "project_id": "pebbles", "source_id": "V-login", "target_id": "API-login", "edge_type": "calls" },
