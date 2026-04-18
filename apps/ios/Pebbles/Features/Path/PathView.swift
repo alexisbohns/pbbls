@@ -9,6 +9,7 @@ struct PathView: View {
     @State private var isPresentingCreate = false
     @State private var selectedPebbleId: UUID?
     @State private var presentedDetailPebbleId: UUID?
+    @State private var isPresentingOnboarding = false
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "path")
 
@@ -16,6 +17,16 @@ struct PathView: View {
         NavigationStack {
             content
                 .navigationTitle("Path")
+                .toolbar {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            isPresentingOnboarding = true
+                        } label: {
+                            Image(systemName: "info.circle")
+                        }
+                        .accessibilityLabel("How Pebbles works")
+                    }
+                }
                 .pebblesScreen()
         }
         .task { await load() }
@@ -32,6 +43,11 @@ struct PathView: View {
         }
         .sheet(item: $presentedDetailPebbleId) { id in
             PebbleDetailSheet(pebbleId: id)
+        }
+        .fullScreenCover(isPresented: $isPresentingOnboarding) {
+            OnboardingView(steps: OnboardingSteps.all) {
+                isPresentingOnboarding = false
+            }
         }
     }
 
