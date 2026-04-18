@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 /// Paged onboarding flow. Renders one `OnboardingPageView` per step inside
 /// a `TabView` with the iOS page-style indicator. Toolbar exposes a close
@@ -12,6 +13,17 @@ struct OnboardingView: View {
     let onFinish: () -> Void
 
     @State private var currentIndex: Int = 0
+
+    init(steps: [OnboardingStep], onFinish: @escaping () -> Void) {
+        self.steps = steps
+        self.onFinish = onFinish
+
+        // SwiftUI's TabView page-dot indicator is a UIPageControl under the
+        // hood; the only way to color it is via UIKit appearance proxies.
+        // Same approach used by MainTabView for the tab bar.
+        UIPageControl.appearance().currentPageIndicatorTintColor = UIColor(named: "AccentColor")
+        UIPageControl.appearance().pageIndicatorTintColor = UIColor(named: "MutedForeground")
+    }
 
     var body: some View {
         NavigationStack {
