@@ -11,20 +11,18 @@ struct GlyphInsertPayloadEncodingTests {
         return try #require(object as? [String: Any])
     }
 
-    @Test("encodes snake_case keys")
+    @Test("encodes snake_case keys without shape_id")
     func snakeCaseKeys() throws {
         let userId = UUID()
-        let shapeId = UUID()
         let payload = GlyphInsertPayload(
             userId: userId,
-            shapeId: shapeId,
             strokes: [GlyphStroke(d: "M0,0 L10,10", width: 6)],
             viewBox: "0 0 200 200",
             name: nil
         )
         let json = try encode(payload)
         #expect((json["user_id"] as? String) == userId.uuidString)
-        #expect((json["shape_id"] as? String) == shapeId.uuidString)
+        #expect(json["shape_id"] == nil, "shape_id must be omitted so the DB stores NULL")
         #expect((json["view_box"] as? String) == "0 0 200 200")
         #expect(json["name"] is NSNull)
     }
@@ -33,7 +31,6 @@ struct GlyphInsertPayloadEncodingTests {
     func strokeShape() throws {
         let payload = GlyphInsertPayload(
             userId: UUID(),
-            shapeId: UUID(),
             strokes: [
                 GlyphStroke(d: "M0,0 L1,1", width: 6),
                 GlyphStroke(d: "M2,2 L3,3", width: 6)

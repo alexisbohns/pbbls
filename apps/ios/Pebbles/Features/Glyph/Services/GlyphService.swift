@@ -7,16 +7,12 @@ import os
 /// Single-table reads/writes only (see `AGENTS.md` — multi-table ops must
 /// become RPCs, but glyphs don't cross table boundaries).
 ///
-/// The `squareShapeId` is hardcoded from the deterministic id pattern in
-/// `packages/supabase/supabase/migrations/20260411000006_deterministic_reference_ids.sql`
-/// (`md5('pebble_shapes:' || slug)::uuid`). This satisfies the V1 constraint
-/// "Glyph zone is a square, no such thing as shape" without a schema change.
+/// iOS-carved glyphs are stored with `shape_id = NULL` (made nullable in
+/// migration `20260415000001`), matching the issue #278 constraint that the
+/// glyph zone is always a square — no per-glyph shape.
 @MainActor
 struct GlyphService {
     let supabase: SupabaseService
-
-    /// Deterministic UUID from `md5('pebble_shapes:square')` reinterpreted as UUID.
-    static let squareShapeId = UUID(uuidString: "3753e7c7-a7dc-5da8-034c-94968e4c7eba")!
 
     private static let logger = Logger(subsystem: "app.pbbls.ios", category: "glyph-service")
 
@@ -43,7 +39,6 @@ struct GlyphService {
         }
         let payload = GlyphInsertPayload(
             userId: userId,
-            shapeId: Self.squareShapeId,
             strokes: strokes,
             viewBox: "0 0 200 200",
             name: name
