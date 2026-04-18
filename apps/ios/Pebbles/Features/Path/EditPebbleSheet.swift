@@ -172,12 +172,19 @@ struct EditPebbleSheet: View {
             // Soft-success: update succeeded but compose failed — the row was
             // updated, so advance as if saved and rely on the parent's list
             // refetch to eventually pick up a freshly composed render.
-            if case .httpError(let status, _) = functionsError, status >= 500 {
-                logger.warning("compose-pebble-update returned \(status, privacy: .public) — advancing on soft-success")
+            if case .httpError(let status, let data) = functionsError, status >= 500 {
+                let bodyString = String(data: data, encoding: .utf8) ?? "<non-utf8 body>"
+                logger.warning("compose-pebble-update returned \(status, privacy: .public) — advancing on soft-success. body=\(bodyString, privacy: .private)")
                 onSaved()
                 dismiss()
             } else {
-                logger.error("compose-pebble-update failed: \(functionsError.localizedDescription, privacy: .private)")
+                let bodyString: String
+                if case .httpError(_, let data) = functionsError {
+                    bodyString = String(data: data, encoding: .utf8) ?? "<non-utf8 body>"
+                } else {
+                    bodyString = "<non-http error>"
+                }
+                logger.error("compose-pebble-update failed: \(functionsError.localizedDescription, privacy: .private) body=\(bodyString, privacy: .private)")
                 self.saveError = "Couldn't save your changes. Please try again."
                 self.isSaving = false
             }

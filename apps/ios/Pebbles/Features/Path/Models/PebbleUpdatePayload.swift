@@ -36,12 +36,21 @@ struct PebbleUpdatePayload: Encodable {
         case glyphId = "glyph_id"
     }
 
+    private static let iso8601: ISO8601DateFormatter = {
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter
+    }()
+
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(name, forKey: .name)
         // Explicit nil encoding so absent descriptions clear the field server-side.
         try container.encode(description, forKey: .description)
-        try container.encode(happenedAt, forKey: .happenedAt)
+        // Encode Date as an ISO8601 string so Postgres' timestamptz cast accepts
+        // it. The Supabase SDK's .functions.invoke() path uses an encoder whose
+        // default date strategy emits Double seconds — which Postgres rejects.
+        try container.encode(Self.iso8601.string(from: happenedAt), forKey: .happenedAt)
         try container.encode(intensity, forKey: .intensity)
         try container.encode(positiveness, forKey: .positiveness)
         try container.encode(visibility, forKey: .visibility)
