@@ -33,7 +33,7 @@ struct RootView: View {
                 NavigationStack(path: $authPath) {
                     WelcomeView(
                         onCreateAccount: { authPath.append(AuthRoute.auth(.signup)) },
-                        onLogin:        { authPath.append(AuthRoute.auth(.login)) }
+                        onLogin: { authPath.append(AuthRoute.auth(.login)) }
                     )
                     .navigationDestination(for: AuthRoute.self) { route in
                         switch route {
