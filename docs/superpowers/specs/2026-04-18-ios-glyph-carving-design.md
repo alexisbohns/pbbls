@@ -18,7 +18,8 @@ The iOS app currently has a read-only `GlyphsListView` that lists glyph names wi
 - Tapping "Carve new glyph" opens a full-screen cover with a drawing canvas, Undo, Clear, Save, and Cancel.
 - On save, the glyph persists to `public.glyphs` and becomes selectable for the pebble being recorded/edited.
 - `Profile → Glyphs` gains a toolbar "+" button to carve a new glyph, and switches from a plain list of names to a thumbnail grid.
-- After associating a glyph with an edited pebble, the pebble's `render_svg` is refetched so the user sees the new composed render.
+- New client-callable edge function `compose-pebble-update` so edits recompose `render_svg` server-side, satisfying acceptance criterion #4.
+- iOS edit flow switches from the direct `update_pebble` RPC call to `compose-pebble-update` for symmetry with the create flow.
 
 ### Out of scope (V1)
 - Editing an existing glyph's strokes.
@@ -35,7 +36,7 @@ The iOS app currently has a read-only `GlyphsListView` that lists glyph names wi
 | 1 | When recording a pebble, user can draw a glyph | `GlyphCarveSheet` reached from `PebbleFormView → GlyphPickerSheet` |
 | 2 | When recording a pebble, user can choose an existing glyph | `GlyphPickerSheet` grid |
 | 3 | Chosen personal glyph appears in the pebble render after save | Extended `PebbleCreatePayload` sends `glyph_id`; server composes `render_svg` |
-| 4 | Editing an existing pebble to add a personal glyph refreshes the render | Extended `PebbleUpdatePayload` sends `glyph_id`; post-update refetch of `render_svg` |
+| 4 | Editing an existing pebble to add a personal glyph refreshes the render | Extended `PebbleUpdatePayload` sends `glyph_id`; new `compose-pebble-update` edge function returns fresh `render_svg` |
 | 5 | Saving a glyph stores it | `GlyphService.create(...)` inserts into `public.glyphs` |
 | 6 | Profile → Glyphs shows all user glyphs | Refactored `GlyphsListView` with thumbnail grid |
 | 7 | Profile → Glyphs allows creating new glyphs | Toolbar "+" button presents `GlyphCarveSheet` |
@@ -141,9 +142,9 @@ Canvas { ctx, size in
 ```
 
 `commitStroke()`:
-1. Apply RDP simplification with `epsilon = 1.5` (matches web `RDP_EPSILON`).
+1. Apply RDP simplification with `epsilon = 1.5` (matches web `RDP_EPSILON` — confirmed in `apps/web/components/carve/DrawingCanvas.tsx:11`).
 2. Map points to 200-space, round to 2 decimals.
-3. Serialize to `"M x,y L x,y …"`.
+3. Serialize via the same smoothing logic web uses: quadratic Beziers through midpoints for three or more points, straight `L` for one–two points (port of `pointsToSvgPath` in `apps/web/lib/utils/simplify-path.ts:59`).
 4. Append `GlyphStroke(d: …, width: 6)` to `strokes`.
 5. Clear `activePoints`.
 
@@ -153,10 +154,16 @@ Canvas { ctx, size in
 Direct port of `apps/web/lib/utils/simplify-path.ts`. Pure function, CoreGraphics only.
 
 **`SVGPath.svgPathString(from points: [CGPoint], precision: Int = 2) -> String`**
-Emits `M x,y L x,y L x,y …` with fixed-precision rounding.
+Direct port of `pointsToSvgPath` in `apps/web/lib/utils/simplify-path.ts:59`. Rules:
+- Empty → `""`.
+- One point → `M x,y L x,y` (a single dot rendered as zero-length line).
+- Two points → `M x,y L x,y`.
+- Three or more → `M p0 Q p1 m12 Q p2 m23 … L p_last` where each `m_i,i+1` is the midpoint between `p_i` and `p_{i+1}`.
+
+All coordinates fixed-precision rounded (default 2 decimals).
 
 **`SVGPath.path(from d: String) -> Path`**
-Parses `M`, `L`, `Q`, `C` commands into a SwiftUI `Path`. iOS-carved glyphs only emit `M` and `L`; the seed system glyphs (`community`, `family`, etc.) use `Q`, so the parser must handle quadratic Béziers for `GlyphThumbnail` to render them correctly if they ever appear. Malformed input returns an empty `Path` and logs a warning — no crashes.
+Parses `M`, `L`, `Q`, `C` commands into a SwiftUI `Path`. iOS-carved glyphs emit `M`/`L`/`Q`; the seed system glyphs (`community`, `family`, etc.) also use `Q`. Malformed input returns an empty `Path` and logs a warning — no crashes.
 
 ## UI flow
 
@@ -218,13 +225,28 @@ Standard `.sheet` (swipe-to-dismiss is safe here — no drawing).
 
 ### Render-SVG refresh after edit
 
-Server-side `compose-pebble` rewrites `render_svg` whenever a pebble's render inputs change. After `update_pebble` succeeds with a new `glyph_id`:
+**Problem:** `render_svg` is only written by the server-side `composeAndWriteRender` helper, which runs inside the `compose-pebble` edge function. The current iOS edit flow calls the `update_pebble` RPC directly, so edits currently leave `render_svg` stale — which fails acceptance criterion #4.
 
-1. `EditPebbleSheet` refetches the pebble's `render_svg` from `v_pebbles_full` (`select id, render_svg where id = …`).
-2. The in-memory pebble model is updated.
-3. `PebbleRenderView` re-renders the composed SVG.
+**Fix:** add a new client-callable edge function `compose-pebble-update` that mirrors the existing `compose-pebble` but wraps `update_pebble` instead of `create_pebble`. The iOS edit flow switches from a direct RPC call to this edge function, symmetric with the current create flow.
 
-If the refetch returns the stale `render_svg` (compose function hasn't completed yet), retry once after a 500 ms delay. The implementation plan should confirm whether an existing iOS post-save refetch pattern already handles this — if yes, reuse it rather than duplicating.
+**New edge function** `packages/supabase/supabase/functions/compose-pebble-update/index.ts`:
+
+```
+POST { pebble_id, payload }
+  → authClient.rpc("update_pebble", { p_pebble_id, payload })
+  → admin.composeAndWriteRender(pebble_id)
+  → 200 { pebble_id, render_svg, render_manifest, render_version }
+
+On RPC failure: 4xx with the RPC error.
+On compose failure after successful update: 500 with pebble_id in the body
+  (soft-success path — mirror compose-pebble behavior).
+```
+
+Implementation reuses the existing `composeAndWriteRender` helper from `_shared/compose-and-write.ts`. Auth-forwarded so `update_pebble`'s ownership check still runs as the end user.
+
+**iOS change:** `EditPebbleSheet.save()` switches from `.rpc("update_pebble", …)` to `.functions.invoke("compose-pebble-update", …)` with body `{ pebble_id, payload }`. The response includes the fresh `render_svg`; iOS updates local state immediately (no second round-trip needed) and then dismisses.
+
+The create flow is unchanged — it still hits `compose-pebble`.
 
 ## Data flow — Supabase integration
 
@@ -356,7 +378,6 @@ Before opening the PR:
 
 ## Open points for the implementation plan
 
-- Confirm whether the iOS edit flow already refetches a pebble's `render_svg` after `update_pebble` — reuse if yes, add if no.
 - Compute and hardcode the exact `square` `pebble_shapes` UUID (deterministic from `md5('pebble_shapes:square')`).
 - Decide the default for system-glyph visibility in the picker (recommendation: filter them out — they're domain-default fallbacks, not personal carvings).
 - Confirm `RDP_EPSILON = 1.5` is the exact constant used in web's `simplify-path.ts` during the port.
