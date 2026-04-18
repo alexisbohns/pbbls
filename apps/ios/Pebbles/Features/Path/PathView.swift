@@ -57,11 +57,14 @@ struct PathView: View {
                         Button {
                             selectedPebbleId = pebble.id
                         } label: {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(pebble.name).font(.body)
-                                Text(pebble.happenedAt, style: .date)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                            HStack(spacing: 12) {
+                                pebbleThumbnail(for: pebble)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(pebble.name).font(.body)
+                                    Text(pebble.happenedAt, style: .date)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
                             }
                         }
                         .buttonStyle(.plain)
@@ -71,11 +74,23 @@ struct PathView: View {
         }
     }
 
+    @ViewBuilder
+    private func pebbleThumbnail(for pebble: Pebble) -> some View {
+        if let svg = pebble.renderSvg {
+            PebbleRenderView(svg: svg, strokeColor: pebble.emotion?.color)
+                .frame(width: 40, height: 40)
+        } else {
+            RoundedRectangle(cornerRadius: 6)
+                .fill(Color.secondary.opacity(0.15))
+                .frame(width: 40, height: 40)
+        }
+    }
+
     private func load() async {
         do {
             let result: [Pebble] = try await supabase.client
                 .from("pebbles")
-                .select("id, name, happened_at")
+                .select("id, name, happened_at, render_svg, emotion:emotions(id, name, color)")
                 .order("happened_at", ascending: false)
                 .execute()
                 .value
