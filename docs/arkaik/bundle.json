@@ -6,7 +6,7 @@
     "root_node_id": "V-landing",
     "metadata": { "view_card_variant": "large" },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-04-17T00:00:00Z"
+    "updated_at": "2026-04-18T00:00:00Z"
   },
   "nodes": [
     {
@@ -353,31 +353,40 @@
       "platforms": ["web", "ios", "android"]
     },
     {
-      "id": "V-onboarding-welcome",
+      "id": "V-onboarding-intro",
       "project_id": "pebbles",
       "species": "view",
-      "title": "Onboarding — Your Life Is a Path",
+      "title": "Onboarding — Your life is a path",
       "description": "First onboarding screen introducing the pebble/path metaphor.",
       "status": "development",
-      "platforms": ["web", "ios", "android"]
+      "platforms": ["ios"]
     },
     {
-      "id": "V-onboarding-collect",
+      "id": "V-onboarding-concept",
       "project_id": "pebbles",
       "species": "view",
-      "title": "Onboarding — Drop a Pebble",
-      "description": "Second onboarding screen framing the user as a collector.",
+      "title": "Onboarding — Drop a pebble, keep the moment",
+      "description": "Second onboarding screen framing pebble recording as low-friction.",
       "status": "development",
-      "platforms": ["web", "ios", "android"]
+      "platforms": ["ios"]
     },
     {
-      "id": "V-onboarding-activate",
+      "id": "V-onboarding-qualify",
       "project_id": "pebbles",
       "species": "view",
-      "title": "Onboarding — Build Your Path",
-      "description": "Third onboarding screen with CTA to record first pebble.",
+      "title": "Onboarding — Qualify and relate",
+      "description": "Third onboarding screen explaining emotion, domain, souls, collections.",
       "status": "development",
-      "platforms": ["web", "ios", "android"]
+      "platforms": ["ios"]
+    },
+    {
+      "id": "V-onboarding-carving",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Onboarding — Get your pebble",
+      "description": "Fourth onboarding screen explaining glyph carving and pebble illustration.",
+      "status": "development",
+      "platforms": ["ios"]
     },
     {
       "id": "V-settings",
@@ -425,9 +434,10 @@
       "metadata": {
         "playlist": {
           "entries": [
-            { "type": "view", "view_id": "V-onboarding-welcome" },
-            { "type": "view", "view_id": "V-onboarding-collect" },
-            { "type": "view", "view_id": "V-onboarding-activate" },
+            { "type": "view", "view_id": "V-onboarding-intro" },
+            { "type": "view", "view_id": "V-onboarding-concept" },
+            { "type": "view", "view_id": "V-onboarding-qualify" },
+            { "type": "view", "view_id": "V-onboarding-carving" },
             { "type": "view", "view_id": "V-home" }
           ]
         }
@@ -1121,9 +1131,10 @@
     { "id": "e-F-record-pebble-V-pebble-revelation", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-pebble-revelation", "edge_type": "composes" },
     { "id": "e-F-record-pebble-V-record-celebration", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-record-celebration", "edge_type": "composes" },
 
-    { "id": "e-F-onboarding-V-onboarding-welcome", "project_id": "pebbles", "source_id": "F-onboarding", "target_id": "V-onboarding-welcome", "edge_type": "composes" },
-    { "id": "e-F-onboarding-V-onboarding-collect", "project_id": "pebbles", "source_id": "F-onboarding", "target_id": "V-onboarding-collect", "edge_type": "composes" },
-    { "id": "e-F-onboarding-V-onboarding-activate", "project_id": "pebbles", "source_id": "F-onboarding", "target_id": "V-onboarding-activate", "edge_type": "composes" },
+    { "id": "e-F-onboarding-V-onboarding-intro", "project_id": "pebbles", "source_id": "F-onboarding", "target_id": "V-onboarding-intro", "edge_type": "composes" },
+    { "id": "e-F-onboarding-V-onboarding-concept", "project_id": "pebbles", "source_id": "F-onboarding", "target_id": "V-onboarding-concept", "edge_type": "composes" },
+    { "id": "e-F-onboarding-V-onboarding-qualify", "project_id": "pebbles", "source_id": "F-onboarding", "target_id": "V-onboarding-qualify", "edge_type": "composes" },
+    { "id": "e-F-onboarding-V-onboarding-carving", "project_id": "pebbles", "source_id": "F-onboarding", "target_id": "V-onboarding-carving", "edge_type": "composes" },
     { "id": "e-F-onboarding-V-home", "project_id": "pebbles", "source_id": "F-onboarding", "target_id": "V-home", "edge_type": "composes" },
 
     { "id": "e-F-manage-collections-V-collections-list", "project_id": "pebbles", "source_id": "F-manage-collections", "target_id": "V-collections-list", "edge_type": "composes" },
@@ -1173,7 +1184,7 @@
     { "id": "e-V-achievements-API-get-achievements", "project_id": "pebbles", "source_id": "V-achievements", "target_id": "API-get-achievements", "edge_type": "calls" },
     { "id": "e-V-weekly-cairn-API-get-weekly-cairn", "project_id": "pebbles", "source_id": "V-weekly-cairn", "target_id": "API-get-weekly-cairn", "edge_type": "calls" },
     { "id": "e-V-monthly-cairn-API-get-monthly-cairn", "project_id": "pebbles", "source_id": "V-monthly-cairn", "target_id": "API-get-monthly-cairn", "edge_type": "calls" },
-    { "id": "e-V-onboarding-activate-V-home", "project_id": "pebbles", "source_id": "V-onboarding-activate", "target_id": "V-home", "edge_type": "composes" },
+    { "id": "e-V-onboarding-carving-V-home", "project_id": "pebbles", "source_id": "V-onboarding-carving", "target_id": "V-home", "edge_type": "composes" },
 
     { "id": "e-V-home-DM-pebble", "project_id": "pebbles", "source_id": "V-home", "target_id": "DM-pebble", "edge_type": "displays" },
     { "id": "e-V-home-DM-bounce", "project_id": "pebbles", "source_id": "V-home", "target_id": "DM-bounce", "edge_type": "displays" },
@@ -1266,6 +1277,7 @@
     { "id": "e-V-pebble-revelation-V-pebble-visual", "project_id": "pebbles", "source_id": "V-pebble-revelation", "target_id": "V-pebble-visual", "edge_type": "composes" },
     { "id": "e-V-pebble-detail-V-pebble-visual", "project_id": "pebbles", "source_id": "V-pebble-detail", "target_id": "V-pebble-visual", "edge_type": "composes" },
     { "id": "e-V-timeline-V-pebble-visual", "project_id": "pebbles", "source_id": "V-timeline", "target_id": "V-pebble-visual", "edge_type": "composes" },
+    { "id": "e-V-timeline-F-onboarding", "project_id": "pebbles", "source_id": "V-timeline", "target_id": "F-onboarding", "edge_type": "composes" },
     { "id": "e-V-pebble-visual-DM-pebble-engine", "project_id": "pebbles", "source_id": "V-pebble-visual", "target_id": "DM-pebble-engine", "edge_type": "displays" },
 
     { "id": "e-V-quick-pebble-editor-API-create-pebble", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "API-create-pebble", "edge_type": "calls" },
