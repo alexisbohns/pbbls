@@ -12,6 +12,8 @@ struct WelcomeView: View {
     let onLogin: () -> Void
 
     @State private var currentIndex: Int = 0
+    @State private var autoAdvanceTick: Int = 0
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(onCreateAccount: @escaping () -> Void, onLogin: @escaping () -> Void) {
         self.onCreateAccount = onCreateAccount
@@ -70,6 +72,19 @@ struct WelcomeView: View {
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 32)
+        }
+        .task(id: autoAdvanceTick) {
+            guard !reduceMotion else { return }
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(4))
+                if Task.isCancelled { break }
+                withAnimation {
+                    currentIndex = (currentIndex + 1) % WelcomeSteps.all.count
+                }
+            }
+        }
+        .onChange(of: currentIndex) { _, _ in
+            autoAdvanceTick &+= 1
         }
         .pebblesScreen()
     }
