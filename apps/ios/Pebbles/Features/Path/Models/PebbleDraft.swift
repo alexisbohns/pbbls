@@ -45,5 +45,6 @@ extension PebbleDraft {
         self.soulId = detail.souls.first?.id
         self.collectionId = detail.collections.first?.id
         self.visibility = detail.visibility
+        self.glyphId = detail.glyphId
     }
 }

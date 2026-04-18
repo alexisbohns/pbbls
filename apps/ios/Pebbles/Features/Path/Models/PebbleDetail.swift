@@ -12,6 +12,7 @@ import os
 // `slug`/`label` fields. `Soul` and `PebbleCollection` are reused directly
 // because their full shapes match the detail select.
 
+
 struct EmotionRef: Decodable, Hashable, Identifiable {
     let id: UUID
     let name: String
@@ -42,6 +43,7 @@ struct PebbleDetail: Identifiable, Decodable, Hashable {
     let collections: [PebbleCollection]
     let renderSvg: String?
     let renderVersion: String?
+    let glyphId: UUID?
     // renderManifest is intentionally not stored on PebbleDetail in slice 1 —
     // the animation consumer lives in a later slice. We still decode it as an
     // opaque placeholder so the field doesn't break decoding when present.
@@ -85,6 +87,7 @@ struct PebbleDetail: Identifiable, Decodable, Hashable {
         case collectionPebbles = "collection_pebbles"
         case renderSvg = "render_svg"
         case renderVersion = "render_version"
+        case glyphId = "glyph_id"
     }
 
     private struct DomainWrapper: Decodable { let domain: DomainRef }
@@ -114,5 +117,6 @@ struct PebbleDetail: Identifiable, Decodable, Hashable {
 
         self.renderSvg = try container.decodeIfPresent(String.self, forKey: .renderSvg)
         self.renderVersion = try container.decodeIfPresent(String.self, forKey: .renderVersion)
+        self.glyphId = try container.decodeIfPresent(UUID.self, forKey: .glyphId)
     }
 }

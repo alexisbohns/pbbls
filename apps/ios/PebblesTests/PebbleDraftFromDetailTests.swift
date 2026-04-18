@@ -123,4 +123,48 @@ struct PebbleDraftFromDetailTests {
         let draft = PebbleDraft(from: detail)
         #expect(draft.valence == .lowlightMedium)
     }
+
+    @Test("draft.glyphId is populated from detail.glyphId")
+    func glyphIdRoundTrip() throws {
+        let glyphId = UUID()
+        let emotionId = UUID()
+        let domainId = UUID()
+
+        let emotionJSON: [String: Any] = [
+            "id": emotionId.uuidString,
+            "name": "Joy",
+            "color": "#FFD166"
+        ]
+        let domainsJSON = [["domain": ["id": domainId.uuidString, "name": "Work"]]]
+
+        var root: [String: Any] = [
+            "id": UUID().uuidString,
+            "name": "Test Pebble",
+            "happened_at": "2026-04-18T12:00:00Z",
+            "intensity": 2,
+            "positiveness": 1,
+            "visibility": "private",
+            "glyph_id": glyphId.uuidString,
+            "emotion": emotionJSON,
+            "pebble_domains": domainsJSON,
+            "pebble_souls": [],
+            "collection_pebbles": []
+        ]
+
+        let data = try JSONSerialization.data(withJSONObject: root)
+        let decoder = JSONDecoder()
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        decoder.dateDecodingStrategy = .custom { dec in
+            let container = try dec.singleValueContainer()
+            let iso = try container.decode(String.self)
+            guard let date = formatter.date(from: iso) else {
+                throw DecodingError.dataCorruptedError(in: container, debugDescription: "bad date")
+            }
+            return date
+        }
+        let detail = try decoder.decode(PebbleDetail.self, from: data)
+        let draft = PebbleDraft(from: detail)
+        #expect(draft.glyphId == glyphId)
+    }
 }
