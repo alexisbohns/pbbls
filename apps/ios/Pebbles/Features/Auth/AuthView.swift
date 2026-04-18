@@ -14,13 +14,17 @@ struct AuthView: View {
 
     @Environment(SupabaseService.self) private var supabase
 
-    @State private var mode: Mode = .login
+    @State private var mode: Mode
     @State private var email = ""
     @State private var password = ""
     @State private var isSubmitting = false
     @State private var termsAccepted = false
     @State private var privacyAccepted = false
     @State private var presentedLegalDoc: LegalDoc?
+
+    init(initialMode: Mode = .login) {
+        _mode = State(initialValue: initialMode)
+    }
 
     var body: some View {
         VStack(spacing: 24) {
