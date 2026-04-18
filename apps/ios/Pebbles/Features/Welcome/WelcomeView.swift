@@ -3,7 +3,9 @@ import UIKit
 
 /// Pre-login landing. Persistent logo header, paged carousel of
 /// `WelcomeSteps.all`, and two stacked CTAs that route into `AuthView`
-/// with the correct mode. Auto-advance is added in a follow-up.
+/// with the correct mode. The carousel auto-advances every 4 seconds;
+/// any change to `currentIndex` (programmatic or manual swipe) resets
+/// the timer. Reduce Motion short-circuits the loop — swipe only.
 ///
 /// Navigation is owned by the parent: this view invokes `onCreateAccount`
 /// and `onLogin` closures so `RootView` can drive the `NavigationPath`.
