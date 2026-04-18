@@ -233,7 +233,7 @@ Why `.onChange(of:)` on `session?.user.id` rather than reading `hasSeenOnboardin
         Button { isPresentingOnboarding = true } label: {
             Image(systemName: "info.circle")
         }
-        .accessibilityLabel("How Pebbles works")
+        .accessibilityLabel("Show how Pebbles works")
     }
 }
 .fullScreenCover(isPresented: $isPresentingOnboarding) {

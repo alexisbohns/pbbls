@@ -1277,6 +1277,7 @@
     { "id": "e-V-pebble-revelation-V-pebble-visual", "project_id": "pebbles", "source_id": "V-pebble-revelation", "target_id": "V-pebble-visual", "edge_type": "composes" },
     { "id": "e-V-pebble-detail-V-pebble-visual", "project_id": "pebbles", "source_id": "V-pebble-detail", "target_id": "V-pebble-visual", "edge_type": "composes" },
     { "id": "e-V-timeline-V-pebble-visual", "project_id": "pebbles", "source_id": "V-timeline", "target_id": "V-pebble-visual", "edge_type": "composes" },
+    { "id": "e-V-timeline-F-onboarding", "project_id": "pebbles", "source_id": "V-timeline", "target_id": "F-onboarding", "edge_type": "composes" },
     { "id": "e-V-pebble-visual-DM-pebble-engine", "project_id": "pebbles", "source_id": "V-pebble-visual", "target_id": "DM-pebble-engine", "edge_type": "displays" },
 
     { "id": "e-V-quick-pebble-editor-API-create-pebble", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "API-create-pebble", "edge_type": "calls" },
