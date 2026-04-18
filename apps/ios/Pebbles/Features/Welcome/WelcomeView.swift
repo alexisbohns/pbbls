@@ -1,0 +1,83 @@
+import SwiftUI
+import UIKit
+
+/// Pre-login landing. Persistent logo header, paged carousel of
+/// `WelcomeSteps.all`, and two stacked CTAs that route into `AuthView`
+/// with the correct mode. Auto-advance is added in a follow-up.
+///
+/// Navigation is owned by the parent: this view invokes `onCreateAccount`
+/// and `onLogin` closures so `RootView` can drive the `NavigationPath`.
+struct WelcomeView: View {
+    let onCreateAccount: () -> Void
+    let onLogin: () -> Void
+
+    @State private var currentIndex: Int = 0
+
+    init(onCreateAccount: @escaping () -> Void, onLogin: @escaping () -> Void) {
+        self.onCreateAccount = onCreateAccount
+        self.onLogin = onLogin
+
+        // Page dot tint mirrors `OnboardingView`: accent for current,
+        // muted foreground for inactive.
+        UIPageControl.appearance().currentPageIndicatorTintColor = UIColor(named: "AccentColor")
+        UIPageControl.appearance().pageIndicatorTintColor = UIColor(named: "MutedForeground")
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            Spacer(minLength: 48)
+
+            Image("WelcomeLogo")
+                .renderingMode(.template)
+                .resizable()
+                .scaledToFit()
+                .foregroundStyle(Color.pebblesForeground)
+                .frame(maxWidth: 220, maxHeight: 220)
+
+            Spacer()
+
+            TabView(selection: $currentIndex) {
+                ForEach(Array(WelcomeSteps.all.enumerated()), id: \.element.id) { index, step in
+                    WelcomeSlideView(step: step)
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel(
+                            "Welcome step \(index + 1) of \(WelcomeSteps.all.count): \(step.title). \(step.description)"
+                        )
+                        .tag(index)
+                }
+            }
+            .tabViewStyle(.page(indexDisplayMode: .always))
+            .frame(height: 160)
+
+            VStack(spacing: 12) {
+                Button {
+                    onCreateAccount()
+                } label: {
+                    Text("Create an account")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                }
+                .buttonStyle(.borderedProminent)
+
+                Button {
+                    onLogin()
+                } label: {
+                    Text("Log in")
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                }
+                .buttonStyle(.bordered)
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 32)
+        }
+        .pebblesScreen()
+    }
+}
+
+#Preview {
+    WelcomeView(
+        onCreateAccount: {},
+        onLogin: {}
+    )
+}
