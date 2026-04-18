@@ -96,4 +96,20 @@ struct PebbleUpdatePayloadEncodingTests {
         let json = try encode(PebbleUpdatePayload(from: draft))
         #expect(json["description"] is NSNull)
     }
+
+    @Test("encodes glyph_id as null when draft has no glyph")
+    func nullGlyphId() throws {
+        let draft = makeValidDraft()
+        let json = try encode(PebbleUpdatePayload(from: draft))
+        #expect(json["glyph_id"] is NSNull)
+    }
+
+    @Test("encodes glyph_id as uuid string when set")
+    func setGlyphId() throws {
+        let glyphId = UUID()
+        var draft = makeValidDraft()
+        draft.glyphId = glyphId
+        let json = try encode(PebbleUpdatePayload(from: draft))
+        #expect((json["glyph_id"] as? String) == glyphId.uuidString)
+    }
 }

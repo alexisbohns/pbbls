@@ -20,6 +20,7 @@ struct PebbleUpdatePayload: Encodable {
     let domainIds: [UUID]
     let soulIds: [UUID]
     let collectionIds: [UUID]
+    let glyphId: UUID?
 
     enum CodingKeys: String, CodingKey {
         case name
@@ -32,6 +33,7 @@ struct PebbleUpdatePayload: Encodable {
         case domainIds = "domain_ids"
         case soulIds = "soul_ids"
         case collectionIds = "collection_ids"
+        case glyphId = "glyph_id"
     }
 
     func encode(to encoder: Encoder) throws {
@@ -47,6 +49,7 @@ struct PebbleUpdatePayload: Encodable {
         try container.encode(domainIds, forKey: .domainIds)
         try container.encode(soulIds, forKey: .soulIds)
         try container.encode(collectionIds, forKey: .collectionIds)
+        try container.encode(glyphId, forKey: .glyphId)
     }
 }
 
@@ -66,5 +69,6 @@ extension PebbleUpdatePayload {
         self.domainIds = [draft.domainId!]
         self.soulIds = draft.soulId.map { [$0] } ?? []
         self.collectionIds = draft.collectionId.map { [$0] } ?? []
+        self.glyphId = draft.glyphId
     }
 }
