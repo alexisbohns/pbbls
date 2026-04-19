@@ -18,6 +18,7 @@ struct PebbleFormView: View {
     var strokeColor: String?
 
     @State private var showPicker = false
+    @State private var showValencePicker = false
     @State private var selectedGlyph: Glyph?
 
     @Environment(SupabaseService.self) private var supabase
@@ -62,12 +63,38 @@ struct PebbleFormView: View {
                     }
                 }
 
-                Picker("Valence", selection: $draft.valence) {
-                    Text("Choose…").tag(Valence?.none)
-                    ForEach(Valence.allCases) { valence in
-                        Text(valence.label).tag(Valence?.some(valence))
+                Button {
+                    showValencePicker = true
+                } label: {
+                    HStack(spacing: 12) {
+                        if let valence = draft.valence {
+                            Image(valence.assetName)
+                                .renderingMode(.template)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 32, height: 32)
+                                .foregroundStyle(Color.pebblesMutedForeground)
+                                .accessibilityHidden(true)
+                        } else {
+                            RoundedRectangle(cornerRadius: 6)
+                                .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [3]))
+                                .frame(width: 32, height: 32)
+                                .foregroundStyle(Color.pebblesMutedForeground)
+                        }
+                        Text("Valence")
+                            .foregroundStyle(Color.pebblesForeground)
+                        Spacer()
+                        Text(draft.valence?.label ?? "Choose…")
+                            .foregroundStyle(Color.pebblesMutedForeground)
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                            .accessibilityHidden(true)
                     }
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Valence")
+                .accessibilityValue(draft.valence?.label ?? "Choose")
             }
 
             Section("Glyph") {
@@ -142,6 +169,12 @@ struct PebbleFormView: View {
             GlyphPickerSheet(
                 currentGlyphId: draft.glyphId,
                 onSelected: { glyphId in draft.glyphId = glyphId }
+            )
+        }
+        .sheet(isPresented: $showValencePicker) {
+            ValencePickerSheet(
+                currentValence: draft.valence,
+                onSelected: { picked in draft.valence = picked }
             )
         }
         .task(id: draft.glyphId) { await loadSelectedGlyph() }
