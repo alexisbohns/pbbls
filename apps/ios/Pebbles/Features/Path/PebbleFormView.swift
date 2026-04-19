@@ -148,15 +148,6 @@ struct PebbleFormView: View {
                 }
             }
 
-            Section("Privacy") {
-                Picker("Privacy", selection: $draft.visibility) {
-                    ForEach(Visibility.allCases) { visibility in
-                        Text(visibility.label).tag(visibility)
-                    }
-                }
-                .pickerStyle(.segmented)
-            }
-
             if let saveError {
                 Section {
                     Text(saveError)
