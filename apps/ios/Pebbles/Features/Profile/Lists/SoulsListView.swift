@@ -99,6 +99,7 @@ struct SoulsListView: View {
                             Label("Delete", systemImage: "trash")
                         }
                     }
+                    .listRowBackground(Color.pebblesListRow)
                 }
             }
         }

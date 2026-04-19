@@ -11,10 +11,10 @@ extension Color {
     static let pebblesBorder          = Color("Border")
     static let pebblesAccent          = Color("AccentColor")
 
-    /// Path list row fill. White in light mode, `SurfaceAlt` in dark — so rows
-    /// read as a layered surface on top of `pebblesBackground` rather than the
-    /// iOS default neutral grey.
-    static let pebblesPathRow = Color(uiColor: UIColor { traits in
+    /// Fill for list/form rows across the app. White in light mode,
+    /// `SurfaceAlt` in dark — so rows read as a layered surface on top of
+    /// `pebblesBackground` rather than the iOS default neutral grey.
+    static let pebblesListRow = Color(uiColor: UIColor { traits in
         traits.userInterfaceStyle == .dark
             ? UIColor(named: "SurfaceAlt") ?? .systemGray5
             : .white

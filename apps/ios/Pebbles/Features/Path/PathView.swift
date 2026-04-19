@@ -68,7 +68,7 @@ struct PathView: View {
                         Label("Record a pebble", systemImage: "plus.circle.fill")
                             .font(.headline)
                     }
-                    .listRowBackground(Color.pebblesPathRow)
+                    .listRowBackground(Color.pebblesListRow)
                 }
 
                 Section("Path") {
@@ -87,7 +87,7 @@ struct PathView: View {
                             }
                         }
                         .buttonStyle(.plain)
-                        .listRowBackground(Color.pebblesPathRow)
+                        .listRowBackground(Color.pebblesListRow)
                     }
                 }
             }

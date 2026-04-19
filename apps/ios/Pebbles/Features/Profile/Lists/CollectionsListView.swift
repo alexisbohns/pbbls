@@ -100,6 +100,7 @@ struct CollectionsListView: View {
                             Label("Delete", systemImage: "trash")
                         }
                     }
+                    .listRowBackground(Color.pebblesListRow)
                 }
             }
         }
