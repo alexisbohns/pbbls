@@ -16,6 +16,7 @@ struct PebbleFormView: View {
     let saveError: String?
     var renderSvg: String?
     var strokeColor: String?
+    var renderHeight: CGFloat = 260
 
     @State private var showPicker = false
     @State private var showValencePicker = false
@@ -28,7 +29,7 @@ struct PebbleFormView: View {
             if let svg = renderSvg {
                 PebbleRenderView(svg: svg, strokeColor: strokeColor)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 260)
+                    .frame(height: renderHeight)
                     .padding(.vertical)
                     // Form rows add insets and a card background; strip both so the artwork spans edge-to-edge.
                     .listRowInsets(EdgeInsets())
@@ -41,11 +42,15 @@ struct PebbleFormView: View {
                     selection: $draft.happenedAt,
                     displayedComponents: [.date, .hourAndMinute]
                 )
+                .tint(Color.pebblesAccent)
+                .listRowBackground(Color.pebblesListRow)
 
                 TextField("Name", text: $draft.name)
+                    .listRowBackground(Color.pebblesListRow)
 
                 TextField("Description (optional)", text: $draft.description, axis: .vertical)
                     .lineLimit(1...5)
+                    .listRowBackground(Color.pebblesListRow)
             }
 
             Section("Mood") {
@@ -55,6 +60,7 @@ struct PebbleFormView: View {
                         Text(emotion.name).tag(UUID?.some(emotion.id))
                     }
                 }
+                .listRowBackground(Color.pebblesListRow)
 
                 Picker("Domain", selection: $draft.domainId) {
                     Text("Choose…").tag(UUID?.none)
@@ -62,6 +68,7 @@ struct PebbleFormView: View {
                         Text(domain.name).tag(UUID?.some(domain.id))
                     }
                 }
+                .listRowBackground(Color.pebblesListRow)
 
                 Button {
                     showValencePicker = true
@@ -95,6 +102,7 @@ struct PebbleFormView: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel("Valence")
                 .accessibilityValue(draft.valence?.label ?? "Choose")
+                .listRowBackground(Color.pebblesListRow)
             }
 
             Section("Glyph") {
@@ -130,6 +138,7 @@ struct PebbleFormView: View {
                         }
                     }
                 }
+                .listRowBackground(Color.pebblesListRow)
             }
 
             Section("Optional") {
@@ -139,6 +148,7 @@ struct PebbleFormView: View {
                         Text(soul.name).tag(UUID?.some(soul.id))
                     }
                 }
+                .listRowBackground(Color.pebblesListRow)
 
                 Picker("Collection", selection: $draft.collectionId) {
                     Text("None").tag(UUID?.none)
@@ -146,15 +156,7 @@ struct PebbleFormView: View {
                         Text(collection.name).tag(UUID?.some(collection.id))
                     }
                 }
-            }
-
-            Section("Privacy") {
-                Picker("Privacy", selection: $draft.visibility) {
-                    ForEach(Visibility.allCases) { visibility in
-                        Text(visibility.label).tag(visibility)
-                    }
-                }
-                .pickerStyle(.segmented)
+                .listRowBackground(Color.pebblesListRow)
             }
 
             if let saveError {
@@ -162,6 +164,7 @@ struct PebbleFormView: View {
                     Text(saveError)
                         .foregroundStyle(.red)
                         .font(.callout)
+                        .listRowBackground(Color.pebblesListRow)
                 }
             }
         }

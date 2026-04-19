@@ -59,7 +59,11 @@ struct GlyphsListView: View {
                 LazyVGrid(columns: columns, spacing: 12) {
                     ForEach(glyphs) { glyph in
                         VStack(spacing: 4) {
-                            GlyphThumbnail(strokes: glyph.strokes, side: 96)
+                            GlyphThumbnail(
+                                strokes: glyph.strokes,
+                                side: 96,
+                                strokeColor: Color.pebblesAccent
+                            )
                             if let name = glyph.name {
                                 Text(name)
                                     .font(.caption)

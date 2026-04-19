@@ -31,6 +31,7 @@ struct ProfileView: View {
                     ) {
                         presentedSheet = .karma
                     }
+                    .listRowBackground(Color.pebblesListRow)
                     ProfileStatRow(
                         title: "Bounce",
                         systemImage: "arrow.up.right",
@@ -38,6 +39,7 @@ struct ProfileView: View {
                     ) {
                         presentedSheet = .bounce
                     }
+                    .listRowBackground(Color.pebblesListRow)
                 }
 
                 Section("Lists") {
@@ -46,25 +48,30 @@ struct ProfileView: View {
                     } label: {
                         Label("Collections", systemImage: "square.stack.3d.up")
                     }
+                    .listRowBackground(Color.pebblesListRow)
                     NavigationLink {
                         SoulsListView()
                     } label: {
                         Label("Souls", systemImage: "person.2")
                     }
+                    .listRowBackground(Color.pebblesListRow)
                     NavigationLink {
                         GlyphsListView()
                     } label: {
                         Label("Glyphs", systemImage: "scribble")
                     }
+                    .listRowBackground(Color.pebblesListRow)
                 }
 
                 Section("Legal") {
                     ProfileNavRow(title: "Terms", systemImage: "doc.text") {
                         presentedLegalDoc = .terms
                     }
+                    .listRowBackground(Color.pebblesListRow)
                     ProfileNavRow(title: "Privacy", systemImage: "lock.shield") {
                         presentedLegalDoc = .privacy
                     }
+                    .listRowBackground(Color.pebblesListRow)
                 }
 
                 Section {
@@ -74,6 +81,7 @@ struct ProfileView: View {
                         Text("Log out")
                             .frame(maxWidth: .infinity)
                     }
+                    .listRowBackground(Color.pebblesListRow)
                 }
             }
             .navigationTitle("Profile")

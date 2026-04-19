@@ -81,6 +81,7 @@ struct AuthView: View {
                 submit()
             } label: {
                 Text("Continue")
+                    .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
             }

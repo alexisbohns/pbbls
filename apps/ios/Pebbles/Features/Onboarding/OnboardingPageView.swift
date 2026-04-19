@@ -39,13 +39,12 @@ struct OnboardingPageView: View {
             Image(name)
                 .resizable()
                 .scaledToFit()
-                .padding(24)
 
         case .remote(let url):
             AsyncImage(url: url) { phase in
                 switch phase {
                 case .success(let image):
-                    image.resizable().scaledToFit().padding(24)
+                    image.resizable().scaledToFit()
                 default:
                     Color.pebblesSurfaceAlt
                 }

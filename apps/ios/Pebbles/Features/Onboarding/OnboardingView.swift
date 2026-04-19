@@ -56,6 +56,7 @@ struct OnboardingView: View {
                             onFinish()
                         } label: {
                             Text("Start your path")
+                                .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity)
                                 .padding(.vertical, 8)
                         }
