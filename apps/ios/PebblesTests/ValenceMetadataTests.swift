@@ -43,3 +43,61 @@ struct ValencePolarityTests {
         #expect(ValencePolarity.allCases == [.lowlight, .neutral, .highlight])
     }
 }
+
+@Suite("Valence helpers")
+struct ValenceHelpersTests {
+
+    @Test("sizeGroup mapping covers all nine cases")
+    func sizeGroupMapping() {
+        #expect(Valence.lowlightSmall.sizeGroup   == .small)
+        #expect(Valence.neutralSmall.sizeGroup    == .small)
+        #expect(Valence.highlightSmall.sizeGroup  == .small)
+        #expect(Valence.lowlightMedium.sizeGroup  == .medium)
+        #expect(Valence.neutralMedium.sizeGroup   == .medium)
+        #expect(Valence.highlightMedium.sizeGroup == .medium)
+        #expect(Valence.lowlightLarge.sizeGroup   == .large)
+        #expect(Valence.neutralLarge.sizeGroup    == .large)
+        #expect(Valence.highlightLarge.sizeGroup  == .large)
+    }
+
+    @Test("polarity mapping covers all nine cases")
+    func polarityMapping() {
+        #expect(Valence.lowlightSmall.polarity    == .lowlight)
+        #expect(Valence.lowlightMedium.polarity   == .lowlight)
+        #expect(Valence.lowlightLarge.polarity    == .lowlight)
+        #expect(Valence.neutralSmall.polarity     == .neutral)
+        #expect(Valence.neutralMedium.polarity    == .neutral)
+        #expect(Valence.neutralLarge.polarity     == .neutral)
+        #expect(Valence.highlightSmall.polarity   == .highlight)
+        #expect(Valence.highlightMedium.polarity  == .highlight)
+        #expect(Valence.highlightLarge.polarity   == .highlight)
+    }
+
+    @Test("assetName matches the imagesets in Assets.xcassets/Valence")
+    func assetNameMatchesAssets() {
+        for valence in Valence.allCases {
+            let name = valence.assetName
+            #expect(name == "valence-\(valence.rawValue)")
+            #expect(!name.isEmpty)
+        }
+    }
+
+    @Test("shortLabel reflects polarity")
+    func shortLabel() {
+        #expect(Valence.lowlightSmall.shortLabel  == "Lowlight")
+        #expect(Valence.neutralMedium.shortLabel  == "Neutral")
+        #expect(Valence.highlightLarge.shortLabel == "Highlight")
+    }
+
+    @Test("Lookup by (sizeGroup, polarity) is unique for every cell")
+    func lookupIsUnique() {
+        for group in ValenceSizeGroup.allCases {
+            for polarity in ValencePolarity.allCases {
+                let matches = Valence.allCases.filter {
+                    $0.sizeGroup == group && $0.polarity == polarity
+                }
+                #expect(matches.count == 1, "(\(group), \(polarity)) should map to exactly one Valence")
+            }
+        }
+    }
+}

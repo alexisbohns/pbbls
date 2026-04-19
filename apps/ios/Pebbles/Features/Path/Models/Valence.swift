@@ -73,3 +73,34 @@ enum ValenceSizeGroup: String, CaseIterable, Identifiable {
 enum ValencePolarity: String, CaseIterable {
     case lowlight, neutral, highlight
 }
+
+extension Valence {
+    var sizeGroup: ValenceSizeGroup {
+        switch self {
+        case .lowlightSmall, .neutralSmall, .highlightSmall:    return .small
+        case .lowlightMedium, .neutralMedium, .highlightMedium: return .medium
+        case .lowlightLarge, .neutralLarge, .highlightLarge:    return .large
+        }
+    }
+
+    var polarity: ValencePolarity {
+        switch self {
+        case .lowlightSmall, .lowlightMedium, .lowlightLarge:    return .lowlight
+        case .neutralSmall, .neutralMedium, .neutralLarge:       return .neutral
+        case .highlightSmall, .highlightMedium, .highlightLarge: return .highlight
+        }
+    }
+
+    /// Asset name in `Assets.xcassets/Valence/`. Always non-empty.
+    var assetName: String { "valence-\(rawValue)" }
+
+    /// Polarity-only label used inside an option button ("Lowlight" / "Neutral" / "Highlight").
+    /// Use `label` when the size axis also matters (e.g. the collapsed form row).
+    var shortLabel: String {
+        switch polarity {
+        case .lowlight:  return "Lowlight"
+        case .neutral:   return "Neutral"
+        case .highlight: return "Highlight"
+        }
+    }
+}
