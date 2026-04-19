@@ -58,6 +58,7 @@ struct WelcomeView: View {
                     onCreateAccount()
                 } label: {
                     Text("Create an account")
+                        .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
                 }
