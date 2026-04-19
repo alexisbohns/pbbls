@@ -41,6 +41,7 @@ struct PebbleFormView: View {
                     selection: $draft.happenedAt,
                     displayedComponents: [.date, .hourAndMinute]
                 )
+                .tint(Color.pebblesAccent)
 
                 TextField("Name", text: $draft.name)
 
