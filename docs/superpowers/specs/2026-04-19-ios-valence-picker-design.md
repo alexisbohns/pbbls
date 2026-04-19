@@ -83,9 +83,9 @@ loading state because it lists user-owned data.
   button), iterates the three size groups, and lays out the three
   options per group inline.
 - `apps/ios/Pebbles/Resources/Assets.xcassets/Valence/`
-  Image-set folder with a parent `Contents.json`
-  (`provides-namespace: true`) and nine PDF asset sets — one per
-  `Valence` case.
+  Image-set folder with a parent `Contents.json` (no
+  `provides-namespace`, so `Image("valence-…")` resolves flat) and
+  nine PDF asset sets — one per `Valence` case.
 - `apps/ios/PebblesTests/ValenceMetadataTests.swift`
   Unit tests covering `sizeGroup`, `polarity`, and `assetName` mappings,
   plus a sanity check that all nine cases have a non-empty asset name
@@ -283,12 +283,18 @@ build-time conversion — the assets are static and low-churn.
 ```
 Resources/Assets.xcassets/
   Valence/
-    Contents.json                            ← provides-namespace: true
+    Contents.json                            ← purely visual grouping (no provides-namespace)
     valence-lowlightSmall.imageset/
       Contents.json                          ← single-scale + preserves-vector-representation
       valence-lowlightSmall.pdf
     … (8 more)
 ```
+
+The parent `Contents.json` deliberately omits `provides-namespace` so
+asset names stay flat — `Image("valence-lowlightSmall")` resolves
+directly without a "Valence/" prefix, matching `Valence.assetName`.
+The folder is for keeping the Xcode asset browser tidy, not for
+namespacing.
 
 Each `imageset/Contents.json` is **Universal**, **Single Scale**, with
 `template-rendering-intent: "template"` and

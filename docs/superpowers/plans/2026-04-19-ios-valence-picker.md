@@ -417,7 +417,7 @@ Run from repo root:
 npm run test --workspace=@pbbls/ios
 ```
 
-Expected: tests pass; new ones are reported alongside the existing baseline. Compare the pass count against the baseline from Task 1 — it should be exactly six higher (the six `@Test` functions you just added).
+Expected: tests pass; new ones are reported alongside the existing baseline. Compare the pass count against the baseline from Task 1 — it should be exactly five higher (the five `@Test` functions you just added: 4 in `ValenceSizeGroupTests`, 1 in `ValencePolarityTests`).
 
 - [ ] **Step 5: Commit**
 
