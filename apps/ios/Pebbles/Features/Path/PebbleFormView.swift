@@ -16,6 +16,7 @@ struct PebbleFormView: View {
     let saveError: String?
     var renderSvg: String?
     var strokeColor: String?
+    var renderHeight: CGFloat = 260
 
     @State private var showPicker = false
     @State private var showValencePicker = false
@@ -28,7 +29,7 @@ struct PebbleFormView: View {
             if let svg = renderSvg {
                 PebbleRenderView(svg: svg, strokeColor: strokeColor)
                     .frame(maxWidth: .infinity)
-                    .frame(height: 260)
+                    .frame(height: renderHeight)
                     .padding(.vertical)
                     // Form rows add insets and a card background; strip both so the artwork spans edge-to-edge.
                     .listRowInsets(EdgeInsets())

@@ -53,7 +53,7 @@ struct PebbleDetailSheet: View {
                     if let svg = detail.renderSvg {
                         PebbleRenderView(svg: svg, strokeColor: detail.emotion.color)
                             .frame(maxWidth: .infinity)
-                            .frame(height: 260)
+                            .frame(height: detail.valence.sizeGroup.renderHeight)
                             .padding(.vertical)
                     }
 

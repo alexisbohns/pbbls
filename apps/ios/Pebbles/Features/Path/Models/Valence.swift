@@ -1,4 +1,5 @@
 import Foundation
+import CoreGraphics
 
 /// The 9-option valence picker shown in the create-pebble form.
 /// Maps to the `pebbles.positiveness` and `pebbles.intensity` columns on save.
@@ -101,6 +102,20 @@ extension Valence {
         case .lowlight:  return "Lowlight"
         case .neutral:   return "Neutral"
         case .highlight: return "Highlight"
+        }
+    }
+}
+
+extension ValenceSizeGroup {
+    /// Render height in the detail / edit sheets. Scales small pebbles down
+    /// so a small render doesn't visually dominate a medium or large one —
+    /// addresses issue #286 "small pebbles are full width, they should be a
+    /// little bit smaller".
+    var renderHeight: CGFloat {
+        switch self {
+        case .small:  return 180
+        case .medium: return 220
+        case .large:  return 260
         }
     }
 }
