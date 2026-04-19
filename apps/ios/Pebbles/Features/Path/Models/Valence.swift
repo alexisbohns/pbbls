@@ -41,3 +41,35 @@ enum Valence: String, CaseIterable, Identifiable, Hashable {
         }
     }
 }
+
+/// Groups the nine `Valence` cases by size for the picker sheet.
+/// Drives the three section headers ("Day event" / "Week event" / "Month event").
+enum ValenceSizeGroup: String, CaseIterable, Identifiable {
+    case small, medium, large
+
+    var id: String { rawValue }
+
+    var name: String {
+        switch self {
+        case .small:  return "Day event"
+        case .medium: return "Week event"
+        case .large:  return "Month event"
+        }
+    }
+
+    var description: String {
+        switch self {
+        case .small:
+            return "This moment impacted my day and will be wrapped in my weekly Cairn"
+        case .medium:
+            return "This moment impacted my whole week and will be wrapped in my monthly Cairn"
+        case .large:
+            return "This moment impacted my whole month and will be wrapped in my yearly Cairn"
+        }
+    }
+}
+
+/// Drives the left-to-right ordering of options inside each picker section.
+enum ValencePolarity: String, CaseIterable {
+    case lowlight, neutral, highlight
+}
