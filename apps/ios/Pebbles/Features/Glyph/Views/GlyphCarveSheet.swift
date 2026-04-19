@@ -87,6 +87,7 @@ struct GlyphCarveSheet: View {
             Spacer(minLength: 0)
         }
         .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 
     private func cancelTapped() {
