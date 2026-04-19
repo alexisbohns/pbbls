@@ -57,7 +57,8 @@ struct GlyphCarveSheet: View {
 
             GlyphCanvasView(
                 committedStrokes: strokes,
-                onStrokeCommit: { stroke in strokes.append(stroke) }
+                onStrokeCommit: { stroke in strokes.append(stroke) },
+                strokeColor: Color.pebblesAccent
             )
 
             if let saveError {
