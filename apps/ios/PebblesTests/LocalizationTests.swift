@@ -29,9 +29,11 @@ struct LocalizationPatternCTests {
 
     @Test("EmotionRef.localizedName falls back to name when slug has no catalog entry")
     func emotionRefFallsBackToName() {
-        let ref = decodeRef(EmotionRef.self, json: """
-        {"id":"00000000-0000-0000-0000-000000000000","slug":"not-a-real-slug-xyz","name":"Ref Fallback","color":"#000000"}
-        """)
+        let json = """
+        {"id":"00000000-0000-0000-0000-000000000000","slug":"not-a-real-slug-xyz",\
+        "name":"Ref Fallback","color":"#000000"}
+        """
+        let ref = decodeRef(EmotionRef.self, json: json)
         #expect(ref.localizedName == "Ref Fallback")
     }
 
@@ -125,7 +127,7 @@ struct LocalizationPatternCCoverageTests {
 /// then call `localizedString(forKey:value:table:)` — the same underlying
 /// API that `NSLocalizedString` and the production `localizedName` extensions
 /// use for runtime-built keys.
-fileprivate func resolveKey(
+private func resolveKey(
     _ key: String,
     locale: Locale,
     fallback: String
@@ -203,10 +205,10 @@ struct LocalizationCatalogFileTests {
             // Skip entries explicitly marked as not-translatable
             // (e.g. the empty-string fallback)
             guard let localizations = entry.localizations else { continue }
-            let en = localizations["en"]?.stringUnit?.value ?? ""
-            let fr = localizations["fr"]?.stringUnit?.value ?? ""
-            #expect(!en.isEmpty, "catalog key '\(key)' missing EN value")
-            #expect(!fr.isEmpty, "catalog key '\(key)' missing FR value")
+            let englishValue = localizations["en"]?.stringUnit?.value ?? ""
+            let frenchValue = localizations["fr"]?.stringUnit?.value ?? ""
+            #expect(!englishValue.isEmpty, "catalog key '\(key)' missing EN value")
+            #expect(!frenchValue.isEmpty, "catalog key '\(key)' missing FR value")
         }
     }
 
@@ -236,7 +238,7 @@ struct LocalizationCatalogFileTests {
 }
 
 /// Resolve `LocalizedStringResource` against a specific locale for testing.
-fileprivate func resolve(
+private func resolve(
     _ resource: LocalizedStringResource,
     locale: Locale
 ) -> String {

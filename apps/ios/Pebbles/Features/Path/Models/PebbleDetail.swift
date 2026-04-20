@@ -12,7 +12,6 @@ import os
 // `label` field. `Soul` and `PebbleCollection` are reused directly because
 // their full shapes match the detail select.
 
-
 struct EmotionRef: Decodable, Hashable, Identifiable {
     let id: UUID
     let slug: String
