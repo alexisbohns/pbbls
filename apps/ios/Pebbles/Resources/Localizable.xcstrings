@@ -1,5 +1,323 @@
 {
   "sourceLanguage" : "en",
-  "strings" : {},
+  "strings" : {
+    "" : {
+
+    },
+    "%@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$@"
+          }
+        }
+      }
+    },
+    "%lld strokes drawn" : {
+
+    },
+    "Add collection" : {
+
+    },
+    "Add emotions, people, and reflections to each pebble." : {
+
+    },
+    "Add soul" : {
+
+    },
+    "Bounce" : {
+
+    },
+    "Bounce is a measure of your momentum over the last 28 days. It goes from level 0 (quiet) to level 7 (unstoppable).\n\nThe more days you record a pebble, the higher your Bounce. Miss a stretch and it eases back down — that's fine. It's a rhythm, not a score." : {
+
+    },
+    "Cancel" : {
+
+    },
+    "Capture moments as they happen — no blank page, no pressure." : {
+
+    },
+    "Carve new glyph" : {
+
+    },
+    "Checked" : {
+
+    },
+    "Choose a glyph" : {
+
+    },
+    "Choose a valence" : {
+
+    },
+    "Choose…" : {
+
+    },
+    "Clear" : {
+
+    },
+    "Close" : {
+
+    },
+    "Close onboarding" : {
+
+    },
+    "Collection" : {
+
+    },
+    "Collections" : {
+
+    },
+    "Continue" : {
+
+    },
+    "Couldn't delete" : {
+
+    },
+    "Couldn't load collections" : {
+
+    },
+    "Couldn't load glyphs" : {
+
+    },
+    "Couldn't load pebbles" : {
+
+    },
+    "Couldn't load souls" : {
+
+    },
+    "Create an account" : {
+
+    },
+    "Delete" : {
+
+    },
+    "Delete %@?" : {
+
+    },
+    "Description (optional)" : {
+
+    },
+    "Discard" : {
+
+    },
+    "Discard your glyph?" : {
+
+    },
+    "Domain" : {
+
+    },
+    "Done" : {
+
+    },
+    "Drawing canvas" : {
+
+    },
+    "Edit" : {
+
+    },
+    "Edit collection" : {
+
+    },
+    "Edit pebble" : {
+
+    },
+    "Edit soul" : {
+
+    },
+    "Email" : {
+
+    },
+    "Emotion" : {
+
+    },
+    "Enrich with meaning." : {
+
+    },
+    "Glyph" : {
+
+    },
+    "Glyphs" : {
+
+    },
+    "Grow your path." : {
+
+    },
+    "Karma" : {
+
+    },
+    "Karma reflects the energy you put into your path. Every pebble you record, every soul you tend, every glyph you draw — they all contribute.\n\nYour Karma grows as you show up for yourself." : {
+
+    },
+    "Keep editing" : {
+
+    },
+    "Legal" : {
+
+    },
+    "Linked pebbles stay; only the collection and its links are removed." : {
+
+    },
+    "Linked pebbles stay; only the soul and its links are removed." : {
+
+    },
+    "Lists" : {
+
+    },
+    "Log in" : {
+
+    },
+    "Log out" : {
+
+    },
+    "Look back at your journey, at your own pace." : {
+
+    },
+    "Mode" : {
+
+    },
+    "Mode: %@" : {
+
+    },
+    "Mood" : {
+
+    },
+    "Name" : {
+
+    },
+    "New collection" : {
+
+    },
+    "New glyph" : {
+
+    },
+    "New pebble" : {
+
+    },
+    "New soul" : {
+
+    },
+    "No collections yet" : {
+
+    },
+    "No glyphs yet" : {
+
+    },
+    "No pebbles yet" : {
+
+    },
+    "No souls yet" : {
+
+    },
+    "None" : {
+
+    },
+    "OK" : {
+
+    },
+    "Optional" : {
+
+    },
+    "Pack" : {
+
+    },
+    "Password" : {
+
+    },
+    "Path" : {
+
+    },
+    "Pebbles" : {
+
+    },
+    "Pebbles added to this collection will appear here." : {
+
+    },
+    "Pebbles you tag with this soul will appear here." : {
+
+    },
+    "People and beings you tag on your pebbles will appear here." : {
+
+    },
+    "Profile" : {
+
+    },
+    "Record a pebble" : {
+
+    },
+    "Record in seconds." : {
+
+    },
+    "Recorded pebble" : {
+
+    },
+    "Remove glyph" : {
+
+    },
+    "Retry" : {
+
+    },
+    "Save" : {
+
+    },
+    "Show how Pebbles works" : {
+
+    },
+    "Skip" : {
+
+    },
+    "Soul" : {
+
+    },
+    "Souls" : {
+
+    },
+    "Stack" : {
+
+    },
+    "Start your path" : {
+
+    },
+    "Stats" : {
+
+    },
+    "Tap + to carve your first glyph." : {
+
+    },
+    "Track" : {
+
+    },
+    "Unchecked" : {
+
+    },
+    "Undo" : {
+
+    },
+    "Valence" : {
+
+    },
+    "Welcome step %lld of %lld: %@. %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Welcome step %1$lld of %2$lld: %3$@. %4$@"
+          }
+        }
+      }
+    },
+    "When" : {
+
+    },
+    "Your collections will appear here." : {
+
+    },
+    "Your glyphs" : {
+
+    },
+    "·" : {
+
+    }
+  },
   "version" : "1.0"
 }

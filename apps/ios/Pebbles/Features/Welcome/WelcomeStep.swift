@@ -5,6 +5,6 @@ import Foundation
 /// `WelcomeView`, not per slide.
 struct WelcomeStep: Identifiable {
     let id: String
-    let title: String
-    let description: String
+    let title: LocalizedStringResource
+    let description: LocalizedStringResource
 }
