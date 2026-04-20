@@ -98,6 +98,9 @@
     "Create an account" : {
 
     },
+    "Day event" : {
+
+    },
     "Delete" : {
 
     },
@@ -161,6 +164,18 @@
     "Grow your path." : {
 
     },
+    "Highlight" : {
+
+    },
+    "Highlight — large" : {
+
+    },
+    "Highlight — medium" : {
+
+    },
+    "Highlight — small" : {
+
+    },
     "Karma" : {
 
     },
@@ -191,16 +206,43 @@
     "Look back at your journey, at your own pace." : {
 
     },
+    "Lowlight" : {
+
+    },
+    "Lowlight — large" : {
+
+    },
+    "Lowlight — medium" : {
+
+    },
+    "Lowlight — small" : {
+
+    },
     "Mode" : {
 
     },
     "Mode: %@" : {
 
     },
+    "Month event" : {
+
+    },
     "Mood" : {
 
     },
     "Name" : {
+
+    },
+    "Neutral" : {
+
+    },
+    "Neutral — large" : {
+
+    },
+    "Neutral — medium" : {
+
+    },
+    "Neutral — small" : {
 
     },
     "New collection" : {
@@ -305,6 +347,15 @@
     "Tap + to carve your first glyph." : {
 
     },
+    "This moment impacted my day and will be wrapped in my weekly Cairn" : {
+
+    },
+    "This moment impacted my whole month and will be wrapped in my yearly Cairn" : {
+
+    },
+    "This moment impacted my whole week and will be wrapped in my monthly Cairn" : {
+
+    },
     "Track" : {
 
     },
@@ -315,6 +366,9 @@
 
     },
     "Valence" : {
+
+    },
+    "Week event" : {
 
     },
     "Welcome step %lld of %lld: %@. %@" : {

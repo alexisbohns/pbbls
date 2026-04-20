@@ -10,7 +10,7 @@ enum Valence: String, CaseIterable, Identifiable, Hashable {
 
     var id: String { rawValue }
 
-    var label: String {
+    var label: LocalizedStringResource {
         switch self {
         case .lowlightSmall:   return "Lowlight — small"
         case .lowlightMedium:  return "Lowlight — medium"
@@ -50,7 +50,7 @@ enum ValenceSizeGroup: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
-    var name: String {
+    var name: LocalizedStringResource {
         switch self {
         case .small:  return "Day event"
         case .medium: return "Week event"
@@ -58,7 +58,7 @@ enum ValenceSizeGroup: String, CaseIterable, Identifiable {
         }
     }
 
-    var description: String {
+    var description: LocalizedStringResource {
         switch self {
         case .small:
             return "This moment impacted my day and will be wrapped in my weekly Cairn"
@@ -97,7 +97,7 @@ extension Valence {
 
     /// Polarity-only label used inside an option button ("Lowlight" / "Neutral" / "Highlight").
     /// Use `label` when the size axis also matters (e.g. the collapsed form row).
-    var shortLabel: String {
+    var shortLabel: LocalizedStringResource {
         switch polarity {
         case .lowlight:  return "Lowlight"
         case .neutral:   return "Neutral"

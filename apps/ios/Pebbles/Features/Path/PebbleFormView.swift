@@ -91,8 +91,13 @@ struct PebbleFormView: View {
                         Text("Valence")
                             .foregroundStyle(Color.pebblesForeground)
                         Spacer()
-                        Text(draft.valence?.label ?? "Choose…")
-                            .foregroundStyle(Color.pebblesMutedForeground)
+                        if let label = draft.valence?.label {
+                            Text(label)
+                                .foregroundStyle(Color.pebblesMutedForeground)
+                        } else {
+                            Text("Choose…")
+                                .foregroundStyle(Color.pebblesMutedForeground)
+                        }
                         Image(systemName: "chevron.right")
                             .font(.caption)
                             .foregroundStyle(.tertiary)
@@ -101,7 +106,9 @@ struct PebbleFormView: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Valence")
-                .accessibilityValue(draft.valence?.label ?? "Choose")
+                .accessibilityValue(
+                    draft.valence.map { Text($0.label) } ?? Text("Choose")
+                )
                 .listRowBackground(Color.pebblesListRow)
             }
 

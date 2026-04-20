@@ -89,7 +89,7 @@ struct ValencePickerSheet: View {
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)
-        .accessibilityLabel("\(group.name), \(option.shortLabel)")
+        .accessibilityLabel(Text("\(String(localized: group.name)), \(String(localized: option.shortLabel))"))
         .accessibilityAddTraits(isActive ? [.isSelected] : [])
     }
 }
