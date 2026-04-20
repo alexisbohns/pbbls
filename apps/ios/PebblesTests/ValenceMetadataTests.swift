@@ -12,18 +12,18 @@ struct ValenceSizeGroupTests {
 
     @Test("name copy matches the spec")
     func nameCopy() {
-        #expect(ValenceSizeGroup.small.name == "Day event")
-        #expect(ValenceSizeGroup.medium.name == "Week event")
-        #expect(ValenceSizeGroup.large.name == "Month event")
+        #expect(String(localized: ValenceSizeGroup.small.name) == "Day event")
+        #expect(String(localized: ValenceSizeGroup.medium.name) == "Week event")
+        #expect(String(localized: ValenceSizeGroup.large.name) == "Month event")
     }
 
     @Test("description copy matches the spec")
     func descriptionCopy() {
-        #expect(ValenceSizeGroup.small.description ==
+        #expect(String(localized: ValenceSizeGroup.small.description) ==
             "This moment impacted my day and will be wrapped in my weekly Cairn")
-        #expect(ValenceSizeGroup.medium.description ==
+        #expect(String(localized: ValenceSizeGroup.medium.description) ==
             "This moment impacted my whole week and will be wrapped in my monthly Cairn")
-        #expect(ValenceSizeGroup.large.description ==
+        #expect(String(localized: ValenceSizeGroup.large.description) ==
             "This moment impacted my whole month and will be wrapped in my yearly Cairn")
     }
 
@@ -84,9 +84,9 @@ struct ValenceHelpersTests {
 
     @Test("shortLabel reflects polarity")
     func shortLabel() {
-        #expect(Valence.lowlightSmall.shortLabel  == "Lowlight")
-        #expect(Valence.neutralMedium.shortLabel  == "Neutral")
-        #expect(Valence.highlightLarge.shortLabel == "Highlight")
+        #expect(String(localized: Valence.lowlightSmall.shortLabel)  == "Lowlight")
+        #expect(String(localized: Valence.neutralMedium.shortLabel)  == "Neutral")
+        #expect(String(localized: Valence.highlightLarge.shortLabel) == "Highlight")
     }
 
     @Test("Lookup by (sizeGroup, polarity) is unique for every cell")

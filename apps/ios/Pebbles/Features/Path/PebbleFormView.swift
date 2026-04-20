@@ -57,7 +57,7 @@ struct PebbleFormView: View {
                 Picker("Emotion", selection: $draft.emotionId) {
                     Text("Choose…").tag(UUID?.none)
                     ForEach(emotions) { emotion in
-                        Text(emotion.name).tag(UUID?.some(emotion.id))
+                        Text(emotion.localizedName).tag(UUID?.some(emotion.id))
                     }
                 }
                 .listRowBackground(Color.pebblesListRow)
@@ -65,7 +65,7 @@ struct PebbleFormView: View {
                 Picker("Domain", selection: $draft.domainId) {
                     Text("Choose…").tag(UUID?.none)
                     ForEach(domains) { domain in
-                        Text(domain.name).tag(UUID?.some(domain.id))
+                        Text(domain.localizedName).tag(UUID?.some(domain.id))
                     }
                 }
                 .listRowBackground(Color.pebblesListRow)
@@ -91,8 +91,13 @@ struct PebbleFormView: View {
                         Text("Valence")
                             .foregroundStyle(Color.pebblesForeground)
                         Spacer()
-                        Text(draft.valence?.label ?? "Choose…")
-                            .foregroundStyle(Color.pebblesMutedForeground)
+                        if let label = draft.valence?.label {
+                            Text(label)
+                                .foregroundStyle(Color.pebblesMutedForeground)
+                        } else {
+                            Text("Choose…")
+                                .foregroundStyle(Color.pebblesMutedForeground)
+                        }
                         Image(systemName: "chevron.right")
                             .font(.caption)
                             .foregroundStyle(.tertiary)
@@ -101,7 +106,9 @@ struct PebbleFormView: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Valence")
-                .accessibilityValue(draft.valence?.label ?? "Choose")
+                .accessibilityValue(
+                    draft.valence.map { Text($0.label) } ?? Text("Choose")
+                )
                 .listRowBackground(Color.pebblesListRow)
             }
 

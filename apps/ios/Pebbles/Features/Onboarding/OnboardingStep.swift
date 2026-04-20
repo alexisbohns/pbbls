@@ -5,6 +5,6 @@ import Foundation
 struct OnboardingStep: Identifiable {
     let id: String
     let image: OnboardingImage
-    let title: String
-    let description: String
+    let title: LocalizedStringResource
+    let description: LocalizedStringResource
 }

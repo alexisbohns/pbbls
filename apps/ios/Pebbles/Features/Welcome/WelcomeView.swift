@@ -45,7 +45,9 @@ struct WelcomeView: View {
                     WelcomeSlideView(step: step)
                         .accessibilityElement(children: .combine)
                         .accessibilityLabel(
-                            "Welcome step \(index + 1) of \(WelcomeSteps.all.count): \(step.title). \(step.description)"
+                            "Welcome step \(index + 1) of \(WelcomeSteps.all.count): "
+                            + "\(String(localized: step.title)). "
+                            + "\(String(localized: step.description))"
                         )
                         .tag(index)
                 }

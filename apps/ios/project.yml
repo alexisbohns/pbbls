@@ -52,6 +52,8 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ENABLE_PREVIEWS: YES
         TARGETED_DEVICE_FAMILY: "1"
+        SWIFT_EMIT_LOC_STRINGS: YES
+        LOCALIZATION_PREFERS_STRING_CATALOGS: YES
     dependencies:
       - package: Supabase
         product: Supabase
@@ -70,6 +72,14 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
     dependencies:
       - target: Pebbles
+    postBuildScripts:
+      - name: Copy Localizable.xcstrings into test bundle
+        inputFiles:
+          - $(SRCROOT)/Pebbles/Resources/Localizable.xcstrings
+        outputFiles:
+          - $(CODESIGNING_FOLDER_PATH)/Localizable.xcstrings
+        script: |
+          cp "${SRCROOT}/Pebbles/Resources/Localizable.xcstrings" "${CODESIGNING_FOLDER_PATH}/Localizable.xcstrings"
 
 schemes:
   Pebbles:

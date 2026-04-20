@@ -26,6 +26,14 @@ Native iOS app for Pebbles. SwiftUI, iOS 17+, iPhone-only.
 - `AppEnvironment` crashes with `fatalError` if config is missing. That's a setup bug, not a runtime condition.
 - Runtime async failures must be surfaced: either logged with `os.Logger` or reflected in view state. No empty catch blocks.
 
+## Localization
+
+- **User-facing strings live in `Pebbles/Resources/Localizable.xcstrings`.** SwiftUI `Text`, `Button`, `Label`, `.navigationTitle`, and similar APIs that accept a `LocalizedStringKey` or `LocalizedStringResource` auto-extract their literal on every build via `SWIFT_EMIT_LOC_STRINGS=YES`. Struct/enum fields that carry user-facing copy declare their type as `LocalizedStringResource`.
+- **Reference-data names (`Emotion`, `Domain`, `EmotionRef`, `DomainRef`) resolve via `localizedName`**, which keys the catalog by slug (`emotion.<slug>.name`) and falls back to the DB `name` column. Never render `.name` directly to the user on a read path.
+- **Before every PR that touches user-facing strings**: open `Localizable.xcstrings` in Xcode and confirm no entry is in the `New` or `Stale` state. Confirm every row has a value in both the `en` and `fr` columns. Add new `ReferenceSlugs` entries whenever a new emotion/domain is seeded in the DB.
+- **Brand names** (the word "Pebbles") and any literal that must render in English regardless of the active locale: wrap in `Text(verbatim: "…")` so they are not extracted.
+- **Dates and numbers** are localized automatically by SwiftUI via `Locale.current`. Never construct a `DateFormatter` / `NumberFormatter` pinned to `Locale(identifier: "en_US")` — that overrides the user's locale.
+
 ## Folder layout
 
 ```

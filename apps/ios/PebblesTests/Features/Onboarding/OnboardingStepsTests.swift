@@ -19,14 +19,14 @@ struct OnboardingStepsTests {
     @Test("every step has a non-empty title")
     func titlesNonEmpty() {
         for step in OnboardingSteps.all {
-            #expect(!step.title.isEmpty)
+            #expect(!String(localized: step.title).isEmpty)
         }
     }
 
     @Test("every step has a non-empty description")
     func descriptionsNonEmpty() {
         for step in OnboardingSteps.all {
-            #expect(!step.description.isEmpty)
+            #expect(!String(localized: step.description).isEmpty)
         }
     }
 
