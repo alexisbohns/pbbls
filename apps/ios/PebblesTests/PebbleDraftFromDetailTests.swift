@@ -133,10 +133,11 @@ struct PebbleDraftFromDetailTests {
 
         let emotionJSON: [String: Any] = [
             "id": emotionId.uuidString,
+            "slug": "joy",
             "name": "Joy",
             "color": "#FFD166"
         ]
-        let domainsJSON = [["domain": ["id": domainId.uuidString, "name": "Work"]]]
+        let domainsJSON = [["domain": ["id": domainId.uuidString, "slug": "zoe", "name": "Work"]]]
 
         var root: [String: Any] = [
             "id": UUID().uuidString,
