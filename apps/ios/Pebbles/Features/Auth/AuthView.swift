@@ -7,9 +7,16 @@ import SwiftUI
 /// `SupabaseService` so errors from `signIn` / `signUp` surface inline.
 struct AuthView: View {
     enum Mode: String, CaseIterable, Identifiable {
-        case login = "Log In"
-        case signup = "Sign Up"
+        case login
+        case signup
         var id: String { rawValue }
+
+        var label: LocalizedStringResource {
+            switch self {
+            case .login:  return "Log In"
+            case .signup: return "Sign Up"
+            }
+        }
     }
 
     @Environment(SupabaseService.self) private var supabase
@@ -28,13 +35,13 @@ struct AuthView: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            Text("Pebbles")
+            Text(verbatim: "Pebbles")
                 .font(.largeTitle.weight(.semibold))
                 .padding(.top, 48)
 
             Picker("Mode", selection: $mode) {
                 ForEach(Mode.allCases) { mode in
-                    Text(mode.rawValue).tag(mode)
+                    Text(mode.label).tag(mode)
                 }
             }
             .pickerStyle(.segmented)
