@@ -66,7 +66,7 @@ struct PebbleDetailSheet: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         if !detail.domains.isEmpty {
-                            Text(detail.domains.map(\.name).joined(separator: " · "))
+                            Text(detail.domains.map(\.localizedName).joined(separator: " · "))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }

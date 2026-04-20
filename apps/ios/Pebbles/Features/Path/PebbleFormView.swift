@@ -57,7 +57,7 @@ struct PebbleFormView: View {
                 Picker("Emotion", selection: $draft.emotionId) {
                     Text("Choose…").tag(UUID?.none)
                     ForEach(emotions) { emotion in
-                        Text(emotion.name).tag(UUID?.some(emotion.id))
+                        Text(emotion.localizedName).tag(UUID?.some(emotion.id))
                     }
                 }
                 .listRowBackground(Color.pebblesListRow)
@@ -65,7 +65,7 @@ struct PebbleFormView: View {
                 Picker("Domain", selection: $draft.domainId) {
                     Text("Choose…").tag(UUID?.none)
                     ForEach(domains) { domain in
-                        Text(domain.name).tag(UUID?.some(domain.id))
+                        Text(domain.localizedName).tag(UUID?.some(domain.id))
                     }
                 }
                 .listRowBackground(Color.pebblesListRow)
