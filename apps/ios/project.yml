@@ -72,6 +72,14 @@ targets:
         GENERATE_INFOPLIST_FILE: YES
     dependencies:
       - target: Pebbles
+    postBuildScripts:
+      - name: Copy Localizable.xcstrings into test bundle
+        inputFiles:
+          - $(SRCROOT)/Pebbles/Resources/Localizable.xcstrings
+        outputFiles:
+          - $(CODESIGNING_FOLDER_PATH)/Localizable.xcstrings
+        script: |
+          cp "${SRCROOT}/Pebbles/Resources/Localizable.xcstrings" "${CODESIGNING_FOLDER_PATH}/Localizable.xcstrings"
 
 schemes:
   Pebbles:

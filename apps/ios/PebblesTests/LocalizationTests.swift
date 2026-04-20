@@ -186,6 +186,55 @@ struct LocalizationPatternBTests {
     }
 }
 
+@Suite("Localization — catalog file coverage")
+struct LocalizationCatalogFileTests {
+
+    @Test("every catalog entry has both en and fr populated")
+    func everyEntryHasBothLocales() throws {
+        let bundle = Bundle(for: CatalogProbe.self)
+        let url = try #require(
+            bundle.url(forResource: "Localizable", withExtension: "xcstrings"),
+            "Localizable.xcstrings not found in test bundle — check project.yml resources"
+        )
+        let data = try Data(contentsOf: url)
+        let catalog = try JSONDecoder().decode(Catalog.self, from: data)
+
+        for (key, entry) in catalog.strings {
+            // Skip entries explicitly marked as not-translatable
+            // (e.g. the empty-string fallback)
+            guard let localizations = entry.localizations else { continue }
+            let en = localizations["en"]?.stringUnit?.value ?? ""
+            let fr = localizations["fr"]?.stringUnit?.value ?? ""
+            #expect(!en.isEmpty, "catalog key '\(key)' missing EN value")
+            #expect(!fr.isEmpty, "catalog key '\(key)' missing FR value")
+        }
+    }
+
+    // MARK: - Catalog decoding types
+
+    private final class CatalogProbe {}
+
+    private struct Catalog: Decodable {
+        let sourceLanguage: String
+        let strings: [String: Entry]
+        let version: String
+    }
+
+    private struct Entry: Decodable {
+        let extractionState: String?
+        let localizations: [String: Localization]?
+    }
+
+    private struct Localization: Decodable {
+        let stringUnit: StringUnit?
+    }
+
+    private struct StringUnit: Decodable {
+        let state: String?
+        let value: String
+    }
+}
+
 /// Resolve `LocalizedStringResource` against a specific locale for testing.
 fileprivate func resolve(
     _ resource: LocalizedStringResource,
