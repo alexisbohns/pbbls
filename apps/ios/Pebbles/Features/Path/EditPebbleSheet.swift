@@ -97,8 +97,8 @@ struct EditPebbleSheet: View {
                 .select("""
                     id, name, description, happened_at, intensity, positiveness, visibility,
                     render_svg, render_version, glyph_id,
-                    emotion:emotions(id, name, color),
-                    pebble_domains(domain:domains(id, name)),
+                    emotion:emotions(id, slug, name, color),
+                    pebble_domains(domain:domains(id, slug, name)),
                     pebble_souls(soul:souls(id, name)),
                     collection_pebbles(collection:collections(id, name))
                 """)

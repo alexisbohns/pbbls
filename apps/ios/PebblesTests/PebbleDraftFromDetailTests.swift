@@ -12,7 +12,7 @@ struct PebbleDraftFromDetailTests {
         intensity: Int = 3,
         visibility: Visibility = .private,
         emotionId: UUID = UUID(),
-        domains: [DomainRef] = [DomainRef(id: UUID(), name: "Work")],
+        domains: [DomainRef] = [DomainRef(id: UUID(), slug: "zoe", name: "Work")],
         souls: [Soul] = [],
         collections: [PebbleCollection] = []
     ) throws -> PebbleDetail {
@@ -20,10 +20,11 @@ struct PebbleDraftFromDetailTests {
         // PebbleDetail has a custom init(from: Decoder), so we can't memberwise-construct it.
         let emotionJSON: [String: Any] = [
             "id": emotionId.uuidString,
+            "slug": "joy",
             "name": "Joy",
             "color": "#FFD166"
         ]
-        let domainsJSON = domains.map { domain in ["domain": ["id": domain.id.uuidString, "name": domain.name]] }
+        let domainsJSON = domains.map { domain in ["domain": ["id": domain.id.uuidString, "slug": domain.slug, "name": domain.name]] }
         let soulsJSON = souls.map { soul in ["soul": ["id": soul.id.uuidString, "name": soul.name]] }
         let collectionsJSON = collections.map { coll in ["collection": ["id": coll.id.uuidString, "name": coll.name]] }
 
@@ -70,7 +71,7 @@ struct PebbleDraftFromDetailTests {
             intensity: 3,
             visibility: .public,
             emotionId: emotionId,
-            domains: [DomainRef(id: domainId, name: "Work")],
+            domains: [DomainRef(id: domainId, slug: "zoe", name: "Work")],
             souls: [Soul(id: soulId, name: "Me")],
             collections: [PebbleCollection(id: collectionId, name: "Wins")]
         )

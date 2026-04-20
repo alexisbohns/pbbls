@@ -34,11 +34,12 @@ struct PebbleDetailDecodingTests {
       "visibility": "private",
       "emotion": {
         "id": "22222222-2222-2222-2222-222222222222",
+        "slug": "joy",
         "name": "Joy",
         "color": "#FFD166"
       },
       "pebble_domains": [
-        { "domain": { "id": "33333333-3333-3333-3333-333333333333", "name": "Work" } }
+        { "domain": { "id": "33333333-3333-3333-3333-333333333333", "slug": "zoe", "name": "Work" } }
       ],
       "pebble_souls": [
         { "soul": { "id": "44444444-4444-4444-4444-444444444444", "name": "Alex" } }
@@ -84,6 +85,7 @@ struct PebbleDetailDecodingTests {
           "visibility": "private",
           "emotion": {
             "id": "22222222-2222-2222-2222-222222222222",
+            "slug": "serenity",
             "name": "Calm",
             "color": "#88CCEE"
           },
@@ -115,12 +117,13 @@ struct PebbleDetailDecodingTests {
           "visibility": "public",
           "emotion": {
             "id": "22222222-2222-2222-2222-222222222222",
+            "slug": "sadness",
             "name": "Sad",
             "color": "#6699CC"
           },
           "pebble_domains": [
-            { "domain": { "id": "33333333-3333-3333-3333-333333333333", "name": "Work" } },
-            { "domain": { "id": "44444444-4444-4444-4444-444444444444", "name": "Health" } }
+            { "domain": { "id": "33333333-3333-3333-3333-333333333333", "slug": "zoe", "name": "Work" } },
+            { "domain": { "id": "44444444-4444-4444-4444-444444444444", "slug": "asphaleia", "name": "Health" } }
           ],
           "pebble_souls": [],
           "collection_pebbles": []
@@ -144,7 +147,7 @@ struct PebbleDetailDecodingTests {
           "intensity": 2,
           "positiveness": 0,
           "visibility": "private",
-          "emotion": {"id": "550e8400-e29b-41d4-a716-446655440001", "name": "joy", "color": "#fff"},
+          "emotion": {"id": "550e8400-e29b-41d4-a716-446655440001", "slug": "joy", "name": "joy", "color": "#fff"},
           "pebble_domains": [],
           "pebble_souls": [],
           "collection_pebbles": [],
@@ -169,7 +172,7 @@ struct PebbleDetailDecodingTests {
           "intensity": 2,
           "positiveness": 0,
           "visibility": "private",
-          "emotion": {"id": "550e8400-e29b-41d4-a716-446655440001", "name": "joy", "color": "#fff"},
+          "emotion": {"id": "550e8400-e29b-41d4-a716-446655440001", "slug": "joy", "name": "joy", "color": "#fff"},
           "pebble_domains": [],
           "pebble_souls": [],
           "collection_pebbles": []

@@ -110,7 +110,7 @@ struct PathView: View {
         do {
             let result: [Pebble] = try await supabase.client
                 .from("pebbles")
-                .select("id, name, happened_at, render_svg, emotion:emotions(id, name, color)")
+                .select("id, name, happened_at, render_svg, emotion:emotions(id, slug, name, color)")
                 .order("happened_at", ascending: false)
                 .execute()
                 .value
