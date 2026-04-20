@@ -5,11 +5,7 @@ extension EmotionRef {
     /// catalog entry exists.
     var localizedName: String {
         let key = "emotion.\(slug).name"
-        // NSLocalizedString(key:value:) is used instead of String(localized:defaultValue:)
-        // because the `localized:` overload requires a StaticString (compile-time constant)
-        // while our keys are built at runtime from the DB slug. The `value:` parameter
-        // provides the same fallback semantics: when no catalog entry exists for `key`,
-        // the `value` (the DB `name`) is returned as-is.
+        // See Emotion+Localized.swift for the NSLocalizedString vs String(localized:) rationale.
         return NSLocalizedString(key, value: name, comment: "")
     }
 }
@@ -19,11 +15,7 @@ extension DomainRef {
     /// catalog entry exists.
     var localizedName: String {
         let key = "domain.\(slug).name"
-        // NSLocalizedString(key:value:) is used instead of String(localized:defaultValue:)
-        // because the `localized:` overload requires a StaticString (compile-time constant)
-        // while our keys are built at runtime from the DB slug. The `value:` parameter
-        // provides the same fallback semantics: when no catalog entry exists for `key`,
-        // the `value` (the DB `name`) is returned as-is.
+        // See Emotion+Localized.swift for the NSLocalizedString vs String(localized:) rationale.
         return NSLocalizedString(key, value: name, comment: "")
     }
 }
