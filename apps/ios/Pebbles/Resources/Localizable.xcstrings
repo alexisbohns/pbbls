@@ -1,3150 +1,3153 @@
 {
-  "sourceLanguage": "en",
-  "strings": {
-    "": {},
-    "·": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "·"
+  "sourceLanguage" : "en",
+  "strings" : {
+    "" : {
+
+    },
+    "·" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "·"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "·"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "·"
           }
         }
       }
     },
-    "%@, %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@, %2$@"
+    "%@, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%1$@, %2$@"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, %2$@"
           }
         }
       }
     },
-    "%lld strokes drawn": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld strokes drawn"
+    "%lld strokes drawn" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld strokes drawn"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld traits dessinés"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld traits dessinés"
           }
         }
       }
     },
-    "A coffee with a friend. A concert that gave you chills. A tough conversation. Record it in seconds — no blank page, no pressure, no audience.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "A coffee with a friend. A concert that gave you chills. A tough conversation. Record it in seconds — no blank page, no pressure, no audience."
+    "A coffee with a friend. A concert that gave you chills. A tough conversation. Record it in seconds — no blank page, no pressure, no audience." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A coffee with a friend. A concert that gave you chills. A tough conversation. Record it in seconds — no blank page, no pressure, no audience."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Un café avec un ami. Un concert qui t’a donné des frissons. Une conversation difficile. Conserve ces moments en quelques secondes : pas de page blanche, pas de pression, pas d'audience."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un café avec un ami. Un concert qui t’a donné des frissons. Une conversation difficile. Conserve ces moments en quelques secondes : pas de page blanche, pas de pression, pas d'audience."
           }
         }
       }
     },
-    "Add collection": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add collection"
+    "Add collection" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add collection"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ajouter une collection"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter une collection"
           }
         }
       }
     },
-    "Add emotions, people, and reflections to each pebble.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add emotions, people, and reflections to each pebble."
+    "Add emotions, people, and reflections to each pebble." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add emotions, people, and reflections to each pebble."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ajoute des émotions, des personnes et des réflexions à chaque galet."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajoute des émotions, des personnes et des réflexions à chaque galet."
           }
         }
       }
     },
-    "Add soul": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Add soul"
+    "Add soul" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add soul"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ajouter une âme"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter une âme"
           }
         }
       }
     },
-    "Associate your moment with an emotion and a domain, relate with people and add your pebble to a stack or a collection.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Associate your moment with an emotion and a domain, relate with people and add your pebble to a stack or a collection."
+    "Associate your moment with an emotion and a domain, relate with people and add your pebble to a stack or a collection." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Associate your moment with an emotion and a domain, relate with people and add your pebble to a stack or a collection."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Associe ton moment à une émotion et un domaine, relie-le à une âme, et ajoute ton galet à une pile ou une collection."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Associe ton moment à une émotion et un domaine, relie-le à une âme, et ajoute ton galet à une pile ou une collection."
           }
         }
       }
     },
-    "Bounce": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bounce"
+    "Bounce" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bounce"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ricochet"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ricochet"
           }
         }
       }
     },
-    "Bounce is a measure of your momentum over the last 28 days. It goes from level 0 (quiet) to level 7 (unstoppable).\n\nThe more days you record a pebble, the higher your Bounce. Miss a stretch and it eases back down — that's fine. It's a rhythm, not a score.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bounce is a measure of your momentum over the last 28 days. It goes from level 0 (quiet) to level 7 (unstoppable).\n\nThe more days you record a pebble, the higher your Bounce. Miss a stretch and it eases back down — that's fine. It's a rhythm, not a score."
+    "Bounce is a measure of your momentum over the last 28 days. It goes from level 0 (quiet) to level 7 (unstoppable).\n\nThe more days you record a pebble, the higher your Bounce. Miss a stretch and it eases back down — that's fine. It's a rhythm, not a score." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bounce is a measure of your momentum over the last 28 days. It goes from level 0 (quiet) to level 7 (unstoppable).\n\nThe more days you record a pebble, the higher your Bounce. Miss a stretch and it eases back down — that's fine. It's a rhythm, not a score."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Le Ricochet mesure ton élan sur les 28 derniers jours. Il va du niveau 0 (calme) au niveau 7 (inarrêtable).\n\nEnregistre des galets chaque jour pour augmenter ton Ricochet. Sinon, il redescend doucement. L’important c’est la régularité."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le Ricochet mesure ton élan sur les 28 derniers jours. Il va du niveau 0 (calme) au niveau 7 (inarrêtable).\n\nEnregistre des galets chaque jour pour augmenter ton Ricochet. Sinon, il redescend doucement. L’important c’est la régularité."
           }
         }
       }
     },
-    "Cancel": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Cancel"
+    "Cancel" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cancel"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Annuler"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuler"
           }
         }
       }
     },
-    "Capture moments as they happen — no blank page, no pressure.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Capture moments as they happen — no blank page, no pressure."
+    "Capture moments as they happen — no blank page, no pressure." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capture moments as they happen — no blank page, no pressure."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Capture les moments au fil de l’eau. Pas de page blanche, pas de pression."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capture les moments au fil de l’eau. Pas de page blanche, pas de pression."
           }
         }
       }
     },
-    "Carve new glyph": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Carve new glyph"
+    "Carve new glyph" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carve new glyph"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Graver un glyphe"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Graver un glyphe"
           }
         }
       }
     },
-    "Checked": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Checked"
+    "Checked" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Checked"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sélectionné"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sélectionné"
           }
         }
       }
     },
-    "Choose": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose"
+    "Choose" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choisir"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir"
           }
         }
       }
     },
-    "Choose a glyph": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose a glyph"
+    "Choose a glyph" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a glyph"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choisir un glyphe"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir un glyphe"
           }
         }
       }
     },
-    "Choose a valence": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose a valence"
+    "Choose a valence" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose a valence"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choisir une valence"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir une valence"
           }
         }
       }
     },
-    "Choose or carve a glyph to mark the moment. Then reveal a unique pebble illustration to remember your moment.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose or carve a glyph to mark the moment. Then reveal a unique pebble illustration to remember your moment."
+    "Choose or carve a glyph to mark the moment. Then reveal a unique pebble illustration to remember your moment." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose or carve a glyph to mark the moment. Then reveal a unique pebble illustration to remember your moment."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choisis ou grave un glyphe pour marquer ce moment. Révèle ensuite le galet qui immortalise ton moment."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisis ou grave un glyphe pour marquer ce moment. Révèle ensuite le galet qui immortalise ton moment."
           }
         }
       }
     },
-    "Choose…": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choose…"
+    "Choose…" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choose…"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Choisir…"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisir…"
           }
         }
       }
     },
-    "Clear": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Clear"
+    "Clear" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Clear"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Effacer"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Effacer"
           }
         }
       }
     },
-    "Close": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Close"
+    "Close" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fermer"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer"
           }
         }
       }
     },
-    "Close onboarding": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Close onboarding"
+    "Close onboarding" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close onboarding"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fermer l'introduction"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer l'introduction"
           }
         }
       }
     },
-    "Collection": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Collection"
+    "Collection" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collection"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Collection"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collection"
           }
         }
       }
     },
-    "Collections": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Collections"
+    "Collections" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collections"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Collections"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collections"
           }
         }
       }
     },
-    "Continue": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Continue"
+    "Continue" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continue"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Continuer"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer"
           }
         }
       }
     },
-    "Couldn't delete": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Couldn't delete"
+    "Couldn't delete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't delete"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Impossible de supprimer"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de supprimer"
           }
         }
       }
     },
-    "Couldn't load collections": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Couldn't load collections"
+    "Couldn't load collections" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't load collections"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Impossible de charger les collections"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de charger les collections"
           }
         }
       }
     },
-    "Couldn't load glyphs": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Couldn't load glyphs"
+    "Couldn't load glyphs" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't load glyphs"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Impossible de charger les glyphes"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de charger les glyphes"
           }
         }
       }
     },
-    "Couldn't load pebbles": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Couldn't load pebbles"
+    "Couldn't load pebbles" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't load pebbles"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Impossible de charger les galets"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de charger les galets"
           }
         }
       }
     },
-    "Couldn't load souls": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Couldn't load souls"
+    "Couldn't load souls" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't load souls"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Impossible de charger les âmes"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de charger les âmes"
           }
         }
       }
     },
-    "Create an account": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Create an account"
+    "Create an account" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create an account"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Créer un compte"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer un compte"
           }
         }
       }
     },
-    "Day event": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Day event"
+    "Day event" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Day event"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Événement du jour"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Événement du jour"
           }
         }
       }
     },
-    "Delete": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete"
+    "Delete" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Supprimer"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer"
           }
         }
       }
     },
-    "Delete %@?": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Delete %@?"
+    "Delete %@?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete %@?"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Supprimer %@ ?"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer %@ ?"
           }
         }
       }
     },
-    "Description (optional)": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Description (optional)"
+    "Description (optional)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Description (optional)"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Description (facultatif)"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Description (facultatif)"
           }
         }
       }
     },
-    "Discard": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Discard"
+    "Discard" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discard"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Abandonner"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abandonner"
           }
         }
       }
     },
-    "Discard your glyph?": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Discard your glyph?"
+    "Discard your glyph?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discard your glyph?"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Abandonner le glyphe ?"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Abandonner le glyphe ?"
           }
         }
       }
     },
-    "Domain": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Domain"
+    "Domain" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Domain"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Domaine"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Domaine"
           }
         }
       }
     },
-    "Done": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Done"
+    "domain.community.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Community"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Terminé"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Communauté"
           }
         }
       }
     },
-    "Drawing canvas": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Drawing canvas"
+    "domain.currentevents.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Events"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zone de gravure"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actualité"
           }
         }
       }
     },
-    "Drop a pebble, keep the moment.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Drop a pebble, keep the moment."
+    "domain.dating.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dating"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Grave un galet, capture l’instant."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rencontres"
           }
         }
       }
     },
-    "Edit": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Edit"
+    "domain.education.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Education"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Modifier"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Éducation"
           }
         }
       }
     },
-    "Edit collection": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Edit collection"
+    "domain.family.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Family"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Modifier la collection"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Famille"
           }
         }
       }
     },
-    "Edit pebble": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Edit pebble"
+    "domain.fitness.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sport"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Modifier le galet"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sport"
           }
         }
       }
     },
-    "Edit soul": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Edit soul"
+    "domain.friends.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Friends"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Modifier l'âme"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amis"
           }
         }
       }
     },
-    "Email": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Email"
+    "domain.health.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Health"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "E-mail"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Santé"
           }
         }
       }
     },
-    "Emotion": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Emotion"
+    "domain.hobbies.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passions"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Émotion"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passions"
           }
         }
       }
     },
-    "Enrich with meaning.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Enrich with meaning."
+    "domain.identity.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Identity"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Enrichissez de sens."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Identité"
           }
         }
       }
     },
-    "Every moment matters — the big ones and the quiet ones. But most of them slip away before you even notice. Pebbles helps you collect them, one by one.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Every moment matters — the big ones and the quiet ones. But most of them slip away before you even notice. Pebbles helps you collect them, one by one."
+    "domain.money.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finance"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chaque moment compte : autant les grands que les discrets. Ne les laisse plus s’échapper : Pebbles t’aide à les collecter, un par un."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Finances"
           }
         }
       }
     },
-    "Get your pebble.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Get your pebble."
+    "domain.partner.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partner"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Révèle ton galet"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partenaire"
           }
         }
       }
     },
-    "Glyph": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Glyph"
+    "domain.selfcare.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Self Care"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Glyphe"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bien-être"
           }
         }
       }
     },
-    "Glyphs": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Glyphs"
+    "domain.spirituality.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spirituality"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Glyphes"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Spiritualité"
           }
         }
       }
     },
-    "Grow your path.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Grow your path."
+    "domain.tasks.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tasks"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fait grandir ton chemin."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tâches"
           }
         }
       }
     },
-    "Highlight": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Highlight"
+    "domain.travel.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Travel"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Temps fort"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voyage"
           }
         }
       }
     },
-    "Highlight — large": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Highlight — large"
+    "domain.weather.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weather"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Temps fort · grand"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Météo"
           }
         }
       }
     },
-    "Highlight — medium": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Highlight — medium"
+    "domain.work.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Work"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Temps fort · moyen"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Travail"
           }
         }
       }
     },
-    "Highlight — small": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Highlight — small"
+    "Done" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Done"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Temps fort · petit"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminé"
           }
         }
       }
     },
-    "Karma": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Karma"
+    "Drawing canvas" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drawing canvas"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Karma"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zone de gravure"
           }
         }
       }
     },
-    "Karma reflects the energy you put into your path. Every pebble you record, every soul you tend, every glyph you draw — they all contribute.\n\nYour Karma grows as you show up for yourself.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Karma reflects the energy you put into your path. Every pebble you record, every soul you tend, every glyph you draw — they all contribute.\n\nYour Karma grows as you show up for yourself."
+    "Drop a pebble, keep the moment." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drop a pebble, keep the moment."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Le Karma reflète l'énergie que tu investis à tracer ton chemin. Chaque galet capturé, chaque âme liée, chaque glyphe gravé, tout contribue.\n\nTon Karma grandit avec ton assiduité."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grave un galet, capture l’instant."
           }
         }
       }
     },
-    "Keep editing": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keep editing"
+    "Edit" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Continuer à modifier"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifier"
           }
         }
       }
     },
-    "Legal": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Legal"
+    "Edit collection" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit collection"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mentions légales"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifier la collection"
           }
         }
       }
     },
-    "Linked pebbles stay; only the collection and its links are removed.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Linked pebbles stay; only the collection and its links are removed."
+    "Edit pebble" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit pebble"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les galets liés sont conservés ; seule la collection et ses liens sont supprimés."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifier le galet"
           }
         }
       }
     },
-    "Linked pebbles stay; only the soul and its links are removed.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Linked pebbles stay; only the soul and its links are removed."
+    "Edit soul" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit soul"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les galets liés sont conservés ; seule l'âme et ses liens sont supprimés."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifier l'âme"
           }
         }
       }
     },
-    "Lists": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lists"
+    "Email" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Email"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Listes"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "E-mail"
           }
         }
       }
     },
-    "Log in": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Log in"
+    "Emotion" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emotion"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Me connecter"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Émotion"
           }
         }
       }
     },
-    "Log In": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Log In"
+    "emotion.amazed.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Awe"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Me connecter"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Émerveillement"
           }
         }
       }
     },
-    "Log out": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Log out"
+    "emotion.amused.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amused"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Me déconnecter"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Amusement"
           }
         }
       }
     },
-    "Look back at your journey, at your own pace.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Look back at your journey, at your own pace."
+    "emotion.angry.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anger"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Reviens sur ton parcours, à ton propre rythme."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Colère"
           }
         }
       }
     },
-    "Lowlight": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lowlight"
+    "emotion.annoyed.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annoyed"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Creux"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agacement"
           }
         }
       }
     },
-    "Lowlight — large": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lowlight — large"
+    "emotion.anxious.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anxiety"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Creux · grand"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anxiété"
           }
         }
       }
     },
-    "Lowlight — medium": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lowlight — medium"
+    "emotion.ashamed.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Shame"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Creux · moyen"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Honte"
           }
         }
       }
     },
-    "Lowlight — small": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Lowlight — small"
+    "emotion.brave.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brave"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Creux · petit"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Courage"
           }
         }
       }
     },
-    "Mode": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mode"
+    "emotion.calm.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calm"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mode"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calme"
           }
         }
       }
     },
-    "Mode: %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mode: %@"
+    "emotion.confident.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confident"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mode : %@"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confiance"
           }
         }
       }
     },
-    "Month event": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Month event"
+    "emotion.content.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Content"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Événement du mois"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Contentement"
           }
         }
       }
     },
-    "Mood": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mood"
+    "emotion.disappointed.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disappointed"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Humeur"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déception"
           }
         }
       }
     },
-    "Name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Name"
+    "emotion.discouraged.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Discouraged"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nom"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Découragement"
           }
         }
       }
     },
-    "Neutral": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Neutral"
+    "emotion.disgusted.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Disgust"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Neutre"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dégoût"
           }
         }
       }
     },
-    "Neutral — large": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Neutral — large"
+    "emotion.drained.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drained"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Neutre · grand"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Épuisement"
           }
         }
       }
     },
-    "Neutral — medium": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Neutral — medium"
+    "emotion.embarrassed.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Embarrassed"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Neutre · moyen"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Embarras"
           }
         }
       }
     },
-    "Neutral — small": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Neutral — small"
+    "emotion.excited.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excitement"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Neutre · petit"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Excitation"
           }
         }
       }
     },
-    "New collection": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "New collection"
+    "emotion.frustrated.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frustrated"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nouvelle collection"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Frustration"
           }
         }
       }
     },
-    "New glyph": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "New glyph"
+    "emotion.grateful.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gratitude"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nouveau glyphe"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gratitude"
           }
         }
       }
     },
-    "New pebble": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "New pebble"
+    "emotion.guilty.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Guilt"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nouveau galet"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Culpabilité"
           }
         }
       }
     },
-    "New soul": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "New soul"
+    "emotion.happy.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Happy"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nouvelle âme"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bonheur"
           }
         }
       }
     },
-    "No collections yet": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No collections yet"
+    "emotion.hopeful.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hopeful"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aucune collection pour l'instant"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Espoir"
           }
         }
       }
     },
-    "No glyphs yet": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No glyphs yet"
+    "emotion.hopeless.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hopeless"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aucun glyphe pour l'instant"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Désespoir"
           }
         }
       }
     },
-    "No pebbles yet": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No pebbles yet"
+    "emotion.indifferent.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indifferent"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aucun galet pour l'instant"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Indifférence"
           }
         }
       }
     },
-    "No souls yet": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No souls yet"
+    "emotion.irritated.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Irritated"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Paz encore d’âmes"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Irritation"
           }
         }
       }
     },
-    "None": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "None"
+    "emotion.jealous.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jealous"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Aucun"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jalousie"
           }
         }
       }
     },
-    "OK": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OK"
+    "emotion.joyful.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Joy"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "OK"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Joie"
           }
         }
       }
     },
-    "Optional": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Optional"
+    "emotion.lonely.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loneliness"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Facultatif"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Solitude"
           }
         }
       }
     },
-    "Pack": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pack"
+    "emotion.overwhelmed.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Overwhelmed"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pack"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Accablement"
           }
         }
       }
     },
-    "Password": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Password"
+    "emotion.passionate.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passion"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mot de passe"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passion"
           }
         }
       }
     },
-    "Path": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Path"
+    "emotion.peaceful.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peaceful"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Chemin"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sérénité"
           }
         }
       }
     },
-    "Pebbles": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pebbles"
+    "emotion.proud.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pride"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pebbles"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fierté"
           }
         }
       }
     },
-    "Pebbles added to this collection will appear here.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pebbles added to this collection will appear here."
+    "emotion.relieved.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relieved"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les galets ajoutés à cette collection apparaîtront ici."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soulagement"
           }
         }
       }
     },
-    "Pebbles you tag with this soul will appear here.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pebbles you tag with this soul will appear here."
+    "emotion.sad.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sadness"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les galets associés à cette âme apparaîtront ici."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tristesse"
           }
         }
       }
     },
-    "People and beings you tag on your pebbles will appear here.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "People and beings you tag on your pebbles will appear here."
+    "emotion.satisfied.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Satisfied"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Les personnes et êtres associés à vos galets apparaîtront ici."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Satisfaction"
           }
         }
       }
     },
-    "Profile": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Profile"
+    "emotion.scared.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fear"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Profil"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Peur"
           }
         }
       }
     },
-    "Qualify and relate.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Qualify and relate."
+    "emotion.stressed.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stressed"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Qualifier et relier"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stress"
           }
         }
       }
     },
-    "Record a pebble": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Record a pebble"
+    "emotion.surprised.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surprise"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Capturer l’instant"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Surprise"
           }
         }
       }
     },
-    "Record in seconds.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Record in seconds."
+    "emotion.worried.name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Worried"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quelques secondes suffisent"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inquiétude"
           }
         }
       }
     },
-    "Recorded pebble": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Recorded pebble"
+    "Enrich with meaning." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enrich with meaning."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Galet enregistré"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enrichir mon galet"
           }
         }
       }
     },
-    "Remove glyph": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Remove glyph"
+    "Every moment matters — the big ones and the quiet ones. But most of them slip away before you even notice. Pebbles helps you collect them, one by one." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every moment matters — the big ones and the quiet ones. But most of them slip away before you even notice. Pebbles helps you collect them, one by one."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Supprimer le glyphe"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chaque moment compte : autant les grands que les discrets. Ne les laisse plus s’échapper : Pebbles t’aide à les collecter, un par un."
           }
         }
       }
     },
-    "Retry": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Retry"
+    "Get your pebble." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get your pebble."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Réessayer"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Révèle ton galet"
           }
         }
       }
     },
-    "Save": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Save"
+    "Glyph" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glyph"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Enregistrer"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glyphe"
           }
         }
       }
     },
-    "Show how Pebbles works": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show how Pebbles works"
+    "Glyphs" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glyphs"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Comment fonctionne Pebbles"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glyphes"
           }
         }
       }
     },
-    "Sign Up": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sign Up"
+    "Grow your path." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grow your path."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "S'inscrire"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fait grandir ton chemin."
           }
         }
       }
     },
-    "Skip": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Skip"
+    "Highlight" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Highlight"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ignorer"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temps fort"
           }
         }
       }
     },
-    "Soul": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Soul"
+    "Highlight — large" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Highlight — large"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Âme"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temps fort · grand"
           }
         }
       }
     },
-    "Souls": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Souls"
+    "Highlight — medium" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Highlight — medium"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Âmes"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temps fort · moyen"
           }
         }
       }
     },
-    "Stack": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stack"
+    "Highlight — small" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Highlight — small"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stack"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temps fort · petit"
           }
         }
       }
     },
-    "Start your path": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Start your path"
+    "Karma" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karma"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Commencer mon chemin"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karma"
           }
         }
       }
     },
-    "Stats": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stats"
+    "Karma reflects the energy you put into your path. Every pebble you record, every soul you tend, every glyph you draw — they all contribute.\n\nYour Karma grows as you show up for yourself." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Karma reflects the energy you put into your path. Every pebble you record, every soul you tend, every glyph you draw — they all contribute.\n\nYour Karma grows as you show up for yourself."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Statistiques"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le Karma reflète l'énergie que tu investis à tracer ton chemin. Chaque galet capturé, chaque âme liée, chaque glyphe gravé, tout contribue.\n\nTon Karma grandit avec ton assiduité."
           }
         }
       }
     },
-    "Tap + to carve your first glyph.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tap + to carve your first glyph."
+    "Keep editing" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep editing"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Appuyer sur + pour graver mon premier glyphe."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer à modifier"
           }
         }
       }
     },
-    "This moment impacted my day and will be wrapped in my weekly Cairn": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This moment impacted my day and will be wrapped in my weekly Cairn"
+    "Legal" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Legal"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ce moment a marqué ma journée et sera intégré dans mon Cairn hebdomadaire"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mentions légales"
           }
         }
       }
     },
-    "This moment impacted my whole month and will be wrapped in my yearly Cairn": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This moment impacted my whole month and will be wrapped in my yearly Cairn"
+    "Linked pebbles stay; only the collection and its links are removed." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Linked pebbles stay; only the collection and its links are removed."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ce moment a marqué mon mois et sera intégré dans mon Cairn annuel"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les galets liés sont conservés ; seule la collection et ses liens sont supprimés."
           }
         }
       }
     },
-    "This moment impacted my whole week and will be wrapped in my monthly Cairn": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This moment impacted my whole week and will be wrapped in my monthly Cairn"
+    "Linked pebbles stay; only the soul and its links are removed." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Linked pebbles stay; only the soul and its links are removed."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ce moment a marqué ma semaine et sera intégré dans mon Cairn mensuel"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les galets liés sont conservés ; seule l'âme et ses liens sont supprimés."
           }
         }
       }
     },
-    "Track": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Track"
+    "Lists" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lists"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Suivre"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listes"
           }
         }
       }
     },
-    "Unchecked": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Unchecked"
+    "Log in" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log in"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Non sélectionné"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Me connecter"
           }
         }
       }
     },
-    "Undo": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Undo"
+    "Log In" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log In"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Annuler"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Me connecter"
           }
         }
       }
     },
-    "Valence": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Valence"
+    "Log out" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Log out"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Valence"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Me déconnecter"
           }
         }
       }
     },
-    "Week event": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Week event"
+    "Look back at your journey, at your own pace." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Look back at your journey, at your own pace."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Événement de la semaine"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reviens sur ton parcours, à ton propre rythme."
           }
         }
       }
     },
-    "Welcome step %lld of %lld: %@. %@": {
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Welcome step %1$lld of %2$lld: %3$@. %4$@"
+    "Lowlight" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lowlight"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Étape d'accueil %1$lld sur %2$lld : %3$@. %4$@"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creux"
           }
         }
       }
     },
-    "When": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "When"
+    "Lowlight — large" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lowlight — large"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Quand"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creux · grand"
           }
         }
       }
     },
-    "Your collections will appear here.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your collections will appear here."
+    "Lowlight — medium" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lowlight — medium"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mes collections apparaîtront ici."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creux · moyen"
           }
         }
       }
     },
-    "Your glyphs": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your glyphs"
+    "Lowlight — small" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lowlight — small"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mes glyphes"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creux · petit"
           }
         }
       }
     },
-    "Your life is a path.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your life is a path."
+    "Mode" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mode"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ma vie est un chemin."
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mode"
           }
         }
       }
     },
-    "emotion.amazed.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Awe"
+    "Mode: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mode: %@"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Émerveillement"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mode : %@"
           }
         }
       }
     },
-    "emotion.amused.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Amused"
+    "Month event" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Month event"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Amusement"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Événement du mois"
           }
         }
       }
     },
-    "emotion.angry.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Anger"
+    "Mood" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mood"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Colère"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Humeur"
           }
         }
       }
     },
-    "emotion.annoyed.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Annoyed"
+    "Name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Name"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Agacement"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom"
           }
         }
       }
     },
-    "emotion.anxious.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Anxiety"
+    "Neutral" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neutral"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Anxiété"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neutre"
           }
         }
       }
     },
-    "emotion.ashamed.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Shame"
+    "Neutral — large" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neutral — large"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Honte"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neutre · grand"
           }
         }
       }
     },
-    "emotion.brave.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Brave"
+    "Neutral — medium" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neutral — medium"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Courage"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neutre · moyen"
           }
         }
       }
     },
-    "emotion.calm.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Calm"
+    "Neutral — small" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neutral — small"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Calme"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Neutre · petit"
           }
         }
       }
     },
-    "emotion.confident.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Confident"
+    "New collection" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New collection"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Confiance"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouvelle collection"
           }
         }
       }
     },
-    "emotion.content.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Content"
+    "New glyph" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New glyph"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Contentement"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouveau glyphe"
           }
         }
       }
     },
-    "emotion.disappointed.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Disappointed"
+    "New pebble" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New pebble"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Déception"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouveau galet"
           }
         }
       }
     },
-    "emotion.discouraged.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Discouraged"
+    "New soul" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New soul"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Découragement"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouvelle âme"
           }
         }
       }
     },
-    "emotion.disgusted.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Disgust"
+    "No collections yet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No collections yet"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dégoût"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune collection pour l'instant"
           }
         }
       }
     },
-    "emotion.drained.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Drained"
+    "No glyphs yet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No glyphs yet"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Épuisement"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun glyphe pour l'instant"
           }
         }
       }
     },
-    "emotion.embarrassed.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Embarrassed"
+    "No pebbles yet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No pebbles yet"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Embarras"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun galet pour l'instant"
           }
         }
       }
     },
-    "emotion.excited.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Excitement"
+    "No souls yet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No souls yet"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Excitation"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paz encore d’âmes"
           }
         }
       }
     },
-    "emotion.frustrated.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Frustrated"
+    "None" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "None"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Frustration"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun"
           }
         }
       }
     },
-    "emotion.grateful.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gratitude"
+    "OK" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gratitude"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OK"
           }
         }
       }
     },
-    "emotion.guilty.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Guilt"
+    "Optional" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Optional"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Culpabilité"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Facultatif"
           }
         }
       }
     },
-    "emotion.happy.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Happy"
+    "Pack" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pack"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bonheur"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pack"
           }
         }
       }
     },
-    "emotion.hopeful.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hopeful"
+    "Password" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Password"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Espoir"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mot de passe"
           }
         }
       }
     },
-    "emotion.hopeless.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Hopeless"
+    "Path" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Path"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Désespoir"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chemin"
           }
         }
       }
     },
-    "emotion.indifferent.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Indifferent"
+    "Pebbles" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pebbles"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Indifférence"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pebbles"
           }
         }
       }
     },
-    "emotion.irritated.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Irritated"
+    "Pebbles added to this collection will appear here." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pebbles added to this collection will appear here."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Irritation"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les galets ajoutés à cette collection apparaîtront ici."
           }
         }
       }
     },
-    "emotion.jealous.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Jealous"
+    "Pebbles you tag with this soul will appear here." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pebbles you tag with this soul will appear here."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Jalousie"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les galets associés à cette âme apparaîtront ici."
           }
         }
       }
     },
-    "emotion.joyful.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Joy"
+    "People and beings you tag on your pebbles will appear here." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "People and beings you tag on your pebbles will appear here."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Joie"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les personnes et êtres associés à vos galets apparaîtront ici."
           }
         }
       }
     },
-    "emotion.lonely.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Loneliness"
+    "Profile" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profile"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Solitude"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profil"
           }
         }
       }
     },
-    "emotion.overwhelmed.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Overwhelmed"
+    "Qualify and relate." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qualify and relate."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Accablement"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qualifier et relier"
           }
         }
       }
     },
-    "emotion.passionate.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Passion"
+    "Record a pebble" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record a pebble"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Passion"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capturer l’instant"
           }
         }
       }
     },
-    "emotion.peaceful.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Peaceful"
+    "Record in seconds." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record in seconds."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Paix"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quelques secondes suffisent"
           }
         }
       }
     },
-    "emotion.proud.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pride"
+    "Recorded pebble" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recorded pebble"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fierté"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Galet enregistré"
           }
         }
       }
     },
-    "emotion.relieved.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Relieved"
+    "Remove glyph" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove glyph"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Soulagement"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer le glyphe"
           }
         }
       }
     },
-    "emotion.sad.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sadness"
+    "Retry" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retry"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tristesse"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessayer"
           }
         }
       }
     },
-    "emotion.satisfied.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Satisfied"
+    "Save" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Satisfaction"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrer"
           }
         }
       }
     },
-    "emotion.scared.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Fear"
+    "Show how Pebbles works" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Show how Pebbles works"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Peur"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment fonctionne Pebbles"
           }
         }
       }
     },
-    "emotion.stressed.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stressed"
+    "Sign Up" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sign Up"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Stress"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "S'inscrire"
           }
         }
       }
     },
-    "emotion.surprised.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Surprise"
+    "Skip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Skip"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Surprise"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ignorer"
           }
         }
       }
     },
-    "emotion.worried.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Worried"
+    "Soul" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soul"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Inquiétude"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Âme"
           }
         }
       }
     },
-    "domain.community.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Community"
+    "Souls" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Souls"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Communauté"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Âmes"
           }
         }
       }
     },
-    "domain.currentevents.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Events"
+    "Stack" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stack"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Actualité"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stack"
           }
         }
       }
     },
-    "domain.dating.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dating"
+    "Start your path" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start your path"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rencontres"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commencer mon chemin"
           }
         }
       }
     },
-    "domain.education.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Education"
+    "Stats" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Stats"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Éducation"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Statistiques"
           }
         }
       }
     },
-    "domain.family.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Family"
+    "Tap + to carve your first glyph." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap + to carve your first glyph."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Famille"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Appuyer sur + pour graver mon premier glyphe."
           }
         }
       }
     },
-    "domain.fitness.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sport"
+    "This moment impacted my day and will be wrapped in my weekly Cairn" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This moment impacted my day and will be wrapped in my weekly Cairn"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sport"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce moment a marqué ma journée et sera intégré dans mon Cairn hebdomadaire"
           }
         }
       }
     },
-    "domain.friends.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Friends"
+    "This moment impacted my whole month and will be wrapped in my yearly Cairn" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This moment impacted my whole month and will be wrapped in my yearly Cairn"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Amis"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce moment a marqué mon mois et sera intégré dans mon Cairn annuel"
           }
         }
       }
     },
-    "domain.health.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Health"
+    "This moment impacted my whole week and will be wrapped in my monthly Cairn" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This moment impacted my whole week and will be wrapped in my monthly Cairn"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Santé"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce moment a marqué ma semaine et sera intégré dans mon Cairn mensuel"
           }
         }
       }
     },
-    "domain.hobbies.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Passions"
+    "Track" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Track"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Loisirs"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suivre"
           }
         }
       }
     },
-    "domain.identity.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Identity"
+    "Unchecked" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unchecked"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Identité"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non sélectionné"
           }
         }
       }
     },
-    "domain.money.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Finance"
+    "Undo" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Undo"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Finances"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuler"
           }
         }
       }
     },
-    "domain.partner.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Partner"
+    "Valence" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valence"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Partenaire"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Valence"
           }
         }
       }
     },
-    "domain.selfcare.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Self Care"
+    "Week event" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Week event"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bien-être"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Événement de la semaine"
           }
         }
       }
     },
-    "domain.spirituality.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Spirituality"
+    "Welcome step %lld of %lld: %@. %@" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Welcome step %1$lld of %2$lld: %3$@. %4$@"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Spiritualité"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Étape d'accueil %1$lld sur %2$lld : %3$@. %4$@"
           }
         }
       }
     },
-    "domain.tasks.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tasks"
+    "When" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Tâches"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quand"
           }
         }
       }
     },
-    "domain.travel.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Travel"
+    "Your collections will appear here." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your collections will appear here."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Voyage"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes collections apparaîtront ici."
           }
         }
       }
     },
-    "domain.weather.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Weather"
+    "Your glyphs" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your glyphs"
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Météo"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mes glyphes"
           }
         }
       }
     },
-    "domain.work.name": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Work"
+    "Your life is a path." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your life is a path."
           }
         },
-        "fr": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Travail"
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ma vie est un chemin."
           }
         }
       }
     }
   },
-  "version": "1.0"
+  "version" : "1.0"
 }
