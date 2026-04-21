@@ -7,6 +7,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -284,6 +289,110 @@ export type Database = {
           },
         ]
       }
+      log_reactions: {
+        Row: {
+          created_at: string
+          log_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          log_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          log_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "log_reactions_log_id_fkey"
+            columns: ["log_id"]
+            isOneToOne: false
+            referencedRelation: "logs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "log_reactions_log_id_fkey"
+            columns: ["log_id"]
+            isOneToOne: false
+            referencedRelation: "v_logs_with_counts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "log_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "log_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      logs: {
+        Row: {
+          body_md_en: string | null
+          body_md_fr: string | null
+          cover_image_path: string | null
+          created_at: string
+          external_url: string | null
+          id: string
+          platform: string
+          published: boolean
+          published_at: string | null
+          species: string
+          status: string
+          summary_en: string
+          summary_fr: string | null
+          title_en: string
+          title_fr: string | null
+          updated_at: string
+        }
+        Insert: {
+          body_md_en?: string | null
+          body_md_fr?: string | null
+          cover_image_path?: string | null
+          created_at?: string
+          external_url?: string | null
+          id?: string
+          platform: string
+          published?: boolean
+          published_at?: string | null
+          species: string
+          status: string
+          summary_en: string
+          summary_fr?: string | null
+          title_en: string
+          title_fr?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body_md_en?: string | null
+          body_md_fr?: string | null
+          cover_image_path?: string | null
+          created_at?: string
+          external_url?: string | null
+          id?: string
+          platform?: string
+          published?: boolean
+          published_at?: string | null
+          species?: string
+          status?: string
+          summary_en?: string
+          summary_fr?: string | null
+          title_en?: string
+          title_fr?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pebble_cards: {
         Row: {
           id: string
@@ -517,6 +626,7 @@ export type Database = {
           created_at: string
           display_name: string
           id: string
+          is_admin: boolean
           onboarding_completed: boolean
           privacy_accepted_at: string | null
           terms_accepted_at: string | null
@@ -528,6 +638,7 @@ export type Database = {
           created_at?: string
           display_name: string
           id?: string
+          is_admin?: boolean
           onboarding_completed?: boolean
           privacy_accepted_at?: string | null
           terms_accepted_at?: string | null
@@ -539,6 +650,7 @@ export type Database = {
           created_at?: string
           display_name?: string
           id?: string
+          is_admin?: boolean
           onboarding_completed?: boolean
           privacy_accepted_at?: string | null
           terms_accepted_at?: string | null
@@ -685,6 +797,28 @@ export type Database = {
         }
         Relationships: []
       }
+      v_logs_with_counts: {
+        Row: {
+          body_md_en: string | null
+          body_md_fr: string | null
+          cover_image_path: string | null
+          created_at: string | null
+          external_url: string | null
+          id: string | null
+          platform: string | null
+          published: boolean | null
+          published_at: string | null
+          reaction_count: number | null
+          species: string | null
+          status: string | null
+          summary_en: string | null
+          summary_fr: string | null
+          title_en: string | null
+          title_fr: string | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
       v_pebbles_full: {
         Row: {
           cards: Json | null
@@ -753,6 +887,7 @@ export type Database = {
       }
       create_pebble: { Args: { payload: Json }; Returns: string }
       delete_pebble: { Args: { p_pebble_id: string }; Returns: undefined }
+      is_admin: { Args: { p_user_id: string }; Returns: boolean }
       update_pebble: {
         Args: { p_pebble_id: string; payload: Json }
         Returns: undefined
@@ -892,4 +1027,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-

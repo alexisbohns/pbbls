@@ -37,6 +37,11 @@ struct MainTabView: View {
                     Label("Path", systemImage: "point.topleft.down.to.point.bottomright.curvepath")
                 }
 
+            LabView()
+                .tabItem {
+                    Label("Lab", systemImage: "testtube.2")
+                }
+
             ProfileView()
                 .tabItem {
                     Label("Profile", systemImage: "person.crop.circle")
