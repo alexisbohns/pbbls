@@ -25,25 +25,16 @@ struct FeaturedCommunityCard: View {
             }
 
             HStack(alignment: .center, spacing: 16) {
-                if let qr = qrImage(for: LabConfig.whatsappInviteURL) {
-                    Image(uiImage: qr)
-                        .interpolation(.none)
-                        .resizable()
-                        .aspectRatio(1, contentMode: .fit)
-                        .frame(width: 96, height: 96)
-                        .accessibilityLabel("WhatsApp invite QR code")
-                }
-
                 Button {
                     openURL(LabConfig.whatsappInviteURL)
                 } label: {
-                    Label("Open in WhatsApp", systemImage: "arrow.up.forward.app")
-                        .font(.subheadline.weight(.semibold))
+                    Text("Open in WhatsApp")
+                        .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 10)
+                        .padding(.vertical, 8)
                 }
                 .buttonStyle(.borderedProminent)
-                .tint(Color.pebblesAccent)
+                .transition(.opacity.combined(with: .move(edge: .bottom)))
             }
         }
         .padding(.vertical, 4)
