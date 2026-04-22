@@ -22,9 +22,11 @@ struct LogsService {
             .eq("published", value: true)
             .order("published_at", ascending: false)
         if let limit {
-            return try await base.limit(limit).execute().value
+            let wrapper: LossyLogArray = try await base.limit(limit).execute().value
+            return wrapper.logs
         }
-        return try await base.execute().value
+        let wrapper: LossyLogArray = try await base.execute().value
+        return wrapper.logs
     }
 
     /// Shipped features, most recent first.
@@ -37,14 +39,16 @@ struct LogsService {
             .eq("published", value: true)
             .order("published_at", ascending: false)
         if let limit {
-            return try await base.limit(limit).execute().value
+            let wrapper: LossyLogArray = try await base.limit(limit).execute().value
+            return wrapper.logs
         }
-        return try await base.execute().value
+        let wrapper: LossyLogArray = try await base.execute().value
+        return wrapper.logs
     }
 
     /// Features currently in progress.
     func initiatives() async throws -> [Log] {
-        try await supabase.client
+        let wrapper: LossyLogArray = try await supabase.client
             .from("v_logs_with_counts")
             .select()
             .eq("species", value: LogSpecies.feature.rawValue)
@@ -53,6 +57,7 @@ struct LogsService {
             .order("published_at", ascending: false)
             .execute()
             .value
+        return wrapper.logs
     }
 
     /// Backlog features, most upvoted first. Ties broken by recency.
@@ -66,9 +71,11 @@ struct LogsService {
             .order("reaction_count", ascending: false)
             .order("created_at", ascending: false)
         if let limit {
-            return try await base.limit(limit).execute().value
+            let wrapper: LossyLogArray = try await base.limit(limit).execute().value
+            return wrapper.logs
         }
-        return try await base.execute().value
+        let wrapper: LossyLogArray = try await base.execute().value
+        return wrapper.logs
     }
 
     // MARK: - Reactions
