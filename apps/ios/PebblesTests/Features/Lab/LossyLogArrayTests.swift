@@ -67,7 +67,10 @@ struct LossyLogArrayTests {
 
     @Test("decodes an all-valid array unchanged")
     func decodesAllValid() throws {
-        let json = Data("[\(validRow(id: "11111111-1111-1111-1111-111111111111", titleEn: "A")),\(validRow(id: "22222222-2222-2222-2222-222222222222", titleEn: "B"))]".utf8)
+        let json = Data("""
+        [\(validRow(id: "11111111-1111-1111-1111-111111111111", titleEn: "A")),
+         \(validRow(id: "22222222-2222-2222-2222-222222222222", titleEn: "B"))]
+        """.utf8)
 
         let wrapper = try makeDecoder().decode(LossyLogArray.self, from: json)
 
@@ -126,10 +129,30 @@ struct LossyLogArrayTests {
         // container didn't advance between bad elements, the second bad
         // row would be re-read and the loop would spin.
         let bad1 = """
-        { "id": "not-a-uuid", "species": "feature", "platform": "ios", "status": "shipped", "title_en": "x", "summary_en": "x", "published": true, "created_at": "2026-04-20T12:00:00Z", "reaction_count": 0 }
+        {
+          "id": "not-a-uuid",
+          "species": "feature",
+          "platform": "ios",
+          "status": "shipped",
+          "title_en": "x",
+          "summary_en": "x",
+          "published": true,
+          "created_at": "2026-04-20T12:00:00Z",
+          "reaction_count": 0
+        }
         """
         let bad2 = """
-        { "id": "55555555-5555-5555-5555-555555555555", "species": "mystery", "platform": "ios", "status": "shipped", "title_en": "x", "summary_en": "x", "published": true, "created_at": "2026-04-20T12:00:00Z", "reaction_count": 0 }
+        {
+          "id": "55555555-5555-5555-5555-555555555555",
+          "species": "mystery",
+          "platform": "ios",
+          "status": "shipped",
+          "title_en": "x",
+          "summary_en": "x",
+          "published": true,
+          "created_at": "2026-04-20T12:00:00Z",
+          "reaction_count": 0
+        }
         """
 
         let json = Data("""
@@ -147,7 +170,17 @@ struct LossyLogArrayTests {
     @Test("all rows bad yields empty logs, not a thrown error")
     func allBadRowsYieldEmpty() throws {
         let bad = """
-        { "id": "not-a-uuid", "species": "feature", "platform": "ios", "status": "shipped", "title_en": "x", "summary_en": "x", "published": true, "created_at": "2026-04-20T12:00:00Z", "reaction_count": 0 }
+        {
+          "id": "not-a-uuid",
+          "species": "feature",
+          "platform": "ios",
+          "status": "shipped",
+          "title_en": "x",
+          "summary_en": "x",
+          "published": true,
+          "created_at": "2026-04-20T12:00:00Z",
+          "reaction_count": 0
+        }
         """
         let json = Data("[\(bad),\(bad)]".utf8)
 
