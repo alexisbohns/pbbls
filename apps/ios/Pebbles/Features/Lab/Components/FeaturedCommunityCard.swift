@@ -1,10 +1,8 @@
 import SwiftUI
-import CoreImage.CIFilterBuiltins
-import UIKit
 
 /// Pinned card at the top of the Lab tab inviting users to join the
 /// Pebbles WhatsApp community. Static content — the link + description
-/// live in `LabConfig`, the QR is generated client-side from the URL.
+/// live in `LabConfig`.
 struct FeaturedCommunityCard: View {
     @Environment(\.openURL) private var openURL
 
@@ -38,18 +36,6 @@ struct FeaturedCommunityCard: View {
             }
         }
         .padding(.vertical, 4)
-    }
-
-    private func qrImage(for url: URL) -> UIImage? {
-        let filter = CIFilter.qrCodeGenerator()
-        filter.message = Data(url.absoluteString.utf8)
-        filter.correctionLevel = "M"
-        guard let ciImage = filter.outputImage else { return nil }
-        // Scale up so the QR is crisp at the rendered size.
-        let scaled = ciImage.transformed(by: CGAffineTransform(scaleX: 8, y: 8))
-        let context = CIContext()
-        guard let cgImage = context.createCGImage(scaled, from: scaled.extent) else { return nil }
-        return UIImage(cgImage: cgImage)
     }
 }
 
