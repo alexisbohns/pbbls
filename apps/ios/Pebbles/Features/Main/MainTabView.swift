@@ -39,7 +39,7 @@ struct MainTabView: View {
 
             LabView()
                 .tabItem {
-                    Label("Lab", systemImage: "testtube.2")
+                    Label("Lab", systemImage: "lightbulb.max")
                 }
 
             ProfileView()
