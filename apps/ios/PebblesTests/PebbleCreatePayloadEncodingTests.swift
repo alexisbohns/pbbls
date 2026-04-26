@@ -130,7 +130,7 @@ struct PebbleCreatePayloadEncodingTests {
         let snaps = try #require(json["snaps"] as? [[String: Any]])
         try #require(snaps.count == 1)
         #expect((snaps[0]["id"] as? String)?.lowercased() == snapId.uuidString.lowercased())
-        #expect(snaps[0]["storage_path"] as? String == "\(userId.uuidString)/\(snapId.uuidString)")
+        #expect(snaps[0]["storage_path"] as? String == "\(userId.uuidString.lowercased())/\(snapId.uuidString.lowercased())")
         #expect(snaps[0]["sort_order"] as? Int == 0)
     }
 
