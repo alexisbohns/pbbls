@@ -3,14 +3,16 @@ import os
 
 struct SoulsListView: View {
     @Environment(SupabaseService.self) private var supabase
-    @State private var items: [Soul] = []
+    @State private var items: [SoulWithGlyph] = []
     @State private var isLoading = true
     @State private var loadError: String?
     @State private var isPresentingCreate = false
-    @State private var pendingDeletion: Soul?
+    @State private var pendingDeletion: SoulWithGlyph?
     @State private var deleteError: String?
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.souls")
+
+    private let columns = [GridItem(.adaptive(minimum: 96), spacing: 16)]
 
     var body: some View {
         content
@@ -83,24 +85,27 @@ struct SoulsListView: View {
                 description: Text("People and beings you tag on your pebbles will appear here.")
             )
         } else {
-            List {
-                ForEach(items) { soul in
-                    NavigationLink {
-                        SoulDetailView(soul: soul, onChanged: {
-                            Task { await load() }
-                        })
-                    } label: {
-                        Text(soul.name)
-                    }
-                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                        Button(role: .destructive) {
-                            pendingDeletion = soul
+            ScrollView {
+                LazyVGrid(columns: columns, spacing: 16) {
+                    ForEach(items) { item in
+                        NavigationLink {
+                            SoulDetailView(initial: item, onChanged: {
+                                Task { await load() }
+                            })
                         } label: {
-                            Label("Delete", systemImage: "trash")
+                            SoulGridCell(soul: item)
+                        }
+                        .buttonStyle(.plain)
+                        .contextMenu {
+                            Button(role: .destructive) {
+                                pendingDeletion = item
+                            } label: {
+                                Label("Delete", systemImage: "trash")
+                            }
                         }
                     }
-                    .listRowBackground(Color.pebblesListRow)
                 }
+                .padding()
             }
         }
     }
@@ -109,10 +114,10 @@ struct SoulsListView: View {
         isLoading = true
         loadError = nil
         do {
-            let result: [Soul] = try await supabase.client
+            let result: [SoulWithGlyph] = try await supabase.client
                 .from("souls")
-                .select("id, name")
-                .order("name")
+                .select("id, name, glyph_id, glyphs(id, name, strokes, view_box)")
+                .order("name", ascending: true)
                 .execute()
                 .value
             self.items = result
@@ -123,7 +128,7 @@ struct SoulsListView: View {
         self.isLoading = false
     }
 
-    private func delete(_ soul: Soul) async {
+    private func delete(_ soul: SoulWithGlyph) async {
         pendingDeletion = nil
         do {
             try await supabase.client
