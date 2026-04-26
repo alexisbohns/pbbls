@@ -72,7 +72,7 @@ struct PebbleDraftFromDetailTests {
             visibility: .public,
             emotionId: emotionId,
             domains: [DomainRef(id: domainId, slug: "zoe", name: "Work")],
-            souls: [Soul(id: soulId, name: "Me")],
+            souls: [Soul(id: soulId, name: "Me", glyphId: UUID())],
             collections: [PebbleCollection(id: collectionId, name: "Wins")]
         )
 

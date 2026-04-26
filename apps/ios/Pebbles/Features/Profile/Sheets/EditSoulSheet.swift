@@ -93,6 +93,6 @@ private struct SoulUpdatePayload: Encodable {
 }
 
 #Preview {
-    EditSoulSheet(soul: Soul(id: UUID(), name: "Preview"), onSaved: {})
+    EditSoulSheet(soul: Soul(id: UUID(), name: "Preview", glyphId: UUID()), onSaved: {})
         .environment(SupabaseService())
 }

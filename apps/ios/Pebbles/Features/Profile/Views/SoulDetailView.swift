@@ -129,7 +129,7 @@ struct SoulDetailView: View {
 
 #Preview {
     NavigationStack {
-        SoulDetailView(soul: Soul(id: UUID(), name: "Preview Soul"), onChanged: {})
+        SoulDetailView(soul: Soul(id: UUID(), name: "Preview Soul", glyphId: UUID()), onChanged: {})
             .environment(SupabaseService())
     }
 }
