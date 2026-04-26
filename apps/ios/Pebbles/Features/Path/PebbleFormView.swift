@@ -18,7 +18,7 @@ struct PebbleFormView: View {
     var strokeColor: String?
     var renderHeight: CGFloat = 260
 
-    var onPhotoPicked: ((PhotoPickerView.PickedPhoto) -> Void)? = nil
+    var onPhotoPicked: ((PhotoPickerView.PickedItem) -> Void)? = nil
     var onSnapRetry:   (() -> Void)?                            = nil
     var onSnapRemoved: (() -> Void)?                            = nil
 
@@ -171,7 +171,7 @@ struct PebbleFormView: View {
                 .listRowBackground(Color.pebblesListRow)
             }
 
-            Section("pebble_form.photo_section") {
+            Section("Photo") {
                 if let snap = draft.attachedSnap {
                     AttachedPhotoView(
                         snap: snap,
@@ -186,7 +186,7 @@ struct PebbleFormView: View {
                     Button {
                         isPhotoPickerPresented = true
                     } label: {
-                        Label("pebble_form.add_photo", systemImage: "photo.badge.plus")
+                        Label("Add a photo", systemImage: "photo.badge.plus")
                     }
                     .listRowBackground(Color.pebblesListRow)
                 }

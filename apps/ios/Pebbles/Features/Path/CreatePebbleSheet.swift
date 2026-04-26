@@ -94,16 +94,29 @@ struct CreatePebbleSheet: View {
 
     // MARK: - upload orchestration
 
-    private func handlePicked(_ picked: PhotoPickerView.PickedPhoto) async {
+    private func handlePicked(_ picked: PhotoPickerView.PickedItem) async {
         guard let userId = currentUserId else {
             logger.error("handlePicked: no current user id")
             return
         }
 
+        // Load bytes from the item provider. PHPicker's loadDataRepresentation
+        // is callback-based; wrap in a continuation.
+        let data: Data
+        do {
+            data = try await loadData(from: picked.itemProvider, uti: picked.uti)
+        } catch {
+            logger.error("picker data load failed: \(error.localizedDescription, privacy: .private)")
+            saveError = "Couldn't read the image."
+            return
+        }
+
+        // Process off the main actor — re-encode is CPU-bound.
         let processed: ProcessedImage
+        let uti = picked.uti
         do {
             processed = try await Task.detached(priority: .userInitiated) {
-                try ImagePipeline.process(picked.data, uti: picked.uti)
+                try ImagePipeline.process(data, uti: uti)
             }.value
         } catch {
             logger.error("image pipeline failed: \(String(describing: error), privacy: .public)")
@@ -116,6 +129,20 @@ struct CreatePebbleSheet: View {
         processedForRetry = processed
 
         await uploadCurrentSnap(processed: processed, userId: userId)
+    }
+
+    private func loadData(from provider: NSItemProvider, uti: String) async throws -> Data {
+        try await withCheckedThrowingContinuation { continuation in
+            provider.loadDataRepresentation(forTypeIdentifier: uti) { data, error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else if let data {
+                    continuation.resume(returning: data)
+                } else {
+                    continuation.resume(throwing: URLError(.cannotDecodeContentData))
+                }
+            }
+        }
     }
 
     private func retryUpload() async {
