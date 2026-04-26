@@ -55,7 +55,9 @@ struct GlyphService {
 
     /// Updates a glyph's name. Pass `nil`, `""`, or any whitespace-only string
     /// to clear it. Single-table write — no RPC needed (per AGENTS.md). RLS
-    /// `glyphs_update` enforces ownership.
+    /// `glyphs_update` enforces ownership; no eager session guard here because
+    /// a missing session is indistinguishable from a permission error at this
+    /// layer.
     func updateName(id: UUID, name: String?) async throws -> Glyph {
         let value = normalizedName(name)
         let updated: Glyph = try await supabase.client
