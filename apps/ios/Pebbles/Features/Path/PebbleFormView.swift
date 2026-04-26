@@ -29,6 +29,34 @@ struct PebbleFormView: View {
 
     @Environment(SupabaseService.self) private var supabase
 
+    init(
+        draft: Binding<PebbleDraft>,
+        emotions: [Emotion],
+        domains: [Domain],
+        souls: [Soul],
+        collections: [PebbleCollection],
+        saveError: String?,
+        renderSvg: String? = nil,
+        strokeColor: String? = nil,
+        renderHeight: CGFloat = 260,
+        onPhotoPicked: ((PhotoPickerView.PickedItem) -> Void)? = nil,
+        onSnapRetry: (() -> Void)? = nil,
+        onSnapRemoved: (() -> Void)? = nil
+    ) {
+        self._draft = draft
+        self.emotions = emotions
+        self.domains = domains
+        self.souls = souls
+        self.collections = collections
+        self.saveError = saveError
+        self.renderSvg = renderSvg
+        self.strokeColor = strokeColor
+        self.renderHeight = renderHeight
+        self.onPhotoPicked = onPhotoPicked
+        self.onSnapRetry = onSnapRetry
+        self.onSnapRemoved = onSnapRemoved
+    }
+
     var body: some View {
         let _ = Logger(subsystem: "app.pbbls.ios", category: "pebble-form")
             .notice("body eval: onPhotoPickedNil=\(onPhotoPicked == nil, privacy: .public)")
