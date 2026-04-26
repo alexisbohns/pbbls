@@ -42,9 +42,24 @@ struct PebbleDetail: Identifiable, Decodable, Hashable {
     let domains: [DomainRef]
     let souls: [Soul]
     let collections: [PebbleCollection]
+    let snaps: [SnapRef]
     let renderSvg: String?
     let renderVersion: String?
     let glyphId: UUID?
+
+    /// Lightweight read-model row for `public.snaps`. The detail SELECT
+    /// projects `snaps(id, storage_path, sort_order)` ordered by `sort_order`.
+    struct SnapRef: Decodable, Hashable, Identifiable {
+        let id: UUID
+        let storagePath: String
+        let sortOrder: Int
+
+        enum CodingKeys: String, CodingKey {
+            case id
+            case storagePath = "storage_path"
+            case sortOrder   = "sort_order"
+        }
+    }
     // renderManifest is intentionally not stored on PebbleDetail in slice 1 —
     // the animation consumer lives in a later slice. We still decode it as an
     // opaque placeholder so the field doesn't break decoding when present.
@@ -86,6 +101,7 @@ struct PebbleDetail: Identifiable, Decodable, Hashable {
         case pebbleDomains = "pebble_domains"
         case pebbleSouls = "pebble_souls"
         case collectionPebbles = "collection_pebbles"
+        case snaps
         case renderSvg = "render_svg"
         case renderVersion = "render_version"
         case glyphId = "glyph_id"
@@ -115,6 +131,9 @@ struct PebbleDetail: Identifiable, Decodable, Hashable {
         let collectionWrappers = try container
             .decodeIfPresent([CollectionWrapper].self, forKey: .collectionPebbles) ?? []
         self.collections = collectionWrappers.map(\.collection)
+
+        let decodedSnaps = try container.decodeIfPresent([SnapRef].self, forKey: .snaps) ?? []
+        self.snaps = decodedSnaps.sorted { $0.sortOrder < $1.sortOrder }
 
         self.renderSvg = try container.decodeIfPresent(String.self, forKey: .renderSvg)
         self.renderVersion = try container.decodeIfPresent(String.self, forKey: .renderVersion)
