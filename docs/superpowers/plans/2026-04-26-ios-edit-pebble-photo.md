@@ -293,27 +293,12 @@ end;
 $$ language plpgsql security definer set search_path = public;
 ```
 
-- [ ] **Step 2: Reset local DB and regenerate types**
+- [ ] **Step 2: Commit the migration file only**
 
-Run from the repo root:
-
-```bash
-npm run db:reset --workspace=packages/supabase
-npm run db:types --workspace=packages/supabase
-```
-
-Expected: both commands succeed; `packages/supabase/types/database.ts` shows a new `delete_pebble_media` entry under the `Functions` block.
-
-- [ ] **Step 3: Spot-check the regenerated type**
-
-Run: `grep -A 5 "delete_pebble_media" packages/supabase/types/database.ts`
-
-Expected: a `delete_pebble_media` function with `Args: { p_snap_id: string }` and `Returns: string`.
-
-- [ ] **Step 4: Commit**
+Type regeneration and remote `db push` are deferred to the user (this project's local Docker is unreliable; the user runs deploys manually). The iOS tasks don't read from `database.ts`, so they compile without the regen.
 
 ```bash
-git add packages/supabase/supabase/migrations/20260426000002_pebble_media_edit.sql packages/supabase/types/database.ts
+git add packages/supabase/supabase/migrations/20260426000002_pebble_media_edit.sql
 git commit -m "feat(db): support snap id round-trip and eager media delete"
 ```
 
