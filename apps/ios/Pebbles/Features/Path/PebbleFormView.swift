@@ -18,8 +18,13 @@ struct PebbleFormView: View {
     var strokeColor: String?
     var renderHeight: CGFloat = 260
 
+    var onPhotoPicked: ((PhotoPickerView.PickedPhoto) -> Void)? = nil
+    var onSnapRetry:   (() -> Void)?                            = nil
+    var onSnapRemoved: (() -> Void)?                            = nil
+
     @State private var showPicker = false
     @State private var showValencePicker = false
+    @State private var isPhotoPickerPresented = false
     @State private var selectedGlyph: Glyph?
 
     @Environment(SupabaseService.self) private var supabase
@@ -166,6 +171,27 @@ struct PebbleFormView: View {
                 .listRowBackground(Color.pebblesListRow)
             }
 
+            Section("pebble_form.photo_section") {
+                if let snap = draft.attachedSnap {
+                    AttachedPhotoView(
+                        snap: snap,
+                        onRemove: {
+                            draft.attachedSnap = nil
+                            onSnapRemoved?()
+                        },
+                        onRetry: { onSnapRetry?() }
+                    )
+                    .listRowBackground(Color.pebblesListRow)
+                } else {
+                    Button {
+                        isPhotoPickerPresented = true
+                    } label: {
+                        Label("pebble_form.add_photo", systemImage: "photo.badge.plus")
+                    }
+                    .listRowBackground(Color.pebblesListRow)
+                }
+            }
+
             if let saveError {
                 Section {
                     Text(saveError)
@@ -186,6 +212,12 @@ struct PebbleFormView: View {
                 currentValence: draft.valence,
                 onSelected: { picked in draft.valence = picked }
             )
+        }
+        .sheet(isPresented: $isPhotoPickerPresented) {
+            PhotoPickerView { picked in
+                isPhotoPickerPresented = false
+                if let picked { onPhotoPicked?(picked) }
+            }
         }
         .task(id: draft.glyphId) { await loadSelectedGlyph() }
     }
