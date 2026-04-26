@@ -19,7 +19,12 @@ export function PebbleVisual({
   tier = "thumbnail",
   className,
 }: PebbleVisualProps) {
-  const { svg } = usePebbleVisual(pebble, mark, tier)
+  // Prefer the server-composed render written by the compose-pebble edge
+  // function. Fall back to the client engine for legacy rows that pre-date
+  // the remote engine and for unauthenticated previews (e.g. landing page
+  // seed pebbles) where no render exists yet.
+  const fallback = usePebbleVisual(pebble, mark, tier)
+  const svg = pebble.render_svg ?? fallback.svg
 
   const emotionName =
     EMOTIONS.find((e) => e.id === pebble.emotion_id)?.name ?? "Unknown"

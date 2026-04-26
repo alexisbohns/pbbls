@@ -39,8 +39,18 @@ export const EMPTY_STORE: Store = {
 // Input types — omit server-generated fields so callers never touch them.
 // ---------------------------------------------------------------------------
 
-export type CreatePebbleInput = Omit<Pebble, "id" | "created_at" | "updated_at">
-export type UpdatePebbleInput = Partial<Omit<Pebble, "id" | "created_at" | "updated_at">>
+// Render columns are written by the compose-pebble / compose-pebble-update edge
+// functions, never by the client — keep them out of mutation inputs.
+type ServerOwnedPebbleFields =
+  | "id"
+  | "created_at"
+  | "updated_at"
+  | "render_svg"
+  | "render_manifest"
+  | "render_version"
+
+export type CreatePebbleInput = Omit<Pebble, ServerOwnedPebbleFields>
+export type UpdatePebbleInput = Partial<Omit<Pebble, ServerOwnedPebbleFields>>
 
 export type CreateSoulInput = Omit<Soul, "id" | "created_at" | "updated_at">
 export type UpdateSoulInput = Partial<Omit<Soul, "id" | "created_at" | "updated_at">>
