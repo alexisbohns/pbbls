@@ -1,6 +1,6 @@
 "use client"
 
-import { useActionState } from "react"
+import { useActionState, useId } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -154,12 +154,15 @@ function FieldSelect({
   defaultValue: string | undefined
   options: ReadonlyArray<{ value: string; label: string }>
 }) {
+  const id = useId()
   return (
-    <label className="space-y-2 text-sm">
-      <span className="text-foreground font-medium">{label}</span>
+    <div className="space-y-2 text-sm">
+      <Label htmlFor={id} className="text-foreground font-medium">
+        {label}
+      </Label>
       {/* Base UI Select renders a visually-hidden <input name={name}> automatically */}
       <Select name={name} defaultValue={defaultValue ?? null}>
-        <SelectTrigger>
+        <SelectTrigger id={id}>
           <SelectValue placeholder={`Select ${label.toLowerCase()}`} />
         </SelectTrigger>
         <SelectContent>
@@ -170,6 +173,6 @@ function FieldSelect({
           ))}
         </SelectContent>
       </Select>
-    </label>
+    </div>
   )
 }

@@ -1,5 +1,14 @@
+import Link from "next/link"
 import { notFound } from "next/navigation"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb"
 import { LogForm } from "../_components/LogForm"
 import { DeleteLogButton } from "../_components/DeleteLogButton"
 import { updateLog } from "../actions"
@@ -21,6 +30,18 @@ export default async function EditLogPage({ params }: { params: Params }) {
 
   return (
     <section className="space-y-6">
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            {/* Base UI BreadcrumbLink uses render prop instead of asChild */}
+            <BreadcrumbLink render={<Link href="/logs" />}>Logs</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{log.title_en}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
       <header>
         <h1 className="text-2xl font-semibold">Edit log</h1>
         <p className="text-muted-foreground text-sm">

@@ -43,7 +43,7 @@ export function LogsTable({ logs }: { logs: LogRow[] }) {
       </TableHeader>
       <TableBody>
         {logs.map((log) => (
-          <TableRow key={log.id} className="cursor-pointer">
+          <TableRow key={log.id}>
             <TableCell className="font-medium">
               <Link href={`/logs/${log.id}`} className="hover:underline">
                 {log.title_en}

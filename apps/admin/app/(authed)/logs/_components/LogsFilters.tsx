@@ -1,5 +1,6 @@
 "use client"
 
+import { useId } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import {
   Select,
@@ -9,6 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Button } from "@/components/ui/button"
+import { Label } from "@/components/ui/label"
 import { SPECIES_OPTIONS, STATUS_OPTIONS } from "@/lib/logs/options"
 
 const PUBLISHED_OPTIONS = [
@@ -71,11 +73,14 @@ function FilterSelect({
   onChange: (v: string) => void
   options: ReadonlyArray<{ value: string; label: string }>
 }) {
+  const id = useId()
   return (
-    <label className="space-y-1 text-sm">
-      <span className="text-muted-foreground">{label}</span>
+    <div className="space-y-1 text-sm">
+      <Label htmlFor={id} className="text-muted-foreground">
+        {label}
+      </Label>
       <Select value={value} onValueChange={(v) => onChange(v ?? "all")}>
-        <SelectTrigger className="w-44">
+        <SelectTrigger id={id} className="w-44">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -86,6 +91,6 @@ function FilterSelect({
           ))}
         </SelectContent>
       </Select>
-    </label>
+    </div>
   )
 }
