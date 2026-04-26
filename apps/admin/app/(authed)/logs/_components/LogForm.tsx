@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PLATFORM_OPTIONS, SPECIES_OPTIONS, STATUS_OPTIONS } from "@/lib/logs/options"
-import type { LogRow } from "@/lib/logs/types"
+import type { LogRow, LogSpecies } from "@/lib/logs/types"
 import { MarkdownField } from "./MarkdownField"
 import { CoverImageInput } from "./CoverImageInput"
 
@@ -27,11 +27,13 @@ export function LogForm({
   action,
   submitLabel,
   extraActions,
+  initialSpecies,
 }: {
   log: LogRow | null
   action: LogFormAction
   submitLabel: string
   extraActions?: React.ReactNode
+  initialSpecies?: LogSpecies
 }) {
   const [state, formAction, pending] = useActionState<LogFormResult, FormData>(action, undefined)
 
@@ -41,7 +43,7 @@ export function LogForm({
         <FieldSelect
           label="Species"
           name="species"
-          defaultValue={log?.species}
+          defaultValue={log?.species ?? initialSpecies}
           options={SPECIES_OPTIONS}
         />
         <FieldSelect
