@@ -733,6 +733,7 @@ export type Database = {
       souls: {
         Row: {
           created_at: string
+          glyph_id: string
           id: string
           name: string
           updated_at: string
@@ -740,6 +741,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          glyph_id?: string
           id?: string
           name: string
           updated_at?: string
@@ -747,12 +749,20 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          glyph_id?: string
           id?: string
           name?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "souls_glyph_id_fkey"
+            columns: ["glyph_id"]
+            isOneToOne: false
+            referencedRelation: "glyphs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "souls_user_id_fkey"
             columns: ["user_id"]

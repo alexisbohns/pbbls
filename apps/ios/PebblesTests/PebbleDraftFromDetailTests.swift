@@ -25,7 +25,13 @@ struct PebbleDraftFromDetailTests {
             "color": "#FFD166"
         ]
         let domainsJSON = domains.map { domain in ["domain": ["id": domain.id.uuidString, "slug": domain.slug, "name": domain.name]] }
-        let soulsJSON = souls.map { soul in ["soul": ["id": soul.id.uuidString, "name": soul.name]] }
+        let soulsJSON = souls.map { soul -> [String: [String: String]] in
+            ["soul": [
+                "id": soul.id.uuidString,
+                "name": soul.name,
+                "glyph_id": soul.glyphId.uuidString
+            ]]
+        }
         let collectionsJSON = collections.map { coll in ["collection": ["id": coll.id.uuidString, "name": coll.name]] }
 
         var root: [String: Any] = [
@@ -72,7 +78,7 @@ struct PebbleDraftFromDetailTests {
             visibility: .public,
             emotionId: emotionId,
             domains: [DomainRef(id: domainId, slug: "zoe", name: "Work")],
-            souls: [Soul(id: soulId, name: "Me")],
+            souls: [Soul(id: soulId, name: "Me", glyphId: UUID())],
             collections: [PebbleCollection(id: collectionId, name: "Wins")]
         )
 

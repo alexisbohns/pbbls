@@ -42,7 +42,13 @@ struct PebbleDetailDecodingTests {
         { "domain": { "id": "33333333-3333-3333-3333-333333333333", "slug": "zoe", "name": "Work" } }
       ],
       "pebble_souls": [
-        { "soul": { "id": "44444444-4444-4444-4444-444444444444", "name": "Alex" } }
+        {
+          "soul": {
+            "id": "44444444-4444-4444-4444-444444444444",
+            "name": "Alex",
+            "glyph_id": "4759c37c-68a6-46a6-b4fc-046bd0316752"
+          }
+        }
       ],
       "collection_pebbles": [
         { "collection": { "id": "55555555-5555-5555-5555-555555555555", "name": "Wins" } }

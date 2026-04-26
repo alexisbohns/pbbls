@@ -89,7 +89,7 @@ struct PebbleDetailSheet: View {
                     render_svg, render_version,
                     emotion:emotions(id, slug, name, color),
                     pebble_domains(domain:domains(id, slug, name)),
-                    pebble_souls(soul:souls(id, name)),
+                    pebble_souls(soul:souls(id, name, glyph_id)),
                     collection_pebbles(collection:collections(id, name))
                 """)
                 .eq("id", value: pebbleId)
