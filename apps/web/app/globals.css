@@ -505,6 +505,19 @@
   @apply h-full;
 }
 
+/* Server-composed pebble SVGs (from the compose-pebble edge function) carry
+ * intrinsic width/height attributes that match the engine canvas size and
+ * would otherwise overflow the wrapper. Force the inline SVG to fluid-fit
+ * via CSS, which overrides the SVG element's width/height attributes while
+ * preserving aspect ratio through the default `preserveAspectRatio` value
+ * (`xMidYMid meet`). The client-engine fallback templates emit no width/
+ * height attributes, so this rule is a no-op for them. */
+.pbbls-visual > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
 .prose {
   @apply flex flex-col gap-4;
 

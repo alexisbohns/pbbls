@@ -51,8 +51,14 @@ export class SupabaseProvider implements DataProvider {
   // ---------------------------------------------------------------------------
 
   async loadFromSupabase(): Promise<Store> {
+    // The render columns (render_svg / render_manifest / render_version) are
+    // not exposed by `v_pebbles_full`, so we fetch them in parallel from the
+    // base `pebbles` table and merge them in by id. This mirrors the iOS read
+    // pattern (it queries `pebbles` directly with explicit columns) and avoids
+    // having to extend the view.
     const [
       pebblesRes,
+      pebblesRenderRes,
       soulsRes,
       collectionsRes,
       collectionPebblesRes,
@@ -61,6 +67,10 @@ export class SupabaseProvider implements DataProvider {
       bounceRes,
     ] = await Promise.all([
       this.supabase.from("v_pebbles_full").select("*").eq("user_id", this.userId),
+      this.supabase
+        .from("pebbles")
+        .select("id, render_svg, render_manifest, render_version")
+        .eq("user_id", this.userId),
       this.supabase.from("souls").select("*").eq("user_id", this.userId),
       this.supabase.from("collections").select("*").eq("user_id", this.userId),
       this.supabase.from("collection_pebbles").select("*, collections!inner(user_id)").eq("collections.user_id", this.userId),
@@ -70,30 +80,55 @@ export class SupabaseProvider implements DataProvider {
     ])
 
     if (pebblesRes.error) throw new Error(`Failed to load pebbles: ${pebblesRes.error.message}`)
+    if (pebblesRenderRes.error) throw new Error(`Failed to load pebble renders: ${pebblesRenderRes.error.message}`)
     if (soulsRes.error) throw new Error(`Failed to load souls: ${soulsRes.error.message}`)
     if (collectionsRes.error) throw new Error(`Failed to load collections: ${collectionsRes.error.message}`)
     if (glyphsRes.error) throw new Error(`Failed to load glyphs: ${glyphsRes.error.message}`)
 
-    const pebbles: Pebble[] = (pebblesRes.data ?? []).map((row: Record<string, unknown>) => ({
-      id: row.id as string,
-      name: row.name as string,
-      description: (row.description as string) ?? undefined,
-      happened_at: row.happened_at as string,
-      intensity: row.intensity as 1 | 2 | 3,
-      positiveness: row.positiveness as -1 | 0 | 1,
-      visibility: (row.visibility as string) as "private" | "public",
-      emotion_id: row.emotion_id as string,
-      soul_ids: ((row.souls as Array<{ id: string }>) ?? []).map((s) => s.id),
-      domain_ids: ((row.domains as Array<{ id: string }>) ?? []).map((d) => d.id),
-      mark_id: (row.glyph_id as string) ?? undefined,
-      instants: [],
-      cards: ((row.cards as Array<{ species_id: string; value: string }>) ?? []).map((c) => ({
-        species_id: c.species_id,
-        value: c.value,
-      })),
-      created_at: row.created_at as string,
-      updated_at: row.updated_at as string,
-    }))
+    const renderById = new Map<
+      string,
+      { render_svg: string | null; render_manifest: unknown; render_version: string | null }
+    >()
+    for (const row of pebblesRenderRes.data ?? []) {
+      const r = row as Record<string, unknown>
+      renderById.set(r.id as string, {
+        render_svg: (r.render_svg as string | null) ?? null,
+        render_manifest: r.render_manifest ?? null,
+        render_version: (r.render_version as string | null) ?? null,
+      })
+    }
+
+    const pebbles: Pebble[] = (pebblesRes.data ?? []).map((row: Record<string, unknown>) => {
+      const id = row.id as string
+      const render = renderById.get(id) ?? {
+        render_svg: null,
+        render_manifest: null,
+        render_version: null,
+      }
+      return {
+        id,
+        name: row.name as string,
+        description: (row.description as string) ?? undefined,
+        happened_at: row.happened_at as string,
+        intensity: row.intensity as 1 | 2 | 3,
+        positiveness: row.positiveness as -1 | 0 | 1,
+        visibility: (row.visibility as string) as "private" | "public",
+        emotion_id: row.emotion_id as string,
+        soul_ids: ((row.souls as Array<{ id: string }>) ?? []).map((s) => s.id),
+        domain_ids: ((row.domains as Array<{ id: string }>) ?? []).map((d) => d.id),
+        mark_id: (row.glyph_id as string) ?? undefined,
+        instants: [],
+        cards: ((row.cards as Array<{ species_id: string; value: string }>) ?? []).map((c) => ({
+          species_id: c.species_id,
+          value: c.value,
+        })),
+        render_svg: render.render_svg,
+        render_manifest: render.render_manifest,
+        render_version: render.render_version,
+        created_at: row.created_at as string,
+        updated_at: row.updated_at as string,
+      }
+    })
 
     const souls: Soul[] = (soulsRes.data ?? []).map((row: Record<string, unknown>) => ({
       id: row.id as string,
@@ -176,56 +211,92 @@ export class SupabaseProvider implements DataProvider {
   // ---------------------------------------------------------------------------
 
   async createPebble(input: CreatePebbleInput): Promise<Pebble> {
-    const result = await this.supabase.rpc("create_pebble", {
-      payload: {
-        name: input.name,
-        description: input.description ?? null,
-        happened_at: input.happened_at,
-        intensity: input.intensity,
-        positiveness: input.positiveness,
-        visibility: input.visibility,
-        emotion_id: input.emotion_id,
-        soul_ids: input.soul_ids,
-        domain_ids: input.domain_ids,
+    const payload = {
+      name: input.name,
+      description: input.description ?? null,
+      happened_at: input.happened_at,
+      intensity: input.intensity,
+      positiveness: input.positiveness,
+      visibility: input.visibility,
+      emotion_id: input.emotion_id,
+      soul_ids: input.soul_ids,
+      domain_ids: input.domain_ids,
+      cards: input.cards.map((c, i) => ({
+        species_id: c.species_id,
+        value: c.value,
+        sort_order: i,
+      })),
+    }
+    const pebbleId = await this.invokeCompose("compose-pebble", { payload })
+    await this.loadFromSupabase()
+    const created = this.store.pebbles.find((p) => p.id === pebbleId)
+    if (!created) throw new Error(`Pebble not found after create: ${pebbleId}`)
+    return created
+  }
+
+  async updatePebble(id: string, input: UpdatePebbleInput): Promise<Pebble> {
+    const payload = {
+      ...(input.name !== undefined && { name: input.name }),
+      ...(input.description !== undefined && { description: input.description }),
+      ...(input.happened_at !== undefined && { happened_at: input.happened_at }),
+      ...(input.intensity !== undefined && { intensity: input.intensity }),
+      ...(input.positiveness !== undefined && { positiveness: input.positiveness }),
+      ...(input.visibility !== undefined && { visibility: input.visibility }),
+      ...(input.emotion_id !== undefined && { emotion_id: input.emotion_id }),
+      ...(input.soul_ids !== undefined && { soul_ids: input.soul_ids }),
+      ...(input.domain_ids !== undefined && { domain_ids: input.domain_ids }),
+      ...(input.cards !== undefined && {
         cards: input.cards.map((c, i) => ({
           species_id: c.species_id,
           value: c.value,
           sort_order: i,
         })),
-      },
-    })
-    const pebbleId = this.unwrap(result) as string
-    await this.loadFromSupabase()
-    return this.store.pebbles.find((p) => p.id === pebbleId)!
-  }
-
-  async updatePebble(id: string, input: UpdatePebbleInput): Promise<Pebble> {
-    const result = await this.supabase.rpc("update_pebble", {
-      p_pebble_id: id,
-      payload: {
-        ...(input.name !== undefined && { name: input.name }),
-        ...(input.description !== undefined && { description: input.description }),
-        ...(input.happened_at !== undefined && { happened_at: input.happened_at }),
-        ...(input.intensity !== undefined && { intensity: input.intensity }),
-        ...(input.positiveness !== undefined && { positiveness: input.positiveness }),
-        ...(input.visibility !== undefined && { visibility: input.visibility }),
-        ...(input.emotion_id !== undefined && { emotion_id: input.emotion_id }),
-        ...(input.soul_ids !== undefined && { soul_ids: input.soul_ids }),
-        ...(input.domain_ids !== undefined && { domain_ids: input.domain_ids }),
-        ...(input.cards !== undefined && {
-          cards: input.cards.map((c, i) => ({
-            species_id: c.species_id,
-            value: c.value,
-            sort_order: i,
-          })),
-        }),
-      },
-    })
-    this.unwrap(result)
+      }),
+    }
+    await this.invokeCompose("compose-pebble-update", { pebble_id: id, payload })
     await this.loadFromSupabase()
     const updated = this.store.pebbles.find((p) => p.id === id)
     if (!updated) throw new Error(`Pebble not found after update: ${id}`)
     return updated
+  }
+
+  /**
+   * Invoke the compose-pebble or compose-pebble-update edge function and
+   * return the resulting pebble id. Mirrors iOS soft-success handling
+   * (`apps/ios/Pebbles/Features/Path/CreatePebbleSheet.swift:139` and
+   * `EditPebbleSheet.swift:180`): if the function returns 5xx but the body
+   * still carries a `pebble_id`, the row was inserted/updated successfully
+   * and only the render write-back failed — we keep going and let the next
+   * `loadFromSupabase` reflect the missing render.
+   */
+  private async invokeCompose(
+    name: "compose-pebble" | "compose-pebble-update",
+    body: Record<string, unknown>,
+  ): Promise<string> {
+    const { data, error } = await this.supabase.functions.invoke<{
+      pebble_id?: string
+      error?: string
+    }>(name, { body })
+
+    const pebbleId = data?.pebble_id
+
+    if (error) {
+      if (pebbleId) {
+        console.warn(
+          `[${name}] edge function returned an error but pebble_id is set — soft-success`,
+          { error, pebbleId },
+        )
+        return pebbleId
+      }
+      console.error(`[${name}] edge function failed`, error)
+      throw new Error(error.message ?? `${name} failed`)
+    }
+
+    if (!pebbleId) {
+      console.error(`[${name}] edge function returned no pebble_id`, data)
+      throw new Error(`${name} returned no pebble_id`)
+    }
+    return pebbleId
   }
 
   async deletePebble(id: string): Promise<void> {
