@@ -30,7 +30,9 @@ struct PebbleFormView: View {
     @Environment(SupabaseService.self) private var supabase
 
     var body: some View {
-        Form {
+        let _ = Logger(subsystem: "app.pbbls.ios", category: "pebble-form")
+            .notice("body eval: onPhotoPickedNil=\(onPhotoPicked == nil, privacy: .public)")
+        return Form {
             if let svg = renderSvg {
                 PebbleRenderView(svg: svg, strokeColor: strokeColor)
                     .frame(maxWidth: .infinity)
