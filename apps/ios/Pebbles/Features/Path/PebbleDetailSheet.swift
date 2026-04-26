@@ -57,6 +57,11 @@ struct PebbleDetailSheet: View {
                             .padding(.vertical)
                     }
 
+                    if let snap = detail.snaps.first {
+                        SnapImageView(storagePath: snap.storagePath)
+                            .padding(.horizontal)
+                    }
+
                     VStack(alignment: .leading, spacing: 8) {
                         Text(detail.name).font(.headline)
                         if let description = detail.description, !description.isEmpty {
@@ -90,7 +95,8 @@ struct PebbleDetailSheet: View {
                     emotion:emotions(id, slug, name, color),
                     pebble_domains(domain:domains(id, slug, name)),
                     pebble_souls(soul:souls(id, name, glyph_id)),
-                    collection_pebbles(collection:collections(id, name))
+                    collection_pebbles(collection:collections(id, name)),
+                    snaps(id, storage_path, sort_order)
                 """)
                 .eq("id", value: pebbleId)
                 .single()

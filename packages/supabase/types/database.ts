@@ -627,6 +627,7 @@ export type Database = {
           display_name: string
           id: string
           is_admin: boolean
+          max_media_per_pebble: number
           onboarding_completed: boolean
           privacy_accepted_at: string | null
           terms_accepted_at: string | null
@@ -639,6 +640,7 @@ export type Database = {
           display_name: string
           id?: string
           is_admin?: boolean
+          max_media_per_pebble?: number
           onboarding_completed?: boolean
           privacy_accepted_at?: string | null
           terms_accepted_at?: string | null
@@ -651,6 +653,7 @@ export type Database = {
           display_name?: string
           id?: string
           is_admin?: boolean
+          max_media_per_pebble?: number
           onboarding_completed?: boolean
           privacy_accepted_at?: string | null
           terms_accepted_at?: string | null
