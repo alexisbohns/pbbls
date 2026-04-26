@@ -164,7 +164,7 @@ Setup steps (the user will do these; this spec documents them so the implementat
 3. Leave Vercel's default build/install commands — Turborepo handles them.
 4. Environment variables (copy from the existing `apps/web` Vercel project):
    - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (matches the name `apps/web` uses)
    - No service-role key — RLS is the authorization layer.
 5. Domain: in **Settings → Domains**, add `admin.<consumer-domain>`. Add the CNAME at the DNS provider. Vercel auto-provisions SSL.
 6. Supabase: in dashboard → **Authentication → URL Configuration**, add `https://admin.<consumer-domain>` to the allowed redirect URLs (used by email-confirmation and password-reset flows; relevant if those features are surfaced later).
