@@ -95,6 +95,8 @@ struct CreatePebbleSheet: View {
     // MARK: - upload orchestration
 
     private func handlePicked(_ picked: PhotoPickerView.PickedItem) async {
+        logger.notice("handlePicked: started uti=\(picked.uti, privacy: .public)")
+
         guard let userId = currentUserId else {
             logger.error("handlePicked: no current user id")
             return
@@ -105,6 +107,7 @@ struct CreatePebbleSheet: View {
         let data: Data
         do {
             data = try await loadData(from: picked.itemProvider, uti: picked.uti)
+            logger.notice("handlePicked: loaded \(data.count, privacy: .public) bytes")
         } catch {
             logger.error("picker data load failed: \(error.localizedDescription, privacy: .private)")
             saveError = "Couldn't read the image."
@@ -156,9 +159,11 @@ struct CreatePebbleSheet: View {
 
     private func uploadCurrentSnap(processed: ProcessedImage, userId: UUID) async {
         guard var snap = draft.attachedSnap else { return }
+        logger.notice("uploadCurrentSnap: started snap=\(snap.id, privacy: .public)")
 
         do {
             try await snapRepo.uploadProcessed(processed, snapId: snap.id, userId: userId)
+            logger.notice("uploadCurrentSnap: success snap=\(snap.id, privacy: .public)")
             snap.state = .uploaded
             draft.attachedSnap = snap
         } catch {

@@ -55,16 +55,18 @@ struct PhotoPickerView: UIViewControllerRepresentable {
         }
 
         nonisolated func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+            let identifiers = results.first?.itemProvider.registeredTypeIdentifiers ?? []
+            logger.notice("delegate fired: results=\(results.count, privacy: .public) identifiers=\(identifiers, privacy: .public)")
+
             // Capture before hopping actors — `results` can't outlive the call site.
             let picked: PickedItem?
             if let result = results.first,
                let uti = result.itemProvider.registeredTypeIdentifiers
                                   .first(where: { ImageFormatValidator.isSupported($0) }) {
                 picked = PickedItem(itemProvider: result.itemProvider, uti: uti)
+                logger.notice("picked uti=\(uti, privacy: .public)")
             } else {
-                if let identifiers = results.first?.itemProvider.registeredTypeIdentifiers {
-                    logger.warning("no supported UTI in picker result; identifiers: \(identifiers, privacy: .public)")
-                }
+                logger.warning("no supported UTI in picker result; identifiers: \(identifiers, privacy: .public)")
                 picked = nil
             }
 
