@@ -17,6 +17,19 @@ struct PebbleCreatePayload: Encodable {
     let soulIds: [UUID]
     let collectionIds: [UUID]
     let glyphId: UUID?
+    let snaps: [SnapPayload]?
+
+    struct SnapPayload: Encodable {
+        let id: UUID
+        let storagePath: String
+        let sortOrder: Int
+
+        enum CodingKeys: String, CodingKey {
+            case id
+            case storagePath = "storage_path"
+            case sortOrder   = "sort_order"
+        }
+    }
 
     enum CodingKeys: String, CodingKey {
         case name
@@ -25,11 +38,12 @@ struct PebbleCreatePayload: Encodable {
         case intensity
         case positiveness
         case visibility
-        case emotionId = "emotion_id"
-        case domainIds = "domain_ids"
-        case soulIds = "soul_ids"
+        case emotionId     = "emotion_id"
+        case domainIds     = "domain_ids"
+        case soulIds       = "soul_ids"
         case collectionIds = "collection_ids"
-        case glyphId = "glyph_id"
+        case glyphId       = "glyph_id"
+        case snaps
     }
 
     private static let iso8601: ISO8601DateFormatter = {
@@ -51,14 +65,20 @@ struct PebbleCreatePayload: Encodable {
         try container.encode(soulIds, forKey: .soulIds)
         try container.encode(collectionIds, forKey: .collectionIds)
         try container.encode(glyphId, forKey: .glyphId)
+        if let snaps {
+            try container.encode(snaps, forKey: .snaps)
+        }
     }
 }
 
 extension PebbleCreatePayload {
     /// Build a payload from a validated draft.
+    /// `userId` is the current authenticated user's id; it is needed only to
+    /// derive the snap's `storage_path` (the RPC re-derives ownership from
+    /// `auth.uid()` server-side, so this value is not security-sensitive).
     /// Precondition: `draft.isValid == true`.
-    init(from draft: PebbleDraft) {
-        precondition(draft.isValid, "PebbleCreatePayload(from:) called with invalid draft")
+    init(from draft: PebbleDraft, userId: UUID) {
+        precondition(draft.isValid, "PebbleCreatePayload(from:userId:) called with invalid draft")
         self.name = draft.name.trimmingCharacters(in: .whitespaces)
         let trimmedDescription = draft.description.trimmingCharacters(in: .whitespaces)
         self.description = trimmedDescription.isEmpty ? nil : trimmedDescription
@@ -71,5 +91,12 @@ extension PebbleCreatePayload {
         self.soulIds = draft.soulId.map { [$0] } ?? []
         self.collectionIds = draft.collectionId.map { [$0] } ?? []
         self.glyphId = draft.glyphId
+        self.snaps = draft.attachedSnap.map { snap in
+            [SnapPayload(
+                id: snap.id,
+                storagePath: snap.storagePrefix(userId: userId),
+                sortOrder: 0
+            )]
+        }
     }
 }
