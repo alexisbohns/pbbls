@@ -10,12 +10,13 @@ const BUCKET = "lab-assets"
 const ACCEPT = "image/png,image/jpeg,image/webp"
 const MAX_BYTES = 5 * 1024 * 1024
 
-function publicUrl(path: string) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ""
-  return `${url}/storage/v1/object/public/${BUCKET}/${path}`
+// Use the Supabase SDK to derive the public URL — avoids hard-coding the URL pattern.
+function publicUrl(supabase: ReturnType<typeof createClient>, path: string) {
+  return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl
 }
 
 export function CoverImageInput({ defaultPath }: { defaultPath: string | null }) {
+  const [supabase] = useState(() => createClient())
   const [path, setPath] = useState<string>(defaultPath ?? "")
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState(false)
@@ -32,12 +33,13 @@ export function CoverImageInput({ defaultPath }: { defaultPath: string | null })
       return
     }
 
+    // Derive extension safely — files without a dot fall back to "bin".
+    const lastDot = file.name.lastIndexOf(".")
+    const ext = lastDot > 0 ? file.name.slice(lastDot + 1).toLowerCase() : "bin"
+    const objectPath = `covers/${crypto.randomUUID()}.${ext}`
+
     setPending(true)
     try {
-      const supabase = createClient()
-      const ext = file.name.split(".").pop() ?? "bin"
-      const objectPath = `covers/${crypto.randomUUID()}.${ext}`
-
       const { error: upErr } = await supabase.storage
         .from(BUCKET)
         .upload(objectPath, file, { contentType: file.type, upsert: false })
@@ -54,6 +56,18 @@ export function CoverImageInput({ defaultPath }: { defaultPath: string | null })
     }
   }
 
+  async function handleRemove() {
+    if (!path) return
+    const oldPath = path
+    // Clear state immediately so UX is responsive regardless of cleanup outcome.
+    setPath("")
+    // Best-effort delete — don't block the UX on failure.
+    const { error: rmErr } = await supabase.storage.from(BUCKET).remove([oldPath])
+    if (rmErr) {
+      console.warn("[CoverImageInput] storage cleanup failed for", oldPath, rmErr.message)
+    }
+  }
+
   return (
     <div className="space-y-2">
       <Label>Cover image</Label>
@@ -63,13 +77,13 @@ export function CoverImageInput({ defaultPath }: { defaultPath: string | null })
         <div className="space-y-2">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={publicUrl(path)}
+            src={publicUrl(supabase, path)}
             alt="Cover preview"
             className="border-border h-40 w-full rounded-md border object-cover"
           />
           <div className="flex items-center gap-2">
             <Input value={path} readOnly className="font-mono text-xs" />
-            <Button type="button" variant="outline" onClick={() => setPath("")}>
+            <Button type="button" variant="outline" onClick={() => void handleRemove()}>
               Remove
             </Button>
           </div>

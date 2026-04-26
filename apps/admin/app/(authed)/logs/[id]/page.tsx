@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
-import type { LogRow } from "@/lib/logs/types"
 import { LogForm } from "../_components/LogForm"
 import { DeleteLogButton } from "../_components/DeleteLogButton"
 import { updateLog } from "../actions"
@@ -17,7 +16,7 @@ export default async function EditLogPage({ params }: { params: Params }) {
     notFound()
   }
 
-  const log = data as LogRow
+  const log = data
   const updateAction = updateLog.bind(null, id)
 
   return (

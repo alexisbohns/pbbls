@@ -64,7 +64,7 @@ export function LogForm({
           <TabsTrigger value="fr">Français (optional)</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="en" className="space-y-4">
+        <TabsContent value="en" keepMounted className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="title_en">Title</Label>
             <Input id="title_en" name="title_en" defaultValue={log?.title_en ?? ""} required />
@@ -85,7 +85,7 @@ export function LogForm({
           </div>
         </TabsContent>
 
-        <TabsContent value="fr" className="space-y-4">
+        <TabsContent value="fr" keepMounted className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="title_fr">Titre</Label>
             <Input id="title_fr" name="title_fr" defaultValue={log?.title_fr ?? ""} />

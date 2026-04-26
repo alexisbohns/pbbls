@@ -47,7 +47,6 @@ function readLogFields(formData: FormData): { values: LogInsert; error?: string 
       external_url,
       cover_image_path,
       published,
-      published_at: published ? new Date().toISOString() : null,
     },
   }
 }
@@ -57,9 +56,10 @@ export async function createLog(_: LogFormResult, formData: FormData): Promise<L
   if (parsed.error) return { error: parsed.error }
 
   const supabase = await createServerSupabaseClient()
+  const published_at = parsed.values.published ? new Date().toISOString() : null
   const { data, error } = await supabase
     .from("logs")
-    .insert(parsed.values)
+    .insert({ ...parsed.values, published_at })
     .select("id")
     .single()
 
@@ -84,7 +84,7 @@ export async function updateLog(
 
   // Preserve published_at if the row was already published and stays published.
   // If newly published: stamp now(). If unpublished: clear it.
-  let published_at: string | null = parsed.values.published_at ?? null
+  let published_at: string | null = null
   if (parsed.values.published) {
     const { data: existing, error: readError } = await supabase
       .from("logs")
