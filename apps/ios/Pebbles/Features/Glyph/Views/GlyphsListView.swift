@@ -85,31 +85,46 @@ struct GlyphsListView: View {
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 12) {
                         ForEach(glyphs) { glyph in
-                            Button {
-                                renameDraft = glyph.name ?? ""
-                                renaming = glyph
-                            } label: {
-                                VStack(spacing: 4) {
-                                    GlyphThumbnail(
-                                        strokes: glyph.strokes,
-                                        side: 96,
-                                        strokeColor: Color.pebblesAccent
-                                    )
-                                    if let name = glyph.name {
-                                        Text(name)
-                                            .font(.caption)
-                                            .foregroundStyle(.secondary)
-                                            .lineLimit(1)
-                                    }
-                                }
-                            }
-                            .buttonStyle(.plain)
-                            .accessibilityLabel(glyph.name ?? "Untitled glyph")
-                            .accessibilityHint("Double tap to rename")
+                            cell(for: glyph)
                         }
                     }
                     .padding()
                 }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func cell(for glyph: Glyph) -> some View {
+        if glyph.userId != nil {
+            Button {
+                renameDraft = glyph.name ?? ""
+                renaming = glyph
+            } label: {
+                thumbnail(for: glyph)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(glyph.name ?? "Untitled glyph")
+            .accessibilityHint("Double tap to rename")
+        } else {
+            thumbnail(for: glyph)
+                .accessibilityElement(children: .combine)
+                .accessibilityLabel(glyph.name ?? "Untitled glyph")
+        }
+    }
+
+    private func thumbnail(for glyph: Glyph) -> some View {
+        VStack(spacing: 4) {
+            GlyphThumbnail(
+                strokes: glyph.strokes,
+                side: 96,
+                strokeColor: Color.pebblesAccent
+            )
+            if let name = glyph.name {
+                Text(name)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
             }
         }
     }
@@ -138,7 +153,8 @@ struct GlyphsListView: View {
             id: glyph.id,
             name: optimisticName,
             strokes: glyph.strokes,
-            viewBox: glyph.viewBox
+            viewBox: glyph.viewBox,
+            userId: glyph.userId
         )
 
         do {

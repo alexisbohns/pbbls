@@ -10,11 +10,15 @@ struct Glyph: Identifiable, Decodable, Hashable {
     let name: String?
     let strokes: [GlyphStroke]
     let viewBox: String
+    /// `nil` means a system glyph (or a row decoded from a select that didn't
+    /// include `user_id` — treat as not-renamable in that case).
+    let userId: UUID?
 
     enum CodingKeys: String, CodingKey {
         case id
         case name
         case strokes
         case viewBox = "view_box"
+        case userId = "user_id"
     }
 }

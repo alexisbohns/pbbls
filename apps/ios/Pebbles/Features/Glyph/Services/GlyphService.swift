@@ -16,15 +16,14 @@ struct GlyphService {
 
     private static let logger = Logger(subsystem: "app.pbbls.ios", category: "glyph-service")
 
-    /// Fetches glyphs visible to the current user. In V1 this also includes
-    /// system glyphs (user_id is null) — the RLS policy allows them for
-    /// domain-default fallback reads elsewhere, and filtering them out
-    /// client-side would require adding user_id to the Glyph model.
-    /// Not blocking — deferred until the picker needs the distinction.
+    /// Fetches glyphs visible to the current user. Includes system glyphs
+    /// (`user_id is null`) so they remain available in pickers and grids; the
+    /// `Glyph.userId` field lets call sites distinguish ownership for
+    /// permission-gated UI like rename.
     func list() async throws -> [Glyph] {
         let rows: [Glyph] = try await supabase.client
             .from("glyphs")
-            .select("id, name, strokes, view_box")
+            .select("id, name, strokes, view_box, user_id")
             .order("created_at", ascending: false)
             .execute()
             .value
@@ -46,7 +45,7 @@ struct GlyphService {
         let created: Glyph = try await supabase.client
             .from("glyphs")
             .insert(payload)
-            .select("id, name, strokes, view_box")
+            .select("id, name, strokes, view_box, user_id")
             .single()
             .execute()
             .value
@@ -64,7 +63,7 @@ struct GlyphService {
             .from("glyphs")
             .update(["name": value])
             .eq("id", value: id)
-            .select("id, name, strokes, view_box")
+            .select("id, name, strokes, view_box, user_id")
             .single()
             .execute()
             .value
