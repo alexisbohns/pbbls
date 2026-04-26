@@ -53,6 +53,22 @@ struct GlyphService {
         return created
     }
 
+    /// Updates a glyph's name. Pass `nil`, `""`, or any whitespace-only string
+    /// to clear it. Single-table write — no RPC needed (per AGENTS.md). RLS
+    /// `glyphs_update` enforces ownership.
+    func updateName(id: UUID, name: String?) async throws -> Glyph {
+        let value = normalizedName(name)
+        let updated: Glyph = try await supabase.client
+            .from("glyphs")
+            .update(["name": value])
+            .eq("id", value: id)
+            .select("id, name, strokes, view_box")
+            .single()
+            .execute()
+            .value
+        return updated
+    }
+
     private func normalizedName(_ raw: String?) -> String? {
         let trimmed = raw?.trimmingCharacters(in: .whitespacesAndNewlines)
         return (trimmed?.isEmpty ?? true) ? nil : trimmed
