@@ -55,6 +55,8 @@ struct PebbleFormView: View {
         self.onPhotoPicked = onPhotoPicked
         self.onSnapRetry = onSnapRetry
         self.onSnapRemoved = onSnapRemoved
+        Logger(subsystem: "app.pbbls.ios", category: "pebble-form")
+            .notice("init: onPhotoPickedNil=\(onPhotoPicked == nil, privacy: .public)")
     }
 
     var body: some View {
