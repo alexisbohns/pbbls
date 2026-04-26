@@ -37,7 +37,7 @@ export function LogForm({
 
   return (
     <form action={formAction} className="space-y-8">
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="flex gap-4">
         <FieldSelect
           label="Species"
           name="species"
@@ -58,7 +58,7 @@ export function LogForm({
         />
       </div>
 
-      <Tabs defaultValue="en" className="space-y-4">
+      <Tabs defaultValue="en" className="flex flex-col space-y-4">
         <TabsList>
           <TabsTrigger value="en">English (required)</TabsTrigger>
           <TabsTrigger value="fr">Français (optional)</TabsTrigger>
