@@ -29,3 +29,17 @@ export function isLogSpecies(value: string | undefined): value is LogSpecies {
 export function isLogStatus(value: string | undefined): value is LogStatus {
   return value !== undefined && (STATUS_VALUES as readonly string[]).includes(value)
 }
+
+export type PlatformFilter = "web" | "ios" | "android"
+
+export const PLATFORM_FILTER_OPTIONS: ReadonlyArray<{ value: PlatformFilter; label: string }> = [
+  { value: "web", label: "Web" },
+  { value: "ios", label: "iOS" },
+  { value: "android", label: "Android" },
+]
+
+const PLATFORM_FILTER_VALUES = PLATFORM_FILTER_OPTIONS.map((o) => o.value)
+
+export function isPlatformFilter(value: string | undefined): value is PlatformFilter {
+  return value !== undefined && (PLATFORM_FILTER_VALUES as readonly string[]).includes(value)
+}
