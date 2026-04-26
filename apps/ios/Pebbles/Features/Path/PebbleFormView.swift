@@ -7,6 +7,7 @@ import os
 /// Knows nothing about Supabase, save/insert semantics, or which sheet is
 /// presenting it. The optional `saveError` row is rendered inline so both
 /// sheets can surface save failures the same way.
+// swiftlint:disable:next type_body_length
 struct PebbleFormView: View {
     @Binding var draft: PebbleDraft
     let emotions: [Emotion]

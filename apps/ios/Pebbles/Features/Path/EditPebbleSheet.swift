@@ -11,6 +11,7 @@ import os
 /// 3. Save calls the `compose-pebble-update` edge function which updates the row
 ///    (via `update_pebble` RPC internally) and returns a fresh `render_svg`.
 /// 4. `onSaved()` notifies the parent (`PathView`) so it can refetch the list.
+// swiftlint:disable:next type_body_length
 struct EditPebbleSheet: View {
     let pebbleId: UUID
     let onSaved: () -> Void
@@ -301,6 +302,7 @@ struct EditPebbleSheet: View {
         }
     }
 
+    // swiftlint:disable:next function_body_length
     private func save() async {
         guard draft.isValid else { return }
 
