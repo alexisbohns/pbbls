@@ -18,9 +18,9 @@ struct PebbleFormView: View {
     var strokeColor: String?
     var renderHeight: CGFloat = 260
 
-    var onPhotoPicked: ((PhotoPickerView.PickedItem) -> Void)? = nil
-    var onSnapRetry:   (() -> Void)?                            = nil
-    var onSnapRemoved: (() -> Void)?                            = nil
+    var onPhotoPicked: (@MainActor (PhotoPickerView.PickedItem) -> Void)? = nil
+    var onSnapRetry:   (@MainActor () -> Void)?                            = nil
+    var onSnapRemoved: (@MainActor () -> Void)?                            = nil
 
     @State private var showPicker = false
     @State private var showValencePicker = false
@@ -39,9 +39,9 @@ struct PebbleFormView: View {
         renderSvg: String? = nil,
         strokeColor: String? = nil,
         renderHeight: CGFloat = 260,
-        onPhotoPicked: ((PhotoPickerView.PickedItem) -> Void)? = nil,
-        onSnapRetry: (() -> Void)? = nil,
-        onSnapRemoved: (() -> Void)? = nil
+        onPhotoPicked: (@MainActor (PhotoPickerView.PickedItem) -> Void)? = nil,
+        onSnapRetry: (@MainActor () -> Void)? = nil,
+        onSnapRemoved: (@MainActor () -> Void)? = nil
     ) {
         self._draft = draft
         self.emotions = emotions
