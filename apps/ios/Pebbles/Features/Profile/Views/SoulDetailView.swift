@@ -3,16 +3,18 @@ import os
 
 /// Pushed detail view for a single soul.
 ///
-/// - Shows the pebbles linked to this soul (filtered via `pebble_souls` inner join).
-/// - Header = `.navigationTitle(soul.name)`; header stays in sync with `soul` local state
-///   so renames reflect without popping the stack (local state is updated in Task 3).
-/// - Tapping a pebble opens the existing `EditPebbleSheet`, matching `PathView` UX.
+/// - Compact header: 56pt glyph thumbnail + name + pebble count.
+/// - Below the header: pebbles tagged with this soul (filtered via
+///   `pebble_souls` inner join).
+/// - Edit toolbar action presents `EditSoulSheet`. The sheet receives the
+///   already-fetched `SoulWithGlyph` so its glyph row renders immediately
+///   without a second fetch.
 struct SoulDetailView: View {
     let onChanged: () -> Void
 
     @Environment(SupabaseService.self) private var supabase
 
-    @State private var soul: Soul
+    @State private var soulWithGlyph: SoulWithGlyph
     @State private var pebbles: [Pebble] = []
     @State private var isLoading = true
     @State private var loadError: String?
@@ -21,14 +23,14 @@ struct SoulDetailView: View {
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.soul.detail")
 
-    init(soul: Soul, onChanged: @escaping () -> Void) {
+    init(initial: SoulWithGlyph, onChanged: @escaping () -> Void) {
         self.onChanged = onChanged
-        self._soul = State(initialValue: soul)
+        self._soulWithGlyph = State(initialValue: initial)
     }
 
     var body: some View {
         content
-            .navigationTitle(soul.name)
+            .navigationTitle(soulWithGlyph.name)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
@@ -39,9 +41,7 @@ struct SoulDetailView: View {
             }
             .task { await load() }
             .sheet(isPresented: $isPresentingEdit) {
-                EditSoulSheet(soul: soul, onSaved: {
-                    // Refresh this view's header and the parent list independently;
-                    // neither blocks the other.
+                EditSoulSheet(original: soulWithGlyph, onSaved: {
                     Task { await reloadSoul() }
                     onChanged()
                 })
@@ -52,6 +52,23 @@ struct SoulDetailView: View {
                 })
             }
             .pebblesScreen()
+    }
+
+    private var header: some View {
+        HStack(spacing: 12) {
+            GlyphThumbnail(strokes: soulWithGlyph.glyph.strokes, side: 56)
+                .accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(soulWithGlyph.name)
+                    .font(.headline)
+                Text("^[\(pebbles.count) pebbles](inflect: true)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
     }
 
     @ViewBuilder
@@ -65,39 +82,45 @@ struct SoulDetailView: View {
                 systemImage: "exclamationmark.triangle",
                 description: Text(loadError)
             )
-        } else if pebbles.isEmpty {
-            ContentUnavailableView(
-                "No pebbles yet",
-                systemImage: "circle.grid.2x1",
-                description: Text("Pebbles you tag with this soul will appear here.")
-            )
         } else {
-            List(pebbles) { pebble in
-                Button {
-                    selectedPebbleId = pebble.id
-                } label: {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(pebble.name).font(.body)
-                        Text(pebble.happenedAt, style: .date)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+            VStack(spacing: 0) {
+                header
+                if pebbles.isEmpty {
+                    ContentUnavailableView(
+                        "No pebbles yet",
+                        systemImage: "circle.grid.2x1",
+                        description: Text("Pebbles you tag with this soul will appear here.")
+                    )
+                    .frame(maxHeight: .infinity)
+                } else {
+                    List(pebbles) { pebble in
+                        Button {
+                            selectedPebbleId = pebble.id
+                        } label: {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(pebble.name).font(.body)
+                                Text(pebble.happenedAt, style: .date)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
-                .buttonStyle(.plain)
             }
         }
     }
 
     private func reloadSoul() async {
         do {
-            let refreshed: Soul = try await supabase.client
+            let refreshed: SoulWithGlyph = try await supabase.client
                 .from("souls")
-                .select("id, name")
-                .eq("id", value: soul.id)
+                .select("id, name, glyph_id, glyphs(id, name, strokes, view_box)")
+                .eq("id", value: soulWithGlyph.id)
                 .single()
                 .execute()
                 .value
-            self.soul = refreshed
+            self.soulWithGlyph = refreshed
         } catch {
             logger.error("soul reload failed: \(error.localizedDescription, privacy: .private)")
             // Leave stale state; next navigation will refresh.
@@ -108,13 +131,10 @@ struct SoulDetailView: View {
         isLoading = true
         loadError = nil
         do {
-            // `pebble_souls!inner(soul_id)` forces an inner join so the `.eq`
-            // on the join column filters the parent rows. The extra column is
-            // tolerated by `Pebble`'s default `Decodable` (extra keys ignored).
             let result: [Pebble] = try await supabase.client
                 .from("pebbles")
                 .select("id, name, happened_at, pebble_souls!inner(soul_id)")
-                .eq("pebble_souls.soul_id", value: soul.id)
+                .eq("pebble_souls.soul_id", value: soulWithGlyph.id)
                 .order("happened_at", ascending: false)
                 .execute()
                 .value
@@ -129,7 +149,20 @@ struct SoulDetailView: View {
 
 #Preview {
     NavigationStack {
-        SoulDetailView(soul: Soul(id: UUID(), name: "Preview Soul", glyphId: UUID()), onChanged: {})
-            .environment(SupabaseService())
+        SoulDetailView(
+            initial: SoulWithGlyph(
+                id: UUID(),
+                name: "Preview Soul",
+                glyphId: SystemGlyph.default,
+                glyph: Glyph(
+                    id: SystemGlyph.default,
+                    name: nil,
+                    strokes: [],
+                    viewBox: "0 0 200 200"
+                )
+            ),
+            onChanged: {}
+        )
+        .environment(SupabaseService())
     }
 }
