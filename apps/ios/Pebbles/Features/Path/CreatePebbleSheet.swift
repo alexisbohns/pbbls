@@ -23,6 +23,8 @@ struct CreatePebbleSheet: View {
     /// without re-picking the photo.
     @State private var processedForRetry: ProcessedImage?
 
+    @State private var isPhotoPickerPresented = false
+
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "create-pebble")
 
     private var snapRepo: PebbleSnapRepository {
@@ -58,6 +60,30 @@ struct CreatePebbleSheet: View {
                 .pebblesScreen()
         }
         .task { await loadReferences() }
+        .sheet(isPresented: $isPhotoPickerPresented) {
+            PhotoPickerView { picked in
+                isPhotoPickerPresented = false
+                if let picked {
+                    Task { await handlePicked(picked) }
+                }
+            }
+        }
+        // Retry: chip mutates snap.state from .failed to .uploading; re-run upload.
+        .onChange(of: draft.attachedSnap?.state) { oldState, newState in
+            if oldState == .failed,
+               newState == .uploading,
+               let processed = processedForRetry,
+               let userId = currentUserId {
+                Task { await uploadCurrentSnap(processed: processed, userId: userId) }
+            }
+        }
+        // Remove: chip clears the snap; fire compensating Storage delete for the
+        // files that were already uploaded under that id.
+        .onChange(of: draft.attachedSnap?.id) { oldId, newId in
+            guard let oldId, newId == nil, let userId = currentUserId else { return }
+            processedForRetry = nil
+            Task { await snapRepo.deleteFiles(snapId: oldId, userId: userId) }
+        }
     }
 
     @ViewBuilder
@@ -79,15 +105,7 @@ struct CreatePebbleSheet: View {
                 souls: souls,
                 collections: collections,
                 saveError: saveError,
-                onPhotoPicked: { (picked: PhotoPickerView.PickedItem) -> Void in
-                    Task { await handlePicked(picked) }
-                },
-                onSnapRetry: { () -> Void in
-                    Task { await retryUpload() }
-                },
-                onSnapRemoved: { () -> Void in
-                    Task { await deleteAttachedSnapFiles() }
-                }
+                photoPickerPresented: $isPhotoPickerPresented
             )
         }
     }
@@ -148,15 +166,6 @@ struct CreatePebbleSheet: View {
         }
     }
 
-    private func retryUpload() async {
-        guard let userId = currentUserId,
-              let processed = processedForRetry,
-              var snap = draft.attachedSnap else { return }
-        snap.state = .uploading
-        draft.attachedSnap = snap
-        await uploadCurrentSnap(processed: processed, userId: userId)
-    }
-
     private func uploadCurrentSnap(processed: ProcessedImage, userId: UUID) async {
         guard var snap = draft.attachedSnap else { return }
         logger.notice("uploadCurrentSnap: started snap=\(snap.id, privacy: .public)")
@@ -181,17 +190,12 @@ struct CreatePebbleSheet: View {
         }
     }
 
-    /// Removes the attached snap from the draft and best-effort deletes its files.
-    private func deleteAttachedSnapFiles() async {
-        guard let userId = currentUserId,
-              let snap = draft.attachedSnap else { return }
-        draft.attachedSnap = nil
-        processedForRetry = nil
-        await snapRepo.deleteFiles(snapId: snap.id, userId: userId)
-    }
-
     private func cancelAndCleanup() async {
-        await deleteAttachedSnapFiles()
+        // Clearing the snap triggers the .onChange(of: draft.attachedSnap?.id)
+        // observer, which fires the compensating Storage delete.
+        draft.attachedSnap = nil
+        // Give the .onChange handler a tick to fire before dismissing.
+        try? await Task.sleep(nanoseconds: 50_000_000)
         dismiss()
     }
 

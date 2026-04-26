@@ -18,13 +18,10 @@ struct PebbleFormView: View {
     var strokeColor: String?
     var renderHeight: CGFloat = 260
 
-    var onPhotoPicked: (@MainActor (PhotoPickerView.PickedItem) -> Void)? = nil
-    var onSnapRetry:   (@MainActor () -> Void)?                            = nil
-    var onSnapRemoved: (@MainActor () -> Void)?                            = nil
+    @Binding var photoPickerPresented: Bool
 
     @State private var showPicker = false
     @State private var showValencePicker = false
-    @State private var isPhotoPickerPresented = false
     @State private var selectedGlyph: Glyph?
 
     @Environment(SupabaseService.self) private var supabase
@@ -39,9 +36,7 @@ struct PebbleFormView: View {
         renderSvg: String? = nil,
         strokeColor: String? = nil,
         renderHeight: CGFloat = 260,
-        onPhotoPicked: (@MainActor (PhotoPickerView.PickedItem) -> Void)? = nil,
-        onSnapRetry: (@MainActor () -> Void)? = nil,
-        onSnapRemoved: (@MainActor () -> Void)? = nil
+        photoPickerPresented: Binding<Bool> = .constant(false)
     ) {
         self._draft = draft
         self.emotions = emotions
@@ -52,17 +47,11 @@ struct PebbleFormView: View {
         self.renderSvg = renderSvg
         self.strokeColor = strokeColor
         self.renderHeight = renderHeight
-        self.onPhotoPicked = onPhotoPicked
-        self.onSnapRetry = onSnapRetry
-        self.onSnapRemoved = onSnapRemoved
-        Logger(subsystem: "app.pbbls.ios", category: "pebble-form")
-            .notice("init: onPhotoPickedNil=\(onPhotoPicked == nil, privacy: .public)")
+        self._photoPickerPresented = photoPickerPresented
     }
 
     var body: some View {
-        let _ = Logger(subsystem: "app.pbbls.ios", category: "pebble-form")
-            .notice("body eval: onPhotoPickedNil=\(onPhotoPicked == nil, privacy: .public)")
-        return Form {
+        Form {
             if let svg = renderSvg {
                 PebbleRenderView(svg: svg, strokeColor: strokeColor)
                     .frame(maxWidth: .infinity)
@@ -204,19 +193,12 @@ struct PebbleFormView: View {
             }
 
             Section("Photo") {
-                if let snap = draft.attachedSnap {
-                    AttachedPhotoView(
-                        snap: snap,
-                        onRemove: {
-                            draft.attachedSnap = nil
-                            onSnapRemoved?()
-                        },
-                        onRetry: { onSnapRetry?() }
-                    )
-                    .listRowBackground(Color.pebblesListRow)
+                if draft.attachedSnap != nil {
+                    AttachedPhotoView(snap: $draft.attachedSnap)
+                        .listRowBackground(Color.pebblesListRow)
                 } else {
                     Button {
-                        isPhotoPickerPresented = true
+                        photoPickerPresented = true
                     } label: {
                         Label("Add a photo", systemImage: "photo.badge.plus")
                     }
@@ -244,14 +226,6 @@ struct PebbleFormView: View {
                 currentValence: draft.valence,
                 onSelected: { picked in draft.valence = picked }
             )
-        }
-        .sheet(isPresented: $isPhotoPickerPresented) {
-            PhotoPickerView { picked in
-                Logger(subsystem: "app.pbbls.ios", category: "pebble-form")
-                    .notice("photo sheet closure: picked=\(picked != nil, privacy: .public) onPhotoPickedNil=\(onPhotoPicked == nil, privacy: .public)")
-                isPhotoPickerPresented = false
-                if let picked { onPhotoPicked?(picked) }
-            }
         }
         .task(id: draft.glyphId) { await loadSelectedGlyph() }
     }

@@ -1,30 +1,33 @@
 import SwiftUI
 
 /// Inline photo "chip" shown inside `PebbleFormView` once the user has picked
-/// an image. Displays the local thumbnail, an upload-state badge, and lets the
-/// user remove the attachment or retry a failed upload.
+/// an image. Operates entirely on a `Binding<AttachedSnap?>`:
+///   - "Remove" sets the binding to nil; the parent observes via `.onChange`
+///     and fires the compensating Storage delete.
+///   - "Retry" mutates `snap.state` to `.uploading`; the parent observes the
+///     transition (failed → uploading) and re-runs the upload.
 struct AttachedPhotoView: View {
 
-    let snap: AttachedSnap
-    let onRemove: () -> Void
-    let onRetry: () -> Void
+    @Binding var snap: AttachedSnap?
 
     var body: some View {
-        HStack(spacing: 12) {
-            thumbnail
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Photo")
-                    .font(.subheadline)
-                stateLabel
+        if let current = snap {
+            HStack(spacing: 12) {
+                thumbnail(current)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Photo")
+                        .font(.subheadline)
+                    stateLabel(current.state)
+                }
+                Spacer()
+                trailingButton(current.state)
             }
-            Spacer()
-            trailingButton
         }
     }
 
     @ViewBuilder
-    private var thumbnail: some View {
-        if let uiImage = UIImage(data: snap.localThumb) {
+    private func thumbnail(_ current: AttachedSnap) -> some View {
+        if let uiImage = UIImage(data: current.localThumb) {
             Image(uiImage: uiImage)
                 .resizable()
                 .scaledToFill()
@@ -38,8 +41,8 @@ struct AttachedPhotoView: View {
     }
 
     @ViewBuilder
-    private var stateLabel: some View {
-        switch snap.state {
+    private func stateLabel(_ state: AttachedSnap.UploadState) -> some View {
+        switch state {
         case .uploading:
             Label("Uploading…", systemImage: "arrow.up.circle")
                 .labelStyle(.titleAndIcon)
@@ -59,31 +62,34 @@ struct AttachedPhotoView: View {
     }
 
     @ViewBuilder
-    private var trailingButton: some View {
-        switch snap.state {
+    private func trailingButton(_ state: AttachedSnap.UploadState) -> some View {
+        switch state {
         case .uploading:
             ProgressView()
         case .uploaded:
-            Button(role: .destructive, action: onRemove) {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundStyle(.secondary)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel("Remove photo")
+            removeButton
         case .failed:
             HStack(spacing: 8) {
-                Button(action: onRetry) {
+                Button {
+                    snap?.state = .uploading
+                } label: {
                     Image(systemName: "arrow.clockwise.circle.fill")
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel("Retry")
-                Button(role: .destructive, action: onRemove) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(.secondary)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel("Remove photo")
+                removeButton
             }
         }
+    }
+
+    private var removeButton: some View {
+        Button(role: .destructive) {
+            snap = nil
+        } label: {
+            Image(systemName: "xmark.circle.fill")
+                .foregroundStyle(.secondary)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("Remove photo")
     }
 }
