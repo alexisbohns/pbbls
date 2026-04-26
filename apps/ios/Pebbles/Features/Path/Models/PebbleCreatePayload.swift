@@ -91,12 +91,22 @@ extension PebbleCreatePayload {
         self.soulIds = draft.soulId.map { [$0] } ?? []
         self.collectionIds = draft.collectionId.map { [$0] } ?? []
         self.glyphId = draft.glyphId
-        self.snaps = draft.attachedSnap.map { snap in
-            [SnapPayload(
-                id: snap.id,
-                storagePath: snap.storagePrefix(userId: userId),
-                sortOrder: 0
-            )]
-        }
+        self.snaps = {
+            switch draft.formSnap {
+            case .none:
+                return nil
+            case .pending(let snap):
+                return [SnapPayload(
+                    id: snap.id,
+                    storagePath: snap.storagePrefix(userId: userId),
+                    sortOrder: 0
+                )]
+            case .existing:
+                // `.existing` only appears in edit flows. Reaching this branch
+                // from create is a programming error — fail loudly in debug.
+                assertionFailure("PebbleCreatePayload: unexpected .existing FormSnap during create")
+                return nil
+            }
+        }()
     }
 }

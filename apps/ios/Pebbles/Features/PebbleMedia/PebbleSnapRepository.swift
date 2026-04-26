@@ -52,6 +52,21 @@ struct PebbleSnapRepository {
         }
     }
 
+    /// Best-effort cleanup variant for callers that already have the
+    /// `storage_path` string (e.g. from `delete_pebble_media`).
+    func deleteFiles(storagePrefix prefix: String) async {
+        let originalPath = "\(prefix)/original.jpg"
+        let thumbPath    = "\(prefix)/thumb.jpg"
+        do {
+            _ = try await client.storage.from(Self.bucketId)
+                .remove(paths: [originalPath, thumbPath])
+        } catch {
+            Self.logger.error(
+                "snap delete failed for prefix \(prefix, privacy: .public): \(error.localizedDescription, privacy: .private)"
+            )
+        }
+    }
+
     /// One round-trip for both URLs of a snap. Caller is responsible for
     /// caching by `snapId` until expiry.
     struct SignedURLs {

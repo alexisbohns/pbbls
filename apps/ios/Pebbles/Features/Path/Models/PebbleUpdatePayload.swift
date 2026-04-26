@@ -9,6 +9,12 @@ import Foundation
 /// We always send every scalar field — the RPC uses `coalesce(payload->>..., existing)`
 /// to fall back to the current value on absent keys, so sending everything is
 /// both correct and simpler than tracking dirty fields on the client.
+///
+/// `snaps` is always sent (possibly empty) so `update_pebble`'s replace block
+/// fires every save: an unchanged snap round-trips with the same `id` and
+/// `storage_path`; a removed-then-not-replaced photo sends `[]` so any stale
+/// row is wiped server-side as defense in depth (the eager `delete_pebble_media`
+/// path should already have removed it).
 struct PebbleUpdatePayload: Encodable {
     let name: String
     let description: String?
@@ -21,6 +27,19 @@ struct PebbleUpdatePayload: Encodable {
     let soulIds: [UUID]
     let collectionIds: [UUID]
     let glyphId: UUID?
+    let snaps: [SnapPayload]
+
+    struct SnapPayload: Encodable {
+        let id: UUID
+        let storagePath: String
+        let sortOrder: Int
+
+        enum CodingKeys: String, CodingKey {
+            case id
+            case storagePath = "storage_path"
+            case sortOrder   = "sort_order"
+        }
+    }
 
     enum CodingKeys: String, CodingKey {
         case name
@@ -34,6 +53,7 @@ struct PebbleUpdatePayload: Encodable {
         case soulIds = "soul_ids"
         case collectionIds = "collection_ids"
         case glyphId = "glyph_id"
+        case snaps
     }
 
     private static let iso8601: ISO8601DateFormatter = {
@@ -59,14 +79,17 @@ struct PebbleUpdatePayload: Encodable {
         try container.encode(soulIds, forKey: .soulIds)
         try container.encode(collectionIds, forKey: .collectionIds)
         try container.encode(glyphId, forKey: .glyphId)
+        try container.encode(snaps, forKey: .snaps)
     }
 }
 
 extension PebbleUpdatePayload {
     /// Build a payload from a validated draft.
+    /// `userId` is needed to derive the storage_path of a `.pending` snap;
+    /// `.existing` snaps already carry the path from the DB.
     /// Precondition: `draft.isValid == true`.
-    init(from draft: PebbleDraft) {
-        precondition(draft.isValid, "PebbleUpdatePayload(from:) called with invalid draft")
+    init(from draft: PebbleDraft, userId: UUID) {
+        precondition(draft.isValid, "PebbleUpdatePayload(from:userId:) called with invalid draft")
         self.name = draft.name.trimmingCharacters(in: .whitespaces)
         let trimmedDescription = draft.description.trimmingCharacters(in: .whitespaces)
         self.description = trimmedDescription.isEmpty ? nil : trimmedDescription
@@ -79,5 +102,19 @@ extension PebbleUpdatePayload {
         self.soulIds = draft.soulId.map { [$0] } ?? []
         self.collectionIds = draft.collectionId.map { [$0] } ?? []
         self.glyphId = draft.glyphId
+        self.snaps = {
+            switch draft.formSnap {
+            case .none:
+                return []
+            case .existing(let id, let storagePath):
+                return [SnapPayload(id: id, storagePath: storagePath, sortOrder: 0)]
+            case .pending(let snap):
+                return [SnapPayload(
+                    id: snap.id,
+                    storagePath: snap.storagePrefix(userId: userId),
+                    sortOrder: 0
+                )]
+            }
+        }()
     }
 }
