@@ -9,6 +9,11 @@
 --
 -- Idempotent: `create or replace view` keeps the view name stable so existing
 -- foreign-key relationships and dependent code continue to resolve.
+--
+-- Note on column order: Postgres rejects `create or replace view` when it would
+-- shift the position or rename of an existing column. The new render columns
+-- are therefore appended at the END of the SELECT — every previously declared
+-- column keeps its original ordinal.
 
 create or replace view public.v_pebbles_full as
 select
@@ -22,9 +27,6 @@ select
   p.visibility,
   p.emotion_id,
   p.glyph_id,
-  p.render_svg,
-  p.render_manifest,
-  p.render_version,
   p.created_at,
   p.updated_at,
 
@@ -119,7 +121,13 @@ select
     join public.collections c on c.id = cp.collection_id
     where cp.pebble_id = p.id),
     '[]'::jsonb
-  ) as collections
+  ) as collections,
+
+  -- Render columns (added in this migration; appended at the end so the
+  -- positions of pre-existing columns are not disturbed).
+  p.render_svg,
+  p.render_manifest,
+  p.render_version
 
 from public.pebbles p
 join public.emotions e on e.id = p.emotion_id
