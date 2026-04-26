@@ -143,14 +143,14 @@ struct GlyphsListView: View {
 
         do {
             let updated = try await service.updateName(id: glyph.id, name: renameDraft)
-            if let i = glyphs.firstIndex(where: { $0.id == updated.id }) {
-                glyphs[i] = updated
+            if let idx = glyphs.firstIndex(where: { $0.id == updated.id }) {
+                glyphs[idx] = updated
             }
         } catch {
             logger.error("glyph rename failed: \(error.localizedDescription, privacy: .private)")
             // Revert
-            if let i = glyphs.firstIndex(where: { $0.id == glyph.id }) {
-                glyphs[i] = original
+            if let idx = glyphs.firstIndex(where: { $0.id == glyph.id }) {
+                glyphs[idx] = original
             }
             renameError = "Couldn't rename glyph. Please try again."
         }
