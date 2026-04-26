@@ -121,7 +121,7 @@ struct EditPebbleSheet: View {
                 .value
             async let soulsQuery: [Soul] = supabase.client
                 .from("souls")
-                .select("id, name")
+                .select("id, name, glyph_id")
                 .order("name")
                 .execute()
                 .value
