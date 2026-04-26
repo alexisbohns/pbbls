@@ -17,6 +17,8 @@ struct GlyphCarveSheet: View {
     @State private var isSaving = false
     @State private var saveError: String?
     @State private var showDiscardAlert = false
+    @State private var name: String = ""
+    @FocusState private var nameFieldFocused: Bool
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "glyph-carve")
 
@@ -41,6 +43,10 @@ struct GlyphCarveSheet: View {
                             .disabled(strokes.isEmpty)
                         }
                     }
+                    ToolbarItemGroup(placement: .keyboard) {
+                        Spacer()
+                        Button("Done") { nameFieldFocused = false }
+                    }
                 }
                 .pebblesScreen()
                 .alert("Discard your glyph?", isPresented: $showDiscardAlert) {
@@ -54,6 +60,14 @@ struct GlyphCarveSheet: View {
     private var content: some View {
         VStack(spacing: 24) {
             Spacer(minLength: 0)
+
+            TextField("Name (optional)", text: $name)
+                .textFieldStyle(.roundedBorder)
+                .textInputAutocapitalization(.words)
+                .submitLabel(.done)
+                .focused($nameFieldFocused)
+                .onSubmit { nameFieldFocused = false }
+                .accessibilityLabel("Glyph name")
 
             GlyphCanvasView(
                 committedStrokes: strokes,
@@ -88,6 +102,8 @@ struct GlyphCarveSheet: View {
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .contentShape(Rectangle())
+        .onTapGesture { nameFieldFocused = false }
     }
 
     private func cancelTapped() {
@@ -103,7 +119,7 @@ struct GlyphCarveSheet: View {
         isSaving = true
         saveError = nil
         do {
-            let glyph = try await service.create(strokes: strokes)
+            let glyph = try await service.create(strokes: strokes, name: name)
             onSaved(glyph)
             dismiss()
         } catch {
