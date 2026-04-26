@@ -158,7 +158,8 @@ struct SoulDetailView: View {
                     id: SystemGlyph.default,
                     name: nil,
                     strokes: [],
-                    viewBox: "0 0 200 200"
+                    viewBox: "0 0 200 200",
+                    userId: nil
                 )
             ),
             onChanged: {}

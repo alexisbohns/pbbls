@@ -32,7 +32,8 @@ struct SoulGridCell: View {
                 id: SystemGlyph.default,
                 name: nil,
                 strokes: [GlyphStroke(d: "M30,30 L170,170", width: 6)],
-                viewBox: "0 0 200 200"
+                viewBox: "0 0 200 200",
+                userId: nil
             )
         )
     )
