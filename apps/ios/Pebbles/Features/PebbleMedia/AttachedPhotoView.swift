@@ -13,7 +13,7 @@ struct AttachedPhotoView: View {
         HStack(spacing: 12) {
             thumbnail
             VStack(alignment: .leading, spacing: 4) {
-                Text("attached_photo.title")
+                Text("Photo")
                     .font(.subheadline)
                 stateLabel
             }
@@ -41,17 +41,17 @@ struct AttachedPhotoView: View {
     private var stateLabel: some View {
         switch snap.state {
         case .uploading:
-            Label("attached_photo.state.uploading", systemImage: "arrow.up.circle")
+            Label("Uploading…", systemImage: "arrow.up.circle")
                 .labelStyle(.titleAndIcon)
                 .font(.caption)
                 .foregroundStyle(.secondary)
         case .uploaded:
-            Label("attached_photo.state.uploaded", systemImage: "checkmark.circle.fill")
+            Label("Ready", systemImage: "checkmark.circle.fill")
                 .labelStyle(.titleAndIcon)
                 .font(.caption)
                 .foregroundStyle(.green)
         case .failed:
-            Label("attached_photo.state.failed", systemImage: "exclamationmark.triangle.fill")
+            Label("Upload failed", systemImage: "exclamationmark.triangle.fill")
                 .labelStyle(.titleAndIcon)
                 .font(.caption)
                 .foregroundStyle(.red)
@@ -69,20 +69,20 @@ struct AttachedPhotoView: View {
                     .foregroundStyle(.secondary)
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("attached_photo.action.remove")
+            .accessibilityLabel("Remove photo")
         case .failed:
             HStack(spacing: 8) {
                 Button(action: onRetry) {
                     Image(systemName: "arrow.clockwise.circle.fill")
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("attached_photo.action.retry")
+                .accessibilityLabel("Retry")
                 Button(role: .destructive, action: onRemove) {
                     Image(systemName: "xmark.circle.fill")
                         .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel("attached_photo.action.remove")
+                .accessibilityLabel("Remove photo")
             }
         }
     }
