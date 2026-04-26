@@ -34,6 +34,10 @@ struct EditPebbleSheet: View {
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "edit-pebble")
 
+    private var currentUserId: UUID? {
+        supabase.session?.user.id
+    }
+
     var body: some View {
         NavigationStack {
             content
@@ -156,7 +160,13 @@ struct EditPebbleSheet: View {
         isSaving = true
         saveError = nil
 
-        let payload = PebbleUpdatePayload(from: draft)
+        guard let userId = currentUserId else {
+            logger.error("save: no current user id")
+            self.saveError = "You must be signed in to save."
+            self.isSaving = false
+            return
+        }
+        let payload = PebbleUpdatePayload(from: draft, userId: userId)
         let requestBody = ComposePebbleUpdateRequest(pebbleId: pebbleId, payload: payload)
 
         do {

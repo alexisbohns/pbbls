@@ -18,12 +18,21 @@ struct PebbleFormView: View {
     var strokeColor: String?
     var renderHeight: CGFloat = 260
 
-    /// When true, render the Photo section. Off by default so EditPebbleSheet
-    /// (which doesn't yet support attach/replace) doesn't show a non-functional
-    /// row. CreatePebbleSheet sets this to true.
+    /// When true, render the Photo section. Off by default so callers that
+    /// don't yet support photo flows opt out explicitly.
     let showsPhotoSection: Bool
 
     @Binding var photoPickerPresented: Bool
+
+    /// Provided by `EditPebbleSheet` to gate the remove button while the RPC
+    /// is in flight. `CreatePebbleSheet` always passes `false`.
+    let isRemovingExistingSnap: Bool
+
+    /// Triggered when the user taps remove on an `.existing` snap row.
+    /// `EditPebbleSheet` runs the eager `delete_pebble_media` RPC + Storage
+    /// cleanup. `CreatePebbleSheet` never sees `.existing`, so it passes a
+    /// no-op closure.
+    let onRemoveExistingSnap: () -> Void
 
     @State private var showPicker = false
     @State private var showValencePicker = false
@@ -42,7 +51,9 @@ struct PebbleFormView: View {
         strokeColor: String? = nil,
         renderHeight: CGFloat = 260,
         showsPhotoSection: Bool = false,
-        photoPickerPresented: Binding<Bool> = .constant(false)
+        photoPickerPresented: Binding<Bool> = .constant(false),
+        isRemovingExistingSnap: Bool = false,
+        onRemoveExistingSnap: @escaping () -> Void = {}
     ) {
         self._draft = draft
         self.emotions = emotions
@@ -55,6 +66,29 @@ struct PebbleFormView: View {
         self.renderHeight = renderHeight
         self.showsPhotoSection = showsPhotoSection
         self._photoPickerPresented = photoPickerPresented
+        self.isRemovingExistingSnap = isRemovingExistingSnap
+        self.onRemoveExistingSnap = onRemoveExistingSnap
+    }
+
+    /// Two-way bridge between the `.pending` case of `draft.formSnap` and the
+    /// `Binding<AttachedSnap?>` that `AttachedPhotoView` already speaks. Setting
+    /// the binding to nil clears `formSnap`; setting it to a value re-wraps as
+    /// `.pending` so the existing retry/remove `.onChange` observers in
+    /// `CreatePebbleSheet` keep working unchanged.
+    private var pendingSnapBinding: Binding<AttachedSnap?> {
+        Binding<AttachedSnap?>(
+            get: {
+                if case .pending(let snap) = draft.formSnap { return snap }
+                return nil
+            },
+            set: { newValue in
+                if let newValue {
+                    draft.formSnap = .pending(newValue)
+                } else {
+                    draft.formSnap = nil
+                }
+            }
+        )
     }
 
     var body: some View {
@@ -201,16 +235,24 @@ struct PebbleFormView: View {
 
             if showsPhotoSection {
                 Section("Photo") {
-                    if draft.attachedSnap != nil {
-                        AttachedPhotoView(snap: $draft.attachedSnap)
-                            .listRowBackground(Color.pebblesListRow)
-                    } else {
+                    switch draft.formSnap {
+                    case .none:
                         Button {
                             photoPickerPresented = true
                         } label: {
                             Label("Add a photo", systemImage: "photo.badge.plus")
                         }
                         .listRowBackground(Color.pebblesListRow)
+                    case .existing(_, let storagePath):
+                        ExistingSnapRow(
+                            storagePath: storagePath,
+                            isRemoving: isRemovingExistingSnap,
+                            onRemove: onRemoveExistingSnap
+                        )
+                        .listRowBackground(Color.pebblesListRow)
+                    case .pending:
+                        AttachedPhotoView(snap: pendingSnapBinding)
+                            .listRowBackground(Color.pebblesListRow)
                     }
                 }
             }

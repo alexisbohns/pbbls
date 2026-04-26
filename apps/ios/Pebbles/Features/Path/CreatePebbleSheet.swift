@@ -35,6 +35,16 @@ struct CreatePebbleSheet: View {
         supabase.session?.user.id
     }
 
+    private var pendingSnapState: AttachedSnap.UploadState? {
+        if case .pending(let snap) = draft.formSnap { return snap.state }
+        return nil
+    }
+
+    private var pendingSnapId: UUID? {
+        if case .pending(let snap) = draft.formSnap { return snap.id }
+        return nil
+    }
+
     var body: some View {
         NavigationStack {
             content
@@ -69,7 +79,7 @@ struct CreatePebbleSheet: View {
             }
         }
         // Retry: chip mutates snap.state from .failed to .uploading; re-run upload.
-        .onChange(of: draft.attachedSnap?.state) { oldState, newState in
+        .onChange(of: pendingSnapState) { oldState, newState in
             if oldState == .failed,
                newState == .uploading,
                let processed = processedForRetry,
@@ -79,7 +89,7 @@ struct CreatePebbleSheet: View {
         }
         // Remove: chip clears the snap; fire compensating Storage delete for the
         // files that were already uploaded under that id.
-        .onChange(of: draft.attachedSnap?.id) { oldId, newId in
+        .onChange(of: pendingSnapId) { oldId, newId in
             guard let oldId, newId == nil, let userId = currentUserId else { return }
             processedForRetry = nil
             Task { await snapRepo.deleteFiles(snapId: oldId, userId: userId) }
@@ -142,12 +152,12 @@ struct CreatePebbleSheet: View {
             }.value
         } catch {
             logger.error("image pipeline failed: \(String(describing: error), privacy: .public)")
-            saveError = userMessage(for: error)
+            saveError = userMessageForPebbleSaveError(error)
             return
         }
 
         let snapId = UUID()
-        draft.attachedSnap = AttachedSnap(id: snapId, localThumb: processed.thumb, state: .uploading)
+        draft.formSnap = .pending(AttachedSnap(id: snapId, localThumb: processed.thumb, state: .uploading))
         processedForRetry = processed
 
         await uploadCurrentSnap(processed: processed, userId: userId)
@@ -168,33 +178,33 @@ struct CreatePebbleSheet: View {
     }
 
     private func uploadCurrentSnap(processed: ProcessedImage, userId: UUID) async {
-        guard var snap = draft.attachedSnap else { return }
+        guard case .pending(var snap) = draft.formSnap else { return }
         logger.notice("uploadCurrentSnap: started snap=\(snap.id, privacy: .public)")
 
         do {
             try await snapRepo.uploadProcessed(processed, snapId: snap.id, userId: userId)
             logger.notice("uploadCurrentSnap: success snap=\(snap.id, privacy: .public)")
             snap.state = .uploaded
-            draft.attachedSnap = snap
+            draft.formSnap = .pending(snap)
         } catch {
             logger.warning("snap upload failed (first attempt): \(error.localizedDescription, privacy: .private)")
             try? await Task.sleep(nanoseconds: 2_000_000_000)
             do {
                 try await snapRepo.uploadProcessed(processed, snapId: snap.id, userId: userId)
                 snap.state = .uploaded
-                draft.attachedSnap = snap
+                draft.formSnap = .pending(snap)
             } catch {
                 logger.error("snap upload failed (retry): \(error.localizedDescription, privacy: .private)")
                 snap.state = .failed
-                draft.attachedSnap = snap
+                draft.formSnap = .pending(snap)
             }
         }
     }
 
     private func cancelAndCleanup() async {
-        // Clearing the snap triggers the .onChange(of: draft.attachedSnap?.id)
+        // Clearing the snap triggers the .onChange(of: pendingSnapId)
         // observer, which fires the compensating Storage delete.
-        draft.attachedSnap = nil
+        draft.formSnap = nil
         // Give the .onChange handler a tick to fire before dismissing.
         try? await Task.sleep(nanoseconds: 50_000_000)
         dismiss()
@@ -251,12 +261,12 @@ struct CreatePebbleSheet: View {
     private func save() async {
         guard draft.isValid else { return }
 
-        if let snap = draft.attachedSnap, snap.state == .uploading {
+        if case .pending(let snap) = draft.formSnap, snap.state == .uploading {
             logger.notice("save blocked: snap still uploading")
             saveError = "Photo is still uploading."
             return
         }
-        if let snap = draft.attachedSnap, snap.state == .failed {
+        if case .pending(let snap) = draft.formSnap, snap.state == .failed {
             logger.notice("save blocked: snap upload failed")
             saveError = "Photo upload failed. Retry or remove it."
             return
@@ -303,30 +313,12 @@ struct CreatePebbleSheet: View {
     /// Save failed and we cannot recover — fire the compensating snap delete
     /// (if a snap was attached) and surface a user-facing message.
     private func handleSaveFailure(_ error: Error) async {
-        if let userId = currentUserId, let snap = draft.attachedSnap {
+        if let userId = currentUserId,
+           case .pending(let snap) = draft.formSnap {
             await snapRepo.deleteFiles(snapId: snap.id, userId: userId)
         }
-        saveError = userMessage(for: error)
+        saveError = userMessageForPebbleSaveError(error)
         isSaving = false
-    }
-
-    private func userMessage(for error: Error) -> String {
-        if let fnError = error as? FunctionsError, case let .httpError(_, data) = fnError,
-           let body = try? JSONDecoder().decode([String: String].self, from: data) {
-            let message = body["error"] ?? body["message"] ?? ""
-            if message.contains("media_quota_exceeded") || message.contains("P0001") {
-                return "Photo limit reached on this pebble."
-            }
-        }
-        if let pipelineError = error as? ImagePipelineError {
-            switch pipelineError {
-            case .unsupportedFormat:    return "That image format isn't supported."
-            case .decodeFailed:         return "Couldn't read the image."
-            case .encodeFailed:         return "Couldn't process the image."
-            case .tooLargeAfterResize:  return "That image is too large to attach."
-            }
-        }
-        return "Couldn't save your pebble. Please try again."
     }
 
     /// Tries to extract a `pebble_id` UUID from the raw error body of a
@@ -352,4 +344,25 @@ private struct PebbleIdPartial: Decodable {
 #Preview {
     CreatePebbleSheet(onCreated: { _ in })
         .environment(SupabaseService())
+}
+
+/// Maps a thrown error to a user-facing localized string. Module-private so
+/// `CreatePebbleSheet` and `EditPebbleSheet` share one mapping.
+func userMessageForPebbleSaveError(_ error: Error) -> String {
+    if let fnError = error as? FunctionsError, case let .httpError(_, data) = fnError,
+       let body = try? JSONDecoder().decode([String: String].self, from: data) {
+        let message = body["error"] ?? body["message"] ?? ""
+        if message.contains("media_quota_exceeded") || message.contains("P0001") {
+            return "Photo limit reached on this pebble."
+        }
+    }
+    if let pipelineError = error as? ImagePipelineError {
+        switch pipelineError {
+        case .unsupportedFormat:    return "That image format isn't supported."
+        case .decodeFailed:         return "Couldn't read the image."
+        case .encodeFailed:         return "Couldn't process the image."
+        case .tooLargeAfterResize:  return "That image is too large to attach."
+        }
+    }
+    return "Couldn't save your pebble. Please try again."
 }
