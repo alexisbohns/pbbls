@@ -81,19 +81,6 @@ struct CreateSoulSheet: View {
     }
 }
 
-/// Matches the `souls` row shape required for insert.
-/// `user_id` is explicit because the RLS policy still requires it in the row
-/// (the policy's `with check` compares it to `auth.uid()`).
-private struct SoulInsertPayload: Encodable {
-    let userId: UUID
-    let name: String
-
-    enum CodingKeys: String, CodingKey {
-        case userId = "user_id"
-        case name
-    }
-}
-
 #Preview {
     CreateSoulSheet(onCreated: {})
         .environment(SupabaseService())

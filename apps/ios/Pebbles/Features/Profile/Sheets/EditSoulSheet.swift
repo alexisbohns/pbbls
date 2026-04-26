@@ -88,10 +88,6 @@ struct EditSoulSheet: View {
     }
 }
 
-private struct SoulUpdatePayload: Encodable {
-    let name: String
-}
-
 #Preview {
     EditSoulSheet(soul: Soul(id: UUID(), name: "Preview", glyphId: UUID()), onSaved: {})
         .environment(SupabaseService())
