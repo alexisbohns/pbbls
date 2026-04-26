@@ -70,6 +70,23 @@
         }
       }
     },
+    "^[%lld pebbles](inflect: true)" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "^[%lld pebbles](inflect: true)"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "^[%lld galets](inflect: true)"
+          }
+        }
+      }
+    },
     "A coffee with a friend. A concert that gave you chills. A tough conversation. Record it in seconds — no blank page, no pressure, no audience." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3077,6 +3094,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Appuyer sur + pour graver mon premier glyphe."
+          }
+        }
+      }
+    },
+    "Tap to choose" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tap to choose"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toucher pour choisir"
           }
         }
       }
