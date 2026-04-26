@@ -79,13 +79,13 @@ struct CreatePebbleSheet: View {
                 souls: souls,
                 collections: collections,
                 saveError: saveError,
-                onPhotoPicked: { picked in
+                onPhotoPicked: { (picked: PhotoPickerView.PickedItem) -> Void in
                     Task { await handlePicked(picked) }
                 },
-                onSnapRetry: {
+                onSnapRetry: { () -> Void in
                     Task { await retryUpload() }
                 },
-                onSnapRemoved: {
+                onSnapRemoved: { () -> Void in
                     Task { await deleteAttachedSnapFiles() }
                 }
             )
