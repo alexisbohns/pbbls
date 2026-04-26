@@ -41,7 +41,7 @@ struct GlyphService {
             userId: userId,
             strokes: strokes,
             viewBox: "0 0 200 200",
-            name: name
+            name: normalizedName(name)
         )
         let created: Glyph = try await supabase.client
             .from("glyphs")
@@ -51,6 +51,11 @@ struct GlyphService {
             .execute()
             .value
         return created
+    }
+
+    private func normalizedName(_ raw: String?) -> String? {
+        let trimmed = raw?.trimmingCharacters(in: .whitespacesAndNewlines)
+        return (trimmed?.isEmpty ?? true) ? nil : trimmed
     }
 }
 
