@@ -5,8 +5,8 @@ import { buttonVariants } from "@/components/ui/button"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { isPlatformFilter } from "@/lib/logs/options"
 import type { LogRow, LogStatus } from "@/lib/logs/types"
-import { FeatureSection } from "../_components/FeatureSection"
-import { FeatureSectionSkeleton } from "../_components/FeatureSectionSkeleton"
+import { LogSection } from "../_components/LogSection"
+import { LogSectionSkeleton } from "../_components/LogSectionSkeleton"
 import { PlatformFilter } from "./_components/PlatformFilter"
 import { FeaturesShippedSection } from "./_components/FeaturesShippedSection"
 
@@ -60,14 +60,14 @@ export default async function FeaturesPage({ searchParams }: { searchParams: Sea
       </header>
       <PlatformFilter />
       <div className="space-y-8">
-        <FeatureSection
+        <LogSection
           title="In progress"
           logs={grouped.in_progress}
           emptyLabel="No features in progress."
         />
-        <FeatureSection title="Planned" logs={grouped.planned} emptyLabel="No planned features." />
-        <FeatureSection title="Backlog" logs={grouped.backlog} emptyLabel="No backlog features." />
-        <Suspense fallback={<FeatureSectionSkeleton title="Shipped" />}>
+        <LogSection title="Planned" logs={grouped.planned} emptyLabel="No planned features." />
+        <LogSection title="Backlog" logs={grouped.backlog} emptyLabel="No backlog features." />
+        <Suspense fallback={<LogSectionSkeleton title="Shipped" />}>
           <FeaturesShippedSection platform={platform} />
         </Suspense>
       </div>

@@ -19,7 +19,7 @@ function formatDate(value: string) {
   })
 }
 
-export function FeatureSection({
+export function LogSection({
   title,
   logs,
   emptyLabel,

@@ -1,6 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton"
 
-export function FeatureSectionSkeleton({ title }: { title: string }) {
+export function LogSectionSkeleton({ title }: { title: string }) {
   return (
     <section className="space-y-3">
       <h2 className="text-base font-semibold">

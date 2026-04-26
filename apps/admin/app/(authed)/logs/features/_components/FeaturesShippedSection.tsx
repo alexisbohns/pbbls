@@ -1,7 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 import type { PlatformFilter as PlatformFilterValue } from "@/lib/logs/options"
 import type { LogRow } from "@/lib/logs/types"
-import { FeatureSection } from "../../_components/FeatureSection"
+import { LogSection } from "../../_components/LogSection"
 
 export async function FeaturesShippedSection({
   platform,
@@ -29,5 +29,5 @@ export async function FeaturesShippedSection({
 
   const logs: LogRow[] = data ?? []
 
-  return <FeatureSection title="Shipped" logs={logs} emptyLabel="No shipped features." />
+  return <LogSection title="Shipped" logs={logs} emptyLabel="No shipped features." />
 }

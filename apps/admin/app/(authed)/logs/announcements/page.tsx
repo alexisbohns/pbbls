@@ -4,8 +4,8 @@ import { Plus } from "lucide-react"
 import { buttonVariants } from "@/components/ui/button"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 import type { LogRow } from "@/lib/logs/types"
-import { FeatureSection } from "../_components/FeatureSection"
-import { FeatureSectionSkeleton } from "../_components/FeatureSectionSkeleton"
+import { LogSection } from "../_components/LogSection"
+import { LogSectionSkeleton } from "../_components/LogSectionSkeleton"
 import { AnnouncementsPublishedSection } from "./_components/AnnouncementsPublishedSection"
 
 export default async function AnnouncementsPage() {
@@ -34,8 +34,8 @@ export default async function AnnouncementsPage() {
         </Link>
       </header>
       <div className="space-y-8">
-        <FeatureSection title="Drafts" logs={drafts} emptyLabel="No drafts." />
-        <Suspense fallback={<FeatureSectionSkeleton title="Published" />}>
+        <LogSection title="Drafts" logs={drafts} emptyLabel="No drafts." />
+        <Suspense fallback={<LogSectionSkeleton title="Published" />}>
           <AnnouncementsPublishedSection />
         </Suspense>
       </div>

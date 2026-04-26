@@ -1,6 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 import type { LogRow } from "@/lib/logs/types"
-import { FeatureSection } from "../../_components/FeatureSection"
+import { LogSection } from "../../_components/LogSection"
 
 export async function AnnouncementsPublishedSection() {
   const supabase = await createServerSupabaseClient()
@@ -18,5 +18,5 @@ export async function AnnouncementsPublishedSection() {
 
   const logs: LogRow[] = data ?? []
 
-  return <FeatureSection title="Published" logs={logs} emptyLabel="No published announcements." />
+  return <LogSection title="Published" logs={logs} emptyLabel="No published announcements." />
 }
