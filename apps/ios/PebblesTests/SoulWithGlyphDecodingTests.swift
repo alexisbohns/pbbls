@@ -10,7 +10,7 @@ struct SoulWithGlyphDecodingTests {
 
     @Test("decodes the joined PostgREST payload for the system default glyph")
     func decodesSystemDefault() throws {
-        let json = """
+        let json = Data("""
         {
           "id": "\(soulId.uuidString)",
           "name": "Alex",
@@ -22,7 +22,7 @@ struct SoulWithGlyphDecodingTests {
             "view_box": "0 0 200 200"
           }
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let decoded = try JSONDecoder().decode(SoulWithGlyph.self, from: json)
         #expect(decoded.id == soulId)
@@ -36,7 +36,7 @@ struct SoulWithGlyphDecodingTests {
     @Test("decodes a soul with a user-carved glyph that has strokes")
     func decodesUserGlyph() throws {
         let userGlyphId = UUID()
-        let json = """
+        let json = Data("""
         {
           "id": "\(soulId.uuidString)",
           "name": "Sam",
@@ -48,7 +48,7 @@ struct SoulWithGlyphDecodingTests {
             "view_box": "0 0 200 200"
           }
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let decoded = try JSONDecoder().decode(SoulWithGlyph.self, from: json)
         #expect(decoded.glyph.name == "wave")
@@ -58,14 +58,14 @@ struct SoulWithGlyphDecodingTests {
 
     @Test("soul accessor strips the joined glyph")
     func soulAccessor() throws {
-        let json = """
+        let json = Data("""
         {
           "id": "\(soulId.uuidString)",
           "name": "Alex",
           "glyph_id": "\(glyphId.uuidString)",
           "glyphs": { "id": "\(glyphId.uuidString)", "name": null, "strokes": [], "view_box": "0 0 200 200" }
         }
-        """.data(using: .utf8)!
+        """.utf8)
 
         let decoded = try JSONDecoder().decode(SoulWithGlyph.self, from: json)
         #expect(decoded.soul.id == soulId)
