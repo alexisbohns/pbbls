@@ -20,9 +20,11 @@ struct AttachedSnap: Equatable {
 
     var state: UploadState
 
-    /// Storage folder shared by both files: `{user_id}/{id}`.
+    /// Storage folder shared by both files: `{user_id}/{id}`. Lowercase
+    /// because Postgres' `auth.uid()::text` is lowercase, and the bucket
+    /// RLS policy compares the first folder segment to it as text.
     func storagePrefix(userId: UUID) -> String {
-        "\(userId.uuidString)/\(id.uuidString)"
+        "\(userId.uuidString.lowercased())/\(id.uuidString.lowercased())"
     }
 
     /// Full Storage path of the 1024 px JPEG.

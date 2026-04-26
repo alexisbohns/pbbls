@@ -21,8 +21,9 @@ struct PebbleSnapRepository {
         snapId: UUID,
         userId: UUID
     ) async throws {
-        let originalPath = "\(userId.uuidString)/\(snapId.uuidString)/original.jpg"
-        let thumbPath    = "\(userId.uuidString)/\(snapId.uuidString)/thumb.jpg"
+        let prefix = Self.storagePrefix(userId: userId, snapId: snapId)
+        let originalPath = "\(prefix)/original.jpg"
+        let thumbPath    = "\(prefix)/thumb.jpg"
         let bucket = client.storage.from(Self.bucketId)
         let options = FileOptions(contentType: "image/jpeg")
 
@@ -38,8 +39,9 @@ struct PebbleSnapRepository {
     /// Best-effort cleanup of a snap's Storage files. Logs failures but does
     /// not throw — the orphan-sweep follow-up will catch any residue.
     func deleteFiles(snapId: UUID, userId: UUID) async {
-        let originalPath = "\(userId.uuidString)/\(snapId.uuidString)/original.jpg"
-        let thumbPath    = "\(userId.uuidString)/\(snapId.uuidString)/thumb.jpg"
+        let prefix = Self.storagePrefix(userId: userId, snapId: snapId)
+        let originalPath = "\(prefix)/original.jpg"
+        let thumbPath    = "\(prefix)/thumb.jpg"
         do {
             _ = try await client.storage.from(Self.bucketId)
                 .remove(paths: [originalPath, thumbPath])
@@ -58,7 +60,14 @@ struct PebbleSnapRepository {
     }
 
     func signedURLs(snapId: UUID, userId: UUID) async throws -> SignedURLs {
-        try await signedURLs(storagePrefix: "\(userId.uuidString)/\(snapId.uuidString)")
+        try await signedURLs(storagePrefix: Self.storagePrefix(userId: userId, snapId: snapId))
+    }
+
+    /// Build the canonical storage prefix for a snap: `{user_id}/{snap_id}`,
+    /// both lowercased so the path matches Postgres `auth.uid()::text` for
+    /// the bucket RLS policy.
+    private static func storagePrefix(userId: UUID, snapId: UUID) -> String {
+        "\(userId.uuidString.lowercased())/\(snapId.uuidString.lowercased())"
     }
 
     /// Read-path overload: caller already has the `storage_path` string from
