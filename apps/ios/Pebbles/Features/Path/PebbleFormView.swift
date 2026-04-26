@@ -18,6 +18,11 @@ struct PebbleFormView: View {
     var strokeColor: String?
     var renderHeight: CGFloat = 260
 
+    /// When true, render the Photo section. Off by default so EditPebbleSheet
+    /// (which doesn't yet support attach/replace) doesn't show a non-functional
+    /// row. CreatePebbleSheet sets this to true.
+    let showsPhotoSection: Bool
+
     @Binding var photoPickerPresented: Bool
 
     @State private var showPicker = false
@@ -36,6 +41,7 @@ struct PebbleFormView: View {
         renderSvg: String? = nil,
         strokeColor: String? = nil,
         renderHeight: CGFloat = 260,
+        showsPhotoSection: Bool = false,
         photoPickerPresented: Binding<Bool> = .constant(false)
     ) {
         self._draft = draft
@@ -47,6 +53,7 @@ struct PebbleFormView: View {
         self.renderSvg = renderSvg
         self.strokeColor = strokeColor
         self.renderHeight = renderHeight
+        self.showsPhotoSection = showsPhotoSection
         self._photoPickerPresented = photoPickerPresented
     }
 
@@ -192,17 +199,19 @@ struct PebbleFormView: View {
                 .listRowBackground(Color.pebblesListRow)
             }
 
-            Section("Photo") {
-                if draft.attachedSnap != nil {
-                    AttachedPhotoView(snap: $draft.attachedSnap)
+            if showsPhotoSection {
+                Section("Photo") {
+                    if draft.attachedSnap != nil {
+                        AttachedPhotoView(snap: $draft.attachedSnap)
+                            .listRowBackground(Color.pebblesListRow)
+                    } else {
+                        Button {
+                            photoPickerPresented = true
+                        } label: {
+                            Label("Add a photo", systemImage: "photo.badge.plus")
+                        }
                         .listRowBackground(Color.pebblesListRow)
-                } else {
-                    Button {
-                        photoPickerPresented = true
-                    } label: {
-                        Label("Add a photo", systemImage: "photo.badge.plus")
                     }
-                    .listRowBackground(Color.pebblesListRow)
                 }
             }
 

@@ -105,6 +105,7 @@ struct CreatePebbleSheet: View {
                 souls: souls,
                 collections: collections,
                 saveError: saveError,
+                showsPhotoSection: true,
                 photoPickerPresented: $isPhotoPickerPresented
             )
         }
