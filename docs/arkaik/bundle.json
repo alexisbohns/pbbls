@@ -203,7 +203,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Souls Directory",
-      "description": "Browse and manage all souls (people in your life).",
+      "description": "Browse and manage all souls (people in your life) as a 3-column glyph grid.",
       "status": "live",
       "platforms": ["web", "ios", "android"]
     },
@@ -655,7 +655,7 @@
       "project_id": "pebbles",
       "species": "data-model",
       "title": "Soul",
-      "description": "A person linked to pebbles, representing someone in the user's life.",
+      "description": "A person linked to pebbles, representing someone in the user's life. Each soul carries a glyph for visual identity.",
       "status": "idea",
       "platforms": ["web", "ios", "android"]
     },
