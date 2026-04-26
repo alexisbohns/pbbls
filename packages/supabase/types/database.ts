@@ -845,9 +845,6 @@ export type Database = {
           intensity: number | null
           name: string | null
           positiveness: number | null
-          render_manifest: Json | null
-          render_svg: string | null
-          render_version: string | null
           snaps: Json | null
           souls: Json | null
           updated_at: string | null

@@ -51,8 +51,14 @@ export class SupabaseProvider implements DataProvider {
   // ---------------------------------------------------------------------------
 
   async loadFromSupabase(): Promise<Store> {
+    // The render columns (render_svg / render_manifest / render_version) are
+    // not exposed by `v_pebbles_full`, so we fetch them in parallel from the
+    // base `pebbles` table and merge them in by id. This mirrors the iOS read
+    // pattern (it queries `pebbles` directly with explicit columns) and avoids
+    // having to extend the view.
     const [
       pebblesRes,
+      pebblesRenderRes,
       soulsRes,
       collectionsRes,
       collectionPebblesRes,
@@ -61,6 +67,10 @@ export class SupabaseProvider implements DataProvider {
       bounceRes,
     ] = await Promise.all([
       this.supabase.from("v_pebbles_full").select("*").eq("user_id", this.userId),
+      this.supabase
+        .from("pebbles")
+        .select("id, render_svg, render_manifest, render_version")
+        .eq("user_id", this.userId),
       this.supabase.from("souls").select("*").eq("user_id", this.userId),
       this.supabase.from("collections").select("*").eq("user_id", this.userId),
       this.supabase.from("collection_pebbles").select("*, collections!inner(user_id)").eq("collections.user_id", this.userId),
@@ -70,33 +80,55 @@ export class SupabaseProvider implements DataProvider {
     ])
 
     if (pebblesRes.error) throw new Error(`Failed to load pebbles: ${pebblesRes.error.message}`)
+    if (pebblesRenderRes.error) throw new Error(`Failed to load pebble renders: ${pebblesRenderRes.error.message}`)
     if (soulsRes.error) throw new Error(`Failed to load souls: ${soulsRes.error.message}`)
     if (collectionsRes.error) throw new Error(`Failed to load collections: ${collectionsRes.error.message}`)
     if (glyphsRes.error) throw new Error(`Failed to load glyphs: ${glyphsRes.error.message}`)
 
-    const pebbles: Pebble[] = (pebblesRes.data ?? []).map((row: Record<string, unknown>) => ({
-      id: row.id as string,
-      name: row.name as string,
-      description: (row.description as string) ?? undefined,
-      happened_at: row.happened_at as string,
-      intensity: row.intensity as 1 | 2 | 3,
-      positiveness: row.positiveness as -1 | 0 | 1,
-      visibility: (row.visibility as string) as "private" | "public",
-      emotion_id: row.emotion_id as string,
-      soul_ids: ((row.souls as Array<{ id: string }>) ?? []).map((s) => s.id),
-      domain_ids: ((row.domains as Array<{ id: string }>) ?? []).map((d) => d.id),
-      mark_id: (row.glyph_id as string) ?? undefined,
-      instants: [],
-      cards: ((row.cards as Array<{ species_id: string; value: string }>) ?? []).map((c) => ({
-        species_id: c.species_id,
-        value: c.value,
-      })),
-      render_svg: (row.render_svg as string | null) ?? null,
-      render_manifest: (row.render_manifest as unknown) ?? null,
-      render_version: (row.render_version as string | null) ?? null,
-      created_at: row.created_at as string,
-      updated_at: row.updated_at as string,
-    }))
+    const renderById = new Map<
+      string,
+      { render_svg: string | null; render_manifest: unknown; render_version: string | null }
+    >()
+    for (const row of pebblesRenderRes.data ?? []) {
+      const r = row as Record<string, unknown>
+      renderById.set(r.id as string, {
+        render_svg: (r.render_svg as string | null) ?? null,
+        render_manifest: r.render_manifest ?? null,
+        render_version: (r.render_version as string | null) ?? null,
+      })
+    }
+
+    const pebbles: Pebble[] = (pebblesRes.data ?? []).map((row: Record<string, unknown>) => {
+      const id = row.id as string
+      const render = renderById.get(id) ?? {
+        render_svg: null,
+        render_manifest: null,
+        render_version: null,
+      }
+      return {
+        id,
+        name: row.name as string,
+        description: (row.description as string) ?? undefined,
+        happened_at: row.happened_at as string,
+        intensity: row.intensity as 1 | 2 | 3,
+        positiveness: row.positiveness as -1 | 0 | 1,
+        visibility: (row.visibility as string) as "private" | "public",
+        emotion_id: row.emotion_id as string,
+        soul_ids: ((row.souls as Array<{ id: string }>) ?? []).map((s) => s.id),
+        domain_ids: ((row.domains as Array<{ id: string }>) ?? []).map((d) => d.id),
+        mark_id: (row.glyph_id as string) ?? undefined,
+        instants: [],
+        cards: ((row.cards as Array<{ species_id: string; value: string }>) ?? []).map((c) => ({
+          species_id: c.species_id,
+          value: c.value,
+        })),
+        render_svg: render.render_svg,
+        render_manifest: render.render_manifest,
+        render_version: render.render_version,
+        created_at: row.created_at as string,
+        updated_at: row.updated_at as string,
+      }
+    })
 
     const souls: Soul[] = (soulsRes.data ?? []).map((row: Record<string, unknown>) => ({
       id: row.id as string,
