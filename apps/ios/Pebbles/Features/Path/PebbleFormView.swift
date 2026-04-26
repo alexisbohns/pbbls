@@ -215,6 +215,8 @@ struct PebbleFormView: View {
         }
         .sheet(isPresented: $isPhotoPickerPresented) {
             PhotoPickerView { picked in
+                Logger(subsystem: "app.pbbls.ios", category: "pebble-form")
+                    .notice("photo sheet closure: picked=\(picked != nil, privacy: .public) onPhotoPickedNil=\(onPhotoPicked == nil, privacy: .public)")
                 isPhotoPickerPresented = false
                 if let picked { onPhotoPicked?(picked) }
             }
