@@ -73,16 +73,15 @@ No client-side multi-call orchestration is needed.
 
 ## Localization
 
-Add the following entries to `apps/ios/Pebbles/Resources/Localizable.xcstrings`, with both `en` and `fr` columns populated:
+Most strings the deletion flow needs are already in `apps/ios/Pebbles/Resources/Localizable.xcstrings` (with both `en` and `fr` populated): `Delete`, `Delete %@?`, `Couldn't delete`, `Cancel`, `OK`. They are reused as-is.
+
+One new entry is needed:
 
 | Key | en | fr |
 |---|---|---|
-| `Delete` | Delete | Supprimer |
-| `Delete %@?` | Delete %@? | Supprimer %@ ? |
 | `This can't be undone.` | This can't be undone. | Cette action est irréversible. |
-| `Couldn't delete` | Couldn't delete | Suppression impossible |
 
-`Cancel`, `OK`, and `Something went wrong. Please try again.` already exist in the catalog and are reused.
+The runtime error string `"Something went wrong. Please try again."` matches the existing pattern in `SoulsListView`/`CollectionsListView`, where it is assigned to a `String?` variable (`deleteError`). Because the literal is not passed directly to `Text(_:)`, it is not auto-extracted by `SWIFT_EMIT_LOC_STRINGS=YES` — those views currently render this message in English regardless of locale. This spec preserves that behaviour to stay consistent with the established pattern; localizing runtime error strings is tracked as a separate cleanup.
 
 Per the iOS CLAUDE.md, open `Localizable.xcstrings` in Xcode after the change and verify no entries are in `New` or `Stale` state.
 
