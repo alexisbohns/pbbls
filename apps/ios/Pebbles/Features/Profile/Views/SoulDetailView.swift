@@ -20,6 +20,8 @@ struct SoulDetailView: View {
     @State private var loadError: String?
     @State private var selectedPebbleId: UUID?
     @State private var isPresentingEdit = false
+    @State private var pendingDeletion: Pebble?
+    @State private var deleteError: String?
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.soul.detail")
 
@@ -50,6 +52,36 @@ struct SoulDetailView: View {
                 EditPebbleSheet(pebbleId: id, onSaved: {
                     Task { await load() }
                 })
+            }
+            .confirmationDialog(
+                pendingDeletion.map { "Delete \($0.name)?" } ?? "",
+                isPresented: Binding(
+                    get: { pendingDeletion != nil },
+                    set: { if !$0 { pendingDeletion = nil } }
+                ),
+                titleVisibility: .visible,
+                presenting: pendingDeletion
+            ) { pebble in
+                Button("Delete", role: .destructive) {
+                    Task { await delete(pebble) }
+                }
+                Button("Cancel", role: .cancel) {
+                    pendingDeletion = nil
+                }
+            } message: { _ in
+                Text("This can't be undone.")
+            }
+            .alert(
+                "Couldn't delete",
+                isPresented: Binding(
+                    get: { deleteError != nil },
+                    set: { if !$0 { deleteError = nil } }
+                ),
+                presenting: deleteError
+            ) { _ in
+                Button("OK", role: .cancel) { deleteError = nil }
+            } message: { message in
+                Text(message)
             }
             .pebblesScreen()
     }
@@ -93,18 +125,14 @@ struct SoulDetailView: View {
                     )
                     .frame(maxHeight: .infinity)
                 } else {
-                    List(pebbles) { pebble in
-                        Button {
-                            selectedPebbleId = pebble.id
-                        } label: {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(pebble.name).font(.body)
-                                Text(pebble.happenedAt, style: .date)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
+                    List {
+                        ForEach(pebbles) { pebble in
+                            PebbleRow(
+                                pebble: pebble,
+                                onTap: { selectedPebbleId = pebble.id },
+                                onDelete: { pendingDeletion = pebble }
+                            )
                         }
-                        .buttonStyle(.plain)
                     }
                 }
             }
@@ -131,9 +159,12 @@ struct SoulDetailView: View {
         isLoading = true
         loadError = nil
         do {
+            let columns = "id, name, happened_at, render_svg"
+                + ", emotion:emotions(id, slug, name, color)"
+                + ", pebble_souls!inner(soul_id)"
             let result: [Pebble] = try await supabase.client
                 .from("pebbles")
-                .select("id, name, happened_at, pebble_souls!inner(soul_id)")
+                .select(columns)
                 .eq("pebble_souls.soul_id", value: soulWithGlyph.id)
                 .order("happened_at", ascending: false)
                 .execute()
@@ -144,6 +175,19 @@ struct SoulDetailView: View {
             self.loadError = "Something went wrong. Please try again."
         }
         self.isLoading = false
+    }
+
+    private func delete(_ pebble: Pebble) async {
+        pendingDeletion = nil
+        do {
+            try await supabase.client
+                .rpc("delete_pebble", params: ["p_pebble_id": pebble.id.uuidString])
+                .execute()
+            await load()
+        } catch {
+            logger.error("delete pebble failed: \(error.localizedDescription, privacy: .private)")
+            deleteError = "Something went wrong. Please try again."
+        }
     }
 }
 
