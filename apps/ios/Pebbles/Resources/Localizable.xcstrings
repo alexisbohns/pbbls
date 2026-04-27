@@ -3276,6 +3276,23 @@
         }
       }
     },
+    "This can't be undone." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This can't be undone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette action est irréversible."
+          }
+        }
+      }
+    },
     "This moment impacted my day and will be wrapped in my weekly Cairn" : {
       "extractionState" : "manual",
       "localizations" : {
