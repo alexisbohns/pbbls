@@ -10,6 +10,8 @@ struct PathView: View {
     @State private var selectedPebbleId: UUID?
     @State private var presentedDetailPebbleId: UUID?
     @State private var isPresentingOnboarding = false
+    @State private var pendingDeletion: Pebble?
+    @State private var deleteError: String?
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "path")
 
@@ -51,6 +53,36 @@ struct PathView: View {
                 isPresentingOnboarding = false
             }
         }
+        .confirmationDialog(
+            pendingDeletion.map { "Delete \($0.name)?" } ?? "",
+            isPresented: Binding(
+                get: { pendingDeletion != nil },
+                set: { if !$0 { pendingDeletion = nil } }
+            ),
+            titleVisibility: .visible,
+            presenting: pendingDeletion
+        ) { pebble in
+            Button("Delete", role: .destructive) {
+                Task { await delete(pebble) }
+            }
+            Button("Cancel", role: .cancel) {
+                pendingDeletion = nil
+            }
+        } message: { _ in
+            Text("This can't be undone.")
+        }
+        .alert(
+            "Couldn't delete",
+            isPresented: Binding(
+                get: { deleteError != nil },
+                set: { if !$0 { deleteError = nil } }
+            ),
+            presenting: deleteError
+        ) { _ in
+            Button("OK", role: .cancel) { deleteError = nil }
+        } message: { message in
+            Text(message)
+        }
     }
 
     @ViewBuilder
@@ -73,36 +105,15 @@ struct PathView: View {
 
                 Section("Path") {
                     ForEach(pebbles) { pebble in
-                        Button {
-                            selectedPebbleId = pebble.id
-                        } label: {
-                            HStack(spacing: 12) {
-                                pebbleThumbnail(for: pebble)
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(pebble.name).font(.body)
-                                    Text(pebble.happenedAt, style: .date)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-                        }
-                        .buttonStyle(.plain)
+                        PebbleRow(
+                            pebble: pebble,
+                            onTap: { selectedPebbleId = pebble.id },
+                            onDelete: { pendingDeletion = pebble }
+                        )
                         .listRowBackground(Color.pebblesListRow)
                     }
                 }
             }
-        }
-    }
-
-    @ViewBuilder
-    private func pebbleThumbnail(for pebble: Pebble) -> some View {
-        if let svg = pebble.renderSvg {
-            PebbleRenderView(svg: svg, strokeColor: pebble.emotion?.color)
-                .frame(width: 40, height: 40)
-        } else {
-            RoundedRectangle(cornerRadius: 6)
-                .fill(Color.secondary.opacity(0.15))
-                .frame(width: 40, height: 40)
         }
     }
 
@@ -120,6 +131,19 @@ struct PathView: View {
             logger.error("path fetch failed: \(error.localizedDescription, privacy: .private)")
             self.loadError = "Couldn't load your pebbles."
             self.isLoading = false
+        }
+    }
+
+    private func delete(_ pebble: Pebble) async {
+        pendingDeletion = nil
+        do {
+            try await supabase.client
+                .rpc("delete_pebble", params: ["p_pebble_id": pebble.id.uuidString])
+                .execute()
+            await load()
+        } catch {
+            logger.error("delete pebble failed: \(error.localizedDescription, privacy: .private)")
+            deleteError = "Something went wrong. Please try again."
         }
     }
 }
