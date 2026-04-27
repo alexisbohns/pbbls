@@ -115,6 +115,15 @@ struct LocalizationPatternCCoverageTests {
             )
         }
     }
+
+    @Test("'This can\u{2019}t be undone.' has en and fr catalog entries")
+    func deletionConfirmationMessageLocalized() {
+        let key: LocalizedStringResource = "This can't be undone."
+        let english = resolve(key, locale: Locale(identifier: "en"))
+        let french = resolve(key, locale: Locale(identifier: "fr"))
+        #expect(english == "This can't be undone.")
+        #expect(french == "Cette action est irréversible.")
+    }
 }
 
 // MARK: - Shared helpers
