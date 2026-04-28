@@ -39,6 +39,10 @@ targets:
     deploymentTarget: "17.0"
     sources:
       - path: Pebbles
+        excludes:
+          - "Resources/Ysabeau SemiBold.ttf"
+    resources:
+      - path: Pebbles/Resources/Ysabeau SemiBold.ttf
     configFiles:
       Debug: Config/Secrets.xcconfig
       Release: Config/Secrets.xcconfig

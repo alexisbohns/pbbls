@@ -39,5 +39,9 @@
 	</array>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Attach a photo to a pebble.</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Ysabeau SemiBold.ttf</string>
+	</array>
 </dict>
 </plist>
