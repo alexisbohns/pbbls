@@ -95,9 +95,9 @@ private extension Color {
         guard trimmed.count == 6, let value = UInt32(trimmed, radix: 16) else {
             return nil
         }
-        let r = Double((value >> 16) & 0xFF) / 255.0
-        let g = Double((value >> 8) & 0xFF) / 255.0
-        let b = Double(value & 0xFF) / 255.0
-        self.init(red: r, green: g, blue: b)
+        let red   = Double((value >> 16) & 0xFF) / 255.0
+        let green = Double((value >> 8) & 0xFF) / 255.0
+        let blue  = Double(value & 0xFF) / 255.0
+        self.init(red: red, green: green, blue: blue)
     }
 }
