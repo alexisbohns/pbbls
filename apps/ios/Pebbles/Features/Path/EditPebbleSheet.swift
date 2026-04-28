@@ -149,7 +149,7 @@ struct EditPebbleSheet: View {
                     render_svg, render_version, glyph_id,
                     emotion:emotions(id, slug, name, color),
                     pebble_domains(domain:domains(id, slug, name)),
-                    pebble_souls(soul:souls(id, name, glyph_id)),
+                    pebble_souls(soul:souls(id, name, glyph_id, glyphs(id, name, strokes, view_box))),
                     collection_pebbles(collection:collections(id, name)),
                     snaps(id, storage_path, sort_order)
                 """)
