@@ -118,11 +118,11 @@ struct PebbleCreatePayloadEncodingTests {
         let snapId = UUID()
         let userId = UUID()
         var draft = makeValidDraft()
-        draft.attachedSnap = AttachedSnap(
+        draft.formSnap = .pending(AttachedSnap(
             id: snapId,
             localThumb: Data(),
             state: .uploaded
-        )
+        ))
 
         let payload = PebbleCreatePayload(from: draft, userId: userId)
         let json = try encode(payload)
