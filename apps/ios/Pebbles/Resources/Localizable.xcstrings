@@ -2810,6 +2810,24 @@
         }
       }
     },
+    "Pebble photo" : {
+      "comment" : "Accessibility label for the photo attached to a pebble",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pebble photo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo du pebble"
+          }
+        }
+      }
+    },
     "Pebbles" : {
       "extractionState" : "manual",
       "localizations" : {
