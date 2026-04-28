@@ -590,6 +590,23 @@
         }
       }
     },
+    "Couldn't load this pebble." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't load this pebble."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de charger ce pebble."
+          }
+        }
+      }
+    },
     "Couldn't load souls" : {
       "extractionState" : "manual",
       "localizations" : {
