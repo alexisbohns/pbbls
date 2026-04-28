@@ -6,7 +6,7 @@
     "root_node_id": "V-landing",
     "metadata": { "view_card_variant": "large" },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-04-18T12:00:00.000Z"
+    "updated_at": "2026-04-28T12:00:00.000Z"
   },
   "nodes": [
     {
@@ -138,9 +138,16 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Pebble Detail",
-      "description": "Full view of a recorded pebble with all enrichments.",
-      "status": "idea",
-      "platforms": ["web", "ios", "android"]
+      "description": "Read-only display of a recorded pebble: rendered shape, title, picture, emotion/domain/collections/souls metadata, and description. Edit button stacks the editor.",
+      "status": "live",
+      "platforms": ["web", "ios", "android"],
+      "metadata": {
+        "platformStatuses": {
+          "ios": "live",
+          "web": "idea",
+          "android": "idea"
+        }
+      }
     },
     {
       "id": "V-pebble-revelation",
@@ -1276,6 +1283,7 @@
 
     { "id": "e-V-pebble-revelation-V-pebble-visual", "project_id": "pebbles", "source_id": "V-pebble-revelation", "target_id": "V-pebble-visual", "edge_type": "composes" },
     { "id": "e-V-pebble-detail-V-pebble-visual", "project_id": "pebbles", "source_id": "V-pebble-detail", "target_id": "V-pebble-visual", "edge_type": "composes" },
+    { "id": "e-V-pebble-detail-V-quick-pebble-editor", "project_id": "pebbles", "source_id": "V-pebble-detail", "target_id": "V-quick-pebble-editor", "edge_type": "composes" },
     { "id": "e-V-timeline-V-pebble-visual", "project_id": "pebbles", "source_id": "V-timeline", "target_id": "V-pebble-visual", "edge_type": "composes" },
     { "id": "e-V-timeline-F-onboarding", "project_id": "pebbles", "source_id": "V-timeline", "target_id": "F-onboarding", "edge_type": "composes" },
     { "id": "e-V-pebble-visual-DM-pebble-engine", "project_id": "pebbles", "source_id": "V-pebble-visual", "target_id": "DM-pebble-engine", "edge_type": "displays" },
