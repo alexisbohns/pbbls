@@ -40,7 +40,7 @@ struct PebbleDetail: Identifiable, Decodable, Hashable {
     let visibility: Visibility
     let emotion: EmotionRef
     let domains: [DomainRef]
-    let souls: [Soul]
+    let souls: [SoulWithGlyph]
     let collections: [PebbleCollection]
     let snaps: [SnapRef]
     let renderSvg: String?
@@ -108,7 +108,7 @@ struct PebbleDetail: Identifiable, Decodable, Hashable {
     }
 
     private struct DomainWrapper: Decodable { let domain: DomainRef }
-    private struct SoulWrapper: Decodable { let soul: Soul }
+    private struct SoulWrapper: Decodable { let soul: SoulWithGlyph }
     private struct CollectionWrapper: Decodable { let collection: PebbleCollection }
 
     init(from decoder: Decoder) throws {

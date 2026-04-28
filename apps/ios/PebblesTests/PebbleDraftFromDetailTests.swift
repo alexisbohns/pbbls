@@ -25,12 +25,20 @@ struct PebbleDraftFromDetailTests {
             "color": "#FFD166"
         ]
         let domainsJSON = domains.map { domain in ["domain": ["id": domain.id.uuidString, "slug": domain.slug, "name": domain.name]] }
-        let soulsJSON = souls.map { soul -> [String: [String: String]] in
+        let soulsJSON: [[String: Any]] = souls.map { soul in
             ["soul": [
                 "id": soul.id.uuidString,
                 "name": soul.name,
-                "glyph_id": soul.glyphId.uuidString
-            ]]
+                "glyph_id": soul.glyphId.uuidString,
+                // SoulWithGlyph requires the joined glyphs row — include a
+                // minimal stub so the decoder finds all required keys.
+                "glyphs": [
+                    "id": soul.glyphId.uuidString,
+                    "name": NSNull(),
+                    "strokes": [] as [[String: Any]],
+                    "view_box": "0 0 200 200"
+                ] as [String: Any]
+            ] as [String: Any]]
         }
         let collectionsJSON = collections.map { coll in ["collection": ["id": coll.id.uuidString, "name": coll.name]] }
 
