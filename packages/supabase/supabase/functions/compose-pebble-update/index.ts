@@ -10,7 +10,7 @@
  *    (ownership check inside the RPC)
  * 2. Calls update_pebble(p_pebble_id, payload)
  * 3. Calls compose-and-write → writes render columns + returns composed output
- * 4. Responds with { pebble_id, render_svg, render_manifest, render_version }
+ * 4. Responds with { pebble_id, render_svg, render_version }
  *
  * On RPC failure: 4xx with the RPC error.
  * On compose failure after successful update: 500 with pebble_id in the body
