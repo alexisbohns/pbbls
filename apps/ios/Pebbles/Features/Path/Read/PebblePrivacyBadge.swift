@@ -16,6 +16,11 @@ struct PebblePrivacyBadge: View {
     let visibility: Visibility
     var style: Style = .capsule
 
+    private var accessibilityLabelText: Text {
+        Text("Privacy: \(String(localized: visibility.label))",
+             comment: "Accessibility label for the pebble privacy badge")
+    }
+
     var body: some View {
         switch style {
         case .capsule: capsuleBody
@@ -40,8 +45,7 @@ struct PebblePrivacyBadge: View {
         )
         .foregroundStyle(Color.pebblesForeground)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(Text("Privacy: \(String(localized: visibility.label))",
-                                 comment: "Accessibility label for the pebble privacy badge"))
+        .accessibilityLabel(accessibilityLabelText)
     }
 
     private var chipBody: some View {
@@ -52,8 +56,7 @@ struct PebblePrivacyBadge: View {
             .background(
                 Circle().fill(Color.pebblesBackground.opacity(0.85))
             )
-            .accessibilityLabel(Text("Privacy: \(String(localized: visibility.label))",
-                                     comment: "Accessibility label for the pebble privacy chip"))
+            .accessibilityLabel(accessibilityLabelText)
     }
 }
 
