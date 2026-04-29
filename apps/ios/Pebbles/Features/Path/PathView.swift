@@ -8,7 +8,6 @@ struct PathView: View {
     @State private var loadError: String?
     @State private var isPresentingCreate = false
     @State private var selectedPebbleId: UUID?
-    @State private var presentedDetailPebbleId: UUID?
     @State private var isPresentingOnboarding = false
     @State private var pendingDeletion: Pebble?
     @State private var deleteError: String?
@@ -34,17 +33,14 @@ struct PathView: View {
         .task { await load() }
         .sheet(isPresented: $isPresentingCreate) {
             CreatePebbleSheet(onCreated: { newPebbleId in
-                presentedDetailPebbleId = newPebbleId
+                selectedPebbleId = newPebbleId
                 Task { await load() }
             })
         }
         .sheet(item: $selectedPebbleId) { id in
-            EditPebbleSheet(pebbleId: id, onSaved: {
+            PebbleDetailSheet(pebbleId: id, onPebbleUpdated: {
                 Task { await load() }
             })
-        }
-        .sheet(item: $presentedDetailPebbleId) { id in
-            PebbleDetailSheet(pebbleId: id)
         }
         .fullScreenCover(isPresented: $isPresentingOnboarding) {
             OnboardingView(steps: OnboardingSteps.all) {

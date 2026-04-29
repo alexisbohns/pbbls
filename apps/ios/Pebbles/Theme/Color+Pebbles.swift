@@ -10,6 +10,7 @@ extension Color {
     static let pebblesMutedForeground = Color("MutedForeground")
     static let pebblesBorder          = Color("Border")
     static let pebblesAccent          = Color("AccentColor")
+    static let pebblesAccentSoft      = Color("AccentSoft")
 
     /// Fill for list/form rows across the app. White in light mode,
     /// `SurfaceAlt` in dark — so rows read as a layered surface on top of

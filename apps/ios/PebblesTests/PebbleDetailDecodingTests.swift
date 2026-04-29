@@ -46,7 +46,13 @@ struct PebbleDetailDecodingTests {
           "soul": {
             "id": "44444444-4444-4444-4444-444444444444",
             "name": "Alex",
-            "glyph_id": "4759c37c-68a6-46a6-b4fc-046bd0316752"
+            "glyph_id": "4759c37c-68a6-46a6-b4fc-046bd0316752",
+            "glyphs": {
+              "id": "4759c37c-68a6-46a6-b4fc-046bd0316752",
+              "name": null,
+              "strokes": [],
+              "view_box": "0 0 200 200"
+            }
           }
         }
       ],

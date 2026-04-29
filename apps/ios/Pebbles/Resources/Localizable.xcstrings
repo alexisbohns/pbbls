@@ -590,6 +590,23 @@
         }
       }
     },
+    "Couldn't load this pebble." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't load this pebble."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de charger ce pebble."
+          }
+        }
+      }
+    },
     "Couldn't load souls" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2615,6 +2632,23 @@
         }
       }
     },
+    "No domain" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No domain"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun domaine"
+          }
+        }
+      }
+    },
     "No glyphs yet" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2679,6 +2713,24 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucun"
+          }
+        }
+      }
+    },
+    "Not set" : {
+      "comment" : "Accessibility value for an unset pebble metadata row",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Not set"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non défini"
           }
         }
       }
@@ -2792,6 +2844,24 @@
         }
       }
     },
+    "Pebble photo" : {
+      "comment" : "Accessibility label for the photo attached to a pebble",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pebble photo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Photo du pebble"
+          }
+        }
+      }
+    },
     "Pebbles" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2890,6 +2960,56 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Profil"
+          }
+        }
+      }
+    },
+    "Privacy: %@" : {
+      "comment" : "Accessibility label for the pebble privacy badge",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privacy: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confidentialité : %@"
+          }
+        }
+      }
+    },
+    "Private" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Private"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privé"
+          }
+        }
+      }
+    },
+    "Public" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Public"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Public"
           }
         }
       }

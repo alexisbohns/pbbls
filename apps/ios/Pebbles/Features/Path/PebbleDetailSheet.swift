@@ -1,18 +1,17 @@
 import SwiftUI
 import os
 
-/// Post-create viewer sheet.
+/// Read-view sheet for a single pebble. Loads the `PebbleDetail` from
+/// Supabase and renders `PebbleReadView` with a privacy badge + Edit button
+/// in the navigation bar. Tapping Edit stacks `EditPebbleSheet` on top; on
+/// save the read view reloads in place and notifies the parent.
 ///
-/// Presented by `PathView` after `CreatePebbleSheet` successfully dismisses.
-/// Loads the `PebbleDetail` from the DB (now including `render_svg`) and
-/// renders `PebbleRenderView` at the top when the render is available,
-/// followed by a metadata block and a Done button.
-///
-/// Distinct from `EditPebbleSheet`: this sheet is a read-only reveal, not a
-/// form. Tap-to-view of existing pebbles from the path list remains on
-/// `EditPebbleSheet` in slice 1.
+/// Used as the destination for both:
+/// - Path-list tap of an existing pebble.
+/// - Post-create reveal after `CreatePebbleSheet` completes.
 struct PebbleDetailSheet: View {
     let pebbleId: UUID
+    var onPebbleUpdated: (() -> Void)?
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(\.dismiss) private var dismiss
@@ -20,22 +19,34 @@ struct PebbleDetailSheet: View {
     @State private var detail: PebbleDetail?
     @State private var isLoading = true
     @State private var loadError: String?
+    @State private var isPresentingEdit = false
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "pebble-detail")
 
     var body: some View {
         NavigationStack {
             content
-                .navigationTitle("Recorded pebble")
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
-                    ToolbarItem(placement: .confirmationAction) {
-                        Button("Done") { dismiss() }
+                    ToolbarItem(placement: .topBarLeading) {
+                        if let detail {
+                            PebblePrivacyBadge(visibility: detail.visibility)
+                        }
+                    }
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button("Edit") { isPresentingEdit = true }
+                            .disabled(detail == nil)
                     }
                 }
                 .pebblesScreen()
         }
         .task { await load() }
+        .sheet(isPresented: $isPresentingEdit) {
+            EditPebbleSheet(pebbleId: pebbleId, onSaved: {
+                Task { await load() }
+                onPebbleUpdated?()
+            })
+        }
     }
 
     @ViewBuilder
@@ -48,38 +59,7 @@ struct PebbleDetailSheet: View {
                 Button("Retry") { Task { await load() } }
             }
         } else if let detail {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    if let svg = detail.renderSvg {
-                        PebbleRenderView(svg: svg, strokeColor: detail.emotion.color)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: detail.valence.sizeGroup.renderHeight)
-                            .padding(.vertical)
-                    }
-
-                    if let snap = detail.snaps.first {
-                        SnapImageView(storagePath: snap.storagePath)
-                            .padding(.horizontal)
-                    }
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(detail.name).font(.headline)
-                        if let description = detail.description, !description.isEmpty {
-                            Text(description).font(.body)
-                        }
-                        Text(detail.happenedAt, style: .date)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        if !detail.domains.isEmpty {
-                            Text(detail.domains.map(\.localizedName).joined(separator: " · "))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal)
-                }
-            }
+            PebbleReadView(detail: detail)
         }
     }
 
@@ -91,10 +71,10 @@ struct PebbleDetailSheet: View {
                 .from("pebbles")
                 .select("""
                     id, name, description, happened_at, intensity, positiveness, visibility,
-                    render_svg, render_version,
+                    render_svg, render_version, glyph_id,
                     emotion:emotions(id, slug, name, color),
                     pebble_domains(domain:domains(id, slug, name)),
-                    pebble_souls(soul:souls(id, name, glyph_id)),
+                    pebble_souls(soul:souls(id, name, glyph_id, glyphs(id, name, strokes, view_box))),
                     collection_pebbles(collection:collections(id, name)),
                     snaps(id, storage_path, sort_order)
                 """)

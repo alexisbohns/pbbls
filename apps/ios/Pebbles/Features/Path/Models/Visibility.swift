@@ -6,7 +6,7 @@ enum Visibility: String, CaseIterable, Identifiable, Hashable, Decodable {
 
     var id: String { rawValue }
 
-    var label: String {
+    var label: LocalizedStringResource {
         switch self {
         case .private: return "Private"
         case .public:  return "Public"
