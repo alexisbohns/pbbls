@@ -27,7 +27,6 @@ struct PebbleDetailSheet: View {
         NavigationStack {
             content
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbarBackground(.hidden, for: .navigationBar)
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         if let detail {
@@ -53,6 +52,7 @@ struct PebbleDetailSheet: View {
                     }
                 }
                 .pebblesScreen()
+                .toolbarBackground(.hidden, for: .navigationBar)
         }
         .task { await load() }
         .sheet(isPresented: $isPresentingEdit) {
