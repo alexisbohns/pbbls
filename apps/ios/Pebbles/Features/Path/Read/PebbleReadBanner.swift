@@ -12,6 +12,7 @@ import SwiftUI
 struct PebbleReadBanner: View {
     let snapStoragePath: String?
     let renderSvg: String?
+    let renderVersion: String?
     let emotionColorHex: String
     let valence: Valence
 
@@ -61,8 +62,12 @@ struct PebbleReadBanner: View {
     @ViewBuilder
     private var renderedPebble: some View {
         if let renderSvg {
-            PebbleRenderView(svg: renderSvg, strokeColor: emotionColorHex)
-                .frame(height: pebbleHeight)
+            PebbleAnimatedRenderView(
+                svg: renderSvg,
+                strokeColor: emotionColorHex,
+                renderVersion: renderVersion
+            )
+            .frame(height: pebbleHeight)
         } else {
             EmptyView()
         }
@@ -88,6 +93,7 @@ struct PebbleReadBanner: View {
               <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="3"/>
             </svg>
             """,
+        renderVersion: "0.1.0",
         emotionColorHex: "#7C5CFA",
         valence: .neutralMedium
     )
@@ -103,6 +109,7 @@ struct PebbleReadBanner: View {
               <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="3"/>
             </svg>
             """,
+        renderVersion: "0.1.0",
         emotionColorHex: "#7C5CFA",
         valence: .highlightLarge
     )

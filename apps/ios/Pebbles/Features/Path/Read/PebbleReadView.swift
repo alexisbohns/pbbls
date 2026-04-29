@@ -15,6 +15,7 @@ struct PebbleReadView: View {
                 PebbleReadBanner(
                     snapStoragePath: detail.snaps.first?.storagePath,
                     renderSvg: detail.renderSvg,
+                    renderVersion: detail.renderVersion,
                     emotionColorHex: detail.emotion.color,
                     valence: detail.valence
                 )
