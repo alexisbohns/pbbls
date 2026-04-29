@@ -23,6 +23,9 @@ struct PebbleReadTitle: View {
     }
 
     private var formattedDate: String {
+        // Locale-aware. Example en output: "MON, MAR 12, 2026 · 2:32 PM".
+        // `.textCase(.uppercase)` on the Text handles casing visually, so we
+        // only need a clean, locale-correct format here.
         let date = happenedAt.formatted(
             .dateTime
                 .weekday(.abbreviated)
