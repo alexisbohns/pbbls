@@ -29,17 +29,17 @@ struct PebblePillFlow: Layout {
         cache: inout ()
     ) {
         let rows = computeRows(subviews: subviews, maxWidth: bounds.width)
-        var y = bounds.minY
+        var originY = bounds.minY
         for row in rows {
-            var x = bounds.minX
+            var originX = bounds.minX
             for item in row.items {
                 subviews[item.index].place(
-                    at: CGPoint(x: x, y: y),
+                    at: CGPoint(x: originX, y: originY),
                     proposal: ProposedViewSize(width: item.size.width, height: item.size.height)
                 )
-                x += item.size.width + spacing
+                originX += item.size.width + spacing
             }
-            y += row.height + spacing
+            originY += row.height + spacing
         }
     }
 
