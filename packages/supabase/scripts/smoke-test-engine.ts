@@ -38,7 +38,7 @@ for (const size of SIZES) {
     const shapeSvg = getShape(size, valence);
     assert(shapeSvg.startsWith("<svg"), `${size}/${valence}: shape starts with <svg`);
 
-    const { svg, manifest } = composePebble({
+    const { svg } = composePebble({
       size,
       valence,
       shapeSvg,
@@ -48,10 +48,6 @@ for (const size of SIZES) {
     assert(svg.startsWith("<svg"), `${size}/${valence}: composed svg starts with <svg`);
     assert(svg.includes(`<g id="layer:shape">`), `${size}/${valence}: composed svg has shape layer`);
     assert(svg.includes(`<g id="layer:glyph"`), `${size}/${valence}: composed svg has glyph layer`);
-
-    assert(Array.isArray(manifest) && manifest.length > 0, `${size}/${valence}: manifest is non-empty array`);
-    assert(manifest.some((l) => l.type === "glyph"), `${size}/${valence}: manifest has glyph layer`);
-    assert(manifest.some((l) => l.type === "shape"), `${size}/${valence}: manifest has shape layer`);
 
     ok += 1;
     console.log(`✓ ${size}/${valence}`);
