@@ -30,15 +30,29 @@ struct PebbleDetailSheet: View {
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         if let detail {
-                            PebblePrivacyBadge(visibility: detail.visibility)
+                            PebblePrivacyBadge(visibility: detail.visibility, style: .chip)
                         }
                     }
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button("Edit") { isPresentingEdit = true }
-                            .disabled(detail == nil)
+                        Button {
+                            isPresentingEdit = true
+                        } label: {
+                            Text("Edit")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                                .foregroundStyle(Color.pebblesForeground)
+                                .padding(.horizontal, 14)
+                                .frame(height: 36)
+                                .background(
+                                    Capsule().fill(Color.pebblesBackground.opacity(0.85))
+                                )
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(detail == nil)
                     }
                 }
                 .pebblesScreen()
+                .toolbarBackground(.hidden, for: .navigationBar)
         }
         .task { await load() }
         .sheet(isPresented: $isPresentingEdit) {
