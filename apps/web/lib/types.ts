@@ -30,7 +30,6 @@ export type Pebble = {
   // Server-rendered pebble. Populated by the compose-pebble / compose-pebble-update
   // edge functions; null for legacy rows or anonymous (LocalProvider) pebbles.
   render_svg: string | null
-  render_manifest: unknown | null
   render_version: string | null
   created_at: string
   updated_at: string

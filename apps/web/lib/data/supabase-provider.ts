@@ -51,7 +51,7 @@ export class SupabaseProvider implements DataProvider {
   // ---------------------------------------------------------------------------
 
   async loadFromSupabase(): Promise<Store> {
-    // The render columns (render_svg / render_manifest / render_version) are
+    // The render columns (render_svg / render_version) are
     // not exposed by `v_pebbles_full`, so we fetch them in parallel from the
     // base `pebbles` table and merge them in by id. This mirrors the iOS read
     // pattern (it queries `pebbles` directly with explicit columns) and avoids
@@ -69,7 +69,7 @@ export class SupabaseProvider implements DataProvider {
       this.supabase.from("v_pebbles_full").select("*").eq("user_id", this.userId),
       this.supabase
         .from("pebbles")
-        .select("id, render_svg, render_manifest, render_version")
+        .select("id, render_svg, render_version")
         .eq("user_id", this.userId),
       this.supabase.from("souls").select("*").eq("user_id", this.userId),
       this.supabase.from("collections").select("*").eq("user_id", this.userId),
@@ -87,13 +87,12 @@ export class SupabaseProvider implements DataProvider {
 
     const renderById = new Map<
       string,
-      { render_svg: string | null; render_manifest: unknown; render_version: string | null }
+      { render_svg: string | null; render_version: string | null }
     >()
     for (const row of pebblesRenderRes.data ?? []) {
       const r = row as Record<string, unknown>
       renderById.set(r.id as string, {
         render_svg: (r.render_svg as string | null) ?? null,
-        render_manifest: r.render_manifest ?? null,
         render_version: (r.render_version as string | null) ?? null,
       })
     }
@@ -102,7 +101,6 @@ export class SupabaseProvider implements DataProvider {
       const id = row.id as string
       const render = renderById.get(id) ?? {
         render_svg: null,
-        render_manifest: null,
         render_version: null,
       }
       return {
@@ -123,7 +121,6 @@ export class SupabaseProvider implements DataProvider {
           value: c.value,
         })),
         render_svg: render.render_svg,
-        render_manifest: render.render_manifest,
         render_version: render.render_version,
         created_at: row.created_at as string,
         updated_at: row.updated_at as string,
