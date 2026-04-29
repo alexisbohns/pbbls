@@ -121,10 +121,10 @@ private struct LayerShape: Shape {
         let dx = (rect.width - scaledWidth) / 2 - viewBox.minX * scale
         let dy = (rect.height - scaledHeight) / 2 - viewBox.minY * scale
 
-        var t = layer.transform
+        var transform = layer.transform
             .concatenating(CGAffineTransform(scaleX: scale, y: scale))
             .concatenating(CGAffineTransform(translationX: dx, y: dy))
-        guard let transformed = layer.combinedPath.copy(using: &t) else {
+        guard let transformed = layer.combinedPath.copy(using: &transform) else {
             return Path(layer.combinedPath)
         }
         return Path(transformed)

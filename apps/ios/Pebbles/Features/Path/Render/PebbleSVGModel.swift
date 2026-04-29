@@ -39,9 +39,9 @@ struct PebbleSVGModel {
         for raw in delegate.rawLayers {
             guard let kind = raw.kind else { continue }
             let combined = CGMutablePath()
-            for d in raw.pathDStrings {
-                guard let p = SVGPathParser.parse(d) else { continue }
-                combined.addPath(p)
+            for dString in raw.pathDStrings {
+                guard let parsedPath = SVGPathParser.parse(dString) else { continue }
+                combined.addPath(parsedPath)
             }
             // Reject layers with no parseable path so we don't render an empty trim.
             guard !combined.boundingBoxOfPath.isNull else { continue }
@@ -98,16 +98,16 @@ struct PebbleSVGModel {
                     default: break
                     }
                 }
-                if let t = attributeDict["transform"] {
-                    layer.transform = parseTransform(t)
+                if let transformAttr = attributeDict["transform"] {
+                    layer.transform = parseTransform(transformAttr)
                 }
-                if let o = attributeDict["opacity"], let v = Double(o) {
-                    layer.opacity = v
+                if let opacityAttr = attributeDict["opacity"], let value = Double(opacityAttr) {
+                    layer.opacity = value
                 }
                 stack.append(layer)
             case "path":
-                if let d = attributeDict["d"], !stack.isEmpty {
-                    stack[stack.count - 1].pathDStrings.append(d)
+                if let dString = attributeDict["d"], !stack.isEmpty {
+                    stack[stack.count - 1].pathDStrings.append(dString)
                 }
             default:
                 break
@@ -128,19 +128,19 @@ struct PebbleSVGModel {
         /// Parses the limited transform forms emitted by the engine:
         /// `translate(x, y) scale(s)` (commas optional), `translate(x, y)`,
         /// `scale(s)`. Other forms collapse to identity.
-        private func parseTransform(_ s: String) -> CGAffineTransform {
-            var t = CGAffineTransform.identity
+        private func parseTransform(_ string: String) -> CGAffineTransform {
+            var result = CGAffineTransform.identity
             let pattern = #"(translate|scale)\s*\(([^)]*)\)"#
             guard let regex = try? NSRegularExpression(pattern: pattern) else { return .identity }
-            let range = NSRange(s.startIndex..<s.endIndex, in: s)
-            regex.enumerateMatches(in: s, range: range) { match, _, _ in
+            let range = NSRange(string.startIndex..<string.endIndex, in: string)
+            regex.enumerateMatches(in: string, range: range) { match, _, _ in
                 guard
                     let match,
-                    let nameRange = Range(match.range(at: 1), in: s),
-                    let argsRange = Range(match.range(at: 2), in: s)
+                    let nameRange = Range(match.range(at: 1), in: string),
+                    let argsRange = Range(match.range(at: 2), in: string)
                 else { return }
-                let name = String(s[nameRange])
-                let args = String(s[argsRange])
+                let name = String(string[nameRange])
+                let args = String(string[argsRange])
                     .split(whereSeparator: { $0 == "," || $0 == " " })
                     .compactMap { Double($0) }
                 // SVG transform list applies left-to-right to a point: e.g.
@@ -151,16 +151,16 @@ struct PebbleSVGModel {
                 case "translate":
                     let tx = args.first ?? 0
                     let ty = args.count > 1 ? args[1] : 0
-                    t = CGAffineTransform(translationX: tx, y: ty).concatenating(t)
+                    result = CGAffineTransform(translationX: tx, y: ty).concatenating(result)
                 case "scale":
                     let sx = args.first ?? 1
                     let sy = args.count > 1 ? args[1] : sx
-                    t = CGAffineTransform(scaleX: sx, y: sy).concatenating(t)
+                    result = CGAffineTransform(scaleX: sx, y: sy).concatenating(result)
                 default:
                     break
                 }
             }
-            return t
+            return result
         }
     }
 }

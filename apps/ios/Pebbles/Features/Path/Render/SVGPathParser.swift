@@ -1,6 +1,16 @@
 import CoreGraphics
 import Foundation
 
+// swiftlint:disable cyclomatic_complexity function_body_length identifier_name
+//
+// This file implements the SVG 1.1 path-`d` grammar. The grammar is best
+// expressed as a single state-machine `parse` function; splitting it per
+// command would obscure the implicit-continuation logic that flows across
+// commands. Single-letter identifiers (`d`, `t`, `c`, `s`, `n`, `v`, `i`,
+// `rx`/`ry`/`cx`/`cy`/`p0`/`p1`) follow SVG-spec convention or are
+// straightforward loop-locals; renaming them would make the parser harder
+// to verify against the spec.
+
 /// Parses an SVG path `d` attribute string into a CGPath.
 ///
 /// Supports the standard SVG path commands `M m L l H h V v C c S s Q q T t A a Z z`
