@@ -2,13 +2,13 @@ import SwiftUI
 
 /// Top zone of the pebble read view.
 ///
-/// With a photo: renders a 16:9 cover banner with rounded corners; the
-/// pebble shape sits in a 120×120pt page-bg-fill box centered over the
-/// banner's bottom edge (50% over photo, 50% below).
+/// With a photo: a 16:9 cover banner with rounded corners; the pebble
+/// shape sits in a 120×120pt page-bg-fill box centered over the banner's
+/// bottom edge (50% over photo, 50% below).
 ///
-/// Without a photo: renders only the pebble centered in a 120pt-tall zone
-/// — no box, no banner. Vertical footprint matches the with-photo case so
-/// the layout below stays consistent.
+/// Without a photo: only the pebble centered in a 120pt-tall zone — no
+/// box, no banner. The two cases intentionally have different vertical
+/// footprints; the no-photo layout reads tighter by design.
 struct PebbleReadBanner: View {
     let snapStoragePath: String?
     let renderSvg: String?
@@ -27,27 +27,26 @@ struct PebbleReadBanner: View {
         }
     }
 
-    @ViewBuilder
     private func withPhoto(storagePath: String) -> some View {
-        VStack(spacing: 0) {
-            SnapImageView(storagePath: storagePath, contentMode: .fill)
-                .aspectRatio(16.0 / 9.0, contentMode: .fit)
-                .clipShape(RoundedRectangle(cornerRadius: bannerCornerRadius))
-                .accessibilityHidden(true)
-                .overlay(alignment: .bottom) {
-                    pebbleBox
-                        .offset(y: boxSize / 2)
-                }
-                .padding(.bottom, boxSize / 2)
-        }
-        .frame(maxWidth: .infinity)
+        // Half-overlap pattern: the pebble box renders as an overlay that
+        // intentionally extends below the banner's bottom edge. Do NOT wrap
+        // this view in a `.clipShape` / `.clipped()` ancestor — the
+        // overflow is the design.
+        SnapImageView(storagePath: storagePath, contentMode: .fill)
+            .aspectRatio(16.0 / 9.0, contentMode: .fit)
+            .clipShape(RoundedRectangle(cornerRadius: bannerCornerRadius))
+            .accessibilityHidden(true)
+            .overlay(alignment: .bottom) {
+                pebbleBox
+                    .offset(y: boxSize / 2)
+            }
+            .padding(.bottom, boxSize / 2)
+            .frame(maxWidth: .infinity)
     }
 
     private var withoutPhoto: some View {
-        VStack {
-            renderedPebble
-        }
-        .frame(maxWidth: .infinity, minHeight: boxSize)
+        renderedPebble
+            .frame(maxWidth: .infinity, minHeight: boxSize)
     }
 
     private var pebbleBox: some View {
@@ -69,8 +68,9 @@ struct PebbleReadBanner: View {
         }
     }
 
-    /// Pebble height inside the 120pt box, scaled by valence so high
-    /// intensity reads bigger than low intensity but always fits comfortably.
+    /// Pebble height inside the 120pt box, scaled by valence size group
+    /// so higher-intensity pebbles read bigger than lower-intensity ones
+    /// while still fitting comfortably.
     private var pebbleHeight: CGFloat {
         switch valence.sizeGroup {
         case .small:  return 80
