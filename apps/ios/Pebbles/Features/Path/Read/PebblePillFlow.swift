@@ -3,6 +3,10 @@ import SwiftUI
 /// Flow layout that places its children left-to-right and wraps to a new
 /// line whenever the next child wouldn't fit in the proposed width.
 /// Both axes use the same gap. iOS 17+ — uses the `Layout` protocol.
+///
+/// Children are measured against the proposed width so a child with
+/// `.lineLimit(1)` (or a similar truncation modifier) can fit when its
+/// natural size would overflow.
 struct PebblePillFlow: Layout {
     var spacing: CGFloat = 8
 
@@ -28,20 +32,23 @@ struct PebblePillFlow: Layout {
         var y = bounds.minY
         for row in rows {
             var x = bounds.minX
-            for index in row.indices {
-                let size = subviews[index].sizeThatFits(.unspecified)
-                subviews[index].place(
+            for item in row.items {
+                subviews[item.index].place(
                     at: CGPoint(x: x, y: y),
-                    proposal: ProposedViewSize(width: size.width, height: size.height)
+                    proposal: ProposedViewSize(width: item.size.width, height: item.size.height)
                 )
-                x += size.width + spacing
+                x += item.size.width + spacing
             }
             y += row.height + spacing
         }
     }
 
     private struct Row {
-        var indices: [Int] = []
+        struct Item {
+            let index: Int
+            let size: CGSize
+        }
+        var items: [Item] = []
         var width: CGFloat = 0
         var height: CGFloat = 0
     }
@@ -49,20 +56,24 @@ struct PebblePillFlow: Layout {
     private func computeRows(subviews: Subviews, maxWidth: CGFloat) -> [Row] {
         var rows: [Row] = [Row()]
         for index in subviews.indices {
-            let size = subviews[index].sizeThatFits(.unspecified)
+            let childProposal = ProposedViewSize(
+                width: maxWidth.isFinite ? maxWidth : nil,
+                height: nil
+            )
+            let size = subviews[index].sizeThatFits(childProposal)
             var current = rows[rows.count - 1]
             let candidateWidth = current.width
-                + (current.indices.isEmpty ? 0 : spacing)
+                + (current.items.isEmpty ? 0 : spacing)
                 + size.width
-            if current.indices.isEmpty || candidateWidth <= maxWidth {
-                if !current.indices.isEmpty { current.width += spacing }
-                current.indices.append(index)
+            if current.items.isEmpty || candidateWidth <= maxWidth {
+                if !current.items.isEmpty { current.width += spacing }
+                current.items.append(Row.Item(index: index, size: size))
                 current.width += size.width
                 current.height = max(current.height, size.height)
                 rows[rows.count - 1] = current
             } else {
                 var fresh = Row()
-                fresh.indices.append(index)
+                fresh.items.append(Row.Item(index: index, size: size))
                 fresh.width = size.width
                 fresh.height = size.height
                 rows.append(fresh)
