@@ -42,8 +42,12 @@ struct PebbleSVGModelTests {
     func noFossil() throws {
         let svg = """
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
-          <g id="layer:shape"><path d="M 0 0 L 100 100" fill="none"/></g>
-          <g id="layer:glyph" transform="translate(0, 0) scale(1)"><path d="M 0 0 L 50 50" fill="none"/></g>
+          <g id="layer:shape">
+            <path d="M 0 0 L 100 100" fill="none" stroke="currentColor"/>
+          </g>
+          <g id="layer:glyph" transform="translate(0, 0) scale(1)">
+            <path d="M 0 0 L 50 50" fill="none" stroke="currentColor"/>
+          </g>
         </svg>
         """
         let model = try #require(PebbleSVGModel(svg: svg))
@@ -78,11 +82,11 @@ struct PebbleSVGModelTests {
         let svg = """
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
           <g id="layer:shape">
-            <path d="M 0 0 L 240 240" fill="none"/>
+            <path d="M 0 0 L 240 240" fill="none" stroke="currentColor"/>
           </g>
           <g id="layer:glyph" transform="translate(40, 40) scale(0.8)">
             <g transform="translate(20, 20) scale(0.5)">
-              <path d="M 0 0 L 100 100" fill="none"/>
+              <path d="M 0 0 L 100 100" fill="none" stroke="currentColor"/>
             </g>
           </g>
         </svg>
@@ -115,5 +119,33 @@ struct PebbleSVGModelTests {
         </svg>
         """
         #expect(PebbleSVGModel(svg: svg) == nil)
+    }
+
+    @Test("skips SVG-invisible paths (fill=none + no stroke)")
+    func skipsInvisiblePaths() throws {
+        // Mirrors the engine's shape output: one visible stroke path plus
+        // one path that's fill=none with no stroke attribute (originally a
+        // Figma fill shape that stripFills zeroed). SVGView correctly
+        // skips the second; the model must too.
+        //
+        // The invisible path's geometry extends beyond the visible one, so
+        // if it leaks into the combined layer path the bounding box widens
+        // past (0,0)–(100,100). That's the assertion below.
+        let svg = """
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+          <g id="layer:shape">
+            <path d="M 0 0 L 100 100" fill="none" stroke="currentColor" stroke-width="6"/>
+            <path fill-rule="evenodd" d="M -50 -50 L 200 200 L 200 -50 Z" fill="none"/>
+          </g>
+        </svg>
+        """
+        let model = try #require(PebbleSVGModel(svg: svg))
+        let shape = try #require(model.layers.first { $0.kind == .shape })
+        // Only the visible stroke path contributes to the combined geometry.
+        let bbox = shape.combinedPath.boundingBoxOfPath
+        #expect(abs(bbox.minX - 0) < 0.001)
+        #expect(abs(bbox.minY - 0) < 0.001)
+        #expect(abs(bbox.maxX - 100) < 0.001)
+        #expect(abs(bbox.maxY - 100) < 0.001)
     }
 }

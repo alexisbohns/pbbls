@@ -119,6 +119,18 @@ struct PebbleSVGModel {
                 stack.append(group)
             case "path":
                 guard let dString = attributeDict["d"], !stack.isEmpty else { return }
+                // Match SVGView's standard SVG visibility semantics. A path
+                // with fill="none" and no stroke (SVG default `stroke="none"`)
+                // is invisible. The engine emits such paths for shape detail
+                // shapes that originally had a fill in Figma — `stripFills`
+                // zeroes the fill, leaving the path with neither fill nor
+                // stroke. SVGView correctly skips these. We must too,
+                // otherwise we trace them as spurious "fossil" strokes.
+                let fillValue = attributeDict["fill"] ?? "black"   // SVG spec default
+                let strokeValue = attributeDict["stroke"] ?? "none" // SVG spec default
+                if fillValue == "none" && strokeValue == "none" {
+                    return
+                }
                 if let parsedPath = SVGPathParser.parse(dString) {
                     stack[stack.count - 1].paths.append(parsedPath)
                 } else {
