@@ -37,15 +37,21 @@ struct PebbleReadBanner: View {
     private let revealDurationReduceMotion: Double = 0.25
 
     var body: some View {
-        VStack(spacing: 0) {
+        // The pebble lives in a stable slot of this ZStack across both phases
+        // — same structural position before and after reveal — so its
+        // identity is preserved and `PebbleAnimatedRenderView.onAppear` does
+        // NOT re-fire. The banner inserts as an optional sibling above the
+        // pebble; its bottom padding produces the half-overlap with the box.
+        ZStack(alignment: .bottom) {
             if revealPhoto, let image = loadedImage {
                 bannerWithPhoto(image: image)
+                    .padding(.bottom, boxSize / 2)
                     .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .top)))
-            } else {
-                renderedPebble
-                    .frame(maxWidth: .infinity, minHeight: boxSize)
             }
+
+            pebbleStableSlot
         }
+        .frame(maxWidth: .infinity, minHeight: boxSize)
         .task(id: snapStoragePath) {
             await loadPhotoIfNeeded()
         }
@@ -54,6 +60,17 @@ struct PebbleReadBanner: View {
         }
         .onChange(of: loadedImage) { _, _ in revealIfReady() }
         .onChange(of: animationFinished) { _, _ in revealIfReady() }
+    }
+
+    private var pebbleStableSlot: some View {
+        renderedPebble
+            .frame(width: boxSize, height: boxSize)
+            .background {
+                if revealPhoto {
+                    RoundedRectangle(cornerRadius: boxCornerRadius)
+                        .fill(Color.pebblesBackground)
+                }
+            }
     }
 
     private func revealIfReady() {
@@ -71,32 +88,22 @@ struct PebbleReadBanner: View {
     @ViewBuilder
     private func bannerWithPhoto(image: UIImage) -> some View {
         let aspect = BannerAspect.nearest(to: image.size.width / max(image.size.height, 1))
-        // Half-overlap pattern: the pebble box renders as an overlay that
-        // intentionally extends below the banner's bottom edge. Do NOT wrap
-        // this view in a `.clipShape` / `.clipped()` ancestor — the
-        // overflow is the design.
-        Image(uiImage: image)
-            .resizable()
-            .aspectRatio(contentMode: .fill)
-            .frame(maxWidth: .infinity)
+        // The Color.clear container is the size-of-truth: it's full-width and
+        // forced to `aspect.cgRatio`. The image overlays it with `.fill`,
+        // overflowing edges are clipped by the surrounding RoundedRectangle.
+        // This gives CSS `background-size: cover` behavior inside a fixed
+        // bucket. The half-overlap with the pebble is produced by the
+        // `.padding(.bottom, boxSize / 2)` applied at the call site.
+        Color.clear
             .aspectRatio(aspect.cgRatio, contentMode: .fit)
+            .frame(maxWidth: .infinity)
+            .overlay {
+                Image(uiImage: image)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            }
             .clipShape(RoundedRectangle(cornerRadius: bannerCornerRadius))
             .accessibilityHidden(true)
-            .overlay(alignment: .bottom) {
-                pebbleBox
-                    .offset(y: boxSize / 2)
-            }
-            .padding(.bottom, boxSize / 2)
-            .frame(maxWidth: .infinity)
-    }
-
-    private var pebbleBox: some View {
-        renderedPebble
-            .frame(width: boxSize, height: boxSize)
-            .background(
-                RoundedRectangle(cornerRadius: boxCornerRadius)
-                    .fill(Color.pebblesBackground)
-            )
     }
 
     // MARK: - Phase 1 background work
