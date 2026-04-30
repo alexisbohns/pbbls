@@ -33,6 +33,8 @@ struct PebbleReadBanner: View {
     private let bannerCornerRadius: CGFloat = 24
     private let boxSize: CGFloat = 120
     private let boxCornerRadius: CGFloat = 24
+    private let revealDuration: Double = 0.45
+    private let revealDurationReduceMotion: Double = 0.25
 
     var body: some View {
         VStack(spacing: 0) {
@@ -57,8 +59,8 @@ struct PebbleReadBanner: View {
     private func revealIfReady() {
         guard !revealPhoto, loadedImage != nil, animationFinished else { return }
         let animation: Animation = reduceMotion
-            ? .easeOut(duration: 0.25)
-            : .easeOut(duration: 0.45)
+            ? .easeOut(duration: revealDurationReduceMotion)
+            : .easeOut(duration: revealDuration)
         withAnimation(animation) {
             revealPhoto = true
         }
@@ -101,6 +103,8 @@ struct PebbleReadBanner: View {
 
     private func loadPhotoIfNeeded() async {
         guard let path = snapStoragePath else { return }
+        loadedImage = nil
+        revealPhoto = false
         do {
             let urls = try await PebbleSnapRepository(client: supabase.client)
                 .signedURLs(storagePrefix: path)
