@@ -69,4 +69,51 @@ struct PebbleSVGModelTests {
         """
         #expect(PebbleSVGModel(svg: svg) == nil)
     }
+
+    @Test("propagates nested-group transforms into layer paths (glyph centering wrapper)")
+    func nestedGroupBakesTransform() throws {
+        // The glyph engine emits glyph strokes inside an extra <g transform=...>
+        // centering wrapper. The model must bake that transform into the path
+        // so the layer ends up with non-empty geometry.
+        let svg = """
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+          <g id="layer:shape">
+            <path d="M 0 0 L 240 240" fill="none"/>
+          </g>
+          <g id="layer:glyph" transform="translate(40, 40) scale(0.8)">
+            <g transform="translate(20, 20) scale(0.5)">
+              <path d="M 0 0 L 100 100" fill="none"/>
+            </g>
+          </g>
+        </svg>
+        """
+        let model = try #require(PebbleSVGModel(svg: svg))
+        #expect(model.layers.map(\.kind) == [.shape, .glyph])
+        // Glyph layer must have a non-empty path despite the path being nested
+        // one level deeper than the layer. Without the bake-and-propagate fix,
+        // this assertion fails: combinedPath is empty and the layer is dropped.
+        let glyph = try #require(model.layers.first { $0.kind == .glyph })
+        #expect(!glyph.combinedPath.boundingBoxOfPath.isNull)
+        // The bbox should reflect the inner transform (translate 20,20 scale 0.5)
+        // applied to the path's source points (0,0)–(100,100). Resulting points
+        // are (20,20)–(70,70) BEFORE the layer's own transform (which the
+        // renderer applies separately).
+        let bbox = glyph.combinedPath.boundingBoxOfPath
+        #expect(abs(bbox.minX - 20) < 0.001)
+        #expect(abs(bbox.minY - 20) < 0.001)
+        #expect(abs(bbox.maxX - 70) < 0.001)
+        #expect(abs(bbox.maxY - 70) < 0.001)
+    }
+
+    @Test("returns nil when any path d-string fails to parse")
+    func failsClosedOnBadPath() {
+        let svg = """
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+          <g id="layer:shape">
+            <path d="this is not a valid path" fill="none"/>
+          </g>
+        </svg>
+        """
+        #expect(PebbleSVGModel(svg: svg) == nil)
+    }
 }

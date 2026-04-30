@@ -20,7 +20,8 @@ struct PebbleSVGModel {
         let transform: CGAffineTransform
         /// Layer opacity from `<g opacity="...">`. 1.0 if absent.
         let opacity: Double
-        /// All descendant `<path>` `d` strings parsed and concatenated into one path.
+        /// All descendant `<path>`s parsed and concatenated into one path.
+        /// Any non-layer nested-group transforms are already baked in.
         let combinedPath: CGPath
     }
 
@@ -29,7 +30,9 @@ struct PebbleSVGModel {
         let parser = XMLParser(data: data)
         let delegate = ParserDelegate()
         parser.delegate = delegate
-        guard parser.parse(), let viewBox = delegate.viewBox else {
+        guard parser.parse(),
+              !delegate.parseFailed,
+              let viewBox = delegate.viewBox else {
             Logger(subsystem: "app.pbbls.ios", category: "pebble-svg")
                 .info("PebbleSVGModel parse failed — falling back to static render")
             return nil
@@ -37,17 +40,14 @@ struct PebbleSVGModel {
 
         var layers: [Layer] = []
         for raw in delegate.rawLayers {
-            guard let kind = raw.kind else { continue }
+            guard !raw.paths.isEmpty else { continue }
             let combined = CGMutablePath()
-            for dString in raw.pathDStrings {
-                guard let parsedPath = SVGPathParser.parse(dString) else { continue }
-                combined.addPath(parsedPath)
+            for path in raw.paths {
+                combined.addPath(path)
             }
-            // Reject layers with no parseable path so we don't render an empty trim.
             guard !combined.boundingBoxOfPath.isNull else { continue }
-
             layers.append(Layer(
-                kind: kind,
+                kind: raw.kind,
                 transform: raw.transform,
                 opacity: raw.opacity,
                 combinedPath: combined.copy() ?? combined
@@ -61,17 +61,27 @@ struct PebbleSVGModel {
 
     // MARK: - XMLParser delegate
 
+    fileprivate struct RawLayer {
+        let kind: Layer.Kind
+        let transform: CGAffineTransform
+        let opacity: Double
+        let paths: [CGPath]
+    }
+
+    fileprivate struct RawGroup {
+        var kind: Layer.Kind?
+        var transform: CGAffineTransform = .identity
+        var opacity: Double = 1.0
+        // Paths attached to this <g>. Already parsed to CGPath. Inner-group
+        // transforms are baked in as those groups close.
+        var paths: [CGPath] = []
+    }
+
     private final class ParserDelegate: NSObject, XMLParserDelegate {
         var viewBox: CGRect?
         var rawLayers: [RawLayer] = []
-        private var stack: [RawLayer] = []
-
-        struct RawLayer {
-            var kind: Layer.Kind?
-            var transform: CGAffineTransform = .identity
-            var opacity: Double = 1.0
-            var pathDStrings: [String] = []
-        }
+        var parseFailed = false
+        private var stack: [RawGroup] = []
 
         func parser(
             _ parser: XMLParser,
@@ -82,32 +92,37 @@ struct PebbleSVGModel {
         ) {
             switch elementName {
             case "svg":
-                if let vb = attributeDict["viewBox"] {
-                    let parts = vb.split(whereSeparator: { $0 == " " || $0 == "," }).compactMap { Double($0) }
+                if let viewBoxAttr = attributeDict["viewBox"] {
+                    let parts = viewBoxAttr
+                        .split(whereSeparator: { $0 == " " || $0 == "," })
+                        .compactMap { Double($0) }
                     if parts.count == 4 {
                         viewBox = CGRect(x: parts[0], y: parts[1], width: parts[2], height: parts[3])
                     }
                 }
             case "g":
-                var layer = RawLayer()
+                var group = RawGroup()
                 if let id = attributeDict["id"] {
                     switch id {
-                    case "layer:shape":  layer.kind = .shape
-                    case "layer:fossil": layer.kind = .fossil
-                    case "layer:glyph":  layer.kind = .glyph
+                    case "layer:shape":  group.kind = .shape
+                    case "layer:fossil": group.kind = .fossil
+                    case "layer:glyph":  group.kind = .glyph
                     default: break
                     }
                 }
                 if let transformAttr = attributeDict["transform"] {
-                    layer.transform = parseTransform(transformAttr)
+                    group.transform = parseTransform(transformAttr)
                 }
                 if let opacityAttr = attributeDict["opacity"], let value = Double(opacityAttr) {
-                    layer.opacity = value
+                    group.opacity = value
                 }
-                stack.append(layer)
+                stack.append(group)
             case "path":
-                if let dString = attributeDict["d"], !stack.isEmpty {
-                    stack[stack.count - 1].pathDStrings.append(dString)
+                guard let dString = attributeDict["d"], !stack.isEmpty else { return }
+                if let parsedPath = SVGPathParser.parse(dString) {
+                    stack[stack.count - 1].paths.append(parsedPath)
+                } else {
+                    parseFailed = true
                 }
             default:
                 break
@@ -120,14 +135,42 @@ struct PebbleSVGModel {
             namespaceURI: String?,
             qualifiedName qName: String?
         ) {
-            if elementName == "g", let layer = stack.popLast(), layer.kind != nil {
-                rawLayers.append(layer)
+            guard elementName == "g", let group = stack.popLast() else { return }
+
+            if let kind = group.kind {
+                // Register the layer. Its paths already have any inner-group
+                // transforms baked in; the layer's own `transform` is applied
+                // by the renderer (LayerShape).
+                rawLayers.append(RawLayer(
+                    kind: kind,
+                    transform: group.transform,
+                    opacity: group.opacity,
+                    paths: group.paths
+                ))
+            } else if !stack.isEmpty {
+                // Non-layer nested group: bake this group's transform into
+                // each of its paths and propagate them upward to the parent.
+                var transform = group.transform
+                for path in group.paths {
+                    if let transformed = path.copy(using: &transform) {
+                        stack[stack.count - 1].paths.append(transformed)
+                    } else {
+                        stack[stack.count - 1].paths.append(path)
+                    }
+                }
             }
+            // Else: orphan non-layer group at the root with no parent — discard.
         }
 
         /// Parses the limited transform forms emitted by the engine:
         /// `translate(x, y) scale(s)` (commas optional), `translate(x, y)`,
         /// `scale(s)`. Other forms collapse to identity.
+        ///
+        /// Composition matches SVG semantics: the transform list applies
+        /// left-to-right to a point, i.e. for `translate(40,40) scale(0.8)`
+        /// the point is first scaled and then translated. In CG row-vector
+        /// math (`p' = p * M`), that means each subsequent op is post-
+        /// multiplied onto the running matrix via `op.concatenating(result)`.
         private func parseTransform(_ string: String) -> CGAffineTransform {
             var result = CGAffineTransform.identity
             let pattern = #"(translate|scale)\s*\(([^)]*)\)"#
@@ -143,10 +186,6 @@ struct PebbleSVGModel {
                 let args = String(string[argsRange])
                     .split(whereSeparator: { $0 == "," || $0 == " " })
                     .compactMap { Double($0) }
-                // SVG transform list applies left-to-right to a point: e.g.
-                // `translate(40,40) scale(0.8)` maps (x,y) → (0.8x+40, 0.8y+40).
-                // In CG (row-vector) terms this means each subsequent op is
-                // prepended (post-multiplied) onto the running transform.
                 switch name {
                 case "translate":
                     let tx = args.first ?? 0
