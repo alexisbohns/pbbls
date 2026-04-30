@@ -37,4 +37,11 @@ struct PebbleAnimationTimingsTests {
         #expect(PebbleAnimationTimings.forVersion("9.9.9") == nil)
         #expect(PebbleAnimationTimings.forVersion(nil) == nil)
     }
+
+    @Test("totalDuration equals settle.delay + settle.duration")
+    func totalDuration() throws {
+        let timings = try #require(PebbleAnimationTimings.forVersion("0.1.0"))
+        #expect(timings.totalDuration == timings.settle.delay + timings.settle.duration)
+        #expect(timings.totalDuration > 0)
+    }
 }
