@@ -35,15 +35,66 @@ struct PebbleReadBanner: View {
     private let boxCornerRadius: CGFloat = 24
 
     var body: some View {
-        // Phase 1 layout (no banner). Phase 2 is wired in Task 4.
+        VStack(spacing: 0) {
+            if revealPhoto, let image = loadedImage {
+                bannerWithPhoto(image: image)
+                    .transition(reduceMotion ? .opacity : .opacity.combined(with: .move(edge: .top)))
+            } else {
+                renderedPebble
+                    .frame(maxWidth: .infinity, minHeight: boxSize)
+            }
+        }
+        .task(id: snapStoragePath) {
+            await loadPhotoIfNeeded()
+        }
+        .task(id: renderVersion) {
+            await waitForAnimationToFinish()
+        }
+        .onChange(of: loadedImage) { _, _ in revealIfReady() }
+        .onChange(of: animationFinished) { _, _ in revealIfReady() }
+    }
+
+    private func revealIfReady() {
+        guard !revealPhoto, loadedImage != nil, animationFinished else { return }
+        let animation: Animation = reduceMotion
+            ? .easeOut(duration: 0.25)
+            : .easeOut(duration: 0.45)
+        withAnimation(animation) {
+            revealPhoto = true
+        }
+    }
+
+    // MARK: - Phase 2 banner
+
+    @ViewBuilder
+    private func bannerWithPhoto(image: UIImage) -> some View {
+        let aspect = BannerAspect.nearest(to: image.size.width / max(image.size.height, 1))
+        // Half-overlap pattern: the pebble box renders as an overlay that
+        // intentionally extends below the banner's bottom edge. Do NOT wrap
+        // this view in a `.clipShape` / `.clipped()` ancestor — the
+        // overflow is the design.
+        Image(uiImage: image)
+            .resizable()
+            .aspectRatio(contentMode: .fill)
+            .frame(maxWidth: .infinity)
+            .aspectRatio(aspect.cgRatio, contentMode: .fit)
+            .clipShape(RoundedRectangle(cornerRadius: bannerCornerRadius))
+            .accessibilityHidden(true)
+            .overlay(alignment: .bottom) {
+                pebbleBox
+                    .offset(y: boxSize / 2)
+            }
+            .padding(.bottom, boxSize / 2)
+            .frame(maxWidth: .infinity)
+    }
+
+    private var pebbleBox: some View {
         renderedPebble
-            .frame(maxWidth: .infinity, minHeight: boxSize)
-            .task(id: snapStoragePath) {
-                await loadPhotoIfNeeded()
-            }
-            .task(id: renderVersion) {
-                await waitForAnimationToFinish()
-            }
+            .frame(width: boxSize, height: boxSize)
+            .background(
+                RoundedRectangle(cornerRadius: boxCornerRadius)
+                    .fill(Color.pebblesBackground)
+            )
     }
 
     // MARK: - Phase 1 background work
@@ -144,6 +195,25 @@ struct PebbleReadBanner: View {
         renderVersion: "0.1.0",
         emotionColorHex: "#7C5CFA",
         valence: .highlightLarge
+    )
+    .padding()
+    .background(Color.pebblesBackground)
+}
+
+#Preview("With photo (preview-only stub)") {
+    // Preview cannot reach Supabase Storage; this preview only shows the
+    // no-photo path. Manual smoke verification (Task 5) covers the with-photo
+    // sequencing in the simulator.
+    PebbleReadBanner(
+        snapStoragePath: nil,
+        renderSvg: """
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="3"/>
+            </svg>
+            """,
+        renderVersion: "0.1.0",
+        emotionColorHex: "#7C5CFA",
+        valence: .neutralMedium
     )
     .padding()
     .background(Color.pebblesBackground)
