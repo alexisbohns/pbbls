@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Megaphone, Sparkles } from "lucide-react"
+import { BarChart3, Megaphone, Sparkles } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -14,6 +14,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+
+const ANALYTICS_ITEMS = [
+  { href: "/analytics", label: "Analytics", icon: BarChart3 },
+] as const
 
 const LOG_ITEMS = [
   { href: "/logs/features", label: "Features", icon: Sparkles },
@@ -29,6 +33,24 @@ export function AppSidebar() {
         <span className="px-2 py-1 text-sm font-semibold">Back-office</span>
       </SidebarHeader>
       <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>Insights</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {ANALYTICS_ITEMS.map(({ href, label, icon: Icon }) => {
+                const active = pathname === href || pathname.startsWith(`${href}/`)
+                return (
+                  <SidebarMenuItem key={href}>
+                    <SidebarMenuButton render={<Link href={href} />} isActive={active}>
+                      <Icon aria-hidden />
+                      <span>{label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
         <SidebarGroup>
           <SidebarGroupLabel>Logs</SidebarGroupLabel>
           <SidebarGroupContent>
