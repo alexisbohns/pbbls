@@ -16,6 +16,12 @@ struct BannerAspectTests {
         #expect(BannerAspect.nearest(to: 3.0 / 2.0) == .fourThree)
     }
 
+    @Test("Near-midpoint ~1.6 picks .sixteenNine (closer than 4:3)")
+    func nearMidpointPicksSixteenNine() {
+        // r = 1.6; |1.6 - 1.778| = 0.178; |1.6 - 1.333| = 0.267 → 16:9 wins.
+        #expect(BannerAspect.nearest(to: 1.6) == .sixteenNine)
+    }
+
     @Test("4:3 source picks .fourThree")
     func fourThreeSource() {
         #expect(BannerAspect.nearest(to: 4.0 / 3.0) == .fourThree)
