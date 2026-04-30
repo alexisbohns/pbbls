@@ -34,7 +34,7 @@ struct PebbleSVGModelTests {
         #expect(abs(glyphTransform.tx - 40) < 1e-6)
         #expect(abs(glyphTransform.ty - 40) < 1e-6)
         for layer in model.layers {
-            #expect(!layer.combinedPath.boundingBoxOfPath.isNull)
+            #expect(!layer.paths.isEmpty)
         }
     }
 
@@ -91,14 +91,14 @@ struct PebbleSVGModelTests {
         #expect(model.layers.map(\.kind) == [.shape, .glyph])
         // Glyph layer must have a non-empty path despite the path being nested
         // one level deeper than the layer. Without the bake-and-propagate fix,
-        // this assertion fails: combinedPath is empty and the layer is dropped.
+        // the path list is empty and the layer is dropped.
         let glyph = try #require(model.layers.first { $0.kind == .glyph })
-        #expect(!glyph.combinedPath.boundingBoxOfPath.isNull)
+        #expect(glyph.paths.count == 1)
         // The bbox should reflect the inner transform (translate 20,20 scale 0.5)
         // applied to the path's source points (0,0)–(100,100). Resulting points
         // are (20,20)–(70,70) BEFORE the layer's own transform (which the
         // renderer applies separately).
-        let bbox = glyph.combinedPath.boundingBoxOfPath
+        let bbox = glyph.paths[0].boundingBoxOfPath
         #expect(abs(bbox.minX - 20) < 0.001)
         #expect(abs(bbox.minY - 20) < 0.001)
         #expect(abs(bbox.maxX - 70) < 0.001)

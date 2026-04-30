@@ -20,9 +20,12 @@ struct PebbleSVGModel {
         let transform: CGAffineTransform
         /// Layer opacity from `<g opacity="...">`. 1.0 if absent.
         let opacity: Double
-        /// All descendant `<path>`s parsed and concatenated into one path.
-        /// Any non-layer nested-group transforms are already baked in.
-        let combinedPath: CGPath
+        /// All descendant `<path>`s parsed into individual CGPaths. Any non-
+        /// layer nested-group transforms are already baked in. Rendered as
+        /// independent SwiftUI `Shape`s so that `.trim` animates them in
+        /// parallel rather than as a single concatenated path (which would
+        /// reveal them sequentially).
+        let paths: [CGPath]
     }
 
     init?(svg: String) {
@@ -41,16 +44,11 @@ struct PebbleSVGModel {
         var layers: [Layer] = []
         for raw in delegate.rawLayers {
             guard !raw.paths.isEmpty else { continue }
-            let combined = CGMutablePath()
-            for path in raw.paths {
-                combined.addPath(path)
-            }
-            guard !combined.boundingBoxOfPath.isNull else { continue }
             layers.append(Layer(
                 kind: raw.kind,
                 transform: raw.transform,
                 opacity: raw.opacity,
-                combinedPath: combined.copy() ?? combined
+                paths: raw.paths
             ))
         }
 

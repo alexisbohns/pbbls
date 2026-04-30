@@ -51,10 +51,14 @@ struct PebbleAnimatedRenderView: View {
     private func animatedBody(model: PebbleSVGModel, timings: PebbleAnimationTimings.Timings) -> some View {
         ZStack {
             ForEach(Array(model.layers.enumerated()), id: \.offset) { _, layer in
-                LayerShape(layer: layer, viewBox: model.viewBox)
-                    .trim(from: 0, to: progress(for: layer.kind))
-                    .stroke(stroke, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
-                    .opacity(layer.opacity)
+                ZStack {
+                    ForEach(Array(layer.paths.enumerated()), id: \.offset) { _, path in
+                        LayerPathShape(path: path, viewBox: model.viewBox, layerTransform: layer.transform)
+                            .trim(from: 0, to: progress(for: layer.kind))
+                            .stroke(stroke, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+                    }
+                }
+                .opacity(layer.opacity)
             }
         }
         .scaleEffect(settleScale)
@@ -103,29 +107,30 @@ struct PebbleAnimatedRenderView: View {
     }
 }
 
-// MARK: - Layer shape
+// MARK: - Layer path shape
 
-private struct LayerShape: Shape {
-    let layer: PebbleSVGModel.Layer
+private struct LayerPathShape: Shape {
+    let path: CGPath
     let viewBox: CGRect
+    let layerTransform: CGAffineTransform
 
     func path(in rect: CGRect) -> Path {
         // Combine the layer's SVG-space transform with the viewBox→rect fit
         // so the resulting path draws at the right size and position inside
         // the Shape's drawing rect. Composition order (CG row-vector math):
-        //   p' = p * layer.transform * scale * translate
-        // ⇒ apply layer.transform first, then fit-scale, then center-offset.
+        //   p' = p * layerTransform * scale * translate
+        // ⇒ apply layerTransform first, then fit-scale, then center-offset.
         let scale = min(rect.width / viewBox.width, rect.height / viewBox.height)
         let scaledWidth = viewBox.width * scale
         let scaledHeight = viewBox.height * scale
         let dx = (rect.width - scaledWidth) / 2 - viewBox.minX * scale
         let dy = (rect.height - scaledHeight) / 2 - viewBox.minY * scale
 
-        var transform = layer.transform
+        var transform = layerTransform
             .concatenating(CGAffineTransform(scaleX: scale, y: scale))
             .concatenating(CGAffineTransform(translationX: dx, y: dy))
-        guard let transformed = layer.combinedPath.copy(using: &transform) else {
-            return Path(layer.combinedPath)
+        guard let transformed = self.path.copy(using: &transform) else {
+            return Path(self.path)
         }
         return Path(transformed)
     }
