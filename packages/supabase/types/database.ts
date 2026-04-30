@@ -1,3 +1,4 @@
+Initialising login role...
 export type Json =
   | string
   | number
@@ -781,6 +782,27 @@ export type Database = {
       }
     }
     Views: {
+      v_analytics_active_users_daily: {
+        Row: {
+          bucket_date: string | null
+          dau: number | null
+          mau: number | null
+          wau: number | null
+        }
+        Relationships: []
+      }
+      v_analytics_kpi_daily: {
+        Row: {
+          bucket_date: string | null
+          dau: number | null
+          dau_mau_pct: number | null
+          mau: number | null
+          pebbles_today: number | null
+          total_users: number | null
+          wau: number | null
+        }
+        Relationships: []
+      }
       v_bounce: {
         Row: {
           active_days: number | null
@@ -898,6 +920,39 @@ export type Database = {
       create_pebble: { Args: { payload: Json }; Returns: string }
       delete_pebble: { Args: { p_pebble_id: string }; Returns: undefined }
       delete_pebble_media: { Args: { p_snap_id: string }; Returns: string }
+      get_active_users_series: {
+        Args: { p_end: string; p_start: string }
+        Returns: {
+          bucket_date: string | null
+          dau: number | null
+          mau: number | null
+          wau: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "v_analytics_active_users_daily"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_kpi_daily: {
+        Args: { p_range: string }
+        Returns: {
+          bucket_date: string | null
+          dau: number | null
+          dau_mau_pct: number | null
+          mau: number | null
+          pebbles_today: number | null
+          total_users: number | null
+          wau: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "v_analytics_kpi_daily"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       is_admin: { Args: { p_user_id: string }; Returns: boolean }
       update_pebble: {
         Args: { p_pebble_id: string; payload: Json }
@@ -1038,3 +1093,5 @@ export const Constants = {
     Enums: {},
   },
 } as const
+A new version of Supabase CLI is available: v2.95.4 (currently installed v2.84.2)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
