@@ -248,8 +248,8 @@ $$;
 revoke all on public.v_analytics_kpi_daily          from public, anon, authenticated;
 revoke all on public.v_analytics_active_users_daily from public, anon, authenticated;
 
-grant execute on function public.get_kpi_daily(text)                from authenticated;
-grant execute on function public.get_active_users_series(date, date) from authenticated;
+grant execute on function public.get_kpi_daily(text)                to authenticated;
+grant execute on function public.get_active_users_series(date, date) to authenticated;
 ```
 
 - [ ] **Step 3: Push the migration to the remote Supabase project**
