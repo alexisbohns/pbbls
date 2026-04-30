@@ -91,3 +91,4 @@ function json(body: any, status: number): Response {
     headers: { "Content-Type": "application/json", ...CORS },
   });
 }
+// redeploy 2026-04-30 — drop render_manifest writeback (post-#333)
