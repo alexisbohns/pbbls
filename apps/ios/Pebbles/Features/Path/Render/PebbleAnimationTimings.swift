@@ -26,10 +26,10 @@ enum PebbleAnimationTimings {
         switch version {
         case "0.1.0":
             return Timings(
-                glyph:  Phase(delay: 0,    duration: 0.8),
-                shape:  Phase(delay: 0.4,  duration: 0.8),
-                fossil: Phase(delay: 0.8,  duration: 0.6),
-                settle: Phase(delay: 1.2,  duration: 0.4)
+                glyph:  Phase(delay: 0,    duration: 1.2),
+                shape:  Phase(delay: 0.8,  duration: 0.8),
+                fossil: Phase(delay: 1.0,  duration: 0.6),
+                settle: Phase(delay: 1.4,  duration: 0.4)
             )
         default:
             return nil
