@@ -2,8 +2,8 @@
  * compose-and-write
  *
  * Given a pebble_id and an admin supabase client, load the pebble + its
- * resolved glyph source, run the engine, write render_svg/render_manifest/
- * render_version back to the row, and return the composed output.
+ * resolved glyph source, run the engine, write render_svg / render_version
+ * back to the row, and return the composed output.
  *
  * Shared by both compose-pebble (create flow) and backfill-pebble-render
  * (ops flow) so both produce byte-identical output for the same pebble_id.
@@ -21,8 +21,6 @@ const RENDER_VERSION = "0.1.0";
 
 export interface ComposedRender {
   render_svg: string;
-  // deno-lint-ignore no-explicit-any
-  render_manifest: any;
   render_version: string;
 }
 
@@ -103,8 +101,6 @@ export async function composeAndWriteRender(
 
   // ── Run the engine ───────────────────────────────────────────────────
   let svg: string;
-  // deno-lint-ignore no-explicit-any
-  let manifest: any;
   try {
     const artwork = createGlyphArtwork(strokes);
     const size = intensityToSize((pebble as { intensity: number }).intensity);
@@ -117,7 +113,6 @@ export async function composeAndWriteRender(
       glyphSvg: artwork.svg,
     });
     svg = output.svg;
-    manifest = output.manifest;
   } catch (err) {
     console.error("compose-and-write: engine error:", err);
     throw new Error(`engine error: ${err instanceof Error ? err.message : String(err)}`);
@@ -128,7 +123,6 @@ export async function composeAndWriteRender(
     .from("pebbles")
     .update({
       render_svg: svg,
-      render_manifest: manifest,
       render_version: RENDER_VERSION,
     })
     .eq("id", pebbleId);
@@ -138,5 +132,5 @@ export async function composeAndWriteRender(
     throw new Error(`write-back failed: ${updateError.message}`);
   }
 
-  return { render_svg: svg, render_manifest: manifest, render_version: RENDER_VERSION };
+  return { render_svg: svg, render_version: RENDER_VERSION };
 }

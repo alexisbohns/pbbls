@@ -46,7 +46,6 @@ type ServerOwnedPebbleFields =
   | "created_at"
   | "updated_at"
   | "render_svg"
-  | "render_manifest"
   | "render_version"
 
 export type CreatePebbleInput = Omit<Pebble, ServerOwnedPebbleFields>

@@ -11,10 +11,6 @@ struct ComposePebbleResponse: Decodable {
     let renderSvg: String?
     let renderVersion: String?
 
-    // `render_manifest` is accepted but not stored on this struct — slice 1
-    // does not consume it. It will be added back when the iOS animation
-    // consumer is built in a later slice.
-
     enum CodingKeys: String, CodingKey {
         case pebbleId = "pebble_id"
         case renderSvg = "render_svg"

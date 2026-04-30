@@ -11,7 +11,7 @@ import { CARD_TYPES } from "@/lib/config/card-types"
 type SeedSoul = Omit<Soul, "created_at" | "updated_at">
 type SeedPebble = Omit<
   Pebble,
-  "created_at" | "updated_at" | "render_svg" | "render_manifest" | "render_version"
+  "created_at" | "updated_at" | "render_svg" | "render_version"
 >
 type SeedCollection = Omit<Collection, "created_at" | "updated_at">
 

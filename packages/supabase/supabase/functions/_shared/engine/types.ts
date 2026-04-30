@@ -83,21 +83,9 @@ export interface PebbleEngineInput {
   layoutOverride?: PebbleLayoutConfig;
 }
 
-export interface AnimationManifestLayer {
-  type: "glyph" | "shape" | "fossil" | "fill" | "settle";
-  paths?: Array<{ d: string; length: number }>;
-  color?: string;
-  delay: number;
-  duration: number;
-}
-
-export type AnimationManifest = AnimationManifestLayer[];
-
 export interface PebbleEngineOutput {
   /** Composed monochrome SVG with stroke IDs. No fills, no colors. */
   svg: string;
-  /** Ordered stroke animation sequence. */
-  manifest: AnimationManifest;
   /** Canvas dimensions used. */
   canvas: CanvasSize;
 }

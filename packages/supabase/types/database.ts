@@ -548,7 +548,6 @@ export type Database = {
           intensity: number
           name: string
           positiveness: number
-          render_manifest: Json | null
           render_svg: string | null
           render_version: string | null
           updated_at: string
@@ -565,7 +564,6 @@ export type Database = {
           intensity: number
           name: string
           positiveness: number
-          render_manifest?: Json | null
           render_svg?: string | null
           render_version?: string | null
           updated_at?: string
@@ -582,7 +580,6 @@ export type Database = {
           intensity?: number
           name?: string
           positiveness?: number
-          render_manifest?: Json | null
           render_svg?: string | null
           render_version?: string | null
           updated_at?: string
@@ -900,6 +897,7 @@ export type Database = {
       }
       create_pebble: { Args: { payload: Json }; Returns: string }
       delete_pebble: { Args: { p_pebble_id: string }; Returns: undefined }
+      delete_pebble_media: { Args: { p_snap_id: string }; Returns: string }
       is_admin: { Args: { p_user_id: string }; Returns: boolean }
       update_pebble: {
         Args: { p_pebble_id: string; payload: Json }
