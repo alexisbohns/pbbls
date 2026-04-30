@@ -36,3 +36,10 @@ enum PebbleAnimationTimings {
         }
     }
 }
+
+extension PebbleAnimationTimings.Timings {
+    /// Total time from `onAppear` until the settle pulse ends. Used by the
+    /// pebble read banner to gate the photo reveal until the stroke animation
+    /// has finished drawing.
+    var totalDuration: Double { settle.delay + settle.duration }
+}
