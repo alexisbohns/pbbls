@@ -1,14 +1,19 @@
 import SwiftUI
+import os
 
 /// Top zone of the pebble read view.
 ///
-/// With a photo: a 16:9 cover banner with rounded corners; the pebble
-/// shape sits in a 120×120pt page-bg-fill box centered over the banner's
-/// bottom edge (50% over photo, 50% below).
+/// Sequencing (issue #335):
+/// 1. Phase 1 — render the no-photo layout regardless of whether the pebble
+///    has a snap. Pebble centered in its 120pt zone. Photo bytes load in the
+///    background; the stroke animation runs in parallel.
+/// 2. Phase 2 — once both the stroke animation has finished AND the bytes
+///    have been decoded into a `UIImage`, flip `revealPhoto` inside a
+///    `withAnimation`. The banner inserts above the pebble box at the
+///    bucketed aspect ratio (`BannerAspect`), the pebble box settles into
+///    its overlap position, and content below shifts down.
 ///
-/// Without a photo: only the pebble centered in a 120pt-tall zone — no
-/// box, no banner. The two cases intentionally have different vertical
-/// footprints; the no-photo layout reads tighter by design.
+/// Without a snap, Phase 2 never fires.
 struct PebbleReadBanner: View {
     let snapStoragePath: String?
     let renderSvg: String?
@@ -16,48 +21,69 @@ struct PebbleReadBanner: View {
     let emotionColorHex: String
     let valence: Valence
 
+    @Environment(SupabaseService.self) private var supabase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    @State private var loadedImage: UIImage?
+    @State private var animationFinished: Bool = false
+    @State private var revealPhoto: Bool = false
+
+    private static let logger = Logger(subsystem: "app.pbbls.ios", category: "pebble-read-banner")
+
     private let bannerCornerRadius: CGFloat = 24
     private let boxSize: CGFloat = 120
     private let boxCornerRadius: CGFloat = 24
 
     var body: some View {
-        if let snapStoragePath {
-            withPhoto(storagePath: snapStoragePath)
-        } else {
-            withoutPhoto
+        // Phase 1 layout (no banner). Phase 2 is wired in Task 4.
+        renderedPebble
+            .frame(maxWidth: .infinity, minHeight: boxSize)
+            .task(id: snapStoragePath) {
+                await loadPhotoIfNeeded()
+            }
+            .task(id: renderVersion) {
+                await waitForAnimationToFinish()
+            }
+    }
+
+    // MARK: - Phase 1 background work
+
+    private func loadPhotoIfNeeded() async {
+        guard let path = snapStoragePath else { return }
+        do {
+            let urls = try await PebbleSnapRepository(client: supabase.client)
+                .signedURLs(storagePrefix: path)
+            let (data, _) = try await URLSession.shared.data(for: URLRequest(url: urls.original))
+            guard let image = UIImage(data: data) else {
+                Self.logger.error(
+                    "decode failed for \(path, privacy: .public)"
+                )
+                return
+            }
+            loadedImage = image
+        } catch {
+            Self.logger.error(
+                "photo load failed for \(path, privacy: .public): \(error.localizedDescription, privacy: .private)"
+            )
         }
     }
 
-    private func withPhoto(storagePath: String) -> some View {
-        // Half-overlap pattern: the pebble box renders as an overlay that
-        // intentionally extends below the banner's bottom edge. Do NOT wrap
-        // this view in a `.clipShape` / `.clipped()` ancestor — the
-        // overflow is the design.
-        SnapImageView(storagePath: storagePath, contentMode: .fill)
-            .aspectRatio(16.0 / 9.0, contentMode: .fit)
-            .clipShape(RoundedRectangle(cornerRadius: bannerCornerRadius))
-            .accessibilityHidden(true)
-            .overlay(alignment: .bottom) {
-                pebbleBox
-                    .offset(y: boxSize / 2)
-            }
-            .padding(.bottom, boxSize / 2)
-            .frame(maxWidth: .infinity)
+    private func waitForAnimationToFinish() async {
+        // Static pebble (no animation) → reveal as soon as the photo is ready.
+        guard !reduceMotion,
+              let timings = PebbleAnimationTimings.forVersion(renderVersion) else {
+            animationFinished = true
+            return
+        }
+        do {
+            try await Task.sleep(for: .seconds(timings.totalDuration))
+        } catch {
+            return // cancellation: view disappeared, leave state as-is.
+        }
+        animationFinished = true
     }
 
-    private var withoutPhoto: some View {
-        renderedPebble
-            .frame(maxWidth: .infinity, minHeight: boxSize)
-    }
-
-    private var pebbleBox: some View {
-        renderedPebble
-            .frame(width: boxSize, height: boxSize)
-            .background(
-                RoundedRectangle(cornerRadius: boxCornerRadius)
-                    .fill(Color.pebblesBackground)
-            )
-    }
+    // MARK: - Pebble rendering (unchanged)
 
     @ViewBuilder
     private var renderedPebble: some View {
@@ -85,9 +111,9 @@ struct PebbleReadBanner: View {
     }
 }
 
-#Preview("With photo · medium") {
+#Preview("Without photo · medium") {
     PebbleReadBanner(
-        snapStoragePath: nil, // preview without network — see no-photo preview
+        snapStoragePath: nil,
         renderSvg: """
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
               <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="3"/>
