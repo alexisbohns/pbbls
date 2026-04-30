@@ -1,0 +1,88 @@
+import { ActiveUsersChart } from "@/components/analytics/ActiveUsersChart"
+import { KpiCard } from "@/components/analytics/KpiCard"
+import { Sparkline } from "@/components/analytics/Sparkline"
+import {
+  denseFixture,
+  emptyFixture,
+  sparseFixture,
+} from "@/components/analytics/__fixtures__/activeUsers"
+import { kpiFixture } from "@/components/analytics/__fixtures__/kpi"
+
+export default function AnalyticsPlaygroundPage() {
+  const sparkValues = kpiFixture.map((r) => r.dau ?? 0)
+
+  return (
+    <div className="space-y-10">
+      <header>
+        <h1 className="text-2xl font-semibold">Playground · Analytics</h1>
+        <p className="text-sm text-muted-foreground">
+          Renders analytics components from fixtures. No live data calls.
+        </p>
+      </header>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">KpiCard variants</h2>
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+          <KpiCard
+            label="DAU"
+            value={142}
+            subLabel="trailing 7-day avg"
+            sparkline={sparkValues}
+            delta={{ absolute: 8, direction: "up" }}
+          />
+          <KpiCard
+            label="DAU"
+            value={142}
+            subLabel="trailing 7-day avg"
+            sparkline={sparkValues}
+            delta={{ absolute: -3, direction: "down" }}
+          />
+          <KpiCard
+            label="MAU"
+            value={1212}
+            subLabel="rolling 30 days"
+            sparkline={sparkValues}
+            delta={{ absolute: 0, direction: "flat" }}
+          />
+          <KpiCard label="Total users" value={1287} subLabel="all signups" />
+          <KpiCard label="DAU / MAU" value="—" subLabel="No data yet" />
+          <KpiCard
+            label="DAU / MAU"
+            value={11.7}
+            unit="%"
+            subLabel="stickiness"
+            delta={{ absolute: 0.3, direction: "up", unit: "pp" }}
+          />
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">Sparkline</h2>
+        <div className="text-foreground/60">
+          <Sparkline values={sparkValues} width={200} height={40} ariaLabel="DAU sparkline" />
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          ActiveUsersChart — dense (90 days)
+        </h2>
+        <ActiveUsersChart data={denseFixture} />
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          ActiveUsersChart — sparse (12 days)
+        </h2>
+        <ActiveUsersChart data={sparseFixture} />
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          ActiveUsersChart — empty
+        </h2>
+        <ActiveUsersChart data={emptyFixture} />
+      </section>
+    </div>
+  )
+}
