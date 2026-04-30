@@ -53,7 +53,10 @@ struct PebbleReadBanner: View {
         do {
             let urls = try await PebbleSnapRepository(client: supabase.client)
                 .signedURLs(storagePrefix: path)
-            let (data, _) = try await URLSession.shared.data(for: URLRequest(url: urls.original))
+            var request = URLRequest(url: urls.original)
+            request.cachePolicy = .reloadIgnoringLocalCacheData
+            request.timeoutInterval = 30
+            let (data, _) = try await URLSession.shared.data(for: request)
             guard let image = UIImage(data: data) else {
                 Self.logger.error(
                     "decode failed for \(path, privacy: .public)"
@@ -78,7 +81,10 @@ struct PebbleReadBanner: View {
         do {
             try await Task.sleep(for: .seconds(timings.totalDuration))
         } catch {
-            return // cancellation: view disappeared, leave state as-is.
+            // Cancellation: either the .task id changed (relaunch will reset
+            // the gate) or the view disappeared (no reveal needed). Leave
+            // animationFinished as-is in both cases.
+            return
         }
         animationFinished = true
     }
