@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pebbles · Admin · Analytics</title>
+<link rel="stylesheet" href="docs/specs/admin-analytics/vendor/tailwind.css" />
+<script src="docs/specs/admin-analytics/vendor/react.js"></script>
+<script src="docs/specs/admin-analytics/vendor/react-dom.js"></script>
+<script src="docs/specs/admin-analytics/vendor/prop-types.js"></script>
+<script src="docs/specs/admin-analytics/vendor/recharts.js"></script>
+<script src="docs/specs/admin-analytics/vendor/babel.js"></script>
+<style>
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --border: 240 5.9% 90%;
+    --primary: 24 9.8% 10%;
+    --radius: 0.75rem;
+  }
+  html, body { font-family: 'Inter', system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  .recharts-default-tooltip {
+    background: white !important;
+    border: 1px solid #e4e4e7 !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05) !important;
+    font-size: 12px !important;
+  }
+  .recharts-tooltip-label { color: #18181b !important; font-weight: 600 !important; margin-bottom: 4px !important; }
+  .recharts-tooltip-item { color: #52525b !important; }
+  .scrollbar-thin::-webkit-scrollbar { height: 6px; width: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 3px; }
+</style>
+</head>
+<body class="bg-zinc-50 text-zinc-900">
+<div id="root"></div>
+<div id="error" style="display:none;position:fixed;top:0;left:0;right:0;background:#fee;color:#900;padding:12px 16px;font-family:monospace;font-size:12px;z-index:9999;white-space:pre-wrap;border-bottom:1px solid #f00;"></div>
+<script>
+  // Surface any runtime errors visibly, instead of leaving the page blank.
+  function showErr(msg) {
+    var el = document.getElementById('error');
+    el.style.display = 'block';
+    el.textContent = (el.textContent ? el.textContent + '\n\n' : '') + msg;
+  }
+  window.addEventListener('error', function (e) {
+    showErr('JS error: ' + (e.message || e.error) + (e.filename ? ' @ ' + e.filename + ':' + e.lineno : ''));
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    showErr('Promise rejection: ' + (e.reason && e.reason.message || e.reason));
+  });
+  // Sanity check globals before Babel kicks in.
+  window.addEventListener('DOMContentLoaded', function () {
+    var missing = [];
+    if (typeof React === 'undefined')    missing.push('React');
+    if (typeof ReactDOM === 'undefined') missing.push('ReactDOM');
+    if (typeof Recharts === 'undefined') missing.push('Recharts');
+    if (typeof Babel === 'undefined')    missing.push('Babel');
+    if (missing.length) showErr('Missing globals: ' + missing.join(', '));
+  });
+</script>
+
+<script type="text/babel" data-presets="env,react" data-type="module">
+const {
+  LineChart, Line, BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell,
+  XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
+  RadialBarChart, RadialBar, ComposedChart
+} = Recharts;
+
+const { useState, useMemo } = React;
+
+/* ============================================================
+   MOCK DATA
+   ============================================================ */
+
+const PALETTE = {
+  stone: '#78716c',
+  pebble: '#44403c',
+  sage: '#84a98c',
+  sand: '#d4a373',
+  sky: '#7aa9c7',
+  rose: '#c98a8a',
+  lime: '#a3b18a',
+  ink: '#27272a',
+  muted: '#a1a1aa',
+};
+
+const EMOTIONS = [
+  { name: 'Joy',      color: '#f5c97e' },
+  { name: 'Calm',     color: '#9bcfd1' },
+  { name: 'Love',     color: '#e9a3a3' },
+  { name: 'Pride',    color: '#c5a572' },
+  { name: 'Sadness',  color: '#8aa9c0' },
+  { name: 'Anger',    color: '#c87a7a' },
+  { name: 'Fear',     color: '#a89cc7' },
+  { name: 'Surprise', color: '#d8a8c5' },
+  { name: 'Awe',      color: '#7fb39c' },
+];
+
+const DOMAINS = [
+  { name: 'Physiological', color: '#c87a5a' },
+  { name: 'Safety',         color: '#7aa9c7' },
+  { name: 'Belonging',      color: '#e9a3a3' },
+  { name: 'Esteem',         color: '#f5c97e' },
+  { name: 'Cognitive',      color: '#a89cc7' },
+  { name: 'Aesthetic',      color: '#9bcfd1' },
+  { name: 'Self-actualization', color: '#84a98c' },
+  { name: 'Transcendence',  color: '#c5a572' },
+];
+
+// Deterministic pseudo-random so the mockup is stable
+function seeded(seed) {
+  let s = seed;
+  return () => {
+    s = (s * 1664525 + 1013904223) % 4294967296;
+    return s / 4294967296;
+  };
+}
+const rand = seeded(42);
+
+function generateTimeSeries(days) {
+  const out = [];
+  const start = new Date('2026-04-30');
+  start.setDate(start.getDate() - days + 1);
+  for (let i = 0; i < days; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const baseUsers = 1200 + i * 9 + Math.sin(i / 6) * 80;
+    const dayOfWeek = d.getDay();
+    const weekendDip = (dayOfWeek === 0 || dayOfWeek === 6) ? 0.85 : 1;
+    const dau = Math.round(baseUsers * weekendDip + (rand() - 0.5) * 60);
+    const wau = Math.round(dau * (2.6 + rand() * 0.3));
+    const mau = Math.round(dau * (5.2 + rand() * 0.4));
+    const pebbles = Math.round(dau * (1.4 + rand() * 0.6));
+    out.push({
+      date: d.toISOString().slice(5, 10),
+      fullDate: d.toISOString().slice(0, 10),
+      dau, wau, mau,
+      pebbles,
+      pebblesWithPicture: Math.round(pebbles * (0.42 + rand() * 0.08)),
+      pebblesWithCustomGlyph: Math.round(pebbles * (0.28 + rand() * 0.06)),
+      pebblesInCollection: Math.round(pebbles * (0.55 + rand() * 0.07)),
+      newUsers: Math.round(35 + rand() * 30 + i * 0.4),
+      bouncesMaintained: Math.round(dau * (0.62 + rand() * 0.05)),
+    });
+  }
+  return out;
+}
+
+const tsData = generateTimeSeries(30);
+const tsData90 = generateTimeSeries(90);
+
+// Retention cohort matrix (rows = cohort weeks, cols = weeks since signup)
+const cohortLabels = ['Mar W1', 'Mar W2', 'Mar W3', 'Mar W4', 'Apr W1', 'Apr W2', 'Apr W3', 'Apr W4'];
+const cohortData = cohortLabels.map((label, rowIdx) => {
+  const size = 280 + Math.round(rand() * 200);
+  const weeks = 8 - rowIdx;
+  const cells = [];
+  let r = 100;
+  for (let w = 0; w < weeks; w++) {
+    if (w === 0) { cells.push(100); continue; }
+    const decay = w === 1 ? 0.62 : Math.pow(0.92, w - 1);
+    r = Math.max(8, Math.round(r * decay + (rand() - 0.5) * 6));
+    cells.push(r);
+  }
+  return { cohort: label, size, cells };
+});
+
+// Per-user averages over time (weekly snapshots)
+const avgWeekly = Array.from({ length: 12 }).map((_, i) => ({
+  week: `W${i + 1}`,
+  glyphs: +(3.2 + i * 0.18 + rand() * 0.4).toFixed(1),
+  souls: +(8.4 + i * 0.22 + rand() * 0.5).toFixed(1),
+  collections: +(2.1 + i * 0.09 + rand() * 0.3).toFixed(1),
+}));
+
+// Bounce karma distribution
+const bounceDist = [
+  { bucket: '0',     users: 180 },
+  { bucket: '1–10',  users: 420 },
+  { bucket: '11–25', users: 680 },
+  { bucket: '26–50', users: 920 },
+  { bucket: '51–100',users: 1340 },
+  { bucket: '100+',  users: 760 },
+];
+
+// Emotions prevalence (current period)
+const emotionsData = EMOTIONS.map((e, i) => ({
+  ...e,
+  share: +(rand() * 14 + 4).toFixed(1),
+})).sort((a, b) => b.share - a.share);
+const emotionsTotal = emotionsData.reduce((s, e) => s + e.share, 0);
+emotionsData.forEach(e => { e.share = +(e.share / emotionsTotal * 100).toFixed(1); });
+
+// Emotions over time (stacked area, weekly)
+const emotionsTimeline = Array.from({ length: 12 }).map((_, i) => {
+  const row = { week: `W${i + 1}` };
+  EMOTIONS.forEach((e, j) => {
+    const base = emotionsData.find(x => x.name === e.name).share;
+    row[e.name] = +(base + (rand() - 0.5) * 4).toFixed(1);
+  });
+  return row;
+});
+
+// Domains prevalence
+const domainsData = DOMAINS.map(d => ({
+  ...d,
+  share: +(rand() * 18 + 4).toFixed(1),
+})).sort((a, b) => b.share - a.share);
+const domTotal = domainsData.reduce((s, d) => s + d.share, 0);
+domainsData.forEach(d => { d.share = +(d.share / domTotal * 100).toFixed(1); });
+
+// Pebble composition donut (current)
+const compositionDonut = [
+  { name: 'With picture',       value: 46, color: '#84a98c' },
+  { name: 'Text-only',          value: 54, color: '#e4e4e7' },
+];
+const compositionGlyph = [
+  { name: 'Custom glyph',       value: 31, color: '#c5a572' },
+  { name: 'Default glyph',      value: 69, color: '#e4e4e7' },
+];
+const compositionColl = [
+  { name: 'In collection',      value: 58, color: '#7aa9c7' },
+  { name: 'Solo pebble',        value: 42, color: '#e4e4e7' },
+];
+
+// Cairn participation
+const cairnData = [
+  { name: 'Weekly cairn',  completed: 62, partial: 24, missed: 14 },
+  { name: 'Monthly cairn', completed: 41, partial: 32, missed: 27 },
+];
+
+/* ============================================================
+   PRIMITIVES (Shadcn-flavored)
+   ============================================================ */
+
+const Card = ({ children, className = '' }) => (
+  <div className={`bg-white border border-zinc-200 rounded-xl shadow-sm ${className}`}>{children}</div>
+);
+const CardHeader = ({ children, className = '' }) => (
+  <div className={`px-5 pt-5 pb-3 ${className}`}>{children}</div>
+);
+const CardTitle = ({ children, className = '' }) => (
+  <h3 className={`text-sm font-semibold text-zinc-900 ${className}`}>{children}</h3>
+);
+const CardDescription = ({ children }) => (
+  <p className="text-xs text-zinc-500 mt-0.5">{children}</p>
+);
+const CardContent = ({ children, className = '' }) => (
+  <div className={`px-5 pb-5 ${className}`}>{children}</div>
+);
+const Badge = ({ children, tone = 'neutral' }) => {
+  const tones = {
+    neutral: 'bg-zinc-100 text-zinc-700 border-zinc-200',
+    positive: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    negative: 'bg-rose-50 text-rose-700 border-rose-200',
+    warning: 'bg-amber-50 text-amber-700 border-amber-200',
+  };
+  return <span className={`inline-flex items-center text-xs font-medium px-2 py-0.5 rounded-md border ${tones[tone]}`}>{children}</span>;
+};
+
+const Tabs = ({ value, onChange, items }) => (
+  <div className="inline-flex rounded-lg border border-zinc-200 bg-zinc-50 p-1">
+    {items.map(it => (
+      <button
+        key={it.value}
+        onClick={() => onChange(it.value)}
+        className={`px-3 py-1 text-xs font-medium rounded-md transition ${value === it.value ? 'bg-white text-zinc-900 shadow-sm' : 'text-zinc-500 hover:text-zinc-700'}`}>
+        {it.label}
+      </button>
+    ))}
+  </div>
+);
+
+/* ============================================================
+   DASHBOARD COMPONENTS
+   ============================================================ */
+
+const Sidebar = () => {
+  const items = [
+    { label: 'Overview',     icon: '◯' },
+    { label: 'Users',        icon: '◐' },
+    { label: 'Pebbles',      icon: '◉' },
+    { label: 'Collections',  icon: '◇' },
+    { label: 'Analytics',    icon: '◆', active: true },
+    { label: 'Cairns',       icon: '△' },
+    { label: 'Moderation',   icon: '◈' },
+    { label: 'System',       icon: '⌘' },
+  ];
+  return (
+    <aside className="w-56 border-r border-zinc-200 bg-white h-screen sticky top-0 px-3 py-5 flex flex-col">
+      <div className="px-2 pb-5 flex items-center gap-2">
+        <div className="w-7 h-7 rounded-md bg-zinc-900 flex items-center justify-center text-white text-xs font-bold">P</div>
+        <div>
+          <div className="text-sm font-semibold text-zinc-900 leading-tight">pbbls</div>
+          <div className="text-[10px] text-zinc-500 uppercase tracking-wider">admin</div>
+        </div>
+      </div>
+      <nav className="flex flex-col gap-0.5">
+        {items.map(it => (
+          <a key={it.label} href="#"
+            className={`flex items-center gap-2.5 px-2.5 py-1.5 rounded-md text-sm transition
+              ${it.active ? 'bg-zinc-100 text-zinc-900 font-medium' : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'}`}>
+            <span className="text-zinc-400 w-4 text-center">{it.icon}</span>
+            {it.label}
+          </a>
+        ))}
+      </nav>
+      <div className="mt-auto px-2 py-2 border-t border-zinc-100">
+        <div className="flex items-center gap-2">
+          <div className="w-7 h-7 rounded-full bg-stone-300" />
+          <div>
+            <div className="text-xs font-medium text-zinc-900">Alexis Bohns</div>
+            <div className="text-[10px] text-zinc-500">Founder</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+};
+
+const Header = ({ range, setRange }) => (
+  <div className="flex items-start justify-between mb-6">
+    <div>
+      <div className="flex items-center gap-2 text-xs text-zinc-500 mb-1">
+        <span>Admin</span>
+        <span>/</span>
+        <span className="text-zinc-700 font-medium">Analytics</span>
+      </div>
+      <h1 className="text-2xl font-semibold text-zinc-900 tracking-tight">Analytics</h1>
+      <p className="text-sm text-zinc-500 mt-1">Retention, engagement, usage and meaning across the Pebbles community.</p>
+    </div>
+    <div className="flex items-center gap-3">
+      <span className="text-xs text-zinc-500 mono">Last refresh: 2026-04-30 03:14 UTC</span>
+      <Tabs
+        value={range}
+        onChange={setRange}
+        items={[
+          { value: '7d',  label: '7d'  },
+          { value: '30d', label: '30d' },
+          { value: '90d', label: '90d' },
+          { value: '1y',  label: '1y'  },
+          { value: 'all', label: 'All' },
+        ]}
+      />
+      <button className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-md border border-zinc-200 bg-white text-zinc-700 hover:bg-zinc-50">
+        Export CSV
+      </button>
+    </div>
+  </div>
+);
+
+const KpiCard = ({ label, value, delta, sub, sparkData, sparkKey, color = PALETTE.stone }) => {
+  const positive = delta && delta.startsWith('+');
+  return (
+    <Card>
+      <CardContent className="p-5">
+        <div className="text-xs text-zinc-500 font-medium">{label}</div>
+        <div className="flex items-baseline justify-between mt-1.5">
+          <div className="text-2xl font-semibold text-zinc-900 tabular-nums">{value}</div>
+          {delta && <Badge tone={positive ? 'positive' : 'negative'}>{delta}</Badge>}
+        </div>
+        {sub && <div className="text-xs text-zinc-500 mt-1">{sub}</div>}
+        {sparkData && (
+          <div className="h-10 -mx-1 mt-3">
+            <ResponsiveContainer>
+              <AreaChart data={sparkData}>
+                <defs>
+                  <linearGradient id={`grad-${label}`} x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%"  stopColor={color} stopOpacity={0.35} />
+                    <stop offset="100%" stopColor={color} stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <Area type="monotone" dataKey={sparkKey} stroke={color} strokeWidth={1.5} fill={`url(#grad-${label})`} />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+const KpiRow = () => (
+  <div className="grid grid-cols-2 lg:grid-cols-6 gap-3 mb-6">
+    <KpiCard label="Total users"     value="42,318" delta="+4.2%" sub="vs prev. period" sparkData={tsData} sparkKey="dau" color={PALETTE.stone} />
+    <KpiCard label="DAU"             value="1,486"  delta="+2.1%" sub="7-day avg"        sparkData={tsData} sparkKey="dau" color={PALETTE.sage} />
+    <KpiCard label="WAU"             value="8,907"  delta="+3.8%" sub="rolling 7d"       sparkData={tsData} sparkKey="wau" color={PALETTE.sky} />
+    <KpiCard label="MAU"             value="24,512" delta="+5.6%" sub="rolling 30d"      sparkData={tsData} sparkKey="mau" color={PALETTE.sand} />
+    <KpiCard label="Pebbles / day"   value="2,340"  delta="+6.4%" sub="7-day avg"        sparkData={tsData} sparkKey="pebbles" color={PALETTE.rose} />
+    <KpiCard label="DAU / MAU"       value="6.1%"   delta="-0.3pp" sub="stickiness"     sparkData={tsData} sparkKey="dau" color={PALETTE.lime} />
+  </div>
+);
+
+const ActivityTrend = () => {
+  const [metric, setMetric] = useState('dau');
+  return (
+    <Card className="col-span-12 lg:col-span-8">
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <div>
+            <CardTitle>Active users over time</CardTitle>
+            <CardDescription>Daily, weekly and monthly active collectors.</CardDescription>
+          </div>
+          <Tabs value={metric} onChange={setMetric} items={[
+            { value: 'dau', label: 'DAU' },
+            { value: 'wau', label: 'WAU' },
+            { value: 'mau', label: 'MAU' },
+            { value: 'all', label: 'All' },
+          ]}/>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="h-72">
+          <ResponsiveContainer>
+            <LineChart data={tsData} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" />
+              <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#71717a' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: '#71717a' }} axisLine={false} tickLine={false} />
+              <Tooltip />
+              {(metric === 'dau' || metric === 'all') && <Line type="monotone" dataKey="dau" stroke={PALETTE.sage} strokeWidth={2} dot={false} name="DAU" />}
+              {(metric === 'wau' || metric === 'all') && <Line type="monotone" dataKey="wau" stroke={PALETTE.sky}  strokeWidth={2} dot={false} name="WAU" />}
+              {(metric === 'mau' || metric === 'all') && <Line type="monotone" dataKey="mau" stroke={PALETTE.sand} strokeWidth={2} dot={false} name="MAU" />}
+              {metric === 'all' && <Legend wrapperStyle={{ fontSize: 11 }} />}
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+const RetentionCohort = () => {
+  const max = 100;
+  const cellColor = (v) => {
+    if (v == null) return '#fafafa';
+    const t = v / max;
+    // Interpolate from very light to stone
+    const r = Math.round(245 - t * (245 - 68));
+    const g = Math.round(245 - t * (245 - 64));
+    const b = Math.round(244 - t * (244 - 60));
+    return `rgb(${r},${g},${b})`;
+  };
+  const cellText = (v) => v >= 45 ? '#fff' : '#3f3f46';
+  return (
+    <Card className="col-span-12 lg:col-span-4">
+      <CardHeader>
+        <CardTitle>Retention cohorts</CardTitle>
+        <CardDescription>% of cohort still active week over week.</CardDescription>
+      </CardHeader>
+      <CardContent className="overflow-x-auto scrollbar-thin">
+        <table className="w-full text-xs mono">
+          <thead>
+            <tr className="text-zinc-500">
+              <th className="text-left font-medium pb-2 pr-2">Cohort</th>
+              <th className="text-right font-medium pb-2 pr-2">Size</th>
+              {Array.from({ length: 8 }).map((_, i) => (
+                <th key={i} className="text-center font-medium pb-2 px-1">W{i}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {cohortData.map(row => (
+              <tr key={row.cohort}>
+                <td className="py-1 pr-2 text-zinc-700">{row.cohort}</td>
+                <td className="py-1 pr-2 text-right text-zinc-500">{row.size}</td>
+                {Array.from({ length: 8 }).map((_, i) => {
+                  const v = row.cells[i];
+                  return (
+                    <td key={i} className="p-0.5">
+                      {v != null ? (
+                        <div className="h-7 flex items-center justify-center rounded text-[11px] font-medium"
+                          style={{ background: cellColor(v), color: cellText(v) }}>
+                          {v}
+                        </div>
+                      ) : (
+                        <div className="h-7" />
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </CardContent>
+    </Card>
+  );
+};
+
+const PebbleVolume = () => {
+  return (
+    <Card className="col-span-12 lg:col-span-8">
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <div>
+            <CardTitle>Pebbles collected</CardTitle>
+            <CardDescription>Daily volume with enrichment breakdown.</CardDescription>
+          </div>
+          <Tabs value="day" onChange={() => {}} items={[
+            { value: 'day',   label: 'Day' },
+            { value: 'week',  label: 'Week' },
+            { value: 'month', label: 'Month' },
+            { value: 'year',  label: 'Year' },
+          ]}/>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <div className="h-72">
+          <ResponsiveContainer>
+            <ComposedChart data={tsData} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" />
+              <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#71717a' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: '#71717a' }} axisLine={false} tickLine={false} />
+              <Tooltip />
+              <Legend wrapperStyle={{ fontSize: 11 }} />
+              <Bar dataKey="pebbles"            stackId="a" fill="#e4e4e7" name="Total pebbles" radius={[4,4,0,0]} />
+              <Line type="monotone" dataKey="pebblesWithPicture"      stroke={PALETTE.sage} strokeWidth={2} dot={false} name="With picture" />
+              <Line type="monotone" dataKey="pebblesWithCustomGlyph"  stroke={PALETTE.sand} strokeWidth={2} dot={false} name="Custom glyph" />
+              <Line type="monotone" dataKey="pebblesInCollection"     stroke={PALETTE.sky}  strokeWidth={2} dot={false} name="In collection" />
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+const Donut = ({ data, label, value }) => (
+  <div className="flex flex-col items-center">
+    <div className="relative w-32 h-32">
+      <ResponsiveContainer>
+        <PieChart>
+          <Pie data={data} dataKey="value" innerRadius={42} outerRadius={56} strokeWidth={0} startAngle={90} endAngle={-270}>
+            {data.map((d, i) => <Cell key={i} fill={d.color} />)}
+          </Pie>
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <div className="text-xl font-semibold text-zinc-900 tabular-nums">{value}</div>
+        <div className="text-[10px] text-zinc-500 uppercase tracking-wider">{data[0].name.split(' ')[0]}</div>
+      </div>
+    </div>
+    <div className="text-xs font-medium text-zinc-700 mt-2">{label}</div>
+  </div>
+);
+
+const PebbleEnrichment = () => (
+  <Card className="col-span-12 lg:col-span-4">
+    <CardHeader>
+      <CardTitle>Pebble enrichment</CardTitle>
+      <CardDescription>Share of pebbles with each enrichment.</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <div className="grid grid-cols-3 gap-2">
+        <Donut data={compositionDonut} label="Picture"      value="46%" />
+        <Donut data={compositionGlyph} label="Custom glyph" value="31%" />
+        <Donut data={compositionColl}  label="Collection"   value="58%" />
+      </div>
+      <div className="mt-4 pt-4 border-t border-zinc-100 text-xs text-zinc-500 space-y-1.5">
+        <div className="flex justify-between"><span>Pebbles with ≥1 emotion pearl</span><span className="text-zinc-900 font-medium">82%</span></div>
+        <div className="flex justify-between"><span>Pebbles linked to ≥1 soul</span><span className="text-zinc-900 font-medium">71%</span></div>
+        <div className="flex justify-between"><span>Pebbles with thought attached</span><span className="text-zinc-900 font-medium">38%</span></div>
+        <div className="flex justify-between"><span>Pebbles with intensity set</span><span className="text-zinc-900 font-medium">94%</span></div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const PerUserAverages = () => (
+  <Card className="col-span-12 lg:col-span-7">
+    <CardHeader>
+      <CardTitle>Per-user averages over time</CardTitle>
+      <CardDescription>Average glyphs, souls and collections per active user, weekly.</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <div className="grid grid-cols-3 gap-4 mb-4">
+        <div>
+          <div className="text-xs text-zinc-500">Avg glyphs / user</div>
+          <div className="flex items-baseline gap-2"><div className="text-xl font-semibold tabular-nums">5.4</div><Badge tone="positive">+0.6</Badge></div>
+        </div>
+        <div>
+          <div className="text-xs text-zinc-500">Avg souls / user</div>
+          <div className="flex items-baseline gap-2"><div className="text-xl font-semibold tabular-nums">11.2</div><Badge tone="positive">+1.1</Badge></div>
+        </div>
+        <div>
+          <div className="text-xs text-zinc-500">Avg collections / user</div>
+          <div className="flex items-baseline gap-2"><div className="text-xl font-semibold tabular-nums">3.1</div><Badge tone="positive">+0.4</Badge></div>
+        </div>
+      </div>
+      <div className="h-56">
+        <ResponsiveContainer>
+          <LineChart data={avgWeekly} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" />
+            <XAxis dataKey="week" tick={{ fontSize: 11, fill: '#71717a' }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 11, fill: '#71717a' }} axisLine={false} tickLine={false} />
+            <Tooltip />
+            <Legend wrapperStyle={{ fontSize: 11 }} />
+            <Line type="monotone" dataKey="glyphs"      stroke={PALETTE.sand} strokeWidth={2} dot={{ r: 2 }} />
+            <Line type="monotone" dataKey="souls"       stroke={PALETTE.rose} strokeWidth={2} dot={{ r: 2 }} />
+            <Line type="monotone" dataKey="collections" stroke={PALETTE.sky}  strokeWidth={2} dot={{ r: 2 }} />
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const BounceKarma = () => (
+  <Card className="col-span-12 lg:col-span-5">
+    <CardHeader>
+      <CardTitle>Bounce karma distribution</CardTitle>
+      <CardDescription>Users by current bounce score.</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <div className="grid grid-cols-3 gap-4 mb-4">
+        <div>
+          <div className="text-xs text-zinc-500">Median bounce</div>
+          <div className="text-xl font-semibold tabular-nums">42</div>
+        </div>
+        <div>
+          <div className="text-xs text-zinc-500">% maintaining bounce</div>
+          <div className="text-xl font-semibold tabular-nums">63%</div>
+        </div>
+        <div>
+          <div className="text-xs text-zinc-500">Avg active days / week</div>
+          <div className="text-xl font-semibold tabular-nums">3.4</div>
+        </div>
+      </div>
+      <div className="h-48">
+        <ResponsiveContainer>
+          <BarChart data={bounceDist} margin={{ top: 8, right: 8, left: -16, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" />
+            <XAxis dataKey="bucket" tick={{ fontSize: 11, fill: '#71717a' }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 11, fill: '#71717a' }} axisLine={false} tickLine={false} />
+            <Tooltip />
+            <Bar dataKey="users" fill={PALETTE.stone} radius={[4,4,0,0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const EmotionsPrevalence = () => (
+  <Card className="col-span-12 lg:col-span-6">
+    <CardHeader>
+      <div className="flex items-start justify-between">
+        <div>
+          <CardTitle>Emotion pearls prevalence</CardTitle>
+          <CardDescription>Share of pebbles tagged with each emotion.</CardDescription>
+        </div>
+        <Tabs value="now" onChange={() => {}} items={[
+          { value: 'now',  label: 'Snapshot' },
+          { value: 'time', label: 'Over time' },
+        ]}/>
+      </div>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-2">
+        {emotionsData.map(e => (
+          <div key={e.name} className="flex items-center gap-3">
+            <div className="w-20 text-xs text-zinc-700">{e.name}</div>
+            <div className="flex-1 h-5 bg-zinc-100 rounded overflow-hidden">
+              <div className="h-full rounded" style={{ width: `${e.share * 4.5}%`, background: e.color }} />
+            </div>
+            <div className="w-12 text-right text-xs mono text-zinc-700">{e.share}%</div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-5 pt-4 border-t border-zinc-100">
+        <div className="text-xs text-zinc-500 mb-2">Last 12 weeks</div>
+        <div className="h-32">
+          <ResponsiveContainer>
+            <AreaChart data={emotionsTimeline} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" />
+              <XAxis dataKey="week" tick={{ fontSize: 10, fill: '#a1a1aa' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: '#a1a1aa' }} axisLine={false} tickLine={false} />
+              <Tooltip />
+              {EMOTIONS.map(e => (
+                <Area key={e.name} type="monotone" dataKey={e.name} stackId="1" stroke={e.color} fill={e.color} fillOpacity={0.85} />
+              ))}
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const DomainsPrevalence = () => (
+  <Card className="col-span-12 lg:col-span-6">
+    <CardHeader>
+      <CardTitle>Maslow domains prevalence</CardTitle>
+      <CardDescription>How pebbles distribute across the revisited Maslow's pyramid.</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <div className="h-72">
+        <ResponsiveContainer>
+          <BarChart data={domainsData} layout="vertical" margin={{ top: 4, right: 16, left: 8, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f4f4f5" horizontal={false} />
+            <XAxis type="number" tick={{ fontSize: 11, fill: '#71717a' }} axisLine={false} tickLine={false} />
+            <YAxis dataKey="name" type="category" width={120} tick={{ fontSize: 11, fill: '#52525b' }} axisLine={false} tickLine={false} />
+            <Tooltip />
+            <Bar dataKey="share" radius={[0,4,4,0]}>
+              {domainsData.map((d, i) => <Cell key={i} fill={d.color} />)}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="mt-2 pt-4 border-t border-zinc-100 text-xs text-zinc-500">
+        <div className="flex justify-between"><span>Most-evolving domain (vs prev. period)</span><span className="text-emerald-700 font-medium">Belonging +3.2pp</span></div>
+        <div className="flex justify-between mt-1"><span>Most-decreasing domain</span><span className="text-rose-700 font-medium">Esteem -1.4pp</span></div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const CairnSection = () => (
+  <Card className="col-span-12 lg:col-span-6">
+    <CardHeader>
+      <CardTitle>Cairn participation</CardTitle>
+      <CardDescription>How users engage with weekly and monthly cairns.</CardDescription>
+    </CardHeader>
+    <CardContent>
+      <div className="space-y-4">
+        {cairnData.map(c => (
+          <div key={c.name}>
+            <div className="flex items-center justify-between mb-1.5">
+              <div className="text-sm font-medium text-zinc-700">{c.name}</div>
+              <div className="text-xs text-zinc-500 mono">{c.completed}% completed</div>
+            </div>
+            <div className="flex h-3 rounded overflow-hidden bg-zinc-100">
+              <div className="bg-emerald-400" style={{ width: `${c.completed}%` }} title={`Completed ${c.completed}%`} />
+              <div className="bg-amber-300"  style={{ width: `${c.partial}%` }}   title={`Partial ${c.partial}%`} />
+              <div className="bg-zinc-300"   style={{ width: `${c.missed}%` }}    title={`Missed ${c.missed}%`} />
+            </div>
+            <div className="flex gap-3 mt-1.5 text-[11px] text-zinc-500">
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-emerald-400"/>Completed</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-amber-300"/>Partial</span>
+              <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-sm bg-zinc-300"/>Missed</span>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-5 pt-4 border-t border-zinc-100 grid grid-cols-3 gap-2 text-xs">
+        <div>
+          <div className="text-zinc-500">Avg pebbles / cairn</div>
+          <div className="text-base font-semibold tabular-nums text-zinc-900">9.4</div>
+        </div>
+        <div>
+          <div className="text-zinc-500">Rewards unlocked / wk</div>
+          <div className="text-base font-semibold tabular-nums text-zinc-900">5,213</div>
+        </div>
+        <div>
+          <div className="text-zinc-500">% users with ≥1 cairn</div>
+          <div className="text-base font-semibold tabular-nums text-zinc-900">71%</div>
+        </div>
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const VisibilityMix = () => {
+  const data = [
+    { name: 'Public',  value: 22, color: PALETTE.sage },
+    { name: 'Private', value: 61, color: PALETTE.stone },
+    { name: 'Secret',  value: 17, color: PALETTE.ink  },
+  ];
+  return (
+    <Card className="col-span-12 lg:col-span-3">
+      <CardHeader>
+        <CardTitle>Visibility mix</CardTitle>
+        <CardDescription>Pebbles by sharing level.</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="h-44">
+          <ResponsiveContainer>
+            <PieChart>
+              <Pie data={data} dataKey="value" innerRadius={36} outerRadius={66} paddingAngle={2}>
+                {data.map((d, i) => <Cell key={i} fill={d.color} />)}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="space-y-1.5 text-xs">
+          {data.map(d => (
+            <div key={d.name} className="flex items-center justify-between">
+              <span className="flex items-center gap-2"><span className="w-2.5 h-2.5 rounded-sm" style={{ background: d.color }}/>{d.name}</span>
+              <span className="mono text-zinc-700">{d.value}%</span>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+const QualitySignals = () => {
+  const rows = [
+    { metric: 'Median session duration',           value: '4m 12s',  delta: '+18s',  positive: true },
+    { metric: 'Sessions / active user / week',     value: '5.7',     delta: '+0.4',  positive: true },
+    { metric: 'Pebbles / active user / week',      value: '8.1',     delta: '+0.6',  positive: true },
+    { metric: '% revisits to past pebbles',        value: '34%',     delta: '+2.1pp',positive: true },
+    { metric: 'D1 retention (new users)',          value: '54%',     delta: '+1.4pp',positive: true },
+    { metric: 'D7 retention (new users)',          value: '31%',     delta: '-0.8pp',positive: false },
+    { metric: 'D30 retention (new users)',         value: '19%',     delta: '+0.9pp',positive: true },
+    { metric: 'Friction events / session',         value: '0.42',    delta: '-0.05', positive: true },
+  ];
+  return (
+    <Card className="col-span-12 lg:col-span-3">
+      <CardHeader>
+        <CardTitle>Quality signals</CardTitle>
+        <CardDescription>Healthy-habit indicators.</CardDescription>
+      </CardHeader>
+      <CardContent className="p-0">
+        <div className="divide-y divide-zinc-100">
+          {rows.map(r => (
+            <div key={r.metric} className="flex items-center justify-between px-5 py-2.5">
+              <div className="text-xs text-zinc-600">{r.metric}</div>
+              <div className="flex items-center gap-2">
+                <div className="text-sm font-medium tabular-nums">{r.value}</div>
+                <div className={`text-[10px] mono ${r.positive ? 'text-emerald-600' : 'text-rose-600'}`}>{r.delta}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
+
+/* ============================================================
+   APP
+   ============================================================ */
+const App = () => {
+  const [range, setRange] = useState('30d');
+  return (
+    <div className="flex">
+      <Sidebar />
+      <main className="flex-1 p-8 max-w-[1600px]">
+        <Header range={range} setRange={setRange} />
+        <KpiRow />
+        <div className="grid grid-cols-12 gap-3 mb-3">
+          <ActivityTrend />
+          <RetentionCohort />
+        </div>
+        <div className="grid grid-cols-12 gap-3 mb-3">
+          <PebbleVolume />
+          <PebbleEnrichment />
+        </div>
+        <div className="grid grid-cols-12 gap-3 mb-3">
+          <PerUserAverages />
+          <BounceKarma />
+        </div>
+        <div className="grid grid-cols-12 gap-3 mb-3">
+          <EmotionsPrevalence />
+          <DomainsPrevalence />
+        </div>
+        <div className="grid grid-cols-12 gap-3 mb-3">
+          <CairnSection />
+          <VisibilityMix />
+          <QualitySignals />
+        </div>
+        <div className="text-[11px] text-zinc-400 mt-8 mono">
+          Mockup · Fake data · Materialized views refresh nightly · Built for spec refinement
+        </div>
+      </main>
+    </div>
+  );
+};
+
+try {
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+} catch (e) {
+  showErr('Render error: ' + (e && e.stack ? e.stack : e));
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,372 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 1620" font-family="Inter, system-ui, sans-serif">
+  <style>
+    .bg { fill: #fafafa; }
+    .card { fill: #ffffff; stroke: #e4e4e7; stroke-width: 1; }
+    .nav { fill: #ffffff; stroke: #e4e4e7; stroke-width: 1; }
+    .title { font-size: 24px; font-weight: 600; fill: #18181b; }
+    .crumb { font-size: 11px; fill: #71717a; }
+    .desc  { font-size: 13px; fill: #71717a; }
+    .label { font-size: 13px; font-weight: 600; fill: #18181b; }
+    .sub   { font-size: 11px; fill: #71717a; }
+    .num   { font-size: 22px; font-weight: 600; fill: #18181b; }
+    .badge { fill: #ecfdf5; stroke: #a7f3d0; stroke-width: 1; }
+    .badgetxt { font-size: 10px; font-weight: 500; fill: #047857; }
+    .tag   { fill: #f4f4f5; stroke: #e4e4e7; stroke-width: 1; }
+    .tagtxt{ font-size: 11px; fill: #52525b; }
+    .navitem { font-size: 12px; fill: #52525b; }
+    .navactive { fill: #18181b; font-weight: 500; }
+    .pill { fill: #f4f4f5; }
+    .pillactive { fill: #ffffff; stroke: #e4e4e7; stroke-width: 1; }
+    .grid { stroke: #f4f4f5; stroke-width: 1; }
+    .axis { stroke: #d4d4d8; stroke-width: 1; }
+    .area { fill-opacity: 0.6; }
+    .stone { fill: #78716c; }
+    .sage  { fill: #84a98c; }
+    .sand  { fill: #d4a373; }
+    .sky   { fill: #7aa9c7; }
+    .rose  { fill: #c98a8a; }
+    .mute  { fill: #e4e4e7; }
+    .heat0 { fill: #f5f5f4; } .heat1 { fill: #d6d3d1; } .heat2 { fill: #a8a29e; } .heat3 { fill: #78716c; } .heat4 { fill: #44403c; }
+    .joy   { fill: #f5c97e; } .calm  { fill: #9bcfd1; } .love  { fill: #e9a3a3; } .pride { fill: #c5a572; }
+    .sad   { fill: #8aa9c0; } .anger { fill: #c87a7a; } .fear  { fill: #a89cc7; } .surp  { fill: #d8a8c5; } .awe { fill: #7fb39c; }
+  </style>
+
+  <rect class="bg" width="1440" height="1620"/>
+
+  <!-- Sidebar -->
+  <rect class="nav" x="0" y="0" width="220" height="1620"/>
+  <rect x="20" y="22" width="28" height="28" rx="6" fill="#18181b"/>
+  <text x="56" y="36" class="label">pbbls</text>
+  <text x="56" y="50" class="sub">ADMIN</text>
+  <g font-family="Inter">
+    <text x="32" y="100" class="navitem">○ Overview</text>
+    <text x="32" y="124" class="navitem">◐ Users</text>
+    <text x="32" y="148" class="navitem">◉ Pebbles</text>
+    <text x="32" y="172" class="navitem">◇ Collections</text>
+    <rect x="20" y="184" width="184" height="28" rx="6" fill="#f4f4f5"/>
+    <text x="32" y="202" class="navitem navactive">◆ Analytics</text>
+    <text x="32" y="226" class="navitem">△ Cairns</text>
+    <text x="32" y="250" class="navitem">◈ Moderation</text>
+    <text x="32" y="274" class="navitem">⌘ System</text>
+  </g>
+
+  <!-- Header -->
+  <text x="252" y="48" class="crumb">Admin / Analytics</text>
+  <text x="252" y="80" class="title">Analytics</text>
+  <text x="252" y="102" class="desc">Retention, engagement, usage and meaning across the Pebbles community.</text>
+  <text x="1180" y="48" class="sub">Last refresh: 2026-04-30 03:14 UTC</text>
+  <g transform="translate(1180, 64)">
+    <rect class="pill" width="180" height="30" rx="8"/>
+    <rect class="pillactive" x="34" y="3" width="34" height="24" rx="6"/>
+    <text x="14" y="20" class="tagtxt">7d</text>
+    <text x="44" y="20" class="tagtxt" font-weight="600">30d</text>
+    <text x="80" y="20" class="tagtxt">90d</text>
+    <text x="110" y="20" class="tagtxt">1y</text>
+    <text x="140" y="20" class="tagtxt">All</text>
+  </g>
+  <rect x="1370" y="64" width="60" height="30" rx="6" fill="#fff" stroke="#e4e4e7"/>
+  <text x="1380" y="84" class="tagtxt">Export</text>
+
+  <!-- KPI ROW (6 cards) -->
+  <g transform="translate(252, 130)">
+    <g transform="translate(0,0)">
+      <rect class="card" width="180" height="100" rx="12"/>
+      <text x="14" y="26" class="sub">Total users</text>
+      <text x="14" y="56" class="num">42,318</text>
+      <rect class="badge" x="120" y="42" width="48" height="18" rx="4"/>
+      <text x="125" y="55" class="badgetxt">+4.2%</text>
+      <path d="M14 90 Q40 78 70 82 T160 70" fill="none" stroke="#78716c" stroke-width="1.5"/>
+    </g>
+    <g transform="translate(196,0)">
+      <rect class="card" width="180" height="100" rx="12"/>
+      <text x="14" y="26" class="sub">DAU</text>
+      <text x="14" y="56" class="num">1,486</text>
+      <rect class="badge" x="120" y="42" width="48" height="18" rx="4"/>
+      <text x="125" y="55" class="badgetxt">+2.1%</text>
+      <path d="M14 90 Q40 80 70 70 T160 65" fill="none" stroke="#84a98c" stroke-width="1.5"/>
+    </g>
+    <g transform="translate(392,0)">
+      <rect class="card" width="180" height="100" rx="12"/>
+      <text x="14" y="26" class="sub">WAU</text>
+      <text x="14" y="56" class="num">8,907</text>
+      <rect class="badge" x="120" y="42" width="48" height="18" rx="4"/>
+      <text x="125" y="55" class="badgetxt">+3.8%</text>
+      <path d="M14 88 Q40 82 70 76 T160 60" fill="none" stroke="#7aa9c7" stroke-width="1.5"/>
+    </g>
+    <g transform="translate(588,0)">
+      <rect class="card" width="180" height="100" rx="12"/>
+      <text x="14" y="26" class="sub">MAU</text>
+      <text x="14" y="56" class="num">24,512</text>
+      <rect class="badge" x="120" y="42" width="48" height="18" rx="4"/>
+      <text x="125" y="55" class="badgetxt">+5.6%</text>
+      <path d="M14 90 Q40 80 70 74 T160 58" fill="none" stroke="#d4a373" stroke-width="1.5"/>
+    </g>
+    <g transform="translate(784,0)">
+      <rect class="card" width="180" height="100" rx="12"/>
+      <text x="14" y="26" class="sub">Pebbles / day</text>
+      <text x="14" y="56" class="num">2,340</text>
+      <rect class="badge" x="120" y="42" width="48" height="18" rx="4"/>
+      <text x="125" y="55" class="badgetxt">+6.4%</text>
+      <path d="M14 90 Q40 82 70 70 T160 55" fill="none" stroke="#c98a8a" stroke-width="1.5"/>
+    </g>
+    <g transform="translate(980,0)">
+      <rect class="card" width="180" height="100" rx="12"/>
+      <text x="14" y="26" class="sub">DAU / MAU</text>
+      <text x="14" y="56" class="num">6.1%</text>
+      <rect x="120" y="42" width="48" height="18" rx="4" fill="#fef2f2" stroke="#fecaca"/>
+      <text x="125" y="55" font-size="10" font-weight="500" fill="#b91c1c">-0.3pp</text>
+      <path d="M14 80 Q40 78 70 82 T160 88" fill="none" stroke="#a3b18a" stroke-width="1.5"/>
+    </g>
+  </g>
+
+  <!-- ROW 2: Activity trend (8 cols) + Retention cohort (4 cols) -->
+  <g transform="translate(252, 252)">
+    <rect class="card" width="772" height="320" rx="12"/>
+    <text x="20" y="32" class="label">Active users over time</text>
+    <text x="20" y="50" class="sub">Daily, weekly and monthly active collectors.</text>
+    <g transform="translate(560, 22)">
+      <rect class="pill" width="190" height="26" rx="6"/>
+      <rect class="pillactive" x="4" y="3" width="38" height="20" rx="4"/>
+      <text x="12" y="18" class="tagtxt" font-weight="600">DAU</text>
+      <text x="50" y="18" class="tagtxt">WAU</text>
+      <text x="90" y="18" class="tagtxt">MAU</text>
+      <text x="135" y="18" class="tagtxt">All</text>
+    </g>
+    <!-- chart area -->
+    <g transform="translate(40, 80)">
+      <line class="grid" x1="0" y1="0"   x2="700" y2="0"/>
+      <line class="grid" x1="0" y1="50"  x2="700" y2="50"/>
+      <line class="grid" x1="0" y1="100" x2="700" y2="100"/>
+      <line class="grid" x1="0" y1="150" x2="700" y2="150"/>
+      <line class="grid" x1="0" y1="200" x2="700" y2="200"/>
+      <path d="M0 180 Q60 160 120 150 T240 130 T360 110 T480 90 T600 75 T700 60" fill="none" stroke="#84a98c" stroke-width="2"/>
+      <path d="M0 150 Q60 140 120 120 T240 100 T360 85 T480 65 T600 50 T700 40" fill="none" stroke="#7aa9c7" stroke-width="2"/>
+      <path d="M0 110 Q60 95 120 85 T240 65 T360 55 T480 40 T600 30 T700 20" fill="none" stroke="#d4a373" stroke-width="2"/>
+      <text x="0" y="220" class="sub">Apr 1</text>
+      <text x="340" y="220" class="sub">Apr 15</text>
+      <text x="660" y="220" class="sub">Apr 30</text>
+    </g>
+  </g>
+
+  <g transform="translate(1040, 252)">
+    <rect class="card" width="372" height="320" rx="12"/>
+    <text x="20" y="32" class="label">Retention cohorts</text>
+    <text x="20" y="50" class="sub">% of cohort still active week over week.</text>
+    <g transform="translate(20, 70)" font-size="10" fill="#52525b">
+      <text x="0"  y="14">Cohort</text>
+      <text x="60" y="14">W0</text>
+      <text x="98" y="14">W1</text>
+      <text x="136" y="14">W2</text>
+      <text x="174" y="14">W3</text>
+      <text x="212" y="14">W4</text>
+      <text x="250" y="14">W5</text>
+      <text x="288" y="14">W6</text>
+      <text x="0" y="38">Mar W1</text>
+      <text x="0" y="62">Mar W2</text>
+      <text x="0" y="86">Mar W3</text>
+      <text x="0" y="110">Mar W4</text>
+      <text x="0" y="134">Apr W1</text>
+      <text x="0" y="158">Apr W2</text>
+      <text x="0" y="182">Apr W3</text>
+      <text x="0" y="206">Apr W4</text>
+    </g>
+    <g transform="translate(75, 76)">
+      <!-- Heat grid 8 rows x 7 cols -->
+      <g>
+        <rect class="heat4" x="0"  y="0"   width="34" height="20" rx="3"/><rect class="heat3" x="38" y="0"   width="34" height="20" rx="3"/><rect class="heat2" x="76" y="0"   width="34" height="20" rx="3"/><rect class="heat2" x="114" y="0"  width="34" height="20" rx="3"/><rect class="heat1" x="152" y="0"  width="34" height="20" rx="3"/><rect class="heat1" x="190" y="0"  width="34" height="20" rx="3"/><rect class="heat0" x="228" y="0"  width="34" height="20" rx="3"/>
+        <rect class="heat4" x="0"  y="24"  width="34" height="20" rx="3"/><rect class="heat3" x="38" y="24"  width="34" height="20" rx="3"/><rect class="heat2" x="76" y="24"  width="34" height="20" rx="3"/><rect class="heat2" x="114" y="24"  width="34" height="20" rx="3"/><rect class="heat1" x="152" y="24" width="34" height="20" rx="3"/><rect class="heat1" x="190" y="24" width="34" height="20" rx="3"/>
+        <rect class="heat4" x="0"  y="48"  width="34" height="20" rx="3"/><rect class="heat3" x="38" y="48"  width="34" height="20" rx="3"/><rect class="heat3" x="76" y="48"  width="34" height="20" rx="3"/><rect class="heat2" x="114" y="48" width="34" height="20" rx="3"/><rect class="heat1" x="152" y="48" width="34" height="20" rx="3"/>
+        <rect class="heat4" x="0"  y="72"  width="34" height="20" rx="3"/><rect class="heat3" x="38" y="72"  width="34" height="20" rx="3"/><rect class="heat2" x="76" y="72"  width="34" height="20" rx="3"/><rect class="heat2" x="114" y="72" width="34" height="20" rx="3"/>
+        <rect class="heat4" x="0"  y="96"  width="34" height="20" rx="3"/><rect class="heat3" x="38" y="96"  width="34" height="20" rx="3"/><rect class="heat3" x="76" y="96"  width="34" height="20" rx="3"/>
+        <rect class="heat4" x="0"  y="120" width="34" height="20" rx="3"/><rect class="heat3" x="38" y="120" width="34" height="20" rx="3"/>
+        <rect class="heat4" x="0"  y="144" width="34" height="20" rx="3"/>
+      </g>
+    </g>
+  </g>
+
+  <!-- ROW 3: Pebble volume (8) + Pebble enrichment (4) -->
+  <g transform="translate(252, 590)">
+    <rect class="card" width="772" height="320" rx="12"/>
+    <text x="20" y="32" class="label">Pebbles collected</text>
+    <text x="20" y="50" class="sub">Daily volume with enrichment breakdown.</text>
+    <g transform="translate(560, 22)">
+      <rect class="pill" width="190" height="26" rx="6"/>
+      <rect class="pillactive" x="4" y="3" width="38" height="20" rx="4"/>
+      <text x="14" y="18" class="tagtxt" font-weight="600">Day</text>
+      <text x="50" y="18" class="tagtxt">Week</text>
+      <text x="92" y="18" class="tagtxt">Month</text>
+      <text x="138" y="18" class="tagtxt">Year</text>
+    </g>
+    <!-- Stacked bars + lines -->
+    <g transform="translate(40, 80)">
+      <line class="grid" x1="0" y1="0" x2="700" y2="0"/>
+      <line class="grid" x1="0" y1="50" x2="700" y2="50"/>
+      <line class="grid" x1="0" y1="100" x2="700" y2="100"/>
+      <line class="grid" x1="0" y1="150" x2="700" y2="150"/>
+      <line class="grid" x1="0" y1="200" x2="700" y2="200"/>
+      <g>
+        <!-- 30 bars across 700px -->
+        <g class="mute">
+          <rect x="0"   y="100" width="18" height="100" rx="3"/>
+          <rect x="24"  y="90"  width="18" height="110" rx="3"/>
+          <rect x="48"  y="95"  width="18" height="105" rx="3"/>
+          <rect x="72"  y="80"  width="18" height="120" rx="3"/>
+          <rect x="96"  y="85"  width="18" height="115" rx="3"/>
+          <rect x="120" y="75"  width="18" height="125" rx="3"/>
+          <rect x="144" y="70"  width="18" height="130" rx="3"/>
+          <rect x="168" y="78"  width="18" height="122" rx="3"/>
+          <rect x="192" y="65"  width="18" height="135" rx="3"/>
+          <rect x="216" y="60"  width="18" height="140" rx="3"/>
+          <rect x="240" y="68"  width="18" height="132" rx="3"/>
+          <rect x="264" y="55"  width="18" height="145" rx="3"/>
+          <rect x="288" y="50"  width="18" height="150" rx="3"/>
+          <rect x="312" y="58"  width="18" height="142" rx="3"/>
+          <rect x="336" y="45"  width="18" height="155" rx="3"/>
+          <rect x="360" y="40"  width="18" height="160" rx="3"/>
+          <rect x="384" y="48"  width="18" height="152" rx="3"/>
+          <rect x="408" y="35"  width="18" height="165" rx="3"/>
+          <rect x="432" y="30"  width="18" height="170" rx="3"/>
+          <rect x="456" y="38"  width="18" height="162" rx="3"/>
+          <rect x="480" y="25"  width="18" height="175" rx="3"/>
+          <rect x="504" y="22"  width="18" height="178" rx="3"/>
+          <rect x="528" y="28"  width="18" height="172" rx="3"/>
+          <rect x="552" y="18"  width="18" height="182" rx="3"/>
+          <rect x="576" y="14"  width="18" height="186" rx="3"/>
+          <rect x="600" y="20"  width="18" height="180" rx="3"/>
+          <rect x="624" y="10"  width="18" height="190" rx="3"/>
+          <rect x="648" y="8"   width="18" height="192" rx="3"/>
+          <rect x="672" y="12"  width="18" height="188" rx="3"/>
+        </g>
+      </g>
+      <path d="M9 150 Q60 145 120 140 T240 125 T360 110 T480 95 T600 80 T690 70" fill="none" stroke="#84a98c" stroke-width="2"/>
+      <path d="M9 175 Q60 168 120 160 T240 148 T360 136 T480 122 T600 108 T690 100" fill="none" stroke="#d4a373" stroke-width="2"/>
+      <path d="M9 130 Q60 120 120 110 T240 95 T360 80 T480 64 T600 50 T690 40" fill="none" stroke="#7aa9c7" stroke-width="2"/>
+    </g>
+    <!-- legend -->
+    <g transform="translate(40, 296)" font-size="11" fill="#52525b">
+      <rect x="0" y="-9" width="10" height="10" class="mute"/><text x="14" y="0">Total pebbles</text>
+      <rect x="110" y="-9" width="10" height="10" class="sage"/><text x="124" y="0">With picture</text>
+      <rect x="220" y="-9" width="10" height="10" class="sand"/><text x="234" y="0">Custom glyph</text>
+      <rect x="335" y="-9" width="10" height="10" class="sky"/><text x="349" y="0">In collection</text>
+    </g>
+  </g>
+
+  <g transform="translate(1040, 590)">
+    <rect class="card" width="372" height="320" rx="12"/>
+    <text x="20" y="32" class="label">Pebble enrichment</text>
+    <text x="20" y="50" class="sub">Share of pebbles with each enrichment.</text>
+    <!-- 3 donuts -->
+    <g transform="translate(40, 90)">
+      <circle cx="40" cy="40" r="32" fill="#e4e4e7"/>
+      <path d="M40 8 A32 32 0 0 1 70.4 53 L40 40 Z" fill="#84a98c"/>
+      <text x="40" y="44" text-anchor="middle" font-size="14" font-weight="600" fill="#18181b">46%</text>
+      <text x="40" y="100" text-anchor="middle" class="sub">Picture</text>
+    </g>
+    <g transform="translate(146, 90)">
+      <circle cx="40" cy="40" r="32" fill="#e4e4e7"/>
+      <path d="M40 8 A32 32 0 0 1 65 60 L40 40 Z" fill="#d4a373"/>
+      <text x="40" y="44" text-anchor="middle" font-size="14" font-weight="600" fill="#18181b">31%</text>
+      <text x="40" y="100" text-anchor="middle" class="sub">Custom glyph</text>
+    </g>
+    <g transform="translate(252, 90)">
+      <circle cx="40" cy="40" r="32" fill="#e4e4e7"/>
+      <path d="M40 8 A32 32 0 1 1 14.5 60 L40 40 Z" fill="#7aa9c7"/>
+      <text x="40" y="44" text-anchor="middle" font-size="14" font-weight="600" fill="#18181b">58%</text>
+      <text x="40" y="100" text-anchor="middle" class="sub">Collection</text>
+    </g>
+    <!-- Sub ratios -->
+    <g transform="translate(20, 220)" font-size="11">
+      <text x="0" y="0" fill="#71717a">Pebbles with ≥1 emotion pearl</text><text x="320" y="0" text-anchor="end" font-weight="600" fill="#18181b">82%</text>
+      <text x="0" y="20" fill="#71717a">Pebbles linked to ≥1 soul</text><text x="320" y="20" text-anchor="end" font-weight="600" fill="#18181b">71%</text>
+      <text x="0" y="40" fill="#71717a">Pebbles with thought attached</text><text x="320" y="40" text-anchor="end" font-weight="600" fill="#18181b">38%</text>
+      <text x="0" y="60" fill="#71717a">Pebbles with intensity set</text><text x="320" y="60" text-anchor="end" font-weight="600" fill="#18181b">94%</text>
+    </g>
+  </g>
+
+  <!-- ROW 4: Per-user averages (7) + Bounce karma (5) -->
+  <g transform="translate(252, 928)">
+    <rect class="card" width="664" height="280" rx="12"/>
+    <text x="20" y="32" class="label">Per-user averages over time</text>
+    <text x="20" y="50" class="sub">Average glyphs, souls and collections per active user, weekly.</text>
+    <g transform="translate(20, 70)" font-size="11">
+      <text x="0" y="0" class="sub">Avg glyphs / user</text><text x="0" y="22" class="num" font-size="18">5.4</text>
+      <text x="180" y="0" class="sub">Avg souls / user</text><text x="180" y="22" class="num" font-size="18">11.2</text>
+      <text x="360" y="0" class="sub">Avg collections / user</text><text x="360" y="22" class="num" font-size="18">3.1</text>
+    </g>
+    <g transform="translate(40, 130)">
+      <line class="grid" x1="0" y1="0" x2="600" y2="0"/>
+      <line class="grid" x1="0" y1="50" x2="600" y2="50"/>
+      <line class="grid" x1="0" y1="100" x2="600" y2="100"/>
+      <path d="M0 90 Q60 85 120 75 T240 55 T360 40 T480 28 T600 15" fill="none" stroke="#d4a373" stroke-width="2"/>
+      <path d="M0 60 Q60 55 120 48 T240 35 T360 25 T480 18 T600 10" fill="none" stroke="#c98a8a" stroke-width="2"/>
+      <path d="M0 100 Q60 96 120 90 T240 80 T360 70 T480 62 T600 55" fill="none" stroke="#7aa9c7" stroke-width="2"/>
+    </g>
+  </g>
+
+  <g transform="translate(932, 928)">
+    <rect class="card" width="480" height="280" rx="12"/>
+    <text x="20" y="32" class="label">Bounce karma distribution</text>
+    <text x="20" y="50" class="sub">Users by current bounce score.</text>
+    <g transform="translate(20, 70)" font-size="11">
+      <text x="0" y="0" class="sub">Median bounce</text><text x="0" y="22" class="num" font-size="18">42</text>
+      <text x="140" y="0" class="sub">% maintaining</text><text x="140" y="22" class="num" font-size="18">63%</text>
+      <text x="280" y="0" class="sub">Active days/wk</text><text x="280" y="22" class="num" font-size="18">3.4</text>
+    </g>
+    <g transform="translate(40, 130)">
+      <rect x="0"   y="100" width="60" height="20" class="stone" rx="3"/>
+      <rect x="70"  y="60"  width="60" height="60" class="stone" rx="3"/>
+      <rect x="140" y="40"  width="60" height="80" class="stone" rx="3"/>
+      <rect x="210" y="20"  width="60" height="100" class="stone" rx="3"/>
+      <rect x="280" y="0"   width="60" height="120" class="stone" rx="3"/>
+      <rect x="350" y="50"  width="60" height="70" class="stone" rx="3"/>
+      <text x="20"  y="135" class="sub" text-anchor="middle">0</text>
+      <text x="100" y="135" class="sub" text-anchor="middle">1–10</text>
+      <text x="170" y="135" class="sub" text-anchor="middle">11–25</text>
+      <text x="240" y="135" class="sub" text-anchor="middle">26–50</text>
+      <text x="310" y="135" class="sub" text-anchor="middle">51–100</text>
+      <text x="380" y="135" class="sub" text-anchor="middle">100+</text>
+    </g>
+  </g>
+
+  <!-- ROW 5: Emotions (6) + Domains (6) -->
+  <g transform="translate(252, 1226)">
+    <rect class="card" width="572" height="280" rx="12"/>
+    <text x="20" y="32" class="label">Emotion pearls prevalence</text>
+    <text x="20" y="50" class="sub">Share of pebbles tagged with each emotion.</text>
+    <g transform="translate(20, 80)" font-size="11">
+      <text x="0" y="14" fill="#52525b">Joy</text>     <rect class="joy"   x="60" y="2" width="280" height="14" rx="2"/><text x="350" y="14" fill="#52525b">22.4%</text>
+      <text x="0" y="34" fill="#52525b">Calm</text>    <rect class="calm"  x="60" y="22" width="220" height="14" rx="2"/><text x="350" y="34" fill="#52525b">17.1%</text>
+      <text x="0" y="54" fill="#52525b">Love</text>    <rect class="love"  x="60" y="42" width="180" height="14" rx="2"/><text x="350" y="54" fill="#52525b">14.0%</text>
+      <text x="0" y="74" fill="#52525b">Pride</text>   <rect class="pride" x="60" y="62" width="140" height="14" rx="2"/><text x="350" y="74" fill="#52525b">11.0%</text>
+      <text x="0" y="94" fill="#52525b">Sadness</text> <rect class="sad"   x="60" y="82" width="120" height="14" rx="2"/><text x="350" y="94" fill="#52525b">9.2%</text>
+      <text x="0" y="114" fill="#52525b">Anger</text>  <rect class="anger" x="60" y="102" width="80" height="14" rx="2"/><text x="350" y="114" fill="#52525b">7.4%</text>
+      <text x="0" y="134" fill="#52525b">Fear</text>   <rect class="fear"  x="60" y="122" width="70" height="14" rx="2"/><text x="350" y="134" fill="#52525b">6.5%</text>
+      <text x="0" y="154" fill="#52525b">Surprise</text><rect class="surp" x="60" y="142" width="60" height="14" rx="2"/><text x="350" y="154" fill="#52525b">5.2%</text>
+      <text x="0" y="174" fill="#52525b">Awe</text>    <rect class="awe"   x="60" y="162" width="50" height="14" rx="2"/><text x="350" y="174" fill="#52525b">4.4%</text>
+    </g>
+    <text x="430" y="62" class="sub">Snapshot · Over time toggle</text>
+  </g>
+
+  <g transform="translate(840, 1226)">
+    <rect class="card" width="572" height="280" rx="12"/>
+    <text x="20" y="32" class="label">Maslow domains prevalence</text>
+    <text x="20" y="50" class="sub">How pebbles distribute across the revisited Maslow's pyramid.</text>
+    <g transform="translate(20, 80)" font-size="11">
+      <text x="0" y="14" fill="#52525b">Belonging</text>          <rect x="120" y="2"   width="240" height="14" fill="#e9a3a3" rx="2"/>
+      <text x="0" y="34" fill="#52525b">Esteem</text>             <rect x="120" y="22"  width="200" height="14" fill="#f5c97e" rx="2"/>
+      <text x="0" y="54" fill="#52525b">Safety</text>             <rect x="120" y="42"  width="170" height="14" fill="#7aa9c7" rx="2"/>
+      <text x="0" y="74" fill="#52525b">Cognitive</text>          <rect x="120" y="62"  width="140" height="14" fill="#a89cc7" rx="2"/>
+      <text x="0" y="94" fill="#52525b">Self-actualization</text> <rect x="120" y="82"  width="115" height="14" fill="#84a98c" rx="2"/>
+      <text x="0" y="114" fill="#52525b">Aesthetic</text>         <rect x="120" y="102" width="95" height="14" fill="#9bcfd1" rx="2"/>
+      <text x="0" y="134" fill="#52525b">Transcendence</text>     <rect x="120" y="122" width="70" height="14" fill="#c5a572" rx="2"/>
+      <text x="0" y="154" fill="#52525b">Physiological</text>     <rect x="120" y="142" width="50" height="14" fill="#c87a5a" rx="2"/>
+    </g>
+    <g transform="translate(20, 246)" font-size="10" fill="#71717a">
+      <text x="0" y="0">Most-evolving domain (vs prev. period)</text><text x="380" y="0" text-anchor="end" fill="#047857">Belonging +3.2pp</text>
+    </g>
+  </g>
+
+  <!-- Footnote -->
+  <text x="252" y="1572" class="sub">Layout map · See analytics-mockup.html for the live, interactive visual reference.</text>
+</svg>
