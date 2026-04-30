@@ -6,7 +6,7 @@
     "root_node_id": "V-landing",
     "metadata": { "view_card_variant": "large" },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-04-28T12:00:00.000Z"
+    "updated_at": "2026-04-30T22:00:00.000Z"
   },
   "nodes": [
     {
@@ -1112,6 +1112,51 @@
           ]
         }
       }
+    },
+    {
+      "id": "V-admin-analytics",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Admin · Analytics",
+      "description": "Back-office analytics page (admin-only). Thin slice (PR #337): KPI strip (Total users, DAU, WAU, MAU, Pebbles/day, DAU/MAU) + Active users line chart with DAU/WAU/MAU toggle. Global time-range tabs (7d/30d/90d/1y/All) URL-driven via ?range=. Six other buildable surfaces (retention, volume, enrichment, per-user, domain share, visibility, single-emotion share) follow on the same milestone (M28).",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "DM-v-analytics-kpi-daily",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "v_analytics_kpi_daily",
+      "description": "Postgres view: one row per calendar day from the earliest pebble's created_at to today. Columns: bucket_date, total_users, dau, pebbles_today, wau, mau, dau_mau_pct. Aggregates auth.users and public.pebbles. Plain (non-materialized) view; will swap to MV when query times warrant.",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "DM-v-analytics-active-users-daily",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "v_analytics_active_users_daily",
+      "description": "Postgres view: projection of v_analytics_kpi_daily exposing bucket_date, dau, wau, mau. Backs the daily DAU/WAU/MAU line chart on the admin analytics page.",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "API-get-kpi-daily",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "get_kpi_daily",
+      "description": "SECURITY DEFINER plpgsql RPC, gated on is_admin(auth.uid()). Takes p_range ('7d'|'30d'|'90d'|'1y'|'all'). Returns the latest row of v_analytics_kpi_daily plus the row at (latest - period_length) for delta computation, plus the trailing 30 days for sparklines. Raises insufficient_privilege (42501) for non-admins.",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "API-get-active-users-series",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "get_active_users_series",
+      "description": "SECURITY DEFINER plpgsql RPC, gated on is_admin(auth.uid()). Takes p_start and p_end dates. Returns rows from v_analytics_active_users_daily in [p_start, p_end] ordered ascending. Raises insufficient_privilege (42501) for non-admins.",
+      "status": "development",
+      "platforms": ["web"]
     }
   ],
   "edges": [
@@ -1310,6 +1355,15 @@
     { "id": "e-V-docs-index-V-docs-privacy", "project_id": "pebbles", "source_id": "V-docs-index", "target_id": "V-docs-privacy", "edge_type": "composes" },
     { "id": "e-F-legal-consent-V-register", "project_id": "pebbles", "source_id": "F-legal-consent", "target_id": "V-register", "edge_type": "composes" },
     { "id": "e-F-ios-app-shell-V-home", "project_id": "pebbles", "source_id": "F-ios-app-shell", "target_id": "V-home", "edge_type": "composes" },
-    { "id": "e-F-ios-app-shell-V-profile", "project_id": "pebbles", "source_id": "F-ios-app-shell", "target_id": "V-profile", "edge_type": "composes" }
+    { "id": "e-F-ios-app-shell-V-profile", "project_id": "pebbles", "source_id": "F-ios-app-shell", "target_id": "V-profile", "edge_type": "composes" },
+    { "id": "e-V-admin-analytics-API-get-kpi-daily", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "API-get-kpi-daily", "edge_type": "calls" },
+    { "id": "e-V-admin-analytics-API-get-active-users-series", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "API-get-active-users-series", "edge_type": "calls" },
+    { "id": "e-V-admin-analytics-DM-v-analytics-kpi-daily", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "DM-v-analytics-kpi-daily", "edge_type": "displays" },
+    { "id": "e-V-admin-analytics-DM-v-analytics-active-users-daily", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "DM-v-analytics-active-users-daily", "edge_type": "displays" },
+    { "id": "e-API-get-kpi-daily-DM-v-analytics-kpi-daily", "project_id": "pebbles", "source_id": "API-get-kpi-daily", "target_id": "DM-v-analytics-kpi-daily", "edge_type": "queries" },
+    { "id": "e-API-get-kpi-daily-DM-pebble", "project_id": "pebbles", "source_id": "API-get-kpi-daily", "target_id": "DM-pebble", "edge_type": "queries" },
+    { "id": "e-API-get-kpi-daily-DM-account", "project_id": "pebbles", "source_id": "API-get-kpi-daily", "target_id": "DM-account", "edge_type": "queries" },
+    { "id": "e-API-get-active-users-series-DM-v-analytics-active-users-daily", "project_id": "pebbles", "source_id": "API-get-active-users-series", "target_id": "DM-v-analytics-active-users-daily", "edge_type": "queries" },
+    { "id": "e-API-get-active-users-series-DM-pebble", "project_id": "pebbles", "source_id": "API-get-active-users-series", "target_id": "DM-pebble", "edge_type": "queries" }
   ]
 }
