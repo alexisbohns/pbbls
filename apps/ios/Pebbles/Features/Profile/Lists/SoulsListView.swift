@@ -30,7 +30,7 @@ struct SoulsListView: View {
             }
             .task { await load() }
             .sheet(isPresented: $isPresentingCreate) {
-                CreateSoulSheet(onCreated: {
+                CreateSoulSheet(onCreated: { _ in
                     Task { await load() }
                 })
             }

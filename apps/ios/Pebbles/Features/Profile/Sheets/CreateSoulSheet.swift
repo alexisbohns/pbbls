@@ -6,7 +6,7 @@ import os
 /// `glyph_id` is initialised to the system default; the user can swap it
 /// via `GlyphPickerSheet` (which itself can carve a fresh glyph).
 struct CreateSoulSheet: View {
-    let onCreated: () -> Void
+    let onCreated: (SoulWithGlyph) -> Void
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(\.dismiss) private var dismiss
@@ -115,11 +115,14 @@ struct CreateSoulSheet: View {
                 name: draft.name.trimmingCharacters(in: .whitespacesAndNewlines),
                 glyphId: draft.glyphId
             )
-            try await supabase.client
+            let inserted: SoulWithGlyph = try await supabase.client
                 .from("souls")
                 .insert(payload)
+                .select("id, name, glyph_id, glyphs(id, name, strokes, view_box)")
+                .single()
                 .execute()
-            onCreated()
+                .value
+            onCreated(inserted)
             dismiss()
         } catch {
             logger.error("create soul failed: \(error.localizedDescription, privacy: .private)")
@@ -160,6 +163,6 @@ private struct GlyphRow: View {
 }
 
 #Preview {
-    CreateSoulSheet(onCreated: {})
+    CreateSoulSheet(onCreated: { _ in })
         .environment(SupabaseService())
 }
