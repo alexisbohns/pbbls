@@ -743,7 +743,7 @@
       "project_id": "pebbles",
       "species": "data-model",
       "title": "Mark",
-      "description": "A user-drawn glyph on a pebble shape, stored as SVG strokes.",
+      "description": "A glyph on a pebble shape, stored as SVG strokes. The is_custom flag (generated from user_id IS NOT NULL) distinguishes user-drawn glyphs from per-domain system seeds, and powers the % custom-glyph creativity signal in admin analytics.",
       "status": "idea",
       "platforms": ["web", "ios", "android"]
     },

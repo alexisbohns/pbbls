@@ -23,6 +23,7 @@ export type PebbleVolumeChartDatum = {
   pebbles: number
   pebbles_with_picture: number
   pebbles_in_collection: number
+  pebbles_with_custom_glyph: number
 }
 
 type PebbleVolumeChartProps = {
@@ -34,6 +35,10 @@ const config: ChartConfig = {
   pebbles: { label: "Pebbles", color: "var(--chart-1)" },
   pebbles_with_picture: { label: "With picture", color: "var(--chart-2)" },
   pebbles_in_collection: { label: "In collection", color: "var(--chart-3)" },
+  pebbles_with_custom_glyph: {
+    label: "With custom glyph",
+    color: "var(--chart-4)",
+  },
 }
 
 /** Truncate an ISO date string to the start of the requested bucket (UTC). */
@@ -69,12 +74,14 @@ function aggregate(
       acc.pebbles += row.pebbles
       acc.pebbles_with_picture += row.pebbles_with_picture
       acc.pebbles_in_collection += row.pebbles_in_collection
+      acc.pebbles_with_custom_glyph += row.pebbles_with_custom_glyph
     } else {
       byKey.set(key, {
         bucket_date: key,
         pebbles: row.pebbles,
         pebbles_with_picture: row.pebbles_with_picture,
         pebbles_in_collection: row.pebbles_in_collection,
+        pebbles_with_custom_glyph: row.pebbles_with_custom_glyph,
       })
     }
   }
@@ -166,6 +173,13 @@ export function PebbleVolumeChart({
               dataKey="pebbles_in_collection"
               type="monotone"
               stroke="var(--color-pebbles_in_collection)"
+              strokeWidth={2}
+              dot={false}
+            />
+            <Line
+              dataKey="pebbles_with_custom_glyph"
+              type="monotone"
+              stroke="var(--color-pebbles_with_custom_glyph)"
               strokeWidth={2}
               dot={false}
             />

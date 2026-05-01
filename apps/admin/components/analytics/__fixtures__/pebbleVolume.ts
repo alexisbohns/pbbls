@@ -18,6 +18,7 @@ export const denseVolumeFixture: PebbleVolumeChartDatum[] = Array.from(
       pebbles,
       pebbles_with_picture: Math.round(pebbles * 0.4),
       pebbles_in_collection: Math.round(pebbles * 0.55),
+      pebbles_with_custom_glyph: Math.round(pebbles * 0.3),
     }
   },
 )
@@ -33,6 +34,7 @@ export const sparseVolumeFixture: PebbleVolumeChartDatum[] = Array.from(
       pebbles,
       pebbles_with_picture: Math.max(0, pebbles - 1),
       pebbles_in_collection: Math.round(pebbles / 2),
+      pebbles_with_custom_glyph: Math.round(pebbles / 3),
     }
   },
 )

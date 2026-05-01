@@ -31,6 +31,7 @@ export async function PebbleVolumeChartCard({ range }: PebbleVolumeChartCardProp
       pebbles: r.pebbles ?? 0,
       pebbles_with_picture: r.pebbles_with_picture ?? 0,
       pebbles_in_collection: r.pebbles_in_collection ?? 0,
+      pebbles_with_custom_glyph: r.pebbles_with_custom_glyph ?? 0,
     }))
 
   return (
