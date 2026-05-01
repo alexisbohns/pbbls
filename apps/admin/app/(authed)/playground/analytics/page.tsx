@@ -1,5 +1,7 @@
 import { ActiveUsersChart } from "@/components/analytics/ActiveUsersChart"
 import { KpiCard } from "@/components/analytics/KpiCard"
+import { PebbleEnrichment } from "@/components/analytics/PebbleEnrichment"
+import { PebbleVolumeChart } from "@/components/analytics/PebbleVolumeChart"
 import { RetentionHeatmap } from "@/components/analytics/RetentionHeatmap"
 import { Sparkline } from "@/components/analytics/Sparkline"
 import {
@@ -8,6 +10,16 @@ import {
   sparseFixture,
 } from "@/components/analytics/__fixtures__/activeUsers"
 import { kpiFixture } from "@/components/analytics/__fixtures__/kpi"
+import {
+  denseEnrichmentFixture,
+  emptyEnrichmentFixture,
+  sparseEnrichmentFixture,
+} from "@/components/analytics/__fixtures__/pebbleEnrichment"
+import {
+  denseVolumeFixture,
+  emptyVolumeFixture,
+  sparseVolumeFixture,
+} from "@/components/analytics/__fixtures__/pebbleVolume"
 import {
   denseRetentionFixture,
   emptyRetentionFixture,
@@ -104,6 +116,54 @@ export default function AnalyticsPlaygroundPage() {
         </h2>
         <div className="max-w-md">
           <RetentionHeatmap rows={emptyRetentionFixture} />
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          PebbleVolumeChart — dense (90 days)
+        </h2>
+        <PebbleVolumeChart data={denseVolumeFixture} />
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          PebbleVolumeChart — sparse (12 days)
+        </h2>
+        <PebbleVolumeChart data={sparseVolumeFixture} />
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          PebbleVolumeChart — empty
+        </h2>
+        <PebbleVolumeChart data={emptyVolumeFixture} />
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          PebbleEnrichment — dense
+        </h2>
+        <div className="max-w-sm">
+          <PebbleEnrichment row={denseEnrichmentFixture} />
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          PebbleEnrichment — sparse
+        </h2>
+        <div className="max-w-sm">
+          <PebbleEnrichment row={sparseEnrichmentFixture} />
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          PebbleEnrichment — empty
+        </h2>
+        <div className="max-w-sm">
+          <PebbleEnrichment row={emptyEnrichmentFixture} />
         </div>
       </section>
     </div>

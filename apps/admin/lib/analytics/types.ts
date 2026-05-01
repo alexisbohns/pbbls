@@ -40,9 +40,38 @@ export interface RetentionCohortRow {
   retention_pct: number | null
 }
 
+export interface PebbleVolumeRow {
+  bucket_date: IsoDate | null
+  pebbles: number | null
+  pebbles_with_picture: number | null
+  pebbles_in_collection: number | null
+  active_users: number | null
+}
+
+export interface PebbleEnrichmentRow {
+  total_pebbles: number | null
+  /** 0–100 percent values. Null when total_pebbles = 0. */
+  pct_with_picture: number | null
+  pct_in_collection: number | null
+  pct_with_thought: number | null
+  pct_with_soul: number | null
+  pct_with_intensity: number | null
+}
+
 export type TimeRange = "7d" | "30d" | "90d" | "1y" | "all"
 
 export type ActivityMetric = "dau" | "wau" | "mau" | "all"
+
+export type VolumeBucket = "day" | "week" | "month" | "year"
+
+export const VOLUME_BUCKETS: readonly VolumeBucket[] = ["day", "week", "month", "year"] as const
+
+export const VOLUME_BUCKET_LABELS: Record<VolumeBucket, string> = {
+  day: "Day",
+  week: "Week",
+  month: "Month",
+  year: "Year",
+}
 
 export const TIME_RANGES: readonly TimeRange[] = ["7d", "30d", "90d", "1y", "all"] as const
 

@@ -802,6 +802,28 @@ export type Database = {
         }
         Relationships: []
       }
+      v_analytics_pebble_enrichment_daily: {
+        Row: {
+          bucket_date: string | null
+          pct_in_collection: number | null
+          pct_with_intensity: number | null
+          pct_with_picture: number | null
+          pct_with_soul: number | null
+          pct_with_thought: number | null
+          total_pebbles: number | null
+        }
+        Relationships: []
+      }
+      v_analytics_pebble_volume_daily: {
+        Row: {
+          active_users: number | null
+          bucket_date: string | null
+          pebbles: number | null
+          pebbles_in_collection: number | null
+          pebbles_with_picture: number | null
+        }
+        Relationships: []
+      }
       v_analytics_retention_cohorts_weekly: {
         Row: {
           active_users: number | null
@@ -961,6 +983,27 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_pebble_enrichment: {
+        Args: { p_end: string; p_start: string }
+        Returns: {
+          pct_in_collection: number | null
+          pct_with_intensity: number | null
+          pct_with_picture: number | null
+          pct_with_soul: number | null
+          pct_with_thought: number | null
+          total_pebbles: number | null
+        }[]
+      }
+      get_pebble_volume_series: {
+        Args: { p_bucket?: string; p_end: string; p_start: string }
+        Returns: {
+          active_users: number | null
+          bucket_date: string | null
+          pebbles: number | null
+          pebbles_in_collection: number | null
+          pebbles_with_picture: number | null
+        }[]
       }
       get_retention_cohorts: {
         Args: Record<PropertyKey, never>
