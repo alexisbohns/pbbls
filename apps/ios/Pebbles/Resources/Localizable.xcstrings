@@ -152,13 +152,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Add emotions, people, and reflections to each pebble."
+            "value" : "Add a picture, emotions, people, and reflections to each pebble."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ajoute des émotions, des personnes et des réflexions à chaque galet."
+            "value" : "Ajoute une photo, des émotions, des personnes et des réflexions."
           }
         }
       }
@@ -278,7 +278,7 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Capture moments as they happen — no blank page, no pressure."
+            "value" : "Capture moments as they happen. No blank page, no pressure."
           }
         },
         "fr" : {
@@ -624,6 +624,23 @@
         }
       }
     },
+    "Couldn't load souls" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't load souls"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de charger les âmes"
+          }
+        }
+      }
+    },
     "Couldn't load this pebble." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -641,19 +658,19 @@
         }
       }
     },
-    "Couldn't load souls" : {
+    "Couldn't remove the photo. Please try again." : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Couldn't load souls"
+            "value" : "Couldn't remove the photo. Please try again."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Impossible de charger les âmes"
+            "value" : "Impossible de retirer la photo. Réessayez."
           }
         }
       }
@@ -2332,13 +2349,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Look back at your journey, at your own pace."
+            "value" : "Collect and look back at your journey. Your path, your pace."
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reviens sur ton parcours, à ton propre rythme."
+            "value" : "Reviens sur tes pas quand tu veux : ton chemin, ton rythme."
           }
         }
       }
@@ -2981,23 +2998,6 @@
         }
       }
     },
-    "Profile" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Profile"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Profil"
-          }
-        }
-      }
-    },
     "Privacy: %@" : {
       "comment" : "Accessibility label for the pebble privacy badge",
       "extractionState" : "manual",
@@ -3028,6 +3028,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Privé"
+          }
+        }
+      }
+    },
+    "Profile" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profile"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profil"
           }
         }
       }
@@ -3196,8 +3213,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Retirer le vote"
+            "state" : "translated",
+            "value" : "Ôter mon vote"
           }
         }
       }
@@ -3249,6 +3266,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Enregistrer"
+          }
+        }
+      }
+    },
+    "Saved" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Saved"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enregistrée"
           }
         }
       }
@@ -3624,13 +3658,13 @@
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rock"
+            "value" : "Upvote"
           }
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Rock"
+            "state" : "translated",
+            "value" : "Voter"
           }
         }
       }
@@ -3733,40 +3767,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ma vie est un chemin."
-          }
-        }
-      }
-    },
-    "Saved" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Saved"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Enregistrée"
-          }
-        }
-      }
-    },
-    "Couldn't remove the photo. Please try again." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Couldn't remove the photo. Please try again."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Impossible de retirer la photo. Réessayez."
           }
         }
       }

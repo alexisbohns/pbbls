@@ -31,6 +31,9 @@ packages:
   SVGView:
     url: https://github.com/exyte/SVGView
     from: "1.0.4"
+  RiveRuntime:
+    url: https://github.com/rive-app/rive-ios
+    from: "6.0.0"
 
 targets:
   Pebbles:
@@ -59,6 +62,8 @@ targets:
         product: Supabase
       - package: SVGView
         product: SVGView
+      - package: RiveRuntime
+        product: RiveRuntime
 
   PebblesTests:
     type: bundle.unit-test
