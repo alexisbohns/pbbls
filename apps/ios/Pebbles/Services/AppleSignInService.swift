@@ -1,5 +1,4 @@
 import AuthenticationServices
-import CryptoKit
 import Foundation
 import ObjectiveC
 import UIKit
@@ -36,8 +35,8 @@ enum AppleSignInService {
 
     @MainActor
     static func authorize() async throws -> AppleSignInResult {
-        let rawNonce = randomNonce()
-        let hashedNonce = sha256(rawNonce)
+        let rawNonce = OAuthNonce.random()
+        let hashedNonce = OAuthNonce.sha256(rawNonce)
 
         let request = ASAuthorizationAppleIDProvider().createRequest()
         request.requestedScopes = [.fullName, .email]
@@ -62,31 +61,6 @@ enum AppleSignInService {
         }
     }
 
-    private static func randomNonce(length: Int = 32) -> String {
-        precondition(length > 0)
-        let charset: [Character] =
-            Array("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-._")
-        var result = ""
-        var remaining = length
-        while remaining > 0 {
-            var random: UInt8 = 0
-            let status = SecRandomCopyBytes(kSecRandomDefault, 1, &random)
-            if status != errSecSuccess {
-                fatalError("SecRandomCopyBytes failed with status \(status)")
-            }
-            if random < charset.count {
-                result.append(charset[Int(random)])
-                remaining -= 1
-            }
-        }
-        return result
-    }
-
-    private static func sha256(_ input: String) -> String {
-        let data = Data(input.utf8)
-        let hash = SHA256.hash(data: data)
-        return hash.map { String(format: "%02x", $0) }.joined()
-    }
 }
 
 private final class AppleAuthDelegate: NSObject,

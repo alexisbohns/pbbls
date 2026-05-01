@@ -31,9 +31,6 @@ packages:
   SVGView:
     url: https://github.com/exyte/SVGView
     from: "1.0.4"
-  GoogleSignIn:
-    url: https://github.com/google/GoogleSignIn-iOS
-    from: "7.1.0"
 
 targets:
   Pebbles:
@@ -62,8 +59,6 @@ targets:
         product: Supabase
       - package: SVGView
         product: SVGView
-      - package: GoogleSignIn
-        product: GoogleSignIn
 
   PebblesTests:
     type: bundle.unit-test

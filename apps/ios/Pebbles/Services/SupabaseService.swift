@@ -120,26 +120,30 @@ final class SupabaseService {
         }
     }
 
-    /// Sign in with Google via the native GoogleSignIn SDK.
+    /// Sign in with Google via Supabase's hosted OAuth flow.
     ///
-    /// Google's id_token includes a `name` claim, exposed by the Supabase
-    /// SDK on `session.user.userMetadata`. We mirror the Apple flow and
-    /// patch the profile post-auth.
+    /// Uses `ASWebAuthenticationSession` under the hood (in-app Safari sheet
+    /// that intercepts the `pebbles://auth-callback` redirect without ever
+    /// leaving the app). This reuses the Google web OAuth client already
+    /// configured in the Supabase dashboard, so no native Google iOS SDK
+    /// is needed.
+    ///
+    /// We use the OAuth flow instead of `signInWithIdToken` because the
+    /// available native Google SDK (GoogleSignIn-iOS 7.1) injects a nonce
+    /// via AppAuth that it never exposes — Supabase rejects the exchange
+    /// because the id_token's nonce claim has no matching parameter.
     func signInWithGoogle() async {
         self.authError = nil
         do {
-            let result = try await GoogleSignInService.authorize()
-            try await client.auth.signInWithIdToken(
-                credentials: .init(
-                    provider: .google,
-                    idToken: result.idToken,
-                    accessToken: result.accessToken
-                )
+            let session = try await client.auth.signInWithOAuth(
+                provider: .google,
+                redirectTo: URL(string: "pebbles://auth-callback")
             )
-            if let name = googleNameFromMetadata() {
+            if let name = nameFromUserMetadata(session.user.userMetadata) {
                 await patchDisplayNameIfDefault(to: name)
             }
-        } catch GoogleSignInService.Failure.canceled {
+        } catch let error as ASWebAuthenticationSessionError
+                where error.code == .canceledLogin {
             // User dismissed the sheet — silent.
         } catch {
             logger.error("signInWithGoogle failed: \(error.localizedDescription, privacy: .private)")
@@ -155,8 +159,7 @@ final class SupabaseService {
         return formatted.isEmpty ? nil : formatted
     }
 
-    private func googleNameFromMetadata() -> String? {
-        guard let metadata = session?.user.userMetadata else { return nil }
+    private func nameFromUserMetadata(_ metadata: [String: AnyJSON]) -> String? {
         // OIDC `name` claim is preferred; `full_name` is a Supabase
         // alias some providers populate. Either is fine.
         for key in ["full_name", "name"] {
