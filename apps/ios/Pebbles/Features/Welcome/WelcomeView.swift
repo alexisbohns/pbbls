@@ -26,7 +26,7 @@ struct WelcomeView: View {
     @State private var isSubmitting: Bool = false
     @State private var presentedLegalDoc: LegalDoc?
     @State private var revealStep: Int = 0
-    @State private var logoViewModel = RiveViewModel(fileName: "pbbls-logo")
+    @State private var logoViewModel = RiveViewModel(fileName: "pbbls-logo-appear_idle")
 
     /// Reveal cadence (seconds from the moment `contentRevealed` flips
     /// true). One row per UI element in the order they fade in.
