@@ -1,3 +1,4 @@
+import AuthenticationServices
 import Foundation
 import Supabase
 import Observation
@@ -89,6 +90,109 @@ final class SupabaseService {
         } catch {
             logger.error("signUp failed: \(error.localizedDescription, privacy: .private)")
             self.authError = error.localizedDescription
+        }
+    }
+
+    /// Sign in with Apple via the native authorization sheet.
+    ///
+    /// On the user's first authorization, Apple returns their `fullName` —
+    /// we use it to overwrite the trigger-seeded `'Pebbler'` display name.
+    /// Subsequent sign-ins return no name, so the patch is a no-op.
+    func signInWithApple() async {
+        self.authError = nil
+        do {
+            let result = try await AppleSignInService.authorize()
+            try await client.auth.signInWithIdToken(
+                credentials: .init(
+                    provider: .apple,
+                    idToken: result.idToken,
+                    nonce: result.rawNonce
+                )
+            )
+            if let name = formatted(result.fullName) {
+                await patchDisplayNameIfDefault(to: name)
+            }
+        } catch AppleSignInService.Failure.canceled {
+            // User dismissed the sheet — silent.
+        } catch {
+            logger.error("signInWithApple failed: \(error.localizedDescription, privacy: .private)")
+            self.authError = error.localizedDescription
+        }
+    }
+
+    /// Sign in with Google via Supabase's hosted OAuth flow.
+    ///
+    /// Uses `ASWebAuthenticationSession` under the hood (in-app Safari sheet
+    /// that intercepts the `pebbles://auth-callback` redirect without ever
+    /// leaving the app). This reuses the Google web OAuth client already
+    /// configured in the Supabase dashboard, so no native Google iOS SDK
+    /// is needed.
+    ///
+    /// We use the OAuth flow instead of `signInWithIdToken` because the
+    /// available native Google SDK (GoogleSignIn-iOS 7.1) injects a nonce
+    /// via AppAuth that it never exposes — Supabase rejects the exchange
+    /// because the id_token's nonce claim has no matching parameter.
+    func signInWithGoogle() async {
+        self.authError = nil
+        do {
+            let session = try await client.auth.signInWithOAuth(
+                provider: .google,
+                redirectTo: URL(string: "pebbles://auth-callback")
+            )
+            if let name = nameFromUserMetadata(session.user.userMetadata) {
+                await patchDisplayNameIfDefault(to: name)
+            }
+        } catch let error as ASWebAuthenticationSessionError
+                where error.code == .canceledLogin {
+            // User dismissed the sheet — silent.
+        } catch {
+            logger.error("signInWithGoogle failed: \(error.localizedDescription, privacy: .private)")
+            self.authError = error.localizedDescription
+        }
+    }
+
+    private func formatted(_ name: PersonNameComponents?) -> String? {
+        guard let name else { return nil }
+        let formatter = PersonNameComponentsFormatter()
+        formatter.style = .default
+        let formatted = formatter.string(from: name).trimmingCharacters(in: .whitespaces)
+        return formatted.isEmpty ? nil : formatted
+    }
+
+    private func nameFromUserMetadata(_ metadata: [String: AnyJSON]) -> String? {
+        // OIDC `name` claim is preferred; `full_name` is a Supabase
+        // alias some providers populate. Either is fine.
+        for key in ["full_name", "name"] {
+            if case let .string(value) = metadata[key],
+               !value.isEmpty {
+                return value
+            }
+        }
+        return nil
+    }
+
+    /// Replaces `profiles.display_name` with `name` only if the row is
+    /// still the trigger default (`'Pebbler'`). Idempotent — safe to call
+    /// on every OAuth sign-in.
+    private func patchDisplayNameIfDefault(to name: String) async {
+        guard let userId = session?.user.id else { return }
+        do {
+            struct ProfileRow: Decodable { let display_name: String }
+            let current: ProfileRow = try await client
+                .from("profiles")
+                .select("display_name")
+                .eq("user_id", value: userId)
+                .single()
+                .execute()
+                .value
+            guard current.display_name == "Pebbler" else { return }
+            try await client
+                .from("profiles")
+                .update(["display_name": name])
+                .eq("user_id", value: userId)
+                .execute()
+        } catch {
+            logger.error("patchDisplayName failed: \(error.localizedDescription, privacy: .private)")
         }
     }
 
