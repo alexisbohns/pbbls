@@ -1,10 +1,9 @@
 import SwiftUI
 
-/// Email + password auth screen. Segmented control toggles between Login and
-/// Signup modes. Signup mode adds consent checkboxes (wired in Task 9).
-///
-/// State lives here (view-local) except for `authError`, which is read from
-/// `SupabaseService` so errors from `signIn` / `signUp` surface inline.
+/// Email + password auth screen. Switcher toggles between Login and Signup
+/// modes. Signup mode adds two consent checkboxes. State lives view-locally
+/// except for `authError`, which is read from `SupabaseService` so failures
+/// from `signIn` / `signUp` surface inline.
 struct AuthView: View {
     enum Mode: String, CaseIterable, Identifiable {
         case login
@@ -35,39 +34,38 @@ struct AuthView: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            Text(verbatim: "Pebbles")
-                .font(.largeTitle.weight(.semibold))
-                .padding(.top, 48)
-
-            Picker("Mode", selection: $mode) {
-                ForEach(Mode.allCases) { mode in
-                    Text(mode.label).tag(mode)
-                }
-            }
-            .pickerStyle(.segmented)
+            PebblesAuthSwitcher(mode: $mode)
+                .padding(.top, 24)
 
             VStack(spacing: 12) {
-                TextField("Email", text: $email)
-                    .textContentType(.emailAddress)
-                    .keyboardType(.emailAddress)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .textFieldStyle(.roundedBorder)
+                PebblesTextInput(
+                    placeholder: "Email",
+                    text: $email,
+                    contentType: .emailAddress,
+                    keyboard: .emailAddress,
+                    autocapitalization: .never,
+                    autocorrection: false
+                )
 
-                SecureField("Password", text: $password)
-                    .textContentType(mode == .login ? .password : .newPassword)
-                    .textFieldStyle(.roundedBorder)
+                PebblesTextInput(
+                    placeholder: "Password",
+                    text: $password,
+                    isSecure: true,
+                    contentType: mode == .login ? .password : .newPassword,
+                    autocapitalization: .never,
+                    autocorrection: false
+                )
             }
 
             if mode == .signup {
                 VStack(alignment: .leading, spacing: 12) {
-                    ConsentCheckbox(
+                    PebblesCheckbox(
                         isChecked: $termsAccepted,
                         prefix: "I accept the ",
                         linkText: "Terms of Service",
                         onLinkTap: { presentedLegalDoc = .terms }
                     )
-                    ConsentCheckbox(
+                    PebblesCheckbox(
                         isChecked: $privacyAccepted,
                         prefix: "I accept the ",
                         linkText: "Privacy Policy",
@@ -84,20 +82,30 @@ struct AuthView: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
-            Button {
-                submit()
-            } label: {
-                Text("Continue")
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
+            Button(action: submit) {
+                Text(mode == .login ? "Connect" : "Create an account")
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(PebblesPrimaryButtonStyle(isLoading: isSubmitting))
             .disabled(!canSubmit)
 
             Spacer()
+
+            VStack(spacing: 12) {
+                AppleSignInButton(action: { Task { await runApple() } })
+                    .disabled(isSubmitting)
+
+                GoogleSignInButton(action: { Task { await runGoogle() } })
+                    .disabled(isSubmitting)
+
+                LegalDisclaimerText(
+                    onTermsTap: { presentedLegalDoc = .terms },
+                    onPrivacyTap: { presentedLegalDoc = .privacy }
+                )
+                .padding(.top, 8)
+            }
         }
         .padding(.horizontal, 24)
+        .padding(.bottom, 32)
         .sheet(item: $presentedLegalDoc) { doc in
             LegalDocumentSheet(url: doc.url)
                 .ignoresSafeArea()
@@ -160,9 +168,28 @@ struct AuthView: View {
             isSubmitting = false
         }
     }
+
+    private func runApple() async {
+        guard !isSubmitting else { return }
+        isSubmitting = true
+        await supabase.signInWithApple()
+        isSubmitting = false
+    }
+
+    private func runGoogle() async {
+        guard !isSubmitting else { return }
+        isSubmitting = true
+        await supabase.signInWithGoogle()
+        isSubmitting = false
+    }
 }
 
-#Preview {
-    AuthView()
+#Preview("Login") {
+    AuthView(initialMode: .login)
+        .environment(SupabaseService())
+}
+
+#Preview("Signup") {
+    AuthView(initialMode: .signup)
         .environment(SupabaseService())
 }
