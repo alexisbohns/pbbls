@@ -7,6 +7,7 @@ import type {
   PebbleVolumeRow,
   RetentionCohortRow,
   TimeRange,
+  UserAveragesWeeklyRow,
   VolumeBucket,
 } from "./types"
 
@@ -91,6 +92,25 @@ export async function getPebbleEnrichment(
     throw new Error(error.message)
   }
   return data?.[0] ?? null
+}
+
+/**
+ * Per-user weekly averages (glyphs / souls / collections) for the most recent
+ * `weeks` ISO weeks, ordered ascending. Default 12 weeks.
+ * The RPC enforces `is_admin(auth.uid())`.
+ */
+export async function getUserAveragesSeries(
+  weeks = 12,
+): Promise<UserAveragesWeeklyRow[]> {
+  const supabase = await createServerSupabaseClient()
+  const { data, error } = await supabase.rpc("get_user_averages_series", {
+    p_weeks: weeks,
+  })
+  if (error) {
+    console.error("[analytics] getUserAveragesSeries failed:", error.message)
+    throw new Error(error.message)
+  }
+  return data ?? []
 }
 
 /**

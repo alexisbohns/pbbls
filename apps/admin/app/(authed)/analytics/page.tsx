@@ -7,6 +7,7 @@ import { PebbleEnrichmentCard } from "@/components/analytics/PebbleEnrichmentCar
 import { PebbleVolumeChartCard } from "@/components/analytics/PebbleVolumeChartCard"
 import { RetentionHeatmapCard } from "@/components/analytics/RetentionHeatmapCard"
 import { TimeRangeTabs } from "@/components/analytics/TimeRangeTabs"
+import { UserAveragesCard } from "@/components/analytics/UserAveragesCard"
 import { isTimeRange, type TimeRange } from "@/lib/analytics/types"
 
 type SearchParams = Promise<{ range?: string }>
@@ -49,6 +50,13 @@ export default async function AnalyticsPage({
         <div className="lg:col-span-4">
           <Suspense fallback={<ChartCardSkeleton />}>
             <PebbleEnrichmentCard range={range} />
+          </Suspense>
+        </div>
+        {/* Per-user weekly averages — paired with bounce-karma distribution
+            (5/12) once #344 ships. Until then this card is full-width. */}
+        <div className="lg:col-span-12">
+          <Suspense fallback={<ChartCardSkeleton />}>
+            <UserAveragesCard />
           </Suspense>
         </div>
       </div>
