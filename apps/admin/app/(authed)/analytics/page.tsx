@@ -3,6 +3,7 @@ import { ActiveUsersChartCard } from "@/components/analytics/ActiveUsersChartCar
 import { ChartCardSkeleton } from "@/components/analytics/ChartCardSkeleton"
 import { KpiStrip } from "@/components/analytics/KpiStrip"
 import { KpiStripSkeleton } from "@/components/analytics/KpiStripSkeleton"
+import { RetentionHeatmapCard } from "@/components/analytics/RetentionHeatmap"
 import { TimeRangeTabs } from "@/components/analytics/TimeRangeTabs"
 import { isTimeRange, type TimeRange } from "@/lib/analytics/types"
 
@@ -27,9 +28,18 @@ export default async function AnalyticsPage({
         <KpiStrip range={range} />
       </Suspense>
 
-      <Suspense fallback={<ChartCardSkeleton />}>
-        <ActiveUsersChartCard range={range} />
-      </Suspense>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <div className="lg:col-span-8">
+          <Suspense fallback={<ChartCardSkeleton />}>
+            <ActiveUsersChartCard range={range} />
+          </Suspense>
+        </div>
+        <div className="lg:col-span-4">
+          <Suspense fallback={<ChartCardSkeleton />}>
+            <RetentionHeatmapCard />
+          </Suspense>
+        </div>
+      </div>
     </section>
   )
 }

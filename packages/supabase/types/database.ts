@@ -802,6 +802,16 @@ export type Database = {
         }
         Relationships: []
       }
+      v_analytics_retention_cohorts_weekly: {
+        Row: {
+          active_users: number | null
+          cohort_size: number | null
+          cohort_week: string | null
+          retention_pct: number | null
+          week_offset: number | null
+        }
+        Relationships: []
+      }
       v_bounce: {
         Row: {
           active_days: number | null
@@ -948,6 +958,22 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "v_analytics_kpi_daily"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_retention_cohorts: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          active_users: number | null
+          cohort_size: number | null
+          cohort_week: string | null
+          retention_pct: number | null
+          week_offset: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "v_analytics_retention_cohorts_weekly"
           isOneToOne: false
           isSetofReturn: true
         }

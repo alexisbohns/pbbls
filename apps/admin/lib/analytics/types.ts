@@ -29,6 +29,17 @@ export interface ActiveUsersDailyRow {
   mau: number | null
 }
 
+export interface RetentionCohortRow {
+  /** Monday of the cohort signup week (UTC), ISO date string. */
+  cohort_week: IsoDate | null
+  /** Weeks since signup (0 = signup week). */
+  week_offset: number | null
+  cohort_size: number | null
+  active_users: number | null
+  /** 0–100 retention percent for this (cohort, week_offset) cell. */
+  retention_pct: number | null
+}
+
 export type TimeRange = "7d" | "30d" | "90d" | "1y" | "all"
 
 export type ActivityMetric = "dau" | "wau" | "mau" | "all"
