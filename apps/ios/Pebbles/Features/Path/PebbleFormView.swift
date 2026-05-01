@@ -12,7 +12,7 @@ struct PebbleFormView: View {
     @Binding var draft: PebbleDraft
     let emotions: [Emotion]
     let domains: [Domain]
-    let souls: [Soul]
+    let souls: [SoulWithGlyph]
     let collections: [PebbleCollection]
     let saveError: String?
     var renderSvg: String?
@@ -45,7 +45,7 @@ struct PebbleFormView: View {
         draft: Binding<PebbleDraft>,
         emotions: [Emotion],
         domains: [Domain],
-        souls: [Soul],
+        souls: [SoulWithGlyph],
         collections: [PebbleCollection],
         saveError: String?,
         renderSvg: String? = nil,

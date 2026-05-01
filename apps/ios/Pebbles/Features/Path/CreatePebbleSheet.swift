@@ -11,7 +11,7 @@ struct CreatePebbleSheet: View {
     @State private var draft = PebbleDraft()
     @State private var emotions: [Emotion] = []
     @State private var domains: [Domain] = []
-    @State private var souls: [Soul] = []
+    @State private var souls: [SoulWithGlyph] = []
     @State private var collections: [PebbleCollection] = []
 
     @State private var isLoadingReferences = true
@@ -228,9 +228,9 @@ struct CreatePebbleSheet: View {
                 .order("name")
                 .execute()
                 .value
-            async let soulsQuery: [Soul] = supabase.client
+            async let soulsQuery: [SoulWithGlyph] = supabase.client
                 .from("souls")
-                .select("id, name, glyph_id")
+                .select("id, name, glyph_id, glyphs(id, name, strokes, view_box)")
                 .order("name")
                 .execute()
                 .value
