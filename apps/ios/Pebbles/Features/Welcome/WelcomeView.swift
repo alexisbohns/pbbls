@@ -142,45 +142,13 @@ struct WelcomeView: View {
                 .disabled(isSubmitting)
                 .opacity(revealStep >= 4 ? 1 : 0)
 
-                Button {
-                    Task { await runApple() }
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "applelogo")
-                            .font(.body)
-                        Text("Continue with Apple")
-                            .fontWeight(.medium)
-                    }
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
-                }
-                .buttonStyle(.borderedProminent)
-                .buttonBorderShape(.capsule)
-                .tint(.black)
-                .disabled(isSubmitting)
-                .opacity(revealStep >= 5 ? 1 : 0)
+                AppleSignInButton(action: { Task { await runApple() } })
+                    .disabled(isSubmitting)
+                    .opacity(revealStep >= 5 ? 1 : 0)
 
-                Button {
-                    Task { await runGoogle() }
-                } label: {
-                    HStack(spacing: 8) {
-                        Image("GoogleGMark")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 18, height: 18)
-                        Text("Continue with Google")
-                            .fontWeight(.medium)
-                    }
-                    .foregroundStyle(Color.pebblesForeground)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(Capsule().fill(Color.white))
-                    .overlay(Capsule().stroke(Color.pebblesBorder, lineWidth: 1))
-                }
-                .buttonStyle(.plain)
-                .disabled(isSubmitting)
-                .opacity(revealStep >= 6 ? 1 : 0)
+                GoogleSignInButton(action: { Task { await runGoogle() } })
+                    .disabled(isSubmitting)
+                    .opacity(revealStep >= 6 ? 1 : 0)
 
                 if let error = supabase.authError {
                     Text(error)
@@ -190,25 +158,12 @@ struct WelcomeView: View {
                         .padding(.top, 4)
                 }
 
-                Text("Read our [Terms](pebbles://legal/terms) and [Privacy](pebbles://legal/privacy) before creating an account with Apple or Google.")
-                    .font(.caption)
-                    .foregroundStyle(Color.pebblesMutedForeground)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .tint(Color.pebblesAccent)
-                    .padding(.top, 8)
-                    .opacity(revealStep >= 7 ? 1 : 0)
-                    .environment(\.openURL, OpenURLAction { url in
-                        switch url.absoluteString {
-                        case "pebbles://legal/terms":
-                            presentedLegalDoc = .terms
-                        case "pebbles://legal/privacy":
-                            presentedLegalDoc = .privacy
-                        default:
-                            break
-                        }
-                        return .handled
-                    })
+                LegalDisclaimerText(
+                    onTermsTap: { presentedLegalDoc = .terms },
+                    onPrivacyTap: { presentedLegalDoc = .privacy }
+                )
+                .padding(.top, 8)
+                .opacity(revealStep >= 7 ? 1 : 0)
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 32)
