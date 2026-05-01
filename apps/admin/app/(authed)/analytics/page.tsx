@@ -1,6 +1,8 @@
 import { Suspense } from "react"
 import { ActiveUsersChartCard } from "@/components/analytics/ActiveUsersChartCard"
 import { ChartCardSkeleton } from "@/components/analytics/ChartCardSkeleton"
+import { DomainShareCard } from "@/components/analytics/DomainShareCard"
+import { EmotionShareCard } from "@/components/analytics/EmotionShareCard"
 import { KpiStrip } from "@/components/analytics/KpiStrip"
 import { KpiStripSkeleton } from "@/components/analytics/KpiStripSkeleton"
 import { PebbleEnrichmentCard } from "@/components/analytics/PebbleEnrichmentCard"
@@ -57,6 +59,16 @@ export default async function AnalyticsPage({
         <div className="lg:col-span-12">
           <Suspense fallback={<ChartCardSkeleton />}>
             <UserAveragesCard />
+          </Suspense>
+        </div>
+        <div className="lg:col-span-6">
+          <Suspense fallback={<ChartCardSkeleton />}>
+            <EmotionShareCard range={range} />
+          </Suspense>
+        </div>
+        <div className="lg:col-span-6">
+          <Suspense fallback={<ChartCardSkeleton />}>
+            <DomainShareCard range={range} />
           </Suspense>
         </div>
       </div>
