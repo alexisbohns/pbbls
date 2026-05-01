@@ -2,27 +2,29 @@ import SwiftUI
 import UIKit
 
 /// Pre-login landing. Persistent logo header, paged carousel of
-/// `WelcomeSteps.all`, and two stacked CTAs that route into `AuthView`
-/// with the correct mode. The carousel auto-advances every 4 seconds;
-/// any change to `currentIndex` (programmatic or manual swipe) resets
-/// the timer. Reduce Motion short-circuits the loop — swipe only.
+/// `WelcomeSteps.all`, and four entry buttons:
+/// "Create an account", "Log in", "Continue with Apple", "Continue with Google".
+/// A passive consent disclosure sits beneath the OAuth buttons.
 ///
-/// Navigation is owned by the parent: this view invokes `onCreateAccount`
-/// and `onLogin` closures so `RootView` can drive the `NavigationPath`.
+/// Email entry buttons (`onCreateAccount` / `onLogin`) push `AuthView` via
+/// the parent's `NavigationPath`. OAuth buttons call `SupabaseService`
+/// directly — a successful sign-in flips `supabase.session` and `RootView`
+/// swaps to the tab bar.
 struct WelcomeView: View {
     let onCreateAccount: () -> Void
     let onLogin: () -> Void
 
+    @Environment(SupabaseService.self) private var supabase
     @State private var currentIndex: Int = 0
     @State private var autoAdvanceTick: Int = 0
+    @State private var isSubmitting: Bool = false
+    @State private var presentedLegalDoc: LegalDoc?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(onCreateAccount: @escaping () -> Void, onLogin: @escaping () -> Void) {
         self.onCreateAccount = onCreateAccount
         self.onLogin = onLogin
 
-        // Page dot tint mirrors `OnboardingView`: accent for current,
-        // muted foreground for inactive.
         UIPageControl.appearance().currentPageIndicatorTintColor = UIColor(named: "AccentColor")
         UIPageControl.appearance().pageIndicatorTintColor = UIColor(named: "MutedForeground")
     }
@@ -65,6 +67,7 @@ struct WelcomeView: View {
                         .padding(.vertical, 8)
                 }
                 .buttonStyle(.borderedProminent)
+                .disabled(isSubmitting)
 
                 Button {
                     onLogin()
@@ -74,6 +77,67 @@ struct WelcomeView: View {
                         .padding(.vertical, 8)
                 }
                 .buttonStyle(.bordered)
+                .disabled(isSubmitting)
+
+                Button {
+                    Task { await runApple() }
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "applelogo")
+                            .font(.body)
+                        Text("Continue with Apple")
+                    }
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.black)
+                .disabled(isSubmitting)
+
+                Button {
+                    Task { await runGoogle() }
+                } label: {
+                    HStack(spacing: 8) {
+                        // TODO: replace with the official Google "G" mark asset
+                        // (download from https://developers.google.com/identity/branding-guidelines
+                        // and add to Assets.xcassets as `GoogleGMark`).
+                        Image(systemName: "g.circle.fill")
+                            .font(.title3)
+                            .foregroundStyle(Color(red: 0.26, green: 0.52, blue: 0.96))
+                        Text("Continue with Google")
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                }
+                .buttonStyle(.bordered)
+                .disabled(isSubmitting)
+
+                if let error = supabase.authError {
+                    Text(error)
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 4)
+                }
+
+                Text("Read our [Terms](pebbles://legal/terms) and [Privacy](pebbles://legal/privacy) before creating an account with Apple or Google.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .tint(.accentColor)
+                    .padding(.top, 8)
+                    .environment(\.openURL, OpenURLAction { url in
+                        switch url.absoluteString {
+                        case "pebbles://legal/terms":
+                            presentedLegalDoc = .terms
+                        case "pebbles://legal/privacy":
+                            presentedLegalDoc = .privacy
+                        default:
+                            break
+                        }
+                        return .handled
+                    })
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 32)
@@ -91,7 +155,25 @@ struct WelcomeView: View {
         .onChange(of: currentIndex) { _, _ in
             autoAdvanceTick &+= 1
         }
+        .sheet(item: $presentedLegalDoc) { doc in
+            LegalDocumentSheet(url: doc.url)
+                .ignoresSafeArea()
+        }
         .pebblesScreen()
+    }
+
+    private func runApple() async {
+        guard !isSubmitting else { return }
+        isSubmitting = true
+        await supabase.signInWithApple()
+        isSubmitting = false
+    }
+
+    private func runGoogle() async {
+        guard !isSubmitting else { return }
+        isSubmitting = true
+        await supabase.signInWithGoogle()
+        isSubmitting = false
     }
 }
 
@@ -100,4 +182,5 @@ struct WelcomeView: View {
         onCreateAccount: {},
         onLogin: {}
     )
+    .environment(SupabaseService())
 }
