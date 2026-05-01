@@ -4,6 +4,7 @@ import { PebbleEnrichment } from "@/components/analytics/PebbleEnrichment"
 import { PebbleVolumeChart } from "@/components/analytics/PebbleVolumeChart"
 import { RetentionHeatmap } from "@/components/analytics/RetentionHeatmap"
 import { Sparkline } from "@/components/analytics/Sparkline"
+import { UserAverages } from "@/components/analytics/UserAverages"
 import {
   denseFixture,
   emptyFixture,
@@ -24,6 +25,11 @@ import {
   denseRetentionFixture,
   emptyRetentionFixture,
 } from "@/components/analytics/__fixtures__/retentionCohorts"
+import {
+  denseUserAveragesFixture,
+  emptyUserAveragesFixture,
+  sparseUserAveragesFixture,
+} from "@/components/analytics/__fixtures__/userAverages"
 
 export default function AnalyticsPlaygroundPage() {
   const sparkValues = kpiFixture.map((r) => r.dau ?? 0)
@@ -165,6 +171,27 @@ export default function AnalyticsPlaygroundPage() {
         <div className="max-w-sm">
           <PebbleEnrichment row={emptyEnrichmentFixture} />
         </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          UserAverages — dense (12 weeks)
+        </h2>
+        <UserAverages data={denseUserAveragesFixture} />
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          UserAverages — sparse (4 weeks)
+        </h2>
+        <UserAverages data={sparseUserAveragesFixture} />
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          UserAverages — empty
+        </h2>
+        <UserAverages data={emptyUserAveragesFixture} />
       </section>
     </div>
   )

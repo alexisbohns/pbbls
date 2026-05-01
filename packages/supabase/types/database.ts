@@ -834,6 +834,16 @@ export type Database = {
         }
         Relationships: []
       }
+      v_analytics_user_averages_weekly: {
+        Row: {
+          active_users: number | null
+          avg_collections: number | null
+          avg_glyphs: number | null
+          avg_souls: number | null
+          bucket_week: string | null
+        }
+        Relationships: []
+      }
       v_bounce: {
         Row: {
           active_days: number | null
@@ -1017,6 +1027,22 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "v_analytics_retention_cohorts_weekly"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_user_averages_series: {
+        Args: { p_weeks?: number }
+        Returns: {
+          active_users: number | null
+          avg_collections: number | null
+          avg_glyphs: number | null
+          avg_souls: number | null
+          bucket_week: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "v_analytics_user_averages_weekly"
           isOneToOne: false
           isSetofReturn: true
         }

@@ -58,6 +58,16 @@ export interface PebbleEnrichmentRow {
   pct_with_intensity: number | null
 }
 
+export interface UserAveragesWeeklyRow {
+  /** Monday of the ISO week (UTC), ISO date string. */
+  bucket_week: IsoDate | null
+  active_users: number | null
+  /** Per-active-user averages rounded to 2 decimals. 0 when active_users = 0. */
+  avg_glyphs: number | null
+  avg_souls: number | null
+  avg_collections: number | null
+}
+
 export type TimeRange = "7d" | "30d" | "90d" | "1y" | "all"
 
 export type ActivityMetric = "dau" | "wau" | "mau" | "all"
