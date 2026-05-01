@@ -8,6 +8,7 @@ struct LegalDisclaimerText: View {
     var onPrivacyTap: () -> Void
 
     var body: some View {
+        // swiftlint:disable:next line_length
         Text("Read our [Terms](pebbles://legal/terms) and [Privacy](pebbles://legal/privacy) before creating an account with Apple or Google.")
             .font(.caption)
             .foregroundStyle(Color.pebblesMutedForeground)

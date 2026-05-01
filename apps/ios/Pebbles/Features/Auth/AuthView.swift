@@ -137,6 +137,7 @@ struct AuthView: View {
         )
     }
 
+    // swiftlint:disable:next function_parameter_count
     static func canSubmit(
         mode: Mode,
         email: String,

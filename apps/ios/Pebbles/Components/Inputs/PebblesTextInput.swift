@@ -9,7 +9,7 @@ struct PebblesTextInput: View {
     let placeholder: LocalizedStringResource
     @Binding var text: String
     var isSecure: Bool = false
-    var contentType: UITextContentType? = nil
+    var contentType: UITextContentType?
     var keyboard: UIKeyboardType = .default
     var autocapitalization: TextInputAutocapitalization = .sentences
     var autocorrection: Bool = true
