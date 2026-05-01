@@ -3,6 +3,8 @@ import { ActiveUsersChartCard } from "@/components/analytics/ActiveUsersChartCar
 import { ChartCardSkeleton } from "@/components/analytics/ChartCardSkeleton"
 import { KpiStrip } from "@/components/analytics/KpiStrip"
 import { KpiStripSkeleton } from "@/components/analytics/KpiStripSkeleton"
+import { PebbleEnrichmentCard } from "@/components/analytics/PebbleEnrichmentCard"
+import { PebbleVolumeChartCard } from "@/components/analytics/PebbleVolumeChartCard"
 import { RetentionHeatmapCard } from "@/components/analytics/RetentionHeatmapCard"
 import { TimeRangeTabs } from "@/components/analytics/TimeRangeTabs"
 import { isTimeRange, type TimeRange } from "@/lib/analytics/types"
@@ -37,6 +39,16 @@ export default async function AnalyticsPage({
         <div className="lg:col-span-4">
           <Suspense fallback={<ChartCardSkeleton />}>
             <RetentionHeatmapCard />
+          </Suspense>
+        </div>
+        <div className="lg:col-span-8">
+          <Suspense fallback={<ChartCardSkeleton />}>
+            <PebbleVolumeChartCard range={range} />
+          </Suspense>
+        </div>
+        <div className="lg:col-span-4">
+          <Suspense fallback={<ChartCardSkeleton />}>
+            <PebbleEnrichmentCard />
           </Suspense>
         </div>
       </div>
