@@ -26,4 +26,15 @@ enum AppEnvironment {
         }
         return key
     }()
+
+    static let googleIOSClientID: String = {
+        guard let id = Bundle.main.object(forInfoDictionaryKey: "GoogleIOSClientID") as? String,
+              !id.isEmpty else {
+            fatalError(
+                "GoogleIOSClientID missing in Info.plist. " +
+                "Did you set GOOGLE_IOS_CLIENT_ID in Config/Secrets.xcconfig?"
+            )
+        }
+        return id
+    }()
 }
