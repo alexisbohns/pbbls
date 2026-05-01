@@ -216,15 +216,16 @@ struct PebbleFormView: View {
                 .listRowBackground(Color.pebblesListRow)
             }
 
-            Section("Optional") {
-                Picker("Soul", selection: $draft.soulId) {
-                    Text("None").tag(UUID?.none)
-                    ForEach(souls) { soul in
-                        Text(soul.name).tag(UUID?.some(soul.id))
-                    }
-                }
-                .listRowBackground(Color.pebblesListRow)
+            Section("Souls") {
+                SelectedSoulsRow(
+                    soulIds: $draft.soulIds,
+                    allSouls: souls
+                )
+                .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
+                .listRowBackground(Color.clear)
+            }
 
+            Section("Optional") {
                 Picker("Collection", selection: $draft.collectionId) {
                     Text("None").tag(UUID?.none)
                     ForEach(collections) { collection in

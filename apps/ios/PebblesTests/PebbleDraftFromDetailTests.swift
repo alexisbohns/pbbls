@@ -97,7 +97,7 @@ struct PebbleDraftFromDetailTests {
         #expect(draft.happenedAt == detail.happenedAt)
         #expect(draft.emotionId == emotionId)
         #expect(draft.domainId == domainId)
-        #expect(draft.soulId == soulId)
+        #expect(draft.soulIds == [soulId])
         #expect(draft.collectionId == collectionId)
         #expect(draft.valence == .highlightLarge)
         #expect(draft.visibility == .public)
@@ -110,11 +110,23 @@ struct PebbleDraftFromDetailTests {
         #expect(draft.description == "")
     }
 
-    @Test("leaves soulId nil when no souls")
+    @Test("soulIds is empty array when detail has no souls")
     func noSouls() throws {
         let detail = try makeDetail(souls: [])
         let draft = PebbleDraft(from: detail)
-        #expect(draft.soulId == nil)
+        #expect(draft.soulIds.isEmpty)
+    }
+
+    @Test("soulIds preserves all souls from the detail")
+    func multipleSouls() throws {
+        let id1 = UUID()
+        let id2 = UUID()
+        let detail = try makeDetail(souls: [
+            Soul(id: id1, name: "Héloïse", glyphId: UUID()),
+            Soul(id: id2, name: "Ingrid", glyphId: UUID())
+        ])
+        let draft = PebbleDraft(from: detail)
+        #expect(draft.soulIds == [id1, id2])
     }
 
     @Test("leaves collectionId nil when no collections")

@@ -10,7 +10,7 @@ struct PebbleDraft {
     var emotionId: UUID?                  // mandatory
     var domainId: UUID?                   // mandatory
     var valence: Valence?                 // mandatory
-    var soulId: UUID?                     // optional
+    var soulIds: [UUID] = []              // optional, empty = no souls
     var collectionId: UUID?               // optional
     var glyphId: UUID?                    // optional — set via GlyphPickerSheet
     var formSnap: FormSnap?               // optional — `.existing` from DB or `.pending` local upload
@@ -34,7 +34,8 @@ extension PebbleDraft {
     /// - `domainId` takes the first (and only expected) domain from `detail.domains`.
     ///   If `detail.domains` is unexpectedly empty, `domainId` stays nil and
     ///   `draft.isValid` will return false.
-    /// - `soulId` / `collectionId` take the first element when present, nil otherwise.
+    /// - `soulIds` is populated from `detail.souls.map(\.id)`; empty when no souls are linked.
+    /// - `collectionId` takes the first element when present, nil otherwise.
     /// - `valence` is derived from `(positiveness, intensity)` by `PebbleDetail.valence`.
     /// - `formSnap` is `.existing(...)` when the detail has at least one snap, else nil
     ///   (the spec caps `max_media_per_pebble` at 1).
@@ -45,7 +46,7 @@ extension PebbleDraft {
         self.emotionId = detail.emotion.id
         self.domainId = detail.domains.first?.id
         self.valence = detail.valence
-        self.soulId = detail.souls.first?.id
+        self.soulIds = detail.souls.map(\.id)
         self.collectionId = detail.collections.first?.id
         self.visibility = detail.visibility
         self.glyphId = detail.glyphId
