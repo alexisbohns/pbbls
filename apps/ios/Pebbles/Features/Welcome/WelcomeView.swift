@@ -2,18 +2,21 @@ import RiveRuntime
 import SwiftUI
 import UIKit
 
-/// Pre-login landing. The Pebbles logo (Rive) starts centered on the
-/// screen and is "pushed" upward by the carousel + sign-in buttons +
-/// disclaimer that fade in below it via a `revealStep` state machine.
-/// Visually, the logo flows out of the preceding `SplashView` (same
-/// artwork, same horizontal scale) and lands in its final header
-/// position once the welcome content finishes revealing.
+/// Pre-login landing AND splash. `RootView` keeps this view mounted for
+/// the entire splash hold so the bundled `pbbls-logo.riv` plays through
+/// without an interrupting view-swap. While `contentRevealed` is false
+/// only the Rive logo is visible, centered at 33% width. When the parent
+/// flips `contentRevealed` true, the carousel + sign-in buttons +
+/// disclaimer are inserted with a `move(.bottom)` transition that pushes
+/// the logo up to its final header position; individual elements then
+/// fade in one-by-one via a `revealStep` state machine.
 ///
 /// Email entry buttons (`onCreateAccount` / `onLogin`) push `AuthView` via
 /// the parent's `NavigationPath`. OAuth buttons call `SupabaseService`
 /// directly — a successful sign-in flips `supabase.session` and `RootView`
 /// swaps to the tab bar.
 struct WelcomeView: View {
+    let contentRevealed: Bool
     let onCreateAccount: () -> Void
     let onLogin: () -> Void
 
@@ -26,10 +29,10 @@ struct WelcomeView: View {
     @State private var revealStep: Int = 0
     @State private var logoViewModel = RiveViewModel(fileName: "pbbls-logo")
 
-    /// Reveal cadence (seconds from welcome appear). One row per UI element
-    /// in the order they fade in.
+    /// Reveal cadence (seconds from the moment `contentRevealed` flips
+    /// true). One row per UI element in the order they fade in.
     private static let revealSchedule: [TimeInterval] = [
-        0.05,   // 1: content container slides in (carousel + buttons + terms layout)
+        0.00,   // 1: content container slides in (carousel + buttons + terms layout)
         0.20,   // 2: carousel
         0.45,   // 3: Create an account
         0.60,   // 4: Log in
@@ -42,7 +45,12 @@ struct WelcomeView: View {
     /// content container is inserted.
     private static let layoutAnimation: Animation = .easeInOut(duration: 0.55)
 
-    init(onCreateAccount: @escaping () -> Void, onLogin: @escaping () -> Void) {
+    init(
+        contentRevealed: Bool,
+        onCreateAccount: @escaping () -> Void,
+        onLogin: @escaping () -> Void
+    ) {
+        self.contentRevealed = contentRevealed
         self.onCreateAccount = onCreateAccount
         self.onLogin = onLogin
 
@@ -51,24 +59,28 @@ struct WelcomeView: View {
     }
 
     var body: some View {
-        VStack(spacing: 0) {
-            Spacer(minLength: 0)
+        ZStack {
+            Color.pebblesBackground.ignoresSafeArea()
 
-            logoViewModel.view()
-                .containerRelativeFrame(.horizontal) { width, _ in width * 0.33 }
-                .aspectRatio(1, contentMode: .fit)
-                .accessibilityHidden(true)
+            VStack(spacing: 0) {
+                Spacer(minLength: 0)
 
-            Spacer(minLength: 0)
+                logoViewModel.view()
+                    .containerRelativeFrame(.horizontal) { width, _ in width * 0.33 }
+                    .aspectRatio(1, contentMode: .fit)
+                    .accessibilityHidden(true)
 
-            if revealStep >= 1 {
-                revealedContent
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                Spacer(minLength: 0)
+
+                if revealStep >= 1 {
+                    revealedContent
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                }
             }
+            .animation(Self.layoutAnimation, value: revealStep >= 1)
         }
-        .animation(Self.layoutAnimation, value: revealStep >= 1)
         .task(id: autoAdvanceTick) {
-            guard !reduceMotion else { return }
+            guard !reduceMotion, revealStep >= 2 else { return }
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(4))
                 if Task.isCancelled { break }
@@ -77,17 +89,30 @@ struct WelcomeView: View {
                 }
             }
         }
-        .task {
-            await runReveal()
+        .onAppear {
+            logoViewModel.play()
+            if contentRevealed && revealStep == 0 {
+                Task { await runReveal() }
+            }
+        }
+        .onChange(of: contentRevealed) { _, newValue in
+            if newValue && revealStep == 0 {
+                Task { await runReveal() }
+            }
         }
         .onChange(of: currentIndex) { _, _ in
             autoAdvanceTick &+= 1
+        }
+        .onChange(of: revealStep) { _, newValue in
+            // Re-arm the auto-advance loop once the carousel becomes visible.
+            if newValue == 2 {
+                autoAdvanceTick &+= 1
+            }
         }
         .sheet(item: $presentedLegalDoc) { doc in
             LegalDocumentSheet(url: doc.url)
                 .ignoresSafeArea()
         }
-        .pebblesScreen()
     }
 
     // MARK: - Revealed content (slides in from below the logo)
@@ -254,8 +279,18 @@ struct WelcomeView: View {
     }
 }
 
-#Preview {
+#Preview("Splash phase") {
     WelcomeView(
+        contentRevealed: false,
+        onCreateAccount: {},
+        onLogin: {}
+    )
+    .environment(SupabaseService())
+}
+
+#Preview("Revealed") {
+    WelcomeView(
+        contentRevealed: true,
         onCreateAccount: {},
         onLogin: {}
     )

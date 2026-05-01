@@ -1,51 +1,63 @@
 import SwiftUI
 
-/// Top-level auth gate. Reads `SupabaseService` from the environment and
-/// decides whether to show the splash, the pre-login welcome flow, or the
-/// main tab bar.
+/// Top-level auth gate. The splash and pre-login welcome are merged into
+/// a single `WelcomeView` so the Rive logo plays continuously without a
+/// view-swap glitch on the splash→welcome boundary.
 ///
-/// On every cold launch a `SplashView` plays the animated drawing of the
-/// Pebbles logo. `supabase.start()` runs in parallel; once the splash
-/// animation has completed AND `isInitializing` has flipped, RootView
-/// transitions to either `WelcomeView` (with a staged reveal) or
-/// `MainTabView`. Eliminates the previous `Color.clear` flash during
-/// keychain restore.
-///
-/// Unauth: `NavigationStack` rooted at `WelcomeView`. The two CTAs push
-/// `AuthView(initialMode:)` with the correct tab preselected; the native
-/// back button pops to welcome. On successful signup/login the whole
-/// stack unmounts as `supabase.session` flips non-nil.
-///
-/// Auth (first transition from no-session to signed-in per device):
-/// presents `OnboardingView` as a `.fullScreenCover` over `MainTabView`.
+/// At cold launch `WelcomeView` is rendered with `contentRevealed: false`
+/// — only the Rive logo is visible, centered. After
+/// `Self.minSplashSeconds` AND `supabase.isInitializing` flips false, one
+/// of two things happens:
+///   - if the user is unauthenticated, `contentRevealed` flips true and
+///     `WelcomeView` slides the carousel + sign-in buttons + disclaimer
+///     in from the bottom, pushing the logo up to its header position;
+///   - if the user is authenticated, the whole view stack swaps to
+///     `MainTabView`. The Rive will have played for at least
+///     `minSplashSeconds`, satisfying the "splash before Path" intent.
 struct RootView: View {
     @Environment(SupabaseService.self) private var supabase
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @State private var isPresentingOnboarding = false
     @State private var authPath = NavigationPath()
-    @State private var splashPhase: SplashPhase = .playing
+    @State private var minSplashDone = false
+
+    /// Minimum time the Rive logo is held centered before the welcome
+    /// content reveals (or, for authenticated users, before swapping to
+    /// `MainTabView`). Tuned to roughly match the bundled `pbbls-logo.riv`
+    /// timeline.
+    private static let minSplashSeconds: TimeInterval = 2.5
 
     private enum AuthRoute: Hashable {
         case auth(AuthView.Mode)
     }
 
-    /// Splash → main content lifecycle.
-    /// `playing`: animation in progress.
-    /// `ready`: animation done, but `supabase.isInitializing` may still be true.
-    /// `finished`: both splash done AND auth resolved → show next screen.
-    private enum SplashPhase {
-        case playing
-        case ready
-        case finished
+    /// True once the user is signed in AND auth resolution has settled
+    /// AND the splash hold has elapsed. Until all three, we keep showing
+    /// `WelcomeView` so the Rive plays out.
+    private var canShowAuthedTabs: Bool {
+        supabase.session != nil && !supabase.isInitializing && minSplashDone
+    }
+
+    /// True once the splash hold has elapsed AND auth resolution settled
+    /// to "no session". Drives WelcomeView's reveal sequence.
+    private var welcomeContentRevealed: Bool {
+        supabase.session == nil && !supabase.isInitializing && minSplashDone
     }
 
     var body: some View {
         ZStack {
-            if splashPhase != .finished {
-                SplashView(onComplete: { splashPhase = .ready })
-            } else if supabase.session == nil {
+            if canShowAuthedTabs {
+                MainTabView()
+                    .fullScreenCover(isPresented: $isPresentingOnboarding) {
+                        OnboardingView(steps: OnboardingSteps.all) {
+                            hasSeenOnboarding = true
+                            isPresentingOnboarding = false
+                        }
+                    }
+            } else {
                 NavigationStack(path: $authPath) {
                     WelcomeView(
+                        contentRevealed: welcomeContentRevealed,
                         onCreateAccount: { authPath.append(AuthRoute.auth(.signup)) },
                         onLogin: { authPath.append(AuthRoute.auth(.login)) }
                     )
@@ -56,32 +68,14 @@ struct RootView: View {
                         }
                     }
                 }
-            } else {
-                MainTabView()
-                    .fullScreenCover(isPresented: $isPresentingOnboarding) {
-                        OnboardingView(steps: OnboardingSteps.all) {
-                            hasSeenOnboarding = true
-                            isPresentingOnboarding = false
-                        }
-                    }
             }
         }
         .task {
             await supabase.start()
         }
-        // Two transitions feed `splashPhase = .finished`:
-        //   - splash finishes after auth resolved (onChange of splashPhase)
-        //   - auth resolves after splash finished (onChange of isInitializing)
-        // We handle both because either order is possible.
-        .onChange(of: splashPhase) { _, phase in
-            if phase == .ready && !supabase.isInitializing {
-                splashPhase = .finished
-            }
-        }
-        .onChange(of: supabase.isInitializing) { _, isInit in
-            if !isInit && splashPhase == .ready {
-                splashPhase = .finished
-            }
+        .task {
+            try? await Task.sleep(for: .seconds(Self.minSplashSeconds))
+            minSplashDone = true
         }
         // Relies on supabase.start() being kicked off in .task above.
         // session?.user.id is nil when this observer is registered, so the
