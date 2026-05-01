@@ -19,7 +19,7 @@ struct AppleSignInResult {
 ///
 /// The hashed nonce is sent to Apple in the request; the *raw* nonce is
 /// passed to Supabase's `signInWithIdToken` so it can verify the JWT.
-enum AppleSignIn {
+enum AppleSignInService {
     enum Failure: Error, LocalizedError {
         case canceled
         case missingIdentityToken
@@ -106,7 +106,7 @@ private final class AppleAuthDelegate: NSObject,
         guard let credential = authorization.credential as? ASAuthorizationAppleIDCredential,
               let tokenData = credential.identityToken,
               let idToken = String(data: tokenData, encoding: .utf8) else {
-            continuation?.resume(throwing: AppleSignIn.Failure.missingIdentityToken)
+            continuation?.resume(throwing: AppleSignInService.Failure.missingIdentityToken)
             return
         }
         continuation?.resume(returning: AppleSignInResult(
@@ -124,9 +124,9 @@ private final class AppleAuthDelegate: NSObject,
         let nsErr = error as NSError
         if nsErr.domain == ASAuthorizationErrorDomain,
            nsErr.code == ASAuthorizationError.canceled.rawValue {
-            continuation?.resume(throwing: AppleSignIn.Failure.canceled)
+            continuation?.resume(throwing: AppleSignInService.Failure.canceled)
         } else {
-            continuation?.resume(throwing: AppleSignIn.Failure.unknown(error.localizedDescription))
+            continuation?.resume(throwing: AppleSignInService.Failure.unknown(error.localizedDescription))
         }
     }
 
