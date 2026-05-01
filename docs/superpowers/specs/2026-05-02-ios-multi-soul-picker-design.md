@@ -143,12 +143,22 @@ unchanged.
 
 ### `PebbleUpdatePayload.swift`
 
-`init(from draft: PebbleDraft, detail: PebbleDetail)`:
+`init(from draft: PebbleDraft, userId: UUID)`:
 
-- Compare `Set(draft.soulIds)` against `Set(detail.souls.map(\.id))`.
-- Send `soul_ids` only when the sets differ. Send the full `draft.soulIds`
-  array when sending — the RPC replaces the join rows wholesale (verified
-  in migration `20260411000005_security_hardening.sql` lines 298–305).
+```swift
+// before
+self.soulIds = draft.soulId.map { [$0] } ?? []
+
+// after
+self.soulIds = draft.soulIds
+```
+
+`PebbleUpdatePayload` follows an "always send everything" pattern (see the
+type doc comment at the top of the file) — the RPC's `if payload ? 'soul_ids'`
+branch then wipes and reinserts the join rows, which is the same behavior
+the single-soul code already triggers on every save. No diff-vs-detail logic
+is needed; matching the existing pattern is simpler and keeps the type's
+two callers (Create and Edit) symmetric.
 
 ## New files
 
@@ -230,11 +240,11 @@ New keys to add to `Pebbles/Resources/Localizable.xcstrings`, with both
 
 - **Zero souls.** `draft.soulIds == []` is valid on both create and edit.
   The chip flow renders only the dashed "Add" chip. The update payload
-  omits `soul_ids` if the set didn't change, sends `[]` if it did.
+  always sends `soul_ids: []`; the RPC's `if payload ? 'soul_ids'` branch
+  wipes any existing join rows.
 - **Editing a pebble that had a soul, removing it all.** Picker opens with
-  the soul pre-selected, user taps it off, hits Done. Update payload
-  detects the change (`Set([id]) != Set()`) and sends `soul_ids: []`. The
-  RPC replaces the join rows wholesale.
+  the soul pre-selected, user taps it off, hits Done. Update payload sends
+  `soul_ids: []`; the RPC wipes and reinserts (zero rows in this case).
 - **Inline create then Cancel pebble form.** The orphan soul persists in
   the user's library. Same outcome as creating a soul from Profile and
   never tagging it.
