@@ -1,10 +1,14 @@
 import SwiftUI
 import UIKit
 
-/// Pre-login landing. Persistent logo header, paged carousel of
-/// `WelcomeSteps.all`, and four entry buttons:
+/// Pre-login landing. Persistent logo header (accent-tinted), paged
+/// carousel of `WelcomeSteps.all`, and four entry buttons:
 /// "Create an account", "Log in", "Continue with Apple", "Continue with Google".
 /// A passive consent disclosure sits beneath the OAuth buttons.
+///
+/// On appear, the slider, buttons, and disclaimer fade in one-by-one via
+/// a `revealStep` state machine. The logo is already on screen from the
+/// preceding `SplashView`, so no entrance animation is applied to it.
 ///
 /// Email entry buttons (`onCreateAccount` / `onLogin`) push `AuthView` via
 /// the parent's `NavigationPath`. OAuth buttons call `SupabaseService`
@@ -15,11 +19,24 @@ struct WelcomeView: View {
     let onLogin: () -> Void
 
     @Environment(SupabaseService.self) private var supabase
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var currentIndex: Int = 0
     @State private var autoAdvanceTick: Int = 0
     @State private var isSubmitting: Bool = false
     @State private var presentedLegalDoc: LegalDoc?
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var revealStep: Int = 0
+
+    /// Reveal cadence (seconds from welcome appear). One row per UI element
+    /// in the order they fade in.
+    private static let revealSchedule: [TimeInterval] = [
+        0.15,   // 1: carousel
+        0.45,   // 2: Create an account
+        0.60,   // 3: Log in
+        0.75,   // 4: Continue with Apple
+        0.90,   // 5: Continue with Google
+        1.10    // 6: terms disclaimer
+    ]
+    private static let fadeDuration: TimeInterval = 0.3
 
     init(onCreateAccount: @escaping () -> Void, onLogin: @escaping () -> Void) {
         self.onCreateAccount = onCreateAccount
@@ -37,7 +54,7 @@ struct WelcomeView: View {
                 .renderingMode(.template)
                 .resizable()
                 .scaledToFit()
-                .foregroundStyle(Color.pebblesForeground)
+                .foregroundStyle(Color.pebblesAccent)
                 .frame(maxWidth: 220, maxHeight: 220)
 
             Spacer()
@@ -56,28 +73,38 @@ struct WelcomeView: View {
             }
             .tabViewStyle(.page(indexDisplayMode: .always))
             .frame(height: 160)
+            .opacity(revealStep >= 1 ? 1 : 0)
 
             VStack(spacing: 12) {
                 Button {
                     onCreateAccount()
                 } label: {
                     Text("Create an account")
+                        .fontWeight(.medium)
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 8)
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(isSubmitting)
+                .opacity(revealStep >= 2 ? 1 : 0)
 
                 Button {
                     onLogin()
                 } label: {
                     Text("Log in")
+                        .fontWeight(.medium)
+                        .foregroundStyle(Color.pebblesAccent)
                         .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
+                        .padding(.vertical, 12)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .stroke(Color.pebblesAccent, lineWidth: 1)
+                        )
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.plain)
                 .disabled(isSubmitting)
+                .opacity(revealStep >= 3 ? 1 : 0)
 
                 Button {
                     Task { await runApple() }
@@ -86,6 +113,7 @@ struct WelcomeView: View {
                         Image(systemName: "applelogo")
                             .font(.body)
                         Text("Continue with Apple")
+                            .fontWeight(.medium)
                     }
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
@@ -94,6 +122,7 @@ struct WelcomeView: View {
                 .buttonStyle(.borderedProminent)
                 .tint(.black)
                 .disabled(isSubmitting)
+                .opacity(revealStep >= 4 ? 1 : 0)
 
                 Button {
                     Task { await runGoogle() }
@@ -104,12 +133,23 @@ struct WelcomeView: View {
                             .scaledToFit()
                             .frame(width: 18, height: 18)
                         Text("Continue with Google")
+                            .fontWeight(.medium)
                     }
+                    .foregroundStyle(Color.pebblesForeground)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
+                    .padding(.vertical, 12)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .fill(Color.white)
+                    )
+                    .background(
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            .stroke(Color.pebblesBorder, lineWidth: 1)
+                    )
                 }
-                .buttonStyle(.bordered)
+                .buttonStyle(.plain)
                 .disabled(isSubmitting)
+                .opacity(revealStep >= 5 ? 1 : 0)
 
                 if let error = supabase.authError {
                     Text(error)
@@ -123,8 +163,10 @@ struct WelcomeView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
                     .tint(Color.pebblesAccent)
                     .padding(.top, 8)
+                    .opacity(revealStep >= 6 ? 1 : 0)
                     .environment(\.openURL, OpenURLAction { url in
                         switch url.absoluteString {
                         case "pebbles://legal/terms":
@@ -150,6 +192,9 @@ struct WelcomeView: View {
                 }
             }
         }
+        .task {
+            await runReveal()
+        }
         .onChange(of: currentIndex) { _, _ in
             autoAdvanceTick &+= 1
         }
@@ -158,6 +203,26 @@ struct WelcomeView: View {
                 .ignoresSafeArea()
         }
         .pebblesScreen()
+    }
+
+    private func runReveal() async {
+        guard revealStep == 0 else { return }
+        if reduceMotion {
+            withAnimation(nil) { revealStep = Self.revealSchedule.count }
+            return
+        }
+        var previous: TimeInterval = 0
+        for (index, delay) in Self.revealSchedule.enumerated() {
+            let wait = delay - previous
+            if wait > 0 {
+                try? await Task.sleep(for: .seconds(wait))
+            }
+            if Task.isCancelled { return }
+            withAnimation(.easeOut(duration: Self.fadeDuration)) {
+                revealStep = index + 1
+            }
+            previous = delay
+        }
     }
 
     private func runApple() async {
