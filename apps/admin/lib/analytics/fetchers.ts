@@ -73,14 +73,21 @@ export async function getPebbleVolumeSeries(
 }
 
 /**
- * Latest enrichment snapshot (most recent day with ≥1 pebble). One row.
+ * Enrichment shares (donuts + secondary ratios) aggregated over the global
+ * time range. Returns null when zero pebbles were created in the window.
  * The RPC enforces `is_admin(auth.uid())`.
  */
-export async function getPebbleEnrichmentToday(): Promise<PebbleEnrichmentRow | null> {
+export async function getPebbleEnrichment(
+  range: TimeRange,
+): Promise<PebbleEnrichmentRow | null> {
+  const { start, end } = dateRangeFor(range)
   const supabase = await createServerSupabaseClient()
-  const { data, error } = await supabase.rpc("get_pebble_enrichment_today")
+  const { data, error } = await supabase.rpc("get_pebble_enrichment", {
+    p_start: start,
+    p_end: end,
+  })
   if (error) {
-    console.error("[analytics] getPebbleEnrichmentToday failed:", error.message)
+    console.error("[analytics] getPebbleEnrichment failed:", error.message)
     throw new Error(error.message)
   }
   return data?.[0] ?? null

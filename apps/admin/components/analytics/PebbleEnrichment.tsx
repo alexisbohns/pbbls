@@ -2,6 +2,7 @@ import type { PebbleEnrichmentRow } from "@/lib/analytics/types"
 
 type PebbleEnrichmentProps = {
   row: PebbleEnrichmentRow | null
+  rangeLabel?: string
 }
 
 type Donut = {
@@ -105,11 +106,11 @@ function RatioRow({ ratio }: { ratio: Ratio }) {
   )
 }
 
-export function PebbleEnrichment({ row }: PebbleEnrichmentProps) {
+export function PebbleEnrichment({ row, rangeLabel }: PebbleEnrichmentProps) {
   if (!row || row.total_pebbles === null || row.total_pebbles === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        No pebbles yet — enrichment metrics appear once users start collecting.
+        No pebbles {rangeLabel ? `in the last ${rangeLabel.toLowerCase()}` : "yet"} — enrichment metrics appear once users start collecting.
       </p>
     )
   }
@@ -148,7 +149,8 @@ export function PebbleEnrichment({ row }: PebbleEnrichmentProps) {
 
       <p className="text-xs text-muted-foreground">
         Based on {row.total_pebbles.toLocaleString()} pebble
-        {row.total_pebbles === 1 ? "" : "s"} on {row.bucket_date ?? "—"}.
+        {row.total_pebbles === 1 ? "" : "s"}
+        {rangeLabel ? ` in the last ${rangeLabel.toLowerCase()}` : ""}.
       </p>
     </div>
   )

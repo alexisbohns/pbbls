@@ -49,7 +49,6 @@ export interface PebbleVolumeRow {
 }
 
 export interface PebbleEnrichmentRow {
-  bucket_date: IsoDate | null
   total_pebbles: number | null
   /** 0–100 percent values. Null when total_pebbles = 0. */
   pct_with_picture: number | null

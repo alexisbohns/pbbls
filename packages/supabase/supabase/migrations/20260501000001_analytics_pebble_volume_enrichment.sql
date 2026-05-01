@@ -176,35 +176,65 @@ end;
 $$;
 
 -- -----------------------------------------------------------------------------
--- get_pebble_enrichment_today()
--- Returns the latest row from v_analytics_pebble_enrichment_daily (i.e. the
--- most recent day that had at least one pebble). Empty result if no pebbles
--- exist yet.
+-- get_pebble_enrichment(p_start, p_end)
+-- Returns one row of share fields aggregated over [p_start, p_end]. Computed
+-- from public.pebbles directly so weighting is by absolute pebble count
+-- (averaging daily percentages would mis-weight low-volume days).
+-- Returns no rows when there are zero pebbles in the window.
 -- -----------------------------------------------------------------------------
-create or replace function public.get_pebble_enrichment_today()
-returns setof public.v_analytics_pebble_enrichment_daily
+drop function if exists public.get_pebble_enrichment_today();
+
+create or replace function public.get_pebble_enrichment(
+  p_start date,
+  p_end   date
+)
+returns table (
+  total_pebbles      bigint,
+  pct_with_picture   numeric,
+  pct_in_collection  numeric,
+  pct_with_thought   numeric,
+  pct_with_soul      numeric,
+  pct_with_intensity numeric
+)
 language plpgsql
 security definer
 set search_path = public, auth
 as $$
-declare
-  v_latest date;
 begin
   if not public.is_admin(auth.uid()) then
     raise exception 'insufficient_privilege' using errcode = '42501';
   end if;
 
-  select max(bucket_date)
-    into v_latest
-    from public.v_analytics_pebble_enrichment_daily;
-
-  if v_latest is null then
-    return;
-  end if;
-
   return query
-    select * from public.v_analytics_pebble_enrichment_daily
-    where bucket_date = v_latest;
+  with base as (
+    select
+      p.id,
+      p.description,
+      p.intensity,
+      exists (select 1 from public.snaps s
+                where s.pebble_id = p.id)             as has_picture,
+      exists (select 1 from public.collection_pebbles cp
+                where cp.pebble_id = p.id)            as in_collection,
+      exists (select 1 from public.pebble_souls ps
+                where ps.pebble_id = p.id)            as has_soul
+    from public.pebbles p
+    where p.created_at::date between p_start and p_end
+  )
+  select
+    count(*)::bigint                                                           as total_pebbles,
+    round(100.0 * count(*) filter (where has_picture)
+                  / nullif(count(*), 0), 1)                                    as pct_with_picture,
+    round(100.0 * count(*) filter (where in_collection)
+                  / nullif(count(*), 0), 1)                                    as pct_in_collection,
+    round(100.0 * count(*) filter (where description is not null
+                                     and length(description) > 0)
+                  / nullif(count(*), 0), 1)                                    as pct_with_thought,
+    round(100.0 * count(*) filter (where has_soul)
+                  / nullif(count(*), 0), 1)                                    as pct_with_soul,
+    round(100.0 * count(*) filter (where intensity is not null)
+                  / nullif(count(*), 0), 1)                                    as pct_with_intensity
+  from base
+  having count(*) > 0;
 end;
 $$;
 
@@ -216,4 +246,4 @@ revoke all on public.v_analytics_pebble_volume_daily     from public, anon, auth
 revoke all on public.v_analytics_pebble_enrichment_daily from public, anon, authenticated;
 
 grant execute on function public.get_pebble_volume_series(date, date, text) to authenticated;
-grant execute on function public.get_pebble_enrichment_today()              to authenticated;
+grant execute on function public.get_pebble_enrichment(date, date)          to authenticated;

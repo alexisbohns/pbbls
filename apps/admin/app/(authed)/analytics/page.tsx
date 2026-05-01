@@ -48,7 +48,7 @@ export default async function AnalyticsPage({
         </div>
         <div className="lg:col-span-4">
           <Suspense fallback={<ChartCardSkeleton />}>
-            <PebbleEnrichmentCard />
+            <PebbleEnrichmentCard range={range} />
           </Suspense>
         </div>
       </div>

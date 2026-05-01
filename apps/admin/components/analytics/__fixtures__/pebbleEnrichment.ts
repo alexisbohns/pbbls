@@ -1,9 +1,6 @@
 import type { PebbleEnrichmentRow } from "@/lib/analytics/types"
 
-const TODAY = new Date().toISOString().slice(0, 10)
-
 export const denseEnrichmentFixture: PebbleEnrichmentRow = {
-  bucket_date: TODAY,
   total_pebbles: 142,
   pct_with_picture: 41,
   pct_in_collection: 56,
@@ -13,7 +10,6 @@ export const denseEnrichmentFixture: PebbleEnrichmentRow = {
 }
 
 export const sparseEnrichmentFixture: PebbleEnrichmentRow = {
-  bucket_date: TODAY,
   total_pebbles: 4,
   pct_with_picture: 0,
   pct_in_collection: 25,

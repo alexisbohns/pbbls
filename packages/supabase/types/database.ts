@@ -984,10 +984,9 @@ export type Database = {
           isSetofReturn: true
         }
       }
-      get_pebble_enrichment_today: {
-        Args: Record<PropertyKey, never>
+      get_pebble_enrichment: {
+        Args: { p_end: string; p_start: string }
         Returns: {
-          bucket_date: string | null
           pct_in_collection: number | null
           pct_with_intensity: number | null
           pct_with_picture: number | null
@@ -995,12 +994,6 @@ export type Database = {
           pct_with_thought: number | null
           total_pebbles: number | null
         }[]
-        SetofOptions: {
-          from: "*"
-          to: "v_analytics_pebble_enrichment_daily"
-          isOneToOne: false
-          isSetofReturn: true
-        }
       }
       get_pebble_volume_series: {
         Args: { p_bucket?: string; p_end: string; p_start: string }

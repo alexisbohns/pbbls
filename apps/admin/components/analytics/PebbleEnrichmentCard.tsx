@@ -1,13 +1,19 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { getPebbleEnrichmentToday } from "@/lib/analytics/fetchers"
-import type { PebbleEnrichmentRow } from "@/lib/analytics/types"
+import { getPebbleEnrichment } from "@/lib/analytics/fetchers"
+import {
+  TIME_RANGE_LABELS,
+  type PebbleEnrichmentRow,
+  type TimeRange,
+} from "@/lib/analytics/types"
 import { ErrorBlock } from "./ErrorBlock"
 import { PebbleEnrichment } from "./PebbleEnrichment"
 
-export async function PebbleEnrichmentCard() {
+type PebbleEnrichmentCardProps = { range: TimeRange }
+
+export async function PebbleEnrichmentCard({ range }: PebbleEnrichmentCardProps) {
   let row: PebbleEnrichmentRow | null
   try {
-    row = await getPebbleEnrichmentToday()
+    row = await getPebbleEnrichment(range)
   } catch (err) {
     return (
       <ErrorBlock
@@ -23,7 +29,7 @@ export async function PebbleEnrichmentCard() {
         <CardTitle>Pebble enrichment</CardTitle>
       </CardHeader>
       <CardContent>
-        <PebbleEnrichment row={row} />
+        <PebbleEnrichment row={row} rangeLabel={TIME_RANGE_LABELS[range]} />
       </CardContent>
     </Card>
   )
