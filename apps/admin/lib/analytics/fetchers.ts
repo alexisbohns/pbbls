@@ -2,6 +2,7 @@ import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { dateRangeFor, periodLengthDays, shiftIsoDate } from "./date"
 import type {
   ActiveUsersDailyRow,
+  BounceDistributionRow,
   DomainShareWeeklyRow,
   EmotionShareWeeklyRow,
   IsoDate,
@@ -111,6 +112,21 @@ export async function getUserAveragesSeries(
   })
   if (error) {
     console.error("[analytics] getUserAveragesSeries failed:", error.message)
+    throw new Error(error.message)
+  }
+  return data ?? []
+}
+
+/**
+ * Today's bounce-karma distribution: one row per histogram bucket plus the
+ * three summary stats (median, % maintaining, avg active days/week)
+ * denormalized onto every row. The RPC enforces `is_admin(auth.uid())`.
+ */
+export async function getBounceDistributionToday(): Promise<BounceDistributionRow[]> {
+  const supabase = await createServerSupabaseClient()
+  const { data, error } = await supabase.rpc("get_bounce_distribution_today")
+  if (error) {
+    console.error("[analytics] getBounceDistributionToday failed:", error.message)
     throw new Error(error.message)
   }
   return data ?? []

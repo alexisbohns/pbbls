@@ -1,5 +1,6 @@
 import { Suspense } from "react"
 import { ActiveUsersChartCard } from "@/components/analytics/ActiveUsersChartCard"
+import { BounceDistributionCard } from "@/components/analytics/BounceDistributionCard"
 import { ChartCardSkeleton } from "@/components/analytics/ChartCardSkeleton"
 import { DomainShareCard } from "@/components/analytics/DomainShareCard"
 import { EmotionShareCard } from "@/components/analytics/EmotionShareCard"
@@ -54,11 +55,14 @@ export default async function AnalyticsPage({
             <PebbleEnrichmentCard range={range} />
           </Suspense>
         </div>
-        {/* Per-user weekly averages — paired with bounce-karma distribution
-            (5/12) once #344 ships. Until then this card is full-width. */}
-        <div className="lg:col-span-12">
+        <div className="lg:col-span-7">
           <Suspense fallback={<ChartCardSkeleton />}>
             <UserAveragesCard />
+          </Suspense>
+        </div>
+        <div className="lg:col-span-5">
+          <Suspense fallback={<ChartCardSkeleton />}>
+            <BounceDistributionCard />
           </Suspense>
         </div>
         <div className="lg:col-span-6">
