@@ -1,14 +1,13 @@
+import RiveRuntime
 import SwiftUI
 import UIKit
 
-/// Pre-login landing. Persistent logo header (accent-tinted), paged
-/// carousel of `WelcomeSteps.all`, and four entry buttons:
-/// "Create an account", "Log in", "Continue with Apple", "Continue with Google".
-/// A passive consent disclosure sits beneath the OAuth buttons.
-///
-/// On appear, the slider, buttons, and disclaimer fade in one-by-one via
-/// a `revealStep` state machine. The logo is already on screen from the
-/// preceding `SplashView`, so no entrance animation is applied to it.
+/// Pre-login landing. The Pebbles logo (Rive) starts centered on the
+/// screen and is "pushed" upward by the carousel + sign-in buttons +
+/// disclaimer that fade in below it via a `revealStep` state machine.
+/// Visually, the logo flows out of the preceding `SplashView` (same
+/// artwork, same horizontal scale) and lands in its final header
+/// position once the welcome content finishes revealing.
 ///
 /// Email entry buttons (`onCreateAccount` / `onLogin`) push `AuthView` via
 /// the parent's `NavigationPath`. OAuth buttons call `SupabaseService`
@@ -25,169 +24,55 @@ struct WelcomeView: View {
     @State private var isSubmitting: Bool = false
     @State private var presentedLegalDoc: LegalDoc?
     @State private var revealStep: Int = 0
+    @State private var logoViewModel = RiveViewModel(fileName: "pbbls-logo")
 
     /// Reveal cadence (seconds from welcome appear). One row per UI element
     /// in the order they fade in.
     private static let revealSchedule: [TimeInterval] = [
-        0.15,   // 1: carousel
-        0.45,   // 2: Create an account
-        0.60,   // 3: Log in
-        0.75,   // 4: Continue with Apple
-        0.90,   // 5: Continue with Google
-        1.10    // 6: terms disclaimer
+        0.05,   // 1: content container slides in (carousel + buttons + terms layout)
+        0.20,   // 2: carousel
+        0.45,   // 3: Create an account
+        0.60,   // 4: Log in
+        0.75,   // 5: Continue with Apple
+        0.90,   // 6: Continue with Google
+        1.10    // 7: terms disclaimer
     ]
     private static let fadeDuration: TimeInterval = 0.3
+    /// Animation used for the logo's center→top translation as the
+    /// content container is inserted.
+    private static let layoutAnimation: Animation = .easeInOut(duration: 0.55)
 
     init(onCreateAccount: @escaping () -> Void, onLogin: @escaping () -> Void) {
         self.onCreateAccount = onCreateAccount
         self.onLogin = onLogin
 
         UIPageControl.appearance().currentPageIndicatorTintColor = UIColor(named: "AccentColor")
-        UIPageControl.appearance().pageIndicatorTintColor = UIColor(named: "MutedForeground")
+        UIPageControl.appearance().pageIndicatorTintColor = UIColor(named: "Muted")
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            Spacer(minLength: 48)
+            Spacer(minLength: 0)
 
-            Image("WelcomeLogo")
-                .renderingMode(.template)
-                .resizable()
-                .scaledToFit()
-                .foregroundStyle(Color.pebblesAccent)
-                .frame(maxWidth: 220, maxHeight: 220)
+            logoViewModel.view()
+                .containerRelativeFrame(.horizontal) { width, _ in width * 0.33 }
+                .aspectRatio(1, contentMode: .fit)
+                .accessibilityHidden(true)
 
-            Spacer()
+            Spacer(minLength: 0)
 
-            TabView(selection: $currentIndex) {
-                ForEach(Array(WelcomeSteps.all.enumerated()), id: \.element.id) { index, step in
-                    WelcomeSlideView(step: step)
-                        .accessibilityElement(children: .combine)
-                        .accessibilityLabel(
-                            "Welcome step \(index + 1) of \(WelcomeSteps.all.count): "
-                            + "\(String(localized: step.title)). "
-                            + "\(String(localized: step.description))"
-                        )
-                        .tag(index)
-                }
+            if revealStep >= 1 {
+                revealedContent
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
             }
-            .tabViewStyle(.page(indexDisplayMode: .always))
-            .frame(height: 160)
-            .opacity(revealStep >= 1 ? 1 : 0)
-
-            VStack(spacing: 12) {
-                Button {
-                    onCreateAccount()
-                } label: {
-                    Text("Create an account")
-                        .fontWeight(.medium)
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 8)
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(isSubmitting)
-                .opacity(revealStep >= 2 ? 1 : 0)
-
-                Button {
-                    onLogin()
-                } label: {
-                    Text("Log in")
-                        .fontWeight(.medium)
-                        .foregroundStyle(Color.pebblesAccent)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 12)
-                        .background(
-                            RoundedRectangle(cornerRadius: 8, style: .continuous)
-                                .stroke(Color.pebblesAccent, lineWidth: 1)
-                        )
-                }
-                .buttonStyle(.plain)
-                .disabled(isSubmitting)
-                .opacity(revealStep >= 3 ? 1 : 0)
-
-                Button {
-                    Task { await runApple() }
-                } label: {
-                    HStack(spacing: 8) {
-                        Image(systemName: "applelogo")
-                            .font(.body)
-                        Text("Continue with Apple")
-                            .fontWeight(.medium)
-                    }
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.black)
-                .disabled(isSubmitting)
-                .opacity(revealStep >= 4 ? 1 : 0)
-
-                Button {
-                    Task { await runGoogle() }
-                } label: {
-                    HStack(spacing: 8) {
-                        Image("GoogleGMark")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 18, height: 18)
-                        Text("Continue with Google")
-                            .fontWeight(.medium)
-                    }
-                    .foregroundStyle(Color.pebblesForeground)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(Color.white)
-                    )
-                    .background(
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .stroke(Color.pebblesBorder, lineWidth: 1)
-                    )
-                }
-                .buttonStyle(.plain)
-                .disabled(isSubmitting)
-                .opacity(revealStep >= 5 ? 1 : 0)
-
-                if let error = supabase.authError {
-                    Text(error)
-                        .font(.footnote)
-                        .foregroundStyle(.red)
-                        .multilineTextAlignment(.center)
-                        .padding(.top, 4)
-                }
-
-                Text("Read our [Terms](pebbles://legal/terms) and [Privacy](pebbles://legal/privacy) before creating an account with Apple or Google.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .tint(Color.pebblesAccent)
-                    .padding(.top, 8)
-                    .opacity(revealStep >= 6 ? 1 : 0)
-                    .environment(\.openURL, OpenURLAction { url in
-                        switch url.absoluteString {
-                        case "pebbles://legal/terms":
-                            presentedLegalDoc = .terms
-                        case "pebbles://legal/privacy":
-                            presentedLegalDoc = .privacy
-                        default:
-                            break
-                        }
-                        return .handled
-                    })
-            }
-            .padding(.horizontal, 24)
-            .padding(.bottom, 32)
         }
+        .animation(Self.layoutAnimation, value: revealStep >= 1)
         .task(id: autoAdvanceTick) {
             guard !reduceMotion else { return }
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(4))
                 if Task.isCancelled { break }
-                withAnimation {
+                withAnimation(.easeInOut(duration: 0.55)) {
                     currentIndex = (currentIndex + 1) % WelcomeSteps.all.count
                 }
             }
@@ -205,6 +90,131 @@ struct WelcomeView: View {
         .pebblesScreen()
     }
 
+    // MARK: - Revealed content (slides in from below the logo)
+
+    private var revealedContent: some View {
+        VStack(spacing: 0) {
+            TabView(selection: $currentIndex) {
+                ForEach(Array(WelcomeSteps.all.enumerated()), id: \.element.id) { index, step in
+                    WelcomeSlideView(step: step)
+                        .accessibilityElement(children: .combine)
+                        .accessibilityLabel(
+                            "Welcome step \(index + 1) of \(WelcomeSteps.all.count): "
+                            + "\(String(localized: step.title)). "
+                            + "\(String(localized: step.description))"
+                        )
+                        .tag(index)
+                }
+            }
+            .tabViewStyle(.page(indexDisplayMode: .always))
+            .frame(height: 160)
+            .opacity(revealStep >= 2 ? 1 : 0)
+
+            VStack(spacing: 12) {
+                Button {
+                    onCreateAccount()
+                } label: {
+                    Text("Create an account")
+                        .fontWeight(.medium)
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                }
+                .buttonStyle(.borderedProminent)
+                .buttonBorderShape(.capsule)
+                .disabled(isSubmitting)
+                .opacity(revealStep >= 3 ? 1 : 0)
+
+                Button {
+                    onLogin()
+                } label: {
+                    Text("Log in")
+                        .fontWeight(.medium)
+                        .foregroundStyle(Color.pebblesAccent)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .overlay(
+                            Capsule()
+                                .stroke(Color.pebblesAccent, lineWidth: 1)
+                        )
+                }
+                .buttonStyle(.plain)
+                .disabled(isSubmitting)
+                .opacity(revealStep >= 4 ? 1 : 0)
+
+                Button {
+                    Task { await runApple() }
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "applelogo")
+                            .font(.body)
+                        Text("Continue with Apple")
+                            .fontWeight(.medium)
+                    }
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                }
+                .buttonStyle(.borderedProminent)
+                .buttonBorderShape(.capsule)
+                .tint(.black)
+                .disabled(isSubmitting)
+                .opacity(revealStep >= 5 ? 1 : 0)
+
+                Button {
+                    Task { await runGoogle() }
+                } label: {
+                    HStack(spacing: 8) {
+                        Image("GoogleGMark")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 18, height: 18)
+                        Text("Continue with Google")
+                            .fontWeight(.medium)
+                    }
+                    .foregroundStyle(Color.pebblesForeground)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+                    .background(Capsule().fill(Color.white))
+                    .overlay(Capsule().stroke(Color.pebblesBorder, lineWidth: 1))
+                }
+                .buttonStyle(.plain)
+                .disabled(isSubmitting)
+                .opacity(revealStep >= 6 ? 1 : 0)
+
+                if let error = supabase.authError {
+                    Text(error)
+                        .font(.footnote)
+                        .foregroundStyle(.red)
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 4)
+                }
+
+                Text("Read our [Terms](pebbles://legal/terms) and [Privacy](pebbles://legal/privacy) before creating an account with Apple or Google.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .tint(Color.pebblesAccent)
+                    .padding(.top, 8)
+                    .opacity(revealStep >= 7 ? 1 : 0)
+                    .environment(\.openURL, OpenURLAction { url in
+                        switch url.absoluteString {
+                        case "pebbles://legal/terms":
+                            presentedLegalDoc = .terms
+                        case "pebbles://legal/privacy":
+                            presentedLegalDoc = .privacy
+                        default:
+                            break
+                        }
+                        return .handled
+                    })
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 32)
+        }
+    }
+
     private func runReveal() async {
         guard revealStep == 0 else { return }
         if reduceMotion {
@@ -218,7 +228,11 @@ struct WelcomeView: View {
                 try? await Task.sleep(for: .seconds(wait))
             }
             if Task.isCancelled { return }
-            withAnimation(.easeOut(duration: Self.fadeDuration)) {
+            // First step (the layout slide-in) uses the layout animation
+            // so logo translation and content insertion stay synchronized.
+            // Subsequent steps use the smaller fade for individual elements.
+            let animation: Animation = (index == 0) ? Self.layoutAnimation : .easeOut(duration: Self.fadeDuration)
+            withAnimation(animation) {
                 revealStep = index + 1
             }
             previous = delay
