@@ -1,5 +1,10 @@
 import { ArrowDown, ArrowUp, Minus } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import {
   UserAveragesChart,
@@ -16,6 +21,12 @@ const METRIC_LABELS: Record<MetricKey, string> = {
   avg_glyphs: "Avg glyphs / user",
   avg_souls: "Avg souls / user",
   avg_collections: "Avg collections / user",
+}
+
+const METRIC_NOUN: Record<MetricKey, string> = {
+  avg_glyphs: "glyphs",
+  avg_souls: "souls",
+  avg_collections: "collections",
 }
 
 export function UserAverages({ data }: UserAveragesProps) {
@@ -40,6 +51,7 @@ export function UserAverages({ data }: UserAveragesProps) {
             label={METRIC_LABELS[key]}
             value={last[key]}
             previous={prev ? prev[key] : null}
+            description={describe(key, last[key], last.active_users)}
           />
         ))}
       </div>
@@ -48,14 +60,27 @@ export function UserAverages({ data }: UserAveragesProps) {
   )
 }
 
+function describe(
+  key: MetricKey,
+  value: number,
+  activeUsers: number,
+): string {
+  const noun = METRIC_NOUN[key]
+  const userPhrase =
+    activeUsers === 1 ? "the 1 active user" : `the ${activeUsers} active users`
+  return `Last week, ${userPhrase} owned an average of ${value.toFixed(2)} ${noun} each.`
+}
+
 function Stat({
   label,
   value,
   previous,
+  description,
 }: {
   label: string
   value: number
   previous: number | null
+  description: string
 }) {
   const delta = previous === null ? null : round2(value - previous)
   const direction: "up" | "down" | "flat" =
@@ -67,9 +92,19 @@ function Stat({
         {label}
       </div>
       <div className="flex items-baseline gap-2">
-        <span className="text-2xl font-semibold tabular-nums">
-          {value.toFixed(2)}
-        </span>
+        <Tooltip>
+          <TooltipTrigger
+            render={
+              <span
+                className="cursor-help text-2xl font-semibold tabular-nums underline decoration-dotted decoration-muted-foreground/50 underline-offset-4"
+                tabIndex={0}
+              >
+                {value.toFixed(2)}
+              </span>
+            }
+          />
+          <TooltipContent>{description}</TooltipContent>
+        </Tooltip>
         {delta !== null ? <DeltaBadge delta={delta} direction={direction} /> : null}
       </div>
     </div>
