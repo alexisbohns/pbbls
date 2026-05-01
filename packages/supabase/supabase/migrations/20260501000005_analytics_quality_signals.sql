@@ -35,16 +35,14 @@ with
       count(*)::numeric / nullif(count(distinct p.user_id), 0)
     , 2) as v
     from public.pebbles p
-    where p.deleted_at is null
-      and p.created_at >= now() - interval '7 days'
+    where p.created_at >= now() - interval '7 days'
   ),
   pebbles_per_wau_previous as (
     select round(
       count(*)::numeric / nullif(count(distinct p.user_id), 0)
     , 2) as v
     from public.pebbles p
-    where p.deleted_at is null
-      and p.created_at >= now() - interval '14 days'
+    where p.created_at >= now() - interval '14 days'
       and p.created_at <  now() - interval '7 days'
   ),
   -- D1 retention: cohort signed up yesterday, active today.
@@ -55,7 +53,6 @@ with
          from auth.users u
          join public.pebbles p
            on p.user_id = u.id
-          and p.deleted_at is null
           and p.created_at::date = current_date
         where u.created_at::date = current_date - 1)::numeric
       / nullif((select count(*) from auth.users u
@@ -68,7 +65,6 @@ with
          from auth.users u
          join public.pebbles p
            on p.user_id = u.id
-          and p.deleted_at is null
           and p.created_at::date = current_date - 1
         where u.created_at::date = current_date - 2)::numeric
       / nullif((select count(*) from auth.users u
@@ -83,7 +79,6 @@ with
          from auth.users u
          join public.pebbles p
            on p.user_id = u.id
-          and p.deleted_at is null
           and p.created_at::date between current_date - 6 and current_date
         where u.created_at::date = current_date - 7)::numeric
       / nullif((select count(*) from auth.users u
@@ -96,7 +91,6 @@ with
          from auth.users u
          join public.pebbles p
            on p.user_id = u.id
-          and p.deleted_at is null
           and p.created_at::date between current_date - 13 and current_date - 7
         where u.created_at::date = current_date - 14)::numeric
       / nullif((select count(*) from auth.users u
@@ -111,7 +105,6 @@ with
          from auth.users u
          join public.pebbles p
            on p.user_id = u.id
-          and p.deleted_at is null
           and p.created_at::date between current_date - 29 and current_date
         where u.created_at::date = current_date - 30)::numeric
       / nullif((select count(*) from auth.users u
@@ -124,7 +117,6 @@ with
          from auth.users u
          join public.pebbles p
            on p.user_id = u.id
-          and p.deleted_at is null
           and p.created_at::date between current_date - 59 and current_date - 30
         where u.created_at::date = current_date - 60)::numeric
       / nullif((select count(*) from auth.users u
