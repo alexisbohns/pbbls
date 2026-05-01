@@ -1,6 +1,5 @@
 import RiveRuntime
 import SwiftUI
-import UIKit
 
 /// Pre-login landing AND splash. `RootView` keeps this view mounted for
 /// the entire splash hold so the bundled `pbbls-logo.riv` plays through
@@ -44,19 +43,6 @@ struct WelcomeView: View {
     /// Animation used for the logo's center→top translation as the
     /// content container is inserted.
     private static let layoutAnimation: Animation = .easeInOut(duration: 0.55)
-
-    init(
-        contentRevealed: Bool,
-        onCreateAccount: @escaping () -> Void,
-        onLogin: @escaping () -> Void
-    ) {
-        self.contentRevealed = contentRevealed
-        self.onCreateAccount = onCreateAccount
-        self.onLogin = onLogin
-
-        UIPageControl.appearance().currentPageIndicatorTintColor = UIColor(named: "AccentColor")
-        UIPageControl.appearance().pageIndicatorTintColor = UIColor(named: "Muted")
-    }
 
     var body: some View {
         ZStack {
@@ -113,27 +99,16 @@ struct WelcomeView: View {
             LegalDocumentSheet(url: doc.url)
                 .ignoresSafeArea()
         }
+        .tint(Color.pebblesAccent)
     }
 
     // MARK: - Revealed content (slides in from below the logo)
 
     private var revealedContent: some View {
         VStack(spacing: 0) {
-            TabView(selection: $currentIndex) {
-                ForEach(Array(WelcomeSteps.all.enumerated()), id: \.element.id) { index, step in
-                    WelcomeSlideView(step: step)
-                        .accessibilityElement(children: .combine)
-                        .accessibilityLabel(
-                            "Welcome step \(index + 1) of \(WelcomeSteps.all.count): "
-                            + "\(String(localized: step.title)). "
-                            + "\(String(localized: step.description))"
-                        )
-                        .tag(index)
-                }
-            }
-            .tabViewStyle(.page(indexDisplayMode: .always))
-            .frame(height: 160)
-            .opacity(revealStep >= 2 ? 1 : 0)
+            carousel
+                .opacity(revealStep >= 2 ? 1 : 0)
+                .padding(.bottom, 24)
 
             VStack(spacing: 12) {
                 Button {
@@ -217,7 +192,7 @@ struct WelcomeView: View {
 
                 Text("Read our [Terms](pebbles://legal/terms) and [Privacy](pebbles://legal/privacy) before creating an account with Apple or Google.")
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(Color.pebblesMutedForeground)
                     .multilineTextAlignment(.center)
                     .fixedSize(horizontal: false, vertical: true)
                     .tint(Color.pebblesAccent)
@@ -237,6 +212,52 @@ struct WelcomeView: View {
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 32)
+        }
+    }
+
+    /// Horizontal slide carousel + custom pagination dots beneath. We
+    /// use `ScrollView` rather than `TabView(.page)` because page-style
+    /// `TabView` only animates horizontal slides for swipe gestures —
+    /// programmatic selection changes (the auto-advance) crossfade as a
+    /// "blink." `ScrollView` + `scrollPosition(id:)` honors the surrounding
+    /// `withAnimation` for both swipe and programmatic transitions.
+    private var carousel: some View {
+        VStack(spacing: 20) {
+            ScrollView(.horizontal) {
+                LazyHStack(spacing: 0) {
+                    ForEach(Array(WelcomeSteps.all.enumerated()), id: \.element.id) { index, step in
+                        WelcomeSlideView(step: step)
+                            .containerRelativeFrame(.horizontal)
+                            .accessibilityElement(children: .combine)
+                            .accessibilityLabel(
+                                "Welcome step \(index + 1) of \(WelcomeSteps.all.count): "
+                                + "\(String(localized: step.title)). "
+                                + "\(String(localized: step.description))"
+                            )
+                            .id(index)
+                    }
+                }
+                .scrollTargetLayout()
+            }
+            .scrollIndicators(.hidden)
+            .scrollTargetBehavior(.paging)
+            .scrollPosition(id: Binding(
+                get: { Optional(currentIndex) },
+                set: { newValue in
+                    if let newValue { currentIndex = newValue }
+                }
+            ))
+            .frame(height: 110)
+
+            HStack(spacing: 8) {
+                ForEach(WelcomeSteps.all.indices, id: \.self) { idx in
+                    Circle()
+                        .fill(idx == currentIndex ? Color.pebblesAccent : Color.pebblesMuted)
+                        .frame(width: 6, height: 6)
+                        .animation(.easeInOut(duration: 0.2), value: currentIndex)
+                }
+            }
+            .accessibilityHidden(true)
         }
     }
 
