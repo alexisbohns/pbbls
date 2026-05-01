@@ -1,3 +1,4 @@
+import AuthenticationServices
 import Foundation
 import Supabase
 import Observation
@@ -89,6 +90,106 @@ final class SupabaseService {
         } catch {
             logger.error("signUp failed: \(error.localizedDescription, privacy: .private)")
             self.authError = error.localizedDescription
+        }
+    }
+
+    /// Sign in with Apple via the native authorization sheet.
+    ///
+    /// On the user's first authorization, Apple returns their `fullName` —
+    /// we use it to overwrite the trigger-seeded `'Pebbler'` display name.
+    /// Subsequent sign-ins return no name, so the patch is a no-op.
+    func signInWithApple() async {
+        self.authError = nil
+        do {
+            let result = try await AppleSignInService.authorize()
+            try await client.auth.signInWithIdToken(
+                credentials: .init(
+                    provider: .apple,
+                    idToken: result.idToken,
+                    nonce: result.rawNonce
+                )
+            )
+            if let name = formatted(result.fullName) {
+                await patchDisplayNameIfDefault(to: name)
+            }
+        } catch AppleSignInService.Failure.canceled {
+            // User dismissed the sheet — silent.
+        } catch {
+            logger.error("signInWithApple failed: \(error.localizedDescription, privacy: .private)")
+            self.authError = error.localizedDescription
+        }
+    }
+
+    /// Sign in with Google via the native GoogleSignIn SDK.
+    ///
+    /// Google's id_token includes a `name` claim, exposed by the Supabase
+    /// SDK on `session.user.userMetadata`. We mirror the Apple flow and
+    /// patch the profile post-auth.
+    func signInWithGoogle() async {
+        self.authError = nil
+        do {
+            let result = try await GoogleSignInService.authorize()
+            try await client.auth.signInWithIdToken(
+                credentials: .init(
+                    provider: .google,
+                    idToken: result.idToken,
+                    accessToken: result.accessToken
+                )
+            )
+            if let name = googleNameFromMetadata() {
+                await patchDisplayNameIfDefault(to: name)
+            }
+        } catch GoogleSignInService.Failure.canceled {
+            // User dismissed the sheet — silent.
+        } catch {
+            logger.error("signInWithGoogle failed: \(error.localizedDescription, privacy: .private)")
+            self.authError = error.localizedDescription
+        }
+    }
+
+    private func formatted(_ name: PersonNameComponents?) -> String? {
+        guard let name else { return nil }
+        let formatter = PersonNameComponentsFormatter()
+        formatter.style = .default
+        let formatted = formatter.string(from: name).trimmingCharacters(in: .whitespaces)
+        return formatted.isEmpty ? nil : formatted
+    }
+
+    private func googleNameFromMetadata() -> String? {
+        guard let metadata = session?.user.userMetadata else { return nil }
+        // OIDC `name` claim is preferred; `full_name` is a Supabase
+        // alias some providers populate. Either is fine.
+        for key in ["full_name", "name"] {
+            if case let .string(value) = metadata[key],
+               !value.isEmpty {
+                return value
+            }
+        }
+        return nil
+    }
+
+    /// Replaces `profiles.display_name` with `name` only if the row is
+    /// still the trigger default (`'Pebbler'`). Idempotent — safe to call
+    /// on every OAuth sign-in.
+    private func patchDisplayNameIfDefault(to name: String) async {
+        guard let userId = session?.user.id else { return }
+        do {
+            struct ProfileRow: Decodable { let display_name: String }
+            let current: ProfileRow = try await client
+                .from("profiles")
+                .select("display_name")
+                .eq("user_id", value: userId)
+                .single()
+                .execute()
+                .value
+            guard current.display_name == "Pebbler" else { return }
+            try await client
+                .from("profiles")
+                .update(["display_name": name])
+                .eq("user_id", value: userId)
+                .execute()
+        } catch {
+            logger.error("patchDisplayName failed: \(error.localizedDescription, privacy: .private)")
         }
     }
 
