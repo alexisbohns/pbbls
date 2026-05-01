@@ -214,6 +214,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          is_custom: boolean
           name: string | null
           shape_id: string | null
           strokes: Json
@@ -224,6 +225,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          is_custom?: never
           name?: string | null
           shape_id?: string | null
           strokes?: Json
@@ -234,6 +236,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          is_custom?: never
           name?: string | null
           shape_id?: string | null
           strokes?: Json
@@ -863,6 +866,7 @@ export type Database = {
         Row: {
           bucket_date: string | null
           pct_in_collection: number | null
+          pct_with_custom_glyph: number | null
           pct_with_intensity: number | null
           pct_with_picture: number | null
           pct_with_soul: number | null
@@ -877,6 +881,7 @@ export type Database = {
           bucket_date: string | null
           pebbles: number | null
           pebbles_in_collection: number | null
+          pebbles_with_custom_glyph: number | null
           pebbles_with_picture: number | null
         }
         Relationships: []
@@ -1125,6 +1130,7 @@ export type Database = {
         Args: { p_end: string; p_start: string }
         Returns: {
           pct_in_collection: number | null
+          pct_with_custom_glyph: number | null
           pct_with_intensity: number | null
           pct_with_picture: number | null
           pct_with_soul: number | null
@@ -1139,6 +1145,7 @@ export type Database = {
           bucket_date: string | null
           pebbles: number | null
           pebbles_in_collection: number | null
+          pebbles_with_custom_glyph: number | null
           pebbles_with_picture: number | null
         }[]
       }

@@ -115,11 +115,9 @@ export function PebbleEnrichment({ row, rangeLabel }: PebbleEnrichmentProps) {
     )
   }
 
-  // The original spec called for three donuts (picture / custom glyph /
-  // collection); custom glyph is dropped (no `glyphs.is_custom` — see #347)
-  // so only two donuts remain.
   const donuts: Donut[] = [
     { label: "With picture", pct: row.pct_with_picture },
+    { label: "Custom glyph", pct: row.pct_with_custom_glyph },
     { label: "In collection", pct: row.pct_in_collection },
   ]
 
@@ -135,7 +133,7 @@ export function PebbleEnrichment({ row, rangeLabel }: PebbleEnrichmentProps) {
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         {donuts.map((d) => (
           <DonutTile key={d.label} donut={d} />
         ))}

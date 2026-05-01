@@ -45,6 +45,7 @@ export interface PebbleVolumeRow {
   pebbles: number | null
   pebbles_with_picture: number | null
   pebbles_in_collection: number | null
+  pebbles_with_custom_glyph: number | null
   active_users: number | null
 }
 
@@ -53,6 +54,7 @@ export interface PebbleEnrichmentRow {
   /** 0–100 percent values. Null when total_pebbles = 0. */
   pct_with_picture: number | null
   pct_in_collection: number | null
+  pct_with_custom_glyph: number | null
   pct_with_thought: number | null
   pct_with_soul: number | null
   pct_with_intensity: number | null
