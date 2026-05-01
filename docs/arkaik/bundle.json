@@ -1238,6 +1238,24 @@
       "description": "SECURITY DEFINER plpgsql RPC, gated on is_admin(auth.uid()). No arguments. Returns the six histogram-bucket rows from v_analytics_bounce_distribution_today ordered by bucket_order asc. Backs the bounce karma distribution card on the admin analytics page. Raises insufficient_privilege (42501) for non-admins.",
       "status": "development",
       "platforms": ["web"]
+    },
+    {
+      "id": "DM-v-analytics-quality-signals-today",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "v_analytics_quality_signals_today",
+      "description": "Postgres view: 8 rows describing today's habit-health indicators for the admin Quality signals table. Each row has indicator_order, indicator_key, indicator_label, unit, value (current period), previous_value (matching prior period), and available (false for the four indicators whose source data isn't captured yet — median session duration, sessions/WAU, % revisits to past pebbles, friction events/session). Phase A computes pebbles/WAU and D1 / D7 / D30 retention from public.pebbles + auth.users; the other four rows return null until sessions, pebble_views, and a normalized analytics_events table land in Phases B and C of issue #346.",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "API-get-quality-signals-today",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "get_quality_signals_today",
+      "description": "SECURITY DEFINER plpgsql RPC, gated on is_admin(auth.uid()). No arguments. Returns all eight rows from v_analytics_quality_signals_today ordered by indicator_order asc. Backs the Quality signals card on the admin analytics page. Raises insufficient_privilege (42501) for non-admins.",
+      "status": "development",
+      "platforms": ["web"]
     }
   ],
   "edges": [
@@ -1461,6 +1479,11 @@
     { "id": "e-V-admin-analytics-DM-v-analytics-bounce-distribution-today", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "DM-v-analytics-bounce-distribution-today", "edge_type": "displays" },
     { "id": "e-API-get-bounce-distribution-today-DM-v-analytics-bounce-distribution-today", "project_id": "pebbles", "source_id": "API-get-bounce-distribution-today", "target_id": "DM-v-analytics-bounce-distribution-today", "edge_type": "queries" },
     { "id": "e-API-get-bounce-distribution-today-DM-bounce", "project_id": "pebbles", "source_id": "API-get-bounce-distribution-today", "target_id": "DM-bounce", "edge_type": "queries" },
-    { "id": "e-API-get-bounce-distribution-today-DM-pebble", "project_id": "pebbles", "source_id": "API-get-bounce-distribution-today", "target_id": "DM-pebble", "edge_type": "queries" }
+    { "id": "e-API-get-bounce-distribution-today-DM-pebble", "project_id": "pebbles", "source_id": "API-get-bounce-distribution-today", "target_id": "DM-pebble", "edge_type": "queries" },
+    { "id": "e-V-admin-analytics-API-get-quality-signals-today", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "API-get-quality-signals-today", "edge_type": "calls" },
+    { "id": "e-V-admin-analytics-DM-v-analytics-quality-signals-today", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "DM-v-analytics-quality-signals-today", "edge_type": "displays" },
+    { "id": "e-API-get-quality-signals-today-DM-v-analytics-quality-signals-today", "project_id": "pebbles", "source_id": "API-get-quality-signals-today", "target_id": "DM-v-analytics-quality-signals-today", "edge_type": "queries" },
+    { "id": "e-API-get-quality-signals-today-DM-pebble", "project_id": "pebbles", "source_id": "API-get-quality-signals-today", "target_id": "DM-pebble", "edge_type": "queries" },
+    { "id": "e-API-get-quality-signals-today-DM-account", "project_id": "pebbles", "source_id": "API-get-quality-signals-today", "target_id": "DM-account", "edge_type": "queries" }
   ]
 }

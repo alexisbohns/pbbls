@@ -5,6 +5,7 @@ import { EmotionShare } from "@/components/analytics/EmotionShare"
 import { KpiCard } from "@/components/analytics/KpiCard"
 import { PebbleEnrichment } from "@/components/analytics/PebbleEnrichment"
 import { PebbleVolumeChart } from "@/components/analytics/PebbleVolumeChart"
+import { QualitySignalsTable } from "@/components/analytics/QualitySignalsTable"
 import { RetentionHeatmap } from "@/components/analytics/RetentionHeatmap"
 import { Sparkline } from "@/components/analytics/Sparkline"
 import { UserAverages } from "@/components/analytics/UserAverages"
@@ -52,6 +53,11 @@ import {
   emptyBounceDistributionFixture,
   sparseBounceDistributionFixture,
 } from "@/components/analytics/__fixtures__/bounceDistribution"
+import {
+  denseQualitySignalsFixture,
+  emptyQualitySignalsFixture,
+  sparseQualitySignalsFixture,
+} from "@/components/analytics/__fixtures__/qualitySignals"
 import {
   denseDomainShareBottomMover,
   denseDomainShareSnapshot,
@@ -352,6 +358,33 @@ export default function AnalyticsPlaygroundPage() {
             totalUsers={emptyBounceDistributionFixture.totalUsers}
             stats={emptyBounceDistributionFixture.stats}
           />
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          QualitySignalsTable — dense (4 of 8 populated)
+        </h2>
+        <div className="max-w-2xl">
+          <QualitySignalsTable rows={denseQualitySignalsFixture} />
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          QualitySignalsTable — sparse (no comparable prior period)
+        </h2>
+        <div className="max-w-2xl">
+          <QualitySignalsTable rows={sparseQualitySignalsFixture} />
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          QualitySignalsTable — empty
+        </h2>
+        <div className="max-w-2xl">
+          <QualitySignalsTable rows={emptyQualitySignalsFixture} />
         </div>
       </section>
     </div>

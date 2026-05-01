@@ -102,6 +102,25 @@ export interface BounceDistributionRow {
   avg_active_days_per_week: number | null
 }
 
+export type QualitySignalUnit = "percent" | "seconds" | "pebbles" | "sessions" | "events"
+
+export interface QualitySignalRow {
+  bucket_date: IsoDate | null
+  /** 1..8 ordering, matches the spec / mockup row order. */
+  indicator_order: number | null
+  /** Stable machine key (e.g. "d1_retention"). */
+  indicator_key: string | null
+  /** Human label for the row (e.g. "D1 retention"). */
+  indicator_label: string | null
+  unit: QualitySignalUnit | null
+  /** Current-period value. Null when `available = false` or computation has no denominator. */
+  value: number | null
+  /** Same metric for the matching prior period. Null when `available = false`. */
+  previous_value: number | null
+  /** True when the metric is computable from existing data; false for Phase B/C placeholders. */
+  available: boolean | null
+}
+
 export interface UserAveragesWeeklyRow {
   /** Monday of the ISO week (UTC), ISO date string. */
   bucket_week: IsoDate | null

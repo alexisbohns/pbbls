@@ -8,6 +8,7 @@ import { KpiStrip } from "@/components/analytics/KpiStrip"
 import { KpiStripSkeleton } from "@/components/analytics/KpiStripSkeleton"
 import { PebbleEnrichmentCard } from "@/components/analytics/PebbleEnrichmentCard"
 import { PebbleVolumeChartCard } from "@/components/analytics/PebbleVolumeChartCard"
+import { QualitySignalsTableCard } from "@/components/analytics/QualitySignalsTableCard"
 import { RetentionHeatmapCard } from "@/components/analytics/RetentionHeatmapCard"
 import { TimeRangeTabs } from "@/components/analytics/TimeRangeTabs"
 import { UserAveragesCard } from "@/components/analytics/UserAveragesCard"
@@ -73,6 +74,11 @@ export default async function AnalyticsPage({
         <div className="lg:col-span-6">
           <Suspense fallback={<ChartCardSkeleton />}>
             <DomainShareCard range={range} />
+          </Suspense>
+        </div>
+        <div className="lg:col-span-12">
+          <Suspense fallback={<ChartCardSkeleton />}>
+            <QualitySignalsTableCard />
           </Suspense>
         </div>
       </div>
