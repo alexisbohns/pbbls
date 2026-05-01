@@ -55,7 +55,10 @@ export async function getRetentionCohorts(): Promise<RetentionCohortRow[]> {
   const { data, error } = await supabase.rpc("get_retention_cohorts")
   if (error) {
     console.error("[analytics] getRetentionCohorts failed:", error.message)
-    throw error
+    // PostgrestError isn't an Error subclass; rewrap so consumers (e.g.
+    // ErrorBlock with `err instanceof Error ? err.message : String(err)`)
+    // get a readable string instead of "[object Object]".
+    throw new Error(error.message)
   }
   return data ?? []
 }

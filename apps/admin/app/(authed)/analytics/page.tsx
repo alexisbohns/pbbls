@@ -3,7 +3,7 @@ import { ActiveUsersChartCard } from "@/components/analytics/ActiveUsersChartCar
 import { ChartCardSkeleton } from "@/components/analytics/ChartCardSkeleton"
 import { KpiStrip } from "@/components/analytics/KpiStrip"
 import { KpiStripSkeleton } from "@/components/analytics/KpiStripSkeleton"
-import { RetentionHeatmapCard } from "@/components/analytics/RetentionHeatmap"
+import { RetentionHeatmapCard } from "@/components/analytics/RetentionHeatmapCard"
 import { TimeRangeTabs } from "@/components/analytics/TimeRangeTabs"
 import { isTimeRange, type TimeRange } from "@/lib/analytics/types"
 
