@@ -119,6 +119,24 @@ struct AuthView: View {
     }
 
     private var canSubmit: Bool {
+        Self.canSubmit(
+            mode: mode,
+            email: email,
+            password: password,
+            termsAccepted: termsAccepted,
+            privacyAccepted: privacyAccepted,
+            isSubmitting: isSubmitting
+        )
+    }
+
+    static func canSubmit(
+        mode: Mode,
+        email: String,
+        password: String,
+        termsAccepted: Bool,
+        privacyAccepted: Bool,
+        isSubmitting: Bool
+    ) -> Bool {
         guard !isSubmitting,
               email.contains("@"),
               password.count >= 6
