@@ -11,19 +11,21 @@ struct PebblesCheckbox: View {
     let linkText: LocalizedStringResource
     let onLinkTap: () -> Void
 
-    @ScaledMetric(relativeTo: .body) private var boxSize: CGFloat = 28
+    @ScaledMetric(relativeTo: .body) private var boxSize: CGFloat = 44
     @ScaledMetric(relativeTo: .body) private var cornerRadius: CGFloat = 12
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
             box
-                .frame(minWidth: 44, minHeight: 44)
                 .contentShape(Rectangle())
                 .onTapGesture { isChecked.toggle() }
 
             label
                 .onTapGesture { onLinkTap() }
+
+            Spacer(minLength: 0)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
         .accessibilityAddTraits(isChecked ? .isSelected : [])
@@ -38,7 +40,7 @@ struct PebblesCheckbox: View {
                 .stroke(isChecked ? Color.pebblesAccent : Color.pebblesBorder, lineWidth: 1)
 
             Image(systemName: isChecked ? "checkmark.square" : "square")
-                .font(.body)
+                .font(.title3)
                 .foregroundStyle(isChecked ? Color.pebblesBackground : Color.pebblesMutedForeground)
         }
         .frame(width: boxSize, height: boxSize)
