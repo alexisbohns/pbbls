@@ -99,12 +99,10 @@ struct WelcomeView: View {
                     Task { await runGoogle() }
                 } label: {
                     HStack(spacing: 8) {
-                        // TODO: replace with the official Google "G" mark asset
-                        // (download from https://developers.google.com/identity/branding-guidelines
-                        // and add to Assets.xcassets as `GoogleGMark`).
-                        Image(systemName: "g.circle.fill")
-                            .font(.title3)
-                            .foregroundStyle(Color(red: 0.26, green: 0.52, blue: 0.96))
+                        Image("GoogleGMark")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 18, height: 18)
                         Text("Continue with Google")
                     }
                     .frame(maxWidth: .infinity)
