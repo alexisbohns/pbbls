@@ -790,6 +790,33 @@ export type Database = {
         }
         Relationships: []
       }
+      v_analytics_domain_share_weekly: {
+        Row: {
+          bucket_week: string | null
+          domain_id: string | null
+          domain_label: string | null
+          domain_level: number | null
+          domain_name: string | null
+          domain_slug: string | null
+          pebbles_in_domain: number | null
+          share_pct: number | null
+          total_pebbles: number | null
+        }
+        Relationships: []
+      }
+      v_analytics_emotion_share_weekly: {
+        Row: {
+          bucket_week: string | null
+          color: string | null
+          emotion_id: string | null
+          emotion_name: string | null
+          emotion_slug: string | null
+          pebbles_with_emotion: number | null
+          share_pct: number | null
+          total_pebbles: number | null
+        }
+        Relationships: []
+      }
       v_analytics_kpi_daily: {
         Row: {
           bucket_date: string | null
@@ -972,6 +999,45 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "v_analytics_active_users_daily"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_domain_share: {
+        Args: { p_end: string; p_start: string }
+        Returns: {
+          bucket_week: string | null
+          domain_id: string | null
+          domain_label: string | null
+          domain_level: number | null
+          domain_name: string | null
+          domain_slug: string | null
+          pebbles_in_domain: number | null
+          share_pct: number | null
+          total_pebbles: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "v_analytics_domain_share_weekly"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_emotion_share: {
+        Args: { p_end: string; p_start: string }
+        Returns: {
+          bucket_week: string | null
+          color: string | null
+          emotion_id: string | null
+          emotion_name: string | null
+          emotion_slug: string | null
+          pebbles_with_emotion: number | null
+          share_pct: number | null
+          total_pebbles: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "v_analytics_emotion_share_weekly"
           isOneToOne: false
           isSetofReturn: true
         }

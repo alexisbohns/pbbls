@@ -58,6 +58,35 @@ export interface PebbleEnrichmentRow {
   pct_with_intensity: number | null
 }
 
+export interface EmotionShareWeeklyRow {
+  /** Monday of the ISO week (UTC), ISO date string. */
+  bucket_week: IsoDate | null
+  emotion_id: string | null
+  emotion_slug: string | null
+  emotion_name: string | null
+  /** Hex color from the emotions reference table. */
+  color: string | null
+  pebbles_with_emotion: number | null
+  total_pebbles: number | null
+  /** 0–100 percent share of pebbles in this week assigned this emotion. */
+  share_pct: number | null
+}
+
+export interface DomainShareWeeklyRow {
+  /** Monday of the ISO week (UTC), ISO date string. */
+  bucket_week: IsoDate | null
+  domain_id: string | null
+  domain_slug: string | null
+  domain_name: string | null
+  domain_label: string | null
+  /** Maslow rank derived from seeded slug order. NULL for unknown slugs. */
+  domain_level: number | null
+  pebbles_in_domain: number | null
+  total_pebbles: number | null
+  /** 0–100 percent share of pebbles in this week linked to this domain. */
+  share_pct: number | null
+}
+
 export interface UserAveragesWeeklyRow {
   /** Monday of the ISO week (UTC), ISO date string. */
   bucket_week: IsoDate | null

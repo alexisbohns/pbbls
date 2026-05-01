@@ -1175,6 +1175,42 @@
       "description": "SECURITY DEFINER plpgsql RPC, gated on is_admin(auth.uid()). No arguments. Returns rows from v_analytics_retention_cohorts_weekly for the last 8 cohorts (most recent signup weeks). Raises insufficient_privilege (42501) for non-admins.",
       "status": "development",
       "platforms": ["web"]
+    },
+    {
+      "id": "DM-v-analytics-emotion-share-weekly",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "v_analytics_emotion_share_weekly",
+      "description": "Postgres view: one row per (ISO week, emotion). Columns: bucket_week, emotion_id, emotion_slug, emotion_name, color, pebbles_with_emotion, total_pebbles, share_pct. Source: pebbles.emotion_id (NOT NULL FK), so each pebble counts toward exactly one emotion and share_pct sums to 100% per week.",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "DM-v-analytics-domain-share-weekly",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "v_analytics_domain_share_weekly",
+      "description": "Postgres view: one row per (ISO week, domain). Columns: bucket_week, domain_id, domain_slug, domain_name, domain_label, domain_level, pebbles_in_domain, total_pebbles, share_pct. Source: pebble_domains many-to-many, so a pebble can be linked to multiple domains and shares may exceed 100%. domain_level is derived from the seeded Maslow slug order (zoe, asphaleia, philia, time, eudaimonia).",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "API-get-emotion-share",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "get_emotion_share",
+      "description": "SECURITY DEFINER plpgsql RPC, gated on is_admin(auth.uid()). Takes p_start and p_end dates (week-truncated internally). Returns rows from v_analytics_emotion_share_weekly within the range, ordered by bucket_week asc, share_pct desc. The admin emotion-share card aggregates these rows for the snapshot view and renders them directly for the 12-week stacked-area over-time view.",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "API-get-domain-share",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "get_domain_share",
+      "description": "SECURITY DEFINER plpgsql RPC, gated on is_admin(auth.uid()). Takes p_start and p_end dates (week-truncated internally). Returns rows from v_analytics_domain_share_weekly within the range, ordered by bucket_week asc, domain_level asc. The admin domain-share card calls this RPC twice (current + previous period) to compute 'biggest movers' deltas in pp.",
+      "status": "development",
+      "platforms": ["web"]
     }
   ],
   "edges": [
@@ -1387,6 +1423,12 @@
     { "id": "e-V-admin-analytics-DM-v-analytics-retention-cohorts-weekly", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "DM-v-analytics-retention-cohorts-weekly", "edge_type": "displays" },
     { "id": "e-API-get-retention-cohorts-DM-v-analytics-retention-cohorts-weekly", "project_id": "pebbles", "source_id": "API-get-retention-cohorts", "target_id": "DM-v-analytics-retention-cohorts-weekly", "edge_type": "queries" },
     { "id": "e-API-get-retention-cohorts-DM-pebble", "project_id": "pebbles", "source_id": "API-get-retention-cohorts", "target_id": "DM-pebble", "edge_type": "queries" },
-    { "id": "e-API-get-retention-cohorts-DM-account", "project_id": "pebbles", "source_id": "API-get-retention-cohorts", "target_id": "DM-account", "edge_type": "queries" }
+    { "id": "e-API-get-retention-cohorts-DM-account", "project_id": "pebbles", "source_id": "API-get-retention-cohorts", "target_id": "DM-account", "edge_type": "queries" },
+    { "id": "e-V-admin-analytics-API-get-emotion-share", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "API-get-emotion-share", "edge_type": "calls" },
+    { "id": "e-V-admin-analytics-API-get-domain-share", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "API-get-domain-share", "edge_type": "calls" },
+    { "id": "e-V-admin-analytics-DM-v-analytics-emotion-share-weekly", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "DM-v-analytics-emotion-share-weekly", "edge_type": "displays" },
+    { "id": "e-V-admin-analytics-DM-v-analytics-domain-share-weekly", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "DM-v-analytics-domain-share-weekly", "edge_type": "displays" },
+    { "id": "e-API-get-emotion-share-DM-v-analytics-emotion-share-weekly", "project_id": "pebbles", "source_id": "API-get-emotion-share", "target_id": "DM-v-analytics-emotion-share-weekly", "edge_type": "queries" },
+    { "id": "e-API-get-domain-share-DM-v-analytics-domain-share-weekly", "project_id": "pebbles", "source_id": "API-get-domain-share", "target_id": "DM-v-analytics-domain-share-weekly", "edge_type": "queries" }
   ]
 }

@@ -1,7 +1,10 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server"
-import { dateRangeFor } from "./date"
+import { dateRangeFor, periodLengthDays, shiftIsoDate } from "./date"
 import type {
   ActiveUsersDailyRow,
+  DomainShareWeeklyRow,
+  EmotionShareWeeklyRow,
+  IsoDate,
   KpiDailyRow,
   PebbleEnrichmentRow,
   PebbleVolumeRow,
@@ -111,6 +114,88 @@ export async function getUserAveragesSeries(
     throw new Error(error.message)
   }
   return data ?? []
+}
+
+/**
+ * Weekly emotion share rows over the snapshot range. Used by the emotion-share
+ * card for both the snapshot view (aggregated across weeks) and the stacked-
+ * area over-time view. The RPC enforces `is_admin(auth.uid())`.
+ */
+export async function getEmotionShare(
+  range: TimeRange,
+): Promise<EmotionShareWeeklyRow[]> {
+  const { start, end } = dateRangeFor(range)
+  return fetchEmotionShare(start, end)
+}
+
+/**
+ * Always-12-weeks emotion share rows for the over-time stacked area, regardless
+ * of the active time-range tab. The over-time framing in the spec is fixed at
+ * 12 weeks so the chart shape stays comparable across snapshots.
+ */
+export async function getEmotionShareLast12Weeks(): Promise<EmotionShareWeeklyRow[]> {
+  const today = new Date()
+  const end = today.toISOString().slice(0, 10)
+  // 12 weeks back, week-start aligned by the SQL view (date_trunc('week', ...)).
+  const start = shiftIsoDate(end, -7 * 11)
+  return fetchEmotionShare(start, end)
+}
+
+async function fetchEmotionShare(
+  start: IsoDate,
+  end: IsoDate,
+): Promise<EmotionShareWeeklyRow[]> {
+  const supabase = await createServerSupabaseClient()
+  const { data, error } = await supabase.rpc("get_emotion_share", {
+    p_start: start,
+    p_end: end,
+  })
+  if (error) {
+    console.error("[analytics] getEmotionShare failed:", error.message)
+    throw new Error(error.message)
+  }
+  return data ?? []
+}
+
+/**
+ * Weekly domain share rows for the snapshot range, plus a parallel set for the
+ * matching previous period (used to compute "biggest movers" deltas in pp).
+ * Returns null for `previous` when the active range is "all" (no prior period).
+ * Both RPC calls enforce `is_admin(auth.uid())`.
+ */
+export async function getDomainShare(
+  range: TimeRange,
+): Promise<{
+  current: DomainShareWeeklyRow[]
+  previous: DomainShareWeeklyRow[] | null
+}> {
+  const { start, end } = dateRangeFor(range)
+  const supabase = await createServerSupabaseClient()
+  const { data, error } = await supabase.rpc("get_domain_share", {
+    p_start: start,
+    p_end: end,
+  })
+  if (error) {
+    console.error("[analytics] getDomainShare current failed:", error.message)
+    throw new Error(error.message)
+  }
+  const current = data ?? []
+
+  const days = periodLengthDays(range)
+  if (days === null) {
+    return { current, previous: null }
+  }
+  const prevEnd = shiftIsoDate(start, -1)
+  const prevStart = shiftIsoDate(prevEnd, -(days - 1))
+  const { data: prevData, error: prevError } = await supabase.rpc(
+    "get_domain_share",
+    { p_start: prevStart, p_end: prevEnd },
+  )
+  if (prevError) {
+    console.error("[analytics] getDomainShare previous failed:", prevError.message)
+    throw new Error(prevError.message)
+  }
+  return { current, previous: prevData ?? [] }
 }
 
 /**

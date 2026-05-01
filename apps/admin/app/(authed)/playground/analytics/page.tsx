@@ -1,4 +1,6 @@
 import { ActiveUsersChart } from "@/components/analytics/ActiveUsersChart"
+import { DomainShare } from "@/components/analytics/DomainShare"
+import { EmotionShare } from "@/components/analytics/EmotionShare"
 import { KpiCard } from "@/components/analytics/KpiCard"
 import { PebbleEnrichment } from "@/components/analytics/PebbleEnrichment"
 import { PebbleVolumeChart } from "@/components/analytics/PebbleVolumeChart"
@@ -30,6 +32,30 @@ import {
   emptyUserAveragesFixture,
   sparseUserAveragesFixture,
 } from "@/components/analytics/__fixtures__/userAverages"
+import {
+  denseEmotionShareCatalog,
+  denseEmotionShareSnapshot,
+  denseEmotionShareTotalPebbles,
+  denseEmotionShareWeekly,
+  emptyEmotionShareCatalog,
+  emptyEmotionShareSnapshot,
+  emptyEmotionShareTotalPebbles,
+  emptyEmotionShareWeekly,
+  sparseEmotionShareCatalog,
+  sparseEmotionShareSnapshot,
+  sparseEmotionShareTotalPebbles,
+  sparseEmotionShareWeekly,
+} from "@/components/analytics/__fixtures__/emotionShare"
+import {
+  denseDomainShareBottomMover,
+  denseDomainShareSnapshot,
+  denseDomainShareTopMover,
+  denseDomainShareTotalPebbles,
+  emptyDomainShareSnapshot,
+  emptyDomainShareTotalPebbles,
+  sparseDomainShareSnapshot,
+  sparseDomainShareTotalPebbles,
+} from "@/components/analytics/__fixtures__/domainShare"
 
 export default function AnalyticsPlaygroundPage() {
   const sparkValues = kpiFixture.map((r) => r.dau ?? 0)
@@ -192,6 +218,96 @@ export default function AnalyticsPlaygroundPage() {
           UserAverages — empty
         </h2>
         <UserAverages data={emptyUserAveragesFixture} />
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          EmotionShare — dense
+        </h2>
+        <div className="max-w-xl">
+          <EmotionShare
+            snapshot={denseEmotionShareSnapshot}
+            weekly={denseEmotionShareWeekly}
+            catalog={denseEmotionShareCatalog}
+            totalPebbles={denseEmotionShareTotalPebbles}
+            rangeLabel="30 days"
+          />
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          EmotionShare — sparse
+        </h2>
+        <div className="max-w-xl">
+          <EmotionShare
+            snapshot={sparseEmotionShareSnapshot}
+            weekly={sparseEmotionShareWeekly}
+            catalog={sparseEmotionShareCatalog}
+            totalPebbles={sparseEmotionShareTotalPebbles}
+            rangeLabel="30 days"
+          />
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          EmotionShare — empty
+        </h2>
+        <div className="max-w-xl">
+          <EmotionShare
+            snapshot={emptyEmotionShareSnapshot}
+            weekly={emptyEmotionShareWeekly}
+            catalog={emptyEmotionShareCatalog}
+            totalPebbles={emptyEmotionShareTotalPebbles}
+            rangeLabel="30 days"
+          />
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          DomainShare — dense (with movers)
+        </h2>
+        <div className="max-w-xl">
+          <DomainShare
+            rows={denseDomainShareSnapshot}
+            totalPebbles={denseDomainShareTotalPebbles}
+            rangeLabel="30 days"
+            topMover={denseDomainShareTopMover}
+            bottomMover={denseDomainShareBottomMover}
+          />
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          DomainShare — sparse (no prior period)
+        </h2>
+        <div className="max-w-xl">
+          <DomainShare
+            rows={sparseDomainShareSnapshot}
+            totalPebbles={sparseDomainShareTotalPebbles}
+            rangeLabel="all time"
+            topMover={null}
+            bottomMover={null}
+          />
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          DomainShare — empty
+        </h2>
+        <div className="max-w-xl">
+          <DomainShare
+            rows={emptyDomainShareSnapshot}
+            totalPebbles={emptyDomainShareTotalPebbles}
+            rangeLabel="30 days"
+            topMover={null}
+            bottomMover={null}
+          />
+        </div>
       </section>
     </div>
   )
