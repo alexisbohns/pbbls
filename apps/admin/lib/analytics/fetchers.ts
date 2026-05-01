@@ -9,6 +9,7 @@ import type {
   KpiDailyRow,
   PebbleEnrichmentRow,
   PebbleVolumeRow,
+  QualitySignalRow,
   RetentionCohortRow,
   TimeRange,
   UserAveragesWeeklyRow,
@@ -212,6 +213,22 @@ export async function getDomainShare(
     throw new Error(prevError.message)
   }
   return { current, previous: prevData ?? [] }
+}
+
+/**
+ * Today's 8-row Quality signals table (current value + matching prior-period
+ * value per indicator). Four rows are computable from existing data; the other
+ * four return `available = false` until sessions / pebble_views / analytics
+ * events land. The RPC enforces `is_admin(auth.uid())`.
+ */
+export async function getQualitySignalsToday(): Promise<QualitySignalRow[]> {
+  const supabase = await createServerSupabaseClient()
+  const { data, error } = await supabase.rpc("get_quality_signals_today")
+  if (error) {
+    console.error("[analytics] getQualitySignalsToday failed:", error.message)
+    throw new Error(error.message)
+  }
+  return (data ?? []) as QualitySignalRow[]
 }
 
 /**

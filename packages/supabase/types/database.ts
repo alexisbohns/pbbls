@@ -881,6 +881,19 @@ export type Database = {
         }
         Relationships: []
       }
+      v_analytics_quality_signals_today: {
+        Row: {
+          available: boolean | null
+          bucket_date: string | null
+          indicator_key: string | null
+          indicator_label: string | null
+          indicator_order: number | null
+          previous_value: number | null
+          unit: string | null
+          value: number | null
+        }
+        Relationships: []
+      }
       v_analytics_retention_cohorts_weekly: {
         Row: {
           active_users: number | null
@@ -1128,6 +1141,25 @@ export type Database = {
           pebbles_in_collection: number | null
           pebbles_with_picture: number | null
         }[]
+      }
+      get_quality_signals_today: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          available: boolean | null
+          bucket_date: string | null
+          indicator_key: string | null
+          indicator_label: string | null
+          indicator_order: number | null
+          previous_value: number | null
+          unit: string | null
+          value: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "v_analytics_quality_signals_today"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_retention_cohorts: {
         Args: Record<PropertyKey, never>
