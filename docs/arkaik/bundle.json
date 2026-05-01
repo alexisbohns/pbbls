@@ -1118,7 +1118,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Admin · Analytics",
-      "description": "Back-office analytics page (admin-only). Thin slice (PR #337): KPI strip (Total users, DAU, WAU, MAU, Pebbles/day, DAU/MAU) + Active users line chart with DAU/WAU/MAU toggle. Global time-range tabs (7d/30d/90d/1y/All) URL-driven via ?range=. Six other buildable surfaces (retention, volume, enrichment, per-user, domain share, visibility, single-emotion share) follow on the same milestone (M28).",
+      "description": "Back-office analytics page (admin-only). Thin slice (PR #337): KPI strip (Total users, DAU, WAU, MAU, Pebbles/day, DAU/MAU) + Active users line chart with DAU/WAU/MAU toggle. Global time-range tabs (7d/30d/90d/1y/All) URL-driven via ?range=. Layout extension (#339): Active users chart shrinks to 8/12 and a Retention cohort heatmap (last 8 weekly signup cohorts) fills 4/12. Five other buildable surfaces (volume, enrichment, per-user, domain share, visibility, single-emotion share) follow on the same milestone (M28).",
       "status": "development",
       "platforms": ["web"]
     },
@@ -1155,6 +1155,24 @@
       "species": "api-endpoint",
       "title": "get_active_users_series",
       "description": "SECURITY DEFINER plpgsql RPC, gated on is_admin(auth.uid()). Takes p_start and p_end dates. Returns rows from v_analytics_active_users_daily in [p_start, p_end] ordered ascending. Raises insufficient_privilege (42501) for non-admins.",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "DM-v-analytics-retention-cohorts-weekly",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "v_analytics_retention_cohorts_weekly",
+      "description": "Postgres view: one row per (cohort_week, week_offset). Cohort = users grouped by signup week (Mon–Sun, UTC) from auth.users.created_at. Columns: cohort_week, week_offset, cohort_size, active_users, retention_pct. retention_pct = % of cohort users who created >=1 pebble in that week_offset.",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "API-get-retention-cohorts",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "get_retention_cohorts",
+      "description": "SECURITY DEFINER plpgsql RPC, gated on is_admin(auth.uid()). No arguments. Returns rows from v_analytics_retention_cohorts_weekly for the last 8 cohorts (most recent signup weeks). Raises insufficient_privilege (42501) for non-admins.",
       "status": "development",
       "platforms": ["web"]
     }
@@ -1364,6 +1382,11 @@
     { "id": "e-API-get-kpi-daily-DM-pebble", "project_id": "pebbles", "source_id": "API-get-kpi-daily", "target_id": "DM-pebble", "edge_type": "queries" },
     { "id": "e-API-get-kpi-daily-DM-account", "project_id": "pebbles", "source_id": "API-get-kpi-daily", "target_id": "DM-account", "edge_type": "queries" },
     { "id": "e-API-get-active-users-series-DM-v-analytics-active-users-daily", "project_id": "pebbles", "source_id": "API-get-active-users-series", "target_id": "DM-v-analytics-active-users-daily", "edge_type": "queries" },
-    { "id": "e-API-get-active-users-series-DM-pebble", "project_id": "pebbles", "source_id": "API-get-active-users-series", "target_id": "DM-pebble", "edge_type": "queries" }
+    { "id": "e-API-get-active-users-series-DM-pebble", "project_id": "pebbles", "source_id": "API-get-active-users-series", "target_id": "DM-pebble", "edge_type": "queries" },
+    { "id": "e-V-admin-analytics-API-get-retention-cohorts", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "API-get-retention-cohorts", "edge_type": "calls" },
+    { "id": "e-V-admin-analytics-DM-v-analytics-retention-cohorts-weekly", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "DM-v-analytics-retention-cohorts-weekly", "edge_type": "displays" },
+    { "id": "e-API-get-retention-cohorts-DM-v-analytics-retention-cohorts-weekly", "project_id": "pebbles", "source_id": "API-get-retention-cohorts", "target_id": "DM-v-analytics-retention-cohorts-weekly", "edge_type": "queries" },
+    { "id": "e-API-get-retention-cohorts-DM-pebble", "project_id": "pebbles", "source_id": "API-get-retention-cohorts", "target_id": "DM-pebble", "edge_type": "queries" },
+    { "id": "e-API-get-retention-cohorts-DM-account", "project_id": "pebbles", "source_id": "API-get-retention-cohorts", "target_id": "DM-account", "edge_type": "queries" }
   ]
 }

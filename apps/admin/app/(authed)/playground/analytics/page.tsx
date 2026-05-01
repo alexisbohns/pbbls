@@ -1,5 +1,6 @@
 import { ActiveUsersChart } from "@/components/analytics/ActiveUsersChart"
 import { KpiCard } from "@/components/analytics/KpiCard"
+import { RetentionHeatmap } from "@/components/analytics/RetentionHeatmap"
 import { Sparkline } from "@/components/analytics/Sparkline"
 import {
   denseFixture,
@@ -7,6 +8,10 @@ import {
   sparseFixture,
 } from "@/components/analytics/__fixtures__/activeUsers"
 import { kpiFixture } from "@/components/analytics/__fixtures__/kpi"
+import {
+  denseRetentionFixture,
+  emptyRetentionFixture,
+} from "@/components/analytics/__fixtures__/retentionCohorts"
 
 export default function AnalyticsPlaygroundPage() {
   const sparkValues = kpiFixture.map((r) => r.dau ?? 0)
@@ -82,6 +87,24 @@ export default function AnalyticsPlaygroundPage() {
           ActiveUsersChart — empty
         </h2>
         <ActiveUsersChart data={emptyFixture} />
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          RetentionHeatmap — 8 cohorts, varying retention
+        </h2>
+        <div className="max-w-md">
+          <RetentionHeatmap rows={denseRetentionFixture} />
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          RetentionHeatmap — empty
+        </h2>
+        <div className="max-w-md">
+          <RetentionHeatmap rows={emptyRetentionFixture} />
+        </div>
       </section>
     </div>
   )
