@@ -1211,6 +1211,33 @@
       "description": "SECURITY DEFINER plpgsql RPC, gated on is_admin(auth.uid()). Takes p_start and p_end dates (week-truncated internally). Returns rows from v_analytics_domain_share_weekly within the range, ordered by bucket_week asc, domain_level asc. The admin domain-share card calls this RPC twice (current + previous period) to compute 'biggest movers' deltas in pp.",
       "status": "development",
       "platforms": ["web"]
+    },
+    {
+      "id": "DM-bounce",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "bounces",
+      "description": "Postgres table: snapshot of each user's running bounce karma score. Columns: user_id (PK, FK auth.users), score (int, default 0; cumulative sum of karma_events.delta — may be transiently negative if reversals exceed gains, the analytics view floors at 0), updated_at. Maintained atomically by trigger karma_events_apply_to_bounce on every karma_events insert (upserts the delta in the same transaction). Backfilled at migration time from sum(karma_events.delta) per user. RLS: users can read their own row; writes only via the trigger (security definer).",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "DM-v-analytics-bounce-distribution-today",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "v_analytics_bounce_distribution_today",
+      "description": "Postgres view: histogram of users by current bounce score (six buckets: 0, 1-10, 11-25, 26-50, 51-100, 100+) plus three summary stats denormalized onto every row — median_score, pct_maintaining (% of users whose current bounce >= bounce 7 days ago, reconstructed from karma_events), avg_active_days_per_week (avg distinct active days in the last 7 days across MAU). Always emits all six bucket rows, even when empty.",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "API-get-bounce-distribution-today",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "get_bounce_distribution_today",
+      "description": "SECURITY DEFINER plpgsql RPC, gated on is_admin(auth.uid()). No arguments. Returns the six histogram-bucket rows from v_analytics_bounce_distribution_today ordered by bucket_order asc. Backs the bounce karma distribution card on the admin analytics page. Raises insufficient_privilege (42501) for non-admins.",
+      "status": "development",
+      "platforms": ["web"]
     }
   ],
   "edges": [
@@ -1429,6 +1456,11 @@
     { "id": "e-V-admin-analytics-DM-v-analytics-emotion-share-weekly", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "DM-v-analytics-emotion-share-weekly", "edge_type": "displays" },
     { "id": "e-V-admin-analytics-DM-v-analytics-domain-share-weekly", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "DM-v-analytics-domain-share-weekly", "edge_type": "displays" },
     { "id": "e-API-get-emotion-share-DM-v-analytics-emotion-share-weekly", "project_id": "pebbles", "source_id": "API-get-emotion-share", "target_id": "DM-v-analytics-emotion-share-weekly", "edge_type": "queries" },
-    { "id": "e-API-get-domain-share-DM-v-analytics-domain-share-weekly", "project_id": "pebbles", "source_id": "API-get-domain-share", "target_id": "DM-v-analytics-domain-share-weekly", "edge_type": "queries" }
+    { "id": "e-API-get-domain-share-DM-v-analytics-domain-share-weekly", "project_id": "pebbles", "source_id": "API-get-domain-share", "target_id": "DM-v-analytics-domain-share-weekly", "edge_type": "queries" },
+    { "id": "e-V-admin-analytics-API-get-bounce-distribution-today", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "API-get-bounce-distribution-today", "edge_type": "calls" },
+    { "id": "e-V-admin-analytics-DM-v-analytics-bounce-distribution-today", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "DM-v-analytics-bounce-distribution-today", "edge_type": "displays" },
+    { "id": "e-API-get-bounce-distribution-today-DM-v-analytics-bounce-distribution-today", "project_id": "pebbles", "source_id": "API-get-bounce-distribution-today", "target_id": "DM-v-analytics-bounce-distribution-today", "edge_type": "queries" },
+    { "id": "e-API-get-bounce-distribution-today-DM-bounce", "project_id": "pebbles", "source_id": "API-get-bounce-distribution-today", "target_id": "DM-bounce", "edge_type": "queries" },
+    { "id": "e-API-get-bounce-distribution-today-DM-pebble", "project_id": "pebbles", "source_id": "API-get-bounce-distribution-today", "target_id": "DM-pebble", "edge_type": "queries" }
   ]
 }

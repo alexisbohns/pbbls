@@ -1,4 +1,5 @@
 import { ActiveUsersChart } from "@/components/analytics/ActiveUsersChart"
+import { BounceDistribution } from "@/components/analytics/BounceDistribution"
 import { DomainShare } from "@/components/analytics/DomainShare"
 import { EmotionShare } from "@/components/analytics/EmotionShare"
 import { KpiCard } from "@/components/analytics/KpiCard"
@@ -46,6 +47,11 @@ import {
   sparseEmotionShareTotalPebbles,
   sparseEmotionShareWeekly,
 } from "@/components/analytics/__fixtures__/emotionShare"
+import {
+  denseBounceDistributionFixture,
+  emptyBounceDistributionFixture,
+  sparseBounceDistributionFixture,
+} from "@/components/analytics/__fixtures__/bounceDistribution"
 import {
   denseDomainShareBottomMover,
   denseDomainShareSnapshot,
@@ -306,6 +312,45 @@ export default function AnalyticsPlaygroundPage() {
             rangeLabel="30 days"
             topMover={null}
             bottomMover={null}
+          />
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          BounceDistribution — dense
+        </h2>
+        <div className="max-w-xl">
+          <BounceDistribution
+            buckets={denseBounceDistributionFixture.buckets}
+            totalUsers={denseBounceDistributionFixture.totalUsers}
+            stats={denseBounceDistributionFixture.stats}
+          />
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          BounceDistribution — sparse
+        </h2>
+        <div className="max-w-xl">
+          <BounceDistribution
+            buckets={sparseBounceDistributionFixture.buckets}
+            totalUsers={sparseBounceDistributionFixture.totalUsers}
+            stats={sparseBounceDistributionFixture.stats}
+          />
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          BounceDistribution — empty
+        </h2>
+        <div className="max-w-xl">
+          <BounceDistribution
+            buckets={emptyBounceDistributionFixture.buckets}
+            totalUsers={emptyBounceDistributionFixture.totalUsers}
+            stats={emptyBounceDistributionFixture.stats}
           />
         </div>
       </section>

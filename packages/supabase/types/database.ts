@@ -39,6 +39,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      bounces: {
+        Row: {
+          score: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          score?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          score?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       card_types: {
         Row: {
           id: string
@@ -781,6 +799,18 @@ export type Database = {
       }
     }
     Views: {
+      v_analytics_bounce_distribution_today: {
+        Row: {
+          avg_active_days_per_week: number | null
+          bucket_date: string | null
+          bucket_label: string | null
+          bucket_order: number | null
+          median_score: number | null
+          pct_maintaining: number | null
+          users: number | null
+        }
+        Relationships: []
+      }
       v_analytics_active_users_daily: {
         Row: {
           bucket_date: string | null
@@ -999,6 +1029,24 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "v_analytics_active_users_daily"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_bounce_distribution_today: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          avg_active_days_per_week: number | null
+          bucket_date: string | null
+          bucket_label: string | null
+          bucket_order: number | null
+          median_score: number | null
+          pct_maintaining: number | null
+          users: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "v_analytics_bounce_distribution_today"
           isOneToOne: false
           isSetofReturn: true
         }

@@ -87,6 +87,21 @@ export interface DomainShareWeeklyRow {
   share_pct: number | null
 }
 
+export interface BounceDistributionRow {
+  bucket_date: IsoDate | null
+  /** 0..5 ordering, matches the canonical bucket sequence. */
+  bucket_order: number | null
+  /** Human-readable bucket: "0", "1-10", "11-25", "26-50", "51-100", "100+". */
+  bucket_label: string | null
+  users: number | null
+  /** Median current bounce score across all users. Null when zero users. */
+  median_score: number | null
+  /** % of users whose current bounce >= their bounce 7 days ago. 0–100. */
+  pct_maintaining: number | null
+  /** Avg distinct active days in the last 7 days, across all MAU. 0–7. */
+  avg_active_days_per_week: number | null
+}
+
 export interface UserAveragesWeeklyRow {
   /** Monday of the ISO week (UTC), ISO date string. */
   bucket_week: IsoDate | null
