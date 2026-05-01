@@ -106,7 +106,7 @@ struct WelcomeView: View {
 
     private var revealedContent: some View {
         VStack(spacing: 0) {
-            carousel
+            WelcomeCarousel(currentIndex: $currentIndex)
                 .opacity(revealStep >= 2 ? 1 : 0)
                 .padding(.bottom, 24)
 
@@ -212,52 +212,6 @@ struct WelcomeView: View {
             }
             .padding(.horizontal, 24)
             .padding(.bottom, 32)
-        }
-    }
-
-    /// Horizontal slide carousel + custom pagination dots beneath. We
-    /// use `ScrollView` rather than `TabView(.page)` because page-style
-    /// `TabView` only animates horizontal slides for swipe gestures —
-    /// programmatic selection changes (the auto-advance) crossfade as a
-    /// "blink." `ScrollView` + `scrollPosition(id:)` honors the surrounding
-    /// `withAnimation` for both swipe and programmatic transitions.
-    private var carousel: some View {
-        VStack(spacing: 20) {
-            ScrollView(.horizontal) {
-                LazyHStack(spacing: 0) {
-                    ForEach(Array(WelcomeSteps.all.enumerated()), id: \.element.id) { index, step in
-                        WelcomeSlideView(step: step)
-                            .containerRelativeFrame(.horizontal)
-                            .accessibilityElement(children: .combine)
-                            .accessibilityLabel(
-                                "Welcome step \(index + 1) of \(WelcomeSteps.all.count): "
-                                + "\(String(localized: step.title)). "
-                                + "\(String(localized: step.description))"
-                            )
-                            .id(index)
-                    }
-                }
-                .scrollTargetLayout()
-            }
-            .scrollIndicators(.hidden)
-            .scrollTargetBehavior(.paging)
-            .scrollPosition(id: Binding(
-                get: { Optional(currentIndex) },
-                set: { newValue in
-                    if let newValue { currentIndex = newValue }
-                }
-            ))
-            .frame(height: 110)
-
-            HStack(spacing: 8) {
-                ForEach(WelcomeSteps.all.indices, id: \.self) { idx in
-                    Circle()
-                        .fill(idx == currentIndex ? Color.pebblesAccent : Color.pebblesMuted)
-                        .frame(width: 6, height: 6)
-                        .animation(.easeInOut(duration: 0.2), value: currentIndex)
-                }
-            }
-            .accessibilityHidden(true)
         }
     }
 
