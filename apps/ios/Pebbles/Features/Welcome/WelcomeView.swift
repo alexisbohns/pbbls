@@ -123,7 +123,7 @@ struct WelcomeView: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
-                    .tint(.accentColor)
+                    .tint(Color.pebblesAccent)
                     .padding(.top, 8)
                     .environment(\.openURL, OpenURLAction { url in
                         switch url.absoluteString {
