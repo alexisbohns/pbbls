@@ -88,7 +88,7 @@ extension PebbleCreatePayload {
         self.visibility = draft.visibility.rawValue
         self.emotionId = draft.emotionId!
         self.domainIds = [draft.domainId!]
-        self.soulIds = draft.soulId.map { [$0] } ?? []
+        self.soulIds = draft.soulIds
         self.collectionIds = draft.collectionId.map { [$0] } ?? []
         self.glyphId = draft.glyphId
         self.snaps = {

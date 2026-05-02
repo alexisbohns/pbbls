@@ -19,7 +19,7 @@ struct PebbleCreatePayloadEncodingTests {
     }
 
     private func makeValidDraft(
-        soulId: UUID? = nil,
+        soulIds: [UUID] = [],
         collectionId: UUID? = nil
     ) -> PebbleDraft {
         var draft = PebbleDraft()
@@ -28,7 +28,7 @@ struct PebbleCreatePayloadEncodingTests {
         draft.emotionId = UUID()
         draft.domainId = UUID()
         draft.valence = .highlightLarge
-        draft.soulId = soulId
+        draft.soulIds = soulIds
         draft.collectionId = collectionId
         draft.visibility = .private
         return draft
@@ -58,23 +58,25 @@ struct PebbleCreatePayloadEncodingTests {
         #expect(ids.first == draft.domainId?.uuidString)
     }
 
-    @Test("soul_ids is empty array when soulId is nil")
+    @Test("soul_ids is empty array when draft.soulIds is empty")
     func emptySoulIds() throws {
-        let draft = makeValidDraft(soulId: nil)
+        let draft = makeValidDraft(soulIds: [])
         let json = try encode(PebbleCreatePayload(from: draft, userId: UUID()))
 
         let ids = json["soul_ids"] as? [String] ?? ["not-empty"]
         #expect(ids.isEmpty)
     }
 
-    @Test("soul_ids is single-element array when soulId is set")
-    func singleSoulId() throws {
-        let soulId = UUID()
-        let draft = makeValidDraft(soulId: soulId)
+    @Test("soul_ids encodes every soul in draft.soulIds in order")
+    func multipleSoulIds() throws {
+        let id1 = UUID()
+        let id2 = UUID()
+        let id3 = UUID()
+        let draft = makeValidDraft(soulIds: [id1, id2, id3])
         let json = try encode(PebbleCreatePayload(from: draft, userId: UUID()))
 
         let ids = json["soul_ids"] as? [String] ?? []
-        #expect(ids == [soulId.uuidString])
+        #expect(ids == [id1.uuidString, id2.uuidString, id3.uuidString])
     }
 
     @Test("collection_ids follows the same pattern as soul_ids")
