@@ -84,13 +84,9 @@ struct PebbleReadView: View {
 
     @ViewBuilder
     private var soulsRow: some View {
-        PebblePillFlow {
+        LazyVGrid(columns: SoulPillGrid.columns, spacing: SoulPillGrid.spacing) {
             ForEach(detail.souls) { soulWithGlyph in
-                PebbleMetaPill(
-                    icon: .glyph(soulWithGlyph.glyph),
-                    label: LocalizedStringResource(stringLiteral: soulWithGlyph.name),
-                    style: .neutral
-                )
+                SoulPill(glyph: soulWithGlyph.glyph, name: soulWithGlyph.name)
             }
         }
     }

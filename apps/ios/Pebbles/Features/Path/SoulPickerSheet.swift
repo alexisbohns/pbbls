@@ -69,6 +69,7 @@ struct SoulPickerSheet: View {
         } else {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 16) {
+                    NewSoulTile { isPresentingCreate = true }
                     ForEach(souls) { soul in
                         SoulSelectableCell(
                             soul: soul,
@@ -76,7 +77,6 @@ struct SoulPickerSheet: View {
                             onToggle: { toggle(soul.id) }
                         )
                     }
-                    NewSoulTile { isPresentingCreate = true }
                 }
                 .padding()
 

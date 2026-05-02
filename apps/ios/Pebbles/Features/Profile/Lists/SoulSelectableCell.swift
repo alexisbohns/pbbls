@@ -1,8 +1,12 @@
 import SwiftUI
 
-/// Selection variant of `SoulGridCell`. Same 96pt glyph thumbnail + name
-/// label, plus a 2pt accent ring and a checkmark badge in the top-right
-/// when selected. Tap toggles via `onToggle`.
+/// Selection variant of `SoulGridCell`. Square 96pt frame with a rounded
+/// border (no fill) and the glyph drawn directly inside — no inner
+/// background. When unselected the glyph is rendered in
+/// `pebblesForeground` and the border is a faint `pebblesAccent` tint;
+/// when selected the glyph and border switch to full `pebblesAccent`,
+/// a `checkmark.circle.fill` badge appears in the top-right, and the
+/// name label below becomes medium-weight `pebblesAccent`.
 struct SoulSelectableCell: View {
     let soul: SoulWithGlyph
     let isSelected: Bool
@@ -12,25 +16,32 @@ struct SoulSelectableCell: View {
         Button(action: onToggle) {
             VStack(spacing: 8) {
                 ZStack(alignment: .topTrailing) {
-                    GlyphThumbnail(strokes: soul.glyph.strokes, side: 96)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(
-                                    isSelected ? Color.pebblesAccent : Color.clear,
-                                    lineWidth: 2
-                                )
-                        )
+                    GlyphThumbnail(
+                        strokes: soul.glyph.strokes,
+                        side: 96,
+                        strokeColor: isSelected ? Color.pebblesAccent : Color.pebblesForeground,
+                        backgroundColor: .clear
+                    )
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(
+                                isSelected ? Color.pebblesAccent : Color.pebblesAccent.opacity(0.15),
+                                lineWidth: isSelected ? 2 : 1
+                            )
+                    }
 
                     if isSelected {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.title3)
-                            .foregroundStyle(Color.pebblesAccent, Color.pebblesBackground)
+                            .foregroundStyle(Color.pebblesAccent)
                             .padding(6)
                             .accessibilityHidden(true)
                     }
                 }
                 Text(soul.name)
                     .font(.callout)
+                    .fontWeight(isSelected ? .medium : .regular)
+                    .foregroundStyle(isSelected ? Color.pebblesAccent : Color.pebblesForeground)
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .frame(maxWidth: .infinity)
@@ -47,7 +58,7 @@ struct SoulSelectableCell: View {
     SoulSelectableCell(
         soul: SoulWithGlyph(
             id: UUID(),
-            name: "Héloïse",
+            name: "Edgar",
             glyphId: SystemGlyph.default,
             glyph: Glyph(
                 id: SystemGlyph.default,
@@ -67,7 +78,7 @@ struct SoulSelectableCell: View {
     SoulSelectableCell(
         soul: SoulWithGlyph(
             id: UUID(),
-            name: "Ingrid",
+            name: "Globule",
             glyphId: SystemGlyph.default,
             glyph: Glyph(
                 id: SystemGlyph.default,
