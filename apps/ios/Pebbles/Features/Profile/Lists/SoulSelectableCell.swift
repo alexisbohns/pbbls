@@ -19,7 +19,7 @@ struct SoulSelectableCell: View {
                     GlyphThumbnail(
                         strokes: soul.glyph.strokes,
                         side: 96,
-                        strokeColor: isSelected ? Color.pebblesAccent : Color.pebblesForeground,
+                        strokeColor: isSelected ? Color.pebblesAccent : Color.pebblesMutedForeground,
                         backgroundColor: .clear
                     )
                     .overlay {
@@ -41,7 +41,7 @@ struct SoulSelectableCell: View {
                 Text(soul.name)
                     .font(.callout)
                     .fontWeight(isSelected ? .medium : .regular)
-                    .foregroundStyle(isSelected ? Color.pebblesAccent : Color.pebblesForeground)
+                    .foregroundStyle(isSelected ? Color.pebblesAccent : Color.pebblesMutedForeground)
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .frame(maxWidth: .infinity)
