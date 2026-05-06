@@ -19,7 +19,7 @@ struct PebbleMetaPill: View {
     }
 
     enum Style: Equatable {
-        case emotion(color: Color)
+        case emotion(background: Color, foreground: Color)
         case neutral
         case unset
     }
@@ -67,8 +67,8 @@ struct PebbleMetaPill: View {
     @ViewBuilder
     private var background: some View {
         switch style {
-        case .emotion(let color):
-            Capsule().fill(color)
+        case .emotion(let background, _):
+            Capsule().fill(background)
         case .neutral, .unset:
             Capsule().fill(Color.pebblesAccentSoft)
         }
@@ -87,7 +87,7 @@ struct PebbleMetaPill: View {
 
     private var foreground: Color {
         switch style {
-        case .emotion: return .white
+        case .emotion(_, let foreground): return foreground
         case .neutral: return Color.pebblesForeground
         case .unset:   return Color.pebblesMutedForeground
         }
@@ -128,7 +128,10 @@ extension Color {
         PebbleMetaPill(
             icon: .system("heart.fill"),
             label: "Anxiety",
-            style: .emotion(color: Color(red: 0.5, green: 0.4, blue: 0.95))
+            style: .emotion(
+                background: Color(red: 0.5, green: 0.4, blue: 0.95),
+                foreground: .white
+            )
         )
         PebbleMetaPill(
             icon: .system("square.grid.2x2"),

@@ -88,7 +88,10 @@ struct PebblePillFlow: Layout {
         PebbleMetaPill(
             icon: .system("heart.fill"),
             label: "Anxiety",
-            style: .emotion(color: Color(red: 0.5, green: 0.4, blue: 0.95))
+            style: .emotion(
+                background: Color(red: 0.5, green: 0.4, blue: 0.95),
+                foreground: .white
+            )
         )
         PebbleMetaPill(icon: .system("square.grid.2x2"), label: "Family", style: .neutral)
         PebbleMetaPill(icon: .system("folder.fill"), label: "Writing, Books, Photography", style: .neutral)
