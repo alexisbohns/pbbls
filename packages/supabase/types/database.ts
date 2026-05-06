@@ -236,21 +236,21 @@ export type Database = {
       }
       emotions: {
         Row: {
-          category_id: string | null
+          category_id: string
           color: string
           id: string
           name: string
           slug: string
         }
         Insert: {
-          category_id?: string | null
+          category_id: string
           color: string
           id?: string
           name: string
           slug: string
         }
         Update: {
-          category_id?: string | null
+          category_id?: string
           color?: string
           id?: string
           name?: string
