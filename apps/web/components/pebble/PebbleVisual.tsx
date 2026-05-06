@@ -1,8 +1,11 @@
 "use client"
 
+import type { CSSProperties } from "react"
+
 import type { Mark, Pebble } from "@/lib/types"
 import type { RenderTier } from "@/lib/engine"
 import { EMOTIONS } from "@/lib/config/emotions"
+import { useEmotionPalettes } from "@/lib/data/useEmotionPalettes"
 import { usePebbleVisual } from "@/lib/hooks/usePebbleVisual"
 import { cn } from "@/lib/utils"
 
@@ -27,19 +30,25 @@ export function PebbleVisual({
   const isServerRender = pebble.render_svg !== null
   const svg = pebble.render_svg ?? fallback.svg
 
-  const emotion = EMOTIONS.find((e) => e.id === pebble.emotion_id)
-  const emotionName = emotion?.name ?? "Unknown"
+  const emotionName =
+    EMOTIONS.find((e) => e.id === pebble.emotion_id)?.name ?? "Unknown"
 
   // Server-composed SVGs use stroke="currentColor" and carry their own
-  // width/height attributes. Setting `color` on the wrapper resolves the
-  // `currentColor` strokes to the emotion hue (mirrors iOS PebbleRenderView).
-  // The CSS rule on `.pbbls-visual svg` (in globals.css) overrides the
-  // intrinsic width/height so the SVG fits its container.
+  // width/height attributes. The wrapper sets two CSS custom properties from
+  // the category palette; globals.css picks --pebble-stroke-light in light
+  // mode and --pebble-stroke-dark in dark mode, so theme switches are
+  // CSS-only (no JS subscription, no hydration mismatch).
   // The client-engine fallback already inlines the emotion color via
-  // `recolor()`, so the wrapper color is harmless there.
-  const wrapperStyle = isServerRender && emotion
-    ? { color: emotion.color }
-    : undefined
+  // `recolor()`, so leaving wrapperStyle undefined for it is harmless.
+  const { paletteByEmotionId } = useEmotionPalettes()
+  const palette = paletteByEmotionId.get(pebble.emotion_id)
+  const wrapperStyle: CSSProperties | undefined =
+    isServerRender && palette
+      ? ({
+          ["--pebble-stroke-light"]: palette.primary_color,
+          ["--pebble-stroke-dark"]: palette.secondary_color,
+        } as CSSProperties)
+      : undefined
 
   return (
     <div
