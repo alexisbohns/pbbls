@@ -27,6 +27,7 @@ export function useSupabaseAuth(): AuthContextValue {
   // Always start as true on both server and client to avoid hydration mismatch.
   // The client-side effect sets it to false after session check.
   const [isLoading, setIsLoading] = useState(true)
+  const [isProfileLoading, setIsProfileLoading] = useState(true)
 
   // Dev-only watchdog: warns if auth stays in loading state too long,
   // which indicates a hang (deadlock, network issue, missing callback).
@@ -70,6 +71,7 @@ export function useSupabaseAuth(): AuthContextValue {
         setUser(null)
         setProfile(null)
         setIsLoading(false)
+        setIsProfileLoading(false)
         return
       }
 
@@ -80,6 +82,7 @@ export function useSupabaseAuth(): AuthContextValue {
         created_at: session.user.created_at,
       })
       setIsLoading(false)
+      setIsProfileLoading(true)
 
       // Profile fetch is fire-and-forget — must NOT block this callback
       // or it deadlocks the Supabase client's internal auth lock.
@@ -95,6 +98,8 @@ export function useSupabaseAuth(): AuthContextValue {
         if (!cancelled) setProfile(data as Profile | null)
       }).catch((err) => {
         console.warn("[auth] profile fetch failed:", (err as Error).message)
+      }).finally(() => {
+        if (!cancelled) setIsProfileLoading(false)
       })
     })
 
@@ -204,6 +209,7 @@ export function useSupabaseAuth(): AuthContextValue {
     profile,
     isAuthenticated: user !== null,
     isLoading,
+    isProfileLoading,
     login,
     register,
     signInWithApple,
