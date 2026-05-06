@@ -16,6 +16,7 @@ import SwiftUI
 ///     `minSplashSeconds`, satisfying the "splash before Path" intent.
 struct RootView: View {
     @Environment(SupabaseService.self) private var supabase
+    @Environment(EmotionPaletteService.self) private var palettes
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @State private var isPresentingOnboarding = false
     @State private var authPath = NavigationPath()
@@ -77,6 +78,7 @@ struct RootView: View {
             try? await Task.sleep(for: .seconds(Self.minSplashSeconds))
             minSplashDone = true
         }
+        .task { await palettes.load() }
         // Relies on supabase.start() being kicked off in .task above.
         // session?.user.id is nil when this observer is registered, so the
         // first authStateChanges event delivers a real nil→id transition
@@ -90,6 +92,8 @@ struct RootView: View {
 }
 
 #Preview {
-    RootView()
-        .environment(SupabaseService())
+    let supabase = SupabaseService()
+    return RootView()
+        .environment(supabase)
+        .environment(EmotionPaletteService(client: supabase.client))
 }
