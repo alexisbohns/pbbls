@@ -49,3 +49,50 @@ struct ColorHexTests {
         #expect(color != nil)
     }
 }
+
+@Suite("EmotionPalette")
+struct EmotionPaletteTests {
+    private static func makePalette() -> EmotionPalette? {
+        EmotionPalette(
+            primaryHex: "#7B5E99FF",
+            secondaryHex: "#AE91CCFF",
+            lightHex: "#F2EFF5FF",
+            surfaceHex: "#7B5E991A"
+        )
+    }
+
+    @Test("init succeeds with well-formed 8-digit hex")
+    func initSucceeds() {
+        #expect(Self.makePalette() != nil)
+    }
+
+    @Test("init returns nil when any hex is malformed")
+    func initFailsOnBadHex() {
+        let palette = EmotionPalette(
+            primaryHex: "not-hex",
+            secondaryHex: "#AE91CCFF",
+            lightHex: "#F2EFF5FF",
+            surfaceHex: "#7B5E991A"
+        )
+        #expect(palette == nil)
+    }
+
+    @Test("strokeHex returns primary in light mode")
+    func strokeHexLight() {
+        let palette = Self.makePalette()
+        #expect(palette?.strokeHex(for: .light) == "#7B5E99FF")
+    }
+
+    @Test("strokeHex returns secondary in dark mode")
+    func strokeHexDark() {
+        let palette = Self.makePalette()
+        #expect(palette?.strokeHex(for: .dark) == "#AE91CCFF")
+    }
+
+    @Test("primaryHex and secondaryHex are preserved verbatim")
+    func hexPreserved() {
+        let palette = Self.makePalette()
+        #expect(palette?.primaryHex == "#7B5E99FF")
+        #expect(palette?.secondaryHex == "#AE91CCFF")
+    }
+}
