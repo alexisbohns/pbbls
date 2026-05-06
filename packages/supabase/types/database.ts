@@ -55,7 +55,22 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "bounces_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "bounces_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       card_types: {
         Row: {
@@ -189,32 +204,80 @@ export type Database = {
           },
         ]
       }
+      emotion_categories: {
+        Row: {
+          id: string
+          light_color: string
+          name: string
+          primary_color: string
+          secondary_color: string
+          slug: string
+          surface_color: string
+        }
+        Insert: {
+          id?: string
+          light_color: string
+          name: string
+          primary_color: string
+          secondary_color: string
+          slug: string
+          surface_color: string
+        }
+        Update: {
+          id?: string
+          light_color?: string
+          name?: string
+          primary_color?: string
+          secondary_color?: string
+          slug?: string
+          surface_color?: string
+        }
+        Relationships: []
+      }
       emotions: {
         Row: {
+          category_id: string
           color: string
           id: string
           name: string
           slug: string
         }
         Insert: {
+          category_id: string
           color: string
           id?: string
           name: string
           slug: string
         }
         Update: {
+          category_id?: string
           color?: string
           id?: string
           name?: string
           slug?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "emotions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "emotion_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emotions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "v_emotions_with_palette"
+            referencedColumns: ["category_id"]
+          },
+        ]
       }
       glyphs: {
         Row: {
           created_at: string
           id: string
-          is_custom: boolean
+          is_custom: boolean | null
           name: string | null
           shape_id: string | null
           strokes: Json
@@ -225,7 +288,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
-          is_custom?: never
+          is_custom?: boolean | null
           name?: string | null
           shape_id?: string | null
           strokes?: Json
@@ -236,7 +299,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
-          is_custom?: never
+          is_custom?: boolean | null
           name?: string | null
           shape_id?: string | null
           strokes?: Json
@@ -482,6 +545,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "pebble_domains_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "v_analytics_domain_share_weekly"
+            referencedColumns: ["domain_id"]
+          },
+          {
             foreignKeyName: "pebble_domains_pebble_id_fkey"
             columns: ["pebble_id"]
             isOneToOne: false
@@ -613,6 +683,20 @@ export type Database = {
             columns: ["emotion_id"]
             isOneToOne: false
             referencedRelation: "emotions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pebbles_emotion_id_fkey"
+            columns: ["emotion_id"]
+            isOneToOne: false
+            referencedRelation: "v_analytics_emotion_share_weekly"
+            referencedColumns: ["emotion_id"]
+          },
+          {
+            foreignKeyName: "pebbles_emotion_id_fkey"
+            columns: ["emotion_id"]
+            isOneToOne: false
+            referencedRelation: "v_emotions_with_palette"
             referencedColumns: ["id"]
           },
           {
@@ -802,6 +886,15 @@ export type Database = {
       }
     }
     Views: {
+      v_analytics_active_users_daily: {
+        Row: {
+          bucket_date: string | null
+          dau: number | null
+          mau: number | null
+          wau: number | null
+        }
+        Relationships: []
+      }
       v_analytics_bounce_distribution_today: {
         Row: {
           avg_active_days_per_week: number | null
@@ -811,15 +904,6 @@ export type Database = {
           median_score: number | null
           pct_maintaining: number | null
           users: number | null
-        }
-        Relationships: []
-      }
-      v_analytics_active_users_daily: {
-        Row: {
-          bucket_date: string | null
-          dau: number | null
-          mau: number | null
-          wau: number | null
         }
         Relationships: []
       }
@@ -927,6 +1011,22 @@ export type Database = {
         }
         Relationships: []
       }
+      v_emotions_with_palette: {
+        Row: {
+          category_id: string | null
+          category_name: string | null
+          category_slug: string | null
+          color: string | null
+          id: string | null
+          light_color: string | null
+          name: string | null
+          primary_color: string | null
+          secondary_color: string | null
+          slug: string | null
+          surface_color: string | null
+        }
+        Relationships: []
+      }
       v_karma_summary: {
         Row: {
           pebbles_count: number | null
@@ -998,6 +1098,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "pebbles_emotion_id_fkey"
+            columns: ["emotion_id"]
+            isOneToOne: false
+            referencedRelation: "v_analytics_emotion_share_weekly"
+            referencedColumns: ["emotion_id"]
+          },
+          {
+            foreignKeyName: "pebbles_emotion_id_fkey"
+            columns: ["emotion_id"]
+            isOneToOne: false
+            referencedRelation: "v_emotions_with_palette"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "pebbles_glyph_id_fkey"
             columns: ["glyph_id"]
             isOneToOne: false
@@ -1052,7 +1166,7 @@ export type Database = {
         }
       }
       get_bounce_distribution_today: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           avg_active_days_per_week: number | null
           bucket_date: string | null
@@ -1129,28 +1243,28 @@ export type Database = {
       get_pebble_enrichment: {
         Args: { p_end: string; p_start: string }
         Returns: {
-          pct_in_collection: number | null
-          pct_with_custom_glyph: number | null
-          pct_with_intensity: number | null
-          pct_with_picture: number | null
-          pct_with_soul: number | null
-          pct_with_thought: number | null
-          total_pebbles: number | null
+          pct_in_collection: number
+          pct_with_custom_glyph: number
+          pct_with_intensity: number
+          pct_with_picture: number
+          pct_with_soul: number
+          pct_with_thought: number
+          total_pebbles: number
         }[]
       }
       get_pebble_volume_series: {
         Args: { p_bucket?: string; p_end: string; p_start: string }
         Returns: {
-          active_users: number | null
-          bucket_date: string | null
-          pebbles: number | null
-          pebbles_in_collection: number | null
-          pebbles_with_custom_glyph: number | null
-          pebbles_with_picture: number | null
+          active_users: number
+          bucket_date: string
+          pebbles: number
+          pebbles_in_collection: number
+          pebbles_with_custom_glyph: number
+          pebbles_with_picture: number
         }[]
       }
       get_quality_signals_today: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           available: boolean | null
           bucket_date: string | null
@@ -1169,7 +1283,7 @@ export type Database = {
         }
       }
       get_retention_cohorts: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           active_users: number | null
           cohort_size: number | null
