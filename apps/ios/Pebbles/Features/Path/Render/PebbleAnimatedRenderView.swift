@@ -13,7 +13,12 @@ import os
 /// The animation replays each time the view appears.
 struct PebbleAnimatedRenderView: View {
     let svg: String
-    let strokeColor: String
+    /// Stroke for the SwiftUI shape paths used during the animation.
+    let strokeColor: Color
+    /// Hex equivalent of `strokeColor`, injected into raw SVG markup by the
+    /// static `PebbleRenderView` fallback (Reduce Motion, unknown timings,
+    /// or parse failure). Must match `strokeColor` for the current scheme.
+    let strokeColorHex: String
     let renderVersion: String?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -29,7 +34,7 @@ struct PebbleAnimatedRenderView: View {
             if let model, let timings = PebbleAnimationTimings.forVersion(renderVersion), !reduceMotion {
                 animatedBody(model: model, timings: timings)
             } else {
-                PebbleRenderView(svg: svg, strokeColor: strokeColor)
+                PebbleRenderView(svg: svg, strokeColor: strokeColorHex)
             }
         }
         .onAppear {
@@ -61,7 +66,7 @@ struct PebbleAnimatedRenderView: View {
         .accessibilityHidden(true)
     }
 
-    private var stroke: Color { Color(hex: strokeColor) ?? Color.pebblesAccent }
+    private var stroke: Color { strokeColor }
 
     private func progress(for kind: PebbleSVGModel.Layer.Kind) -> Double {
         switch kind {
@@ -146,7 +151,8 @@ private struct LayerShape: Shape {
           </g>
         </svg>
         """,
-        strokeColor: "#7C5CFA",
+        strokeColor: Color(red: 0.486, green: 0.361, blue: 0.980),
+        strokeColorHex: "#7C5CFA",
         renderVersion: "0.1.0"
     )
     .frame(width: 200, height: 200)
@@ -162,7 +168,8 @@ private struct LayerShape: Shape {
           <g id="layer:shape"><path d="M 0 0 L 100 100" fill="none"/></g>
         </svg>
         """,
-        strokeColor: "#7C5CFA",
+        strokeColor: Color(red: 0.486, green: 0.361, blue: 0.980),
+        strokeColorHex: "#7C5CFA",
         renderVersion: "unknown"
     )
     .frame(width: 200, height: 200)
