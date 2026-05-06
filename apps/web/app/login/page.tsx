@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 export default function LoginPage() {
-  const { login, signInWithApple, signInWithGoogle, profile, isAuthenticated, isLoading } =
+  const { login, signInWithApple, signInWithGoogle, profile, isAuthenticated, isLoading, isProfileLoading } =
     useAuth()
   const router = useRouter()
 
@@ -24,10 +24,10 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false)
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
+    if (!isLoading && !isProfileLoading && isAuthenticated) {
       router.replace(profile?.onboarding_completed ? "/path" : "/onboarding")
     }
-  }, [isLoading, isAuthenticated, profile, router])
+  }, [isLoading, isProfileLoading, isAuthenticated, profile, router])
 
   if (isLoading || isAuthenticated) return null
 

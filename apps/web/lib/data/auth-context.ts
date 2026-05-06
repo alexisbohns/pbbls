@@ -23,6 +23,13 @@ export type AuthContextValue = {
   isAuthenticated: boolean
   /** True while the initial session is being rehydrated. */
   isLoading: boolean
+  /**
+   * True while the profile row is being fetched after the session is known.
+   * Profile fetching is fire-and-forget (to avoid a Supabase auth deadlock),
+   * so callers that key off `profile` must wait on this flag too — otherwise
+   * they'll see a transient `profile === null` and treat it as "no profile".
+   */
+  isProfileLoading: boolean
   login(input: LoginInput): Promise<void>
   register(input: RegisterInput): Promise<void>
   signInWithApple(): Promise<void>
