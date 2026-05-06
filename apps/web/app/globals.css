@@ -503,6 +503,11 @@
 
 .pbbls-visual {
   @apply h-full;
+  color: var(--pebble-stroke-light);
+}
+
+.dark .pbbls-visual {
+  color: var(--pebble-stroke-dark);
 }
 
 /* Server-composed pebble SVGs (from the compose-pebble edge function) carry
