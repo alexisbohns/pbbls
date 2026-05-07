@@ -10,8 +10,7 @@ struct LocalizationPatternCTests {
         let emotion = Emotion(
             id: UUID(),
             slug: "not-a-real-slug-xyz",
-            name: "Fallback Name",
-            color: "#000000"
+            name: "Fallback Name"
         )
         #expect(emotion.localizedName == "Fallback Name")
     }

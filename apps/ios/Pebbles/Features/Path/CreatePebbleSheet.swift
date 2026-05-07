@@ -218,7 +218,7 @@ struct CreatePebbleSheet: View {
         do {
             async let emotionsQuery: [Emotion] = supabase.client
                 .from("emotions")
-                .select()
+                .select("id, slug, name")
                 .order("name")
                 .execute()
                 .value

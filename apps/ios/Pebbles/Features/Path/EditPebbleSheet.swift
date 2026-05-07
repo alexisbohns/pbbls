@@ -17,6 +17,8 @@ struct EditPebbleSheet: View {
     let onSaved: () -> Void
 
     @Environment(SupabaseService.self) private var supabase
+    @Environment(EmotionPaletteService.self) private var palettes
+    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
 
     @State private var draft = PebbleDraft()
@@ -147,7 +149,7 @@ struct EditPebbleSheet: View {
                 .select("""
                     id, name, description, happened_at, intensity, positiveness, visibility,
                     render_svg, render_version, glyph_id,
-                    emotion:emotions(id, slug, name, color),
+                    emotion:emotions(id, slug, name),
                     pebble_domains(domain:domains(id, slug, name)),
                     pebble_souls(soul:souls(id, name, glyph_id, glyphs(id, name, strokes, view_box))),
                     collection_pebbles(collection:collections(id, name)),
@@ -160,7 +162,7 @@ struct EditPebbleSheet: View {
 
             async let emotionsQuery: [Emotion] = supabase.client
                 .from("emotions")
-                .select()
+                .select("id, slug, name")
                 .order("name")
                 .execute()
                 .value
@@ -192,7 +194,8 @@ struct EditPebbleSheet: View {
             self.collections = loadedCollections
             self.draft = PebbleDraft(from: detail)
             self.renderSvg = detail.renderSvg
-            self.strokeColor = detail.emotion.color
+            self.strokeColor = palettes.palette(for: detail.emotion.id)?
+                .strokeHex(for: colorScheme) ?? Color.pebblesAccentHex
             self.sizeGroup = detail.valence.sizeGroup
             self.isLoading = false
         } catch {

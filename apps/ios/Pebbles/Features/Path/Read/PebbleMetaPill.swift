@@ -3,8 +3,9 @@ import SwiftUI
 /// Compact pill used in the pebble read view to show emotion, domain,
 /// collections, and souls inline. Variants:
 ///
-/// - `.emotion(color:)`: filled pill in the emotion's color, white icon and
-///   label. Always used for the emotion pill.
+/// - `.emotion(background:foreground:)`: filled pill in the emotion's
+///   palette accent context (primary background, light foreground from
+///   `EmotionPalette`). Always used for the emotion pill.
 /// - `.neutral`: muted surface fill with normal foreground. Used for set
 ///   domain/collections/souls.
 /// - `.unset`: same neutral fill plus a 1pt dashed stroke and muted
