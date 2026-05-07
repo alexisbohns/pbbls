@@ -18,11 +18,13 @@ struct PebbleReadBanner: View {
     let snapStoragePath: String?
     let renderSvg: String?
     let renderVersion: String?
-    let emotionColorHex: String
+    let emotionId: UUID
     let valence: Valence
 
     @Environment(SupabaseService.self) private var supabase
+    @Environment(EmotionPaletteService.self) private var palettes
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.colorScheme) private var colorScheme
 
     @State private var loadedImage: UIImage?
     @State private var animationFinished: Bool = false
@@ -156,9 +158,11 @@ struct PebbleReadBanner: View {
     @ViewBuilder
     private var renderedPebble: some View {
         if let renderSvg {
+            let palette = palettes.palette(for: emotionId)
             PebbleAnimatedRenderView(
                 svg: renderSvg,
-                strokeColor: emotionColorHex,
+                strokeColor: palette?.stroke(for: colorScheme) ?? Color.pebblesAccent,
+                strokeColorHex: palette?.strokeHex(for: colorScheme) ?? Color.pebblesAccentHex,
                 renderVersion: renderVersion
             )
             .frame(height: pebbleHeight)
@@ -180,7 +184,8 @@ struct PebbleReadBanner: View {
 }
 
 #Preview("Without photo · medium") {
-    PebbleReadBanner(
+    let supabase = SupabaseService()
+    return PebbleReadBanner(
         snapStoragePath: nil,
         renderSvg: """
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
@@ -188,15 +193,18 @@ struct PebbleReadBanner: View {
             </svg>
             """,
         renderVersion: "0.1.0",
-        emotionColorHex: "#7C5CFA",
+        emotionId: UUID(),
         valence: .neutralMedium
     )
     .padding()
     .background(Color.pebblesBackground)
+    .environment(supabase)
+    .environment(EmotionPaletteService(client: supabase.client))
 }
 
 #Preview("Without photo · large") {
-    PebbleReadBanner(
+    let supabase = SupabaseService()
+    return PebbleReadBanner(
         snapStoragePath: nil,
         renderSvg: """
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
@@ -204,18 +212,21 @@ struct PebbleReadBanner: View {
             </svg>
             """,
         renderVersion: "0.1.0",
-        emotionColorHex: "#7C5CFA",
+        emotionId: UUID(),
         valence: .highlightLarge
     )
     .padding()
     .background(Color.pebblesBackground)
+    .environment(supabase)
+    .environment(EmotionPaletteService(client: supabase.client))
 }
 
 #Preview("With photo (preview-only stub)") {
     // Preview cannot reach Supabase Storage; this preview only shows the
-    // no-photo path. Manual smoke verification (Task 5) covers the with-photo
+    // no-photo path. Manual smoke verification covers the with-photo
     // sequencing in the simulator.
-    PebbleReadBanner(
+    let supabase = SupabaseService()
+    return PebbleReadBanner(
         snapStoragePath: nil,
         renderSvg: """
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
@@ -223,9 +234,11 @@ struct PebbleReadBanner: View {
             </svg>
             """,
         renderVersion: "0.1.0",
-        emotionColorHex: "#7C5CFA",
+        emotionId: UUID(),
         valence: .neutralMedium
     )
     .padding()
     .background(Color.pebblesBackground)
+    .environment(supabase)
+    .environment(EmotionPaletteService(client: supabase.client))
 }

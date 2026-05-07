@@ -6,7 +6,7 @@
     "root_node_id": "V-landing",
     "metadata": { "view_card_variant": "large" },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-04-30T22:00:00.000Z"
+    "updated_at": "2026-05-07T00:00:00.000Z"
   },
   "nodes": [
     {
@@ -1256,6 +1256,24 @@
       "description": "SECURITY DEFINER plpgsql RPC, gated on is_admin(auth.uid()). No arguments. Returns all eight rows from v_analytics_quality_signals_today ordered by indicator_order asc. Backs the Quality signals card on the admin analytics page. Raises insufficient_privilege (42501) for non-admins.",
       "status": "development",
       "platforms": ["web"]
+    },
+    {
+      "id": "DM-emotion-category",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "Emotion Category & Palette",
+      "description": "public.emotion_categories table grouping emotions (anger, fear, joy, peace, pride, sadness, shame) with an inlined four-color palette: primary_color, secondary_color, light_color, surface_color (all 8-digit #RRGGBBAA). public.emotions.category_id NOT NULL FK joins to it. The view public.v_emotions_with_palette is an INNER JOIN of emotions and emotion_categories that clients consume to render pebble strokes (primary in light mode, secondary in dark) and the emotion meta pill (primary background, light foreground). Schema shipped in #367; iOS consumer in #369.",
+      "status": "development",
+      "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "API-get-emotion-palettes",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "select v_emotions_with_palette",
+      "description": "PostgREST select on public.v_emotions_with_palette. RLS open (select using true) — readable by any authenticated user. Returns ~38 rows × 11 columns: id, slug, name, color (legacy), category_id, category_slug, category_name, primary_color, secondary_color, light_color, surface_color. iOS consumes this once on app mount via EmotionPaletteService and caches in memory for the session.",
+      "status": "development",
+      "platforms": ["web", "ios", "android"]
     }
   ],
   "edges": [
@@ -1484,6 +1502,17 @@
     { "id": "e-V-admin-analytics-DM-v-analytics-quality-signals-today", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "DM-v-analytics-quality-signals-today", "edge_type": "displays" },
     { "id": "e-API-get-quality-signals-today-DM-v-analytics-quality-signals-today", "project_id": "pebbles", "source_id": "API-get-quality-signals-today", "target_id": "DM-v-analytics-quality-signals-today", "edge_type": "queries" },
     { "id": "e-API-get-quality-signals-today-DM-pebble", "project_id": "pebbles", "source_id": "API-get-quality-signals-today", "target_id": "DM-pebble", "edge_type": "queries" },
-    { "id": "e-API-get-quality-signals-today-DM-account", "project_id": "pebbles", "source_id": "API-get-quality-signals-today", "target_id": "DM-account", "edge_type": "queries" }
+    { "id": "e-API-get-quality-signals-today-DM-account", "project_id": "pebbles", "source_id": "API-get-quality-signals-today", "target_id": "DM-account", "edge_type": "queries" },
+    { "id": "e-API-get-emotion-palettes-DM-emotion-category", "project_id": "pebbles", "source_id": "API-get-emotion-palettes", "target_id": "DM-emotion-category", "edge_type": "queries" },
+    { "id": "e-V-timeline-API-get-emotion-palettes", "project_id": "pebbles", "source_id": "V-timeline", "target_id": "API-get-emotion-palettes", "edge_type": "calls" },
+    { "id": "e-V-timeline-DM-emotion-category", "project_id": "pebbles", "source_id": "V-timeline", "target_id": "DM-emotion-category", "edge_type": "displays" },
+    { "id": "e-V-pebble-detail-API-get-emotion-palettes", "project_id": "pebbles", "source_id": "V-pebble-detail", "target_id": "API-get-emotion-palettes", "edge_type": "calls" },
+    { "id": "e-V-pebble-detail-DM-emotion-category", "project_id": "pebbles", "source_id": "V-pebble-detail", "target_id": "DM-emotion-category", "edge_type": "displays" },
+    { "id": "e-V-soul-detail-API-get-emotion-palettes", "project_id": "pebbles", "source_id": "V-soul-detail", "target_id": "API-get-emotion-palettes", "edge_type": "calls" },
+    { "id": "e-V-soul-detail-DM-emotion-category", "project_id": "pebbles", "source_id": "V-soul-detail", "target_id": "DM-emotion-category", "edge_type": "displays" },
+    { "id": "e-V-collection-detail-API-get-emotion-palettes", "project_id": "pebbles", "source_id": "V-collection-detail", "target_id": "API-get-emotion-palettes", "edge_type": "calls" },
+    { "id": "e-V-collection-detail-DM-emotion-category", "project_id": "pebbles", "source_id": "V-collection-detail", "target_id": "DM-emotion-category", "edge_type": "displays" },
+    { "id": "e-V-quick-pebble-editor-API-get-emotion-palettes", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "API-get-emotion-palettes", "edge_type": "calls" },
+    { "id": "e-V-quick-pebble-editor-DM-emotion-category", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "DM-emotion-category", "edge_type": "displays" }
   ]
 }

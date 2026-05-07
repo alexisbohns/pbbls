@@ -10,13 +10,18 @@ import SwiftUI
 /// error alert, the `delete_pebble` RPC call, and the reload.
 ///
 /// `pebble` must be loaded with `render_svg` and the
-/// `emotion:emotions(id, slug, name, color)` join populated for the
-/// thumbnail to render correctly. When `render_svg` is nil the row
-/// falls back to a neutral rounded rectangle.
+/// `emotion:emotions(id, slug, name)` join populated for the
+/// thumbnail to render correctly. The stroke color is resolved from
+/// `EmotionPaletteService` — primary in light mode, secondary in dark.
+/// When `render_svg` is nil the row falls back to a neutral rounded
+/// rectangle.
 struct PebbleRow: View {
     let pebble: Pebble
     let onTap: () -> Void
     let onDelete: () -> Void
+
+    @Environment(EmotionPaletteService.self) private var palettes
+    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         Button(action: onTap) {
@@ -41,7 +46,7 @@ struct PebbleRow: View {
     @ViewBuilder
     private var thumbnail: some View {
         if let svg = pebble.renderSvg {
-            PebbleRenderView(svg: svg, strokeColor: pebble.emotion?.color)
+            PebbleRenderView(svg: svg, strokeColor: strokeHex)
                 .frame(width: 40, height: 40)
         } else {
             RoundedRectangle(cornerRadius: 6)
@@ -49,10 +54,17 @@ struct PebbleRow: View {
                 .frame(width: 40, height: 40)
         }
     }
+
+    private var strokeHex: String? {
+        guard let emotionId = pebble.emotion?.id else { return nil }
+        return palettes.palette(for: emotionId)?.strokeHex(for: colorScheme)
+            ?? Color.pebblesAccentHex
+    }
 }
 
 #Preview {
-    List {
+    let supabase = SupabaseService()
+    return List {
         PebbleRow(
             pebble: Pebble(
                 id: UUID(),
@@ -65,4 +77,5 @@ struct PebbleRow: View {
             onDelete: {}
         )
     }
+    .environment(EmotionPaletteService(client: supabase.client))
 }

@@ -3,8 +3,9 @@ import SwiftUI
 /// Compact pill used in the pebble read view to show emotion, domain,
 /// collections, and souls inline. Variants:
 ///
-/// - `.emotion(color:)`: filled pill in the emotion's color, white icon and
-///   label. Always used for the emotion pill.
+/// - `.emotion(background:foreground:)`: filled pill in the emotion's
+///   palette accent context (primary background, light foreground from
+///   `EmotionPalette`). Always used for the emotion pill.
 /// - `.neutral`: muted surface fill with normal foreground. Used for set
 ///   domain/collections/souls.
 /// - `.unset`: same neutral fill plus a 1pt dashed stroke and muted
@@ -19,7 +20,7 @@ struct PebbleMetaPill: View {
     }
 
     enum Style: Equatable {
-        case emotion(color: Color)
+        case emotion(background: Color, foreground: Color)
         case neutral
         case unset
     }
@@ -67,8 +68,8 @@ struct PebbleMetaPill: View {
     @ViewBuilder
     private var background: some View {
         switch style {
-        case .emotion(let color):
-            Capsule().fill(color)
+        case .emotion(let background, _):
+            Capsule().fill(background)
         case .neutral, .unset:
             Capsule().fill(Color.pebblesAccentSoft)
         }
@@ -87,7 +88,7 @@ struct PebbleMetaPill: View {
 
     private var foreground: Color {
         switch style {
-        case .emotion: return .white
+        case .emotion(_, let foreground): return foreground
         case .neutral: return Color.pebblesForeground
         case .unset:   return Color.pebblesMutedForeground
         }
@@ -96,19 +97,30 @@ struct PebbleMetaPill: View {
 
 // MARK: - Hex color helper
 
-/// Parses `#RRGGBB` strings stored on `EmotionRef.color`. Falls back to
-/// `nil` if the format is unexpected — caller decides on a default.
+/// Parses `#RRGGBB` and `#RRGGBBAA` strings. The 6-digit form is used by the
+/// legacy `EmotionRef.color` column; the 8-digit form is used by the four
+/// palette columns on `public.emotion_categories` (alpha lives in the last
+/// byte). Returns `nil` for any other length — caller decides on a default.
 extension Color {
     init?(hex: String) {
         var trimmed = hex.trimmingCharacters(in: .whitespaces)
         if trimmed.hasPrefix("#") { trimmed.removeFirst() }
-        guard trimmed.count == 6, let value = UInt32(trimmed, radix: 16) else {
+        guard let value = UInt32(trimmed, radix: 16) else { return nil }
+        switch trimmed.count {
+        case 6:
+            let red   = Double((value >> 16) & 0xFF) / 255.0
+            let green = Double((value >> 8) & 0xFF) / 255.0
+            let blue  = Double(value & 0xFF) / 255.0
+            self.init(red: red, green: green, blue: blue)
+        case 8:
+            let red   = Double((value >> 24) & 0xFF) / 255.0
+            let green = Double((value >> 16) & 0xFF) / 255.0
+            let blue  = Double((value >> 8) & 0xFF) / 255.0
+            let alpha = Double(value & 0xFF) / 255.0
+            self.init(red: red, green: green, blue: blue, opacity: alpha)
+        default:
             return nil
         }
-        let red   = Double((value >> 16) & 0xFF) / 255.0
-        let green = Double((value >> 8) & 0xFF) / 255.0
-        let blue  = Double(value & 0xFF) / 255.0
-        self.init(red: red, green: green, blue: blue)
     }
 }
 
@@ -117,7 +129,10 @@ extension Color {
         PebbleMetaPill(
             icon: .system("heart.fill"),
             label: "Anxiety",
-            style: .emotion(color: Color(red: 0.5, green: 0.4, blue: 0.95))
+            style: .emotion(
+                background: Color(red: 0.5, green: 0.4, blue: 0.95),
+                foreground: .white
+            )
         )
         PebbleMetaPill(
             icon: .system("square.grid.2x2"),

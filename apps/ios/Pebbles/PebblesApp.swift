@@ -3,9 +3,13 @@ import UIKit
 
 @main
 struct PebblesApp: App {
-    @State private var supabase = SupabaseService()
+    @State private var supabase: SupabaseService
+    @State private var palettes: EmotionPaletteService
 
     init() {
+        let supabase = SupabaseService()
+        self._supabase = State(initialValue: supabase)
+        self._palettes = State(initialValue: EmotionPaletteService(client: supabase.client))
         Self.configureSegmentedControlAppearance()
     }
 
@@ -13,6 +17,7 @@ struct PebblesApp: App {
         WindowGroup {
             RootView()
                 .environment(supabase)
+                .environment(palettes)
         }
     }
 

@@ -9,6 +9,8 @@ import SwiftUI
 struct PebbleReadView: View {
     let detail: PebbleDetail
 
+    @Environment(EmotionPaletteService.self) private var palettes
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -16,7 +18,7 @@ struct PebbleReadView: View {
                     snapStoragePath: detail.snaps.first?.storagePath,
                     renderSvg: detail.renderSvg,
                     renderVersion: detail.renderVersion,
-                    emotionColorHex: detail.emotion.color,
+                    emotionId: detail.emotion.id,
                     valence: detail.valence
                 )
 
@@ -46,10 +48,14 @@ struct PebbleReadView: View {
     private var metadataRow: some View {
         PebblePillFlow {
             // Emotion — always present.
+            let palette = palettes.palette(for: detail.emotion.id)
             PebbleMetaPill(
                 icon: .system("heart.fill"),
                 label: LocalizedStringResource(stringLiteral: detail.emotion.localizedName),
-                style: .emotion(color: Color(hex: detail.emotion.color) ?? Color.pebblesAccent)
+                style: .emotion(
+                    background: palette?.accentBackground ?? Color.pebblesAccent,
+                    foreground: palette?.accentForeground ?? .white
+                )
             )
 
             // Domain — always rendered. Set when non-empty, else dashed unset.

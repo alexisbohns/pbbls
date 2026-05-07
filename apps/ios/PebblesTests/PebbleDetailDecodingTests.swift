@@ -72,7 +72,7 @@ struct PebbleDetailDecodingTests {
         #expect(detail.positiveness == 1)
         #expect(detail.visibility == .private)
         #expect(detail.emotion.name == "Joy")
-        #expect(detail.emotion.color == "#FFD166")
+        #expect(detail.emotion.slug == "joy")
         #expect(detail.domains.map(\.name) == ["Work"])
         #expect(detail.souls.map(\.name) == ["Alex"])
         #expect(detail.collections.map(\.name) == ["Wins"])
