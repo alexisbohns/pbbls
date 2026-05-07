@@ -31,7 +31,7 @@ struct EmotionWithPaletteDecodingTests {
         #expect(row.slug == "anxiety")
         #expect(row.categorySlug == "fear")
         #expect(row.palette.primaryHex == "#7B5E99FF")
-        #expect(row.palette.strokeHex(for: .dark) == "#AE91CCFF")
+        #expect(row.palette.strokeHex(for: .dark) == "#AE91CC")
     }
 
     @Test("rejects null id")

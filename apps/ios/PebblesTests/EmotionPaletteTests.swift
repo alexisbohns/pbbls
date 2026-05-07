@@ -77,19 +77,19 @@ struct EmotionPaletteTests {
         #expect(palette == nil)
     }
 
-    @Test("strokeHex returns primary in light mode")
+    @Test("strokeHex returns 6-digit primary in light mode")
     func strokeHexLight() {
         let palette = Self.makePalette()
-        #expect(palette?.strokeHex(for: .light) == "#7B5E99FF")
+        #expect(palette?.strokeHex(for: .light) == "#7B5E99")
     }
 
-    @Test("strokeHex returns secondary in dark mode")
+    @Test("strokeHex returns 6-digit secondary in dark mode")
     func strokeHexDark() {
         let palette = Self.makePalette()
-        #expect(palette?.strokeHex(for: .dark) == "#AE91CCFF")
+        #expect(palette?.strokeHex(for: .dark) == "#AE91CC")
     }
 
-    @Test("primaryHex and secondaryHex are preserved verbatim")
+    @Test("primaryHex and secondaryHex are preserved verbatim (8-digit)")
     func hexPreserved() {
         let palette = Self.makePalette()
         #expect(palette?.primaryHex == "#7B5E99FF")

@@ -57,7 +57,14 @@ struct EmotionPalette: Equatable {
         scheme == .dark ? secondary : primary
     }
 
+    /// 6-digit `#RRGGBB` for SVG-text injection. The 8-digit form stored in
+    /// the DB doesn't render correctly when SVGView parses it inline; stroke
+    /// colors are always opaque (alpha = FF), so dropping the alpha bytes is
+    /// lossless for this use case.
     func strokeHex(for scheme: ColorScheme) -> String {
-        scheme == .dark ? secondaryHex : primaryHex
+        let hex = scheme == .dark ? secondaryHex : primaryHex
+        // "#RRGGBBAA" → "#RRGGBB". Defensive: only trim when the input is
+        // exactly 9 chars including the leading '#'.
+        return hex.count == 9 ? String(hex.prefix(7)) : hex
     }
 }
