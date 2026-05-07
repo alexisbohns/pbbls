@@ -243,15 +243,19 @@ Drop `color` from the `emotions` `select(...)` strings. The compose flow's strok
 
 ## Fallback constants
 
-A new static is added wherever `pebblesAccent` is used:
+A new static is added alongside `pebblesAccent`:
 
 ```swift
 extension Color {
-    static let pebblesAccentHex: String = "#7C5CFA" // single source of truth, mirrors Color.pebblesAccent
+    // Light-mode hex of `pebblesAccent` (AccentColor asset).
+    // Used as a hex-string fallback for SVG-text injection when the palette
+    // cache is unwarm. Single value for both schemes — the fallback path is
+    // rare and brief; perfect dark-mode parity is not worth a second constant.
+    static let pebblesAccentHex: String = "#C07A7A"
 }
 ```
 
-This avoids the smell of duplicating the brand purple across SwiftUI assets and string literals.
+Hex is taken from `AccentColor.colorset/Contents.json` (light variant). If `AccentColor` is ever retuned, this string drifts silently — accepted maintenance burden for a defensive fallback.
 
 ## App-wiring
 
