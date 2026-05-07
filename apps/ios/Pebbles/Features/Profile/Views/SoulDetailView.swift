@@ -160,7 +160,7 @@ struct SoulDetailView: View {
         loadError = nil
         do {
             let columns = "id, name, happened_at, render_svg"
-                + ", emotion:emotions(id, slug, name, color)"
+                + ", emotion:emotions(id, slug, name)"
                 + ", pebble_souls!inner(soul_id)"
             let result: [Pebble] = try await supabase.client
                 .from("pebbles")

@@ -6,17 +6,17 @@ import os
 // `EmotionRef` and `DomainRef` exist because the PostgREST select in
 // `EditPebbleSheet.load()` restricts columns to what the edit UI actually
 // renders:
-//     emotion:emotions(id, slug, name, color)
+//     emotion:emotions(id, slug, name)
 //     pebble_domains(domain:domains(id, slug, name))
 // Reusing the full `Emotion`/`Domain` models would fail to decode the missing
 // `label` field. `Soul` and `PebbleCollection` are reused directly because
-// their full shapes match the detail select.
+// their full shapes match the detail select. Color comes from the palette
+// service (`EmotionPaletteService.palette(for: emotion.id)`).
 
 struct EmotionRef: Decodable, Hashable, Identifiable {
     let id: UUID
     let slug: String
     let name: String
-    let color: String
 }
 
 struct DomainRef: Decodable, Hashable, Identifiable {
