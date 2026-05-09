@@ -3,7 +3,7 @@
 import { CircleCheckBig, CircleDashed, CircleDot, type LucideIcon } from "lucide-react"
 import type { ReactNode } from "react"
 import type { Log } from "@/lib/types"
-import { logTitle } from "@/lib/utils/log-localized"
+import { logSummary, logTitle } from "@/lib/utils/log-localized"
 import { dayMonthYearFormatter } from "@/lib/utils/formatters"
 import { cn } from "@/lib/utils"
 
@@ -42,11 +42,11 @@ export function LogTimeline({ mode, logs, locale, renderTrailing }: LogTimelineP
 
         return (
           <li key={log.id} className="flex gap-3">
-            <div className="flex flex-col items-center">
+            <div className="flex flex-col items-center pt-0.5">
               <Icon
                 className={cn(
-                  "size-5 shrink-0",
-                  mode === "changelog" ? "text-foreground" : "text-muted-foreground",
+                  "size-3.5 shrink-0",
+                  mode === "changelog" ? "text-primary" : "text-muted-foreground",
                 )}
                 aria-hidden
               />
@@ -61,6 +61,9 @@ export function LogTimeline({ mode, logs, locale, renderTrailing }: LogTimelineP
                 <h3 className="text-sm font-medium leading-snug">
                   {logTitle(log, locale)}
                 </h3>
+                <p className="mt-1 text-xs text-muted-foreground">
+                  {logSummary(log, locale)}
+                </p>
               </div>
               {trailing && <div className="shrink-0">{trailing}</div>}
             </div>
