@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { ChevronLeft } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { LocaleToggle } from "@/components/docs/LocaleToggle"
@@ -16,6 +17,7 @@ type DocsSidebarProps = {
 export function DocsSidebar({ pages }: DocsSidebarProps) {
   const params = useParams<{ slug?: string }>()
   const { locale } = useDocsLocale()
+  const t = useTranslations("docs")
 
   const grouped = pages.reduce<Record<string, DocsPageMeta[]>>((acc, page) => {
     const group = acc[page.category] ?? []
@@ -28,12 +30,12 @@ export function DocsSidebar({ pages }: DocsSidebarProps) {
     <div className="flex flex-col gap-4">
       <Button variant="outline" className="hidden md:flex self-end" render={<Link href="/path" />}>
         <ChevronLeft />
-        Back to app
+        {t("back")}
       </Button>
 
       <LocaleToggle />
 
-      <nav aria-label="Documentation">
+      <nav aria-label={t("navAria")}>
         {Object.entries(grouped).map(([category, categoryPages]) => (
           <section key={category}>
             <h2 className="mb-1 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">

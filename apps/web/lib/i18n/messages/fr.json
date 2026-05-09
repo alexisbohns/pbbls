@@ -59,6 +59,18 @@
     "retry": "Réessayer",
     "generic": "Une erreur est survenue."
   },
+  "docs": {
+    "title": "Documentation",
+    "navAria": "Documentation",
+    "back": "Retour à l'application",
+    "lastUpdated": "Dernière mise à jour",
+    "languageAria": "Langue"
+  },
+  "offline": {
+    "title": "Vous êtes hors ligne",
+    "description": "Cette page n'est pas disponible hors ligne. Connectez-vous à internet et réessayez.",
+    "cta": "Aller à mon chemin"
+  },
   "lab": {
     "title": "Lab",
     "back": "Retour au Lab",

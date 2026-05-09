@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useSearchParams } from "next/navigation"
 import { FileText } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { PageLayout } from "@/components/layout/PageLayout"
 import { DocsSidebar } from "@/components/docs/DocsSidebar"
 import { useDocsLocale } from "@/lib/hooks/useDocsLocale"
@@ -16,6 +17,7 @@ export function DocsIndex({ pages }: DocsIndexProps) {
   const { locale } = useDocsLocale()
   const searchParams = useSearchParams()
   const isEmbed = searchParams.get("embed") === "true"
+  const t = useTranslations("docs")
 
   const grouped = pages.reduce<Record<string, DocsPageMeta[]>>((acc, page) => {
     const group = acc[page.category] ?? []
@@ -26,9 +28,7 @@ export function DocsIndex({ pages }: DocsIndexProps) {
 
   const content = (
     <section>
-      <h1 className="mb-6 text-xl font-semibold">
-        {locale === "fr" ? "Documentation" : "Documentation"}
-      </h1>
+      <h1 className="mb-6 text-xl font-semibold">{t("title")}</h1>
       {Object.entries(grouped).map(([category, categoryPages]) => (
         <div key={category} className="mb-6">
           <h2 className="mb-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground">

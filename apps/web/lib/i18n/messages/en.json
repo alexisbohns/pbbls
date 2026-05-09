@@ -59,6 +59,18 @@
     "retry": "Try again",
     "generic": "Something went wrong."
   },
+  "docs": {
+    "title": "Documentation",
+    "navAria": "Documentation",
+    "back": "Back to app",
+    "lastUpdated": "Last updated",
+    "languageAria": "Language"
+  },
+  "offline": {
+    "title": "You're offline",
+    "description": "This page isn't available offline. Connect to the internet and try again.",
+    "cta": "Go to timeline"
+  },
   "lab": {
     "title": "Lab",
     "back": "Back to Lab",
