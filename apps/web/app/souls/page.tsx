@@ -13,7 +13,7 @@ import { PathProfileCard } from "@/components/path/PathProfileCard"
 import { BackPath } from "@/components/ui/BackPath"
 
 export default function SoulsPage() {
-  const { souls, loading: soulsLoading, addSoul, removeSoul } = useSouls()
+  const { souls, loading: soulsLoading, addSoul } = useSouls()
   const { pebbles, loading: pebblesLoading } = usePebbles()
   const { marks } = useMarks()
   const t = useTranslations("souls")
@@ -48,8 +48,8 @@ export default function SoulsPage() {
       ) : (
         <SoulList
           souls={souls}
+          marks={marks}
           pebbleCounts={pebbleCounts}
-          onDelete={removeSoul}
         />
       )}
       </section>
