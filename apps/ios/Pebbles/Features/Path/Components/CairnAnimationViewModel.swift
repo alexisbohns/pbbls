@@ -15,10 +15,24 @@ final class CairnAnimationViewModel: RiveViewModel {
     /// reset) cannot trigger the cascade twice.
     var onFinished: (() -> Void)?
 
-    @objc override func player(pausedWithModel riveModel: RiveModel?) {
-        super.player(pausedWithModel: riveModel)
+    private func fireFinished() {
         let handler = onFinished
         onFinished = nil
         handler?()
+    }
+
+    /// Natural end-of-timeline transitions `isPlaying` to false and
+    /// fires this delegate (see `RiveView.swift` line 419).
+    @objc override func player(pausedWithModel riveModel: RiveModel?) {
+        super.player(pausedWithModel: riveModel)
+        fireFinished()
+    }
+
+    /// Defensive: if the runtime ever chooses to fire `stopped` instead
+    /// (or both, on dismantle), the cascade still proceeds. The
+    /// `onFinished = nil` clearing in `fireFinished()` makes this idempotent.
+    @objc override func player(stoppedWithModel riveModel: RiveModel?) {
+        super.player(stoppedWithModel: riveModel)
+        fireFinished()
     }
 }

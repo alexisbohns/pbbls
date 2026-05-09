@@ -20,15 +20,30 @@ struct WeekSectionHeader: View {
     let weekStart: Date
     let calendar: Calendar
     /// When false, the title text is faded out — used by `PathView` to
-    /// gate the first week's title behind its cairn animation. Other
-    /// weeks pass `true` and the title shows immediately.
-    var titleVisible: Bool = true
-    /// Invoked the first time the cairn animation reaches its stopped
-    /// state. `PathView` passes a non-nil closure for the first week
-    /// only and uses it to start the per-row reveal cascade.
-    var onCairnFinished: (() -> Void)? = nil
+    /// gate each week's title behind its cairn animation. After cascade
+    /// completion `PathView` passes `true` so the title shows immediately.
+    let titleVisible: Bool
 
-    @State private var cairnViewModel = CairnAnimationViewModel(fileName: "pbbls-cairn")
+    @State private var cairnViewModel: CairnAnimationViewModel
+
+    /// The callback is baked into the view-model at `init` time rather
+    /// than wired up in `.onAppear`. List section headers in iOS 17 do
+    /// not always fire `.onAppear` synchronously when added mid-render,
+    /// so binding the closure during view construction guarantees it is
+    /// in place before the cairn timeline starts advancing.
+    init(
+        weekStart: Date,
+        calendar: Calendar,
+        titleVisible: Bool = true,
+        onCairnFinished: (() -> Void)? = nil
+    ) {
+        self.weekStart = weekStart
+        self.calendar = calendar
+        self.titleVisible = titleVisible
+        let viewModel = CairnAnimationViewModel(fileName: "pbbls-cairn")
+        viewModel.onFinished = onCairnFinished
+        self._cairnViewModel = State(initialValue: viewModel)
+    }
 
     private static let titleSize: CGFloat = 14
 
@@ -62,9 +77,6 @@ struct WeekSectionHeader: View {
             cairnViewModel.view()
                 .frame(width: 56, height: 56)
                 .accessibilityHidden(true)
-                .onAppear {
-                    cairnViewModel.onFinished = onCairnFinished
-                }
             Text("Week \(weekOfYear)")
                 .font(Self.titleFont)
                 .tracking(2.5)
