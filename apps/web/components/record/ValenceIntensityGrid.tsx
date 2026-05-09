@@ -213,14 +213,22 @@ function ValencePickerBody({
                         : "border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground",
                     )}
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={shapeUrl(size, polarity)}
-                      alt=""
-                      width={48}
-                      height={48}
+                    {/* SVG rendered as a CSS mask so its color follows
+                        the button's text color (muted-foreground when
+                        idle, primary when selected). */}
+                    <span
                       aria-hidden
-                      className="size-12"
+                      className="size-12 bg-current"
+                      style={{
+                        WebkitMaskImage: `url(${shapeUrl(size, polarity)})`,
+                        maskImage: `url(${shapeUrl(size, polarity)})`,
+                        WebkitMaskRepeat: "no-repeat",
+                        maskRepeat: "no-repeat",
+                        WebkitMaskPosition: "center",
+                        maskPosition: "center",
+                        WebkitMaskSize: "contain",
+                        maskSize: "contain",
+                      }}
                     />
                     <span className="text-xs font-medium">
                       {tPicker(VALENCE_KEY[polarity])}
