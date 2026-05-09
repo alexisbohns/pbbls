@@ -38,8 +38,8 @@ struct EmotionCategoryOrderingTests {
     func allNineCellsPresent() {
         let expected: [(ValenceSizeGroup, ValencePolarity)] = [
             (.large, .highlight), (.medium, .highlight), (.small, .highlight),
-            (.large, .neutral),   (.medium, .neutral),   (.small, .neutral),
-            (.large, .lowlight),  (.medium, .lowlight),  (.small, .lowlight),
+            (.large, .neutral), (.medium, .neutral), (.small, .neutral),
+            (.large, .lowlight), (.medium, .lowlight), (.small, .lowlight)
         ]
         for (size, polarity) in expected {
             let key = EmotionCategoryOrdering.Key(size, polarity)

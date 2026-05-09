@@ -25,26 +25,26 @@ enum EmotionCategoryOrdering {
 
     static let byValence: [Key: [String]] = [
         // HIGHLIGHTS — pleasant first
-        Key(.large,  .highlight): ["pride",   "joy",     "peace",   "fear",    "anger",   "shame",   "sadness"],
-        Key(.medium, .highlight): ["joy",     "pride",   "peace",   "fear",    "anger",   "shame",   "sadness"],
-        Key(.small,  .highlight): ["peace",   "joy",     "pride",   "shame",   "sadness", "fear",    "anger"],
+        Key(.large, .highlight): ["pride", "joy", "peace", "fear", "anger", "shame", "sadness"],
+        Key(.medium, .highlight): ["joy", "pride", "peace", "fear", "anger", "shame", "sadness"],
+        Key(.small, .highlight): ["peace", "joy", "pride", "shame", "sadness", "fear", "anger"],
 
         // NEUTRALS — balanced, peace leads
-        Key(.large,  .neutral):   ["peace",   "joy",     "pride",   "fear",    "anger",   "shame",   "sadness"],
-        Key(.medium, .neutral):   ["peace",   "fear",    "joy",     "anger",   "pride",   "shame",   "sadness"],
-        Key(.small,  .neutral):   ["peace",   "anger",   "joy",     "fear",    "pride",   "sadness", "shame"],
+        Key(.large, .neutral): ["peace", "joy", "pride", "fear", "anger", "shame", "sadness"],
+        Key(.medium, .neutral): ["peace", "fear", "joy", "anger", "pride", "shame", "sadness"],
+        Key(.small, .neutral): ["peace", "anger", "joy", "fear", "pride", "sadness", "shame"],
 
         // LOWLIGHTS — unpleasant first
-        Key(.large,  .lowlight):  ["sadness", "fear",    "anger",   "shame",   "peace",   "joy",     "pride"],
-        Key(.medium, .lowlight):  ["anger",   "fear",    "shame",   "sadness", "peace",   "pride",   "joy"],
-        Key(.small,  .lowlight):  ["shame",   "sadness", "fear",    "anger",   "peace",   "pride",   "joy"],
+        Key(.large, .lowlight): ["sadness", "fear", "anger", "shame", "peace", "joy", "pride"],
+        Key(.medium, .lowlight): ["anger", "fear", "shame", "sadness", "peace", "pride", "joy"],
+        Key(.small, .lowlight): ["shame", "sadness", "fear", "anger", "peace", "pride", "joy"]
     ]
 
     /// Used when no valence is selected on the draft yet. Equal to Medium Neutral.
     static let `default`: [String] = ["peace", "fear", "joy", "anger", "pride", "shame", "sadness"]
 
     static func order(for valence: Valence?) -> [String] {
-        guard let v = valence else { return `default` }
-        return byValence[Key(v.sizeGroup, v.polarity)] ?? `default`
+        guard let valence else { return `default` }
+        return byValence[Key(valence.sizeGroup, valence.polarity)] ?? `default`
     }
 }
