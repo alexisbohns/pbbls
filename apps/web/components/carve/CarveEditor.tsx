@@ -9,6 +9,7 @@ import type { MarkStroke } from "@/lib/types"
 import { DrawingCanvas } from "@/components/carve/DrawingCanvas"
 import { CarveToolbar } from "@/components/carve/CarveToolbar"
 import { StampPicker } from "@/components/carve/StampPicker"
+import { Input } from "@/components/ui/input"
 
 type CarveEditorProps = {
   markId?: string
@@ -24,6 +25,7 @@ export function CarveEditor({ onSaved }: CarveEditorProps) {
   const [strokeWidth, setStrokeWidth] = useState(4)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [name, setName] = useState("")
 
   // Pick a consistent shape for this editor session
   const shape = useMemo(
@@ -61,10 +63,12 @@ export function CarveEditor({ onSaved }: CarveEditorProps) {
     if (saving || strokes.length === 0) return
     setSaving(true)
     try {
+      const trimmed = name.trim()
       const mark = await addMark({
         shape_id: shape.id,
         strokes,
         viewBox: shape.viewBox,
+        name: trimmed.length > 0 ? trimmed : undefined,
       })
       vibrate([10, 50, 10])
       setSaved(true)
@@ -72,11 +76,12 @@ export function CarveEditor({ onSaved }: CarveEditorProps) {
     } finally {
       setSaving(false)
     }
-  }, [saving, strokes, addMark, shape, vibrate, onSaved])
+  }, [saving, strokes, addMark, shape, vibrate, onSaved, name])
 
   const handleNewMark = useCallback(() => {
     setStrokes([])
     setSaved(false)
+    setName("")
   }, [])
 
   if (saved) {
@@ -89,7 +94,7 @@ export function CarveEditor({ onSaved }: CarveEditorProps) {
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
       >
         <p className="text-lg font-medium" aria-live="polite">
-          Glyph saved
+          {name.trim() ? `“${name.trim()}” saved` : "Glyph saved"}
         </p>
         <svg
           viewBox={shape.viewBox}
@@ -154,6 +159,16 @@ export function CarveEditor({ onSaved }: CarveEditorProps) {
           ? "No strokes drawn"
           : `${strokes.length} stroke${strokes.length === 1 ? "" : "s"} drawn`}
       </p>
+
+      <Input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Name (optional)"
+        aria-label="Glyph name"
+        maxLength={80}
+        className="w-full max-w-xs"
+      />
 
       <CarveToolbar
         strokeCount={strokes.length}
