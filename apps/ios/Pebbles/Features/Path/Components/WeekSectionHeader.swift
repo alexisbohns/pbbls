@@ -63,7 +63,7 @@ struct WeekSectionHeader: View {
                 .frame(width: 56, height: 56)
                 .accessibilityHidden(true)
                 .onAppear {
-                    cairnViewModel.onStopped = onCairnFinished
+                    cairnViewModel.onFinished = onCairnFinished
                 }
             Text("Week \(weekOfYear)")
                 .font(Self.titleFont)
