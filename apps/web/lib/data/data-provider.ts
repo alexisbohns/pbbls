@@ -51,7 +51,11 @@ type ServerOwnedPebbleFields =
 export type CreatePebbleInput = Omit<Pebble, ServerOwnedPebbleFields>
 export type UpdatePebbleInput = Partial<Omit<Pebble, ServerOwnedPebbleFields>>
 
-export type CreateSoulInput = Omit<Soul, "id" | "created_at" | "updated_at">
+// glyph_id is optional on create — providers default it to the system glyph
+// (matches the DB column default in `20260426000000_add_glyph_to_souls.sql`).
+export type CreateSoulInput = Omit<Soul, "id" | "glyph_id" | "created_at" | "updated_at"> & {
+  glyph_id?: string
+}
 export type UpdateSoulInput = Partial<Omit<Soul, "id" | "created_at" | "updated_at">>
 
 export type CreateCollectionInput = Omit<Collection, "id" | "created_at" | "updated_at">

@@ -4,6 +4,7 @@ import { useMemo } from "react"
 import { useTranslations } from "next-intl"
 import { useSouls } from "@/lib/data/useSouls"
 import { usePebbles } from "@/lib/data/usePebbles"
+import { useMarks } from "@/lib/data/useMarks"
 import { AddSoulForm } from "@/components/souls/AddSoulForm"
 import { SoulList } from "@/components/souls/SoulList"
 import { SoulsEmptyState } from "@/components/souls/SoulsEmptyState"
@@ -12,8 +13,9 @@ import { PathProfileCard } from "@/components/path/PathProfileCard"
 import { BackPath } from "@/components/ui/BackPath"
 
 export default function SoulsPage() {
-  const { souls, loading: soulsLoading, addSoul, removeSoul } = useSouls()
+  const { souls, loading: soulsLoading, addSoul } = useSouls()
   const { pebbles, loading: pebblesLoading } = usePebbles()
+  const { marks } = useMarks()
   const t = useTranslations("souls")
 
   const loading = soulsLoading || pebblesLoading
@@ -28,8 +30,8 @@ export default function SoulsPage() {
     return counts
   }, [pebbles])
 
-  const handleAdd = async (name: string) => {
-    await addSoul({ name })
+  const handleAdd = async (input: { name: string; glyph_id: string }) => {
+    await addSoul(input)
   }
 
   return (
@@ -37,7 +39,7 @@ export default function SoulsPage() {
       <section>
       <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
 
-      <AddSoulForm onAdd={handleAdd} />
+      <AddSoulForm marks={marks} onAdd={handleAdd} />
 
       {loading ? (
         <p className="text-sm text-muted-foreground">{t("loading")}</p>
@@ -46,8 +48,8 @@ export default function SoulsPage() {
       ) : (
         <SoulList
           souls={souls}
+          marks={marks}
           pebbleCounts={pebbleCounts}
-          onDelete={removeSoul}
         />
       )}
       </section>

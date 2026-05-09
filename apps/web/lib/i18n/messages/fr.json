@@ -276,6 +276,7 @@
     "addCta": "Ajouter",
     "pebbleCount": "{count, plural, one {# galet} other {# galets}}",
     "deleteAria": "Supprimer {name}",
+    "deleteCta": "Supprimer l'âme",
     "deleteTitle": "Supprimer l'âme ?",
     "deleteDescription": "{name} sera retiré·e de votre répertoire et délié·e de tous les galets. Cette action est irréversible.",
     "deleteConfirm": "Supprimer",
@@ -293,6 +294,10 @@
       "noPebbles": "Aucun galet lié à cette âme pour l'instant.",
       "notFoundTitle": "Âme introuvable",
       "notFoundDescription": "Cette âme n'existe pas ou a été supprimée."
+    },
+    "glyph": {
+      "addAria": "Choisir un glyphe",
+      "changeAria": "Modifier le glyphe"
     }
   },
   "collections": {

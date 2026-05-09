@@ -276,6 +276,7 @@
     "addCta": "Add",
     "pebbleCount": "{count, plural, one {# pebble} other {# pebbles}}",
     "deleteAria": "Delete {name}",
+    "deleteCta": "Delete soul",
     "deleteTitle": "Delete soul?",
     "deleteDescription": "This will remove {name} from your directory and unlink them from all pebbles. This cannot be undone.",
     "deleteConfirm": "Delete",
@@ -293,6 +294,10 @@
       "noPebbles": "No pebbles linked to this soul yet.",
       "notFoundTitle": "Soul not found",
       "notFoundDescription": "This soul doesn't exist or may have been removed."
+    },
+    "glyph": {
+      "addAria": "Choose glyph",
+      "changeAria": "Change glyph"
     }
   },
   "collections": {
