@@ -17,6 +17,7 @@
     "db:migration:new": "supabase migration new",
     "db:migration:list": "supabase migration list",
     "db:link": "supabase link",
-    "db:types": "supabase gen types typescript --local > types/database.ts"
+    "db:types": "supabase gen types typescript --local 2>/dev/null > types/database.ts",
+    "db:types:remote": "supabase gen types typescript --linked 2>/dev/null > types/database.ts"
   }
 }
