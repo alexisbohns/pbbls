@@ -39,7 +39,7 @@ export function LogForm({
 
   return (
     <form action={formAction} className="space-y-8">
-      <div className="flex gap-4">
+      <div className="flex flex-wrap gap-4">
         <FieldSelect
           label="Species"
           name="species"
@@ -58,6 +58,7 @@ export function LogForm({
           defaultValue={log?.status}
           options={STATUS_OPTIONS}
         />
+        <ReleasedAtField defaultValue={log?.released_at ?? null} />
       </div>
 
       <Tabs defaultValue="en" className="flex flex-col space-y-4">
@@ -143,6 +144,35 @@ export function LogForm({
       </div>
     </form>
   )
+}
+
+function ReleasedAtField({ defaultValue }: { defaultValue: string | null }) {
+  const id = useId()
+  // <input type="datetime-local"> wants "YYYY-MM-DDTHH:mm" in the local zone.
+  // Slice off the offset/seconds from the ISO UTC value so the picker shows it
+  // in the admin's local time; the action converts the submitted local string
+  // back to an ISO timestamp.
+  const localValue = defaultValue ? toLocalDateTimeInputValue(defaultValue) : ""
+  return (
+    <div className="space-y-2 text-sm">
+      <Label htmlFor={id} className="text-foreground font-medium">
+        Release date
+      </Label>
+      <Input
+        id={id}
+        name="released_at"
+        type="datetime-local"
+        defaultValue={localValue}
+      />
+    </div>
+  )
+}
+
+function toLocalDateTimeInputValue(iso: string): string {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return ""
+  const pad = (n: number) => String(n).padStart(2, "0")
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
 function FieldSelect({
