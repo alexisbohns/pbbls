@@ -14,6 +14,16 @@ struct PathView: View {
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "path")
 
+    /// ISO 8601 calendar — Mon-start, week-1-contains-first-Thursday.
+    /// Locale-independent so all users see the same week boundaries.
+    private var isoCalendar: Calendar {
+        Calendar(identifier: .iso8601)
+    }
+
+    private var groupedPebbles: [(key: Date, value: [Pebble])] {
+        groupPebblesByISOWeek(pebbles, calendar: isoCalendar)
+    }
+
     var body: some View {
         NavigationStack {
             content
@@ -99,14 +109,19 @@ struct PathView: View {
                     .listRowBackground(Color.pebblesListRow)
                 }
 
-                Section("Path") {
-                    ForEach(pebbles) { pebble in
-                        PebbleRow(
-                            pebble: pebble,
-                            onTap: { selectedPebbleId = pebble.id },
-                            onDelete: { pendingDeletion = pebble }
-                        )
-                        .listRowBackground(Color.pebblesListRow)
+                ForEach(groupedPebbles, id: \.key) { group in
+                    Section {
+                        WeekSectionHeader(weekStart: group.key, calendar: isoCalendar)
+                            .listRowBackground(Color.pebblesListRow)
+
+                        ForEach(group.value) { pebble in
+                            PathPebbleRow(
+                                pebble: pebble,
+                                onTap: { selectedPebbleId = pebble.id },
+                                onDelete: { pendingDeletion = pebble }
+                            )
+                            .listRowBackground(Color.pebblesListRow)
+                        }
                     }
                 }
             }
