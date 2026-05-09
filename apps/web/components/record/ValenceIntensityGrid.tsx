@@ -27,6 +27,12 @@ const INTENSITY_KEY: Record<Intensity, "small" | "medium" | "large"> = {
   3: "large",
 }
 
+const INTENSITY_LONG_KEY: Record<Intensity, "longSmall" | "longMedium" | "longLarge"> = {
+  1: "longSmall",
+  2: "longMedium",
+  3: "longLarge",
+}
+
 const VALENCE_KEY: Record<Valence, "highlight" | "neutral" | "lowlight"> = {
   1: "highlight",
   0: "neutral",
@@ -63,27 +69,22 @@ export function ValenceIntensityGrid({
 }: ValenceIntensityGridProps) {
   const tIntensity = useTranslations("record.intensity")
   const tValence = useTranslations("record.valence")
+  const tPicker = useTranslations("record.valencePicker")
   const [open, setOpen] = useState(false)
+
+  const longIntensity = tIntensity(INTENSITY_LONG_KEY[intensity])
+  const valenceLabel = tPicker(VALENCE_KEY[valence]).toLowerCase()
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger
-        className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
         aria-label={tIntensity("ariaSelected", {
           intensity: tIntensity(INTENSITY_KEY[intensity]),
           valence: tValence(VALENCE_KEY[valence]),
         })}
       >
-        <span className="font-semibold">{tIntensity(INTENSITY_KEY[intensity])}</span>
-        <span
-          className={cn(
-            "inline-block size-3.5 rounded-sm border",
-            valence === 1 && "border-primary bg-primary/30",
-            valence === 0 && "border-muted-foreground bg-muted-foreground/30",
-            valence === -1 && "border-muted-foreground/50 bg-muted-foreground/10",
-          )}
-          aria-hidden
-        />
+        <span>{`${longIntensity} ${valenceLabel}`}</span>
       </SheetTrigger>
 
       {/* Remount the picker body each time the sheet opens so the initial

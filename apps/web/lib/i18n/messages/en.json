@@ -454,7 +454,10 @@
       "ariaSelected": "Intensity: {intensity}, Valence: {valence}",
       "small": "S",
       "medium": "M",
-      "large": "L"
+      "large": "L",
+      "longSmall": "Small",
+      "longMedium": "Medium",
+      "longLarge": "Large"
     },
     "valence": {
       "highlight": "HIGHLIGHT",
