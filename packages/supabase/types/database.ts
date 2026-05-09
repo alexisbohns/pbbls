@@ -1,3 +1,4 @@
+Initialising login role...
 export type Json =
   | string
   | number
@@ -238,6 +239,7 @@ export type Database = {
         Row: {
           category_id: string
           color: string
+          emoji: string
           id: string
           name: string
           slug: string
@@ -245,6 +247,7 @@ export type Database = {
         Insert: {
           category_id: string
           color: string
+          emoji: string
           id?: string
           name: string
           slug: string
@@ -252,6 +255,7 @@ export type Database = {
         Update: {
           category_id?: string
           color?: string
+          emoji?: string
           id?: string
           name?: string
           slug?: string
@@ -1017,6 +1021,7 @@ export type Database = {
           category_name: string | null
           category_slug: string | null
           color: string | null
+          emoji: string | null
           id: string | null
           light_color: string | null
           name: string | null
@@ -1454,3 +1459,5 @@ export const Constants = {
     Enums: {},
   },
 } as const
+A new version of Supabase CLI is available: v2.98.2 (currently installed v2.84.2)
+We recommend updating regularly for new features and bug fixes: https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
