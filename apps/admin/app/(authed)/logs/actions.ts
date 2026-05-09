@@ -26,6 +26,11 @@ function readLogFields(formData: FormData): { values: LogInsert; error?: string 
   const external_url = formData.get("external_url")?.toString().trim() || null
   const cover_image_path = formData.get("cover_image_path")?.toString().trim() || null
   const published = formData.get("published") === "on"
+  const released_at_raw = formData.get("released_at")?.toString().trim() || null
+  // <input type="datetime-local"> submits a naive local datetime; new Date()
+  // interprets that in the admin's zone, so toISOString() gives back the
+  // correct UTC instant.
+  const released_at = released_at_raw ? new Date(released_at_raw).toISOString() : null
 
   if (!isLogSpecies(species)) return { error: "Species is required.", values: {} as LogInsert }
   if (!isLogPlatform(platform)) return { error: "Platform is required.", values: {} as LogInsert }
@@ -47,6 +52,7 @@ function readLogFields(formData: FormData): { values: LogInsert; error?: string 
       external_url,
       cover_image_path,
       published,
+      released_at,
     },
   }
 }
@@ -57,9 +63,14 @@ export async function createLog(_: LogFormResult, formData: FormData): Promise<L
 
   const supabase = await createServerSupabaseClient()
   const published_at = parsed.values.published ? new Date().toISOString() : null
+  // Auto-stamp release date when shipping if the admin didn't provide one.
+  const released_at =
+    parsed.values.status === "shipped" && !parsed.values.released_at
+      ? new Date().toISOString()
+      : parsed.values.released_at
   const { data, error } = await supabase
     .from("logs")
-    .insert({ ...parsed.values, published_at })
+    .insert({ ...parsed.values, published_at, released_at })
     .select("id")
     .single()
 
@@ -82,31 +93,42 @@ export async function updateLog(
 
   const supabase = await createServerSupabaseClient()
 
+  // We need the existing row to (a) preserve published_at across re-saves and
+  // (b) decide whether this update is the transition into 'shipped' that
+  // should auto-stamp released_at.
+  const { data: existing, error: readError } = await supabase
+    .from("logs")
+    .select("published, published_at, status, released_at")
+    .eq("id", id)
+    .single()
+  if (readError) {
+    console.error("[logs/updateLog] read existing failed:", readError.message)
+    return { error: "Could not load the existing log to update." }
+  }
+
   // Preserve published_at if the row was already published and stays published.
   // If newly published: stamp now(). If unpublished: clear it.
   let published_at: string | null = null
   if (parsed.values.published) {
-    const { data: existing, error: readError } = await supabase
-      .from("logs")
-      .select("published, published_at")
-      .eq("id", id)
-      .single()
-    if (readError) {
-      console.error("[logs/updateLog] read existing failed:", readError.message)
-      return { error: "Could not load the existing log to update." }
-    }
     if (existing.published && existing.published_at) {
       published_at = existing.published_at
     } else {
       published_at = new Date().toISOString()
     }
-  } else {
-    published_at = null
+  }
+
+  // Auto-stamp released_at when the admin transitions the log into 'shipped'
+  // without setting a date themselves. If they provided a date, honor it.
+  // For non-shipped statuses, we still persist whatever the admin entered (or
+  // null) so they can pre-fill a planned release date.
+  let released_at: string | null = parsed.values.released_at
+  if (parsed.values.status === "shipped" && !released_at) {
+    released_at = existing.released_at ?? new Date().toISOString()
   }
 
   const { error } = await supabase
     .from("logs")
-    .update({ ...parsed.values, published_at })
+    .update({ ...parsed.values, published_at, released_at })
     .eq("id", id)
 
   if (error) {

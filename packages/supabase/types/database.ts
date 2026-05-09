@@ -431,6 +431,7 @@ export type Database = {
           platform: string
           published: boolean
           published_at: string | null
+          released_at: string | null
           species: string
           status: string
           summary_en: string
@@ -449,6 +450,7 @@ export type Database = {
           platform: string
           published?: boolean
           published_at?: string | null
+          released_at?: string | null
           species: string
           status: string
           summary_en: string
@@ -467,6 +469,7 @@ export type Database = {
           platform?: string
           published?: boolean
           published_at?: string | null
+          released_at?: string | null
           species?: string
           status?: string
           summary_en?: string
