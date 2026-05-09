@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl"
 import { useSoul } from "@/lib/data/useSoul"
 import { usePebbles } from "@/lib/data/usePebbles"
 import { useSouls } from "@/lib/data/useSouls"
+import { useMarks } from "@/lib/data/useMarks"
 import { SoulDetailHeader } from "@/components/souls/SoulDetailHeader"
 import { SoulPebbleList } from "@/components/souls/SoulPebbleList"
 import { SoulNotFound } from "@/components/souls/SoulNotFound"
@@ -22,6 +23,7 @@ export default function SoulDetailPage({
   const { soul, loading: soulLoading, updateSoul } = useSoul(id)
   const { pebbles, loading: pebblesLoading } = usePebbles()
   const { souls, loading: soulsLoading } = useSouls()
+  const { marks } = useMarks()
 
   const loading = soulLoading || pebblesLoading || soulsLoading
 
@@ -32,6 +34,10 @@ export default function SoulDetailPage({
 
   const handleUpdateName = async (name: string) => {
     await updateSoul({ name })
+  }
+
+  const handleUpdateGlyph = async (glyph_id: string) => {
+    await updateSoul({ glyph_id })
   }
 
   return (
@@ -53,7 +59,9 @@ export default function SoulDetailPage({
           <SoulDetailHeader
             soul={soul}
             pebbleCount={relatedPebbles.length}
+            marks={marks}
             onUpdateName={handleUpdateName}
+            onUpdateGlyph={handleUpdateGlyph}
           />
           {relatedPebbles.length === 0 ? (
             <p className="py-10 text-center text-sm text-muted-foreground">

@@ -293,6 +293,10 @@
       "noPebbles": "No pebbles linked to this soul yet.",
       "notFoundTitle": "Soul not found",
       "notFoundDescription": "This soul doesn't exist or may have been removed."
+    },
+    "glyph": {
+      "addAria": "Choose glyph",
+      "changeAria": "Change glyph"
     }
   },
   "collections": {

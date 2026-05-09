@@ -293,6 +293,10 @@
       "noPebbles": "Aucun galet lié à cette âme pour l'instant.",
       "notFoundTitle": "Âme introuvable",
       "notFoundDescription": "Cette âme n'existe pas ou a été supprimée."
+    },
+    "glyph": {
+      "addAria": "Choisir un glyphe",
+      "changeAria": "Modifier le glyphe"
     }
   },
   "collections": {

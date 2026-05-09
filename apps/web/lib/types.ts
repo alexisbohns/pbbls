@@ -38,6 +38,7 @@ export type Pebble = {
 export type Soul = {
   id: string
   name: string
+  glyph_id: string
   created_at: string
   updated_at: string
 }

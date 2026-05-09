@@ -2,6 +2,7 @@ import type { Pebble, Soul, Collection } from "@/lib/types"
 import { EMOTIONS } from "@/lib/config/emotions"
 import { DOMAINS } from "@/lib/config/domains"
 import { CARD_TYPES } from "@/lib/config/card-types"
+import { DEFAULT_GLYPH_ID } from "@/lib/config/glyphs"
 
 // ---------------------------------------------------------------------------
 // Seed types — timestamps are injected at hydration time,
@@ -20,11 +21,11 @@ type SeedCollection = Omit<Collection, "created_at" | "updated_at">
 // ---------------------------------------------------------------------------
 
 export const SEED_SOULS: SeedSoul[] = [
-  { id: "soul-mia",     name: "Mia" },
-  { id: "soul-lucas",   name: "Lucas" },
-  { id: "soul-papa",    name: "Papa" },
-  { id: "soul-luna",    name: "Luna" },
-  { id: "soul-dr-roux", name: "Dr. Roux" },
+  { id: "soul-mia",     name: "Mia",      glyph_id: DEFAULT_GLYPH_ID },
+  { id: "soul-lucas",   name: "Lucas",    glyph_id: DEFAULT_GLYPH_ID },
+  { id: "soul-papa",    name: "Papa",     glyph_id: DEFAULT_GLYPH_ID },
+  { id: "soul-luna",    name: "Luna",     glyph_id: DEFAULT_GLYPH_ID },
+  { id: "soul-dr-roux", name: "Dr. Roux", glyph_id: DEFAULT_GLYPH_ID },
 ]
 
 export const SEED_COLLECTIONS: SeedCollection[] = [

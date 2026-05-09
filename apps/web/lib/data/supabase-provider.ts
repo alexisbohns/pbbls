@@ -18,6 +18,7 @@ import type {
   Collection,
   Mark,
 } from "@/lib/types"
+import { DEFAULT_GLYPH_ID } from "@/lib/config/glyphs"
 
 export class SupabaseProvider implements DataProvider {
   private store: Store
@@ -130,6 +131,7 @@ export class SupabaseProvider implements DataProvider {
     const souls: Soul[] = (soulsRes.data ?? []).map((row: Record<string, unknown>) => ({
       id: row.id as string,
       name: row.name as string,
+      glyph_id: row.glyph_id as string,
       created_at: row.created_at as string,
       updated_at: row.updated_at as string,
     }))
@@ -309,13 +311,18 @@ export class SupabaseProvider implements DataProvider {
   async createSoul(input: CreateSoulInput): Promise<Soul> {
     const result = await this.supabase
       .from("souls")
-      .insert({ user_id: this.userId, name: input.name })
+      .insert({
+        user_id: this.userId,
+        name: input.name,
+        glyph_id: input.glyph_id ?? DEFAULT_GLYPH_ID,
+      })
       .select()
       .single()
     const soul = this.unwrap(result) as Record<string, unknown>
     const created: Soul = {
       id: soul.id as string,
       name: soul.name as string,
+      glyph_id: soul.glyph_id as string,
       created_at: soul.created_at as string,
       updated_at: soul.updated_at as string,
     }
@@ -326,7 +333,10 @@ export class SupabaseProvider implements DataProvider {
   async updateSoul(id: string, input: UpdateSoulInput): Promise<Soul> {
     const result = await this.supabase
       .from("souls")
-      .update({ ...(input.name !== undefined && { name: input.name }) })
+      .update({
+        ...(input.name !== undefined && { name: input.name }),
+        ...(input.glyph_id !== undefined && { glyph_id: input.glyph_id }),
+      })
       .eq("id", id)
       .select()
       .single()
@@ -334,6 +344,7 @@ export class SupabaseProvider implements DataProvider {
     const updated: Soul = {
       id: soul.id as string,
       name: soul.name as string,
+      glyph_id: soul.glyph_id as string,
       created_at: soul.created_at as string,
       updated_at: soul.updated_at as string,
     }
