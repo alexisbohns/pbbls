@@ -454,12 +454,34 @@
       "ariaSelected": "Intensity: {intensity}, Valence: {valence}",
       "small": "S",
       "medium": "M",
-      "large": "L"
+      "large": "L",
+      "longSmall": "Small",
+      "longMedium": "Medium",
+      "longLarge": "Large"
     },
     "valence": {
       "highlight": "HIGHLIGHT",
       "neutral": "NEUTRAL",
       "lowlight": "LOWLIGHT"
+    },
+    "valencePicker": {
+      "title": "Choose a valence",
+      "optionAria": "{section}, {polarity}",
+      "highlight": "Highlight",
+      "neutral": "Neutral",
+      "lowlight": "Lowlight",
+      "small": {
+        "name": "Day event",
+        "description": "This moment impacted my day and will be wrapped in my weekly Cairn."
+      },
+      "medium": {
+        "name": "Week event",
+        "description": "This moment impacted my whole week and will be wrapped in my monthly Cairn."
+      },
+      "large": {
+        "name": "Month event",
+        "description": "This moment impacted my whole month and will be wrapped in my yearly Cairn."
+      }
     },
     "date": {
       "title": "When",

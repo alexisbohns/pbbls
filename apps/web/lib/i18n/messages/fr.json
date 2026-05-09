@@ -454,12 +454,34 @@
       "ariaSelected": "Intensité : {intensity}, Valence : {valence}",
       "small": "S",
       "medium": "M",
-      "large": "L"
+      "large": "L",
+      "longSmall": "Petit",
+      "longMedium": "Moyen",
+      "longLarge": "Grand"
     },
     "valence": {
       "highlight": "TEMPS FORT",
       "neutral": "NEUTRE",
       "lowlight": "CREUX"
+    },
+    "valencePicker": {
+      "title": "Choisir une valence",
+      "optionAria": "{section}, {polarity}",
+      "highlight": "Temps fort",
+      "neutral": "Neutre",
+      "lowlight": "Creux",
+      "small": {
+        "name": "Évènement du jour",
+        "description": "Ce moment a marqué ma journée et sera réuni dans mon Cairn hebdomadaire."
+      },
+      "medium": {
+        "name": "Évènement de la semaine",
+        "description": "Ce moment a marqué toute ma semaine et sera réuni dans mon Cairn mensuel."
+      },
+      "large": {
+        "name": "Évènement du mois",
+        "description": "Ce moment a marqué tout mon mois et sera réuni dans mon Cairn annuel."
+      }
     },
     "date": {
       "title": "Quand",
