@@ -19,8 +19,16 @@ import UIKit
 struct WeekSectionHeader: View {
     let weekStart: Date
     let calendar: Calendar
+    /// When false, the title text is faded out — used by `PathView` to
+    /// gate the first week's title behind its cairn animation. Other
+    /// weeks pass `true` and the title shows immediately.
+    var titleVisible: Bool = true
+    /// Invoked the first time the cairn animation reaches its stopped
+    /// state. `PathView` passes a non-nil closure for the first week
+    /// only and uses it to start the per-row reveal cascade.
+    var onCairnFinished: (() -> Void)? = nil
 
-    @State private var cairnViewModel = RiveViewModel(fileName: "pbbls-cairn")
+    @State private var cairnViewModel = CairnAnimationViewModel(fileName: "pbbls-cairn")
 
     private static let titleSize: CGFloat = 14
 
@@ -54,11 +62,16 @@ struct WeekSectionHeader: View {
             cairnViewModel.view()
                 .frame(width: 56, height: 56)
                 .accessibilityHidden(true)
+                .onAppear {
+                    cairnViewModel.onStopped = onCairnFinished
+                }
             Text("Week \(weekOfYear)")
                 .font(Self.titleFont)
                 .tracking(2.5)
                 .textCase(.uppercase)
                 .foregroundStyle(Color.pebblesMutedForeground)
+                .opacity(titleVisible ? 1 : 0)
+                .animation(.easeOut(duration: 0.25), value: titleVisible)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)

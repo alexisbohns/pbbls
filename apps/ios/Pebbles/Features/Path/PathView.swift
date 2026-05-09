@@ -12,7 +12,22 @@ struct PathView: View {
     @State private var pendingDeletion: Pebble?
     @State private var deleteError: String?
 
+    /// First-week reveal cascade. Stages:
+    ///   0 → cairn playing, title hidden, all pebbles hidden
+    ///   1 → title visible, pebbles still hidden
+    ///   N (N≥2) → first (N-1) pebbles visible
+    /// Set to `Int.max` once the cascade has completed (or the user has
+    /// since added/removed a pebble) so subsequent re-renders don't
+    /// re-animate.
+    @State private var firstWeekRevealStage: Int = 0
+    @State private var firstWeekHasCascaded = false
+
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "path")
+
+    /// Stagger between consecutive pebble reveals in the first week.
+    private static let pebbleRevealStagger: Duration = .milliseconds(80)
+    /// Delay after the cairn stops before the title fades in.
+    private static let titleRevealDelay: Duration = .milliseconds(120)
 
     /// ISO 8601 calendar — Mon-start, week-1-contains-first-Thursday.
     /// Locale-independent so all users see the same week boundaries.
@@ -109,19 +124,33 @@ struct PathView: View {
                     .listRowBackground(Color.pebblesListRow)
                 }
 
-                ForEach(groupedPebbles, id: \.key) { group in
+                ForEach(Array(groupedPebbles.enumerated()), id: \.element.key) { weekIndex, group in
+                    let isFirstWeek = (weekIndex == 0)
                     Section {
-                        ForEach(group.value) { pebble in
+                        ForEach(Array(group.value.enumerated()), id: \.element.id) { pebbleIndex, pebble in
+                            let visible = !isFirstWeek
+                                || firstWeekHasCascaded
+                                || firstWeekRevealStage >= pebbleIndex + 2
                             PathPebbleRow(
                                 pebble: pebble,
                                 onTap: { selectedPebbleId = pebble.id },
                                 onDelete: { pendingDeletion = pebble }
                             )
+                            .opacity(visible ? 1 : 0)
+                            .offset(y: visible ? 0 : 8)
+                            .animation(.easeOut(duration: 0.25), value: visible)
                             .listRowBackground(Color.pebblesListRow)
                             .listRowSeparator(.hidden)
                         }
                     } header: {
-                        WeekSectionHeader(weekStart: group.key, calendar: isoCalendar)
+                        WeekSectionHeader(
+                            weekStart: group.key,
+                            calendar: isoCalendar,
+                            titleVisible: !isFirstWeek
+                                || firstWeekHasCascaded
+                                || firstWeekRevealStage >= 1,
+                            onCairnFinished: isFirstWeek ? { runFirstWeekCascade() } : nil
+                        )
                     }
                 }
             }
@@ -142,6 +171,28 @@ struct PathView: View {
             logger.error("path fetch failed: \(error.localizedDescription, privacy: .private)")
             self.loadError = "Couldn't load your pebbles."
             self.isLoading = false
+        }
+    }
+
+    /// Drives the first-week reveal cascade once the cairn animation
+    /// has finished. Idempotent — guarded by `firstWeekHasCascaded` so
+    /// `RiveViewModel` callbacks fired after a re-render do not restart
+    /// the sequence.
+    private func runFirstWeekCascade() {
+        guard !firstWeekHasCascaded else { return }
+        Task { @MainActor in
+            try? await Task.sleep(for: Self.titleRevealDelay)
+            withAnimation(.easeOut(duration: 0.25)) {
+                firstWeekRevealStage = 1
+            }
+            let pebbleCount = groupedPebbles.first?.value.count ?? 0
+            for index in 0..<pebbleCount {
+                try? await Task.sleep(for: Self.pebbleRevealStagger)
+                withAnimation(.easeOut(duration: 0.25)) {
+                    firstWeekRevealStage = index + 2
+                }
+            }
+            firstWeekHasCascaded = true
         }
     }
 
