@@ -1,10 +1,10 @@
 "use client"
 
+import { useTranslations } from "next-intl"
+import { useLocale } from "@/lib/i18n"
 import { useLogList, type LogListMode } from "@/lib/data/useLab"
 import { LogTimeline } from "@/components/lab/LogTimeline"
 import { ReactionButton } from "@/components/lab/ReactionButton"
-
-const LOCALE = "en"
 
 type LabLogListProps = {
   mode: LogListMode
@@ -16,28 +16,26 @@ type LabLogListProps = {
 // Mirrors apps/ios/Pebbles/Features/Lab/Views/LogListView.swift.
 export function LabLogList({ mode }: LabLogListProps) {
   const { logs, reactedIds, loading, error, toggleReaction } = useLogList(mode)
+  const t = useTranslations("lab")
+  const { locale } = useLocale()
 
   if (loading) {
-    return <p className="text-sm text-muted-foreground">Loading…</p>
+    return <p className="text-sm text-muted-foreground">{t("loading")}</p>
   }
 
   if (error) {
-    return (
-      <p className="text-sm text-muted-foreground">
-        Couldn’t load the list. Please try again.
-      </p>
-    )
+    return <p className="text-sm text-muted-foreground">{t("listError")}</p>
   }
 
   if (logs.length === 0) {
-    return <p className="text-sm text-muted-foreground">Nothing here yet.</p>
+    return <p className="text-sm text-muted-foreground">{t("empty")}</p>
   }
 
   return (
     <LogTimeline
       mode={mode}
       logs={logs}
-      locale={LOCALE}
+      locale={locale}
       renderTrailing={
         mode === "backlog"
           ? (log) => (

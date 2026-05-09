@@ -1,7 +1,6 @@
 "use client"
 
 import { useCallback, useEffect, useSyncExternalStore } from "react"
-import { useSearchParams } from "next/navigation"
 import {
   DEFAULT_LOCALE,
   LOCALE_STORAGE_KEY,
@@ -32,20 +31,28 @@ function getServerSnapshot(): Locale {
 }
 
 /**
- * Resolves the active app locale.
- * Priority: `?lang=` query param > stored preference > browser language > EN.
- *
- * The query-param override is non-persistent (doesn't write to storage), so a
- * shared link with `?lang=fr` shows French without changing the visitor's
- * stored preference.
+ * Resolves the active app locale from `localStorage`, with fallback to the
+ * default. The `?lang=` override and browser-language detection are wired in
+ * separately by `LangParamSync` so this hook can run anywhere without
+ * requiring a Suspense boundary.
  */
 export function useLocale() {
-  const searchParams = useSearchParams()
   const stored = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
 
-  const langParam = searchParams.get("lang")
-  const locale: Locale = isSupportedLocale(langParam) ? langParam : stored
+  const setLocale = useCallback((value: Locale) => {
+    localStorage.setItem(LOCALE_STORAGE_KEY, value)
+    window.dispatchEvent(new Event(LOCALE_CHANGE_EVENT))
+  }, [])
 
+  return { locale: stored, setLocale, locales: SUPPORTED_LOCALES }
+}
+
+/**
+ * One-time browser-language detection on first visit. Writes the detected
+ * locale (or default) to storage so subsequent reads are stable. Safe to
+ * call anywhere; runs once on mount.
+ */
+export function useDetectInitialLocale() {
   useEffect(() => {
     if (!localStorage.getItem(LOCALE_STORAGE_KEY)) {
       const detected = detectBrowserLocale()
@@ -53,11 +60,4 @@ export function useLocale() {
       window.dispatchEvent(new Event(LOCALE_CHANGE_EVENT))
     }
   }, [])
-
-  const setLocale = useCallback((value: Locale) => {
-    localStorage.setItem(LOCALE_STORAGE_KEY, value)
-    window.dispatchEvent(new Event(LOCALE_CHANGE_EVENT))
-  }, [])
-
-  return { locale, setLocale, locales: SUPPORTED_LOCALES }
 }

@@ -59,6 +59,31 @@
     "retry": "Try again",
     "generic": "Something went wrong."
   },
+  "lab": {
+    "title": "Lab",
+    "back": "Back to Lab",
+    "loading": "Loading…",
+    "feedError": "Couldn't load the Lab. Please try again.",
+    "listError": "Couldn't load the list. Please try again.",
+    "announcementError": "Couldn't load this announcement.",
+    "empty": "Nothing here yet.",
+    "seeAll": "See all",
+    "sections": {
+      "announcements": "Announcements",
+      "changelog": "Changelog",
+      "inProgress": "In progress",
+      "backlog": "Backlog"
+    },
+    "community": {
+      "title": "Join the community",
+      "description": "Shape Pebbles with other pebblers on WhatsApp.",
+      "cta": "Open in WhatsApp"
+    },
+    "reaction": {
+      "upvoteAria": "Upvote",
+      "removeUpvoteAria": "Remove upvote"
+    }
+  },
   "glyphs": {
     "title": "Glyphs",
     "loading": "Loading…",

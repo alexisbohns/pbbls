@@ -59,6 +59,31 @@
     "retry": "Réessayer",
     "generic": "Une erreur est survenue."
   },
+  "lab": {
+    "title": "Lab",
+    "back": "Retour au Lab",
+    "loading": "Chargement…",
+    "feedError": "Impossible de charger le Lab. Veuillez réessayer.",
+    "listError": "Impossible de charger la liste. Veuillez réessayer.",
+    "announcementError": "Impossible de charger cette annonce.",
+    "empty": "Pas grand chose pour le moment.",
+    "seeAll": "Voir tout",
+    "sections": {
+      "announcements": "Annonces",
+      "changelog": "Registre des changements",
+      "inProgress": "En cours",
+      "backlog": "Réserve d'améliorations"
+    },
+    "community": {
+      "title": "Rejoindre la communauté",
+      "description": "Aidez-nous à façonner Pebbles sur WhatsApp.",
+      "cta": "Ouvrir dans WhatsApp"
+    },
+    "reaction": {
+      "upvoteAria": "Voter",
+      "removeUpvoteAria": "Ôter mon vote"
+    }
+  },
   "glyphs": {
     "title": "Glyphes",
     "loading": "Chargement…",

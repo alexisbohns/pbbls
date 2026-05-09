@@ -2,13 +2,13 @@
 
 import Link from "next/link"
 import { ArrowRight } from "lucide-react"
+import { useTranslations } from "next-intl"
+import { useLocale } from "@/lib/i18n"
 import { useLabFeed } from "@/lib/data/useLab"
 import { FeaturedCommunityCard } from "@/components/lab/FeaturedCommunityCard"
 import { AnnouncementRow } from "@/components/lab/AnnouncementRow"
 import { LogTimeline } from "@/components/lab/LogTimeline"
 import { ReactionButton } from "@/components/lab/ReactionButton"
-
-const LOCALE = "en"
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
@@ -41,16 +41,17 @@ export function LabFeed() {
     error,
     toggleReaction,
   } = useLabFeed()
+  const t = useTranslations("lab")
+  const tSections = useTranslations("lab.sections")
+  const { locale } = useLocale()
 
   if (loading) {
-    return <p className="text-sm text-muted-foreground">Loading…</p>
+    return <p className="text-sm text-muted-foreground">{t("loading")}</p>
   }
 
   if (error) {
     return (
-      <p className="text-sm text-muted-foreground">
-        Couldn’t load the Lab. Please try again.
-      </p>
+      <p className="text-sm text-muted-foreground">{t("feedError")}</p>
     )
   }
 
@@ -60,11 +61,11 @@ export function LabFeed() {
 
       {announcements.length > 0 && (
         <section>
-          <SectionTitle>Announcements</SectionTitle>
+          <SectionTitle>{tSections("announcements")}</SectionTitle>
           <ul className="flex flex-col gap-2">
             {announcements.map((log) => (
               <li key={log.id}>
-                <AnnouncementRow log={log} locale={LOCALE} />
+                <AnnouncementRow log={log} locale={locale} />
               </li>
             ))}
           </ul>
@@ -73,26 +74,26 @@ export function LabFeed() {
 
       {changelog.length > 0 && (
         <section>
-          <SectionTitle>Changelog</SectionTitle>
-          <LogTimeline mode="changelog" logs={changelog} locale={LOCALE} />
-          <SeeAllLink href="/lab/changelog" label="See all" />
+          <SectionTitle>{tSections("changelog")}</SectionTitle>
+          <LogTimeline mode="changelog" logs={changelog} locale={locale} />
+          <SeeAllLink href="/lab/changelog" label={t("seeAll")} />
         </section>
       )}
 
       {initiatives.length > 0 && (
         <section>
-          <SectionTitle>In progress</SectionTitle>
-          <LogTimeline mode="in_progress" logs={initiatives} locale={LOCALE} />
+          <SectionTitle>{tSections("inProgress")}</SectionTitle>
+          <LogTimeline mode="in_progress" logs={initiatives} locale={locale} />
         </section>
       )}
 
       {backlog.length > 0 && (
         <section>
-          <SectionTitle>Backlog</SectionTitle>
+          <SectionTitle>{tSections("backlog")}</SectionTitle>
           <LogTimeline
             mode="backlog"
             logs={backlog}
-            locale={LOCALE}
+            locale={locale}
             renderTrailing={(log) => (
               <ReactionButton
                 count={log.reaction_count}
@@ -101,7 +102,7 @@ export function LabFeed() {
               />
             )}
           />
-          <SeeAllLink href="/lab/backlog" label="See all" />
+          <SeeAllLink href="/lab/backlog" label={t("seeAll")} />
         </section>
       )}
     </div>

@@ -1,4 +1,7 @@
+"use client"
+
 import { MessagesSquare } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { LAB_CONFIG } from "@/lib/config/lab"
@@ -7,15 +10,16 @@ import { LAB_CONFIG } from "@/lib/config/lab"
 // Pebbles WhatsApp community. Static content — link lives in `LabConfig`.
 // Mirrors apps/ios/Pebbles/Features/Lab/Components/FeaturedCommunityCard.swift.
 export function FeaturedCommunityCard() {
+  const t = useTranslations("lab.community")
   return (
     <Card>
       <CardContent className="flex flex-col gap-3">
         <div className="flex items-start gap-3">
           <MessagesSquare className="size-5 shrink-0 text-primary" aria-hidden />
           <div className="flex flex-col gap-0.5">
-            <h2 className="text-sm font-medium">Join the community</h2>
+            <h2 className="text-sm font-medium">{t("title")}</h2>
             <p className="text-xs text-muted-foreground">
-              Shape Pebbles with other pebblers on WhatsApp.
+              {t("description")}
             </p>
           </div>
         </div>
@@ -30,7 +34,7 @@ export function FeaturedCommunityCard() {
             />
           }
         >
-          Open in WhatsApp
+          {t("cta")}
         </Button>
       </CardContent>
     </Card>
