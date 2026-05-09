@@ -7,6 +7,7 @@ import { DataProvider } from "@/components/layout/DataProvider";
 import { AuthProvider } from "@/components/layout/AuthProvider";
 import { SerwistRegistration } from "@/components/layout/SerwistRegistration";
 import { MainContent } from "@/components/layout/MainContent";
+import { LocaleProvider } from "@/lib/i18n/LocaleProvider";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -82,18 +83,20 @@ export default function RootLayout({
       </head>
       <body className="bg-background text-foreground">
         <SerwistRegistration>
-          <AuthProvider>
-            <DataProvider>
-              <ColorWorldProvider>
-                <ThemeProvider>
-                  <ThemeColorSync />
-                  <div className="flex h-full pl-[var(--safe-area-left)] pr-[var(--safe-area-right)]">
-                    <MainContent>{children}</MainContent>
-                  </div>
-                </ThemeProvider>
-              </ColorWorldProvider>
-            </DataProvider>
-          </AuthProvider>
+          <LocaleProvider>
+            <AuthProvider>
+              <DataProvider>
+                <ColorWorldProvider>
+                  <ThemeProvider>
+                    <ThemeColorSync />
+                    <div className="flex h-full pl-[var(--safe-area-left)] pr-[var(--safe-area-right)]">
+                      <MainContent>{children}</MainContent>
+                    </div>
+                  </ThemeProvider>
+                </ColorWorldProvider>
+              </DataProvider>
+            </AuthProvider>
+          </LocaleProvider>
         </SerwistRegistration>
       </body>
     </html>

@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ChevronRight } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/data/auth-context"
 import { ProfileCard } from "@/components/profile/ProfileCard"
 import { LogoutButton } from "@/components/profile/LogoutButton"
@@ -20,6 +21,7 @@ const PROFILE_NAV = NAV_ITEMS.filter(
 export default function ProfilePage() {
   const { user, profile, isAuthenticated, isLoading, logout } = useAuth()
   const router = useRouter()
+  const t = useTranslations("profile")
 
   const handleLogout = async () => {
     await logout()
@@ -30,8 +32,8 @@ export default function ProfilePage() {
     return (
       <PageLayout sidebar={<PathProfileCard />}>
         <section>
-          <h1 className="mb-6 text-2xl font-semibold">Profile</h1>
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("loading")}</p>
         </section>
       </PageLayout>
     )
@@ -41,10 +43,8 @@ export default function ProfilePage() {
     return (
       <PageLayout sidebar={<PathProfileCard />}>
         <section>
-          <h1 className="mb-6 text-2xl font-semibold">Profile</h1>
-          <p className="text-sm text-muted-foreground">
-            Sign in to view your profile.
-          </p>
+          <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("signedOut")}</p>
         </section>
       </PageLayout>
     )
@@ -53,7 +53,7 @@ export default function ProfilePage() {
   return (
     <PageLayout sidebar={<><BackPath /><PathProfileCard /></>}>
       <section>
-        <h1 className="mb-6 text-2xl font-semibold">Profile</h1>
+        <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
         <div className="space-y-6">
           <ProfileCard user={user} profile={profile} />
 
