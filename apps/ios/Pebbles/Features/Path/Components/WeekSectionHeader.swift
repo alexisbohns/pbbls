@@ -1,9 +1,14 @@
+import RiveRuntime
 import SwiftUI
 
-/// Centered "Week N" title rendered as the first list row inside each
-/// week card on the Path screen. The week number is read from the
-/// supplied `weekStart` Date using the supplied calendar — callers pass
-/// the same `Calendar(identifier: .iso8601)` they used to bucket.
+/// Header rendered ABOVE each week card on the Path screen: a small Rive
+/// cairn animation stacked above the centered "Week N" / "Semaine N"
+/// title. Used as the `header:` view of each `Section` so it sits in the
+/// gap between cards rather than as a row inside one.
+///
+/// The week number is read from the supplied `weekStart` Date using the
+/// supplied calendar — callers pass the same `Calendar(identifier:
+/// .iso8601)` they used to bucket.
 ///
 /// The localized source key is `"Week %lld"`, with `"Semaine %lld"` as
 /// the French translation. Xcode auto-extracts the source key on every
@@ -13,13 +18,21 @@ struct WeekSectionHeader: View {
     let weekStart: Date
     let calendar: Calendar
 
+    @State private var cairnViewModel = RiveViewModel(fileName: "pbbls-cairn")
+
     var body: some View {
         let weekOfYear = calendar.component(.weekOfYear, from: weekStart)
-        Text("Week \(weekOfYear)")
-            .font(.custom("Ysabeau-SemiBold", size: 18))
-            .foregroundStyle(Color.pebblesForeground)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
+        VStack(spacing: 8) {
+            cairnViewModel.view()
+                .frame(width: 56, height: 56)
+                .accessibilityHidden(true)
+            Text("Week \(weekOfYear)")
+                .font(.custom("Ysabeau-SemiBold", size: 18))
+                .foregroundStyle(Color.pebblesForeground)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 12)
+        .textCase(nil) // override the default `.insetGrouped` uppercase header style
     }
 }
 
@@ -43,11 +56,13 @@ private func previewISOCalendar() -> Calendar {
 #Preview {
     List {
         Section {
+            Text("Pebble row")
+                .listRowBackground(Color.pebblesListRow)
+        } header: {
             WeekSectionHeader(
                 weekStart: previewWeekStart(),
                 calendar: previewISOCalendar()
             )
-            .listRowBackground(Color.pebblesListRow)
         }
     }
 }

@@ -111,9 +111,6 @@ struct PathView: View {
 
                 ForEach(groupedPebbles, id: \.key) { group in
                     Section {
-                        WeekSectionHeader(weekStart: group.key, calendar: isoCalendar)
-                            .listRowBackground(Color.pebblesListRow)
-
                         ForEach(group.value) { pebble in
                             PathPebbleRow(
                                 pebble: pebble,
@@ -121,7 +118,10 @@ struct PathView: View {
                                 onDelete: { pendingDeletion = pebble }
                             )
                             .listRowBackground(Color.pebblesListRow)
+                            .listRowSeparator(.hidden)
                         }
+                    } header: {
+                        WeekSectionHeader(weekStart: group.key, calendar: isoCalendar)
                     }
                 }
             }
