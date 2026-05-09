@@ -346,6 +346,7 @@
     "yesterday": "Yesterday",
     "todayLabel": "Today — {date}",
     "yesterdayLabel": "Yesterday — {date}",
+    "weekLabel": "Week {week}",
     "profileAria": "{name}'s profile",
     "stats": {
       "bounce": "bounce",
