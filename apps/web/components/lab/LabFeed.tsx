@@ -5,7 +5,7 @@ import { ArrowRight } from "lucide-react"
 import { useLabFeed } from "@/lib/data/useLab"
 import { FeaturedCommunityCard } from "@/components/lab/FeaturedCommunityCard"
 import { AnnouncementRow } from "@/components/lab/AnnouncementRow"
-import { LogRow } from "@/components/lab/LogRow"
+import { LogTimeline } from "@/components/lab/LogTimeline"
 import { ReactionButton } from "@/components/lab/ReactionButton"
 
 const LOCALE = "en"
@@ -74,13 +74,7 @@ export function LabFeed() {
       {changelog.length > 0 && (
         <section>
           <SectionTitle>Changelog</SectionTitle>
-          <ul className="flex flex-col gap-2">
-            {changelog.map((log) => (
-              <li key={log.id}>
-                <LogRow log={log} locale={LOCALE} />
-              </li>
-            ))}
-          </ul>
+          <LogTimeline mode="changelog" logs={changelog} locale={LOCALE} />
           <SeeAllLink href="/lab/changelog" label="See all" />
         </section>
       )}
@@ -88,36 +82,25 @@ export function LabFeed() {
       {initiatives.length > 0 && (
         <section>
           <SectionTitle>In progress</SectionTitle>
-          <ul className="flex flex-col gap-2">
-            {initiatives.map((log) => (
-              <li key={log.id}>
-                <LogRow log={log} locale={LOCALE} />
-              </li>
-            ))}
-          </ul>
+          <LogTimeline mode="in_progress" logs={initiatives} locale={LOCALE} />
         </section>
       )}
 
       {backlog.length > 0 && (
         <section>
           <SectionTitle>Backlog</SectionTitle>
-          <ul className="flex flex-col gap-2">
-            {backlog.map((log) => (
-              <li key={log.id}>
-                <LogRow
-                  log={log}
-                  locale={LOCALE}
-                  trailing={
-                    <ReactionButton
-                      count={log.reaction_count}
-                      isReacted={reactedIds.has(log.id)}
-                      onToggle={() => void toggleReaction(log.id)}
-                    />
-                  }
-                />
-              </li>
-            ))}
-          </ul>
+          <LogTimeline
+            mode="backlog"
+            logs={backlog}
+            locale={LOCALE}
+            renderTrailing={(log) => (
+              <ReactionButton
+                count={log.reaction_count}
+                isReacted={reactedIds.has(log.id)}
+                onToggle={() => void toggleReaction(log.id)}
+              />
+            )}
+          />
           <SeeAllLink href="/lab/backlog" label="See all" />
         </section>
       )}

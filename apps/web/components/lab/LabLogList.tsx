@@ -1,7 +1,7 @@
 "use client"
 
 import { useLogList, type LogListMode } from "@/lib/data/useLab"
-import { LogRow } from "@/components/lab/LogRow"
+import { LogTimeline } from "@/components/lab/LogTimeline"
 import { ReactionButton } from "@/components/lab/ReactionButton"
 
 const LOCALE = "en"
@@ -34,24 +34,21 @@ export function LabLogList({ mode }: LabLogListProps) {
   }
 
   return (
-    <ul className="flex flex-col gap-2">
-      {logs.map((log) => (
-        <li key={log.id}>
-          <LogRow
-            log={log}
-            locale={LOCALE}
-            trailing={
-              mode === "backlog" ? (
-                <ReactionButton
-                  count={log.reaction_count}
-                  isReacted={reactedIds.has(log.id)}
-                  onToggle={() => void toggleReaction(log.id)}
-                />
-              ) : undefined
-            }
-          />
-        </li>
-      ))}
-    </ul>
+    <LogTimeline
+      mode={mode}
+      logs={logs}
+      locale={LOCALE}
+      renderTrailing={
+        mode === "backlog"
+          ? (log) => (
+              <ReactionButton
+                count={log.reaction_count}
+                isReacted={reactedIds.has(log.id)}
+                onToggle={() => void toggleReaction(log.id)}
+              />
+            )
+          : undefined
+      }
+    />
   )
 }
