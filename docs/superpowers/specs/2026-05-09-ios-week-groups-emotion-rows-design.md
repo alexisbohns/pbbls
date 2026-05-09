@@ -66,10 +66,10 @@ Layout: `HStack(spacing: 12)` of thumbnail + 2-line text VStack.
 
 **New files:**
 
-- `apps/ios/Pebbles/Features/Path/Models/WeekGroup.swift` — pure value type plus a static grouping helper.
+- `apps/ios/Pebbles/Features/Path/GroupPebblesByISOWeek.swift` — free function helper, mirroring the existing `Features/Profile/Views/GroupPebblesByMonth.swift` pattern.
 - `apps/ios/Pebbles/Features/Path/Components/PathPebbleRow.swift` — emotion-tinted row used only in Path.
 - `apps/ios/Pebbles/Features/Path/Components/WeekSectionHeader.swift` — centered Ysabeau "Week N" row, used as the first row of each card.
-- `apps/ios/PebblesTests/WeekGroupTests.swift` — Swift Testing suite for the grouping helper.
+- `apps/ios/PebblesTests/GroupPebblesByISOWeekTests.swift` — Swift Testing suite for the grouping helper.
 
 **Modified files:**
 
@@ -83,37 +83,35 @@ Layout: `HStack(spacing: 12)` of thumbnail + 2-line text VStack.
 - The Supabase query in `PathView.load()` — same `select` string, same RPC, same ordering.
 - `project.yml` — no new build settings; the new files are already covered by the existing source globs.
 
-### `WeekGroup` model
+### `groupPebblesByISOWeek` helper
+
+Mirror the shape of the existing `groupPebblesByMonth(_:calendar:)`:
 
 ```swift
-struct WeekGroup: Identifiable, Hashable {
-    let year: Int          // ISO 8601 year-for-week-of-year
-    let weekOfYear: Int    // ISO 8601 week-of-year (1...53)
-    let pebbles: [Pebble]  // sorted by happenedAt descending
-
-    var id: String { "\(year)-\(weekOfYear)" }
-}
-
-extension WeekGroup {
-    /// Buckets `pebbles` by ISO-week using the supplied calendar (defaults
-    /// to `.iso8601`). Within each bucket, pebbles are sorted by
-    /// `happenedAt` descending. Returned groups are sorted by
-    /// (year, week) descending — newest week first.
-    static func group(
-        _ pebbles: [Pebble],
-        calendar: Calendar = Calendar(identifier: .iso8601)
-    ) -> [WeekGroup]
-}
+/// Groups pebbles by their ISO 8601 week, returning `(weekStart, pebbles)`
+/// pairs ordered descending by week. The `weekStart` is the first instant
+/// of the week's Monday in the provided calendar.
+///
+/// - Caller passes `Calendar(identifier: .iso8601)` — only that calendar
+///   gives Mon-start, week-1-contains-first-Thursday semantics
+///   consistently. `Calendar.current` would vary by user locale.
+/// - Within a group, input order is preserved — callers typically pass
+///   pebbles already sorted descending by `happenedAt`.
+func groupPebblesByISOWeek(
+    _ pebbles: [Pebble],
+    calendar: Calendar
+) -> [(key: Date, value: [Pebble])]
 ```
 
-**Why `Calendar(identifier: .iso8601)` specifically:** it is the only standard calendar where `.weekOfYear` and `.yearForWeekOfYear` give Mon-start, week-1-contains-first-Thursday behavior consistently. `Calendar.current` would vary by user locale (Sun-start in en-US). Using ISO 8601 makes the grouping deterministic.
+**Why `Calendar(identifier: .iso8601)` specifically:** it is the only standard calendar where `.weekOfYear` and `.yearForWeekOfYear` give Mon-start, week-1-contains-first-Thursday behavior consistently. `Calendar.current` would vary by user locale (Sun-start in en-US). The caller (`PathView`) passes the ISO 8601 calendar; the helper is generic over the calendar so tests can inject it.
 
-**Why `.yearForWeekOfYear` and not `.year`:** at year boundaries, a date like `2025-12-29` (Mon) belongs to ISO week 1 of `yearForWeekOfYear = 2026`. Bucketing by `.year` would split that week incorrectly across two cards.
+**Why bucket key uses `.yearForWeekOfYear` and `.weekOfYear`:** at year boundaries, a date like `2025-12-29` (Mon) belongs to ISO week 1 of `yearForWeekOfYear = 2026`. Bucketing by `.year` + `.month` (as `groupPebblesByMonth` does) would split such a week incorrectly across two cards. Internally, we compute the bucket key by reconstructing the date from `[.yearForWeekOfYear, .weekOfYear, .weekday]` components, fixed at weekday 2 (Monday in ISO 8601).
 
 ### Data flow in `PathView`
 
-- Replace `@State private var pebbles: [Pebble]` with `@State private var weekGroups: [WeekGroup]`.
-- After a successful `load()`, run `weekGroups = WeekGroup.group(result)` before rendering.
+- Replace `@State private var pebbles: [Pebble]` with `@State private var pebbles: [Pebble] = []` (kept) plus a computed `groupedPebbles: [(key: Date, value: [Pebble])]` property.
+- The Supabase query is unchanged. `pebbles` already arrives sorted descending by `happened_at` from the `.order(...)` clause.
+- The view passes `Calendar(identifier: .iso8601)` to the grouping helper. That choice lives in the view, not the helper.
 - Render structure:
 
   ```swift
@@ -126,12 +124,12 @@ extension WeekGroup {
           .listRowBackground(Color.pebblesListRow)
       }
 
-      ForEach(weekGroups) { group in
+      ForEach(groupedPebbles, id: \.key) { group in
           Section {
-              WeekSectionHeader(weekOfYear: group.weekOfYear)
+              WeekSectionHeader(weekStart: group.key, calendar: isoCalendar)
                   .listRowBackground(Color.pebblesListRow)
 
-              ForEach(group.pebbles) { pebble in
+              ForEach(group.value) { pebble in
                   PathPebbleRow(
                       pebble: pebble,
                       onTap: { selectedPebbleId = pebble.id },
@@ -144,7 +142,8 @@ extension WeekGroup {
   }
   ```
 
-- Empty state (`weekGroups.isEmpty`): only the "Record a pebble" card renders. No empty-state copy is added.
+- `WeekSectionHeader` reads `weekOfYear` from the calendar passed in: `calendar.component(.weekOfYear, from: weekStart)`.
+- Empty state (`pebbles.isEmpty`): only the "Record a pebble" card renders. No empty-state copy is added.
 - Loading / error: still gated by `isLoading` / `loadError` outside the list. Unchanged.
 
 ## Localization
@@ -156,14 +155,14 @@ extension WeekGroup {
 
 ## Testing
 
-`apps/ios/PebblesTests/WeekGroupTests.swift`, Swift Testing (`@Suite`, `@Test`, `#expect`):
+`apps/ios/PebblesTests/GroupPebblesByISOWeekTests.swift`, Swift Testing (`@Suite`, `@Test`, `#expect`). Mirrors the shape of the existing `GroupPebblesByMonthTests`. All tests inject `Calendar(identifier: .iso8601)` with `TimeZone(identifier: "UTC")` so they are deterministic on any machine.
 
-1. `group(_:)` returns an empty array for empty input.
+1. Empty input returns an empty array.
 2. Two pebbles inside the same ISO week land in one group; pebbles from adjacent calendar weeks land in two separate groups.
-3. **Year-boundary case:** pebbles dated `2025-12-29` and `2026-01-02` both fall in `(year: 2026, weekOfYear: 1)`. This is the test that pins down `.yearForWeekOfYear` usage.
-4. Within a group, pebbles are sorted by `happenedAt` descending.
-5. Groups themselves are sorted by `(year, weekOfYear)` descending — newest first.
-6. Inputs in arbitrary order produce the same grouping as inputs already sorted (helper is order-independent).
+3. **Year-boundary case:** pebbles dated `2025-12-29T10:00:00Z` (Mon) and `2026-01-02T10:00:00Z` (Fri) both fall in ISO week 1 of `yearForWeekOfYear = 2026` — they land in a single group. Pins down the `.yearForWeekOfYear` usage.
+4. Groups are ordered descending by `key` (newest week first).
+5. Within a group, input order is preserved (mirrors the month helper's contract — caller is responsible for sort).
+6. The `key` of a group is the Monday `00:00:00` of that ISO week.
 
 No UI tests, no screenshot tests (none in the repo today).
 
