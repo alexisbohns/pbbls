@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useId, useRef, useState } from "react"
-import Image from "next/image"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import {
@@ -37,22 +36,23 @@ const VALENCE_KEY: Record<Valence, "highlight" | "neutral" | "lowlight"> = {
 const SIZE_GROUPS: Intensity[] = [1, 2, 3]
 const POLARITIES: Valence[] = [-1, 0, 1]
 
-const ASSET_NAME: Record<Intensity, Record<Valence, string>> = {
-  1: {
-    [-1]: "valence-lowlightSmall.svg",
-    0: "valence-neutralSmall.svg",
-    1: "valence-highlightSmall.svg",
-  },
-  2: {
-    [-1]: "valence-lowlightMedium.svg",
-    0: "valence-neutralMedium.svg",
-    1: "valence-highlightMedium.svg",
-  },
-  3: {
-    [-1]: "valence-lowlightLarge.svg",
-    0: "valence-neutralLarge.svg",
-    1: "valence-highlightLarge.svg",
-  },
+const SHAPE_BASE_URL =
+  "https://enuuezhrnncuhqonyxbb.supabase.co/storage/v1/object/public/public-assets/shapes"
+
+const SHAPE_INTENSITY: Record<Intensity, "low" | "medium" | "high"> = {
+  1: "low",
+  2: "medium",
+  3: "high",
+}
+
+const SHAPE_POLARITY: Record<Valence, "negative" | "neutral" | "positive"> = {
+  [-1]: "negative",
+  0: "neutral",
+  1: "positive",
+}
+
+function shapeUrl(size: Intensity, polarity: Valence): string {
+  return `${SHAPE_BASE_URL}/${SHAPE_INTENSITY[size]}-${SHAPE_POLARITY[polarity]}.svg`
 }
 
 export function ValenceIntensityGrid({
@@ -213,8 +213,9 @@ function ValencePickerBody({
                         : "border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground",
                     )}
                   >
-                    <Image
-                      src={`/valence/${ASSET_NAME[size][polarity]}`}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={shapeUrl(size, polarity)}
                       alt=""
                       width={48}
                       height={48}
