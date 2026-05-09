@@ -55,6 +55,11 @@ function rowsToLogs(rows: LogRow[] | null): Log[] {
   return (rows ?? []).map(rowToLog).filter((l): l is Log => l != null)
 }
 
+// Logs are scoped to a platform (`web`, `ios`, `android`, or `all`). The
+// web app surfaces only entries that are relevant to it: those tagged for
+// `web` and those tagged for every platform.
+const WEB_PLATFORMS = ["web", "all"] as const
+
 export async function fetchAnnouncements(
   supabase: SupabaseClient,
   options?: { limit?: number },
@@ -64,6 +69,7 @@ export async function fetchAnnouncements(
     .select("*")
     .eq("species", "announcement")
     .eq("published", true)
+    .in("platform", WEB_PLATFORMS as unknown as string[])
     .order("published_at", { ascending: false })
   if (options?.limit) query = query.limit(options.limit)
   const { data, error } = await query
@@ -81,6 +87,7 @@ export async function fetchChangelog(
     .eq("species", "feature")
     .eq("status", "shipped")
     .eq("published", true)
+    .in("platform", WEB_PLATFORMS as unknown as string[])
     .order("published_at", { ascending: false })
   if (options?.limit) query = query.limit(options.limit)
   const { data, error } = await query
@@ -95,6 +102,7 @@ export async function fetchInitiatives(supabase: SupabaseClient): Promise<Log[]>
     .eq("species", "feature")
     .eq("status", "in_progress")
     .eq("published", true)
+    .in("platform", WEB_PLATFORMS as unknown as string[])
     .order("published_at", { ascending: false })
   if (error) throw new Error(error.message)
   return rowsToLogs(data as LogRow[] | null)
@@ -110,6 +118,7 @@ export async function fetchBacklog(
     .eq("species", "feature")
     .eq("status", "backlog")
     .eq("published", true)
+    .in("platform", WEB_PLATFORMS as unknown as string[])
     .order("reaction_count", { ascending: false })
     .order("created_at", { ascending: false })
   if (options?.limit) query = query.limit(options.limit)
