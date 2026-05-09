@@ -58,6 +58,29 @@
     "description": "Une erreur inattendue s'est produite. Veuillez réessayer.",
     "retry": "Réessayer"
   },
+  "onboarding": {
+    "controlsAria": "Commandes de l'introduction",
+    "progressAria": "Progression de l'introduction",
+    "stepAria": "Étape {current} sur {total}",
+    "skip": "Ignorer",
+    "back": "Retour",
+    "next": "Suivant",
+    "complete": "Capturer votre premier galet",
+    "steps": {
+      "path": {
+        "heading": "Votre vie est un chemin",
+        "body": "Chaque moment compte — les grands comme les plus discrets. Mais la plupart s'échappent avant même qu'on les remarque. Pebbles vous aide à les recueillir, un par un."
+      },
+      "pebble": {
+        "heading": "Déposez un galet, gardez l'instant",
+        "body": "Un café avec un ami. Un concert qui vous a donné des frissons. Une conversation difficile. Capturez-le en quelques secondes — sans page blanche, sans pression, sans audience."
+      },
+      "ritual": {
+        "heading": "Tracez votre chemin, à votre rythme",
+        "body": "Aucune série à entretenir, aucun fil à faire défiler. Juste un rituel paisible qui grandit avec vous."
+      }
+    }
+  },
   "souls": {
     "title": "Âmes",
     "loading": "Chargement…",

@@ -58,6 +58,29 @@
     "description": "An unexpected error occurred. Please try again.",
     "retry": "Try again"
   },
+  "onboarding": {
+    "controlsAria": "Onboarding controls",
+    "progressAria": "Onboarding progress",
+    "stepAria": "Step {current} of {total}",
+    "skip": "Skip",
+    "back": "Back",
+    "next": "Next",
+    "complete": "Collect your first pebble",
+    "steps": {
+      "path": {
+        "heading": "Your life is a path",
+        "body": "Every moment matters — the big ones and the quiet ones. But most of them slip away before you even notice. Pebbles helps you collect them, one by one."
+      },
+      "pebble": {
+        "heading": "Drop a pebble, keep the moment",
+        "body": "A coffee with a friend. A concert that gave you chills. A tough conversation. Record it in seconds — no blank page, no pressure, no audience."
+      },
+      "ritual": {
+        "heading": "Build your path, at your own pace",
+        "body": "No streak to protect, no feed to scroll. Just a calm ritual that grows with you."
+      }
+    }
+  },
   "souls": {
     "title": "Souls",
     "loading": "Loading…",
