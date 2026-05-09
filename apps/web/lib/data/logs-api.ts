@@ -55,10 +55,10 @@ function rowsToLogs(rows: LogRow[] | null): Log[] {
   return (rows ?? []).map(rowToLog).filter((l): l is Log => l != null)
 }
 
-// Logs are scoped to a platform (`web`, `ios`, `android`, or `all`). The
+// Logs are scoped to a platform (`webapp`, `ios`, `android`, or `all`). The
 // web app surfaces only entries that are relevant to it: those tagged for
-// `web` and those tagged for every platform.
-const WEB_PLATFORMS = ["web", "all"] as const
+// `webapp` and those tagged for every platform.
+const WEB_PLATFORMS = ["webapp", "all"] as const
 
 export async function fetchAnnouncements(
   supabase: SupabaseClient,
