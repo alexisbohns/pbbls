@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { Gem } from "lucide-react"
+import { Stone } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { Mark, Soul } from "@/lib/types"
 import { SoulGlyphThumbnail } from "@/components/souls/SoulGlyphThumbnail"
@@ -27,7 +27,7 @@ export function SoulCard({ soul, mark, pebbleCount }: SoulCardProps) {
         {soul.name}
       </span>
       <span className="flex items-center gap-1 text-xs text-foreground">
-        <Gem
+        <Stone
           className="size-3 text-primary"
           aria-hidden="true"
         />
