@@ -1,0 +1,536 @@
+{
+  "brand": {
+    "name": "Pebbles",
+    "short": "pbbls"
+  },
+  "common": {
+    "loading": "Chargement…",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "confirm": "Confirmer",
+    "back": "Retour",
+    "close": "Fermer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "retry": "Réessayer",
+    "unknown": "Inconnu",
+    "aria": {
+      "mainNavigation": "Navigation principale",
+      "profile": "Profil"
+    }
+  },
+  "nav": {
+    "path": "Chemin",
+    "record": "Capturer",
+    "collections": "Collections",
+    "souls": "Âmes",
+    "glyphs": "Glyphes",
+    "lab": "Lab"
+  },
+  "profile": {
+    "title": "Profil",
+    "appSectionsAria": "Sections de l'application",
+    "loading": "Chargement…",
+    "signedOut": "Connectez-vous pour voir votre profil.",
+    "email": "E-mail",
+    "memberSince": "Membre depuis",
+    "appearance": "Apparence",
+    "language": "Langue",
+    "theme": {
+      "label": "Thème",
+      "light": "Clair",
+      "dark": "Sombre",
+      "system": "Système",
+      "toggle": "Changer de thème"
+    },
+    "haptics": "Vibrations",
+    "hapticsEnable": "Activer les vibrations",
+    "hapticsDisable": "Désactiver les vibrations",
+    "resetAria": "Réinitialiser aux données d'exemple",
+    "resetTitle": "Tout réinitialiser ?",
+    "resetDescription": "Vos galets, âmes et collections seront remplacés par les données d'exemple d'origine. Cette action est irréversible.",
+    "resetConfirm": "Réinitialiser",
+    "logout": "Me déconnecter",
+    "loggingOut": "Déconnexion…"
+  },
+  "errors": {
+    "title": "Une erreur est survenue",
+    "description": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+    "retry": "Réessayer",
+    "generic": "Une erreur est survenue."
+  },
+  "docs": {
+    "title": "Documentation",
+    "navAria": "Documentation",
+    "back": "Retour à l'application",
+    "lastUpdated": "Dernière mise à jour",
+    "languageAria": "Langue"
+  },
+  "offline": {
+    "title": "Vous êtes hors ligne",
+    "description": "Cette page n'est pas disponible hors ligne. Connectez-vous à internet et réessayez.",
+    "cta": "Aller à mon chemin"
+  },
+  "legal": {
+    "navAria": "Mentions légales",
+    "legalNotice": "Mentions légales",
+    "terms": "Conditions Générales d'Utilisation",
+    "privacy": "Politique de Confidentialité"
+  },
+  "lab": {
+    "title": "Lab",
+    "back": "Retour au Lab",
+    "loading": "Chargement…",
+    "feedError": "Impossible de charger le Lab. Veuillez réessayer.",
+    "listError": "Impossible de charger la liste. Veuillez réessayer.",
+    "announcementError": "Impossible de charger cette annonce.",
+    "empty": "Pas grand chose pour le moment.",
+    "seeAll": "Voir tout",
+    "sections": {
+      "announcements": "Annonces",
+      "changelog": "Registre des changements",
+      "inProgress": "En cours",
+      "backlog": "Réserve d'améliorations"
+    },
+    "community": {
+      "title": "Rejoindre la communauté",
+      "description": "Aidez-nous à façonner Pebbles sur WhatsApp.",
+      "cta": "Ouvrir dans WhatsApp"
+    },
+    "reaction": {
+      "upvoteAria": "Voter",
+      "removeUpvoteAria": "Ôter mon vote"
+    }
+  },
+  "glyphs": {
+    "title": "Glyphes",
+    "loading": "Chargement…",
+    "carveNew": "Graver un glyphe",
+    "untitled": "Glyphe sans nom",
+    "card": {
+      "strokeCount": "{count, plural, one {# trait} other {# traits}}"
+    },
+    "empty": {
+      "title": "Aucun glyphe pour l'instant",
+      "description": "Les glyphes sont des symboles que vous gravez à la surface des galets. Créez le premier.",
+      "cta": "Graver un glyphe"
+    },
+    "detail": {
+      "back": "← Retour aux glyphes",
+      "linkText": "Retour aux glyphes",
+      "namePlaceholder": "Nom (facultatif)",
+      "nameAria": "Nom du glyphe",
+      "editAria": "Modifier le nom",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "deleteCta": "Supprimer le glyphe",
+      "deleteTitle": "Supprimer ce glyphe ?",
+      "deleteDescription": "Cette action est irréversible. Le glyphe sera définitivement retiré.",
+      "deleteConfirm": "Supprimer",
+      "notFoundTitle": "Glyphe introuvable",
+      "notFoundDescription": "Ce glyphe n'existe pas ou a été supprimé."
+    },
+    "picker": {
+      "label": "Glyphes",
+      "empty": "Aucun glyphe pour l'instant. Gravez-en un depuis la page Glyphes.",
+      "fallbackName": "Glyphe {short}"
+    }
+  },
+  "carve": {
+    "back": "← Retour aux glyphes",
+    "title": "Graver un glyphe",
+    "namePlaceholder": "Nom (facultatif)",
+    "nameAria": "Nom du glyphe",
+    "canvasAria": "Zone de dessin pour le glyphe",
+    "canvasCaption": "Dessinez un symbole sur le galet. Vos traits restent dans le contour de la pierre.",
+    "strokeCountAnnounce": "{count, plural, =0 {Aucun trait} one {# trait gravé} other {# traits gravés}}",
+    "saved": "Glyphe enregistré",
+    "savedNamed": "« {name} » enregistré",
+    "savedAria": "Glyphe enregistré",
+    "newGlyph": "Créer un autre glyphe",
+    "toolbar": {
+      "ariaLabel": "Outils de dessin",
+      "undo": "Annuler le dernier trait",
+      "clear": "Effacer tous les traits",
+      "widthLabel": "Épaisseur du trait",
+      "widthAria": "Trait {label}",
+      "thin": "Fin",
+      "medium": "Moyen",
+      "thick": "Épais",
+      "save": "Enregistrer le glyphe",
+      "saving": "Enregistrement…",
+      "saveAria": "Enregistrer le glyphe"
+    },
+    "stamps": {
+      "legend": "Tampons",
+      "ariaLabel": "Symboles préconçus",
+      "star": "Étoile",
+      "spiral": "Spirale",
+      "wave": "Vague",
+      "cross": "Croix",
+      "circle": "Cercle",
+      "zigzag": "Zigzag",
+      "diamond": "Losange",
+      "heart": "Cœur"
+    }
+  },
+  "shape": {
+    "river-smooth": { "name": "Rivière lisse" },
+    "creek-flat":   { "name": "Ruisseau plat" },
+    "moss-round":   { "name": "Rond mousse" },
+    "canyon-long":  { "name": "Canyon long" },
+    "shore-wide":   { "name": "Rivage large" },
+    "dusk-pebble":  { "name": "Galet du soir" }
+  },
+  "landing": {
+    "tagline": "Collectionnez vos moments précieux.",
+    "exampleAria": "Galets en exemple",
+    "getStarted": "Commencer",
+    "haveAccount": "Vous avez déjà un compte ?",
+    "logIn": "Me connecter",
+    "features": {
+      "record": {
+        "title": "Capturez en quelques secondes",
+        "description": "Capturez les moments au fil de l'eau. Pas de page blanche, pas de pression."
+      },
+      "enrich": {
+        "title": "Enrichissez de sens",
+        "description": "Ajoutez une photo, des émotions, des personnes et des réflexions."
+      },
+      "grow": {
+        "title": "Faites grandir votre chemin",
+        "description": "Revenez sur vos pas quand vous voulez : votre chemin, votre rythme."
+      }
+    }
+  },
+  "auth": {
+    "or": "ou",
+    "fields": {
+      "email": "E-mail",
+      "password": "Mot de passe",
+      "confirmPassword": "Confirmer le mot de passe"
+    },
+    "errors": {
+      "fillFields": "Veuillez remplir tous les champs.",
+      "passwordsMismatch": "Les mots de passe ne correspondent pas.",
+      "mustAcceptLegal": "Vous devez accepter les Conditions Générales d'Utilisation et la Politique de Confidentialité.",
+      "generic": "Une erreur est survenue.",
+      "callbackFailed": "La connexion a échoué. Veuillez réessayer."
+    },
+    "login": {
+      "title": "Me connecter",
+      "subtitle": "Heureux de vous revoir. Reprenez où vous en étiez.",
+      "submit": "Me connecter",
+      "submitting": "Connexion…",
+      "appleAria": "Se connecter avec Apple",
+      "appleLabel": "Se connecter avec Apple",
+      "googleAria": "Se connecter avec Google",
+      "googleLabel": "Se connecter avec Google",
+      "createAccount": "Créer un compte"
+    },
+    "register": {
+      "title": "Créer un compte",
+      "subtitle": "Commencez à collectionner vos moments précieux.",
+      "submit": "Créer un compte",
+      "submitting": "Création du compte…",
+      "appleAria": "S'inscrire avec Apple",
+      "appleLabel": "S'inscrire avec Apple",
+      "googleAria": "S'inscrire avec Google",
+      "googleLabel": "S'inscrire avec Google",
+      "logInLink": "Me connecter",
+      "termsPrefix": "J'accepte les ",
+      "termsLink": "Conditions Générales d'Utilisation",
+      "privacyPrefix": "J'accepte la ",
+      "privacyLink": "Politique de Confidentialité"
+    }
+  },
+  "onboarding": {
+    "controlsAria": "Commandes de l'introduction",
+    "progressAria": "Progression de l'introduction",
+    "stepAria": "Étape {current} sur {total}",
+    "skip": "Ignorer",
+    "back": "Retour",
+    "next": "Suivant",
+    "complete": "Capturer votre premier galet",
+    "steps": {
+      "path": {
+        "heading": "Votre vie est un chemin",
+        "body": "Chaque moment compte — les grands comme les plus discrets. Mais la plupart s'échappent avant même qu'on les remarque. Pebbles vous aide à les recueillir, un par un."
+      },
+      "pebble": {
+        "heading": "Déposez un galet, gardez l'instant",
+        "body": "Un café avec un ami. Un concert qui vous a donné des frissons. Une conversation difficile. Capturez-le en quelques secondes — sans page blanche, sans pression, sans audience."
+      },
+      "ritual": {
+        "heading": "Tracez votre chemin, à votre rythme",
+        "body": "Aucune série à entretenir, aucun fil à faire défiler. Juste un rituel paisible qui grandit avec vous."
+      }
+    }
+  },
+  "souls": {
+    "title": "Âmes",
+    "loading": "Chargement…",
+    "addAria": "Ajouter une âme",
+    "addPlaceholder": "Nom de la nouvelle âme…",
+    "addNameAria": "Nom de la nouvelle âme",
+    "addCta": "Ajouter",
+    "pebbleCount": "{count, plural, one {# galet} other {# galets}}",
+    "deleteAria": "Supprimer {name}",
+    "deleteTitle": "Supprimer l'âme ?",
+    "deleteDescription": "{name} sera retiré·e de votre répertoire et délié·e de tous les galets. Cette action est irréversible.",
+    "deleteConfirm": "Supprimer",
+    "empty": {
+      "title": "Aucune âme pour l'instant",
+      "description": "Les âmes représentent les personnes de votre vie. Ajoutez-en une pour commencer à suivre vos moments partagés."
+    },
+    "detail": {
+      "back": "← Retour aux âmes",
+      "linkText": "Retour aux âmes",
+      "nameAria": "Nom de l'âme",
+      "editAria": "Modifier le nom",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "noPebbles": "Aucun galet lié à cette âme pour l'instant.",
+      "notFoundTitle": "Âme introuvable",
+      "notFoundDescription": "Cette âme n'existe pas ou a été supprimée."
+    }
+  },
+  "collections": {
+    "title": "Collections",
+    "loading": "Chargement…",
+    "newCta": "Nouvelle",
+    "form": {
+      "newTitle": "Nouvelle collection",
+      "editTitle": "Modifier la collection",
+      "submitCreate": "Créer",
+      "submitSave": "Enregistrer",
+      "cancel": "Annuler",
+      "nameLabel": "Nom",
+      "namePlaceholder": "ex. Gratitudes du matin",
+      "modeLegend": "Mode (facultatif)"
+    },
+    "pebbleCount": "{count, plural, one {# galet} other {# galets}}",
+    "modes": {
+      "stack": "Pile",
+      "pack": "Pack",
+      "track": "Suivi",
+      "ariaLabel": "Mode : {label}"
+    },
+    "empty": {
+      "title": "Aucune collection pour l'instant",
+      "description": "Les collections vous permettent de regrouper les galets par thème, objectif ou période."
+    },
+    "detail": {
+      "back": "← Retour aux collections",
+      "linkText": "Retour aux collections",
+      "editAria": "Modifier la collection",
+      "noPebbles": "Aucun galet dans cette collection pour l'instant.",
+      "removePebbleAria": "Retirer {name} de la collection",
+      "notFoundTitle": "Collection introuvable",
+      "notFoundDescription": "Cette collection n'existe pas ou a été supprimée."
+    }
+  },
+  "path": {
+    "loading": "Chargement…",
+    "empty": {
+      "title": "Aucun galet pour l'instant",
+      "description": "Capturez votre premier moment pour commencer à tracer votre chemin.",
+      "cta": "Capturer un galet"
+    },
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "todayLabel": "Aujourd'hui — {date}",
+    "yesterdayLabel": "Hier — {date}",
+    "profileAria": "Profil de {name}",
+    "stats": {
+      "bounce": "ricochet",
+      "karma": "karma"
+    }
+  },
+  "card": {
+    "free":      { "name": "Libre",          "prompt": "Écrivez ce que vous voulez…" },
+    "feelings":  { "name": "Ressentis",      "prompt": "Qu'est-ce que j'ai ressenti ?" },
+    "thoughts":  { "name": "Pensées",        "prompt": "Qu'est-ce que j'ai pensé ?" },
+    "behaviour": { "name": "Comportement",   "prompt": "Qu'est-ce que j'ai fait ?" }
+  },
+  "pebble": {
+    "loading": "Chargement…",
+    "notFoundTitle": "Galet introuvable",
+    "notFoundInline": "Galet introuvable.",
+    "notFoundDescription": "Ce galet n'existe pas ou a été supprimé.",
+    "backToPath": "← Retour au chemin",
+    "back": "Retour au chemin",
+    "cardAria": "{name}, {time}",
+    "instantAlt": "Photo de l'instant pour {name}",
+    "photoAlt": "Photo du galet",
+    "visualAria": "Galet : {name}, {emotion}, intensité {intensity}",
+    "withPrefix": "Avec : ",
+    "intensity": {
+      "title": "Intensité : {value} sur 3"
+    },
+    "positiveness": {
+      "title": "Positivité : {label}",
+      "highlight": "Temps fort",
+      "neutral": "Neutre",
+      "lowlight": "Creux"
+    },
+    "peek": {
+      "close": "Fermer",
+      "souls": "Âmes",
+      "picture": "Photo",
+      "writeCard": "Écrire une carte",
+      "writeCardAria": "Écrire une carte"
+    }
+  },
+  "record": {
+    "srTitle": "Capturer l'instant",
+    "editorAria": "Éditeur de galet",
+    "namePlaceholder": "Que s'est-il passé ?",
+    "descriptionPlaceholder": "Qu'est-ce qui rendait ça génial ?",
+    "now": "Maintenant",
+    "save": "Enregistrer le galet",
+    "domain": {
+      "label": "Domaine",
+      "pickerLabel": "Domaines",
+      "pickerAria": "Domaines de vie",
+      "pickAria": "Choisir des domaines",
+      "selectedAria": "Domaines : {names}"
+    },
+    "emotion": {
+      "label": "Émotion",
+      "pickAria": "Choisir une émotion",
+      "selectedAria": "Émotion : {name}",
+      "searchPlaceholder": "Rechercher une émotion…",
+      "empty": "Aucune émotion trouvée"
+    },
+    "collection": {
+      "label": "Collection",
+      "pickAria": "Choisir des collections",
+      "selectedAria": "Collections : {names}",
+      "tilePickAria": "Ajouter à une collection",
+      "tileSelectedAria": "{count, plural, one {# collection sélectionnée} other {# collections sélectionnées}}",
+      "empty": "Aucune collection pour l'instant"
+    },
+    "souls": {
+      "label": "Âmes",
+      "title": "Âmes",
+      "addAria": "Ajouter des âmes",
+      "selectedAria": "{count, plural, one {# âme sélectionnée} other {# âmes sélectionnées}}",
+      "selectedListAria": "Âmes sélectionnées",
+      "removeAria": "Retirer {name}",
+      "searchPlaceholder": "Rechercher une âme…",
+      "searchOrAddPlaceholder": "Rechercher ou ajouter une âme…",
+      "searchOrAddLabel": "Rechercher ou ajouter une âme",
+      "empty": "Aucune âme trouvée",
+      "addNew": "Ajouter « {name} »",
+      "adding": "Ajout…",
+      "found": "{count, plural, one {# âme trouvée} other {# âmes trouvées}}",
+      "addHint": ", appuyez sur Entrée pour ajouter « {name} »",
+      "done": "Terminé"
+    },
+    "glyph": {
+      "title": "Glyphe",
+      "addAria": "Ajouter un glyphe",
+      "changeAria": "Changer de glyphe"
+    },
+    "photo": {
+      "addAria": "Ajouter une photo",
+      "removeAria": "Retirer la photo",
+      "alt": "Photo téléversée"
+    },
+    "visibility": {
+      "private": "Privé",
+      "public": "Public",
+      "ariaPrivate": "Visibilité : privé",
+      "ariaPublic": "Visibilité : public"
+    },
+    "intensity": {
+      "ariaTitle": "Intensité et valence",
+      "ariaSelected": "Intensité : {intensity}, Valence : {valence}",
+      "small": "S",
+      "medium": "M",
+      "large": "L"
+    },
+    "valence": {
+      "highlight": "TEMPS FORT",
+      "neutral": "NEUTRE",
+      "lowlight": "CREUX"
+    },
+    "date": {
+      "title": "Quand",
+      "now": "Maintenant",
+      "cancel": "Annuler",
+      "done": "Terminé",
+      "groupAria": "Heure",
+      "subtract15": "Retirer 15 minutes",
+      "add15": "Ajouter 15 minutes",
+      "selectTime": "Sélectionner l'heure",
+      "selectDate": "Sélectionner la date"
+    }
+  },
+  "locale": {
+    "switcher": "Langue",
+    "en": "English",
+    "fr": "Français"
+  },
+  "emotion": {
+    "anxious": { "name": "Anxiété", "label": "Inquiétude face à ce qui pourrait arriver" },
+    "overwhelmed": { "name": "Accablement", "label": "Trop de choses à gérer en même temps" },
+    "scared": { "name": "Peur", "label": "Sentir un danger ou une menace" },
+    "stressed": { "name": "Stress", "label": "Pression d'exigences qui dépassent vos capacités" },
+    "worried": { "name": "Inquiétude", "label": "S'attarder sur une préoccupation précise" },
+    "disappointed": { "name": "Déception", "label": "Déçu par des attentes non comblées" },
+    "discouraged": { "name": "Découragement", "label": "Perdre la motivation de continuer" },
+    "drained": { "name": "Épuisement", "label": "Épuisé émotionnellement ou physiquement" },
+    "hopeless": { "name": "Désespoir", "label": "Sentir que rien ne s'améliorera" },
+    "lonely": { "name": "Solitude", "label": "Se sentir déconnecté des autres" },
+    "sad": { "name": "Tristesse", "label": "Une lourdeur née d'une perte ou d'un manque" },
+    "ashamed": { "name": "Honte", "label": "Se sentir fondamentalement défaillant ou exposé" },
+    "embarrassed": { "name": "Embarras", "label": "Mal à l'aise après un faux pas social" },
+    "guilty": { "name": "Culpabilité", "label": "Regretter ce que vous avez fait ou pas fait" },
+    "indifferent": { "name": "Indifférence", "label": "Ne s'en soucier ni dans un sens ni dans l'autre" },
+    "calm": { "name": "Calme", "label": "Une immobilité tranquille et centrée" },
+    "content": { "name": "Contentement", "label": "Tranquillement satisfait de ce qui est" },
+    "grateful": { "name": "Gratitude", "label": "Apprécier ce que vous avez ou recevez" },
+    "hopeful": { "name": "Espoir", "label": "Croire que les choses peuvent s'améliorer" },
+    "peaceful": { "name": "Sérénité", "label": "Harmonie avec vous-même et le monde" },
+    "relieved": { "name": "Soulagement", "label": "La tension se dissout après le passage d'une inquiétude" },
+    "satisfied": { "name": "Satisfaction", "label": "Content d'un résultat ou d'un effort" },
+    "surprised": { "name": "Surprise", "label": "Pris au dépourvu par l'inattendu" },
+    "angry": { "name": "Colère", "label": "Une réaction forte face à l'injustice ou à la transgression" },
+    "annoyed": { "name": "Agacement", "label": "Légèrement contrarié par une petite chose" },
+    "disgusted": { "name": "Dégoût", "label": "Forte aversion envers quelque chose d'offensant" },
+    "frustrated": { "name": "Frustration", "label": "Empêché d'atteindre un objectif" },
+    "irritated": { "name": "Irritation", "label": "Gêné par de petites contrariétés répétées" },
+    "jealous": { "name": "Jalousie", "label": "Désirer ce que quelqu'un d'autre possède" },
+    "brave": { "name": "Courage", "label": "Affronter la peur avec courage" },
+    "confident": { "name": "Confiance", "label": "Avoir foi en vos propres capacités" },
+    "proud": { "name": "Fierté", "label": "Comblé par quelque chose que vous avez accompli" },
+    "amazed": { "name": "Émerveillement", "label": "Frappé par quelque chose de vaste ou d'extraordinaire" },
+    "amused": { "name": "Amusement", "label": "Trouver quelque chose drôle ou divertissant" },
+    "excited": { "name": "Excitation", "label": "Forte énergie et anticipation pour ce qui vient" },
+    "happy": { "name": "Bonheur", "label": "Une chaleur intérieure qui dit que tout va bien" },
+    "joyful": { "name": "Joie", "label": "Un bonheur profond et rayonnant" },
+    "passionate": { "name": "Passion", "label": "Élan intense et engagement profond" }
+  },
+  "domain": {
+    "health": { "name": "Santé", "label": "Votre corps, votre énergie et votre bien-être physique" },
+    "finance": { "name": "Finances", "label": "Argent, stabilité et sécurité matérielle" },
+    "friends": { "name": "Amis", "label": "Les personnes que vous choisissez d'avoir à vos côtés" },
+    "work": { "name": "Travail", "label": "Votre emploi, votre carrière et votre vie professionnelle" },
+    "passions": { "name": "Passions", "label": "Activités créatives et choses que vous aimez faire" },
+    "self-care": { "name": "Bien-être", "label": "Rituels et habitudes qui vous ressourcent" },
+    "event": { "name": "Actualité", "label": "Ce qui se passe dans le monde qui vous entoure" },
+    "tasks": { "name": "Tâches", "label": "Les choses que vous devez accomplir" },
+    "weather": { "name": "Météo", "label": "Soleil ou pluie, saisons et ciels" },
+    "identity": { "name": "Identité", "label": "Qui vous êtes et qui vous devenez" },
+    "spirituality": { "name": "Spiritualité", "label": "Foi, sens et vie intérieure" },
+    "travel": { "name": "Voyage", "label": "Explorer de nouveaux lieux et horizons" },
+    "community": { "name": "Communauté", "label": "Celles et ceux qui partagent vos valeurs, votre culture ou vos croyances" },
+    "dating": { "name": "Rencontres", "label": "Relations amoureuses et nouvelles connexions" },
+    "family": { "name": "Famille", "label": "Celles et ceux qui vous sont liés par le sang ou par le cœur" },
+    "partner": { "name": "Partenaire", "label": "Votre moitié ou relation amoureuse" },
+    "education": { "name": "Éducation", "label": "Apprentissage, croissance et quête intellectuelle" },
+    "sport": { "name": "Sport", "label": "Activité physique, jeux et compétition" }
+  }
+}

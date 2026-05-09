@@ -2,6 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react"
 import { motion, useReducedMotion } from "framer-motion"
+import { useTranslations } from "next-intl"
 import { PEBBLE_SHAPES } from "@/lib/config"
 import { useMarks } from "@/lib/data/useMarks"
 import { useHaptics } from "@/lib/hooks/useHaptics"
@@ -20,6 +21,7 @@ export function CarveEditor({ onSaved }: CarveEditorProps) {
   const { addMark } = useMarks()
   const { vibrate } = useHaptics()
   const prefersReducedMotion = useReducedMotion()
+  const t = useTranslations("carve")
 
   const [strokes, setStrokes] = useState<MarkStroke[]>([])
   const [strokeWidth, setStrokeWidth] = useState(4)
@@ -87,14 +89,14 @@ export function CarveEditor({ onSaved }: CarveEditorProps) {
   if (saved) {
     return (
       <motion.section
-        aria-label="Glyph saved"
+        aria-label={t("savedAria")}
         className="flex flex-col items-center gap-6 py-8"
         initial={prefersReducedMotion ? false : { scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
       >
         <p className="text-lg font-medium" aria-live="polite">
-          {name.trim() ? `“${name.trim()}” saved` : "Glyph saved"}
+          {name.trim() ? t("savedNamed", { name: name.trim() }) : t("saved")}
         </p>
         <svg
           viewBox={shape.viewBox}
@@ -127,7 +129,7 @@ export function CarveEditor({ onSaved }: CarveEditorProps) {
           onClick={handleNewMark}
           className="text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
         >
-          Create another glyph
+          {t("newGlyph")}
         </button>
       </motion.section>
     )
@@ -148,24 +150,21 @@ export function CarveEditor({ onSaved }: CarveEditorProps) {
           onStrokeComplete={handleStrokeComplete}
         />
         <figcaption className="sr-only">
-          Draw a symbol on the pebble surface. Your strokes are clipped to the
-          stone outline.
+          {t("canvasCaption")}
         </figcaption>
       </figure>
 
       {/* Screen reader announcement for stroke count */}
       <p className="sr-only" aria-live="polite">
-        {strokes.length === 0
-          ? "No strokes drawn"
-          : `${strokes.length} stroke${strokes.length === 1 ? "" : "s"} drawn`}
+        {t("strokeCountAnnounce", { count: strokes.length })}
       </p>
 
       <Input
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="Name (optional)"
-        aria-label="Glyph name"
+        placeholder={t("namePlaceholder")}
+        aria-label={t("nameAria")}
         maxLength={80}
         className="w-full max-w-xs"
       />

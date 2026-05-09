@@ -2,6 +2,7 @@
 
 import { useCallback, useRef } from "react"
 import { Minus, Plus } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 
 type TimeStepPickerProps = {
@@ -19,6 +20,7 @@ function formatTime(date: Date): string {
 
 export function TimeStepPicker({ value, onChange }: TimeStepPickerProps) {
   const inputRef = useRef<HTMLInputElement>(null)
+  const t = useTranslations("record.date")
 
   const step = useCallback(
     (direction: 1 | -1) => {
@@ -44,11 +46,11 @@ export function TimeStepPicker({ value, onChange }: TimeStepPickerProps) {
   )
 
   return (
-    <div role="group" aria-label="Time" className="flex items-center gap-2">
+    <div role="group" aria-label={t("groupAria")} className="flex items-center gap-2">
       <Button
         variant="outline"
         size="icon"
-        aria-label="Subtract 15 minutes"
+        aria-label={t("subtract15")}
         onClick={() => step(-1)}
       >
         <Minus />
@@ -58,7 +60,7 @@ export function TimeStepPicker({ value, onChange }: TimeStepPickerProps) {
         type="button"
         className="relative flex h-11 items-center justify-center rounded-lg border border-input bg-transparent px-4 text-lg font-medium tabular-nums transition-colors hover:bg-muted focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 outline-none md:h-8 md:text-sm"
         onClick={() => inputRef.current?.showPicker()}
-        aria-label="Select time"
+        aria-label={t("selectTime")}
       >
         <span aria-hidden="true">{formatTime(value)}</span>
         <input
@@ -75,7 +77,7 @@ export function TimeStepPicker({ value, onChange }: TimeStepPickerProps) {
       <Button
         variant="outline"
         size="icon"
-        aria-label="Add 15 minutes"
+        aria-label={t("add15")}
         onClick={() => step(1)}
       >
         <Plus />

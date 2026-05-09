@@ -2,6 +2,7 @@
 
 import { useSyncExternalStore } from "react"
 import { Vibrate, VibrateOff } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { useHaptics } from "@/lib/hooks/useHaptics"
 
@@ -18,6 +19,7 @@ const noop = () => () => {}
 export function HapticsToggle() {
   const { enabled, setEnabled } = useHaptics()
   const supported = useSyncExternalStore(noop, getSupported, getServerSupported)
+  const t = useTranslations("profile")
 
   if (!supported) return null
 
@@ -25,7 +27,7 @@ export function HapticsToggle() {
     <Button
       variant="ghost"
       size="icon"
-      aria-label={enabled ? "Disable haptic feedback" : "Enable haptic feedback"}
+      aria-label={enabled ? t("hapticsDisable") : t("hapticsEnable")}
       aria-pressed={enabled}
       onClick={() => setEnabled(!enabled)}
     >

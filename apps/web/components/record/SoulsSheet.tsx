@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react"
 import { Plus, X } from "lucide-react"
+import { useTranslations } from "next-intl"
 import type { Soul } from "@/lib/types"
 import { SelectableItem } from "@/components/ui/SelectableItem"
 import { SearchableList } from "@/components/ui/SearchableList"
@@ -31,6 +32,7 @@ export function SoulsSheet({
   onAddSoul,
 }: SoulsSheetProps) {
   const [query, setQuery] = useState("")
+  const t = useTranslations("record.souls")
 
   const filtered = useMemo(() => {
     if (!query.trim()) return souls
@@ -59,15 +61,15 @@ export function SoulsSheet({
     <Sheet open={open} onOpenChange={handleOpenChange}>
       <SheetContent>
         <SheetHeader>
-          <SheetTitle>Souls</SheetTitle>
+          <SheetTitle>{t("title")}</SheetTitle>
         </SheetHeader>
 
         <SearchableList
           query={query}
           onQueryChange={setQuery}
-          placeholder="Search souls\u2026"
+          placeholder={t("searchPlaceholder")}
           isEmpty={filtered.length === 0 && !canAddNew}
-          emptyMessage="No souls found"
+          emptyMessage={t("empty")}
           onKeyDown={(e) => {
             if (e.key === "Enter" && canAddNew) {
               e.preventDefault()
@@ -77,7 +79,7 @@ export function SoulsSheet({
         >
           {/* Selected chips */}
           {selectedIds.length > 0 && (
-            <ul className="mb-3 flex flex-wrap gap-1.5" role="list" aria-label="Selected souls">
+            <ul className="mb-3 flex flex-wrap gap-1.5" role="list" aria-label={t("selectedListAria")}>
               {selectedIds.map((id) => {
                 const soul = souls.find((s) => s.id === id)
                 if (!soul) return null
@@ -87,7 +89,7 @@ export function SoulsSheet({
                       type="button"
                       onClick={() => onToggle(id)}
                       className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
-                      aria-label={`Remove ${soul.name}`}
+                      aria-label={t("removeAria", { name: soul.name })}
                     >
                       {soul.name}
                       <X className="size-3" aria-hidden />
@@ -116,14 +118,14 @@ export function SoulsSheet({
               className="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-sm text-muted-foreground outline-none transition-colors hover:bg-muted hover:text-foreground"
             >
               <Plus className="size-4 shrink-0" />
-              Add &quot;{query.trim()}&quot;
+              {t("addNew", { name: query.trim() })}
             </button>
           )}
         </SearchableList>
 
         <div className="mt-4 flex justify-end">
-          <SheetClose aria-label="Done">
-            Done
+          <SheetClose aria-label={t("done")}>
+            {t("done")}
           </SheetClose>
         </div>
       </SheetContent>

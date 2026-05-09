@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback } from "react"
+import { useTranslations } from "next-intl"
 import type { Mark } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import {
@@ -29,6 +30,8 @@ export function GlyphPickerDialog({
   onSave,
 }: GlyphPickerDialogProps) {
   const [localMarkId, setLocalMarkId] = useState<string | undefined>(selectedMarkId)
+  const t = useTranslations("record.glyph")
+  const tCommon = useTranslations("common")
 
   const handleOpenChange = useCallback(
     (nextOpen: boolean) => {
@@ -42,7 +45,7 @@ export function GlyphPickerDialog({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Glyph</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
         </DialogHeader>
 
         <GlyphPickerGrid
@@ -52,14 +55,14 @@ export function GlyphPickerDialog({
         />
 
         <DialogFooter>
-          <DialogClose>Cancel</DialogClose>
+          <DialogClose>{tCommon("cancel")}</DialogClose>
           <Button
             onClick={() => {
               onSave(localMarkId)
               onOpenChange(false)
             }}
           >
-            Save
+            {tCommon("save")}
           </Button>
         </DialogFooter>
       </DialogContent>

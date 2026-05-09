@@ -1,6 +1,7 @@
 "use client"
 
 import { Trash2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
 
@@ -10,20 +11,21 @@ type DeleteSoulDialogProps = {
 }
 
 export function DeleteSoulDialog({ soulName, onConfirm }: DeleteSoulDialogProps) {
+  const t = useTranslations("souls")
   return (
     <ConfirmDialog
       trigger={
         <Button
           variant="ghost"
           size="icon-xs"
-          aria-label={`Delete ${soulName}`}
+          aria-label={t("deleteAria", { name: soulName })}
         >
           <Trash2 className="size-3.5" />
         </Button>
       }
-      title="Delete soul?"
-      description={`This will remove ${soulName} from your directory and unlink them from all pebbles. This cannot be undone.`}
-      confirmLabel="Delete"
+      title={t("deleteTitle")}
+      description={t("deleteDescription", { name: soulName })}
+      confirmLabel={t("deleteConfirm")}
       onConfirm={onConfirm}
     />
   )

@@ -1,10 +1,12 @@
 "use client"
 
 import type { CSSProperties } from "react"
+import { useTranslations } from "next-intl"
 
 import type { Mark, Pebble } from "@/lib/types"
 import type { RenderTier } from "@/lib/engine"
 import { EMOTIONS } from "@/lib/config/emotions"
+import { useEmotionLocalized } from "@/lib/i18n"
 import { useEmotionPalettes } from "@/lib/data/useEmotionPalettes"
 import { usePebbleVisual } from "@/lib/hooks/usePebbleVisual"
 import { cn } from "@/lib/utils"
@@ -30,8 +32,11 @@ export function PebbleVisual({
   const isServerRender = pebble.render_svg !== null
   const svg = pebble.render_svg ?? fallback.svg
 
-  const emotionName =
-    EMOTIONS.find((e) => e.id === pebble.emotion_id)?.name ?? "Unknown"
+  const t = useTranslations("pebble")
+  const tCommon = useTranslations("common")
+  const matched = EMOTIONS.find((e) => e.id === pebble.emotion_id)
+  const fallbackEmotion = matched ?? { slug: "", name: tCommon("unknown"), label: "" }
+  const { name: emotionName } = useEmotionLocalized(fallbackEmotion)
 
   // Server-composed SVGs use stroke="currentColor" and carry their own
   // width/height attributes. The wrapper sets two CSS custom properties from
@@ -54,7 +59,11 @@ export function PebbleVisual({
     <div
       data-slot="pebble-visual"
       role="img"
-      aria-label={`Pebble: ${pebble.name}, ${emotionName}, intensity ${pebble.intensity}`}
+      aria-label={t("visualAria", {
+        name: pebble.name,
+        emotion: emotionName,
+        intensity: pebble.intensity,
+      })}
       className={cn("pbbls-visual", className)}
       style={wrapperStyle}
       dangerouslySetInnerHTML={{ __html: svg }}

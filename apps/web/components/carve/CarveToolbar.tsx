@@ -1,6 +1,7 @@
 "use client"
 
 import { Undo2, Trash2, Pen, Check } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 
 type CarveToolbarProps = {
@@ -14,10 +15,10 @@ type CarveToolbarProps = {
   showSave?: boolean
 }
 
-const WIDTH_OPTIONS = [
-  { value: 2, label: "Thin" },
-  { value: 4, label: "Medium" },
-  { value: 7, label: "Thick" },
+const WIDTH_OPTIONS: ReadonlyArray<{ value: number; key: "thin" | "medium" | "thick" }> = [
+  { value: 2, key: "thin" },
+  { value: 4, key: "medium" },
+  { value: 7, key: "thick" },
 ]
 
 export function CarveToolbar({
@@ -30,17 +31,19 @@ export function CarveToolbar({
   saving,
   showSave = true,
 }: CarveToolbarProps) {
+  const t = useTranslations("carve.toolbar")
+
   return (
     <nav
       className="flex flex-wrap items-center gap-2"
-      aria-label="Drawing tools"
+      aria-label={t("ariaLabel")}
     >
       <Button
         variant="ghost"
         size="icon"
         onClick={onUndo}
         disabled={strokeCount === 0}
-        aria-label="Undo last stroke"
+        aria-label={t("undo")}
       >
         <Undo2 className="h-4 w-4" />
       </Button>
@@ -50,7 +53,7 @@ export function CarveToolbar({
         size="icon"
         onClick={onClear}
         disabled={strokeCount === 0}
-        aria-label="Clear all strokes"
+        aria-label={t("clear")}
       >
         <Trash2 className="h-4 w-4" />
       </Button>
@@ -59,7 +62,7 @@ export function CarveToolbar({
 
       <div
         role="radiogroup"
-        aria-label="Stroke width"
+        aria-label={t("widthLabel")}
         className="flex items-center gap-1"
       >
         {WIDTH_OPTIONS.map((opt) => (
@@ -69,7 +72,7 @@ export function CarveToolbar({
             size="sm"
             role="radio"
             aria-checked={strokeWidth === opt.value}
-            aria-label={`${opt.label} stroke width`}
+            aria-label={t("widthAria", { label: t(opt.key) })}
             onClick={() => onWidthChange(opt.value)}
             className="h-8 px-2"
           >
@@ -90,11 +93,11 @@ export function CarveToolbar({
           <Button
             onClick={onSave}
             disabled={strokeCount === 0 || saving}
-            aria-label="Save mark"
+            aria-label={t("saveAria")}
             className="h-11 px-4 md:h-8 md:px-2.5"
           >
             <Check className="mr-1.5 h-4 w-4" />
-            {saving ? "Saving\u2026" : "Save mark"}
+            {saving ? t("saving") : t("save")}
           </Button>
         </>
       )}

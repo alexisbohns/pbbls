@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import { LogOut } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 
 interface LogoutButtonProps {
@@ -10,6 +11,7 @@ interface LogoutButtonProps {
 
 export function LogoutButton({ onLogout }: LogoutButtonProps) {
   const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const t = useTranslations("profile")
 
   const handleLogout = async () => {
     setIsLoggingOut(true)
@@ -27,7 +29,7 @@ export function LogoutButton({ onLogout }: LogoutButtonProps) {
       onClick={handleLogout}
     >
       <LogOut data-icon="inline-start" />
-      {isLoggingOut ? "Logging out\u2026" : "Log out"}
+      {isLoggingOut ? t("loggingOut") : t("logout")}
     </Button>
   )
 }

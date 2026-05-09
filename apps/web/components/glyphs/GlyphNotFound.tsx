@@ -1,12 +1,16 @@
+"use client"
+
+import { useTranslations } from "next-intl"
 import { NotFoundCard } from "@/components/layout/NotFoundCard"
 
 export function GlyphNotFound() {
+  const t = useTranslations("glyphs.detail")
   return (
     <NotFoundCard
-      title="Glyph not found"
-      description="This glyph doesn't exist or may have been removed."
+      title={t("notFoundTitle")}
+      description={t("notFoundDescription")}
       href="/glyphs"
-      linkText="Back to Glyphs"
+      linkText={t("linkText")}
     />
   )
 }

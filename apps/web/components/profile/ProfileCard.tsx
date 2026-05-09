@@ -1,3 +1,6 @@
+"use client"
+
+import { useTranslations } from "next-intl"
 import type { Account, Profile } from "@/lib/types"
 import {
   Card,
@@ -5,6 +8,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { useFormatDate } from "@/lib/i18n"
 
 interface ProfileCardProps {
   user: Account
@@ -12,9 +16,9 @@ interface ProfileCardProps {
 }
 
 export function ProfileCard({ user, profile }: ProfileCardProps) {
-  const memberSince = new Intl.DateTimeFormat(undefined, {
-    dateStyle: "long",
-  }).format(new Date(user.created_at))
+  const t = useTranslations("profile")
+  const formatDate = useFormatDate()
+  const memberSince = formatDate(user.created_at, { dateStyle: "long" })
 
   return (
     <Card>
@@ -24,11 +28,11 @@ export function ProfileCard({ user, profile }: ProfileCardProps) {
       <CardContent>
         <dl className="space-y-3 text-sm">
           <div>
-            <dt className="text-muted-foreground">Email</dt>
+            <dt className="text-muted-foreground">{t("email")}</dt>
             <dd className="font-medium">{user.email}</dd>
           </div>
           <div>
-            <dt className="text-muted-foreground">Member since</dt>
+            <dt className="text-muted-foreground">{t("memberSince")}</dt>
             <dd className="font-medium">{memberSince}</dd>
           </div>
         </dl>

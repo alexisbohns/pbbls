@@ -2,16 +2,19 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
-import { NAV_ITEMS } from "@/lib/config/navigation"
+import { useNavItems } from "@/lib/hooks/useNavItems"
 
 export function BottomNav() {
   const pathname = usePathname()
+  const navItems = useNavItems()
+  const t = useTranslations("common.aria")
   const hidden = pathname === "/" || pathname.startsWith("/record") || pathname.startsWith("/onboarding") || pathname === "/login" || pathname === "/register"
 
   return (
     <nav
-      aria-label="Main navigation"
+      aria-label={t("mainNavigation")}
       aria-hidden={hidden}
       className={cn(
         "fixed inset-x-0 bottom-0 z-50 border-t border-border bg-background pb-[var(--safe-area-bottom)] md:hidden",
@@ -20,7 +23,7 @@ export function BottomNav() {
       )}
     >
       <ul className="flex items-center justify-around py-2">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+        {navItems.map(({ href, label, icon: Icon }) => {
           const isActive = pathname.startsWith(href)
           return (
             <li key={href} className="flex-1 flex justify-center">

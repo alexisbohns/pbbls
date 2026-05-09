@@ -4,7 +4,7 @@ import { CircleCheckBig, CircleDashed, CircleDot, type LucideIcon } from "lucide
 import type { ReactNode } from "react"
 import type { Log } from "@/lib/types"
 import { logSummary, logTitle } from "@/lib/utils/log-localized"
-import { dayMonthYearFormatter } from "@/lib/utils/formatters"
+import { useFormatDate } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
 
 export type TimelineMode = "changelog" | "in_progress" | "backlog"
@@ -29,6 +29,7 @@ type LogTimelineProps = {
 export function LogTimeline({ mode, logs, locale, renderTrailing }: LogTimelineProps) {
   const Icon = MODE_ICON[mode]
   const showDate = mode === "changelog"
+  const formatDate = useFormatDate()
 
   return (
     <ol className="flex flex-col">
@@ -36,7 +37,11 @@ export function LogTimeline({ mode, logs, locale, renderTrailing }: LogTimelineP
         const isLast = index === logs.length - 1
         const date =
           showDate && log.published_at
-            ? dayMonthYearFormatter.format(new Date(log.published_at))
+            ? formatDate(log.published_at, {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })
             : null
         const trailing = renderTrailing?.(log)
 

@@ -1,6 +1,8 @@
+"use client"
+
 import { Pencil } from "lucide-react"
+import { useTranslations } from "next-intl"
 import type { Collection } from "@/lib/types"
-import { pluralize } from "@/lib/utils/formatters"
 import { ModeBadge } from "@/components/collections/ModeBadge"
 import { CollectionFormDialog } from "@/components/collections/CollectionFormDialog"
 import { Button } from "@/components/ui/button"
@@ -16,6 +18,10 @@ export function CollectionDetailHeader({
   pebbleCount,
   onEdit,
 }: CollectionDetailHeaderProps) {
+  const t = useTranslations("collections")
+  const tForm = useTranslations("collections.form")
+  const tDetail = useTranslations("collections.detail")
+
   return (
     <header className="mb-6">
       <div className="flex items-center gap-2">
@@ -25,13 +31,13 @@ export function CollectionDetailHeader({
             <Button
               variant="ghost"
               size="icon-xs"
-              aria-label="Edit collection"
+              aria-label={tDetail("editAria")}
             >
               <Pencil />
             </Button>
           }
-          title="Edit collection"
-          submitLabel="Save"
+          title={tForm("editTitle")}
+          submitLabel={tForm("submitSave")}
           initialName={collection.name}
           initialMode={collection.mode}
           onSubmit={onEdit}
@@ -40,7 +46,7 @@ export function CollectionDetailHeader({
 
       <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
         <ModeBadge mode={collection.mode} />
-        <span>{pluralize(pebbleCount, "pebble")}</span>
+        <span>{t("pebbleCount", { count: pebbleCount })}</span>
       </div>
     </header>
   )

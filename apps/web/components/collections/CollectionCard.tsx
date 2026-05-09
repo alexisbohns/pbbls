@@ -1,13 +1,16 @@
+"use client"
+
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import type { Collection } from "@/lib/types"
 import { ModeBadge } from "@/components/collections/ModeBadge"
-import { pluralize } from "@/lib/utils/formatters"
 
 type CollectionCardProps = {
   collection: Collection
 }
 
 export function CollectionCard({ collection }: CollectionCardProps) {
+  const t = useTranslations("collections")
   const count = collection.pebble_ids.length
 
   return (
@@ -20,7 +23,7 @@ export function CollectionCard({ collection }: CollectionCardProps) {
 
         <div className="mt-1.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
           <ModeBadge mode={collection.mode} />
-          <span>{pluralize(count, "pebble")}</span>
+          <span>{t("pebbleCount", { count })}</span>
         </div>
       </Link>
     </article>

@@ -5,11 +5,11 @@ import { unified } from "unified"
 import remarkParse from "remark-parse"
 import remarkRehype from "remark-rehype"
 import rehypeStringify from "rehype-stringify"
+import { useTranslations } from "next-intl"
+import { useLocale } from "@/lib/i18n"
 import { useAnnouncement } from "@/lib/data/useLab"
 import { logBody, logSummary, logTitle } from "@/lib/utils/log-localized"
 import { labAssetUrl } from "@/lib/utils/lab-asset-url"
-
-const LOCALE = "en"
 
 const markdownProcessor = unified()
   .use(remarkParse)
@@ -30,23 +30,23 @@ type AnnouncementDetailProps = {
 // Mirrors apps/ios/Pebbles/Features/Lab/Views/AnnouncementDetailView.swift.
 export function AnnouncementDetail({ id }: AnnouncementDetailProps) {
   const { log, loading, error } = useAnnouncement(id)
+  const t = useTranslations("lab")
+  const { locale } = useLocale()
 
   const html = useMemo(() => {
     if (!log) return null
-    const body = logBody(log, LOCALE)
+    const body = logBody(log, locale)
     if (!body) return null
     return renderMarkdown(body)
-  }, [log])
+  }, [log, locale])
 
   if (loading) {
-    return <p className="text-sm text-muted-foreground">Loading…</p>
+    return <p className="text-sm text-muted-foreground">{t("loading")}</p>
   }
 
   if (error || !log) {
     return (
-      <p className="text-sm text-muted-foreground">
-        Couldn’t load this announcement.
-      </p>
+      <p className="text-sm text-muted-foreground">{t("announcementError")}</p>
     )
   }
 
@@ -65,10 +65,10 @@ export function AnnouncementDetail({ id }: AnnouncementDetailProps) {
 
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold leading-tight">
-          {logTitle(log, LOCALE)}
+          {logTitle(log, locale)}
         </h1>
         <p className="text-base text-muted-foreground">
-          {logSummary(log, LOCALE)}
+          {logSummary(log, locale)}
         </p>
       </header>
 

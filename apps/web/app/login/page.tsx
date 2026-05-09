@@ -3,6 +3,7 @@
 import { useState, useEffect, type FormEvent } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/data/auth-context"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -11,6 +12,10 @@ export default function LoginPage() {
   const { login, signInWithApple, signInWithGoogle, profile, isAuthenticated, isLoading, isProfileLoading } =
     useAuth()
   const router = useRouter()
+  const t = useTranslations("auth.login")
+  const tFields = useTranslations("auth.fields")
+  const tCommon = useTranslations("auth")
+  const tErrors = useTranslations("auth.errors")
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
@@ -18,7 +23,7 @@ export default function LoginPage() {
     if (typeof window === "undefined") return null
     const params = new URLSearchParams(window.location.search)
     return params.get("error") === "auth_callback_failed"
-      ? "Sign-in failed. Please try again."
+      ? tErrors("callbackFailed")
       : null
   })
   const [submitting, setSubmitting] = useState(false)
@@ -36,7 +41,7 @@ export default function LoginPage() {
     setError(null)
 
     if (!email.trim() || !password) {
-      setError("Please fill in all fields.")
+      setError(tErrors("fillFields"))
       return
     }
 
@@ -45,7 +50,7 @@ export default function LoginPage() {
       await login({ email: email.trim(), password })
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Something went wrong."
+        err instanceof Error ? err.message : tErrors("generic")
       setError(message)
       setSubmitting(false)
     }
@@ -57,7 +62,7 @@ export default function LoginPage() {
       await signInWithGoogle()
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Something went wrong."
+        err instanceof Error ? err.message : tErrors("generic")
       setError(message)
     }
   }
@@ -68,16 +73,16 @@ export default function LoginPage() {
       await signInWithApple()
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "Something went wrong."
+        err instanceof Error ? err.message : tErrors("generic")
       setError(message)
     }
   }
 
   return (
     <section className="flex min-h-full flex-col items-center justify-center px-6 text-center">
-      <h1 className="text-4xl font-bold tracking-tight">Log in</h1>
+      <h1 className="text-4xl font-bold tracking-tight">{t("title")}</h1>
       <p className="mt-3 max-w-sm text-muted-foreground">
-        Welcome back. Pick up where you left off.
+        {t("subtitle")}
       </p>
 
       <form
@@ -87,7 +92,7 @@ export default function LoginPage() {
       >
         <div className="flex flex-col gap-1.5 text-left">
           <label htmlFor="login-email" className="text-sm font-medium">
-            Email
+            {tFields("email")}
           </label>
           <Input
             id="login-email"
@@ -103,7 +108,7 @@ export default function LoginPage() {
 
         <div className="flex flex-col gap-1.5 text-left">
           <label htmlFor="login-password" className="text-sm font-medium">
-            Password
+            {tFields("password")}
           </label>
           <Input
             id="login-password"
@@ -123,7 +128,7 @@ export default function LoginPage() {
         )}
 
         <Button type="submit" size="lg" disabled={submitting}>
-          {submitting ? "Logging in\u2026" : "Log in"}
+          {submitting ? t("submitting") : t("submit")}
         </Button>
       </form>
 
@@ -131,7 +136,7 @@ export default function LoginPage() {
         <div className="relative flex items-center justify-center">
           <span className="absolute inset-x-0 top-1/2 h-px bg-border" />
           <span className="relative bg-background px-2 text-xs text-muted-foreground">
-            or
+            {tCommon("or")}
           </span>
         </div>
 
@@ -140,7 +145,7 @@ export default function LoginPage() {
           size="lg"
           onClick={handleAppleSignIn}
           disabled={submitting}
-          aria-label="Sign in with Apple"
+          aria-label={t("appleAria")}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -153,7 +158,7 @@ export default function LoginPage() {
           >
             <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
           </svg>
-          Sign in with Apple
+          {t("appleLabel")}
         </Button>
 
         <Button
@@ -161,7 +166,7 @@ export default function LoginPage() {
           size="lg"
           onClick={handleGoogleSignIn}
           disabled={submitting}
-          aria-label="Sign in with Google"
+          aria-label={t("googleAria")}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -176,7 +181,7 @@ export default function LoginPage() {
             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
           </svg>
-          Sign in with Google
+          {t("googleLabel")}
         </Button>
       </div>
 
@@ -184,7 +189,7 @@ export default function LoginPage() {
         href="/register"
         className="mt-6 text-sm text-muted-foreground underline underline-offset-4 hover:text-foreground"
       >
-        Create account
+        {t("createAccount")}
       </Link>
     </section>
   )

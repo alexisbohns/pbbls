@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { ChevronRight } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/data/auth-context"
 import { ProfileCard } from "@/components/profile/ProfileCard"
 import { LogoutButton } from "@/components/profile/LogoutButton"
@@ -11,15 +12,14 @@ import { LegalSection } from "@/components/profile/LegalSection"
 import { PageLayout } from "@/components/layout/PageLayout"
 import { PathProfileCard } from "@/components/path/PathProfileCard"
 import { BackPath } from "@/components/ui/BackPath"
-import { NAV_ITEMS } from "@/lib/config/navigation"
-
-const PROFILE_NAV = NAV_ITEMS.filter(
-  (item) => item.href !== "/path",
-)
+import { useNavItems } from "@/lib/hooks/useNavItems"
 
 export default function ProfilePage() {
   const { user, profile, isAuthenticated, isLoading, logout } = useAuth()
   const router = useRouter()
+  const t = useTranslations("profile")
+  const navItems = useNavItems()
+  const profileNav = navItems.filter((item) => item.href !== "/path")
 
   const handleLogout = async () => {
     await logout()
@@ -30,8 +30,8 @@ export default function ProfilePage() {
     return (
       <PageLayout sidebar={<PathProfileCard />}>
         <section>
-          <h1 className="mb-6 text-2xl font-semibold">Profile</h1>
-          <p className="text-sm text-muted-foreground">Loading…</p>
+          <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("loading")}</p>
         </section>
       </PageLayout>
     )
@@ -41,10 +41,8 @@ export default function ProfilePage() {
     return (
       <PageLayout sidebar={<PathProfileCard />}>
         <section>
-          <h1 className="mb-6 text-2xl font-semibold">Profile</h1>
-          <p className="text-sm text-muted-foreground">
-            Sign in to view your profile.
-          </p>
+          <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
+          <p className="text-sm text-muted-foreground">{t("signedOut")}</p>
         </section>
       </PageLayout>
     )
@@ -53,13 +51,13 @@ export default function ProfilePage() {
   return (
     <PageLayout sidebar={<><BackPath /><PathProfileCard /></>}>
       <section>
-        <h1 className="mb-6 text-2xl font-semibold">Profile</h1>
+        <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
         <div className="space-y-6">
           <ProfileCard user={user} profile={profile} />
 
-        <nav aria-label="App sections">
+        <nav aria-label={t("appSectionsAria")}>
           <ul className="divide-y divide-border rounded-xl border border-border">
-            {PROFILE_NAV.map((item) => {
+            {profileNav.map((item) => {
               const Icon = item.icon
               return (
                 <li key={item.href}>

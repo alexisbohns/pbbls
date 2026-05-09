@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback } from "react"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -22,6 +23,7 @@ type DatePickerDialogProps = {
 
 export function DatePickerDialog({ open, onOpenChange, initialDate, onSave }: DatePickerDialogProps) {
   const [tempDate, setTempDate] = useState(initialDate)
+  const t = useTranslations("record.date")
 
   const handleOpenChange = useCallback(
     (nextOpen: boolean) => {
@@ -47,7 +49,7 @@ export function DatePickerDialog({ open, onOpenChange, initialDate, onSave }: Da
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>When</DialogTitle>
+          <DialogTitle>{t("title")}</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <InlineDatePicker value={tempDate} onChange={handleDateChange} />
@@ -57,19 +59,19 @@ export function DatePickerDialog({ open, onOpenChange, initialDate, onSave }: Da
               variant="outline"
               onClick={() => setTempDate(new Date())}
             >
-              Now
+              {t("now")}
             </Button>
           </div>
         </div>
         <DialogFooter>
-          <DialogClose>Cancel</DialogClose>
+          <DialogClose>{t("cancel")}</DialogClose>
           <Button
             onClick={() => {
               onSave(tempDate)
               onOpenChange(false)
             }}
           >
-            Done
+            {t("done")}
           </Button>
         </DialogFooter>
       </DialogContent>

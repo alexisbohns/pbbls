@@ -1,0 +1,536 @@
+{
+  "brand": {
+    "name": "Pebbles",
+    "short": "pbbls"
+  },
+  "common": {
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "back": "Back",
+    "close": "Close",
+    "delete": "Delete",
+    "edit": "Edit",
+    "retry": "Retry",
+    "unknown": "Unknown",
+    "aria": {
+      "mainNavigation": "Main navigation",
+      "profile": "Profile"
+    }
+  },
+  "nav": {
+    "path": "Path",
+    "record": "Record",
+    "collections": "Collections",
+    "souls": "Souls",
+    "glyphs": "Glyphs",
+    "lab": "Lab"
+  },
+  "profile": {
+    "title": "Profile",
+    "appSectionsAria": "App sections",
+    "loading": "Loading…",
+    "signedOut": "Sign in to view your profile.",
+    "email": "Email",
+    "memberSince": "Member since",
+    "appearance": "Appearance",
+    "language": "Language",
+    "theme": {
+      "label": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System",
+      "toggle": "Toggle theme"
+    },
+    "haptics": "Haptics",
+    "hapticsEnable": "Enable haptic feedback",
+    "hapticsDisable": "Disable haptic feedback",
+    "resetAria": "Reset to seed data",
+    "resetTitle": "Reset all data?",
+    "resetDescription": "This will replace your pebbles, souls, and collections with the original seed data. This cannot be undone.",
+    "resetConfirm": "Reset data",
+    "logout": "Log out",
+    "loggingOut": "Logging out…"
+  },
+  "errors": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. Please try again.",
+    "retry": "Try again",
+    "generic": "Something went wrong."
+  },
+  "docs": {
+    "title": "Documentation",
+    "navAria": "Documentation",
+    "back": "Back to app",
+    "lastUpdated": "Last updated",
+    "languageAria": "Language"
+  },
+  "offline": {
+    "title": "You're offline",
+    "description": "This page isn't available offline. Connect to the internet and try again.",
+    "cta": "Go to timeline"
+  },
+  "legal": {
+    "navAria": "Legal",
+    "legalNotice": "Legal Notice",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy"
+  },
+  "lab": {
+    "title": "Lab",
+    "back": "Back to Lab",
+    "loading": "Loading…",
+    "feedError": "Couldn't load the Lab. Please try again.",
+    "listError": "Couldn't load the list. Please try again.",
+    "announcementError": "Couldn't load this announcement.",
+    "empty": "Nothing here yet.",
+    "seeAll": "See all",
+    "sections": {
+      "announcements": "Announcements",
+      "changelog": "Changelog",
+      "inProgress": "In progress",
+      "backlog": "Backlog"
+    },
+    "community": {
+      "title": "Join the community",
+      "description": "Shape Pebbles with other pebblers on WhatsApp.",
+      "cta": "Open in WhatsApp"
+    },
+    "reaction": {
+      "upvoteAria": "Upvote",
+      "removeUpvoteAria": "Remove upvote"
+    }
+  },
+  "glyphs": {
+    "title": "Glyphs",
+    "loading": "Loading…",
+    "carveNew": "Carve new glyph",
+    "untitled": "Untitled glyph",
+    "card": {
+      "strokeCount": "{count, plural, one {# stroke} other {# strokes}}"
+    },
+    "empty": {
+      "title": "No glyphs yet",
+      "description": "Glyphs are symbols you carve on pebble surfaces. Create your first one.",
+      "cta": "Carve a glyph"
+    },
+    "detail": {
+      "back": "← Back to Glyphs",
+      "linkText": "Back to Glyphs",
+      "namePlaceholder": "Name (optional)",
+      "nameAria": "Glyph name",
+      "editAria": "Edit glyph name",
+      "save": "Save",
+      "cancel": "Cancel",
+      "deleteCta": "Delete glyph",
+      "deleteTitle": "Delete this glyph?",
+      "deleteDescription": "This action cannot be undone. The glyph will be permanently removed.",
+      "deleteConfirm": "Delete",
+      "notFoundTitle": "Glyph not found",
+      "notFoundDescription": "This glyph doesn't exist or may have been removed."
+    },
+    "picker": {
+      "label": "Glyphs",
+      "empty": "No glyphs yet. Carve one from the Glyphs page.",
+      "fallbackName": "Glyph {short}"
+    }
+  },
+  "carve": {
+    "back": "← Back to Glyphs",
+    "title": "Carve a glyph",
+    "namePlaceholder": "Name (optional)",
+    "nameAria": "Glyph name",
+    "canvasAria": "Drawing canvas for pebble mark",
+    "canvasCaption": "Draw a symbol on the pebble surface. Your strokes are clipped to the stone outline.",
+    "strokeCountAnnounce": "{count, plural, =0 {No strokes drawn} one {# stroke drawn} other {# strokes drawn}}",
+    "saved": "Glyph saved",
+    "savedNamed": "\"{name}\" saved",
+    "savedAria": "Glyph saved",
+    "newGlyph": "Create another glyph",
+    "toolbar": {
+      "ariaLabel": "Drawing tools",
+      "undo": "Undo last stroke",
+      "clear": "Clear all strokes",
+      "widthLabel": "Stroke width",
+      "widthAria": "{label} stroke width",
+      "thin": "Thin",
+      "medium": "Medium",
+      "thick": "Thick",
+      "save": "Save mark",
+      "saving": "Saving…",
+      "saveAria": "Save mark"
+    },
+    "stamps": {
+      "legend": "Stamps",
+      "ariaLabel": "Pre-made stamp symbols",
+      "star": "Star",
+      "spiral": "Spiral",
+      "wave": "Wave",
+      "cross": "Cross",
+      "circle": "Circle",
+      "zigzag": "Zigzag",
+      "diamond": "Diamond",
+      "heart": "Heart"
+    }
+  },
+  "shape": {
+    "river-smooth": { "name": "River Smooth" },
+    "creek-flat":   { "name": "Creek Flat" },
+    "moss-round":   { "name": "Moss Round" },
+    "canyon-long":  { "name": "Canyon Long" },
+    "shore-wide":   { "name": "Shore Wide" },
+    "dusk-pebble":  { "name": "Dusk Pebble" }
+  },
+  "landing": {
+    "tagline": "Collect meaningful moments.",
+    "exampleAria": "Example pebbles",
+    "getStarted": "Get started",
+    "haveAccount": "Already have an account?",
+    "logIn": "Log in",
+    "features": {
+      "record": {
+        "title": "Record in seconds",
+        "description": "Capture moments as they happen — no blank page, no pressure."
+      },
+      "enrich": {
+        "title": "Enrich with meaning",
+        "description": "Add emotions, people, and reflections to each pebble."
+      },
+      "grow": {
+        "title": "Grow your path",
+        "description": "Look back at your journey, at your own pace."
+      }
+    }
+  },
+  "auth": {
+    "or": "or",
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm password"
+    },
+    "errors": {
+      "fillFields": "Please fill in all fields.",
+      "passwordsMismatch": "Passwords do not match.",
+      "mustAcceptLegal": "You must accept the Terms of Service and Privacy Policy.",
+      "generic": "Something went wrong.",
+      "callbackFailed": "Sign-in failed. Please try again."
+    },
+    "login": {
+      "title": "Log in",
+      "subtitle": "Welcome back. Pick up where you left off.",
+      "submit": "Log in",
+      "submitting": "Logging in…",
+      "appleAria": "Sign in with Apple",
+      "appleLabel": "Sign in with Apple",
+      "googleAria": "Sign in with Google",
+      "googleLabel": "Sign in with Google",
+      "createAccount": "Create account"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Start collecting meaningful moments.",
+      "submit": "Create account",
+      "submitting": "Creating account…",
+      "appleAria": "Sign up with Apple",
+      "appleLabel": "Sign up with Apple",
+      "googleAria": "Sign up with Google",
+      "googleLabel": "Sign up with Google",
+      "logInLink": "Log in",
+      "termsPrefix": "I accept the ",
+      "termsLink": "Terms of Service",
+      "privacyPrefix": "I accept the ",
+      "privacyLink": "Privacy Policy"
+    }
+  },
+  "onboarding": {
+    "controlsAria": "Onboarding controls",
+    "progressAria": "Onboarding progress",
+    "stepAria": "Step {current} of {total}",
+    "skip": "Skip",
+    "back": "Back",
+    "next": "Next",
+    "complete": "Collect your first pebble",
+    "steps": {
+      "path": {
+        "heading": "Your life is a path",
+        "body": "Every moment matters — the big ones and the quiet ones. But most of them slip away before you even notice. Pebbles helps you collect them, one by one."
+      },
+      "pebble": {
+        "heading": "Drop a pebble, keep the moment",
+        "body": "A coffee with a friend. A concert that gave you chills. A tough conversation. Record it in seconds — no blank page, no pressure, no audience."
+      },
+      "ritual": {
+        "heading": "Build your path, at your own pace",
+        "body": "No streak to protect, no feed to scroll. Just a calm ritual that grows with you."
+      }
+    }
+  },
+  "souls": {
+    "title": "Souls",
+    "loading": "Loading…",
+    "addAria": "Add soul",
+    "addPlaceholder": "New soul name…",
+    "addNameAria": "New soul name",
+    "addCta": "Add",
+    "pebbleCount": "{count, plural, one {# pebble} other {# pebbles}}",
+    "deleteAria": "Delete {name}",
+    "deleteTitle": "Delete soul?",
+    "deleteDescription": "This will remove {name} from your directory and unlink them from all pebbles. This cannot be undone.",
+    "deleteConfirm": "Delete",
+    "empty": {
+      "title": "No souls yet",
+      "description": "Souls represent the people in your life. Add one to start tracking shared moments."
+    },
+    "detail": {
+      "back": "← Back to Souls",
+      "linkText": "Back to Souls",
+      "nameAria": "Soul name",
+      "editAria": "Edit soul name",
+      "save": "Save",
+      "cancel": "Cancel",
+      "noPebbles": "No pebbles linked to this soul yet.",
+      "notFoundTitle": "Soul not found",
+      "notFoundDescription": "This soul doesn't exist or may have been removed."
+    }
+  },
+  "collections": {
+    "title": "Collections",
+    "loading": "Loading…",
+    "newCta": "New",
+    "form": {
+      "newTitle": "New collection",
+      "editTitle": "Edit collection",
+      "submitCreate": "Create",
+      "submitSave": "Save",
+      "cancel": "Cancel",
+      "nameLabel": "Name",
+      "namePlaceholder": "e.g. Morning gratitudes",
+      "modeLegend": "Mode (optional)"
+    },
+    "pebbleCount": "{count, plural, one {# pebble} other {# pebbles}}",
+    "modes": {
+      "stack": "Stack",
+      "pack": "Pack",
+      "track": "Track",
+      "ariaLabel": "Mode: {label}"
+    },
+    "empty": {
+      "title": "No collections yet",
+      "description": "Collections let you group pebbles by theme, goal, or time period."
+    },
+    "detail": {
+      "back": "← Back to Collections",
+      "linkText": "Back to Collections",
+      "editAria": "Edit collection",
+      "noPebbles": "No pebbles in this collection yet.",
+      "removePebbleAria": "Remove {name} from collection",
+      "notFoundTitle": "Collection not found",
+      "notFoundDescription": "This collection doesn't exist or may have been removed."
+    }
+  },
+  "path": {
+    "loading": "Loading…",
+    "empty": {
+      "title": "No pebbles yet",
+      "description": "Record your first moment to start building your path.",
+      "cta": "Record a pebble"
+    },
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "todayLabel": "Today — {date}",
+    "yesterdayLabel": "Yesterday — {date}",
+    "profileAria": "{name}'s profile",
+    "stats": {
+      "bounce": "bounce",
+      "karma": "karma"
+    }
+  },
+  "card": {
+    "free":      { "name": "Free",      "prompt": "Write anything…" },
+    "feelings":  { "name": "Feelings",  "prompt": "What did I feel?" },
+    "thoughts":  { "name": "Thoughts",  "prompt": "What did I think?" },
+    "behaviour": { "name": "Behaviour", "prompt": "What did I do?" }
+  },
+  "pebble": {
+    "loading": "Loading…",
+    "notFoundTitle": "Pebble not found",
+    "notFoundInline": "Pebble not found.",
+    "notFoundDescription": "This pebble doesn't exist or may have been removed.",
+    "backToPath": "← Back to Path",
+    "back": "Back to Path",
+    "cardAria": "{name}, {time}",
+    "instantAlt": "Instant photo for {name}",
+    "photoAlt": "Pebble photo",
+    "visualAria": "Pebble: {name}, {emotion}, intensity {intensity}",
+    "withPrefix": "With: ",
+    "intensity": {
+      "title": "Intensity: {value} of 3"
+    },
+    "positiveness": {
+      "title": "Positiveness: {label}",
+      "highlight": "Highlight",
+      "neutral": "Neutral",
+      "lowlight": "Lowlight"
+    },
+    "peek": {
+      "close": "Close",
+      "souls": "Souls",
+      "picture": "Picture",
+      "writeCard": "Write a card",
+      "writeCardAria": "Write a card"
+    }
+  },
+  "record": {
+    "srTitle": "Record a pebble",
+    "editorAria": "Pebble editor",
+    "namePlaceholder": "What happened?",
+    "descriptionPlaceholder": "What was that awesome?",
+    "now": "Now",
+    "save": "Save pebble",
+    "domain": {
+      "label": "Domain",
+      "pickerLabel": "Domains",
+      "pickerAria": "Life domains",
+      "pickAria": "Pick domains",
+      "selectedAria": "Domains: {names}"
+    },
+    "emotion": {
+      "label": "Emotion",
+      "pickAria": "Pick emotion",
+      "selectedAria": "Emotion: {name}",
+      "searchPlaceholder": "Search emotions…",
+      "empty": "No emotions found"
+    },
+    "collection": {
+      "label": "Collection",
+      "pickAria": "Pick collections",
+      "selectedAria": "Collections: {names}",
+      "tilePickAria": "Add to collection",
+      "tileSelectedAria": "{count, plural, one {# collection selected} other {# collections selected}}",
+      "empty": "No collections yet"
+    },
+    "souls": {
+      "label": "Souls",
+      "title": "Souls",
+      "addAria": "Add souls",
+      "selectedAria": "{count, plural, one {# soul selected} other {# souls selected}}",
+      "selectedListAria": "Selected souls",
+      "removeAria": "Remove {name}",
+      "searchPlaceholder": "Search souls…",
+      "searchOrAddPlaceholder": "Search or add a soul…",
+      "searchOrAddLabel": "Search or add a soul",
+      "empty": "No souls found",
+      "addNew": "Add \"{name}\"",
+      "adding": "Adding…",
+      "found": "{count, plural, one {# soul} other {# souls}} found",
+      "addHint": ", type Enter to add \"{name}\"",
+      "done": "Done"
+    },
+    "glyph": {
+      "title": "Glyph",
+      "addAria": "Add glyph",
+      "changeAria": "Change glyph"
+    },
+    "photo": {
+      "addAria": "Add photo",
+      "removeAria": "Remove photo",
+      "alt": "Uploaded photo"
+    },
+    "visibility": {
+      "private": "Private",
+      "public": "Public",
+      "ariaPrivate": "Visibility: private",
+      "ariaPublic": "Visibility: public"
+    },
+    "intensity": {
+      "ariaTitle": "Intensity and valence",
+      "ariaSelected": "Intensity: {intensity}, Valence: {valence}",
+      "small": "S",
+      "medium": "M",
+      "large": "L"
+    },
+    "valence": {
+      "highlight": "HIGHLIGHT",
+      "neutral": "NEUTRAL",
+      "lowlight": "LOWLIGHT"
+    },
+    "date": {
+      "title": "When",
+      "now": "Now",
+      "cancel": "Cancel",
+      "done": "Done",
+      "groupAria": "Time",
+      "subtract15": "Subtract 15 minutes",
+      "add15": "Add 15 minutes",
+      "selectTime": "Select time",
+      "selectDate": "Select date"
+    }
+  },
+  "locale": {
+    "switcher": "Language",
+    "en": "English",
+    "fr": "Français"
+  },
+  "emotion": {
+    "anxious": { "name": "Anxiety", "label": "Unease about what might happen" },
+    "overwhelmed": { "name": "Overwhelmed", "label": "Too much to handle at once" },
+    "scared": { "name": "Fear", "label": "Sensing danger or threat" },
+    "stressed": { "name": "Stressed", "label": "Pressure from demands exceeding capacity" },
+    "worried": { "name": "Worried", "label": "Dwelling on a specific concern" },
+    "disappointed": { "name": "Disappointed", "label": "Let down by unmet expectations" },
+    "discouraged": { "name": "Discouraged", "label": "Losing motivation to keep going" },
+    "drained": { "name": "Drained", "label": "Emotionally or physically depleted" },
+    "hopeless": { "name": "Hopeless", "label": "Feeling nothing will improve" },
+    "lonely": { "name": "Loneliness", "label": "Feeling disconnected from others" },
+    "sad": { "name": "Sadness", "label": "A heaviness from loss or longing" },
+    "ashamed": { "name": "Shame", "label": "Feeling fundamentally flawed or exposed" },
+    "embarrassed": { "name": "Embarrassed", "label": "Uncomfortable from a social misstep" },
+    "guilty": { "name": "Guilt", "label": "Regretting something you did or didn't do" },
+    "indifferent": { "name": "Indifferent", "label": "Not caring either way" },
+    "calm": { "name": "Calm", "label": "A quiet, centered stillness" },
+    "content": { "name": "Content", "label": "Quietly satisfied with how things are" },
+    "grateful": { "name": "Gratitude", "label": "Appreciating what you have or received" },
+    "hopeful": { "name": "Hopeful", "label": "Believing things can get better" },
+    "peaceful": { "name": "Peaceful", "label": "Harmony with yourself and the world" },
+    "relieved": { "name": "Relieved", "label": "Tension dissolving after a worry passes" },
+    "satisfied": { "name": "Satisfied", "label": "Pleased with an outcome or effort" },
+    "surprised": { "name": "Surprise", "label": "Caught off guard by the unexpected" },
+    "angry": { "name": "Anger", "label": "A strong reaction against injustice or violation" },
+    "annoyed": { "name": "Annoyed", "label": "Mildly bothered by something small" },
+    "disgusted": { "name": "Disgust", "label": "Strong aversion to something offensive" },
+    "frustrated": { "name": "Frustrated", "label": "Blocked from reaching a goal" },
+    "irritated": { "name": "Irritated", "label": "Bothered by repeated small annoyances" },
+    "jealous": { "name": "Jealous", "label": "Wanting what someone else has" },
+    "brave": { "name": "Brave", "label": "Facing fear with courage" },
+    "confident": { "name": "Confident", "label": "Trusting your own ability" },
+    "proud": { "name": "Pride", "label": "Fulfilled by something you achieved" },
+    "amazed": { "name": "Awe", "label": "Struck by something vast or extraordinary" },
+    "amused": { "name": "Amused", "label": "Finding something funny or entertaining" },
+    "excited": { "name": "Excitement", "label": "High energy and anticipation for something ahead" },
+    "happy": { "name": "Happy", "label": "A warm sense that things are good" },
+    "joyful": { "name": "Joy", "label": "Deep, radiant happiness" },
+    "passionate": { "name": "Passion", "label": "Intense drive and deep engagement" }
+  },
+  "domain": {
+    "health": { "name": "Health", "label": "Your body, energy, and physical well-being" },
+    "finance": { "name": "Finance", "label": "Money, stability, and material security" },
+    "friends": { "name": "Friends", "label": "People you choose to walk alongside" },
+    "work": { "name": "Work", "label": "Your job, career, and professional life" },
+    "passions": { "name": "Passions", "label": "Creative pursuits and things you love doing" },
+    "self-care": { "name": "Self-Care", "label": "Rituals and habits that restore you" },
+    "event": { "name": "Event", "label": "What's happening in the world around you" },
+    "tasks": { "name": "Tasks", "label": "Things you need to get done" },
+    "weather": { "name": "Weather", "label": "Sun or rain, seasons and skies" },
+    "identity": { "name": "Identity", "label": "Who you are and who you're becoming" },
+    "spirituality": { "name": "Spirituality", "label": "Faith, meaning, and your inner life" },
+    "travel": { "name": "Travel", "label": "Exploring new places and horizons" },
+    "community": { "name": "Community", "label": "People who share your values, culture, or beliefs" },
+    "dating": { "name": "Dating", "label": "Romantic relationships and connections" },
+    "family": { "name": "Family", "label": "Those connected to you by blood or soul" },
+    "partner": { "name": "Partner", "label": "Your significant other or love relationship" },
+    "education": { "name": "Education", "label": "Learning, growth, and intellectual pursuits" },
+    "sport": { "name": "Sport", "label": "Physical activity, games, and competition" }
+  }
+}

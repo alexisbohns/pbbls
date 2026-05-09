@@ -1,4 +1,7 @@
+"use client"
+
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import type { Soul } from "@/lib/types"
 import { DeleteSoulDialog } from "@/components/souls/DeleteSoulDialog"
 
@@ -9,6 +12,7 @@ type SoulCardProps = {
 }
 
 export function SoulCard({ soul, pebbleCount, onDelete }: SoulCardProps) {
+  const t = useTranslations("souls")
   return (
     <article className="flex items-center gap-2">
       <Link
@@ -18,7 +22,7 @@ export function SoulCard({ soul, pebbleCount, onDelete }: SoulCardProps) {
         <h3 className="text-sm font-medium">{soul.name}</h3>
 
         <p className="mt-1.5 text-xs text-muted-foreground">
-          {pebbleCount} {pebbleCount === 1 ? "pebble" : "pebbles"}
+          {t("pebbleCount", { count: pebbleCount })}
         </p>
       </Link>
 

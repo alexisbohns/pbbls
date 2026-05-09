@@ -1,6 +1,6 @@
 export { type Emotion, EMOTIONS } from "./emotions"
 export { type Domain, DOMAINS } from "./domains"
 export { type CardType, CARD_TYPES } from "./card-types"
-export { POSITIVENESS_SIGNS, POSITIVENESS_LABELS } from "./positiveness"
+export { POSITIVENESS_SIGNS } from "./positiveness"
 export { type ColorWorldConfig, COLOR_WORLDS, getColorWorldBackground } from "./color-worlds"
 export { type PebbleShape, PEBBLE_SHAPES } from "./pebble-shapes"

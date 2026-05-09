@@ -1,10 +1,9 @@
 "use client"
 
-import { useMemo } from "react"
 import type { Pebble, Soul } from "@/lib/types"
 import { useMarks } from "@/lib/data/useMarks"
 import { useLookupMaps } from "@/lib/data/useLookupMaps"
-import { groupPebblesByDate } from "@/lib/utils/group-pebbles-by-date"
+import { useGroupedPebbles } from "@/lib/hooks/useGroupedPebbles"
 import { PebbleCard } from "@/components/path/PebbleCard"
 
 type PebbleTimelineProps = {
@@ -14,7 +13,7 @@ type PebbleTimelineProps = {
 }
 
 export function PebbleTimeline({ pebbles, souls, onSelectPebble }: PebbleTimelineProps) {
-  const groups = useMemo(() => groupPebblesByDate(pebbles), [pebbles])
+  const groups = useGroupedPebbles(pebbles)
   const { marks } = useMarks()
   const { emotionMap, soulMap, markMap } = useLookupMaps(souls, marks)
 

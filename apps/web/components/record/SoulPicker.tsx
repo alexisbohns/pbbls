@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from "react"
 import { Plus, Search, X } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { useSouls } from "@/lib/data/useSouls"
 import { useComboboxFilter } from "@/lib/hooks/useComboboxFilter"
 import { useComboboxKeyboard } from "@/lib/hooks/useComboboxKeyboard"
@@ -19,6 +20,7 @@ export function SoulPicker({ value, onChange }: SoulPickerProps) {
   const [activeIndex, setActiveIndex] = useState(-1)
   const inputRef = useRef<HTMLInputElement>(null)
   const listboxId = "soul-listbox"
+  const t = useTranslations("record.souls")
 
   const { filteredSouls, showAddOption, optionCount, addOptionIndex, trimmed } =
     useComboboxFilter(souls, value, query)
@@ -64,11 +66,11 @@ export function SoulPicker({ value, onChange }: SoulPickerProps) {
 
   return (
     <fieldset>
-      <legend className="text-sm font-medium">Souls</legend>
+      <legend className="text-sm font-medium">{t("label")}</legend>
 
       {/* Selected chips */}
       {selectedSouls.length > 0 && (
-        <ul role="list" className="mt-2 flex flex-wrap gap-2" aria-label="Selected souls">
+        <ul role="list" className="mt-2 flex flex-wrap gap-2" aria-label={t("selectedListAria")}>
           {selectedSouls.map((soul) => (
             <li
               key={soul.id}
@@ -77,7 +79,7 @@ export function SoulPicker({ value, onChange }: SoulPickerProps) {
               {soul.name}
               <button
                 type="button"
-                aria-label={`Remove ${soul.name}`}
+                aria-label={t("removeAria", { name: soul.name })}
                 onClick={() => toggle(soul.id)}
                 className="rounded-full p-0.5 text-muted-foreground transition-all duration-75 hover:text-foreground active:scale-90 focus-visible:ring-2 focus-visible:ring-ring/50 focus-visible:outline-none"
               >
@@ -95,7 +97,7 @@ export function SoulPicker({ value, onChange }: SoulPickerProps) {
           aria-hidden="true"
         />
         <label htmlFor="soul-search" className="sr-only">
-          Search or add a soul
+          {t("searchOrAddLabel")}
         </label>
         <input
           ref={inputRef}
@@ -107,7 +109,7 @@ export function SoulPicker({ value, onChange }: SoulPickerProps) {
             setActiveIndex(-1)
           }}
           onKeyDown={handleKeyDown}
-          placeholder="Search or add a soul\u2026"
+          placeholder={t("searchOrAddPlaceholder")}
           role="combobox"
           aria-autocomplete="list"
           aria-controls={listboxId}
@@ -123,7 +125,7 @@ export function SoulPicker({ value, onChange }: SoulPickerProps) {
           id={listboxId}
           role="listbox"
           aria-multiselectable="true"
-          aria-label="Souls"
+          aria-label={t("label")}
           className="mt-1 max-h-48 overflow-y-auto rounded-lg border border-input bg-background"
         >
           {filteredSouls.map((soul, i) => {
@@ -173,15 +175,15 @@ export function SoulPicker({ value, onChange }: SoulPickerProps) {
               )}
             >
               <Plus className="size-4 shrink-0" aria-hidden="true" />
-              {isAdding ? "Adding\u2026" : `Add \u201c${trimmed}\u201d`}
+              {isAdding ? t("adding") : t("addNew", { name: trimmed })}
             </li>
           )}
         </ul>
       )}
 
       <p aria-live="polite" className="sr-only">
-        {filteredSouls.length} soul{filteredSouls.length !== 1 && "s"} found
-        {showAddOption && `, type Enter to add "${trimmed}"`}
+        {t("found", { count: filteredSouls.length })}
+        {showAddOption && t("addHint", { name: trimmed })}
       </p>
     </fieldset>
   )

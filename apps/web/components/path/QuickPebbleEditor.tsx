@@ -9,6 +9,8 @@ import {
   Users,
 } from "lucide-react"
 import { motion, useReducedMotion } from "framer-motion"
+import { useTranslations } from "next-intl"
+import { useFormatDate } from "@/lib/i18n"
 import { usePebbles } from "@/lib/data/usePebbles"
 import { usePebblesCount } from "@/lib/data/usePebblesCount"
 import { useBounce } from "@/lib/data/useBounce"
@@ -50,6 +52,11 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
   const { pebblesCount, loading: countLoading } = usePebblesCount()
   const { bounceWindow, loading: bounceLoading } = useBounce()
   const prefersReducedMotion = useReducedMotion()
+  const t = useTranslations("record")
+  const tGlyph = useTranslations("record.glyph")
+  const tPhoto = useTranslations("record.photo")
+  const tSouls = useTranslations("record.souls")
+  const formatDate = useFormatDate()
 
   // Collapse state
   const [expanded, setExpanded] = useState(false)
@@ -208,19 +215,19 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
     : { height: { duration: 0.25, ease: "easeInOut" }, opacity: { duration: 0.15 } }
 
   const dateLabel = isNow(happenedAt)
-    ? "Now"
-    : new Intl.DateTimeFormat(undefined, {
+    ? t("now")
+    : formatDate(happenedAt, {
         month: "short",
         day: "numeric",
         hour: "numeric",
         minute: "2-digit",
-      }).format(new Date(happenedAt))
+      })
 
   return (
     <section
       ref={sectionRef}
       className={cn("rounded-xl border bg-card transition-[padding] duration-200", expanded ? "p-4" : "px-4 py-3")}
-      aria-label="Pebble editor"
+      aria-label={t("editorAria")}
       onFocusCapture={handleFocusCapture}
       onBlurCapture={handleBlurCapture}
     >
@@ -260,7 +267,7 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
         ref={titleInputRef}
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="What happened?"
+        placeholder={t("namePlaceholder")}
         className={cn(
           "w-full resize-none border-none bg-transparent font-heading text-xl font-semibold text-foreground outline-none field-sizing-content placeholder:text-muted-foreground/50",
           expanded && "mb-2",
@@ -293,7 +300,7 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
       <textarea
         value={description}
         onChange={(e) => setDescription(e.target.value)}
-        placeholder="What was that awesome?"
+        placeholder={t("descriptionPlaceholder")}
         className="mb-4 w-full resize-none border-none bg-transparent text-sm text-foreground outline-none field-sizing-content placeholder:text-muted-foreground/50"
         rows={1}
       />
@@ -305,7 +312,7 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
           icon={Fingerprint}
           filled={!!selectedMark}
           onClick={() => setGlyphOpen(true)}
-          ariaLabel={selectedMark ? "Change glyph" : "Add glyph"}
+          ariaLabel={selectedMark ? tGlyph("changeAria") : tGlyph("addAria")}
         >
           {selectedMark && (
             <GlyphPreview mark={selectedMark} className="size-full p-2" />
@@ -324,7 +331,7 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
           icon={Users}
           filled={soulIds.length > 0}
           onClick={() => setSoulsOpen(true)}
-          ariaLabel={soulIds.length > 0 ? `${soulIds.length} soul(s) selected` : "Add souls"}
+          ariaLabel={soulIds.length > 0 ? tSouls("selectedAria", { count: soulIds.length }) : tSouls("addAria")}
         >
           {soulIds.length > 0 && (
             <span className="text-xs font-medium text-muted-foreground">
@@ -344,13 +351,13 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
               fileInputRef.current?.click()
             }
           }}
-          ariaLabel={instant ? "Remove photo" : "Add photo"}
+          ariaLabel={instant ? tPhoto("removeAria") : tPhoto("addAria")}
         >
           {instant && (
             /* eslint-disable-next-line @next/next/no-img-element -- base64 data URL, next/image optimization not applicable */
             <img
               src={instant}
-              alt="Uploaded photo"
+              alt={tPhoto("alt")}
               className="size-full object-cover"
             />
           )}
@@ -380,7 +387,7 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
           size="icon"
           disabled={!name.trim() || saving}
           onClick={() => void handleSubmit()}
-          aria-label="Save pebble"
+          aria-label={t("save")}
           className="size-9 rounded-full"
         >
           <Check className="size-5" aria-hidden />

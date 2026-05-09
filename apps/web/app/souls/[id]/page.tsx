@@ -2,6 +2,7 @@
 
 import { use, useMemo } from "react"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { useSoul } from "@/lib/data/useSoul"
 import { usePebbles } from "@/lib/data/usePebbles"
 import { useSouls } from "@/lib/data/useSouls"
@@ -16,6 +17,8 @@ export default function SoulDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
+  const t = useTranslations("souls.detail")
+  const tSouls = useTranslations("souls")
   const { soul, loading: soulLoading, updateSoul } = useSoul(id)
   const { pebbles, loading: pebblesLoading } = usePebbles()
   const { souls, loading: soulsLoading } = useSouls()
@@ -39,12 +42,12 @@ export default function SoulDetailPage({
           href="/souls"
           className="text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
-          &larr; Back to Souls
+          {t("back")}
         </Link>
       </nav>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading&hellip;</p>
+        <p className="text-sm text-muted-foreground">{tSouls("loading")}</p>
       ) : soul ? (
         <>
           <SoulDetailHeader
@@ -54,7 +57,7 @@ export default function SoulDetailPage({
           />
           {relatedPebbles.length === 0 ? (
             <p className="py-10 text-center text-sm text-muted-foreground">
-              No pebbles linked to this soul yet.
+              {t("noPebbles")}
             </p>
           ) : (
             <SoulPebbleList pebbles={relatedPebbles} souls={souls} />

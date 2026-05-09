@@ -1,3 +1,6 @@
+"use client"
+
+import { useTranslations } from "next-intl"
 import type { OnboardingStepConfig } from "@/lib/config/onboarding-steps"
 
 interface OnboardingScreenProps {
@@ -5,6 +8,8 @@ interface OnboardingScreenProps {
 }
 
 export function OnboardingScreen({ step }: OnboardingScreenProps) {
+  const t = useTranslations("onboarding.steps")
+
   return (
     <section
       className="flex flex-1 flex-col items-center justify-center px-6 text-center"
@@ -14,10 +19,10 @@ export function OnboardingScreen({ step }: OnboardingScreenProps) {
         id={`onboarding-heading-${step.id}`}
         className="mb-4 text-3xl font-bold tracking-tight"
       >
-        {step.heading}
+        {t(`${step.id}.heading`)}
       </h1>
       <p className="max-w-sm text-lg text-muted-foreground">
-        {step.body}
+        {t(`${step.id}.body`)}
       </p>
     </section>
   )

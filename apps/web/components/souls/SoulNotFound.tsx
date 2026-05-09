@@ -1,12 +1,16 @@
+"use client"
+
+import { useTranslations } from "next-intl"
 import { NotFoundCard } from "@/components/layout/NotFoundCard"
 
 export function SoulNotFound() {
+  const t = useTranslations("souls.detail")
   return (
     <NotFoundCard
-      title="Soul not found"
-      description="This soul doesn't exist or may have been removed."
+      title={t("notFoundTitle")}
+      description={t("notFoundDescription")}
       href="/souls"
-      linkText="Back to Souls"
+      linkText={t("linkText")}
     />
   )
 }

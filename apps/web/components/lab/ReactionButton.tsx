@@ -1,6 +1,7 @@
 "use client"
 
 import { ArrowUpCircle } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 
 type ReactionButtonProps = {
@@ -14,12 +15,13 @@ type ReactionButtonProps = {
 // Purely visual — the parent owns the state and performs the write.
 // Mirrors apps/ios/Pebbles/Features/Lab/Components/ReactionButton.swift.
 export function ReactionButton({ count, isReacted, onToggle, disabled }: ReactionButtonProps) {
+  const t = useTranslations("lab.reaction")
   return (
     <button
       type="button"
       onClick={onToggle}
       disabled={disabled}
-      aria-label={isReacted ? "Remove upvote" : "Upvote"}
+      aria-label={isReacted ? t("removeUpvoteAria") : t("upvoteAria")}
       aria-pressed={isReacted}
       className={cn(
         "inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors",

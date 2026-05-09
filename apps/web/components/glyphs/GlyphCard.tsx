@@ -1,6 +1,10 @@
+"use client"
+
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { PEBBLE_SHAPES } from "@/lib/config"
 import type { Mark } from "@/lib/types"
+import { useFormatDate, useShapeName } from "@/lib/i18n"
 import { GlyphPreview } from "@/components/glyphs/GlyphPreview"
 
 type GlyphCardProps = {
@@ -8,10 +12,11 @@ type GlyphCardProps = {
 }
 
 export function GlyphCard({ mark }: GlyphCardProps) {
+  const t = useTranslations("glyphs")
   const shape = PEBBLE_SHAPES.find((s) => s.id === mark.shape_id)
-  const created = new Intl.DateTimeFormat(undefined, {
-    dateStyle: "medium",
-  }).format(new Date(mark.created_at))
+  const shapeName = useShapeName(shape ?? { slug: "", name: "" })
+  const formatDate = useFormatDate()
+  const created = formatDate(mark.created_at, { dateStyle: "medium" })
 
   return (
     <article>
@@ -26,10 +31,10 @@ export function GlyphCard({ mark }: GlyphCardProps) {
 
         <div className="min-w-0">
           <h3 className="text-sm font-medium truncate">
-            {mark.name || "Untitled glyph"}
+            {mark.name || t("untitled")}
           </h3>
           <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-            {shape && <span>{shape.name}</span>}
+            {shape && <span>{shapeName}</span>}
             <span>{created}</span>
           </div>
         </div>

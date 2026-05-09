@@ -2,6 +2,7 @@
 
 import { use, useMemo, useCallback } from "react"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import type { Pebble, Collection } from "@/lib/types"
 import { useCollection } from "@/lib/data/useCollection"
 import { useCollections } from "@/lib/data/useCollections"
@@ -18,6 +19,8 @@ export default function CollectionDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
+  const t = useTranslations("collections")
+  const tDetail = useTranslations("collections.detail")
   const { collection, loading: collectionLoading } = useCollection(id)
   const { updateCollection } = useCollections()
   const { pebbles, loading: pebblesLoading } = usePebbles()
@@ -58,12 +61,12 @@ export default function CollectionDetailPage({
           href="/collections"
           className="text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
-          &larr; Back to Collections
+          {tDetail("back")}
         </Link>
       </nav>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <p className="text-sm text-muted-foreground">{t("loading")}</p>
       ) : collection ? (
         <>
           <CollectionDetailHeader
@@ -73,7 +76,7 @@ export default function CollectionDetailPage({
           />
           {resolvedPebbles.length === 0 ? (
             <p className="py-10 text-center text-sm text-muted-foreground">
-              No pebbles in this collection yet.
+              {tDetail("noPebbles")}
             </p>
           ) : (
             <CollectionPebbleList

@@ -3,6 +3,7 @@
 import { use } from "react"
 import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { AnnouncementDetail } from "@/components/lab/AnnouncementDetail"
 import { PageLayout } from "@/components/layout/PageLayout"
 
@@ -12,6 +13,7 @@ export default function AnnouncementPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
+  const t = useTranslations("lab")
 
   return (
     <PageLayout>
@@ -22,7 +24,7 @@ export default function AnnouncementPage({
             className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
           >
             <ChevronLeft className="size-4" aria-hidden />
-            Back to Lab
+            {t("back")}
           </Link>
         </nav>
         <AnnouncementDetail id={id} />
