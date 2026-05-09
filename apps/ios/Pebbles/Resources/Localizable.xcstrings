@@ -3848,6 +3848,23 @@
         }
       }
     },
+    "Week %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Week %lld"
+          }
+        },
+        "fr": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Semaine %lld"
+          }
+        }
+      }
+    },
     "Week event": {
       "extractionState": "manual",
       "localizations": {
