@@ -71,6 +71,12 @@
     "description": "This page isn't available offline. Connect to the internet and try again.",
     "cta": "Go to timeline"
   },
+  "legal": {
+    "navAria": "Legal",
+    "legalNotice": "Legal Notice",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy"
+  },
   "lab": {
     "title": "Lab",
     "back": "Back to Lab",
@@ -135,6 +141,7 @@
     "title": "Carve a glyph",
     "namePlaceholder": "Name (optional)",
     "nameAria": "Glyph name",
+    "canvasAria": "Drawing canvas for pebble mark",
     "canvasCaption": "Draw a symbol on the pebble surface. Your strokes are clipped to the stone outline.",
     "strokeCountAnnounce": "{count, plural, =0 {No strokes drawn} one {# stroke drawn} other {# strokes drawn}}",
     "saved": "Glyph saved",
@@ -457,7 +464,8 @@
       "groupAria": "Time",
       "subtract15": "Subtract 15 minutes",
       "add15": "Add 15 minutes",
-      "selectTime": "Select time"
+      "selectTime": "Select time",
+      "selectDate": "Select date"
     }
   },
   "locale": {

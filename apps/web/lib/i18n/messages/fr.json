@@ -71,6 +71,12 @@
     "description": "Cette page n'est pas disponible hors ligne. Connectez-vous à internet et réessayez.",
     "cta": "Aller à mon chemin"
   },
+  "legal": {
+    "navAria": "Mentions légales",
+    "legalNotice": "Mentions légales",
+    "terms": "Conditions Générales d'Utilisation",
+    "privacy": "Politique de Confidentialité"
+  },
   "lab": {
     "title": "Lab",
     "back": "Retour au Lab",
@@ -135,6 +141,7 @@
     "title": "Graver un glyphe",
     "namePlaceholder": "Nom (facultatif)",
     "nameAria": "Nom du glyphe",
+    "canvasAria": "Zone de dessin pour le glyphe",
     "canvasCaption": "Dessinez un symbole sur le galet. Vos traits restent dans le contour de la pierre.",
     "strokeCountAnnounce": "{count, plural, =0 {Aucun trait} one {# trait gravé} other {# traits gravés}}",
     "saved": "Glyphe enregistré",
@@ -457,7 +464,8 @@
       "groupAria": "Heure",
       "subtract15": "Retirer 15 minutes",
       "add15": "Ajouter 15 minutes",
-      "selectTime": "Sélectionner l'heure"
+      "selectTime": "Sélectionner l'heure",
+      "selectDate": "Sélectionner la date"
     }
   },
   "locale": {

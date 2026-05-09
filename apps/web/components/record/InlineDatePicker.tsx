@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { Calendar } from "@/components/ui/calendar"
 
 type InlineDatePickerProps = {
@@ -8,6 +9,7 @@ type InlineDatePickerProps = {
 }
 
 export function InlineDatePicker({ value, onChange }: InlineDatePickerProps) {
+  const t = useTranslations("record.date")
   return (
     <div className="flex justify-center">
       <Calendar
@@ -17,7 +19,7 @@ export function InlineDatePicker({ value, onChange }: InlineDatePickerProps) {
           if (date) onChange(date)
         }}
         defaultMonth={value}
-        aria-label="Select date"
+        aria-label={t("selectDate")}
       />
     </div>
   )

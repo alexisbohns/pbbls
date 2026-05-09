@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback, useRef, useState } from "react"
+import { useTranslations } from "next-intl"
 import type { PebbleShape } from "@/lib/config"
 import type { MarkStroke } from "@/lib/types"
 import { simplifyPath, pointsToSvgPath, type Point } from "@/lib/utils/simplify-path"
@@ -29,6 +30,7 @@ export function DrawingCanvas({
   const drawingRef = useRef(false)
   const rafRef = useRef<number>(0)
   const [activePoints, setActivePoints] = useState<Point[]>([])
+  const t = useTranslations("carve")
 
   const toSvgCoords = useCallback((e: React.PointerEvent): Point | null => {
     const svg = svgRef.current
@@ -106,7 +108,7 @@ export function DrawingCanvas({
       onPointerUp={handlePointerUp}
       onPointerCancel={handlePointerUp}
       role="img"
-      aria-label="Drawing canvas for pebble mark"
+      aria-label={t("canvasAria")}
     >
       <PebbleOutline shape={shape} clipId={clipId} />
       <g clipPath={`url(#${clipId})`}>
