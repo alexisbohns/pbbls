@@ -14,3 +14,20 @@ extension Emotion {
         return NSLocalizedString(key, value: name, comment: "")
     }
 }
+
+extension EmotionWithPalette {
+    /// Localized display name for an emotion row coming out of the palette
+    /// view. Same key pattern as `Emotion.localizedName` (`emotion.<slug>.name`).
+    var localizedName: String {
+        NSLocalizedString("emotion.\(slug).name", value: name, comment: "")
+    }
+}
+
+extension EmotionCategory {
+    /// Localized display name keyed off the category slug
+    /// (`emotionCategory.<slug>.name`). Falls back to the DB `name` when the
+    /// catalog has no entry — same fallback contract as the emotion helpers.
+    var localizedName: String {
+        NSLocalizedString("emotionCategory.\(slug).name", value: name, comment: "")
+    }
+}

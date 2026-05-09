@@ -9,7 +9,6 @@ struct CreatePebbleSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var draft = PebbleDraft()
-    @State private var emotions: [Emotion] = []
     @State private var domains: [Domain] = []
     @State private var souls: [SoulWithGlyph] = []
     @State private var collections: [PebbleCollection] = []
@@ -110,7 +109,6 @@ struct CreatePebbleSheet: View {
         } else {
             PebbleFormView(
                 draft: $draft,
-                emotions: emotions,
                 domains: domains,
                 souls: souls,
                 collections: collections,
@@ -216,12 +214,6 @@ struct CreatePebbleSheet: View {
         isLoadingReferences = true
         loadError = nil
         do {
-            async let emotionsQuery: [Emotion] = supabase.client
-                .from("emotions")
-                .select("id, slug, name")
-                .order("name")
-                .execute()
-                .value
             async let domainsQuery: [Domain] = supabase.client
                 .from("domains")
                 .select()
@@ -241,10 +233,9 @@ struct CreatePebbleSheet: View {
                 .execute()
                 .value
 
-            let (loadedEmotions, loadedDomains, loadedSouls, loadedCollections) =
-                try await (emotionsQuery, domainsQuery, soulsQuery, collectionsQuery)
+            let (loadedDomains, loadedSouls, loadedCollections) =
+                try await (domainsQuery, soulsQuery, collectionsQuery)
 
-            self.emotions = loadedEmotions
             self.domains = loadedDomains
             self.souls = loadedSouls
             self.collections = loadedCollections

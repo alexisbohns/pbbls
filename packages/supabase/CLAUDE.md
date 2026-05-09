@@ -29,6 +29,7 @@ All commands run from this package directory (`packages/supabase/`):
 | `npm run db:migration:list` | List migration status |
 | `npm run db:link` | Link to a remote Supabase project (interactive) |
 | `npm run db:types` | Regenerate TypeScript types from local schema |
+| `npm run db:types:remote` | Regenerate TypeScript types from the linked remote schema |
 
 ## Type Generation
 
@@ -42,7 +43,9 @@ Generated types live in `types/database.ts` and are committed to the repo. The w
 3. `npm run db:types` (regenerate types)
 4. Commit the updated `types/database.ts`
 
-If the local Supabase instance is not available, the Supabase MCP tool `generate_typescript_types` can generate types from the remote project as a fallback.
+If the local Supabase instance is not available, run `npm run db:types:remote` to generate types directly from the linked remote project. (The Supabase MCP tool `generate_typescript_types` is also a viable fallback.)
+
+**Important — stderr suppression.** Both `db:types` scripts route the CLI's stderr to `/dev/null` because `supabase gen types` emits non-TypeScript status lines (`Initialising login role...`, version-update notices, etc.) on stderr. Without the redirect, those lines leak into the redirected stdout and corrupt `database.ts`, causing TS1434 errors that break every TypeScript consumer (`@pbbls/supabase` build, web/admin Vercel deploys). If you ever invoke the command manually, always include `2>/dev/null` before the `>`.
 
 ## Linking to Remote
 

@@ -15,6 +15,7 @@ struct EmotionWithPaletteDecodingTests {
       "slug": "anxiety",
       "name": "Anxiety",
       "color": "#7B5E99",
+      "emoji": "😰",
       "category_id": "22222222-2222-2222-2222-222222222222",
       "category_slug": "fear",
       "category_name": "Fear",
@@ -57,6 +58,30 @@ struct EmotionWithPaletteDecodingTests {
         let json = validJson.replacingOccurrences(
             of: "\"primary_color\": \"#7B5E99FF\"",
             with: "\"primary_color\": \"not-hex\""
+        )
+        #expect(throws: DecodingError.self) { try decode(json) }
+    }
+
+    @Test("decodes the emoji field")
+    func decodesEmoji() throws {
+        let row = try decode(validJson)
+        #expect(row.emoji == "😰")
+    }
+
+    @Test("rejects null emoji")
+    func rejectsNullEmoji() {
+        let json = validJson.replacingOccurrences(
+            of: "\"emoji\": \"😰\"",
+            with: "\"emoji\": null"
+        )
+        #expect(throws: DecodingError.self) { try decode(json) }
+    }
+
+    @Test("rejects missing emoji")
+    func rejectsMissingEmoji() {
+        let json = validJson.replacingOccurrences(
+            of: "\"emoji\": \"😰\",\n",
+            with: ""
         )
         #expect(throws: DecodingError.self) { try decode(json) }
     }

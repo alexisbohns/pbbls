@@ -12,4 +12,4 @@ update public.logs
 
 alter table public.logs
   add constraint logs_platform_check
-  check (platform in ('webapp','ios','android','all'));
+  check (platform in ('webapp','ios','android','all','project','infra'));

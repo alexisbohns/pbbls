@@ -238,6 +238,7 @@ export type Database = {
         Row: {
           category_id: string
           color: string
+          emoji: string
           id: string
           name: string
           slug: string
@@ -245,6 +246,7 @@ export type Database = {
         Insert: {
           category_id: string
           color: string
+          emoji: string
           id?: string
           name: string
           slug: string
@@ -252,6 +254,7 @@ export type Database = {
         Update: {
           category_id?: string
           color?: string
+          emoji?: string
           id?: string
           name?: string
           slug?: string
@@ -1017,6 +1020,7 @@ export type Database = {
           category_name: string | null
           category_slug: string | null
           color: string | null
+          emoji: string | null
           id: string | null
           light_color: string | null
           name: string | null
