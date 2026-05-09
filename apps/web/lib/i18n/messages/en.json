@@ -56,7 +56,70 @@
   "errors": {
     "title": "Something went wrong",
     "description": "An unexpected error occurred. Please try again.",
-    "retry": "Try again"
+    "retry": "Try again",
+    "generic": "Something went wrong."
+  },
+  "landing": {
+    "tagline": "Collect meaningful moments.",
+    "exampleAria": "Example pebbles",
+    "getStarted": "Get started",
+    "haveAccount": "Already have an account?",
+    "logIn": "Log in",
+    "features": {
+      "record": {
+        "title": "Record in seconds",
+        "description": "Capture moments as they happen — no blank page, no pressure."
+      },
+      "enrich": {
+        "title": "Enrich with meaning",
+        "description": "Add emotions, people, and reflections to each pebble."
+      },
+      "grow": {
+        "title": "Grow your path",
+        "description": "Look back at your journey, at your own pace."
+      }
+    }
+  },
+  "auth": {
+    "or": "or",
+    "fields": {
+      "email": "Email",
+      "password": "Password",
+      "confirmPassword": "Confirm password"
+    },
+    "errors": {
+      "fillFields": "Please fill in all fields.",
+      "passwordsMismatch": "Passwords do not match.",
+      "mustAcceptLegal": "You must accept the Terms of Service and Privacy Policy.",
+      "generic": "Something went wrong.",
+      "callbackFailed": "Sign-in failed. Please try again."
+    },
+    "login": {
+      "title": "Log in",
+      "subtitle": "Welcome back. Pick up where you left off.",
+      "submit": "Log in",
+      "submitting": "Logging in…",
+      "appleAria": "Sign in with Apple",
+      "appleLabel": "Sign in with Apple",
+      "googleAria": "Sign in with Google",
+      "googleLabel": "Sign in with Google",
+      "createAccount": "Create account"
+    },
+    "register": {
+      "title": "Create account",
+      "subtitle": "Start collecting meaningful moments.",
+      "submit": "Create account",
+      "submitting": "Creating account…",
+      "appleAria": "Sign up with Apple",
+      "appleLabel": "Sign up with Apple",
+      "googleAria": "Sign up with Google",
+      "googleLabel": "Sign up with Google",
+      "logInLink": "Log in",
+      "termsPrefix": "I accept the ",
+      "termsLink": "Terms of Service",
+      "privacyPrefix": "I accept the ",
+      "privacyLink": "Privacy Policy"
+    }
   },
   "onboarding": {
     "controlsAria": "Onboarding controls",

@@ -56,7 +56,70 @@
   "errors": {
     "title": "Une erreur est survenue",
     "description": "Une erreur inattendue s'est produite. Veuillez réessayer.",
-    "retry": "Réessayer"
+    "retry": "Réessayer",
+    "generic": "Une erreur est survenue."
+  },
+  "landing": {
+    "tagline": "Collectionnez vos moments précieux.",
+    "exampleAria": "Galets en exemple",
+    "getStarted": "Commencer",
+    "haveAccount": "Vous avez déjà un compte ?",
+    "logIn": "Me connecter",
+    "features": {
+      "record": {
+        "title": "Capturez en quelques secondes",
+        "description": "Capturez les moments au fil de l'eau. Pas de page blanche, pas de pression."
+      },
+      "enrich": {
+        "title": "Enrichissez de sens",
+        "description": "Ajoutez une photo, des émotions, des personnes et des réflexions."
+      },
+      "grow": {
+        "title": "Faites grandir votre chemin",
+        "description": "Revenez sur vos pas quand vous voulez : votre chemin, votre rythme."
+      }
+    }
+  },
+  "auth": {
+    "or": "ou",
+    "fields": {
+      "email": "E-mail",
+      "password": "Mot de passe",
+      "confirmPassword": "Confirmer le mot de passe"
+    },
+    "errors": {
+      "fillFields": "Veuillez remplir tous les champs.",
+      "passwordsMismatch": "Les mots de passe ne correspondent pas.",
+      "mustAcceptLegal": "Vous devez accepter les Conditions Générales d'Utilisation et la Politique de Confidentialité.",
+      "generic": "Une erreur est survenue.",
+      "callbackFailed": "La connexion a échoué. Veuillez réessayer."
+    },
+    "login": {
+      "title": "Me connecter",
+      "subtitle": "Heureux de vous revoir. Reprenez où vous en étiez.",
+      "submit": "Me connecter",
+      "submitting": "Connexion…",
+      "appleAria": "Se connecter avec Apple",
+      "appleLabel": "Se connecter avec Apple",
+      "googleAria": "Se connecter avec Google",
+      "googleLabel": "Se connecter avec Google",
+      "createAccount": "Créer un compte"
+    },
+    "register": {
+      "title": "Créer un compte",
+      "subtitle": "Commencez à collectionner vos moments précieux.",
+      "submit": "Créer un compte",
+      "submitting": "Création du compte…",
+      "appleAria": "S'inscrire avec Apple",
+      "appleLabel": "S'inscrire avec Apple",
+      "googleAria": "S'inscrire avec Google",
+      "googleLabel": "S'inscrire avec Google",
+      "logInLink": "Me connecter",
+      "termsPrefix": "J'accepte les ",
+      "termsLink": "Conditions Générales d'Utilisation",
+      "privacyPrefix": "J'accepte la ",
+      "privacyLink": "Politique de Confidentialité"
+    }
   },
   "onboarding": {
     "controlsAria": "Commandes de l'introduction",
