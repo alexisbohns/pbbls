@@ -1,10 +1,11 @@
 import RiveRuntime
 import SwiftUI
+import UIKit
 
 /// Header rendered ABOVE each week card on the Path screen: a small Rive
-/// cairn animation stacked above the centered "Week N" / "Semaine N"
-/// title. Used as the `header:` view of each `Section` so it sits in the
-/// gap between cards rather than as a row inside one.
+/// cairn animation stacked above the uppercased, tracked "WEEK N" /
+/// "SEMAINE N" title. Used as the `header:` view of each `Section` so it
+/// sits in the gap between cards rather than as a row inside one.
 ///
 /// The week number is read from the supplied `weekStart` Date using the
 /// supplied calendar — callers pass the same `Calendar(identifier:
@@ -13,26 +14,54 @@ import SwiftUI
 /// The localized source key is `"Week %lld"`, with `"Semaine %lld"` as
 /// the French translation. Xcode auto-extracts the source key on every
 /// build because `SWIFT_EMIT_LOC_STRINGS = YES`; the FR value is filled
-/// in `Localizable.xcstrings`.
+/// in `Localizable.xcstrings`. Uppercasing happens visually via
+/// `.textCase(.uppercase)`.
 struct WeekSectionHeader: View {
     let weekStart: Date
     let calendar: Calendar
 
     @State private var cairnViewModel = RiveViewModel(fileName: "pbbls-cairn")
 
+    private static let titleSize: CGFloat = 14
+
+    /// Ysabeau-SemiBold with OpenType proportional + lining figures applied
+    /// so the digits in "WEEK 19" align to cap height with proportional
+    /// (not tabular) widths. Matches the design spec.
+    ///
+    /// Feature constants from `CoreText/SFNTLayoutTypes.h`:
+    /// - Number Spacing (type 6) → Proportional Numbers (selector 1)
+    /// - Number Case (type 21) → Upper Case Numbers / lining (selector 1)
+    private static var titleFont: SwiftUI.Font {
+        let descriptor = UIFontDescriptor(name: "Ysabeau-SemiBold", size: titleSize)
+            .addingAttributes([
+                .featureSettings: [
+                    [
+                        UIFontDescriptor.FeatureKey.type: 6,
+                        UIFontDescriptor.FeatureKey.selector: 1,
+                    ],
+                    [
+                        UIFontDescriptor.FeatureKey.type: 21,
+                        UIFontDescriptor.FeatureKey.selector: 1,
+                    ],
+                ],
+            ])
+        return SwiftUI.Font(UIFont(descriptor: descriptor, size: titleSize))
+    }
+
     var body: some View {
         let weekOfYear = calendar.component(.weekOfYear, from: weekStart)
-        VStack(spacing: 8) {
+        VStack(spacing: 0) {
             cairnViewModel.view()
                 .frame(width: 56, height: 56)
                 .accessibilityHidden(true)
             Text("Week \(weekOfYear)")
-                .font(.custom("Ysabeau-SemiBold", size: 18))
-                .foregroundStyle(Color.pebblesForeground)
+                .font(Self.titleFont)
+                .tracking(2.5)
+                .textCase(.uppercase)
+                .foregroundStyle(Color.pebblesMutedForeground)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 12)
-        .textCase(nil) // override the default `.insetGrouped` uppercase header style
     }
 }
 
