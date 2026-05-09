@@ -44,6 +44,22 @@ struct LocalizationPatternCTests {
         #expect(ref.localizedName == "Ref Fallback")
     }
 
+    @Test("EmotionCategory.localizedName falls back to name when slug has no catalog entry")
+    func emotionCategoryFallsBackToName() {
+        let category = EmotionCategory(
+            id: UUID(),
+            slug: "not-a-real-slug-xyz",
+            name: "Fallback Name",
+            palette: EmotionPalette(
+                primaryHex: "#000000FF",
+                secondaryHex: "#000000FF",
+                lightHex: "#FFFFFFFF",
+                surfaceHex: "#0000001A"
+            )!
+        )
+        #expect(category.localizedName == "Fallback Name")
+    }
+
     // MARK: helpers
 
     private func decodeRef<T: Decodable>(_ type: T.Type, json: String) -> T {
@@ -111,6 +127,36 @@ struct LocalizationPatternCCoverageTests {
             #expect(
                 resolved != "__FALLBACK__",
                 "domain.\(slug).name missing from catalog in 'fr'"
+            )
+        }
+    }
+
+    @Test("every emotion category slug has an EN catalog entry distinct from DB fallback")
+    func everyEmotionCategoryHasEnglishEntry() {
+        for slug in ReferenceSlugs.emotionCategories {
+            let resolved = resolveKey(
+                "emotionCategory.\(slug).name",
+                locale: Locale(identifier: "en"),
+                fallback: "__FALLBACK__"
+            )
+            #expect(
+                resolved != "__FALLBACK__",
+                "emotionCategory.\(slug).name missing from catalog in 'en'"
+            )
+        }
+    }
+
+    @Test("every emotion category slug has a FR catalog entry distinct from DB fallback")
+    func everyEmotionCategoryHasFrenchEntry() {
+        for slug in ReferenceSlugs.emotionCategories {
+            let resolved = resolveKey(
+                "emotionCategory.\(slug).name",
+                locale: Locale(identifier: "fr"),
+                fallback: "__FALLBACK__"
+            )
+            #expect(
+                resolved != "__FALLBACK__",
+                "emotionCategory.\(slug).name missing from catalog in 'fr'"
             )
         }
     }
