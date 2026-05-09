@@ -64,10 +64,10 @@ export async function createLog(_: LogFormResult, formData: FormData): Promise<L
   const supabase = await createServerSupabaseClient()
   const published_at = parsed.values.published ? new Date().toISOString() : null
   // Auto-stamp release date when shipping if the admin didn't provide one.
-  const released_at =
+  const released_at: string | null =
     parsed.values.status === "shipped" && !parsed.values.released_at
       ? new Date().toISOString()
-      : parsed.values.released_at
+      : (parsed.values.released_at ?? null)
   const { data, error } = await supabase
     .from("logs")
     .insert({ ...parsed.values, published_at, released_at })
@@ -121,7 +121,7 @@ export async function updateLog(
   // without setting a date themselves. If they provided a date, honor it.
   // For non-shipped statuses, we still persist whatever the admin entered (or
   // null) so they can pre-fill a planned release date.
-  let released_at: string | null = parsed.values.released_at
+  let released_at: string | null = parsed.values.released_at ?? null
   if (parsed.values.status === "shipped" && !released_at) {
     released_at = existing.released_at ?? new Date().toISOString()
   }
