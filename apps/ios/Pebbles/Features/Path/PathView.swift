@@ -12,22 +12,38 @@ struct PathView: View {
     @State private var pendingDeletion: Pebble?
     @State private var deleteError: String?
 
-    /// First-week reveal cascade. Stages:
-    ///   0 → cairn playing, title hidden, all pebbles hidden
-    ///   1 → title visible, pebbles still hidden
-    ///   N (N≥2) → first (N-1) pebbles visible
-    /// Set to `Int.max` once the cascade has completed (or the user has
-    /// since added/removed a pebble) so subsequent re-renders don't
-    /// re-animate.
-    @State private var firstWeekRevealStage: Int = 0
-    @State private var firstWeekHasCascaded = false
+    /// Per-week reveal cascade state. Each week's section only mounts
+    /// once the previous week's cascade is complete, so its cairn
+    /// animation doesn't start prematurely.
+    ///
+    /// - `revealedWeeksCount`: how many weeks are currently in the list
+    ///   (starts at 1 — the topmost week — so its cairn begins playing
+    ///   on appear). Incremented each time a week finishes its cascade.
+    /// - `revealedPebblesPerWeek[i]`: how many of week `i`'s pebbles are
+    ///   currently visible. Pebble rows beyond this count are not
+    ///   emitted at all (so the card grows from zero height instead of
+    ///   reserving space for hidden rows).
+    /// - `titleVisiblePerWeek[i]`: whether week `i`'s title has faded in.
+    /// - `cascadeStartedWeeks`: guards `runCascade(forWeek:)` against
+    ///   duplicate invocation.
+    /// - `cascadeFullyDone`: once true, the gating dictionaries are
+    ///   ignored and the full list renders immediately. Prevents a
+    ///   `load()` triggered by a new/deleted pebble from re-animating.
+    @State private var revealedWeeksCount: Int = 1
+    @State private var revealedPebblesPerWeek: [Int: Int] = [:]
+    @State private var titleVisiblePerWeek: [Int: Bool] = [:]
+    @State private var cascadeStartedWeeks: Set<Int> = []
+    @State private var cascadeFullyDone = false
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "path")
 
-    /// Stagger between consecutive pebble reveals in the first week.
+    /// Stagger between consecutive pebble reveals in a single week.
     private static let pebbleRevealStagger: Duration = .milliseconds(80)
-    /// Delay after the cairn stops before the title fades in.
+    /// Delay after a cairn stops before its week title fades in.
     private static let titleRevealDelay: Duration = .milliseconds(120)
+    /// Pause after a week's last pebble before the next week's section
+    /// is mounted (and its cairn starts).
+    private static let nextWeekDelay: Duration = .milliseconds(180)
 
     /// ISO 8601 calendar — Mon-start, week-1-contains-first-Thursday.
     /// Locale-independent so all users see the same week boundaries.
@@ -124,32 +140,37 @@ struct PathView: View {
                     .listRowBackground(Color.pebblesListRow)
                 }
 
-                ForEach(Array(groupedPebbles.enumerated()), id: \.element.key) { weekIndex, group in
-                    let isFirstWeek = (weekIndex == 0)
+                let visibleWeekCount = cascadeFullyDone
+                    ? groupedPebbles.count
+                    : min(revealedWeeksCount, groupedPebbles.count)
+
+                ForEach(0..<visibleWeekCount, id: \.self) { weekIndex in
+                    let group = groupedPebbles[weekIndex]
+                    let revealedPebbleCount = cascadeFullyDone
+                        ? group.value.count
+                        : (revealedPebblesPerWeek[weekIndex] ?? 0)
+                    let visiblePebbles = Array(group.value.prefix(revealedPebbleCount))
+
                     Section {
-                        ForEach(Array(group.value.enumerated()), id: \.element.id) { pebbleIndex, pebble in
-                            let visible = !isFirstWeek
-                                || firstWeekHasCascaded
-                                || firstWeekRevealStage >= pebbleIndex + 2
+                        ForEach(visiblePebbles) { pebble in
                             PathPebbleRow(
                                 pebble: pebble,
                                 onTap: { selectedPebbleId = pebble.id },
                                 onDelete: { pendingDeletion = pebble }
                             )
-                            .opacity(visible ? 1 : 0)
-                            .offset(y: visible ? 0 : 8)
-                            .animation(.easeOut(duration: 0.25), value: visible)
                             .listRowBackground(Color.pebblesListRow)
                             .listRowSeparator(.hidden)
+                            .transition(.opacity.combined(with: .move(edge: .top)))
                         }
                     } header: {
                         WeekSectionHeader(
                             weekStart: group.key,
                             calendar: isoCalendar,
-                            titleVisible: !isFirstWeek
-                                || firstWeekHasCascaded
-                                || firstWeekRevealStage >= 1,
-                            onCairnFinished: isFirstWeek ? { runFirstWeekCascade() } : nil
+                            titleVisible: cascadeFullyDone
+                                || (titleVisiblePerWeek[weekIndex] ?? false),
+                            onCairnFinished: cascadeFullyDone
+                                ? nil
+                                : { runCascade(forWeek: weekIndex) }
                         )
                     }
                 }
@@ -174,25 +195,38 @@ struct PathView: View {
         }
     }
 
-    /// Drives the first-week reveal cascade once the cairn animation
-    /// has finished. Idempotent — guarded by `firstWeekHasCascaded` so
-    /// `RiveViewModel` callbacks fired after a re-render do not restart
-    /// the sequence.
-    private func runFirstWeekCascade() {
-        guard !firstWeekHasCascaded else { return }
+    /// Drives one week's reveal cascade, then chains to the next week
+    /// by mounting its section so that section's cairn animation can
+    /// start. Idempotent — guarded by `cascadeStartedWeeks` so a stray
+    /// `RiveViewModel` callback fired after a re-render does not
+    /// re-trigger an in-flight or completed cascade.
+    private func runCascade(forWeek weekIndex: Int) {
+        guard !cascadeStartedWeeks.contains(weekIndex) else { return }
+        cascadeStartedWeeks.insert(weekIndex)
+
         Task { @MainActor in
             try? await Task.sleep(for: Self.titleRevealDelay)
             withAnimation(.easeOut(duration: 0.25)) {
-                firstWeekRevealStage = 1
+                titleVisiblePerWeek[weekIndex] = true
             }
-            let pebbleCount = groupedPebbles.first?.value.count ?? 0
+
+            let groups = groupedPebbles
+            let pebbleCount = weekIndex < groups.count ? groups[weekIndex].value.count : 0
             for index in 0..<pebbleCount {
                 try? await Task.sleep(for: Self.pebbleRevealStagger)
                 withAnimation(.easeOut(duration: 0.25)) {
-                    firstWeekRevealStage = index + 2
+                    revealedPebblesPerWeek[weekIndex] = index + 1
                 }
             }
-            firstWeekHasCascaded = true
+
+            try? await Task.sleep(for: Self.nextWeekDelay)
+            if weekIndex + 1 < groupedPebbles.count {
+                withAnimation(.easeOut(duration: 0.3)) {
+                    revealedWeeksCount = weekIndex + 2
+                }
+            } else {
+                cascadeFullyDone = true
+            }
         }
     }
 
