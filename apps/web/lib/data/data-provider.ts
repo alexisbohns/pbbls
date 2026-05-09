@@ -58,7 +58,10 @@ export type CreateCollectionInput = Omit<Collection, "id" | "created_at" | "upda
 export type UpdateCollectionInput = Partial<Omit<Collection, "id" | "created_at" | "updated_at">>
 
 export type CreateMarkInput = Omit<Mark, "id" | "created_at" | "updated_at">
-export type UpdateMarkInput = Partial<Omit<Mark, "id" | "created_at" | "updated_at">>
+// `name: null` clears the column; `name: undefined` leaves it unchanged.
+export type UpdateMarkInput = Partial<
+  Omit<Mark, "id" | "name" | "created_at" | "updated_at">
+> & { name?: string | null }
 
 // ---------------------------------------------------------------------------
 // DataProvider interface — implemented by SupabaseProvider.

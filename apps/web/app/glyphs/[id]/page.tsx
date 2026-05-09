@@ -16,12 +16,16 @@ export default function GlyphDetailPage({
 }) {
   const { id } = use(params)
   const { mark, loading } = useMark(id)
-  const { removeMark } = useMarks()
+  const { removeMark, updateMark } = useMarks()
   const router = useRouter()
 
   const handleDelete = async () => {
     await removeMark(id)
     router.push("/glyphs")
+  }
+
+  const handleUpdateName = async (name: string | null) => {
+    await updateMark(id, { name })
   }
 
   return (
@@ -39,7 +43,11 @@ export default function GlyphDetailPage({
       {loading ? (
         <p className="text-sm text-muted-foreground">Loading…</p>
       ) : mark ? (
-        <GlyphDetail mark={mark} onDelete={handleDelete} />
+        <GlyphDetail
+          mark={mark}
+          onDelete={handleDelete}
+          onUpdateName={handleUpdateName}
+        />
       ) : (
         <GlyphNotFound />
       )}
