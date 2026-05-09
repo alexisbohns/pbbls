@@ -1,6 +1,7 @@
 {
   "brand": {
-    "name": "Pebbles"
+    "name": "Pebbles",
+    "short": "pbbls"
   },
   "common": {
     "loading": "Chargement…",
@@ -12,10 +13,23 @@
     "delete": "Supprimer",
     "edit": "Modifier",
     "retry": "Réessayer",
-    "unknown": "Inconnu"
+    "unknown": "Inconnu",
+    "aria": {
+      "mainNavigation": "Navigation principale",
+      "profile": "Profil"
+    }
+  },
+  "nav": {
+    "path": "Chemin",
+    "record": "Capturer",
+    "collections": "Collections",
+    "souls": "Âmes",
+    "glyphs": "Glyphes",
+    "lab": "Lab"
   },
   "profile": {
     "title": "Profil",
+    "appSectionsAria": "Sections de l'application",
     "loading": "Chargement…",
     "signedOut": "Connectez-vous pour voir votre profil.",
     "email": "E-mail",
@@ -30,8 +44,19 @@
       "toggle": "Changer de thème"
     },
     "haptics": "Vibrations",
+    "hapticsEnable": "Activer les vibrations",
+    "hapticsDisable": "Désactiver les vibrations",
+    "resetAria": "Réinitialiser aux données d'exemple",
+    "resetTitle": "Tout réinitialiser ?",
+    "resetDescription": "Vos galets, âmes et collections seront remplacés par les données d'exemple d'origine. Cette action est irréversible.",
+    "resetConfirm": "Réinitialiser",
     "logout": "Me déconnecter",
     "loggingOut": "Déconnexion…"
+  },
+  "errors": {
+    "title": "Une erreur est survenue",
+    "description": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+    "retry": "Réessayer"
   },
   "locale": {
     "switcher": "Langue",

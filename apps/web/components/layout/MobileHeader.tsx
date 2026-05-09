@@ -3,12 +3,15 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { CircleUser } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/lib/data/auth-context"
 
 export function MobileHeader() {
   const pathname = usePathname()
   const { isAuthenticated } = useAuth()
+  const aria = useTranslations("common.aria")
+  const brand = useTranslations("brand")
   const hidden =
     pathname.startsWith("/record") || pathname.startsWith("/onboarding") || pathname === "/login" || pathname === "/register"
 
@@ -20,7 +23,7 @@ export function MobileHeader() {
         hidden && "hidden",
       )}
     >
-      <span className="text-lg font-semibold">pbbls</span>
+      <span className="text-lg font-semibold">{brand("short")}</span>
 
       {isAuthenticated && (
         <Link
@@ -31,7 +34,7 @@ export function MobileHeader() {
               ? "text-primary"
               : "text-muted-foreground hover:text-foreground",
           )}
-          aria-label="Profile"
+          aria-label={aria("profile")}
           aria-current={pathname.startsWith("/profile") ? "page" : undefined}
         >
           <CircleUser className="size-5" />

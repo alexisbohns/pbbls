@@ -3,8 +3,9 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { CircleUser } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
-import { NAV_ITEMS } from "@/lib/config/navigation"
+import { useNavItems } from "@/lib/hooks/useNavItems"
 import { useAuth } from "@/lib/data/auth-context"
 import { ThemeToggle } from "@/components/layout/ThemeToggle"
 import { HapticsToggle } from "@/components/layout/HapticsToggle"
@@ -13,17 +14,20 @@ import { ResetDataButton } from "@/components/layout/ResetDataButton"
 export function Sidebar() {
   const pathname = usePathname()
   const { isAuthenticated } = useAuth()
+  const navItems = useNavItems()
+  const aria = useTranslations("common.aria")
+  const brand = useTranslations("brand")
   const hidden = pathname === "/" || pathname.startsWith("/onboarding") || pathname === "/login" || pathname === "/register" || pathname.startsWith("/docs")
 
   return (
     <aside className={cn("hidden w-56 shrink-0 border-r border-border md:flex md:flex-col", hidden && "md:hidden")}>
       <div className="flex h-14 items-center px-4 text-lg font-semibold">
-        pbbls
+        {brand("short")}
       </div>
 
-      <nav aria-label="Main navigation" className="flex-1 px-2 py-2">
+      <nav aria-label={aria("mainNavigation")} className="flex-1 px-2 py-2">
         <ul className="flex flex-col gap-1">
-          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+          {navItems.map(({ href, label, icon: Icon }) => {
             const isActive = pathname.startsWith(href)
             return (
               <li key={href}>
@@ -56,7 +60,7 @@ export function Sidebar() {
                 ? "bg-muted text-primary"
                 : "text-muted-foreground hover:bg-muted hover:text-foreground",
             )}
-            aria-label="Profile"
+            aria-label={aria("profile")}
             aria-current={pathname.startsWith("/profile") ? "page" : undefined}
           >
             <CircleUser className="size-4" />

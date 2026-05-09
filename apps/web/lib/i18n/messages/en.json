@@ -1,6 +1,7 @@
 {
   "brand": {
-    "name": "Pebbles"
+    "name": "Pebbles",
+    "short": "pbbls"
   },
   "common": {
     "loading": "Loading…",
@@ -12,10 +13,23 @@
     "delete": "Delete",
     "edit": "Edit",
     "retry": "Retry",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "aria": {
+      "mainNavigation": "Main navigation",
+      "profile": "Profile"
+    }
+  },
+  "nav": {
+    "path": "Path",
+    "record": "Record",
+    "collections": "Collections",
+    "souls": "Souls",
+    "glyphs": "Glyphs",
+    "lab": "Lab"
   },
   "profile": {
     "title": "Profile",
+    "appSectionsAria": "App sections",
     "loading": "Loading…",
     "signedOut": "Sign in to view your profile.",
     "email": "Email",
@@ -30,8 +44,19 @@
       "toggle": "Toggle theme"
     },
     "haptics": "Haptics",
+    "hapticsEnable": "Enable haptic feedback",
+    "hapticsDisable": "Disable haptic feedback",
+    "resetAria": "Reset to seed data",
+    "resetTitle": "Reset all data?",
+    "resetDescription": "This will replace your pebbles, souls, and collections with the original seed data. This cannot be undone.",
+    "resetConfirm": "Reset data",
     "logout": "Log out",
     "loggingOut": "Logging out…"
+  },
+  "errors": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. Please try again.",
+    "retry": "Try again"
   },
   "locale": {
     "switcher": "Language",
