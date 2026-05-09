@@ -1,12 +1,16 @@
+"use client"
+
+import { useTranslations } from "next-intl"
 import { NotFoundCard } from "@/components/layout/NotFoundCard"
 
 export function PebbleNotFound() {
+  const t = useTranslations("pebble")
   return (
     <NotFoundCard
-      title="Pebble not found"
-      description="This pebble doesn't exist or may have been removed."
+      title={t("notFoundTitle")}
+      description={t("notFoundDescription")}
       href="/path"
-      linkText="Back to Path"
+      linkText={t("back")}
     />
   )
 }

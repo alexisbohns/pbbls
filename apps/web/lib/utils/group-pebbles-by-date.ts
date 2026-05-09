@@ -6,12 +6,14 @@ export type DateGroup = {
   pebbles: Pebble[]
 }
 
-const dayFormatter = new Intl.DateTimeFormat("en-US", {
-  weekday: "long",
-  year: "numeric",
-  month: "long",
-  day: "numeric",
-})
+export type GroupLabelFormatters = {
+  /** Wraps a long-date string into "Today — {date}" for the active locale. */
+  formatTodayLabel: (longDate: string) => string
+  /** Wraps a long-date string into "Yesterday — {date}" for the active locale. */
+  formatYesterdayLabel: (longDate: string) => string
+  /** Locale-aware long date formatter (e.g. "Monday, April 5, 2026"). */
+  formatLongDate: (date: Date) => string
+}
 
 function toLocalDateKey(isoString: string): string {
   const d = new Date(isoString)
@@ -21,25 +23,27 @@ function toLocalDateKey(isoString: string): string {
   return `${year}-${month}-${day}`
 }
 
-function formatDayLabel(dateKey: string): string {
+function buildLabel(dateKey: string, args: GroupLabelFormatters): string {
   // Parse dateKey as local date (noon avoids DST edge cases)
   const date = new Date(`${dateKey}T12:00:00`)
 
   const today = new Date()
-  const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`
-
+  const todayKey = toLocalDateKey(today.toISOString())
   const yesterday = new Date(today)
   yesterday.setDate(yesterday.getDate() - 1)
-  const yesterdayKey = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, "0")}-${String(yesterday.getDate()).padStart(2, "0")}`
+  const yesterdayKey = toLocalDateKey(yesterday.toISOString())
 
-  const formatted = dayFormatter.format(date)
+  const formatted = args.formatLongDate(date)
 
-  if (dateKey === todayKey) return `Today — ${formatted}`
-  if (dateKey === yesterdayKey) return `Yesterday — ${formatted}`
+  if (dateKey === todayKey) return args.formatTodayLabel(formatted)
+  if (dateKey === yesterdayKey) return args.formatYesterdayLabel(formatted)
   return formatted
 }
 
-export function groupPebblesByDate(pebbles: Pebble[]): DateGroup[] {
+export function groupPebblesByDate(
+  pebbles: Pebble[],
+  formatters: GroupLabelFormatters,
+): DateGroup[] {
   const sorted = [...pebbles].sort(
     (a, b) => new Date(b.happened_at).getTime() - new Date(a.happened_at).getTime(),
   )
@@ -60,7 +64,7 @@ export function groupPebblesByDate(pebbles: Pebble[]): DateGroup[] {
 
   return groupOrder.map((dateKey) => ({
     dateKey,
-    label: formatDayLabel(dateKey),
+    label: buildLabel(dateKey, formatters),
     pebbles: groupMap.get(dateKey)!,
   }))
 }

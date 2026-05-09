@@ -2,6 +2,7 @@
 
 import { use, useCallback } from "react"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { usePebble } from "@/lib/data/usePebble"
 import { useSouls } from "@/lib/data/useSouls"
 import { useCollections } from "@/lib/data/useCollections"
@@ -16,6 +17,7 @@ export default function PebbleDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
+  const t = useTranslations("pebble")
   const { pebble, loading: pebbleLoading, updatePebble } = usePebble(id)
   const { souls, loading: soulsLoading, addSoul } = useSouls()
   const { collections, loading: collectionsLoading, updateCollection } = useCollections()
@@ -46,12 +48,12 @@ export default function PebbleDetailPage({
           href="/path"
           className="text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
-          &larr; Back to Path
+          {t("backToPath")}
         </Link>
       </nav>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <p className="text-sm text-muted-foreground">{t("loading")}</p>
       ) : pebble ? (
         <PebbleDetail
           pebble={pebble}

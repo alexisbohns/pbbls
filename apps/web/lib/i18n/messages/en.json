@@ -58,6 +58,58 @@
     "description": "An unexpected error occurred. Please try again.",
     "retry": "Try again"
   },
+  "path": {
+    "loading": "Loading…",
+    "empty": {
+      "title": "No pebbles yet",
+      "description": "Record your first moment to start building your path.",
+      "cta": "Record a pebble"
+    },
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "todayLabel": "Today — {date}",
+    "yesterdayLabel": "Yesterday — {date}",
+    "profileAria": "{name}'s profile",
+    "stats": {
+      "bounce": "bounce",
+      "karma": "karma"
+    }
+  },
+  "card": {
+    "free":      { "name": "Free",      "prompt": "Write anything…" },
+    "feelings":  { "name": "Feelings",  "prompt": "What did I feel?" },
+    "thoughts":  { "name": "Thoughts",  "prompt": "What did I think?" },
+    "behaviour": { "name": "Behaviour", "prompt": "What did I do?" }
+  },
+  "pebble": {
+    "loading": "Loading…",
+    "notFoundTitle": "Pebble not found",
+    "notFoundInline": "Pebble not found.",
+    "notFoundDescription": "This pebble doesn't exist or may have been removed.",
+    "backToPath": "← Back to Path",
+    "back": "Back to Path",
+    "cardAria": "{name}, {time}",
+    "instantAlt": "Instant photo for {name}",
+    "photoAlt": "Pebble photo",
+    "visualAria": "Pebble: {name}, {emotion}, intensity {intensity}",
+    "withPrefix": "With: ",
+    "intensity": {
+      "title": "Intensity: {value} of 3"
+    },
+    "positiveness": {
+      "title": "Positiveness: {label}",
+      "highlight": "Highlight",
+      "neutral": "Neutral",
+      "lowlight": "Lowlight"
+    },
+    "peek": {
+      "close": "Close",
+      "souls": "Souls",
+      "picture": "Picture",
+      "writeCard": "Write a card",
+      "writeCardAria": "Write a card"
+    }
+  },
   "record": {
     "srTitle": "Record a pebble",
     "editorAria": "Pebble editor",

@@ -1,8 +1,11 @@
+"use client"
+
+import { useTranslations } from "next-intl"
 import type { Pebble, Emotion, Mark } from "@/lib/types"
+import { useFormatTime } from "@/lib/i18n"
 import { PebbleVisual } from "@/components/pebble/PebbleVisual"
 import { IntensityDots, PositivenessIndicator } from "@/components/pebble/PebbleIndicators"
 import { EmotionBadge } from "@/components/ui/EmotionBadge"
-import { timeFormatter } from "@/lib/utils/formatters"
 
 type PebbleCardProps = {
   pebble: Pebble
@@ -29,7 +32,9 @@ function MetadataRow({
 }
 
 export function PebbleCard({ pebble, emotion, mark, soulNames, onSelect }: PebbleCardProps) {
-  const time = timeFormatter.format(new Date(pebble.happened_at))
+  const t = useTranslations("pebble")
+  const formatTime = useFormatTime()
+  const time = formatTime(pebble.happened_at)
   const isLarge = pebble.intensity === 3
   const firstInstant = pebble.instants[0] ?? null
 
@@ -43,7 +48,7 @@ export function PebbleCard({ pebble, emotion, mark, soulNames, onSelect }: Pebbl
             ? "flex w-full flex-col items-center gap-3 rounded-xl px-4 py-7 text-left transition-all duration-100 bg-card hover:bg-card/50 border active:scale-[0.98] focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
             : "flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left transition-all duration-100 bg-card hover:bg-card/50 border active:scale-[0.98] focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
         }
-        aria-label={`${pebble.name}, ${time}`}
+        aria-label={t("cardAria", { name: pebble.name, time })}
       >
         {isLarge ? (
           <>
@@ -69,7 +74,7 @@ export function PebbleCard({ pebble, emotion, mark, soulNames, onSelect }: Pebbl
               /* eslint-disable-next-line @next/next/no-img-element -- base64 data URL, next/image optimization not applicable */
               <img
                 src={firstInstant}
-                alt={`Instant photo for ${pebble.name}`}
+                alt={t("instantAlt", { name: pebble.name })}
                 className="max-h-40 w-full rounded-lg object-cover"
               />
             )}
@@ -78,7 +83,7 @@ export function PebbleCard({ pebble, emotion, mark, soulNames, onSelect }: Pebbl
 
             {soulNames.length > 0 && (
               <span className="text-xs text-muted-foreground">
-                <span className="sr-only">With: </span>
+                <span className="sr-only">{t("withPrefix")}</span>
                 {soulNames.join(", ")}
               </span>
             )}
@@ -104,7 +109,7 @@ export function PebbleCard({ pebble, emotion, mark, soulNames, onSelect }: Pebbl
 
                 {soulNames.length > 0 && (
                   <span>
-                    <span className="sr-only">With: </span>
+                    <span className="sr-only">{t("withPrefix")}</span>
                     {soulNames.join(", ")}
                   </span>
                 )}
@@ -115,7 +120,7 @@ export function PebbleCard({ pebble, emotion, mark, soulNames, onSelect }: Pebbl
               /* eslint-disable-next-line @next/next/no-img-element -- base64 data URL, next/image optimization not applicable */
               <img
                 src={firstInstant}
-                alt={`Instant photo for ${pebble.name}`}
+                alt={t("instantAlt", { name: pebble.name })}
                 className="size-8 shrink-0 rounded-md object-cover"
               />
             )}

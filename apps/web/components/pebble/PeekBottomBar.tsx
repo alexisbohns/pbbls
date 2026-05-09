@@ -1,4 +1,7 @@
+"use client"
+
 import { Users, Image as ImageIcon, PenLine } from "lucide-react"
+import { useTranslations } from "next-intl"
 import type { Pebble, Soul } from "@/lib/types"
 
 type PeekBottomBarProps = {
@@ -14,6 +17,7 @@ export function PeekBottomBar({
   onOpenSoulsSheet,
   onTriggerPhotoUpload,
 }: PeekBottomBarProps) {
+  const t = useTranslations("pebble.peek")
   const matchedSouls = pebble.soul_ids
     .map((id) => souls.find((s) => s.id === id))
     .filter((s): s is Soul => s !== undefined)
@@ -39,7 +43,7 @@ export function PeekBottomBar({
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <Users className="size-4" aria-hidden />
-          Souls
+          {t("souls")}
         </button>
       )}
 
@@ -50,7 +54,7 @@ export function PeekBottomBar({
           className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ImageIcon className="size-4" aria-hidden />
-          Picture
+          {t("picture")}
         </button>
       )}
 
@@ -58,10 +62,10 @@ export function PeekBottomBar({
         type="button"
         disabled
         className="inline-flex items-center gap-1.5 text-sm text-muted-foreground opacity-50"
-        aria-label="Write a card"
+        aria-label={t("writeCardAria")}
       >
         <PenLine className="size-4" aria-hidden />
-        Write a card
+        {t("writeCard")}
       </button>
     </footer>
   )

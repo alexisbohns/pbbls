@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect, useCallback } from "react"
+import { useTranslations } from "next-intl"
 import { usePebbles } from "@/lib/data/usePebbles"
 import { useSouls } from "@/lib/data/useSouls"
 import { PebbleTimeline } from "@/components/path/PebbleTimeline"
@@ -15,6 +16,7 @@ export default function PathPage() {
   const { souls, loading: soulsLoading } = useSouls()
   const [selectedPebbleId, setSelectedPebbleId] = useState<string | null>(null)
   const scrollTargetRef = useRef<string | null>(null)
+  const t = useTranslations("path")
 
   const loading = pebblesLoading || soulsLoading
 
@@ -40,7 +42,7 @@ export default function PathPage() {
       <QuickPebbleEditor onPebbleCreated={handlePebbleCreated} />
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <p className="text-sm text-muted-foreground">{t("loading")}</p>
       ) : pebbles.length === 0 ? (
         <PathEmptyState />
       ) : (

@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { CircleUser, CirclePile, Sparkle } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/data/auth-context"
 import { useBounce } from "@/lib/data/useBounce"
 import { useKarma } from "@/lib/data/useKarma"
@@ -28,6 +29,7 @@ export function PathProfileCard() {
   const { user, profile, isAuthenticated, isLoading: authLoading } = useAuth()
   const { bounce, loading: bounceLoading } = useBounce()
   const { karma, loading: karmaLoading } = useKarma()
+  const t = useTranslations("path")
 
   const loading = authLoading || bounceLoading || karmaLoading
 
@@ -37,7 +39,7 @@ export function PathProfileCard() {
     <Link
       href="/profile"
       className="block rounded-xl transition-colors bg-card hover:bg-muted focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none border"
-      aria-label={`${profile.display_name}'s profile`}
+      aria-label={t("profileAria", { name: profile.display_name })}
     >
       <div className="flex gap-2 px-4 py-3 md:flex-col md:space-y-4 p-4 justify-between items-center md:items-stretch">
         <div className="flex items-center md:gap-3">
@@ -51,8 +53,8 @@ export function PathProfileCard() {
         </div>
 
         <div className="flex md:flex-col items-start justify-between gap-3">
-          <StatItem icon={CirclePile} value={bounce} label="bounce" />
-          <StatItem icon={Sparkle} value={karma} label="karma" />
+          <StatItem icon={CirclePile} value={bounce} label={t("stats.bounce")} />
+          <StatItem icon={Sparkle} value={karma} label={t("stats.karma")} />
         </div>
       </div>
     </Link>

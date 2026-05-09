@@ -10,4 +10,11 @@ export {
 export { useLocale } from "./useLocale"
 export { LocaleProvider } from "./LocaleProvider"
 export { useEmotionLocalized, useDomainLocalized } from "./useReferenceCatalog"
-export { formatDate, formatNumber, useFormatDate, useFormatNumber } from "./format"
+export {
+  formatDate,
+  formatNumber,
+  useFormatDate,
+  useFormatNumber,
+  useFormatTime,
+  useFormatPeekDate,
+} from "./format"

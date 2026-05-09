@@ -1,16 +1,26 @@
-import { POSITIVENESS_SIGNS, POSITIVENESS_LABELS } from "@/lib/config"
+"use client"
+
+import { useTranslations } from "next-intl"
+import { POSITIVENESS_SIGNS } from "@/lib/config"
 
 type IntensityDotsProps = {
   intensity: 1 | 2 | 3
   size?: "xs" | "sm"
 }
 
+const POSITIVENESS_KEY: Record<number, "highlight" | "neutral" | "lowlight"> = {
+  [-1]: "lowlight",
+  [0]: "neutral",
+  [1]: "highlight",
+}
+
 export function IntensityDots({ intensity, size = "sm" }: IntensityDotsProps) {
+  const t = useTranslations("pebble.intensity")
   const filled = "●".repeat(intensity)
   const empty = "○".repeat(3 - intensity)
   return (
     <abbr
-      title={`Intensity: ${intensity} of 3`}
+      title={t("title", { value: intensity })}
       className={`tracking-wide no-underline ${size === "xs" ? "text-xs" : "text-sm"}`}
     >
       {filled}
@@ -25,11 +35,13 @@ type PositivenessIndicatorProps = {
 }
 
 export function PositivenessIndicator({ value, size = "sm" }: PositivenessIndicatorProps) {
+  const t = useTranslations("pebble.positiveness")
   const sign = POSITIVENESS_SIGNS[value] ?? "~"
-  const label = POSITIVENESS_LABELS[value] ?? "Neutral"
+  const labelKey = POSITIVENESS_KEY[value] ?? "neutral"
+  const label = t(labelKey)
   return (
     <abbr
-      title={`Positiveness: ${label}`}
+      title={t("title", { label })}
       className={`font-medium no-underline ${size === "xs" ? "text-xs" : "text-sm"}`}
     >
       {sign}

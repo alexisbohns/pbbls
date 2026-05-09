@@ -2,6 +2,7 @@
 
 import { useCallback } from "react"
 import { X } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -20,6 +21,7 @@ type PebblePeekProps = {
 export function PebblePeek({ pebbleId, onClose }: PebblePeekProps) {
   const open = pebbleId !== null
   const id = pebbleId ?? ""
+  const t = useTranslations("pebble")
 
   const { pebble, loading: pebbleLoading, updatePebble } = usePebble(id)
   const { souls, loading: soulsLoading, addSoul } = useSouls()
@@ -80,14 +82,14 @@ export function PebblePeek({ pebbleId, onClose }: PebblePeekProps) {
             )}
             <DialogPrimitive.Close
               render={<Button variant="ghost" size="icon-sm" />}
-              aria-label="Close"
+              aria-label={t("peek.close")}
             >
               <X className="size-4" />
             </DialogPrimitive.Close>
           </div>
 
           {loading ? (
-            <p className="text-sm text-muted-foreground">Loading…</p>
+            <p className="text-sm text-muted-foreground">{t("loading")}</p>
           ) : pebble ? (
             <PebbleDetail
               pebble={pebble}
@@ -101,7 +103,7 @@ export function PebblePeek({ pebbleId, onClose }: PebblePeekProps) {
               onAddSoul={handleAddSoul}
             />
           ) : (
-            <p className="text-sm text-muted-foreground">Pebble not found.</p>
+            <p className="text-sm text-muted-foreground">{t("notFoundInline")}</p>
           )}
         </DialogPrimitive.Popup>
       </DialogPrimitive.Portal>

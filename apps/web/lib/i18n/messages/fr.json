@@ -58,6 +58,58 @@
     "description": "Une erreur inattendue s'est produite. Veuillez réessayer.",
     "retry": "Réessayer"
   },
+  "path": {
+    "loading": "Chargement…",
+    "empty": {
+      "title": "Aucun galet pour l'instant",
+      "description": "Capturez votre premier moment pour commencer à tracer votre chemin.",
+      "cta": "Capturer un galet"
+    },
+    "today": "Aujourd'hui",
+    "yesterday": "Hier",
+    "todayLabel": "Aujourd'hui — {date}",
+    "yesterdayLabel": "Hier — {date}",
+    "profileAria": "Profil de {name}",
+    "stats": {
+      "bounce": "ricochet",
+      "karma": "karma"
+    }
+  },
+  "card": {
+    "free":      { "name": "Libre",          "prompt": "Écrivez ce que vous voulez…" },
+    "feelings":  { "name": "Ressentis",      "prompt": "Qu'est-ce que j'ai ressenti ?" },
+    "thoughts":  { "name": "Pensées",        "prompt": "Qu'est-ce que j'ai pensé ?" },
+    "behaviour": { "name": "Comportement",   "prompt": "Qu'est-ce que j'ai fait ?" }
+  },
+  "pebble": {
+    "loading": "Chargement…",
+    "notFoundTitle": "Galet introuvable",
+    "notFoundInline": "Galet introuvable.",
+    "notFoundDescription": "Ce galet n'existe pas ou a été supprimé.",
+    "backToPath": "← Retour au chemin",
+    "back": "Retour au chemin",
+    "cardAria": "{name}, {time}",
+    "instantAlt": "Photo de l'instant pour {name}",
+    "photoAlt": "Photo du galet",
+    "visualAria": "Galet : {name}, {emotion}, intensité {intensity}",
+    "withPrefix": "Avec : ",
+    "intensity": {
+      "title": "Intensité : {value} sur 3"
+    },
+    "positiveness": {
+      "title": "Positivité : {label}",
+      "highlight": "Temps fort",
+      "neutral": "Neutre",
+      "lowlight": "Creux"
+    },
+    "peek": {
+      "close": "Fermer",
+      "souls": "Âmes",
+      "picture": "Photo",
+      "writeCard": "Écrire une carte",
+      "writeCardAria": "Écrire une carte"
+    }
+  },
   "record": {
     "srTitle": "Capturer l'instant",
     "editorAria": "Éditeur de galet",
