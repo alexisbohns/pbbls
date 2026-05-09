@@ -2,8 +2,10 @@
 
 import { useState, type FormEvent, type KeyboardEvent } from "react"
 import { Pencil, Trash2 } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { PEBBLE_SHAPES } from "@/lib/config"
 import type { Mark } from "@/lib/types"
+import { useFormatDate, useShapeName } from "@/lib/i18n"
 import { GlyphPreview } from "@/components/glyphs/GlyphPreview"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,10 +18,13 @@ type GlyphDetailProps = {
 }
 
 export function GlyphDetail({ mark, onDelete, onUpdateName }: GlyphDetailProps) {
+  const t = useTranslations("glyphs")
+  const tDetail = useTranslations("glyphs.detail")
+  const tCard = useTranslations("glyphs.card")
+  const formatDate = useFormatDate()
   const shape = PEBBLE_SHAPES.find((s) => s.id === mark.shape_id)
-  const created = new Intl.DateTimeFormat(undefined, {
-    dateStyle: "long",
-  }).format(new Date(mark.created_at))
+  const shapeName = useShapeName(shape ?? { slug: "", name: "" })
+  const created = formatDate(mark.created_at, { dateStyle: "long" })
 
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState(mark.name ?? "")
@@ -54,14 +59,14 @@ export function GlyphDetail({ mark, onDelete, onUpdateName }: GlyphDetailProps) 
               value={editValue}
               onChange={(e) => setEditValue(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Name (optional)"
-              aria-label="Glyph name"
+              placeholder={tDetail("namePlaceholder")}
+              aria-label={tDetail("nameAria")}
               autoFocus
               maxLength={80}
               className="text-2xl font-semibold"
             />
             <Button type="submit" size="sm">
-              Save
+              {tDetail("save")}
             </Button>
             <Button
               type="button"
@@ -69,13 +74,13 @@ export function GlyphDetail({ mark, onDelete, onUpdateName }: GlyphDetailProps) 
               size="sm"
               onClick={handleCancel}
             >
-              Cancel
+              {tDetail("cancel")}
             </Button>
           </form>
         ) : (
           <div className="flex items-center gap-2">
             <h1 className="text-2xl font-semibold">
-              {mark.name || "Untitled glyph"}
+              {mark.name || t("untitled")}
             </h1>
             <Button
               variant="ghost"
@@ -84,7 +89,7 @@ export function GlyphDetail({ mark, onDelete, onUpdateName }: GlyphDetailProps) 
                 setEditValue(mark.name ?? "")
                 setIsEditing(true)
               }}
-              aria-label="Edit glyph name"
+              aria-label={tDetail("editAria")}
             >
               <Pencil className="size-3.5" />
             </Button>
@@ -92,11 +97,8 @@ export function GlyphDetail({ mark, onDelete, onUpdateName }: GlyphDetailProps) 
         )}
 
         <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          {shape && <span>{shape.name}</span>}
-          <span aria-label={`${mark.strokes.length} strokes`}>
-            {mark.strokes.length}{" "}
-            {mark.strokes.length === 1 ? "stroke" : "strokes"}
-          </span>
+          {shape && <span>{shapeName}</span>}
+          <span>{tCard("strokeCount", { count: mark.strokes.length })}</span>
           <time dateTime={mark.created_at}>{created}</time>
         </div>
       </header>
@@ -113,12 +115,12 @@ export function GlyphDetail({ mark, onDelete, onUpdateName }: GlyphDetailProps) 
           trigger={
             <Button variant="outline" size="sm">
               <Trash2 className="size-4" aria-hidden="true" />
-              Delete glyph
+              {tDetail("deleteCta")}
             </Button>
           }
-          title="Delete this glyph?"
-          description="This action cannot be undone. The glyph will be permanently removed."
-          confirmLabel="Delete"
+          title={tDetail("deleteTitle")}
+          description={tDetail("deleteDescription")}
+          confirmLabel={tDetail("deleteConfirm")}
           onConfirm={onDelete}
         />
       </div>

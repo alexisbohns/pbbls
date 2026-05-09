@@ -3,6 +3,7 @@
 import { use } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
+import { useTranslations } from "next-intl"
 import { useMark } from "@/lib/data/useMark"
 import { useMarks } from "@/lib/data/useMarks"
 import { GlyphDetail } from "@/components/glyphs/GlyphDetail"
@@ -15,6 +16,8 @@ export default function GlyphDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
+  const t = useTranslations("glyphs")
+  const tDetail = useTranslations("glyphs.detail")
   const { mark, loading } = useMark(id)
   const { removeMark, updateMark } = useMarks()
   const router = useRouter()
@@ -36,12 +39,12 @@ export default function GlyphDetailPage({
           href="/glyphs"
           className="text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
-          &larr; Back to Glyphs
+          {tDetail("back")}
         </Link>
       </nav>
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading…</p>
+        <p className="text-sm text-muted-foreground">{t("loading")}</p>
       ) : mark ? (
         <GlyphDetail
           mark={mark}

@@ -59,6 +59,85 @@
     "retry": "Réessayer",
     "generic": "Une erreur est survenue."
   },
+  "glyphs": {
+    "title": "Glyphes",
+    "loading": "Chargement…",
+    "carveNew": "Graver un glyphe",
+    "untitled": "Glyphe sans nom",
+    "card": {
+      "strokeCount": "{count, plural, one {# trait} other {# traits}}"
+    },
+    "empty": {
+      "title": "Aucun glyphe pour l'instant",
+      "description": "Les glyphes sont des symboles que vous gravez à la surface des galets. Créez le premier.",
+      "cta": "Graver un glyphe"
+    },
+    "detail": {
+      "back": "← Retour aux glyphes",
+      "linkText": "Retour aux glyphes",
+      "namePlaceholder": "Nom (facultatif)",
+      "nameAria": "Nom du glyphe",
+      "editAria": "Modifier le nom",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "deleteCta": "Supprimer le glyphe",
+      "deleteTitle": "Supprimer ce glyphe ?",
+      "deleteDescription": "Cette action est irréversible. Le glyphe sera définitivement retiré.",
+      "deleteConfirm": "Supprimer",
+      "notFoundTitle": "Glyphe introuvable",
+      "notFoundDescription": "Ce glyphe n'existe pas ou a été supprimé."
+    },
+    "picker": {
+      "label": "Glyphes",
+      "empty": "Aucun glyphe pour l'instant. Gravez-en un depuis la page Glyphes.",
+      "fallbackName": "Glyphe {short}"
+    }
+  },
+  "carve": {
+    "back": "← Retour aux glyphes",
+    "title": "Graver un glyphe",
+    "namePlaceholder": "Nom (facultatif)",
+    "nameAria": "Nom du glyphe",
+    "canvasCaption": "Dessinez un symbole sur le galet. Vos traits restent dans le contour de la pierre.",
+    "strokeCountAnnounce": "{count, plural, =0 {Aucun trait} one {# trait gravé} other {# traits gravés}}",
+    "saved": "Glyphe enregistré",
+    "savedNamed": "« {name} » enregistré",
+    "savedAria": "Glyphe enregistré",
+    "newGlyph": "Créer un autre glyphe",
+    "toolbar": {
+      "ariaLabel": "Outils de dessin",
+      "undo": "Annuler le dernier trait",
+      "clear": "Effacer tous les traits",
+      "widthLabel": "Épaisseur du trait",
+      "widthAria": "Trait {label}",
+      "thin": "Fin",
+      "medium": "Moyen",
+      "thick": "Épais",
+      "save": "Enregistrer le glyphe",
+      "saving": "Enregistrement…",
+      "saveAria": "Enregistrer le glyphe"
+    },
+    "stamps": {
+      "legend": "Tampons",
+      "ariaLabel": "Symboles préconçus",
+      "star": "Étoile",
+      "spiral": "Spirale",
+      "wave": "Vague",
+      "cross": "Croix",
+      "circle": "Cercle",
+      "zigzag": "Zigzag",
+      "diamond": "Losange",
+      "heart": "Cœur"
+    }
+  },
+  "shape": {
+    "river-smooth": { "name": "Rivière lisse" },
+    "creek-flat":   { "name": "Ruisseau plat" },
+    "moss-round":   { "name": "Rond mousse" },
+    "canyon-long":  { "name": "Canyon long" },
+    "shore-wide":   { "name": "Rivage large" },
+    "dusk-pebble":  { "name": "Galet du soir" }
+  },
   "landing": {
     "tagline": "Collectionnez vos moments précieux.",
     "exampleAria": "Galets en exemple",

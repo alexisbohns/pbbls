@@ -59,6 +59,85 @@
     "retry": "Try again",
     "generic": "Something went wrong."
   },
+  "glyphs": {
+    "title": "Glyphs",
+    "loading": "Loading…",
+    "carveNew": "Carve new glyph",
+    "untitled": "Untitled glyph",
+    "card": {
+      "strokeCount": "{count, plural, one {# stroke} other {# strokes}}"
+    },
+    "empty": {
+      "title": "No glyphs yet",
+      "description": "Glyphs are symbols you carve on pebble surfaces. Create your first one.",
+      "cta": "Carve a glyph"
+    },
+    "detail": {
+      "back": "← Back to Glyphs",
+      "linkText": "Back to Glyphs",
+      "namePlaceholder": "Name (optional)",
+      "nameAria": "Glyph name",
+      "editAria": "Edit glyph name",
+      "save": "Save",
+      "cancel": "Cancel",
+      "deleteCta": "Delete glyph",
+      "deleteTitle": "Delete this glyph?",
+      "deleteDescription": "This action cannot be undone. The glyph will be permanently removed.",
+      "deleteConfirm": "Delete",
+      "notFoundTitle": "Glyph not found",
+      "notFoundDescription": "This glyph doesn't exist or may have been removed."
+    },
+    "picker": {
+      "label": "Glyphs",
+      "empty": "No glyphs yet. Carve one from the Glyphs page.",
+      "fallbackName": "Glyph {short}"
+    }
+  },
+  "carve": {
+    "back": "← Back to Glyphs",
+    "title": "Carve a glyph",
+    "namePlaceholder": "Name (optional)",
+    "nameAria": "Glyph name",
+    "canvasCaption": "Draw a symbol on the pebble surface. Your strokes are clipped to the stone outline.",
+    "strokeCountAnnounce": "{count, plural, =0 {No strokes drawn} one {# stroke drawn} other {# strokes drawn}}",
+    "saved": "Glyph saved",
+    "savedNamed": "\"{name}\" saved",
+    "savedAria": "Glyph saved",
+    "newGlyph": "Create another glyph",
+    "toolbar": {
+      "ariaLabel": "Drawing tools",
+      "undo": "Undo last stroke",
+      "clear": "Clear all strokes",
+      "widthLabel": "Stroke width",
+      "widthAria": "{label} stroke width",
+      "thin": "Thin",
+      "medium": "Medium",
+      "thick": "Thick",
+      "save": "Save mark",
+      "saving": "Saving…",
+      "saveAria": "Save mark"
+    },
+    "stamps": {
+      "legend": "Stamps",
+      "ariaLabel": "Pre-made stamp symbols",
+      "star": "Star",
+      "spiral": "Spiral",
+      "wave": "Wave",
+      "cross": "Cross",
+      "circle": "Circle",
+      "zigzag": "Zigzag",
+      "diamond": "Diamond",
+      "heart": "Heart"
+    }
+  },
+  "shape": {
+    "river-smooth": { "name": "River Smooth" },
+    "creek-flat":   { "name": "Creek Flat" },
+    "moss-round":   { "name": "Moss Round" },
+    "canyon-long":  { "name": "Canyon Long" },
+    "shore-wide":   { "name": "Shore Wide" },
+    "dusk-pebble":  { "name": "Dusk Pebble" }
+  },
   "landing": {
     "tagline": "Collect meaningful moments.",
     "exampleAria": "Example pebbles",
