@@ -10,7 +10,6 @@ import os
 // swiftlint:disable:next type_body_length
 struct PebbleFormView: View {
     @Binding var draft: PebbleDraft
-    let emotions: [Emotion]
     let domains: [Domain]
     let souls: [SoulWithGlyph]
     let collections: [PebbleCollection]
@@ -37,13 +36,14 @@ struct PebbleFormView: View {
 
     @State private var showPicker = false
     @State private var showValencePicker = false
+    @State private var showEmotionPicker = false
     @State private var selectedGlyph: Glyph?
 
     @Environment(SupabaseService.self) private var supabase
+    @Environment(EmotionPaletteService.self) private var palettes
 
     init(
         draft: Binding<PebbleDraft>,
-        emotions: [Emotion],
         domains: [Domain],
         souls: [SoulWithGlyph],
         collections: [PebbleCollection],
@@ -57,7 +57,6 @@ struct PebbleFormView: View {
         onRemoveExistingSnap: @escaping () -> Void = {}
     ) {
         self._draft = draft
-        self.emotions = emotions
         self.domains = domains
         self.souls = souls
         self.collections = collections
@@ -122,12 +121,40 @@ struct PebbleFormView: View {
             }
 
             Section("Mood") {
-                Picker("Emotion", selection: $draft.emotionId) {
-                    Text("Choose…").tag(UUID?.none)
-                    ForEach(emotions) { emotion in
-                        Text(emotion.localizedName).tag(UUID?.some(emotion.id))
+                Button {
+                    showEmotionPicker = true
+                } label: {
+                    HStack(spacing: 12) {
+                        if let id = draft.emotionId, let row = palettes.byEmotionId[id] {
+                            Text(row.emoji)
+                                .font(.system(size: 28))
+                                .frame(width: 32, height: 32)
+                                .accessibilityHidden(true)
+                        } else {
+                            RoundedRectangle(cornerRadius: 6)
+                                .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [3]))
+                                .frame(width: 32, height: 32)
+                                .foregroundStyle(Color.pebblesMutedForeground)
+                        }
+                        Text("Emotion")
+                            .foregroundStyle(Color.pebblesForeground)
+                        Spacer()
+                        emotionRowLabel
+                            .foregroundStyle(Color.pebblesMutedForeground)
+                        Image(systemName: "chevron.right")
+                            .font(.caption)
+                            .foregroundStyle(.tertiary)
+                            .accessibilityHidden(true)
                     }
                 }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Emotion")
+                .accessibilityValue(
+                    draft.emotionId
+                        .flatMap { palettes.byEmotionId[$0] }
+                        .map { Text(verbatim: $0.localizedName) }
+                        ?? Text("Choose")
+                )
                 .listRowBackground(Color.pebblesListRow)
 
                 Picker("Domain", selection: $draft.domainId) {
@@ -280,7 +307,24 @@ struct PebbleFormView: View {
                 onSelected: { picked in draft.valence = picked }
             )
         }
+        .sheet(isPresented: $showEmotionPicker) {
+            EmotionPickerSheet(
+                currentEmotionId: draft.emotionId,
+                valence: draft.valence,
+                onSelected: { picked in draft.emotionId = picked }
+            )
+        }
         .task(id: draft.glyphId) { await loadSelectedGlyph() }
+    }
+
+    /// Right-hand label on the Emotion row. Returns a `Text` (not a string)
+    /// to avoid double-localization: `localizedName` is already resolved
+    /// against the catalog at runtime, so we wrap it with `Text(verbatim:)`.
+    private var emotionRowLabel: Text {
+        if let id = draft.emotionId, let row = palettes.byEmotionId[id] {
+            return Text(verbatim: row.localizedName)
+        }
+        return Text("Choose…")
     }
 
     private var glyphRowLabel: String {

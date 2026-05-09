@@ -22,7 +22,6 @@ struct EditPebbleSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var draft = PebbleDraft()
-    @State private var emotions: [Emotion] = []
     @State private var domains: [Domain] = []
     @State private var souls: [SoulWithGlyph] = []
     @State private var collections: [PebbleCollection] = []
@@ -120,7 +119,6 @@ struct EditPebbleSheet: View {
         } else {
             PebbleFormView(
                 draft: $draft,
-                emotions: emotions,
                 domains: domains,
                 souls: souls,
                 collections: collections,
@@ -160,12 +158,6 @@ struct EditPebbleSheet: View {
                 .execute()
                 .value
 
-            async let emotionsQuery: [Emotion] = supabase.client
-                .from("emotions")
-                .select("id, slug, name")
-                .order("name")
-                .execute()
-                .value
             async let domainsQuery: [Domain] = supabase.client
                 .from("domains")
                 .select()
@@ -185,10 +177,9 @@ struct EditPebbleSheet: View {
                 .execute()
                 .value
 
-            let (detail, loadedEmotions, loadedDomains, loadedSouls, loadedCollections) =
-                try await (detailQuery, emotionsQuery, domainsQuery, soulsQuery, collectionsQuery)
+            let (detail, loadedDomains, loadedSouls, loadedCollections) =
+                try await (detailQuery, domainsQuery, soulsQuery, collectionsQuery)
 
-            self.emotions = loadedEmotions
             self.domains = loadedDomains
             self.souls = loadedSouls
             self.collections = loadedCollections
