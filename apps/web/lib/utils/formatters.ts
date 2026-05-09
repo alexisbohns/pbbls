@@ -47,3 +47,10 @@ export function pluralize(count: number, singular: string, plural?: string): str
   const word = count === 1 ? singular : (plural ?? `${singular}s`)
   return `${count} ${word}`
 }
+
+/** Day + month + year: "12 May 2026" */
+export const dayMonthYearFormatter = new Intl.DateTimeFormat("en-GB", {
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+})

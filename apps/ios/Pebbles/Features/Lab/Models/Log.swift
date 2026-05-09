@@ -90,7 +90,7 @@ enum LogSpecies: String, Decodable {
 }
 
 enum LogPlatform: String, Decodable {
-    case web, ios, android, all
+    case webapp, ios, android, all
 }
 
 enum LogStatus: String, Decodable {

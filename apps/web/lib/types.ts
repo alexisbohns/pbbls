@@ -74,6 +74,33 @@ export type Mark = {
 }
 
 // ---------------------------------------------------------------------------
+// Lab — product-transparency feed (announcements, changelog, backlog)
+// ---------------------------------------------------------------------------
+
+export type LogSpecies = "announcement" | "feature"
+export type LogStatus = "backlog" | "planned" | "in_progress" | "shipped"
+export type LogPlatform = "web" | "ios" | "android" | "all"
+
+export type Log = {
+  id: string
+  species: LogSpecies
+  platform: LogPlatform
+  status: LogStatus
+  title_en: string
+  title_fr: string | null
+  summary_en: string
+  summary_fr: string | null
+  body_md_en: string | null
+  body_md_fr: string | null
+  cover_image_path: string | null
+  external_url: string | null
+  published: boolean
+  published_at: string | null
+  created_at: string
+  reaction_count: number
+}
+
+// ---------------------------------------------------------------------------
 // Auth
 // ---------------------------------------------------------------------------
 
