@@ -58,6 +58,69 @@
     "description": "Une erreur inattendue s'est produite. Veuillez réessayer.",
     "retry": "Réessayer"
   },
+  "souls": {
+    "title": "Âmes",
+    "loading": "Chargement…",
+    "addAria": "Ajouter une âme",
+    "addPlaceholder": "Nom de la nouvelle âme…",
+    "addNameAria": "Nom de la nouvelle âme",
+    "addCta": "Ajouter",
+    "pebbleCount": "{count, plural, one {# galet} other {# galets}}",
+    "deleteAria": "Supprimer {name}",
+    "deleteTitle": "Supprimer l'âme ?",
+    "deleteDescription": "{name} sera retiré·e de votre répertoire et délié·e de tous les galets. Cette action est irréversible.",
+    "deleteConfirm": "Supprimer",
+    "empty": {
+      "title": "Aucune âme pour l'instant",
+      "description": "Les âmes représentent les personnes de votre vie. Ajoutez-en une pour commencer à suivre vos moments partagés."
+    },
+    "detail": {
+      "back": "← Retour aux âmes",
+      "linkText": "Retour aux âmes",
+      "nameAria": "Nom de l'âme",
+      "editAria": "Modifier le nom",
+      "save": "Enregistrer",
+      "cancel": "Annuler",
+      "noPebbles": "Aucun galet lié à cette âme pour l'instant.",
+      "notFoundTitle": "Âme introuvable",
+      "notFoundDescription": "Cette âme n'existe pas ou a été supprimée."
+    }
+  },
+  "collections": {
+    "title": "Collections",
+    "loading": "Chargement…",
+    "newCta": "Nouvelle",
+    "form": {
+      "newTitle": "Nouvelle collection",
+      "editTitle": "Modifier la collection",
+      "submitCreate": "Créer",
+      "submitSave": "Enregistrer",
+      "cancel": "Annuler",
+      "nameLabel": "Nom",
+      "namePlaceholder": "ex. Gratitudes du matin",
+      "modeLegend": "Mode (facultatif)"
+    },
+    "pebbleCount": "{count, plural, one {# galet} other {# galets}}",
+    "modes": {
+      "stack": "Pile",
+      "pack": "Pack",
+      "track": "Suivi",
+      "ariaLabel": "Mode : {label}"
+    },
+    "empty": {
+      "title": "Aucune collection pour l'instant",
+      "description": "Les collections vous permettent de regrouper les galets par thème, objectif ou période."
+    },
+    "detail": {
+      "back": "← Retour aux collections",
+      "linkText": "Retour aux collections",
+      "editAria": "Modifier la collection",
+      "noPebbles": "Aucun galet dans cette collection pour l'instant.",
+      "removePebbleAria": "Retirer {name} de la collection",
+      "notFoundTitle": "Collection introuvable",
+      "notFoundDescription": "Cette collection n'existe pas ou a été supprimée."
+    }
+  },
   "path": {
     "loading": "Chargement…",
     "empty": {

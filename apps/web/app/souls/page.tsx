@@ -1,6 +1,7 @@
 "use client"
 
 import { useMemo } from "react"
+import { useTranslations } from "next-intl"
 import { useSouls } from "@/lib/data/useSouls"
 import { usePebbles } from "@/lib/data/usePebbles"
 import { AddSoulForm } from "@/components/souls/AddSoulForm"
@@ -13,6 +14,7 @@ import { BackPath } from "@/components/ui/BackPath"
 export default function SoulsPage() {
   const { souls, loading: soulsLoading, addSoul, removeSoul } = useSouls()
   const { pebbles, loading: pebblesLoading } = usePebbles()
+  const t = useTranslations("souls")
 
   const loading = soulsLoading || pebblesLoading
 
@@ -33,12 +35,12 @@ export default function SoulsPage() {
   return (
     <PageLayout sidebar={<><BackPath /><PathProfileCard /></>}>
       <section>
-      <h1 className="mb-6 text-2xl font-semibold">Souls</h1>
+      <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
 
       <AddSoulForm onAdd={handleAdd} />
 
       {loading ? (
-        <p className="text-sm text-muted-foreground">Loading\u2026</p>
+        <p className="text-sm text-muted-foreground">{t("loading")}</p>
       ) : souls.length === 0 ? (
         <SoulsEmptyState />
       ) : (

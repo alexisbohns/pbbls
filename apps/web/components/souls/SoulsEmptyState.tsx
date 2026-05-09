@@ -1,10 +1,9 @@
+"use client"
+
+import { useTranslations } from "next-intl"
 import { EmptyState } from "@/components/layout/EmptyState"
 
 export function SoulsEmptyState() {
-  return (
-    <EmptyState
-      title="No souls yet"
-      description="Souls represent the people in your life. Add one to start tracking shared moments."
-    />
-  )
+  const t = useTranslations("souls.empty")
+  return <EmptyState title={t("title")} description={t("description")} />
 }

@@ -1,12 +1,16 @@
+"use client"
+
+import { useTranslations } from "next-intl"
 import { NotFoundCard } from "@/components/layout/NotFoundCard"
 
 export function CollectionNotFound() {
+  const t = useTranslations("collections.detail")
   return (
     <NotFoundCard
-      title="Collection not found"
-      description="This collection doesn't exist or may have been removed."
+      title={t("notFoundTitle")}
+      description={t("notFoundDescription")}
       href="/collections"
-      linkText="Back to Collections"
+      linkText={t("linkText")}
     />
   )
 }

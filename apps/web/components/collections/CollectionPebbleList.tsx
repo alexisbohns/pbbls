@@ -1,6 +1,7 @@
 "use client"
 
 import { X } from "lucide-react"
+import { useTranslations } from "next-intl"
 import type { Pebble, Soul } from "@/lib/types"
 import { useLookupMaps } from "@/lib/data/useLookupMaps"
 import { PebbleCard } from "@/components/path/PebbleCard"
@@ -18,6 +19,7 @@ export function CollectionPebbleList({
   onRemove,
 }: CollectionPebbleListProps) {
   const { emotionMap, soulMap } = useLookupMaps(souls)
+  const t = useTranslations("collections.detail")
 
   return (
     <ul className="flex flex-col gap-2">
@@ -36,7 +38,7 @@ export function CollectionPebbleList({
             <Button
               variant="ghost"
               size="icon-xs"
-              aria-label={`Remove ${pebble.name} from collection`}
+              aria-label={t("removePebbleAria", { name: pebble.name })}
               onClick={() => onRemove(pebble.id)}
             >
               <X />

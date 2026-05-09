@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react"
 import { Plus } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 
@@ -12,6 +13,7 @@ type AddSoulFormProps = {
 export function AddSoulForm({ onAdd }: AddSoulFormProps) {
   const [name, setName] = useState("")
   const [submitting, setSubmitting] = useState(false)
+  const t = useTranslations("souls")
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -32,8 +34,8 @@ export function AddSoulForm({ onAdd }: AddSoulFormProps) {
       <Input
         value={name}
         onChange={(e) => setName(e.target.value)}
-        placeholder="New soul name…"
-        aria-label="New soul name"
+        placeholder={t("addPlaceholder")}
+        aria-label={t("addNameAria")}
         disabled={submitting}
         className="flex-1"
       />
@@ -41,10 +43,10 @@ export function AddSoulForm({ onAdd }: AddSoulFormProps) {
         type="submit"
         size="sm"
         disabled={!name.trim() || submitting}
-        aria-label="Add soul"
+        aria-label={t("addAria")}
       >
         <Plus className="size-4" />
-        Add
+        {t("addCta")}
       </Button>
     </form>
   )

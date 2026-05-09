@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useCallback } from "react"
+import { useTranslations } from "next-intl"
 import type { Collection } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,7 +15,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
-import { MODE_META } from "@/components/collections/ModeBadge"
+import { MODE_EMOJI, MODE_KEYS } from "@/components/collections/ModeBadge"
 
 type CollectionFormDialogProps = {
   trigger: React.ReactElement
@@ -24,11 +25,6 @@ type CollectionFormDialogProps = {
   initialMode?: Collection["mode"]
   onSubmit: (data: { name: string; mode?: Collection["mode"] }) => void
 }
-
-const MODES = Object.entries(MODE_META) as [
-  NonNullable<Collection["mode"]>,
-  { emoji: string; label: string },
-][]
 
 export function CollectionFormDialog({
   trigger,
@@ -41,6 +37,8 @@ export function CollectionFormDialog({
   const [open, setOpen] = useState(false)
   const [name, setName] = useState(initialName)
   const [mode, setMode] = useState<Collection["mode"]>(initialMode)
+  const t = useTranslations("collections.form")
+  const tModes = useTranslations("collections.modes")
 
   const resetForm = useCallback(() => {
     setName(initialName)
@@ -75,11 +73,11 @@ export function CollectionFormDialog({
         <div className="grid gap-4">
           <div className="grid gap-1.5">
             <label htmlFor="collection-name" className="text-sm font-medium">
-              Name
+              {t("nameLabel")}
             </label>
             <Input
               id="collection-name"
-              placeholder="e.g. Morning gratitudes"
+              placeholder={t("namePlaceholder")}
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => {
@@ -90,9 +88,9 @@ export function CollectionFormDialog({
           </div>
 
           <fieldset className="grid gap-1.5">
-            <legend className="text-sm font-medium">Mode (optional)</legend>
+            <legend className="text-sm font-medium">{t("modeLegend")}</legend>
             <div className="flex gap-2">
-              {MODES.map(([key, meta]) => (
+              {MODE_KEYS.map((key) => (
                 <Button
                   key={key}
                   type="button"
@@ -101,7 +99,7 @@ export function CollectionFormDialog({
                   onClick={() => setMode(mode === key ? undefined : key)}
                   aria-pressed={mode === key}
                 >
-                  <span aria-hidden="true">{meta.emoji}</span> {meta.label}
+                  <span aria-hidden="true">{MODE_EMOJI[key]}</span> {tModes(key)}
                 </Button>
               ))}
             </div>
@@ -109,7 +107,7 @@ export function CollectionFormDialog({
         </div>
 
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
           <AlertDialogAction disabled={!canSubmit} onClick={handleSubmit}>
             {submitLabel}
           </AlertDialogAction>

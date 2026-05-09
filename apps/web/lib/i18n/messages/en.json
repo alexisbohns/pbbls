@@ -58,6 +58,69 @@
     "description": "An unexpected error occurred. Please try again.",
     "retry": "Try again"
   },
+  "souls": {
+    "title": "Souls",
+    "loading": "Loading…",
+    "addAria": "Add soul",
+    "addPlaceholder": "New soul name…",
+    "addNameAria": "New soul name",
+    "addCta": "Add",
+    "pebbleCount": "{count, plural, one {# pebble} other {# pebbles}}",
+    "deleteAria": "Delete {name}",
+    "deleteTitle": "Delete soul?",
+    "deleteDescription": "This will remove {name} from your directory and unlink them from all pebbles. This cannot be undone.",
+    "deleteConfirm": "Delete",
+    "empty": {
+      "title": "No souls yet",
+      "description": "Souls represent the people in your life. Add one to start tracking shared moments."
+    },
+    "detail": {
+      "back": "← Back to Souls",
+      "linkText": "Back to Souls",
+      "nameAria": "Soul name",
+      "editAria": "Edit soul name",
+      "save": "Save",
+      "cancel": "Cancel",
+      "noPebbles": "No pebbles linked to this soul yet.",
+      "notFoundTitle": "Soul not found",
+      "notFoundDescription": "This soul doesn't exist or may have been removed."
+    }
+  },
+  "collections": {
+    "title": "Collections",
+    "loading": "Loading…",
+    "newCta": "New",
+    "form": {
+      "newTitle": "New collection",
+      "editTitle": "Edit collection",
+      "submitCreate": "Create",
+      "submitSave": "Save",
+      "cancel": "Cancel",
+      "nameLabel": "Name",
+      "namePlaceholder": "e.g. Morning gratitudes",
+      "modeLegend": "Mode (optional)"
+    },
+    "pebbleCount": "{count, plural, one {# pebble} other {# pebbles}}",
+    "modes": {
+      "stack": "Stack",
+      "pack": "Pack",
+      "track": "Track",
+      "ariaLabel": "Mode: {label}"
+    },
+    "empty": {
+      "title": "No collections yet",
+      "description": "Collections let you group pebbles by theme, goal, or time period."
+    },
+    "detail": {
+      "back": "← Back to Collections",
+      "linkText": "Back to Collections",
+      "editAria": "Edit collection",
+      "noPebbles": "No pebbles in this collection yet.",
+      "removePebbleAria": "Remove {name} from collection",
+      "notFoundTitle": "Collection not found",
+      "notFoundDescription": "This collection doesn't exist or may have been removed."
+    }
+  },
   "path": {
     "loading": "Loading…",
     "empty": {

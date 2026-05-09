@@ -2,10 +2,10 @@
 
 import { useState, type FormEvent, type KeyboardEvent } from "react"
 import { Pencil } from "lucide-react"
+import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { Soul } from "@/lib/types"
-import { pluralize } from "@/lib/utils/formatters"
 
 type SoulDetailHeaderProps = {
   soul: Soul
@@ -20,6 +20,8 @@ export function SoulDetailHeader({
 }: SoulDetailHeaderProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [editValue, setEditValue] = useState(soul.name)
+  const t = useTranslations("souls")
+  const tDetail = useTranslations("souls.detail")
 
   const handleSave = async (e?: FormEvent) => {
     e?.preventDefault()
@@ -50,12 +52,12 @@ export function SoulDetailHeader({
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            aria-label="Soul name"
+            aria-label={tDetail("nameAria")}
             autoFocus
             className="text-2xl font-semibold"
           />
           <Button type="submit" size="sm" disabled={!editValue.trim()}>
-            Save
+            {tDetail("save")}
           </Button>
           <Button
             type="button"
@@ -63,7 +65,7 @@ export function SoulDetailHeader({
             size="sm"
             onClick={handleCancel}
           >
-            Cancel
+            {tDetail("cancel")}
           </Button>
         </form>
       ) : (
@@ -76,7 +78,7 @@ export function SoulDetailHeader({
               setEditValue(soul.name)
               setIsEditing(true)
             }}
-            aria-label="Edit soul name"
+            aria-label={tDetail("editAria")}
           >
             <Pencil className="size-3.5" />
           </Button>
@@ -84,7 +86,7 @@ export function SoulDetailHeader({
       )}
 
       <p className="mt-2 text-sm text-muted-foreground">
-        {pluralize(pebbleCount, "pebble")}
+        {t("pebbleCount", { count: pebbleCount })}
       </p>
     </header>
   )
