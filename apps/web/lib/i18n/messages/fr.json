@@ -58,6 +58,91 @@
     "description": "Une erreur inattendue s'est produite. Veuillez réessayer.",
     "retry": "Réessayer"
   },
+  "record": {
+    "srTitle": "Capturer l'instant",
+    "editorAria": "Éditeur de galet",
+    "namePlaceholder": "Que s'est-il passé ?",
+    "descriptionPlaceholder": "Qu'est-ce qui rendait ça génial ?",
+    "now": "Maintenant",
+    "save": "Enregistrer le galet",
+    "domain": {
+      "label": "Domaine",
+      "pickerLabel": "Domaines",
+      "pickerAria": "Domaines de vie",
+      "pickAria": "Choisir des domaines",
+      "selectedAria": "Domaines : {names}"
+    },
+    "emotion": {
+      "label": "Émotion",
+      "pickAria": "Choisir une émotion",
+      "selectedAria": "Émotion : {name}",
+      "searchPlaceholder": "Rechercher une émotion…",
+      "empty": "Aucune émotion trouvée"
+    },
+    "collection": {
+      "label": "Collection",
+      "pickAria": "Choisir des collections",
+      "selectedAria": "Collections : {names}",
+      "tilePickAria": "Ajouter à une collection",
+      "tileSelectedAria": "{count, plural, one {# collection sélectionnée} other {# collections sélectionnées}}",
+      "empty": "Aucune collection pour l'instant"
+    },
+    "souls": {
+      "label": "Âmes",
+      "title": "Âmes",
+      "addAria": "Ajouter des âmes",
+      "selectedAria": "{count, plural, one {# âme sélectionnée} other {# âmes sélectionnées}}",
+      "selectedListAria": "Âmes sélectionnées",
+      "removeAria": "Retirer {name}",
+      "searchPlaceholder": "Rechercher une âme…",
+      "searchOrAddPlaceholder": "Rechercher ou ajouter une âme…",
+      "searchOrAddLabel": "Rechercher ou ajouter une âme",
+      "empty": "Aucune âme trouvée",
+      "addNew": "Ajouter « {name} »",
+      "adding": "Ajout…",
+      "found": "{count, plural, one {# âme trouvée} other {# âmes trouvées}}",
+      "addHint": ", appuyez sur Entrée pour ajouter « {name} »",
+      "done": "Terminé"
+    },
+    "glyph": {
+      "title": "Glyphe",
+      "addAria": "Ajouter un glyphe",
+      "changeAria": "Changer de glyphe"
+    },
+    "photo": {
+      "addAria": "Ajouter une photo",
+      "removeAria": "Retirer la photo",
+      "alt": "Photo téléversée"
+    },
+    "visibility": {
+      "private": "Privé",
+      "public": "Public",
+      "ariaPrivate": "Visibilité : privé",
+      "ariaPublic": "Visibilité : public"
+    },
+    "intensity": {
+      "ariaTitle": "Intensité et valence",
+      "ariaSelected": "Intensité : {intensity}, Valence : {valence}",
+      "small": "S",
+      "medium": "M",
+      "large": "L"
+    },
+    "valence": {
+      "highlight": "TEMPS FORT",
+      "neutral": "NEUTRE",
+      "lowlight": "CREUX"
+    },
+    "date": {
+      "title": "Quand",
+      "now": "Maintenant",
+      "cancel": "Annuler",
+      "done": "Terminé",
+      "groupAria": "Heure",
+      "subtract15": "Retirer 15 minutes",
+      "add15": "Ajouter 15 minutes",
+      "selectTime": "Sélectionner l'heure"
+    }
+  },
   "locale": {
     "switcher": "Langue",
     "en": "English",

@@ -58,6 +58,91 @@
     "description": "An unexpected error occurred. Please try again.",
     "retry": "Try again"
   },
+  "record": {
+    "srTitle": "Record a pebble",
+    "editorAria": "Pebble editor",
+    "namePlaceholder": "What happened?",
+    "descriptionPlaceholder": "What was that awesome?",
+    "now": "Now",
+    "save": "Save pebble",
+    "domain": {
+      "label": "Domain",
+      "pickerLabel": "Domains",
+      "pickerAria": "Life domains",
+      "pickAria": "Pick domains",
+      "selectedAria": "Domains: {names}"
+    },
+    "emotion": {
+      "label": "Emotion",
+      "pickAria": "Pick emotion",
+      "selectedAria": "Emotion: {name}",
+      "searchPlaceholder": "Search emotions…",
+      "empty": "No emotions found"
+    },
+    "collection": {
+      "label": "Collection",
+      "pickAria": "Pick collections",
+      "selectedAria": "Collections: {names}",
+      "tilePickAria": "Add to collection",
+      "tileSelectedAria": "{count, plural, one {# collection selected} other {# collections selected}}",
+      "empty": "No collections yet"
+    },
+    "souls": {
+      "label": "Souls",
+      "title": "Souls",
+      "addAria": "Add souls",
+      "selectedAria": "{count, plural, one {# soul selected} other {# souls selected}}",
+      "selectedListAria": "Selected souls",
+      "removeAria": "Remove {name}",
+      "searchPlaceholder": "Search souls…",
+      "searchOrAddPlaceholder": "Search or add a soul…",
+      "searchOrAddLabel": "Search or add a soul",
+      "empty": "No souls found",
+      "addNew": "Add \"{name}\"",
+      "adding": "Adding…",
+      "found": "{count, plural, one {# soul} other {# souls}} found",
+      "addHint": ", type Enter to add \"{name}\"",
+      "done": "Done"
+    },
+    "glyph": {
+      "title": "Glyph",
+      "addAria": "Add glyph",
+      "changeAria": "Change glyph"
+    },
+    "photo": {
+      "addAria": "Add photo",
+      "removeAria": "Remove photo",
+      "alt": "Uploaded photo"
+    },
+    "visibility": {
+      "private": "Private",
+      "public": "Public",
+      "ariaPrivate": "Visibility: private",
+      "ariaPublic": "Visibility: public"
+    },
+    "intensity": {
+      "ariaTitle": "Intensity and valence",
+      "ariaSelected": "Intensity: {intensity}, Valence: {valence}",
+      "small": "S",
+      "medium": "M",
+      "large": "L"
+    },
+    "valence": {
+      "highlight": "HIGHLIGHT",
+      "neutral": "NEUTRAL",
+      "lowlight": "LOWLIGHT"
+    },
+    "date": {
+      "title": "When",
+      "now": "Now",
+      "cancel": "Cancel",
+      "done": "Done",
+      "groupAria": "Time",
+      "subtract15": "Subtract 15 minutes",
+      "add15": "Add 15 minutes",
+      "selectTime": "Select time"
+    }
+  },
   "locale": {
     "switcher": "Language",
     "en": "English",
