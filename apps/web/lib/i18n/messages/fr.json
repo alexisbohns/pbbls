@@ -346,6 +346,7 @@
     "yesterday": "Hier",
     "todayLabel": "Aujourd'hui — {date}",
     "yesterdayLabel": "Hier — {date}",
+    "weekLabel": "Semaine {week}",
     "profileAria": "Profil de {name}",
     "stats": {
       "bounce": "ricochet",

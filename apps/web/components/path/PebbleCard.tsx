@@ -46,7 +46,7 @@ export function PebbleCard({ pebble, emotion, mark, soulNames, onSelect }: Pebbl
         className={
           isLarge
             ? "flex w-full flex-col items-center gap-3 rounded-xl px-4 py-7 text-left transition-all duration-100 bg-card hover:bg-card/50 border active:scale-[0.98] focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
-            : "flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left transition-all duration-100 bg-card hover:bg-card/50 border active:scale-[0.98] focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+            : "flex w-full items-center gap-3 rounded-xl p-3 text-left transition-all duration-100 bg-card hover:bg-card/50 border active:scale-[0.98] focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
         }
         aria-label={t("cardAria", { name: pebble.name, time })}
       >

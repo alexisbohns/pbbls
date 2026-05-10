@@ -523,6 +523,18 @@
   height: 100%;
 }
 
+/* Path row palette tinting: text colour follows the row's emotion-category
+ * palette via two CSS custom properties set inline on the button root.
+ * The dark-mode swap is a pure CSS cascade so SSR + CSR agree without a
+ * `useTheme()` round-trip during hydration. */
+.path-row .path-row-name {
+  color: var(--path-row-name-light);
+}
+
+.dark .path-row .path-row-name {
+  color: var(--path-row-name-dark);
+}
+
 .prose {
   @apply flex flex-col gap-4;
 
