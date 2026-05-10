@@ -1,5 +1,4 @@
 import SwiftUI
-import os
 
 /// Discriminator for which explainer sheet is currently presented.
 /// Driving sheets by an optional enum is the idiomatic SwiftUI pattern —
@@ -12,13 +11,10 @@ private enum ProfileSheet: String, Identifiable {
 
 struct ProfileView: View {
     @Environment(SupabaseService.self) private var supabase
+    @Environment(PathStatsService.self) private var stats
 
-    @State private var karma: KarmaSummary?
-    @State private var bounce: BounceSummary?
     @State private var presentedSheet: ProfileSheet?
     @State private var presentedLegalDoc: LegalDoc?
-
-    private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile")
 
     var body: some View {
         NavigationStack {
@@ -27,7 +23,7 @@ struct ProfileView: View {
                     ProfileStatRow(
                         title: "Karma",
                         systemImage: "sparkles",
-                        value: karma?.totalKarma
+                        value: stats.karma
                     ) {
                         presentedSheet = .karma
                     }
@@ -35,7 +31,7 @@ struct ProfileView: View {
                     ProfileStatRow(
                         title: "Bounce",
                         systemImage: "arrow.up.right",
-                        value: bounce?.bounceLevel
+                        value: stats.bounce
                     ) {
                         presentedSheet = .bounce
                     }
@@ -101,31 +97,7 @@ struct ProfileView: View {
     }
 
     private func loadStats() async {
-        async let karmaResult: KarmaSummary = supabase.client
-            .from("v_karma_summary")
-            .select("total_karma, pebbles_count")
-            .single()
-            .execute()
-            .value
-
-        async let bounceResult: BounceSummary = supabase.client
-            .from("v_bounce")
-            .select("bounce_level, active_days")
-            .single()
-            .execute()
-            .value
-
-        do {
-            self.karma = try await karmaResult
-        } catch {
-            logger.error("karma fetch failed: \(error.localizedDescription, privacy: .private)")
-        }
-
-        do {
-            self.bounce = try await bounceResult
-        } catch {
-            logger.error("bounce fetch failed: \(error.localizedDescription, privacy: .private)")
-        }
+        await stats.load()
     }
 }
 
