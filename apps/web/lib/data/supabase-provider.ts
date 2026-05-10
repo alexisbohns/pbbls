@@ -98,12 +98,53 @@ export class SupabaseProvider implements DataProvider {
       })
     }
 
+    // Snaps are stored in the private `pebbles-media` bucket as
+    // `{storage_path}/original.jpg` (+ `…/thumb.jpg`); the view only carries
+    // the prefix. Collect every original.jpg path across all pebbles, mint
+    // signed URLs in a single round-trip (mirrors iOS's 1 h TTL in
+    // PebbleSnapRepository), and hand the resulting URLs back to each pebble
+    // in `sort_order`.
+    type RawSnap = { id: string; storage_path: string; sort_order: number }
+    const rawSnapsByPebble = new Map<string, RawSnap[]>()
+    for (const row of pebblesRes.data ?? []) {
+      const r = row as Record<string, unknown>
+      const snaps = (r.snaps as RawSnap[] | undefined) ?? []
+      if (snaps.length > 0) rawSnapsByPebble.set(r.id as string, snaps)
+    }
+
+    const originalPaths: string[] = []
+    for (const snaps of rawSnapsByPebble.values()) {
+      for (const s of snaps) originalPaths.push(`${s.storage_path}/original.jpg`)
+    }
+
+    const signedUrlByPath = new Map<string, string>()
+    if (originalPaths.length > 0) {
+      const { data, error } = await this.supabase.storage
+        .from("pebbles-media")
+        .createSignedUrls(originalPaths, 3600)
+      if (error) {
+        console.warn("[pebbles] failed to sign snap URLs", error)
+      } else {
+        for (const entry of data ?? []) {
+          if (entry.signedUrl && entry.path) {
+            signedUrlByPath.set(entry.path, entry.signedUrl)
+          }
+        }
+      }
+    }
+
     const pebbles: Pebble[] = (pebblesRes.data ?? []).map((row: Record<string, unknown>) => {
       const id = row.id as string
       const render = renderById.get(id) ?? {
         render_svg: null,
         render_version: null,
       }
+      const snaps = rawSnapsByPebble.get(id) ?? []
+      const instants = snaps
+        .slice()
+        .sort((a, b) => a.sort_order - b.sort_order)
+        .map((s) => signedUrlByPath.get(`${s.storage_path}/original.jpg`))
+        .filter((url): url is string => typeof url === "string")
       return {
         id,
         name: row.name as string,
@@ -116,7 +157,7 @@ export class SupabaseProvider implements DataProvider {
         soul_ids: ((row.souls as Array<{ id: string }>) ?? []).map((s) => s.id),
         domain_ids: ((row.domains as Array<{ id: string }>) ?? []).map((d) => d.id),
         mark_id: (row.glyph_id as string) ?? undefined,
-        instants: [],
+        instants,
         cards: ((row.cards as Array<{ species_id: string; value: string }>) ?? []).map((c) => ({
           species_id: c.species_id,
           value: c.value,
