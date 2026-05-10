@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useCallback, useRef, type CSSProperties } from "react"
+import { useState, useCallback, useRef } from "react"
 import { Lock, X } from "lucide-react"
 import { useTranslations } from "next-intl"
-import type { Pebble, Soul, Collection, Mark } from "@/lib/types"
-import type { UpdatePebbleInput, UpdateCollectionInput } from "@/lib/data/data-provider"
+import type { Pebble, PebbleSnap, Soul, Collection, Mark } from "@/lib/types"
+import type { UpdatePebbleInput } from "@/lib/data/data-provider"
 import { useFormatPeekDate } from "@/lib/i18n"
 import { useEmotionPalettes } from "@/lib/data/useEmotionPalettes"
 import { PebbleVisual } from "@/components/pebble/PebbleVisual"
@@ -18,18 +18,16 @@ import { PebbleDetailAddToolbar } from "@/components/pebble/PebbleDetailAddToolb
 import { Sheet } from "@/components/ui/sheet"
 import { ValencePickerBody } from "@/components/record/ValenceIntensityGrid"
 import { SoulsSheet } from "@/components/record/SoulsSheet"
-import { compressImage } from "@/lib/utils/image-compress"
 import { cn } from "@/lib/utils"
 
 type PebbleDetailProps = {
   pebble: Pebble
   souls: Soul[]
   collections: Collection[]
-  allCollections: Collection[]
   marks: Mark[]
   mark: Mark | undefined
   onUpdatePebble: (input: UpdatePebbleInput) => Promise<Pebble>
-  onUpdateCollection: (id: string, input: UpdateCollectionInput) => Promise<Collection>
+  onUploadSnap: (file: File) => Promise<PebbleSnap>
   onAddSoul: (name: string) => Promise<void>
   onClose?: () => void
 }
@@ -38,11 +36,10 @@ export function PebbleDetail({
   pebble,
   souls,
   collections,
-  allCollections,
   marks,
   mark,
   onUpdatePebble,
-  onUpdateCollection,
+  onUploadSnap,
   onAddSoul,
   onClose,
 }: PebbleDetailProps) {
@@ -61,10 +58,8 @@ export function PebbleDetail({
     .filter((s): s is Soul => s !== undefined)
   const snap = pebble.instants[0]
   const hasSouls = matchedSouls.length > 0
-  const hasCollection = collections.length > 0
+  const hasCollection = pebble.collection_ids.length > 0
   const hasPicture = !!snap
-
-  const linkedCollectionIds = collections.map((c) => c.id)
 
   const handleEmotionChange = useCallback(
     (id: string) => {
@@ -80,38 +75,18 @@ export function PebbleDetail({
     [onUpdatePebble],
   )
 
-  // Collection membership is stored on the collection side, so a toggle on the
-  // pebble fans out to one updateCollection per changed link.
   const handleCollectionChange = useCallback(
     (newIds: string[]) => {
-      const added = newIds.filter((id) => !linkedCollectionIds.includes(id))
-      const removed = linkedCollectionIds.filter((id) => !newIds.includes(id))
-
-      for (const collId of added) {
-        const coll = allCollections.find((c) => c.id === collId)
-        if (coll) {
-          void onUpdateCollection(collId, {
-            pebble_ids: [...coll.pebble_ids, pebble.id],
-          })
-        }
-      }
-      for (const collId of removed) {
-        const coll = allCollections.find((c) => c.id === collId)
-        if (coll) {
-          void onUpdateCollection(collId, {
-            pebble_ids: coll.pebble_ids.filter((pid) => pid !== pebble.id),
-          })
-        }
-      }
+      void onUpdatePebble({ collection_ids: newIds })
     },
-    [linkedCollectionIds, allCollections, pebble.id, onUpdateCollection],
+    [onUpdatePebble],
   )
 
   const handleAddCollection = useCallback(
     (id: string) => {
-      handleCollectionChange([...linkedCollectionIds, id])
+      void onUpdatePebble({ collection_ids: [...pebble.collection_ids, id] })
     },
-    [handleCollectionChange, linkedCollectionIds],
+    [onUpdatePebble, pebble.collection_ids],
   )
 
   const handleSoulToggle = useCallback(
@@ -128,21 +103,26 @@ export function PebbleDetail({
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const files = e.target.files
       if (!files || files.length === 0) return
-      const compressed = await compressImage(files[0])
-      void onUpdatePebble({ instants: [compressed] })
+      try {
+        const uploaded = await onUploadSnap(files[0])
+        await onUpdatePebble({ snaps: [uploaded] })
+      } catch (err) {
+        console.error("[pebble-detail] snap upload failed", err)
+      } finally {
+        // Reset so picking the same file twice still fires onChange.
+        e.target.value = ""
+      }
     },
-    [onUpdatePebble],
+    [onUploadSnap, onUpdatePebble],
   )
 
   // Emotion palette drives the boxed pebble overlay when a snap is shown.
-  // Secondary as background, light as stroke — mirrors iOS PebbleReadBanner.
-  const overlayStyle: CSSProperties | undefined = palette
-    ? ({
-        backgroundColor: palette.secondary_color,
-        ["--pebble-stroke-light"]: palette.light_color,
-        ["--pebble-stroke-dark"]: palette.light_color,
-      } as CSSProperties)
-    : undefined
+  // Secondary as background; pebble stroke is forced to `light_color` via the
+  // PebbleVisual override so the pebble reads against the tinted box in dark
+  // mode (where the default stroke is `secondary_color` — same hue as the
+  // box).
+  const overlayBackground = palette?.secondary_color
+  const overlayStroke = palette?.light_color
 
   return (
     <article>
@@ -189,17 +169,18 @@ export function PebbleDetail({
               <img
                 src={snap}
                 alt={t("photoAlt")}
-                className="aspect-square w-full rounded-2xl object-cover"
+                className="aspect-square w-full rounded-2xl object-cover scale-90 -rotate-4"
               />
               <span
-                className="absolute -right-4 -top-4 grid size-[100px] place-items-center rounded-2xl shadow-md"
-                style={overlayStyle}
+                className="absolute -right-4 -top-4 grid size-[100px] place-items-center rounded-2xl shadow-md rotate-7"
+                style={overlayBackground ? { backgroundColor: overlayBackground } : undefined}
               >
                 <PebbleVisual
                   pebble={pebble}
                   mark={mark}
                   tier="detail"
                   className="size-[72px]"
+                  strokeOverride={overlayStroke}
                 />
               </span>
             </div>
@@ -245,9 +226,9 @@ export function PebbleDetail({
         <DomainTile value={pebble.domain_ids} onChange={handleDomainChange} />
         {hasCollection && (
           <CollectionTile
-            value={linkedCollectionIds}
+            value={pebble.collection_ids}
             onChange={handleCollectionChange}
-            collections={allCollections}
+            collections={collections}
           />
         )}
       </div>
@@ -276,7 +257,7 @@ export function PebbleDetail({
           showSoul={!hasSouls}
           showStack={!hasCollection}
           showPicture={!hasPicture}
-          collections={allCollections}
+          collections={collections}
           onAddCollection={handleAddCollection}
           onOpenSoulsSheet={() => setSoulsOpen(true)}
           onTriggerPhotoUpload={() => fileInputRef.current?.click()}

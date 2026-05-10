@@ -52,7 +52,7 @@ lib/
   data/           → DataProvider interface, SupabaseProvider implementation, data hooks (usePebbles, useSouls, useCollections, useMarks, useKarma, useBounce, etc.)
   hooks/          → Non-data hooks: UI logic, interaction, locale (useStepNavigation, useHaptics, useCombobox*, usePebbleVisual, etc.)
   engine/         → Glyph generation engine (rendering, templates, params)
-  utils/          → Utility functions (formatters, group-pebbles-by-date, image-compress, simplify-path)
+  utils/          → Utility functions (formatters, group-pebbles-by-date, process-pebble-image, simplify-path)
   seed/           → Seed/fixture data for development
   supabase/       → Supabase client initialization (browser + server)
 docs/             → Documentation content (markdown pages with i18n, Arkaik architecture bundle)

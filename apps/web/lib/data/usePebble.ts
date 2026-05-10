@@ -2,7 +2,7 @@
 
 import { useDataProvider } from "@/lib/data/provider-context"
 import type { UpdatePebbleInput } from "@/lib/data/data-provider"
-import type { Pebble } from "@/lib/types"
+import type { Pebble, PebbleSnap } from "@/lib/types"
 
 export function usePebble(id: string) {
   const { provider, store, setStore, loading } = useDataProvider()
@@ -20,9 +20,22 @@ export function usePebble(id: string) {
     return updated
   }
 
+  const uploadSnap = async (file: File): Promise<PebbleSnap> => {
+    if (!provider) throw new Error("Not authenticated")
+    return provider.uploadSnap(file)
+  }
+
+  const deletePebbleMedia = async (snapId: string): Promise<void> => {
+    if (!provider) throw new Error("Not authenticated")
+    await provider.deletePebbleMedia(snapId)
+    setStore(provider.getStore())
+  }
+
   return {
     pebble,
     loading,
     updatePebble,
+    uploadSnap,
+    deletePebbleMedia,
   }
 }

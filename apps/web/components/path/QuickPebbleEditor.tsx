@@ -10,6 +10,7 @@ import {
 } from "lucide-react"
 import { motion, useReducedMotion } from "framer-motion"
 import { useTranslations } from "next-intl"
+import type { PebbleSnap } from "@/lib/types"
 import { useFormatDate } from "@/lib/i18n"
 import { usePebbles } from "@/lib/data/usePebbles"
 import { usePebblesCount } from "@/lib/data/usePebblesCount"
@@ -18,7 +19,6 @@ import { todayLocal } from "@/lib/data/bounce-levels"
 import { useSouls } from "@/lib/data/useSouls"
 import { useCollections } from "@/lib/data/useCollections"
 import { useMarks } from "@/lib/data/useMarks"
-import { compressImage } from "@/lib/utils/image-compress"
 import { Button } from "@/components/ui/button"
 import { ValenceIntensityGrid } from "@/components/record/ValenceIntensityGrid"
 import { CustomizationTile } from "@/components/record/CustomizationTile"
@@ -45,9 +45,9 @@ function isNow(dateStr: string): boolean {
 }
 
 export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
-  const { addPebble } = usePebbles()
+  const { addPebble, uploadSnap } = usePebbles()
   const { souls, addSoul } = useSouls()
-  const { collections, updateCollection } = useCollections()
+  const { collections } = useCollections()
   const { marks } = useMarks()
   const { pebblesCount, loading: countLoading } = usePebblesCount()
   const { bounceWindow, loading: bounceLoading } = useBounce()
@@ -75,7 +75,14 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
   const [soulIds, setSoulIds] = useState<string[]>([])
   const [markId, setMarkId] = useState<string | undefined>(undefined)
   const [collectionIds, setCollectionIds] = useState<string[]>([])
-  const [instant, setInstant] = useState<string | undefined>(undefined)
+  // Snap upload state: `pendingSnap` is the uploaded descriptor we'll send in
+  // the create payload; `snapPreview` is an object URL for in-form preview
+  // (revoked on replace/unmount). Re-picking a photo leaves the previous
+  // snap's storage files as orphans — same as iOS CreatePebbleSheet when the
+  // sheet is dismissed without saving; the server-side sweep handles them.
+  const [pendingSnap, setPendingSnap] = useState<PebbleSnap | undefined>(undefined)
+  const [snapPreview, setSnapPreview] = useState<string | undefined>(undefined)
+  const [snapUploading, setSnapUploading] = useState(false)
   const [visibility, setVisibility] = useState<"private" | "public">("private")
   const [saving, setSaving] = useState(false)
 
@@ -117,12 +124,23 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
     setSoulIds([])
     setMarkId(undefined)
     setCollectionIds([])
-    setInstant(undefined)
+    setPendingSnap(undefined)
+    setSnapPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev)
+      return undefined
+    })
     setVisibility("private")
   }, [])
 
+  // Revoke any outstanding object URL on unmount.
+  useEffect(() => {
+    return () => {
+      if (snapPreview) URL.revokeObjectURL(snapPreview)
+    }
+  }, [snapPreview])
+
   const handleSubmit = useCallback(async () => {
-    if (!name.trim() || saving) return
+    if (!name.trim() || saving || snapUploading) return
     setSaving(true)
 
     try {
@@ -138,22 +156,13 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
         emotion_id: emotionId || "serenity",
         soul_ids: soulIds,
         domain_ids: domainIds,
+        collection_ids: collectionIds,
         mark_id: markId,
-        instants: instant ? [instant] : [],
+        snaps: pendingSnap ? [pendingSnap] : [],
         cards: [],
       }
 
       const pebble = await addPebble(input)
-
-      // Add pebble to selected collections
-      for (const collId of collectionIds) {
-        const coll = collections.find((c) => c.id === collId)
-        if (coll) {
-          await updateCollection(collId, {
-            pebble_ids: [...coll.pebble_ids, pebble.id],
-          })
-        }
-      }
 
       resetForm()
       setExpanded(false)
@@ -164,8 +173,8 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
     }
   }, [
     name, description, happenedAt, intensity, valence, visibility,
-    emotionId, soulIds, domainIds, markId, collectionIds, instant,
-    saving, addPebble, collections, updateCollection, resetForm, onPebbleCreated,
+    emotionId, soulIds, domainIds, markId, collectionIds, pendingSnap,
+    saving, snapUploading, addPebble, resetForm, onPebbleCreated,
   ])
 
   const toggleSoul = useCallback((id: string) => {
@@ -181,8 +190,35 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
 
   const handleFileChange = useCallback(async (files: FileList | null) => {
     if (!files || files.length === 0) return
-    const compressed = await compressImage(files[0])
-    setInstant(compressed)
+    const file = files[0]
+    // Show a local preview immediately, then upload to storage and store the
+    // returned snap descriptor for the create payload.
+    setSnapPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev)
+      return URL.createObjectURL(file)
+    })
+    setSnapUploading(true)
+    try {
+      const snap = await uploadSnap(file)
+      setPendingSnap(snap)
+    } catch (err) {
+      console.error("[quick-pebble-editor] snap upload failed", err)
+      setSnapPreview((prev) => {
+        if (prev) URL.revokeObjectURL(prev)
+        return undefined
+      })
+      setPendingSnap(undefined)
+    } finally {
+      setSnapUploading(false)
+    }
+  }, [uploadSnap])
+
+  const clearSnap = useCallback(() => {
+    setSnapPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev)
+      return undefined
+    })
+    setPendingSnap(undefined)
   }, [])
 
   // Focus tracking — expand on focus, collapse on blur when empty
@@ -343,20 +379,20 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
         {/* Photo tile */}
         <CustomizationTile
           icon={Image}
-          filled={!!instant}
+          filled={!!snapPreview}
           onClick={() => {
-            if (instant) {
-              setInstant(undefined)
+            if (snapPreview) {
+              clearSnap()
             } else {
               fileInputRef.current?.click()
             }
           }}
-          ariaLabel={instant ? tPhoto("removeAria") : tPhoto("addAria")}
+          ariaLabel={snapPreview ? tPhoto("removeAria") : tPhoto("addAria")}
         >
-          {instant && (
-            /* eslint-disable-next-line @next/next/no-img-element -- base64 data URL, next/image optimization not applicable */
+          {snapPreview && (
+            /* eslint-disable-next-line @next/next/no-img-element -- object URL, next/image optimization not applicable */
             <img
-              src={instant}
+              src={snapPreview}
               alt={tPhoto("alt")}
               className="size-full object-cover"
             />
@@ -385,7 +421,7 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
         <Button
           variant="default"
           size="icon"
-          disabled={!name.trim() || saving}
+          disabled={!name.trim() || saving || snapUploading}
           onClick={() => void handleSubmit()}
           aria-label={t("save")}
           className="size-9 rounded-full"

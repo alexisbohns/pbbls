@@ -16,6 +16,10 @@ type PebbleVisualProps = {
   mark?: Mark | null
   tier?: RenderTier
   className?: string
+  // Force a single stroke color regardless of theme. Used by the snap+pebble
+  // bundle in PebbleDetail where the palette-tinted box would otherwise blend
+  // with the dark-mode stroke (`secondary_color`).
+  strokeOverride?: string
 }
 
 export function PebbleVisual({
@@ -23,6 +27,7 @@ export function PebbleVisual({
   mark = null,
   tier = "thumbnail",
   className,
+  strokeOverride,
 }: PebbleVisualProps) {
   // Prefer the server-composed render written by the compose-pebble edge
   // function. Fall back to the client engine for legacy rows that pre-date
@@ -47,13 +52,19 @@ export function PebbleVisual({
   // `recolor()`, so leaving wrapperStyle undefined for it is harmless.
   const { paletteByEmotionId } = useEmotionPalettes()
   const palette = paletteByEmotionId.get(pebble.emotion_id)
-  const wrapperStyle: CSSProperties | undefined =
-    isServerRender && palette
+  const wrapperStyle: CSSProperties | undefined = !isServerRender
+    ? undefined
+    : strokeOverride
       ? ({
-          ["--pebble-stroke-light"]: palette.primary_color,
-          ["--pebble-stroke-dark"]: palette.secondary_color,
+          ["--pebble-stroke-light"]: strokeOverride,
+          ["--pebble-stroke-dark"]: strokeOverride,
         } as CSSProperties)
-      : undefined
+      : palette
+        ? ({
+            ["--pebble-stroke-light"]: palette.primary_color,
+            ["--pebble-stroke-dark"]: palette.secondary_color,
+          } as CSSProperties)
+        : undefined
 
   return (
     <div

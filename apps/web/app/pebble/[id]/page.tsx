@@ -19,16 +19,13 @@ export default function PebbleDetailPage({
   const { id } = use(params)
   const router = useRouter()
   const t = useTranslations("pebble")
-  const { pebble, loading: pebbleLoading, updatePebble } = usePebble(id)
+  const { pebble, loading: pebbleLoading, updatePebble, uploadSnap } = usePebble(id)
   const { souls, loading: soulsLoading, addSoul } = useSouls()
-  const { collections, loading: collectionsLoading, updateCollection } = useCollections()
+  const { collections, loading: collectionsLoading } = useCollections()
   const { marks, loading: marksLoading } = useMarks()
 
   const loading = pebbleLoading || soulsLoading || collectionsLoading || marksLoading
 
-  const matchedCollections = collections.filter((c) =>
-    c.pebble_ids.includes(id),
-  )
   const mark = pebble ? marks.find((m) => m.id === pebble.mark_id) : undefined
 
   const handleAddSoul = useCallback(
@@ -50,12 +47,11 @@ export default function PebbleDetailPage({
           <PebbleDetail
             pebble={pebble}
             souls={souls}
-            collections={matchedCollections}
-            allCollections={collections}
+            collections={collections}
             marks={marks}
             mark={mark}
             onUpdatePebble={updatePebble}
-            onUpdateCollection={updateCollection}
+            onUploadSnap={uploadSnap}
             onAddSoul={handleAddSoul}
             onClose={() => router.back()}
           />
