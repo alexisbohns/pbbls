@@ -58,8 +58,8 @@ export function PathPebbleRow({ pebble, mark, onSelect }: PathPebbleRowProps) {
       type="button"
       onClick={() => onSelect?.(pebble.id)}
       className={cn(
-        "path-row flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left transition-all duration-100",
-        "hover:bg-foreground/5 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+        "path-row flex w-full items-center gap-3 rounded-xl p-2 text-left transition-all duration-100",
+        "hover:bg-background active:scale-[0.98] focus-visible:outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
       )}
       style={rowStyle}
       aria-label={t("cardAria", { name: pebble.name, time })}
