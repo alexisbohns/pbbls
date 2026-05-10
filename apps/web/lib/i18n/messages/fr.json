@@ -364,7 +364,6 @@
     "notFoundTitle": "Galet introuvable",
     "notFoundInline": "Galet introuvable.",
     "notFoundDescription": "Ce galet n'existe pas ou a été supprimé.",
-    "backToPath": "← Retour au chemin",
     "back": "Retour au chemin",
     "cardAria": "{name}, {time}",
     "instantAlt": "Photo de l'instant pour {name}",
@@ -384,9 +383,17 @@
       "close": "Fermer",
       "souls": "Âmes",
       "picture": "Photo",
-      "writeCard": "Écrire une carte",
-      "writeCardAria": "Écrire une carte"
-    }
+      "editSoulAria": "Modifier les âmes — {name}"
+    },
+    "add": {
+      "soul": "Âme",
+      "soulAria": "Ajouter une âme",
+      "stack": "Pile",
+      "stackAria": "Ajouter à une collection",
+      "picture": "Photo",
+      "pictureAria": "Ajouter une photo"
+    },
+    "editIntensityAria": "Modifier l'intensité et la valence"
   },
   "record": {
     "srTitle": "Capturer l'instant",

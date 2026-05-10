@@ -1,7 +1,7 @@
 "use client"
 
 import { use, useCallback } from "react"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { usePebble } from "@/lib/data/usePebble"
 import { useSouls } from "@/lib/data/useSouls"
@@ -17,6 +17,7 @@ export default function PebbleDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = use(params)
+  const router = useRouter()
   const t = useTranslations("pebble")
   const { pebble, loading: pebbleLoading, updatePebble } = usePebble(id)
   const { souls, loading: soulsLoading, addSoul } = useSouls()
@@ -43,32 +44,24 @@ export default function PebbleDetailPage({
   return (
     <PageLayout>
       <section>
-      <nav className="mb-6">
-        <Link
-          href="/path"
-          className="text-sm text-muted-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-        >
-          {t("backToPath")}
-        </Link>
-      </nav>
-
-      {loading ? (
-        <p className="text-sm text-muted-foreground">{t("loading")}</p>
-      ) : pebble ? (
-        <PebbleDetail
-          pebble={pebble}
-          souls={souls}
-          collections={matchedCollections}
-          allCollections={collections}
-          marks={marks}
-          mark={mark}
-          onUpdatePebble={updatePebble}
-          onUpdateCollection={updateCollection}
-          onAddSoul={handleAddSoul}
-        />
-      ) : (
-        <PebbleNotFound />
-      )}
+        {loading ? (
+          <p className="text-sm text-muted-foreground">{t("loading")}</p>
+        ) : pebble ? (
+          <PebbleDetail
+            pebble={pebble}
+            souls={souls}
+            collections={matchedCollections}
+            allCollections={collections}
+            marks={marks}
+            mark={mark}
+            onUpdatePebble={updatePebble}
+            onUpdateCollection={updateCollection}
+            onAddSoul={handleAddSoul}
+            onClose={() => router.back()}
+          />
+        ) : (
+          <PebbleNotFound />
+        )}
       </section>
     </PageLayout>
   )

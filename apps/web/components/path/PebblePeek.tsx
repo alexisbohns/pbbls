@@ -1,16 +1,13 @@
 "use client"
 
 import { useCallback } from "react"
-import { X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import { usePebble } from "@/lib/data/usePebble"
 import { useSouls } from "@/lib/data/useSouls"
 import { useCollections } from "@/lib/data/useCollections"
 import { useMarks } from "@/lib/data/useMarks"
-import { VisibilityPicker } from "@/components/record/VisibilityPicker"
 import { PebbleDetail } from "@/components/pebble/PebbleDetail"
 
 type PebblePeekProps = {
@@ -70,24 +67,6 @@ export function PebblePeek({ pebbleId, onClose }: PebblePeekProps) {
           {/* Mobile drag handle */}
           <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-muted-foreground/30 md:hidden" aria-hidden />
 
-          {/* Top bar: visibility badge + close button */}
-          <div className="flex items-center justify-between">
-            {pebble ? (
-              <VisibilityPicker
-                value={pebble.visibility}
-                onChange={(v) => void updatePebble({ visibility: v })}
-              />
-            ) : (
-              <div />
-            )}
-            <DialogPrimitive.Close
-              render={<Button variant="ghost" size="icon-sm" />}
-              aria-label={t("peek.close")}
-            >
-              <X className="size-4" />
-            </DialogPrimitive.Close>
-          </div>
-
           {loading ? (
             <p className="text-sm text-muted-foreground">{t("loading")}</p>
           ) : pebble ? (
@@ -101,6 +80,7 @@ export function PebblePeek({ pebbleId, onClose }: PebblePeekProps) {
               onUpdatePebble={updatePebble}
               onUpdateCollection={updateCollection}
               onAddSoul={handleAddSoul}
+              onClose={onClose}
             />
           ) : (
             <p className="text-sm text-muted-foreground">{t("notFoundInline")}</p>
