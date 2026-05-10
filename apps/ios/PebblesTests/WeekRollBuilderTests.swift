@@ -44,8 +44,8 @@ struct WeekRollBuilderTests {
 
     @Test("single pebble in current week → [current(1), next(0)]")
     func singleCurrent() {
-        let p = pebble("2026-05-08T10:00:00Z") // Friday in week 19
-        let entries = WeekRollBuilder.build(pebbles: [p], calendar: calendar, today: today)
+        let friday = pebble("2026-05-08T10:00:00Z") // Friday in week 19
+        let entries = WeekRollBuilder.build(pebbles: [friday], calendar: calendar, today: today)
         #expect(entries.count == 2)
         #expect(entries[0].pebbles.count == 1)
         #expect(entries[1].pebbles.isEmpty)

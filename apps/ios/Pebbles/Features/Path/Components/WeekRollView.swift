@@ -36,7 +36,7 @@ struct WeekRollView: View {
         .scrollPosition(id: Binding(
             get: { focusedWeekStart },
             set: { newValue in
-                if let v = newValue { focusedWeekStart = v }
+                if let value = newValue { focusedWeekStart = value }
             }
         ))
         .contentMargins(.horizontal, scrollMargin, for: .scrollContent)

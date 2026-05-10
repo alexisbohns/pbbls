@@ -163,8 +163,8 @@ extension PathPebbleRow {
 
     /// Photo rotation by row position. Even indices (0, 2, 4...) lean
     /// counter-clockwise (-7°); odd lean clockwise (+4°).
-    static func rotationAngle(forPositionIndex i: Int) -> Double {
-        i.isMultiple(of: 2) ? -7 : 4
+    static func rotationAngle(forPositionIndex index: Int) -> Double {
+        index.isMultiple(of: 2) ? -7 : 4
     }
 
     /// Row height by intensity + photo state + parity. Sized to fit the

@@ -12,9 +12,9 @@ struct WeekHeaderFormatTests {
     }
 
     private func date(_ iso: String) -> Date {
-        let f = ISO8601DateFormatter()
-        f.formatOptions = [.withInternetDateTime]
-        return f.date(from: iso)!
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter.date(from: iso)!
     }
 
     @Test("same-year focus → no year suffix (English locale)")

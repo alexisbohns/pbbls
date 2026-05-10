@@ -25,8 +25,8 @@ enum WeekRollBuilder {
         }
 
         // Bucket pebbles by their week's Monday.
-        let grouped: [Date: [Pebble]] = Dictionary(grouping: pebbles) { p in
-            weekStart(for: p.happenedAt, calendar: calendar)
+        let grouped: [Date: [Pebble]] = Dictionary(grouping: pebbles) { pebble in
+            weekStart(for: pebble.happenedAt, calendar: calendar)
         }
 
         // Union: every week with pebbles, plus current and next.

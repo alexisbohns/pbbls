@@ -9,8 +9,8 @@ struct PebbleDecodingTests {
         let dec = JSONDecoder()
         let formatter = ISO8601DateFormatter()
         formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        dec.dateDecodingStrategy = .custom { d in
-            let raw = try d.singleValueContainer().decode(String.self)
+        dec.dateDecodingStrategy = .custom { decoder in
+            let raw = try decoder.singleValueContainer().decode(String.self)
             // Allow both with and without fractional seconds.
             if let date = formatter.date(from: raw) { return date }
             formatter.formatOptions = [.withInternetDateTime]
