@@ -397,7 +397,7 @@ Manual smoke test before shipping:
 
 ## 11. Follow-up issues to file after V1 ships
 
-1. **Orphan Storage cleanup sweep.** Detect files under `{user_id}/{folder}/` whose folder name does not appear as `pebble_media.id`. Run periodically. Two sources: abandoned form uploads, and pebble deletions.
+1. **Orphan Storage cleanup sweep.** Implemented in `20260510000001_orphan_snap_sweep.sql` (resolves #322). See §12.
 2. **Server-side magic-byte validation** (optional hardening). Edge function or Storage trigger that re-checks the JPEG header on uploaded files; deletes non-conforming.
 3. **Multiple media per pebble.** UI for picking multiple photos, gallery view, reordering. Schema already supports.
 4. **Premium quota raise.** Upgrade flow + admin tool to flip `max_media_per_pebble`.

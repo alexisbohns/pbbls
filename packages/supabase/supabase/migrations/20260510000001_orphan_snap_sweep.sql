@@ -24,8 +24,10 @@ create extension if not exists pg_cron;
 -- path segment (snap_id) is a valid UUID with no matching snaps row.
 -- Returns the count of deleted objects and total bytes freed.
 -- Security definer so the function can access storage.objects regardless
--- of the caller's RLS context. Not granted to authenticated — admin only
--- (invoke via the Supabase SQL editor or with the service_role key).
+-- of the caller's RLS context.
+--
+-- Access: callable by postgres (pg_cron) and service_role (admin API only).
+-- Revoked from public so regular authenticated users cannot invoke it.
 
 create or replace function public.sweep_orphan_snap_files()
 returns table (deleted_count bigint, bytes_freed bigint)
@@ -54,6 +56,10 @@ begin
   return query select v_count, v_bytes;
 end;
 $$;
+
+revoke execute on function public.sweep_orphan_snap_files() from public;
+grant  execute on function public.sweep_orphan_snap_files() to postgres;
+grant  execute on function public.sweep_orphan_snap_files() to service_role;
 
 -- ============================================================
 -- pg_cron: daily at 03:00 UTC (idempotent)
