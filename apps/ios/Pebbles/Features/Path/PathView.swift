@@ -152,9 +152,10 @@ struct PathView: View {
                     let visiblePebbles = Array(group.value.prefix(revealedPebbleCount))
 
                     Section {
-                        ForEach(visiblePebbles) { pebble in
+                        ForEach(Array(visiblePebbles.enumerated()), id: \.element.id) { index, pebble in
                             PathPebbleRow(
                                 pebble: pebble,
+                                positionIndex: index,
                                 onTap: { selectedPebbleId = pebble.id },
                                 onDelete: { pendingDeletion = pebble }
                             )
