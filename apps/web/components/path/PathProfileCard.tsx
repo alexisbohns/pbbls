@@ -42,8 +42,8 @@ export function PathProfileCard() {
       aria-label={t("profileAria", { name: profile.display_name })}
     >
       <div className="flex gap-2 px-4 py-3 md:flex-col md:space-y-4 p-4 justify-between items-center md:items-stretch">
-        <div className="flex items-center md:gap-3">
-          <div className="hidden md:flex md:flex-col md:w-full">
+        <div className="flex items-center md:gap-3 md:w-full">
+          <div className="hidden md:flex md:flex-col md:flex-1 md:min-w-0">
             <p className="text-sm font-semibold truncate">{profile.display_name}</p>
             <p className="text-xs text-muted-foreground truncate">{user.email}</p>
           </div>
