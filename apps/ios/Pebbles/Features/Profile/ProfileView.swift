@@ -15,10 +15,22 @@ struct ProfileView: View {
 
     @State private var presentedSheet: ProfileSheet?
     @State private var presentedLegalDoc: LegalDoc?
+    @State private var isPresentingOnboarding = false
 
     var body: some View {
         NavigationStack {
             List {
+                Section {
+                    NavigationLink {
+                        LabView()
+                    } label: {
+                        Label("Lab", systemImage: "lightbulb.max")
+                    }
+                    .listRowBackground(Color.pebblesListRow)
+                } header: {
+                    Text("Discover")
+                }
+
                 Section("Stats") {
                     ProfileStatRow(
                         title: "Karma",
@@ -60,6 +72,10 @@ struct ProfileView: View {
                 }
 
                 Section("Legal") {
+                    ProfileNavRow(title: "Replay onboarding", systemImage: "play.circle") {
+                        isPresentingOnboarding = true
+                    }
+                    .listRowBackground(Color.pebblesListRow)
                     ProfileNavRow(title: "Terms", systemImage: "doc.text") {
                         presentedLegalDoc = .terms
                     }
@@ -92,6 +108,11 @@ struct ProfileView: View {
             .sheet(item: $presentedLegalDoc) { doc in
                 LegalDocumentSheet(url: doc.url)
                     .ignoresSafeArea()
+            }
+            .fullScreenCover(isPresented: $isPresentingOnboarding) {
+                OnboardingView(steps: OnboardingSteps.all) {
+                    isPresentingOnboarding = false
+                }
             }
         }
     }
