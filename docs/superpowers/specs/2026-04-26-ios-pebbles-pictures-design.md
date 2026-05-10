@@ -403,7 +403,44 @@ Manual smoke test before shipping:
 4. **Premium quota raise.** Upgrade flow + admin tool to flip `max_media_per_pebble`.
 5. **Public pebble read access.** Add a SELECT policy variant when public/shareable pebbles ship.
 
-## 12. Operational steps (paste into Supabase Studio)
+## 12. Orphan sweep (follow-up to V1)
+
+Implemented in `packages/supabase/supabase/migrations/20260510000001_orphan_snap_sweep.sql` (issue #322).
+
+### 12.1 What it does
+
+`public.sweep_orphan_snap_files()` scans every `storage.objects` row in the `pebbles-media` bucket and deletes any file whose second path segment (the `snap_id` UUID) has no matching `public.snaps` row. It returns `(deleted_count bigint, bytes_freed bigint)`.
+
+The two orphan sources it handles:
+
+| Source | Mechanism |
+|--------|-----------|
+| Abandoned upload | iOS picks a photo, files upload, user cancels the form before `create_pebble` is called — no `public.snaps` row ever created. |
+| Pebble deletion | The `on delete cascade` on `snaps.pebble_id` removes the DB row, but Postgres cannot reach Supabase Storage to remove the files. |
+
+### 12.2 Schedule
+
+A `pg_cron` job named `sweep_orphan_snap_files` runs the function daily at **03:00 UTC**. It is registered by the migration and is idempotent (the migration safely replaces itself on re-run).
+
+### 12.3 Ad-hoc invocation (admin)
+
+Call via the Supabase SQL editor or any client initialised with the `service_role` key:
+
+```sql
+-- SQL editor (Supabase dashboard)
+select * from public.sweep_orphan_snap_files();
+```
+
+```swift
+// Swift — service_role client only, never the anon/user client
+let result = try await adminSupabase
+  .rpc("sweep_orphan_snap_files")
+  .execute()
+```
+
+The function is `security definer` and is **not** granted to the `authenticated` role, so regular users cannot invoke it.
+
+## 13. Operational steps (paste into Supabase Studio)
 
 Run in this order:
 
