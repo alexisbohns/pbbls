@@ -14,11 +14,16 @@ import {
 } from "@/lib/data/data-provider"
 import type {
   Pebble,
+  PebbleSnap,
   Soul,
   Collection,
   Mark,
 } from "@/lib/types"
 import { DEFAULT_GLYPH_ID } from "@/lib/config/glyphs"
+import { processPebbleImage } from "@/lib/utils/process-pebble-image"
+
+const PEBBLE_MEDIA_BUCKET = "pebbles-media"
+const SNAP_URL_TTL_SECONDS = 3600
 
 export class SupabaseProvider implements DataProvider {
   private store: Store
@@ -104,11 +109,10 @@ export class SupabaseProvider implements DataProvider {
     // signed URLs in a single round-trip (mirrors iOS's 1 h TTL in
     // PebbleSnapRepository), and hand the resulting URLs back to each pebble
     // in `sort_order`.
-    type RawSnap = { id: string; storage_path: string; sort_order: number }
-    const rawSnapsByPebble = new Map<string, RawSnap[]>()
+    const rawSnapsByPebble = new Map<string, PebbleSnap[]>()
     for (const row of pebblesRes.data ?? []) {
       const r = row as Record<string, unknown>
-      const snaps = (r.snaps as RawSnap[] | undefined) ?? []
+      const snaps = (r.snaps as PebbleSnap[] | undefined) ?? []
       if (snaps.length > 0) rawSnapsByPebble.set(r.id as string, snaps)
     }
 
@@ -120,8 +124,8 @@ export class SupabaseProvider implements DataProvider {
     const signedUrlByPath = new Map<string, string>()
     if (originalPaths.length > 0) {
       const { data, error } = await this.supabase.storage
-        .from("pebbles-media")
-        .createSignedUrls(originalPaths, 3600)
+        .from(PEBBLE_MEDIA_BUCKET)
+        .createSignedUrls(originalPaths, SNAP_URL_TTL_SECONDS)
       if (error) {
         console.warn("[pebbles] failed to sign snap URLs", error)
       } else {
@@ -139,10 +143,10 @@ export class SupabaseProvider implements DataProvider {
         render_svg: null,
         render_version: null,
       }
-      const snaps = rawSnapsByPebble.get(id) ?? []
-      const instants = snaps
+      const snaps = (rawSnapsByPebble.get(id) ?? [])
         .slice()
         .sort((a, b) => a.sort_order - b.sort_order)
+      const instants = snaps
         .map((s) => signedUrlByPath.get(`${s.storage_path}/original.jpg`))
         .filter((url): url is string => typeof url === "string")
       return {
@@ -156,8 +160,10 @@ export class SupabaseProvider implements DataProvider {
         emotion_id: row.emotion_id as string,
         soul_ids: ((row.souls as Array<{ id: string }>) ?? []).map((s) => s.id),
         domain_ids: ((row.domains as Array<{ id: string }>) ?? []).map((d) => d.id),
+        collection_ids: ((row.collections as Array<{ id: string }>) ?? []).map((c) => c.id),
         mark_id: (row.glyph_id as string) ?? undefined,
         instants,
+        snaps,
         cards: ((row.cards as Array<{ species_id: string; value: string }>) ?? []).map((c) => ({
           species_id: c.species_id,
           value: c.value,
@@ -259,8 +265,15 @@ export class SupabaseProvider implements DataProvider {
       positiveness: input.positiveness,
       visibility: input.visibility,
       emotion_id: input.emotion_id,
+      glyph_id: input.mark_id ?? null,
       soul_ids: input.soul_ids,
       domain_ids: input.domain_ids,
+      collection_ids: input.collection_ids,
+      snaps: input.snaps.map((s, i) => ({
+        id: s.id,
+        storage_path: s.storage_path,
+        sort_order: i,
+      })),
       cards: input.cards.map((c, i) => ({
         species_id: c.species_id,
         value: c.value,
@@ -283,8 +296,18 @@ export class SupabaseProvider implements DataProvider {
       ...(input.positiveness !== undefined && { positiveness: input.positiveness }),
       ...(input.visibility !== undefined && { visibility: input.visibility }),
       ...(input.emotion_id !== undefined && { emotion_id: input.emotion_id }),
+      // `mark_id: undefined` leaves the column alone; `null` clears it.
+      ...("mark_id" in input && { glyph_id: input.mark_id ?? null }),
       ...(input.soul_ids !== undefined && { soul_ids: input.soul_ids }),
       ...(input.domain_ids !== undefined && { domain_ids: input.domain_ids }),
+      ...(input.collection_ids !== undefined && { collection_ids: input.collection_ids }),
+      ...(input.snaps !== undefined && {
+        snaps: input.snaps.map((s, i) => ({
+          id: s.id,
+          storage_path: s.storage_path,
+          sort_order: i,
+        })),
+      }),
       ...(input.cards !== undefined && {
         cards: input.cards.map((c, i) => ({
           species_id: c.species_id,
@@ -298,6 +321,46 @@ export class SupabaseProvider implements DataProvider {
     const updated = this.store.pebbles.find((p) => p.id === id)
     if (!updated) throw new Error(`Pebble not found after update: ${id}`)
     return updated
+  }
+
+  // ---------------------------------------------------------------------------
+  // Snap media — mirror of iOS PebbleSnapRepository.uploadProcessed +
+  // delete_pebble_media RPC.
+  // ---------------------------------------------------------------------------
+
+  async uploadSnap(file: File): Promise<PebbleSnap> {
+    const processed = await processPebbleImage(file)
+    const snapId = crypto.randomUUID()
+    const storagePath = `${this.userId}/${snapId}`
+    const bucket = this.supabase.storage.from(PEBBLE_MEDIA_BUCKET)
+    const options = { contentType: "image/jpeg", upsert: false }
+    const [originalRes, thumbRes] = await Promise.all([
+      bucket.upload(`${storagePath}/original.jpg`, processed.original, options),
+      bucket.upload(`${storagePath}/thumb.jpg`, processed.thumb, options),
+    ])
+    if (originalRes.error) throw new Error(`Snap original upload failed: ${originalRes.error.message}`)
+    if (thumbRes.error) throw new Error(`Snap thumb upload failed: ${thumbRes.error.message}`)
+    return { id: snapId, storage_path: storagePath, sort_order: 0 }
+  }
+
+  async deletePebbleMedia(snapId: string): Promise<void> {
+    // The RPC deletes the DB row and returns the snap's `storage_path` as
+    // text; we then remove the two files. Mirrors iOS
+    // EditPebbleSheet.removeExistingSnap.
+    const { data, error } = await this.supabase.rpc("delete_pebble_media", {
+      p_snap_id: snapId,
+    })
+    if (error) throw new Error(`delete_pebble_media failed: ${error.message}`)
+    const prefix = typeof data === "string" ? data : null
+    if (prefix) {
+      const { error: removeError } = await this.supabase.storage
+        .from(PEBBLE_MEDIA_BUCKET)
+        .remove([`${prefix}/original.jpg`, `${prefix}/thumb.jpg`])
+      if (removeError) {
+        console.warn("[pebbles] snap storage cleanup failed", removeError)
+      }
+    }
+    await this.loadFromSupabase()
   }
 
   /**

@@ -2,7 +2,7 @@
 
 import { useDataProvider } from "@/lib/data/provider-context"
 import type { CreatePebbleInput, UpdatePebbleInput } from "@/lib/data/data-provider"
-import type { Pebble } from "@/lib/types"
+import type { Pebble, PebbleSnap } from "@/lib/types"
 
 export function usePebbles() {
   const { provider, store, setStore, loading } = useDataProvider()
@@ -27,5 +27,17 @@ export function usePebbles() {
     setStore(provider.getStore())
   }
 
-  return { pebbles: store.pebbles, loading, addPebble, updatePebble, removePebble }
+  const uploadSnap = async (file: File): Promise<PebbleSnap> => {
+    if (!provider) throw new Error("Not authenticated")
+    return provider.uploadSnap(file)
+  }
+
+  return {
+    pebbles: store.pebbles,
+    loading,
+    addPebble,
+    updatePebble,
+    removePebble,
+    uploadSnap,
+  }
 }

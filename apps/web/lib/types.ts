@@ -13,6 +13,15 @@ export type PebbleCard = {
   value: string
 }
 
+// One row from `public.snaps`. `storage_path` is the per-snap directory under
+// `pebbles-media` (`{userId}/{snapId}`) — actual files live at
+// `{storage_path}/original.jpg` and `{storage_path}/thumb.jpg`.
+export type PebbleSnap = {
+  id: string
+  storage_path: string
+  sort_order: number
+}
+
 export type Pebble = {
   id: string
   name: string
@@ -24,8 +33,11 @@ export type Pebble = {
   emotion_id: string
   soul_ids: string[]
   domain_ids: string[]
+  collection_ids: string[]
   mark_id?: string
+  // Signed `original.jpg` URLs derived from `snaps` at load time. Display-only.
   instants: string[]
+  snaps: PebbleSnap[]
   cards: PebbleCard[]
   // Server-rendered pebble. Populated by the compose-pebble / compose-pebble-update
   // edge functions; null for legacy rows or anonymous (LocalProvider) pebbles.

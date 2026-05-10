@@ -1,5 +1,6 @@
 import type {
   Pebble,
+  PebbleSnap,
   Soul,
   Collection,
   KarmaEvent,
@@ -41,12 +42,14 @@ export const EMPTY_STORE: Store = {
 
 // Render columns are written by the compose-pebble / compose-pebble-update edge
 // functions, never by the client — keep them out of mutation inputs.
+// `instants` is the read-path projection (signed URLs); writes use `snaps`.
 type ServerOwnedPebbleFields =
   | "id"
   | "created_at"
   | "updated_at"
   | "render_svg"
   | "render_version"
+  | "instants"
 
 export type CreatePebbleInput = Omit<Pebble, ServerOwnedPebbleFields>
 export type UpdatePebbleInput = Partial<Omit<Pebble, ServerOwnedPebbleFields>>
@@ -86,6 +89,14 @@ export interface DataProvider {
   createPebble(input: CreatePebbleInput): Promise<Pebble>
   updatePebble(id: string, input: UpdatePebbleInput): Promise<Pebble>
   deletePebble(id: string): Promise<void>
+
+  // Snap media: upload processes the file client-side (mirrors iOS
+  // ImagePipeline) and writes original + thumb JPEGs to `pebbles-media`.
+  // The returned `PebbleSnap` is what callers pass to `createPebble`/
+  // `updatePebble` via the `snaps` field. `deletePebbleMedia` is the
+  // eager-cleanup variant for existing snaps (file delete + DB row).
+  uploadSnap(file: File): Promise<PebbleSnap>
+  deletePebbleMedia(snapId: string): Promise<void>
 
   listSouls(): Promise<Soul[]>
   getSoul(id: string): Promise<Soul | undefined>
