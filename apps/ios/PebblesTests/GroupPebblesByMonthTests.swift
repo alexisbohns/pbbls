@@ -22,7 +22,7 @@ struct GroupPebblesByMonthTests {
     private func pebble(_ happened: String) throws -> Pebble {
         // Decode through JSON to construct a Pebble since all properties are `let`.
         let json = Data("""
-        { "id": "\(UUID().uuidString)", "name": "p", "happened_at": "\(happened)" }
+        { "id": "\(UUID().uuidString)", "name": "p", "happened_at": "\(happened)", "intensity": 1 }
         """.utf8)
         let decoder = JSONDecoder()
         let formatter = ISO8601DateFormatter()
