@@ -169,10 +169,10 @@ export function PebbleDetail({
               <img
                 src={snap}
                 alt={t("photoAlt")}
-                className="aspect-square w-full rounded-2xl object-cover"
+                className="aspect-square w-full rounded-2xl object-cover scale-90 -rotate-4"
               />
               <span
-                className="absolute -right-4 -top-4 grid size-[100px] place-items-center rounded-2xl shadow-md"
+                className="absolute -right-4 -top-4 grid size-[100px] place-items-center rounded-2xl shadow-md rotate-7"
                 style={overlayBackground ? { backgroundColor: overlayBackground } : undefined}
               >
                 <PebbleVisual
