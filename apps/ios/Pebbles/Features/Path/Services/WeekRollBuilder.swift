@@ -53,3 +53,21 @@ enum WeekRollBuilder {
         return calendar.date(from: monday) ?? date
     }
 }
+
+extension WeekRollBuilder {
+
+    static func previous(of weekStart: Date, in entries: [WeekRollEntry]) -> WeekRollEntry? {
+        guard let idx = entries.firstIndex(where: { $0.weekStart == weekStart }), idx > 0 else {
+            return nil
+        }
+        return entries[idx - 1]
+    }
+
+    static func next(of weekStart: Date, in entries: [WeekRollEntry]) -> WeekRollEntry? {
+        guard let idx = entries.firstIndex(where: { $0.weekStart == weekStart }),
+              idx + 1 < entries.count else {
+            return nil
+        }
+        return entries[idx + 1]
+    }
+}

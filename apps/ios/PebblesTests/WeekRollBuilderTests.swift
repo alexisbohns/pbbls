@@ -114,4 +114,26 @@ struct WeekRollBuilderTests {
         let weekNum = calendar.component(.weekOfYear, from: target.weekStart)
         #expect(weekNum == 19)
     }
+
+    @Test("previous(of:) returns the entry one before focus, or nil at the head")
+    func previousLookup() {
+        let p17 = pebble("2026-04-22T10:00:00Z")
+        let p19 = pebble("2026-05-04T10:00:00Z")
+        let entries = WeekRollBuilder.build(pebbles: [p17, p19], calendar: calendar, today: today)
+        let week17Start = entries.first { calendar.component(.weekOfYear, from: $0.weekStart) == 17 }!.weekStart
+        let week19Start = entries.first { calendar.component(.weekOfYear, from: $0.weekStart) == 19 }!.weekStart
+        #expect(WeekRollBuilder.previous(of: week17Start, in: entries) == nil)
+        #expect(WeekRollBuilder.previous(of: week19Start, in: entries)?.weekStart == week17Start)
+    }
+
+    @Test("next(of:) returns the entry one after focus, or nil at the tail")
+    func nextLookup() {
+        let p17 = pebble("2026-04-22T10:00:00Z")
+        let p19 = pebble("2026-05-04T10:00:00Z")
+        let entries = WeekRollBuilder.build(pebbles: [p17, p19], calendar: calendar, today: today)
+        let last = entries.last!.weekStart
+        let week19Start = entries.first { calendar.component(.weekOfYear, from: $0.weekStart) == 19 }!.weekStart
+        #expect(WeekRollBuilder.next(of: last, in: entries) == nil)
+        #expect((WeekRollBuilder.next(of: week19Start, in: entries)?.weekStart ?? .distantPast) > week19Start)
+    }
 }
