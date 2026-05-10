@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useRef, type CSSProperties } from "react"
+import { useState, useCallback, useRef } from "react"
 import { Lock, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { Pebble, PebbleSnap, Soul, Collection, Mark } from "@/lib/types"
@@ -117,14 +117,12 @@ export function PebbleDetail({
   )
 
   // Emotion palette drives the boxed pebble overlay when a snap is shown.
-  // Secondary as background, light as stroke — mirrors iOS PebbleReadBanner.
-  const overlayStyle: CSSProperties | undefined = palette
-    ? ({
-        backgroundColor: palette.secondary_color,
-        ["--pebble-stroke-light"]: palette.light_color,
-        ["--pebble-stroke-dark"]: palette.light_color,
-      } as CSSProperties)
-    : undefined
+  // Secondary as background; pebble stroke is forced to `light_color` via the
+  // PebbleVisual override so the pebble reads against the tinted box in dark
+  // mode (where the default stroke is `secondary_color` — same hue as the
+  // box).
+  const overlayBackground = palette?.secondary_color
+  const overlayStroke = palette?.light_color
 
   return (
     <article>
@@ -175,13 +173,14 @@ export function PebbleDetail({
               />
               <span
                 className="absolute -right-4 -top-4 grid size-[100px] place-items-center rounded-2xl shadow-md"
-                style={overlayStyle}
+                style={overlayBackground ? { backgroundColor: overlayBackground } : undefined}
               >
                 <PebbleVisual
                   pebble={pebble}
                   mark={mark}
                   tier="detail"
                   className="size-[72px]"
+                  strokeOverride={overlayStroke}
                 />
               </span>
             </div>
