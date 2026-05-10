@@ -409,7 +409,9 @@ Implemented in `packages/supabase/supabase/migrations/20260510000001_orphan_snap
 
 ### 12.1 What it does
 
-`public.sweep_orphan_snap_files()` scans every `storage.objects` row in the `pebbles-media` bucket and deletes any file whose second path segment (the `snap_id` UUID) has no matching `public.snaps` row. It returns `(deleted_count bigint, bytes_freed bigint)`.
+`public.sweep_orphan_snap_files()` scans every `storage.objects` row in the `pebbles-media` bucket, identifies files whose second path segment (the `snap_id` UUID) has no matching `public.snaps` row, and queues their deletion via the Supabase Storage HTTP API using `pg_net`. It returns `(queued_count bigint, estimated_bytes bigint)`.
+
+Deletion is **asynchronous** — `pg_net` fires the HTTP requests after the transaction commits. The counts reflect what was queued, not confirmed-deleted. In practice, failures are rare (the service_role key has full Storage access) and any surviving files will be caught on the next daily run.
 
 The two orphan sources it handles:
 
@@ -418,13 +420,56 @@ The two orphan sources it handles:
 | Abandoned upload | iOS picks a photo, files upload, user cancels the form before `create_pebble` is called — no `public.snaps` row ever created. |
 | Pebble deletion | The `on delete cascade` on `snaps.pebble_id` removes the DB row, but Postgres cannot reach Supabase Storage to remove the files. |
 
-### 12.2 Schedule
+### 12.2 One-time setup (required before first run)
+
+The function reads the project URL and service_role JWT from database settings. Run these once in the Supabase SQL editor (or via `psql`), then reconnect:
+
+```sql
+alter database postgres
+  set app.settings.supabase_url = 'https://<ref>.supabase.co';
+alter database postgres
+  set app.settings.service_role_key = '<service_role_jwt>';
+```
+
+The service_role JWT is found in **Project Settings → API → Project API keys** in the Supabase dashboard.
+
+### 12.3 Schedule
 
 A `pg_cron` job named `sweep_orphan_snap_files` runs the function daily at **03:00 UTC**. It is registered by the migration and is idempotent (the migration safely replaces itself on re-run).
 
-### 12.3 Ad-hoc invocation (admin)
+### 12.4 Dry-run before first use
 
-Call via the Supabase SQL editor or any client initialised with the `service_role` key:
+Run this SELECT (identical `WHERE` clause, no side effects) to preview what would be queued:
+
+```sql
+select
+  o.name,
+  (storage.foldername(o.name))[1]  as user_id,
+  (storage.foldername(o.name))[2]  as snap_id,
+  coalesce((o.metadata->>'size')::bigint, 0) as bytes
+from storage.objects o
+where o.bucket_id = 'pebbles-media'
+  and array_length(storage.foldername(o.name), 1) >= 2
+  and (storage.foldername(o.name))[2]
+        ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+  and not exists (
+    select 1 from public.snaps s
+    where s.id = ((storage.foldername(o.name))[2])::uuid
+  )
+order by o.name;
+```
+
+To exercise the real function without committing HTTP requests, wrap it in a transaction and roll back — `pg_net` rows are part of the transaction and are discarded on `ROLLBACK`:
+
+```sql
+begin;
+select * from public.sweep_orphan_snap_files();
+rollback;  -- HTTP requests are never fired
+```
+
+### 12.5 Ad-hoc invocation (admin)
+
+Once setup (§12.2) is complete, call via the Supabase SQL editor or any client initialised with the `service_role` key:
 
 ```sql
 -- SQL editor (Supabase dashboard)
