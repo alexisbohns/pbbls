@@ -12,7 +12,7 @@ import SwiftUI
 ///     `WelcomeView` slides the carousel + sign-in buttons + disclaimer
 ///     in from the bottom, pushing the logo up to its header position;
 ///   - if the user is authenticated, the whole view stack swaps to
-///     `MainTabView`. The Rive will have played for at least
+///     `PathView`. The Rive will have played for at least
 ///     `minSplashSeconds`, satisfying the "splash before Path" intent.
 struct RootView: View {
     @Environment(SupabaseService.self) private var supabase
@@ -24,7 +24,7 @@ struct RootView: View {
 
     /// Minimum time the Rive logo is held centered before the welcome
     /// content reveals (or, for authenticated users, before swapping to
-    /// `MainTabView`). Tuned to roughly match the bundled `pbbls-logo.riv`
+    /// `PathView`). Tuned to roughly match the bundled `pbbls-logo.riv`
     /// timeline.
     private static let minSplashSeconds: TimeInterval = 2.5
 
@@ -48,7 +48,7 @@ struct RootView: View {
     var body: some View {
         ZStack {
             if canShowAuthedTabs {
-                MainTabView()
+                PathView()
                     .fullScreenCover(isPresented: $isPresentingOnboarding) {
                         OnboardingView(steps: OnboardingSteps.all) {
                             hasSeenOnboarding = true
