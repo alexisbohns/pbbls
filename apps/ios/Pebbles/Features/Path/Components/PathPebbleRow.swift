@@ -118,3 +118,21 @@ struct PathPebbleRow: View {
     }
     .environment(EmotionPaletteService(client: supabase.client))
 }
+
+extension PathPebbleRow {
+
+    /// Photo rotation by row position. Even indices (0, 2, 4...) lean
+    /// counter-clockwise (-7°); odd lean clockwise (+4°).
+    static func rotationAngle(forPositionIndex i: Int) -> Double {
+        i.isMultiple(of: 2) ? -7 : 4
+    }
+
+    /// Row height by intensity + photo state + parity. Sized to fit the
+    /// rotated 64pt photo's bounding box for small/medium rows; large rows
+    /// are dominated by the 96pt thumbnail and stay at 100pt.
+    static func rowHeight(intensity: Int, hasPhoto: Bool, positionIndex: Int) -> CGFloat {
+        if intensity >= 3 { return 100 }
+        if !hasPhoto { return 60 }
+        return positionIndex.isMultiple(of: 2) ? 71 : 68
+    }
+}
