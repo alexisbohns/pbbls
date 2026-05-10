@@ -6,7 +6,7 @@
     "root_node_id": "V-landing",
     "metadata": { "view_card_variant": "large" },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-05-07T00:00:00.000Z"
+    "updated_at": "2026-05-11T00:00:00.000Z"
   },
   "nodes": [
     {
@@ -41,7 +41,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Home",
-      "description": "Main dashboard showing recent pebbles, bounce tempo, and entry points.",
+      "description": "Main dashboard. iOS (#388) is now the post-auth root: horizontal weeks roll of cairns at top, paginated per-week pebble list (TabView page style) in the body, full-width 'New pebble' button and a custom bottom bar (glyph + bounce + karma) replacing the system tab bar. Glyph and stats push the Profile screen; Lab is reachable as a NavigationLink inside Profile.",
       "status": "idea",
       "platforms": ["web", "ios", "android"]
     },
@@ -409,7 +409,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Profile",
-      "description": "User profile page displaying account info, appearance settings, legal document links, and logout functionality.",
+      "description": "User profile page. Stats (karma, bounce), Discover section (Lab), Lists (Collections, Souls, Glyphs), Legal (Replay onboarding, Terms, Privacy), and logout. iOS (#388): pushed from PathView's bottom bar; hosts the Lab navigation link and the onboarding replay full-screen cover.",
       "status": "development",
       "platforms": ["web", "ios", "android"]
     },
@@ -1097,21 +1097,13 @@
       }
     },
     {
-      "id": "F-ios-app-shell",
+      "id": "V-lab",
       "project_id": "pebbles",
-      "species": "flow",
-      "title": "iOS App Shell",
-      "description": "Native iOS app shell initialized in PR #200. A two-tab SwiftUI TabView (Path, Profile). Email auth landed in PR #243; the Path tab now fetches the signed-in user's pebbles from Supabase and renders a reverse-chronological list (PR for #211). Profile tab is still a placeholder. Being fleshed out as feature PRs land.",
+      "species": "view",
+      "title": "Lab",
+      "description": "Living product-transparency view. Featured community card, then announcements, changelog (top 5 + see all), ongoing initiatives, and backlog (top 5 by upvotes). iOS (#388): no longer a tab; pushed from Profile's Discover section.",
       "status": "development",
-      "platforms": ["ios"],
-      "metadata": {
-        "playlist": {
-          "entries": [
-            { "type": "view", "view_id": "V-home" },
-            { "type": "view", "view_id": "V-profile" }
-          ]
-        }
-      }
+      "platforms": ["ios", "web"]
     },
     {
       "id": "V-admin-analytics",
@@ -1471,8 +1463,7 @@
     { "id": "e-V-docs-index-V-docs-terms", "project_id": "pebbles", "source_id": "V-docs-index", "target_id": "V-docs-terms", "edge_type": "composes" },
     { "id": "e-V-docs-index-V-docs-privacy", "project_id": "pebbles", "source_id": "V-docs-index", "target_id": "V-docs-privacy", "edge_type": "composes" },
     { "id": "e-F-legal-consent-V-register", "project_id": "pebbles", "source_id": "F-legal-consent", "target_id": "V-register", "edge_type": "composes" },
-    { "id": "e-F-ios-app-shell-V-home", "project_id": "pebbles", "source_id": "F-ios-app-shell", "target_id": "V-home", "edge_type": "composes" },
-    { "id": "e-F-ios-app-shell-V-profile", "project_id": "pebbles", "source_id": "F-ios-app-shell", "target_id": "V-profile", "edge_type": "composes" },
+    { "id": "e-V-profile-V-lab", "project_id": "pebbles", "source_id": "V-profile", "target_id": "V-lab", "edge_type": "composes" },
     { "id": "e-V-admin-analytics-API-get-kpi-daily", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "API-get-kpi-daily", "edge_type": "calls" },
     { "id": "e-V-admin-analytics-API-get-active-users-series", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "API-get-active-users-series", "edge_type": "calls" },
     { "id": "e-V-admin-analytics-DM-v-analytics-kpi-daily", "project_id": "pebbles", "source_id": "V-admin-analytics", "target_id": "DM-v-analytics-kpi-daily", "edge_type": "displays" },
