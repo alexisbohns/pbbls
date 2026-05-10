@@ -1,42 +1,25 @@
 "use client"
 
-import { useState, useCallback, useRef } from "react"
+import { useState, useCallback, useRef, type CSSProperties } from "react"
+import { Lock, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { Pebble, Soul, Collection, Mark } from "@/lib/types"
 import type { UpdatePebbleInput, UpdateCollectionInput } from "@/lib/data/data-provider"
-import { CARD_TYPES } from "@/lib/config"
 import { useFormatPeekDate } from "@/lib/i18n"
+import { useEmotionPalettes } from "@/lib/data/useEmotionPalettes"
 import { PebbleVisual } from "@/components/pebble/PebbleVisual"
-import { PeekTagChips } from "@/components/pebble/PeekTagChips"
-import { PeekBottomBar } from "@/components/pebble/PeekBottomBar"
-import { ValenceIntensityGrid } from "@/components/record/ValenceIntensityGrid"
-import { GlyphPickerDialog } from "@/components/record/GlyphPickerDialog"
-import { DatePickerDialog } from "@/components/record/DatePickerDialog"
+import {
+  EmotionTile,
+  DomainTile,
+  CollectionTile,
+} from "@/components/pebble/PebbleDetailTiles"
+import { PebbleDetailSoulsGrid } from "@/components/pebble/PebbleDetailSoulsGrid"
+import { PebbleDetailAddToolbar } from "@/components/pebble/PebbleDetailAddToolbar"
+import { Sheet } from "@/components/ui/sheet"
+import { ValencePickerBody } from "@/components/record/ValenceIntensityGrid"
 import { SoulsSheet } from "@/components/record/SoulsSheet"
 import { compressImage } from "@/lib/utils/image-compress"
-
-function CardEntry({
-  slug,
-  fallbackPrompt,
-  value,
-}: {
-  slug: string | undefined
-  fallbackPrompt: string
-  value: string
-}) {
-  const t = useTranslations() as unknown as {
-    (key: string): string
-    has(key: string): boolean
-  }
-  const promptKey = slug ? `card.${slug}.prompt` : ""
-  const prompt = slug && t.has(promptKey) ? t(promptKey) : fallbackPrompt
-  return (
-    <li className="rounded-lg border border-border px-4 py-3">
-      <h3 className="text-xs font-medium text-muted-foreground">{prompt}</h3>
-      <p className="mt-1 text-sm whitespace-pre-wrap">{value}</p>
-    </li>
-  )
-}
+import { cn } from "@/lib/utils"
 
 type PebbleDetailProps = {
   pebble: Pebble
@@ -48,6 +31,7 @@ type PebbleDetailProps = {
   onUpdatePebble: (input: UpdatePebbleInput) => Promise<Pebble>
   onUpdateCollection: (id: string, input: UpdateCollectionInput) => Promise<Collection>
   onAddSoul: (name: string) => Promise<void>
+  onClose?: () => void
 }
 
 export function PebbleDetail({
@@ -60,30 +44,74 @@ export function PebbleDetail({
   onUpdatePebble,
   onUpdateCollection,
   onAddSoul,
+  onClose,
 }: PebbleDetailProps) {
-  const [glyphOpen, setGlyphOpen] = useState(false)
-  const [dateOpen, setDateOpen] = useState(false)
+  const [valenceOpen, setValenceOpen] = useState(false)
   const [soulsOpen, setSoulsOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const t = useTranslations("pebble")
-  const tGlyph = useTranslations("record.glyph")
+  const tVisibility = useTranslations("record.visibility")
   const formatPeekDate = useFormatPeekDate()
   const formattedDate = formatPeekDate(pebble.happened_at)
+  const { paletteByEmotionId } = useEmotionPalettes()
+  const palette = paletteByEmotionId.get(pebble.emotion_id)
 
-  const handleGlyphSave = useCallback(
-    (markId: string | undefined) => {
-      void onUpdatePebble({ mark_id: markId })
-      setGlyphOpen(false)
+  const matchedSouls = pebble.soul_ids
+    .map((id) => souls.find((s) => s.id === id))
+    .filter((s): s is Soul => s !== undefined)
+  const snap = pebble.instants[0]
+  const hasSouls = matchedSouls.length > 0
+  const hasCollection = collections.length > 0
+  const hasPicture = !!snap
+
+  const linkedCollectionIds = collections.map((c) => c.id)
+
+  const handleEmotionChange = useCallback(
+    (id: string) => {
+      void onUpdatePebble({ emotion_id: id })
     },
     [onUpdatePebble],
   )
 
-  const handleDateSave = useCallback(
-    (date: Date) => {
-      void onUpdatePebble({ happened_at: date.toISOString() })
-      setDateOpen(false)
+  const handleDomainChange = useCallback(
+    (ids: string[]) => {
+      void onUpdatePebble({ domain_ids: ids })
     },
     [onUpdatePebble],
+  )
+
+  // Collection membership is stored on the collection side, so a toggle on the
+  // pebble fans out to one updateCollection per changed link.
+  const handleCollectionChange = useCallback(
+    (newIds: string[]) => {
+      const added = newIds.filter((id) => !linkedCollectionIds.includes(id))
+      const removed = linkedCollectionIds.filter((id) => !newIds.includes(id))
+
+      for (const collId of added) {
+        const coll = allCollections.find((c) => c.id === collId)
+        if (coll) {
+          void onUpdateCollection(collId, {
+            pebble_ids: [...coll.pebble_ids, pebble.id],
+          })
+        }
+      }
+      for (const collId of removed) {
+        const coll = allCollections.find((c) => c.id === collId)
+        if (coll) {
+          void onUpdateCollection(collId, {
+            pebble_ids: coll.pebble_ids.filter((pid) => pid !== pebble.id),
+          })
+        }
+      }
+    },
+    [linkedCollectionIds, allCollections, pebble.id, onUpdateCollection],
+  )
+
+  const handleAddCollection = useCallback(
+    (id: string) => {
+      handleCollectionChange([...linkedCollectionIds, id])
+    },
+    [handleCollectionChange, linkedCollectionIds],
   )
 
   const handleSoulToggle = useCallback(
@@ -106,97 +134,154 @@ export function PebbleDetail({
     [onUpdatePebble],
   )
 
+  // Emotion palette drives the boxed pebble overlay when a snap is shown.
+  // Secondary as background, light as stroke — mirrors iOS PebbleReadBanner.
+  const overlayStyle: CSSProperties | undefined = palette
+    ? ({
+        backgroundColor: palette.secondary_color,
+        ["--pebble-stroke-light"]: palette.light_color,
+        ["--pebble-stroke-dark"]: palette.light_color,
+      } as CSSProperties)
+    : undefined
+
   return (
     <article>
-      {/* Clickable pebble visual → glyph picker */}
-      <button
-        type="button"
-        onClick={() => setGlyphOpen(true)}
-        className="mx-auto mb-4 block cursor-pointer"
-        aria-label={tGlyph("changeAria")}
-      >
-        <PebbleVisual
-          pebble={pebble}
-          mark={mark}
-          tier="detail"
-          className="size-[160px]"
-        />
-      </button>
+      {/* Top bar: static privacy indicator + close button */}
+      <header className="flex items-center justify-between">
+        <span
+          aria-label={
+            pebble.visibility === "private"
+              ? tVisibility("ariaPrivate")
+              : tVisibility("ariaPublic")
+          }
+          className={cn(
+            "grid size-10 place-items-center rounded-full bg-muted/60 text-muted-foreground",
+            pebble.visibility !== "private" && "opacity-0",
+          )}
+        >
+          <Lock className="size-4" aria-hidden />
+        </span>
+        {onClose ? (
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={t("peek.close")}
+            className="grid size-10 place-items-center rounded-full bg-muted/60 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <X className="size-4" aria-hidden />
+          </button>
+        ) : (
+          <span className="size-10" aria-hidden />
+        )}
+      </header>
+
+      {/* Pebble visual (and snap if present) — opens valence/intensity sheet */}
+      <Sheet open={valenceOpen} onOpenChange={setValenceOpen}>
+        <button
+          type="button"
+          onClick={() => setValenceOpen(true)}
+          className="mx-auto mt-2 mb-4 block cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-2xl"
+          aria-label={t("editIntensityAria")}
+        >
+          {hasPicture ? (
+            <div className="relative mx-auto w-[240px]">
+              {/* eslint-disable-next-line @next/next/no-img-element -- base64 data URL, next/image optimization not applicable */}
+              <img
+                src={snap}
+                alt={t("photoAlt")}
+                className="aspect-square w-full rounded-2xl object-cover"
+              />
+              <span
+                className="absolute -right-4 -top-4 grid size-[100px] place-items-center rounded-2xl shadow-md"
+                style={overlayStyle}
+              >
+                <PebbleVisual
+                  pebble={pebble}
+                  mark={mark}
+                  tier="detail"
+                  className="size-[72px]"
+                />
+              </span>
+            </div>
+          ) : (
+            <PebbleVisual
+              pebble={pebble}
+              mark={mark}
+              tier="detail"
+              className="mx-auto size-[180px]"
+            />
+          )}
+        </button>
+        {valenceOpen && (
+          <ValencePickerBody
+            intensity={pebble.intensity}
+            valence={pebble.positiveness}
+            onSelect={(size, polarity) => {
+              void onUpdatePebble({ intensity: size, positiveness: polarity })
+              setValenceOpen(false)
+            }}
+          />
+        )}
+      </Sheet>
 
       {/* Title */}
-      <h1 className="text-2xl font-heading font-semibold text-muted-foreground text-center">
+      <h1 className="text-center font-heading text-2xl font-semibold text-foreground">
         {pebble.name}
       </h1>
 
-      {/* Clickable date → date picker */}
-      <button
-        type="button"
-        onClick={() => setDateOpen(true)}
-        className="mx-auto mt-2 block cursor-pointer text-xs uppercase tracking-wider text-muted-foreground transition-colors hover:text-foreground"
-      >
+      {/* Date */}
+      <p className="mt-2 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
         <time dateTime={pebble.happened_at}>{formattedDate}</time>
-      </button>
+      </p>
 
-      {/* Intensity / Valence grid */}
-      <div className="mt-2 flex justify-center">
-        <ValenceIntensityGrid
-          intensity={pebble.intensity}
-          valence={pebble.positiveness}
-          onIntensityChange={(v) => void onUpdatePebble({ intensity: v })}
-          onValenceChange={(v) => void onUpdatePebble({ positiveness: v })}
-        />
+      {/* Tile row: emotion + domain + collection (if any) */}
+      <div
+        className={cn(
+          "mt-6 grid gap-3",
+          hasCollection ? "grid-cols-3" : "grid-cols-2",
+        )}
+      >
+        <EmotionTile value={pebble.emotion_id} onChange={handleEmotionChange} />
+        <DomainTile value={pebble.domain_ids} onChange={handleDomainChange} />
+        {hasCollection && (
+          <CollectionTile
+            value={linkedCollectionIds}
+            onChange={handleCollectionChange}
+            collections={allCollections}
+          />
+        )}
       </div>
-
-      {/* Tag chips: emotion, domain, collection */}
-      <div className="mt-4">
-        <PeekTagChips
-          pebble={pebble}
-          collections={collections}
-          allCollections={allCollections}
-          onUpdatePebble={onUpdatePebble}
-          onUpdateCollection={onUpdateCollection}
-        />
-      </div>
-
-      {/* Single photo */}
-      {pebble.instants[0] && (
-        /* eslint-disable-next-line @next/next/no-img-element -- base64 data URL, next/image optimization not applicable */
-        <img
-          src={pebble.instants[0]}
-          alt={t("photoAlt")}
-          className="mt-4 w-full rounded-xl object-cover"
-        />
-      )}
 
       {/* Description */}
       {pebble.description && (
-        <p className="mt-4 text-sm text-foreground">{pebble.description}</p>
+        <p className="mt-6 whitespace-pre-wrap text-base text-foreground leading-[1.4]">
+          {pebble.description}
+        </p>
       )}
 
-      {/* Cards */}
-      {pebble.cards.length > 0 && (
-        <ol className="mt-4 space-y-3" role="list">
-          {pebble.cards.map((card, index) => {
-            const cardType = CARD_TYPES.find((c) => c.id === card.species_id)
-            return (
-              <CardEntry
-                key={`${card.species_id}-${index}`}
-                slug={cardType?.slug}
-                fallbackPrompt={cardType?.prompt ?? card.species_id}
-                value={card.value}
-              />
-            )
-          })}
-        </ol>
+      {/* Souls grid */}
+      {hasSouls && (
+        <div className="mt-6">
+          <PebbleDetailSoulsGrid
+            souls={matchedSouls}
+            marks={marks}
+            onOpenSoulsSheet={() => setSoulsOpen(true)}
+          />
+        </div>
       )}
 
-      {/* Bottom bar */}
-      <PeekBottomBar
-        pebble={pebble}
-        souls={souls}
-        onOpenSoulsSheet={() => setSoulsOpen(true)}
-        onTriggerPhotoUpload={() => fileInputRef.current?.click()}
-      />
+      {/* Add toolbar — only renders if something is missing */}
+      <div className="mt-6">
+        <PebbleDetailAddToolbar
+          showSoul={!hasSouls}
+          showStack={!hasCollection}
+          showPicture={!hasPicture}
+          collections={allCollections}
+          onAddCollection={handleAddCollection}
+          onOpenSoulsSheet={() => setSoulsOpen(true)}
+          onTriggerPhotoUpload={() => fileInputRef.current?.click()}
+        />
+      </div>
 
       {/* Hidden file input for photo upload */}
       <input
@@ -207,20 +292,6 @@ export function PebbleDetail({
         onChange={(e) => void handleFileChange(e)}
       />
 
-      {/* Controlled dialogs */}
-      <GlyphPickerDialog
-        open={glyphOpen}
-        onOpenChange={setGlyphOpen}
-        marks={marks}
-        selectedMarkId={pebble.mark_id}
-        onSave={handleGlyphSave}
-      />
-      <DatePickerDialog
-        open={dateOpen}
-        onOpenChange={setDateOpen}
-        initialDate={new Date(pebble.happened_at)}
-        onSave={handleDateSave}
-      />
       <SoulsSheet
         open={soulsOpen}
         onOpenChange={setSoulsOpen}

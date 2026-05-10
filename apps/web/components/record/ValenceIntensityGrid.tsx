@@ -110,7 +110,10 @@ type ValencePickerBodyProps = {
   onSelect: (size: Intensity, polarity: Valence) => void
 }
 
-function ValencePickerBody({
+// Exported so callers can host the picker inside their own controlled Sheet
+// when they want a different trigger surface (e.g. PebbleDetail opens it from
+// the pebble visual itself instead of a separate chip button).
+export function ValencePickerBody({
   intensity,
   valence,
   onSelect,

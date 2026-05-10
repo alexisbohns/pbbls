@@ -364,7 +364,6 @@
     "notFoundTitle": "Pebble not found",
     "notFoundInline": "Pebble not found.",
     "notFoundDescription": "This pebble doesn't exist or may have been removed.",
-    "backToPath": "← Back to Path",
     "back": "Back to Path",
     "cardAria": "{name}, {time}",
     "instantAlt": "Instant photo for {name}",
@@ -384,9 +383,17 @@
       "close": "Close",
       "souls": "Souls",
       "picture": "Picture",
-      "writeCard": "Write a card",
-      "writeCardAria": "Write a card"
-    }
+      "editSoulAria": "Edit souls — {name}"
+    },
+    "add": {
+      "soul": "Soul",
+      "soulAria": "Add a soul",
+      "stack": "Stack",
+      "stackAria": "Add to a collection",
+      "picture": "Picture",
+      "pictureAria": "Add a picture"
+    },
+    "editIntensityAria": "Edit intensity and valence"
   },
   "record": {
     "srTitle": "Record a pebble",
