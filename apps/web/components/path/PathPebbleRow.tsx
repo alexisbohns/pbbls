@@ -88,7 +88,7 @@ export function PathPebbleRow({ pebble, mark, onSelect }: PathPebbleRowProps) {
         <time
           dateTime={pebble.happened_at}
           className={cn(
-            "path-row-name text-xs uppercase tracking-[0.12em] opacity-50",
+            "path-row-name text-[10px] uppercase tracking-[0.12em] opacity-50",
             !palette && "text-muted-foreground opacity-100",
           )}
         >

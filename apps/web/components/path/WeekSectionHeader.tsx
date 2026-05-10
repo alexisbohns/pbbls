@@ -27,7 +27,10 @@ export function WeekSectionHeader({ label }: WeekSectionHeaderProps) {
         className="size-14"
         aria-hidden="true"
       />
-      <span className="font-heading text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+      <span
+        className="font-heading text-sm font-semibold uppercase tracking-[0.18em] text-muted-foreground"
+        style={{ fontVariantNumeric: "proportional-nums lining-nums" }}
+      >
         {label}
       </span>
     </div>
