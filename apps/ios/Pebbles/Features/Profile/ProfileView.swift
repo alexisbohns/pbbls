@@ -18,101 +18,99 @@ struct ProfileView: View {
     @State private var isPresentingOnboarding = false
 
     var body: some View {
-        NavigationStack {
-            List {
-                Section {
-                    NavigationLink {
-                        LabView()
-                    } label: {
-                        Label("Lab", systemImage: "lightbulb.max")
-                    }
-                    .listRowBackground(Color.pebblesListRow)
-                } header: {
-                    Text("Discover")
+        List {
+            Section {
+                NavigationLink {
+                    LabView()
+                } label: {
+                    Label("Lab", systemImage: "lightbulb.max")
                 }
-
-                Section("Stats") {
-                    ProfileStatRow(
-                        title: "Karma",
-                        systemImage: "sparkles",
-                        value: stats.karma
-                    ) {
-                        presentedSheet = .karma
-                    }
-                    .listRowBackground(Color.pebblesListRow)
-                    ProfileStatRow(
-                        title: "Bounce",
-                        systemImage: "arrow.up.right",
-                        value: stats.bounce
-                    ) {
-                        presentedSheet = .bounce
-                    }
-                    .listRowBackground(Color.pebblesListRow)
-                }
-
-                Section("Lists") {
-                    NavigationLink {
-                        CollectionsListView()
-                    } label: {
-                        Label("Collections", systemImage: "square.stack.3d.up")
-                    }
-                    .listRowBackground(Color.pebblesListRow)
-                    NavigationLink {
-                        SoulsListView()
-                    } label: {
-                        Label("Souls", systemImage: "person.2")
-                    }
-                    .listRowBackground(Color.pebblesListRow)
-                    NavigationLink {
-                        GlyphsListView()
-                    } label: {
-                        Label("Glyphs", systemImage: "scribble")
-                    }
-                    .listRowBackground(Color.pebblesListRow)
-                }
-
-                Section("Legal") {
-                    ProfileNavRow(title: "Replay onboarding", systemImage: "play.circle") {
-                        isPresentingOnboarding = true
-                    }
-                    .listRowBackground(Color.pebblesListRow)
-                    ProfileNavRow(title: "Terms", systemImage: "doc.text") {
-                        presentedLegalDoc = .terms
-                    }
-                    .listRowBackground(Color.pebblesListRow)
-                    ProfileNavRow(title: "Privacy", systemImage: "lock.shield") {
-                        presentedLegalDoc = .privacy
-                    }
-                    .listRowBackground(Color.pebblesListRow)
-                }
-
-                Section {
-                    Button(role: .destructive) {
-                        Task { await supabase.signOut() }
-                    } label: {
-                        Text("Log out")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .listRowBackground(Color.pebblesListRow)
-                }
+                .listRowBackground(Color.pebblesListRow)
+            } header: {
+                Text("Discover")
             }
-            .navigationTitle("Profile")
-            .pebblesScreen()
-            .task { await loadStats() }
-            .sheet(item: $presentedSheet) { sheet in
-                switch sheet {
-                case .karma:  KarmaExplainerSheet()
-                case .bounce: BounceExplainerSheet()
+
+            Section("Stats") {
+                ProfileStatRow(
+                    title: "Karma",
+                    systemImage: "sparkles",
+                    value: stats.karma
+                ) {
+                    presentedSheet = .karma
                 }
-            }
-            .sheet(item: $presentedLegalDoc) { doc in
-                LegalDocumentSheet(url: doc.url)
-                    .ignoresSafeArea()
-            }
-            .fullScreenCover(isPresented: $isPresentingOnboarding) {
-                OnboardingView(steps: OnboardingSteps.all) {
-                    isPresentingOnboarding = false
+                .listRowBackground(Color.pebblesListRow)
+                ProfileStatRow(
+                    title: "Bounce",
+                    systemImage: "arrow.up.right",
+                    value: stats.bounce
+                ) {
+                    presentedSheet = .bounce
                 }
+                .listRowBackground(Color.pebblesListRow)
+            }
+
+            Section("Lists") {
+                NavigationLink {
+                    CollectionsListView()
+                } label: {
+                    Label("Collections", systemImage: "square.stack.3d.up")
+                }
+                .listRowBackground(Color.pebblesListRow)
+                NavigationLink {
+                    SoulsListView()
+                } label: {
+                    Label("Souls", systemImage: "person.2")
+                }
+                .listRowBackground(Color.pebblesListRow)
+                NavigationLink {
+                    GlyphsListView()
+                } label: {
+                    Label("Glyphs", systemImage: "scribble")
+                }
+                .listRowBackground(Color.pebblesListRow)
+            }
+
+            Section("Legal") {
+                ProfileNavRow(title: "Replay onboarding", systemImage: "play.circle") {
+                    isPresentingOnboarding = true
+                }
+                .listRowBackground(Color.pebblesListRow)
+                ProfileNavRow(title: "Terms", systemImage: "doc.text") {
+                    presentedLegalDoc = .terms
+                }
+                .listRowBackground(Color.pebblesListRow)
+                ProfileNavRow(title: "Privacy", systemImage: "lock.shield") {
+                    presentedLegalDoc = .privacy
+                }
+                .listRowBackground(Color.pebblesListRow)
+            }
+
+            Section {
+                Button(role: .destructive) {
+                    Task { await supabase.signOut() }
+                } label: {
+                    Text("Log out")
+                        .frame(maxWidth: .infinity)
+                }
+                .listRowBackground(Color.pebblesListRow)
+            }
+        }
+        .navigationTitle("Profile")
+        .pebblesScreen()
+        .task { await loadStats() }
+        .sheet(item: $presentedSheet) { sheet in
+            switch sheet {
+            case .karma:  KarmaExplainerSheet()
+            case .bounce: BounceExplainerSheet()
+            }
+        }
+        .sheet(item: $presentedLegalDoc) { doc in
+            LegalDocumentSheet(url: doc.url)
+                .ignoresSafeArea()
+        }
+        .fullScreenCover(isPresented: $isPresentingOnboarding) {
+            OnboardingView(steps: OnboardingSteps.all) {
+                isPresentingOnboarding = false
             }
         }
     }
