@@ -1,6 +1,5 @@
 import RiveRuntime
 import SwiftUI
-import UIKit
 
 /// One cell in the horizontal weeks roll. Renders the cairn Rive
 /// animation above the ISO week number. Plays its one-shot whenever
@@ -29,21 +28,6 @@ struct WeekRollCairnCell: View {
         self._cairn = State(initialValue: CairnAnimationViewModel(fileName: "pbbls-cairn"))
     }
 
-    private static let titleSize: CGFloat = 13
-
-    /// Ysabeau-SemiBold with proportional + lining figures (matches
-    /// `WeekSectionHeader`'s rendering).
-    private static var titleFont: SwiftUI.Font {
-        let descriptor = UIFontDescriptor(name: "Ysabeau-SemiBold", size: titleSize)
-            .addingAttributes([
-                .featureSettings: [
-                    [UIFontDescriptor.FeatureKey.type: 6,  UIFontDescriptor.FeatureKey.selector: 1],
-                    [UIFontDescriptor.FeatureKey.type: 21, UIFontDescriptor.FeatureKey.selector: 1],
-                ],
-            ])
-        return SwiftUI.Font(UIFont(descriptor: descriptor, size: titleSize))
-    }
-
     var body: some View {
         let weekNum = calendar.component(.weekOfYear, from: entry.weekStart)
         Button(action: onTap) {
@@ -52,7 +36,7 @@ struct WeekRollCairnCell: View {
                     .frame(width: 56, height: 56)
                     .accessibilityHidden(true)
                 Text(verbatim: "\(weekNum)")
-                    .font(Self.titleFont)
+                    .font(.ysabeauSemibold(13))
                     .foregroundStyle(isFocused ? Color.pebblesAccent : Color.pebblesMutedForeground)
             }
         }

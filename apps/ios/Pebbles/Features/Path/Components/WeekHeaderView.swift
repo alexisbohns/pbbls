@@ -10,8 +10,6 @@ struct WeekHeaderView: View {
     let calendar: Calendar
     let today: Date
 
-    @Environment(\.colorScheme) private var colorScheme
-
     var body: some View {
         HStack(spacing: 12) {
             chevronButton(isPrevious: true)
@@ -20,7 +18,7 @@ struct WeekHeaderView: View {
                 weekStart: focusedWeekStart, today: today,
                 calendar: calendar, locale: .current
             ))
-            .font(.custom("Ysabeau-SemiBold", size: 17))
+            .font(.ysabeauSemibold(17))
             .tracking(0.34)              // 2% of 17pt
             .textCase(.uppercase)
             .foregroundStyle(Color.pebblesMutedForeground)
@@ -36,7 +34,7 @@ struct WeekHeaderView: View {
     }
 
     private var strokeColor: Color {
-        colorScheme == .dark ? Color.pebblesForeground : Color.pebblesMutedForeground
+        Color.pebblesBorder
     }
 
     @ViewBuilder

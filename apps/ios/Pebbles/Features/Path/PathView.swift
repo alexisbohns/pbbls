@@ -35,7 +35,7 @@ struct PathView: View {
                     }
                 }
                 .toolbar(.hidden, for: .navigationBar)
-                .pebblesScreen()
+                .pebblesScreen(background: Color.pebblesPathBackground)
         }
         .task { await load() }
         .task { await stats.load() }
@@ -92,7 +92,7 @@ struct PathView: View {
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
-            VStack(spacing: 16) {
+            VStack(spacing: 0) {
                 WeekRollView(
                     entries: entries,
                     focusedWeekStart: $focusedWeekStart,
@@ -104,6 +104,7 @@ struct PathView: View {
                     calendar: isoCalendar,
                     today: today
                 )
+                .padding(.top, 16)
                 TabView(selection: $focusedWeekStart) {
                     ForEach(entries) { entry in
                         WeekPathView(

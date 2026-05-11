@@ -17,7 +17,7 @@ struct NewPebbleButton: View {
     var body: some View {
         Button(action: onTap) {
             Text("New pebble")
-                .font(.custom("Ysabeau-SemiBold", size: 17))
+                .font(.ysabeauSemibold(17))
                 .foregroundStyle(Color.pebblesAccent)
                 .frame(maxWidth: .infinity)
                 .frame(height: 52)

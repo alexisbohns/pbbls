@@ -27,4 +27,12 @@ extension Color {
             ? UIColor(named: "SurfaceAlt") ?? .systemGray5
             : .white
     })
+
+    /// Pure white in light mode, `pebblesBackground` (near-black) in dark.
+    /// Used by PathView per the #388 design.
+    static let pebblesPathBackground = Color(uiColor: UIColor { traits in
+        traits.userInterfaceStyle == .dark
+            ? (UIColor(named: "Background") ?? .black)
+            : .white
+    })
 }

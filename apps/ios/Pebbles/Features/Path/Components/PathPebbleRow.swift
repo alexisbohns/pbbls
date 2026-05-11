@@ -40,7 +40,7 @@ struct PathPebbleRow: View {
                 thumbnail
                 VStack(alignment: .leading, spacing: 4) {
                     Text(pebble.name)
-                        .font(.custom("Ysabeau-SemiBold", size: 17))
+                        .font(.ysabeauSemibold(17))
                         .foregroundStyle(nameColor)
                     Text(formattedWeekdayTime)
                         .font(.caption)

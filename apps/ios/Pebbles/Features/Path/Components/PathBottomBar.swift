@@ -48,7 +48,7 @@ struct PathBottomBar: View {
                 .foregroundStyle(Color.pebblesAccent)
             VStack(alignment: .leading, spacing: 0) {
                 Text(value.map { "\($0)" } ?? "—")
-                    .font(.custom("Ysabeau-SemiBold", size: 17))
+                    .font(.ysabeauSemibold(17))
                     .foregroundStyle(numberColor)
                 Text(label)
                     .font(.caption)
