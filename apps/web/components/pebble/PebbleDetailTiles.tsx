@@ -4,16 +4,18 @@ import { useMemo, useState, type ReactNode } from "react"
 import { Heart, Tag, Layers } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { Collection } from "@/lib/types"
-import { EMOTIONS } from "@/lib/config/emotions"
 import { DOMAINS } from "@/lib/config/domains"
-import { useEmotionLocalized, useDomainLocalized } from "@/lib/i18n"
+import { useDomainLocalized } from "@/lib/i18n"
 import { SelectableItem } from "@/components/ui/SelectableItem"
-import { SearchableList } from "@/components/ui/SearchableList"
 import {
   Popover,
   PopoverTrigger,
   PopoverContent,
 } from "@/components/ui/popover"
+import {
+  EmotionPickerSheet,
+  useSelectedEmotionDisplay,
+} from "@/components/record/EmotionPicker"
 import { cn } from "@/lib/utils"
 
 // Vertical tile shared by emotion / domain / collection triggers in the
@@ -55,92 +57,42 @@ type EmotionTileProps = {
   onChange: (id: string) => void
 }
 
-function EmotionOption({
-  emotion,
-  selected,
-  onSelect,
-}: {
-  emotion: (typeof EMOTIONS)[number]
-  selected: boolean
-  onSelect: () => void
-}) {
-  const { name } = useEmotionLocalized(emotion)
-  return (
-    <SelectableItem selected={selected} onSelect={onSelect}>
-      <span
-        className="size-3 shrink-0 rounded-full"
-        style={{ backgroundColor: emotion.color }}
-        aria-hidden
-      />
-      {name}
-    </SelectableItem>
-  )
-}
-
-function useLocalizedEmotionMap(): Map<string, string> {
-  const t = useTranslations() as unknown as {
-    (key: string): string
-    has(key: string): boolean
-  }
-  return useMemo(() => {
-    const map = new Map<string, string>()
-    for (const e of EMOTIONS) {
-      const key = `emotion.${e.slug}.name`
-      map.set(e.slug, t.has(key) ? t(key) : e.name)
-    }
-    return map
-  }, [t])
-}
-
 export function EmotionTile({ value, onChange }: EmotionTileProps) {
-  const [query, setQuery] = useState("")
   const t = useTranslations("record.emotion")
-  const selected = EMOTIONS.find((e) => e.id === value)
-  const fallback = { slug: "", name: "", label: "" }
-  const localized = useEmotionLocalized(selected ?? fallback)
-  const localizedNames = useLocalizedEmotionMap()
-
-  const filtered = useMemo(() => {
-    const trimmed = query.trim().toLowerCase()
-    if (!trimmed) return EMOTIONS
-    return EMOTIONS.filter((e) => {
-      const name = localizedNames.get(e.slug) ?? e.name
-      return name.toLowerCase().includes(trimmed)
-    })
-  }, [query, localizedNames])
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const selected = useSelectedEmotionDisplay(value || undefined)
 
   return (
-    <Popover
-      onOpenChange={(open) => {
-        if (!open) setQuery("")
-      }}
-    >
-      <TileTrigger
-        icon={<Heart className="size-5" />}
-        label={selected ? localized.name : t("label")}
-        ariaLabel={
-          selected ? t("selectedAria", { name: localized.name }) : t("pickAria")
+    <>
+      <button
+        type="button"
+        onClick={() => setPickerOpen(true)}
+        aria-label={
+          selected ? t("selectedAria", { name: selected.name }) : t("pickAria")
         }
+        className={cn(
+          "flex flex-col items-center justify-center gap-2 rounded-2xl border border-border/60 bg-muted/40 px-3 py-4 transition-colors",
+          "hover:bg-muted/70 active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        )}
+      >
+        <span className="text-muted-foreground" aria-hidden>
+          {selected ? (
+            <span className="text-lg leading-none">{selected.emoji}</span>
+          ) : (
+            <Heart className="size-5" />
+          )}
+        </span>
+        <span className="text-sm font-medium text-foreground line-clamp-1">
+          {selected ? selected.name : t("label")}
+        </span>
+      </button>
+      <EmotionPickerSheet
+        open={pickerOpen}
+        onOpenChange={setPickerOpen}
+        value={value || undefined}
+        onChange={(id) => onChange(id ?? "")}
       />
-      <PopoverContent align="center" className="min-w-[220px] p-2">
-        <SearchableList
-          query={query}
-          onQueryChange={setQuery}
-          placeholder={t("searchPlaceholder")}
-          isEmpty={filtered.length === 0}
-          emptyMessage={t("empty")}
-        >
-          {filtered.map((emotion) => (
-            <EmotionOption
-              key={emotion.id}
-              emotion={emotion}
-              selected={value === emotion.id}
-              onSelect={() => onChange(emotion.id)}
-            />
-          ))}
-        </SearchableList>
-      </PopoverContent>
-    </Popover>
+    </>
   )
 }
 

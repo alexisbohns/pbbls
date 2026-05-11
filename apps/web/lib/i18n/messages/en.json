@@ -416,6 +416,12 @@
       "searchPlaceholder": "Search emotions…",
       "empty": "No emotions found"
     },
+    "emotionPicker": {
+      "title": "Emotions",
+      "cancel": "Cancel",
+      "done": "Done",
+      "loading": "Loading emotions…"
+    },
     "collection": {
       "label": "Collection",
       "pickAria": "Pick collections",
@@ -547,6 +553,15 @@
     "happy": { "name": "Happy", "label": "A warm sense that things are good" },
     "joyful": { "name": "Joy", "label": "Deep, radiant happiness" },
     "passionate": { "name": "Passion", "label": "Intense drive and deep engagement" }
+  },
+  "emotionCategory": {
+    "anger":   { "name": "Anger" },
+    "fear":    { "name": "Fear" },
+    "joy":     { "name": "Joy" },
+    "peace":   { "name": "Peace" },
+    "pride":   { "name": "Pride" },
+    "sadness": { "name": "Sadness" },
+    "shame":   { "name": "Shame" }
   },
   "domain": {
     "health": { "name": "Health", "label": "Your body, energy, and physical well-being" },

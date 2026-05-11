@@ -416,6 +416,12 @@
       "searchPlaceholder": "Rechercher une émotion…",
       "empty": "Aucune émotion trouvée"
     },
+    "emotionPicker": {
+      "title": "Émotions",
+      "cancel": "Annuler",
+      "done": "Terminé",
+      "loading": "Chargement des émotions…"
+    },
     "collection": {
       "label": "Collection",
       "pickAria": "Choisir des collections",
@@ -547,6 +553,15 @@
     "happy": { "name": "Bonheur", "label": "Une chaleur intérieure qui dit que tout va bien" },
     "joyful": { "name": "Joie", "label": "Un bonheur profond et rayonnant" },
     "passionate": { "name": "Passion", "label": "Élan intense et engagement profond" }
+  },
+  "emotionCategory": {
+    "anger":   { "name": "Colère" },
+    "fear":    { "name": "Peur" },
+    "joy":     { "name": "Joie" },
+    "peace":   { "name": "Paix" },
+    "pride":   { "name": "Fierté" },
+    "sadness": { "name": "Tristesse" },
+    "shame":   { "name": "Honte" }
   },
   "domain": {
     "health": { "name": "Santé", "label": "Votre corps, votre énergie et votre bien-être physique" },

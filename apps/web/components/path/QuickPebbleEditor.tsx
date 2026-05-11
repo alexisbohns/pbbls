@@ -23,7 +23,10 @@ import { Button } from "@/components/ui/button"
 import { ValenceIntensityGrid } from "@/components/record/ValenceIntensityGrid"
 import { CustomizationTile } from "@/components/record/CustomizationTile"
 import { DomainPopover } from "@/components/record/DomainPopover"
-import { EmotionPopover } from "@/components/record/EmotionPopover"
+import {
+  EmotionPickerSheet,
+  useSelectedEmotionDisplay,
+} from "@/components/record/EmotionPicker"
 import { CollectionPopover } from "@/components/record/CollectionPopover"
 import { VisibilityPicker } from "@/components/record/VisibilityPicker"
 import { DatePickerDialog } from "@/components/record/DatePickerDialog"
@@ -56,6 +59,7 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
   const tGlyph = useTranslations("record.glyph")
   const tPhoto = useTranslations("record.photo")
   const tSouls = useTranslations("record.souls")
+  const tEmotion = useTranslations("record.emotion")
   const formatDate = useFormatDate()
 
   // Collapse state
@@ -90,6 +94,7 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
   const [dateOpen, setDateOpen] = useState(false)
   const [glyphOpen, setGlyphOpen] = useState(false)
   const [soulsOpen, setSoulsOpen] = useState(false)
+  const [emotionPickerOpen, setEmotionPickerOpen] = useState(false)
 
   // File input ref
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -112,6 +117,7 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
   }, [shouldAutoExpand, countLoading, bounceLoading])
 
   const selectedMark = marks.find((m) => m.id === markId)
+  const selectedEmotion = useSelectedEmotionDisplay(emotionId || undefined)
 
   const resetForm = useCallback(() => {
     setName("")
@@ -329,7 +335,30 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
       {/* Qualification pills: domain + emotion */}
       <div className="mb-3 flex items-center gap-2">
         <DomainPopover value={domainIds} onChange={setDomainIds} />
-        <EmotionPopover value={emotionId} onChange={setEmotionId} />
+        <button
+          type="button"
+          onClick={() => setEmotionPickerOpen(true)}
+          aria-label={
+            selectedEmotion
+              ? tEmotion("selectedAria", { name: selectedEmotion.name })
+              : tEmotion("pickAria")
+          }
+          className={cn(
+            "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+            selectedEmotion
+              ? "border border-border bg-background text-foreground"
+              : "border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-muted-foreground/50",
+          )}
+        >
+          {selectedEmotion ? (
+            <>
+              <span aria-hidden>{selectedEmotion.emoji}</span>
+              {selectedEmotion.name}
+            </>
+          ) : (
+            tEmotion("label")
+          )}
+        </button>
       </div>
 
       {/* Description textarea */}
@@ -456,6 +485,16 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
         onToggle={toggleSoul}
         souls={souls}
         onAddSoul={handleAddSoul}
+      />
+
+      {/* Emotion picker sheet */}
+      <EmotionPickerSheet
+        open={emotionPickerOpen}
+        onOpenChange={setEmotionPickerOpen}
+        value={emotionId || undefined}
+        intensity={intensity}
+        valence={valence}
+        onChange={(id) => setEmotionId(id ?? "")}
       />
     </section>
   )
