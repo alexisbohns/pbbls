@@ -1,77 +1,44 @@
 import SwiftUI
 import os
 
+private enum PathRoute: Hashable {
+    case profile
+}
+
 struct PathView: View {
     @Environment(SupabaseService.self) private var supabase
+    @Environment(EmotionPaletteService.self) private var palettes
+    @Environment(PathStatsService.self) private var stats
+
     @State private var pebbles: [Pebble] = []
-    @State private var isLoading = true
-    @State private var loadError: String?
+    @State private var entries: [WeekRollEntry] = []
+    @State private var focusedWeekStart: Date = Date()
+    @State private var navPath = NavigationPath()
     @State private var isPresentingCreate = false
     @State private var selectedPebbleId: UUID?
-    @State private var isPresentingOnboarding = false
     @State private var pendingDeletion: Pebble?
     @State private var deleteError: String?
-
-    /// Per-week reveal cascade state. Each week's section only mounts
-    /// once the previous week's cascade is complete, so its cairn
-    /// animation doesn't start prematurely.
-    ///
-    /// - `revealedWeeksCount`: how many weeks are currently in the list
-    ///   (starts at 1 — the topmost week — so its cairn begins playing
-    ///   on appear). Incremented each time a week finishes its cascade.
-    /// - `revealedPebblesPerWeek[i]`: how many of week `i`'s pebbles are
-    ///   currently visible. Pebble rows beyond this count are not
-    ///   emitted at all (so the card grows from zero height instead of
-    ///   reserving space for hidden rows).
-    /// - `titleVisiblePerWeek[i]`: whether week `i`'s title has faded in.
-    /// - `cascadeStartedWeeks`: guards `runCascade(forWeek:)` against
-    ///   duplicate invocation.
-    /// - `cascadeFullyDone`: once true, the gating dictionaries are
-    ///   ignored and the full list renders immediately. Prevents a
-    ///   `load()` triggered by a new/deleted pebble from re-animating.
-    @State private var revealedWeeksCount: Int = 1
-    @State private var revealedPebblesPerWeek: [Int: Int] = [:]
-    @State private var titleVisiblePerWeek: [Int: Bool] = [:]
-    @State private var cascadeStartedWeeks: Set<Int> = []
-    @State private var cascadeFullyDone = false
+    @State private var isLoading = true
+    @State private var loadError: String?
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "path")
 
-    /// Stagger between consecutive pebble reveals in a single week.
-    private static let pebbleRevealStagger: Duration = .milliseconds(80)
-    /// Delay after a cairn stops before its week title fades in.
-    private static let titleRevealDelay: Duration = .milliseconds(120)
-    /// Pause after a week's last pebble before the next week's section
-    /// is mounted (and its cairn starts).
-    private static let nextWeekDelay: Duration = .milliseconds(180)
-
-    /// ISO 8601 calendar — Mon-start, week-1-contains-first-Thursday.
-    /// Locale-independent so all users see the same week boundaries.
-    private var isoCalendar: Calendar {
-        Calendar(identifier: .iso8601)
-    }
-
-    private var groupedPebbles: [(key: Date, value: [Pebble])] {
-        groupPebblesByISOWeek(pebbles, calendar: isoCalendar)
-    }
+    private var isoCalendar: Calendar { Calendar(identifier: .iso8601) }
+    private var today: Date { Date() }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navPath) {
             content
-                .navigationTitle("Path")
-                .toolbar {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button {
-                            isPresentingOnboarding = true
-                        } label: {
-                            Image(systemName: "info.circle")
-                        }
-                        .accessibilityLabel("Show how Pebbles works")
+                .navigationDestination(for: PathRoute.self) { route in
+                    switch route {
+                    case .profile: ProfileView()
                     }
                 }
-                .pebblesScreen()
+                .toolbar(.hidden, for: .navigationBar)
+                .pebblesScreen(background: Color.pebblesPathBackground)
         }
         .task { await load() }
+        .task { await stats.load() }
         .sheet(isPresented: $isPresentingCreate) {
             CreatePebbleSheet(onCreated: { newPebbleId in
                 selectedPebbleId = newPebbleId
@@ -82,13 +49,6 @@ struct PathView: View {
             PebbleDetailSheet(pebbleId: id, onPebbleUpdated: {
                 Task { await load() }
             })
-        }
-        .fullScreenCover(isPresented: $isPresentingOnboarding) {
-            OnboardingView(steps: OnboardingSteps.all) {
-                // Replay is idempotent — only RootView's initial-gate
-                // closure writes @AppStorage("hasSeenOnboarding").
-                isPresentingOnboarding = false
-            }
         }
         .confirmationDialog(
             pendingDeletion.map { "Delete \($0.name)?" } ?? "",
@@ -126,54 +86,49 @@ struct PathView: View {
     private var content: some View {
         if isLoading {
             ProgressView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if let loadError {
-            Text(loadError).foregroundStyle(.secondary)
+            Text(loadError)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
-            List {
-                Section {
-                    Button {
-                        isPresentingCreate = true
-                    } label: {
-                        Label("Record a pebble", systemImage: "plus.circle.fill")
-                            .font(.headline)
-                    }
-                    .listRowBackground(Color.pebblesListRow)
-                }
-
-                let visibleWeekCount = cascadeFullyDone
-                    ? groupedPebbles.count
-                    : min(revealedWeeksCount, groupedPebbles.count)
-
-                ForEach(0..<visibleWeekCount, id: \.self) { weekIndex in
-                    let group = groupedPebbles[weekIndex]
-                    let revealedPebbleCount = cascadeFullyDone
-                        ? group.value.count
-                        : (revealedPebblesPerWeek[weekIndex] ?? 0)
-                    let visiblePebbles = Array(group.value.prefix(revealedPebbleCount))
-
-                    Section {
-                        ForEach(visiblePebbles) { pebble in
-                            PathPebbleRow(
-                                pebble: pebble,
-                                onTap: { selectedPebbleId = pebble.id },
-                                onDelete: { pendingDeletion = pebble }
-                            )
-                            .listRowBackground(Color.pebblesListRow)
-                            .listRowSeparator(.hidden)
-                            .transition(.opacity.combined(with: .move(edge: .top)))
-                        }
-                    } header: {
-                        WeekSectionHeader(
-                            weekStart: group.key,
-                            calendar: isoCalendar,
-                            titleVisible: cascadeFullyDone
-                                || (titleVisiblePerWeek[weekIndex] ?? false),
-                            onCairnFinished: cascadeFullyDone
-                                ? nil
-                                : { runCascade(forWeek: weekIndex) }
+            VStack(spacing: 0) {
+                WeekRollView(
+                    entries: entries,
+                    focusedWeekStart: $focusedWeekStart,
+                    calendar: isoCalendar
+                )
+                WeekHeaderView(
+                    entries: entries,
+                    focusedWeekStart: $focusedWeekStart,
+                    calendar: isoCalendar,
+                    today: today
+                )
+                .padding(.top, 16)
+                TabView(selection: $focusedWeekStart) {
+                    ForEach(entries) { entry in
+                        WeekPathView(
+                            entry: entry,
+                            onTap: { pebble in selectedPebbleId = pebble.id },
+                            onDelete: { pebble in pendingDeletion = pebble },
+                            onCreate: { isPresentingCreate = true }
                         )
+                        .tag(entry.weekStart)
                     }
                 }
+                .tabViewStyle(.page(indexDisplayMode: .never))
+            }
+            .safeAreaInset(edge: .bottom) {
+                VStack(spacing: 12) {
+                    NewPebbleButton(onTap: { isPresentingCreate = true })
+                    PathBottomBar(
+                        karma: stats.karma,
+                        bounce: stats.bounce,
+                        onProfile: { navPath.append(PathRoute.profile) }
+                    )
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 8)
             }
         }
     }
@@ -181,52 +136,33 @@ struct PathView: View {
     private func load() async {
         do {
             let result: [Pebble] = try await supabase.client
-                .from("pebbles")
-                .select("id, name, happened_at, render_svg, emotion:emotions(id, slug, name)")
-                .order("happened_at", ascending: false)
+                .rpc("path_pebbles")
                 .execute()
                 .value
             self.pebbles = result
+            self.entries = WeekRollBuilder.build(
+                pebbles: result, calendar: isoCalendar, today: today
+            )
+            // First load (or after a deletion that removed the focused week):
+            // pick the current-week entry if present, else the closest entry.
+            if !entries.contains(where: { $0.weekStart == focusedWeekStart }) {
+                let currentWeekStart = WeekRollBuilder.build(
+                    pebbles: [], calendar: isoCalendar, today: today
+                ).first?.weekStart ?? today
+                if let cur = entries.first(where: { $0.weekStart == currentWeekStart }) {
+                    focusedWeekStart = cur.weekStart
+                } else if let closest = entries.min(by: {
+                    abs($0.weekStart.timeIntervalSince(focusedWeekStart)) <
+                    abs($1.weekStart.timeIntervalSince(focusedWeekStart))
+                }) {
+                    focusedWeekStart = closest.weekStart
+                }
+            }
             self.isLoading = false
         } catch {
             logger.error("path fetch failed: \(error.localizedDescription, privacy: .private)")
             self.loadError = "Couldn't load your pebbles."
             self.isLoading = false
-        }
-    }
-
-    /// Drives one week's reveal cascade, then chains to the next week
-    /// by mounting its section so that section's cairn animation can
-    /// start. Idempotent — guarded by `cascadeStartedWeeks` so a stray
-    /// `RiveViewModel` callback fired after a re-render does not
-    /// re-trigger an in-flight or completed cascade.
-    private func runCascade(forWeek weekIndex: Int) {
-        guard !cascadeStartedWeeks.contains(weekIndex) else { return }
-        cascadeStartedWeeks.insert(weekIndex)
-
-        Task { @MainActor in
-            try? await Task.sleep(for: Self.titleRevealDelay)
-            withAnimation(.easeOut(duration: 0.25)) {
-                titleVisiblePerWeek[weekIndex] = true
-            }
-
-            let groups = groupedPebbles
-            let pebbleCount = weekIndex < groups.count ? groups[weekIndex].value.count : 0
-            for index in 0..<pebbleCount {
-                try? await Task.sleep(for: Self.pebbleRevealStagger)
-                withAnimation(.easeOut(duration: 0.25)) {
-                    revealedPebblesPerWeek[weekIndex] = index + 1
-                }
-            }
-
-            try? await Task.sleep(for: Self.nextWeekDelay)
-            if weekIndex + 1 < groupedPebbles.count {
-                withAnimation(.easeOut(duration: 0.3)) {
-                    revealedWeeksCount = weekIndex + 2
-                }
-            } else {
-                cascadeFullyDone = true
-            }
         }
     }
 

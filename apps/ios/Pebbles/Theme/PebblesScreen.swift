@@ -15,14 +15,15 @@ private struct PebblesLabelStyle: LabelStyle {
 }
 
 private struct PebblesScreen: ViewModifier {
+    let background: Color
     func body(content: Content) -> some View {
         content
             .tint(Color.pebblesAccent)
             .foregroundStyle(Color.pebblesMutedForeground)
             .labelStyle(PebblesLabelStyle())
             .scrollContentBackground(.hidden)
-            .background(Color.pebblesBackground)
-            .toolbarBackground(Color.pebblesBackground, for: .navigationBar)
+            .background(background)
+            .toolbarBackground(background, for: .navigationBar)
     }
 }
 
@@ -33,7 +34,11 @@ extension View {
     /// Apply inside a `NavigationStack` so the toolbar modifiers attach to the
     /// correct bar. Modifiers that don't apply to the current context (e.g.
     /// `.toolbarBackground` when there is no toolbar) are inert.
-    func pebblesScreen() -> some View {
-        modifier(PebblesScreen())
+    ///
+    /// Default background uses `Color.pebblesBackground`. Pass a custom
+    /// `background` to override (e.g. PathView wants a pure-white root in
+    /// light mode while keeping the dark theme color in dark).
+    func pebblesScreen(background: Color = Color.pebblesBackground) -> some View {
+        modifier(PebblesScreen(background: background))
     }
 }

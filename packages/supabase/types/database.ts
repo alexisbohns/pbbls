@@ -1322,6 +1322,25 @@ export type Database = {
         }
       }
       is_admin: { Args: { p_user_id: string }; Returns: boolean }
+      path_pebbles: {
+        Args: never
+        Returns: {
+          emotion: Json
+          first_snap_path: string
+          happened_at: string
+          id: string
+          intensity: number
+          name: string
+          render_svg: string
+        }[]
+      }
+      sweep_orphan_snap_files: {
+        Args: never
+        Returns: {
+          bytes_freed: number
+          deleted_count: number
+        }[]
+      }
       update_pebble: {
         Args: { p_pebble_id: string; payload: Json }
         Returns: undefined

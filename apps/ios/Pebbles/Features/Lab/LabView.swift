@@ -23,12 +23,10 @@ struct LabView: View {
     private var service: LogsService { LogsService(supabase: supabase) }
 
     var body: some View {
-        NavigationStack {
-            content
-                .navigationTitle("Lab")
-                .pebblesScreen()
-        }
-        .task { await load() }
+        content
+            .navigationTitle("Lab")
+            .pebblesScreen()
+            .task { await load() }
     }
 
     @ViewBuilder
