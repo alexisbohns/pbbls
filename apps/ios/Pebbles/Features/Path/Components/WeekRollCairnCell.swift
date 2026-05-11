@@ -57,13 +57,11 @@ struct WeekRollCairnCell: View {
 
     /// The stroke color to feed into Rive:
     ///   - focused → accent (both schemes)
-    ///   - unfocused, light → Muted (subtle grey)
-    ///   - unfocused, dark → MutedForeground (slightly brighter)
+    ///   - unfocused → mutedForeground (both schemes; same shade in light/dark
+    ///     so the cairn stays visible on both the white path background and
+    ///     the dark theme background)
     private var strokeColor: SwiftUI.Color {
-        if isFocused {
-            return SwiftUI.Color.pebblesAccent
-        }
-        return colorScheme == .dark ? SwiftUI.Color.pebblesMutedForeground : SwiftUI.Color.pebblesMuted
+        isFocused ? SwiftUI.Color.pebblesAccent : SwiftUI.Color.pebblesMutedForeground
     }
 
     // MARK: - Data Binding setup

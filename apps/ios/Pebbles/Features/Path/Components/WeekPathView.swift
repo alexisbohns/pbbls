@@ -10,6 +10,7 @@ struct WeekPathView: View {
     let entry: WeekRollEntry
     let onTap: (Pebble) -> Void
     let onDelete: (Pebble) -> Void
+    let onCreate: () -> Void
 
     @State private var revealedCount = 0
 
@@ -72,10 +73,30 @@ struct WeekPathView: View {
     }
 
     private var emptyState: some View {
-        VStack {
+        VStack(spacing: 12) {
             Spacer()
-            Text("No pebbles this week")
+            Text("Fresh week")
+                .font(.ysabeauSemibold(20))
+                .foregroundStyle(Color.pebblesForeground)
+            Text("Collect a new pebble")
+                .font(.caption)
+                .tracking(1.2)
+                .textCase(.uppercase)
                 .foregroundStyle(Color.pebblesMutedForeground)
+            Button(action: onCreate) {
+                Image(systemName: "plus")
+                    .font(.title)
+                    .fontWeight(.medium)
+                    .foregroundStyle(.white)
+                    .frame(width: 44, height: 44)
+                    .background(
+                        RoundedRectangle(cornerRadius: 17)
+                            .fill(Color.pebblesAccent)
+                    )
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("New pebble")
+            .padding(.top, 12)
             Spacer()
         }
         .frame(maxWidth: .infinity)

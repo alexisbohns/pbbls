@@ -3,9 +3,11 @@ import Foundation
 /// Pure builder for the iOS Path screen's weeks roll.
 ///
 /// Returns `[WeekRollEntry]` containing every ISO week with at least one
-/// pebble, plus the current week and the next week (so the user can always
-/// see "today" and "tomorrow's week" in the roll). Entries are sorted
-/// ascending by `weekStart`.
+/// pebble, plus the current week (so a fresh user always sees their
+/// current-week empty state). Future weeks are NOT pre-created — they
+/// only appear in the roll once a pebble is dated into them.
+///
+/// Entries are sorted ascending by `weekStart`.
 ///
 /// Within each entry, pebbles are sorted asymmetrically:
 ///   - Past weeks (whose Monday is strictly before the current week's
@@ -20,17 +22,14 @@ enum WeekRollBuilder {
         today: Date
     ) -> [WeekRollEntry] {
         let currentStart = weekStart(for: today, calendar: calendar)
-        guard let nextStart = calendar.date(byAdding: .weekOfYear, value: 1, to: currentStart) else {
-            return []
-        }
 
         // Bucket pebbles by their week's Monday.
         let grouped: [Date: [Pebble]] = Dictionary(grouping: pebbles) { pebble in
             weekStart(for: pebble.happenedAt, calendar: calendar)
         }
 
-        // Union: every week with pebbles, plus current and next.
-        let weekStarts = Set(grouped.keys).union([currentStart, nextStart])
+        // Union: every week with pebbles, plus current. No empty future weeks.
+        let weekStarts = Set(grouped.keys).union([currentStart])
 
         return weekStarts
             .sorted()

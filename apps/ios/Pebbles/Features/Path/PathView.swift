@@ -110,7 +110,8 @@ struct PathView: View {
                         WeekPathView(
                             entry: entry,
                             onTap: { pebble in selectedPebbleId = pebble.id },
-                            onDelete: { pebble in pendingDeletion = pebble }
+                            onDelete: { pebble in pendingDeletion = pebble },
+                            onCreate: { isPresentingCreate = true }
                         )
                         .tag(entry.weekStart)
                     }
