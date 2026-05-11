@@ -1,0 +1,260 @@
+name: Weekly audit
+
+on:
+  schedule:
+    - cron: "0 5 * * 6"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  audit-web:
+    name: Audit web app
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Capture npm audit
+        run: npm audit --workspace=apps/web --json > /tmp/audit-web.json || true
+
+      - name: Capture outdated dependencies
+        run: npm outdated --workspace=apps/web --json > /tmp/outdated-web.json || true
+
+      - name: Run Claude audit
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          claude_args: |
+            --model claude-opus-4-7
+            --max-turns 40
+            --allowed-tools "Read,Grep,Glob,Bash(git log:*),Bash(git diff:*),Bash(cat /tmp/audit-web.json),Bash(cat /tmp/outdated-web.json),mcp__github__issue_write,mcp__github__list_issues,mcp__github__search_issues"
+          prompt: |
+            You are running the weekly compliance audit for the **web app** (`apps/web`).
+
+            ## Sources of truth (read these first)
+            - `/AGENTS.md`
+            - `/CLAUDE.md`
+            - `/apps/web/CLAUDE.md`
+            - `/docs/agents/ui-and-styling.md`
+            - `/docs/agents/data-and-async.md`
+
+            ## What to audit
+            1. **Compliance with agent instructions.** Cross-reference `apps/web` source against the docs above. Look for:
+               - DRY violations and missed factorization opportunities (similar components, duplicated hooks, repeated patterns).
+               - Modern stack adherence: the repo runs Next.js 16 — check for deprecated Next.js patterns (`pages/` router leftovers, legacy data-fetching, old App Router idioms). See `AGENTS.md` "this is NOT the Next.js you know".
+               - Business logic in components (should live in hooks or pure utilities — see `CLAUDE.md`).
+               - `any` types and unjustified type assertions.
+               - Multi-table Supabase writes done client-side instead of via RPCs (`AGENTS.md` rule).
+               - Components not following atomic design / shadcn-first (`docs/agents/ui-and-styling.md`).
+            2. **Dependency vulnerabilities.** Read `/tmp/audit-web.json` and summarize: severity counts, top advisories, fix availability.
+            3. **Outdated dependencies.** Read `/tmp/outdated-web.json` and flag majors with security or stack-modernity implications.
+            4. **Recent activity.** Run `git log --since='7 days ago' --oneline -- apps/web` for context.
+
+            ## Output
+            Use `mcp__github__issue_write` to **create** a new issue in `alexisbohns/pbbls` with:
+            - **Title:** `[Audit] Web weekly review — <today's date YYYY-MM-DD>`
+            - **Labels:** `quality`, `web`
+            - **Body (markdown):**
+              ```
+              ## Summary
+              <2–3 sentence overview>
+
+              ## Compliance findings
+              <bulleted list — each item: file:line, what's wrong, which rule>
+
+              ## Vulnerabilities
+              <severity counts + notable advisories from npm audit>
+
+              ## Outdated dependencies
+              <majors worth bumping, with rationale>
+
+              ## Recent changes reviewed
+              <commits since last Saturday>
+
+              ## Recommended follow-ups
+              <priority-ordered list>
+              ```
+
+            If there are zero findings in a section, write "No issues found." — do not omit the section.
+            Do not open more than one issue. Do not edit any code.
+
+  audit-admin:
+    name: Audit admin app
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Capture npm audit
+        run: npm audit --workspace=apps/admin --json > /tmp/audit-admin.json || true
+
+      - name: Capture outdated dependencies
+        run: npm outdated --workspace=apps/admin --json > /tmp/outdated-admin.json || true
+
+      - name: Run Claude audit
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          claude_args: |
+            --model claude-opus-4-7
+            --max-turns 40
+            --allowed-tools "Read,Grep,Glob,Bash(git log:*),Bash(git diff:*),Bash(cat /tmp/audit-admin.json),Bash(cat /tmp/outdated-admin.json),mcp__github__issue_write,mcp__github__list_issues,mcp__github__search_issues"
+          prompt: |
+            You are running the weekly compliance audit for the **admin app** (`apps/admin`).
+
+            ## Sources of truth (read these first)
+            - `/AGENTS.md`
+            - `/CLAUDE.md`
+            - `/apps/admin/CLAUDE.md`
+            - `/docs/agents/ui-and-styling.md`
+            - `/docs/agents/data-and-async.md`
+
+            ## What to audit
+            1. **Compliance with agent instructions.** Cross-reference `apps/admin` source against the docs above. Look for:
+               - DRY violations and missed factorization (analytics cards, fetcher patterns, fixture helpers).
+               - Modern Next.js 16 patterns (no legacy routing or data-fetching).
+               - Business logic leaking into components.
+               - `any` / unjustified type assertions.
+               - Security: SECURITY DEFINER RPCs handled correctly (see `apps/admin/CLAUDE.md`).
+               - Analytics conventions followed (see `apps/admin/CLAUDE.md`).
+            2. **Dependency vulnerabilities.** Read `/tmp/audit-admin.json` and summarize.
+            3. **Outdated dependencies.** Read `/tmp/outdated-admin.json` and flag majors.
+            4. **Recent activity.** `git log --since='7 days ago' --oneline -- apps/admin`.
+
+            ## Output
+            Use `mcp__github__issue_write` to **create** a new issue in `alexisbohns/pbbls` with:
+            - **Title:** `[Audit] Admin weekly review — <today's date YYYY-MM-DD>`
+            - **Labels:** `quality`, `core`
+            - **Body:** same markdown skeleton as the web audit (Summary, Compliance findings, Vulnerabilities, Outdated dependencies, Recent changes reviewed, Recommended follow-ups). Write "No issues found." for empty sections.
+
+            Do not open more than one issue. Do not edit any code.
+
+  audit-ios:
+    name: Audit iOS app
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Claude audit
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          claude_args: |
+            --model claude-opus-4-7
+            --max-turns 40
+            --allowed-tools "Read,Grep,Glob,Bash(git log:*),Bash(git diff:*),mcp__github__issue_write,mcp__github__list_issues,mcp__github__search_issues"
+          prompt: |
+            You are running the weekly compliance audit for the **iOS app** (`apps/ios`).
+
+            ## Sources of truth (read these first)
+            - `/AGENTS.md`
+            - `/CLAUDE.md`
+            - `/apps/ios/CLAUDE.md`
+
+            ## What to audit
+            1. **Compliance with agent instructions.** Cross-reference `apps/ios` Swift source against the docs above. Look for:
+               - DRY / factorization opportunities (similar views, repeated formatters, parallel service classes).
+               - Modern iOS 17+ APIs: `@Observable` instead of `ObservableObject`, Swift Testing instead of XCTest, structured concurrency.
+               - Locale-respecting formatters (`DateFormatter` / `NumberFormatter` without explicit locale — see related work in existing issue #291).
+               - SwiftLint config drift: rules disabled, files excluded.
+               - View hierarchy: business logic kept out of views, services injected.
+            2. **Dependency vulnerabilities.** Read `apps/ios/project.yml` (and any `Package.resolved`) for SPM dependencies. Identify outdated packages and any with known CVEs you can reason about from version numbers. Best-effort — no native tool exists.
+            3. **Recent activity.** `git log --since='7 days ago' --oneline -- apps/ios`.
+
+            ## Output
+            Use `mcp__github__issue_write` to **create** a new issue in `alexisbohns/pbbls` with:
+            - **Title:** `[Audit] iOS weekly review — <today's date YYYY-MM-DD>`
+            - **Labels:** `quality`, `ios`
+            - **Body:** same markdown skeleton (Summary, Compliance findings, Vulnerabilities, Outdated dependencies, Recent changes reviewed, Recommended follow-ups). Write "No issues found." for empty sections.
+
+            Do not open more than one issue. Do not edit any code.
+
+  audit-parity:
+    name: Audit iOS / web parity
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Claude audit
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          claude_args: |
+            --model claude-opus-4-7
+            --max-turns 50
+            --allowed-tools "Read,Grep,Glob,Bash(git log:*),Bash(git diff:*),mcp__github__issue_write,mcp__github__list_issues,mcp__github__search_issues"
+          prompt: |
+            You are running the weekly **iOS ↔ web feature parity audit**. The product owner wants to know where the two apps have diverged.
+
+            ## Sources of truth (read these first)
+            - `/AGENTS.md`
+            - `/CLAUDE.md`
+            - `/apps/web/CLAUDE.md`
+            - `/apps/ios/CLAUDE.md`
+            - `/docs/arkaik/bundle.json` if it exists — the product architecture map
+
+            ## What to audit
+            Enumerate the user-facing features/screens of each app by exploring:
+            - `apps/web/app/` (routes), `apps/web/components/`
+            - `apps/ios/Pebbles/Features/`, `apps/ios/Pebbles/` views
+
+            Then produce two diffs:
+            1. **In iOS, missing on web:** features present on iOS that the web app doesn't have (or has only partially).
+            2. **On web, missing or deprecated on iOS:** features present on web that iOS lacks, or web features that iOS has explicitly moved past (deprecated patterns).
+
+            For each item: a 1-line description, the iOS files involved, the web files involved (or "n/a"), and a rough impact note (cosmetic / functional / data model).
+
+            ## Output
+            Use `mcp__github__issue_write` to **create** a new issue in `alexisbohns/pbbls` with:
+            - **Title:** `[Audit] iOS ↔ web parity — <today's date YYYY-MM-DD>`
+            - **Labels:** `quality`, `web`, `ios`
+            - **Body (markdown):**
+              ```
+              ## Summary
+              <2–3 sentences — overall parity health>
+
+              ## iOS features missing on web
+              <bulleted list>
+
+              ## Web features missing or deprecated on iOS
+              <bulleted list>
+
+              ## Recommended follow-ups
+              <priority-ordered list>
+              ```
+
+            Write "No discrepancies found." for empty sections. Do not open more than one issue. Do not edit any code.
