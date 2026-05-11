@@ -60,6 +60,12 @@ export function EmotionPickerSheet({
   onChange,
 }: EmotionPickerSheetProps) {
   const t = useTranslations("record.emotionPicker")
+  // Untyped accessor for the runtime `emotion.<slug>.name` catalog — slugs
+  // are DB values, not part of the typed message tree.
+  const tAll = useTranslations() as unknown as {
+    (key: string): string
+    has(key: string): boolean
+  }
   const locale = useLocale()
   const { rows, loading } = useEmotionsWithPalette()
 
@@ -80,12 +86,16 @@ export function EmotionPickerSheet({
       group.rows.push(row)
     }
 
-    // Sort emotions within each category by DB name (locale-aware). The
-    // catalog mirrors DB names so this stays close to the localized order;
-    // we re-run on locale change for proper collation.
+    // Sort emotions within each category by their localized name so the order
+    // matches the chip text the user actually sees (and follows fr-locale
+    // collation when active).
     const collator = new Intl.Collator(locale, { sensitivity: "base" })
+    const localizedName = (row: EmotionWithPalette): string => {
+      const key = `emotion.${row.slug}.name`
+      return tAll.has(key) ? tAll(key) : row.name
+    }
     for (const group of byCategorySlug.values()) {
-      group.rows.sort((a, b) => collator.compare(a.name, b.name))
+      group.rows.sort((a, b) => collator.compare(localizedName(a), localizedName(b)))
     }
 
     const order = emotionCategoryOrder(intensity, valence)
@@ -95,7 +105,7 @@ export function EmotionPickerSheet({
       if (group && group.rows.length > 0) ordered.push(group)
     }
     return ordered
-  }, [rows, intensity, valence, locale])
+  }, [rows, intensity, valence, locale, tAll])
 
   const handleChipSelect = (id: string) => {
     onChange(id === value ? undefined : id)
