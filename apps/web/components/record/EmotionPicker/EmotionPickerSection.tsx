@@ -10,7 +10,7 @@ type EmotionPickerSectionProps = {
   primaryColor: string
   rows: EmotionWithPalette[]
   selectedId: string | undefined
-  onToggle: (id: string) => void
+  onSelect: (id: string) => void
 }
 
 /**
@@ -23,7 +23,7 @@ export function EmotionPickerSection({
   primaryColor,
   rows,
   selectedId,
-  onToggle,
+  onSelect,
 }: EmotionPickerSectionProps) {
   const localizedCategoryName = useEmotionCategoryName({ slug: categorySlug, name: categoryName })
 
@@ -41,7 +41,7 @@ export function EmotionPickerSection({
             key={row.id}
             row={row}
             selected={row.id === selectedId}
-            onToggle={() => onToggle(row.id)}
+            onSelect={() => onSelect(row.id)}
           />
         ))}
       </div>

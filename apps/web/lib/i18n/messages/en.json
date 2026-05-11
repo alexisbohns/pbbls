@@ -418,8 +418,7 @@
     },
     "emotionPicker": {
       "title": "Emotions",
-      "cancel": "Cancel",
-      "done": "Done",
+      "close": "Close",
       "loading": "Loading emotions…"
     },
     "collection": {

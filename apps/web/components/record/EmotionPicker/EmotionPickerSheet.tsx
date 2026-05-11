@@ -1,14 +1,15 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo } from "react"
 import { useLocale, useTranslations } from "next-intl"
+import { X } from "lucide-react"
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetClose,
 } from "@/components/ui/sheet"
-import { Button } from "@/components/ui/button"
 import { useEmotionsWithPalette, type EmotionWithPalette } from "@/lib/data/useEmotionsWithPalette"
 import {
   emotionCategoryOrder,
@@ -21,12 +22,15 @@ import { EmotionPickerEmpty } from "./EmotionPickerEmpty"
 type EmotionPickerSheetProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  /** Current emotion_id from the form; selection is staged locally until Done. */
+  /** Current emotion_id from the form. */
   value: string | undefined
   /** Drives section order (mirrors iOS valence-based ordering). */
   intensity?: Intensity
   valence?: Valence
-  /** Commit handler. Receives the staged emotion id, or undefined to clear. */
+  /**
+   * Called when the user picks (or clears) an emotion. Receives `undefined`
+   * when the user taps the currently-selected chip to deselect.
+   */
   onChange: (id: string | undefined) => void
 }
 
@@ -42,9 +46,10 @@ type CategoryGroup = {
  *
  * Categories derive from the cached `v_emotions_with_palette` rows by deduping
  * on `category_slug`; section order is `emotionCategoryOrder(intensity, valence)`
- * driven by the form's current cell. Selection is staged locally — Done commits
- * via `onChange`; Cancel discards. Tapping the staged chip clears it so the
- * user can deselect inside the sheet without backing out (mirrors iOS).
+ * driven by the form's current cell. Tapping a chip commits the selection and
+ * dismisses the sheet — tapping the currently-selected chip clears the value
+ * (preserves iOS deselect behavior). The close (X) button in the header
+ * dismisses without committing any change.
  */
 export function EmotionPickerSheet({
   open,
@@ -57,15 +62,6 @@ export function EmotionPickerSheet({
   const t = useTranslations("record.emotionPicker")
   const locale = useLocale()
   const { rows, loading } = useEmotionsWithPalette()
-  const [staged, setStaged] = useState<string | undefined>(value)
-
-  // Reset staged selection on every open transition so unsaved local edits
-  // from a Cancel'd session don't leak into the next opening. Handled here
-  // (instead of in an effect) to avoid cascading renders.
-  const handleOpenChange = (nextOpen: boolean) => {
-    if (nextOpen) setStaged(value)
-    onOpenChange(nextOpen)
-  }
 
   const groups = useMemo<CategoryGroup[]>(() => {
     if (rows.length === 0) return []
@@ -84,11 +80,9 @@ export function EmotionPickerSheet({
       group.rows.push(row)
     }
 
-    // Sort emotions within each category by localized name (locale-aware), to
-    // match iOS `EmotionPickerSheet.groups`. We don't have the localized name
-    // resolved here (no hook in this scope), so sort on the DB `name` column
-    // — close enough since the catalog tracks DB names. Re-run on locale change
-    // via the dependency so `localeCompare` picks up the right locale rules.
+    // Sort emotions within each category by DB name (locale-aware). The
+    // catalog mirrors DB names so this stays close to the localized order;
+    // we re-run on locale change for proper collation.
     const collator = new Intl.Collator(locale, { sensitivity: "base" })
     for (const group of byCategorySlug.values()) {
       group.rows.sort((a, b) => collator.compare(a.name, b.name))
@@ -103,24 +97,24 @@ export function EmotionPickerSheet({
     return ordered
   }, [rows, intensity, valence, locale])
 
-  const handleChipToggle = (id: string) => {
-    setStaged((current) => (current === id ? undefined : id))
-  }
-
-  const handleCancel = () => {
-    onOpenChange(false)
-  }
-
-  const handleDone = () => {
-    onChange(staged)
+  const handleChipSelect = (id: string) => {
+    onChange(id === value ? undefined : id)
     onOpenChange(false)
   }
 
   return (
-    <Sheet open={open} onOpenChange={handleOpenChange}>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
-        <SheetHeader>
+        <SheetHeader className="relative">
           <SheetTitle>{t("title")}</SheetTitle>
+          <SheetClose
+            aria-label={t("close")}
+            variant="ghost"
+            size="icon-sm"
+            className="absolute right-0 top-0"
+          >
+            <X aria-hidden />
+          </SheetClose>
         </SheetHeader>
 
         {loading || groups.length === 0 ? (
@@ -134,23 +128,13 @@ export function EmotionPickerSheet({
                 categoryName={group.name}
                 primaryColor={group.primaryColor}
                 rows={group.rows}
-                selectedId={staged}
-                onToggle={handleChipToggle}
+                selectedId={value}
+                onSelect={handleChipSelect}
               />
             ))}
           </div>
         )}
-
-        <div className="sticky bottom-0 -mx-4 mt-2 flex justify-end gap-2 border-t border-border/40 bg-popover px-4 py-3 md:-mx-6 md:px-6">
-          <Button variant="ghost" size="sm" onClick={handleCancel}>
-            {t("cancel")}
-          </Button>
-          <Button size="sm" onClick={handleDone}>
-            {t("done")}
-          </Button>
-        </div>
       </SheetContent>
     </Sheet>
   )
 }
-

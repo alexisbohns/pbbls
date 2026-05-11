@@ -418,8 +418,7 @@
     },
     "emotionPicker": {
       "title": "Émotions",
-      "cancel": "Annuler",
-      "done": "Terminé",
+      "close": "Fermer",
       "loading": "Chargement des émotions…"
     },
     "collection": {
