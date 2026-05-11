@@ -14,7 +14,6 @@ import SwiftUI
 struct WeekRollCairnCell: View {
     let entry: WeekRollEntry
     let isFocused: Bool
-    let opacity: Double
     let calendar: Calendar
     let onTap: () -> Void
 
@@ -46,7 +45,6 @@ struct WeekRollCairnCell: View {
         }
         .buttonStyle(.plain)
         .frame(width: 72)
-        .opacity(opacity)
         .onAppear { configureAutoBind() }
         .onChange(of: isFocused) { _, _ in applyViewModel() }
         .onChange(of: colorScheme) { _, _ in applyViewModel() }
@@ -77,12 +75,7 @@ struct WeekRollCairnCell: View {
     /// (unlikely with @StateObject, but defensive) just re-registers.
     private func configureAutoBind() {
         rvm.riveModel?.enableAutoBind { [self] instance in
-            // `instance` is a RiveDataBindingViewModelInstance bound to
-            // the artboard and state machine.
-            // colorPropertyFromPath(_:) is defined in:
-            //   RiveDataBindingViewModelInstance.h:108
-            let prop = instance.colorProperty(fromPath: "strokeColor")
-            colorProperty = prop
+            colorProperty = instance.colorProperty(fromPath: "strokeColor")
             applyViewModel()
         }
     }
@@ -101,11 +94,7 @@ struct WeekRollCairnCell: View {
     ///     auto-bound instance (defined in
     ///     RiveDataBindingViewModelInstance.h:108–109).
     private func applyViewModel() {
-        // (a) State machine boolean input.
         rvm.setInput("isSelected", value: isFocused)
-
-        // (b) Data Binding color property. Guard: colorProperty is nil
-        //     until the auto-bind callback fires (artboard not yet loaded).
         guard let prop = colorProperty else { return }
         strokeColor.applyToRiveColorProperty(prop, in: colorScheme)
     }
