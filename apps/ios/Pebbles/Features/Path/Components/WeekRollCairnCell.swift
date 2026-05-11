@@ -1,9 +1,16 @@
 import RiveRuntime
 import SwiftUI
 
-/// One cell in the horizontal weeks roll. Renders the cairn Rive
-/// animation above the ISO week number. Plays its one-shot whenever
-/// `isFocused` flips true; resets to frame 1 when it flips false.
+/// One cell in the horizontal weeks roll.
+///
+/// Renders a state-machine-driven cairn animation above the ISO week number.
+/// The animation is powered by `pbbls-cairn-states.riv` which exposes:
+///   - `isSelected` (state-machine bool input): switches between idle and
+///     active states.
+///   - `strokeColor` (Data Binding color property): tints the cairn outline.
+///
+/// Each cell owns its own `RiveViewModel` so the state machines run
+/// independently across the visible roll.
 struct WeekRollCairnCell: View {
     let entry: WeekRollEntry
     let isFocused: Bool
@@ -11,28 +18,25 @@ struct WeekRollCairnCell: View {
     let calendar: Calendar
     let onTap: () -> Void
 
-    @State private var cairn: CairnAnimationViewModel
+    @Environment(\.colorScheme) private var colorScheme
 
-    init(
-        entry: WeekRollEntry,
-        isFocused: Bool,
-        opacity: Double,
-        calendar: Calendar,
-        onTap: @escaping () -> Void
-    ) {
-        self.entry = entry
-        self.isFocused = isFocused
-        self.opacity = opacity
-        self.calendar = calendar
-        self.onTap = onTap
-        self._cairn = State(initialValue: CairnAnimationViewModel(fileName: "pbbls-cairn"))
-    }
+    // RiveViewModel is an ObservableObject (SDK class); @StateObject keeps it
+    // alive for the cell's lifetime and lets it drive re-renders when Rive
+    // publishes ObjectWillChange notifications.
+    @StateObject private var rvm = RiveViewModel(
+        fileName: "pbbls-cairn-states",
+        stateMachineName: "State Machine 1"
+    )
+
+    // Cached reference to the color property; nil until the auto-bind
+    // callback fires (i.e. until the artboard is loaded and bound).
+    @State private var colorProperty: RiveDataBindingViewModel.Instance.ColorProperty?
 
     var body: some View {
         let weekNum = calendar.component(.weekOfYear, from: entry.weekStart)
         Button(action: onTap) {
             VStack(spacing: 4) {
-                cairn.view()
+                rvm.view()
                     .frame(width: 56, height: 56)
                     .accessibilityHidden(true)
                 Text(verbatim: "\(weekNum)")
@@ -43,17 +47,68 @@ struct WeekRollCairnCell: View {
         .buttonStyle(.plain)
         .frame(width: 72)
         .opacity(opacity)
-        .onChange(of: isFocused) { _, nowFocused in
-            if nowFocused {
-                cairn.play()
-            } else {
-                cairn.reset()
-            }
-        }
-        .onAppear {
-            // Initial focused cairn plays its intro on first mount.
-            if isFocused { cairn.play() }
-        }
+        .onAppear { configureAutoBind() }
+        .onChange(of: isFocused) { _, _ in applyViewModel() }
+        .onChange(of: colorScheme) { _, _ in applyViewModel() }
         .accessibilityLabel("Week \(weekNum), \(entry.pebbles.count) pebbles")
+    }
+
+    // MARK: - Computed state
+
+    /// The stroke color to feed into Rive:
+    ///   - focused → accent (both schemes)
+    ///   - unfocused, light → Muted (subtle grey)
+    ///   - unfocused, dark → MutedForeground (slightly brighter)
+    private var strokeColor: SwiftUI.Color {
+        if isFocused {
+            return SwiftUI.Color.pebblesAccent
+        }
+        return colorScheme == .dark ? SwiftUI.Color.pebblesMutedForeground : SwiftUI.Color.pebblesMuted
+    }
+
+    // MARK: - Data Binding setup
+
+    /// Registers the auto-bind callback on `riveModel` so the SDK creates
+    /// and binds the default Data Binding view-model instance when the
+    /// artboard loads. The callback:
+    ///   1. Caches the `strokeColor` `ColorProperty` (SDK caches it too,
+    ///      so subsequent calls with the same path are a no-op lookup).
+    ///   2. Applies the initial state immediately.
+    ///
+    /// `enableAutoBind` is idempotent; calling it again from a re-mount
+    /// (unlikely with @StateObject, but defensive) just re-registers.
+    private func configureAutoBind() {
+        rvm.riveModel?.enableAutoBind { [self] instance in
+            // `instance` is a RiveDataBindingViewModelInstance bound to
+            // the artboard and state machine.
+            // colorPropertyFromPath(_:) is defined in:
+            //   RiveDataBindingViewModelInstance.h:108
+            let prop = instance.colorProperty(fromPath: "strokeColor")
+            colorProperty = prop
+            applyViewModel()
+        }
+    }
+
+    // MARK: - State application
+
+    /// Pushes the current `isFocused` / `colorScheme` state into Rive.
+    ///
+    /// (a) State-machine bool input — `setInput(_:value:)` on `RiveViewModel`
+    ///     works in 6.19.2 (defined in RiveViewModel.swift:376–377).
+    ///
+    /// (b) Data Binding color property — `set(red:green:blue:alpha:)` on
+    ///     `RiveDataBindingViewModelInstance.ColorProperty` (defined in
+    ///     RiveDataBindingViewModelInstanceProperty.h:168–173).
+    ///     Accessed via `colorPropertyFromPath("strokeColor")` on the
+    ///     auto-bound instance (defined in
+    ///     RiveDataBindingViewModelInstance.h:108–109).
+    private func applyViewModel() {
+        // (a) State machine boolean input.
+        rvm.setInput("isSelected", value: isFocused)
+
+        // (b) Data Binding color property. Guard: colorProperty is nil
+        //     until the auto-bind callback fires (artboard not yet loaded).
+        guard let prop = colorProperty else { return }
+        strokeColor.applyToRiveColorProperty(prop, in: colorScheme)
     }
 }
