@@ -6,4 +6,4 @@ export type LogUpdate = Database["public"]["Tables"]["logs"]["Update"]
 
 export type LogSpecies = LogRow["species"] // 'announcement' | 'feature'
 export type LogStatus = LogRow["status"]   // 'backlog' | 'planned' | 'in_progress' | 'shipped'
-export type LogPlatform = LogRow["platform"] // 'web' | 'ios' | 'android' | 'all'
+export type LogPlatform = LogRow["platform"] // 'webapp' | 'ios' | 'android' | 'all' | 'project' | 'infra'

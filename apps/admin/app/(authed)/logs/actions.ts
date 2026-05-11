@@ -6,7 +6,14 @@ import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { isLogSpecies, isLogStatus } from "@/lib/logs/options"
 import type { LogInsert, LogPlatform } from "@/lib/logs/types"
 
-const PLATFORM_VALUES: ReadonlyArray<LogPlatform> = ["web", "ios", "android", "all"]
+const PLATFORM_VALUES: ReadonlyArray<LogPlatform> = [
+  "webapp",
+  "ios",
+  "android",
+  "all",
+  "project",
+  "infra",
+]
 function isLogPlatform(value: string | null): value is LogPlatform {
   return value !== null && (PLATFORM_VALUES as readonly string[]).includes(value)
 }

@@ -7,9 +7,11 @@ export const SPECIES_OPTIONS: ReadonlyArray<{ value: LogSpecies; label: string }
 
 export const PLATFORM_OPTIONS: ReadonlyArray<{ value: LogPlatform; label: string }> = [
   { value: "all", label: "All platforms" },
-  { value: "web", label: "Web" },
+  { value: "webapp", label: "Web app" },
   { value: "ios", label: "iOS" },
   { value: "android", label: "Android" },
+  { value: "project", label: "Project" },
+  { value: "infra", label: "Infra" },
 ]
 
 export const STATUS_OPTIONS: ReadonlyArray<{ value: LogStatus; label: string }> = [
@@ -30,10 +32,10 @@ export function isLogStatus(value: string | undefined): value is LogStatus {
   return value !== undefined && (STATUS_VALUES as readonly string[]).includes(value)
 }
 
-export type PlatformFilter = "web" | "ios" | "android"
+export type PlatformFilter = "webapp" | "ios" | "android"
 
 export const PLATFORM_FILTER_OPTIONS: ReadonlyArray<{ value: PlatformFilter; label: string }> = [
-  { value: "web", label: "Web" },
+  { value: "webapp", label: "Web app" },
   { value: "ios", label: "iOS" },
   { value: "android", label: "Android" },
 ]

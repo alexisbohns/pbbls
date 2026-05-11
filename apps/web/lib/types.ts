@@ -92,7 +92,7 @@ export type Mark = {
 
 export type LogSpecies = "announcement" | "feature"
 export type LogStatus = "backlog" | "planned" | "in_progress" | "shipped"
-export type LogPlatform = "web" | "ios" | "android" | "all"
+export type LogPlatform = "webapp" | "ios" | "android" | "all" | "project" | "infra"
 
 export type Log = {
   id: string
