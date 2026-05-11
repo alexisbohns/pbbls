@@ -53,6 +53,22 @@ export function useDomainLocalized(
 }
 
 /**
+ * Resolve an emotion category's display name for the active locale.
+ * Falls back to the DB `name` column when the slug isn't in the catalog —
+ * mirrors `useEmotionLocalized` for the parent grouping.
+ */
+export function useEmotionCategoryName(
+  category: { slug: string; name: string },
+): string {
+  const t = useTranslations() as unknown as {
+    (key: string): string
+    has(key: string): boolean
+  }
+  const key = `emotionCategory.${category.slug}.name`
+  return t.has(key) ? t(key) : category.name
+}
+
+/**
  * Resolve a pebble shape's display name for the active locale.
  * Falls back to the static `name` when the slug isn't in the catalog.
  */

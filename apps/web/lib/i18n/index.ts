@@ -9,7 +9,12 @@ export {
 } from "./locales"
 export { useLocale } from "./useLocale"
 export { LocaleProvider } from "./LocaleProvider"
-export { useEmotionLocalized, useDomainLocalized, useShapeName } from "./useReferenceCatalog"
+export {
+  useEmotionLocalized,
+  useEmotionCategoryName,
+  useDomainLocalized,
+  useShapeName,
+} from "./useReferenceCatalog"
 export {
   formatDate,
   formatNumber,
