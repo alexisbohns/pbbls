@@ -28,7 +28,7 @@ struct WeekHeaderView: View {
         .padding(.horizontal, 16)
         .frame(height: 40)
         .overlay(
-            Capsule().stroke(strokeColor, lineWidth: 1)
+            RoundedRectangle(cornerRadius: 17).stroke(strokeColor, lineWidth: 1)
         )
         .padding(.horizontal, 16)
     }

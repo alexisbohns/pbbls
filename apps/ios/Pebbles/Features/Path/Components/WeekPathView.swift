@@ -28,8 +28,8 @@ struct WeekPathView: View {
             if entry.pebbles.isEmpty {
                 emptyState
             } else {
-                List {
-                    Section {
+                ScrollView {
+                    LazyVStack(spacing: 0) {
                         ForEach(Array(entry.pebbles.enumerated()), id: \.element.id) { index, pebble in
                             if index < revealedCount {
                                 PathPebbleRow(
@@ -38,15 +38,16 @@ struct WeekPathView: View {
                                     onTap: { onTap(pebble) },
                                     onDelete: { onDelete(pebble) }
                                 )
-                                .listRowBackground(Color.pebblesListRow)
-                                .listRowSeparator(.hidden)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 24)
                                 .transition(.opacity.combined(with: .move(edge: .top)))
                             }
                         }
                     }
+                    .padding(.bottom, 80)
                 }
-                .listStyle(.plain)
-                .scrollContentBackground(.hidden)
+                .scrollClipDisabled()
                 .mask(
                     LinearGradient(
                         stops: [
