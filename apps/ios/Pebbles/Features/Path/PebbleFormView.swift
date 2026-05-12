@@ -1,5 +1,4 @@
 import SwiftUI
-import os
 
 /// The pebble `Form` body, shared by `CreatePebbleSheet` and `EditPebbleSheet`.
 ///
@@ -17,6 +16,17 @@ struct PebbleFormView: View {
     var renderSvg: String?
     var strokeColor: String?
     var renderHeight: CGFloat = 260
+
+    /// Full glyph row for the currently-selected `draft.glyphId`. Owned by
+    /// the parent sheet (loaded from the detail SELECT on edit, or set from
+    /// `onGlyphPicked` after the user picks one). The form renders a
+    /// thumbnail + name from it but never fetches.
+    let selectedGlyph: Glyph?
+
+    /// Fired when the user picks a glyph from `GlyphPickerSheet`. The parent
+    /// is responsible for updating both `selectedGlyph` and `draft.glyphId`
+    /// (the form sets `draft.glyphId` via the binding before calling back).
+    let onGlyphPicked: (Glyph) -> Void
 
     /// When true, render the Photo section. Off by default so callers that
     /// don't yet support photo flows opt out explicitly.
@@ -47,9 +57,7 @@ struct PebbleFormView: View {
     @State private var showPicker = false
     @State private var showValencePicker = false
     @State private var showEmotionPicker = false
-    @State private var selectedGlyph: Glyph?
 
-    @Environment(SupabaseService.self) private var supabase
     @Environment(EmotionPaletteService.self) private var palettes
 
     init(
@@ -61,6 +69,8 @@ struct PebbleFormView: View {
         renderSvg: String? = nil,
         strokeColor: String? = nil,
         renderHeight: CGFloat = 260,
+        selectedGlyph: Glyph? = nil,
+        onGlyphPicked: @escaping (Glyph) -> Void = { _ in },
         showsPhotoSection: Bool = false,
         photoPickerPresented: Binding<Bool> = .constant(false),
         isRemovingExistingSnap: Bool = false,
@@ -77,6 +87,8 @@ struct PebbleFormView: View {
         self.renderSvg = renderSvg
         self.strokeColor = strokeColor
         self.renderHeight = renderHeight
+        self.selectedGlyph = selectedGlyph
+        self.onGlyphPicked = onGlyphPicked
         self.showsPhotoSection = showsPhotoSection
         self._photoPickerPresented = photoPickerPresented
         self.isRemovingExistingSnap = isRemovingExistingSnap
@@ -229,7 +241,6 @@ struct PebbleFormView: View {
                     if draft.glyphId != nil {
                         Button(role: .destructive) {
                             draft.glyphId = nil
-                            selectedGlyph = nil
                         } label: {
                             Label("Remove glyph", systemImage: "trash")
                         }
@@ -297,7 +308,10 @@ struct PebbleFormView: View {
         .sheet(isPresented: $showPicker) {
             GlyphPickerSheet(
                 currentGlyphId: draft.glyphId,
-                onSelected: { glyphId in draft.glyphId = glyphId }
+                onSelected: { picked in
+                    draft.glyphId = picked.id
+                    onGlyphPicked(picked)
+                }
             )
         }
         .sheet(isPresented: $showValencePicker) {
@@ -313,7 +327,6 @@ struct PebbleFormView: View {
                 onSelected: { picked in draft.emotionId = picked }
             )
         }
-        .task(id: draft.glyphId) { await loadSelectedGlyph() }
     }
 
     /// Right-hand label on the Emotion row. Returns a `Text` (not a string)
@@ -330,27 +343,5 @@ struct PebbleFormView: View {
         if draft.glyphId == nil { return "Carve or pick a glyph" }
         if let name = selectedGlyph?.name { return name }
         return "Untitled glyph"
-    }
-
-    private func loadSelectedGlyph() async {
-        guard let id = draft.glyphId else {
-            selectedGlyph = nil
-            return
-        }
-        if selectedGlyph?.id == id { return }
-        do {
-            let fetched: Glyph = try await supabase.client
-                .from("glyphs")
-                .select("id, name, strokes, view_box")
-                .eq("id", value: id)
-                .single()
-                .execute()
-                .value
-            self.selectedGlyph = fetched
-        } catch {
-            // Non-fatal: the row renders without a thumbnail until the refetch works.
-            Logger(subsystem: "app.pbbls.ios", category: "pebble-form")
-                .warning("glyph fetch for preview failed: \(error.localizedDescription, privacy: .private)")
-        }
     }
 }

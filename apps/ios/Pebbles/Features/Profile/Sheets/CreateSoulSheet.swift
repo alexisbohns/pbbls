@@ -63,13 +63,12 @@ struct CreateSoulSheet: View {
                 GlyphPickerSheet(
                     currentGlyphId: draft.glyphId,
                     onSelected: { selected in
-                        // Picker returns the chosen glyph's id. Update draft
-                        // and refetch the glyph so the row's thumbnail
-                        // re-renders without waiting for a list reload.
-                        if let selected {
-                            draft.glyphId = selected
-                            Task { await loadGlyph(id: selected) }
-                        }
+                        // Picker hands us the full Glyph; we still refetch via
+                        // `loadGlyph` so the row's thumbnail re-renders from
+                        // shared state. Eliminating the refetch is tracked
+                        // separately.
+                        draft.glyphId = selected.id
+                        Task { await loadGlyph(id: selected.id) }
                     }
                 )
             }
