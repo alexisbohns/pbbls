@@ -2,6 +2,15 @@ import Foundation
 import Testing
 @testable import Pebbles
 
+/// Recorded calls on `FakeRepo`. Top-level so the suite type stays at nesting
+/// depth 1 (avoids swiftlint's nesting violation).
+enum FakeRepoCall: Equatable {
+    case upload(snapId: UUID, userId: UUID)
+    case deleteFilesBySnapId(snapId: UUID, userId: UUID)
+    case deleteFilesByPrefix(prefix: String)
+    case deletePebbleMedia(snapId: UUID)
+}
+
 @MainActor
 @Suite("SnapUploadCoordinator")
 struct SnapUploadCoordinatorTests {
@@ -15,14 +24,7 @@ struct SnapUploadCoordinatorTests {
     @MainActor
     final class FakeRepo: PebbleSnapRepositoryProtocol {
 
-        enum Call: Equatable {
-            case upload(snapId: UUID, userId: UUID)
-            case deleteFilesBySnapId(snapId: UUID, userId: UUID)
-            case deleteFilesByPrefix(prefix: String)
-            case deletePebbleMedia(snapId: UUID)
-        }
-
-        var calls: [Call] = []
+        var calls: [FakeRepoCall] = []
 
         // Stubs — set before invoking the method under test.
         var uploadResults: [Result<Void, Error>] = []
@@ -115,7 +117,7 @@ struct SnapUploadCoordinatorTests {
         let repo = FakeRepo()
         repo.uploadResults = [
             .failure(StubError(tag: "first")),
-            .failure(StubError(tag: "second")),
+            .failure(StubError(tag: "second"))
         ]
         let snap = AttachedSnap(id: UUID(), localThumb: Data([0xFF]), state: .uploading)
         let coordinator = SnapUploadCoordinator(
@@ -232,7 +234,7 @@ struct SnapUploadCoordinatorTests {
         #expect(coordinator.formSnap == nil)
         #expect(repo.calls == [
             .deletePebbleMedia(snapId: snapId),
-            .deleteFilesByPrefix(prefix: "uid/sid"),
+            .deleteFilesByPrefix(prefix: "uid/sid")
         ])
     }
 
