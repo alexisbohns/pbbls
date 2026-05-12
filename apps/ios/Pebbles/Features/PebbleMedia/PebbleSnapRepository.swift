@@ -2,11 +2,24 @@ import Foundation
 import Supabase
 import os
 
+/// Abstraction over snap Storage + RPC operations so callers (notably
+/// `SnapUploadCoordinator`) can be unit-tested with a fake. The live
+/// conformance is `PebbleSnapRepository`.
+@MainActor
+protocol PebbleSnapRepositoryProtocol {
+    func uploadProcessed(_ processed: ProcessedImage, snapId: UUID, userId: UUID) async throws
+    func deleteFiles(snapId: UUID, userId: UUID) async
+    func deleteFiles(storagePrefix: String) async
+    /// Calls the `delete_pebble_media` Postgres RPC. Returns the row's
+    /// `storage_path` so the caller can fire-and-forget Storage cleanup.
+    func deletePebbleMedia(snapId: UUID) async throws -> String
+}
+
 /// Storage operations for `pebbles-media`. Stateless except for the injected
 /// `SupabaseClient`. Errors propagate; callers decide whether to retry, surface
 /// to the user, or fire-and-forget.
 @MainActor
-struct PebbleSnapRepository {
+struct PebbleSnapRepository: PebbleSnapRepositoryProtocol {
 
     private static let bucketId = "pebbles-media"
     private static let signedUrlTTL: Int = 3600    // 1 h
@@ -65,6 +78,16 @@ struct PebbleSnapRepository {
                 "snap delete failed for prefix \(prefix, privacy: .public): \(error.localizedDescription, privacy: .private)"
             )
         }
+    }
+
+    /// Wraps the `delete_pebble_media` RPC. Returns the row's `storage_path`
+    /// so the caller can run fire-and-forget Storage cleanup using
+    /// `deleteFiles(storagePrefix:)`.
+    func deletePebbleMedia(snapId: UUID) async throws -> String {
+        try await client
+            .rpc("delete_pebble_media", params: ["p_snap_id": snapId.uuidString])
+            .execute()
+            .value
     }
 
     /// One round-trip for both URLs of a snap. Caller is responsible for

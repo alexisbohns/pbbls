@@ -88,8 +88,8 @@ extension PebbleUpdatePayload {
     /// `userId` is needed to derive the storage_path of a `.pending` snap;
     /// `.existing` snaps already carry the path from the DB.
     /// Precondition: `draft.isValid == true`.
-    init(from draft: PebbleDraft, userId: UUID) {
-        precondition(draft.isValid, "PebbleUpdatePayload(from:userId:) called with invalid draft")
+    init(from draft: PebbleDraft, formSnap: FormSnap?, userId: UUID) {
+        precondition(draft.isValid, "PebbleUpdatePayload(from:formSnap:userId:) called with invalid draft")
         self.name = draft.name.trimmingCharacters(in: .whitespaces)
         let trimmedDescription = draft.description.trimmingCharacters(in: .whitespaces)
         self.description = trimmedDescription.isEmpty ? nil : trimmedDescription
@@ -103,7 +103,7 @@ extension PebbleUpdatePayload {
         self.collectionIds = draft.collectionId.map { [$0] } ?? []
         self.glyphId = draft.glyphId
         self.snaps = {
-            switch draft.formSnap {
+            switch formSnap {
             case .none:
                 return []
             case .existing(let id, let storagePath):

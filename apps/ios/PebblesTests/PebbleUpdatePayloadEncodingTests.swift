@@ -37,7 +37,7 @@ struct PebbleUpdatePayloadEncodingTests {
     @Test("encodes all scalar fields with snake_case keys")
     func scalarKeys() throws {
         let draft = makeValidDraft()
-        let json = try encode(PebbleUpdatePayload(from: draft, userId: UUID()))
+        let json = try encode(PebbleUpdatePayload(from: draft, formSnap: nil, userId: UUID()))
 
         #expect(json["name"] as? String == "Test")
         #expect(json["description"] as? String == "body")
@@ -51,7 +51,7 @@ struct PebbleUpdatePayloadEncodingTests {
     @Test("domain_ids is always a single-element array")
     func domainIds() throws {
         let draft = makeValidDraft()
-        let json = try encode(PebbleUpdatePayload(from: draft, userId: UUID()))
+        let json = try encode(PebbleUpdatePayload(from: draft, formSnap: nil, userId: UUID()))
 
         let ids = json["domain_ids"] as? [String] ?? []
         #expect(ids.count == 1)
@@ -61,7 +61,7 @@ struct PebbleUpdatePayloadEncodingTests {
     @Test("soul_ids is empty array when draft.soulIds is empty")
     func emptySoulIds() throws {
         let draft = makeValidDraft(soulIds: [])
-        let json = try encode(PebbleUpdatePayload(from: draft, userId: UUID()))
+        let json = try encode(PebbleUpdatePayload(from: draft, formSnap: nil, userId: UUID()))
 
         let ids = json["soul_ids"] as? [String] ?? ["not-empty"]
         #expect(ids.isEmpty)
@@ -73,7 +73,7 @@ struct PebbleUpdatePayloadEncodingTests {
         let id2 = UUID()
         let id3 = UUID()
         let draft = makeValidDraft(soulIds: [id1, id2, id3])
-        let json = try encode(PebbleUpdatePayload(from: draft, userId: UUID()))
+        let json = try encode(PebbleUpdatePayload(from: draft, formSnap: nil, userId: UUID()))
 
         let ids = json["soul_ids"] as? [String] ?? []
         #expect(ids == [id1.uuidString, id2.uuidString, id3.uuidString])
@@ -83,11 +83,11 @@ struct PebbleUpdatePayloadEncodingTests {
     func collectionIds() throws {
         let collectionId = UUID()
         let draftWith = makeValidDraft(collectionId: collectionId)
-        let jsonWith = try encode(PebbleUpdatePayload(from: draftWith, userId: UUID()))
+        let jsonWith = try encode(PebbleUpdatePayload(from: draftWith, formSnap: nil, userId: UUID()))
         #expect((jsonWith["collection_ids"] as? [String]) == [collectionId.uuidString])
 
         let draftWithout = makeValidDraft(collectionId: nil)
-        let jsonWithout = try encode(PebbleUpdatePayload(from: draftWithout, userId: UUID()))
+        let jsonWithout = try encode(PebbleUpdatePayload(from: draftWithout, formSnap: nil, userId: UUID()))
         #expect((jsonWithout["collection_ids"] as? [String])?.isEmpty == true)
     }
 
@@ -95,14 +95,14 @@ struct PebbleUpdatePayloadEncodingTests {
     func emptyDescriptionBecomesNull() throws {
         var draft = makeValidDraft()
         draft.description = "   "
-        let json = try encode(PebbleUpdatePayload(from: draft, userId: UUID()))
+        let json = try encode(PebbleUpdatePayload(from: draft, formSnap: nil, userId: UUID()))
         #expect(json["description"] is NSNull)
     }
 
     @Test("encodes glyph_id as null when draft has no glyph")
     func nullGlyphId() throws {
         let draft = makeValidDraft()
-        let json = try encode(PebbleUpdatePayload(from: draft, userId: UUID()))
+        let json = try encode(PebbleUpdatePayload(from: draft, formSnap: nil, userId: UUID()))
         #expect(json["glyph_id"] is NSNull)
     }
 
@@ -111,7 +111,7 @@ struct PebbleUpdatePayloadEncodingTests {
         let glyphId = UUID()
         var draft = makeValidDraft()
         draft.glyphId = glyphId
-        let json = try encode(PebbleUpdatePayload(from: draft, userId: UUID()))
+        let json = try encode(PebbleUpdatePayload(from: draft, formSnap: nil, userId: UUID()))
         #expect((json["glyph_id"] as? String) == glyphId.uuidString)
     }
 
@@ -128,7 +128,7 @@ struct PebbleUpdatePayloadEncodingTests {
         var draft = makeValidDraft()
         draft.happenedAt = fixedDate
 
-        let data = try JSONEncoder().encode(PebbleUpdatePayload(from: draft, userId: UUID()))
+        let data = try JSONEncoder().encode(PebbleUpdatePayload(from: draft, formSnap: nil, userId: UUID()))
         let object = try JSONSerialization.jsonObject(with: data)
         let json = try #require(object as? [String: Any])
 
