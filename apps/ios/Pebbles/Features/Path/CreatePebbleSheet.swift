@@ -272,7 +272,7 @@ struct CreatePebbleSheet: View {
         isSaving = true
         saveError = nil
 
-        let payload = PebbleCreatePayload(from: draft, userId: userId)
+        let payload = PebbleCreatePayload(from: draft, formSnap: draft.formSnap, userId: userId)
         let requestBody = ComposePebbleRequest(payload: payload)
 
         do {

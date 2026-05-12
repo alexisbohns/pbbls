@@ -77,8 +77,8 @@ extension PebbleCreatePayload {
     /// derive the snap's `storage_path` (the RPC re-derives ownership from
     /// `auth.uid()` server-side, so this value is not security-sensitive).
     /// Precondition: `draft.isValid == true`.
-    init(from draft: PebbleDraft, userId: UUID) {
-        precondition(draft.isValid, "PebbleCreatePayload(from:userId:) called with invalid draft")
+    init(from draft: PebbleDraft, formSnap: FormSnap?, userId: UUID) {
+        precondition(draft.isValid, "PebbleCreatePayload(from:formSnap:userId:) called with invalid draft")
         self.name = draft.name.trimmingCharacters(in: .whitespaces)
         let trimmedDescription = draft.description.trimmingCharacters(in: .whitespaces)
         self.description = trimmedDescription.isEmpty ? nil : trimmedDescription
@@ -92,7 +92,7 @@ extension PebbleCreatePayload {
         self.collectionIds = draft.collectionId.map { [$0] } ?? []
         self.glyphId = draft.glyphId
         self.snaps = {
-            switch draft.formSnap {
+            switch formSnap {
             case .none:
                 return nil
             case .pending(let snap):

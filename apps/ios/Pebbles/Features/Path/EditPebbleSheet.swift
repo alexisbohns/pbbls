@@ -320,7 +320,7 @@ struct EditPebbleSheet: View {
             self.isSaving = false
             return
         }
-        let payload = PebbleUpdatePayload(from: draft, userId: userId)
+        let payload = PebbleUpdatePayload(from: draft, formSnap: draft.formSnap, userId: userId)
         let requestBody = ComposePebbleUpdateRequest(pebbleId: pebbleId, payload: payload)
 
         do {
