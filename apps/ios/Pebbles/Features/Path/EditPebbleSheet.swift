@@ -27,6 +27,7 @@ struct EditPebbleSheet: View {
     @State private var renderSvg: String?
     @State private var strokeColor: String?
     @State private var sizeGroup: ValenceSizeGroup = .medium
+    @State private var selectedGlyph: Glyph?
 
     @State private var isLoading = true
     @State private var loadError: String?
@@ -108,6 +109,8 @@ struct EditPebbleSheet: View {
                 renderSvg: renderSvg,
                 strokeColor: strokeColor,
                 renderHeight: sizeGroup.renderHeight,
+                selectedGlyph: selectedGlyph,
+                onGlyphPicked: { picked in selectedGlyph = picked },
                 showsPhotoSection: true,
                 photoPickerPresented: $isPhotoPickerPresented,
                 isRemovingExistingSnap: isRemovingExistingSnap,
@@ -126,6 +129,9 @@ struct EditPebbleSheet: View {
                     }
                 }
             )
+            .onChange(of: draft.glyphId) { _, newValue in
+                if newValue == nil { selectedGlyph = nil }
+            }
         }
     }
 
@@ -159,6 +165,7 @@ struct EditPebbleSheet: View {
                 .select("""
                     id, name, description, happened_at, intensity, positiveness, visibility,
                     render_svg, render_version, glyph_id,
+                    glyph:glyphs(id, name, strokes, view_box),
                     emotion:emotions(id, slug, name),
                     pebble_domains(domain:domains(id, slug, name)),
                     pebble_souls(soul:souls(id, name, glyph_id, glyphs(id, name, strokes, view_box))),
@@ -196,6 +203,7 @@ struct EditPebbleSheet: View {
             self.souls = loadedSouls
             self.collections = loadedCollections
             self.draft = PebbleDraft(from: detail)
+            self.selectedGlyph = detail.glyph
             self.renderSvg = detail.renderSvg
             self.strokeColor = palettes.palette(for: detail.emotion.id)?
                 .strokeHex(for: colorScheme) ?? Color.pebblesAccentHex

@@ -12,6 +12,7 @@ struct CreatePebbleSheet: View {
     @State private var domains: [Domain] = []
     @State private var souls: [SoulWithGlyph] = []
     @State private var collections: [PebbleCollection] = []
+    @State private var selectedGlyph: Glyph?
 
     @State private var isLoadingReferences = true
     @State private var loadError: String?
@@ -88,6 +89,8 @@ struct CreatePebbleSheet: View {
                 souls: souls,
                 collections: collections,
                 saveError: saveError,
+                selectedGlyph: selectedGlyph,
+                onGlyphPicked: { picked in selectedGlyph = picked },
                 showsPhotoSection: true,
                 photoPickerPresented: $isPhotoPickerPresented,
                 formSnap: snaps?.formSnap,
@@ -102,6 +105,9 @@ struct CreatePebbleSheet: View {
                     }
                 }
             )
+            .onChange(of: draft.glyphId) { _, newValue in
+                if newValue == nil { selectedGlyph = nil }
+            }
         }
     }
 

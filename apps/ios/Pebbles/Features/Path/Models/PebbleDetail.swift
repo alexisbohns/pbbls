@@ -46,6 +46,10 @@ struct PebbleDetail: Identifiable, Decodable, Hashable {
     let renderSvg: String?
     let renderVersion: String?
     let glyphId: UUID?
+    /// Full glyph row when the detail SELECT includes
+    /// `glyph:glyphs(id, name, strokes, view_box)`. `nil` when the pebble has
+    /// no glyph or the caller didn't ask for it.
+    let glyph: Glyph?
 
     /// Lightweight read-model row for `public.snaps`. The detail SELECT
     /// projects `snaps(id, storage_path, sort_order)` ordered by `sort_order`.
@@ -105,6 +109,7 @@ struct PebbleDetail: Identifiable, Decodable, Hashable {
         case renderSvg = "render_svg"
         case renderVersion = "render_version"
         case glyphId = "glyph_id"
+        case glyph
     }
 
     private struct DomainWrapper: Decodable { let domain: DomainRef }
@@ -138,5 +143,6 @@ struct PebbleDetail: Identifiable, Decodable, Hashable {
         self.renderSvg = try container.decodeIfPresent(String.self, forKey: .renderSvg)
         self.renderVersion = try container.decodeIfPresent(String.self, forKey: .renderVersion)
         self.glyphId = try container.decodeIfPresent(UUID.self, forKey: .glyphId)
+        self.glyph = try container.decodeIfPresent(Glyph.self, forKey: .glyph)
     }
 }

@@ -5,7 +5,7 @@ import os
 /// Presented from `PebbleFormView`'s "Glyph" row.
 struct GlyphPickerSheet: View {
     let currentGlyphId: UUID?
-    let onSelected: (UUID?) -> Void
+    let onSelected: (Glyph) -> Void
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(\.dismiss) private var dismiss
@@ -35,7 +35,7 @@ struct GlyphPickerSheet: View {
                 .fullScreenCover(isPresented: $showCarveSheet) {
                     GlyphCarveSheet(onSaved: { glyph in
                         glyphs.insert(glyph, at: 0)
-                        onSelected(glyph.id)
+                        onSelected(glyph)
                         dismiss()
                     })
                 }
@@ -69,7 +69,7 @@ struct GlyphPickerSheet: View {
                         LazyVGrid(columns: columns, spacing: 12) {
                             ForEach(glyphs) { glyph in
                                 Button {
-                                    onSelected(glyph.id)
+                                    onSelected(glyph)
                                     dismiss()
                                 } label: {
                                     GlyphThumbnail(

@@ -75,10 +75,8 @@ struct EditSoulSheet: View {
                 GlyphPickerSheet(
                     currentGlyphId: draft.glyphId,
                     onSelected: { selected in
-                        if let selected {
-                            draft.glyphId = selected
-                            Task { await loadGlyph(id: selected) }
-                        }
+                        draft.glyphId = selected.id
+                        Task { await loadGlyph(id: selected.id) }
                     }
                 )
             }
