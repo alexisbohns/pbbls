@@ -34,6 +34,16 @@ struct PebbleFormView: View {
     /// no-op closure.
     let onRemoveExistingSnap: () -> Void
 
+    /// Current snap state. The parent owns this via a `SnapUploadCoordinator`
+    /// and re-passes it on every render.
+    let formSnap: FormSnap?
+
+    /// Tapped when the user hits retry on a `.pending(.failed)` chip.
+    let onRetryPending: () -> Void
+
+    /// Tapped when the user hits remove on a `.pending` chip (any state).
+    let onRemovePending: () -> Void
+
     @State private var showPicker = false
     @State private var showValencePicker = false
     @State private var showEmotionPicker = false
@@ -54,7 +64,10 @@ struct PebbleFormView: View {
         showsPhotoSection: Bool = false,
         photoPickerPresented: Binding<Bool> = .constant(false),
         isRemovingExistingSnap: Bool = false,
-        onRemoveExistingSnap: @escaping () -> Void = {}
+        onRemoveExistingSnap: @escaping () -> Void = {},
+        formSnap: FormSnap? = nil,
+        onRetryPending: @escaping () -> Void = {},
+        onRemovePending: @escaping () -> Void = {}
     ) {
         self._draft = draft
         self.domains = domains
@@ -68,27 +81,9 @@ struct PebbleFormView: View {
         self._photoPickerPresented = photoPickerPresented
         self.isRemovingExistingSnap = isRemovingExistingSnap
         self.onRemoveExistingSnap = onRemoveExistingSnap
-    }
-
-    /// Two-way bridge between the `.pending` case of `draft.formSnap` and the
-    /// `Binding<AttachedSnap?>` that `AttachedPhotoView` already speaks. Setting
-    /// the binding to nil clears `formSnap`; setting it to a value re-wraps as
-    /// `.pending` so the existing retry/remove `.onChange` observers in
-    /// `CreatePebbleSheet` keep working unchanged.
-    private var pendingSnapBinding: Binding<AttachedSnap?> {
-        Binding<AttachedSnap?>(
-            get: {
-                if case .pending(let snap) = draft.formSnap { return snap }
-                return nil
-            },
-            set: { newValue in
-                if let newValue {
-                    draft.formSnap = .pending(newValue)
-                } else {
-                    draft.formSnap = nil
-                }
-            }
-        )
+        self.formSnap = formSnap
+        self.onRetryPending = onRetryPending
+        self.onRemovePending = onRemovePending
     }
 
     var body: some View {
@@ -264,7 +259,7 @@ struct PebbleFormView: View {
 
             if showsPhotoSection {
                 Section("Photo") {
-                    switch draft.formSnap {
+                    switch formSnap {
                     case .none:
                         Button {
                             photoPickerPresented = true
@@ -279,9 +274,13 @@ struct PebbleFormView: View {
                             onRemove: onRemoveExistingSnap
                         )
                         .listRowBackground(Color.pebblesListRow)
-                    case .pending:
-                        AttachedPhotoView(snap: pendingSnapBinding)
-                            .listRowBackground(Color.pebblesListRow)
+                    case .pending(let snap):
+                        AttachedPhotoView(
+                            snap: snap,
+                            onRetry: onRetryPending,
+                            onRemove: onRemovePending
+                        )
+                        .listRowBackground(Color.pebblesListRow)
                     }
                 }
             }
