@@ -18,30 +18,16 @@ struct CreatePebbleSheet: View {
     @State private var isSaving = false
     @State private var saveError: String?
 
-    /// In-flight processed bytes kept around so the user can retry an upload
-    /// without re-picking the photo.
-    @State private var processedForRetry: ProcessedImage?
-
     @State private var isPhotoPickerPresented = false
+
+    /// Lazily constructed in `.task` so we have access to `supabase.client`.
+    /// Nil only for the very first body render before `.task` fires.
+    @State private var snaps: SnapUploadCoordinator?
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "create-pebble")
 
-    private var snapRepo: PebbleSnapRepository {
-        PebbleSnapRepository(client: supabase.client)
-    }
-
     private var currentUserId: UUID? {
         supabase.session?.user.id
-    }
-
-    private var pendingSnapState: AttachedSnap.UploadState? {
-        if case .pending(let snap) = draft.formSnap { return snap.state }
-        return nil
-    }
-
-    private var pendingSnapId: UUID? {
-        if case .pending(let snap) = draft.formSnap { return snap.id }
-        return nil
     }
 
     var body: some View {
@@ -68,30 +54,19 @@ struct CreatePebbleSheet: View {
                 }
                 .pebblesScreen()
         }
-        .task { await loadReferences() }
+        .task {
+            if snaps == nil {
+                snaps = SnapUploadCoordinator(repo: PebbleSnapRepository(client: supabase.client))
+            }
+            await loadReferences()
+        }
         .sheet(isPresented: $isPhotoPickerPresented) {
             PhotoPickerView { picked in
                 isPhotoPickerPresented = false
-                if let picked {
-                    Task { await handlePicked(picked) }
+                if let picked, let userId = currentUserId, let snaps {
+                    Task { await snaps.handlePicked(picked, userId: userId) }
                 }
             }
-        }
-        // Retry: chip mutates snap.state from .failed to .uploading; re-run upload.
-        .onChange(of: pendingSnapState) { oldState, newState in
-            if oldState == .failed,
-               newState == .uploading,
-               let processed = processedForRetry,
-               let userId = currentUserId {
-                Task { await uploadCurrentSnap(processed: processed, userId: userId) }
-            }
-        }
-        // Remove: chip clears the snap; fire compensating Storage delete for the
-        // files that were already uploaded under that id.
-        .onChange(of: pendingSnapId) { oldId, newId in
-            guard let oldId, newId == nil, let userId = currentUserId else { return }
-            processedForRetry = nil
-            Task { await snapRepo.deleteFiles(snapId: oldId, userId: userId) }
         }
     }
 
@@ -114,97 +89,26 @@ struct CreatePebbleSheet: View {
                 collections: collections,
                 saveError: saveError,
                 showsPhotoSection: true,
-                photoPickerPresented: $isPhotoPickerPresented
+                photoPickerPresented: $isPhotoPickerPresented,
+                formSnap: snaps?.formSnap,
+                onRetryPending: {
+                    if let userId = currentUserId, let snaps {
+                        Task { await snaps.retryCurrent(userId: userId) }
+                    }
+                },
+                onRemovePending: {
+                    if let userId = currentUserId, let snaps {
+                        Task { await snaps.removePending(userId: userId) }
+                    }
+                }
             )
         }
     }
 
-    // MARK: - upload orchestration
-
-    private func handlePicked(_ picked: PhotoPickerView.PickedItem) async {
-        logger.notice("handlePicked: started uti=\(picked.uti, privacy: .public)")
-
-        guard let userId = currentUserId else {
-            logger.error("handlePicked: no current user id")
-            return
-        }
-
-        // Load bytes from the item provider. PHPicker's loadDataRepresentation
-        // is callback-based; wrap in a continuation.
-        let data: Data
-        do {
-            data = try await loadData(from: picked.itemProvider, uti: picked.uti)
-            logger.notice("handlePicked: loaded \(data.count, privacy: .public) bytes")
-        } catch {
-            logger.error("picker data load failed: \(error.localizedDescription, privacy: .private)")
-            saveError = "Couldn't read the image."
-            return
-        }
-
-        // Process off the main actor — re-encode is CPU-bound.
-        let processed: ProcessedImage
-        let uti = picked.uti
-        do {
-            processed = try await Task.detached(priority: .userInitiated) {
-                try ImagePipeline.process(data, uti: uti)
-            }.value
-        } catch {
-            logger.error("image pipeline failed: \(String(describing: error), privacy: .public)")
-            saveError = userMessageForPebbleSaveError(error)
-            return
-        }
-
-        let snapId = UUID()
-        draft.formSnap = .pending(AttachedSnap(id: snapId, localThumb: processed.thumb, state: .uploading))
-        processedForRetry = processed
-
-        await uploadCurrentSnap(processed: processed, userId: userId)
-    }
-
-    private func loadData(from provider: NSItemProvider, uti: String) async throws -> Data {
-        try await withCheckedThrowingContinuation { continuation in
-            provider.loadDataRepresentation(forTypeIdentifier: uti) { data, error in
-                if let error {
-                    continuation.resume(throwing: error)
-                } else if let data {
-                    continuation.resume(returning: data)
-                } else {
-                    continuation.resume(throwing: URLError(.cannotDecodeContentData))
-                }
-            }
-        }
-    }
-
-    private func uploadCurrentSnap(processed: ProcessedImage, userId: UUID) async {
-        guard case .pending(var snap) = draft.formSnap else { return }
-        logger.notice("uploadCurrentSnap: started snap=\(snap.id, privacy: .public)")
-
-        do {
-            try await snapRepo.uploadProcessed(processed, snapId: snap.id, userId: userId)
-            logger.notice("uploadCurrentSnap: success snap=\(snap.id, privacy: .public)")
-            snap.state = .uploaded
-            draft.formSnap = .pending(snap)
-        } catch {
-            logger.warning("snap upload failed (first attempt): \(error.localizedDescription, privacy: .private)")
-            try? await Task.sleep(nanoseconds: 2_000_000_000)
-            do {
-                try await snapRepo.uploadProcessed(processed, snapId: snap.id, userId: userId)
-                snap.state = .uploaded
-                draft.formSnap = .pending(snap)
-            } catch {
-                logger.error("snap upload failed (retry): \(error.localizedDescription, privacy: .private)")
-                snap.state = .failed
-                draft.formSnap = .pending(snap)
-            }
-        }
-    }
-
     private func cancelAndCleanup() async {
-        // Clearing the snap triggers the .onChange(of: pendingSnapId)
-        // observer, which fires the compensating Storage delete.
-        draft.formSnap = nil
-        // Give the .onChange handler a tick to fire before dismissing.
-        try? await Task.sleep(nanoseconds: 50_000_000)
+        if let userId = currentUserId, let snaps {
+            await snaps.cancelAndCleanup(userId: userId)
+        }
         dismiss()
     }
 
@@ -252,12 +156,12 @@ struct CreatePebbleSheet: View {
     private func save() async {
         guard draft.isValid else { return }
 
-        if case .pending(let snap) = draft.formSnap, snap.state == .uploading {
+        if snaps?.isUploading == true {
             logger.notice("save blocked: snap still uploading")
             saveError = "Photo is still uploading."
             return
         }
-        if case .pending(let snap) = draft.formSnap, snap.state == .failed {
+        if snaps?.hasFailed == true {
             logger.notice("save blocked: snap upload failed")
             saveError = "Photo upload failed. Retry or remove it."
             return
@@ -272,7 +176,7 @@ struct CreatePebbleSheet: View {
         isSaving = true
         saveError = nil
 
-        let payload = PebbleCreatePayload(from: draft, formSnap: draft.formSnap, userId: userId)
+        let payload = PebbleCreatePayload(from: draft, formSnap: snaps?.formSnap, userId: userId)
         let requestBody = ComposePebbleRequest(payload: payload)
 
         do {
@@ -304,9 +208,8 @@ struct CreatePebbleSheet: View {
     /// Save failed and we cannot recover — fire the compensating snap delete
     /// (if a snap was attached) and surface a user-facing message.
     private func handleSaveFailure(_ error: Error) async {
-        if let userId = currentUserId,
-           case .pending(let snap) = draft.formSnap {
-            await snapRepo.deleteFiles(snapId: snap.id, userId: userId)
+        if let userId = currentUserId, let snaps {
+            await snaps.handleSaveFailure(userId: userId)
         }
         saveError = userMessageForPebbleSaveError(error)
         isSaving = false
