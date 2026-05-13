@@ -3,6 +3,7 @@ import os
 
 struct SoulsListView: View {
     @Environment(SupabaseService.self) private var supabase
+    @Environment(ReferenceDataService.self) private var refs
     @State private var items: [SoulWithGlyph] = []
     @State private var isLoading = true
     @State private var loadError: String?
@@ -31,7 +32,10 @@ struct SoulsListView: View {
             .task { await load() }
             .sheet(isPresented: $isPresentingCreate) {
                 CreateSoulSheet(onCreated: { _ in
-                    Task { await load() }
+                    Task {
+                        await load()
+                        await refs.refreshSouls()
+                    }
                 })
             }
             .confirmationDialog(
@@ -90,7 +94,10 @@ struct SoulsListView: View {
                     ForEach(items) { item in
                         NavigationLink {
                             SoulDetailView(initial: item, onChanged: {
-                                Task { await load() }
+                                Task {
+                                    await load()
+                                    await refs.refreshSouls()
+                                }
                             })
                         } label: {
                             SoulGridCell(soul: item)
@@ -137,6 +144,7 @@ struct SoulsListView: View {
                 .eq("id", value: soul.id)
                 .execute()
             await load()
+            await refs.refreshSouls()
         } catch {
             logger.error("delete soul failed: \(error.localizedDescription, privacy: .private)")
             deleteError = "Something went wrong. Please try again."
@@ -145,8 +153,10 @@ struct SoulsListView: View {
 }
 
 #Preview {
-    NavigationStack {
+    let supabase = SupabaseService()
+    return NavigationStack {
         SoulsListView()
-            .environment(SupabaseService())
+            .environment(supabase)
+            .environment(ReferenceDataService(client: supabase.client))
     }
 }

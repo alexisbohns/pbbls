@@ -17,13 +17,11 @@ struct EditPebbleSheet: View {
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(EmotionPaletteService.self) private var palettes
+    @Environment(ReferenceDataService.self) private var refs
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
 
     @State private var draft = PebbleDraft()
-    @State private var domains: [Domain] = []
-    @State private var souls: [SoulWithGlyph] = []
-    @State private var collections: [PebbleCollection] = []
     @State private var renderSvg: String?
     @State private var strokeColor: String?
     @State private var sizeGroup: ValenceSizeGroup = .medium
@@ -102,9 +100,9 @@ struct EditPebbleSheet: View {
         } else {
             PebbleFormView(
                 draft: $draft,
-                domains: domains,
-                souls: souls,
-                collections: collections,
+                domains: refs.domains,
+                souls: refs.souls,
+                collections: refs.collections,
                 saveError: saveError,
                 renderSvg: renderSvg,
                 strokeColor: strokeColor,
@@ -154,13 +152,11 @@ struct EditPebbleSheet: View {
         }
     }
 
-    // Five parallel queries (detail + four reference lists) push this just past the default limit.
-    // swiftlint:disable:next function_body_length
     private func load() async {
         isLoading = true
         loadError = nil
         do {
-            async let detailQuery: PebbleDetail = supabase.client
+            let detail: PebbleDetail = try await supabase.client
                 .from("pebbles")
                 .select("""
                     id, name, description, happened_at, intensity, positiveness, visibility,
@@ -177,31 +173,6 @@ struct EditPebbleSheet: View {
                 .execute()
                 .value
 
-            async let domainsQuery: [Domain] = supabase.client
-                .from("domains")
-                .select()
-                .order("name")
-                .execute()
-                .value
-            async let soulsQuery: [SoulWithGlyph] = supabase.client
-                .from("souls")
-                .select("id, name, glyph_id, glyphs(id, name, strokes, view_box)")
-                .order("name")
-                .execute()
-                .value
-            async let collectionsQuery: [PebbleCollection] = supabase.client
-                .from("collections")
-                .select("id, name")
-                .order("name")
-                .execute()
-                .value
-
-            let (detail, loadedDomains, loadedSouls, loadedCollections) =
-                try await (detailQuery, domainsQuery, soulsQuery, collectionsQuery)
-
-            self.domains = loadedDomains
-            self.souls = loadedSouls
-            self.collections = loadedCollections
             self.draft = PebbleDraft(from: detail)
             self.selectedGlyph = detail.glyph
             self.renderSvg = detail.renderSvg
@@ -305,6 +276,8 @@ private struct ComposePebbleUpdateRequest: Encodable {
 }
 
 #Preview {
-    EditPebbleSheet(pebbleId: UUID(), onSaved: {})
-        .environment(SupabaseService())
+    let supabase = SupabaseService()
+    return EditPebbleSheet(pebbleId: UUID(), onSaved: {})
+        .environment(supabase)
+        .environment(ReferenceDataService(client: supabase.client))
 }

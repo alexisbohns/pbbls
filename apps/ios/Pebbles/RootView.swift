@@ -17,6 +17,7 @@ import SwiftUI
 struct RootView: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(EmotionPaletteService.self) private var palettes
+    @Environment(ReferenceDataService.self) private var refs
     @Environment(SnapURLCache.self) private var snapURLs
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @State private var isPresentingOnboarding = false
@@ -80,6 +81,7 @@ struct RootView: View {
             minSplashDone = true
         }
         .task { await palettes.load() }
+        .task { await refs.load() }
         // Relies on supabase.start() being kicked off in .task above.
         // session?.user.id is nil when this observer is registered, so the
         // first authStateChanges event delivers a real nil→id transition
@@ -102,5 +104,6 @@ struct RootView: View {
     return RootView()
         .environment(supabase)
         .environment(EmotionPaletteService(client: supabase.client))
+        .environment(ReferenceDataService(client: supabase.client))
         .environment(SnapURLCache(client: supabase.client))
 }
