@@ -6,16 +6,12 @@ struct CreatePebbleSheet: View {
     let onCreated: (UUID) -> Void
 
     @Environment(SupabaseService.self) private var supabase
+    @Environment(ReferenceDataService.self) private var refs
     @Environment(\.dismiss) private var dismiss
 
     @State private var draft = PebbleDraft()
-    @State private var domains: [Domain] = []
-    @State private var souls: [SoulWithGlyph] = []
-    @State private var collections: [PebbleCollection] = []
     @State private var selectedGlyph: Glyph?
 
-    @State private var isLoadingReferences = true
-    @State private var loadError: String?
     @State private var isSaving = false
     @State private var saveError: String?
 
@@ -59,7 +55,6 @@ struct CreatePebbleSheet: View {
             if snaps == nil {
                 snaps = SnapUploadCoordinator(repo: PebbleSnapRepository(client: supabase.client))
             }
-            await loadReferences()
         }
         .sheet(isPresented: $isPhotoPickerPresented) {
             PhotoPickerView { picked in
@@ -73,41 +68,30 @@ struct CreatePebbleSheet: View {
 
     @ViewBuilder
     private var content: some View {
-        if isLoadingReferences {
-            ProgressView()
-        } else if let loadError {
-            VStack(spacing: 12) {
-                Text(loadError).foregroundStyle(.secondary)
-                Button("Retry") {
-                    Task { await loadReferences() }
+        PebbleFormView(
+            draft: $draft,
+            domains: refs.domains,
+            souls: refs.souls,
+            collections: refs.collections,
+            saveError: saveError,
+            selectedGlyph: selectedGlyph,
+            onGlyphPicked: { picked in selectedGlyph = picked },
+            showsPhotoSection: true,
+            photoPickerPresented: $isPhotoPickerPresented,
+            formSnap: snaps?.formSnap,
+            onRetryPending: {
+                if let userId = currentUserId, let snaps {
+                    Task { await snaps.retryCurrent(userId: userId) }
+                }
+            },
+            onRemovePending: {
+                if let userId = currentUserId, let snaps {
+                    Task { await snaps.removePending(userId: userId) }
                 }
             }
-        } else {
-            PebbleFormView(
-                draft: $draft,
-                domains: domains,
-                souls: souls,
-                collections: collections,
-                saveError: saveError,
-                selectedGlyph: selectedGlyph,
-                onGlyphPicked: { picked in selectedGlyph = picked },
-                showsPhotoSection: true,
-                photoPickerPresented: $isPhotoPickerPresented,
-                formSnap: snaps?.formSnap,
-                onRetryPending: {
-                    if let userId = currentUserId, let snaps {
-                        Task { await snaps.retryCurrent(userId: userId) }
-                    }
-                },
-                onRemovePending: {
-                    if let userId = currentUserId, let snaps {
-                        Task { await snaps.removePending(userId: userId) }
-                    }
-                }
-            )
-            .onChange(of: draft.glyphId) { _, newValue in
-                if newValue == nil { selectedGlyph = nil }
-            }
+        )
+        .onChange(of: draft.glyphId) { _, newValue in
+            if newValue == nil { selectedGlyph = nil }
         }
     }
 
@@ -116,45 +100,6 @@ struct CreatePebbleSheet: View {
             await snaps.cancelAndCleanup(userId: userId)
         }
         dismiss()
-    }
-
-    // MARK: - load references
-
-    private func loadReferences() async {
-        isLoadingReferences = true
-        loadError = nil
-        do {
-            async let domainsQuery: [Domain] = supabase.client
-                .from("domains")
-                .select()
-                .order("name")
-                .execute()
-                .value
-            async let soulsQuery: [SoulWithGlyph] = supabase.client
-                .from("souls")
-                .select("id, name, glyph_id, glyphs(id, name, strokes, view_box)")
-                .order("name")
-                .execute()
-                .value
-            async let collectionsQuery: [PebbleCollection] = supabase.client
-                .from("collections")
-                .select("id, name")
-                .order("name")
-                .execute()
-                .value
-
-            let (loadedDomains, loadedSouls, loadedCollections) =
-                try await (domainsQuery, soulsQuery, collectionsQuery)
-
-            self.domains = loadedDomains
-            self.souls = loadedSouls
-            self.collections = loadedCollections
-            self.isLoadingReferences = false
-        } catch {
-            logger.error("reference load failed: \(error.localizedDescription, privacy: .private)")
-            self.loadError = "Couldn't load the form data."
-            self.isLoadingReferences = false
-        }
     }
 
     // MARK: - save
@@ -242,8 +187,10 @@ private struct PebbleIdPartial: Decodable {
 }
 
 #Preview {
-    CreatePebbleSheet(onCreated: { _ in })
-        .environment(SupabaseService())
+    let supabase = SupabaseService()
+    return CreatePebbleSheet(onCreated: { _ in })
+        .environment(supabase)
+        .environment(ReferenceDataService(client: supabase.client))
 }
 
 /// Maps a thrown error to a user-facing localized string. Module-private so

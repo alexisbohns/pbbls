@@ -5,6 +5,7 @@ import UIKit
 struct PebblesApp: App {
     @State private var supabase: SupabaseService
     @State private var palettes: EmotionPaletteService
+    @State private var refs: ReferenceDataService
     @State private var stats: PathStatsService
     @State private var snapURLs: SnapURLCache
 
@@ -12,6 +13,7 @@ struct PebblesApp: App {
         let supabase = SupabaseService()
         self._supabase = State(initialValue: supabase)
         self._palettes = State(initialValue: EmotionPaletteService(client: supabase.client))
+        self._refs     = State(initialValue: ReferenceDataService(client: supabase.client))
         self._stats    = State(initialValue: PathStatsService(supabase: supabase))
         self._snapURLs = State(initialValue: SnapURLCache(client: supabase.client))
         Self.configureSegmentedControlAppearance()
@@ -22,6 +24,7 @@ struct PebblesApp: App {
             RootView()
                 .environment(supabase)
                 .environment(palettes)
+                .environment(refs)
                 .environment(stats)
                 .environment(snapURLs)
         }

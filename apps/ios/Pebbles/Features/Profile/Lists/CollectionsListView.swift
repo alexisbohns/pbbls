@@ -3,6 +3,7 @@ import os
 
 struct CollectionsListView: View {
     @Environment(SupabaseService.self) private var supabase
+    @Environment(ReferenceDataService.self) private var refs
     @State private var items: [Collection] = []
     @State private var isLoading = true
     @State private var loadError: String?
@@ -29,7 +30,10 @@ struct CollectionsListView: View {
             .task { await load() }
             .sheet(isPresented: $isPresentingCreate) {
                 CreateCollectionSheet(onCreated: {
-                    Task { await load() }
+                    Task {
+                        await load()
+                        await refs.refreshCollections()
+                    }
                 })
             }
             .refreshable { await load() }
@@ -88,7 +92,10 @@ struct CollectionsListView: View {
                 ForEach(items) { collection in
                     NavigationLink {
                         CollectionDetailView(collection: collection, onChanged: {
-                            Task { await load() }
+                            Task {
+                                await load()
+                                await refs.refreshCollections()
+                            }
                         })
                     } label: {
                         CollectionRow(collection: collection)
@@ -134,6 +141,7 @@ struct CollectionsListView: View {
                 .eq("id", value: collection.id)
                 .execute()
             await load()
+            await refs.refreshCollections()
         } catch {
             logger.error("delete collection failed: \(error.localizedDescription, privacy: .private)")
             deleteError = "Something went wrong. Please try again."
@@ -172,8 +180,10 @@ private struct CollectionRow: View {
 }
 
 #Preview {
-    NavigationStack {
+    let supabase = SupabaseService()
+    return NavigationStack {
         CollectionsListView()
-            .environment(SupabaseService())
+            .environment(supabase)
+            .environment(ReferenceDataService(client: supabase.client))
     }
 }
