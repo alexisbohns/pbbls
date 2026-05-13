@@ -2,6 +2,14 @@ import Foundation
 import Supabase
 import os
 
+/// Minimal signing surface the cache depends on. `PebbleSnapRepository`
+/// is the live conformance; tests inject a fake.
+@MainActor
+protocol SignedURLProviding {
+    func signedURLs(storagePrefix: String) async throws
+        -> PebbleSnapRepository.SignedURLs
+}
+
 /// Abstraction over snap Storage + RPC operations so callers (notably
 /// `SnapUploadCoordinator`) can be unit-tested with a fake. The live
 /// conformance is `PebbleSnapRepository`.
@@ -19,7 +27,7 @@ protocol PebbleSnapRepositoryProtocol {
 /// `SupabaseClient`. Errors propagate; callers decide whether to retry, surface
 /// to the user, or fire-and-forget.
 @MainActor
-struct PebbleSnapRepository: PebbleSnapRepositoryProtocol {
+struct PebbleSnapRepository: PebbleSnapRepositoryProtocol, SignedURLProviding {
 
     private static let bucketId = "pebbles-media"
     private static let signedUrlTTL: Int = 3600    // 1 h

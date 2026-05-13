@@ -17,6 +17,7 @@ import SwiftUI
 struct RootView: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(EmotionPaletteService.self) private var palettes
+    @Environment(SnapURLCache.self) private var snapURLs
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @State private var isPresentingOnboarding = false
     @State private var authPath = NavigationPath()
@@ -88,6 +89,11 @@ struct RootView: View {
                 isPresentingOnboarding = true
             }
         }
+        .onChange(of: supabase.session == nil) { wasSignedOut, isSignedOut in
+            if !wasSignedOut && isSignedOut {
+                snapURLs.invalidateAll()
+            }
+        }
     }
 }
 
@@ -96,4 +102,5 @@ struct RootView: View {
     return RootView()
         .environment(supabase)
         .environment(EmotionPaletteService(client: supabase.client))
+        .environment(SnapURLCache(client: supabase.client))
 }
