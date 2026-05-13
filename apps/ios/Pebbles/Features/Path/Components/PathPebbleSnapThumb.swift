@@ -9,7 +9,7 @@ import os
 struct PathPebbleSnapThumb: View {
     let storagePath: String
 
-    @Environment(SupabaseService.self) private var supabase
+    @Environment(SnapURLCache.self) private var snapURLs
     @State private var url: URL?
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "path-row-thumb")
@@ -24,8 +24,7 @@ struct PathPebbleSnapThumb: View {
         }
         .task(id: storagePath) {
             do {
-                let urls = try await PebbleSnapRepository(client: supabase.client)
-                    .signedURLs(storagePrefix: storagePath)
+                let urls = try await snapURLs.signedURLs(storagePath: storagePath)
                 url = urls.thumb
             } catch {
                 logger.error("snap sign failed: \(error.localizedDescription, privacy: .private)")

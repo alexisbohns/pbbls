@@ -21,7 +21,7 @@ struct PebbleReadBanner: View {
     let emotionId: UUID
     let valence: Valence
 
-    @Environment(SupabaseService.self) private var supabase
+    @Environment(SnapURLCache.self) private var snapURLs
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.colorScheme) private var colorScheme
@@ -115,10 +115,8 @@ struct PebbleReadBanner: View {
         loadedImage = nil
         revealPhoto = false
         do {
-            let urls = try await PebbleSnapRepository(client: supabase.client)
-                .signedURLs(storagePrefix: path)
+            let urls = try await snapURLs.signedURLs(storagePath: path)
             var request = URLRequest(url: urls.original)
-            request.cachePolicy = .reloadIgnoringLocalCacheData
             request.timeoutInterval = 30
             let (data, _) = try await URLSession.shared.data(for: request)
             guard let image = UIImage(data: data) else {
@@ -200,6 +198,7 @@ struct PebbleReadBanner: View {
     .background(Color.pebblesBackground)
     .environment(supabase)
     .environment(EmotionPaletteService(client: supabase.client))
+    .environment(SnapURLCache(client: supabase.client))
 }
 
 #Preview("Without photo · large") {
@@ -219,6 +218,7 @@ struct PebbleReadBanner: View {
     .background(Color.pebblesBackground)
     .environment(supabase)
     .environment(EmotionPaletteService(client: supabase.client))
+    .environment(SnapURLCache(client: supabase.client))
 }
 
 #Preview("With photo (preview-only stub)") {
@@ -241,4 +241,5 @@ struct PebbleReadBanner: View {
     .background(Color.pebblesBackground)
     .environment(supabase)
     .environment(EmotionPaletteService(client: supabase.client))
+    .environment(SnapURLCache(client: supabase.client))
 }

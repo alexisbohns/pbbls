@@ -11,7 +11,7 @@ struct SnapImageView: View {
     let storagePath: String
     var contentMode: ContentMode = .fit
 
-    @Environment(SupabaseService.self) private var supabase
+    @Environment(SnapURLCache.self) private var snapURLs
 
     @State private var urls: PebbleSnapRepository.SignedURLs?
     @State private var loadError = false
@@ -44,8 +44,7 @@ struct SnapImageView: View {
         }
         .task {
             do {
-                urls = try await PebbleSnapRepository(client: supabase.client)
-                    .signedURLs(storagePrefix: storagePath)
+                urls = try await snapURLs.signedURLs(storagePath: storagePath)
             } catch {
                 loadError = true
             }
