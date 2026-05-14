@@ -26,6 +26,7 @@ struct WelcomeView: View {
     @State private var isSubmitting: Bool = false
     @State private var presentedLegalDoc: LegalDoc?
     @State private var revealStep: Int = 0
+    @State private var authError: String?
     @State private var logoViewModel = RiveViewModel(fileName: "pbbls-logo-appear_idle")
 
     /// Reveal cadence (seconds from the moment `contentRevealed` flips
@@ -150,7 +151,7 @@ struct WelcomeView: View {
                     .disabled(isSubmitting)
                     .opacity(revealStep >= 6 ? 1 : 0)
 
-                if let error = supabase.authError {
+                if let error = authError {
                     Text(error)
                         .font(.footnote)
                         .foregroundStyle(.red)
@@ -197,14 +198,24 @@ struct WelcomeView: View {
     private func runApple() async {
         guard !isSubmitting else { return }
         isSubmitting = true
-        await supabase.signInWithApple()
+        authError = nil
+        do {
+            try await supabase.signInWithApple()
+        } catch {
+            authError = error.localizedDescription
+        }
         isSubmitting = false
     }
 
     private func runGoogle() async {
         guard !isSubmitting else { return }
         isSubmitting = true
-        await supabase.signInWithGoogle()
+        authError = nil
+        do {
+            try await supabase.signInWithGoogle()
+        } catch {
+            authError = error.localizedDescription
+        }
         isSubmitting = false
     }
 }

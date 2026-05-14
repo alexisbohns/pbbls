@@ -1,9 +1,9 @@
 import SwiftUI
 
 /// Email + password auth screen. Switcher toggles between Login and Signup
-/// modes. Signup mode adds two consent checkboxes. State lives view-locally
-/// except for `authError`, which is read from `SupabaseService` so failures
-/// from `signIn` / `signUp` surface inline.
+/// modes. Signup mode adds two consent checkboxes. All state lives view-locally,
+/// including `authError` — the auth service throws on failure and this view
+/// catches and renders the message inline.
 struct AuthView: View {
     enum Mode: String, CaseIterable, Identifiable {
         case login
@@ -27,6 +27,7 @@ struct AuthView: View {
     @State private var termsAccepted = false
     @State private var privacyAccepted = false
     @State private var presentedLegalDoc: LegalDoc?
+    @State private var authError: String?
 
     init(initialMode: Mode = .login) {
         _mode = State(initialValue: initialMode)
@@ -74,7 +75,7 @@ struct AuthView: View {
                 }
             }
 
-            if let error = supabase.authError {
+            if let error = authError {
                 Text(error)
                     .font(.footnote)
                     .foregroundStyle(.red)
@@ -111,17 +112,17 @@ struct AuthView: View {
                 .ignoresSafeArea()
         }
         .onChange(of: mode) { _, newMode in
-            supabase.authError = nil
+            authError = nil
             if newMode == .login {
                 termsAccepted = false
                 privacyAccepted = false
             }
         }
         .onChange(of: email) { _, _ in
-            if supabase.authError != nil { supabase.authError = nil }
+            if authError != nil { authError = nil }
         }
         .onChange(of: password) { _, _ in
-            if supabase.authError != nil { supabase.authError = nil }
+            if authError != nil { authError = nil }
         }
         .pebblesScreen()
     }
@@ -159,12 +160,17 @@ struct AuthView: View {
 
     private func submit() {
         isSubmitting = true
+        authError = nil
         Task {
-            switch mode {
-            case .login:
-                await supabase.signIn(email: email, password: password)
-            case .signup:
-                await supabase.signUp(email: email, password: password)
+            do {
+                switch mode {
+                case .login:
+                    try await supabase.signIn(email: email, password: password)
+                case .signup:
+                    try await supabase.signUp(email: email, password: password)
+                }
+            } catch {
+                authError = error.localizedDescription
             }
             isSubmitting = false
         }
@@ -173,14 +179,24 @@ struct AuthView: View {
     private func runApple() async {
         guard !isSubmitting else { return }
         isSubmitting = true
-        await supabase.signInWithApple()
+        authError = nil
+        do {
+            try await supabase.signInWithApple()
+        } catch {
+            authError = error.localizedDescription
+        }
         isSubmitting = false
     }
 
     private func runGoogle() async {
         guard !isSubmitting else { return }
         isSubmitting = true
-        await supabase.signInWithGoogle()
+        authError = nil
+        do {
+            try await supabase.signInWithGoogle()
+        } catch {
+            authError = error.localizedDescription
+        }
         isSubmitting = false
     }
 }
