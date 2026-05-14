@@ -34,12 +34,25 @@ export function WeekPager({
   const isTouch = useMediaQuery("(pointer: coarse)")
 
   const handleDragEnd = (_: unknown, info: PanInfo) => {
+    // Ignore the gesture entirely when the user moved more vertically than
+    // horizontally — that's a scroll, not a swipe. Even with
+    // dragDirectionLock, Framer can briefly register horizontal pan during a
+    // diagonal scroll; this guard rejects anything that's not clearly
+    // sideways intent.
+    if (Math.abs(info.offset.y) >= Math.abs(info.offset.x)) return
+
     const width = typeof window !== "undefined" ? window.innerWidth : 0
-    const threshold = width * 0.3
-    if (info.offset.x < -threshold || info.velocity.x < -200) {
+    const offsetThreshold = width * 0.4
+    const velocityThreshold = 600
+    const goNext =
+      info.offset.x < -offsetThreshold || info.velocity.x < -velocityThreshold
+    const goPrev =
+      info.offset.x > offsetThreshold || info.velocity.x > velocityThreshold
+
+    if (goNext) {
       const next = entries[focusedIndex + 1]
       if (next) onFocusChange(next.weekStart)
-    } else if (info.offset.x > threshold || info.velocity.x > 200) {
+    } else if (goPrev) {
       const prev = entries[focusedIndex - 1]
       if (prev) onFocusChange(prev.weekStart)
     }
