@@ -250,15 +250,17 @@ export function QuickPebbleEditor({
 
   return (
     <>
-      {/* Collapsed trigger — always in flow */}
-      <button
-        type="button"
-        onClick={() => setExpanded(true)}
-        aria-label={t("triggerAria")}
-        className="block w-full rounded-xl border bg-card px-4 py-3 text-left font-heading text-base text-muted-foreground transition-colors hover:bg-muted"
-      >
-        {t("namePlaceholder")}
-      </button>
+      {/* Collapsed trigger — hidden while the overlay is open */}
+      {!expanded && (
+        <button
+          type="button"
+          onClick={() => setExpanded(true)}
+          aria-label={t("triggerAria")}
+          className="block w-full rounded-xl border bg-card px-4 py-3 text-left font-heading text-base text-muted-foreground transition-colors hover:bg-muted"
+        >
+          {t("namePlaceholder")}
+        </button>
+      )}
 
       {/* Expanded overlay */}
       <AnimatePresence>
