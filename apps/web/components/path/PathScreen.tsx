@@ -11,8 +11,10 @@ import { PathBottomDock } from "@/components/path/PathBottomDock"
 import { PebblePeek } from "@/components/path/PebblePeek"
 import {
   buildWeekRollEntries,
+  isoWeekKey,
   isoWeekStart,
   weekIndex,
+  type WeekRollEntry,
 } from "@/lib/utils/week-roll-entries"
 
 type PathScreenProps = {
@@ -21,32 +23,42 @@ type PathScreenProps = {
   loading: boolean
 }
 
+/**
+ * Pick the entry whose `weekStart` is closest to `preferred`. On tie,
+ * prefer the earlier week. Caller guarantees `entries.length > 0`.
+ */
+function closestEntry(entries: WeekRollEntry[], preferred: Date): WeekRollEntry {
+  return entries.reduce((best, e) => {
+    const dBest = Math.abs(best.weekStart.getTime() - preferred.getTime())
+    const dE = Math.abs(e.weekStart.getTime() - preferred.getTime())
+    if (dE < dBest) return e
+    if (dE === dBest && e.weekStart.getTime() < best.weekStart.getTime()) return e
+    return best
+  }, entries[0])
+}
+
 export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
   const t = useTranslations("path")
+  // today is frozen at mount; the failure mode (user leaves the tab open past
+  // midnight) is acceptable — navigation back to /path remounts the component.
   const today = useMemo(() => new Date(), [])
   const entries = useMemo(() => buildWeekRollEntries(pebbles, today), [pebbles, today])
 
-  const [focusedWeekStart, setFocusedWeekStart] = useState<Date>(() => isoWeekStart(today))
+  // Source of truth is the ISO key (e.g. "2026-W19"). Resolving to a real
+  // entry at render time lets us fall back gracefully when a focused week
+  // disappears (e.g. last pebble of a past, non-current week deleted) —
+  // no setState-during-render, no useEffect setState ping-pong.
+  const [focusedKey, setFocusedKey] = useState<string>(() => isoWeekKey(today))
   const [selectedPebbleId, setSelectedPebbleId] = useState<string | null>(null)
   const [editorExpanded, setEditorExpanded] = useState(false)
   const scrollTargetRef = useRef<string | null>(null)
 
-  // If entries change and the focused week is no longer in them, fall back to
-  // the closest remaining entry. Computed during render (not in an effect) so
-  // we satisfy the React 19 set-state-in-effect rule.
-  if (entries.length > 0 && weekIndex(entries, focusedWeekStart) < 0) {
-    const target = entries.reduce((best, e) => {
-      if (!best) return e
-      const dBest = Math.abs(best.weekStart.getTime() - focusedWeekStart.getTime())
-      const dE = Math.abs(e.weekStart.getTime() - focusedWeekStart.getTime())
-      if (dE < dBest) return e
-      if (dE === dBest && e.weekStart.getTime() < best.weekStart.getTime()) return e
-      return best
-    }, entries[0])
-    setFocusedWeekStart(target.weekStart)
-  }
+  const focusedEntry = entries.find((e) => e.weekStartIso === focusedKey)
+    ?? (entries.length > 0 ? closestEntry(entries, isoWeekStart(today)) : undefined)
+  const focusedWeekStart = focusedEntry?.weekStart ?? isoWeekStart(today)
 
-  // Keyboard nav: ←/→ when no input is focused.
+  const resolvedFocusedKey = focusedEntry?.weekStartIso ?? focusedKey
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return
@@ -55,17 +67,21 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
         const tag = active.tagName.toLowerCase()
         if (tag === "input" || tag === "textarea" || active.isContentEditable) return
       }
-      const idx = weekIndex(entries, focusedWeekStart)
+      const idx = entries.findIndex((entry) => entry.weekStartIso === resolvedFocusedKey)
       const nextIdx = e.key === "ArrowLeft" ? idx - 1 : idx + 1
       const target = entries[nextIdx]
       if (target) {
         e.preventDefault()
-        setFocusedWeekStart(target.weekStart)
+        setFocusedKey(target.weekStartIso)
       }
     }
     window.addEventListener("keydown", onKey)
     return () => window.removeEventListener("keydown", onKey)
-  }, [entries, focusedWeekStart])
+  }, [entries, resolvedFocusedKey])
+
+  const setFocusedFromDate = useCallback((date: Date) => {
+    setFocusedKey(isoWeekKey(date))
+  }, [])
 
   const handlePebbleCreated = useCallback((id: string) => {
     scrollTargetRef.current = id
@@ -74,16 +90,18 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
 
   const handleCarvePebble = useCallback(() => setEditorExpanded(true), [])
 
+  const handleClosePeek = useCallback(() => setSelectedPebbleId(null), [])
+
   const handlePrev = useCallback(() => {
     const idx = weekIndex(entries, focusedWeekStart)
     const target = entries[idx - 1]
-    if (target) setFocusedWeekStart(target.weekStart)
+    if (target) setFocusedKey(target.weekStartIso)
   }, [entries, focusedWeekStart])
 
   const handleNext = useCallback(() => {
     const idx = weekIndex(entries, focusedWeekStart)
     const target = entries[idx + 1]
-    if (target) setFocusedWeekStart(target.weekStart)
+    if (target) setFocusedKey(target.weekStartIso)
   }, [entries, focusedWeekStart])
 
   if (loading && pebbles.length === 0) {
@@ -100,7 +118,7 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
         <WeekRoll
           entries={entries}
           focused={focusedWeekStart}
-          onFocus={setFocusedWeekStart}
+          onFocus={setFocusedFromDate}
         />
       </div>
       <div className="px-4 pt-3">
@@ -117,7 +135,7 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
           entries={entries}
           focused={focusedWeekStart}
           souls={souls}
-          onFocusChange={setFocusedWeekStart}
+          onFocusChange={setFocusedFromDate}
           onSelectPebble={setSelectedPebbleId}
           onCarvePebble={handleCarvePebble}
           scrollTargetRef={scrollTargetRef}
@@ -130,7 +148,7 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
       />
       <PebblePeek
         pebbleId={selectedPebbleId}
-        onClose={() => setSelectedPebbleId(null)}
+        onClose={handleClosePeek}
       />
     </div>
   )
