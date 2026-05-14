@@ -1,25 +1,26 @@
--- Migration: Add released_at to logs
--- The admin UI and the changelog feeds (web + iOS) already reference
--- `released_at` — it distinguishes when a feature actually shipped from
--- when its log row was first published. The column was never added to the
--- table, so any query that selects or orders by it crashes
--- (`column v_logs_with_counts.released_at does not exist`).
+-- Migration: Expose released_at on v_logs_with_counts
+-- `logs.released_at` already exists on the remote DB (added out-of-band)
+-- and the admin UI / web changelog feed already write and read it. But
+-- `v_logs_with_counts` was created with `select l.*`, which Postgres
+-- expands to a fixed column list at view-creation time — so the view
+-- never picked up `released_at` and any query selecting/ordering by it
+-- crashes with "column v_logs_with_counts.released_at does not exist".
 --
--- The view `v_logs_with_counts` is `select l.*`, which Postgres expands
--- to the column list at creation time. Adding a column to `logs` is not
--- enough — the view has to be recreated so it picks up the new column.
+-- The alter/index statements use `if not exists` so the migration is
+-- safe whether the column was pre-added in production or is missing on
+-- a fresh local DB.
 
 alter table public.logs
-  add column released_at timestamptz;
+  add column if not exists released_at timestamptz;
 
--- Backfill existing shipped rows from `published_at` so the changelog
--- ordering (`released_at desc nulls last, published_at desc`) is stable
--- on rows authored before this migration.
+-- Backfill any shipped rows that pre-date the column so the changelog
+-- ordering (`released_at desc nulls last, published_at desc`) is stable.
+-- No-op on rows that already have a release date.
 update public.logs
   set released_at = published_at
   where status = 'shipped' and released_at is null;
 
-create index logs_released_at_idx on public.logs (released_at desc);
+create index if not exists logs_released_at_idx on public.logs (released_at desc);
 
 drop view if exists public.v_logs_with_counts;
 
