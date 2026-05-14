@@ -258,7 +258,7 @@ export function QuickPebbleEditor({
         <button
           type="button"
           onClick={() => setExpanded(true)}
-          className="block w-full rounded-full bg-background py-3 text-center font-heading text-[17px] font-bold text-primary transition-colors hover:bg-muted dark:bg-foreground dark:text-primary"
+          className="block w-full rounded-2xl bg-surface py-3 text-center font-heading text-[17px] font-bold text-primary transition-colors hover:bg-muted dark:bg-foreground dark:text-primary"
         >
           {tPath("newPebble")}
         </button>

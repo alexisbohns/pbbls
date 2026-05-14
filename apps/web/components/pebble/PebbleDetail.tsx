@@ -135,7 +135,7 @@ export function PebbleDetail({
               : tVisibility("ariaPublic")
           }
           className={cn(
-            "grid size-10 place-items-center rounded-full bg-muted/60 text-muted-foreground",
+            "grid size-10 place-items-center rounded-full bg-surface text-muted-foreground",
             pebble.visibility !== "private" && "opacity-0",
           )}
         >
@@ -146,7 +146,7 @@ export function PebbleDetail({
             type="button"
             onClick={onClose}
             aria-label={t("peek.close")}
-            className="grid size-10 place-items-center rounded-full bg-muted/60 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="grid size-10 place-items-center rounded-full bg-surface text-muted-foreground transition-colors hover:bg-primary hover:text-surface active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <X className="size-4" aria-hidden />
           </button>
@@ -189,7 +189,7 @@ export function PebbleDetail({
               pebble={pebble}
               mark={mark}
               tier="detail"
-              className="mx-auto size-[180px]"
+              className="mx-auto size-[100px]"
             />
           )}
         </button>

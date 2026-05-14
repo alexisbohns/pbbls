@@ -33,12 +33,12 @@ function TileTrigger({
   return (
     <PopoverTrigger
       className={cn(
-        "flex flex-col items-center justify-center gap-2 rounded-2xl border border-border/60 bg-muted/40 px-3 py-4 transition-colors",
+        "flex flex-col items-center justify-center gap-2 rounded-2xl bg-surface px-3 py-4 transition-colors",
         "hover:bg-muted/70 active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-ring",
       )}
       aria-label={ariaLabel}
     >
-      <span className="text-muted-foreground" aria-hidden>
+      <span className="text-primary" aria-hidden>
         {icon}
       </span>
       <span className="text-sm font-medium text-foreground line-clamp-1">
@@ -71,7 +71,7 @@ export function EmotionTile({ value, onChange }: EmotionTileProps) {
           selected ? t("selectedAria", { name: selected.name }) : t("pickAria")
         }
         className={cn(
-          "flex flex-col items-center justify-center gap-2 rounded-2xl border border-border/60 bg-muted/40 px-3 py-4 transition-colors",
+          "flex flex-col items-center justify-center gap-2 rounded-2xl bg-surface px-3 py-4 transition-colors",
           "hover:bg-muted/70 active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-ring",
         )}
       >

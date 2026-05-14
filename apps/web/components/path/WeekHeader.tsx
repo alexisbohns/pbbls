@@ -25,7 +25,7 @@ export function WeekHeader({ entries, focused, today, onPrev, onNext }: WeekHead
   const atEnd = idx >= entries.length - 1
 
   return (
-    <div className="flex h-10 items-center justify-between rounded-full border border-muted px-2 dark:border-foreground">
+    <div className="flex h-10 items-center justify-between rounded-xl border border-muted px-2 dark:border-foreground">
       <Button
         variant="ghost"
         size="icon"

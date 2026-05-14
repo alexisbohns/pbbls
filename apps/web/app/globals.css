@@ -60,9 +60,9 @@
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-left: env(safe-area-inset-left, 0px);
 
-  --background: #F8F0F0;
+  --background: #FFFFFF;
   --foreground: #2E2024;
-  --surface: #F0E4E4;
+  --surface: #F8F0F0;
   --surface-alt: #E8D8DA;
   --card: #FFFFFF;
   --card-foreground: #2E2024;

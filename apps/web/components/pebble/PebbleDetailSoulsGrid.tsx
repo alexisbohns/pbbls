@@ -28,7 +28,7 @@ export function PebbleDetailSoulsGrid({
               type="button"
               onClick={onOpenSoulsSheet}
               aria-label={t("editSoulAria", { name: soul.name })}
-              className="flex w-full items-center gap-3 rounded-2xl border border-border/60 px-3 py-2.5 text-left transition-colors hover:bg-muted/40 active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="flex w-full items-center gap-3 rounded-2xl border border-border/60 px-3 py-2.5 text-left transition-colors hover:bg-surface active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
               <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-muted/60">
                 <SoulGlyphThumbnail
