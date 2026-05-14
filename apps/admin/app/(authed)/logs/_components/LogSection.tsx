@@ -1,5 +1,18 @@
 import Link from "next/link"
 import {
+  Apple,
+  Bot,
+  CircleCheckBig,
+  CircleDotDashed,
+  CircleFadingArrowUp,
+  CirclePile,
+  DatabaseZap,
+  Monitor,
+  MonitorSmartphone,
+  Telescope,
+  type LucideIcon,
+} from "lucide-react"
+import {
   Table,
   TableBody,
   TableCell,
@@ -7,7 +20,82 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import type { LogRow } from "@/lib/logs/types"
+import { cn } from "@/lib/utils"
+import { PLATFORM_OPTIONS } from "@/lib/logs/options"
+import type { LogPlatform, LogRow } from "@/lib/logs/types"
+
+export type LogSectionVariant =
+  | "in_progress"
+  | "planned"
+  | "backlog"
+  | "shipped"
+  | "drafts"
+  | "published"
+
+type DateField = "updated_at" | "released_at" | "published_at"
+
+type VariantConfig = {
+  icon: LucideIcon | null
+  iconClass: string
+  dateField: DateField
+  dateLabel: string
+}
+
+const VARIANTS: Record<LogSectionVariant, VariantConfig> = {
+  in_progress: {
+    icon: CircleDotDashed,
+    iconClass: "text-blue-500",
+    dateField: "updated_at",
+    dateLabel: "Updated",
+  },
+  planned: {
+    icon: CircleFadingArrowUp,
+    iconClass: "text-yellow-500",
+    dateField: "updated_at",
+    dateLabel: "Updated",
+  },
+  backlog: {
+    icon: CirclePile,
+    iconClass: "text-muted-foreground",
+    dateField: "updated_at",
+    dateLabel: "Updated",
+  },
+  shipped: {
+    icon: CircleCheckBig,
+    iconClass: "text-green-600",
+    dateField: "released_at",
+    dateLabel: "Released",
+  },
+  drafts: {
+    icon: null,
+    iconClass: "",
+    dateField: "updated_at",
+    dateLabel: "Updated",
+  },
+  published: {
+    icon: null,
+    iconClass: "",
+    dateField: "published_at",
+    dateLabel: "Published",
+  },
+}
+
+const PLATFORM_ICONS: Record<LogPlatform, LucideIcon> = {
+  ios: Apple,
+  webapp: Monitor,
+  android: Bot,
+  all: MonitorSmartphone,
+  infra: DatabaseZap,
+  project: Telescope,
+}
+
+const PLATFORM_LABELS: Record<LogPlatform, string> = PLATFORM_OPTIONS.reduce(
+  (acc, o) => {
+    acc[o.value] = o.label
+    return acc
+  },
+  {} as Record<LogPlatform, string>,
+)
 
 function formatDate(value: string) {
   return new Date(value).toLocaleString(undefined, {
@@ -19,19 +107,35 @@ function formatDate(value: string) {
   })
 }
 
+function getDateValue(log: LogRow, field: DateField): string {
+  const value = log[field]
+  return typeof value === "string" && value.length > 0 ? value : log.updated_at
+}
+
+function isLogPlatform(value: string): value is LogPlatform {
+  return value in PLATFORM_ICONS
+}
+
 export function LogSection({
   title,
   logs,
   emptyLabel,
+  variant,
 }: {
   title: string
   logs: LogRow[]
   emptyLabel: string
+  variant: LogSectionVariant
 }) {
+  const config = VARIANTS[variant]
+  const Icon = config.icon
+
   return (
     <section className="space-y-3">
-      <h2 className="text-base font-semibold">
-        {title} <span className="text-muted-foreground font-normal">· {logs.length}</span>
+      <h2 className="flex items-center gap-2 text-base font-semibold">
+        {Icon && <Icon className={cn("size-5", config.iconClass)} aria-hidden />}
+        <span>{title}</span>
+        <span className="text-muted-foreground font-normal">· {logs.length}</span>
       </h2>
       {logs.length === 0 ? (
         <div className="border-border rounded-md border border-dashed p-8 text-center">
@@ -42,24 +146,43 @@ export function LogSection({
           <TableHeader>
             <TableRow>
               <TableHead>Title</TableHead>
-              <TableHead>Platform</TableHead>
-              <TableHead>Updated</TableHead>
+              <TableHead className="w-44">{config.dateLabel}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {logs.map((log) => (
-              <TableRow key={log.id}>
-                <TableCell className="font-medium">
-                  <Link href={`/logs/${log.id}`} className="hover:underline">
-                    {log.title_en}
-                  </Link>
-                </TableCell>
-                <TableCell>{log.platform}</TableCell>
-                <TableCell className="text-muted-foreground text-sm">
-                  {formatDate(log.updated_at)}
-                </TableCell>
-              </TableRow>
-            ))}
+            {logs.map((log) => {
+              const platform = isLogPlatform(log.platform) ? log.platform : "all"
+              const PlatformIcon = PLATFORM_ICONS[platform]
+              const platformLabel = PLATFORM_LABELS[platform] ?? log.platform
+              return (
+                <TableRow key={log.id}>
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="bg-muted text-muted-foreground flex size-10 shrink-0 items-center justify-center rounded-md border"
+                        aria-hidden
+                      >
+                        <PlatformIcon className="size-5" />
+                      </div>
+                      <div className="flex flex-col">
+                        <Link
+                          href={`/logs/${log.id}`}
+                          className="font-medium hover:underline"
+                        >
+                          {log.title_en}
+                        </Link>
+                        <span className="text-muted-foreground text-xs">
+                          {platformLabel}
+                        </span>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground text-sm">
+                    {formatDate(getDateValue(log, config.dateField))}
+                  </TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       )}

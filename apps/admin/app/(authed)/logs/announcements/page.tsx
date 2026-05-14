@@ -34,7 +34,7 @@ export default async function AnnouncementsPage() {
         </Link>
       </header>
       <div className="space-y-8">
-        <LogSection title="Drafts" logs={drafts} emptyLabel="No drafts." />
+        <LogSection title="Drafts" logs={drafts} emptyLabel="No drafts." variant="drafts" />
         <Suspense fallback={<LogSectionSkeleton title="Published" />}>
           <AnnouncementsPublishedSection />
         </Suspense>
