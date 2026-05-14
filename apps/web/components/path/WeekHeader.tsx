@@ -25,7 +25,7 @@ export function WeekHeader({ entries, focused, today, onPrev, onNext }: WeekHead
   const atEnd = idx >= entries.length - 1
 
   return (
-    <div className="flex h-10 items-center justify-between rounded-xl border border-muted px-2 dark:border-foreground">
+    <div className="flex h-10 items-center justify-between rounded-xl border border-muted px-2 dark:border-accent">
       <Button
         variant="ghost"
         size="icon"
@@ -35,7 +35,7 @@ export function WeekHeader({ entries, focused, today, onPrev, onNext }: WeekHead
       >
         <ChevronLeft className="size-5 text-primary" />
       </Button>
-      <span className="font-heading text-[17px] font-semibold uppercase tracking-[0.02em] text-muted-foreground dark:text-muted">
+      <span className="font-heading text-[17px] font-semibold uppercase tracking-[0.02em] text-muted-foreground">
         {formatWeekRange(focused, today, locale)}
       </span>
       <Button
