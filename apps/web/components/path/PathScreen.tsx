@@ -134,7 +134,7 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
           onNext={handleNext}
         />
       </div>
-      <div className="min-h-0 flex-1 pt-3">
+      <div className="min-h-0 flex-1">
         <WeekPager
           entries={entries}
           focused={focusedWeekStart}
