@@ -81,7 +81,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="bg-background text-foreground">
+      <body className="h-full bg-background text-foreground">
         <SerwistRegistration>
           <LocaleProvider>
             <AuthProvider>

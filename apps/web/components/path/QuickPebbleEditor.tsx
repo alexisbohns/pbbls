@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import {
   CalendarDays,
   Check,
@@ -8,14 +8,11 @@ import {
   Image,
   Users,
 } from "lucide-react"
-import { motion, useReducedMotion } from "framer-motion"
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import { useTranslations } from "next-intl"
-import type { PebbleSnap } from "@/lib/types"
+import type { Pebble, PebbleSnap } from "@/lib/types"
 import { useFormatDate } from "@/lib/i18n"
 import { usePebbles } from "@/lib/data/usePebbles"
-import { usePebblesCount } from "@/lib/data/usePebblesCount"
-import { useBounce } from "@/lib/data/useBounce"
-import { todayLocal } from "@/lib/data/bounce-levels"
 import { useSouls } from "@/lib/data/useSouls"
 import { useCollections } from "@/lib/data/useCollections"
 import { useMarks } from "@/lib/data/useMarks"
@@ -39,7 +36,9 @@ type Intensity = 1 | 2 | 3
 type Valence = -1 | 0 | 1
 
 type QuickPebbleEditorProps = {
-  onPebbleCreated?: (pebbleId: string) => void
+  expanded?: boolean
+  onExpandedChange?: (next: boolean) => void
+  onPebbleCreated?: (pebble: Pebble) => void
 }
 
 function isNow(dateStr: string): boolean {
@@ -47,26 +46,37 @@ function isNow(dateStr: string): boolean {
   return diff < 60_000
 }
 
-export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
+export function QuickPebbleEditor({
+  expanded: expandedProp,
+  onExpandedChange,
+  onPebbleCreated,
+}: QuickPebbleEditorProps) {
   const { addPebble, uploadSnap } = usePebbles()
   const { souls, addSoul } = useSouls()
   const { collections } = useCollections()
   const { marks } = useMarks()
-  const { pebblesCount, loading: countLoading } = usePebblesCount()
-  const { bounceWindow, loading: bounceLoading } = useBounce()
   const prefersReducedMotion = useReducedMotion()
   const t = useTranslations("record")
+  const tPath = useTranslations("path")
   const tGlyph = useTranslations("record.glyph")
   const tPhoto = useTranslations("record.photo")
   const tSouls = useTranslations("record.souls")
   const tEmotion = useTranslations("record.emotion")
   const formatDate = useFormatDate()
 
-  // Collapse state
-  const [expanded, setExpanded] = useState(false)
+  // Collapse state — controlled-or-uncontrolled
+  const [expandedInternal, setExpandedInternal] = useState(false)
+  const isControlled = expandedProp !== undefined
+  const expanded = isControlled ? expandedProp : expandedInternal
+  const setExpanded = useCallback(
+    (next: boolean) => {
+      if (!isControlled) setExpandedInternal(next)
+      onExpandedChange?.(next)
+    },
+    [isControlled, onExpandedChange],
+  )
   const sectionRef = useRef<HTMLElement>(null)
   const titleInputRef = useRef<HTMLTextAreaElement>(null)
-  const hasAutoExpanded = useRef(false)
 
   // Form state
   const [name, setName] = useState("")
@@ -98,23 +108,6 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
 
   // File input ref
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  // Auto-expand: new users (<5 pebbles) or no pebble created today
-  const shouldAutoExpand = useMemo(() => {
-    if (countLoading || bounceLoading) return false
-    if (pebblesCount < 5) return true
-    return !bounceWindow.includes(todayLocal())
-  }, [pebblesCount, countLoading, bounceWindow, bounceLoading])
-
-  useEffect(() => {
-    if (hasAutoExpanded.current) return
-    if (countLoading || bounceLoading) return
-    hasAutoExpanded.current = true
-    if (shouldAutoExpand) {
-      setExpanded(true)
-      requestAnimationFrame(() => titleInputRef.current?.focus())
-    }
-  }, [shouldAutoExpand, countLoading, bounceLoading])
 
   const selectedMark = marks.find((m) => m.id === markId)
   const selectedEmotion = useSelectedEmotionDisplay(emotionId || undefined)
@@ -173,14 +166,14 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
       resetForm()
       setExpanded(false)
       titleInputRef.current?.blur()
-      onPebbleCreated?.(pebble.id)
+      onPebbleCreated?.(pebble)
     } finally {
       setSaving(false)
     }
   }, [
     name, description, happenedAt, intensity, valence, visibility,
     emotionId, soulIds, domainIds, markId, collectionIds, pendingSnap,
-    saving, snapUploading, addPebble, resetForm, onPebbleCreated,
+    saving, snapUploading, addPebble, resetForm, onPebbleCreated, setExpanded,
   ])
 
   const toggleSoul = useCallback((id: string) => {
@@ -230,7 +223,7 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
   // Focus tracking — expand on focus, collapse on blur when empty
   const handleFocusCapture = useCallback(() => {
     if (!expanded) setExpanded(true)
-  }, [expanded])
+  }, [expanded, setExpanded])
 
   const handleBlurCapture = useCallback(() => {
     // rAF lets the browser settle focus after portal transitions
@@ -245,16 +238,7 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
       }
       if (!name.trim()) setExpanded(false)
     })
-  }, [name])
-
-  // Collapse/expand animation
-  const collapsibleVariants = {
-    expanded: { height: "auto", opacity: 1 },
-    collapsed: { height: 0, opacity: 0 },
-  }
-  const collapsibleTransition = prefersReducedMotion
-    ? { duration: 0 }
-    : { height: { duration: 0.25, ease: "easeInOut" }, opacity: { duration: 0.15 } }
+  }, [name, setExpanded])
 
   const dateLabel = isNow(happenedAt)
     ? t("now")
@@ -266,209 +250,202 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
       })
 
   return (
-    <section
-      ref={sectionRef}
-      className={cn("rounded-xl border bg-card transition-[padding] duration-200", expanded ? "p-4" : "px-4 py-3")}
-      aria-label={t("editorAria")}
-      onFocusCapture={handleFocusCapture}
-      onBlurCapture={handleBlurCapture}
-    >
-      {/* Collapsible: header row above title */}
-      <motion.div
-        initial={false}
-        animate={expanded ? "expanded" : "collapsed"}
-        variants={collapsibleVariants}
-        transition={collapsibleTransition}
-        style={{ overflow: "hidden" }}
-        aria-hidden={!expanded}
-      >
-        {/* Header: date + intensity/valence grid */}
-        <div className="mb-3 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => {
-              setDateOpen(true)
-            }}
-            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            <CalendarDays className="size-3.5" aria-hidden />
-            {dateLabel}
-          </button>
-
-          <ValenceIntensityGrid
-            intensity={intensity}
-            valence={valence}
-            onIntensityChange={setIntensity}
-            onValenceChange={setValence}
-          />
-        </div>
-      </motion.div>
-
-      {/* Title input — always visible */}
-      <textarea
-        ref={titleInputRef}
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder={t("namePlaceholder")}
-        className={cn(
-          "w-full resize-none border-none bg-transparent font-heading text-xl font-semibold text-foreground outline-none field-sizing-content placeholder:text-muted-foreground/50",
-          expanded && "mb-2",
-        )}
-        rows={1}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault()
-            void handleSubmit()
-          }
-        }}
-      />
-
-      {/* Collapsible: content below title */}
-      <motion.div
-        initial={false}
-        animate={expanded ? "expanded" : "collapsed"}
-        variants={collapsibleVariants}
-        transition={collapsibleTransition}
-        style={{ overflow: "hidden" }}
-        aria-hidden={!expanded}
-      >
-      {/* Qualification pills: domain + emotion */}
-      <div className="mb-3 flex items-center gap-2">
-        <DomainPopover value={domainIds} onChange={setDomainIds} />
+    <>
+      {/* Collapsed trigger — hidden while the overlay is open.
+          Light mode: brand-light bg with brand accent label.
+          Dark mode: brand foreground (near-white) bg with brand accent label. */}
+      {!expanded && (
         <button
           type="button"
-          onClick={() => setEmotionPickerOpen(true)}
-          aria-label={
-            selectedEmotion
-              ? tEmotion("selectedAria", { name: selectedEmotion.name })
-              : tEmotion("pickAria")
-          }
-          className={cn(
-            "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
-            selectedEmotion
-              ? "border border-border bg-background text-foreground"
-              : "border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-muted-foreground/50",
-          )}
+          onClick={() => setExpanded(true)}
+          className="block w-full rounded-2xl bg-surface py-3 text-center font-heading text-[17px] font-bold text-primary transition-colors hover:bg-muted dark:bg-accent dark:text-primary"
         >
-          {selectedEmotion ? (
-            <>
-              <span aria-hidden>{selectedEmotion.emoji}</span>
-              {selectedEmotion.name}
-            </>
-          ) : (
-            tEmotion("label")
-          )}
+          {tPath("newPebble")}
         </button>
-      </div>
+      )}
 
-      {/* Description textarea */}
-      <textarea
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        placeholder={t("descriptionPlaceholder")}
-        className="mb-4 w-full resize-none border-none bg-transparent text-sm text-foreground outline-none field-sizing-content placeholder:text-muted-foreground/50"
-        rows={1}
-      />
-
-      {/* Customization tiles: glyph, collection, souls, photo */}
-      <div className="mb-4 grid grid-cols-4 gap-2">
-        {/* Glyph tile */}
-        <CustomizationTile
-          icon={Fingerprint}
-          filled={!!selectedMark}
-          onClick={() => setGlyphOpen(true)}
-          ariaLabel={selectedMark ? tGlyph("changeAria") : tGlyph("addAria")}
-        >
-          {selectedMark && (
-            <GlyphPreview mark={selectedMark} className="size-full p-2" />
-          )}
-        </CustomizationTile>
-
-        {/* Collection tile */}
-        <CollectionPopover
-          value={collectionIds}
-          onChange={setCollectionIds}
-          collections={collections}
-        />
-
-        {/* Souls tile */}
-        <CustomizationTile
-          icon={Users}
-          filled={soulIds.length > 0}
-          onClick={() => setSoulsOpen(true)}
-          ariaLabel={soulIds.length > 0 ? tSouls("selectedAria", { count: soulIds.length }) : tSouls("addAria")}
-        >
-          {soulIds.length > 0 && (
-            <span className="text-xs font-medium text-muted-foreground">
-              {soulIds.length}
-            </span>
-          )}
-        </CustomizationTile>
-
-        {/* Photo tile */}
-        <CustomizationTile
-          icon={Image}
-          filled={!!snapPreview}
-          onClick={() => {
-            if (snapPreview) {
-              clearSnap()
-            } else {
-              fileInputRef.current?.click()
-            }
-          }}
-          ariaLabel={snapPreview ? tPhoto("removeAria") : tPhoto("addAria")}
-        >
-          {snapPreview && (
-            /* eslint-disable-next-line @next/next/no-img-element -- object URL, next/image optimization not applicable */
-            <img
-              src={snapPreview}
-              alt={tPhoto("alt")}
-              className="size-full object-cover"
+      {/* Expanded overlay */}
+      <AnimatePresence>
+        {expanded && (
+          <>
+            <motion.div
+              key="backdrop"
+              className="fixed inset-0 z-30 bg-background/60 backdrop-blur-sm"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
+              onClick={() => {
+                if (!name.trim()) setExpanded(false)
+              }}
             />
-          )}
-        </CustomizationTile>
-      </div>
+            <motion.section
+              key="overlay"
+              ref={sectionRef}
+              aria-label={t("editorAria")}
+              className="fixed inset-x-0 bottom-0 z-40 max-h-[min(72vh,640px)] overflow-y-auto rounded-t-2xl border-t bg-card p-4 pb-[calc(1rem+var(--safe-area-bottom))]"
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ duration: prefersReducedMotion ? 0 : 0.25, ease: "easeOut" }}
+              onFocusCapture={handleFocusCapture}
+              onBlurCapture={handleBlurCapture}
+            >
+              {/* Header: date + intensity/valence grid */}
+              <div className="mb-3 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => setDateOpen(true)}
+                  className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                >
+                  <CalendarDays className="size-3.5" aria-hidden />
+                  {dateLabel}
+                </button>
+                <ValenceIntensityGrid
+                  intensity={intensity}
+                  valence={valence}
+                  onIntensityChange={setIntensity}
+                  onValenceChange={setValence}
+                />
+              </div>
 
-      {/* Hidden file input for photo upload */}
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/*"
-        className="hidden"
-        aria-hidden="true"
-        tabIndex={-1}
-        onChange={(e) => {
-          void handleFileChange(e.target.files)
-          e.target.value = ""
-        }}
-      />
+              {/* Title input */}
+              <textarea
+                ref={titleInputRef}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder={t("namePlaceholder")}
+                className="mb-2 w-full resize-none border-none bg-transparent font-heading text-xl font-semibold text-foreground outline-none field-sizing-content placeholder:text-muted-foreground/50"
+                rows={1}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault()
+                    void handleSubmit()
+                  }
+                }}
+              />
 
-      {/* Footer: privacy picker + save button */}
-      <div className="flex items-center justify-between">
-        <VisibilityPicker value={visibility} onChange={setVisibility} />
+              {/* Qualification pills */}
+              <div className="mb-3 flex items-center gap-2">
+                <DomainPopover value={domainIds} onChange={setDomainIds} />
+                <button
+                  type="button"
+                  onClick={() => setEmotionPickerOpen(true)}
+                  aria-label={
+                    selectedEmotion
+                      ? tEmotion("selectedAria", { name: selectedEmotion.name })
+                      : tEmotion("pickAria")
+                  }
+                  className={cn(
+                    "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+                    selectedEmotion
+                      ? "border border-border bg-background text-foreground"
+                      : "border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-muted-foreground/50",
+                  )}
+                >
+                  {selectedEmotion ? (
+                    <>
+                      <span aria-hidden>{selectedEmotion.emoji}</span>
+                      {selectedEmotion.name}
+                    </>
+                  ) : (
+                    tEmotion("label")
+                  )}
+                </button>
+              </div>
 
-        <Button
-          variant="default"
-          size="icon"
-          disabled={!name.trim() || saving || snapUploading}
-          onClick={() => void handleSubmit()}
-          aria-label={t("save")}
-          className="size-9 rounded-full"
-        >
-          <Check className="size-5" aria-hidden />
-        </Button>
-      </div>
-      </motion.div>
+              {/* Description */}
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder={t("descriptionPlaceholder")}
+                className="mb-4 w-full resize-none border-none bg-transparent text-sm text-foreground outline-none field-sizing-content placeholder:text-muted-foreground/50"
+                rows={1}
+              />
 
-      {/* Date picker dialog */}
+              {/* Customization tiles */}
+              <div className="mb-4 grid grid-cols-4 gap-2">
+                <CustomizationTile
+                  icon={Fingerprint}
+                  filled={!!selectedMark}
+                  onClick={() => setGlyphOpen(true)}
+                  ariaLabel={selectedMark ? tGlyph("changeAria") : tGlyph("addAria")}
+                >
+                  {selectedMark && <GlyphPreview mark={selectedMark} className="size-full p-2" />}
+                </CustomizationTile>
+                <CollectionPopover
+                  value={collectionIds}
+                  onChange={setCollectionIds}
+                  collections={collections}
+                />
+                <CustomizationTile
+                  icon={Users}
+                  filled={soulIds.length > 0}
+                  onClick={() => setSoulsOpen(true)}
+                  ariaLabel={soulIds.length > 0 ? tSouls("selectedAria", { count: soulIds.length }) : tSouls("addAria")}
+                >
+                  {soulIds.length > 0 && (
+                    <span className="text-xs font-medium text-muted-foreground">{soulIds.length}</span>
+                  )}
+                </CustomizationTile>
+                <CustomizationTile
+                  icon={Image}
+                  filled={!!snapPreview}
+                  onClick={() => {
+                    if (snapPreview) {
+                      clearSnap()
+                    } else {
+                      fileInputRef.current?.click()
+                    }
+                  }}
+                  ariaLabel={snapPreview ? tPhoto("removeAria") : tPhoto("addAria")}
+                >
+                  {snapPreview && (
+                    /* eslint-disable-next-line @next/next/no-img-element -- object URL */
+                    <img src={snapPreview} alt={tPhoto("alt")} className="size-full object-cover" />
+                  )}
+                </CustomizationTile>
+              </div>
+
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                aria-hidden="true"
+                tabIndex={-1}
+                onChange={(e) => {
+                  void handleFileChange(e.target.files)
+                  e.target.value = ""
+                }}
+              />
+
+              {/* Footer */}
+              <div className="flex items-center justify-between">
+                <VisibilityPicker value={visibility} onChange={setVisibility} />
+                <Button
+                  variant="default"
+                  size="icon"
+                  disabled={!name.trim() || saving || snapUploading}
+                  onClick={() => void handleSubmit()}
+                  aria-label={t("save")}
+                  className="size-9 rounded-full"
+                >
+                  <Check className="size-5" aria-hidden />
+                </Button>
+              </div>
+            </motion.section>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Dialogs / sheets (unchanged) */}
       <DatePickerDialog
         open={dateOpen}
         onOpenChange={setDateOpen}
         initialDate={new Date(happenedAt)}
         onSave={(date) => setHappenedAt(date.toISOString())}
       />
-
-      {/* Glyph picker dialog */}
       <GlyphPickerDialog
         open={glyphOpen}
         onOpenChange={setGlyphOpen}
@@ -476,8 +453,6 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
         selectedMarkId={markId}
         onSave={setMarkId}
       />
-
-      {/* Souls picker sheet */}
       <SoulsSheet
         open={soulsOpen}
         onOpenChange={setSoulsOpen}
@@ -486,8 +461,6 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
         souls={souls}
         onAddSoul={handleAddSoul}
       />
-
-      {/* Emotion picker sheet */}
       <EmotionPickerSheet
         open={emotionPickerOpen}
         onOpenChange={setEmotionPickerOpen}
@@ -496,6 +469,6 @@ export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
         valence={valence}
         onChange={(id) => setEmotionId(id ?? "")}
       />
-    </section>
+    </>
   )
 }

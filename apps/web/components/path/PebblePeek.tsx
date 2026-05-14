@@ -53,7 +53,7 @@ export function PebblePeek({ pebbleId, onClose }: PebblePeekProps) {
         <DialogPrimitive.Popup
           className={cn(
             // Shared
-            "fixed z-50 w-full bg-popover text-popover-foreground ring-1 ring-foreground/10 outline-none overflow-y-auto max-h-[85dvh]",
+            "fixed z-50 w-full bg-background text-popover-foreground ring-1 ring-foreground/10 outline-none overflow-y-auto max-h-[85dvh]",
             // Mobile: bottom sheet
             "inset-x-0 bottom-0 rounded-t-2xl p-4 pt-2",
             "translate-y-full opacity-0 data-open:translate-y-0 data-open:opacity-100 transition-[transform,opacity] duration-200 ease-out",

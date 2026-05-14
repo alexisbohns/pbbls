@@ -6,7 +6,7 @@
     "root_node_id": "V-landing",
     "metadata": { "view_card_variant": "large" },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-05-11T00:00:00.000Z"
+    "updated_at": "2026-05-14T00:00:00.000Z"
   },
   "nodes": [
     {
@@ -49,9 +49,9 @@
       "id": "V-timeline",
       "project_id": "pebbles",
       "species": "view",
-      "title": "Timeline",
-      "description": "Chronological feed of all recorded pebbles.",
-      "status": "idea",
+      "title": "Path",
+      "description": "Week-paginated path of pebbles. Top: horizontal weeks roll of cairn animations centered on the focused week. Middle: date-range header with prev/next chevrons and a per-week scrollable list of pebble rows that pages horizontally between weeks. Bottom: in-view dock combining the quick pebble editor (collapsed as a 'What happened?' trigger; expanded as a bottom-sheet overlay) and a stats bar (profile glyph link, bounce, karma — all link to Profile).",
+      "status": "development",
       "platforms": ["web", "ios", "android"]
     },
     {
@@ -129,7 +129,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Quick Pebble Editor",
-      "description": "Single-page pebble creation editor (V2) combining all enrichment steps inline; embedded on /path and standalone on /record, with collection assignment support.",
+      "description": "Single-page pebble creation editor (V2) combining all enrichment steps. On /path the editor is anchored to the bottom dock — collapsed as a 'What happened?' trigger that opens an overlay bottom-sheet on tap; on /record it auto-opens as the route's primary affordance.",
       "status": "live",
       "platforms": ["web", "ios", "android"]
     },

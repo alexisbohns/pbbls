@@ -338,9 +338,11 @@
   "path": {
     "loading": "Loading…",
     "empty": {
-      "title": "No pebbles yet",
-      "description": "Record your first moment to start building your path.",
-      "cta": "Record a pebble"
+      "currentWeek": {
+        "title": "Fresh week",
+        "description": "Carve your first pebble of the week.",
+        "cta": "Carve a pebble"
+      }
     },
     "today": "Today",
     "yesterday": "Yesterday",
@@ -348,6 +350,20 @@
     "yesterdayLabel": "Yesterday — {date}",
     "weekLabel": "Week {week}",
     "profileAria": "{name}'s profile",
+    "weekRoll": {
+      "label": "Weeks"
+    },
+    "newPebble": "New pebble",
+    "weekHeader": {
+      "previous": "Previous week",
+      "next": "Next week",
+      "weekAria": "Week {iso}, {count} pebbles"
+    },
+    "bottomBar": {
+      "label": "Profile and stats",
+      "profileAria": "Profile",
+      "statsAria": "Profile stats"
+    },
     "stats": {
       "bounce": "bounce",
       "karma": "karma"
@@ -398,6 +414,7 @@
   "record": {
     "srTitle": "Record a pebble",
     "editorAria": "Pebble editor",
+    "triggerAria": "What happened?",
     "namePlaceholder": "What happened?",
     "descriptionPlaceholder": "What was that awesome?",
     "now": "Now",

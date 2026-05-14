@@ -23,8 +23,8 @@ type AddTileProps = {
 
 function AddTileButton(props: AddTileProps) {
   const className = cn(
-    "flex items-center justify-center gap-2 rounded-2xl border border-dashed border-muted-foreground/40 bg-transparent px-3 py-3 transition-colors",
-    "text-muted-foreground hover:bg-muted/40 hover:text-foreground active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-ring",
+    "flex items-center justify-center gap-2 rounded-xl border border-dashed border-muted bg-transparent px-3 py-3 transition-colors",
+    "text-muted-foreground hover:bg-surface hover:text-foreground active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-ring",
   )
   const inner = (
     <>
