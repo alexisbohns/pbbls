@@ -16,8 +16,6 @@ import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
-  TableHeader,
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
@@ -152,19 +150,16 @@ export function LogSection({
         </div>
       ) : (
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead className="w-44">{config.dateLabel}</TableHead>
-            </TableRow>
-          </TableHeader>
           <TableBody>
             {logs.map((log) => {
               const platform = isLogPlatform(log.platform) ? log.platform : "all"
               const PlatformIcon = PLATFORM_ICONS[platform]
               return (
-                <TableRow key={log.id}>
-                  <TableCell>
+                <TableRow
+                  key={log.id}
+                  className="group border-b-0 hover:bg-transparent"
+                >
+                  <TableCell className="rounded-l-md group-hover:bg-muted/50">
                     <div className="flex items-center gap-3">
                       <div
                         className="flex size-7 shrink-0 items-center justify-center rounded-md"
@@ -184,7 +179,7 @@ export function LogSection({
                       </Link>
                     </div>
                   </TableCell>
-                  <TableCell className="text-muted-foreground text-sm">
+                  <TableCell className="text-muted-foreground w-44 rounded-r-md text-sm group-hover:bg-muted/50">
                     {formatDate(getDateValue(log, config.dateField))}
                   </TableCell>
                 </TableRow>
