@@ -68,8 +68,9 @@ export function LogForm({
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-4">
+          <h2 className="text-lg font-semibold">English</h2>
           <div className="space-y-2">
-            <Label htmlFor="title_en">Title (English, required)</Label>
+            <Label htmlFor="title_en">Title</Label>
             <Input id="title_en" name="title_en" defaultValue={log?.title_en ?? ""} required />
           </div>
           <div className="space-y-2">
@@ -89,8 +90,9 @@ export function LogForm({
         </div>
 
         <div className="space-y-4">
+          <h2 className="text-lg font-semibold">Français (optional)</h2>
           <div className="space-y-2">
-            <Label htmlFor="title_fr">Titre (Français, optionnel)</Label>
+            <Label htmlFor="title_fr">Titre</Label>
             <Input id="title_fr" name="title_fr" defaultValue={log?.title_fr ?? ""} />
           </div>
           <div className="space-y-2">
