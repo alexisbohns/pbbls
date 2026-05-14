@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test:week-roll": "tsx scripts/test-week-roll.ts",
     "generate:splash": "npx tsx scripts/generate-splash-screens.ts"
   },
   "dependencies": {
@@ -47,6 +48,7 @@
     "shadcn": "^4.1.0",
     "sharp": "^0.34.5",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }
