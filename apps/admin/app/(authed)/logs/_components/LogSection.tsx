@@ -89,12 +89,21 @@ const PLATFORM_ICONS: Record<LogPlatform, LucideIcon> = {
 }
 
 const PLATFORM_ICON_BG: Record<LogPlatform, string> = {
+  ios: "#00000022",
+  webapp: "#087ea422",
+  android: "#2e924922",
+  all: "#C07A7A",
+  project: "#C07A7A22",
+  infra: "#AA333322",
+}
+
+const PLATFORM_ICON_FG: Record<LogPlatform, string> = {
   ios: "#000000",
   webapp: "#087ea4",
   android: "#2e9249",
-  all: "#C07A7A",
-  project: "#7A5E64",
-  infra: "#722F37",
+  all: "#FFFFFF",
+  project: "#C07A7A",
+  infra: "#AA3333",
 }
 
 function formatDate(value: string) {
@@ -158,8 +167,11 @@ export function LogSection({
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <div
-                        className="flex size-7 shrink-0 items-center justify-center rounded-md text-white"
-                        style={{ backgroundColor: PLATFORM_ICON_BG[platform] }}
+                        className="flex size-7 shrink-0 items-center justify-center rounded-md"
+                        style={{
+                          backgroundColor: PLATFORM_ICON_BG[platform],
+                          color: PLATFORM_ICON_FG[platform],
+                        }}
                         aria-hidden
                       >
                         <PlatformIcon className="size-3" strokeWidth={3} />
