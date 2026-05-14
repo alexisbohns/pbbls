@@ -11,7 +11,22 @@ import { cn } from "@/lib/utils"
 type PathPebbleRowProps = {
   pebble: Pebble
   mark?: Mark
+  positionIndex: number
   onSelect?: (id: string) => void
+}
+
+export function rotation(positionIndex: number): number {
+  return positionIndex % 2 === 0 ? -7 : 4
+}
+
+export function rowHeight(
+  intensity: 1 | 2 | 3,
+  hasPhoto: boolean,
+  positionIndex: number,
+): number {
+  if (intensity === 3) return 100
+  if (!hasPhoto) return 60
+  return positionIndex % 2 === 0 ? 71 : 68
 }
 
 /**
@@ -24,12 +39,16 @@ type PathPebbleRowProps = {
  * from the canonical `PebbleCard` so a Path-only tweak cannot regress
  * the Soul / Collection detail rows that still use the card layout.
  */
-export function PathPebbleRow({ pebble, mark, onSelect }: PathPebbleRowProps) {
+export function PathPebbleRow({ pebble, mark, positionIndex, onSelect }: PathPebbleRowProps) {
   const t = useTranslations("pebble")
   const formatDate = useFormatDate()
   const formatTime = useFormatTime()
   const { paletteByEmotionId } = useEmotionPalettes()
   const palette = paletteByEmotionId.get(pebble.emotion_id)
+
+  const photoUrl = pebble.instants[0]
+  const hasPhoto = Boolean(photoUrl)
+  const heightPx = rowHeight(pebble.intensity, hasPhoto, positionIndex)
 
   const date = new Date(pebble.happened_at)
   const dateLabel = formatDate(date, {
@@ -42,12 +61,13 @@ export function PathPebbleRow({ pebble, mark, onSelect }: PathPebbleRowProps) {
   // Pipe palette into CSS custom properties on the row root, so the
   // dark-mode swap happens via `.dark` cascade in globals.css rather
   // than via JS-read `useTheme()` (which causes SSR/CSR mismatch).
-  const rowStyle: CSSProperties | undefined = palette
+  const rowStyle: CSSProperties = palette
     ? ({
+        height: heightPx,
         ["--path-row-name-light"]: palette.primary_color,
         ["--path-row-name-dark"]: palette.light_color,
       } as CSSProperties)
-    : undefined
+    : { height: heightPx }
 
   const thumbnailStyle: CSSProperties | undefined = palette
     ? { backgroundColor: palette.surface_color }
@@ -95,6 +115,17 @@ export function PathPebbleRow({ pebble, mark, onSelect }: PathPebbleRowProps) {
           {dateLabel} · {time}
         </time>
       </div>
+
+      {photoUrl && (
+        /* eslint-disable-next-line @next/next/no-img-element -- signed Storage URL, next/image not applicable */
+        <img
+          src={photoUrl}
+          alt=""
+          loading="lazy"
+          className="size-16 shrink-0 rounded-lg object-cover ring-4 ring-background shadow-md"
+          style={{ transform: `rotate(${rotation(positionIndex)}deg)` }}
+        />
+      )}
     </button>
   )
 }

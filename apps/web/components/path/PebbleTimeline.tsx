@@ -29,6 +29,7 @@ export function PebbleTimeline({ pebbles, souls, onSelectPebble }: PebbleTimelin
                 <PathPebbleRow
                   pebble={pebble}
                   mark={pebble.mark_id ? markMap.get(pebble.mark_id) : undefined}
+                  positionIndex={0}
                   onSelect={onSelectPebble}
                 />
               </li>
