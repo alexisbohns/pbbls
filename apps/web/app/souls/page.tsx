@@ -9,8 +9,7 @@ import { AddSoulForm } from "@/components/souls/AddSoulForm"
 import { SoulList } from "@/components/souls/SoulList"
 import { SoulsEmptyState } from "@/components/souls/SoulsEmptyState"
 import { PageLayout } from "@/components/layout/PageLayout"
-import { PathProfileCard } from "@/components/path/PathProfileCard"
-import { BackPath } from "@/components/ui/BackPath"
+import { PageHeader } from "@/components/layout/PageHeader"
 
 export default function SoulsPage() {
   const { souls, loading: soulsLoading, addSoul } = useSouls()
@@ -35,23 +34,23 @@ export default function SoulsPage() {
   }
 
   return (
-    <PageLayout sidebar={<><BackPath /><PathProfileCard /></>}>
+    <PageLayout>
       <section>
-      <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
+        <PageHeader title={t("title")} />
 
-      <AddSoulForm marks={marks} onAdd={handleAdd} />
+        <AddSoulForm marks={marks} onAdd={handleAdd} />
 
-      {loading ? (
-        <p className="text-sm text-muted-foreground">{t("loading")}</p>
-      ) : souls.length === 0 ? (
-        <SoulsEmptyState />
-      ) : (
-        <SoulList
-          souls={souls}
-          marks={marks}
-          pebbleCounts={pebbleCounts}
-        />
-      )}
+        {loading ? (
+          <p className="text-sm text-muted-foreground">{t("loading")}</p>
+        ) : souls.length === 0 ? (
+          <SoulsEmptyState />
+        ) : (
+          <SoulList
+            souls={souls}
+            marks={marks}
+            pebbleCounts={pebbleCounts}
+          />
+        )}
       </section>
     </PageLayout>
   )

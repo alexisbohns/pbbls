@@ -10,8 +10,7 @@ import { LogoutButton } from "@/components/profile/LogoutButton"
 import { AppearanceSection } from "@/components/profile/AppearanceSection"
 import { LegalSection } from "@/components/profile/LegalSection"
 import { PageLayout } from "@/components/layout/PageLayout"
-import { PathProfileCard } from "@/components/path/PathProfileCard"
-import { BackPath } from "@/components/ui/BackPath"
+import { PageHeader } from "@/components/layout/PageHeader"
 import { useNavItems } from "@/lib/hooks/useNavItems"
 
 export default function ProfilePage() {
@@ -28,9 +27,9 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <PageLayout sidebar={<PathProfileCard />}>
+      <PageLayout>
         <section>
-          <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
+          <PageHeader title={t("title")} />
           <p className="text-sm text-muted-foreground">{t("loading")}</p>
         </section>
       </PageLayout>
@@ -39,9 +38,9 @@ export default function ProfilePage() {
 
   if (!isAuthenticated || !user || !profile) {
     return (
-      <PageLayout sidebar={<PathProfileCard />}>
+      <PageLayout>
         <section>
-          <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
+          <PageHeader title={t("title")} />
           <p className="text-sm text-muted-foreground">{t("signedOut")}</p>
         </section>
       </PageLayout>
@@ -49,31 +48,31 @@ export default function ProfilePage() {
   }
 
   return (
-    <PageLayout sidebar={<><BackPath /><PathProfileCard /></>}>
+    <PageLayout>
       <section>
-        <h1 className="mb-6 text-2xl font-semibold">{t("title")}</h1>
+        <PageHeader title={t("title")} />
         <div className="space-y-6">
           <ProfileCard user={user} profile={profile} />
 
-        <nav aria-label={t("appSectionsAria")}>
-          <ul className="divide-y divide-border rounded-xl border border-border">
-            {profileNav.map((item) => {
-              const Icon = item.icon
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50 first:rounded-t-xl last:rounded-b-xl"
-                  >
-                    <Icon className="size-5 text-muted-foreground" aria-hidden />
-                    <span className="flex-1 text-sm font-medium">{item.label}</span>
-                    <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
-                  </Link>
-                </li>
-              )
-            })}
-          </ul>
-        </nav>
+          <nav aria-label={t("appSectionsAria")}>
+            <ul className="divide-y divide-border rounded-xl border border-border">
+              {profileNav.map((item) => {
+                const Icon = item.icon
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-muted/50 first:rounded-t-xl last:rounded-b-xl"
+                    >
+                      <Icon className="size-5 text-muted-foreground" aria-hidden />
+                      <span className="flex-1 text-sm font-medium">{item.label}</span>
+                      <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
+                    </Link>
+                  </li>
+                )
+              })}
+            </ul>
+          </nav>
 
           <AppearanceSection />
 
