@@ -40,30 +40,32 @@ struct LogTimeline<Trailing: View>: View {
     private func row(log: Log, isFirst: Bool, isLast: Bool) -> some View {
         HStack(alignment: .top, spacing: 12) {
             iconColumn(isFirst: isFirst, isLast: isLast)
-            VStack(alignment: .leading, spacing: 4) {
-                if mode == .changelog, let date = log.releasedAt ?? log.publishedAt {
-                    Text(date, format: Date.FormatStyle(date: .long, time: .omitted))
+            // The content + trailing pair shares one vertical-padding block so
+            // both align to the icon (which sits 12pt below row top in
+            // `iconColumn` due to the lead-in segment) and so the bottom
+            // padding extends the row past the description, letting the icon
+            // column's `Rectangle(maxHeight: .infinity)` bridge into the next
+            // row's lead-in. Mirrors the web's `pb-5` on `<li>` content.
+            HStack(alignment: .top, spacing: 12) {
+                VStack(alignment: .leading, spacing: 4) {
+                    if mode == .changelog, let date = log.releasedAt ?? log.publishedAt {
+                        Text(date, format: Date.FormatStyle(date: .long, time: .omitted))
+                            .font(.footnote)
+                            .foregroundStyle(Color.pebblesMutedForeground)
+                    }
+                    Text(log.title(for: locale))
+                        .font(.body)
+                        .foregroundStyle(Color.pebblesForeground)
+                    Text(log.summary(for: locale))
                         .font(.footnote)
                         .foregroundStyle(Color.pebblesMutedForeground)
+                        .lineLimit(3)
                 }
-                Text(log.title(for: locale))
-                    .font(.body)
-                    .foregroundStyle(Color.pebblesForeground)
-                Text(log.summary(for: locale))
-                    .font(.footnote)
-                    .foregroundStyle(Color.pebblesMutedForeground)
-                    .lineLimit(3)
+                Spacer(minLength: 0)
+                trailing(log)
             }
-            // Top/bottom padding lives on the content column (not the row) so
-            // the HStack's height grows past the description, letting the icon
-            // column's `Rectangle(maxHeight: .infinity)` extend into the gap
-            // before the next row's icon. Mirrors the web's `pb-5` on `<li>`.
-            // The 12pt top padding aligns the title's first baseline with the
-            // icon — which sits 12pt below the row's top inside `iconColumn`.
             .padding(.top, 12)
             .padding(.bottom, isLast ? 12 : 16)
-            Spacer(minLength: 0)
-            trailing(log)
         }
     }
 
