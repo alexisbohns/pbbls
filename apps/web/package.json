@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test:week-roll": "tsx scripts/test-week-roll.ts",
-    "generate:splash": "npx tsx scripts/generate-splash-screens.ts"
+    "generate:splash": "tsx scripts/generate-splash-screens.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",
