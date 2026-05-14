@@ -61,6 +61,10 @@ export function WeekRoll({ entries, focused, onFocus }: WeekRollProps) {
       ref={scrollRef}
       aria-label={t("weekRoll.label")}
       className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+      style={{
+        maskImage: "linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)",
+        WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)",
+      }}
     >
       {/* paddingInline 50% lets scrollIntoView center the first or last item;
           arbitrary % via Tailwind sometimes drops the rule, so inline. */}
