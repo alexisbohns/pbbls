@@ -21,7 +21,6 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
-import { PLATFORM_OPTIONS } from "@/lib/logs/options"
 import type { LogPlatform, LogRow } from "@/lib/logs/types"
 
 export type LogSectionVariant =
@@ -98,14 +97,6 @@ const PLATFORM_ICON_BG: Record<LogPlatform, string> = {
   infra: "#722F37",
 }
 
-const PLATFORM_LABELS: Record<LogPlatform, string> = PLATFORM_OPTIONS.reduce(
-  (acc, o) => {
-    acc[o.value] = o.label
-    return acc
-  },
-  {} as Record<LogPlatform, string>,
-)
-
 function formatDate(value: string) {
   return new Date(value).toLocaleString(undefined, {
     year: "numeric",
@@ -162,29 +153,23 @@ export function LogSection({
             {logs.map((log) => {
               const platform = isLogPlatform(log.platform) ? log.platform : "all"
               const PlatformIcon = PLATFORM_ICONS[platform]
-              const platformLabel = PLATFORM_LABELS[platform] ?? log.platform
               return (
                 <TableRow key={log.id}>
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <div
-                        className="flex size-10 shrink-0 items-center justify-center rounded-md text-white"
+                        className="flex size-7 shrink-0 items-center justify-center rounded-md text-white"
                         style={{ backgroundColor: PLATFORM_ICON_BG[platform] }}
                         aria-hidden
                       >
-                        <PlatformIcon className="size-5" />
+                        <PlatformIcon className="size-3" strokeWidth={3} />
                       </div>
-                      <div className="flex flex-col">
-                        <Link
-                          href={`/logs/${log.id}`}
-                          className="font-medium hover:underline"
-                        >
-                          {log.title_en}
-                        </Link>
-                        <span className="text-muted-foreground text-xs">
-                          {platformLabel}
-                        </span>
-                      </div>
+                      <Link
+                        href={`/logs/${log.id}`}
+                        className="font-medium hover:underline"
+                      >
+                        {log.title_en}
+                      </Link>
                     </div>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-sm">
