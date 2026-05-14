@@ -1,0 +1,1483 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+  public: {
+    Tables: {
+      bounces: {
+        Row: {
+          score: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          score?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          score?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bounces_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "bounces_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      card_types: {
+        Row: {
+          id: string
+          name: string
+          prompt: string
+          slug: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          prompt: string
+          slug: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          prompt?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      collection_pebbles: {
+        Row: {
+          collection_id: string
+          pebble_id: string
+        }
+        Insert: {
+          collection_id: string
+          pebble_id: string
+        }
+        Update: {
+          collection_id?: string
+          pebble_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_pebbles_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "collections"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_pebbles_pebble_id_fkey"
+            columns: ["pebble_id"]
+            isOneToOne: false
+            referencedRelation: "pebbles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_pebbles_pebble_id_fkey"
+            columns: ["pebble_id"]
+            isOneToOne: false
+            referencedRelation: "v_pebbles_full"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collections: {
+        Row: {
+          created_at: string
+          id: string
+          mode: string | null
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mode?: string | null
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mode?: string | null
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collections_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "collections_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      domains: {
+        Row: {
+          default_glyph_id: string | null
+          id: string
+          label: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          default_glyph_id?: string | null
+          id?: string
+          label: string
+          name: string
+          slug: string
+        }
+        Update: {
+          default_glyph_id?: string | null
+          id?: string
+          label?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domains_default_glyph_id_fkey"
+            columns: ["default_glyph_id"]
+            isOneToOne: false
+            referencedRelation: "glyphs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      emotion_categories: {
+        Row: {
+          id: string
+          light_color: string
+          name: string
+          primary_color: string
+          secondary_color: string
+          slug: string
+          surface_color: string
+        }
+        Insert: {
+          id?: string
+          light_color: string
+          name: string
+          primary_color: string
+          secondary_color: string
+          slug: string
+          surface_color: string
+        }
+        Update: {
+          id?: string
+          light_color?: string
+          name?: string
+          primary_color?: string
+          secondary_color?: string
+          slug?: string
+          surface_color?: string
+        }
+        Relationships: []
+      }
+      emotions: {
+        Row: {
+          category_id: string
+          color: string
+          emoji: string
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          category_id: string
+          color: string
+          emoji: string
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          category_id?: string
+          color?: string
+          emoji?: string
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "emotions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "emotion_categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "emotions_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "v_emotions_with_palette"
+            referencedColumns: ["category_id"]
+          },
+        ]
+      }
+      glyphs: {
+        Row: {
+          created_at: string
+          id: string
+          is_custom: boolean | null
+          name: string | null
+          shape_id: string | null
+          strokes: Json
+          updated_at: string
+          user_id: string | null
+          view_box: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_custom?: boolean | null
+          name?: string | null
+          shape_id?: string | null
+          strokes?: Json
+          updated_at?: string
+          user_id?: string | null
+          view_box: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_custom?: boolean | null
+          name?: string | null
+          shape_id?: string | null
+          strokes?: Json
+          updated_at?: string
+          user_id?: string | null
+          view_box?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "glyphs_shape_id_fkey"
+            columns: ["shape_id"]
+            isOneToOne: false
+            referencedRelation: "pebble_shapes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "glyphs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "glyphs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      karma_events: {
+        Row: {
+          created_at: string
+          delta: number
+          id: string
+          reason: string
+          ref_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          delta: number
+          id?: string
+          reason: string
+          ref_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          id?: string
+          reason?: string
+          ref_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "karma_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "karma_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      log_reactions: {
+        Row: {
+          created_at: string
+          log_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          log_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          log_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "log_reactions_log_id_fkey"
+            columns: ["log_id"]
+            isOneToOne: false
+            referencedRelation: "logs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "log_reactions_log_id_fkey"
+            columns: ["log_id"]
+            isOneToOne: false
+            referencedRelation: "v_logs_with_counts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "log_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "log_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      logs: {
+        Row: {
+          body_md_en: string | null
+          body_md_fr: string | null
+          cover_image_path: string | null
+          created_at: string
+          external_url: string | null
+          id: string
+          platform: string
+          published: boolean
+          published_at: string | null
+          released_at: string | null
+          species: string
+          status: string
+          summary_en: string
+          summary_fr: string | null
+          title_en: string
+          title_fr: string | null
+          updated_at: string
+        }
+        Insert: {
+          body_md_en?: string | null
+          body_md_fr?: string | null
+          cover_image_path?: string | null
+          created_at?: string
+          external_url?: string | null
+          id?: string
+          platform: string
+          published?: boolean
+          published_at?: string | null
+          released_at?: string | null
+          species: string
+          status: string
+          summary_en: string
+          summary_fr?: string | null
+          title_en: string
+          title_fr?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body_md_en?: string | null
+          body_md_fr?: string | null
+          cover_image_path?: string | null
+          created_at?: string
+          external_url?: string | null
+          id?: string
+          platform?: string
+          published?: boolean
+          published_at?: string | null
+          released_at?: string | null
+          species?: string
+          status?: string
+          summary_en?: string
+          summary_fr?: string | null
+          title_en?: string
+          title_fr?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      pebble_cards: {
+        Row: {
+          id: string
+          pebble_id: string
+          sort_order: number
+          species_id: string
+          value: string
+        }
+        Insert: {
+          id?: string
+          pebble_id: string
+          sort_order?: number
+          species_id: string
+          value: string
+        }
+        Update: {
+          id?: string
+          pebble_id?: string
+          sort_order?: number
+          species_id?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pebble_cards_pebble_id_fkey"
+            columns: ["pebble_id"]
+            isOneToOne: false
+            referencedRelation: "pebbles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pebble_cards_pebble_id_fkey"
+            columns: ["pebble_id"]
+            isOneToOne: false
+            referencedRelation: "v_pebbles_full"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pebble_cards_species_id_fkey"
+            columns: ["species_id"]
+            isOneToOne: false
+            referencedRelation: "card_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pebble_domains: {
+        Row: {
+          domain_id: string
+          pebble_id: string
+        }
+        Insert: {
+          domain_id: string
+          pebble_id: string
+        }
+        Update: {
+          domain_id?: string
+          pebble_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pebble_domains_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "domains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pebble_domains_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "v_analytics_domain_share_weekly"
+            referencedColumns: ["domain_id"]
+          },
+          {
+            foreignKeyName: "pebble_domains_pebble_id_fkey"
+            columns: ["pebble_id"]
+            isOneToOne: false
+            referencedRelation: "pebbles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pebble_domains_pebble_id_fkey"
+            columns: ["pebble_id"]
+            isOneToOne: false
+            referencedRelation: "v_pebbles_full"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pebble_shapes: {
+        Row: {
+          id: string
+          name: string
+          path: string
+          slug: string
+          view_box: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          path: string
+          slug: string
+          view_box: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          path?: string
+          slug?: string
+          view_box?: string
+        }
+        Relationships: []
+      }
+      pebble_souls: {
+        Row: {
+          pebble_id: string
+          soul_id: string
+        }
+        Insert: {
+          pebble_id: string
+          soul_id: string
+        }
+        Update: {
+          pebble_id?: string
+          soul_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pebble_souls_pebble_id_fkey"
+            columns: ["pebble_id"]
+            isOneToOne: false
+            referencedRelation: "pebbles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pebble_souls_pebble_id_fkey"
+            columns: ["pebble_id"]
+            isOneToOne: false
+            referencedRelation: "v_pebbles_full"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pebble_souls_soul_id_fkey"
+            columns: ["soul_id"]
+            isOneToOne: false
+            referencedRelation: "souls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pebbles: {
+        Row: {
+          created_at: string
+          description: string | null
+          emotion_id: string
+          glyph_id: string | null
+          happened_at: string
+          id: string
+          intensity: number
+          name: string
+          positiveness: number
+          render_svg: string | null
+          render_version: string | null
+          updated_at: string
+          user_id: string
+          visibility: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          emotion_id: string
+          glyph_id?: string | null
+          happened_at: string
+          id?: string
+          intensity: number
+          name: string
+          positiveness: number
+          render_svg?: string | null
+          render_version?: string | null
+          updated_at?: string
+          user_id: string
+          visibility?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          emotion_id?: string
+          glyph_id?: string | null
+          happened_at?: string
+          id?: string
+          intensity?: number
+          name?: string
+          positiveness?: number
+          render_svg?: string | null
+          render_version?: string | null
+          updated_at?: string
+          user_id?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pebbles_emotion_id_fkey"
+            columns: ["emotion_id"]
+            isOneToOne: false
+            referencedRelation: "emotions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pebbles_emotion_id_fkey"
+            columns: ["emotion_id"]
+            isOneToOne: false
+            referencedRelation: "v_analytics_emotion_share_weekly"
+            referencedColumns: ["emotion_id"]
+          },
+          {
+            foreignKeyName: "pebbles_emotion_id_fkey"
+            columns: ["emotion_id"]
+            isOneToOne: false
+            referencedRelation: "v_emotions_with_palette"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pebbles_glyph_id_fkey"
+            columns: ["glyph_id"]
+            isOneToOne: false
+            referencedRelation: "glyphs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pebbles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pebbles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          color_world: string
+          created_at: string
+          display_name: string
+          id: string
+          is_admin: boolean
+          max_media_per_pebble: number
+          onboarding_completed: boolean
+          privacy_accepted_at: string | null
+          terms_accepted_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color_world?: string
+          created_at?: string
+          display_name: string
+          id?: string
+          is_admin?: boolean
+          max_media_per_pebble?: number
+          onboarding_completed?: boolean
+          privacy_accepted_at?: string | null
+          terms_accepted_at?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color_world?: string
+          created_at?: string
+          display_name?: string
+          id?: string
+          is_admin?: boolean
+          max_media_per_pebble?: number
+          onboarding_completed?: boolean
+          privacy_accepted_at?: string | null
+          terms_accepted_at?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      snaps: {
+        Row: {
+          created_at: string
+          id: string
+          pebble_id: string
+          sort_order: number
+          storage_path: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          pebble_id: string
+          sort_order?: number
+          storage_path: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          pebble_id?: string
+          sort_order?: number
+          storage_path?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "snaps_pebble_id_fkey"
+            columns: ["pebble_id"]
+            isOneToOne: false
+            referencedRelation: "pebbles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "snaps_pebble_id_fkey"
+            columns: ["pebble_id"]
+            isOneToOne: false
+            referencedRelation: "v_pebbles_full"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "snaps_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "snaps_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      souls: {
+        Row: {
+          created_at: string
+          glyph_id: string
+          id: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          glyph_id?: string
+          id?: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          glyph_id?: string
+          id?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "souls_glyph_id_fkey"
+            columns: ["glyph_id"]
+            isOneToOne: false
+            referencedRelation: "glyphs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "souls_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "souls_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+    }
+    Views: {
+      v_analytics_active_users_daily: {
+        Row: {
+          bucket_date: string | null
+          dau: number | null
+          mau: number | null
+          wau: number | null
+        }
+        Relationships: []
+      }
+      v_analytics_bounce_distribution_today: {
+        Row: {
+          avg_active_days_per_week: number | null
+          bucket_date: string | null
+          bucket_label: string | null
+          bucket_order: number | null
+          median_score: number | null
+          pct_maintaining: number | null
+          users: number | null
+        }
+        Relationships: []
+      }
+      v_analytics_domain_share_weekly: {
+        Row: {
+          bucket_week: string | null
+          domain_id: string | null
+          domain_label: string | null
+          domain_level: number | null
+          domain_name: string | null
+          domain_slug: string | null
+          pebbles_in_domain: number | null
+          share_pct: number | null
+          total_pebbles: number | null
+        }
+        Relationships: []
+      }
+      v_analytics_emotion_share_weekly: {
+        Row: {
+          bucket_week: string | null
+          color: string | null
+          emotion_id: string | null
+          emotion_name: string | null
+          emotion_slug: string | null
+          pebbles_with_emotion: number | null
+          share_pct: number | null
+          total_pebbles: number | null
+        }
+        Relationships: []
+      }
+      v_analytics_kpi_daily: {
+        Row: {
+          bucket_date: string | null
+          dau: number | null
+          dau_mau_pct: number | null
+          mau: number | null
+          pebbles_today: number | null
+          total_users: number | null
+          wau: number | null
+        }
+        Relationships: []
+      }
+      v_analytics_pebble_enrichment_daily: {
+        Row: {
+          bucket_date: string | null
+          pct_in_collection: number | null
+          pct_with_custom_glyph: number | null
+          pct_with_intensity: number | null
+          pct_with_picture: number | null
+          pct_with_soul: number | null
+          pct_with_thought: number | null
+          total_pebbles: number | null
+        }
+        Relationships: []
+      }
+      v_analytics_pebble_volume_daily: {
+        Row: {
+          active_users: number | null
+          bucket_date: string | null
+          pebbles: number | null
+          pebbles_in_collection: number | null
+          pebbles_with_custom_glyph: number | null
+          pebbles_with_picture: number | null
+        }
+        Relationships: []
+      }
+      v_analytics_quality_signals_today: {
+        Row: {
+          available: boolean | null
+          bucket_date: string | null
+          indicator_key: string | null
+          indicator_label: string | null
+          indicator_order: number | null
+          previous_value: number | null
+          unit: string | null
+          value: number | null
+        }
+        Relationships: []
+      }
+      v_analytics_retention_cohorts_weekly: {
+        Row: {
+          active_users: number | null
+          cohort_size: number | null
+          cohort_week: string | null
+          retention_pct: number | null
+          week_offset: number | null
+        }
+        Relationships: []
+      }
+      v_analytics_user_averages_weekly: {
+        Row: {
+          active_users: number | null
+          avg_collections: number | null
+          avg_glyphs: number | null
+          avg_souls: number | null
+          bucket_week: string | null
+        }
+        Relationships: []
+      }
+      v_bounce: {
+        Row: {
+          active_days: number | null
+          bounce_level: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
+      v_emotions_with_palette: {
+        Row: {
+          category_id: string | null
+          category_name: string | null
+          category_slug: string | null
+          color: string | null
+          emoji: string | null
+          id: string | null
+          light_color: string | null
+          name: string | null
+          primary_color: string | null
+          secondary_color: string | null
+          slug: string | null
+          surface_color: string | null
+        }
+        Relationships: []
+      }
+      v_karma_summary: {
+        Row: {
+          pebbles_count: number | null
+          total_karma: number | null
+          user_id: string | null
+        }
+        Insert: {
+          pebbles_count?: never
+          total_karma?: never
+          user_id?: string | null
+        }
+        Update: {
+          pebbles_count?: never
+          total_karma?: never
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      v_logs_with_counts: {
+        Row: {
+          body_md_en: string | null
+          body_md_fr: string | null
+          cover_image_path: string | null
+          created_at: string | null
+          external_url: string | null
+          id: string | null
+          platform: string | null
+          published: boolean | null
+          published_at: string | null
+          reaction_count: number | null
+          released_at: string | null
+          species: string | null
+          status: string | null
+          summary_en: string | null
+          summary_fr: string | null
+          title_en: string | null
+          title_fr: string | null
+          updated_at: string | null
+        }
+        Relationships: []
+      }
+      v_pebbles_full: {
+        Row: {
+          cards: Json | null
+          collections: Json | null
+          created_at: string | null
+          description: string | null
+          domains: Json | null
+          emotion: Json | null
+          emotion_id: string | null
+          glyph: Json | null
+          glyph_id: string | null
+          happened_at: string | null
+          id: string | null
+          intensity: number | null
+          name: string | null
+          positiveness: number | null
+          snaps: Json | null
+          souls: Json | null
+          updated_at: string | null
+          user_id: string | null
+          visibility: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pebbles_emotion_id_fkey"
+            columns: ["emotion_id"]
+            isOneToOne: false
+            referencedRelation: "emotions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pebbles_emotion_id_fkey"
+            columns: ["emotion_id"]
+            isOneToOne: false
+            referencedRelation: "v_analytics_emotion_share_weekly"
+            referencedColumns: ["emotion_id"]
+          },
+          {
+            foreignKeyName: "pebbles_emotion_id_fkey"
+            columns: ["emotion_id"]
+            isOneToOne: false
+            referencedRelation: "v_emotions_with_palette"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pebbles_glyph_id_fkey"
+            columns: ["glyph_id"]
+            isOneToOne: false
+            referencedRelation: "glyphs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pebbles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pebbles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+    }
+    Functions: {
+      compute_karma_delta: {
+        Args: {
+          p_cards_count: number
+          p_description: string
+          p_domains_count: number
+          p_has_glyph: boolean
+          p_snaps_count: number
+          p_souls_count: number
+        }
+        Returns: number
+      }
+      create_pebble: { Args: { payload: Json }; Returns: string }
+      delete_pebble: { Args: { p_pebble_id: string }; Returns: undefined }
+      delete_pebble_media: { Args: { p_snap_id: string }; Returns: string }
+      get_active_users_series: {
+        Args: { p_end: string; p_start: string }
+        Returns: {
+          bucket_date: string | null
+          dau: number | null
+          mau: number | null
+          wau: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "v_analytics_active_users_daily"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_bounce_distribution_today: {
+        Args: never
+        Returns: {
+          avg_active_days_per_week: number | null
+          bucket_date: string | null
+          bucket_label: string | null
+          bucket_order: number | null
+          median_score: number | null
+          pct_maintaining: number | null
+          users: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "v_analytics_bounce_distribution_today"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_domain_share: {
+        Args: { p_end: string; p_start: string }
+        Returns: {
+          bucket_week: string | null
+          domain_id: string | null
+          domain_label: string | null
+          domain_level: number | null
+          domain_name: string | null
+          domain_slug: string | null
+          pebbles_in_domain: number | null
+          share_pct: number | null
+          total_pebbles: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "v_analytics_domain_share_weekly"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_emotion_share: {
+        Args: { p_end: string; p_start: string }
+        Returns: {
+          bucket_week: string | null
+          color: string | null
+          emotion_id: string | null
+          emotion_name: string | null
+          emotion_slug: string | null
+          pebbles_with_emotion: number | null
+          share_pct: number | null
+          total_pebbles: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "v_analytics_emotion_share_weekly"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_kpi_daily: {
+        Args: { p_range: string }
+        Returns: {
+          bucket_date: string | null
+          dau: number | null
+          dau_mau_pct: number | null
+          mau: number | null
+          pebbles_today: number | null
+          total_users: number | null
+          wau: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "v_analytics_kpi_daily"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_pebble_enrichment: {
+        Args: { p_end: string; p_start: string }
+        Returns: {
+          pct_in_collection: number
+          pct_with_custom_glyph: number
+          pct_with_intensity: number
+          pct_with_picture: number
+          pct_with_soul: number
+          pct_with_thought: number
+          total_pebbles: number
+        }[]
+      }
+      get_pebble_volume_series: {
+        Args: { p_bucket?: string; p_end: string; p_start: string }
+        Returns: {
+          active_users: number
+          bucket_date: string
+          pebbles: number
+          pebbles_in_collection: number
+          pebbles_with_custom_glyph: number
+          pebbles_with_picture: number
+        }[]
+      }
+      get_quality_signals_today: {
+        Args: never
+        Returns: {
+          available: boolean | null
+          bucket_date: string | null
+          indicator_key: string | null
+          indicator_label: string | null
+          indicator_order: number | null
+          previous_value: number | null
+          unit: string | null
+          value: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "v_analytics_quality_signals_today"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_retention_cohorts: {
+        Args: never
+        Returns: {
+          active_users: number | null
+          cohort_size: number | null
+          cohort_week: string | null
+          retention_pct: number | null
+          week_offset: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "v_analytics_retention_cohorts_weekly"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      get_user_averages_series: {
+        Args: { p_weeks?: number }
+        Returns: {
+          active_users: number | null
+          avg_collections: number | null
+          avg_glyphs: number | null
+          avg_souls: number | null
+          bucket_week: string | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "v_analytics_user_averages_weekly"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      is_admin: { Args: { p_user_id: string }; Returns: boolean }
+      path_pebbles: {
+        Args: never
+        Returns: {
+          emotion: Json
+          first_snap_path: string
+          happened_at: string
+          id: string
+          intensity: number
+          name: string
+          render_svg: string
+        }[]
+      }
+      sweep_orphan_snap_files: {
+        Args: never
+        Returns: {
+          bytes_freed: number
+          deleted_count: number
+        }[]
+      }
+      update_pebble: {
+        Args: { p_pebble_id: string; payload: Json }
+        Returns: undefined
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
+  public: {
+    Enums: {},
+  },
+} as const
