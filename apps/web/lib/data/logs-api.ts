@@ -22,6 +22,7 @@ type LogRow = {
   external_url: string | null
   published: boolean | null
   published_at: string | null
+  released_at: string | null
   created_at: string | null
   reaction_count: number | null
 }
@@ -46,6 +47,7 @@ function rowToLog(row: LogRow): Log | null {
     external_url: row.external_url,
     published: row.published ?? false,
     published_at: row.published_at,
+    released_at: row.released_at,
     created_at: row.created_at,
     reaction_count: row.reaction_count ?? 0,
   }
@@ -88,6 +90,7 @@ export async function fetchChangelog(
     .eq("status", "shipped")
     .eq("published", true)
     .in("platform", WEB_PLATFORMS as unknown as string[])
+    .order("released_at", { ascending: false, nullsFirst: false })
     .order("published_at", { ascending: false })
   if (options?.limit) query = query.limit(options.limit)
   const { data, error } = await query

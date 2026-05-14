@@ -109,6 +109,7 @@ export type Log = {
   external_url: string | null
   published: boolean
   published_at: string | null
+  released_at: string | null
   created_at: string
   reaction_count: number
 }
