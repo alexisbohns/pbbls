@@ -152,3 +152,4 @@ Manual verification on a device or simulator after the change:
 
 - `apps/ios/Pebbles/Services/SupabaseService.swift`
 - `apps/ios/Pebbles/Features/Auth/AuthView.swift`
+- `apps/ios/Pebbles/Features/Welcome/WelcomeView.swift` — also read `supabase.authError` and called `signInWithApple` / `signInWithGoogle`; gets the same view-local `authError` + `do/catch` treatment.

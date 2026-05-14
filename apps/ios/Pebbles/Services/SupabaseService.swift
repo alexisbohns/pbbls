@@ -25,10 +25,6 @@ final class SupabaseService {
     /// AuthView flash before the tab bar.
     var isInitializing: Bool = true
 
-    /// Last signIn/signUp error, displayed inline under the auth form.
-    /// Cleared on successful auth, on mode toggle, and as the user edits the form.
-    var authError: String?
-
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "auth")
 
     init() {
@@ -49,25 +45,21 @@ final class SupabaseService {
     /// awaiting a Supabase call from inside the callback deadlocks the
     /// client. Mutate state synchronously only.
     func start() async {
-        for await (event, session) in client.auth.authStateChanges {
+        for await (_, session) in client.auth.authStateChanges {
             self.session = session
             self.isInitializing = false
-            if event == .signedIn {
-                self.authError = nil
-            }
         }
         logger.error("authStateChanges stream ended unexpectedly")
     }
 
     /// Sign in with email + password. On success, the `.signedIn` event flows
     /// through `authStateChanges` and `session` becomes non-nil.
-    func signIn(email: String, password: String) async {
-        self.authError = nil
+    func signIn(email: String, password: String) async throws {
         do {
             try await client.auth.signIn(email: email, password: password)
         } catch {
             logger.error("signIn failed: \(error.localizedDescription, privacy: .private)")
-            self.authError = error.localizedDescription
+            throw error
         }
     }
 
@@ -75,8 +67,7 @@ final class SupabaseService {
     /// passed through `auth.users.raw_user_meta_data`. Note: the current
     /// `handle_new_user` DB trigger does not copy them into `public.profiles`
     /// — this mirrors web behavior and will be fixed in a separate `fix(db)` issue.
-    func signUp(email: String, password: String) async {
-        self.authError = nil
+    func signUp(email: String, password: String) async throws {
         let now = ISO8601DateFormatter().string(from: Date())
         do {
             try await client.auth.signUp(
@@ -89,7 +80,7 @@ final class SupabaseService {
             )
         } catch {
             logger.error("signUp failed: \(error.localizedDescription, privacy: .private)")
-            self.authError = error.localizedDescription
+            throw error
         }
     }
 
@@ -98,8 +89,7 @@ final class SupabaseService {
     /// On the user's first authorization, Apple returns their `fullName` —
     /// we use it to overwrite the trigger-seeded `'Pebbler'` display name.
     /// Subsequent sign-ins return no name, so the patch is a no-op.
-    func signInWithApple() async {
-        self.authError = nil
+    func signInWithApple() async throws {
         do {
             let result = try await AppleSignInService.authorize()
             try await client.auth.signInWithIdToken(
@@ -116,7 +106,7 @@ final class SupabaseService {
             // User dismissed the sheet — silent.
         } catch {
             logger.error("signInWithApple failed: \(error.localizedDescription, privacy: .private)")
-            self.authError = error.localizedDescription
+            throw error
         }
     }
 
@@ -132,8 +122,7 @@ final class SupabaseService {
     /// available native Google SDK (GoogleSignIn-iOS 7.1) injects a nonce
     /// via AppAuth that it never exposes — Supabase rejects the exchange
     /// because the id_token's nonce claim has no matching parameter.
-    func signInWithGoogle() async {
-        self.authError = nil
+    func signInWithGoogle() async throws {
         do {
             let session = try await client.auth.signInWithOAuth(
                 provider: .google,
@@ -147,7 +136,7 @@ final class SupabaseService {
             // User dismissed the sheet — silent.
         } catch {
             logger.error("signInWithGoogle failed: \(error.localizedDescription, privacy: .private)")
-            self.authError = error.localizedDescription
+            throw error
         }
     }
 
