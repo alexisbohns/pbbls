@@ -29,5 +29,12 @@ export async function FeaturesShippedSection({
 
   const logs: LogRow[] = data ?? []
 
-  return <LogSection title="Shipped" logs={logs} emptyLabel="No shipped features." />
+  return (
+    <LogSection
+      title="Shipped"
+      logs={logs}
+      emptyLabel="No shipped features."
+      variant="shipped"
+    />
+  )
 }

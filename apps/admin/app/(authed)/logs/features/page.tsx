@@ -64,9 +64,20 @@ export default async function FeaturesPage({ searchParams }: { searchParams: Sea
           title="In progress"
           logs={grouped.in_progress}
           emptyLabel="No features in progress."
+          variant="in_progress"
         />
-        <LogSection title="Planned" logs={grouped.planned} emptyLabel="No planned features." />
-        <LogSection title="Backlog" logs={grouped.backlog} emptyLabel="No backlog features." />
+        <LogSection
+          title="Planned"
+          logs={grouped.planned}
+          emptyLabel="No planned features."
+          variant="planned"
+        />
+        <LogSection
+          title="Backlog"
+          logs={grouped.backlog}
+          emptyLabel="No backlog features."
+          variant="backlog"
+        />
         <Suspense fallback={<LogSectionSkeleton title="Shipped" />}>
           <FeaturesShippedSection platform={platform} />
         </Suspense>

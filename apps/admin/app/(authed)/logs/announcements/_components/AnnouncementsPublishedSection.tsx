@@ -18,5 +18,12 @@ export async function AnnouncementsPublishedSection() {
 
   const logs: LogRow[] = data ?? []
 
-  return <LogSection title="Published" logs={logs} emptyLabel="No published announcements." />
+  return (
+    <LogSection
+      title="Published"
+      logs={logs}
+      emptyLabel="No published announcements."
+      variant="published"
+    />
+  )
 }
