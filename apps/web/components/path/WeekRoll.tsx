@@ -14,27 +14,18 @@ type WeekRollProps = {
   onFocus: (weekStart: Date) => void
 }
 
-function opacityForDistance(d: number): number {
-  if (d === 0) return 1
-  if (d === 1) return 0.5
-  if (d === 2) return 0.25
-  return 0
-}
-
 export function WeekRoll({ entries, focused, onFocus }: WeekRollProps) {
   const t = useTranslations("path")
   const focusedIso = isoWeekKey(focused)
-  const focusedIndex = entries.findIndex((e) => e.weekStartIso === focusedIso)
   const scrollRef = useRef<HTMLDivElement>(null)
   const isFirstRunRef = useRef(true)
 
   useEffect(() => {
     const container = scrollRef.current
     if (!container) return
-    // Defer so the flex layout and Rive canvas sizing have settled before we
-    // measure. Without this, the first run sees zero-width Rive canvases and
-    // the scroll math snaps to the wrong column.
-    const handle = window.requestAnimationFrame(() => {
+    const ul = container.firstElementChild as HTMLElement | null
+
+    const center = () => {
       const el = container.querySelector<HTMLElement>(`[data-week="${focusedIso}"]`)
       if (!el) return
       const elRect = el.getBoundingClientRect()
@@ -49,8 +40,20 @@ export function WeekRoll({ entries, focused, onFocus }: WeekRollProps) {
         behavior: isFirstRunRef.current ? "instant" : "smooth",
       })
       isFirstRunRef.current = false
-    })
-    return () => window.cancelAnimationFrame(handle)
+    }
+
+    // First pass after layout settles.
+    const handle = window.requestAnimationFrame(center)
+
+    // The Rive canvases load asynchronously and can resize the row well after
+    // mount; re-center whenever the inner list resizes.
+    const ro = ul ? new ResizeObserver(center) : null
+    if (ul && ro) ro.observe(ul)
+
+    return () => {
+      window.cancelAnimationFrame(handle)
+      ro?.disconnect()
+    }
   }, [focusedIso])
 
   return (
@@ -65,12 +68,11 @@ export function WeekRoll({ entries, focused, onFocus }: WeekRollProps) {
         className="flex items-center gap-3"
         style={{ paddingInline: "50%" }}
       >
-        {entries.map((entry, i) => (
+        {entries.map((entry) => (
           <WeekRollCairn
             key={entry.weekStartIso}
             entry={entry}
-            isFocused={i === focusedIndex}
-            opacity={opacityForDistance(Math.abs(i - focusedIndex))}
+            isFocused={entry.weekStartIso === focusedIso}
             onClick={() => onFocus(entry.weekStart)}
           />
         ))}

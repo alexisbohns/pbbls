@@ -23,11 +23,10 @@ const STATE_MACHINE_NAME = "State Machine 1"
 type WeekRollCairnProps = {
   entry: WeekRollEntry
   isFocused: boolean
-  opacity: number
   onClick: () => void
 }
 
-export function WeekRollCairn({ entry, isFocused, opacity, onClick }: WeekRollCairnProps) {
+export function WeekRollCairn({ entry, isFocused, onClick }: WeekRollCairnProps) {
   const t = useTranslations("path")
 
   // State-machine-driven Rive cairn. `pbbls-cairn-states.riv` exposes:
@@ -72,10 +71,11 @@ export function WeekRollCairn({ entry, isFocused, opacity, onClick }: WeekRollCa
           iso: entry.isoWeek,
           count: entry.pebbles.length,
         })}
-        className="flex w-[72px] shrink-0 flex-col items-center gap-1 transition-opacity"
-        style={{ opacity }}
+        className="flex w-[72px] shrink-0 flex-col items-center gap-1"
       >
-        <div className="size-14"><RiveComponent /></div>
+        <div className="size-14 overflow-hidden">
+          <RiveComponent className="size-full" />
+        </div>
         <span
           className={cn(
             "font-heading text-xs font-semibold",
