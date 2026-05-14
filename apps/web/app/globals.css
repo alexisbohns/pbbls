@@ -468,6 +468,14 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* /path uses a white surface in light mode (the brand-tinted "New pebble"
+     pill needs a neutral body to stand out); dark mode keeps the brand bg. */
+  body.path-route {
+    @apply bg-white;
+  }
+  .dark body.path-route {
+    @apply bg-background;
+  }
   html {
     @apply font-sans;
     overscroll-behavior: none;

@@ -46,9 +46,9 @@ export function WeekPager({
   }
 
   return (
-    <div className="overflow-hidden">
+    <div className="h-full w-full overflow-hidden">
       <motion.div
-        className="flex w-full"
+        className="flex h-full w-full"
         animate={{ x: `-${focusedIndex * 100}%` }}
         transition={{
           duration: prefersReducedMotion ? 0 : 0.3,
@@ -61,7 +61,7 @@ export function WeekPager({
         onDragEnd={handleDragEnd}
       >
         {entries.map((entry, i) => (
-          <div key={entry.weekStartIso} className="w-full shrink-0">
+          <div key={entry.weekStartIso} className="h-full w-full shrink-0">
             {Math.abs(i - focusedIndex) <= 1 ? (
               <WeekPath
                 entry={entry}

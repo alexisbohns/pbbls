@@ -117,7 +117,7 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
   }
 
   return (
-    <div className="mx-auto flex h-full max-w-md flex-col pt-[var(--safe-area-top)]">
+    <div className="mx-auto flex h-full w-full max-w-md flex-col overflow-x-hidden pt-[var(--safe-area-top)]">
       <div className="px-4 pt-4">
         <WeekRoll
           entries={entries}

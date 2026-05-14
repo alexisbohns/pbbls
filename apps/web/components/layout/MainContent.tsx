@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { AuthGate } from "@/components/auth/AuthGate"
@@ -23,11 +24,20 @@ export function MainContent({ children }: MainContentProps) {
   const isCarve = pathname.startsWith("/carve")
   const isImmersive = isRecord || isCarve
 
+  // Body bg is normally --background (brand-light); /path needs it white in
+  // light mode so the brand-tinted "New pebble" pill stands out on a clean
+  // surface. Toggle a route-aware class on <body> so the bg fills the whole
+  // viewport (including safe-area insets and the gradient under the dock).
+  useEffect(() => {
+    if (typeof document === "undefined") return
+    document.body.classList.toggle("path-route", isPath)
+  }, [isPath])
+
   return (
     <main
       className={cn(
         "min-w-0 flex-1 touch-pan-y overflow-x-hidden",
-        isPath ? "overflow-y-hidden bg-white dark:bg-background" : "overflow-y-auto",
+        isPath ? "overflow-y-hidden" : "overflow-y-auto",
         isFullScreen
           ? "flex flex-col"
           : isImmersive
