@@ -37,6 +37,7 @@ struct LogsService {
             .eq("species", value: LogSpecies.feature.rawValue)
             .eq("status", value: LogStatus.shipped.rawValue)
             .eq("published", value: true)
+            .order("released_at", ascending: false, nullsFirst: false)
             .order("published_at", ascending: false)
         if let limit {
             let wrapper: LossyLogArray = try await base.limit(limit).execute().value
