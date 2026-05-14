@@ -35,14 +35,14 @@ export function LogTimeline({ mode, logs, locale, renderTrailing }: LogTimelineP
     <ol className="flex flex-col">
       {logs.map((log, index) => {
         const isLast = index === logs.length - 1
-        const date =
-          showDate && log.published_at
-            ? formatDate(log.published_at, {
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })
-            : null
+        const dateSource = showDate ? (log.released_at ?? log.published_at) : null
+        const date = dateSource
+          ? formatDate(dateSource, {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })
+          : null
         const trailing = renderTrailing?.(log)
 
         return (
