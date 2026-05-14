@@ -29,7 +29,7 @@ export default function ProfilePage() {
     return (
       <PageLayout>
         <section>
-          <PageHeader title={t("title")} />
+          <PageHeader title={t("title")} backHref="/path" />
           <p className="text-sm text-muted-foreground">{t("loading")}</p>
         </section>
       </PageLayout>
@@ -40,7 +40,7 @@ export default function ProfilePage() {
     return (
       <PageLayout>
         <section>
-          <PageHeader title={t("title")} />
+          <PageHeader title={t("title")} backHref="/path" />
           <p className="text-sm text-muted-foreground">{t("signedOut")}</p>
         </section>
       </PageLayout>
@@ -50,7 +50,7 @@ export default function ProfilePage() {
   return (
     <PageLayout>
       <section>
-        <PageHeader title={t("title")} />
+        <PageHeader title={t("title")} backHref="/path" />
         <div className="space-y-6">
           <ProfileCard user={user} profile={profile} />
 
