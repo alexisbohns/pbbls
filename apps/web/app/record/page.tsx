@@ -18,7 +18,7 @@ export default function RecordPage() {
       <QuickPebbleEditor
         expanded={editorExpanded}
         onExpandedChange={setEditorExpanded}
-        onPebbleCreated={setSelectedPebbleId}
+        onPebbleCreated={(pebble) => setSelectedPebbleId(pebble.id)}
       />
       <PebblePeek
         pebbleId={selectedPebbleId}

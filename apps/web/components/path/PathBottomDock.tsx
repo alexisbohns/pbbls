@@ -1,12 +1,13 @@
 "use client"
 
+import type { Pebble } from "@/lib/types"
 import { QuickPebbleEditor } from "@/components/path/QuickPebbleEditor"
 import { PathBottomBar } from "@/components/path/PathBottomBar"
 
 type PathBottomDockProps = {
   editorExpanded: boolean
   onEditorExpandedChange: (next: boolean) => void
-  onPebbleCreated: (id: string) => void
+  onPebbleCreated: (pebble: Pebble) => void
 }
 
 export function PathBottomDock({

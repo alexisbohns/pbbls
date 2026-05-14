@@ -83,10 +83,14 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
     setFocusedKey(isoWeekKey(date))
   }, [])
 
-  const handlePebbleCreated = useCallback((id: string) => {
-    scrollTargetRef.current = id
-    setSelectedPebbleId(id)
-  }, [])
+  const handlePebbleCreated = useCallback((pebble: Pebble) => {
+    // If the new pebble landed in a different week than the focused one,
+    // jump focus to that week so the user sees their just-created row.
+    const pebbleWeek = isoWeekKey(new Date(pebble.happened_at))
+    if (pebbleWeek !== focusedKey) setFocusedKey(pebbleWeek)
+    scrollTargetRef.current = pebble.id
+    setSelectedPebbleId(pebble.id)
+  }, [focusedKey])
 
   const handleCarvePebble = useCallback(() => setEditorExpanded(true), [])
 

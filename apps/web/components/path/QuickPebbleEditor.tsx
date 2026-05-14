@@ -10,7 +10,7 @@ import {
 } from "lucide-react"
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import { useTranslations } from "next-intl"
-import type { PebbleSnap } from "@/lib/types"
+import type { Pebble, PebbleSnap } from "@/lib/types"
 import { useFormatDate } from "@/lib/i18n"
 import { usePebbles } from "@/lib/data/usePebbles"
 import { useSouls } from "@/lib/data/useSouls"
@@ -38,7 +38,7 @@ type Valence = -1 | 0 | 1
 type QuickPebbleEditorProps = {
   expanded?: boolean
   onExpandedChange?: (next: boolean) => void
-  onPebbleCreated?: (pebbleId: string) => void
+  onPebbleCreated?: (pebble: Pebble) => void
 }
 
 function isNow(dateStr: string): boolean {
@@ -165,7 +165,7 @@ export function QuickPebbleEditor({
       resetForm()
       setExpanded(false)
       titleInputRef.current?.blur()
-      onPebbleCreated?.(pebble.id)
+      onPebbleCreated?.(pebble)
     } finally {
       setSaving(false)
     }
