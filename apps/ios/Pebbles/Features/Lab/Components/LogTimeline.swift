@@ -76,7 +76,7 @@ struct LogTimeline<Trailing: View>: View {
     private var iconName: String {
         switch mode {
         case .changelog:  return "checkmark.circle"
-        case .inProgress: return "circle.dotted"
+        case .inProgress: return "circle.inset.filled"
         case .backlog:    return "circle.dashed"
         }
     }
