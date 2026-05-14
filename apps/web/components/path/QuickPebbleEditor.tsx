@@ -57,6 +57,7 @@ export function QuickPebbleEditor({
   const { marks } = useMarks()
   const prefersReducedMotion = useReducedMotion()
   const t = useTranslations("record")
+  const tPath = useTranslations("path")
   const tGlyph = useTranslations("record.glyph")
   const tPhoto = useTranslations("record.photo")
   const tSouls = useTranslations("record.souls")
@@ -250,15 +251,16 @@ export function QuickPebbleEditor({
 
   return (
     <>
-      {/* Collapsed trigger — hidden while the overlay is open */}
+      {/* Collapsed trigger — hidden while the overlay is open.
+          Light mode: brand-light bg with brand accent label.
+          Dark mode: brand foreground (near-white) bg with brand accent label. */}
       {!expanded && (
         <button
           type="button"
           onClick={() => setExpanded(true)}
-          aria-label={t("triggerAria")}
-          className="block w-full rounded-xl border bg-card px-4 py-3 text-left font-heading text-base text-muted-foreground transition-colors hover:bg-muted"
+          className="block w-full rounded-full bg-background py-3 text-center font-heading text-[17px] font-bold text-primary transition-colors hover:bg-muted dark:bg-foreground dark:text-primary"
         >
-          {t("namePlaceholder")}
+          {tPath("newPebble")}
         </button>
       )}
 

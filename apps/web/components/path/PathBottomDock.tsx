@@ -16,7 +16,7 @@ export function PathBottomDock({
   onPebbleCreated,
 }: PathBottomDockProps) {
   return (
-    <div className="sticky inset-x-0 bottom-0 bg-gradient-to-t from-background to-transparent pt-4">
+    <div className="sticky inset-x-0 bottom-0 bg-gradient-to-t from-white to-transparent pt-4 dark:from-background">
       <div className="px-4">
         <QuickPebbleEditor
           expanded={editorExpanded}

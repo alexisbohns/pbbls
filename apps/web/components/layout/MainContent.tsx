@@ -27,7 +27,7 @@ export function MainContent({ children }: MainContentProps) {
     <main
       className={cn(
         "min-w-0 flex-1 touch-pan-y overflow-x-hidden",
-        isPath ? "overflow-y-hidden" : "overflow-y-auto",
+        isPath ? "overflow-y-hidden bg-white dark:bg-background" : "overflow-y-auto",
         isFullScreen
           ? "flex flex-col"
           : isImmersive

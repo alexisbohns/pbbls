@@ -353,6 +353,7 @@
     "weekRoll": {
       "label": "Weeks"
     },
+    "newPebble": "New pebble",
     "weekHeader": {
       "previous": "Previous week",
       "next": "Next week",
