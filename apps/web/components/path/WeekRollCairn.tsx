@@ -62,7 +62,7 @@ export function WeekRollCairn({ entry, isFocused, opacity, onClick }: WeekRollCa
   }, [isFocused, setRgb])
 
   return (
-    <li>
+    <li className="shrink-0">
       <button
         type="button"
         data-week={entry.weekStartIso}
@@ -72,7 +72,7 @@ export function WeekRollCairn({ entry, isFocused, opacity, onClick }: WeekRollCa
           iso: entry.isoWeek,
           count: entry.pebbles.length,
         })}
-        className="flex w-[72px] flex-col items-center gap-1 transition-opacity scroll-mx-[50%]"
+        className="flex w-[72px] shrink-0 flex-col items-center gap-1 transition-opacity"
         style={{ opacity }}
       >
         <div className="size-14"><RiveComponent /></div>

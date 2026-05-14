@@ -47,7 +47,12 @@ export function WeekRoll({ entries, focused, onFocus }: WeekRollProps) {
       aria-label={t("weekRoll.label")}
       className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
     >
-      <ul className="flex items-center gap-3 px-[50%]">
+      {/* paddingInline 50% lets scrollIntoView center the first or last item;
+          arbitrary % via Tailwind sometimes drops the rule, so inline. */}
+      <ul
+        className="flex items-center gap-3"
+        style={{ paddingInline: "50%" }}
+      >
         {entries.map((entry, i) => (
           <WeekRollCairn
             key={entry.weekStartIso}
