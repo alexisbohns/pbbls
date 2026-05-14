@@ -51,18 +51,18 @@ struct LogListView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else {
             List {
-                ForEach(logs) { log in
-                    LogRow(log: log) {
-                        if mode == .backlog {
-                            ReactionButton(
-                                count: log.reactionCount,
-                                isReacted: reactedIds.contains(log.id)
-                            ) {
-                                Task { await toggle(log) }
-                            }
+                switch mode {
+                case .changelog:
+                    LogTimeline(mode: .changelog, logs: logs)
+                case .backlog:
+                    LogTimeline(mode: .backlog, logs: logs) { log in
+                        ReactionButton(
+                            count: log.reactionCount,
+                            isReacted: reactedIds.contains(log.id)
+                        ) {
+                            Task { await toggle(log) }
                         }
                     }
-                    .listRowBackground(Color.pebblesListRow)
                 }
             }
         }
