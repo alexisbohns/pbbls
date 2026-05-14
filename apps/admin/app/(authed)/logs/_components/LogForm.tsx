@@ -62,9 +62,7 @@ export function LogForm({
           <Label htmlFor="published" className="text-foreground font-medium">
             Published
           </Label>
-          <div className="flex h-9 items-center">
-            <Switch id="published" name="published" defaultChecked={log?.published ?? false} />
-          </div>
+          <Switch id="published" name="published" defaultChecked={log?.published ?? false} />
         </div>
       </div>
 
