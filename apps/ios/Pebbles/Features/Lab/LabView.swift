@@ -118,24 +118,45 @@ struct LabView: View {
     // MARK: - Data
 
     private func load() async {
-        do {
-            async let announcementsResult: [Log] = service.announcements()
-            async let changelogResult: [Log] = service.changelog(limit: Self.feedLimit)
-            async let initiativesResult: [Log] = service.initiatives()
-            async let backlogResult: [Log] = service.backlog(limit: Self.feedLimit)
-            async let reactionsResult: Set<UUID> = service.myReactions()
+        async let announcementsResult: [Log] = service.announcements()
+        async let changelogResult: [Log] = service.changelog(limit: Self.feedLimit)
+        async let initiativesResult: [Log] = service.initiatives()
+        async let backlogResult: [Log] = service.backlog(limit: Self.feedLimit)
+        async let reactionsResult: Set<UUID> = service.myReactions()
 
-            self.announcements = try await announcementsResult
-            self.changelog = try await changelogResult
-            self.initiatives = try await initiativesResult
-            self.backlog = try await backlogResult
-            self.reactedIds = try await reactionsResult
-            self.isLoading = false
-        } catch {
-            logger.error("lab fetch failed: \(error.localizedDescription, privacy: .private)")
+        // Each feed loads independently so a single transient failure (e.g.
+        // reactions) doesn't blank out the whole Lab. The fullscreen error
+        // is reserved for the case where every content feed fails.
+        var announcements: [Log]?
+        var changelog: [Log]?
+        var initiatives: [Log]?
+        var backlog: [Log]?
+        var reactedIds: Set<UUID>?
+
+        do { announcements = try await announcementsResult } catch { logFetchFailure(error, "announcements") }
+        do { changelog = try await changelogResult } catch { logFetchFailure(error, "changelog") }
+        do { initiatives = try await initiativesResult } catch { logFetchFailure(error, "initiatives") }
+        do { backlog = try await backlogResult } catch { logFetchFailure(error, "backlog") }
+        do { reactedIds = try await reactionsResult } catch { logFetchFailure(error, "reactions") }
+
+        self.announcements = announcements ?? []
+        self.changelog = changelog ?? []
+        self.initiatives = initiatives ?? []
+        self.backlog = backlog ?? []
+        self.reactedIds = reactedIds ?? []
+
+        let allContentFailed = announcements == nil
+            && changelog == nil
+            && initiatives == nil
+            && backlog == nil
+        if allContentFailed {
             self.loadError = "Couldn't load the Lab."
-            self.isLoading = false
         }
+        self.isLoading = false
+    }
+
+    private func logFetchFailure(_ error: Error, _ label: String) {
+        logger.error("lab \(label) fetch failed: \(error.localizedDescription, privacy: .private)")
     }
 
     private func toggle(_ log: Log) async {
