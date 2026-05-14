@@ -15,7 +15,7 @@ export function TopBar({ email }: { email: string }) {
   const formRef = useRef<HTMLFormElement>(null)
 
   return (
-    <header className="bg-card flex items-center gap-2 border-b px-4 py-2">
+    <header className="flex items-center gap-2 border-b px-4 py-2">
       <SidebarTrigger />
       <Separator orientation="vertical" className="h-5" />
       <div className="flex-1" />
