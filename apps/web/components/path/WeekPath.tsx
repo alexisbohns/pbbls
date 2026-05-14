@@ -56,7 +56,7 @@ export function WeekPath({
   return (
     <motion.ol
       key={cascadeKey}
-      className="flex h-full flex-col gap-1 overflow-y-auto px-4 pb-32"
+      className="flex h-full flex-col gap-1 overflow-y-auto p-4 pb-16"
       style={{
         maskImage: "linear-gradient(to bottom, black 0%, black 90%, transparent 100%)",
         WebkitMaskImage: "linear-gradient(to bottom, black 0%, black 90%, transparent 100%)",
