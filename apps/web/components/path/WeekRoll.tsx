@@ -31,14 +31,26 @@ export function WeekRoll({ entries, focused, onFocus }: WeekRollProps) {
   useEffect(() => {
     const container = scrollRef.current
     if (!container) return
-    const el = container.querySelector<HTMLElement>(`[data-week="${focusedIso}"]`)
-    if (!el) return
-    el.scrollIntoView({
-      behavior: isFirstRunRef.current ? "instant" : "smooth",
-      inline: "center",
-      block: "nearest",
+    // Defer so the flex layout and Rive canvas sizing have settled before we
+    // measure. Without this, the first run sees zero-width Rive canvases and
+    // the scroll math snaps to the wrong column.
+    const handle = window.requestAnimationFrame(() => {
+      const el = container.querySelector<HTMLElement>(`[data-week="${focusedIso}"]`)
+      if (!el) return
+      const elRect = el.getBoundingClientRect()
+      const containerRect = container.getBoundingClientRect()
+      const elementLeftInContainer =
+        elRect.left - containerRect.left + container.scrollLeft
+      const desiredLeftInContainer =
+        (container.clientWidth - elRect.width) / 2
+      const targetScroll = elementLeftInContainer - desiredLeftInContainer
+      container.scrollTo({
+        left: targetScroll,
+        behavior: isFirstRunRef.current ? "instant" : "smooth",
+      })
+      isFirstRunRef.current = false
     })
-    isFirstRunRef.current = false
+    return () => window.cancelAnimationFrame(handle)
   }, [focusedIso])
 
   return (
