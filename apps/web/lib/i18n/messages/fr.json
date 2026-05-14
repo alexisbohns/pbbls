@@ -338,9 +338,11 @@
   "path": {
     "loading": "Chargement…",
     "empty": {
-      "title": "Aucun galet pour l'instant",
-      "description": "Capturez votre premier moment pour commencer à tracer votre chemin.",
-      "cta": "Capturer un galet"
+      "currentWeek": {
+        "title": "Nouvelle semaine",
+        "description": "Taillez votre premier pebble de la semaine.",
+        "cta": "Tailler un pebble"
+      }
     },
     "today": "Aujourd'hui",
     "yesterday": "Hier",
@@ -348,6 +350,19 @@
     "yesterdayLabel": "Hier — {date}",
     "weekLabel": "Semaine {week}",
     "profileAria": "Profil de {name}",
+    "weekRoll": {
+      "label": "Semaines"
+    },
+    "weekHeader": {
+      "previous": "Semaine précédente",
+      "next": "Semaine suivante",
+      "weekAria": "Semaine {iso}, {count} pebbles"
+    },
+    "bottomBar": {
+      "label": "Profil et statistiques",
+      "profileAria": "Profil",
+      "statsAria": "Statistiques du profil"
+    },
     "stats": {
       "bounce": "ricochet",
       "karma": "karma"
@@ -398,6 +413,7 @@
   "record": {
     "srTitle": "Capturer l'instant",
     "editorAria": "Éditeur de galet",
+    "triggerAria": "Que s'est-il passé ?",
     "namePlaceholder": "Que s'est-il passé ?",
     "descriptionPlaceholder": "Qu'est-ce qui rendait ça génial ?",
     "now": "Maintenant",
