@@ -1,4 +1,3 @@
-import { addWeeks } from "date-fns"
 import type { Pebble } from "@/lib/types"
 
 export type WeekRollEntry = {
@@ -54,16 +53,16 @@ export function weekIndex(entries: WeekRollEntry[], weekStart: Date): number {
 
 /**
  * Build the weeks roll: union of weeks that contain pebbles with the
- * current and next week, sorted ascending by `weekStart`. Past weeks
- * have their pebbles sorted oldest-first; current and future weeks
- * sort newest-first. Pivot is strict `weekStart < currentWeekStart`.
+ * current week, sorted ascending by `weekStart`. Past weeks have their
+ * pebbles sorted oldest-first; current and future weeks (if a retro
+ * pebble lives there) sort newest-first. Pivot is strict
+ * `weekStart < currentWeekStart`.
  */
 export function buildWeekRollEntries(
   pebbles: Pebble[],
   today: Date,
 ): WeekRollEntry[] {
   const currentStart = isoWeekStart(today)
-  const nextStart = isoWeekStart(addWeeks(today, 1))
 
   const bucket = new Map<string, { weekStart: Date; pebbles: Pebble[] }>()
   const seed = (date: Date) => {
@@ -75,7 +74,6 @@ export function buildWeekRollEntries(
   }
 
   seed(currentStart)
-  seed(nextStart)
 
   for (const p of pebbles) {
     const happened = new Date(p.happened_at)

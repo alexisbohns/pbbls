@@ -63,23 +63,29 @@ eq(
 const today = new Date(2026, 4, 14)   // 2026-05-14 Thursday → ISO W20
 
 let entries = buildWeekRollEntries([], today)
-eq("empty pebbles → [currentWeek, nextWeek]", entries.map((e) => e.weekStartIso), [
+eq("empty pebbles → [currentWeek]", entries.map((e) => e.weekStartIso), [
   "2026-W20",
-  "2026-W21",
 ])
 
 entries = buildWeekRollEntries([pebble("p1", "2026-05-14T09:00:00")], today)
 eq(
-  "single current-week pebble → [W20 (1), W21 (0)]",
+  "single current-week pebble → [W20 (1)]",
   entries.map((e) => `${e.weekStartIso}:${e.pebbles.length}`),
-  ["2026-W20:1", "2026-W21:0"],
+  ["2026-W20:1"],
 )
 
 entries = buildWeekRollEntries([pebble("p1", "2026-04-23T09:00:00")], today)
 eq(
-  "single past pebble in W17 → [W17, W20, W21]",
+  "single past pebble in W17 → [W17, W20]",
   entries.map((e) => e.weekStartIso),
-  ["2026-W17", "2026-W20", "2026-W21"],
+  ["2026-W17", "2026-W20"],
+)
+
+entries = buildWeekRollEntries([pebble("p1", "2026-05-25T09:00:00")], today)
+eq(
+  "retro pebble in future W22 still appears → [W20, W22]",
+  entries.map((e) => e.weekStartIso),
+  ["2026-W20", "2026-W22"],
 )
 
 entries = buildWeekRollEntries(
@@ -130,7 +136,7 @@ entries = buildWeekRollEntries([pebble("p", "2026-04-23T09:00:00")], today)
 eq(
   "weekIndex finds focused entry",
   weekIndex(entries, isoWeekStart(today)),
-  1, // [W17, W20, W21] → W20 is index 1
+  1, // [W17, W20] → W20 is index 1
 )
 
 eq(
