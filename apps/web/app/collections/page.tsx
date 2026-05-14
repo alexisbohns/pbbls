@@ -9,9 +9,8 @@ import { CollectionsEmptyState } from "@/components/collections/CollectionsEmpty
 import { CollectionFormDialog } from "@/components/collections/CollectionFormDialog"
 import { Button } from "@/components/ui/button"
 import { PageLayout } from "@/components/layout/PageLayout"
-import { PathProfileCard } from "@/components/path/PathProfileCard"
+import { PageHeader } from "@/components/layout/PageHeader"
 import type { Collection } from "@/lib/types"
-import { BackPath } from "@/components/ui/BackPath"
 
 export default function CollectionsPage() {
   const { collections, loading, addCollection } = useCollections()
@@ -26,30 +25,32 @@ export default function CollectionsPage() {
   )
 
   return (
-    <PageLayout sidebar={<><BackPath /><PathProfileCard /></>}>
+    <PageLayout>
       <section>
-      <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">{t("title")}</h1>
-        <CollectionFormDialog
-          trigger={
-            <Button variant="outline" size="sm">
-              <Plus data-icon="inline-start" />
-              {t("newCta")}
-            </Button>
+        <PageHeader
+          title={t("title")}
+          rightSlot={
+            <CollectionFormDialog
+              trigger={
+                <Button variant="outline" size="sm">
+                  <Plus data-icon="inline-start" />
+                  {t("newCta")}
+                </Button>
+              }
+              title={tForm("newTitle")}
+              submitLabel={tForm("submitCreate")}
+              onSubmit={handleCreate}
+            />
           }
-          title={tForm("newTitle")}
-          submitLabel={tForm("submitCreate")}
-          onSubmit={handleCreate}
         />
-      </div>
 
-      {loading ? (
-        <p className="text-sm text-muted-foreground">{t("loading")}</p>
-      ) : collections.length === 0 ? (
-        <CollectionsEmptyState />
-      ) : (
-        <CollectionList collections={collections} />
-      )}
+        {loading ? (
+          <p className="text-sm text-muted-foreground">{t("loading")}</p>
+        ) : collections.length === 0 ? (
+          <CollectionsEmptyState />
+        ) : (
+          <CollectionList collections={collections} />
+        )}
       </section>
     </PageLayout>
   )
