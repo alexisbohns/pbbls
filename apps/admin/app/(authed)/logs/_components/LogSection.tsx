@@ -87,7 +87,7 @@ const PLATFORM_ICONS: Record<LogPlatform, LucideIcon> = {
 }
 
 const PLATFORM_ICON_BG: Record<LogPlatform, string> = {
-  ios: "#00000022",
+  ios: "#00000011",
   webapp: "#087ea422",
   android: "#2e924922",
   all: "#C07A7A",
@@ -105,13 +105,12 @@ const PLATFORM_ICON_FG: Record<LogPlatform, string> = {
 }
 
 function formatDate(value: string) {
-  return new Date(value).toLocaleString(undefined, {
-    year: "numeric",
+  const date = new Date(value)
+  const monthDay = date.toLocaleString(undefined, {
     month: "short",
     day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
   })
+  return `${monthDay} ${date.getHours()}h`
 }
 
 function getDateValue(log: LogRow, field: DateField): string {
@@ -179,7 +178,7 @@ export function LogSection({
                       </Link>
                     </div>
                   </TableCell>
-                  <TableCell className="text-muted-foreground w-44 rounded-r-md text-sm group-hover:bg-muted/50">
+                  <TableCell className="text-muted-foreground w-28 rounded-r-md text-right text-xs group-hover:bg-muted/50">
                     {formatDate(getDateValue(log, config.dateField))}
                   </TableCell>
                 </TableRow>
