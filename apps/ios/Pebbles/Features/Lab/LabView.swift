@@ -66,10 +66,7 @@ struct LabView: View {
 
                 if !changelog.isEmpty {
                     Section("Changelog") {
-                        ForEach(changelog) { log in
-                            LogRow(log: log)
-                                .listRowBackground(Color.pebblesListRow)
-                        }
+                        LogTimeline(mode: .changelog, logs: changelog)
                         NavigationLink {
                             LogListView(mode: .changelog)
                         } label: {
@@ -82,25 +79,19 @@ struct LabView: View {
 
                 if !initiatives.isEmpty {
                     Section("In progress") {
-                        ForEach(initiatives) { log in
-                            LogRow(log: log)
-                                .listRowBackground(Color.pebblesListRow)
-                        }
+                        LogTimeline(mode: .inProgress, logs: initiatives)
                     }
                 }
 
                 if !backlog.isEmpty {
                     Section("Backlog") {
-                        ForEach(backlog) { log in
-                            LogRow(log: log) {
-                                ReactionButton(
-                                    count: log.reactionCount,
-                                    isReacted: reactedIds.contains(log.id)
-                                ) {
-                                    Task { await toggle(log) }
-                                }
+                        LogTimeline(mode: .backlog, logs: backlog) { log in
+                            ReactionButton(
+                                count: log.reactionCount,
+                                isReacted: reactedIds.contains(log.id)
+                            ) {
+                                Task { await toggle(log) }
                             }
-                            .listRowBackground(Color.pebblesListRow)
                         }
                         NavigationLink {
                             LogListView(mode: .backlog)
