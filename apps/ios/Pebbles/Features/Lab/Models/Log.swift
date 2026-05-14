@@ -22,6 +22,7 @@ struct Log: Identifiable, Decodable, Hashable {
 
     let published: Bool
     let publishedAt: Date?
+    let releasedAt: Date?
     let createdAt: Date
 
     let reactionCount: Int
@@ -41,6 +42,7 @@ struct Log: Identifiable, Decodable, Hashable {
         case externalUrl = "external_url"
         case published
         case publishedAt = "published_at"
+        case releasedAt = "released_at"
         case createdAt = "created_at"
         case reactionCount = "reaction_count"
     }
@@ -78,6 +80,7 @@ struct Log: Identifiable, Decodable, Hashable {
             externalUrl: externalUrl,
             published: published,
             publishedAt: publishedAt,
+            releasedAt: releasedAt,
             createdAt: createdAt,
             reactionCount: max(0, reactionCount + delta)
         )

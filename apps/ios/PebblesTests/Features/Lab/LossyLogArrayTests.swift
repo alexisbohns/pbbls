@@ -203,4 +203,47 @@ struct LossyLogArrayTests {
             try self.makeDecoder().decode(LossyLogArray.self, from: json)
         }
     }
+
+    @Test("released_at decodes into Log.releasedAt when present")
+    func decodesReleasedAt() throws {
+        let row = """
+        {
+          "id": "44444444-4444-4444-4444-444444444444",
+          "species": "feature",
+          "platform": "ios",
+          "status": "shipped",
+          "title_en": "Shipped",
+          "title_fr": null,
+          "summary_en": "One line.",
+          "summary_fr": null,
+          "body_md_en": null,
+          "body_md_fr": null,
+          "cover_image_path": null,
+          "external_url": null,
+          "published": true,
+          "published_at": "2026-04-20T12:00:00Z",
+          "released_at": "2026-05-14T09:30:00Z",
+          "created_at": "2026-04-20T12:00:00Z",
+          "reaction_count": 0
+        }
+        """
+        let json = Data("[\(row)]".utf8)
+
+        let wrapper = try makeDecoder().decode(LossyLogArray.self, from: json)
+
+        #expect(wrapper.logs.count == 1)
+        let expected = ISO8601DateFormatter().date(from: "2026-05-14T09:30:00Z")
+        #expect(wrapper.logs.first?.releasedAt == expected)
+    }
+
+    @Test("released_at absent decodes to nil releasedAt")
+    func decodesMissingReleasedAt() throws {
+        // Uses the existing validRow() fixture which does not emit released_at.
+        let json = Data("[\(validRow())]".utf8)
+
+        let wrapper = try makeDecoder().decode(LossyLogArray.self, from: json)
+
+        #expect(wrapper.logs.count == 1)
+        #expect(wrapper.logs.first?.releasedAt == nil)
+    }
 }
