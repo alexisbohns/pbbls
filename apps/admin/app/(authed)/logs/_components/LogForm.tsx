@@ -38,7 +38,7 @@ export function LogForm({
 
   return (
     <form action={formAction} className="space-y-8">
-      <div className="flex flex-wrap items-end gap-4">
+      <div className="flex flex-wrap gap-4">
         <FieldSelect
           label="Species"
           name="species"
@@ -58,11 +58,13 @@ export function LogForm({
           options={STATUS_OPTIONS}
         />
         <ReleasedAtField defaultValue={log?.released_at ?? null} />
-        <div className="flex h-9 items-center gap-3">
-          <Switch id="published" name="published" defaultChecked={log?.published ?? false} />
-          <Label htmlFor="published" className="cursor-pointer">
+        <div className="space-y-2 text-sm">
+          <Label htmlFor="published" className="text-foreground font-medium">
             Published
           </Label>
+          <div className="flex h-9 items-center">
+            <Switch id="published" name="published" defaultChecked={log?.published ?? false} />
+          </div>
         </div>
       </div>
 
