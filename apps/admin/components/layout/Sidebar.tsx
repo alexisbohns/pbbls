@@ -28,7 +28,7 @@ export function AppSidebar() {
   const pathname = usePathname()
 
   return (
-    <Sidebar>
+    <Sidebar variant="inset" collapsible="icon">
       <SidebarHeader>
         <span className="px-2 py-1 text-sm font-semibold">Back-office</span>
       </SidebarHeader>
