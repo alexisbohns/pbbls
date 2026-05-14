@@ -1064,6 +1064,7 @@ export type Database = {
           published: boolean | null
           published_at: string | null
           reaction_count: number | null
+          released_at: string | null
           species: string | null
           status: string | null
           summary_en: string | null
