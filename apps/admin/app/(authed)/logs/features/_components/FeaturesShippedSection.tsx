@@ -15,7 +15,7 @@ export async function FeaturesShippedSection({
     .select("*")
     .eq("species", "feature")
     .eq("status", "shipped")
-    .order("updated_at", { ascending: false })
+    .order("released_at", { ascending: false, nullsFirst: false })
 
   if (platform) {
     query = query.in("platform", [platform, "all"])
