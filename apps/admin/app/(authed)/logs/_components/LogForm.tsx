@@ -13,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PLATFORM_OPTIONS, SPECIES_OPTIONS, STATUS_OPTIONS } from "@/lib/logs/options"
 import type { LogRow, LogSpecies } from "@/lib/logs/types"
 import { MarkdownField } from "./MarkdownField"
@@ -39,7 +38,7 @@ export function LogForm({
 
   return (
     <form action={formAction} className="space-y-8">
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap items-end gap-4">
         <FieldSelect
           label="Species"
           name="species"
@@ -59,17 +58,18 @@ export function LogForm({
           options={STATUS_OPTIONS}
         />
         <ReleasedAtField defaultValue={log?.released_at ?? null} />
+        <div className="flex h-9 items-center gap-3">
+          <Switch id="published" name="published" defaultChecked={log?.published ?? false} />
+          <Label htmlFor="published" className="cursor-pointer">
+            Published
+          </Label>
+        </div>
       </div>
 
-      <Tabs defaultValue="en" className="flex flex-col space-y-4">
-        <TabsList>
-          <TabsTrigger value="en">English (required)</TabsTrigger>
-          <TabsTrigger value="fr">Français (optional)</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="en" keepMounted className="space-y-4">
+      <div className="grid gap-6 md:grid-cols-2">
+        <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title_en">Title</Label>
+            <Label htmlFor="title_en">Title (English, required)</Label>
             <Input id="title_en" name="title_en" defaultValue={log?.title_en ?? ""} required />
           </div>
           <div className="space-y-2">
@@ -86,11 +86,11 @@ export function LogForm({
             <Label>Body (markdown)</Label>
             <MarkdownField name="body_md_en" defaultValue={log?.body_md_en} ariaLabel="Body, English" />
           </div>
-        </TabsContent>
+        </div>
 
-        <TabsContent value="fr" keepMounted className="space-y-4">
+        <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title_fr">Titre</Label>
+            <Label htmlFor="title_fr">Titre (Français, optionnel)</Label>
             <Input id="title_fr" name="title_fr" defaultValue={log?.title_fr ?? ""} />
           </div>
           <div className="space-y-2">
@@ -106,8 +106,8 @@ export function LogForm({
             <Label>Corps (markdown)</Label>
             <MarkdownField name="body_md_fr" defaultValue={log?.body_md_fr} ariaLabel="Body, French" />
           </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2">
         <div className="space-y-2">
@@ -121,13 +121,6 @@ export function LogForm({
           />
         </div>
         <CoverImageInput defaultPath={log?.cover_image_path ?? null} />
-      </div>
-
-      <div className="flex items-center gap-3">
-        <Switch id="published" name="published" defaultChecked={log?.published ?? false} />
-        <Label htmlFor="published" className="cursor-pointer">
-          Published
-        </Label>
       </div>
 
       {state?.error ? (
