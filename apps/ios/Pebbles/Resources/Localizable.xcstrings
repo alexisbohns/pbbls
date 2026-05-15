@@ -3725,7 +3725,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Niveau Ripple %lld, actif aujourd'hui"
+            "value" : "Ricochet %lld, actif aujourd'hui"
           }
         }
       }
@@ -3743,7 +3743,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Niveau Ripple %lld, inactif aujourd'hui"
+            "value" : "Ricochets %lld, inactif aujourd'hui"
           }
         }
       }
