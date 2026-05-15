@@ -2,14 +2,15 @@ import Foundation
 import os
 import Supabase
 
-/// Shared @Observable wrapper around `v_karma_summary` and `v_bounce`.
-/// PathView (bottom bar) and ProfileView read the same instance so a
-/// reload from one screen is visible to the other.
+/// Shared @Observable wrapper around `v_karma_summary`, `v_bounce`, and
+/// `v_ripple`. PathView (bottom bar) and ProfileView read the same
+/// instance so a reload from one screen is visible to the other.
 @Observable
 @MainActor
 final class PathStatsService {
     var karma: Int?
     var bounce: Int?
+    var ripple: RippleSummary?
 
     private var isLoading = false
     private(set) var hasLoaded = false
@@ -45,6 +46,9 @@ final class PathStatsService {
         async let bounceResult: BounceSummary = supabase.client
             .from("v_bounce").select("bounce_level, active_days")
             .single().execute().value
+        async let rippleResult: RippleSummary = supabase.client
+            .from("v_ripple").select("ripple_level, pebbles_28d, active_today")
+            .single().execute().value
 
         do {
             self.karma = try await karmaResult.totalKarma
@@ -56,6 +60,12 @@ final class PathStatsService {
             self.bounce = try await bounceResult.bounceLevel
         } catch {
             logger.error("bounce fetch failed: \(error.localizedDescription, privacy: .private)")
+        }
+
+        do {
+            self.ripple = try await rippleResult
+        } catch {
+            logger.error("ripple fetch failed: \(error.localizedDescription, privacy: .private)")
         }
 
         hasLoaded = true
