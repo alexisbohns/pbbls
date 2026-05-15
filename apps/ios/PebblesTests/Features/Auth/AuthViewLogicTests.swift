@@ -74,4 +74,51 @@ struct AuthViewLogicTests {
             termsAccepted: true, privacyAccepted: true, isSubmitting: true
         ) == false)
     }
+
+    @Test("login: email missing dot returns false")
+    func loginEmailMissingDot() {
+        #expect(AuthView.canSubmit(
+            mode: .login, email: "hello@bohns", password: "abcdef",
+            termsAccepted: false, privacyAccepted: false, isSubmitting: false
+        ) == false)
+    }
+
+    @Test("login: email with '+' returns false")
+    func loginEmailWithPlus() {
+        #expect(AuthView.canSubmit(
+            mode: .login, email: "hello+work@bohns.design", password: "abcdef",
+            termsAccepted: false, privacyAccepted: false, isSubmitting: false
+        ) == false)
+    }
+
+    @Test("login: whitespace-only email returns false")
+    func loginWhitespaceEmail() {
+        #expect(AuthView.canSubmit(
+            mode: .login, email: "   ", password: "abcdef",
+            termsAccepted: false, privacyAccepted: false, isSubmitting: false
+        ) == false)
+    }
+
+    @Test("login: email with surrounding whitespace is accepted")
+    func loginEmailTrimmed() {
+        #expect(AuthView.canSubmit(
+            mode: .login, email: "  hello@bohns.design  ", password: "abcdef",
+            termsAccepted: false, privacyAccepted: false, isSubmitting: false
+        ) == true)
+    }
+
+    @Test("normalizeEmailInput lowercases uppercase characters")
+    func normalizeLowercases() {
+        #expect(AuthView.normalizeEmailInput("Hello@Bohns.Design") == "hello@bohns.design")
+    }
+
+    @Test("normalizeEmailInput strips '+' characters")
+    func normalizeStripsPlus() {
+        #expect(AuthView.normalizeEmailInput("hello+work@bohns.design") == "hellowork@bohns.design")
+    }
+
+    @Test("normalizeEmailInput is idempotent on a clean address")
+    func normalizeIdempotent() {
+        #expect(AuthView.normalizeEmailInput("hello@bohns.design") == "hello@bohns.design")
+    }
 }

@@ -3952,6 +3952,23 @@
         }
       }
     },
+    "The '+' character is not allowed in email addresses." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The '+' character is not allowed in email addresses."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le caractère « + » n’est pas autorisé dans les adresses e-mail."
+          }
+        }
+      }
+    },
     "This can't be undone." : {
       "extractionState" : "manual",
       "localizations" : {
