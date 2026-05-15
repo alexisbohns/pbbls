@@ -28,6 +28,7 @@ struct AuthView: View {
     @State private var privacyAccepted = false
     @State private var presentedLegalDoc: LegalDoc?
     @State private var authError: String?
+    @State private var emailError: LocalizedStringResource?
 
     init(initialMode: Mode = .login) {
         _mode = State(initialValue: initialMode)
@@ -39,14 +40,24 @@ struct AuthView: View {
                 .padding(.top, 24)
 
             VStack(spacing: 12) {
-                PebblesTextInput(
-                    placeholder: "Email",
-                    text: $email,
-                    contentType: .emailAddress,
-                    keyboard: .emailAddress,
-                    autocapitalization: .never,
-                    autocorrection: false
-                )
+                VStack(alignment: .leading, spacing: 4) {
+                    PebblesTextInput(
+                        placeholder: "Email",
+                        text: $email,
+                        contentType: .emailAddress,
+                        keyboard: .emailAddress,
+                        autocapitalization: .never,
+                        autocorrection: false
+                    )
+
+                    if let emailError {
+                        Text(emailError)
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                            .multilineTextAlignment(.leading)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
 
                 PebblesTextInput(
                     placeholder: "Password",
@@ -118,8 +129,25 @@ struct AuthView: View {
                 privacyAccepted = false
             }
         }
-        .onChange(of: email) { _, _ in
+        .onChange(of: email) { oldValue, newValue in
+            // Writing `email = normalized` below re-enters this closure with
+            // the normalized string. Detect that and skip so we don't undo
+            // the emailError we just set when stripping a '+'.
+            if oldValue != newValue, Self.normalizeEmailInput(oldValue) == newValue {
+                return
+            }
             if authError != nil { authError = nil }
+            // Stripping '+' is the only normalization that requires an inline
+            // explanation — lowercasing is silent on purpose.
+            if newValue.contains("+") {
+                emailError = "The '+' character is not allowed in email addresses."
+            } else if emailError != nil {
+                emailError = nil
+            }
+            let normalized = Self.normalizeEmailInput(newValue)
+            if normalized != newValue {
+                email = normalized
+            }
         }
         .onChange(of: password) { _, _ in
             if authError != nil { authError = nil }
@@ -147,8 +175,12 @@ struct AuthView: View {
         privacyAccepted: Bool,
         isSubmitting: Bool
     ) -> Bool {
+        let trimmed = email.trimmingCharacters(in: .whitespaces)
         guard !isSubmitting,
-              email.contains("@"),
+              !trimmed.isEmpty,
+              trimmed.contains("@"),
+              trimmed.contains("."),
+              !trimmed.contains("+"),
               password.count >= 6
         else { return false }
 
@@ -158,16 +190,26 @@ struct AuthView: View {
         return true
     }
 
+    /// Lowercases and strips disallowed characters from raw email input.
+    /// Real-time scrubbing keeps the visible field, the submitted value, and
+    /// the server's view of the address in sync.
+    static func normalizeEmailInput(_ raw: String) -> String {
+        var result = raw.lowercased()
+        result.removeAll { $0 == "+" }
+        return result
+    }
+
     private func submit() {
         isSubmitting = true
         authError = nil
+        let submittedEmail = email.trimmingCharacters(in: .whitespaces)
         Task {
             do {
                 switch mode {
                 case .login:
-                    try await supabase.signIn(email: email, password: password)
+                    try await supabase.signIn(email: submittedEmail, password: password)
                 case .signup:
-                    try await supabase.signUp(email: email, password: password)
+                    try await supabase.signUp(email: submittedEmail, password: password)
                 }
             } catch {
                 authError = error.localizedDescription
