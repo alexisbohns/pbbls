@@ -11,6 +11,9 @@ extension Color {
     static let pebblesBorder          = Color("Border")
     static let pebblesAccent          = Color("AccentColor")
     static let pebblesAccentSoft      = Color("AccentSoft")
+    static let rippleDefault          = Color("RippleDefault")
+    static let rippleActive           = Color("RippleActive")
+    static let rippleInactive         = Color("RippleInactive")
 
     /// Hex equivalent of `pebblesAccent` (light-mode value of `AccentColor`).
     /// Used as a fallback for SVG-text injection when the palette cache
