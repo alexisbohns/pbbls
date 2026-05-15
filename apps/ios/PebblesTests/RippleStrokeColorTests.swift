@@ -16,20 +16,20 @@ struct RippleStrokeColorTests {
     }
 
     private let rows: [Row] = [
-        Row(level: 0, activeToday: true,  expected: [.default, .default, .default, .default, .default, .default]),
+        Row(level: 0, activeToday: true, expected: [.default, .default, .default, .default, .default, .default]),
         Row(level: 0, activeToday: false, expected: [.default, .default, .default, .default, .default, .default]),
-        Row(level: 1, activeToday: true,  expected: [.active,  .default, .default, .default, .default, .default]),
+        Row(level: 1, activeToday: true, expected: [.active, .default, .default, .default, .default, .default]),
         Row(level: 1, activeToday: false, expected: [.inactive, .default, .default, .default, .default, .default]),
-        Row(level: 2, activeToday: true,  expected: [.active, .active, .default, .default, .default, .default]),
+        Row(level: 2, activeToday: true, expected: [.active, .active, .default, .default, .default, .default]),
         Row(level: 2, activeToday: false, expected: [.inactive, .inactive, .default, .default, .default, .default]),
-        Row(level: 3, activeToday: true,  expected: [.active, .active, .active, .default, .default, .default]),
+        Row(level: 3, activeToday: true, expected: [.active, .active, .active, .default, .default, .default]),
         Row(level: 3, activeToday: false, expected: [.inactive, .inactive, .inactive, .default, .default, .default]),
-        Row(level: 4, activeToday: true,  expected: [.active, .active, .active, .active, .default, .default]),
+        Row(level: 4, activeToday: true, expected: [.active, .active, .active, .active, .default, .default]),
         Row(level: 4, activeToday: false, expected: [.inactive, .inactive, .inactive, .inactive, .default, .default]),
-        Row(level: 5, activeToday: true,  expected: [.active, .active, .active, .active, .active, .default]),
+        Row(level: 5, activeToday: true, expected: [.active, .active, .active, .active, .active, .default]),
         Row(level: 5, activeToday: false, expected: [.inactive, .inactive, .inactive, .inactive, .inactive, .default]),
-        Row(level: 6, activeToday: true,  expected: [.active, .active, .active, .active, .active, .active]),
-        Row(level: 6, activeToday: false, expected: [.inactive, .inactive, .inactive, .inactive, .inactive, .inactive]),
+        Row(level: 6, activeToday: true, expected: [.active, .active, .active, .active, .active, .active]),
+        Row(level: 6, activeToday: false, expected: [.inactive, .inactive, .inactive, .inactive, .inactive, .inactive])
     ]
 
     @Test("matches the issue #442 truth table for all 14 cases")
