@@ -81,14 +81,15 @@ left join lateral (
   from public.pebbles pb
   where pb.user_id = u.id
     and pb.created_at >= now() - interval '28 days'
-) stats on true;
+) stats on true
+where u.id = auth.uid();
 ```
 
 Notes:
 
 - Counts by `created_at`, not `happened_at` — explicit per the issue. This is the key behavioural difference from `v_bounce`.
 - `active_today` uses server-side `current_date`. Single lateral scan returns both metrics.
-- Permissions and RLS inherit from the existing `pebbles` table policies, exactly like `v_bounce`.
+- The trailing `where u.id = auth.uid()` restricts the view to the caller's own row. Postgres views run as the view owner by default and would otherwise bypass RLS on `pebbles`, allowing any authenticated PostgREST client to enumerate engagement data for every user. Mirrors the pattern set by `v_bounce` and `v_karma_summary` in `20260411000005_security_hardening.sql`.
 
 ### Pipeline (mandatory per AGENTS.md)
 
