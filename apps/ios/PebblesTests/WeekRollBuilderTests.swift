@@ -22,6 +22,7 @@ struct WeekRollBuilderTests {
             id: UUID(),
             name: "p",
             happenedAt: date(happened),
+            createdAt: date(happened),
             intensity: intensity,
             renderSvg: nil,
             emotion: nil,

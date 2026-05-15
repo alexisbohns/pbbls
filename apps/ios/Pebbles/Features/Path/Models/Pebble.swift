@@ -4,6 +4,7 @@ struct Pebble: Identifiable, Decodable, Hashable {
     let id: UUID
     let name: String
     let happenedAt: Date
+    let createdAt: Date
     let intensity: Int                  // 1=small, 2=medium, 3=large
     let renderSvg: String?
     let emotion: EmotionRef?
@@ -12,6 +13,7 @@ struct Pebble: Identifiable, Decodable, Hashable {
     private enum CodingKeys: String, CodingKey {
         case id, name, intensity, emotion
         case happenedAt = "happened_at"
+        case createdAt = "created_at"
         case renderSvg = "render_svg"
         case firstSnapPath = "first_snap_path"
     }

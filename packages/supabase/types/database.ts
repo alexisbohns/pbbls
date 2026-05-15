@@ -70,6 +70,13 @@ export type Database = {
             referencedRelation: "v_karma_summary"
             referencedColumns: ["user_id"]
           },
+          {
+            foreignKeyName: "bounces_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       card_types: {
@@ -168,6 +175,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "collections_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
             referencedColumns: ["user_id"]
           },
         ]
@@ -332,6 +346,13 @@ export type Database = {
             referencedRelation: "v_karma_summary"
             referencedColumns: ["user_id"]
           },
+          {
+            foreignKeyName: "glyphs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       karma_events: {
@@ -372,6 +393,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "karma_events_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
             referencedColumns: ["user_id"]
           },
         ]
@@ -419,6 +447,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "log_reactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
             referencedColumns: ["user_id"]
           },
         ]
@@ -726,6 +761,13 @@ export type Database = {
             referencedRelation: "v_karma_summary"
             referencedColumns: ["user_id"]
           },
+          {
+            foreignKeyName: "pebbles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       profiles: {
@@ -781,6 +823,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: true
             referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "profiles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_ripple"
             referencedColumns: ["user_id"]
           },
         ]
@@ -839,6 +888,13 @@ export type Database = {
             referencedRelation: "v_karma_summary"
             referencedColumns: ["user_id"]
           },
+          {
+            foreignKeyName: "snaps_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
         ]
       }
       souls: {
@@ -886,6 +942,13 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "souls_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
             referencedColumns: ["user_id"]
           },
         ]
@@ -1140,7 +1203,23 @@ export type Database = {
             referencedRelation: "v_karma_summary"
             referencedColumns: ["user_id"]
           },
+          {
+            foreignKeyName: "pebbles_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
         ]
+      }
+      v_ripple: {
+        Row: {
+          active_today: boolean | null
+          pebbles_28d: number | null
+          ripple_level: number | null
+          user_id: string | null
+        }
+        Relationships: []
       }
     }
     Functions: {
@@ -1326,6 +1405,7 @@ export type Database = {
       path_pebbles: {
         Args: never
         Returns: {
+          created_at: string
           emotion: Json
           first_snap_path: string
           happened_at: string

@@ -26,6 +26,20 @@ struct PathView: View {
     private var isoCalendar: Calendar { Calendar(identifier: .iso8601) }
     private var today: Date { Date() }
 
+    /// Overrides the server's `active_today` flag (which compares against
+    /// UTC `current_date`) with a device-local check so users in non-UTC
+    /// timezones don't see "active today" while local-midnight has passed.
+    /// See M22 follow-up for proper server-side timezone handling.
+    private var rippleWithLocalActiveToday: RippleSummary? {
+        guard let server = stats.ripple else { return nil }
+        let activeToday = pebbles.contains { Calendar.current.isDateInToday($0.createdAt) }
+        return RippleSummary(
+            rippleLevel: server.rippleLevel,
+            pebbles28d: server.pebbles28d,
+            activeToday: activeToday
+        )
+    }
+
     var body: some View {
         NavigationStack(path: $navPath) {
             content
@@ -42,12 +56,20 @@ struct PathView: View {
         .sheet(isPresented: $isPresentingCreate) {
             CreatePebbleSheet(onCreated: { newPebbleId in
                 selectedPebbleId = newPebbleId
-                Task { await load() }
+                Task {
+                    async let timeline: Void = load()
+                    async let statsReload: Void = stats.refresh()
+                    _ = await (timeline, statsReload)
+                }
             })
         }
         .sheet(item: $selectedPebbleId) { id in
             PebbleDetailSheet(pebbleId: id, onPebbleUpdated: {
-                Task { await load() }
+                Task {
+                    async let timeline: Void = load()
+                    async let statsReload: Void = stats.refresh()
+                    _ = await (timeline, statsReload)
+                }
             })
         }
         .confirmationDialog(
@@ -123,7 +145,7 @@ struct PathView: View {
                     NewPebbleButton(onTap: { isPresentingCreate = true })
                     PathBottomBar(
                         karma: stats.karma,
-                        bounce: stats.bounce,
+                        ripple: rippleWithLocalActiveToday,
                         onProfile: { navPath.append(PathRoute.profile) }
                     )
                 }
@@ -172,7 +194,9 @@ struct PathView: View {
             try await supabase.client
                 .rpc("delete_pebble", params: ["p_pebble_id": pebble.id.uuidString])
                 .execute()
-            await load()
+            async let timeline: Void = load()
+            async let statsReload: Void = stats.refresh()
+            _ = await (timeline, statsReload)
         } catch {
             logger.error("delete pebble failed: \(error.localizedDescription, privacy: .private)")
             deleteError = "Something went wrong. Please try again."

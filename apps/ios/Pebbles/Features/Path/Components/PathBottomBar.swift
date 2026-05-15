@@ -2,13 +2,13 @@ import SwiftUI
 
 /// Bottom nav for the iOS Path screen. Replaces the system tab bar.
 ///
-/// Glyph (left) and stat cluster (right) all push to ProfileView via
-/// the `onProfile` callback. Karma uses the `sparkle` symbol; bounce
-/// uses `circle.hexagongrid` (issue spec; implementer should verify
-/// against Figma — `.fill` variant may apply).
+/// Left: profile avatar (taps to ProfileView).
+/// Right: karma stat (icon + number + caption) followed by the
+/// Ripples badge. Karma and badge are independent tap targets so a
+/// future Ripples explainer sheet can wire in without restructuring.
 struct PathBottomBar: View {
     let karma: Int?
-    let bounce: Int?
+    let ripple: RippleSummary?
     let onProfile: () -> Void
 
     @Environment(\.colorScheme) private var colorScheme
@@ -30,27 +30,30 @@ struct PathBottomBar: View {
             Spacer(minLength: 0)
 
             Button(action: onProfile) {
-                HStack(spacing: 16) {
-                    stat(systemImage: "circle.hexagongrid", value: bounce, label: "bounce")
-                    stat(systemImage: "sparkle",            value: karma,  label: "karma")
-                }
+                karmaStat
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Bounce \(bounce.map(String.init) ?? "—"), Karma \(karma.map(String.init) ?? "—")")
+            .accessibilityLabel("Karma \(karma.map(String.init) ?? "—")")
+
+            Button(action: onProfile) {
+                RippleBadge(level: ripple?.rippleLevel ?? 0,
+                            activeToday: ripple?.activeToday ?? false)
+            }
+            .buttonStyle(.plain)
+            .padding(.leading, 16)
         }
         .padding(.horizontal, 16)
     }
 
-    @ViewBuilder
-    private func stat(systemImage: String, value: Int?, label: LocalizedStringKey) -> some View {
+    private var karmaStat: some View {
         HStack(spacing: 6) {
-            Image(systemName: systemImage)
+            Image(systemName: "sparkle")
                 .foregroundStyle(Color.pebblesAccent)
             VStack(alignment: .leading, spacing: 0) {
-                Text(value.map { "\($0)" } ?? "—")
+                Text(karma.map { "\($0)" } ?? "—")
                     .font(.ysabeauSemibold(17))
                     .foregroundStyle(numberColor)
-                Text(label)
+                Text("karma")
                     .font(.caption)
                     .foregroundStyle(Color.pebblesMutedForeground)
             }
