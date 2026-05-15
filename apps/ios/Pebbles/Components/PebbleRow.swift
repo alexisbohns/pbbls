@@ -70,6 +70,7 @@ struct PebbleRow: View {
                 id: UUID(),
                 name: "Sample pebble",
                 happenedAt: Date(),
+                createdAt: Date(),
                 intensity: 1,
                 renderSvg: nil,
                 emotion: nil,

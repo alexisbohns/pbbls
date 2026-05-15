@@ -26,6 +26,20 @@ struct PathView: View {
     private var isoCalendar: Calendar { Calendar(identifier: .iso8601) }
     private var today: Date { Date() }
 
+    /// Overrides the server's `active_today` flag (which compares against
+    /// UTC `current_date`) with a device-local check so users in non-UTC
+    /// timezones don't see "active today" while local-midnight has passed.
+    /// See M22 follow-up for proper server-side timezone handling.
+    private var rippleWithLocalActiveToday: RippleSummary? {
+        guard let server = stats.ripple else { return nil }
+        let activeToday = pebbles.contains { Calendar.current.isDateInToday($0.createdAt) }
+        return RippleSummary(
+            rippleLevel: server.rippleLevel,
+            pebbles28d: server.pebbles28d,
+            activeToday: activeToday
+        )
+    }
+
     var body: some View {
         NavigationStack(path: $navPath) {
             content
@@ -131,7 +145,7 @@ struct PathView: View {
                     NewPebbleButton(onTap: { isPresentingCreate = true })
                     PathBottomBar(
                         karma: stats.karma,
-                        ripple: stats.ripple,
+                        ripple: rippleWithLocalActiveToday,
                         onProfile: { navPath.append(PathRoute.profile) }
                     )
                 }

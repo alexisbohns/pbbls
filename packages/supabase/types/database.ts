@@ -1405,6 +1405,7 @@ export type Database = {
       path_pebbles: {
         Args: never
         Returns: {
+          created_at: string
           emotion: Json
           first_snap_path: string
           happened_at: string
