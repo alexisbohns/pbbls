@@ -42,12 +42,20 @@ struct PathView: View {
         .sheet(isPresented: $isPresentingCreate) {
             CreatePebbleSheet(onCreated: { newPebbleId in
                 selectedPebbleId = newPebbleId
-                Task { await load() }
+                Task {
+                    async let timeline: Void = load()
+                    async let statsReload: Void = stats.refresh()
+                    _ = await (timeline, statsReload)
+                }
             })
         }
         .sheet(item: $selectedPebbleId) { id in
             PebbleDetailSheet(pebbleId: id, onPebbleUpdated: {
-                Task { await load() }
+                Task {
+                    async let timeline: Void = load()
+                    async let statsReload: Void = stats.refresh()
+                    _ = await (timeline, statsReload)
+                }
             })
         }
         .confirmationDialog(
@@ -123,7 +131,7 @@ struct PathView: View {
                     NewPebbleButton(onTap: { isPresentingCreate = true })
                     PathBottomBar(
                         karma: stats.karma,
-                        bounce: stats.bounce,
+                        ripple: stats.ripple,
                         onProfile: { navPath.append(PathRoute.profile) }
                     )
                 }
@@ -172,7 +180,9 @@ struct PathView: View {
             try await supabase.client
                 .rpc("delete_pebble", params: ["p_pebble_id": pebble.id.uuidString])
                 .execute()
-            await load()
+            async let timeline: Void = load()
+            async let statsReload: Void = stats.refresh()
+            _ = await (timeline, statsReload)
         } catch {
             logger.error("delete pebble failed: \(error.localizedDescription, privacy: .private)")
             deleteError = "Something went wrong. Please try again."
