@@ -60,6 +60,8 @@ struct SettingsSheet: View {
         NavigationStack {
             Form {
                 headerSection
+                informationsSection
+                legalSection
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
@@ -119,6 +121,40 @@ struct SettingsSheet: View {
                         .font(.title)
                         .foregroundStyle(Color.pebblesMutedForeground)
                 }
+        }
+    }
+
+    private var informationsSection: some View {
+        Section("Informations") {
+            HStack {
+                Text("Name")
+                    .foregroundStyle(Color.pebblesMutedForeground)
+                Spacer()
+                TextField("Your name", text: $displayName)
+                    .multilineTextAlignment(.trailing)
+                    .textInputAutocapitalization(.words)
+                    .autocorrectionDisabled(false)
+            }
+            HStack {
+                Text("Email")
+                    .foregroundStyle(Color.pebblesMutedForeground)
+                Spacer()
+                Text(email ?? "—")
+                    .foregroundStyle(Color.pebblesMutedForeground)
+            }
+        }
+    }
+
+    private var legalSection: some View {
+        Section("Legal") {
+            Button { presentedLegalDoc = .terms } label: {
+                Label("Terms of Service", systemImage: "doc.text")
+            }
+            .buttonStyle(.plain)
+            Button { presentedLegalDoc = .privacy } label: {
+                Label("Privacy Policy", systemImage: "hand.raised")
+            }
+            .buttonStyle(.plain)
         }
     }
 
