@@ -8,26 +8,26 @@ struct ProfileLabCard: View {
             HStack(spacing: 12) {
                 Image(systemName: "lightbulb.max")
                     .font(.title3)
-                    .foregroundStyle(Color.pebblesAccent)
+                    .foregroundStyle(Color.accent.primary)
                 VStack(alignment: .leading, spacing: 2) {
                     Text("Lab")
                         .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(Color.pebblesForeground)
+                        .foregroundStyle(Color.system.foreground)
                     Text("News & community")
                         .font(.caption)
-                        .foregroundStyle(Color.pebblesMutedForeground)
+                        .foregroundStyle(Color.system.secondary)
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color.pebblesMutedForeground)
+                    .foregroundStyle(Color.system.secondary)
             }
             .padding(16)
-            .background(Color.pebblesListRow)
+            .background(Color.system.background)
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .overlay {
                 RoundedRectangle(cornerRadius: 16)
-                    .strokeBorder(Color.pebblesBorder, lineWidth: 1)
+                    .strokeBorder(Color.system.muted, lineWidth: 1)
             }
         }
         .buttonStyle(.plain)

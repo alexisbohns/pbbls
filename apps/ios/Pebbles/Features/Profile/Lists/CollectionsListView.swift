@@ -107,9 +107,10 @@ struct CollectionsListView: View {
                             Label("Delete", systemImage: "trash")
                         }
                     }
-                    .listRowBackground(Color.pebblesListRow)
+                    .listRowBackground(Color.clear)
                 }
             }
+            .listRowSeparatorTint(Color.system.muted)
         }
     }
 

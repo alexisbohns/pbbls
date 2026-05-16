@@ -12,20 +12,20 @@ struct ProfileStatsCard: View {
             Text("STATS")
                 .font(.caption.weight(.semibold))
                 .tracking(0.8)
-                .foregroundStyle(Color.pebblesMutedForeground)
+                .foregroundStyle(Color.system.secondary)
 
             RipplesRow(ripple: ripple, assiduity: assiduity)
 
-            Divider().overlay(Color.pebblesMutedForeground.opacity(0.3))
+            Divider().overlay(Color.system.secondary.opacity(0.3))
 
             ProfileCountersRow(daysPracticed: daysPracticed, pebbles: pebbles, karma: karma)
         }
         .padding(16)
-        .background(Color.pebblesListRow)
+        .background(Color.system.background)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay {
             RoundedRectangle(cornerRadius: 16)
-                .strokeBorder(Color.pebblesBorder, lineWidth: 1)
+                .strokeBorder(Color.system.muted, lineWidth: 1)
         }
     }
 }

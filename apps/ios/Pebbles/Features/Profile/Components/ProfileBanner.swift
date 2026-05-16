@@ -13,11 +13,11 @@ struct ProfileBanner: View {
             VStack(spacing: 2) {
                 Text(displayName ?? "")
                     .font(.title3.weight(.semibold))
-                    .foregroundStyle(Color.pebblesForeground)
+                    .foregroundStyle(Color.system.foreground)
                 if let memberSince {
                     Text("Member since \(memberSince.formatted(.dateTime.month(.wide).year()))")
                         .font(.caption)
-                        .foregroundStyle(Color.pebblesMutedForeground)
+                        .foregroundStyle(Color.system.secondary)
                         .textCase(.uppercase)
                 }
             }
@@ -35,7 +35,7 @@ struct ProfileBanner: View {
                 .overlay {
                     Image(systemName: "scribble")
                         .font(.title)
-                        .foregroundStyle(Color.pebblesMutedForeground)
+                        .foregroundStyle(Color.system.secondary)
                 }
         }
     }

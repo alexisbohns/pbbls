@@ -18,14 +18,14 @@ struct ProfileCountersRow: View {
         VStack(spacing: 4) {
             Text(value.map { "\($0)" } ?? "—")
                 .font(.title2.weight(.semibold))
-                .foregroundStyle(Color.pebblesForeground)
+                .foregroundStyle(Color.system.foreground)
                 .monospacedDigit()
             Image(systemName: icon)
                 .font(.caption)
-                .foregroundStyle(Color.pebblesMutedForeground)
+                .foregroundStyle(Color.system.secondary)
             Text(label)
                 .font(.caption2)
-                .foregroundStyle(Color.pebblesMutedForeground)
+                .foregroundStyle(Color.system.secondary)
         }
         .frame(maxWidth: .infinity)
     }

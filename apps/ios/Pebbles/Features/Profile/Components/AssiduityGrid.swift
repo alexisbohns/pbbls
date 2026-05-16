@@ -34,7 +34,7 @@ struct AssiduityGrid: View {
                     ForEach(Array(row.enumerated()), id: \.offset) { _, active in
                         Image(systemName: active ? "fossil.shell.fill" : "alternatingcurrent")
                             .font(.system(size: cellSize))
-                            .foregroundStyle(active ? Color.rippleActive : Color.rippleInactive)
+                            .foregroundStyle(active ? Color.accent.primary : Color.system.muted)
                             .frame(width: cellSize, height: cellSize)
                     }
                 }
@@ -49,5 +49,5 @@ struct AssiduityGrid: View {
     let sample = (0..<28).map { $0 % 3 != 0 }
     return AssiduityGrid(data: sample)
         .padding()
-        .background(Color.pebblesListRow)
+        .background(Color.system.background)
 }

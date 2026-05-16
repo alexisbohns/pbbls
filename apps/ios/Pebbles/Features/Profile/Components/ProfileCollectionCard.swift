@@ -73,7 +73,7 @@ private extension ProfileCollectionCard.Variant {
         case .empty:
             RoundedRectangle(cornerRadius: 16)
                 .strokeBorder(
-                    Color.pebblesMutedForeground,
+                    Color.system.secondary,
                     style: StrokeStyle(lineWidth: 1.5, dash: [4])
                 )
         }
