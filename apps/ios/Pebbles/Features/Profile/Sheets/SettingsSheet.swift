@@ -1,3 +1,4 @@
+import Supabase
 import SwiftUI
 import os
 
@@ -65,6 +66,13 @@ struct SettingsSheet: View {
                     providersSection
                 } else {
                     passwordSection
+                }
+                if let saveError {
+                    Section {
+                        Text(saveError)
+                            .font(.footnote)
+                            .foregroundStyle(.red)
+                    }
                 }
                 legalSection
             }
@@ -214,8 +222,51 @@ struct SettingsSheet: View {
     }
 
     private func save() async {
-        // Implemented in Task 6.
+        guard isDirty, !isSaving else { return }
+        isSaving = true
+        saveError = nil
+
+        let nameToSend: String? = {
+            let trimmed = trimmedDisplayName
+            return (trimmed != initialDisplayName && !trimmed.isEmpty) ? trimmed : nil
+        }()
+        let glyphIdToSend: String? = {
+            guard let picked = pickedGlyph, picked.id != initialGlyphId else { return nil }
+            return picked.id.uuidString
+        }()
+        let passwordToSend: String? = newPassword.isEmpty ? nil : newPassword
+
+        do {
+            if nameToSend != nil || glyphIdToSend != nil {
+                let params = UpdateProfileParams(
+                    p_display_name: nameToSend,
+                    p_glyph_id: glyphIdToSend
+                )
+                try await supabase.client
+                    .rpc("update_profile", params: params)
+                    .execute()
+            }
+
+            if let passwordToSend {
+                _ = try await supabase.client.auth.update(
+                    user: UserAttributes(password: passwordToSend)
+                )
+            }
+
+            onSaved(nameToSend ?? initialDisplayName, pickedGlyph)
+            dismiss()
+        } catch {
+            logger.error("settings save failed: \(error.localizedDescription, privacy: .private)")
+            saveError = "Couldn't save your changes. Please try again."
+            isSaving = false
+        }
     }
+}
+
+/// Wire shape for `update_profile` RPC. Null fields tell Postgres "don't change".
+private struct UpdateProfileParams: Encodable {
+    let p_display_name: String?
+    let p_glyph_id: String?
 }
 
 #Preview("Email user") {
