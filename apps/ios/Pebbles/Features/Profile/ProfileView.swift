@@ -20,7 +20,6 @@ struct ProfileView: View {
 
     @State private var profile: ProfileRow?
     @State private var glyphStrokes: [GlyphStroke]?
-    @State private var presentedLegalDoc: LegalDoc?
     @State private var isPresentingSettings = false
     @State private var hasLoadedProfile = false
 
@@ -49,8 +48,6 @@ struct ProfileView: View {
                 ProfileCollectionsCard()
 
                 ProfileLabCard()
-
-                LegalLinks(presentedLegalDoc: $presentedLegalDoc)
 
                 ProfileLogoutPill {
                     Task { await supabase.signOut() }
@@ -95,10 +92,6 @@ struct ProfileView: View {
                 }
             )
         }
-        .sheet(item: $presentedLegalDoc) { doc in
-            LegalDocumentSheet(url: doc.url)
-                .ignoresSafeArea()
-        }
     }
 
     private func loadProfile() async {
@@ -135,32 +128,6 @@ struct ProfileView: View {
         } catch {
             logger.error("glyph fetch failed: \(error.localizedDescription, privacy: .private)")
         }
-    }
-}
-
-private struct LegalLinks: View {
-    @Binding var presentedLegalDoc: LegalDoc?
-
-    var body: some View {
-        HStack(spacing: 16) {
-            Button {
-                presentedLegalDoc = .terms
-            } label: {
-                Text("Terms")
-                    .font(.footnote)
-                    .foregroundStyle(Color.pebblesMutedForeground)
-            }
-            Text(verbatim: "·")
-                .foregroundStyle(Color.pebblesMutedForeground)
-            Button {
-                presentedLegalDoc = .privacy
-            } label: {
-                Text("Privacy")
-                    .font(.footnote)
-                    .foregroundStyle(Color.pebblesMutedForeground)
-            }
-        }
-        .padding(.vertical, 8)
     }
 }
 
