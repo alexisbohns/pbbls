@@ -13,7 +13,7 @@ struct ProfileEngagementDecodingTests {
           "assiduity": [false, true, true, false, true, false, false,
                         true,  true, false, false, true, true, false,
                         false, true, true, false, true, false, false,
-                        true,  true, false, false, true, true, false]
+                        true,  true, false, false, true, true, true]
         }
         """#.data(using: .utf8)!
 
@@ -21,7 +21,7 @@ struct ProfileEngagementDecodingTests {
 
         #expect(row.daysPracticed == 42)
         #expect(row.assiduity.count == 28)
-        #expect(row.assiduity.last == false)
+        #expect(row.assiduity.last == true)
     }
 
     @Test("decodes zero-state correctly")
