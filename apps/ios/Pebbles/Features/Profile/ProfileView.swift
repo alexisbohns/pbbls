@@ -2,9 +2,9 @@ import SwiftUI
 import os
 
 private struct ProfileRow: Decodable {
-    let displayName: String?
+    var displayName: String?
     let createdAt: Date
-    let glyphId: UUID?
+    var glyphId: UUID?
 
     enum CodingKeys: String, CodingKey {
         case displayName = "display_name"
@@ -78,7 +78,22 @@ struct ProfileView: View {
             await loadProfile()
         }
         .sheet(isPresented: $isPresentingSettings) {
-            SettingsStubSheet()
+            SettingsSheet(
+                initialDisplayName: profile?.displayName ?? "",
+                initialGlyphId: profile?.glyphId,
+                initialGlyphStrokes: glyphStrokes,
+                email: supabase.session?.user.email,
+                onSaved: { newName, newGlyph in
+                    if var current = profile {
+                        current.displayName = newName
+                        current.glyphId = newGlyph?.id ?? current.glyphId
+                        profile = current
+                    }
+                    if let strokes = newGlyph?.strokes {
+                        glyphStrokes = strokes
+                    }
+                }
+            )
         }
         .sheet(item: $presentedLegalDoc) { doc in
             LegalDocumentSheet(url: doc.url)
