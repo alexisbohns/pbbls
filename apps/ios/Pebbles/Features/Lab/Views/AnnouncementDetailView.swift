@@ -113,7 +113,7 @@ struct AnnouncementDetailView: View {
         "id": "00000000-0000-0000-0000-000000000001",
         "species": "announcement",
         "platform": "ios",
-        "status": "published",
+        "status": "shipped",
         "title_en": "New feature: color system refactor",
         "title_fr": null,
         "summary_en": "We have rebuilt the design system around a system + accent palette.",
