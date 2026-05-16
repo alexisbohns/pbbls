@@ -26,18 +26,18 @@ private struct TokensGrid: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                Section {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(verbatim: "System").font(.headline)
                     LazyVGrid(columns: columns, spacing: 12) {
                         Swatch(name: "system.foreground", color: .system.foreground)
                         Swatch(name: "system.secondary",  color: .system.secondary)
                         Swatch(name: "system.muted",      color: .system.muted)
                         Swatch(name: "system.background", color: .system.background)
                     }
-                } header: {
-                    Text("System").font(.headline)
                 }
 
-                Section {
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(verbatim: "Accent").font(.headline)
                     LazyVGrid(columns: columns, spacing: 12) {
                         Swatch(name: "accent.dark",      color: .accent.dark)
                         Swatch(name: "accent.shaded",    color: .accent.shaded)
@@ -46,8 +46,6 @@ private struct TokensGrid: View {
                         Swatch(name: "accent.light",     color: .accent.light)
                         Swatch(name: "accent.surface",   color: .accent.surface)
                     }
-                } header: {
-                    Text("Accent").font(.headline)
                 }
             }
             .padding()
