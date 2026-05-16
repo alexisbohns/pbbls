@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// White capsule button with the multi-color G mark and "Continue with Google"
-/// label. 1pt border in `pebblesBorder` so it reads against the page background.
+/// label. 1pt border in `system.muted` so it reads against the page background.
 struct GoogleSignInButton: View {
     var action: () -> Void
 
@@ -17,12 +17,12 @@ struct GoogleSignInButton: View {
                     .frame(width: glyphSize, height: glyphSize)
                 Text("Continue with Google").fontWeight(.medium)
             }
-            .foregroundStyle(Color.pebblesForeground)
+            .foregroundStyle(Color.system.foreground)
             .frame(maxWidth: .infinity)
             .frame(minHeight: minHeight)
         }
         .background(Capsule().fill(Color.white))
-        .overlay(Capsule().stroke(Color.pebblesBorder, lineWidth: 1))
+        .overlay(Capsule().stroke(Color.system.muted, lineWidth: 1))
         .buttonStyle(.plain)
     }
 }
@@ -30,5 +30,5 @@ struct GoogleSignInButton: View {
 #Preview {
     GoogleSignInButton(action: {})
         .padding()
-        .background(Color.pebblesBackground)
+        .background(Color.system.background)
 }

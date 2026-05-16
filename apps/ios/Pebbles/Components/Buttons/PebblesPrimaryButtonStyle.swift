@@ -18,13 +18,13 @@ struct PebblesPrimaryButtonStyle: ButtonStyle {
             } else {
                 configuration.label
                     .fontWeight(.medium)
-                    .foregroundStyle(isEnabled ? Color.white : Color.pebblesBorder)
+                    .foregroundStyle(isEnabled ? Color.white : Color.system.muted)
             }
         }
         .frame(maxWidth: .infinity)
         .frame(minHeight: minHeight)
         .background(
-            Capsule().fill(isEnabled ? Color.pebblesAccent : Color.pebblesMuted)
+            Capsule().fill(isEnabled ? Color.accent.primary : Color.system.muted)
         )
         .opacity(configuration.isPressed ? 0.85 : 1.0)
         .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
