@@ -2,9 +2,9 @@ import SwiftUI
 import os
 
 private struct ProfileRow: Decodable {
-    let displayName: String?
+    var displayName: String?
     let createdAt: Date
-    let glyphId: UUID?
+    var glyphId: UUID?
 
     enum CodingKeys: String, CodingKey {
         case displayName = "display_name"
@@ -20,7 +20,6 @@ struct ProfileView: View {
 
     @State private var profile: ProfileRow?
     @State private var glyphStrokes: [GlyphStroke]?
-    @State private var presentedLegalDoc: LegalDoc?
     @State private var isPresentingSettings = false
     @State private var hasLoadedProfile = false
 
@@ -50,8 +49,6 @@ struct ProfileView: View {
 
                 ProfileLabCard()
 
-                LegalLinks(presentedLegalDoc: $presentedLegalDoc)
-
                 ProfileLogoutPill {
                     Task { await supabase.signOut() }
                 }
@@ -78,11 +75,22 @@ struct ProfileView: View {
             await loadProfile()
         }
         .sheet(isPresented: $isPresentingSettings) {
-            SettingsStubSheet()
-        }
-        .sheet(item: $presentedLegalDoc) { doc in
-            LegalDocumentSheet(url: doc.url)
-                .ignoresSafeArea()
+            SettingsSheet(
+                initialDisplayName: profile?.displayName ?? "",
+                initialGlyphId: profile?.glyphId,
+                initialGlyphStrokes: glyphStrokes,
+                email: supabase.session?.user.email,
+                onSaved: { newName, newGlyph in
+                    if var current = profile {
+                        current.displayName = newName
+                        current.glyphId = newGlyph?.id ?? current.glyphId
+                        profile = current
+                    }
+                    if let strokes = newGlyph?.strokes {
+                        glyphStrokes = strokes
+                    }
+                }
+            )
         }
     }
 
@@ -120,32 +128,6 @@ struct ProfileView: View {
         } catch {
             logger.error("glyph fetch failed: \(error.localizedDescription, privacy: .private)")
         }
-    }
-}
-
-private struct LegalLinks: View {
-    @Binding var presentedLegalDoc: LegalDoc?
-
-    var body: some View {
-        HStack(spacing: 16) {
-            Button {
-                presentedLegalDoc = .terms
-            } label: {
-                Text("Terms")
-                    .font(.footnote)
-                    .foregroundStyle(Color.pebblesMutedForeground)
-            }
-            Text(verbatim: "·")
-                .foregroundStyle(Color.pebblesMutedForeground)
-            Button {
-                presentedLegalDoc = .privacy
-            } label: {
-                Text("Privacy")
-                    .font(.footnote)
-                    .foregroundStyle(Color.pebblesMutedForeground)
-            }
-        }
-        .padding(.vertical, 8)
     }
 }
 
