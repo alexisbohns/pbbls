@@ -775,6 +775,7 @@ export type Database = {
           color_world: string
           created_at: string
           display_name: string
+          glyph_id: string | null
           id: string
           is_admin: boolean
           max_media_per_pebble: number
@@ -788,6 +789,7 @@ export type Database = {
           color_world?: string
           created_at?: string
           display_name: string
+          glyph_id?: string | null
           id?: string
           is_admin?: boolean
           max_media_per_pebble?: number
@@ -801,6 +803,7 @@ export type Database = {
           color_world?: string
           created_at?: string
           display_name?: string
+          glyph_id?: string | null
           id?: string
           is_admin?: boolean
           max_media_per_pebble?: number
@@ -811,6 +814,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_glyph_id_fkey"
+            columns: ["glyph_id"]
+            isOneToOne: false
+            referencedRelation: "glyphs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_user_id_fkey"
             columns: ["user_id"]
@@ -1350,6 +1360,13 @@ export type Database = {
           pebbles_with_picture: number
         }[]
       }
+      get_profile_engagement: {
+        Args: { p_tz: string }
+        Returns: {
+          assiduity: boolean[]
+          days_practiced: number
+        }[]
+      }
       get_quality_signals_today: {
         Args: never
         Returns: {
@@ -1425,6 +1442,29 @@ export type Database = {
       update_pebble: {
         Args: { p_pebble_id: string; payload: Json }
         Returns: undefined
+      }
+      update_profile: {
+        Args: { p_display_name?: string; p_glyph_id?: string }
+        Returns: {
+          color_world: string
+          created_at: string
+          display_name: string
+          glyph_id: string | null
+          id: string
+          is_admin: boolean
+          max_media_per_pebble: number
+          onboarding_completed: boolean
+          privacy_accepted_at: string | null
+          terms_accepted_at: string | null
+          updated_at: string
+          user_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "profiles"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
     }
     Enums: {
