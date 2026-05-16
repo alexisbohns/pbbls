@@ -106,3 +106,33 @@ struct AnnouncementDetailView: View {
         )) ?? AttributedString(markdown)
     }
 }
+
+#Preview {
+    let json = """
+    {
+        "id": "00000000-0000-0000-0000-000000000001",
+        "species": "announcement",
+        "platform": "ios",
+        "status": "published",
+        "title_en": "New feature: color system refactor",
+        "title_fr": null,
+        "summary_en": "We have rebuilt the design system around a system + accent palette.",
+        "summary_fr": null,
+        "body_md_en": "# Heading 1\\n\\nFirst paragraph with some **bold** text and a [link](https://example.com).\\n\\n## Heading 2\\n\\nSecond paragraph after a heading. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\\n\\n### Heading 3\\n\\nThird paragraph under a smaller heading.",
+        "body_md_fr": null,
+        "cover_image_path": null,
+        "external_url": null,
+        "published": true,
+        "published_at": "2026-05-15T10:00:00Z",
+        "released_at": null,
+        "created_at": "2026-05-15T10:00:00Z",
+        "reaction_count": 0
+    }
+    """
+    let decoder = JSONDecoder()
+    decoder.dateDecodingStrategy = .iso8601
+    let log = try! decoder.decode(Log.self, from: Data(json.utf8))
+    return NavigationStack {
+        AnnouncementDetailView(log: log, coverImageURL: nil)
+    }
+}
