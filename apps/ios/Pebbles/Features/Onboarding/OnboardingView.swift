@@ -22,7 +22,7 @@ struct OnboardingView: View {
         // hood; the only way to color it is via UIKit appearance proxies.
         // Same approach used by MainTabView for the tab bar.
         UIPageControl.appearance().currentPageIndicatorTintColor = UIColor(named: "AccentColor")
-        UIPageControl.appearance().pageIndicatorTintColor = UIColor(named: "MutedForeground")
+        UIPageControl.appearance().pageIndicatorTintColor = UIColor(named: "SystemSecondary")
     }
 
     var body: some View {
