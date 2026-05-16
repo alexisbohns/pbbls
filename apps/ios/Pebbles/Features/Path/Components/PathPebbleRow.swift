@@ -102,25 +102,25 @@ struct PathPebbleRow: View {
     }
 
     private var thumbnailFill: Color {
-        if isLarge { return palette?.primary ?? Color.pebblesAccent }
-        return palette?.surface ?? Color.pebblesAccent.opacity(0.15)
+        if isLarge { return palette?.primary ?? Color.accent.primary }
+        return palette?.surface ?? Color.accent.primary.opacity(0.15)
     }
 
     private var glyphStrokeHex: String? {
         if isLarge {
             // Large rows stroke in light variant. Trim 8-digit hex to 6-digit
             // for SVGView reliability (matches PebbleRenderView's ingest).
-            guard let palette else { return Color.pebblesAccentHex }
+            guard let palette else { return Color.accent.primaryHex }
             let hex = palette.lightHex
             return hex.count == 9 ? String(hex.prefix(7)) : hex
         }
-        guard let palette else { return Color.pebblesAccentHex }
+        guard let palette else { return Color.accent.primaryHex }
         let hex = palette.secondaryHex
         return hex.count == 9 ? String(hex.prefix(7)) : hex
     }
 
     private var nameColor: Color {
-        guard let palette else { return Color.pebblesForeground }
+        guard let palette else { return Color.system.foreground }
         if isLarge { return palette.light }
         return colorScheme == .dark ? palette.light : palette.primary
     }
@@ -153,7 +153,7 @@ struct PathPebbleRow: View {
                 onTap: {},
                 onDelete: {}
             )
-            .listRowBackground(Color.pebblesListRow)
+            .listRowBackground(Color.clear)
         }
     }
     .environment(EmotionPaletteService(client: supabase.client))

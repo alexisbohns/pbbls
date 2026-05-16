@@ -40,7 +40,7 @@ struct WeekRollCairnCell: View {
                     .accessibilityHidden(true)
                 Text(verbatim: "\(weekNum)")
                     .font(.ysabeauSemibold(13))
-                    .foregroundStyle(isFocused ? Color.pebblesAccent : Color.pebblesMutedForeground)
+                    .foregroundStyle(isFocused ? Color.accent.primary : Color.system.secondary)
             }
         }
         .buttonStyle(.plain)
@@ -59,7 +59,7 @@ struct WeekRollCairnCell: View {
     ///     so the cairn stays visible on both the white path background and
     ///     the dark theme background)
     private var strokeColor: SwiftUI.Color {
-        isFocused ? SwiftUI.Color.pebblesAccent : SwiftUI.Color.pebblesMutedForeground
+        isFocused ? SwiftUI.Color.accent.primary : SwiftUI.Color.system.secondary
     }
 
     // MARK: - Data Binding setup

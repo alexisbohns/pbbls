@@ -177,7 +177,7 @@ struct EditPebbleSheet: View {
             self.selectedGlyph = detail.glyph
             self.renderSvg = detail.renderSvg
             self.strokeColor = palettes.palette(for: detail.emotion.id)?
-                .strokeHex(for: colorScheme) ?? Color.pebblesAccentHex
+                .strokeHex(for: colorScheme) ?? Color.accent.primaryHex
             self.sizeGroup = detail.valence.sizeGroup
             if let existing = detail.snaps.first {
                 snaps?.seedExisting(.existing(id: existing.id, storagePath: existing.storagePath))

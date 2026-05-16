@@ -41,11 +41,11 @@ struct ValencePickerSheet: View {
         VStack(alignment: .leading, spacing: 12) {
             Text(group.name)
                 .font(.headline)
-                .foregroundStyle(Color.pebblesMutedForeground)
+                .foregroundStyle(Color.system.secondary)
 
             Text(group.description)
                 .font(.subheadline)
-                .foregroundStyle(Color.pebblesMutedForeground)
+                .foregroundStyle(Color.system.secondary)
 
             HStack(spacing: 12) {
                 ForEach(ValencePolarity.allCases, id: \.self) { polarity in
@@ -77,15 +77,15 @@ struct ValencePickerSheet: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 64, height: 64)
-                    .foregroundStyle(isActive ? Color.pebblesBackground : Color.pebblesMutedForeground)
+                    .foregroundStyle(isActive ? Color.system.background : Color.system.secondary)
 
                 Text(option.shortLabel)
                     .font(.footnote)
-                    .foregroundStyle(isActive ? Color.pebblesBackground : Color.pebblesMutedForeground)
+                    .foregroundStyle(isActive ? Color.system.background : Color.system.secondary)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
-            .background(isActive ? Color.pebblesAccent : Color.pebblesSurfaceAlt)
+            .background(isActive ? Color.accent.primary : Color.system.muted)
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)

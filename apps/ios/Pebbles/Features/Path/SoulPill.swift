@@ -17,14 +17,14 @@ struct SoulPill: View {
             GlyphThumbnail(
                 strokes: glyph.strokes,
                 side: 24,
-                strokeColor: Color.pebblesAccent,
+                strokeColor: Color.accent.primary,
                 backgroundColor: .clear
             )
             .accessibilityHidden(true)
 
             Text(name)
                 .font(.subheadline)
-                .foregroundStyle(Color.pebblesMutedForeground)
+                .foregroundStyle(Color.system.secondary)
                 .lineLimit(1)
                 .truncationMode(.tail)
 
@@ -35,7 +35,7 @@ struct SoulPill: View {
         .frame(maxWidth: .infinity)
         .overlay {
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.pebblesAccent.opacity(0.25), lineWidth: 1)
+                .stroke(Color.accent.primary.opacity(0.25), lineWidth: 1)
         }
         .accessibilityElement(children: .combine)
         .accessibilityLabel(name)
@@ -49,13 +49,13 @@ struct AddSoulPill: View {
         HStack(spacing: 8) {
             Image(systemName: "person.badge.plus")
                 .font(.callout)
-                .foregroundStyle(Color.pebblesMutedForeground)
+                .foregroundStyle(Color.system.secondary)
                 .frame(width: 24, height: 24)
                 .accessibilityHidden(true)
 
             Text("Add")
                 .font(.subheadline)
-                .foregroundStyle(Color.pebblesMutedForeground)
+                .foregroundStyle(Color.system.secondary)
                 .lineLimit(1)
 
             Spacer(minLength: 0)
@@ -66,7 +66,7 @@ struct AddSoulPill: View {
         .overlay {
             RoundedRectangle(cornerRadius: 12)
                 .strokeBorder(
-                    Color.pebblesMutedForeground,
+                    Color.system.secondary,
                     style: StrokeStyle(lineWidth: 1.5, dash: [4])
                 )
         }

@@ -77,12 +77,12 @@ struct WeekPathView: View {
             Spacer()
             Text("Fresh week")
                 .font(.ysabeauSemibold(20))
-                .foregroundStyle(Color.pebblesForeground)
+                .foregroundStyle(Color.system.foreground)
             Text("Collect a new pebble")
                 .font(.caption)
                 .tracking(1.2)
                 .textCase(.uppercase)
-                .foregroundStyle(Color.pebblesMutedForeground)
+                .foregroundStyle(Color.system.secondary)
             Button(action: onCreate) {
                 Image(systemName: "plus")
                     .font(.title)
@@ -91,7 +91,7 @@ struct WeekPathView: View {
                     .frame(width: 44, height: 44)
                     .background(
                         RoundedRectangle(cornerRadius: 17)
-                            .fill(Color.pebblesAccent)
+                            .fill(Color.accent.primary)
                     )
             }
             .buttonStyle(.plain)

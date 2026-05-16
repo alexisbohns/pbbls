@@ -14,7 +14,7 @@ import SwiftUI
 /// Initialized from the four 8-digit hex strings stored on
 /// `public.emotion_categories`. Returns `nil` if any hex fails to parse —
 /// callers treat the palette as unavailable and fall back to
-/// `Color.pebblesAccent` / `Color.pebblesAccentHex`.
+/// `Color.accent.primary` / `Color.accent.primaryHex`.
 struct EmotionPalette: Equatable {
     let primary: Color
     let secondary: Color

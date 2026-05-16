@@ -29,7 +29,7 @@ struct PebbleReadView: View {
                 if let description = detail.description, !description.isEmpty {
                     Text(description)
                         .font(.system(size: 17, weight: .regular, design: .serif))
-                        .foregroundStyle(Color.pebblesForeground)
+                        .foregroundStyle(Color.system.foreground)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
@@ -41,7 +41,7 @@ struct PebbleReadView: View {
             .padding(.top, 8)
             .padding(.bottom, 32)
         }
-        .background(Color.pebblesBackground)
+        .background(Color.system.background)
     }
 
     @ViewBuilder
@@ -53,7 +53,7 @@ struct PebbleReadView: View {
                 icon: .system("heart.fill"),
                 label: LocalizedStringResource(stringLiteral: detail.emotion.localizedName),
                 style: .emotion(
-                    background: palette?.accentBackground ?? Color.pebblesAccent,
+                    background: palette?.accentBackground ?? Color.accent.primary,
                     foreground: palette?.accentForeground ?? .white
                 )
             )
