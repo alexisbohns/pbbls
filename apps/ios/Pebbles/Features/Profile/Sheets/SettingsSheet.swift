@@ -61,6 +61,9 @@ struct SettingsSheet: View {
             Form {
                 headerSection
                 informationsSection
+                if isSSO {
+                    providersSection
+                }
                 legalSection
             }
             .navigationTitle("Settings")
@@ -121,6 +124,43 @@ struct SettingsSheet: View {
                         .font(.title)
                         .foregroundStyle(Color.pebblesMutedForeground)
                 }
+        }
+    }
+
+    private struct LinkedProvider: Identifiable {
+        let id: String       // provider raw value: "apple" | "google" | …
+        let label: LocalizedStringResource
+        let systemImage: String
+    }
+
+    private var linkedProviders: [LinkedProvider] {
+        let identities = supabase.session?.user.identities ?? []
+        return identities.compactMap { identity in
+            switch identity.provider {
+            case "apple":
+                return LinkedProvider(id: "apple", label: "Apple", systemImage: "apple.logo")
+            case "google":
+                return LinkedProvider(id: "google", label: "Google", systemImage: "g.circle")
+            case "email":
+                return nil
+            default:
+                return nil
+            }
+        }
+    }
+
+    private var isSSO: Bool { !linkedProviders.isEmpty }
+
+    private var providersSection: some View {
+        Section("Providers") {
+            ForEach(linkedProviders) { provider in
+                HStack(spacing: 12) {
+                    Image(systemName: provider.systemImage)
+                        .foregroundStyle(Color.pebblesMutedForeground)
+                    Text(provider.label)
+                    Spacer()
+                }
+            }
         }
     }
 
