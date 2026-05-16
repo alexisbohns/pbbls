@@ -10,6 +10,8 @@ import Supabase
 final class PathStatsService {
     var karma: Int?
     var ripple: RippleSummary?
+    var daysPracticed: Int?
+    var assiduity: [Bool]?
 
     private var isLoading = false
     private(set) var hasLoaded = false
@@ -45,6 +47,9 @@ final class PathStatsService {
         async let rippleResult: RippleSummary = supabase.client
             .from("v_ripple").select("ripple_level, pebbles_28d, active_today")
             .single().execute().value
+        async let engagementResult: [ProfileEngagement] = supabase.client
+            .rpc("get_profile_engagement", params: ["p_tz": TimeZone.current.identifier])
+            .execute().value
 
         do {
             self.karma = try await karmaResult.totalKarma
@@ -56,6 +61,15 @@ final class PathStatsService {
             self.ripple = try await rippleResult
         } catch {
             logger.error("ripple fetch failed: \(error.localizedDescription, privacy: .private)")
+        }
+
+        do {
+            if let row = try await engagementResult.first {
+                self.daysPracticed = row.daysPracticed
+                self.assiduity     = row.assiduity
+            }
+        } catch {
+            logger.error("engagement fetch failed: \(error.localizedDescription, privacy: .private)")
         }
 
         hasLoaded = true
