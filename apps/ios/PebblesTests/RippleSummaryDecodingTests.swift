@@ -49,6 +49,7 @@ struct RippleSummaryLevelProgressionTests {
             (0, 0,  1,   1),  // need 1 pebble to reach level 1
             (1, 1,  4,   2),  // 5 - 1 = 4 to reach level 2
             (1, 4,  1,   2),
+            (1, 7,  0,   2),  // already above level-2 threshold; clamp to 0
             (2, 5,  4,   3),
             (2, 8,  1,   3),
             (3, 12, 1,   4),

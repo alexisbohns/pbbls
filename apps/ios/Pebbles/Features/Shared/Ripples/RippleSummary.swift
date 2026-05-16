@@ -21,13 +21,6 @@ struct RippleSummary: Decodable, Equatable {
         self.activeToday = activeToday
     }
 
-    init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        self.rippleLevel = try c.decode(Int.self, forKey: .rippleLevel)
-        self.pebbles28d  = try c.decode(Int.self, forKey: .pebbles28d)
-        self.activeToday = try c.decode(Bool.self, forKey: .activeToday)
-    }
-
     /// Minimum `pebbles28d` required to enter levels 1…6.
     /// Source of truth: `packages/supabase/supabase/migrations/20260516000001_v_ripple_security_filter.sql`.
     /// If those thresholds change, update both places.
