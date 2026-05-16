@@ -25,6 +25,10 @@ struct ProfileLabCard: View {
             .padding(16)
             .background(Color.pebblesListRow)
             .clipShape(RoundedRectangle(cornerRadius: 16))
+            .overlay {
+                RoundedRectangle(cornerRadius: 16)
+                    .strokeBorder(Color.pebblesBorder, lineWidth: 1)
+            }
         }
         .buttonStyle(.plain)
     }

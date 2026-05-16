@@ -7,10 +7,11 @@ struct ProfileLogoutPill: View {
         Button(role: .destructive, action: action) {
             Text("Log out")
                 .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.pebblesAccent)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
+                .padding(.vertical, 14)
+                .background(Capsule().fill(Color.pebblesMuted))
         }
-        .buttonStyle(.bordered)
-        .clipShape(Capsule())
+        .buttonStyle(.plain)
     }
 }

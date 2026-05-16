@@ -23,8 +23,8 @@ func chunkAssiduity(_ data: [Bool], columns: Int) -> [[Bool]] {
 struct AssiduityGrid: View {
     let data: [Bool]
     var columns: Int = 7
-    var cellSize: CGFloat = 10
-    var cellSpacing: CGFloat = 3
+    var cellSize: CGFloat = 14
+    var cellSpacing: CGFloat = 4
 
     var body: some View {
         let rows = chunkAssiduity(data, columns: columns)
@@ -32,8 +32,9 @@ struct AssiduityGrid: View {
             ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
                 HStack(spacing: cellSpacing) {
                     ForEach(Array(row.enumerated()), id: \.offset) { _, active in
-                        RoundedRectangle(cornerRadius: cellSize * 0.25)
-                            .fill(active ? Color.rippleActive : Color.rippleInactive)
+                        Image(systemName: active ? "fossil.shell.fill" : "alternatingcurrent")
+                            .font(.system(size: cellSize))
+                            .foregroundStyle(active ? Color.rippleActive : Color.rippleInactive)
                             .frame(width: cellSize, height: cellSize)
                     }
                 }

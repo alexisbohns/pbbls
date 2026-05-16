@@ -72,7 +72,7 @@ struct ProfileView: View {
                 .accessibilityLabel(Text("Settings"))
             }
         }
-        .pebblesScreen()
+        .pebblesScreen(background: Color.pebblesPathBackground)
         .task {
             await stats.load()
             await loadProfile()

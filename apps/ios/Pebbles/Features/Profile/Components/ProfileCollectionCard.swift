@@ -38,7 +38,7 @@ private extension ProfileCollectionCard.Variant {
     var iconName: String {
         switch self {
         case .filled: return "square.stack.3d.up"
-        case .empty:  return "plus"
+        case .empty:  return "plus.square.dashed"
         }
     }
     var iconColor: Color {

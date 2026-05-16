@@ -42,6 +42,10 @@ struct ProfileCollectionsCard: View {
         .padding(16)
         .background(Color.pebblesListRow)
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .overlay {
+            RoundedRectangle(cornerRadius: 16)
+                .strokeBorder(Color.pebblesBorder, lineWidth: 1)
+        }
         .task { await load() }
         .sheet(isPresented: $isPresentingCreateSheet) {
             CreateCollectionSheet(onCreated: {

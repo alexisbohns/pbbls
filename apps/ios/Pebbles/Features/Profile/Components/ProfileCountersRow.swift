@@ -8,7 +8,7 @@ struct ProfileCountersRow: View {
     var body: some View {
         HStack(alignment: .top, spacing: 0) {
             counter(value: daysPracticed, icon: "calendar", label: "Days")
-            counter(value: pebbles,       icon: "circle.fill", label: "Pebbles")
+            counter(value: pebbles,       icon: "fossil.shell", label: "Pebbles")
             counter(value: karma,         icon: "sparkles", label: "Karma")
         }
     }

@@ -19,7 +19,7 @@ struct ProfileShortcutTile<Destination: View>: View {
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
-            .background(Color.pebblesListRow)
+            .background(Color.pebblesMuted)
             .clipShape(RoundedRectangle(cornerRadius: 16))
         }
         .buttonStyle(.plain)
