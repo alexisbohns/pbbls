@@ -24,7 +24,13 @@ struct PebblesPrimaryButtonStyle: ButtonStyle {
         .frame(maxWidth: .infinity)
         .frame(minHeight: minHeight)
         .background(
-            Capsule().fill(isEnabled ? Color.accent.primary : Color.system.muted)
+            Capsule().fill(isEnabled ? Color.accent.primary : Color.clear)
+        )
+        .overlay(
+            Capsule().stroke(
+                isEnabled ? Color.clear : Color.system.muted,
+                lineWidth: 1
+            )
         )
         .opacity(configuration.isPressed ? 0.85 : 1.0)
         .animation(.easeOut(duration: 0.1), value: configuration.isPressed)
