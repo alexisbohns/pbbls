@@ -139,7 +139,7 @@ struct SettingsSheet: View {
 
     private struct LinkedProvider: Identifiable {
         let id: String       // provider raw value: "apple" | "google" | …
-        let label: LocalizedStringResource
+        let label: String    // brand name; rendered verbatim, not localized.
         let systemImage: String
     }
 
@@ -167,7 +167,7 @@ struct SettingsSheet: View {
                 HStack(spacing: 12) {
                     Image(systemName: provider.systemImage)
                         .foregroundStyle(Color.pebblesMutedForeground)
-                    Text(provider.label)
+                    Text(verbatim: provider.label)
                     Spacer()
                 }
             }
