@@ -118,7 +118,7 @@ struct GlyphsListView: View {
             GlyphThumbnail(
                 strokes: glyph.strokes,
                 side: 96,
-                strokeColor: Color.pebblesAccent
+                strokeColor: Color.accent.primary
             )
             if let name = glyph.name {
                 Text(name)
