@@ -45,7 +45,10 @@ struct ProfileCollectionsCard: View {
         .task { await load() }
         .sheet(isPresented: $isPresentingCreateSheet) {
             CreateCollectionSheet(onCreated: {
-                Task { await load() }
+                Task {
+                    hasLoaded = false
+                    await load()
+                }
             })
         }
     }
