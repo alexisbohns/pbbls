@@ -49,7 +49,7 @@ struct PathView: View {
                     }
                 }
                 .toolbar(.hidden, for: .navigationBar)
-                .pebblesScreen(background: Color.pebblesPathBackground)
+                .pebblesScreen()
         }
         .task { await load() }
         .task { await stats.load() }

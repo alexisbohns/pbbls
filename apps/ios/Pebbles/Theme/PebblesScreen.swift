@@ -9,36 +9,34 @@ private struct PebblesLabelStyle: LabelStyle {
             configuration.title
         } icon: {
             configuration.icon
-                .foregroundStyle(Color.pebblesAccent)
+                .foregroundStyle(Color.accent.primary)
         }
     }
 }
 
 private struct PebblesScreen: ViewModifier {
-    let background: Color
     func body(content: Content) -> some View {
         content
-            .tint(Color.pebblesAccent)
-            .foregroundStyle(Color.pebblesMutedForeground)
+            .tint(Color.accent.primary)
+            .foregroundStyle(Color.system.secondary)
             .labelStyle(PebblesLabelStyle())
             .scrollContentBackground(.hidden)
-            .background(background)
-            .toolbarBackground(background, for: .navigationBar)
+            .background(Color.system.background)
+            .toolbarBackground(Color.system.background, for: .navigationBar)
     }
 }
 
 extension View {
-    /// Applies the Pebbles design-system styling: tint, foreground, background,
-    /// hidden scroll-content background, and nav/tab toolbar backgrounds.
+    /// Applies the Pebbles design-system styling: tint, foreground,
+    /// background, hidden scroll-content background, and nav-toolbar
+    /// background. Background is always `system.background` — there is
+    /// no override knob, screens should not deviate.
     ///
-    /// Apply inside a `NavigationStack` so the toolbar modifiers attach to the
-    /// correct bar. Modifiers that don't apply to the current context (e.g.
-    /// `.toolbarBackground` when there is no toolbar) are inert.
-    ///
-    /// Default background uses `Color.pebblesBackground`. Pass a custom
-    /// `background` to override (e.g. PathView wants a pure-white root in
-    /// light mode while keeping the dark theme color in dark).
-    func pebblesScreen(background: Color = Color.pebblesBackground) -> some View {
-        modifier(PebblesScreen(background: background))
+    /// Apply inside a `NavigationStack` so the toolbar modifier attaches
+    /// to the correct bar. Modifiers that don't apply to the current
+    /// context (e.g. `.toolbarBackground` when there is no toolbar)
+    /// are inert.
+    func pebblesScreen() -> some View {
+        modifier(PebblesScreen())
     }
 }
