@@ -1,126 +1,157 @@
 import SwiftUI
+import os
 
-/// Discriminator for which explainer sheet is currently presented.
-/// Driving sheets by an optional enum is the idiomatic SwiftUI pattern —
-/// it guarantees a single sheet presentation per state transition.
-private enum ProfileSheet: String, Identifiable {
-    case karma
-    case bounce
-    var id: String { rawValue }
+private struct ProfileRow: Decodable {
+    let displayName: String?
+    let createdAt: Date
+    let glyphId: UUID?
+
+    enum CodingKeys: String, CodingKey {
+        case displayName = "display_name"
+        case createdAt   = "created_at"
+        case glyphId     = "glyph_id"
+    }
 }
 
 struct ProfileView: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(PathStatsService.self) private var stats
+    @Environment(\.dismiss) private var dismiss
 
-    @State private var presentedSheet: ProfileSheet?
+    @State private var profile: ProfileRow?
+    @State private var glyphStrokes: [GlyphStroke]?
     @State private var presentedLegalDoc: LegalDoc?
-    @State private var isPresentingOnboarding = false
+    @State private var isPresentingSettings = false
+    @State private var hasLoadedProfile = false
+
+    private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile-view")
 
     var body: some View {
-        List {
-            Section {
-                NavigationLink {
-                    LabView()
-                } label: {
-                    Label("Lab", systemImage: "lightbulb.max")
-                }
-                .listRowBackground(Color.pebblesListRow)
-            } header: {
-                Text("Discover")
-            }
+        ScrollView {
+            VStack(spacing: 16) {
+                ProfileBanner(
+                    displayName: profile?.displayName,
+                    memberSince: profile?.createdAt,
+                    glyphStrokes: glyphStrokes
+                )
+                .padding(.top, 8)
 
-            Section("Stats") {
-                ProfileStatRow(
-                    title: "Karma",
-                    systemImage: "sparkles",
-                    value: stats.karma
-                ) {
-                    presentedSheet = .karma
-                }
-                .listRowBackground(Color.pebblesListRow)
-                ProfileStatRow(
-                    title: "Bounce",
-                    systemImage: "arrow.up.right",
-                    value: stats.bounce
-                ) {
-                    presentedSheet = .bounce
-                }
-                .listRowBackground(Color.pebblesListRow)
-            }
+                ProfileShortcutsRow()
 
-            Section("Lists") {
-                NavigationLink {
-                    CollectionsListView()
-                } label: {
-                    Label("Collections", systemImage: "square.stack.3d.up")
-                }
-                .listRowBackground(Color.pebblesListRow)
-                NavigationLink {
-                    SoulsListView()
-                } label: {
-                    Label("Souls", systemImage: "person.2")
-                }
-                .listRowBackground(Color.pebblesListRow)
-                NavigationLink {
-                    GlyphsListView()
-                } label: {
-                    Label("Glyphs", systemImage: "scribble")
-                }
-                .listRowBackground(Color.pebblesListRow)
-            }
+                ProfileStatsCard(
+                    ripple: stats.ripple,
+                    assiduity: stats.assiduity,
+                    daysPracticed: stats.daysPracticed,
+                    pebbles: stats.pebbles,
+                    karma: stats.karma
+                )
 
-            Section("Legal") {
-                ProfileNavRow(title: "Replay onboarding", systemImage: "play.circle") {
-                    isPresentingOnboarding = true
-                }
-                .listRowBackground(Color.pebblesListRow)
-                ProfileNavRow(title: "Terms", systemImage: "doc.text") {
-                    presentedLegalDoc = .terms
-                }
-                .listRowBackground(Color.pebblesListRow)
-                ProfileNavRow(title: "Privacy", systemImage: "lock.shield") {
-                    presentedLegalDoc = .privacy
-                }
-                .listRowBackground(Color.pebblesListRow)
-            }
+                ProfileCollectionsCard()
 
-            Section {
-                Button(role: .destructive) {
+                ProfileLabCard()
+
+                LegalLinks(presentedLegalDoc: $presentedLegalDoc)
+
+                ProfileLogoutPill {
                     Task { await supabase.signOut() }
-                } label: {
-                    Text("Log out")
-                        .frame(maxWidth: .infinity)
                 }
-                .listRowBackground(Color.pebblesListRow)
+                .padding(.top, 8)
             }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 32)
         }
         .navigationTitle("Profile")
-        .pebblesScreen()
-        .task { await loadStats() }
-        .sheet(item: $presentedSheet) { sheet in
-            switch sheet {
-            case .karma:  KarmaExplainerSheet()
-            case .bounce: BounceExplainerSheet()
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    isPresentingSettings = true
+                } label: {
+                    Image(systemName: "gear")
+                }
+                .accessibilityLabel(Text("Settings"))
             }
+        }
+        .pebblesScreen(background: Color.pebblesPathBackground)
+        .task {
+            await stats.load()
+            await loadProfile()
+        }
+        .sheet(isPresented: $isPresentingSettings) {
+            SettingsStubSheet()
         }
         .sheet(item: $presentedLegalDoc) { doc in
             LegalDocumentSheet(url: doc.url)
                 .ignoresSafeArea()
         }
-        .fullScreenCover(isPresented: $isPresentingOnboarding) {
-            OnboardingView(steps: OnboardingSteps.all) {
-                isPresentingOnboarding = false
+    }
+
+    private func loadProfile() async {
+        guard !hasLoadedProfile else { return }
+        do {
+            let row: ProfileRow = try await supabase.client
+                .from("profiles")
+                .select("display_name, created_at, glyph_id")
+                .single().execute().value
+            self.profile = row
+            self.hasLoadedProfile = true
+
+            if let glyphId = row.glyphId {
+                await loadGlyphStrokes(glyphId)
             }
+        } catch {
+            logger.error("profile fetch failed: \(error.localizedDescription, privacy: .private)")
+            self.hasLoadedProfile = true
         }
     }
 
-    private func loadStats() async {
-        await stats.load()
+    private func loadGlyphStrokes(_ glyphId: UUID) async {
+        // GlyphService.list() confirms the column name is "strokes" (a JSONB array
+        // decoding into [GlyphStroke]). We follow the same shape here for a
+        // single-row fetch by id.
+        struct GlyphRow: Decodable { let strokes: [GlyphStroke] }
+        do {
+            let row: GlyphRow = try await supabase.client
+                .from("glyphs")
+                .select("strokes")
+                .eq("id", value: glyphId.uuidString)
+                .single().execute().value
+            self.glyphStrokes = row.strokes
+        } catch {
+            logger.error("glyph fetch failed: \(error.localizedDescription, privacy: .private)")
+        }
+    }
+}
+
+private struct LegalLinks: View {
+    @Binding var presentedLegalDoc: LegalDoc?
+
+    var body: some View {
+        HStack(spacing: 16) {
+            Button {
+                presentedLegalDoc = .terms
+            } label: {
+                Text("Terms")
+                    .font(.footnote)
+                    .foregroundStyle(Color.pebblesMutedForeground)
+            }
+            Text(verbatim: "·")
+                .foregroundStyle(Color.pebblesMutedForeground)
+            Button {
+                presentedLegalDoc = .privacy
+            } label: {
+                Text("Privacy")
+                    .font(.footnote)
+                    .foregroundStyle(Color.pebblesMutedForeground)
+            }
+        }
+        .padding(.vertical, 8)
     }
 }
 
 #Preview {
-    ProfileView()
-        .environment(SupabaseService())
+    NavigationStack {
+        ProfileView()
+            .environment(SupabaseService())
+    }
 }

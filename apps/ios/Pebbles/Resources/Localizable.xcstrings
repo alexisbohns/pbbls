@@ -88,6 +88,23 @@
         }
       }
     },
+    "%lld more pebbles to level %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld more pebbles to level %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pebbles avant le niveau %lld"
+          }
+        }
+      }
+    },
     "^[%lld pebbles](inflect: true)" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -119,6 +136,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "+ Nouvelle âme"
+          }
+        }
+      }
+    },
+    "Assiduity grid, last 28 days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assiduity grid, last 28 days"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grille d'assiduité, 28 derniers jours"
           }
         }
       }
@@ -299,53 +333,19 @@
         }
       }
     },
-    "bounce" : {
+    "COLLECTIONS" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "bounce"
+            "value" : "COLLECTIONS"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "bounce"
-          }
-        }
-      }
-    },
-    "Bounce" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bounce"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ricochet"
-          }
-        }
-      }
-    },
-    "Bounce is a measure of your momentum over the last 28 days. It goes from level 0 (quiet) to level 7 (unstoppable).\n\nThe more days you record a pebble, the higher your Bounce. Miss a stretch and it eases back down — that's fine. It's a rhythm, not a score." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bounce is a measure of your momentum over the last 28 days. It goes from level 0 (quiet) to level 7 (unstoppable).\n\nThe more days you record a pebble, the higher your Bounce. Miss a stretch and it eases back down — that's fine. It's a rhythm, not a score."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le Ricochet mesure ton élan sur les 28 derniers jours. Il va du niveau 0 (calme) au niveau 7 (inarrêtable).\n\nEnregistre des galets chaque jour pour augmenter ton Ricochet. Sinon, il redescend doucement. L’important c’est la régularité."
+            "value" : "COLLECTIONS"
           }
         }
       }
@@ -883,6 +883,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Événement du jour"
+          }
+        }
+      }
+    },
+    "Days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Days"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jours"
           }
         }
       }
@@ -2557,23 +2574,6 @@
         }
       }
     },
-    "Karma reflects the energy you put into your path. Every pebble you record, every soul you tend, every glyph you draw — they all contribute.\n\nYour Karma grows as you show up for yourself." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Karma reflects the energy you put into your path. Every pebble you record, every soul you tend, every glyph you draw — they all contribute.\n\nYour Karma grows as you show up for yourself."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le Karma reflète l'énergie que tu investis à tracer ton chemin. Chaque galet capturé, chaque âme liée, chaque glyphe gravé, tout contribue.\n\nTon Karma grandit avec ton assiduité."
-          }
-        }
-      }
-    },
     "Keep editing" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2667,6 +2667,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Listes"
+          }
+        }
+      }
+    },
+    "Loading…" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Loading…"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chargement…"
           }
         }
       }
@@ -2803,6 +2820,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Creux · petit"
+          }
+        }
+      }
+    },
+    "Max level reached" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Max level reached"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niveau max atteint"
+          }
+        }
+      }
+    },
+    "Member since %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Member since %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Membre depuis %@"
           }
         }
       }
@@ -3041,6 +3092,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nouvelle âme"
+          }
+        }
+      }
+    },
+    "News & community" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "News & community"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Actus & communauté"
           }
         }
       }
@@ -3428,6 +3496,23 @@
         }
       }
     },
+    "Privacy" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Privacy"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Confidentialité"
+          }
+        }
+      }
+    },
     "Privacy Policy" : {
       "comment" : "Link in the LegalDisclaimerText that navigates to the Privacy Policy.",
       "isCommentAutoGenerated" : true,
@@ -3748,6 +3833,40 @@
         }
       }
     },
+    "Ripples Level %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ripples Level %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Niveau Ripples %lld"
+          }
+        }
+      }
+    },
+    "STATS" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "STATS"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "STATS"
+          }
+        }
+      }
+    },
     "Save" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3790,6 +3909,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Voir tout"
+          }
+        }
+      }
+    },
+    "Settings" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paramètres"
+          }
+        }
+      }
+    },
+    "Settings — coming in #452" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings — coming in #452"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paramètres — à venir dans #452"
           }
         }
       }
@@ -3972,6 +4125,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Toucher pour choisir"
+          }
+        }
+      }
+    },
+    "Terms" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terms"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Conditions"
           }
         }
       }
