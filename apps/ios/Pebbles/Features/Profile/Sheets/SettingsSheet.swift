@@ -63,6 +63,8 @@ struct SettingsSheet: View {
                 informationsSection
                 if isSSO {
                     providersSection
+                } else {
+                    passwordSection
                 }
                 legalSection
             }
@@ -182,6 +184,19 @@ struct SettingsSheet: View {
                 Text(email ?? "—")
                     .foregroundStyle(Color.pebblesMutedForeground)
             }
+        }
+    }
+
+    private var passwordSection: some View {
+        Section {
+            SecureField("New password", text: $newPassword)
+                .textContentType(.newPassword)
+                .autocorrectionDisabled(true)
+                .textInputAutocapitalization(.never)
+        } header: {
+            Text("Password")
+        } footer: {
+            Text("Leave blank to keep your current password.")
         }
     }
 
