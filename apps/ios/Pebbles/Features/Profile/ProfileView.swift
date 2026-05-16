@@ -1,17 +1,157 @@
 import SwiftUI
+import os
+
+private struct ProfileRow: Decodable {
+    let displayName: String?
+    let createdAt: Date
+    let glyphId: UUID?
+
+    enum CodingKeys: String, CodingKey {
+        case displayName = "display_name"
+        case createdAt   = "created_at"
+        case glyphId     = "glyph_id"
+    }
+}
 
 struct ProfileView: View {
     @Environment(SupabaseService.self) private var supabase
+    @Environment(PathStatsService.self) private var stats
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var profile: ProfileRow?
+    @State private var glyphStrokes: [GlyphStroke]?
+    @State private var presentedLegalDoc: LegalDoc?
+    @State private var isPresentingSettings = false
+    @State private var hasLoadedProfile = false
+
+    private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile-view")
 
     var body: some View {
-        // Intentional WIP stub; replaced in task 14 of the #451 plan.
-        Text(verbatim: "Profile WIP")
-            .navigationTitle("Profile")
-            .pebblesScreen()
+        ScrollView {
+            VStack(spacing: 16) {
+                ProfileBanner(
+                    displayName: profile?.displayName,
+                    memberSince: profile?.createdAt,
+                    glyphStrokes: glyphStrokes
+                )
+                .padding(.top, 8)
+
+                ProfileShortcutsRow()
+
+                ProfileStatsCard(
+                    ripple: stats.ripple,
+                    assiduity: stats.assiduity,
+                    daysPracticed: stats.daysPracticed,
+                    pebbles: stats.pebbles,
+                    karma: stats.karma
+                )
+
+                ProfileCollectionsCard()
+
+                ProfileLabCard()
+
+                LegalLinks(presentedLegalDoc: $presentedLegalDoc)
+
+                ProfileLogoutPill {
+                    Task { await supabase.signOut() }
+                }
+                .padding(.top, 8)
+            }
+            .padding(.horizontal, 16)
+            .padding(.bottom, 32)
+        }
+        .navigationTitle("Profile")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    isPresentingSettings = true
+                } label: {
+                    Image(systemName: "gear")
+                }
+                .accessibilityLabel(Text("Settings"))
+            }
+        }
+        .pebblesScreen()
+        .task {
+            await stats.load()
+            await loadProfile()
+        }
+        .sheet(isPresented: $isPresentingSettings) {
+            SettingsStubSheet()
+        }
+        .sheet(item: $presentedLegalDoc) { doc in
+            LegalDocumentSheet(url: doc.url)
+                .ignoresSafeArea()
+        }
+    }
+
+    private func loadProfile() async {
+        guard !hasLoadedProfile else { return }
+        do {
+            let row: ProfileRow = try await supabase.client
+                .from("profiles")
+                .select("display_name, created_at, glyph_id")
+                .single().execute().value
+            self.profile = row
+            self.hasLoadedProfile = true
+
+            if let glyphId = row.glyphId {
+                await loadGlyphStrokes(glyphId)
+            }
+        } catch {
+            logger.error("profile fetch failed: \(error.localizedDescription, privacy: .private)")
+            self.hasLoadedProfile = true
+        }
+    }
+
+    private func loadGlyphStrokes(_ glyphId: UUID) async {
+        // GlyphService.list() confirms the column name is "strokes" (a JSONB array
+        // decoding into [GlyphStroke]). We follow the same shape here for a
+        // single-row fetch by id.
+        struct GlyphRow: Decodable { let strokes: [GlyphStroke] }
+        do {
+            let row: GlyphRow = try await supabase.client
+                .from("glyphs")
+                .select("strokes")
+                .eq("id", value: glyphId.uuidString)
+                .single().execute().value
+            self.glyphStrokes = row.strokes
+        } catch {
+            logger.error("glyph fetch failed: \(error.localizedDescription, privacy: .private)")
+        }
+    }
+}
+
+private struct LegalLinks: View {
+    @Binding var presentedLegalDoc: LegalDoc?
+
+    var body: some View {
+        HStack(spacing: 16) {
+            Button {
+                presentedLegalDoc = .terms
+            } label: {
+                Text("Terms")
+                    .font(.footnote)
+                    .foregroundStyle(Color.pebblesMutedForeground)
+            }
+            Text(verbatim: "·")
+                .foregroundStyle(Color.pebblesMutedForeground)
+            Button {
+                presentedLegalDoc = .privacy
+            } label: {
+                Text("Privacy")
+                    .font(.footnote)
+                    .foregroundStyle(Color.pebblesMutedForeground)
+            }
+        }
+        .padding(.vertical, 8)
     }
 }
 
 #Preview {
-    ProfileView()
-        .environment(SupabaseService())
+    NavigationStack {
+        ProfileView()
+            .environment(SupabaseService())
+    }
 }

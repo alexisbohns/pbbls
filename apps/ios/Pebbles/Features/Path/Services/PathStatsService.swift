@@ -10,6 +10,7 @@ import Supabase
 final class PathStatsService {
     var karma: Int?
     var ripple: RippleSummary?
+    var pebbles: Int?
     var daysPracticed: Int?
     var assiduity: [Bool]?
 
@@ -52,7 +53,9 @@ final class PathStatsService {
             .execute().value
 
         do {
-            self.karma = try await karmaResult.totalKarma
+            let summary = try await karmaResult
+            self.karma   = summary.totalKarma
+            self.pebbles = summary.pebblesCount
         } catch {
             logger.error("karma fetch failed: \(error.localizedDescription, privacy: .private)")
         }
