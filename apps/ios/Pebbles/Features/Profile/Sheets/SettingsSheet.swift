@@ -24,6 +24,9 @@ struct SettingsSheet: View {
     @State private var saveError: String?
     @State private var presentedLegalDoc: LegalDoc?
     @State private var isPresentingGlyphPicker = false
+    @FocusState private var focusedField: Field?
+
+    private enum Field: Hashable { case displayName, newPassword }
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "settings-sheet")
 
@@ -76,6 +79,7 @@ struct SettingsSheet: View {
                 }
                 legalSection
             }
+            .scrollDismissesKeyboard(.interactively)
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -89,6 +93,10 @@ struct SettingsSheet: View {
                         Button("Save") { Task { await save() } }
                             .disabled(!isDirty)
                     }
+                }
+                ToolbarItemGroup(placement: .keyboard) {
+                    Spacer()
+                    Button("Done") { focusedField = nil }
                 }
             }
             .pebblesScreen()
@@ -184,6 +192,9 @@ struct SettingsSheet: View {
                     .multilineTextAlignment(.trailing)
                     .textInputAutocapitalization(.words)
                     .autocorrectionDisabled(false)
+                    .focused($focusedField, equals: .displayName)
+                    .submitLabel(.done)
+                    .onSubmit { focusedField = nil }
             }
             HStack {
                 Text("Email")
@@ -201,6 +212,9 @@ struct SettingsSheet: View {
                 .textContentType(.newPassword)
                 .autocorrectionDisabled(true)
                 .textInputAutocapitalization(.never)
+                .focused($focusedField, equals: .newPassword)
+                .submitLabel(.done)
+                .onSubmit { focusedField = nil }
         } header: {
             Text("Password")
         } footer: {
