@@ -7,7 +7,7 @@ struct ProfileEngagementDecodingTests {
 
     @Test("decodes the canonical RPC row shape")
     func decodesCanonicalRow() throws {
-        let json = #"""
+        let json = Data(#"""
         {
           "days_practiced": 42,
           "assiduity": [false, true, true, false, true, false, false,
@@ -15,7 +15,7 @@ struct ProfileEngagementDecodingTests {
                         false, true, true, false, true, false, false,
                         true,  true, false, false, true, true, true]
         }
-        """#.data(using: .utf8)!
+        """#.utf8)
 
         let row = try JSONDecoder().decode(ProfileEngagement.self, from: json)
 
@@ -26,14 +26,14 @@ struct ProfileEngagementDecodingTests {
 
     @Test("decodes zero-state correctly")
     func decodesZeroState() throws {
-        let json = #"""
+        let json = Data(#"""
         { "days_practiced": 0, "assiduity": [
           false,false,false,false,false,false,false,
           false,false,false,false,false,false,false,
           false,false,false,false,false,false,false,
           false,false,false,false,false,false,false
         ] }
-        """#.data(using: .utf8)!
+        """#.utf8)
 
         let row = try JSONDecoder().decode(ProfileEngagement.self, from: json)
         #expect(row.daysPracticed == 0)

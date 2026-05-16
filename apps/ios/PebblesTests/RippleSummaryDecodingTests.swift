@@ -7,13 +7,13 @@ struct RippleSummaryDecodingTests {
 
     @Test("decodes the canonical v_ripple row shape")
     func decodesCanonicalShape() throws {
-        let json = #"""
+        let json = Data(#"""
         {
           "ripple_level": 3,
           "pebbles_28d": 11,
           "active_today": true
         }
-        """#.data(using: .utf8)!
+        """#.utf8)
 
         let summary = try JSONDecoder().decode(RippleSummary.self, from: json)
 
@@ -24,13 +24,13 @@ struct RippleSummaryDecodingTests {
 
     @Test("decodes a zero/false row (resting state)")
     func decodesRestingState() throws {
-        let json = #"""
+        let json = Data(#"""
         {
           "ripple_level": 0,
           "pebbles_28d": 0,
           "active_today": false
         }
-        """#.data(using: .utf8)!
+        """#.utf8)
 
         let summary = try JSONDecoder().decode(RippleSummary.self, from: json)
 
