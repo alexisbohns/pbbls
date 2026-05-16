@@ -94,9 +94,24 @@ struct SettingsSheet: View {
                             .disabled(!isDirty)
                     }
                 }
-                ToolbarItemGroup(placement: .keyboard) {
-                    Spacer()
-                    Button("Done") { focusedField = nil }
+            }
+            .safeAreaInset(edge: .bottom) {
+                if focusedField != nil {
+                    HStack {
+                        Spacer()
+                        Button {
+                            focusedField = nil
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.title)
+                                .symbolRenderingMode(.hierarchical)
+                                .foregroundStyle(Color.pebblesMutedForeground)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(Text("Close keyboard"))
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
                 }
             }
             .pebblesScreen()
