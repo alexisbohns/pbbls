@@ -299,57 +299,6 @@
         }
       }
     },
-    "bounce" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "bounce"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "bounce"
-          }
-        }
-      }
-    },
-    "Bounce" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bounce"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Ricochet"
-          }
-        }
-      }
-    },
-    "Bounce is a measure of your momentum over the last 28 days. It goes from level 0 (quiet) to level 7 (unstoppable).\n\nThe more days you record a pebble, the higher your Bounce. Miss a stretch and it eases back down — that's fine. It's a rhythm, not a score." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Bounce is a measure of your momentum over the last 28 days. It goes from level 0 (quiet) to level 7 (unstoppable).\n\nThe more days you record a pebble, the higher your Bounce. Miss a stretch and it eases back down — that's fine. It's a rhythm, not a score."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le Ricochet mesure ton élan sur les 28 derniers jours. Il va du niveau 0 (calme) au niveau 7 (inarrêtable).\n\nEnregistre des galets chaque jour pour augmenter ton Ricochet. Sinon, il redescend doucement. L’important c’est la régularité."
-          }
-        }
-      }
-    },
     "Cancel" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2553,23 +2502,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Karma %@"
-          }
-        }
-      }
-    },
-    "Karma reflects the energy you put into your path. Every pebble you record, every soul you tend, every glyph you draw — they all contribute.\n\nYour Karma grows as you show up for yourself." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Karma reflects the energy you put into your path. Every pebble you record, every soul you tend, every glyph you draw — they all contribute.\n\nYour Karma grows as you show up for yourself."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Le Karma reflète l'énergie que tu investis à tracer ton chemin. Chaque galet capturé, chaque âme liée, chaque glyphe gravé, tout contribue.\n\nTon Karma grandit avec ton assiduité."
           }
         }
       }
