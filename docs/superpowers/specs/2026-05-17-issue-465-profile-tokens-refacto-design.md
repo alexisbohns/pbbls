@@ -121,12 +121,13 @@ Wrap the entire `HStack` in a `NavigationLink { destination } label: { … }.but
 ### `RippleBadge`
 
 - Digit typography: `.pebblesFont(.captionEmphasized)` (was `.system(size: 12, weight: .bold, design: .rounded)`).
-- Digit color: always `Color.system.foreground` (was conditional on `colorScheme` × `activeToday`). Remove the `digitColor` computed property and `@Environment(\.colorScheme)`. This is a spec change — flag in PR description so design can confirm dark-mode contrast on inactive states.
+- Digit color: always `Color.system.foreground` (was conditional on `colorScheme` × `activeToday`). Remove the `digitColor` computed property and `@Environment(\.colorScheme)`. Confirmed acceptable by design.
 
 ### `AssiduityGrid`
 
-- Cell size 7 per spec (`.font(.system(size: 7))`), down from 14. Confirm visual density is still readable; if not, escalate to design before changing.
-- Cell spacing stays 4 unless visual review says otherwise.
+- Cell size 7 per spec (`.font(.system(size: 7))`), down from 14.
+- Cell spacing stays 4.
+- **Smoke-test gate**: verify in simulator after change. If 7pt is visually broken, escalate to design before shipping.
 
 ### `ProfileCountersRow` → `DataTile`
 
@@ -192,7 +193,7 @@ Body:
 
 - VStack(alignment: .leading, spacing: Spacing.xs).
 - Name: `.headline` + `system.foreground` for `.filled`; `"New collection"` + `.headline` + `system.foreground` for `.empty` (per the screenshots, the label is the same weight regardless of variant — only the icon and border differ).
-- Subtitle for `.filled`: `Text("\(pebbleCount) pebbles")` → `.subhead` + `system.secondary`. Localize the plural (`pebble` vs `pebbles`) via `LocalizedStringResource` with a stringsdict or inline `Text("^[\(pebbleCount) pebble](inflect: true)")` — pick whichever already matches conventions in the iOS app. **TBD during implementation; cheapest correct option wins.**
+- Subtitle for `.filled`: pebble count → `.subhead` + `system.secondary`. Localize the plural ("1 pebble" / "N pebbles") via a stringsdict-style plural entry in `Localizable.xcstrings`. Add the entry under the same convention used by other reference-data keys; confirm both `en` and `fr` are filled per the iOS CLAUDE.md localization rule before opening the PR.
 - Subtitle for `.empty`: omit (no count to show).
 
 Tap target:
@@ -226,7 +227,7 @@ This lets the tile read `collection.name` and `collection.pebbleCount` from a si
 - Label: `.pebblesFont(.buttonLabel)` + `Color.accent.primary`.
 - Shape: `RoundedRectangle(cornerRadius: Spacing.lg)` (was `Capsule()`).
 - Drop `role: .destructive` — visually no longer destructive (matches accent palette, not red). Keep the action.
-- Rename consideration: file is `ProfileLogoutPill.swift` but it's no longer pill-shaped. Leave the filename for this PR; rename in a follow-up if it bothers anyone.
+- **Rename in this PR**: `ProfileLogoutPill.swift` → `ProfileLogoutButton.swift`, struct `ProfileLogoutPill` → `ProfileLogoutButton`. Update the single call site in `ProfileView`. Add the new file and remove the old in `project.yml`-driven xcodegen — actually xcodegen globs the Features folder, so no `project.yml` edit needed; just rerun `xcodegen generate` (or `npm run generate --workspace=@pbbls/ios`) after the rename.
 
 ---
 
@@ -249,7 +250,7 @@ This lets the tile read `collection.name` and `collection.pebbleCount` from a si
 | `Features/Profile/Components/ProfileCollectionsCard.swift` | `.profileCard()`, header, query +pebble_count, filled-tile NavigationLink |
 | `Features/Profile/Components/ProfileCollectionCard.swift` | Full rewrite per spec |
 | `Features/Profile/Components/ProfileLabCard.swift` | `.profileCard()`, tokens |
-| `Features/Profile/Components/ProfileLogoutPill.swift` | bg + text + shape per spec |
+| `Features/Profile/Components/ProfileLogoutPill.swift` → `ProfileLogoutButton.swift` | bg + text + shape per spec; rename file + struct |
 
 Estimated diff: ~400 LOC (mostly substitutions and the two component rewrites).
 
@@ -258,7 +259,7 @@ Estimated diff: ~400 LOC (mostly substitutions and the two component rewrites).
 ## Risks & non-obvious decisions
 
 - **`RippleBadge` digit color**: spec change ("ensure level color is `system.foreground`"). The existing logic inverted the digit to background on the active-today filled disc for contrast. Hard-coding `system.foreground` may reduce contrast on the active-day state. Flag for design review at PR time.
-- **`AssiduityGrid` cell size 7**: spec says size 7. The current 14 is already small. Verify in simulator that 7 isn't visually broken (`fossil.shell.fill` at 7pt is tiny).
+- **`AssiduityGrid` cell size 7**: spec says size 7. The current 14 is already small. Smoke-test in simulator after change; escalate if visually broken.
 - **`pebbleCount` aggregate**: PostgREST returns `[{ "count": N }]`. The `Collection` model already handles this shape — no new decoding needed.
 - **Per-collection plural**: localization-correct plural ("1 pebble" / "N pebbles") needs either a stringsdict entry in `Localizable.xcstrings` or inline morphology. Pick the convention already used in the iOS app (e.g. `SoulsListView` displays similar counts — match that pattern).
 - **No tests added**: project policy is "no UI tests for now"; no test layer for these view-only changes is expected. Snapshot-style preview coverage is via SwiftUI `#Preview` blocks already in each component file — update them as APIs change (e.g. `ProfileCollectionCard` variant signature).
