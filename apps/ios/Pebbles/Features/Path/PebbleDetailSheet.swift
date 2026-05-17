@@ -26,7 +26,7 @@ struct PebbleDetailSheet: View {
     var body: some View {
         NavigationStack {
             content
-                .navigationBarTitleDisplayMode(.inline)
+                .pebblesToolbarTitle(detail?.name ?? "")
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
                         if let detail {
@@ -34,20 +34,9 @@ struct PebbleDetailSheet: View {
                         }
                     }
                     ToolbarItem(placement: .topBarTrailing) {
-                        Button {
+                        PebbleToolbarButton("Edit") {
                             isPresentingEdit = true
-                        } label: {
-                            Text("Edit")
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                                .foregroundStyle(Color.system.foreground)
-                                .padding(.horizontal, 14)
-                                .frame(height: 36)
-                                .background(
-                                    Capsule().fill(Color.system.background.opacity(0.85))
-                                )
                         }
-                        .buttonStyle(.plain)
                         .disabled(detail == nil)
                     }
                 }
