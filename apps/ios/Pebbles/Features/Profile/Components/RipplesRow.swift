@@ -5,18 +5,18 @@ struct RipplesRow: View {
     let assiduity: [Bool]?
 
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
+        HStack(alignment: .center, spacing: Spacing.lg) {
             RippleBadge(
                 level: ripple?.rippleLevel ?? 0,
                 activeToday: ripple?.activeToday ?? false
             )
 
-            VStack(alignment: .leading, spacing: 2) {
+            VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text("Ripples Level \(ripple?.rippleLevel ?? 0)")
-                    .font(.subheadline.weight(.semibold))
+                    .pebblesFont(.headline)
                     .foregroundStyle(Color.system.foreground)
                 Text(progressCopy)
-                    .font(.caption)
+                    .pebblesFont(.subhead)
                     .foregroundStyle(Color.system.secondary)
             }
 
