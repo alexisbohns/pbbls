@@ -61,18 +61,28 @@ struct GlyphCarveSheet: View {
         VStack(spacing: 24) {
             Spacer(minLength: 0)
 
-            TextField("Name (optional)", text: $name)
-                .textFieldStyle(.roundedBorder)
-                .textInputAutocapitalization(.words)
-                .submitLabel(.done)
-                .focused($nameFieldFocused)
-                .onSubmit { nameFieldFocused = false }
-                .accessibilityLabel("Glyph name")
+            TextField(
+                "",
+                text: $name,
+                prompt: Text("Name (optional)").foregroundStyle(Color.system.muted)
+            )
+            .pebblesFont(.title)
+            .foregroundStyle(Color.system.foreground)
+            .multilineTextAlignment(.center)
+            .textInputAutocapitalization(.words)
+            .submitLabel(.done)
+            .focused($nameFieldFocused)
+            .onSubmit { nameFieldFocused = false }
+            .accessibilityLabel("Glyph name")
 
             GlyphCanvasView(
                 committedStrokes: strokes,
                 onStrokeCommit: { stroke in strokes.append(stroke) },
                 strokeColor: Color.accent.primary
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius: Spacing.xxl, style: .continuous)
+                    .stroke(Color.system.muted, lineWidth: 1)
             )
 
             if let saveError {
