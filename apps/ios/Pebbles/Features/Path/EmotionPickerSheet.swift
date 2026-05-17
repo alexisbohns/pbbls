@@ -45,14 +45,13 @@ struct EmotionPickerSheet: View {
                 }
                 .padding()
             }
-            .navigationTitle("Emotions")
-            .navigationBarTitleDisplayMode(.inline)
+            .pebblesToolbarTitle("Emotions")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    PebbleToolbarButton("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
+                    PebbleToolbarButton("Done") {
                         onSelected(stagedEmotionId)
                         dismiss()
                     }

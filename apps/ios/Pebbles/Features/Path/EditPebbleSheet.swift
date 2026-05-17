@@ -48,11 +48,10 @@ struct EditPebbleSheet: View {
     var body: some View {
         NavigationStack {
             content
-                .navigationTitle("Edit pebble")
-                .navigationBarTitleDisplayMode(.inline)
+                .pebblesToolbarTitle("Edit pebble")
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") {
+                        PebbleToolbarButton("Cancel") {
                             Task { await cancelAndCleanup() }
                         }
                     }
@@ -60,7 +59,7 @@ struct EditPebbleSheet: View {
                         if isSaving {
                             ProgressView()
                         } else {
-                            Button("Save") {
+                            PebbleToolbarButton("Save") {
                                 Task { await save() }
                             }
                             .disabled(!draft.isValid || isLoading)
