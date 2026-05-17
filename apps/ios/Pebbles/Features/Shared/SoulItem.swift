@@ -100,7 +100,8 @@ struct SoulItem: View {
             ],
             viewBox: "0 0 200 200",
             userId: nil
-        )
+        ),
+        pebblesCount: 12
     )
 
     return ScrollView {
