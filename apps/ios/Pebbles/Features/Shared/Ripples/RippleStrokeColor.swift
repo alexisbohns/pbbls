@@ -22,9 +22,9 @@ extension RippleStrokeTone {
     /// Resolved theme-aware color for this tone.
     var color: Color {
         switch self {
-        case .default:  return .rippleDefault
-        case .active:   return .rippleActive
-        case .inactive: return .rippleInactive
+        case .default:  return .system.muted
+        case .active:   return .accent.primary
+        case .inactive: return .system.secondary
         }
     }
 }
