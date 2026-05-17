@@ -132,8 +132,10 @@ struct ProfileView: View {
 }
 
 #Preview {
-    NavigationStack {
+    let supabase = SupabaseService()
+    return NavigationStack {
         ProfileView()
-            .environment(SupabaseService())
+            .environment(supabase)
+            .environment(PathStatsService(supabase: supabase))
     }
 }
