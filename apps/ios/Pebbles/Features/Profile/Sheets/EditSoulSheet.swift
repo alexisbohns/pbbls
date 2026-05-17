@@ -53,17 +53,16 @@ struct EditSoulSheet: View {
                     }
                 }
             }
-            .navigationTitle("Edit soul")
-            .navigationBarTitleDisplayMode(.inline)
+            .pebblesToolbarTitle("Edit soul")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    PebbleToolbarButton("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     if isSaving {
                         ProgressView()
                     } else {
-                        Button("Save") {
+                        PebbleToolbarButton("Save") {
                             Task { await save() }
                         }
                         .disabled(!canSave)

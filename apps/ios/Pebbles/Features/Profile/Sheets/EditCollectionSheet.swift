@@ -58,17 +58,16 @@ struct EditCollectionSheet: View {
                     }
                 }
             }
-            .navigationTitle("Edit collection")
-            .navigationBarTitleDisplayMode(.inline)
+            .pebblesToolbarTitle("Edit collection")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    PebbleToolbarButton("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     if isSaving {
                         ProgressView()
                     } else {
-                        Button("Save") {
+                        PebbleToolbarButton("Save") {
                             Task { await save() }
                         }
                         .disabled(!canSave)

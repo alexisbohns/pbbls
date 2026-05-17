@@ -40,17 +40,16 @@ struct CreateSoulSheet: View {
                     }
                 }
             }
-            .navigationTitle("New soul")
-            .navigationBarTitleDisplayMode(.inline)
+            .pebblesToolbarTitle("New soul")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    PebbleToolbarButton("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     if isSaving {
                         ProgressView()
                     } else {
-                        Button("Save") {
+                        PebbleToolbarButton("Save") {
                             Task { await save() }
                         }
                         .disabled(!draft.isValid)
