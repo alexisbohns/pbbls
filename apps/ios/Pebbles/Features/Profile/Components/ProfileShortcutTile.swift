@@ -9,18 +9,18 @@ struct ProfileShortcutTile<Destination: View>: View {
         NavigationLink {
             destination()
         } label: {
-            VStack(spacing: 8) {
+            VStack(spacing: Spacing.xs) {
                 Image(systemName: systemImage)
-                    .font(.title3)
+                    .pebblesIcon(.large)
                     .foregroundStyle(Color.accent.primary)
                 Text(title)
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(Color.system.foreground)
+                    .pebblesFont(.callout)
+                    .foregroundStyle(Color.system.secondary)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(Color.system.muted)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .padding(.vertical, Spacing.md)
+            .background(Color.accent.surface)
+            .clipShape(RoundedRectangle(cornerRadius: Spacing.lg))
         }
         .buttonStyle(.plain)
     }

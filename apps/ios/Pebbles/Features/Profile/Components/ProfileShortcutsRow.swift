@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ProfileShortcutsRow: View {
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: Spacing.sm) {
             ProfileShortcutTile(title: "Collections", systemImage: "square.stack.3d.up") {
                 CollectionsListView()
             }

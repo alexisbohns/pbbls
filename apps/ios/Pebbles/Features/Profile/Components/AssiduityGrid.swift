@@ -23,7 +23,7 @@ func chunkAssiduity(_ data: [Bool], columns: Int) -> [[Bool]] {
 struct AssiduityGrid: View {
     let data: [Bool]
     var columns: Int = 7
-    var cellSize: CGFloat = 14
+    var cellSize: CGFloat = 7
     var cellSpacing: CGFloat = 4
 
     var body: some View {

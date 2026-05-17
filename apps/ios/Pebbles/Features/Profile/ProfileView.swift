@@ -27,13 +27,12 @@ struct ProfileView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
+            VStack(spacing: Spacing.xl) {
                 ProfileBanner(
                     displayName: profile?.displayName,
                     memberSince: profile?.createdAt,
                     glyphStrokes: glyphStrokes
                 )
-                .padding(.top, 8)
 
                 ProfileShortcutsRow()
 
@@ -49,10 +48,9 @@ struct ProfileView: View {
 
                 ProfileLabCard()
 
-                ProfileLogoutPill {
+                ProfileLogoutButton {
                     Task { await supabase.signOut() }
                 }
-                .padding(.top, 8)
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 32)

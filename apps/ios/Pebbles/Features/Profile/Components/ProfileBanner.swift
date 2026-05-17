@@ -6,18 +6,17 @@ struct ProfileBanner: View {
     let glyphStrokes: [GlyphStroke]?
 
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: Spacing.xxl) {
             glyph
 
-            VStack(spacing: 2) {
+            VStack(spacing: Spacing.xs) {
                 Text(displayName ?? "")
-                    .font(.title3.weight(.semibold))
+                    .pebblesFont(.title)
                     .foregroundStyle(Color.system.foreground)
                 if let memberSince {
                     Text("Member since \(memberSince.formatted(.dateTime.month(.wide).year()))")
-                        .font(.caption)
+                        .pebblesFont(.meta)
                         .foregroundStyle(Color.system.secondary)
-                        .textCase(.uppercase)
                 }
             }
         }

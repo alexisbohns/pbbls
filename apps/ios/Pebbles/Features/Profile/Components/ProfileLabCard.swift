@@ -5,31 +5,32 @@ struct ProfileLabCard: View {
         NavigationLink {
             LabView()
         } label: {
-            HStack(spacing: 12) {
+            HStack(spacing: Spacing.lg) {
                 Image(systemName: "lightbulb.max")
-                    .font(.title3)
+                    .pebblesIcon(.large)
                     .foregroundStyle(Color.accent.primary)
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading) {
                     Text("Lab")
-                        .font(.subheadline.weight(.semibold))
+                        .pebblesFont(.headline)
                         .foregroundStyle(Color.system.foreground)
                     Text("News & community")
-                        .font(.caption)
+                        .pebblesFont(.subhead)
                         .foregroundStyle(Color.system.secondary)
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color.system.secondary)
+                    .pebblesIcon(.medium)
+                    .foregroundStyle(Color.system.muted)
             }
-            .padding(16)
-            .background(Color.system.background)
-            .clipShape(RoundedRectangle(cornerRadius: 16))
-            .overlay {
-                RoundedRectangle(cornerRadius: 16)
-                    .strokeBorder(Color.system.muted, lineWidth: 1)
-            }
+            .contentShape(Rectangle())
+            .profileCard()
         }
         .buttonStyle(.plain)
+    }
+}
+
+#Preview {
+    NavigationStack {
+        ProfileLabCard().padding()
     }
 }
