@@ -32,11 +32,10 @@ struct SoulDetailView: View {
 
     var body: some View {
         content
-            .navigationTitle(soulWithGlyph.name)
-            .navigationBarTitleDisplayMode(.inline)
+            .pebblesToolbarTitle(soulWithGlyph.name)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button("Edit") {
+                    PebbleToolbarButton("Edit") {
                         isPresentingEdit = true
                     }
                 }

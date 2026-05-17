@@ -39,11 +39,10 @@ struct CollectionDetailView: View {
 
     var body: some View {
         content
-            .navigationTitle(collection.name)
-            .navigationBarTitleDisplayMode(.inline)
+            .pebblesToolbarTitle(collection.name)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button("Edit") {
+                    PebbleToolbarButton("Edit") {
                         isPresentingEdit = true
                     }
                 }

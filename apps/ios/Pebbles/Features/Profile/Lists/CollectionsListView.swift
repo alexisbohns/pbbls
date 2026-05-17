@@ -15,13 +15,10 @@ struct CollectionsListView: View {
 
     var body: some View {
         content
-            .navigationTitle("Collections")
-            .navigationBarTitleDisplayMode(.inline)
+            .pebblesToolbarTitle("Collections")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        isPresentingCreate = true
-                    } label: {
+                    PebbleToolbarButton(action: { isPresentingCreate = true }) {
                         Image(systemName: "plus")
                     }
                     .accessibilityLabel("Add collection")

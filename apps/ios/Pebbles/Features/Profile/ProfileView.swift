@@ -55,13 +55,10 @@ struct ProfileView: View {
             .padding(.horizontal, 16)
             .padding(.bottom, 32)
         }
-        .navigationTitle("Profile")
-        .navigationBarTitleDisplayMode(.inline)
+        .pebblesToolbarTitle("Profile")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    isPresentingSettings = true
-                } label: {
+                PebbleToolbarButton(action: { isPresentingSettings = true }) {
                     Image(systemName: "gear")
                 }
                 .accessibilityLabel(Text("Settings"))
