@@ -158,7 +158,7 @@ struct SoulDetailView: View {
         isLoading = true
         loadError = nil
         do {
-            let columns = "id, name, happened_at, render_svg"
+            let columns = "id, name, happened_at, created_at, intensity, render_svg"
                 + ", emotion:emotions(id, slug, name)"
                 + ", pebble_souls!inner(soul_id)"
             let result: [Pebble] = try await supabase.client
