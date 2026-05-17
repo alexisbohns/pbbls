@@ -18,6 +18,8 @@ enum PebblesFont {
     case metaEmphasized
     case cardHeading
     case cardHeadingEmphasized
+    case counterLg
+    case captionEmphasized
     case title
     case buttonLabel
 }
@@ -61,6 +63,8 @@ private extension PebblesFont {
         case .metaEmphasized:        return .sfCompactRounded(12, .bold)
         case .cardHeading:           return .sfCompactRounded(15, .semibold)
         case .cardHeadingEmphasized: return .sfCompactRounded(15, .bold)
+        case .counterLg:             return .sfProRounded(17, .semibold)
+        case .captionEmphasized:     return .sfProRounded(12, .semibold)
         case .title:                 return .ysabeauSemibold(28)
         case .buttonLabel:           return .ysabeauSemibold(17)
         }
@@ -70,11 +74,12 @@ private extension PebblesFont {
     var tracking: CGFloat {
         switch self {
         case .body, .bodyEmphasized, .headline, .headlineEmphasized,
-             .buttonLabel:                                        return 0.34   // 2% of 17
+             .buttonLabel, .counterLg:                            return 0.34   // 2% of 17
         case .subhead, .subheadEmphasized:                        return 0.30   // 2% of 15
         case .callout, .calloutEmphasized:                        return 0.32   // 2% of 16
         case .meta, .metaEmphasized:                              return 1.20   // 10% of 12
         case .cardHeading, .cardHeadingEmphasized:                return 1.50   // 10% of 15
+        case .captionEmphasized:                                  return 0.24   // 2% of 12
         case .title:                                              return -0.56  // -2% of 28
         }
     }
