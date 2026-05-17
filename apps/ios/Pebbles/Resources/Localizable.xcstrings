@@ -59,6 +59,23 @@
         }
       }
     },
+    "%lld more pebbles to level %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld more pebbles to level %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pebbles avant le niveau %lld"
+          }
+        }
+      }
+    },
     "%lld strokes drawn" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -84,23 +101,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld rocks"
-          }
-        }
-      }
-    },
-    "%lld more pebbles to level %lld" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld more pebbles to level %lld"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%lld pebbles avant le niveau %lld"
           }
         }
       }
@@ -136,23 +136,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "+ Nouvelle âme"
-          }
-        }
-      }
-    },
-    "Assiduity grid, last 28 days" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Assiduity grid, last 28 days"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Grille d'assiduité, 28 derniers jours"
           }
         }
       }
@@ -304,6 +287,23 @@
         }
       }
     },
+    "Assiduity grid, last 28 days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Assiduity grid, last 28 days"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grille d'assiduité, 28 derniers jours"
+          }
+        }
+      }
+    },
     "Associate your moment with an emotion and a domain, relate with people and add your pebble to a stack or a collection." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -329,23 +329,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réserve d’améliorations"
-          }
-        }
-      }
-    },
-    "COLLECTIONS" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "COLLECTIONS"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "COLLECTIONS"
           }
         }
       }
@@ -567,6 +550,23 @@
         }
       }
     },
+    "Close keyboard" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Close keyboard"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fermer le clavier"
+          }
+        }
+      }
+    },
     "Close onboarding" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -626,6 +626,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Collections"
+          }
+        }
+      }
+    },
+    "COLLECTIONS" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "COLLECTIONS"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "COLLECTIONS"
           }
         }
       }
@@ -831,6 +848,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Impossible de renommer le glyphe. Veuillez réessayer."
+          }
+        }
+      }
+    },
+    "Couldn't save your changes. Please try again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't save your changes. Please try again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible d'enregistrer vos modifications. Veuillez réessayer."
           }
         }
       }
@@ -2510,6 +2544,23 @@
         }
       }
     },
+    "Informations" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informations"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Informations"
+          }
+        }
+      }
+    },
     "Join the community" : {
       "comment" : "A heading for a feature that invites users to join a community.",
       "isCommentAutoGenerated" : true,
@@ -2599,6 +2650,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lab"
+          }
+        }
+      }
+    },
+    "Leave blank to keep your current password." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Leave blank to keep your current password."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Laissez vide pour conserver votre mot de passe actuel."
           }
         }
       }
@@ -3058,6 +3126,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nouveau glyphe"
+          }
+        }
+      }
+    },
+    "New password" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "New password"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouveau mot de passe"
           }
         }
       }
@@ -3576,6 +3661,23 @@
         }
       }
     },
+    "Providers" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Providers"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fournisseurs"
+          }
+        }
+      }
+    },
     "Public" : {
       "localizations" : {
         "en" : {
@@ -3850,23 +3952,6 @@
         }
       }
     },
-    "STATS" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "STATS"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "STATS"
-          }
-        }
-      }
-    },
     "Save" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4091,6 +4176,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Statistiques"
+          }
+        }
+      }
+    },
+    "STATS" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "STATS"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "STATS"
           }
         }
       }
@@ -4500,40 +4602,6 @@
         }
       }
     },
-    "Informations" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Informations"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Informations"
-          }
-        }
-      }
-    },
-    "Providers" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Providers"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fournisseurs"
-          }
-        }
-      }
-    },
     "Your name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4547,74 +4615,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Votre nom"
-          }
-        }
-      }
-    },
-    "New password" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "New password"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Nouveau mot de passe"
-          }
-        }
-      }
-    },
-    "Leave blank to keep your current password." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Leave blank to keep your current password."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Laissez vide pour conserver votre mot de passe actuel."
-          }
-        }
-      }
-    },
-    "Couldn't save your changes. Please try again." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Couldn't save your changes. Please try again."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Impossible d'enregistrer vos modifications. Veuillez réessayer."
-          }
-        }
-      }
-    },
-    "Close keyboard" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Close keyboard"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fermer le clavier"
           }
         }
       }
