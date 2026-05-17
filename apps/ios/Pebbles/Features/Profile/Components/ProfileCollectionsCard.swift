@@ -65,7 +65,7 @@ struct ProfileCollectionsCard: View {
                     .foregroundStyle(Color.system.secondary)
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .pebblesIcon(.md)
+                    .pebblesIcon(.medium)
                     .foregroundStyle(Color.system.muted)
             }
             .contentShape(Rectangle())

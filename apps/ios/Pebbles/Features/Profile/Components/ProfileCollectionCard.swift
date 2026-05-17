@@ -44,7 +44,7 @@ struct ProfileCollectionCard: View {
             RoundedRectangle(cornerRadius: Spacing.sm)
                 .fill(Color.accent.surface)
             Image(systemName: variant.iconName)
-                .pebblesIcon(.sm)
+                .pebblesIcon(.small)
                 .foregroundStyle(Color.accent.primary)
         }
         .frame(width: Spacing.xxl, height: Spacing.xxl)

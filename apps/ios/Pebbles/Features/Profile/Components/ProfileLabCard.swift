@@ -19,7 +19,7 @@ struct ProfileLabCard: View {
                 }
                 Spacer()
                 Image(systemName: "chevron.right")
-                    .pebblesIcon(.md)
+                    .pebblesIcon(.medium)
                     .foregroundStyle(Color.system.muted)
             }
             .contentShape(Rectangle())

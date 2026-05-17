@@ -3,7 +3,7 @@ import SwiftUI
 /// Single value/icon/label tile used inside the Profile Stats card.
 /// vstack(xs) of:
 ///   - large counter number (counter.lg)
-///   - hstack(xs) of icon (icon.sm, accent.primary) and label (subhead, system.secondary)
+///   - hstack(xs) of icon (icon.small, accent.primary) and label (subhead, system.secondary)
 struct DataTile: View {
     let value: Int?
     let icon: String
@@ -17,7 +17,7 @@ struct DataTile: View {
                 .monospacedDigit()
             HStack(spacing: Spacing.xs) {
                 Image(systemName: icon)
-                    .pebblesIcon(.sm)
+                    .pebblesIcon(.small)
                     .foregroundStyle(Color.accent.primary)
                 Text(label)
                     .pebblesFont(.subhead)
