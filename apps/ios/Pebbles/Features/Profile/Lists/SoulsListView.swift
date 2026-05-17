@@ -100,7 +100,7 @@ struct SoulsListView: View {
                                 }
                             })
                         } label: {
-                            SoulItem(case: .default, soul: item, count: nil)
+                            SoulItem(case: .default, soul: item, count: item.pebblesCount)
                         }
                         .buttonStyle(.plain)
                         .contextMenu {
@@ -123,7 +123,7 @@ struct SoulsListView: View {
         do {
             let result: [SoulWithGlyph] = try await supabase.client
                 .from("souls")
-                .select("id, name, glyph_id, glyphs(id, name, strokes, view_box)")
+                .select("id, name, glyph_id, glyphs(id, name, strokes, view_box), pebbles_count:pebble_souls(count)")
                 .order("name", ascending: true)
                 .execute()
                 .value

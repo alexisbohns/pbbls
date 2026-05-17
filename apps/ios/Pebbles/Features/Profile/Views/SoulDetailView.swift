@@ -204,7 +204,8 @@ struct SoulDetailView: View {
                     strokes: [],
                     viewBox: "0 0 200 200",
                     userId: nil
-                )
+                ),
+                pebblesCount: 0
             ),
             onChanged: {}
         )

@@ -85,7 +85,7 @@ struct SoulPickerSheet: View {
                             SoulItem(
                                 case: itemCase(for: soul.id),
                                 soul: soul,
-                                count: nil
+                                count: soul.pebblesCount
                             ) {
                                 toggle(soul.id)
                             }
@@ -125,7 +125,7 @@ struct SoulPickerSheet: View {
         do {
             let result: [SoulWithGlyph] = try await supabase.client
                 .from("souls")
-                .select("id, name, glyph_id, glyphs(id, name, strokes, view_box)")
+                .select("id, name, glyph_id, glyphs(id, name, strokes, view_box), pebbles_count:pebble_souls(count)")
                 .order("name", ascending: true)
                 .execute()
                 .value

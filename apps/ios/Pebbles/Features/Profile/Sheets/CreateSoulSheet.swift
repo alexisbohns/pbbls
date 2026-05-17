@@ -117,7 +117,7 @@ struct CreateSoulSheet: View {
             let inserted: SoulWithGlyph = try await supabase.client
                 .from("souls")
                 .insert(payload)
-                .select("id, name, glyph_id, glyphs(id, name, strokes, view_box)")
+                .select("id, name, glyph_id, glyphs(id, name, strokes, view_box), pebbles_count:pebble_souls(count)")
                 .single()
                 .execute()
                 .value
