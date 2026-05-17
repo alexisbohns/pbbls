@@ -49,7 +49,7 @@ struct ProfileView: View {
 
                 ProfileLabCard()
 
-                ProfileLogoutPill {
+                ProfileLogoutButton {
                     Task { await supabase.signOut() }
                 }
                 .padding(.top, 8)
