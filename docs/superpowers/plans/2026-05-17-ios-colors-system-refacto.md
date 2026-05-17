@@ -1,10 +1,13 @@
 # iOS Colors System Refactor — Implementation Plan
 
+> **Status: SHIPPED via [PR #458](https://github.com/Bohns/pbbls/pull/458).** This plan is preserved as a historical artifact of the work that was attempted. The actual sequence landed differently — see **As-shipped commit sequence** and **Lessons learned** below for the differences. The spec doc has been updated post-merge to describe the final state; consult that for the authoritative description of the new palette.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Spec:** `docs/superpowers/specs/2026-05-17-ios-colors-system-refacto-design.md`
 **Issue:** [#456](https://github.com/Bohns/pbbls/issues/456)
-**Branch:** `quality/456-ios-colors-refacto` (already created)
+**PR:** [#458](https://github.com/Bohns/pbbls/pull/458)
+**Branch:** `quality/456-ios-colors-refacto`
 
 **Goal:** Replace the legacy iOS color tokens with two clearly-scoped palettes — `Color.system` (4 primitives) and `Color.accent` (6 tiers) — and remove all legacy colorsets / `Color.pebbles*` constants from the codebase.
 
@@ -18,7 +21,7 @@
 
 ---
 
-## Refinement vs. spec
+## Refinement vs. spec (planning-time)
 
 Discovery during planning revealed:
 
@@ -27,7 +30,7 @@ Discovery during planning revealed:
 3. **`Features/PebbleMedia/`** has zero color refs. No commit needed.
 4. **`Services/EmotionPaletteService.swift`** has a doc-comment reference to `Color.pebblesAccent` / `Color.pebblesAccentHex` that needs updating. Folded into the foundation commit.
 
-Refined commit sequence:
+Originally-planned commit sequence:
 
 ```
 1  feat(ios): add system + accent palettes
@@ -42,6 +45,51 @@ Refined commit sequence:
 10 quality(ios): migrate Welcome feature to new palette
 11 quality(ios): remove legacy color tokens
 ```
+
+---
+
+## As-shipped commit sequence
+
+The PR landed with **24 commits**, not 11. Each per-feature commit produced one or more follow-on commits during the inline review (preview fixes, design tweaks, missed dot-elided refs, scope additions the user approved on the spot). The actual sequence:
+
+```
+feat(ios):    add system + accent palettes                          (foundation)
+quality(ios): polish ColorTokensPreview headers                     (post-review polish)
+quality(ios): migrate shared components to new palette              (Task 6)
+quality(ios): use clear fill + outline for disabled primary button  (user tweak)
+quality(ios): migrate Glyph feature to new palette                  (Task 8)
+quality(ios): recolor nav titles + migrate missed UIColor refs      (scope addition)
+quality(ios): tint Undo/Clear with accent.surface                   (scope addition)
+quality(ios): migrate Lab feature to new palette                    (Task 9)
+quality(ios): simplify pebblesScreen, drop background override      (scope addition)
+docs(ios):    add #Preview for AnnouncementDetailView               (preview gap)
+fix(ios):     use valid LogStatus in AnnouncementDetailView preview (preview crash)
+quality(ios): migrate Onboarding feature to new palette             (Task 10)
+quality(ios): soften onboarding page indicator                      (user tweak)
+quality(ios): migrate Path feature to new palette                   (Task 11)
+quality(ios): migrate Profile feature to new palette                (Task 12)
+fix(ios):     inject PathStatsService in ProfileView preview        (preview crash)
+quality(ios): add system.muted border around profile glyph slot     (user request)
+quality(ios): round profile glyph slot to 34pt, clear fill          (user tweak)
+fix(ios):     catch-up missed dot-elided refs in ProfileCollection… (dot-elided gap)
+quality(ios): migrate Shared/Ripples to new palette                 (Task 13)
+quality(ios): migrate Welcome feature to new palette                (Task 14)
+quality(ios): remove legacy color tokens                            (Task 15)
+```
+
+(Preceded by two docs commits — this plan and the spec.)
+
+---
+
+## Lessons learned
+
+1. **Search for dot-elided color references too**, not just `Color.pebbles*`. Swift lets you write `.pebblesAccent` when the return type is `Color` (as in computed-property switches). The original inventory grep missed every such site. A whole catch-up commit was needed for `ProfileCollectionCard.swift`, and similar refs were caught only by a re-grep before the cleanup commit. The corrected pattern: `grep -rEn '\.(pebbles[A-Z][A-Za-z]*|ripple(Active|Default|Inactive))' --include="*.swift"` (with `pebblesScreen|pebblesCount|pebblesToNextLevel|self\.ripple|rippleLevel` excluded as false positives).
+2. **Search for `UIColor(named:)` too.** Two files (`PebblesApp.swift`, `OnboardingView.swift`) used UIKit appearance proxies with legacy asset names. These never appear in any `Color.*` search and would have broken silently at runtime when the legacy assets were deleted. Add the `UIColor(named:` grep to every asset-rename plan.
+3. **Search outside `Features/<X>/`.** The plan structured tasks by feature folder, but the Auth flow's color refs lived in shared widgets at `Pebbles/Components/*` one directory above. Generalize: always inventory ALL color refs across the whole app before assigning to per-feature buckets.
+4. **`xcodegen` is needed when Swift files are added.** The `.xcodeproj` is git-ignored, and `project.yml`'s directory glob only auto-discovers when xcodegen runs. The foundation commit's new `Palettes.swift` and `ColorTokensPreview.swift` required an `xcodegen generate` before building. Same again at cleanup time to drop the stale reference to the deleted `Color+Pebbles.swift`. Build it into the implementer-subagent's instructions: if a Swift file is added or removed and the build complains about a missing file ref, run xcodegen first.
+5. **Previews can crash at canvas time even if they compile.** Two previews (`AnnouncementDetailView` had none; `ProfileView` was missing `PathStatsService` injection) crashed at canvas display. A clean build is necessary but not sufficient for visual review — try opening every touched preview before assuming the migration is verifiable.
+6. **Interactive design feedback expands scope.** During inline review the user surfaced changes that weren't in the spec but were either (a) genuine colors concerns (kept in PR) or (b) UI polish that happened to be visible (deferred to #457). Be explicit when triaging: "is this actually about colors?" The PR title sets the scope contract.
+7. **`SectionView` semantics inside `VStack` are no-ops.** The first version of `ColorTokensPreview.swift` used `Section { … } header: { … }` inside a plain `VStack` — visually fine, but `Section` only has meaning inside `List`/`Form`/`Table`. Caught in code review; switched to a labelled `VStack`.
 
 ---
 

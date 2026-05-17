@@ -1,8 +1,10 @@
 # iOS Colors System Refactor — Design
 
 **Issue:** [#456](https://github.com/Bohns/pbbls/issues/456) — `[Quality] Colors system refacto on iOS`
+**PR:** [#458](https://github.com/Bohns/pbbls/pull/458) — `quality(ios): refactor colors system`
 **Milestone:** M32 · iOS Quality
 **Date:** 2026-05-17
+**Status:** Shipped. This document was last updated post-merge to describe the as-shipped solution; divergences from the original plan are called out in the **Execution notes** section at the bottom.
 
 ## Context
 
@@ -90,10 +92,14 @@ During the migration commits `Palettes.swift` coexists with `Color+Pebbles.swift
 
 ### Helpers that are NOT migrated as tokens
 
-`pebblesListRow` and `pebblesPathBackground` are not part of the new palette. They are component-level recipes ("white in light, something else in dark") that happen to reference other tokens. They are inlined locally during the per-feature commits:
+`pebblesListRow` and `pebblesPathBackground` are not part of the new palette. They were component-level recipes ("white in light, something else in dark") that happened to reference other tokens.
 
-- `pebblesPathBackground` — inline a scheme switch in `PathView` directly.
-- `pebblesListRow` — inline at each of the 23 call sites; if a clear shared shape emerges, factor it back out into a `Pebbles/Theme/SurfaceRecipes.swift` later (out of scope for this PR).
+- **`pebblesPathBackground` — removed entirely**, not inlined. During execution the `.pebblesScreen()` modifier was simplified to always use `Color.system.background` (the `background:` parameter was dropped). PathView and ProfileView, the only two callers that ever overrode the background, now use the standard shape. The recipe is no longer needed anywhere.
+- **`pebblesListRow` — swapped per call site.** Two patterns emerged: rows inside a `List` or `Form` use `.listRowBackground(Color.clear)` paired with `.listRowSeparatorTint(Color.system.muted)` on the container (Lab, Profile collections list, PebbleFormView). Free-standing "card" views that used `.background(Color.pebblesListRow)` (the four Profile cards) became `.background(Color.system.background)` plus a `Color.system.muted` outline — an "outline only" card recipe.
+
+### Navigation title color (added during execution)
+
+`UINavigationBarAppearance` is configured in `PebblesApp.init` so navigation titles (inline + large) render in `system.foreground` instead of SwiftUI's default `UIColor.label`. Asset-catalog can't override `Color.primary` directly — only `AccentColor` has that magic — so titles must be re-tinted via the UIKit appearance proxy. The same `PebblesApp.init` already configured the segmented-control appearance via the same pattern.
 
 ## Asset catalog
 
@@ -133,19 +139,19 @@ Apple's asset catalog reserves the name `AccentColor` for the global SwiftUI tin
 | `pebblesAccentHex`           | `accent.primaryHex`  |
 | `rippleActive`               | `accent.primary`     |
 
-### Per-call-site decision (reviewed live during the relevant feature commit)
+### Per-call-site (decided inline during execution)
 
-| Legacy                  | Why it is case-by-case |
-|-------------------------|------------------------|
-| `pebblesBorder`         | Could be `system.muted`, `system.secondary`, or `accent.secondary` depending on the divider's role. |
-| `pebblesSurface`        | Three sites only — likely `system.muted` or `accent.surface`, but each one needs a look. |
-| `pebblesSurfaceAlt`     | Three sites — same reasoning. |
-| `rippleDefault`         | Currently muted-hex; may want `system.muted` or `accent.surface`. |
-| `rippleInactive`        | Currently border-hex; may want `system.secondary` or `accent.secondary`. |
-| `pebblesListRow`        | 23 sites — inline per the helpers section above; decide the look at each call site. |
-| `pebblesPathBackground` | Inline in `PathView`. |
+| Legacy                  | Final mapping | Notes |
+|-------------------------|---------------|-------|
+| `pebblesBorder`         | `system.muted` | Uniform across all 6 sites (Google sign-in capsule, primary-button disabled stroke, checkbox stroke, text input border, week-card outline, privacy-chip outline). |
+| `pebblesSurface`        | `system.background` | Single site (RippleBadge digit on dark + active). The digit blends into the dark base so the active ring carries the visual emphasis. |
+| `pebblesSurfaceAlt`     | `accent.surface` (Onboarding card) · `system.muted` (ValencePickerSheet inactive pill) | Branded warm for the onboarding illustration; neutral for a picker's off-state. |
+| `rippleDefault`         | `system.muted` | "Potential" rings beyond the user's level. |
+| `rippleInactive`        | `system.secondary` (RippleStrokeColor) · `system.muted` (AssiduityGrid dots) | Intentionally divergent: RippleStrokeColor needed default vs inactive to read distinctly (split via `system.muted` / `system.secondary`); AssiduityGrid uses `system.muted` because its only contrast is against `accent.primary` active dots. |
+| `pebblesListRow`        | `Color.clear` + `.listRowSeparatorTint(Color.system.muted)` on the container (Lab, Profile collections, PebbleFormView) · `system.background` for free-standing Profile cards | See **Helpers that are NOT migrated as tokens** above. |
+| `pebblesPathBackground` | Removed entirely | See **Helpers** — `.pebblesScreen()` simplification killed the override knob. |
 
-The mechanical mappings can be applied with a per-folder search-and-replace; each file is still opened and eyeballed (with Xcode preview) for the per-call-site decisions.
+Per-feature mechanical mappings were applied via `sed` across each folder, then per-call-site decisions were proposed inline via interactive multi-choice questions and committed file-by-file.
 
 ## Preview support
 
@@ -155,48 +161,46 @@ For component-level previews the work relies on the 54 existing `#Preview` block
 
 ## Commit sequence (single PR)
 
-Branch: `quality/456-ios-colors-refacto`
-PR title: `quality(ios): refactor colors system`
-
-The commit prefix `(ios)` matches the convention used by recent project commits (`feat(ios)`, `fix(ios)`). The species `quality` matches the issue's `[Quality]` title bracket.
+Branch: `quality/456-ios-colors-refacto`. PR title: `quality(ios): refactor colors system`. PR landed with 24 commits — the original plan called for 11 but the interactive review surfaced several refinements (preview fixes, design tweaks, missed dot-elided refs) that became their own commits. The full sequence:
 
 ```
-commit  1  feat(ios): add system + accent palettes
-           - 10 new colorsets + retuned AccentColor in Assets.xcassets
-           - Pebbles/Theme/Palettes.swift (SystemPalette, AccentPalette,
-             Color.system, Color.accent)
-           - Pebbles/Theme/ColorTokensPreview.swift (light + dark grid)
-           - No consumer changes. Legacy still in place.
-
-commit  2  quality(ios): migrate Auth to new palette
-commit  3  quality(ios): migrate Glyph to new palette
-commit  4  quality(ios): migrate Lab to new palette
-commit  5  quality(ios): migrate Onboarding to new palette
-commit  6  quality(ios): migrate Path to new palette
-commit  7  quality(ios): migrate PebbleMedia to new palette
-commit  8  quality(ios): migrate Profile to new palette
-commit  9  quality(ios): migrate Shared to new palette
-commit 10  quality(ios): migrate Welcome to new palette
-
-  - Each feature commit applies the mechanical mappings, then walks the
-    per-call-site decisions inline together. Verification: existing
-    #Previews + ColorTokensPreview as the reference. Inline
-    pebblesListRow / pebblesPathBackground locally.
-
-commit 11  quality(ios): remove legacy color tokens
-           - Delete Pebbles/Theme/Color+Pebbles.swift
-           - Delete 11 legacy colorsets from Assets.xcassets
-             (Background, Foreground, Surface, SurfaceAlt, Muted,
-              MutedForeground, Border, AccentSoft, RippleDefault,
-              RippleActive, RippleInactive). AccentColor.colorset stays.
+feat(ios):    add system + accent palettes (foundation)
+quality(ios): polish ColorTokensPreview headers
+quality(ios): migrate shared components to new palette
+quality(ios): use clear fill + outline for disabled primary button
+quality(ios): migrate Glyph feature to new palette
+quality(ios): recolor nav titles + migrate missed UIColor refs
+quality(ios): tint Undo/Clear with accent.surface
+quality(ios): migrate Lab feature to new palette
+quality(ios): simplify pebblesScreen, drop background override
+docs(ios):    add #Preview for AnnouncementDetailView
+fix(ios):     use valid LogStatus in AnnouncementDetailView preview
+quality(ios): migrate Onboarding feature to new palette
+quality(ios): soften onboarding page indicator
+quality(ios): migrate Path feature to new palette
+quality(ios): migrate Profile feature to new palette
+fix(ios):     inject PathStatsService in ProfileView preview
+quality(ios): add system.muted border around profile glyph slot
+quality(ios): round profile glyph slot to 34pt, clear fill
+fix(ios):     catch-up missed dot-elided refs in ProfileCollectionCard
+quality(ios): migrate Shared/Ripples to new palette
+quality(ios): migrate Welcome feature to new palette
+quality(ios): remove legacy color tokens
 ```
 
-### Per-feature commit workflow
+(Two docs commits — the spec and plan — precede the code.)
 
-1. List the files in the feature that touch legacy tokens, with the tokens each uses.
+`PebbleMedia` was skipped: zero color refs. `Auth` had no direct color refs of its own (everything composed shared widgets in `Pebbles/Components/`), so its "commit" was verification-only.
+
+### Per-feature commit workflow (what actually happened)
+
+1. `grep -rEn` inventory of legacy tokens in the feature's folder, including dot-elided refs (`\.pebbles[A-Z]`).
 2. Open the relevant Xcode preview together — confirm the current look.
-3. Apply mechanical mappings; propose a mapping for each per-call-site decision.
-4. User confirms or redirects; commit.
+3. Apply mechanical mappings via `sed -i ''` (ordered carefully — `AccentHex` and `AccentSoft` before `Accent`; `MutedForeground` before `Muted` — to avoid partial matches).
+4. Propose mappings for per-call-site decisions via interactive multi-choice questions; pause for user confirmation.
+5. Rebuild (`xcodebuild -scheme Pebbles … build`); commit.
+
+The interactive multi-choice prompts during step 4 are what turned the "11-commit, one-decision-per-feature" plan into a 24-commit collaboration with design feedback baked in commit-by-commit.
 
 ## Risks
 
@@ -210,20 +214,44 @@ commit 11  quality(ios): remove legacy color tokens
 
 ## Verification
 
-**Per commit:** build the iOS target (`⌘B`) in Xcode and confirm `#Preview`s for any touched component render correctly in both schemes. `xcodegen generate` is only required if `project.yml` changes (it shouldn't — colorsets and Swift files are auto-discovered).
+**Per commit:** build the iOS target (`⌘B`) in Xcode and confirm `#Preview`s for any touched component render correctly in both schemes. `xcodegen generate` was required once — during the foundation commit — to register the two new Swift files in the (git-ignored) `.xcodeproj`. After that, `project.yml`'s directory globs handled additions automatically. The final cleanup commit also needed `xcodegen generate` to drop the stale `Color+Pebbles.swift` reference.
 
-**Final commit (commit 11):**
+**Final cleanup commit:** all four greps must return zero rows.
 
-- Grep must return zero results:
-  ```
-  grep -rn "Color\.pebbles\|Color\.ripple" apps/ios/Pebbles --include="*.swift"
-  grep -rn 'Color("\(Background\|Foreground\|Surface\|SurfaceAlt\|Muted\|MutedForeground\|Border\|AccentSoft\|Ripple[A-Za-z]*\)")' apps/ios/Pebbles --include="*.swift"
-  ```
-- Asset catalog must contain none of the legacy colorset folders.
-- Full app smoke in the simulator, light + dark: Path, Profile, Lab, Onboarding, Auth, Welcome.
+```bash
+# Swift references to Color.pebbles* or Color.ripple* via the façade
+grep -rEn '(Color\.pebbles|Color\.ripple[ADIc])' apps/ios/Pebbles --include="*.swift" \
+  | grep -v "pebblesScreen"
+
+# Dot-elided Swift references (e.g. .pebblesAccent when type is inferred — the
+# pattern that bit us mid-PR and required several catch-up commits)
+grep -rEn '\.(pebbles[A-Z][A-Za-z]*|ripple(Active|Default|Inactive))' apps/ios/Pebbles --include="*.swift" \
+  | grep -vE "pebblesScreen|pebblesCount|pebblesToNextLevel|self\.ripple|rippleLevel"
+
+# UIColor(named:) references to legacy asset names
+grep -rEn 'UIColor\(named: *"(Background|Foreground|Surface|SurfaceAlt|Muted|MutedForeground|Border|AccentSoft|Ripple[A-Za-z]*)"' apps/ios/Pebbles --include="*.swift"
+
+# Color("string") references to legacy asset names
+grep -rEn 'Color\("(Background|Foreground|Surface|SurfaceAlt|Muted|MutedForeground|Border|AccentSoft|Ripple[A-Za-z]*)"' apps/ios/Pebbles --include="*.swift"
+```
+
+Asset catalog must contain none of the 11 legacy colorset folders; `AccentColor.colorset` remains. The user smoke-tested the running app in the simulator across light + dark for Welcome → Onboarding → Auth → Path → Profile → Lab before merge.
 
 ## PR metadata
 
-- **Labels (to propose to user before opening the PR):** `quality`, `ios`, `ui`. The issue carries `feat, ios, ui`; we propose swapping `feat` → `quality` since the actual work is a refactor and the issue's own title uses `[Quality]`. Confirm with the user before creating the PR.
-- **Milestone:** M32 · iOS Quality (inherited from issue).
-- **Body:** `Resolves #456`, followed by a short summary and the commit-by-commit overview from above.
+- **Labels:** `quality`, `ios`, `ui` (issue carried `feat, ios, ui`; swapped `feat` → `quality` since the work is a refactor and the issue's title uses `[Quality]`).
+- **Milestone:** M32 · iOS Quality (inherited).
+- **Resolves:** #456.
+- **Follow-up:** [#457](https://github.com/Bohns/pbbls/issues/457) — Glyph carve sheet TextField swap to `PebblesTextInput` (the buttons half of #457 was pulled into #456 mid-review).
+
+## Execution notes (what we didn't anticipate)
+
+These came out of the inline review and deserve their own callouts so future migrations don't repeat the same surprises:
+
+1. **Dot-elided color references.** The original plan grep only looked for `Color.pebbles*` and `Color.ripple*`. Swift allows `.pebblesAccent` when the return type is `Color` (as in `enum.color: Color { switch self … }`). Several files used this form, slipped past the initial inventory, and produced a separate catch-up commit. The final-verification grep now matches both forms.
+2. **`UIColor(named:)` references.** `PebblesApp.configureSegmentedControlAppearance` and `OnboardingView.init` both held UIKit-side references to legacy asset names. These never appeared in any `Color.*` search and would have broken silently at runtime when the legacy assets were deleted. Caught during a defensive re-grep before Task 15.
+3. **Top-level `Pebbles/Components/*` shared widgets.** The original plan grouped tasks by `Pebbles/Features/<X>/`, but the Auth flow's color usage actually lives in shared widgets one directory above (`Components/Auth/`, `Components/Buttons/Sign*`, `Components/Inputs/`, `Components/Checkboxes/`). Discovered while listing files for the Auth commit; led to a dedicated "shared components" commit before Auth.
+4. **Preview crashes.** Two views had previews that crashed at canvas time: `AnnouncementDetailView` (no preview at all — added one with a JSON fixture that initially used an invalid `LogStatus` value), and `ProfileView` (missing `PathStatsService` from the environment). Both fixed inline.
+5. **In-scope vs follow-up triage.** The user asked for two additional changes during the Glyph review: replace the carve-sheet TextField with `PebblesTextInput`, and restyle the Undo/Clear buttons with `accent.surface`. The TextField swap is genuine UI polish, not a color migration, so it went to #457. The button restyle is a colors concern and was pulled into this PR. The pattern: stay strict about "is this actually about colors?" — but be willing to absorb the parts that are.
+6. **`.pebblesScreen()` simplification.** Was not in the original spec. The user observed mid-review that the `background:` parameter was rarely used and asked to remove it; we did, killing the `pebblesPathBackground` recipe entirely (it had been a special case for PathView and ProfileView's pure-white-in-light treatment). Net win: every screen now uses `system.background` uniformly.
+7. **Navigation title color.** Also not in the original spec. The user noticed that `.navigationTitle` rendered in SwiftUI's default `UIColor.label` rather than the brand foreground; fixed via `UINavigationBarAppearance` configuration in `PebblesApp.init`. Same pattern as the existing segmented-control configuration that lived right next to it.
