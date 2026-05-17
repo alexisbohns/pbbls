@@ -71,7 +71,6 @@ struct RootView: View {
                         }
                     }
                 }
-                .tint(Color.system.secondary)
             }
         }
         .task {

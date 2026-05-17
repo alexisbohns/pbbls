@@ -51,7 +51,6 @@ struct PathView: View {
                 .toolbar(.hidden, for: .navigationBar)
                 .pebblesScreen()
         }
-        .tint(Color.system.secondary)
         .task { await load() }
         .task { await stats.load() }
         .sheet(isPresented: $isPresentingCreate) {
