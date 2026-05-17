@@ -56,7 +56,7 @@ struct GlyphCanvasView: View {
         }
         .frame(width: side, height: side)
         .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 12))
+        .clipShape(RoundedRectangle(cornerRadius: Spacing.xxl, style: .continuous))
         .gesture(
             DragGesture(minimumDistance: 0, coordinateSpace: .local)
                 .onChanged { value in
