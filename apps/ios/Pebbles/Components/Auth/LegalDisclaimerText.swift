@@ -11,10 +11,10 @@ struct LegalDisclaimerText: View {
         // swiftlint:disable:next line_length
         Text("Read our [Terms](pebbles://legal/terms) and [Privacy](pebbles://legal/privacy) before creating an account with Apple or Google.")
             .font(.caption)
-            .foregroundStyle(Color.pebblesMutedForeground)
+            .foregroundStyle(Color.system.secondary)
             .multilineTextAlignment(.center)
             .fixedSize(horizontal: false, vertical: true)
-            .tint(Color.pebblesAccent)
+            .tint(Color.accent.primary)
             .environment(\.openURL, OpenURLAction { url in
                 switch url.absoluteString {
                 case "pebbles://legal/terms":
@@ -33,5 +33,5 @@ struct LegalDisclaimerText: View {
 #Preview {
     LegalDisclaimerText(onTermsTap: {}, onPrivacyTap: {})
         .padding()
-        .background(Color.pebblesBackground)
+        .background(Color.system.background)
 }

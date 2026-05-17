@@ -157,7 +157,7 @@ private struct LayerShape: Shape {
     )
     .frame(width: 200, height: 200)
     .padding()
-    .background(Color.pebblesBackground)
+    .background(Color.system.background)
 }
 
 #Preview("Static fallback (unknown version)") {

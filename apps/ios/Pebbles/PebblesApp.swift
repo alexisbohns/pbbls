@@ -17,6 +17,7 @@ struct PebblesApp: App {
         self._stats    = State(initialValue: PathStatsService(supabase: supabase))
         self._snapURLs = State(initialValue: SnapURLCache(client: supabase.client))
         Self.configureSegmentedControlAppearance()
+        Self.configureNavigationBarAppearance()
     }
 
     var body: some Scene {
@@ -35,12 +36,12 @@ struct PebblesApp: App {
     /// (`PebblesAuthSwitcher`); if a second variant is added later, scope this
     /// via `appearance(whenContainedInInstancesOf:)`.
     private static func configureSegmentedControlAppearance() {
-        let muted = UIColor(named: "Muted") ?? .systemGray5
-        let mutedForeground = UIColor(named: "MutedForeground") ?? .systemGray
+        let muted = UIColor(named: "SystemMuted") ?? .systemGray5
+        let secondary = UIColor(named: "SystemSecondary") ?? .systemGray
 
         let proxy = UISegmentedControl.appearance()
         proxy.backgroundColor = muted
-        proxy.selectedSegmentTintColor = mutedForeground
+        proxy.selectedSegmentTintColor = secondary
 
         proxy.setTitleTextAttributes([
             .foregroundColor: UIColor.white,
@@ -48,8 +49,27 @@ struct PebblesApp: App {
         ], for: .selected)
 
         proxy.setTitleTextAttributes([
-            .foregroundColor: mutedForeground,
+            .foregroundColor: secondary,
             .font: UIFont.systemFont(ofSize: UIFont.systemFontSize, weight: .regular)
         ], for: .normal)
+    }
+
+    /// Recolors the navigation bar title so it picks up `system.foreground`
+    /// instead of SwiftUI's default `UIColor.label`. Asset-catalog can't
+    /// override `Color.primary` directly — only `AccentColor` has that
+    /// magic — so titles must be re-tinted via the UIKit appearance proxy.
+    /// Applied to both inline and large-title display modes.
+    private static func configureNavigationBarAppearance() {
+        guard let foreground = UIColor(named: "SystemForeground") else { return }
+
+        let appearance = UINavigationBarAppearance()
+        appearance.configureWithDefaultBackground()
+        appearance.titleTextAttributes = [.foregroundColor: foreground]
+        appearance.largeTitleTextAttributes = [.foregroundColor: foreground]
+
+        let proxy = UINavigationBar.appearance()
+        proxy.standardAppearance = appearance
+        proxy.scrollEdgeAppearance = appearance
+        proxy.compactAppearance = appearance
     }
 }

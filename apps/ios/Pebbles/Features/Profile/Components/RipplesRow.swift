@@ -14,10 +14,10 @@ struct RipplesRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Ripples Level \(ripple?.rippleLevel ?? 0)")
                     .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(Color.pebblesForeground)
+                    .foregroundStyle(Color.system.foreground)
                 Text(progressCopy)
                     .font(.caption)
-                    .foregroundStyle(Color.pebblesMutedForeground)
+                    .foregroundStyle(Color.system.secondary)
             }
 
             Spacer(minLength: 8)

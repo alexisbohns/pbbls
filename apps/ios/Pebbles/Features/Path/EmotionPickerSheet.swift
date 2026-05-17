@@ -134,7 +134,7 @@ struct EmotionPickerSheet: View {
                 .fontWeight(.semibold)
                 .tracking(1.5)
                 .textCase(.uppercase)
-                .foregroundStyle(Color.pebblesMutedForeground)
+                .foregroundStyle(Color.system.secondary)
         }
     }
 
@@ -154,7 +154,7 @@ struct EmotionPickerSheet: View {
             .padding(.vertical, 12)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(isSelected ? category.palette.primary : category.palette.surface)
-            .foregroundStyle(isSelected ? category.palette.light : Color.pebblesForeground)
+            .foregroundStyle(isSelected ? category.palette.light : Color.system.foreground)
             .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .buttonStyle(.plain)

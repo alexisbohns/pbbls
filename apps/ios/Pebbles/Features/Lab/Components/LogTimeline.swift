@@ -27,7 +27,7 @@ struct LogTimeline<Trailing: View>: View {
         ForEach(Array(logs.enumerated()), id: \.element.id) { index, log in
             row(log: log, isFirst: index == 0, isLast: index == logs.count - 1)
                 .listRowSeparator(.hidden)
-                .listRowBackground(Color.pebblesListRow)
+                .listRowBackground(Color.clear)
                 // Zero out List's default vertical insets so rows touch
                 // top-to-bottom. The row's own padding (lead-in line in the
                 // icon column + bottom padding on the content column) becomes
@@ -51,14 +51,14 @@ struct LogTimeline<Trailing: View>: View {
                     if mode == .changelog, let date = log.releasedAt ?? log.publishedAt {
                         Text(date, format: Date.FormatStyle(date: .long, time: .omitted))
                             .font(.footnote)
-                            .foregroundStyle(Color.pebblesMutedForeground)
+                            .foregroundStyle(Color.system.secondary)
                     }
                     Text(log.title(for: locale))
                         .font(.body)
-                        .foregroundStyle(Color.pebblesForeground)
+                        .foregroundStyle(Color.system.foreground)
                     Text(log.summary(for: locale))
                         .font(.footnote)
-                        .foregroundStyle(Color.pebblesMutedForeground)
+                        .foregroundStyle(Color.system.secondary)
                         .lineLimit(3)
                 }
                 Spacer(minLength: 0)
@@ -78,14 +78,14 @@ struct LogTimeline<Trailing: View>: View {
             // the first row it's transparent so the timeline starts cleanly
             // at the icon.
             Rectangle()
-                .fill(isFirst ? Color.clear : Color.pebblesBorder)
+                .fill(isFirst ? Color.clear : Color.system.muted)
                 .frame(width: 1, height: 12)
             Image(systemName: iconName)
                 .font(.system(size: 14, weight: .regular))
                 .foregroundStyle(iconColor)
             if !isLast {
                 Rectangle()
-                    .fill(Color.pebblesBorder)
+                    .fill(Color.system.muted)
                     .frame(width: 1)
                     .frame(maxHeight: .infinity)
                     .padding(.top, 2)
@@ -104,8 +104,8 @@ struct LogTimeline<Trailing: View>: View {
 
     private var iconColor: Color {
         switch mode {
-        case .changelog:  return Color.pebblesAccent
-        case .inProgress, .backlog: return Color.pebblesMutedForeground
+        case .changelog:  return Color.accent.primary
+        case .inProgress, .backlog: return Color.system.secondary
         }
     }
 }

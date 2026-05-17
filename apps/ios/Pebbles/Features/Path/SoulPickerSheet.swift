@@ -83,7 +83,7 @@ struct SoulPickerSheet: View {
                 if souls.isEmpty {
                     Text("Add the first soul to tag this pebble with")
                         .font(.callout)
-                        .foregroundStyle(Color.pebblesMutedForeground)
+                        .foregroundStyle(Color.system.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                         .padding(.top, 8)
@@ -131,18 +131,18 @@ private struct NewSoulTile: View {
             VStack(spacing: 8) {
                 RoundedRectangle(cornerRadius: 12)
                     .strokeBorder(
-                        Color.pebblesMutedForeground,
+                        Color.system.secondary,
                         style: StrokeStyle(lineWidth: 1.5, dash: [4])
                     )
                     .frame(width: 96, height: 96)
                     .overlay {
                         Image(systemName: "person.badge.plus")
                             .font(.title2)
-                            .foregroundStyle(Color.pebblesMutedForeground)
+                            .foregroundStyle(Color.system.secondary)
                     }
                 Text("+ New soul")
                     .font(.callout)
-                    .foregroundStyle(Color.pebblesMutedForeground)
+                    .foregroundStyle(Color.system.secondary)
                     .lineLimit(1)
                     .frame(maxWidth: .infinity)
             }

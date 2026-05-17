@@ -69,7 +69,7 @@ struct ProfileView: View {
                 .accessibilityLabel(Text("Settings"))
             }
         }
-        .pebblesScreen(background: Color.pebblesPathBackground)
+        .pebblesScreen()
         .task {
             await stats.load()
             await loadProfile()
@@ -132,8 +132,10 @@ struct ProfileView: View {
 }
 
 #Preview {
-    NavigationStack {
+    let supabase = SupabaseService()
+    return NavigationStack {
         ProfileView()
-            .environment(SupabaseService())
+            .environment(supabase)
+            .environment(PathStatsService(supabase: supabase))
     }
 }

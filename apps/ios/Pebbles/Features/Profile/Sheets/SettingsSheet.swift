@@ -145,7 +145,7 @@ struct SettingsSheet: View {
                 .overlay {
                     Image(systemName: "scribble")
                         .font(.title)
-                        .foregroundStyle(Color.pebblesMutedForeground)
+                        .foregroundStyle(Color.system.secondary)
                 }
         }
     }
@@ -179,7 +179,7 @@ struct SettingsSheet: View {
             ForEach(linkedProviders) { provider in
                 HStack(spacing: 12) {
                     Image(systemName: provider.systemImage)
-                        .foregroundStyle(Color.pebblesMutedForeground)
+                        .foregroundStyle(Color.system.secondary)
                     Text(verbatim: provider.label)
                     Spacer()
                 }
@@ -191,7 +191,7 @@ struct SettingsSheet: View {
         Section("Informations") {
             HStack {
                 Text("Name")
-                    .foregroundStyle(Color.pebblesMutedForeground)
+                    .foregroundStyle(Color.system.secondary)
                 Spacer()
                 TextField("Your name", text: $displayName)
                     .multilineTextAlignment(.trailing)
@@ -203,10 +203,10 @@ struct SettingsSheet: View {
             }
             HStack {
                 Text("Email")
-                    .foregroundStyle(Color.pebblesMutedForeground)
+                    .foregroundStyle(Color.system.secondary)
                 Spacer()
                 Text(email ?? "—")
-                    .foregroundStyle(Color.pebblesMutedForeground)
+                    .foregroundStyle(Color.system.secondary)
             }
         }
     }

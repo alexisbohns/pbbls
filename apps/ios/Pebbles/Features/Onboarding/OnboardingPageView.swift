@@ -12,17 +12,17 @@ struct OnboardingPageView: View {
             illustration
                 .frame(maxWidth: .infinity)
                 .frame(height: 360)
-                .background(Color.pebblesSurfaceAlt)
+                .background(Color.accent.surface)
                 .clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
 
             VStack(alignment: .leading, spacing: 12) {
                 Text(step.title)
                     .font(.title2.weight(.semibold))
-                    .foregroundStyle(Color.pebblesForeground)
+                    .foregroundStyle(Color.system.foreground)
 
                 Text(step.description)
                     .font(.body)
-                    .foregroundStyle(Color.pebblesMutedForeground)
+                    .foregroundStyle(Color.system.secondary)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -46,7 +46,7 @@ struct OnboardingPageView: View {
                 case .success(let image):
                     image.resizable().scaledToFit()
                 default:
-                    Color.pebblesSurfaceAlt
+                    Color.accent.surface
                 }
             }
         }

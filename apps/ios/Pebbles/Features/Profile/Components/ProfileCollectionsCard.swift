@@ -40,11 +40,11 @@ struct ProfileCollectionsCard: View {
             .padding(.horizontal, -16)
         }
         .padding(16)
-        .background(Color.pebblesListRow)
+        .background(Color.system.background)
         .clipShape(RoundedRectangle(cornerRadius: 16))
         .overlay {
             RoundedRectangle(cornerRadius: 16)
-                .strokeBorder(Color.pebblesBorder, lineWidth: 1)
+                .strokeBorder(Color.system.muted, lineWidth: 1)
         }
         .task { await load() }
         .sheet(isPresented: $isPresentingCreateSheet) {
@@ -62,14 +62,14 @@ struct ProfileCollectionsCard: View {
             Text("COLLECTIONS")
                 .font(.caption.weight(.semibold))
                 .tracking(0.8)
-                .foregroundStyle(Color.pebblesMutedForeground)
+                .foregroundStyle(Color.system.secondary)
             Spacer()
             NavigationLink {
                 CollectionsListView()
             } label: {
                 Image(systemName: "chevron.right")
                     .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color.pebblesMutedForeground)
+                    .foregroundStyle(Color.system.secondary)
             }
         }
     }

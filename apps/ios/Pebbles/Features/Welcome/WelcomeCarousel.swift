@@ -47,7 +47,7 @@ struct WelcomeCarousel: View {
             HStack(spacing: 8) {
                 ForEach(steps.indices, id: \.self) { idx in
                     Circle()
-                        .fill(idx == currentIndex ? Color.pebblesAccent : Color.pebblesMuted)
+                        .fill(idx == currentIndex ? Color.accent.primary : Color.system.muted)
                         .frame(width: 6, height: 6)
                         .animation(.easeInOut(duration: 0.2), value: currentIndex)
                 }

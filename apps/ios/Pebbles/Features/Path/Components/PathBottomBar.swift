@@ -14,7 +14,7 @@ struct PathBottomBar: View {
     @Environment(\.colorScheme) private var colorScheme
 
     private var numberColor: Color {
-        colorScheme == .dark ? Color.pebblesAccent : Color.pebblesForeground
+        colorScheme == .dark ? Color.accent.primary : Color.system.foreground
     }
 
     var body: some View {
@@ -22,7 +22,7 @@ struct PathBottomBar: View {
             Button(action: onProfile) {
                 Image(systemName: "person.crop.circle")
                     .font(.title2)
-                    .foregroundStyle(Color.pebblesAccent)
+                    .foregroundStyle(Color.accent.primary)
                     .frame(width: 40, height: 40)
             }
             .accessibilityLabel("Profile")
@@ -48,14 +48,14 @@ struct PathBottomBar: View {
     private var karmaStat: some View {
         HStack(spacing: 6) {
             Image(systemName: "sparkle")
-                .foregroundStyle(Color.pebblesAccent)
+                .foregroundStyle(Color.accent.primary)
             VStack(alignment: .leading, spacing: 0) {
                 Text(karma.map { "\($0)" } ?? "—")
                     .font(.ysabeauSemibold(17))
                     .foregroundStyle(numberColor)
                 Text("karma")
                     .font(.caption)
-                    .foregroundStyle(Color.pebblesMutedForeground)
+                    .foregroundStyle(Color.system.secondary)
             }
         }
     }

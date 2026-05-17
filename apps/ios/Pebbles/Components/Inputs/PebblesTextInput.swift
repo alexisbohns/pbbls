@@ -22,15 +22,15 @@ struct PebblesTextInput: View {
         ZStack(alignment: .leading) {
             if text.isEmpty {
                 Text(placeholder)
-                    .foregroundStyle(Color.pebblesMutedForeground)
+                    .foregroundStyle(Color.system.secondary)
                     .padding(.horizontal, horizontalPadding)
                     .allowsHitTesting(false)
             }
 
             field
                 .font(.body)
-                .foregroundStyle(Color.pebblesMutedForeground)
-                .tint(Color.pebblesAccent)
+                .foregroundStyle(Color.system.secondary)
+                .tint(Color.accent.primary)
                 .textContentType(contentType)
                 .keyboardType(keyboard)
                 .textInputAutocapitalization(autocapitalization)
@@ -43,7 +43,7 @@ struct PebblesTextInput: View {
         )
         .overlay(
             RoundedRectangle(cornerRadius: cornerRadius)
-                .stroke(Color.pebblesBorder, lineWidth: 1)
+                .stroke(Color.system.muted, lineWidth: 1)
         )
     }
 
@@ -61,19 +61,19 @@ struct PebblesTextInput: View {
     @Previewable @State var text = ""
     return PebblesTextInput(placeholder: "Email", text: $text)
         .padding()
-        .background(Color.pebblesBackground)
+        .background(Color.system.background)
 }
 
 #Preview("Filled") {
     @Previewable @State var text = "hello@bohns.design"
     return PebblesTextInput(placeholder: "Email", text: $text)
         .padding()
-        .background(Color.pebblesBackground)
+        .background(Color.system.background)
 }
 
 #Preview("Secure") {
     @Previewable @State var text = "hunter22"
     return PebblesTextInput(placeholder: "Password", text: $text, isSecure: true)
         .padding()
-        .background(Color.pebblesBackground)
+        .background(Color.system.background)
 }

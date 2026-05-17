@@ -12,12 +12,12 @@ struct PebbleReadTitle: View {
             Text(name)
                 .font(.custom("Ysabeau-SemiBold", size: 24))
                 .multilineTextAlignment(.center)
-                .foregroundStyle(Color.pebblesForeground)
+                .foregroundStyle(Color.system.foreground)
             Text(formattedDate)
                 .font(.caption)
                 .tracking(1.2)
                 .textCase(.uppercase)
-                .foregroundStyle(Color.pebblesMutedForeground)
+                .foregroundStyle(Color.system.secondary)
         }
         .frame(maxWidth: .infinity)
     }
@@ -47,5 +47,5 @@ struct PebbleReadTitle: View {
         )
     }
     .padding()
-    .background(Color.pebblesBackground)
+    .background(Color.system.background)
 }

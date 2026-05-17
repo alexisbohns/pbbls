@@ -116,15 +116,15 @@ struct PebbleFormView: View {
                     selection: $draft.happenedAt,
                     displayedComponents: [.date, .hourAndMinute]
                 )
-                .tint(Color.pebblesAccent)
-                .listRowBackground(Color.pebblesListRow)
+                .tint(Color.accent.primary)
+                .listRowBackground(Color.clear)
 
                 TextField("Name", text: $draft.name)
-                    .listRowBackground(Color.pebblesListRow)
+                    .listRowBackground(Color.clear)
 
                 TextField("Description (optional)", text: $draft.description, axis: .vertical)
                     .lineLimit(1...5)
-                    .listRowBackground(Color.pebblesListRow)
+                    .listRowBackground(Color.clear)
             }
 
             Section("Mood") {
@@ -141,13 +141,13 @@ struct PebbleFormView: View {
                             RoundedRectangle(cornerRadius: 6)
                                 .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [3]))
                                 .frame(width: 32, height: 32)
-                                .foregroundStyle(Color.pebblesMutedForeground)
+                                .foregroundStyle(Color.system.secondary)
                         }
                         Text("Emotion")
-                            .foregroundStyle(Color.pebblesForeground)
+                            .foregroundStyle(Color.system.foreground)
                         Spacer()
                         emotionRowLabel
-                            .foregroundStyle(Color.pebblesMutedForeground)
+                            .foregroundStyle(Color.system.secondary)
                         Image(systemName: "chevron.right")
                             .font(.caption)
                             .foregroundStyle(.tertiary)
@@ -162,7 +162,7 @@ struct PebbleFormView: View {
                         .map { Text(verbatim: $0.localizedName) }
                         ?? Text("Choose")
                 )
-                .listRowBackground(Color.pebblesListRow)
+                .listRowBackground(Color.clear)
 
                 Picker("Domain", selection: $draft.domainId) {
                     Text("Choose…").tag(UUID?.none)
@@ -170,7 +170,7 @@ struct PebbleFormView: View {
                         Text(domain.localizedName).tag(UUID?.some(domain.id))
                     }
                 }
-                .listRowBackground(Color.pebblesListRow)
+                .listRowBackground(Color.clear)
 
                 Button {
                     showValencePicker = true
@@ -182,23 +182,23 @@ struct PebbleFormView: View {
                                 .resizable()
                                 .scaledToFit()
                                 .frame(width: 32, height: 32)
-                                .foregroundStyle(Color.pebblesMutedForeground)
+                                .foregroundStyle(Color.system.secondary)
                                 .accessibilityHidden(true)
                         } else {
                             RoundedRectangle(cornerRadius: 6)
                                 .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [3]))
                                 .frame(width: 32, height: 32)
-                                .foregroundStyle(Color.pebblesMutedForeground)
+                                .foregroundStyle(Color.system.secondary)
                         }
                         Text("Valence")
-                            .foregroundStyle(Color.pebblesForeground)
+                            .foregroundStyle(Color.system.foreground)
                         Spacer()
                         if let label = draft.valence?.label {
                             Text(label)
-                                .foregroundStyle(Color.pebblesMutedForeground)
+                                .foregroundStyle(Color.system.secondary)
                         } else {
                             Text("Choose…")
-                                .foregroundStyle(Color.pebblesMutedForeground)
+                                .foregroundStyle(Color.system.secondary)
                         }
                         Image(systemName: "chevron.right")
                             .font(.caption)
@@ -211,7 +211,7 @@ struct PebbleFormView: View {
                 .accessibilityValue(
                     draft.valence.map { Text($0.label) } ?? Text("Choose")
                 )
-                .listRowBackground(Color.pebblesListRow)
+                .listRowBackground(Color.clear)
             }
 
             Section("Glyph") {
@@ -246,7 +246,7 @@ struct PebbleFormView: View {
                         }
                     }
                 }
-                .listRowBackground(Color.pebblesListRow)
+                .listRowBackground(Color.clear)
             }
 
             Section("Souls") {
@@ -265,7 +265,7 @@ struct PebbleFormView: View {
                         Text(collection.name).tag(UUID?.some(collection.id))
                     }
                 }
-                .listRowBackground(Color.pebblesListRow)
+                .listRowBackground(Color.clear)
             }
 
             if showsPhotoSection {
@@ -277,21 +277,21 @@ struct PebbleFormView: View {
                         } label: {
                             Label("Add a photo", systemImage: "photo.badge.plus")
                         }
-                        .listRowBackground(Color.pebblesListRow)
+                        .listRowBackground(Color.clear)
                     case .existing(_, let storagePath):
                         ExistingSnapRow(
                             storagePath: storagePath,
                             isRemoving: isRemovingExistingSnap,
                             onRemove: onRemoveExistingSnap
                         )
-                        .listRowBackground(Color.pebblesListRow)
+                        .listRowBackground(Color.clear)
                     case .pending(let snap):
                         AttachedPhotoView(
                             snap: snap,
                             onRetry: onRetryPending,
                             onRemove: onRemovePending
                         )
-                        .listRowBackground(Color.pebblesListRow)
+                        .listRowBackground(Color.clear)
                     }
                 }
             }
@@ -301,10 +301,11 @@ struct PebbleFormView: View {
                     Text(saveError)
                         .foregroundStyle(.red)
                         .font(.callout)
-                        .listRowBackground(Color.pebblesListRow)
+                        .listRowBackground(Color.clear)
                 }
             }
         }
+        .listRowSeparatorTint(Color.system.muted)
         .sheet(isPresented: $showPicker) {
             GlyphPickerSheet(
                 currentGlyphId: draft.glyphId,

@@ -43,8 +43,8 @@ private extension ProfileCollectionCard.Variant {
     }
     var iconColor: Color {
         switch self {
-        case .filled: return .pebblesAccent
-        case .empty:  return .pebblesMutedForeground
+        case .filled: return .accent.primary
+        case .empty:  return .system.secondary
         }
     }
     var title: LocalizedStringResource {
@@ -55,13 +55,13 @@ private extension ProfileCollectionCard.Variant {
     }
     var textColor: Color {
         switch self {
-        case .filled: return .pebblesForeground
-        case .empty:  return .pebblesMutedForeground
+        case .filled: return .system.foreground
+        case .empty:  return .system.secondary
         }
     }
     var backgroundColor: Color {
         switch self {
-        case .filled: return .pebblesListRow
+        case .filled: return .system.background
         case .empty:  return .clear
         }
     }
@@ -73,7 +73,7 @@ private extension ProfileCollectionCard.Variant {
         case .empty:
             RoundedRectangle(cornerRadius: 16)
                 .strokeBorder(
-                    Color.pebblesMutedForeground,
+                    Color.system.secondary,
                     style: StrokeStyle(lineWidth: 1.5, dash: [4])
                 )
         }

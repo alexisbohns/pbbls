@@ -58,7 +58,7 @@ struct PebbleRow: View {
     private var strokeHex: String? {
         guard let emotionId = pebble.emotion?.id else { return nil }
         return palettes.palette(for: emotionId)?.strokeHex(for: colorScheme)
-            ?? Color.pebblesAccentHex
+            ?? Color.accent.primaryHex
     }
 }
 

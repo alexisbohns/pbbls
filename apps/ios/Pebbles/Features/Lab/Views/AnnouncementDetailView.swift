@@ -22,9 +22,9 @@ struct AnnouncementDetailView: View {
                         case .success(let image):
                             image.resizable().aspectRatio(contentMode: .fill)
                         case .empty, .failure:
-                            Rectangle().fill(Color.pebblesMuted.opacity(0.3))
+                            Rectangle().fill(Color.system.muted.opacity(0.3))
                         @unknown default:
-                            Rectangle().fill(Color.pebblesMuted.opacity(0.3))
+                            Rectangle().fill(Color.system.muted.opacity(0.3))
                         }
                     }
                     .frame(height: 200)
@@ -33,11 +33,11 @@ struct AnnouncementDetailView: View {
 
                 Text(log.title(for: locale))
                     .font(.largeTitle.bold())
-                    .foregroundStyle(Color.pebblesForeground)
+                    .foregroundStyle(Color.system.foreground)
 
                 Text(log.summary(for: locale))
                     .font(.title3)
-                    .foregroundStyle(Color.pebblesMutedForeground)
+                    .foregroundStyle(Color.system.secondary)
 
                 if let body = log.body(for: locale), !body.isEmpty {
                     ForEach(Array(blocks(from: body).enumerated()), id: \.offset) { _, block in
@@ -83,11 +83,11 @@ struct AnnouncementDetailView: View {
         case .heading(let level, let text):
             Text(text)
                 .font(headingFont(for: level))
-                .foregroundStyle(Color.pebblesForeground)
+                .foregroundStyle(Color.system.foreground)
         case .paragraph(let text):
             Text(attributed(text))
                 .font(.body)
-                .foregroundStyle(Color.pebblesForeground)
+                .foregroundStyle(Color.system.foreground)
         }
     }
 
@@ -104,5 +104,35 @@ struct AnnouncementDetailView: View {
             markdown: markdown,
             options: .init(interpretedSyntax: .inlineOnlyPreservingWhitespace)
         )) ?? AttributedString(markdown)
+    }
+}
+
+#Preview {
+    let json = """
+    {
+        "id": "00000000-0000-0000-0000-000000000001",
+        "species": "announcement",
+        "platform": "ios",
+        "status": "shipped",
+        "title_en": "New feature: color system refactor",
+        "title_fr": null,
+        "summary_en": "We have rebuilt the design system around a system + accent palette.",
+        "summary_fr": null,
+        "body_md_en": "# Heading 1\\n\\nFirst paragraph with some **bold** text and a [link](https://example.com).\\n\\n## Heading 2\\n\\nSecond paragraph after a heading. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.\\n\\n### Heading 3\\n\\nThird paragraph under a smaller heading.",
+        "body_md_fr": null,
+        "cover_image_path": null,
+        "external_url": null,
+        "published": true,
+        "published_at": "2026-05-15T10:00:00Z",
+        "released_at": null,
+        "created_at": "2026-05-15T10:00:00Z",
+        "reaction_count": 0
+    }
+    """
+    let decoder = JSONDecoder()
+    decoder.dateDecodingStrategy = .iso8601
+    let log = try! decoder.decode(Log.self, from: Data(json.utf8))
+    return NavigationStack {
+        AnnouncementDetailView(log: log, coverImageURL: nil)
     }
 }

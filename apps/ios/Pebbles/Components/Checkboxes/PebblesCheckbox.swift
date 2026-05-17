@@ -35,21 +35,21 @@ struct PebblesCheckbox: View {
     private var box: some View {
         ZStack {
             RoundedRectangle(cornerRadius: cornerRadius)
-                .fill(isChecked ? Color.pebblesAccent : Color.white)
+                .fill(isChecked ? Color.accent.primary : Color.white)
             RoundedRectangle(cornerRadius: cornerRadius)
-                .stroke(isChecked ? Color.pebblesAccent : Color.pebblesBorder, lineWidth: 1)
+                .stroke(isChecked ? Color.accent.primary : Color.system.muted, lineWidth: 1)
 
             Image(systemName: isChecked ? "checkmark.square" : "square")
                 .font(.title3)
-                .foregroundStyle(isChecked ? Color.pebblesBackground : Color.pebblesMutedForeground)
+                .foregroundStyle(isChecked ? Color.system.background : Color.system.secondary)
         }
         .frame(width: boxSize, height: boxSize)
     }
 
     private var label: some View {
-        (Text(prefix) + Text(linkText).underline().foregroundColor(Color.pebblesAccent))
+        (Text(prefix) + Text(linkText).underline().foregroundColor(Color.accent.primary))
             .font(.subheadline)
-            .foregroundStyle(Color.pebblesMutedForeground)
+            .foregroundStyle(Color.system.secondary)
     }
 }
 
@@ -62,7 +62,7 @@ struct PebblesCheckbox: View {
         onLinkTap: {}
     )
     .padding()
-    .background(Color.pebblesBackground)
+    .background(Color.system.background)
 }
 
 #Preview("Checked") {
@@ -74,5 +74,5 @@ struct PebblesCheckbox: View {
         onLinkTap: {}
     )
     .padding()
-    .background(Color.pebblesBackground)
+    .background(Color.system.background)
 }

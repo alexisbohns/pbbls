@@ -40,11 +40,11 @@ struct PebbleDetailSheet: View {
                             Text("Edit")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                                .foregroundStyle(Color.pebblesForeground)
+                                .foregroundStyle(Color.system.foreground)
                                 .padding(.horizontal, 14)
                                 .frame(height: 36)
                                 .background(
-                                    Capsule().fill(Color.pebblesBackground.opacity(0.85))
+                                    Capsule().fill(Color.system.background.opacity(0.85))
                                 )
                         }
                         .buttonStyle(.plain)

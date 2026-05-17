@@ -19,13 +19,13 @@ struct SoulSelectableCell: View {
                     GlyphThumbnail(
                         strokes: soul.glyph.strokes,
                         side: 96,
-                        strokeColor: isSelected ? Color.pebblesAccent : Color.pebblesMutedForeground,
+                        strokeColor: isSelected ? Color.accent.primary : Color.system.secondary,
                         backgroundColor: .clear
                     )
                     .overlay {
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(
-                                isSelected ? Color.pebblesAccent : Color.pebblesAccent.opacity(0.15),
+                                isSelected ? Color.accent.primary : Color.accent.primary.opacity(0.15),
                                 lineWidth: isSelected ? 2 : 1
                             )
                     }
@@ -33,7 +33,7 @@ struct SoulSelectableCell: View {
                     if isSelected {
                         Image(systemName: "checkmark.circle.fill")
                             .font(.title3)
-                            .foregroundStyle(Color.pebblesAccent)
+                            .foregroundStyle(Color.accent.primary)
                             .padding(6)
                             .accessibilityHidden(true)
                     }
@@ -41,7 +41,7 @@ struct SoulSelectableCell: View {
                 Text(soul.name)
                     .font(.callout)
                     .fontWeight(isSelected ? .medium : .regular)
-                    .foregroundStyle(isSelected ? Color.pebblesAccent : Color.pebblesMutedForeground)
+                    .foregroundStyle(isSelected ? Color.accent.primary : Color.system.secondary)
                     .lineLimit(1)
                     .truncationMode(.tail)
                     .frame(maxWidth: .infinity)

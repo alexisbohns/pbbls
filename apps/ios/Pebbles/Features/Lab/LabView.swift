@@ -42,7 +42,7 @@ struct LabView: View {
             List {
                 Section {
                     FeaturedCommunityCard()
-                        .listRowBackground(Color.pebblesListRow)
+                        .listRowBackground(Color.clear)
                 }
 
                 if !announcements.isEmpty {
@@ -59,7 +59,7 @@ struct LabView: View {
                                     coverImageURL: coverURL(for: log)
                                 )
                             }
-                            .listRowBackground(Color.pebblesListRow)
+                            .listRowBackground(Color.clear)
                         }
                     }
                 }
@@ -73,7 +73,7 @@ struct LabView: View {
                             Label("See all", systemImage: "arrow.right")
                                 .font(.footnote.weight(.semibold))
                         }
-                        .listRowBackground(Color.pebblesListRow)
+                        .listRowBackground(Color.clear)
                     }
                 }
 
@@ -99,10 +99,11 @@ struct LabView: View {
                             Label("See all", systemImage: "arrow.right")
                                 .font(.footnote.weight(.semibold))
                         }
-                        .listRowBackground(Color.pebblesListRow)
+                        .listRowBackground(Color.clear)
                     }
                 }
             }
+            .listRowSeparatorTint(Color.system.muted)
         }
     }
 

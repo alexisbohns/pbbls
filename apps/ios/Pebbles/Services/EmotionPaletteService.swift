@@ -9,7 +9,7 @@ import os
 /// `RootView.minSplashSeconds`). Render surfaces look up by `emotion.id`
 /// via `palette(for:)`. A miss (cache not warm yet, or a bad row that the
 /// decoder rejected) returns `nil` — callers fall back to
-/// `Color.pebblesAccent` / `Color.pebblesAccentHex`. No retry on failure;
+/// `Color.accent.primary` / `Color.accent.primaryHex`. No retry on failure;
 /// state recovers on next app launch.
 @Observable
 @MainActor

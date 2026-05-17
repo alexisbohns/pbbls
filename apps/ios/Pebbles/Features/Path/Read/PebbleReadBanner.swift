@@ -70,7 +70,7 @@ struct PebbleReadBanner: View {
             .background {
                 if revealPhoto {
                     RoundedRectangle(cornerRadius: boxCornerRadius)
-                        .fill(Color.pebblesBackground)
+                        .fill(Color.system.background)
                 }
             }
     }
@@ -159,8 +159,8 @@ struct PebbleReadBanner: View {
             let palette = palettes.palette(for: emotionId)
             PebbleAnimatedRenderView(
                 svg: renderSvg,
-                strokeColor: palette?.stroke(for: colorScheme) ?? Color.pebblesAccent,
-                strokeColorHex: palette?.strokeHex(for: colorScheme) ?? Color.pebblesAccentHex,
+                strokeColor: palette?.stroke(for: colorScheme) ?? Color.accent.primary,
+                strokeColorHex: palette?.strokeHex(for: colorScheme) ?? Color.accent.primaryHex,
                 renderVersion: renderVersion
             )
             .frame(height: pebbleHeight)
@@ -195,7 +195,7 @@ struct PebbleReadBanner: View {
         valence: .neutralMedium
     )
     .padding()
-    .background(Color.pebblesBackground)
+    .background(Color.system.background)
     .environment(supabase)
     .environment(EmotionPaletteService(client: supabase.client))
     .environment(SnapURLCache(client: supabase.client))
@@ -215,7 +215,7 @@ struct PebbleReadBanner: View {
         valence: .highlightLarge
     )
     .padding()
-    .background(Color.pebblesBackground)
+    .background(Color.system.background)
     .environment(supabase)
     .environment(EmotionPaletteService(client: supabase.client))
     .environment(SnapURLCache(client: supabase.client))
@@ -238,7 +238,7 @@ struct PebbleReadBanner: View {
         valence: .neutralMedium
     )
     .padding()
-    .background(Color.pebblesBackground)
+    .background(Color.system.background)
     .environment(supabase)
     .environment(EmotionPaletteService(client: supabase.client))
     .environment(SnapURLCache(client: supabase.client))

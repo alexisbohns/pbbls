@@ -13,11 +13,11 @@ struct RippleBadge: View {
 
     private var digitColor: Color {
         switch (colorScheme, activeToday) {
-        case (.dark, true):   return .pebblesSurface
-        case (.light, true):  return .pebblesForeground
+        case (.dark, true):   return .system.background
+        case (.light, true):  return .system.foreground
         case (.dark, false),
-             (.light, false): return .pebblesMutedForeground
-        @unknown default:     return .pebblesForeground
+             (.light, false): return .system.secondary
+        @unknown default:     return .system.foreground
         }
     }
 
@@ -91,6 +91,6 @@ private struct RipplePreviewGrid: View {
             }
         }
         .padding()
-        .background(Color.pebblesPathBackground)
+        .background(Color.system.background)
     }
 }

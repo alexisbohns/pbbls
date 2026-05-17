@@ -72,7 +72,7 @@ struct GlyphCarveSheet: View {
             GlyphCanvasView(
                 committedStrokes: strokes,
                 onStrokeCommit: { stroke in strokes.append(stroke) },
-                strokeColor: Color.pebblesAccent
+                strokeColor: Color.accent.primary
             )
 
             if let saveError {
@@ -86,17 +86,26 @@ struct GlyphCarveSheet: View {
                     if !strokes.isEmpty { strokes.removeLast() }
                 } label: {
                     Label("Undo", systemImage: "arrow.uturn.backward")
+                        .foregroundStyle(Color.accent.primary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(Capsule().fill(Color.accent.surface))
                 }
+                .buttonStyle(.plain)
                 .disabled(strokes.isEmpty)
 
                 Button(role: .destructive) {
                     strokes.removeAll()
                 } label: {
                     Label("Clear", systemImage: "trash")
+                        .foregroundStyle(Color.accent.primary)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(Capsule().fill(Color.accent.surface))
                 }
+                .buttonStyle(.plain)
                 .disabled(strokes.isEmpty)
             }
-            .buttonStyle(.bordered)
 
             Spacer(minLength: 0)
         }

@@ -12,14 +12,14 @@ struct ProfileShortcutTile<Destination: View>: View {
             VStack(spacing: 8) {
                 Image(systemName: systemImage)
                     .font(.title3)
-                    .foregroundStyle(Color.pebblesAccent)
+                    .foregroundStyle(Color.accent.primary)
                 Text(title)
                     .font(.caption.weight(.medium))
-                    .foregroundStyle(Color.pebblesForeground)
+                    .foregroundStyle(Color.system.foreground)
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
-            .background(Color.pebblesMuted)
+            .background(Color.system.muted)
             .clipShape(RoundedRectangle(cornerRadius: 16))
         }
         .buttonStyle(.plain)
