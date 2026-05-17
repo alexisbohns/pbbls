@@ -141,7 +141,7 @@ private struct GlyphRow: View {
         Button(action: onTap) {
             HStack(spacing: 12) {
                 if let glyph {
-                    GlyphThumbnail(strokes: glyph.strokes, side: 32)
+                    GlyphView(case: .default, strokes: glyph.strokes, side: 32)
                         .accessibilityHidden(true)
                 } else {
                     RoundedRectangle(cornerRadius: 6)

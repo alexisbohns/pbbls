@@ -115,11 +115,7 @@ struct GlyphsListView: View {
 
     private func thumbnail(for glyph: Glyph) -> some View {
         VStack(spacing: 4) {
-            GlyphThumbnail(
-                strokes: glyph.strokes,
-                side: 96,
-                strokeColor: Color.accent.primary
-            )
+            GlyphView(case: .default, strokes: glyph.strokes, side: 96)
             if let name = glyph.name {
                 Text(name)
                     .font(.caption)

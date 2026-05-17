@@ -88,7 +88,7 @@ struct SoulDetailView: View {
 
     private var header: some View {
         HStack(spacing: 12) {
-            GlyphThumbnail(strokes: soulWithGlyph.glyph.strokes, side: 56)
+            GlyphView(case: .default, strokes: soulWithGlyph.glyph.strokes, side: 56)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 4) {
                 Text(soulWithGlyph.name)

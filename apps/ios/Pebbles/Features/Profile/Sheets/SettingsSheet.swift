@@ -137,16 +137,9 @@ struct SettingsSheet: View {
     @ViewBuilder
     private var glyphView: some View {
         if let strokes = currentStrokes, !strokes.isEmpty {
-            GlyphThumbnail(strokes: strokes, side: 120)
+            GlyphView(case: .profile, strokes: strokes, side: 120)
         } else {
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color.secondary.opacity(0.08))
-                .frame(width: 120, height: 120)
-                .overlay {
-                    Image(systemName: "scribble")
-                        .font(.title)
-                        .foregroundStyle(Color.system.secondary)
-                }
+            GlyphView(case: .carve, side: 120)
         }
     }
 
