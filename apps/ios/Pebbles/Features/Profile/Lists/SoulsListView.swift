@@ -13,7 +13,7 @@ struct SoulsListView: View {
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.souls")
 
-    private let columns = [GridItem(.adaptive(minimum: 96), spacing: 16)]
+    private let columns = [GridItem(.adaptive(minimum: 96), spacing: Spacing.lg)]
 
     var body: some View {
         content
@@ -90,7 +90,7 @@ struct SoulsListView: View {
             )
         } else {
             ScrollView {
-                LazyVGrid(columns: columns, spacing: 16) {
+                LazyVGrid(columns: columns, spacing: Spacing.lg) {
                     ForEach(items) { item in
                         NavigationLink {
                             SoulDetailView(initial: item, onChanged: {
@@ -100,7 +100,7 @@ struct SoulsListView: View {
                                 }
                             })
                         } label: {
-                            SoulGridCell(soul: item)
+                            SoulItem(case: .default, soul: item, count: nil)
                         }
                         .buttonStyle(.plain)
                         .contextMenu {
@@ -112,7 +112,7 @@ struct SoulsListView: View {
                         }
                     }
                 }
-                .padding()
+                .padding(Spacing.lg)
             }
         }
     }
