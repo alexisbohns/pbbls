@@ -1,36 +1,53 @@
 import SwiftUI
 
 /// Tile in the horizontal Collections scroller on the Profile screen.
-/// Two visual variants — a normal filled tile, and a dashed empty-state
-/// tile that prompts the user to create their first collection.
+/// Two visual variants:
+///   - `.filled(collection:)` — a real collection: solid border, icon glyph,
+///     name + pebble count.
+///   - `.empty` — dashed-border placeholder prompting the user to create
+///     their first collection.
+///
+/// Both variants render only their visual content; the parent decides whether
+/// to wrap the tile in a `NavigationLink` (filled → detail view) or a
+/// `Button` (empty → create sheet). The whole tile is hit-tested via
+/// `.contentShape(...)` so taps land regardless of fill.
 struct ProfileCollectionCard: View {
     enum Variant {
-        case filled(name: String)
+        case filled(collection: Collection)
         case empty
     }
 
     let variant: Variant
-    let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            VStack(alignment: .leading, spacing: 8) {
-                Image(systemName: variant.iconName)
-                    .font(.title3)
-                    .foregroundStyle(variant.iconColor)
-                Spacer(minLength: 0)
+        VStack(alignment: .leading, spacing: Spacing.sm) {
+            iconBox
+            VStack(alignment: .leading, spacing: Spacing.xs) {
                 Text(variant.title)
-                    .font(.subheadline.weight(.medium))
-                    .foregroundStyle(variant.textColor)
-                    .lineLimit(2)
+                    .pebblesFont(.headline)
+                    .foregroundStyle(Color.system.foreground)
+                if let subtitleKey = variant.subtitleKey {
+                    Text(subtitleKey)
+                        .pebblesFont(.subhead)
+                        .foregroundStyle(Color.system.secondary)
+                }
             }
-            .padding(12)
-            .frame(width: 140, height: 120, alignment: .leading)
-            .background(variant.backgroundColor)
-            .overlay { variant.borderOverlay }
-            .clipShape(RoundedRectangle(cornerRadius: 16))
         }
-        .buttonStyle(.plain)
+        .padding(Spacing.lg)
+        .frame(width: 140, alignment: .leading)
+        .overlay { variant.borderOverlay }
+        .contentShape(RoundedRectangle(cornerRadius: Spacing.lg))
+    }
+
+    private var iconBox: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: Spacing.sm)
+                .fill(Color.accent.surface)
+            Image(systemName: variant.iconName)
+                .pebblesIcon(.sm)
+                .foregroundStyle(Color.accent.primary)
+        }
+        .frame(width: Spacing.xxl, height: Spacing.xxl)
     }
 }
 
@@ -38,44 +55,64 @@ private extension ProfileCollectionCard.Variant {
     var iconName: String {
         switch self {
         case .filled: return "square.stack.3d.up"
-        case .empty:  return "plus.square.dashed"
+        case .empty:  return "plus"
         }
     }
-    var iconColor: Color {
-        switch self {
-        case .filled: return .accent.primary
-        case .empty:  return .system.secondary
-        }
-    }
+
     var title: LocalizedStringResource {
         switch self {
-        case .filled(let name): return LocalizedStringResource(stringLiteral: name)
-        case .empty:            return "New collection"
+        case .filled(let collection): return LocalizedStringResource(stringLiteral: collection.name)
+        case .empty:                  return "New collection"
         }
     }
-    var textColor: Color {
+
+    /// `subhead` line under the title. `nil` for the empty tile (no count to show).
+    var subtitleKey: LocalizedStringResource? {
         switch self {
-        case .filled: return .system.foreground
-        case .empty:  return .system.secondary
+        case .filled(let collection):
+            // String-catalog plural entry; see Localizable.xcstrings → "%lld pebbles".
+            return LocalizedStringResource("\(collection.pebbleCount) pebbles")
+        case .empty:
+            return nil
         }
     }
-    var backgroundColor: Color {
-        switch self {
-        case .filled: return .system.background
-        case .empty:  return .clear
-        }
-    }
+
     @ViewBuilder
     var borderOverlay: some View {
         switch self {
         case .filled:
-            EmptyView()
+            RoundedRectangle(cornerRadius: Spacing.lg)
+                .strokeBorder(Color.system.muted, lineWidth: 1)
         case .empty:
-            RoundedRectangle(cornerRadius: 16)
+            RoundedRectangle(cornerRadius: Spacing.lg)
                 .strokeBorder(
-                    Color.system.secondary,
-                    style: StrokeStyle(lineWidth: 1.5, dash: [4])
+                    Color.system.muted,
+                    style: StrokeStyle(lineWidth: 1, lineCap: .round, dash: [10, 10])
                 )
         }
+    }
+}
+
+#Preview {
+    HStack(spacing: Spacing.sm) {
+        ProfileCollectionCard(
+            variant: .filled(collection: Collection.preview)
+        )
+        ProfileCollectionCard(variant: .empty)
+    }
+    .padding()
+}
+
+private extension Collection {
+    static var preview: Collection {
+        // Workaround: Collection has a custom decoder, no memberwise init.
+        // Build via JSON for previews so we keep one source of truth.
+        let data = """
+        { "id": "11111111-1111-1111-1111-111111111111",
+          "name": "Reading list",
+          "mode": "pack",
+          "pebble_count": [{ "count": 7 }] }
+        """.data(using: .utf8)!
+        return try! JSONDecoder().decode(Collection.self, from: data)
     }
 }

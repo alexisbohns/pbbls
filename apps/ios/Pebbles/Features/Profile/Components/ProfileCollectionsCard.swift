@@ -19,25 +19,7 @@ struct ProfileCollectionsCard: View {
         VStack(alignment: .leading, spacing: 12) {
             header
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 12) {
-                    if collections.isEmpty && hasLoaded {
-                        ProfileCollectionCard(variant: .empty) {
-                            isPresentingCreateSheet = true
-                        }
-                    } else {
-                        ForEach(collections) { c in
-                            ProfileCollectionCard(variant: .filled(name: c.name)) {
-                                // The horizontal cards aren't NavigationLinks; the chevron in
-                                // the card header navigates to the full list instead. Tapping
-                                // a card from the Profile is a future enhancement.
-                            }
-                        }
-                    }
-                }
-                .padding(.horizontal, 16)
-            }
-            .padding(.horizontal, -16)
+            EmptyView() // FIXME: rewired in Task 13
         }
         .padding(16)
         .background(Color.system.background)
