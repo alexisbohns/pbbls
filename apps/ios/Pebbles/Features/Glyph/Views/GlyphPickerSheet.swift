@@ -74,10 +74,7 @@ struct GlyphPickerSheet: View {
                                 } label: {
                                     GlyphThumbnail(
                                         strokes: glyph.strokes,
-                                        side: 96,
-                                        backgroundColor: glyph.id == currentGlyphId
-                                            ? Color.accentColor.opacity(0.15)
-                                            : Color.secondary.opacity(0.08)
+                                        side: 96
                                     )
                                 }
                                 .accessibilityLabel(glyph.name ?? "Untitled glyph")

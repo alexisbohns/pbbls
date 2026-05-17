@@ -17,8 +17,7 @@ struct SoulPill: View {
             GlyphThumbnail(
                 strokes: glyph.strokes,
                 side: 24,
-                strokeColor: Color.accent.primary,
-                backgroundColor: .clear
+                strokeColor: Color.accent.primary
             )
             .accessibilityHidden(true)
 

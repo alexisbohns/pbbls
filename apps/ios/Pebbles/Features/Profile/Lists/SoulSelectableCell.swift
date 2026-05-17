@@ -19,8 +19,7 @@ struct SoulSelectableCell: View {
                     GlyphThumbnail(
                         strokes: soul.glyph.strokes,
                         side: 96,
-                        strokeColor: isSelected ? Color.accent.primary : Color.system.secondary,
-                        backgroundColor: .clear
+                        strokeColor: isSelected ? Color.accent.primary : Color.system.secondary
                     )
                     .overlay {
                         RoundedRectangle(cornerRadius: 12)
