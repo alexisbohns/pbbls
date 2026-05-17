@@ -36,15 +36,13 @@ struct OnboardingView: View {
             .tabViewStyle(.page(indexDisplayMode: .always))
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        onFinish()
-                    } label: {
+                    PebbleToolbarButton(action: { onFinish() }) {
                         Image(systemName: "xmark")
                     }
                     .accessibilityLabel("Close onboarding")
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button("Skip") {
+                    PebbleToolbarButton("Skip") {
                         onFinish()
                     }
                 }
