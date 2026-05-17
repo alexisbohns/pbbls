@@ -45,17 +45,16 @@ struct CreateCollectionSheet: View {
                     }
                 }
             }
-            .navigationTitle("New collection")
-            .navigationBarTitleDisplayMode(.inline)
+            .pebblesToolbarTitle("New collection")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    PebbleToolbarButton("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     if isSaving {
                         ProgressView()
                     } else {
-                        Button("Save") {
+                        PebbleToolbarButton("Save") {
                             Task { await save() }
                         }
                         .disabled(trimmedName.isEmpty)

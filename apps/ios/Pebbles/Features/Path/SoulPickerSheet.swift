@@ -32,14 +32,13 @@ struct SoulPickerSheet: View {
     var body: some View {
         NavigationStack {
             content
-                .navigationTitle("Choose souls")
-                .navigationBarTitleDisplayMode(.inline)
+                .pebblesToolbarTitle("Choose souls")
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") { dismiss() }
+                        PebbleToolbarButton("Cancel") { dismiss() }
                     }
                     ToolbarItem(placement: .confirmationAction) {
-                        Button("Done") {
+                        PebbleToolbarButton("Done") {
                             onConfirm(Array(selection))
                             dismiss()
                         }

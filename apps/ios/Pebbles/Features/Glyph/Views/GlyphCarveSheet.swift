@@ -27,17 +27,16 @@ struct GlyphCarveSheet: View {
     var body: some View {
         NavigationStack {
             content
-                .navigationTitle("New glyph")
-                .navigationBarTitleDisplayMode(.inline)
+                .pebblesToolbarTitle("New glyph")
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") { cancelTapped() }
+                        PebbleToolbarButton("Cancel") { cancelTapped() }
                     }
                     ToolbarItem(placement: .confirmationAction) {
                         if isSaving {
                             ProgressView()
                         } else {
-                            Button("Save") {
+                            PebbleToolbarButton("Save") {
                                 Task { await save() }
                             }
                             .disabled(strokes.isEmpty)

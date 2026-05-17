@@ -80,17 +80,16 @@ struct SettingsSheet: View {
                 legalSection
             }
             .scrollDismissesKeyboard(.interactively)
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
+            .pebblesToolbarTitle("Settings")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    PebbleToolbarButton("Cancel") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     if isSaving {
                         ProgressView()
                     } else {
-                        Button("Save") { Task { await save() } }
+                        PebbleToolbarButton("Save") { Task { await save() } }
                             .disabled(!isDirty)
                     }
                 }

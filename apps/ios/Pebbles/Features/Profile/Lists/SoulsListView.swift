@@ -17,13 +17,10 @@ struct SoulsListView: View {
 
     var body: some View {
         content
-            .navigationTitle("Souls")
-            .navigationBarTitleDisplayMode(.inline)
+            .pebblesToolbarTitle("Souls")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        isPresentingCreate = true
-                    } label: {
+                    PebbleToolbarButton(action: { isPresentingCreate = true }) {
                         Image(systemName: "plus")
                     }
                     .accessibilityLabel("Add soul")

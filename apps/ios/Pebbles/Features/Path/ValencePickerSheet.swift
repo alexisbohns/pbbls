@@ -23,11 +23,10 @@ struct ValencePickerSheet: View {
                 }
                 .padding()
             }
-            .navigationTitle("Choose a valence")
-            .navigationBarTitleDisplayMode(.inline)
+            .pebblesToolbarTitle("Choose a valence")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    PebbleToolbarButton("Cancel") { dismiss() }
                 }
             }
             .pebblesScreen()

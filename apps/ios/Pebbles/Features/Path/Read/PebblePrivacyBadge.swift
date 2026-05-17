@@ -51,11 +51,8 @@ struct PebblePrivacyBadge: View {
     private var chipBody: some View {
         Image(systemName: "lock.fill")
             .font(.system(size: 14, weight: .medium))
-            .foregroundStyle(Color.system.foreground)
+            .foregroundStyle(Color.system.secondary)
             .frame(width: 36, height: 36)
-            .background(
-                Circle().fill(Color.system.background.opacity(0.85))
-            )
             .accessibilityLabel(accessibilityLabelText)
     }
 }

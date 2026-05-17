@@ -24,7 +24,7 @@ struct LogListView: View {
 
     var body: some View {
         content
-            .navigationTitle(title)
+            .pebblesToolbarTitle(title)
             .pebblesScreen()
             .task { await load() }
     }

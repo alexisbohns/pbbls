@@ -20,13 +20,10 @@ struct GlyphsListView: View {
 
     var body: some View {
         content
-            .navigationTitle("Glyphs")
-            .navigationBarTitleDisplayMode(.inline)
+            .pebblesToolbarTitle("Glyphs")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button {
-                        showCarveSheet = true
-                    } label: {
+                    PebbleToolbarButton(action: { showCarveSheet = true }) {
                         Image(systemName: "plus")
                     }
                     .accessibilityLabel("Carve new glyph")

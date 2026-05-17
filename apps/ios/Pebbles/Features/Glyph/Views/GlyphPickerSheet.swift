@@ -23,11 +23,10 @@ struct GlyphPickerSheet: View {
     var body: some View {
         NavigationStack {
             content
-                .navigationTitle("Choose a glyph")
-                .navigationBarTitleDisplayMode(.inline)
+                .pebblesToolbarTitle("Choose a glyph")
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button("Close") { dismiss() }
+                        PebbleToolbarButton("Close") { dismiss() }
                     }
                 }
                 .pebblesScreen()
