@@ -7,19 +7,7 @@ struct RippleBadge: View {
     let level: Int
     let activeToday: Bool
 
-    @Environment(\.colorScheme) private var colorScheme
-
     private var clampedLevel: Int { min(max(level, 0), 6) }
-
-    private var digitColor: Color {
-        switch (colorScheme, activeToday) {
-        case (.dark, true):   return .system.background
-        case (.light, true):  return .system.foreground
-        case (.dark, false),
-             (.light, false): return .system.secondary
-        @unknown default:     return .system.foreground
-        }
-    }
 
     private func tone(forStroke id: Int) -> RippleStrokeTone {
         rippleStrokeTone(strokeId: id, level: clampedLevel, activeToday: activeToday)
@@ -47,8 +35,8 @@ struct RippleBadge: View {
                 .stroke(tone(forStroke: 1).color, style: stroke)
 
             Text(verbatim: "\(clampedLevel)")
-                .font(.system(size: 12, weight: .bold, design: .rounded))
-                .foregroundStyle(digitColor)
+                .pebblesFont(.captionEmphasized)
+                .foregroundStyle(Color.system.foreground)
         }
         .frame(width: 44, height: 44)
         .accessibilityElement(children: .ignore)
