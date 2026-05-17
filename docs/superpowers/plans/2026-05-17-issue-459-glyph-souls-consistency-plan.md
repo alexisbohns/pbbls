@@ -27,7 +27,7 @@
 - `apps/ios/Pebbles/Resources/Fonts/SF-Compact-Rounded-Medium.otf` — bundled font (Task 2).
 - `apps/ios/Pebbles/Resources/Fonts/SF-Compact-Rounded-Semibold.otf` — bundled font (Task 2).
 - `apps/ios/Pebbles/Resources/Fonts/SF-Compact-Rounded-Bold.otf` — bundled font (Task 2).
-- `apps/ios/Pebbles/Features/Glyph/Views/Glyph.swift` — `Glyph` component (Task 4).
+- `apps/ios/Pebbles/Features/Glyph/Views/GlyphView.swift` — `Glyph` component (Task 4).
 - `apps/ios/Pebbles/Features/Shared/SoulItem.swift` — `SoulItem` component (Task 5).
 
 ### Modify
@@ -372,7 +372,7 @@ git commit -m "feat(ios): introduce typography tokens" -m "Co-Authored-By: Claud
 **Files:**
 - Modify: `apps/ios/Pebbles/Features/Glyph/Views/GlyphThumbnail.swift`
 
-**Note:** After this commit, the seven sites that today rely on `GlyphThumbnail`'s default grey background will render as bare strokes against the page. That's a deliberate, brief regression — Task 4 migrates them to `Glyph(case:)` which restores the chrome. Do not stop here.
+**Note:** After this commit, the seven sites that today rely on `GlyphThumbnail`'s default grey background will render as bare strokes against the page. That's a deliberate, brief regression — Task 4 migrates them to `GlyphView(case:)` which restores the chrome. Do not stop here.
 
 - [ ] **Step 3.1 — Rewrite `GlyphThumbnail.swift`**
 
@@ -492,12 +492,14 @@ git commit -m "quality(ios): strip GlyphThumbnail chrome" -m "Co-Authored-By: Cl
 
 ---
 
-## Task 4 — Introduce `Glyph` and migrate seven call sites
+## Task 4 — Introduce `GlyphView` and migrate seven call sites
 
-**Commit message:** `feat(ios): introduce Glyph component`
+**Commit message:** `feat(ios): introduce GlyphView component`
+
+**Naming note:** The new view is named `GlyphView` (not `Glyph`) to avoid a collision with the existing `Glyph` model struct at `Features/Glyph/Models/Glyph.swift`. Swift module qualification does not disambiguate types defined in the same module, so the rename is mandatory rather than optional.
 
 **Files:**
-- Create: `apps/ios/Pebbles/Features/Glyph/Views/Glyph.swift`
+- Create: `apps/ios/Pebbles/Features/Glyph/Views/GlyphView.swift`
 - Modify: `apps/ios/Pebbles/Features/Path/PebbleFormView.swift:223`
 - Modify: `apps/ios/Pebbles/Features/Profile/Sheets/SettingsSheet.swift:140`
 - Modify: `apps/ios/Pebbles/Features/Profile/Sheets/EditSoulSheet.swift:135`
@@ -507,7 +509,7 @@ git commit -m "quality(ios): strip GlyphThumbnail chrome" -m "Co-Authored-By: Cl
 - Modify: `apps/ios/Pebbles/Features/Glyph/Views/GlyphsListView.swift:118-122`
 - Modify: `apps/ios/Pebbles/Features/Glyph/Views/GlyphPickerSheet.swift:75-81,93-113`
 
-- [ ] **Step 4.1 — Create `Glyph.swift`**
+- [ ] **Step 4.1 — Create `GlyphView.swift`**
 
 Full file content:
 
@@ -519,9 +521,13 @@ import SwiftUI
 /// the user's glyph strokes or an SF Symbol overlay (scribble for `.carve`,
 /// plus for `.create`).
 ///
+/// Named `GlyphView` (not `Glyph`) because the model type at
+/// `Features/Glyph/Models/Glyph.swift` already owns the `Glyph` symbol
+/// in this module.
+///
 /// Visual specification table is in
 /// `docs/superpowers/specs/2026-05-17-issue-459-glyph-souls-consistency-design.md` §2.
-struct Glyph: View {
+struct GlyphView: View {
     enum Case {
         case profile      // continuous 1pt system.muted; glyph in accent.primary
         case carve        // dashed 2pt system.muted; sf.scribble in system.secondary
@@ -593,14 +599,14 @@ struct Glyph: View {
     return ScrollView {
         VStack(spacing: Spacing.lg) {
             HStack(spacing: Spacing.lg) {
-                VStack { Glyph(case: .profile,    strokes: strokes); Text(".profile") }
-                VStack { Glyph(case: .carve);                       Text(".carve") }
-                VStack { Glyph(case: .create);                      Text(".create") }
+                VStack { GlyphView(case: .profile,    strokes: strokes); Text(".profile") }
+                VStack { GlyphView(case: .carve);                       Text(".carve") }
+                VStack { GlyphView(case: .create);                      Text(".create") }
             }
             HStack(spacing: Spacing.lg) {
-                VStack { Glyph(case: .selected,   strokes: strokes); Text(".selected") }
-                VStack { Glyph(case: .unselected, strokes: strokes); Text(".unselected") }
-                VStack { Glyph(case: .default,    strokes: strokes); Text(".default") }
+                VStack { GlyphView(case: .selected,   strokes: strokes); Text(".selected") }
+                VStack { GlyphView(case: .unselected, strokes: strokes); Text(".unselected") }
+                VStack { GlyphView(case: .default,    strokes: strokes); Text(".default") }
             }
         }
         .padding(Spacing.lg)
@@ -614,14 +620,14 @@ struct Glyph: View {
     return ScrollView {
         VStack(spacing: Spacing.lg) {
             HStack(spacing: Spacing.lg) {
-                Glyph(case: .profile,    strokes: strokes)
-                Glyph(case: .carve)
-                Glyph(case: .create)
+                GlyphView(case: .profile,    strokes: strokes)
+                GlyphView(case: .carve)
+                GlyphView(case: .create)
             }
             HStack(spacing: Spacing.lg) {
-                Glyph(case: .selected,   strokes: strokes)
-                Glyph(case: .unselected, strokes: strokes)
-                Glyph(case: .default,    strokes: strokes)
+                GlyphView(case: .selected,   strokes: strokes)
+                GlyphView(case: .unselected, strokes: strokes)
+                GlyphView(case: .default,    strokes: strokes)
             }
         }
         .padding(Spacing.lg)
@@ -636,7 +642,7 @@ struct Glyph: View {
 npm run generate --workspace=@pbbls/ios
 cd apps/ios && xcodebuild -scheme Pebbles -destination 'platform=iOS Simulator,name=iPhone 15' build -quiet
 ```
-Expected: `** BUILD SUCCEEDED **`. Open `Glyph.swift` in Xcode and confirm the two `#Preview` canvases render the six chrome cases. Note: `selected` / `unselected` / `default` all share the same strokes — the difference is color + border weight.
+Expected: `** BUILD SUCCEEDED **`. Open `GlyphView.swift` in Xcode and confirm the two `#Preview` canvases render the six chrome cases. Note: `selected` / `unselected` / `default` all share the same strokes — the difference is color + border weight.
 
 - [ ] **Step 4.3 — Migrate `PebbleFormView.swift`**
 
@@ -650,7 +656,7 @@ GlyphThumbnail(strokes: glyph.strokes, side: 32)
 With:
 
 ```swift
-Glyph(case: .default, strokes: glyph.strokes, side: 32)
+GlyphView(case: .default, strokes: glyph.strokes, side: 32)
     .accessibilityHidden(true)
 ```
 
@@ -665,7 +671,7 @@ GlyphThumbnail(strokes: strokes, side: 120)
 With:
 
 ```swift
-Glyph(case: .profile, strokes: strokes, side: 120)
+GlyphView(case: .profile, strokes: strokes, side: 120)
 ```
 
 - [ ] **Step 4.5 — Migrate `EditSoulSheet.swift`**
@@ -680,7 +686,7 @@ GlyphThumbnail(strokes: glyph.strokes, side: 32)
 With:
 
 ```swift
-Glyph(case: .default, strokes: glyph.strokes, side: 32)
+GlyphView(case: .default, strokes: glyph.strokes, side: 32)
     .accessibilityHidden(true)
 ```
 
@@ -696,7 +702,7 @@ GlyphThumbnail(strokes: glyph.strokes, side: 32)
 With:
 
 ```swift
-Glyph(case: .default, strokes: glyph.strokes, side: 32)
+GlyphView(case: .default, strokes: glyph.strokes, side: 32)
     .accessibilityHidden(true)
 ```
 
@@ -770,9 +776,9 @@ var body: some View {
 @ViewBuilder
 private var glyph: some View {
     if let strokes = glyphStrokes, !strokes.isEmpty {
-        Glyph(case: .profile, strokes: strokes, side: 96)
+        GlyphView(case: .profile, strokes: strokes, side: 96)
     } else {
-        Glyph(case: .carve, side: 96)
+        GlyphView(case: .carve, side: 96)
     }
 }
 ```
@@ -791,7 +797,7 @@ GlyphThumbnail(strokes: soulWithGlyph.glyph.strokes, side: 56)
 With:
 
 ```swift
-Glyph(case: .default, strokes: soulWithGlyph.glyph.strokes, side: 56)
+GlyphView(case: .default, strokes: soulWithGlyph.glyph.strokes, side: 56)
     .accessibilityHidden(true)
 ```
 
@@ -822,9 +828,7 @@ With:
 ```swift
 private func thumbnail(for glyph: Glyph) -> some View {
     VStack(spacing: 4) {
-        // Note: `Glyph` here refers to the new view component;
-        // `glyph` is the model type (see `Features/Glyph/Models/Glyph.swift`).
-        Pebbles.Glyph(case: .default, strokes: glyph.strokes, side: 96)
+        GlyphView(case: .default, strokes: glyph.strokes, side: 96)
         if let name = glyph.name {
             Text(name)
                 .font(.caption)
@@ -835,11 +839,7 @@ private func thumbnail(for glyph: Glyph) -> some View {
 }
 ```
 
-⚠ **Naming collision check.** `Glyph` is both the new view (Task 4.1) and the existing model type at `Features/Glyph/Models/Glyph.swift`. `GlyphsListView.swift` imports neither into a separate namespace; Swift will resolve `Glyph(...)` to whichever is in scope. To disambiguate, either:
-- (a) prefix with the module name as shown above (`Pebbles.Glyph(case:...)`), which works because the app target's module is `Pebbles`. **OR**
-- (b) rename the model type to `GlyphModel` and the view to `Glyph` — out of scope for this PR.
-
-Use (a) for now: explicitly qualify the new component as `Pebbles.Glyph(...)` in any file where the model is also in scope. Step 4.11 lists all such files.
+No naming collision concern: the new view is `GlyphView`, the model parameter is `glyph: Glyph` — distinct symbols.
 
 - [ ] **Step 4.10 — Migrate `GlyphPickerSheet.swift`**
 
@@ -860,7 +860,7 @@ GlyphThumbnail(
 With:
 
 ```swift
-Pebbles.Glyph(
+GlyphView(
     case: glyph.id == currentGlyphId ? .selected : .default,
     strokes: glyph.strokes,
     side: 96
@@ -901,7 +901,7 @@ private var carveNewRow: some View {
         showCarveSheet = true
     } label: {
         HStack(spacing: Spacing.sm) {
-            Pebbles.Glyph(case: .carve, side: 48)
+            GlyphView(case: .carve, side: 48)
             Text("Carve new glyph")
                 .font(.body)
             Spacer()
@@ -916,19 +916,14 @@ private var carveNewRow: some View {
 }
 ```
 
-- [ ] **Step 4.11 — Verify module-qualification covers all collision sites**
+- [ ] **Step 4.11 — Sanity grep for stale `Glyph(` view-call references**
 
-Files where the model type `Glyph` is in scope and the new view `Glyph` is now referenced:
-- `GlyphsListView.swift` — qualified in Step 4.9.
-- `GlyphPickerSheet.swift` — qualified in Step 4.10.
-- `PebbleFormView.swift` — uses `selectedGlyph: Glyph?` (model). Search the file for `Glyph(case:` introduced in Step 4.3 and prefix with `Pebbles.`. Replace `Glyph(case: .default, strokes: glyph.strokes, side: 32)` with `Pebbles.Glyph(case: .default, strokes: glyph.strokes, side: 32)`.
-- `EditSoulSheet.swift` — its private `GlyphRow` takes `let glyph: Glyph?` (model). Qualify the Step 4.5 insertion the same way.
-- `CreateSoulSheet.swift` — same pattern as EditSoulSheet; qualify the Step 4.6 insertion.
-- `SoulDetailView.swift` — uses `soulWithGlyph.glyph` (model). Qualify the Step 4.8 insertion.
-- `ProfileBanner.swift` — does **not** reference the model type. The Step 4.7 `Glyph(...)` call resolves unambiguously; no qualification needed.
-- `SettingsSheet.swift` — search the file for `Glyph` references; if the model type appears, qualify Step 4.4 the same way. If only `GlyphThumbnail` appeared before, leave Step 4.4 unqualified.
+Because the new view is `GlyphView` and the existing `Glyph` symbol is the model type, any leftover `Glyph(case:` call would be a typo — the model has no `case:` initializer parameter. Run:
 
-Run `grep -n "\\bGlyph\\b" apps/ios/Pebbles/Features/Profile/Sheets/SettingsSheet.swift` to check. If the result includes `Glyph?`, `: Glyph`, or `Glyph(` referring to the model, qualify Step 4.4.
+```bash
+grep -rn "\\bGlyph(case:" apps/ios/Pebbles/
+```
+Expected: zero results. If anything matches, it's a leftover from a Step 4.3–4.10 edit that wasn't switched to `GlyphView` — fix in place.
 
 - [ ] **Step 4.12 — Regenerate + build**
 
@@ -936,7 +931,7 @@ Run `grep -n "\\bGlyph\\b" apps/ios/Pebbles/Features/Profile/Sheets/SettingsShee
 npm run generate --workspace=@pbbls/ios
 cd apps/ios && xcodebuild -scheme Pebbles -destination 'platform=iOS Simulator,name=iPhone 15' build -quiet
 ```
-Expected: `** BUILD SUCCEEDED **`. If you see "'Glyph' is ambiguous" errors, add `Pebbles.` qualification to the conflicting call site.
+Expected: `** BUILD SUCCEEDED **`.
 
 - [ ] **Step 4.13 — Visual smoke check (Xcode previews)**
 
@@ -959,7 +954,7 @@ Open each of these files in Xcode and verify the `#Preview` renders without runt
 - [ ] **Step 4.14 — Commit**
 
 ```bash
-git add apps/ios/Pebbles/Features/Glyph/Views/Glyph.swift \
+git add apps/ios/Pebbles/Features/Glyph/Views/GlyphView.swift \
         apps/ios/Pebbles/Features/Path/PebbleFormView.swift \
         apps/ios/Pebbles/Features/Profile/Sheets/SettingsSheet.swift \
         apps/ios/Pebbles/Features/Profile/Sheets/EditSoulSheet.swift \
@@ -968,7 +963,7 @@ git add apps/ios/Pebbles/Features/Glyph/Views/Glyph.swift \
         apps/ios/Pebbles/Features/Profile/Views/SoulDetailView.swift \
         apps/ios/Pebbles/Features/Glyph/Views/GlyphsListView.swift \
         apps/ios/Pebbles/Features/Glyph/Views/GlyphPickerSheet.swift
-git commit -m "feat(ios): introduce Glyph component" -m "Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
+git commit -m "feat(ios): introduce GlyphView component" -m "Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 ```
 
 ---
@@ -998,8 +993,8 @@ Full file content:
 import SwiftUI
 
 /// Single soul cell used in both `SoulsListView` (always `.default`) and
-/// `SoulPickerSheet` (state-driven). Vertical stack: `Glyph` on top, name
-/// in subhead, optional `fossil.shell` + ripple/pebble count below.
+/// `SoulPickerSheet` (state-driven). Vertical stack: `GlyphView` on top,
+/// name in subhead, optional `fossil.shell` + ripple/pebble count below.
 ///
 /// Visual specification table is in
 /// `docs/superpowers/specs/2026-05-17-issue-459-glyph-souls-consistency-design.md` §3.
@@ -1014,7 +1009,7 @@ struct SoulItem: View {
     var body: some View {
         Button(action: onTap) {
             VStack(spacing: Spacing.sm) {
-                Pebbles.Glyph(case: glyphCase, strokes: soul?.glyph.strokes, side: 96)
+                GlyphView(case: glyphCase, strokes: soul?.glyph.strokes, side: 96)
 
                 VStack(spacing: Spacing.xs) {
                     Text(displayName)
@@ -1042,7 +1037,7 @@ struct SoulItem: View {
         .accessibilityAddTraits(`case` == .selected ? [.isButton, .isSelected] : [.isButton])
     }
 
-    private var glyphCase: Pebbles.Glyph.Case {
+    private var glyphCase: GlyphView.Case {
         switch `case` {
         case .selected:   return .selected
         case .unselected: return .unselected
@@ -1068,17 +1063,16 @@ struct SoulItem: View {
 }
 
 #Preview("All cases") {
-    let strokes = [
-        GlyphStroke(d: "M30,30 C60,10 140,10 170,30 S190,140 170,170 S60,190 30,170 S10,60 30,30", width: 6)
-    ]
-    let molly = SoulWithGlyph(
+    let sample = SoulWithGlyph(
         id: UUID(),
         name: "Molly",
         glyphId: SystemGlyph.default,
-        glyph: Pebbles.Glyph.Model(   // see note: model type is in Features/Glyph/Models/Glyph.swift
+        glyph: Glyph(
             id: SystemGlyph.default,
             name: nil,
-            strokes: strokes,
+            strokes: [
+                GlyphStroke(d: "M30,30 C60,10 140,10 170,30 S190,140 170,170 S60,190 30,170 S10,60 30,30", width: 6)
+            ],
             viewBox: "0 0 200 200",
             userId: nil
         )
@@ -1089,9 +1083,9 @@ struct SoulItem: View {
             columns: [GridItem(.adaptive(minimum: 96), spacing: Spacing.lg)],
             spacing: Spacing.lg
         ) {
-            SoulItem(case: .selected,   soul: molly, count: 12)
-            SoulItem(case: .unselected, soul: molly, count: 9)
-            SoulItem(case: .default,    soul: molly, count: 3)
+            SoulItem(case: .selected,   soul: sample, count: 12)
+            SoulItem(case: .unselected, soul: sample, count: 9)
+            SoulItem(case: .default,    soul: sample, count: 3)
             SoulItem(case: .create,     soul: nil,   count: nil)
         }
         .padding(Spacing.lg)
@@ -1099,67 +1093,7 @@ struct SoulItem: View {
 }
 ```
 
-⚠ **Note on the preview:** the `Pebbles.Glyph.Model(...)` reference in the preview is illustrative. The actual model type is named `Glyph` and lives in `Features/Glyph/Models/Glyph.swift`. Because this preview file ALSO references `Pebbles.Glyph` (the view) via `glyphCase`, the unqualified `Glyph(...)` constructor call in the preview will be ambiguous. Resolve by:
-
-```swift
-let glyphModel = ___Glyph(  // model
-    id: SystemGlyph.default,
-    name: nil,
-    strokes: strokes,
-    viewBox: "0 0 200 200",
-    userId: nil
-)
-```
-
-Where `___Glyph` is replaced by the **fully qualified model name**. Since both view and model are in the same `Pebbles` module, qualification with `Pebbles.` doesn't disambiguate them. Use a `typealias` at the top of the preview function:
-
-```swift
-typealias GlyphModel = Glyph   // resolves to the model because we don't shadow the view here
-// ...but wait — we DO use `Pebbles.Glyph(...)` in `glyphCase`, so `Glyph` in scope
-// will resolve to the view if it shadows.
-```
-
-**Cleanest fix:** put the preview's helper at file scope, *outside* `SoulItem`, where `Pebbles.Glyph` is never referenced unqualified:
-
-Replace the preview block with:
-
-```swift
-#Preview("All cases") {
-    SoulItemPreviewHarness()
-}
-
-private struct SoulItemPreviewHarness: View {
-    var body: some View {
-        ScrollView {
-            LazyVGrid(
-                columns: [GridItem(.adaptive(minimum: 96), spacing: Spacing.lg)],
-                spacing: Spacing.lg
-            ) {
-                SoulItem(case: .selected,   soul: Self.sample, count: 12)
-                SoulItem(case: .unselected, soul: Self.sample, count: 9)
-                SoulItem(case: .default,    soul: Self.sample, count: 3)
-                SoulItem(case: .create,     soul: nil,         count: nil)
-            }
-            .padding(Spacing.lg)
-        }
-    }
-
-    static let sample: SoulWithGlyph = SoulWithGlyph(
-        id: UUID(),
-        name: "Molly",
-        glyphId: SystemGlyph.default,
-        glyph: Glyph(    // model — unambiguous because `Pebbles.Glyph` view is never referenced bare here
-            id: SystemGlyph.default,
-            name: nil,
-            strokes: [GlyphStroke(d: "M30,30 L170,170", width: 6)],
-            viewBox: "0 0 200 200",
-            userId: nil
-        )
-    )
-}
-```
-
-Use **this** preview block in the actual file.
+No naming ambiguity in the preview: `Glyph(...)` resolves to the model, `GlyphView(...)` (used inside `SoulItem.body`) resolves to the view.
 
 - [ ] **Step 5.3 — Localize `"New soul"` and `"All my souls"`**
 
@@ -1525,11 +1459,11 @@ Resolves #459.
 - Adds a spacing scale rooted on the 17pt body baseline (`Theme/Spacing.swift`).
 - Adds 8 typography tokens (Body, Subhead, Headline, Callout, Meta, CardHeading, Title, ButtonLabel) exposed via a `pebblesFont(_:)` view modifier. SF Compact Rounded OTFs bundled. Ysabeau Bold deferred (`title.emphasized` and `buttonLabel.emphasized` not needed by this PR).
 - Strips `GlyphThumbnail` chrome — it is now a pure stroke canvas.
-- Introduces `Glyph` view component owning all chrome (continuous/dashed border, plus/scribble overlays, state colors) per #459 spec table.
-- Introduces `SoulItem` view component (vertical: Glyph + name + optional fossil.shell + count) shared between `SoulsListView` (`.default`) and `SoulPickerSheet` (state-driven).
+- Introduces `GlyphView` view component owning all chrome (continuous/dashed border, plus/scribble overlays, state colors) per #459 spec table. (Named `GlyphView` rather than `Glyph` to avoid a collision with the existing `Glyph` model struct.)
+- Introduces `SoulItem` view component (vertical: GlyphView + name + optional fossil.shell + count) shared between `SoulsListView` (`.default`) and `SoulPickerSheet` (state-driven).
 - `SoulPickerSheet` enforces the #459 selection rule: 0 selected → all `.default`; ≥1 selected → selected ones `.selected`, others `.unselected`. `.create` is invariant. Adds "All my souls" section header (cardHeading).
 - Deletes `SoulGridCell` and `SoulSelectableCell`.
-- Migrates the seven remaining `GlyphThumbnail` chrome-relying sites to `Glyph(case: ...)`.
+- Migrates the seven remaining `GlyphThumbnail` chrome-relying sites to `GlyphView(case: ...)`.
 
 ## Out of scope (follow-ups)
 - Wiring per-soul ripple/pebble count into the data layer (`SoulItem.count` accepts `Int?`, currently passed as `nil`).
@@ -1571,7 +1505,7 @@ Capture the PR URL from the output and report it back.
 - `Glyph` view's `Case` enum cases (`profile/carve/create/selected/unselected/default`) are spelled identically in Tasks 4.1 and 5.2's `glyphCase` mapping. ✅
 - `SoulItem.Case` cases (`selected/unselected/default/create`) are spelled identically in Tasks 5.2, 5.4, and 5.5. ✅
 - `PebblesFont` cases (`subhead/subheadEmphasized/meta/cardHeading/callout`) are spelled identically in Task 2.5 and consumed in Tasks 5.2 and 5.4. ✅
-- The model/view `Glyph` collision is called out and resolved with `Pebbles.Glyph` qualification in Step 4.9, Step 4.10, Step 4.11, and Step 5.2. Cross-checked: every Task-4 and Task-5 site that references the new view in a file where the model is in scope uses the qualified form.
+- The model/view `Glyph` collision is called out and resolved with `GlyphView` qualification in Step 4.9, Step 4.10, Step 4.11, and Step 5.2. Cross-checked: every Task-4 and Task-5 site that references the new view in a file where the model is in scope uses the qualified form.
 
 **Known risk preserved from spec:** if SF Compact Rounded TTFs cannot be obtained, Step 2.1 documents the fallback (use `Font.system(design: .rounded)` for `meta` / `cardHeading`); the `sfCompactRounded` helper in Step 2.5 already falls back automatically via `UIFont(name:)` returning `nil`.
 
