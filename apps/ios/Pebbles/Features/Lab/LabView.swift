@@ -24,7 +24,7 @@ struct LabView: View {
 
     var body: some View {
         content
-            .navigationTitle("Lab")
+            .pebblesToolbarTitle("Lab")
             .pebblesScreen()
             .task { await load() }
     }
