@@ -9,7 +9,7 @@ struct ProfileShortcutTile<Destination: View>: View {
         NavigationLink {
             destination()
         } label: {
-            VStack(spacing: Spacing.sm) {
+            VStack(spacing: Spacing.xs) {
                 Image(systemName: systemImage)
                     .pebblesIcon(.large)
                     .foregroundStyle(Color.accent.primary)
@@ -18,7 +18,7 @@ struct ProfileShortcutTile<Destination: View>: View {
                     .foregroundStyle(Color.system.secondary)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, Spacing.lg)
+            .padding(.vertical, Spacing.md)
             .background(Color.accent.surface)
             .clipShape(RoundedRectangle(cornerRadius: Spacing.lg))
         }

@@ -11,7 +11,7 @@ struct RipplesRow: View {
                 activeToday: ripple?.activeToday ?? false
             )
 
-            VStack(alignment: .leading, spacing: Spacing.xs) {
+            VStack(alignment: .leading) {
                 Text("Ripples Level \(ripple?.rippleLevel ?? 0)")
                     .pebblesFont(.headline)
                     .foregroundStyle(Color.system.foreground)

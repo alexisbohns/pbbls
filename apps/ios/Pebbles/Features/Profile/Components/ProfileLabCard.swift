@@ -5,11 +5,11 @@ struct ProfileLabCard: View {
         NavigationLink {
             LabView()
         } label: {
-            HStack(spacing: Spacing.xs) {
+            HStack(spacing: Spacing.lg) {
                 Image(systemName: "lightbulb.max")
                     .pebblesIcon(.large)
                     .foregroundStyle(Color.accent.primary)
-                VStack(alignment: .leading, spacing: Spacing.xs) {
+                VStack(alignment: .leading) {
                     Text("Lab")
                         .pebblesFont(.headline)
                         .foregroundStyle(Color.system.foreground)
