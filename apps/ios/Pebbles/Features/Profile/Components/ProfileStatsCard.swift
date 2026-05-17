@@ -8,25 +8,18 @@ struct ProfileStatsCard: View {
     let karma: Int?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text("STATS")
-                .font(.caption.weight(.semibold))
-                .tracking(0.8)
+        VStack(alignment: .leading, spacing: Spacing.lg) {
+            Text("Stats")
+                .pebblesFont(.cardHeading)
                 .foregroundStyle(Color.system.secondary)
 
             RipplesRow(ripple: ripple, assiduity: assiduity)
 
-            Divider().overlay(Color.system.secondary.opacity(0.3))
+            Divider().overlay(Color.system.muted)
 
             ProfileCountersRow(daysPracticed: daysPracticed, pebbles: pebbles, karma: karma)
         }
-        .padding(16)
-        .background(Color.system.background)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-        .overlay {
-            RoundedRectangle(cornerRadius: 16)
-                .strokeBorder(Color.system.muted, lineWidth: 1)
-        }
+        .profileCard()
     }
 }
 
