@@ -8,11 +8,6 @@ struct ProfileBanner: View {
     var body: some View {
         VStack(spacing: 12) {
             glyph
-                .frame(width: 96, height: 96)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 34)
-                        .strokeBorder(Color.system.muted, lineWidth: 1)
-                )
 
             VStack(spacing: 2) {
                 Text(displayName ?? "")
@@ -32,15 +27,9 @@ struct ProfileBanner: View {
     @ViewBuilder
     private var glyph: some View {
         if let strokes = glyphStrokes, !strokes.isEmpty {
-            GlyphThumbnail(strokes: strokes, side: 96)
+            GlyphView(case: .profile, strokes: strokes, side: 96)
         } else {
-            RoundedRectangle(cornerRadius: 34)
-                .fill(Color.clear)
-                .overlay {
-                    Image(systemName: "scribble")
-                        .font(.title)
-                        .foregroundStyle(Color.system.secondary)
-                }
+            GlyphView(case: .carve, side: 96)
         }
     }
 }
@@ -48,4 +37,13 @@ struct ProfileBanner: View {
 #Preview("With glyph (placeholder strokes)") {
     ProfileBanner(displayName: "Alexis", memberSince: Date(), glyphStrokes: nil)
         .padding()
+}
+
+#Preview("With glyph") {
+    ProfileBanner(
+        displayName: "Alexis",
+        memberSince: Date(),
+        glyphStrokes: [GlyphStroke(d: "M40,40 L160,160", width: 6)]
+    )
+    .padding()
 }

@@ -6,9 +6,12 @@ import os
 /// `SupabaseService` so the form doesn't need to refetch when an inline
 /// `+ New` insert happens.
 ///
-/// Tap a cell to toggle. Done applies the selection. Cancel (or
-/// swipe-down) discards. The `+ New` tile presents `CreateSoulSheet`;
-/// the inserted soul is appended to the local list and pre-selected.
+/// Selection rule (see issue #459):
+/// - If no soul is currently selected, all rows render as `.default`.
+/// - As soon as one or more souls are selected, selected rows render as
+///   `.selected` and every other soul renders as `.unselected`.
+/// - The `.create` tile is always rendered the same; selection does not
+///   affect it.
 struct SoulPickerSheet: View {
     let currentSelection: [UUID]
     let onConfirm: ([UUID]) -> Void
@@ -24,7 +27,7 @@ struct SoulPickerSheet: View {
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "pebble-form.souls")
 
-    private let columns = [GridItem(.adaptive(minimum: 96), spacing: 16)]
+    private let columns = [GridItem(.adaptive(minimum: 96), spacing: Spacing.lg)]
 
     var body: some View {
         NavigationStack {
@@ -68,28 +71,43 @@ struct SoulPickerSheet: View {
             )
         } else {
             ScrollView {
-                LazyVGrid(columns: columns, spacing: 16) {
-                    NewSoulTile { isPresentingCreate = true }
-                    ForEach(souls) { soul in
-                        SoulSelectableCell(
-                            soul: soul,
-                            isSelected: selection.contains(soul.id),
-                            onToggle: { toggle(soul.id) }
-                        )
+                VStack(alignment: .leading, spacing: Spacing.lg) {
+                    Text("All my souls")
+                        .pebblesFont(.cardHeading)
+                        .foregroundStyle(Color.system.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    LazyVGrid(columns: columns, spacing: Spacing.lg) {
+                        SoulItem(case: .create, soul: nil, count: nil) {
+                            isPresentingCreate = true
+                        }
+                        ForEach(souls) { soul in
+                            SoulItem(
+                                case: itemCase(for: soul.id),
+                                soul: soul,
+                                count: nil
+                            ) {
+                                toggle(soul.id)
+                            }
+                        }
+                    }
+
+                    if souls.isEmpty {
+                        Text("Add the first soul to tag this pebble with")
+                            .pebblesFont(.callout)
+                            .foregroundStyle(Color.system.secondary)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity)
                     }
                 }
-                .padding()
-
-                if souls.isEmpty {
-                    Text("Add the first soul to tag this pebble with")
-                        .font(.callout)
-                        .foregroundStyle(Color.system.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                        .padding(.top, 8)
-                }
+                .padding(Spacing.lg)
             }
         }
+    }
+
+    private func itemCase(for id: UUID) -> SoulItem.Case {
+        if selection.isEmpty { return .default }
+        return selection.contains(id) ? .selected : .unselected
     }
 
     private func toggle(_ id: UUID) {
@@ -117,37 +135,5 @@ struct SoulPickerSheet: View {
             self.loadError = "Something went wrong. Please try again."
         }
         self.isLoading = false
-    }
-}
-
-/// Trailing tile in the picker grid that opens `CreateSoulSheet`.
-/// Visually matches a soul cell: same 96pt square frame, dashed border,
-/// `person.badge.plus` icon, and "+ New soul" label below.
-private struct NewSoulTile: View {
-    let onTap: () -> Void
-
-    var body: some View {
-        Button(action: onTap) {
-            VStack(spacing: 8) {
-                RoundedRectangle(cornerRadius: 12)
-                    .strokeBorder(
-                        Color.system.secondary,
-                        style: StrokeStyle(lineWidth: 1.5, dash: [4])
-                    )
-                    .frame(width: 96, height: 96)
-                    .overlay {
-                        Image(systemName: "person.badge.plus")
-                            .font(.title2)
-                            .foregroundStyle(Color.system.secondary)
-                    }
-                Text("+ New soul")
-                    .font(.callout)
-                    .foregroundStyle(Color.system.secondary)
-                    .lineLimit(1)
-                    .frame(maxWidth: .infinity)
-            }
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel("Create a new soul")
     }
 }

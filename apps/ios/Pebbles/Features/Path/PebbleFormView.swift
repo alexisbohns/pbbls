@@ -220,7 +220,7 @@ struct PebbleFormView: View {
                 } label: {
                     HStack(spacing: 12) {
                         if let glyph = selectedGlyph {
-                            GlyphThumbnail(strokes: glyph.strokes, side: 32)
+                            GlyphView(case: .default, strokes: glyph.strokes, side: 32)
                                 .accessibilityHidden(true)
                         } else {
                             RoundedRectangle(cornerRadius: 6)

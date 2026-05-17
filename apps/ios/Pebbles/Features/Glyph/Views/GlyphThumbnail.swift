@@ -1,22 +1,21 @@
 import SwiftUI
 
-/// Square preview of a glyph. Renders each `GlyphStroke.d` via `SVGPath.path(from:)`
-/// inside a 200x200 coordinate space, scaled to the requested side length.
+/// Pure stroke canvas for a glyph. Renders each `GlyphStroke.d` via
+/// `SVGPath.path(from:)` inside a 200x200 coordinate space, scaled to the
+/// requested side length. No background, no clipping — chrome is the
+/// caller's responsibility (see `GlyphView` for the canonical wrapper).
 ///
-/// Used in:
-/// - `PebbleFormView` glyph row (32pt)
-/// - `GlyphPickerSheet` grid cells (~100pt)
-/// - `GlyphsListView` grid cells (~100pt)
-/// - `GlyphCarveSheet` "saved" confirmation (200pt)
+/// Direct callers after the #459 refactor:
+/// - `SoulPill` (path)         — explicitly chrome-less inside a pill
+/// - `PebbleMetaPill` (path)   — explicitly chrome-less inside a pill
+/// - `GlyphView` (composition) — owns 34-radius border + state colors
 struct GlyphThumbnail: View {
     let strokes: [GlyphStroke]
     var side: CGFloat = 100
     var strokeColor: Color = .primary
-    var backgroundColor: Color = Color.secondary.opacity(0.08)
 
     var body: some View {
         Canvas { ctx, size in
-            // Scale 200x200 glyph coords to the requested frame size.
             let scale = size.width / 200.0
             for stroke in strokes {
                 var path = SVGPath.path(from: stroke.d)
@@ -33,8 +32,6 @@ struct GlyphThumbnail: View {
             }
         }
         .frame(width: side, height: side)
-        .background(backgroundColor)
-        .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 }
 
@@ -44,7 +41,8 @@ struct GlyphThumbnail: View {
             GlyphStroke(d: "M30,30 L170,170", width: 6),
             GlyphStroke(d: "M170,30 L30,170", width: 6)
         ],
-        side: 120
+        side: 120,
+        strokeColor: .primary
     )
     .padding()
 }

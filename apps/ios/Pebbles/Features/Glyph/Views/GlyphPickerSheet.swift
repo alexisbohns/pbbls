@@ -72,12 +72,10 @@ struct GlyphPickerSheet: View {
                                     onSelected(glyph)
                                     dismiss()
                                 } label: {
-                                    GlyphThumbnail(
+                                    GlyphView(
+                                        case: glyph.id == currentGlyphId ? .selected : .default,
                                         strokes: glyph.strokes,
-                                        side: 96,
-                                        backgroundColor: glyph.id == currentGlyphId
-                                            ? Color.accentColor.opacity(0.15)
-                                            : Color.secondary.opacity(0.08)
+                                        side: 96
                                     )
                                 }
                                 .accessibilityLabel(glyph.name ?? "Untitled glyph")
@@ -94,18 +92,15 @@ struct GlyphPickerSheet: View {
         Button {
             showCarveSheet = true
         } label: {
-            HStack(spacing: 12) {
-                RoundedRectangle(cornerRadius: 8)
-                    .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [4]))
-                    .frame(width: 48, height: 48)
-                    .overlay(Image(systemName: "plus"))
+            HStack(spacing: Spacing.sm) {
+                GlyphView(case: .carve, side: 48)
                 Text("Carve new glyph")
                     .font(.body)
                 Spacer()
                 Image(systemName: "chevron.right")
                     .foregroundStyle(.secondary)
             }
-            .padding(12)
+            .padding(Spacing.sm)
             .background(Color.secondary.opacity(0.06))
             .clipShape(RoundedRectangle(cornerRadius: 10))
         }

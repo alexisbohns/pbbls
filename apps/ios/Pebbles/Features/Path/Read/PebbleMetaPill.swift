@@ -59,8 +59,7 @@ struct PebbleMetaPill: View {
             GlyphThumbnail(
                 strokes: glyph.strokes,
                 side: 16,
-                strokeColor: foreground,
-                backgroundColor: .clear
+                strokeColor: foreground
             )
         }
     }
