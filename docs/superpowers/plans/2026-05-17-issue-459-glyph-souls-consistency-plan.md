@@ -24,15 +24,11 @@
 
 ### Create
 - `apps/ios/Pebbles/Theme/Spacing.swift` — spacing scale (Task 1).
-- `apps/ios/Pebbles/Resources/Fonts/SF-Compact-Rounded-Medium.otf` — bundled font (Task 2).
-- `apps/ios/Pebbles/Resources/Fonts/SF-Compact-Rounded-Semibold.otf` — bundled font (Task 2).
-- `apps/ios/Pebbles/Resources/Fonts/SF-Compact-Rounded-Bold.otf` — bundled font (Task 2).
-- `apps/ios/Pebbles/Features/Glyph/Views/GlyphView.swift` — `Glyph` component (Task 4).
+- `apps/ios/Pebbles/Features/Glyph/Views/GlyphView.swift` — `GlyphView` component (Task 4).
 - `apps/ios/Pebbles/Features/Shared/SoulItem.swift` — `SoulItem` component (Task 5).
 
 ### Modify
-- `apps/ios/Pebbles/Theme/Font+Pebbles.swift` — add helpers, tokens, modifier (Task 2).
-- `apps/ios/Pebbles/Resources/Info.plist` — register the three new TTFs in `UIAppFonts` (Task 2).
+- `apps/ios/Pebbles/Theme/Font+Pebbles.swift` — add helpers, tokens, modifier (Task 2). SF Compact OTFs not bundled per user decision; `sfCompactRounded` helper falls back to SF Pro Rounded automatically.
 - `apps/ios/Pebbles/Features/Glyph/Views/GlyphThumbnail.swift` — strip chrome (Task 3).
 - `apps/ios/Pebbles/Features/Path/PebbleFormView.swift` — migrate to `Glyph(.default)` (Task 4).
 - `apps/ios/Pebbles/Features/Profile/Sheets/SettingsSheet.swift` — migrate to `Glyph(.profile)` (Task 4).
@@ -112,64 +108,13 @@ git commit -m "feat(ios): add spacing scale" -m "Co-Authored-By: Claude Opus 4.7
 **Commit message:** `feat(ios): introduce typography tokens`
 
 **Files:**
-- Create: `apps/ios/Pebbles/Resources/Fonts/SF-Compact-Rounded-Medium.otf`
-- Create: `apps/ios/Pebbles/Resources/Fonts/SF-Compact-Rounded-Semibold.otf`
-- Create: `apps/ios/Pebbles/Resources/Fonts/SF-Compact-Rounded-Bold.otf`
-- Modify: `apps/ios/Pebbles/Resources/Info.plist:42-45` (extend `UIAppFonts`)
 - Modify: `apps/ios/Pebbles/Theme/Font+Pebbles.swift` (full rewrite — extend with helpers + tokens + modifier)
 
-- [ ] **Step 2.1 — Source the SF Compact Rounded TTFs**
+**Font sourcing decision:** Per the user, the SF Compact Rounded OTFs are **not bundled in this PR** (~18MB hit deemed not worth the visual delta). The `sfCompactRounded(...)` helper below is written to fall back to `Font.system(size:weight:design:.rounded)` (which uses SF Pro Rounded) when `UIFont(name:"SFCompactRounded-...")` returns nil — which it will, since no OTFs are bundled. If a later PR drops the OTFs into `Resources/Fonts/` and registers them in `Info.plist`, the helper will start picking them up with zero code changes.
 
-Apple ships SF Compact in a DMG at https://developer.apple.com/fonts/ → "SF Compact" download. Mount the DMG, open the `.pkg`, and from the installed `/Library/Fonts/` (or the package's `Payload`) copy:
-- `SF-Compact-Rounded-Medium.otf`
-- `SF-Compact-Rounded-Semibold.otf`
-- `SF-Compact-Rounded-Bold.otf`
+Skip the OTF / Info.plist work and go straight to the helper rewrite:
 
-Place them under `apps/ios/Pebbles/Resources/Fonts/` (create the `Fonts/` directory if it does not exist).
-
-**Fallback if the TTFs cannot be obtained:** skip Step 2.1 and Step 2.3, and in Step 2.5 below replace the `sfCompactRounded` helper body with the `Font.system(size:weight:design:.rounded)` fallback documented in the spec's §1 risk note. The rest of the task proceeds unchanged.
-
-- [ ] **Step 2.2 — Verify the files landed**
-
-Run from repo root:
-```bash
-ls -lh apps/ios/Pebbles/Resources/Fonts/
-```
-Expected: three `.otf` files, each non-zero size.
-
-- [ ] **Step 2.3 — Register fonts in `Info.plist`**
-
-Edit `apps/ios/Pebbles/Resources/Info.plist` lines 42–45. Replace:
-
-```xml
-<key>UIAppFonts</key>
-<array>
-    <string>Ysabeau SemiBold.ttf</string>
-</array>
-```
-
-With:
-
-```xml
-<key>UIAppFonts</key>
-<array>
-    <string>Ysabeau SemiBold.ttf</string>
-    <string>Fonts/SF-Compact-Rounded-Medium.otf</string>
-    <string>Fonts/SF-Compact-Rounded-Semibold.otf</string>
-    <string>Fonts/SF-Compact-Rounded-Bold.otf</string>
-</array>
-```
-
-- [ ] **Step 2.4 — Confirm font PostScript names**
-
-Open one of the OTFs in Font Book (`open apps/ios/Pebbles/Resources/Fonts/SF-Compact-Rounded-Medium.otf`) and note the PostScript name shown in the info panel (e.g. `SFCompactRounded-Medium`). The three names must match what we'll request in `UIFont(name:)`. Apple's standard PostScript names for these weights are:
-- `SFCompactRounded-Medium`
-- `SFCompactRounded-Semibold`
-- `SFCompactRounded-Bold`
-
-If Font Book shows a different casing or spelling, use the exact PostScript name in Step 2.5 instead.
-
-- [ ] **Step 2.5 — Replace `Font+Pebbles.swift`**
+- [ ] **Step 2.1 — Replace `Font+Pebbles.swift`**
 
 Full file replacement:
 
@@ -314,12 +259,12 @@ extension Font {
 }
 ```
 
-- [ ] **Step 2.6 — Regenerate project**
+- [ ] **Step 2.2 — Regenerate project**
 
 Run: `npm run generate --workspace=@pbbls/ios`
-Expected: xcodegen exits 0; `Resources/Fonts/*.otf` are visible under the Pebbles target.
+Expected: xcodegen exits 0.
 
-- [ ] **Step 2.7 — Build + token sanity check**
+- [ ] **Step 2.3 — Build + token sanity check**
 
 Run from `apps/ios/`:
 ```bash
@@ -327,7 +272,7 @@ xcodebuild -scheme Pebbles -destination 'platform=iOS Simulator,name=iPhone 15' 
 ```
 Expected: `** BUILD SUCCEEDED **`.
 
-Then, in `Font+Pebbles.swift` at the bottom of the file, temporarily add (will be removed in Step 2.8):
+Then, in `Font+Pebbles.swift` at the bottom of the file, temporarily add (will be removed in Step 2.4):
 
 ```swift
 #Preview("Pebbles font tokens") {
@@ -350,16 +295,16 @@ Then, in `Font+Pebbles.swift` at the bottom of the file, temporarily add (will b
 }
 ```
 
-Open the file in Xcode; the canvas should render two distinguishable rounded-font families. `meta` and `cardHeading` must render UPPERCASE with visible letter-spacing. If `meta`/`cardHeading` look identical to `subhead`, the SF Compact OTFs are not loading — re-check Step 2.4 (PostScript name) and Step 2.3 (`Info.plist` entry path).
+Open the file in Xcode; the canvas should render the token specimens. Since SF Compact OTFs are not bundled, `meta` and `cardHeading` will render in SF Pro Rounded — that's expected. They must still display UPPERCASE with visible letter-spacing (those come from the modifier, not the font).
 
-- [ ] **Step 2.8 — Remove the temporary preview**
+- [ ] **Step 2.4 — Remove the temporary preview**
 
-Delete the `#Preview("Pebbles font tokens")` block added in Step 2.7. The token catalog ships without a preview to avoid coupling the theme file to specimen content.
+Delete the `#Preview("Pebbles font tokens")` block added in Step 2.3. The token catalog ships without a preview to avoid coupling the theme file to specimen content.
 
-- [ ] **Step 2.9 — Commit**
+- [ ] **Step 2.5 — Commit**
 
 ```bash
-git add apps/ios/Pebbles/Resources/Fonts/ apps/ios/Pebbles/Resources/Info.plist apps/ios/Pebbles/Theme/Font+Pebbles.swift
+git add apps/ios/Pebbles/Theme/Font+Pebbles.swift
 git commit -m "feat(ios): introduce typography tokens" -m "Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 ```
 
