@@ -9,6 +9,10 @@ struct ProfileBanner: View {
         VStack(spacing: 12) {
             glyph
                 .frame(width: 96, height: 96)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .strokeBorder(Color.system.muted, lineWidth: 1)
+                )
 
             VStack(spacing: 2) {
                 Text(displayName ?? "")
