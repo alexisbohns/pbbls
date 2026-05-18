@@ -40,10 +40,11 @@ private struct PebblesListModifier: ViewModifier {
 
 // MARK: - Row chrome
 
-/// Applied to each row inside a Section: clears the native row background
-/// and draws the section border's contribution for this row (top/bottom
-/// corners rounded according to `position`). Adjacent rows' borders
-/// overlap on the shared horizontal edge — visually a single rectangle.
+/// Applied to each row inside a Section: replaces the native row background
+/// with a `system.muted` stroke that draws only the edges this row owns —
+/// top/sides for the first row, sides only for middle rows, bottom/sides for
+/// the last. Combined with the list-level `listRowSeparatorTint` (also
+/// `system.muted`), the horizontal dividers between rows complete the card.
 extension View {
     func pebblesListRow(position: PebblesListRowPosition = .only) -> some View {
         modifier(PebblesListRowModifier(position: position))
@@ -54,37 +55,77 @@ private struct PebblesListRowModifier: ViewModifier {
     let position: PebblesListRowPosition
 
     func body(content: Content) -> some View {
-        content
-            .listRowBackground(Color.clear)
-            .overlay(borderOverlay)
+        content.listRowBackground(
+            PebblesSectionBorderShape(position: position, radius: Spacing.lg)
+                .stroke(Color.system.muted, lineWidth: 1)
+        )
     }
+}
 
-    private var borderOverlay: some View {
-        let radius = Spacing.lg
-        let radii: RectangleCornerRadii = {
-            switch position {
-            case .only:
-                return RectangleCornerRadii(
-                    topLeading: radius, bottomLeading: radius,
-                    bottomTrailing: radius, topTrailing: radius
-                )
-            case .top:
-                return RectangleCornerRadii(
-                    topLeading: radius, bottomLeading: 0,
-                    bottomTrailing: 0, topTrailing: radius
-                )
-            case .middle:
-                return RectangleCornerRadii()
-            case .bottom:
-                return RectangleCornerRadii(
-                    topLeading: 0, bottomLeading: radius,
-                    bottomTrailing: radius, topTrailing: 0
-                )
-            }
-        }()
-        return UnevenRoundedRectangle(cornerRadii: radii)
-            .strokeBorder(Color.system.muted, lineWidth: 1)
-            .allowsHitTesting(false)
+/// Draws only the perimeter edges this row owns inside the section card.
+/// Open paths (top/middle/bottom) avoid double-stroking shared horizontal
+/// edges — the system row separator handles those dividers.
+private struct PebblesSectionBorderShape: Shape {
+    let position: PebblesListRowPosition
+    let radius: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        // Inset by half the line width so the 1pt stroke stays fully inside
+        // the row's clip bounds (otherwise the outer edge gets clipped).
+        let bounds = rect.insetBy(dx: 0.5, dy: 0.5)
+        let cornerR = min(radius, min(bounds.width, bounds.height) / 2)
+        var path = Path()
+        switch position {
+        case .only:
+            path.addRoundedRect(
+                in: bounds,
+                cornerSize: CGSize(width: cornerR, height: cornerR)
+            )
+        case .top:
+            path.move(to: CGPoint(x: bounds.minX, y: bounds.maxY))
+            path.addLine(to: CGPoint(x: bounds.minX, y: bounds.minY + cornerR))
+            path.addArc(
+                center: CGPoint(x: bounds.minX + cornerR, y: bounds.minY + cornerR),
+                radius: cornerR,
+                startAngle: .degrees(180),
+                endAngle: .degrees(270),
+                clockwise: false
+            )
+            path.addLine(to: CGPoint(x: bounds.maxX - cornerR, y: bounds.minY))
+            path.addArc(
+                center: CGPoint(x: bounds.maxX - cornerR, y: bounds.minY + cornerR),
+                radius: cornerR,
+                startAngle: .degrees(270),
+                endAngle: .degrees(0),
+                clockwise: false
+            )
+            path.addLine(to: CGPoint(x: bounds.maxX, y: bounds.maxY))
+        case .middle:
+            path.move(to: CGPoint(x: bounds.minX, y: bounds.minY))
+            path.addLine(to: CGPoint(x: bounds.minX, y: bounds.maxY))
+            path.move(to: CGPoint(x: bounds.maxX, y: bounds.minY))
+            path.addLine(to: CGPoint(x: bounds.maxX, y: bounds.maxY))
+        case .bottom:
+            path.move(to: CGPoint(x: bounds.minX, y: bounds.minY))
+            path.addLine(to: CGPoint(x: bounds.minX, y: bounds.maxY - cornerR))
+            path.addArc(
+                center: CGPoint(x: bounds.minX + cornerR, y: bounds.maxY - cornerR),
+                radius: cornerR,
+                startAngle: .degrees(180),
+                endAngle: .degrees(90),
+                clockwise: true
+            )
+            path.addLine(to: CGPoint(x: bounds.maxX - cornerR, y: bounds.maxY))
+            path.addArc(
+                center: CGPoint(x: bounds.maxX - cornerR, y: bounds.maxY - cornerR),
+                radius: cornerR,
+                startAngle: .degrees(90),
+                endAngle: .degrees(0),
+                clockwise: true
+            )
+            path.addLine(to: CGPoint(x: bounds.maxX, y: bounds.minY))
+        }
+        return path
     }
 }
 
