@@ -108,6 +108,7 @@ struct PebbleFormView: View {
                     // Form rows add insets and a card background; strip both so the artwork spans edge-to-edge.
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
             }
 
             Section {

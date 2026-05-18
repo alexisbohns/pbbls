@@ -132,6 +132,7 @@ struct SettingsSheet: View {
             }
             .buttonStyle(.plain)
             .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
         }
     }
 
