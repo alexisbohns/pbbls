@@ -86,7 +86,7 @@ struct CollectionsListView: View {
             )
         } else {
             List {
-                ForEach(items) { collection in
+                ForEach(Array(items.enumerated()), id: \.element.id) { index, collection in
                     NavigationLink {
                         CollectionDetailView(collection: collection, onChanged: {
                             Task {
@@ -104,10 +104,10 @@ struct CollectionsListView: View {
                             Label("Delete", systemImage: "trash")
                         }
                     }
-                    .listRowBackground(Color.clear)
+                    .pebblesListRow(position: pebblesRowPosition(index: index, count: items.count))
                 }
             }
-            .listRowSeparatorTint(Color.system.muted)
+            .pebblesList()
         }
     }
 
