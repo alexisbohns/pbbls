@@ -62,7 +62,7 @@ struct SettingsSheet: View {
 
     var body: some View {
         NavigationStack {
-            Form {
+            List {
                 headerSection
                 informationsSection
                 if isSSO {

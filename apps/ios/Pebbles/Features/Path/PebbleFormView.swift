@@ -99,7 +99,7 @@ struct PebbleFormView: View {
     }
 
     var body: some View {
-        Form {
+        List {
             if let svg = renderSvg {
                 PebbleRenderView(svg: svg, strokeColor: strokeColor)
                     .frame(maxWidth: .infinity)
@@ -170,6 +170,7 @@ struct PebbleFormView: View {
                         Text(domain.localizedName).tag(UUID?.some(domain.id))
                     }
                 }
+                .pickerStyle(.menu)
                 .pebblesListRow(position: .middle)
 
                 Button {
@@ -271,6 +272,7 @@ struct PebbleFormView: View {
                         Text(collection.name).tag(UUID?.some(collection.id))
                     }
                 }
+                .pickerStyle(.menu)
                 .pebblesListRow(position: .only)
             } header: {
                 Text("Optional").pebblesSectionHeader()

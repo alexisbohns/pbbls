@@ -36,6 +36,7 @@ private struct PebblesListModifier: ViewModifier {
             .scrollContentBackground(.hidden)
             .listRowSeparatorTint(Color.system.muted)
             .listSectionSpacing(Spacing.lg)
+            .padding(.horizontal, Spacing.lg)
     }
 }
 

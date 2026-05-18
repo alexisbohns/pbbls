@@ -22,7 +22,7 @@ struct CreateCollectionSheet: View {
 
     var body: some View {
         NavigationStack {
-            Form {
+            List {
                 Section {
                     TextField("Name", text: $name)
                         .textInputAutocapitalization(.words)

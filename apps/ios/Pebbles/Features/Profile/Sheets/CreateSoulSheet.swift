@@ -20,7 +20,7 @@ struct CreateSoulSheet: View {
 
     var body: some View {
         NavigationStack {
-            Form {
+            List {
                 Section {
                     TextField("Name", text: $draft.name)
                         .textInputAutocapitalization(.words)
