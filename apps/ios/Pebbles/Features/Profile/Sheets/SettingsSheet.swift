@@ -131,7 +131,7 @@ struct SettingsSheet: View {
                 .padding(.vertical, 8)
             }
             .buttonStyle(.plain)
-            .pebblesListRow(position: .only)
+            .listRowBackground(Color.clear)
         }
     }
 

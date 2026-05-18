@@ -55,77 +55,42 @@ private struct PebblesListRowModifier: ViewModifier {
     let position: PebblesListRowPosition
 
     func body(content: Content) -> some View {
-        content.listRowBackground(
-            PebblesSectionBorderShape(position: position, radius: Spacing.lg)
-                .stroke(Color.system.muted, lineWidth: 1)
-        )
+        content
+            .listRowBackground(borderBackground)
+            .listRowSeparatorTint(Color.system.muted)
     }
-}
 
-/// Draws only the perimeter edges this row owns inside the section card.
-/// Open paths (top/middle/bottom) avoid double-stroking shared horizontal
-/// edges — the system row separator handles those dividers.
-private struct PebblesSectionBorderShape: Shape {
-    let position: PebblesListRowPosition
-    let radius: CGFloat
-
-    func path(in rect: CGRect) -> Path {
-        // Inset by half the line width so the 1pt stroke stays fully inside
-        // the row's clip bounds (otherwise the outer edge gets clipped).
-        let bounds = rect.insetBy(dx: 0.5, dy: 0.5)
-        let cornerR = min(radius, min(bounds.width, bounds.height) / 2)
-        var path = Path()
+    @ViewBuilder
+    private var borderBackground: some View {
+        let radius = Spacing.lg
         switch position {
         case .only:
-            path.addRoundedRect(
-                in: bounds,
-                cornerSize: CGSize(width: cornerR, height: cornerR)
-            )
+            RoundedRectangle(cornerRadius: radius)
+                .strokeBorder(Color.system.muted, lineWidth: 1)
         case .top:
-            path.move(to: CGPoint(x: bounds.minX, y: bounds.maxY))
-            path.addLine(to: CGPoint(x: bounds.minX, y: bounds.minY + cornerR))
-            path.addArc(
-                center: CGPoint(x: bounds.minX + cornerR, y: bounds.minY + cornerR),
-                radius: cornerR,
-                startAngle: .degrees(180),
-                endAngle: .degrees(270),
-                clockwise: false
+            UnevenRoundedRectangle(
+                cornerRadii: RectangleCornerRadii(
+                    topLeading: radius,
+                    bottomLeading: 0,
+                    bottomTrailing: 0,
+                    topTrailing: radius
+                )
             )
-            path.addLine(to: CGPoint(x: bounds.maxX - cornerR, y: bounds.minY))
-            path.addArc(
-                center: CGPoint(x: bounds.maxX - cornerR, y: bounds.minY + cornerR),
-                radius: cornerR,
-                startAngle: .degrees(270),
-                endAngle: .degrees(0),
-                clockwise: false
-            )
-            path.addLine(to: CGPoint(x: bounds.maxX, y: bounds.maxY))
+            .strokeBorder(Color.system.muted, lineWidth: 1)
         case .middle:
-            path.move(to: CGPoint(x: bounds.minX, y: bounds.minY))
-            path.addLine(to: CGPoint(x: bounds.minX, y: bounds.maxY))
-            path.move(to: CGPoint(x: bounds.maxX, y: bounds.minY))
-            path.addLine(to: CGPoint(x: bounds.maxX, y: bounds.maxY))
+            Rectangle()
+                .strokeBorder(Color.system.muted, lineWidth: 1)
         case .bottom:
-            path.move(to: CGPoint(x: bounds.minX, y: bounds.minY))
-            path.addLine(to: CGPoint(x: bounds.minX, y: bounds.maxY - cornerR))
-            path.addArc(
-                center: CGPoint(x: bounds.minX + cornerR, y: bounds.maxY - cornerR),
-                radius: cornerR,
-                startAngle: .degrees(180),
-                endAngle: .degrees(90),
-                clockwise: true
+            UnevenRoundedRectangle(
+                cornerRadii: RectangleCornerRadii(
+                    topLeading: 0,
+                    bottomLeading: radius,
+                    bottomTrailing: radius,
+                    topTrailing: 0
+                )
             )
-            path.addLine(to: CGPoint(x: bounds.maxX - cornerR, y: bounds.maxY))
-            path.addArc(
-                center: CGPoint(x: bounds.maxX - cornerR, y: bounds.maxY - cornerR),
-                radius: cornerR,
-                startAngle: .degrees(90),
-                endAngle: .degrees(0),
-                clockwise: true
-            )
-            path.addLine(to: CGPoint(x: bounds.maxX, y: bounds.minY))
+            .strokeBorder(Color.system.muted, lineWidth: 1)
         }
-        return path
     }
 }
 
