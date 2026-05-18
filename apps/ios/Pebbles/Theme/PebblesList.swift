@@ -11,7 +11,6 @@ enum PebblesListRowPosition {
     case bottom
 }
 
-/// Map a `ForEach` index/count pair to a row position.
 func pebblesRowPosition(index: Int, count: Int) -> PebblesListRowPosition {
     if count <= 1 { return .only }
     if index == 0 { return .top }
@@ -57,7 +56,6 @@ private struct PebblesListRowModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .listRowBackground(Color.clear)
-            .listRowSeparatorTint(Color.system.muted)
             .overlay(borderOverlay)
     }
 
@@ -76,10 +74,7 @@ private struct PebblesListRowModifier: ViewModifier {
                     bottomTrailing: 0, topTrailing: radius
                 )
             case .middle:
-                return RectangleCornerRadii(
-                    topLeading: 0, bottomLeading: 0,
-                    bottomTrailing: 0, topTrailing: 0
-                )
+                return RectangleCornerRadii()
             case .bottom:
                 return RectangleCornerRadii(
                     topLeading: 0, bottomLeading: radius,
