@@ -125,14 +125,16 @@ struct SoulDetailView: View {
                     .frame(maxHeight: .infinity)
                 } else {
                     List {
-                        ForEach(pebbles) { pebble in
+                        ForEach(Array(pebbles.enumerated()), id: \.element.id) { index, pebble in
                             PebbleRow(
                                 pebble: pebble,
                                 onTap: { selectedPebbleId = pebble.id },
                                 onDelete: { pendingDeletion = pebble }
                             )
+                            .pebblesListRow(position: pebblesRowPosition(index: index, count: pebbles.count))
                         }
                     }
+                    .pebblesList()
                 }
             }
         }
