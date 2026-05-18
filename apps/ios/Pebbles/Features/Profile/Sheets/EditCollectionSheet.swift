@@ -36,12 +36,15 @@ struct EditCollectionSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Name") {
+                Section {
                     TextField("Name", text: $name)
                         .textInputAutocapitalization(.words)
                         .autocorrectionDisabled(false)
+                        .pebblesListRow(position: .only)
+                } header: {
+                    Text("Name").pebblesSectionHeader()
                 }
-                Section("Mode") {
+                Section {
                     Picker("Mode", selection: $mode) {
                         Text("None").tag(CollectionMode?.none)
                         Text("Stack").tag(CollectionMode?.some(.stack))
@@ -49,15 +52,20 @@ struct EditCollectionSheet: View {
                         Text("Track").tag(CollectionMode?.some(.track))
                     }
                     .pickerStyle(.segmented)
+                    .pebblesListRow(position: .only)
+                } header: {
+                    Text("Mode").pebblesSectionHeader()
                 }
                 if let saveError {
                     Section {
                         Text(saveError)
                             .font(.footnote)
                             .foregroundStyle(.red)
+                            .pebblesListRow(position: .only)
                     }
                 }
             }
+            .pebblesList()
             .pebblesToolbarTitle("Edit collection")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
