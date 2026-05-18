@@ -32,6 +32,7 @@ extension View {
 private struct PebblesListModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
+            .listStyle(.plain)
             .scrollContentBackground(.hidden)
             .listRowSeparatorTint(Color.system.muted)
             .listSectionSpacing(Spacing.lg)
