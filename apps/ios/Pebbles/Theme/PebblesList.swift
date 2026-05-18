@@ -57,7 +57,7 @@ private struct PebblesListRowModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .listRowBackground(borderBackground)
-            .listRowSeparatorTint(Color.system.muted)
+            .listRowSeparator(.hidden)
     }
 
     @ViewBuilder
@@ -66,7 +66,7 @@ private struct PebblesListRowModifier: ViewModifier {
         switch position {
         case .only:
             RoundedRectangle(cornerRadius: radius)
-                .strokeBorder(Color.system.muted, lineWidth: 1)
+                .stroke(Color.system.muted, lineWidth: 1)
         case .top:
             UnevenRoundedRectangle(
                 cornerRadii: RectangleCornerRadii(
@@ -76,10 +76,10 @@ private struct PebblesListRowModifier: ViewModifier {
                     topTrailing: radius
                 )
             )
-            .strokeBorder(Color.system.muted, lineWidth: 1)
+            .stroke(Color.system.muted, lineWidth: 1)
         case .middle:
             Rectangle()
-                .strokeBorder(Color.system.muted, lineWidth: 1)
+                .stroke(Color.system.muted, lineWidth: 1)
         case .bottom:
             UnevenRoundedRectangle(
                 cornerRadii: RectangleCornerRadii(
@@ -89,7 +89,7 @@ private struct PebblesListRowModifier: ViewModifier {
                     topTrailing: 0
                 )
             )
-            .strokeBorder(Color.system.muted, lineWidth: 1)
+            .stroke(Color.system.muted, lineWidth: 1)
         }
     }
 }
