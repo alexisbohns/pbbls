@@ -121,21 +121,25 @@ struct CollectionDetailView: View {
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
+                    .pebblesListRow(position: .only)
                 }
 
                 ForEach(groupedPebbles, id: \.key) { group in
-                    Section(header: Text(Self.monthFormatter.string(from: group.key))) {
-                        ForEach(group.value) { pebble in
+                    Section {
+                        ForEach(Array(group.value.enumerated()), id: \.element.id) { index, pebble in
                             PebbleRow(
                                 pebble: pebble,
                                 onTap: { selectedPebbleId = pebble.id },
                                 onDelete: { pendingDeletion = pebble }
                             )
+                            .pebblesListRow(position: pebblesRowPosition(index: index, count: group.value.count))
                         }
+                    } header: {
+                        Text(Self.monthFormatter.string(from: group.key)).pebblesSectionHeader()
                     }
                 }
             }
-            .listStyle(.insetGrouped)
+            .pebblesList()
         }
     }
 

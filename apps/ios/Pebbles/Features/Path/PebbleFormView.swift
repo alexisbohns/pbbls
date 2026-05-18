@@ -99,7 +99,7 @@ struct PebbleFormView: View {
     }
 
     var body: some View {
-        Form {
+        List {
             if let svg = renderSvg {
                 PebbleRenderView(svg: svg, strokeColor: strokeColor)
                     .frame(maxWidth: .infinity)
@@ -108,6 +108,7 @@ struct PebbleFormView: View {
                     // Form rows add insets and a card background; strip both so the artwork spans edge-to-edge.
                     .listRowInsets(EdgeInsets())
                     .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
             }
 
             Section {
@@ -117,17 +118,17 @@ struct PebbleFormView: View {
                     displayedComponents: [.date, .hourAndMinute]
                 )
                 .tint(Color.accent.primary)
-                .listRowBackground(Color.clear)
+                .pebblesListRow(position: .top)
 
                 TextField("Name", text: $draft.name)
-                    .listRowBackground(Color.clear)
+                    .pebblesListRow(position: .middle)
 
                 TextField("Description (optional)", text: $draft.description, axis: .vertical)
                     .lineLimit(1...5)
-                    .listRowBackground(Color.clear)
+                    .pebblesListRow(position: .bottom)
             }
 
-            Section("Mood") {
+            Section {
                 Button {
                     showEmotionPicker = true
                 } label: {
@@ -162,7 +163,7 @@ struct PebbleFormView: View {
                         .map { Text(verbatim: $0.localizedName) }
                         ?? Text("Choose")
                 )
-                .listRowBackground(Color.clear)
+                .pebblesListRow(position: .top)
 
                 Picker("Domain", selection: $draft.domainId) {
                     Text("Choose…").tag(UUID?.none)
@@ -170,7 +171,8 @@ struct PebbleFormView: View {
                         Text(domain.localizedName).tag(UUID?.some(domain.id))
                     }
                 }
-                .listRowBackground(Color.clear)
+                .pickerStyle(.menu)
+                .pebblesListRow(position: .middle)
 
                 Button {
                     showValencePicker = true
@@ -211,10 +213,12 @@ struct PebbleFormView: View {
                 .accessibilityValue(
                     draft.valence.map { Text($0.label) } ?? Text("Choose")
                 )
-                .listRowBackground(Color.clear)
+                .pebblesListRow(position: .bottom)
+            } header: {
+                Text("Mood").pebblesSectionHeader()
             }
 
-            Section("Glyph") {
+            Section {
                 Button {
                     showPicker = true
                 } label: {
@@ -246,30 +250,37 @@ struct PebbleFormView: View {
                         }
                     }
                 }
-                .listRowBackground(Color.clear)
+                .pebblesListRow(position: .only)
+            } header: {
+                Text("Glyph").pebblesSectionHeader()
             }
 
-            Section("Souls") {
+            Section {
                 SelectedSoulsRow(
                     soulIds: $draft.soulIds,
                     allSouls: souls
                 )
                 .listRowInsets(EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16))
-                .listRowBackground(Color.clear)
+                .pebblesListRow(position: .only)
+            } header: {
+                Text("Souls").pebblesSectionHeader()
             }
 
-            Section("Optional") {
+            Section {
                 Picker("Collection", selection: $draft.collectionId) {
                     Text("None").tag(UUID?.none)
                     ForEach(collections) { collection in
                         Text(collection.name).tag(UUID?.some(collection.id))
                     }
                 }
-                .listRowBackground(Color.clear)
+                .pickerStyle(.menu)
+                .pebblesListRow(position: .only)
+            } header: {
+                Text("Optional").pebblesSectionHeader()
             }
 
             if showsPhotoSection {
-                Section("Photo") {
+                Section {
                     switch formSnap {
                     case .none:
                         Button {
@@ -277,22 +288,24 @@ struct PebbleFormView: View {
                         } label: {
                             Label("Add a photo", systemImage: "photo.badge.plus")
                         }
-                        .listRowBackground(Color.clear)
+                        .pebblesListRow(position: .only)
                     case .existing(_, let storagePath):
                         ExistingSnapRow(
                             storagePath: storagePath,
                             isRemoving: isRemovingExistingSnap,
                             onRemove: onRemoveExistingSnap
                         )
-                        .listRowBackground(Color.clear)
+                        .pebblesListRow(position: .only)
                     case .pending(let snap):
                         AttachedPhotoView(
                             snap: snap,
                             onRetry: onRetryPending,
                             onRemove: onRemovePending
                         )
-                        .listRowBackground(Color.clear)
+                        .pebblesListRow(position: .only)
                     }
+                } header: {
+                    Text("Photo").pebblesSectionHeader()
                 }
             }
 
@@ -301,11 +314,11 @@ struct PebbleFormView: View {
                     Text(saveError)
                         .foregroundStyle(.red)
                         .font(.callout)
-                        .listRowBackground(Color.clear)
+                        .pebblesListRow(position: .only)
                 }
             }
         }
-        .listRowSeparatorTint(Color.system.muted)
+        .pebblesList()
         .sheet(isPresented: $showPicker) {
             GlyphPickerSheet(
                 currentGlyphId: draft.glyphId,

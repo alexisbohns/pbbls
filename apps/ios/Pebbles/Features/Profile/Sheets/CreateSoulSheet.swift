@@ -20,26 +20,32 @@ struct CreateSoulSheet: View {
 
     var body: some View {
         NavigationStack {
-            Form {
+            List {
                 Section {
                     TextField("Name", text: $draft.name)
                         .textInputAutocapitalization(.words)
                         .autocorrectionDisabled(false)
+                        .pebblesListRow(position: .only)
                 }
-                Section("Glyph") {
+                Section {
                     GlyphRow(
                         glyph: draft.currentGlyph,
                         onTap: { isPresentingPicker = true }
                     )
+                    .pebblesListRow(position: .only)
+                } header: {
+                    Text("Glyph").pebblesSectionHeader()
                 }
                 if let saveError {
                     Section {
                         Text(saveError)
                             .font(.footnote)
                             .foregroundStyle(.red)
+                            .pebblesListRow(position: .only)
                     }
                 }
             }
+            .pebblesList()
             .pebblesToolbarTitle("New soul")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {

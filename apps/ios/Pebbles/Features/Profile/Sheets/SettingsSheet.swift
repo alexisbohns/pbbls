@@ -62,7 +62,7 @@ struct SettingsSheet: View {
 
     var body: some View {
         NavigationStack {
-            Form {
+            List {
                 headerSection
                 informationsSection
                 if isSSO {
@@ -75,10 +75,12 @@ struct SettingsSheet: View {
                         Text(saveError)
                             .font(.footnote)
                             .foregroundStyle(.red)
+                            .pebblesListRow(position: .only)
                     }
                 }
                 legalSection
             }
+            .pebblesList()
             .scrollDismissesKeyboard(.interactively)
             .pebblesToolbarTitle("Settings")
             .toolbar {
@@ -130,6 +132,7 @@ struct SettingsSheet: View {
             }
             .buttonStyle(.plain)
             .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
         }
     }
 
@@ -167,20 +170,23 @@ struct SettingsSheet: View {
     private var isSSO: Bool { !linkedProviders.isEmpty }
 
     private var providersSection: some View {
-        Section("Providers") {
-            ForEach(linkedProviders) { provider in
+        Section {
+            ForEach(Array(linkedProviders.enumerated()), id: \.element.id) { index, provider in
                 HStack(spacing: 12) {
                     Image(systemName: provider.systemImage)
                         .foregroundStyle(Color.system.secondary)
                     Text(verbatim: provider.label)
                     Spacer()
                 }
+                .pebblesListRow(position: pebblesRowPosition(index: index, count: linkedProviders.count))
             }
+        } header: {
+            Text("Providers").pebblesSectionHeader()
         }
     }
 
     private var informationsSection: some View {
-        Section("Informations") {
+        Section {
             HStack {
                 Text("Name")
                     .foregroundStyle(Color.system.secondary)
@@ -193,6 +199,7 @@ struct SettingsSheet: View {
                     .submitLabel(.done)
                     .onSubmit { focusedField = nil }
             }
+            .pebblesListRow(position: .top)
             HStack {
                 Text("Email")
                     .foregroundStyle(Color.system.secondary)
@@ -200,6 +207,9 @@ struct SettingsSheet: View {
                 Text(email ?? "—")
                     .foregroundStyle(Color.system.secondary)
             }
+            .pebblesListRow(position: .bottom)
+        } header: {
+            Text("Informations").pebblesSectionHeader()
         }
     }
 
@@ -212,23 +222,28 @@ struct SettingsSheet: View {
                 .focused($focusedField, equals: .newPassword)
                 .submitLabel(.done)
                 .onSubmit { focusedField = nil }
+                .pebblesListRow(position: .only)
         } header: {
-            Text("Password")
+            Text("Password").pebblesSectionHeader()
         } footer: {
             Text("Leave blank to keep your current password.")
         }
     }
 
     private var legalSection: some View {
-        Section("Legal") {
+        Section {
             Button { presentedLegalDoc = .terms } label: {
                 Label("Terms of Service", systemImage: "doc.text")
             }
             .buttonStyle(.plain)
+            .pebblesListRow(position: .top)
             Button { presentedLegalDoc = .privacy } label: {
                 Label("Privacy Policy", systemImage: "hand.raised")
             }
             .buttonStyle(.plain)
+            .pebblesListRow(position: .bottom)
+        } header: {
+            Text("Legal").pebblesSectionHeader()
         }
     }
 
