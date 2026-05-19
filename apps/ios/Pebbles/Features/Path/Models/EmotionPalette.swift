@@ -68,3 +68,27 @@ struct EmotionPalette: Equatable {
         return hex.count == 9 ? String(hex.prefix(7)) : hex
     }
 }
+
+/// Pair of hex strings handed to the pebble render stack: `strokeHex`
+/// is consumed by `PebbleRenderView` (replaces `currentColor` in the
+/// composed SVG); `fillHex` is consumed by `PebbleOutlineBackdropView`
+/// (replaces the `#FF00FF` sentinel in the outline SVG).
+struct PebbleFrameColors: Equatable {
+    let strokeHex: String
+    let fillHex: String
+}
+
+extension EmotionPalette {
+
+    /// Single source of truth for the intensity → role mapping.
+    /// - intensity 3 (large): `light` stroke + `primary` fill (opaque body).
+    /// - intensity 1 / 2:     `secondary` stroke + `surface` fill (alpha body).
+    func pebbleFrameColors(forIntensity intensity: Int) -> PebbleFrameColors {
+        switch intensity {
+        case 3:
+            return PebbleFrameColors(strokeHex: lightHex,     fillHex: primaryHex)
+        default:
+            return PebbleFrameColors(strokeHex: secondaryHex, fillHex: surfaceHex)
+        }
+    }
+}
