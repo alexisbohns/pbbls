@@ -161,7 +161,7 @@ struct CollectionDetailView: View {
         do {
             // Inner join on `collection_pebbles` filters parent rows; the extra
             // key is ignored by Pebble's default decoder.
-            let columns = "id, name, happened_at, created_at, intensity, render_svg"
+            let columns = "id, name, happened_at, created_at, intensity, positiveness, render_svg"
                 + ", emotion:emotions(id, slug, name)"
                 + ", collection_pebbles!inner(collection_id)"
             let result: [Pebble] = try await supabase.client
