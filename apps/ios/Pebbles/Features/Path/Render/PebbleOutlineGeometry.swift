@@ -8,6 +8,9 @@ import CoreGraphics
 /// correct relative size inside the backdrop.
 enum PebbleOutlineGeometry {
 
+    /// Outline frame dimensions from issue #473's SVG assets (the
+    /// `width` / `height` attributes on each `apps/ios/Pebbles/Resources/Outlines/<name>.svg`).
+    /// Keep in sync with the SVG files manually.
     private static let outlineSize: [ValenceSizeGroup: CGSize] = [
         .small:  CGSize(width: 337, height: 270),
         .medium: CGSize(width: 350, height: 350),
@@ -28,7 +31,7 @@ enum PebbleOutlineGeometry {
     /// aspect ratios (see `PebbleOutlineGeometryTests`).
     static func pebbleScale(for size: ValenceSizeGroup) -> Double {
         guard let outline = outlineSize[size], let pebble = pebbleSize[size] else {
-            return 1
+            fatalError("PebbleOutlineGeometry: missing geometry for \(size) — add to pebbleSize and outlineSize dictionaries")
         }
         return Double(pebble.width / outline.width)
     }
@@ -36,7 +39,9 @@ enum PebbleOutlineGeometry {
     /// Aspect ratio (`width / height`) of the outline viewBox for the
     /// outer `ZStack` to adopt via `.aspectRatio(_:contentMode:)`.
     static func aspectRatio(for size: ValenceSizeGroup) -> Double {
-        guard let outline = outlineSize[size] else { return 1 }
+        guard let outline = outlineSize[size] else {
+            fatalError("PebbleOutlineGeometry: missing geometry for \(size) — add to outlineSize dictionary")
+        }
         return Double(outline.width / outline.height)
     }
 }
