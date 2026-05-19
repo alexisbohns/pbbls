@@ -1429,6 +1429,7 @@ export type Database = {
           id: string
           intensity: number
           name: string
+          positiveness: number
           render_svg: string
         }[]
       }
