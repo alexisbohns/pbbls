@@ -21,7 +21,7 @@ struct GroupPebblesByISOWeekTests {
 
     private func pebble(_ happened: String) throws -> Pebble {
         let json = Data("""
-        { "id": "\(UUID().uuidString)", "name": "p", "happened_at": "\(happened)", "intensity": 1 }
+        { "id": "\(UUID().uuidString)", "name": "p", "happened_at": "\(happened)", "created_at": "\(happened)", "intensity": 1, "positiveness": 0 }
         """.utf8)
         let decoder = JSONDecoder()
         let formatter = ISO8601DateFormatter()

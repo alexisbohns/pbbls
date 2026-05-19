@@ -145,6 +145,7 @@ struct PathPebbleRow: View {
                     happenedAt: Date(),
                     createdAt: Date(),
                     intensity: 1,
+                    positiveness: 0,
                     renderSvg: nil,
                     emotion: nil,
                     firstSnapPath: nil
