@@ -5,21 +5,11 @@ import Foundation
 @Suite
 struct PebbleOutlineBackdropViewTests {
 
-    /// Locate the Pebbles app bundle from the test runner host.
-    private static var appBundle: Bundle? {
-        Bundle.allBundles.first { $0.bundleIdentifier?.hasPrefix("app.pbbls.ios") == true && !$0.bundleIdentifier!.contains("test") }
-    }
-
-    private static func svgURL(for name: String) -> URL? {
-        if let url = appBundle?.url(forResource: name, withExtension: "svg") { return url }
-        return Bundle.main.url(forResource: name, withExtension: "svg")
-    }
-
     /// The view's `coloredSvg` is private. We test the same logic by
     /// loading the asset directly and running the swap — exercises the
     /// contract (sentinel + replacement), not the SwiftUI body.
     @Test func sentinelSwapProducesNoMagentaResidue() throws {
-        let url = try #require(Self.svgURL(for: "small-neutral"), "missing asset: small-neutral.svg")
+        let url = try #require(Bundle.main.url(forResource: "small-neutral", withExtension: "svg"))
         let raw = try String(contentsOf: url, encoding: .utf8)
         let swapped = raw.replacingOccurrences(of: "#FF00FF", with: "#C07A7A")
         #expect(!swapped.contains("#FF00FF"))
