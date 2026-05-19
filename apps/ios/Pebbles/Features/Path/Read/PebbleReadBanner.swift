@@ -157,10 +157,14 @@ struct PebbleReadBanner: View {
     private var renderedPebble: some View {
         if let renderSvg {
             let palette = palettes.palette(for: emotionId)
+            let frameColors = palette?.pebbleFrameColors(forIntensity: valence.intensity)
             PebbleAnimatedRenderView(
                 svg: renderSvg,
                 strokeColor: palette?.stroke(for: colorScheme) ?? Color.accent.primary,
-                strokeColorHex: palette?.strokeHex(for: colorScheme) ?? Color.accent.primaryHex,
+                strokeColorHex: frameColors?.strokeHex ?? Color.accent.primaryHex,
+                fillHex: frameColors?.fillHex ?? Color.accent.primaryHex,
+                size: valence.sizeGroup,
+                polarity: valence.polarity,
                 renderVersion: renderVersion
             )
             .frame(height: pebbleHeight)
