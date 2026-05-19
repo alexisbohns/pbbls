@@ -20,10 +20,17 @@ struct PebbleOutlineBackdropView: View {
     private static let logger = Logger(subsystem: "app.pbbls.ios", category: "pebble-outline")
 
     private var coloredSvg: String? {
+        // Asset naming: "{size}-{polarity}.svg" (e.g. "small-neutral.svg") —
+        // matches ValenceSizeGroup.rawValue + ValencePolarity.rawValue exactly.
         let name = "\(size.rawValue)-\(polarity.rawValue)"
         guard let url = Bundle.main.url(forResource: name, withExtension: "svg"),
               let raw = try? String(contentsOf: url, encoding: .utf8) else {
             Self.logger.error("missing outline asset: \(name, privacy: .public).svg")
+            // Bundled-resource miss is a setup bug (xcodegen didn't pick the
+            // file up, or it was deleted). We log + render transparent rather
+            // than fatalError because a missing asset would otherwise crash
+            // the app on every scroll frame that lays out this view. The
+            // log line surfaces the bug; the empty cell makes it visible.
             return nil
         }
         let safeHex = fillHex.count == 9 ? String(fillHex.prefix(7)) : fillHex
