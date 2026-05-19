@@ -77,13 +77,8 @@ struct PebbleAnimatedRenderView: View {
         withAnimation(.spring(response: 0.42, dampingFraction: 0.7)) {
             backdropIn = true
         }
-        Task {
-            try? await Task.sleep(for: .milliseconds(180))
-            await MainActor.run {
-                withAnimation(.easeOut(duration: 0.25)) {
-                    pebbleIn = true
-                }
-            }
+        withAnimation(.easeOut(duration: 0.25).delay(0.18)) {
+            pebbleIn = true
         }
     }
 

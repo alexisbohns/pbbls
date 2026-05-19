@@ -24,7 +24,6 @@ struct PebbleReadBanner: View {
     @Environment(SnapURLCache.self) private var snapURLs
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.colorScheme) private var colorScheme
 
     @State private var loadedImage: UIImage?
     @State private var animationFinished: Bool = false
@@ -158,10 +157,11 @@ struct PebbleReadBanner: View {
         if let renderSvg {
             let palette = palettes.palette(for: emotionId)
             let frameColors = palette?.pebbleFrameColors(forIntensity: valence.intensity)
+            let strokeHex = frameColors?.strokeHex ?? Color.accent.primaryHex
             PebbleAnimatedRenderView(
                 svg: renderSvg,
-                strokeColor: palette?.stroke(for: colorScheme) ?? Color.accent.primary,
-                strokeColorHex: frameColors?.strokeHex ?? Color.accent.primaryHex,
+                strokeColor: Color(hex: strokeHex) ?? Color.accent.primary,
+                strokeColorHex: strokeHex,
                 fillHex: frameColors?.fillHex ?? Color.accent.primaryHex,
                 size: valence.sizeGroup,
                 polarity: valence.polarity,
