@@ -1,6 +1,6 @@
 # iOS pebble outline frame
 
-Resolves: _new issue to be opened after spec approval. Parent: https://github.com/Bohns/pbbls/issues/473 (cross-platform — this spec is iOS only)._
+Resolves https://github.com/Bohns/pbbls/issues/474 (parent: #473 cross-platform; this slice is iOS only)
 
 ## Problem
 
