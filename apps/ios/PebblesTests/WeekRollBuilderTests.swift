@@ -24,6 +24,7 @@ struct WeekRollBuilderTests {
             happenedAt: date(happened),
             createdAt: date(happened),
             intensity: intensity,
+            positiveness: 0,
             renderSvg: nil,
             emotion: nil,
             firstSnapPath: nil

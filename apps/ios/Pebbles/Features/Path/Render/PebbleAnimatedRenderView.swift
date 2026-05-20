@@ -19,6 +19,10 @@ struct PebbleAnimatedRenderView: View {
     /// static `PebbleRenderView` fallback (Reduce Motion, unknown timings,
     /// or parse failure). Must match `strokeColor` for the current scheme.
     let strokeColorHex: String
+    let fillHex: String
+    let fillOpacity: Double
+    let size: ValenceSizeGroup
+    let polarity: ValencePolarity
     let renderVersion: String?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -28,15 +32,20 @@ struct PebbleAnimatedRenderView: View {
     @State private var shapeProgress: Double = 0
     @State private var fossilProgress: Double = 0
     @State private var settleScale: Double = 1
+    @State private var backdropIn: Bool = false
+    @State private var pebbleIn: Bool = false
 
     var body: some View {
-        Group {
-            if let model, let timings = PebbleAnimationTimings.forVersion(renderVersion), !reduceMotion {
-                animatedBody(model: model, timings: timings)
-            } else {
-                PebbleRenderView(svg: svg, strokeColor: strokeColorHex)
-            }
+        ZStack {
+            PebbleOutlineBackdropView(size: size, polarity: polarity, fillHex: fillHex, fillOpacity: fillOpacity)
+                .scaleEffect(reduceMotion ? 1 : (backdropIn ? 1 : 0.6))
+                .opacity(reduceMotion ? 1 : (backdropIn ? 1 : 0))
+
+            pebbleLayer
+                .scaleEffect(PebbleOutlineGeometry.pebbleScale(for: size))
+                .opacity(reduceMotion ? 1 : (pebbleIn ? 1 : 0))
         }
+        .aspectRatio(PebbleOutlineGeometry.aspectRatio(for: size), contentMode: .fit)
         .onAppear {
             if model == nil {
                 model = PebbleSVGModel(svg: svg)
@@ -45,9 +54,37 @@ struct PebbleAnimatedRenderView: View {
                         .info("PebbleAnimatedRenderView: parse failed; using SVGView fallback")
                 }
             }
+            startEntryAnimation()
             startAnimation()
         }
-        .onDisappear { resetProgress() }
+        .onDisappear {
+            resetProgress()
+            backdropIn = false
+            pebbleIn = false
+        }
+    }
+
+    @ViewBuilder
+    private var pebbleLayer: some View {
+        if let model, let timings = PebbleAnimationTimings.forVersion(renderVersion), !reduceMotion {
+            animatedBody(model: model, timings: timings)
+        } else {
+            PebbleRenderView(svg: svg, strokeColor: strokeColorHex)
+        }
+    }
+
+    private func startEntryAnimation() {
+        guard !reduceMotion else {
+            backdropIn = true
+            pebbleIn = true
+            return
+        }
+        withAnimation(.spring(response: 0.42, dampingFraction: 0.7)) {
+            backdropIn = true
+        }
+        withAnimation(.easeOut(duration: 0.25).delay(0.18)) {
+            pebbleIn = true
+        }
     }
 
     // MARK: - Animated rendering
@@ -76,6 +113,11 @@ struct PebbleAnimatedRenderView: View {
         }
     }
 
+    /// Resets only the stroke-trim progress. The entry-animation flags
+    /// (`backdropIn` / `pebbleIn`) are deliberately NOT reset here:
+    /// `startAnimation()` calls this after `startEntryAnimation()` has
+    /// already set them, so clearing them here would blank the view.
+    /// They are reset in `.onDisappear` instead.
     private func resetProgress() {
         glyphProgress = 0
         shapeProgress = 0
@@ -153,6 +195,10 @@ private struct LayerShape: Shape {
         """,
         strokeColor: Color(red: 0.486, green: 0.361, blue: 0.980),
         strokeColorHex: "#7C5CFA",
+        fillHex: "#7C5CFA",
+        fillOpacity: 1,
+        size: .medium,
+        polarity: .neutral,
         renderVersion: "0.1.0"
     )
     .frame(width: 200, height: 200)
@@ -170,6 +216,10 @@ private struct LayerShape: Shape {
         """,
         strokeColor: Color(red: 0.486, green: 0.361, blue: 0.980),
         strokeColorHex: "#7C5CFA",
+        fillHex: "#7C5CFA",
+        fillOpacity: 1,
+        size: .medium,
+        polarity: .neutral,
         renderVersion: "unknown"
     )
     .frame(width: 200, height: 200)

@@ -2,12 +2,15 @@ import SwiftUI
 
 /// Path-specific pebble row, used by `WeekPathView`. Renders three
 /// states based on the pebble's `intensity`:
-///   - intensity 1–2 (small/medium): 56pt thumbnail with `palette.surface`
-///     fill and `palette.secondary` glyph stroke; name color follows the
-///     scheme (light=primary, dark=light).
+///   - intensity 1–2 (small/medium): 56pt thumbnail backed by
+///     `PebbleOutlineBackdropView` with `palette.surface` fill and
+///     `palette.secondary` glyph stroke; name color follows the scheme
+///     (light=primary, dark=light).
 ///   - intensity 3 (large): 96pt thumbnail with `palette.primary` fill and
 ///     `palette.light` glyph stroke; name color is `palette.light` in both
 ///     schemes (the primary fill carries scheme contrast).
+///
+/// Colors are sourced from `palette.pebbleFrameColors(forIntensity:)`.
 ///
 /// When `pebble.firstSnapPath` is non-nil, a 64pt photo is rendered to
 /// the right with rotation by parity (even = -7°, odd = +4°) and a white
@@ -27,7 +30,6 @@ struct PathPebbleRow: View {
 
     private static let smallThumbnailSize: CGFloat = 56
     private static let largeThumbnailSize: CGFloat = 96
-    private static let glyphInset: CGFloat = 8
     private static let photoSize: CGFloat = 64
 
     private var isLarge: Bool { pebble.intensity >= 3 }
@@ -73,13 +75,18 @@ struct PathPebbleRow: View {
     @ViewBuilder
     private var thumbnail: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 12)
-                .fill(thumbnailFill)
+            PebbleOutlineBackdropView(
+                size: pebble.valence.sizeGroup,
+                polarity: pebble.valence.polarity,
+                fillHex: frameColors?.fillHex ?? Color.accent.primaryHex,
+                fillOpacity: frameColors?.fillOpacity ?? 1
+            )
             if let svg = pebble.renderSvg {
-                PebbleRenderView(svg: svg, strokeColor: glyphStrokeHex)
-                    .padding(Self.glyphInset)
+                PebbleRenderView(svg: svg, strokeColor: frameColors?.strokeHex ?? Color.accent.primaryHex)
+                    .scaleEffect(PebbleOutlineGeometry.pebbleScale(for: pebble.valence.sizeGroup))
             }
         }
+        .aspectRatio(PebbleOutlineGeometry.aspectRatio(for: pebble.valence.sizeGroup), contentMode: .fit)
         .frame(width: thumbnailSize, height: thumbnailSize)
     }
 
@@ -101,22 +108,8 @@ struct PathPebbleRow: View {
         return palettes.palette(for: emotionId)
     }
 
-    private var thumbnailFill: Color {
-        if isLarge { return palette?.primary ?? Color.accent.primary }
-        return palette?.surface ?? Color.accent.primary.opacity(0.15)
-    }
-
-    private var glyphStrokeHex: String? {
-        if isLarge {
-            // Large rows stroke in light variant. Trim 8-digit hex to 6-digit
-            // for SVGView reliability (matches PebbleRenderView's ingest).
-            guard let palette else { return Color.accent.primaryHex }
-            let hex = palette.lightHex
-            return hex.count == 9 ? String(hex.prefix(7)) : hex
-        }
-        guard let palette else { return Color.accent.primaryHex }
-        let hex = palette.secondaryHex
-        return hex.count == 9 ? String(hex.prefix(7)) : hex
+    private var frameColors: PebbleFrameColors? {
+        palette?.pebbleFrameColors(forIntensity: pebble.intensity)
     }
 
     private var nameColor: Color {
@@ -145,6 +138,7 @@ struct PathPebbleRow: View {
                     happenedAt: Date(),
                     createdAt: Date(),
                     intensity: 1,
+                    positiveness: 0,
                     renderSvg: nil,
                     emotion: nil,
                     firstSnapPath: nil

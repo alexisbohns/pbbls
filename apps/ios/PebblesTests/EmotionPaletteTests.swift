@@ -95,4 +95,17 @@ struct EmotionPaletteTests {
         #expect(palette?.primaryHex == "#7B5E99FF")
         #expect(palette?.secondaryHex == "#AE91CCFF")
     }
+
+    @Test("trims surrounding whitespace from palette hex before storing")
+    func trimsWhitespaceFromHex() {
+        let palette = EmotionPalette(
+            primaryHex:   "#7B5E99FF  ",
+            secondaryHex: "  #AE91CCFF",
+            lightHex:     "#F2EFF5FF\n",
+            surfaceHex:   "#7B5E991A "
+        )
+        #expect(palette?.primaryHex == "#7B5E99FF")
+        #expect(palette?.surfaceHex == "#7B5E991A")
+        #expect(palette?.strokeHex(for: .light) == "#7B5E99")
+    }
 }

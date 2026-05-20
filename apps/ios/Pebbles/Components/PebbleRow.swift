@@ -11,8 +11,8 @@ import SwiftUI
 ///
 /// `pebble` must be loaded with `render_svg` and the
 /// `emotion:emotions(id, slug, name)` join populated for the
-/// thumbnail to render correctly. The stroke color is resolved from
-/// `EmotionPaletteService` — primary in light mode, secondary in dark.
+/// thumbnail to render correctly. Colors are sourced from
+/// `palette.pebbleFrameColors(forIntensity:)` and are scheme-independent.
 /// When `render_svg` is nil the row falls back to a neutral rounded
 /// rectangle.
 struct PebbleRow: View {
@@ -21,7 +21,6 @@ struct PebbleRow: View {
     let onDelete: () -> Void
 
     @Environment(EmotionPaletteService.self) private var palettes
-    @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
         Button(action: onTap) {
@@ -46,8 +45,18 @@ struct PebbleRow: View {
     @ViewBuilder
     private var thumbnail: some View {
         if let svg = pebble.renderSvg {
-            PebbleRenderView(svg: svg, strokeColor: strokeHex)
-                .frame(width: 40, height: 40)
+            ZStack {
+                PebbleOutlineBackdropView(
+                    size: pebble.valence.sizeGroup,
+                    polarity: pebble.valence.polarity,
+                    fillHex: frameColors?.fillHex ?? Color.accent.primaryHex,
+                    fillOpacity: frameColors?.fillOpacity ?? 1
+                )
+                PebbleRenderView(svg: svg, strokeColor: frameColors?.strokeHex ?? Color.accent.primaryHex)
+                    .scaleEffect(PebbleOutlineGeometry.pebbleScale(for: pebble.valence.sizeGroup))
+            }
+            .aspectRatio(PebbleOutlineGeometry.aspectRatio(for: pebble.valence.sizeGroup), contentMode: .fit)
+            .frame(width: 40, height: 40)
         } else {
             RoundedRectangle(cornerRadius: 6)
                 .fill(Color.secondary.opacity(0.15))
@@ -55,10 +64,13 @@ struct PebbleRow: View {
         }
     }
 
-    private var strokeHex: String? {
+    private var palette: EmotionPalette? {
         guard let emotionId = pebble.emotion?.id else { return nil }
-        return palettes.palette(for: emotionId)?.strokeHex(for: colorScheme)
-            ?? Color.accent.primaryHex
+        return palettes.palette(for: emotionId)
+    }
+
+    private var frameColors: PebbleFrameColors? {
+        palette?.pebbleFrameColors(forIntensity: pebble.intensity)
     }
 }
 
@@ -72,6 +84,7 @@ struct PebbleRow: View {
                 happenedAt: Date(),
                 createdAt: Date(),
                 intensity: 1,
+                positiveness: 0,
                 renderSvg: nil,
                 emotion: nil,
                 firstSnapPath: nil
