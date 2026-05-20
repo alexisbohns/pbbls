@@ -57,7 +57,11 @@ struct PebbleAnimatedRenderView: View {
             startEntryAnimation()
             startAnimation()
         }
-        .onDisappear { resetProgress() }
+        .onDisappear {
+            resetProgress()
+            backdropIn = false
+            pebbleIn = false
+        }
     }
 
     @ViewBuilder
@@ -109,13 +113,16 @@ struct PebbleAnimatedRenderView: View {
         }
     }
 
+    /// Resets only the stroke-trim progress. The entry-animation flags
+    /// (`backdropIn` / `pebbleIn`) are deliberately NOT reset here:
+    /// `startAnimation()` calls this after `startEntryAnimation()` has
+    /// already set them, so clearing them here would blank the view.
+    /// They are reset in `.onDisappear` instead.
     private func resetProgress() {
         glyphProgress = 0
         shapeProgress = 0
         fossilProgress = 0
         settleScale = 1
-        backdropIn = false
-        pebbleIn = false
     }
 
     private func startAnimation() {
