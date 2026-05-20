@@ -16,6 +16,7 @@ struct PebbleOutlineBackdropView: View {
     let size: ValenceSizeGroup
     let polarity: ValencePolarity
     let fillHex: String
+    let fillOpacity: Double
 
     private static let logger = Logger(subsystem: "app.pbbls.ios", category: "pebble-outline")
 
@@ -33,8 +34,7 @@ struct PebbleOutlineBackdropView: View {
             // log line surfaces the bug; the empty cell makes it visible.
             return nil
         }
-        let safeHex = fillHex.count == 9 ? String(fillHex.prefix(7)) : fillHex
-        return raw.replacingOccurrences(of: "#FF00FF", with: safeHex)
+        return raw.replacingOccurrences(of: "#FF00FF", with: fillHex)
     }
 
     var body: some View {
@@ -46,15 +46,16 @@ struct PebbleOutlineBackdropView: View {
                 Color.clear
             }
         }
+        .opacity(fillOpacity)
         .accessibilityHidden(true)
     }
 }
 
 #Preview {
     HStack(spacing: 16) {
-        PebbleOutlineBackdropView(size: .small,  polarity: .neutral,   fillHex: "#C07A7A")
-        PebbleOutlineBackdropView(size: .medium, polarity: .lowlight,  fillHex: "#5C7AB8")
-        PebbleOutlineBackdropView(size: .large,  polarity: .highlight, fillHex: "#D4A85E")
+        PebbleOutlineBackdropView(size: .small,  polarity: .neutral,   fillHex: "#C07A7A", fillOpacity: 0.1)
+        PebbleOutlineBackdropView(size: .medium, polarity: .lowlight,  fillHex: "#5C7AB8", fillOpacity: 0.1)
+        PebbleOutlineBackdropView(size: .large,  polarity: .highlight, fillHex: "#D4A85E", fillOpacity: 1)
     }
     .frame(height: 200)
     .padding()

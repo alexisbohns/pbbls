@@ -16,9 +16,4 @@ struct PebbleOutlineBackdropViewTests {
         #expect(swapped.contains("#C07A7A"))
     }
 
-    @Test func eightDigitHexTrimsAlphaBeforeInjection() {
-        let input = "#C07A7AFF"
-        let trimmed = input.count == 9 ? String(input.prefix(7)) : input
-        #expect(trimmed == "#C07A7A")
-    }
 }

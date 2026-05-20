@@ -20,6 +20,7 @@ struct PebbleAnimatedRenderView: View {
     /// or parse failure). Must match `strokeColor` for the current scheme.
     let strokeColorHex: String
     let fillHex: String
+    let fillOpacity: Double
     let size: ValenceSizeGroup
     let polarity: ValencePolarity
     let renderVersion: String?
@@ -36,7 +37,7 @@ struct PebbleAnimatedRenderView: View {
 
     var body: some View {
         ZStack {
-            PebbleOutlineBackdropView(size: size, polarity: polarity, fillHex: fillHex)
+            PebbleOutlineBackdropView(size: size, polarity: polarity, fillHex: fillHex, fillOpacity: fillOpacity)
                 .scaleEffect(reduceMotion ? 1 : (backdropIn ? 1 : 0.6))
                 .opacity(reduceMotion ? 1 : (backdropIn ? 1 : 0))
 
@@ -188,6 +189,7 @@ private struct LayerShape: Shape {
         strokeColor: Color(red: 0.486, green: 0.361, blue: 0.980),
         strokeColorHex: "#7C5CFA",
         fillHex: "#7C5CFA",
+        fillOpacity: 1,
         size: .medium,
         polarity: .neutral,
         renderVersion: "0.1.0"
@@ -208,6 +210,7 @@ private struct LayerShape: Shape {
         strokeColor: Color(red: 0.486, green: 0.361, blue: 0.980),
         strokeColorHex: "#7C5CFA",
         fillHex: "#7C5CFA",
+        fillOpacity: 1,
         size: .medium,
         polarity: .neutral,
         renderVersion: "unknown"

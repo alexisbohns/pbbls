@@ -49,7 +49,8 @@ struct PebbleRow: View {
                 PebbleOutlineBackdropView(
                     size: pebble.valence.sizeGroup,
                     polarity: pebble.valence.polarity,
-                    fillHex: frameColors?.fillHex ?? Color.accent.primaryHex
+                    fillHex: frameColors?.fillHex ?? Color.accent.primaryHex,
+                    fillOpacity: frameColors?.fillOpacity ?? 1
                 )
                 PebbleRenderView(svg: svg, strokeColor: frameColors?.strokeHex ?? Color.accent.primaryHex)
                     .scaleEffect(PebbleOutlineGeometry.pebbleScale(for: pebble.valence.sizeGroup))

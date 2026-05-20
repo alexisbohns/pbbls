@@ -163,6 +163,7 @@ struct PebbleReadBanner: View {
                 strokeColor: Color(hex: strokeHex) ?? Color.accent.primary,
                 strokeColorHex: strokeHex,
                 fillHex: frameColors?.fillHex ?? Color.accent.primaryHex,
+                fillOpacity: frameColors?.fillOpacity ?? 1,
                 size: valence.sizeGroup,
                 polarity: valence.polarity,
                 renderVersion: renderVersion
