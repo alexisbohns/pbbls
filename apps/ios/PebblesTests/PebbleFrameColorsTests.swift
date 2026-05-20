@@ -48,6 +48,29 @@ struct PebbleFrameColorsTests {
         #expect(colors.fillHex   == "#C07A7A")
     }
 
+    @Test func whitespacePaddedPaletteHexStillSanitizesToSixDigit() {
+        // Regression (#474): palette hex columns were hand-entered in
+        // Supabase Studio and several rows carry trailing whitespace.
+        // Untrimmed, the `count == 9` guard in the sanitizers fails and the
+        // backdrop receives an 8-digit hex at full opacity — SVGView then
+        // misparses it into a wrong, opaque color.
+        let padded = EmotionPalette(
+            primaryHex:   "#487C5AFF   ",
+            secondaryHex: "#80BF96FF\n",
+            lightHex:     "  #EDF2EEFF",
+            surfaceHex:   "#487C5A1A                    "
+        )!
+        let small = padded.pebbleFrameColors(forIntensity: 1)
+        #expect(small.fillHex == "#487C5A")
+        #expect(small.strokeHex == "#80BF96")
+        #expect(abs(small.fillOpacity - 26.0 / 255.0) < 0.001)
+
+        let large = padded.pebbleFrameColors(forIntensity: 3)
+        #expect(large.fillHex == "#487C5A")
+        #expect(large.strokeHex == "#EDF2EE")
+        #expect(abs(large.fillOpacity - 1.0) < 0.001)
+    }
+
     @Test func sixDigitPaletteHexPassesThroughAtFullOpacity() {
         // Defensive: a palette already stored as 6-digit hex must not
         // be mangled, and its fill must default to fully opaque.

@@ -32,6 +32,16 @@ struct EmotionPalette: Equatable {
         lightHex: String,
         surfaceHex: String
     ) {
+        // The palette hex columns on `emotion_categories` are populated by
+        // hand in Supabase Studio and can carry stray surrounding whitespace.
+        // Trim at the model boundary so the stored `*Hex` strings are clean
+        // `#RRGGBBAA`: the SVG-injection helpers (`rgbHex` / `alphaComponent`
+        // / `strokeHex`) gate on `count == 9`, which silently no-ops on a
+        // padded string and would leak 8-digit hex into the render stack.
+        let primaryHex = primaryHex.trimmingCharacters(in: .whitespacesAndNewlines)
+        let secondaryHex = secondaryHex.trimmingCharacters(in: .whitespacesAndNewlines)
+        let lightHex = lightHex.trimmingCharacters(in: .whitespacesAndNewlines)
+        let surfaceHex = surfaceHex.trimmingCharacters(in: .whitespacesAndNewlines)
         guard
             let primary = Color(hex: primaryHex),
             let secondary = Color(hex: secondaryHex),
