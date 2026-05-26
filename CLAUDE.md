@@ -35,6 +35,17 @@ Keep CLAUDE.md short. Read these when relevant — don't pre-load:
 - **Data layer / Supabase / async** → `docs/agents/data-and-async.md` (DataProvider, auth deadlock, withTimeout, error logging)
 - **Product architecture map** → `arkaik` skill (see `.claude/skills/arkaik/`)
 
+## Editing CLAUDE.md / AGENTS.md
+
+These files load into every agent context, so they are the most token-precious docs in the repo — they must hold only durable, action-guiding rules, not a junk drawer of observations.
+
+Treat learnings as living wisdom captured in plans' "Lessons learned" sections. Promote a learning into a CLAUDE.md/AGENTS.md rule **only when it hardens** — i.e. clears both bars:
+
+- **Durable** — the constraint will outlive the next refactor, not a quirk of one feature.
+- **Action-guiding** — it tells a future agent what to do or avoid, not a passive observation.
+
+Cadence: promote during the periodic monorepo-audit grooming pass at **milestone boundaries** (folded into the audit's "Doc accuracy" domain — see `docs/superpowers/specs/2026-04-11-monorepo-audit-design.md`). **Never edit CLAUDE.md per-PR for learnings.** Land each promoted rule at the right scope: root `CLAUDE.md` / `AGENTS.md` for cross-cutting rules; workspace `CLAUDE.md` (`apps/web`, `apps/ios`, `apps/admin`, `packages/supabase`) for surface-specific ones.
+
 ## Code conventions
 
 - TypeScript strict. No `any`. No type assertions unless absolutely necessary.

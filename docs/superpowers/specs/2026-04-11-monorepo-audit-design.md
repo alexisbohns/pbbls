@@ -28,7 +28,7 @@ Each domain is checked against these 6 categories:
 3. **Build integrity** — build/lint pass cleanly, unused deps, mismatched versions, workspace wiring
 4. **Pattern consistency** — adherence to CLAUDE.md conventions (naming, structure, separation of concerns)
 5. **Redundancy** — duplicated logic, components, or configs across workspaces
-6. **Doc accuracy** — do instructions match reality, stale references to old structure
+6. **Doc accuracy** — do instructions match reality, stale references to old structure; **learnings grooming pass** — review recent plans' "Lessons learned" sections and promote any that have hardened (durable + action-guiding, per the bar in root `CLAUDE.md`) into the right-scope CLAUDE.md/AGENTS.md. Conversely, demote or delete rules that have gone stale.
 
 ## Findings format
 

@@ -70,3 +70,14 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** Routine choices, style nits, and anything obvious from the code stay out of the log. GitHub Issues remain the place for discussion; the log captures the outcome. If the log grows unwieldy, we'll revisit splitting it by scope — not yet.
 - **Supersedes / Superseded-by:** —
 - **Refs:** #477, #482, `CLAUDE.md` (PR checklist step 6).
+
+## 2026-05-26 — Promote learnings into CLAUDE.md only on hardening, via a milestone grooming pass
+
+- **Status:** taken
+- **Scope:** docs
+- **Context:** Learnings are living wisdom, captured cheaply in plans' "Lessons learned" sections. `CLAUDE.md`/`AGENTS.md` load into *every* agent context, so they are the most token-precious files in the repo and must hold only durable, action-guiding rules — not a junk drawer of observations. Per-PR CLAUDE.md edits for learnings bloat the file and dilute its signal.
+- **Decision:** We will promote a learning into a CLAUDE.md/AGENTS.md rule only when it clears both bars — **durable** (outlives the next refactor) and **action-guiding** (tells a future agent what to do or avoid). Cadence is the periodic monorepo-audit grooming pass at **milestone boundaries**, folded into the audit's existing "Doc accuracy" domain. Never a per-PR CLAUDE.md edit for learnings. Promoted rules land at the right scope: root `CLAUDE.md`/`AGENTS.md` for cross-cutting, workspace `CLAUDE.md` for surface-specific.
+- **Why:** Two-stage pipe — cheap capture, expensive promotion — keeps CLAUDE.md small and high-signal while losing nothing. Milestone cadence groups grooming with the audit work that already touches the same files, so there is no separate ritual to remember. Precedent: the "never await Supabase inside `onAuthStateChange`" rail is a learning that hardened into a rule exactly this way.
+- **Consequences:** Agents do not edit CLAUDE.md to record per-PR learnings; they leave them in the plan's "Lessons learned". Reviewers can push back on CLAUDE.md edits that fail the durable + action-guiding bars. The monorepo-audit checklist now explicitly includes a grooming sweep; expect rules to be **demoted or deleted** during the same pass when they have gone stale.
+- **Supersedes / Superseded-by:** —
+- **Refs:** #479, `CLAUDE.md` ("Editing CLAUDE.md / AGENTS.md"), `docs/superpowers/specs/2026-04-11-monorepo-audit-design.md` (per-domain checklist item 6).
