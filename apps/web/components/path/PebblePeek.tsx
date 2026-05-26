@@ -1,6 +1,7 @@
 "use client"
 
 import { useCallback } from "react"
+import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { cn } from "@/lib/utils"
@@ -19,6 +20,7 @@ export function PebblePeek({ pebbleId, onClose }: PebblePeekProps) {
   const open = pebbleId !== null
   const id = pebbleId ?? ""
   const t = useTranslations("pebble")
+  const router = useRouter()
 
   const { pebble, loading: pebbleLoading, updatePebble, uploadSnap } = usePebble(id)
   const { souls, loading: soulsLoading, addSoul } = useSouls()
@@ -77,6 +79,10 @@ export function PebblePeek({ pebbleId, onClose }: PebblePeekProps) {
               onUploadSnap={uploadSnap}
               onAddSoul={handleAddSoul}
               onClose={onClose}
+              onEdit={() => {
+                onClose()
+                router.push(`/pebble/${id}/edit`)
+              }}
             />
           ) : (
             <p className="text-sm text-muted-foreground">{t("notFoundInline")}</p>
