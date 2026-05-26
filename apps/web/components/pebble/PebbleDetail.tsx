@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback, useRef } from "react"
-import { Lock, X } from "lucide-react"
+import { Lock, SquarePen, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { Pebble, PebbleSnap, Soul, Collection, Mark } from "@/lib/types"
 import type { UpdatePebbleInput } from "@/lib/data/data-provider"
@@ -30,6 +30,7 @@ type PebbleDetailProps = {
   onUploadSnap: (file: File) => Promise<PebbleSnap>
   onAddSoul: (name: string) => Promise<void>
   onClose?: () => void
+  onEdit?: () => void
 }
 
 export function PebbleDetail({
@@ -42,6 +43,7 @@ export function PebbleDetail({
   onUploadSnap,
   onAddSoul,
   onClose,
+  onEdit,
 }: PebbleDetailProps) {
   const [valenceOpen, setValenceOpen] = useState(false)
   const [soulsOpen, setSoulsOpen] = useState(false)
@@ -126,7 +128,7 @@ export function PebbleDetail({
 
   return (
     <article>
-      {/* Top bar: static privacy indicator + close button */}
+      {/* Top bar: static privacy indicator + edit/close buttons */}
       <header className="flex items-center justify-between">
         <span
           aria-label={
@@ -141,18 +143,30 @@ export function PebbleDetail({
         >
           <Lock className="size-4" aria-hidden />
         </span>
-        {onClose ? (
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label={t("peek.close")}
-            className="grid size-10 place-items-center rounded-full bg-surface text-muted-foreground transition-colors hover:bg-primary hover:text-surface active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <X className="size-4" aria-hidden />
-          </button>
-        ) : (
-          <span className="size-10" aria-hidden />
-        )}
+        <div className="flex items-center gap-2">
+          {onEdit && (
+            <button
+              type="button"
+              onClick={onEdit}
+              aria-label={t("editAria")}
+              className="grid size-10 place-items-center rounded-full bg-surface text-muted-foreground transition-colors hover:bg-primary hover:text-surface active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <SquarePen className="size-4" aria-hidden />
+            </button>
+          )}
+          {onClose ? (
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label={t("peek.close")}
+              className="grid size-10 place-items-center rounded-full bg-surface text-muted-foreground transition-colors hover:bg-primary hover:text-surface active:scale-95 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <X className="size-4" aria-hidden />
+            </button>
+          ) : (
+            <span className="size-10" aria-hidden />
+          )}
+        </div>
       </header>
 
       {/* Pebble visual (and snap if present) — opens valence/intensity sheet */}

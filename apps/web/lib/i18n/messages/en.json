@@ -409,7 +409,37 @@
       "picture": "Picture",
       "pictureAria": "Add a picture"
     },
-    "editIntensityAria": "Edit intensity and valence"
+    "editIntensityAria": "Edit intensity and valence",
+    "editAria": "Edit pebble",
+    "edit": {
+      "toolbarTitle": "EDITION",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving…",
+      "saveAria": "Save changes",
+      "cancelAria": "Cancel editing",
+      "discardTitle": "Discard changes?",
+      "discardDescription": "Your edits won't be saved.",
+      "discardConfirm": "Discard",
+      "discardKeep": "Keep editing",
+      "titlePlaceholder": "Untitled",
+      "titleAria": "Pebble name",
+      "descriptionPlaceholder": "Add a description",
+      "descriptionAria": "Pebble description",
+      "addSoul": "Add",
+      "addSoulAria": "Add a soul",
+      "removeSoulTitle": "Remove soul?",
+      "removeSoulDescription": "{name} won't be linked to this pebble anymore.",
+      "removeSoulConfirm": "Remove",
+      "removeSoulCancel": "Keep",
+      "pictureEmptyAria": "Add a picture",
+      "pictureFilledAria": "Replace or remove the picture",
+      "replacePhoto": "Replace",
+      "removePhoto": "Remove",
+      "errorToast": "Couldn't save your edits. Try again.",
+      "uploading": "Uploading picture…",
+      "uploadFailed": "Picture upload failed. Try again."
+    }
   },
   "record": {
     "srTitle": "Record a pebble",

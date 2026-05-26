@@ -409,7 +409,37 @@
       "picture": "Photo",
       "pictureAria": "Ajouter une photo"
     },
-    "editIntensityAria": "Modifier l'intensité et la valence"
+    "editIntensityAria": "Modifier l'intensité et la valence",
+    "editAria": "Modifier le galet",
+    "edit": {
+      "toolbarTitle": "ÉDITION",
+      "cancel": "Annuler",
+      "save": "Enregistrer",
+      "saving": "Enregistrement…",
+      "saveAria": "Enregistrer les modifications",
+      "cancelAria": "Annuler la modification",
+      "discardTitle": "Abandonner les modifications ?",
+      "discardDescription": "Vos modifications ne seront pas enregistrées.",
+      "discardConfirm": "Abandonner",
+      "discardKeep": "Continuer",
+      "titlePlaceholder": "Sans titre",
+      "titleAria": "Nom du galet",
+      "descriptionPlaceholder": "Ajouter une description",
+      "descriptionAria": "Description du galet",
+      "addSoul": "Ajouter",
+      "addSoulAria": "Ajouter une âme",
+      "removeSoulTitle": "Retirer l'âme ?",
+      "removeSoulDescription": "{name} ne sera plus liée à ce galet.",
+      "removeSoulConfirm": "Retirer",
+      "removeSoulCancel": "Garder",
+      "pictureEmptyAria": "Ajouter une photo",
+      "pictureFilledAria": "Remplacer ou retirer la photo",
+      "replacePhoto": "Remplacer",
+      "removePhoto": "Retirer",
+      "errorToast": "Impossible d'enregistrer. Réessayez.",
+      "uploading": "Envoi de la photo…",
+      "uploadFailed": "Échec de l'envoi de la photo. Réessayez."
+    }
   },
   "record": {
     "srTitle": "Capturer l'instant",
