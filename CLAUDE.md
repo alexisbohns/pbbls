@@ -76,3 +76,4 @@ Keep CLAUDE.md short. Read these when relevant — don't pre-load:
    - If no issue, ask for species + scope label(s) and milestone.
    - Never open a PR without labels and milestone (unless the user confirms there's no milestone).
 5. Run lint/build at the **scope of your change** (per task-size triage above), confirm green, then open the PR.
+6. If this PR established or reversed a **significant** decision, append one entry to `docs/decisions/log.md` (usually a no-op). Significance bar: would a future agent or human waste real time rediscovering or wrongly reversing it? Supersede-don't-edit — status changes are new appended entries, never edits to prior ones.
