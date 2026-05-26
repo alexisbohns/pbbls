@@ -59,3 +59,14 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** Single-table, single-statement reads/writes stay as direct client calls — no RPC needed. Extending an existing RPC is preferred over re-implementing logic client-side, even when the RPC is missing a small piece of what you need.
 - **Supersedes / Superseded-by:** —
 - **Refs:** `AGENTS.md` ("Supabase — prefer RPCs for multi-table writes"), `packages/supabase/supabase/migrations/`.
+
+## 2026-05-26 — Track significant decisions in an in-repo log
+
+- **Status:** taken
+- **Scope:** docs
+- **Context:** ADRs lived only in GitHub Issues — good for discussion, but not greppable from the repo, noisy, and invisible to agents at read time. Settled questions kept getting re-litigated because there was no durable, low-token home for them.
+- **Decision:** We will keep an append-only ledger at `docs/decisions/log.md`, one terse entry per significant decision, supersede-don't-edit. The PR checklist in `CLAUDE.md` gains a gated micro-step (usually a no-op): if a PR established or reversed a significant decision, append one entry.
+- **Why:** Greppable and cheap to read for agents and humans alike. The "supersede, don't edit" rule preserves history of *why* a decision changed without rewriting the past. The gated step keeps cost near zero on routine PRs while making the bar visible on the ones that matter. Significance test: "would a future agent or human waste real time rediscovering or wrongly reversing this?"
+- **Consequences:** Routine choices, style nits, and anything obvious from the code stay out of the log. GitHub Issues remain the place for discussion; the log captures the outcome. If the log grows unwieldy, we'll revisit splitting it by scope — not yet.
+- **Supersedes / Superseded-by:** —
+- **Refs:** #477, #482, `CLAUDE.md` (PR checklist step 6).
