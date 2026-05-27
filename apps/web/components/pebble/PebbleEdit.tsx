@@ -4,7 +4,6 @@ import { useCallback, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import type { Pebble, PebbleSnap, Soul, Collection, Mark } from "@/lib/types"
-import { useFormatPeekDate } from "@/lib/i18n"
 import { usePebbleDraft } from "@/lib/hooks/usePebbleDraft"
 import type { UpdatePebbleInput } from "@/lib/data/data-provider"
 import { PebbleVisual } from "@/components/pebble/PebbleVisual"
@@ -16,6 +15,7 @@ import {
 import { PebbleEditToolbar } from "@/components/pebble/PebbleEditToolbar"
 import { PebbleEditTitle } from "@/components/pebble/PebbleEditTitle"
 import { PebbleEditDescription } from "@/components/pebble/PebbleEditDescription"
+import { PebbleEditDate } from "@/components/pebble/PebbleEditDate"
 import {
   PebbleEditPicture,
   useSnapStaging,
@@ -66,7 +66,6 @@ export function PebbleEdit({
   const t = useTranslations("pebble.edit")
   const tPebble = useTranslations("pebble")
   const router = useRouter()
-  const formatPeekDate = useFormatPeekDate()
 
   const { draft, setField, setFields, isDirty, buildPayload } =
     usePebbleDraft(pebble)
@@ -176,10 +175,8 @@ export function PebbleEdit({
     ? marks.find((m) => m.id === draft.mark_id)
     : mark
 
-  const formattedDate = formatPeekDate(pebble.happened_at)
-
   return (
-    <article className="pb-12">
+    <article className="mx-auto max-w-md pb-12">
       <PebbleEditToolbar
         isSaving={saving}
         canSave={canSave}
@@ -226,9 +223,11 @@ export function PebbleEdit({
         className="mt-4"
       />
 
-      <p className="mt-2 text-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
-        <time dateTime={pebble.happened_at}>{formattedDate}</time>
-      </p>
+      <PebbleEditDate
+        value={draft.happened_at}
+        onChange={(next) => setField("happened_at", next)}
+        className="mt-2"
+      />
 
       <div className="mt-6 flex flex-wrap gap-3">
         <EmotionTile

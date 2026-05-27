@@ -424,6 +424,7 @@
       "discardKeep": "Continuer",
       "titlePlaceholder": "Sans titre",
       "titleAria": "Nom du galet",
+      "dateAria": "Date et heure",
       "descriptionPlaceholder": "Ajouter une description",
       "descriptionAria": "Description du galet",
       "addSoul": "Ajouter",

@@ -174,7 +174,7 @@ export function PebbleDetail({
         <button
           type="button"
           onClick={() => setValenceOpen(true)}
-          className="mx-auto mt-2 mb-4 block cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-2xl"
+          className="mx-auto mt-8 mb-4 block cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-2xl"
           aria-label={t("editIntensityAria")}
         >
           {hasPicture ? (

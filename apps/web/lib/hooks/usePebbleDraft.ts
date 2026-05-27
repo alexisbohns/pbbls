@@ -17,6 +17,7 @@ export type PebbleDraftSnap = PebbleSnap
 export type PebbleDraft = {
   name: string
   description: string
+  happened_at: string
   intensity: Pebble["intensity"]
   positiveness: Pebble["positiveness"]
   emotion_id: string
@@ -47,6 +48,7 @@ function snapshotFromPebble(pebble: Pebble): PebbleDraft {
   return {
     name: pebble.name,
     description: pebble.description ?? "",
+    happened_at: pebble.happened_at,
     intensity: pebble.intensity,
     positiveness: pebble.positiveness,
     emotion_id: pebble.emotion_id,
@@ -74,6 +76,7 @@ function diffFields(original: PebbleDraft, draft: PebbleDraft): Set<keyof Pebble
   const dirty = new Set<keyof PebbleDraft>()
   if (original.name !== draft.name) dirty.add("name")
   if (original.description !== draft.description) dirty.add("description")
+  if (original.happened_at !== draft.happened_at) dirty.add("happened_at")
   if (original.intensity !== draft.intensity) dirty.add("intensity")
   if (original.positiveness !== draft.positiveness) dirty.add("positiveness")
   if (original.emotion_id !== draft.emotion_id) dirty.add("emotion_id")
@@ -124,6 +127,7 @@ export function usePebbleDraft(pebble: Pebble): UsePebbleDraftResult {
     const payload: UpdatePebbleInput = {}
     if (dirtyFields.has("name")) payload.name = draft.name
     if (dirtyFields.has("description")) payload.description = draft.description
+    if (dirtyFields.has("happened_at")) payload.happened_at = draft.happened_at
     if (dirtyFields.has("intensity")) payload.intensity = draft.intensity
     if (dirtyFields.has("positiveness")) payload.positiveness = draft.positiveness
     if (dirtyFields.has("emotion_id")) payload.emotion_id = draft.emotion_id

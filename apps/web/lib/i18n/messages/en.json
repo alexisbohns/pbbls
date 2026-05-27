@@ -424,6 +424,7 @@
       "discardKeep": "Keep editing",
       "titlePlaceholder": "Untitled",
       "titleAria": "Pebble name",
+      "dateAria": "Date and time",
       "descriptionPlaceholder": "Add a description",
       "descriptionAria": "Pebble description",
       "addSoul": "Add",
