@@ -21,20 +21,32 @@ import { cn } from "@/lib/utils"
 // Vertical tile shared by emotion / domain / collection triggers in the
 // pebble detail view. Icon on top, label below — matches the design in
 // issue #391.
+//
+// `unset` switches to the Edit-mode empty state from issue #481:
+// dashed border + faded, no surface fill. Used when `editing` is true and
+// the underlying value is empty.
 function TileTrigger({
   icon,
   label,
   ariaLabel,
+  unset,
+  className,
 }: {
   icon: ReactNode
   label: string
   ariaLabel: string
+  unset?: boolean
+  className?: string
 }) {
   return (
     <PopoverTrigger
       className={cn(
-        "flex flex-col items-center justify-center gap-2 rounded-2xl bg-surface px-3 py-4 transition-colors",
-        "hover:bg-muted/70 active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "flex flex-col items-center justify-center gap-2 rounded-2xl px-3 py-4 transition-colors",
+        "active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        unset
+          ? "border-2 border-dashed border-muted-foreground/30 opacity-60 hover:opacity-100"
+          : "bg-surface hover:bg-muted/70",
+        className,
       )}
       aria-label={ariaLabel}
     >
@@ -55,12 +67,15 @@ function TileTrigger({
 type EmotionTileProps = {
   value: string
   onChange: (id: string) => void
+  editing?: boolean
+  className?: string
 }
 
-export function EmotionTile({ value, onChange }: EmotionTileProps) {
+export function EmotionTile({ value, onChange, editing, className }: EmotionTileProps) {
   const t = useTranslations("record.emotion")
   const [pickerOpen, setPickerOpen] = useState(false)
   const selected = useSelectedEmotionDisplay(value || undefined)
+  const unset = editing && !selected
 
   return (
     <>
@@ -71,8 +86,12 @@ export function EmotionTile({ value, onChange }: EmotionTileProps) {
           selected ? t("selectedAria", { name: selected.name }) : t("pickAria")
         }
         className={cn(
-          "flex flex-col items-center justify-center gap-2 rounded-2xl bg-surface px-3 py-4 transition-colors",
-          "hover:bg-muted/70 active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          "flex flex-col items-center justify-center gap-2 rounded-2xl px-3 py-4 transition-colors",
+          "active:scale-[0.98] outline-none focus-visible:ring-2 focus-visible:ring-ring",
+          unset
+            ? "border-2 border-dashed border-muted-foreground/30 opacity-60 hover:opacity-100"
+            : "bg-surface hover:bg-muted/70",
+          className,
         )}
       >
         <span className="text-muted-foreground" aria-hidden>
@@ -103,6 +122,8 @@ export function EmotionTile({ value, onChange }: EmotionTileProps) {
 type DomainTileProps = {
   value: string[]
   onChange: (ids: string[]) => void
+  editing?: boolean
+  className?: string
 }
 
 function DomainOption({
@@ -140,7 +161,7 @@ function useLocalizedDomainMap(): Map<string, string> {
   }, [t])
 }
 
-export function DomainTile({ value, onChange }: DomainTileProps) {
+export function DomainTile({ value, onChange, editing, className }: DomainTileProps) {
   const t = useTranslations("record.domain")
   const localizedNames = useLocalizedDomainMap()
   const selectedDomains = DOMAINS.filter((d) => value.includes(d.id))
@@ -165,6 +186,8 @@ export function DomainTile({ value, onChange }: DomainTileProps) {
       <TileTrigger
         icon={<Tag className="size-5" />}
         label={tileLabel}
+        unset={editing && selectedDomains.length === 0}
+        className={className}
         ariaLabel={
           selectedDomains.length > 0
             ? t("selectedAria", { names: selectedNames.join(", ") })
@@ -193,12 +216,16 @@ type CollectionTileProps = {
   value: string[]
   onChange: (ids: string[]) => void
   collections: Collection[]
+  editing?: boolean
+  className?: string
 }
 
 export function CollectionTile({
   value,
   onChange,
   collections,
+  editing,
+  className,
 }: CollectionTileProps) {
   const t = useTranslations("record.collection")
   const selected = collections.filter((c) => value.includes(c.id))
@@ -220,6 +247,8 @@ export function CollectionTile({
       <TileTrigger
         icon={<Layers className="size-5" />}
         label={tileLabel}
+        unset={editing && selected.length === 0}
+        className={className}
         ariaLabel={
           selected.length > 0
             ? t("selectedAria", { names: selectedNames.join(", ") })
