@@ -6,8 +6,7 @@ import { useTranslations } from "next-intl"
 import type { Pebble, PebbleSnap, Soul, Collection, Mark } from "@/lib/types"
 import type { UpdatePebbleInput } from "@/lib/data/data-provider"
 import { useFormatPeekDate } from "@/lib/i18n"
-import { useEmotionPalettes } from "@/lib/data/useEmotionPalettes"
-import { PebbleVisual } from "@/components/pebble/PebbleVisual"
+import { PebbleFramed } from "@/components/pebble/PebbleFramed"
 import {
   EmotionTile,
   DomainTile,
@@ -52,8 +51,6 @@ export function PebbleDetail({
   const tVisibility = useTranslations("record.visibility")
   const formatPeekDate = useFormatPeekDate()
   const formattedDate = formatPeekDate(pebble.happened_at)
-  const { paletteByEmotionId } = useEmotionPalettes()
-  const palette = paletteByEmotionId.get(pebble.emotion_id)
 
   const matchedSouls = pebble.soul_ids
     .map((id) => souls.find((s) => s.id === id))
@@ -118,14 +115,6 @@ export function PebbleDetail({
     [onUploadSnap, onUpdatePebble],
   )
 
-  // Emotion palette drives the boxed pebble overlay when a snap is shown.
-  // Secondary as background; pebble stroke is forced to `light_color` via the
-  // PebbleVisual override so the pebble reads against the tinted box in dark
-  // mode (where the default stroke is `secondary_color` — same hue as the
-  // box).
-  const overlayBackground = palette?.secondary_color
-  const overlayStroke = palette?.light_color
-
   return (
     <article>
       {/* Top bar: static privacy indicator + edit/close buttons */}
@@ -185,25 +174,21 @@ export function PebbleDetail({
                 alt={t("photoAlt")}
                 className="aspect-square w-full rounded-2xl object-cover scale-90 -rotate-4"
               />
-              <span
-                className="absolute -right-4 -top-4 grid size-[100px] place-items-center rounded-2xl shadow-md rotate-7"
-                style={overlayBackground ? { backgroundColor: overlayBackground } : undefined}
-              >
-                <PebbleVisual
-                  pebble={pebble}
-                  mark={mark}
-                  tier="detail"
-                  className="size-[72px]"
-                  strokeOverride={overlayStroke}
-                />
-              </span>
+              <PebbleFramed
+                pebble={pebble}
+                mark={mark}
+                tier="detail"
+                className="absolute -right-4 -top-4 size-[100px] rotate-7"
+                animateIn
+              />
             </div>
           ) : (
-            <PebbleVisual
+            <PebbleFramed
               pebble={pebble}
               mark={mark}
               tier="detail"
               className="mx-auto size-[100px]"
+              animateIn
             />
           )}
         </button>

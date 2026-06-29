@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 import type { Mark, Pebble } from "@/lib/types"
 import { useEmotionPalettes } from "@/lib/data/useEmotionPalettes"
 import { useFormatDate, useFormatTime } from "@/lib/i18n"
-import { PebbleVisual } from "@/components/pebble/PebbleVisual"
+import { PebbleFramed } from "@/components/pebble/PebbleFramed"
 import { cn } from "@/lib/utils"
 
 type PathPebbleRowProps = {
@@ -69,10 +69,6 @@ export function PathPebbleRow({ pebble, mark, positionIndex, onSelect }: PathPeb
       } as CSSProperties)
     : { height: heightPx }
 
-  const thumbnailStyle: CSSProperties | undefined = palette
-    ? { backgroundColor: palette.surface_color }
-    : undefined
-
   return (
     <button
       type="button"
@@ -84,17 +80,12 @@ export function PathPebbleRow({ pebble, mark, positionIndex, onSelect }: PathPeb
       style={rowStyle}
       aria-label={t("cardAria", { name: pebble.name, time })}
     >
-      <div
-        className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-muted"
-        style={thumbnailStyle}
-      >
-        <PebbleVisual
-          pebble={pebble}
-          mark={mark}
-          tier="thumbnail"
-          className="size-10"
-        />
-      </div>
+      <PebbleFramed
+        pebble={pebble}
+        mark={mark}
+        tier="thumbnail"
+        className="size-14 shrink-0"
+      />
 
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <h3

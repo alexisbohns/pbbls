@@ -12,18 +12,18 @@
 // Within each polarity, the "peak" member leads at LARGE, the most "subtle"
 // member leads at SMALL, balanced at MEDIUM.
 
-export type Intensity = 1 | 2 | 3
-export type Valence = -1 | 0 | 1
+import {
+  SIZE_BY_INTENSITY as SIZE,
+  POLARITY_BY_VALENCE as POLARITY,
+  type Size,
+  type Polarity,
+  type Intensity,
+  type Valence,
+} from "./pebble-geometry"
 
-type Size = "small" | "medium" | "large"
-type Polarity = "lowlight" | "neutral" | "highlight"
-
-const SIZE: Record<Intensity, Size> = { 1: "small", 2: "medium", 3: "large" }
-const POLARITY: Record<Valence, Polarity> = {
-  [-1]: "lowlight",
-  0: "neutral",
-  1: "highlight",
-}
+// Re-exported so existing importers (e.g. `EmotionPickerSheet`) keep their
+// `from "@/lib/config/emotion-category-ordering"` import path.
+export type { Intensity, Valence }
 
 const TABLE: Record<`${Size}.${Polarity}`, readonly string[]> = {
   // HIGHLIGHTS — pleasant first

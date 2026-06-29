@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl"
 import type { Pebble, PebbleSnap, Soul, Collection, Mark } from "@/lib/types"
 import { usePebbleDraft } from "@/lib/hooks/usePebbleDraft"
 import type { UpdatePebbleInput } from "@/lib/data/data-provider"
-import { PebbleVisual } from "@/components/pebble/PebbleVisual"
+import { PebbleFramed } from "@/components/pebble/PebbleFramed"
 import {
   EmotionTile,
   DomainTile,
@@ -200,7 +200,7 @@ export function PebbleEdit({
             aria-label={tPebble("editIntensityAria")}
             className="mt-4 cursor-pointer rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <PebbleVisual
+            <PebbleFramed
               pebble={draftPebble}
               mark={draftMark}
               tier="detail"
