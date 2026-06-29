@@ -24,7 +24,7 @@
 ## File structure
 
 **Create:**
-- `packages/supabase/supabase/migrations/<ts>_karma_events_type_axis.sql` — type column, delta→integer, reason check, indexes.
+- `packages/supabase/supabase/migrations/<ts>_karma_events_type_axis.sql` — type column, reason check, indexes (delta stays smallint — widening would force live-DB view surgery).
 - `packages/supabase/supabase/migrations/<ts>_wallet_balances.sql` — snapshot table, trigger, backfill.
 - `packages/supabase/supabase/migrations/<ts>_wallet_rpcs.sql` — `spend_karma`, `refund_karma`.
 - `packages/supabase/supabase/migrations/<ts>_wallet_summary_and_bounce_credit_only.sql` — `v_wallet_summary` view + `bounces` trigger folds credits only.
@@ -68,10 +68,10 @@ alter table public.karma_events
   add column type text not null default 'credit'
     check (type in ('credit','withdraw'));
 
--- Widen delta: smallint (max 32767) is fine per-event today, but lifetime sums
--- and future goods (themes/skins) make integer the safe choice.
-alter table public.karma_events
-  alter column delta type integer;
+-- delta stays smallint: per-event values are small (earn ≤ 10) and balance/total
+-- sums promote to integer/bigint anyway. Widening would force dropping & recreating
+-- the views that depend on this column (v_karma_summary,
+-- v_analytics_bounce_distribution_today) on the live DB — not worth it.
 
 -- Constrain reason now that it spans both sides. Existing rows are all earn-side
 -- and already use the first three reasons, so the default 'credit' covers them.
@@ -103,15 +103,13 @@ select count(*)                         as total_rows,
        count(*) filter (where type='credit')   as credit_rows,
        count(*) filter (where type='withdraw') as withdraw_rows
 from public.karma_events;
-select data_type from information_schema.columns
-where table_name='karma_events' and column_name='delta';   -- expect 'integer'
 ```
-Expected: `withdraw_rows = 0`, `credit_rows = total_rows`, `delta` is `integer`.
+Expected: `withdraw_rows = 0`, `credit_rows = total_rows` (every historical row is typed `credit`).
 
 - [ ] **Step 4: Regenerate types**
 
 Run: `npm run db:types:remote --workspace=packages/supabase`
-Expected: `packages/supabase/types/database.ts` updates (`karma_events.Row` gains `type`, `delta` becomes `number`).
+Expected: `packages/supabase/types/database.ts` updates (`karma_events.Row` gains `type`; `delta` stays `number`).
 
 - [ ] **Step 5: Commit**
 

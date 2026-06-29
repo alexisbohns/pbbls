@@ -46,10 +46,11 @@ alter table public.karma_events
   add column type text not null default 'credit'
     check (type in ('credit','withdraw'));
 
--- Widen delta: a smallint (max 32767) is fine per-event today, but future
--- goods (themes/skins) and lifetime sums make integer the safe choice.
-alter table public.karma_events
-  alter column delta type integer;
+-- delta stays smallint. Per-event values are small (earn ≤ 10) and balance/total
+-- sums promote to integer/bigint anyway (wallet_balances.balance is integer).
+-- Widening to integer would force dropping & recreating the views that depend on
+-- this column (v_karma_summary, v_analytics_bounce_distribution_today) on the live
+-- DB — not worth it. Revisit only if one good ever needs a price > 32767 karma.
 
 -- Backfill is trivial: every existing row is earn-side.
 -- (default 'credit' already covers historical rows; pebble_deleted included —
