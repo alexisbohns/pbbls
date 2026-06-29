@@ -1,5 +1,6 @@
 "use client"
 
+import { notifyKarma } from "@/lib/activity/karma-activity"
 import { useDataProvider } from "@/lib/data/provider-context"
 import type { CreatePebbleInput, UpdatePebbleInput } from "@/lib/data/data-provider"
 import type { Pebble, PebbleSnap } from "@/lib/types"
@@ -9,15 +10,26 @@ export function usePebbles() {
 
   const addPebble = async (input: CreatePebbleInput): Promise<Pebble> => {
     if (!provider) throw new Error("Not authenticated")
+    const before = provider.getStore().karma
     const pebble = await provider.createPebble(input)
-    setStore(provider.getStore())
+    const after = provider.getStore()
+    setStore(after)
+    const delta = after.karma - before
+    if (delta > 0) notifyKarma(delta, "pebble_created")
     return pebble
   }
 
+  // Karma fire kept symmetric with usePebble(id).updatePebble — the singular
+  // hook is what the live enrichment surfaces use; this path is for parity if a
+  // future caller updates through the plural hook.
   const updatePebble = async (id: string, input: UpdatePebbleInput): Promise<Pebble> => {
     if (!provider) throw new Error("Not authenticated")
+    const before = provider.getStore().karma
     const pebble = await provider.updatePebble(id, input)
-    setStore(provider.getStore())
+    const after = provider.getStore()
+    setStore(after)
+    const delta = after.karma - before
+    if (delta > 0) notifyKarma(delta, "pebble_enriched")
     return pebble
   }
 
