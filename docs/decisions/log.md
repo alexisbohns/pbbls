@@ -92,3 +92,14 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** **Do not add `CHECK(balance >= 0)` to `wallet_balances`** — it would break pebble deletion. New spend-side reasons go through `spend_karma`; new earn-side reasons just insert credit events. The `bounces` admin snapshot trigger now folds **credits only** so "bounce karma distribution" keeps meaning *earned*. `delta` stays `smallint` (widening would force dropping/recreating dependent views on the live DB). Idempotency of a *purchase* is the caller's (sub-project C's) responsibility, enabled by `spend_karma` being callable inside the caller's transaction.
 - **Supersedes / Superseded-by:** —
 - **Refs:** #494, `docs/superpowers/specs/2026-06-29-issue-494-karma-wallet-design.md`, `packages/supabase/supabase/migrations/20260629192621_karma_events_type_axis.sql` … `20260629194621_wallet_summary_and_bounce_credit_only.sql`.
+
+## 2026-06-29 — Web in-app notifications: Sonner + explicit-fire, no realtime
+
+- **Status:** taken
+- **Scope:** webapp
+- **Context:** M36 sub-project B (#495) needed a non-invasive in-app activity primitive, first used for a "+N karma" pill on wallet credit. A web PWA cannot render into the iOS Dynamic Island, so the admired Opal effect had to be approximated within web limits, and we needed a way to know when a credit happened.
+- **Decision:** We will build in-app activity on **Sonner** (ported from `apps/admin`), rendering a compact custom pill via `toast.custom()` bottom-center. The trigger is **explicit fire at the action site** via store-diff: the pebble mutation hooks read karma from provider truth before/after the action and call `notifyKarma(delta, reason)` on a positive delta. No Supabase realtime, no central balance-watcher.
+- **Why:** Sonner gives queueing, timeout, swipe-dismiss, `aria-live`, and reduced-motion handling for free. Explicit fire is the cleanest feature-agnostic primitive (carries a reason label, no false-fire surface), needs no backend change, and suits a personal PWA where credits come from the user's own on-device actions. Realtime would be heavier and double-fire against the optimistic store reload.
+- **Consequences:** New credit sources surface a pill by adding one `notifyKarma(...)` call at their action site — and must wire it on the hook the live surface actually uses (enrichment goes through the singular `usePebble(id)`, not `usePebbles()`). Credit-only by design: clawbacks (delta ≤ 0) stay silent. The pill uses a stable toast id so a new credit replaces the prior one. Reused by C (e.g. "glyph purchased") via the same primitive.
+- **Supersedes / Superseded-by:** —
+- **Refs:** #495, `docs/superpowers/specs/2026-06-29-issue-495-in-app-activity-design.md`, `apps/web/lib/activity/karma-activity.tsx`, `apps/web/components/activity/KarmaActivityPill.tsx`.
