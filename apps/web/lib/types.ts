@@ -64,11 +64,28 @@ export type Collection = {
   updated_at: string
 }
 
+export type KarmaReason =
+  | "pebble_created"
+  | "pebble_enriched"
+  | "pebble_deleted"
+  | "grant"
+  | "purchase"
+  | "refund"
+
 export type KarmaEvent = {
+  id: string
+  type: "credit" | "withdraw"
   delta: number
-  reason: string
+  reason: KarmaReason
   ref_id?: string
   created_at: string
+}
+
+// Read-only wallet summary projected from v_wallet_summary.
+export type WalletSnapshot = {
+  balance: number
+  totalEarned: number
+  totalSpent: number
 }
 
 export type MarkStroke = {
