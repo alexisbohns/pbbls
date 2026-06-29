@@ -362,6 +362,7 @@ export type Database = {
           id: string
           reason: string
           ref_id: string | null
+          type: string
           user_id: string
         }
         Insert: {
@@ -370,6 +371,7 @@ export type Database = {
           id?: string
           reason: string
           ref_id?: string | null
+          type?: string
           user_id: string
         }
         Update: {
@@ -378,6 +380,7 @@ export type Database = {
           id?: string
           reason?: string
           ref_id?: string | null
+          type?: string
           user_id?: string
         }
         Relationships: [
