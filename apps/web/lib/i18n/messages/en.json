@@ -102,6 +102,24 @@
       "removeUpvoteAria": "Remove upvote"
     }
   },
+  "wallet": {
+    "title": "Wallet",
+    "balance": "Balance",
+    "earned": "Total earned",
+    "spent": "Total spent",
+    "debtHint": "Earn karma to clear your balance before you can shop again.",
+    "history": "History",
+    "empty": "No karma movements yet.",
+    "loadMore": "Load more",
+    "reason": {
+      "pebble_created": "Pebble created",
+      "pebble_enriched": "Pebble enriched",
+      "pebble_deleted": "Pebble deleted",
+      "grant": "Karma granted",
+      "purchase": "Purchase",
+      "refund": "Refund"
+    }
+  },
   "glyphs": {
     "title": "Glyphs",
     "loading": "Loading…",
