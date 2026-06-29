@@ -102,6 +102,11 @@
       "removeUpvoteAria": "Ôter mon vote"
     }
   },
+  "activity": {
+    "amount": "+{amount} karma",
+    "srEarned": "Vous avez gagné {amount} karma — {reason}.",
+    "viewWallet": "Voir le porte-karma"
+  },
   "wallet": {
     "title": "Porte-karma",
     "balance": "Solde",

@@ -102,6 +102,11 @@
       "removeUpvoteAria": "Remove upvote"
     }
   },
+  "activity": {
+    "amount": "+{amount} karma",
+    "srEarned": "Earned {amount} karma — {reason}.",
+    "viewWallet": "View wallet"
+  },
   "wallet": {
     "title": "Wallet",
     "balance": "Balance",
