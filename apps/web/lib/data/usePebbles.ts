@@ -19,6 +19,9 @@ export function usePebbles() {
     return pebble
   }
 
+  // Karma fire kept symmetric with usePebble(id).updatePebble — the singular
+  // hook is what the live enrichment surfaces use; this path is for parity if a
+  // future caller updates through the plural hook.
   const updatePebble = async (id: string, input: UpdatePebbleInput): Promise<Pebble> => {
     if (!provider) throw new Error("Not authenticated")
     const before = provider.getStore().karma
