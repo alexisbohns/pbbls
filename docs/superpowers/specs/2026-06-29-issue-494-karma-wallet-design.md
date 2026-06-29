@@ -172,8 +172,15 @@ begin
 end;
 $$;
 
-grant execute on function public.spend_karma(integer,text,uuid)  to authenticated;
-grant execute on function public.refund_karma(integer,uuid)      to authenticated;
+-- spend_karma is user-callable (guarded; users spend their own karma).
+grant execute on function public.spend_karma(integer,text,uuid) to authenticated;
+-- refund_karma is NOT user-callable: as written it has no validation against an
+-- original purchase, so granting it to `authenticated` would be a karma-minting
+-- hole (any user could refund_karma(1_000_000, …)). Refunds are issued by trusted
+-- server/admin logic only. The buy flow (C) needs no client refund — a failed
+-- grant rolls back the spend in the same transaction.
+revoke execute on function public.refund_karma(integer,uuid) from public, anon, authenticated;
+grant  execute on function public.refund_karma(integer,uuid) to service_role;
 ```
 
 **Idempotency / double-charge protection.** A single purchase must not be charged twice on a network retry, and a user must not buy what they already own. The clean place for this is the *caller's* domain (C owns "what is a glyph purchase"), enforced by a unique constraint on C's ownership/grant table (e.g. `unique(user_id, glyph_id)`), with the grant + `spend_karma` happening in **one** RPC transaction in C so a failed grant rolls back the debit. A's contract: **`spend_karma` is atomic and self-contained; idempotency of a *purchase* is the caller's responsibility, and A makes that possible by being callable inside the caller's transaction.** This keeps A generic across future goods.
@@ -217,7 +224,7 @@ Once withdraw events exist, the `bounces` snapshot (Σ all delta) would silently
 | Two devices buy at once | Row lock on `wallet_balances` serializes them; the second sees the updated balance and is accepted/rejected correctly. |
 | Delete a pebble after spending | Clawback (`pebble_deleted`, credit) is **always** recorded; balance may go **negative** (debt). Deletion never blocked. |
 | Try to buy while in debt | `balance < 0 < price` → rejected until re-earned. |
-| Refund a purchase | `refund_karma` adds a positive withdraw-side event; balance recovers; `total_spent` nets down. |
+| Refund a purchase (server/admin only) | `refund_karma` (service_role) adds a positive withdraw-side event; balance recovers; `total_spent` nets down. Not user-callable. |
 
 ## Testing
 

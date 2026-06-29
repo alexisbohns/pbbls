@@ -269,10 +269,15 @@ begin
 end;
 $$;
 
-revoke all on function public.spend_karma(integer,text,uuid)  from public, anon;
-revoke all on function public.refund_karma(integer,uuid)      from public, anon;
-grant execute on function public.spend_karma(integer,text,uuid)  to authenticated;
-grant execute on function public.refund_karma(integer,uuid)      to authenticated;
+-- spend_karma is user-callable (guarded; users spend their own karma).
+revoke all on function public.spend_karma(integer,text,uuid) from public, anon;
+grant execute on function public.spend_karma(integer,text,uuid) to authenticated;
+-- refund_karma is NOT user-callable: it has no validation against an original
+-- purchase, so exposing it to `authenticated` would be a karma-minting hole.
+-- Refunds are issued by trusted server/admin logic only (service_role). The buy
+-- flow (C) needs no client refund — a failed grant rolls back the spend in-txn.
+revoke all on function public.refund_karma(integer,uuid) from public, anon, authenticated;
+grant execute on function public.refund_karma(integer,uuid) to service_role;
 ```
 
 - [ ] **Step 2: Apply**
@@ -413,7 +418,10 @@ from public.v_wallet_summary;   -- expect balance = derived_balance
 select score from public.bounces where user_id='<test-user-uuid>';   -- note value
 select public.spend_karma(1,'purchase',null);
 select score from public.bounces where user_id='<test-user-uuid>';   -- UNCHANGED
-select public.refund_karma(1, null);  -- cleanup
+-- cleanup: restore the spent karma. refund_karma is service_role-only, so as a
+-- service-role/SQL-editor session insert a compensating credit directly:
+insert into public.karma_events (user_id, type, delta, reason, ref_id)
+values ('<test-user-uuid>', 'credit', 1, 'grant', null);
 ```
 Expected: `balance = derived_balance`; the bounce `score` is identical before and after the spend.
 
