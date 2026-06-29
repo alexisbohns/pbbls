@@ -15,6 +15,7 @@ export function useWallet() {
   // Start in the loading state only when a provider is available to load from;
   // without one (unauthenticated) there is nothing to fetch.
   const [loading, setLoading] = useState(() => provider !== null)
+  const [loadingMore, setLoadingMore] = useState(false)
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
@@ -51,11 +52,18 @@ export function useWallet() {
   }, [provider])
 
   const loadMore = useCallback(async () => {
-    if (!cursor || !provider) return
-    const page = await provider.getWalletHistory(cursor)
-    setHistory((prev) => [...prev, ...page.events])
-    setCursor(page.nextCursor)
-  }, [provider, cursor])
+    if (!cursor || !provider || loadingMore) return
+    setLoadingMore(true)
+    try {
+      const page = await provider.getWalletHistory(cursor)
+      setHistory((prev) => [...prev, ...page.events])
+      setCursor(page.nextCursor)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error("Failed to load more wallet history"))
+    } finally {
+      setLoadingMore(false)
+    }
+  }, [provider, cursor, loadingMore])
 
   return {
     balance: summary.balance,
@@ -64,6 +72,7 @@ export function useWallet() {
     history,
     hasMore: cursor !== null,
     loadMore,
+    loadingMore,
     loading,
     error,
   }

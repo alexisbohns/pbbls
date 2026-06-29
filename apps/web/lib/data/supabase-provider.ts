@@ -272,13 +272,24 @@ export class SupabaseProvider implements DataProvider {
       .order("created_at", { ascending: false })
       .order("id", { ascending: false })
       .limit(limit + 1)
-    if (cursor) query = query.lt("created_at", cursor)
+    if (cursor) {
+      // Composite keyset cursor "<created_at>|<id>": fetch rows strictly before
+      // (created_at, id) under the (desc, desc) ordering, so same-timestamp rows
+      // straddling a page boundary are not dropped.
+      const sep = cursor.lastIndexOf("|")
+      const ts = cursor.slice(0, sep)
+      const id = cursor.slice(sep + 1)
+      query = query.or(`created_at.lt.${ts},and(created_at.eq.${ts},id.lt.${id})`)
+    }
     const { data, error } = await query
     if (error) throw new Error(`getWalletHistory failed: ${error.message}`)
+    // `as KarmaEvent[]` is load-bearing: PostgREST types `type`/`reason` as plain
+    // strings; the karma_events CHECK constraints are what make this cast sound.
     const rows = (data ?? []) as KarmaEvent[]
     const hasMore = rows.length > limit
     const events = hasMore ? rows.slice(0, limit) : rows
-    const nextCursor = hasMore ? events[events.length - 1].created_at : null
+    const last = events[events.length - 1]
+    const nextCursor = hasMore && last ? `${last.created_at}|${last.id}` : null
     return { events, nextCursor }
   }
 

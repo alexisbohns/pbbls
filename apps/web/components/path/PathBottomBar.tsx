@@ -43,7 +43,7 @@ export function PathBottomBar() {
       </Link>
       <Link
         href="/wallet"
-        aria-label={t("bottomBar.statsAria")}
+        aria-label={t("bottomBar.walletAria")}
         className="flex items-center gap-4"
       >
         <Stat icon={CirclePile} value={bounceLoading ? "—" : bounce} label={t("stats.bounce")} />

@@ -380,7 +380,8 @@
     "bottomBar": {
       "label": "Profil et statistiques",
       "profileAria": "Profil",
-      "statsAria": "Statistiques du profil"
+      "statsAria": "Statistiques du profil",
+      "walletAria": "Porte-karma"
     },
     "stats": {
       "bounce": "ricochet",

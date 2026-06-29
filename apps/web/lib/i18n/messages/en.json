@@ -380,7 +380,8 @@
     "bottomBar": {
       "label": "Profile and stats",
       "profileAria": "Profile",
-      "statsAria": "Profile stats"
+      "statsAria": "Profile stats",
+      "walletAria": "Karma wallet"
     },
     "stats": {
       "bounce": "bounce",
