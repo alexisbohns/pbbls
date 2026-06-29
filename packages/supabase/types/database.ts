@@ -1274,6 +1274,49 @@ export type Database = {
         }
         Relationships: []
       }
+      v_wallet_summary: {
+        Row: {
+          balance: number | null
+          total_earned: number | null
+          total_spent: number | null
+          user_id: string | null
+        }
+        Insert: {
+          balance?: number | null
+          total_earned?: never
+          total_spent?: never
+          user_id?: string | null
+        }
+        Update: {
+          balance?: number | null
+          total_earned?: never
+          total_spent?: never
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_balances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "wallet_balances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "wallet_balances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
     }
     Functions: {
       compute_karma_delta: {
