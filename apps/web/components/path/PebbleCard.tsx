@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import type { Pebble, Emotion, Mark } from "@/lib/types"
 import { useFormatTime } from "@/lib/i18n"
-import { PebbleVisual } from "@/components/pebble/PebbleVisual"
+import { PebbleFramed } from "@/components/pebble/PebbleFramed"
 import { IntensityDots, PositivenessIndicator } from "@/components/pebble/PebbleIndicators"
 import { EmotionBadge } from "@/components/ui/EmotionBadge"
 
@@ -52,7 +52,7 @@ export function PebbleCard({ pebble, emotion, mark, soulNames, onSelect }: Pebbl
       >
         {isLarge ? (
           <>
-            <PebbleVisual
+            <PebbleFramed
               pebble={pebble}
               mark={mark}
               tier="thumbnail"
@@ -90,7 +90,7 @@ export function PebbleCard({ pebble, emotion, mark, soulNames, onSelect }: Pebbl
           </>
         ) : (
           <>
-            <PebbleVisual
+            <PebbleFramed
               pebble={pebble}
               mark={mark}
               tier="thumbnail"
