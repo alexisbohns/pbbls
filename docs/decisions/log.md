@@ -81,3 +81,14 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** Agents do not edit CLAUDE.md to record per-PR learnings; they leave them in the plan's "Lessons learned". Reviewers can push back on CLAUDE.md edits that fail the durable + action-guiding bars. The monorepo-audit checklist now explicitly includes a grooming sweep; expect rules to be **demoted or deleted** during the same pass when they have gone stale.
 - **Supersedes / Superseded-by:** —
 - **Refs:** #479, `CLAUDE.md` ("Editing CLAUDE.md / AGENTS.md"), `docs/superpowers/specs/2026-04-11-monorepo-audit-design.md` (per-domain checklist item 6).
+
+## 2026-06-29 — Karma wallet: one ledger, debt allowed, refunds server-only
+
+- **Status:** taken
+- **Scope:** db, webapp
+- **Context:** Making karma spendable (M36 Pebblestore, #494) required turning the earn-only `karma_events` ledger into a currency with a balance that can go down — without breaking existing flows (notably pebble deletion, which claws back the karma a pebble earned).
+- **Decision:** We will keep **one ledger** (`karma_events` gains a `type` credit/withdraw axis keyed off movement *category*, not sign) with a single balance = Σ delta, snapshotted in `wallet_balances`. The non-negative rule lives **only in the `spend_karma` RPC** (row-locked `balance ≥ amount` check); there is deliberately **no `CHECK(balance >= 0)`** on the snapshot, so earn-side clawbacks may drive the balance **negative (a debt)** the user clears by re-earning. `refund_karma` is **`service_role`-only**, never callable by `authenticated`.
+- **Why:** Coupling pebble deletion to wallet state would be wrong UX, so clawbacks must always apply even into the negative — a column `CHECK` would roll back a legitimate delete. The purchase guard alone keeps the store safe (a negative balance can't buy anything). An unguarded `refund_karma` granted to `authenticated` is a karma-minting hole (`refund_karma(1_000_000, …)`); refunds are admin/server actions, and the buy flow needs no client refund because a failed grant rolls back the spend in the same transaction.
+- **Consequences:** **Do not add `CHECK(balance >= 0)` to `wallet_balances`** — it would break pebble deletion. New spend-side reasons go through `spend_karma`; new earn-side reasons just insert credit events. The `bounces` admin snapshot trigger now folds **credits only** so "bounce karma distribution" keeps meaning *earned*. `delta` stays `smallint` (widening would force dropping/recreating dependent views on the live DB). Idempotency of a *purchase* is the caller's (sub-project C's) responsibility, enabled by `spend_karma` being callable inside the caller's transaction.
+- **Supersedes / Superseded-by:** —
+- **Refs:** #494, `docs/superpowers/specs/2026-06-29-issue-494-karma-wallet-design.md`, `packages/supabase/supabase/migrations/20260629192621_karma_events_type_axis.sql` … `20260629194621_wallet_summary_and_bounce_credit_only.sql`.
