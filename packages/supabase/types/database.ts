@@ -966,6 +966,46 @@ export type Database = {
           },
         ]
       }
+      wallet_balances: {
+        Row: {
+          balance: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_balances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "wallet_balances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "wallet_balances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
     }
     Views: {
       v_analytics_active_users_daily: {
