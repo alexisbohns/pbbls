@@ -42,7 +42,7 @@ export function PathBottomBar() {
         <CircleUser className="size-7" />
       </Link>
       <Link
-        href="/profile"
+        href="/wallet"
         aria-label={t("bottomBar.statsAria")}
         className="flex items-center gap-4"
       >
