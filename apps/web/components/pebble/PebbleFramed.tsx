@@ -64,41 +64,50 @@ export function PebbleFramed({
     transformOrigin: "center",
   }
 
-  return (
-    <div
-      className={cn("relative", className)}
-      style={{ aspectRatio: outlineAspectRatio(size) }}
-    >
-      <motion.div
-        className="absolute inset-0"
-        initial={shouldAnimate ? { scale: 0.6, opacity: 0 } : false}
-        animate={shouldAnimate ? { scale: 1, opacity: 1 } : undefined}
-        transition={{ type: "spring", duration: 0.42, bounce: 0.3 }}
-      >
-        <PebbleOutlineBackdrop
-          size={size}
-          polarity={polarity}
-          fillColor={fillColor}
-          fillOpacity={fillOpacity}
-        />
-      </motion.div>
+  // Fit a box at the outline's aspect ratio INSIDE the caller's (usually
+  // square) box — the CSS equivalent of iOS `.aspectRatio(ar, .fit)`. Pinning
+  // the dimension that would otherwise overflow (height for tall outlines,
+  // width for wide ones) lets `aspect-ratio` derive the other. Without this,
+  // a square caller box forces the box square, the backdrop letterboxes, and
+  // the pebble — scaled against the full square — pokes out of the silhouette.
+  const ar = outlineAspectRatio(size)
+  const fitStyle: CSSProperties =
+    ar <= 1 ? { height: "100%", aspectRatio: ar } : { width: "100%", aspectRatio: ar }
 
-      <motion.div
-        className="absolute inset-0 grid place-items-center"
-        initial={shouldAnimate ? { opacity: 0 } : false}
-        animate={shouldAnimate ? { opacity: 1 } : undefined}
-        transition={{ duration: 0.25, delay: 0.18, ease: "easeOut" }}
-      >
-        <div className="size-full" style={scaleStyle}>
-          <PebbleVisual
-            pebble={pebble}
-            mark={mark}
-            tier={tier}
-            strokeOverride={strokeColor}
-            className="size-full"
+  return (
+    <div className={cn("grid place-items-center", className)}>
+      <div className="relative" style={fitStyle}>
+        <motion.div
+          className="absolute inset-0"
+          initial={shouldAnimate ? { scale: 0.6, opacity: 0 } : false}
+          animate={shouldAnimate ? { scale: 1, opacity: 1 } : undefined}
+          transition={{ type: "spring", duration: 0.42, bounce: 0.3 }}
+        >
+          <PebbleOutlineBackdrop
+            size={size}
+            polarity={polarity}
+            fillColor={fillColor}
+            fillOpacity={fillOpacity}
           />
-        </div>
-      </motion.div>
+        </motion.div>
+
+        <motion.div
+          className="absolute inset-0 grid place-items-center"
+          initial={shouldAnimate ? { opacity: 0 } : false}
+          animate={shouldAnimate ? { opacity: 1 } : undefined}
+          transition={{ duration: 0.25, delay: 0.18, ease: "easeOut" }}
+        >
+          <div className="size-full" style={scaleStyle}>
+            <PebbleVisual
+              pebble={pebble}
+              mark={mark}
+              tier={tier}
+              strokeOverride={strokeColor}
+              className="size-full"
+            />
+          </div>
+        </motion.div>
+      </div>
     </div>
   )
 }
