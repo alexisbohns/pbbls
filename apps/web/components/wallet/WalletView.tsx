@@ -5,6 +5,8 @@ import { Sparkle } from "lucide-react"
 import { useWallet } from "@/lib/data/useWallet"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import { PageLayout } from "@/components/layout/PageLayout"
+import { PageHeader } from "@/components/layout/PageHeader"
 import { WalletHistoryItem } from "./WalletHistoryItem"
 
 export function WalletView() {
@@ -12,8 +14,10 @@ export function WalletView() {
   const { balance, totalEarned, totalSpent, history, hasMore, loadMore, loading } = useWallet()
 
   return (
-    <div className="mx-auto flex w-full max-w-md flex-col gap-6 p-4">
-      <Card className="flex flex-col gap-2 p-6">
+    <PageLayout>
+      <div className="flex flex-col gap-6">
+        <PageHeader title={t("title")} backHref="/path" />
+        <Card className="flex flex-col gap-2 p-6">
         <div className="flex items-center gap-2">
           <Sparkle className="size-5" aria-hidden />
           <span className="text-3xl font-bold tabular-nums">{loading ? "—" : balance}</span>
@@ -42,7 +46,8 @@ export function WalletView() {
             {t("loadMore")}
           </Button>
         )}
-      </section>
-    </div>
+        </section>
+      </div>
+    </PageLayout>
   )
 }
