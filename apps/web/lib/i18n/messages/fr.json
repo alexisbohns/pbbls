@@ -102,6 +102,24 @@
       "removeUpvoteAria": "Ôter mon vote"
     }
   },
+  "wallet": {
+    "title": "Porte-karma",
+    "balance": "Solde",
+    "earned": "Total gagné",
+    "spent": "Total dépensé",
+    "debtHint": "Gagnez du karma pour remettre votre solde à zéro avant de pouvoir acheter à nouveau.",
+    "history": "Historique",
+    "empty": "Aucun mouvement de karma pour l’instant.",
+    "loadMore": "Voir plus",
+    "reason": {
+      "pebble_created": "Caillou créé",
+      "pebble_enriched": "Caillou enrichi",
+      "pebble_deleted": "Caillou supprimé",
+      "grant": "Karma offert",
+      "purchase": "Achat",
+      "refund": "Remboursement"
+    }
+  },
   "glyphs": {
     "title": "Glyphes",
     "loading": "Chargement…",
@@ -362,7 +380,8 @@
     "bottomBar": {
       "label": "Profil et statistiques",
       "profileAria": "Profil",
-      "statsAria": "Statistiques du profil"
+      "statsAria": "Statistiques du profil",
+      "walletAria": "Porte-karma"
     },
     "stats": {
       "bounce": "ricochet",

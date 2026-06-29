@@ -6,7 +6,7 @@
     "root_node_id": "V-landing",
     "metadata": { "view_card_variant": "large" },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-05-16T00:00:00.000Z"
+    "updated_at": "2026-06-29T00:00:00.000Z"
   },
   "nodes": [
     {
@@ -1266,6 +1266,60 @@
       "description": "PostgREST select on public.v_emotions_with_palette. RLS open (select using true) — readable by any authenticated user. Returns ~38 rows × 11 columns: id, slug, name, color (legacy), category_id, category_slug, category_name, primary_color, secondary_color, light_color, surface_color. iOS consumes this once on app mount via EmotionPaletteService and caches in memory for the session.",
       "status": "development",
       "platforms": ["web", "ios", "android"]
+    },
+    {
+      "id": "V-wallet",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Wallet",
+      "description": "Karma wallet page at /wallet (M36, #494). Shows the user's spendable karma balance, total earned, total spent, a debt hint when the balance is negative, and a paginated credit/withdraw history list (fetched on demand, not part of the eager global load). Reachable from the karma stat in the Path bottom bar; back button returns to /path.",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "DM-karma-events",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "karma_events",
+      "description": "Postgres append-only karma ledger. Each row carries a smallint delta plus a type axis (credit = earn-side: pebble_created/pebble_enriched/pebble_deleted/grant; withdraw = spend-side: purchase/refund), making karma a spendable currency. balance = Σ delta; earned = Σ delta where credit; spent = -Σ delta where withdraw. Inserts fire two triggers: apply_karma_event_to_wallet (all events) and apply_karma_event_to_bounce (credit-only, so the bounce snapshot stays earned-karma). Indexed on (user_id, type) and (user_id, created_at desc).",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "DM-wallet-balances",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "wallet_balances",
+      "description": "Postgres table: per-user spendable karma balance snapshot. Columns: user_id (PK, FK auth.users), balance (int, default 0; may go transiently negative on earn-side clawbacks — no non-negative CHECK, the overdraw guard lives in spend_karma), updated_at. Maintained atomically by trigger karma_events_apply_to_wallet on every karma_events insert (credit and withdraw). RLS: users read their own row; writes only via the trigger (security definer). Backfilled at migration time from sum(karma_events.delta) per user.",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "API-spend-karma",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "spend_karma",
+      "description": "SECURITY DEFINER plpgsql RPC (granted to authenticated). Guarded, race-safe karma debit: takes p_amount (positive), p_reason ('purchase'), optional p_ref_id. Locks the caller's wallet_balances row FOR UPDATE to serialize concurrent spends, raises insufficient_karma (P0001) when balance < amount, otherwise inserts a negative withdraw karma_events row — the trigger updates wallet_balances in the same transaction. Returns the new event id.",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "API-refund-karma",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "refund_karma",
+      "description": "SECURITY DEFINER plpgsql RPC, execution restricted to service_role (revoked from authenticated to avoid a client-callable karma mint). Inserts a positive withdraw-side karma_events row reversing a prior spend; the trigger updates wallet_balances. Returns the new event id.",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "API-get-wallet-summary",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "select v_wallet_summary",
+      "description": "PostgREST select on public.v_wallet_summary, filtered to auth.uid() and granted to authenticated. Returns one row: balance (from wallet_balances) plus total_earned (Σ credit delta) and total_spent (-Σ withdraw delta) computed from karma_events. Backs the Wallet page summary card in one round-trip.",
+      "status": "development",
+      "platforms": ["web"]
     }
   ],
   "edges": [
@@ -1504,6 +1558,17 @@
     { "id": "e-V-collection-detail-API-get-emotion-palettes", "project_id": "pebbles", "source_id": "V-collection-detail", "target_id": "API-get-emotion-palettes", "edge_type": "calls" },
     { "id": "e-V-collection-detail-DM-emotion-category", "project_id": "pebbles", "source_id": "V-collection-detail", "target_id": "DM-emotion-category", "edge_type": "displays" },
     { "id": "e-V-quick-pebble-editor-API-get-emotion-palettes", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "API-get-emotion-palettes", "edge_type": "calls" },
-    { "id": "e-V-quick-pebble-editor-DM-emotion-category", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "DM-emotion-category", "edge_type": "displays" }
+    { "id": "e-V-quick-pebble-editor-DM-emotion-category", "project_id": "pebbles", "source_id": "V-quick-pebble-editor", "target_id": "DM-emotion-category", "edge_type": "displays" },
+
+    { "id": "e-V-timeline-V-wallet", "project_id": "pebbles", "source_id": "V-timeline", "target_id": "V-wallet", "edge_type": "composes" },
+    { "id": "e-V-wallet-API-get-wallet-summary", "project_id": "pebbles", "source_id": "V-wallet", "target_id": "API-get-wallet-summary", "edge_type": "calls" },
+    { "id": "e-V-wallet-DM-wallet-balances", "project_id": "pebbles", "source_id": "V-wallet", "target_id": "DM-wallet-balances", "edge_type": "displays" },
+    { "id": "e-V-wallet-DM-karma-events", "project_id": "pebbles", "source_id": "V-wallet", "target_id": "DM-karma-events", "edge_type": "displays" },
+    { "id": "e-API-get-wallet-summary-DM-wallet-balances", "project_id": "pebbles", "source_id": "API-get-wallet-summary", "target_id": "DM-wallet-balances", "edge_type": "queries" },
+    { "id": "e-API-get-wallet-summary-DM-karma-events", "project_id": "pebbles", "source_id": "API-get-wallet-summary", "target_id": "DM-karma-events", "edge_type": "queries" },
+    { "id": "e-API-spend-karma-DM-karma-events", "project_id": "pebbles", "source_id": "API-spend-karma", "target_id": "DM-karma-events", "edge_type": "queries" },
+    { "id": "e-API-spend-karma-DM-wallet-balances", "project_id": "pebbles", "source_id": "API-spend-karma", "target_id": "DM-wallet-balances", "edge_type": "queries" },
+    { "id": "e-API-refund-karma-DM-karma-events", "project_id": "pebbles", "source_id": "API-refund-karma", "target_id": "DM-karma-events", "edge_type": "queries" },
+    { "id": "e-API-refund-karma-DM-wallet-balances", "project_id": "pebbles", "source_id": "API-refund-karma", "target_id": "DM-wallet-balances", "edge_type": "queries" }
   ]
 }

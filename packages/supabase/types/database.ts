@@ -362,6 +362,7 @@ export type Database = {
           id: string
           reason: string
           ref_id: string | null
+          type: string
           user_id: string
         }
         Insert: {
@@ -370,6 +371,7 @@ export type Database = {
           id?: string
           reason: string
           ref_id?: string | null
+          type?: string
           user_id: string
         }
         Update: {
@@ -378,6 +380,7 @@ export type Database = {
           id?: string
           reason?: string
           ref_id?: string | null
+          type?: string
           user_id?: string
         }
         Relationships: [
@@ -963,6 +966,46 @@ export type Database = {
           },
         ]
       }
+      wallet_balances: {
+        Row: {
+          balance: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_balances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "wallet_balances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "wallet_balances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
     }
     Views: {
       v_analytics_active_users_daily: {
@@ -1231,6 +1274,49 @@ export type Database = {
         }
         Relationships: []
       }
+      v_wallet_summary: {
+        Row: {
+          balance: number | null
+          total_earned: number | null
+          total_spent: number | null
+          user_id: string | null
+        }
+        Insert: {
+          balance?: number | null
+          total_earned?: never
+          total_spent?: never
+          user_id?: string | null
+        }
+        Update: {
+          balance?: number | null
+          total_earned?: never
+          total_spent?: never
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wallet_balances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "wallet_balances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "wallet_balances_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
     }
     Functions: {
       compute_karma_delta: {
@@ -1432,6 +1518,14 @@ export type Database = {
           positiveness: number
           render_svg: string
         }[]
+      }
+      refund_karma: {
+        Args: { p_amount: number; p_ref_id: string }
+        Returns: string
+      }
+      spend_karma: {
+        Args: { p_amount: number; p_reason: string; p_ref_id?: string }
+        Returns: string
       }
       sweep_orphan_snap_files: {
         Args: never

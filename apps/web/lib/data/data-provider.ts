@@ -5,6 +5,7 @@ import type {
   Collection,
   KarmaEvent,
   Mark,
+  WalletSnapshot,
 } from "@/lib/types"
 
 // ---------------------------------------------------------------------------
@@ -70,6 +71,11 @@ export type UpdateMarkInput = Partial<
   Omit<Mark, "id" | "name" | "created_at" | "updated_at">
 > & { name?: string | null }
 
+export type WalletHistoryPage = {
+  events: KarmaEvent[]
+  nextCursor: string | null
+}
+
 // ---------------------------------------------------------------------------
 // DataProvider interface — implemented by SupabaseProvider.
 // All mutation methods return Promises to match async Supabase calls.
@@ -79,6 +85,10 @@ export interface DataProvider {
   getStore(): Store
   loadFromSupabase(): Promise<Store>
   reset(): Promise<Store>
+
+  getWallet(): Promise<WalletSnapshot>
+  getWalletHistory(cursor?: string, limit?: number): Promise<WalletHistoryPage>
+  spendKarma(amount: number, reason: "purchase", refId?: string): Promise<string>
 
   getPebblesCount(): Promise<number>
   getKarma(): Promise<number>

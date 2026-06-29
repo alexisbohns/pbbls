@@ -11,6 +11,7 @@ import {
   type UpdateCollectionInput,
   type CreateMarkInput,
   type UpdateMarkInput,
+  type WalletHistoryPage,
 } from "@/lib/data/data-provider"
 import type {
   Pebble,
@@ -18,6 +19,8 @@ import type {
   Soul,
   Collection,
   Mark,
+  KarmaEvent,
+  WalletSnapshot,
 } from "@/lib/types"
 import { DEFAULT_GLYPH_ID } from "@/lib/config/glyphs"
 import { processPebbleImage } from "@/lib/utils/process-pebble-image"
@@ -243,6 +246,62 @@ export class SupabaseProvider implements DataProvider {
   async getPebblesCount(): Promise<number> { return this.store.pebbles_count }
   async getKarma(): Promise<number> { return this.store.karma }
   async getBounce(): Promise<number> { return this.store.bounce }
+
+  // ---------------------------------------------------------------------------
+  // Wallet — read summary + on-demand paginated history, and spend via RPC.
+  // ---------------------------------------------------------------------------
+
+  async getWallet(): Promise<WalletSnapshot> {
+    const { data } = await this.supabase
+      .from("v_wallet_summary")
+      .select("*")
+      .eq("user_id", this.userId)
+      .maybeSingle()
+    return {
+      balance: (data?.balance as number) ?? 0,
+      totalEarned: (data?.total_earned as number) ?? 0,
+      totalSpent: (data?.total_spent as number) ?? 0,
+    }
+  }
+
+  async getWalletHistory(cursor?: string, limit = 20): Promise<WalletHistoryPage> {
+    let query = this.supabase
+      .from("karma_events")
+      .select("id, type, delta, reason, ref_id, created_at")
+      .eq("user_id", this.userId)
+      .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
+      .limit(limit + 1)
+    if (cursor) {
+      // Composite keyset cursor "<created_at>|<id>": fetch rows strictly before
+      // (created_at, id) under the (desc, desc) ordering, so same-timestamp rows
+      // straddling a page boundary are not dropped.
+      const sep = cursor.lastIndexOf("|")
+      const ts = cursor.slice(0, sep)
+      const id = cursor.slice(sep + 1)
+      query = query.or(`created_at.lt.${ts},and(created_at.eq.${ts},id.lt.${id})`)
+    }
+    const { data, error } = await query
+    if (error) throw new Error(`getWalletHistory failed: ${error.message}`)
+    // `as KarmaEvent[]` is load-bearing: PostgREST types `type`/`reason` as plain
+    // strings; the karma_events CHECK constraints are what make this cast sound.
+    const rows = (data ?? []) as KarmaEvent[]
+    const hasMore = rows.length > limit
+    const events = hasMore ? rows.slice(0, limit) : rows
+    const last = events[events.length - 1]
+    const nextCursor = hasMore && last ? `${last.created_at}|${last.id}` : null
+    return { events, nextCursor }
+  }
+
+  async spendKarma(amount: number, reason: "purchase", refId?: string): Promise<string> {
+    const { data, error } = await this.supabase.rpc("spend_karma", {
+      p_amount: amount,
+      p_reason: reason,
+      p_ref_id: refId ?? null,
+    })
+    if (error) throw new Error(`spend_karma failed: ${error.message}`)
+    return data as string
+  }
   async listPebbles(): Promise<Pebble[]> { return this.store.pebbles }
   async getPebble(id: string): Promise<Pebble | undefined> { return this.store.pebbles.find((p) => p.id === id) }
   async listSouls(): Promise<Soul[]> { return this.store.souls }
