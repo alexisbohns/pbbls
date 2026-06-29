@@ -10,20 +10,22 @@ export function usePebbles() {
 
   const addPebble = async (input: CreatePebbleInput): Promise<Pebble> => {
     if (!provider) throw new Error("Not authenticated")
-    const before = store.karma
+    const before = provider.getStore().karma
     const pebble = await provider.createPebble(input)
-    setStore(provider.getStore())
-    const delta = provider.getStore().karma - before
+    const after = provider.getStore()
+    setStore(after)
+    const delta = after.karma - before
     if (delta > 0) notifyKarma(delta, "pebble_created")
     return pebble
   }
 
   const updatePebble = async (id: string, input: UpdatePebbleInput): Promise<Pebble> => {
     if (!provider) throw new Error("Not authenticated")
-    const before = store.karma
+    const before = provider.getStore().karma
     const pebble = await provider.updatePebble(id, input)
-    setStore(provider.getStore())
-    const delta = provider.getStore().karma - before
+    const after = provider.getStore()
+    setStore(after)
+    const delta = after.karma - before
     if (delta > 0) notifyKarma(delta, "pebble_enriched")
     return pebble
   }

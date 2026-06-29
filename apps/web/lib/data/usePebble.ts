@@ -1,6 +1,7 @@
 "use client"
 
 import { useDataProvider } from "@/lib/data/provider-context"
+import { notifyKarma } from "@/lib/activity/karma-activity"
 import type { UpdatePebbleInput } from "@/lib/data/data-provider"
 import type { Pebble, PebbleSnap } from "@/lib/types"
 
@@ -15,8 +16,12 @@ export function usePebble(id: string) {
     input: UpdatePebbleInput,
   ): Promise<Pebble> => {
     if (!provider) throw new Error("Not authenticated")
+    const before = provider.getStore().karma
     const updated = await provider.updatePebble(id, input)
-    setStore(provider.getStore())
+    const after = provider.getStore()
+    setStore(after)
+    const delta = after.karma - before
+    if (delta > 0) notifyKarma(delta, "pebble_enriched")
     return updated
   }
 
