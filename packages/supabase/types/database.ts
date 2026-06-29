@@ -1476,6 +1476,14 @@ export type Database = {
           render_svg: string
         }[]
       }
+      refund_karma: {
+        Args: { p_amount: number; p_ref_id: string }
+        Returns: string
+      }
+      spend_karma: {
+        Args: { p_amount: number; p_reason: string; p_ref_id?: string }
+        Returns: string
+      }
       sweep_orphan_snap_files: {
         Args: never
         Returns: {
