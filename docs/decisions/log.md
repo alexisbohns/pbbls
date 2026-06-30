@@ -103,3 +103,25 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** New credit sources surface a pill by adding one `notifyKarma(...)` call at their action site — and must wire it on the hook the live surface actually uses (enrichment goes through the singular `usePebble(id)`, not `usePebbles()`). Credit-only by design: clawbacks (delta ≤ 0) stay silent. The pill uses a stable toast id so a new credit replaces the prior one. Reused by C (e.g. "glyph purchased") via the same primitive.
 - **Supersedes / Superseded-by:** —
 - **Refs:** #495, `docs/superpowers/specs/2026-06-29-issue-495-in-app-activity-design.md`, `apps/web/lib/activity/karma-activity.tsx`, `apps/web/components/activity/KarmaActivityPill.tsx`.
+
+## 2026-06-30 — Glyph marketplace: use-rights entitlements, per-listing price, atomic buy
+
+- **Status:** taken
+- **Scope:** db, webapp
+- **Context:** M36 sub-project C (#496) makes community glyphs the first thing the Pebblestore sells — buyable with karma over A's spend rails. We had to decide what a purchase grants, where price lives, and how to keep the spend+grant consistent.
+- **Decision:** Buying grants a **use-rights entitlement** (`glyph_entitlements` row), **not a copy** — the original glyph stays single-source and the creator keeps authorship. **Price lives on the listing row** (`glyph_submissions.price`, flat-defaulted to 25 via a constant mirrored in `apps/web/lib/config/glyphs.ts`), read server-side by `buy_glyph` so the client can't set it. Each purchase snapshots **`price_paid`** on the entitlement. The **`buy_glyph` RPC** does spend (`spend_karma`) + entitlement insert in **one transaction**, idempotent via `unique(user_id, glyph_id)`.
+- **Why:** Entitlements avoid stroke duplication and keep authorship/attribution clean, and make a glyph usable everywhere own glyphs are (picker + lookup map). Per-listing price (vs a single global constant) lets D re-price one glyph later with no schema change while staying flat now. `price_paid` preserves a per-glyph purchase ledger (buyers-per-month, revenue) that survives future price changes — so "glyph value" can be a derived aggregate, never a stored column (YAGNI: capture data, defer analytics). Single-transaction buy + the unique constraint make a concurrent double-buy roll back the loser's spend too, so a buyer is charged at most once.
+- **Consequences:** New store goods (themes, pebbleskins) reuse the `buy_glyph` shape: validate listing → `spend_karma(price,'purchase',ref)` → grant, in one txn. Entitlement rows are insertable **only** via the `security definer` RPC (no INSERT policy). The purchase fires a dedicated **spend** pill (`notifyGlyphPurchased`), not credit-only `notifyKarma`. Market stays empty until a submission is `approved` (no moderation UI in C — that's D).
+- **Supersedes / Superseded-by:** —
+- **Refs:** #496, `docs/superpowers/specs/2026-06-30-issue-496-glyph-marketplace-design.md`, `packages/supabase/supabase/migrations/20260630003348_glyph_marketplace.sql`.
+
+## 2026-06-30 — Glyphs become readable when listed/entitled; listed glyphs are creator-immutable (D8)
+
+- **Status:** taken
+- **Scope:** db
+- **Context:** A community market means other users must read a creator's glyph rows (strokes/viewBox) to render and buy them — but glyphs were own-only readable. And once a glyph is listed/bought, letting the creator edit its strokes would be bait-and-switch on what buyers paid for.
+- **Decision:** The `glyphs` SELECT policy widens to **own ∪ system-seeds (`user_id is null`) ∪ approved-listed ∪ own-entitled** — the single place community glyph rows become readable. The `glyphs` UPDATE/DELETE policies are rewritten to **lock** a glyph once it has an active submission (`pending`|`approved`) **or** any entitlement: only `is_admin(auth.uid())` may then modify it; the creator cannot. The market view `v_glyph_market` is `security_invoker` so the caller's RLS applies.
+- **Why:** The widened SELECT exposes *only* glyphs that are genuinely listed or that the caller already bought — no broad leak. The lock is backend-enforced (RLS), not UI-only, because a frontend-only guard is bypassable via the raw update path; `on delete cascade` would otherwise let a creator wipe buyers' entitlements. Admins are exempt because curating/adjusting listed glyphs is D's domain.
+- **Consequences:** **Do not narrow `glyphs_select` back to own-only** — the market and picker depend on the widened policy. Future market goods must keep their listed rows readable the same way. The web UI reflects the lock (`GlyphDetail` hides edit/delete, shows a "Listed — locked" badge) but RLS is the real enforcement. Admin moderation that re-prices or edits listed glyphs (D) relies on the `is_admin` exemption.
+- **Supersedes / Superseded-by:** —
+- **Refs:** #496, `packages/supabase/supabase/migrations/20260630003348_glyph_marketplace.sql` (glyphs policy rewrite, `v_glyph_market`).
