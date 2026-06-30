@@ -105,7 +105,11 @@
   "activity": {
     "amount": "+{amount} karma",
     "srEarned": "Vous avez gagné {amount} karma — {reason}.",
-    "viewWallet": "Voir le porte-karma"
+    "viewWallet": "Voir le porte-karma",
+    "glyphUnlocked": "Glyphe débloqué",
+    "spent": "−{amount} karma",
+    "srUnlocked": "{name} débloqué — {amount} karma dépensés.",
+    "viewGlyph": "Voir le glyphe"
   },
   "wallet": {
     "title": "Porte-karma",

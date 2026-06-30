@@ -105,7 +105,11 @@
   "activity": {
     "amount": "+{amount} karma",
     "srEarned": "Earned {amount} karma — {reason}.",
-    "viewWallet": "View wallet"
+    "viewWallet": "View wallet",
+    "glyphUnlocked": "Glyph unlocked",
+    "spent": "−{amount} karma",
+    "srUnlocked": "Unlocked {name} — {amount} karma spent.",
+    "viewGlyph": "View glyph"
   },
   "wallet": {
     "title": "Wallet",
