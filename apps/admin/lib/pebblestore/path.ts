@@ -20,7 +20,10 @@ export class UnsupportedPathError extends Error {
 export type Matrix = [number, number, number, number, number, number]
 
 const NUMBER_RE = /-?\d*\.?\d+(?:e[-+]?\d+)?/gi
-const COMMAND_RE = /[a-z][^a-z]*/gi
+// Split on path command letters only. `e`/`E` is never a command — excluding it
+// from the delimiter class keeps exponent notation (e.g. `1e3`) inside its number
+// rather than mis-tokenizing it as a new command.
+const COMMAND_RE = /[a-df-z][^a-df-z]*/gi
 
 /** Parse a path `d` into normalized absolute commands. Throws UnsupportedPathError. */
 export function parsePath(d: string): PathCommand[] {

@@ -20,6 +20,10 @@ const SAMPLES: { label: string; svg: string }[] = [
     label: "Unsupported mix (rect skipped, arc skipped)",
     svg: `<svg viewBox="0 0 100 100"><rect x="10" y="10" width="80" height="80"/><path d="M10 10 A 40 40 0 0 1 90 90"/><path d="M10 90 L90 10"/></svg>`,
   },
+  {
+    label: "Exponent coords (1e1 = 10)",
+    svg: `<svg viewBox="0 0 100 100"><path d="M1e1 9e1 L5e1 1e1 L9e1 9e1"/></svg>`,
+  },
 ]
 
 export default function GlyphPlayground() {

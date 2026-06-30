@@ -60,8 +60,16 @@ function readWidth(el: Element): number {
 }
 
 function resolveViewBox(root: Element, strokes: GlyphStroke[]): string {
+  // Only trust the attribute if it is four finite numbers with a positive
+  // width/height — otherwise it would propagate NaN/Infinity into the fit and
+  // adjust matrices. Anything malformed falls through to the safe paths below.
   const vb = root.getAttribute("viewBox")
-  if (vb && vb.trim().split(/[\s,]+/).length === 4) return vb.trim().replace(/,/g, " ")
+  if (vb) {
+    const parts = vb.trim().split(/[\s,]+/).map(Number)
+    if (parts.length === 4 && parts.every(Number.isFinite) && parts[2] > 0 && parts[3] > 0) {
+      return parts.join(" ")
+    }
+  }
 
   const w = parseFloat(root.getAttribute("width") ?? "")
   const h = parseFloat(root.getAttribute("height") ?? "")
@@ -100,6 +108,8 @@ export function svgToStrokes(svg: string): SvgImportResult {
   for (const el of Array.from(root.querySelectorAll("*"))) {
     const tag = el.tagName.toLowerCase()
     if (STRUCTURAL_TAGS.has(tag)) continue
+    // Elements inside <defs> are definitions, not rendered geometry — skip them.
+    if (el.closest("defs")) continue
     if (!SUPPORTED_TAGS.has(tag)) {
       skipped.push(tag)
       continue
@@ -111,7 +121,10 @@ export function svgToStrokes(svg: string): SvgImportResult {
     }
     try {
       const cmds = parsePath(d)
-      if (cmds.length === 0) continue
+      if (cmds.length === 0) {
+        skipped.push(`${tag} (empty)`)
+        continue
+      }
       strokes.push({ d: serializePath(cmds), width: readWidth(el) })
     } catch (e) {
       if (e instanceof UnsupportedPathError) {
