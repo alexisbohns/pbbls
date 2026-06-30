@@ -119,6 +119,7 @@ export type GlyphSubmission = {
   status: GlyphSubmissionStatus
   price: number
   created_at: string
+  review_note?: string | null // admin's reason when status === "rejected"
 }
 
 // ---------------------------------------------------------------------------

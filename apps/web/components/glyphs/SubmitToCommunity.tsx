@@ -19,10 +19,11 @@ import type { GlyphSubmissionStatus } from "@/lib/types"
 
 type SubmitToCommunityProps = {
   status?: GlyphSubmissionStatus // undefined = not submitted
+  reviewNote?: string | null // admin's reason, shown when rejected
   onSubmit: () => Promise<void>
 }
 
-export function SubmitToCommunity({ status, onSubmit }: SubmitToCommunityProps) {
+export function SubmitToCommunity({ status, reviewNote, onSubmit }: SubmitToCommunityProps) {
   const t = useTranslations("glyphs.submit")
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -34,7 +35,18 @@ export function SubmitToCommunity({ status, onSubmit }: SubmitToCommunityProps) 
         : status === "rejected"
           ? "destructive"
           : "secondary"
-    return <Badge variant={variant}>{t(status)}</Badge>
+    const badge = <Badge variant={variant}>{t(status)}</Badge>
+    if (status === "rejected" && reviewNote) {
+      return (
+        <div className="flex flex-col gap-1">
+          {badge}
+          <p className="text-xs text-muted-foreground">
+            {t("rejectedReason", { reason: reviewNote })}
+          </p>
+        </div>
+      )
+    }
+    return badge
   }
 
   const confirm = async () => {

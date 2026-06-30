@@ -172,6 +172,7 @@
       "pending": "En attente de validation",
       "approved": "Publié",
       "rejected": "Refusé",
+      "rejectedReason": "Raison : {reason}",
       "locked": "Publié — verrouillé",
       "confirmTitle": "Proposer ce glyphe à la communauté ?",
       "confirmDescription": "Il sera examiné avant d'apparaître dans le Marché. Une fois proposé, vous ne pourrez plus le modifier ni le supprimer.",

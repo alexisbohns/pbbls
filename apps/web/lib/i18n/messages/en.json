@@ -172,6 +172,7 @@
       "pending": "Pending review",
       "approved": "Listed",
       "rejected": "Not accepted",
+      "rejectedReason": "Reason: {reason}",
       "locked": "Listed — locked",
       "confirmTitle": "Submit this glyph to the community?",
       "confirmDescription": "It will be reviewed before appearing in the Market. Once submitted, you can no longer edit or delete it.",
