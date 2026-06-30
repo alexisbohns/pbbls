@@ -5,6 +5,8 @@ import type {
   Collection,
   KarmaEvent,
   Mark,
+  MarketGlyph,
+  GlyphSubmission,
   WalletSnapshot,
 } from "@/lib/types"
 
@@ -18,6 +20,7 @@ export type Store = {
   souls: Soul[]
   collections: Collection[]
   marks: Mark[]
+  entitledMarks: Mark[]
   pebbles_count: number
   karma: number
   karma_log: KarmaEvent[]
@@ -30,6 +33,7 @@ export const EMPTY_STORE: Store = {
   souls: [],
   collections: [],
   marks: [],
+  entitledMarks: [],
   pebbles_count: 0,
   karma: 0,
   karma_log: [],
@@ -125,4 +129,11 @@ export interface DataProvider {
   createMark(input: CreateMarkInput): Promise<Mark>
   updateMark(id: string, input: UpdateMarkInput): Promise<Mark>
   deleteMark(id: string): Promise<void>
+
+  listMarketGlyphs(): Promise<MarketGlyph[]>     // approved, others' glyphs, + caller flags
+  listFavouriteGlyphs(): Promise<MarketGlyph[]>  // entitled ∪ favourited
+  getMySubmissions(): Promise<GlyphSubmission[]> // caller's submissions (status badges)
+  submitGlyph(glyphId: string): Promise<GlyphSubmission>
+  buyGlyph(glyphId: string): Promise<{ entitlementId: string; karma: number }>
+  setFavourite(glyphId: string, favourite: boolean): Promise<void>
 }

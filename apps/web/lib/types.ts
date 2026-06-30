@@ -103,6 +103,24 @@ export type Mark = {
   updated_at: string
 }
 
+export type GlyphSubmissionStatus = "pending" | "approved" | "rejected"
+
+// A community-market glyph: the glyph plus its listing price and the caller's
+// relationship to it. Extends Mark (becomes Glyph when #488 lands).
+export type MarketGlyph = Mark & {
+  price: number
+  owned: boolean // caller is entitled (bought)
+  favourited: boolean // caller has favourited
+}
+
+export type GlyphSubmission = {
+  id: string
+  glyph_id: string
+  status: GlyphSubmissionStatus
+  price: number
+  created_at: string
+}
+
 // ---------------------------------------------------------------------------
 // Lab — product-transparency feed (announcements, changelog, backlog)
 // ---------------------------------------------------------------------------
