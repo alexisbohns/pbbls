@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 import { usePebble } from "@/lib/data/usePebble"
 import { useSouls } from "@/lib/data/useSouls"
 import { useCollections } from "@/lib/data/useCollections"
-import { useMarks } from "@/lib/data/useMarks"
+import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
 import { PebbleDetail } from "@/components/pebble/PebbleDetail"
 
 type PebblePeekProps = {
@@ -30,7 +30,7 @@ export function PebblePeek({ pebbleId, onClose }: PebblePeekProps) {
   const { pebble, loading: pebbleLoading, updatePebble, uploadSnap } = usePebble(id)
   const { souls, loading: soulsLoading, addSoul } = useSouls()
   const { collections, loading: collectionsLoading } = useCollections()
-  const { marks, loading: marksLoading } = useMarks()
+  const { glyphs: marks, loading: marksLoading } = useUsableGlyphs()
 
   const loading = pebbleLoading || soulsLoading || collectionsLoading || marksLoading
 
