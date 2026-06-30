@@ -708,6 +708,7 @@ export class SupabaseProvider implements DataProvider {
       .from("glyph_submissions")
       .select("id, glyph_id, status, price, created_at")
       .eq("submitter_id", this.userId)
+      .order("created_at", { ascending: false }) // newest first → page's .find picks the active row
     if (error) throw new Error(`Failed to load submissions: ${error.message}`)
     return (data ?? []).map((row) => {
       const r = row as Record<string, unknown>
