@@ -1,6 +1,11 @@
 "use client"
 
-import { useState, type FormEvent, type KeyboardEvent } from "react"
+import {
+  useState,
+  type FormEvent,
+  type KeyboardEvent,
+  type ReactNode,
+} from "react"
 import { Pencil, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { PEBBLE_SHAPES } from "@/lib/config"
@@ -9,17 +14,27 @@ import { useFormatDate, useShapeName } from "@/lib/i18n"
 import { GlyphPreview } from "@/components/glyphs/GlyphPreview"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog"
 
 type GlyphDetailProps = {
   mark: Mark
   onDelete: () => void
   onUpdateName: (name: string | null) => Promise<void>
+  locked?: boolean // listed/bought → no edit/delete
+  submitSlot?: ReactNode // SubmitToCommunity rendered by the page
 }
 
-export function GlyphDetail({ mark, onDelete, onUpdateName }: GlyphDetailProps) {
+export function GlyphDetail({
+  mark,
+  onDelete,
+  onUpdateName,
+  locked,
+  submitSlot,
+}: GlyphDetailProps) {
   const t = useTranslations("glyphs")
   const tDetail = useTranslations("glyphs.detail")
+  const tSubmit = useTranslations("glyphs.submit")
   const tCard = useTranslations("glyphs.card")
   const formatDate = useFormatDate()
   const shape = PEBBLE_SHAPES.find((s) => s.id === mark.shape_id)
@@ -82,17 +97,20 @@ export function GlyphDetail({ mark, onDelete, onUpdateName }: GlyphDetailProps) 
             <h1 className="text-2xl font-semibold">
               {mark.name || t("untitled")}
             </h1>
-            <Button
-              variant="ghost"
-              size="icon-xs"
-              onClick={() => {
-                setEditValue(mark.name ?? "")
-                setIsEditing(true)
-              }}
-              aria-label={tDetail("editAria")}
-            >
-              <Pencil className="size-3.5" />
-            </Button>
+            {!locked && (
+              <Button
+                variant="ghost"
+                size="icon-xs"
+                onClick={() => {
+                  setEditValue(mark.name ?? "")
+                  setIsEditing(true)
+                }}
+                aria-label={tDetail("editAria")}
+              >
+                <Pencil className="size-3.5" />
+              </Button>
+            )}
+            {submitSlot}
           </div>
         )}
 
@@ -111,18 +129,22 @@ export function GlyphDetail({ mark, onDelete, onUpdateName }: GlyphDetailProps) 
       </div>
 
       <div className="mt-8 flex justify-center">
-        <ConfirmDialog
-          trigger={
-            <Button variant="outline" size="sm">
-              <Trash2 className="size-4" aria-hidden="true" />
-              {tDetail("deleteCta")}
-            </Button>
-          }
-          title={tDetail("deleteTitle")}
-          description={tDetail("deleteDescription")}
-          confirmLabel={tDetail("deleteConfirm")}
-          onConfirm={onDelete}
-        />
+        {locked ? (
+          <Badge variant="secondary">{tSubmit("locked")}</Badge>
+        ) : (
+          <ConfirmDialog
+            trigger={
+              <Button variant="outline" size="sm">
+                <Trash2 className="size-4" aria-hidden="true" />
+                {tDetail("deleteCta")}
+              </Button>
+            }
+            title={tDetail("deleteTitle")}
+            description={tDetail("deleteDescription")}
+            confirmLabel={tDetail("deleteConfirm")}
+            onConfirm={onDelete}
+          />
+        )}
       </div>
     </article>
   )
