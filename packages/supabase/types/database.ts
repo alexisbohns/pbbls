@@ -216,6 +216,13 @@ export type Database = {
             referencedRelation: "glyphs"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "domains_default_glyph_id_fkey"
+            columns: ["default_glyph_id"]
+            isOneToOne: false
+            referencedRelation: "v_glyph_market"
+            referencedColumns: ["id"]
+          },
         ]
       }
       emotion_categories: {
@@ -287,6 +294,220 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_emotions_with_palette"
             referencedColumns: ["category_id"]
+          },
+        ]
+      }
+      glyph_entitlements: {
+        Row: {
+          created_at: string
+          glyph_id: string
+          id: string
+          karma_event_id: string
+          price_paid: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          glyph_id: string
+          id?: string
+          karma_event_id: string
+          price_paid: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          glyph_id?: string
+          id?: string
+          karma_event_id?: string
+          price_paid?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "glyph_entitlements_glyph_id_fkey"
+            columns: ["glyph_id"]
+            isOneToOne: false
+            referencedRelation: "glyphs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "glyph_entitlements_glyph_id_fkey"
+            columns: ["glyph_id"]
+            isOneToOne: false
+            referencedRelation: "v_glyph_market"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "glyph_entitlements_karma_event_id_fkey"
+            columns: ["karma_event_id"]
+            isOneToOne: false
+            referencedRelation: "karma_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "glyph_entitlements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "glyph_entitlements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "glyph_entitlements_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      glyph_favourites: {
+        Row: {
+          created_at: string
+          glyph_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          glyph_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          glyph_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "glyph_favourites_glyph_id_fkey"
+            columns: ["glyph_id"]
+            isOneToOne: false
+            referencedRelation: "glyphs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "glyph_favourites_glyph_id_fkey"
+            columns: ["glyph_id"]
+            isOneToOne: false
+            referencedRelation: "v_glyph_market"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "glyph_favourites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "glyph_favourites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "glyph_favourites_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      glyph_submissions: {
+        Row: {
+          created_at: string
+          glyph_id: string
+          id: string
+          price: number
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          submitter_id: string
+        }
+        Insert: {
+          created_at?: string
+          glyph_id: string
+          id?: string
+          price?: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitter_id: string
+        }
+        Update: {
+          created_at?: string
+          glyph_id?: string
+          id?: string
+          price?: number
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          submitter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "glyph_submissions_glyph_id_fkey"
+            columns: ["glyph_id"]
+            isOneToOne: false
+            referencedRelation: "glyphs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "glyph_submissions_glyph_id_fkey"
+            columns: ["glyph_id"]
+            isOneToOne: false
+            referencedRelation: "v_glyph_market"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "glyph_submissions_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "glyph_submissions_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "glyph_submissions_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "glyph_submissions_submitter_id_fkey"
+            columns: ["submitter_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "glyph_submissions_submitter_id_fkey"
+            columns: ["submitter_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "glyph_submissions_submitter_id_fkey"
+            columns: ["submitter_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
           },
         ]
       }
@@ -751,6 +972,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "pebbles_glyph_id_fkey"
+            columns: ["glyph_id"]
+            isOneToOne: false
+            referencedRelation: "v_glyph_market"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "pebbles_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -822,6 +1050,13 @@ export type Database = {
             columns: ["glyph_id"]
             isOneToOne: false
             referencedRelation: "glyphs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_glyph_id_fkey"
+            columns: ["glyph_id"]
+            isOneToOne: false
+            referencedRelation: "v_glyph_market"
             referencedColumns: ["id"]
           },
           {
@@ -941,6 +1176,13 @@ export type Database = {
             columns: ["glyph_id"]
             isOneToOne: false
             referencedRelation: "glyphs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "souls_glyph_id_fkey"
+            columns: ["glyph_id"]
+            isOneToOne: false
+            referencedRelation: "v_glyph_market"
             referencedColumns: ["id"]
           },
           {
@@ -1150,6 +1392,51 @@ export type Database = {
         }
         Relationships: []
       }
+      v_glyph_market: {
+        Row: {
+          created_at: string | null
+          favourited: boolean | null
+          id: string | null
+          name: string | null
+          owned: boolean | null
+          price: number | null
+          shape_id: string | null
+          strokes: Json | null
+          updated_at: string | null
+          user_id: string | null
+          view_box: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "glyphs_shape_id_fkey"
+            columns: ["shape_id"]
+            isOneToOne: false
+            referencedRelation: "pebble_shapes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "glyphs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "glyphs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "glyphs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       v_karma_summary: {
         Row: {
           pebbles_count: number | null
@@ -1243,6 +1530,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "pebbles_glyph_id_fkey"
+            columns: ["glyph_id"]
+            isOneToOne: false
+            referencedRelation: "v_glyph_market"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "pebbles_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -1319,6 +1613,7 @@ export type Database = {
       }
     }
     Functions: {
+      buy_glyph: { Args: { p_glyph_id: string }; Returns: Json }
       compute_karma_delta: {
         Args: {
           p_cards_count: number
@@ -1527,6 +1822,7 @@ export type Database = {
         Args: { p_amount: number; p_reason: string; p_ref_id?: string }
         Returns: string
       }
+      submit_glyph: { Args: { p_glyph_id: string }; Returns: Json }
       sweep_orphan_snap_files: {
         Args: never
         Returns: {
