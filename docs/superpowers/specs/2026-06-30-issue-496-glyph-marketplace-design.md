@@ -56,6 +56,12 @@ no-ops on non-positive delta) plus the Sonner `Toaster` mounted in `app/layout.t
   pill (tappable → the glyph's detail).
 - **D7 — Entitlement = usable everywhere own glyphs are.** For the grant to mean anything,
   entitled glyphs appear in the glyph picker alongside owned glyphs (own ∪ entitled).
+- **D8 — A listed/bought glyph is immutable to its creator (backend-enforced).** Once a glyph
+  is actively listed (`pending`|`approved`) or has any entitlement, the creator can no longer
+  edit or delete it — **only an admin can** (D's curation domain). Enforced in RLS (§3.4), not
+  just the UI; a frontend-only lock would be bypassable via the raw update path. Rationale:
+  the strokes are what buyers paid for (no bait-and-switch), and `on delete cascade` would
+  otherwise let a creator erase buyers' entitlements.
 
 ---
 
@@ -134,15 +140,27 @@ create policy glyph_favourites_all on public.glyph_favourites for all
   to authenticated using (user_id = auth.uid()) with check (user_id = auth.uid());
 ```
 
-**Critical knock-on — widen `glyphs` SELECT.** The Market and the picker must read *other
-people's* glyph rows (strokes/viewBox/name), which today's own-only policy forbids. Add a
-SELECT policy exposing exactly: own ∪ approved-in-market ∪ entitled.
+**Critical knock-on — rewrite `glyphs` SELECT/UPDATE/DELETE.** Today (from
+`20260415000001_remote_pebble_engine.sql` + `20260411000001_core_tables.sql`):
 
 ```sql
-create policy glyphs_select_market on public.glyphs for select
-  to authenticated
+glyphs_select : using (user_id = auth.uid() or user_id is null)   -- own ∪ system seeds
+glyphs_update : using (user_id = auth.uid())
+glyphs_delete : using (user_id = auth.uid())
+```
+
+Two changes, both drop-and-recreate the named policies (preserving the `user_id is null`
+system-seed clause):
+
+**(a) Widen SELECT** so the Market and picker can read *other people's* listed/bought glyph
+rows (strokes/viewBox/name) — own ∪ system seeds ∪ approved-in-market ∪ entitled:
+
+```sql
+drop policy if exists "glyphs_select" on public.glyphs;
+create policy "glyphs_select" on public.glyphs for select to authenticated
   using (
     user_id = auth.uid()
+    or user_id is null                                          -- system seeds
     or exists (select 1 from public.glyph_submissions s
                where s.glyph_id = glyphs.id and s.status = 'approved')
     or exists (select 1 from public.glyph_entitlements e
@@ -150,8 +168,38 @@ create policy glyphs_select_market on public.glyphs for select
   );
 ```
 
-(If a single permissive `glyphs` SELECT policy already exists, replace it; verify the exact
-existing policy name during implementation before dropping.)
+**(b) Lock listed/bought glyphs (D8).** A creator may no longer UPDATE or DELETE a glyph once
+it is actively listed (`pending`|`approved`) **or** has been bought by anyone — admins are
+exempt (D curates listed glyphs). This is the integrity rule behind the user's "once locked,
+not editable except by admin": the strokes are what buyers paid for, and `on delete cascade`
+would otherwise let a creator wipe buyers' entitlements.
+
+```sql
+-- shared lock predicate, inlined into both policies:
+--   not actively listed AND not bought
+--   not exists (… glyph_submissions s where s.glyph_id = id and s.status in ('pending','approved'))
+--   not exists (… glyph_entitlements e where e.glyph_id = id)
+
+drop policy if exists "glyphs_update" on public.glyphs;
+create policy "glyphs_update" on public.glyphs for update to authenticated
+  using (
+    public.is_admin(auth.uid())
+    or (
+      user_id = auth.uid()
+      and not exists (select 1 from public.glyph_submissions s
+                      where s.glyph_id = glyphs.id and s.status in ('pending','approved'))
+      and not exists (select 1 from public.glyph_entitlements e
+                      where e.glyph_id = glyphs.id)
+    )
+  );
+
+drop policy if exists "glyphs_delete" on public.glyphs;
+create policy "glyphs_delete" on public.glyphs for delete to authenticated
+  using ( /* identical predicate to glyphs_update */ );
+```
+
+Verify the exact live policy names/bodies before dropping (they match the snapshot above as of
+this spec).
 
 ---
 
@@ -276,7 +324,10 @@ default `mine`) so the purchase pill and favourites are deep-linkable. New
 
 - **Mine** — existing `GlyphList`; each owned **custom** glyph gains a status-aware
   "Submit to community" affordance (in `GlyphDetail` and/or card): not-submitted → CTA;
-  `pending`/`approved`/`rejected` → a badge. System seeds show no submit CTA.
+  `pending`/`approved`/`rejected` → a badge. System seeds show no submit CTA. **Reflect the
+  D8 lock:** when a glyph is actively listed or bought, `GlyphDetail` hides the
+  edit-name/delete controls and shows a "Listed — locked" indicator (the RLS policy is the
+  real enforcement; this is just honest UX so the user isn't offered an action that will fail).
 - **Market** — `MarketGlyphList` + `MarketGlyphCard` (glyph preview, karma price, Buy /
   "Owned" state, favourite heart). Buy opens a shadcn confirm dialog → `buyGlyph`; on
   success the glyph moves into Favourites and the pill fires; `insufficient_karma` and other
@@ -328,7 +379,10 @@ No web test runner (V1) — verification is lint + build + manual, per the prior
   6. Buy your own approved glyph → blocked (`cannot_buy_own`).
   7. Favourite/unfavourite a market glyph → moves in/out of Favourites.
   8. Attach a bought glyph to a pebble via the picker (D7).
-  9. EN + FR across all new surfaces; pill respects reduced-motion + dark/color-world.
+  9. **D8 lock:** with a glyph listed (pending or approved) or bought, `updateMark`/`deleteMark`
+     are rejected by RLS for the creator (and the UI hides the controls); an admin can still
+     edit. Confirm a non-listed glyph remains editable as before.
+  10. EN + FR across all new surfaces; pill respects reduced-motion + dark/color-world.
 
 ---
 
@@ -338,5 +392,7 @@ No web test runner (V1) — verification is lint + build + manual, per the prior
   `price_paid` snapshot captures the purchase ledger for deferred per-glyph analytics.
 - `buy_glyph` RPC wraps `spend_karma` + entitlement insert atomically; idempotent via
   `unique(user_id, glyph_id)`. New goods reuse this shape.
-- `glyphs` SELECT widened to own ∪ approved-listed ∪ entitled — the one place community
-  glyph rows become readable; future market goods must keep this policy in mind.
+- `glyphs` SELECT widened to own ∪ system seeds ∪ approved-listed ∪ entitled — the one place
+  community glyph rows become readable; future market goods must keep this policy in mind.
+- Listed/bought glyphs are immutable to their creator (RLS UPDATE/DELETE lock, admin-exempt) —
+  protects what buyers paid for; only an admin (D) may edit a listed glyph.
