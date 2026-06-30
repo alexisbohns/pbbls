@@ -275,7 +275,8 @@ export type GlyphSubmission = {
 ```ts
 listMarketGlyphs(): Promise<MarketGlyph[]>          // approved ∪ flags for caller
 listFavouriteGlyphs(): Promise<MarketGlyph[]>       // entitled ∪ favourited
-listUsableMarks(): Promise<Mark[]>                  // own ∪ entitled (for the picker, D7)
+listUsableGlyphs(): Promise<Mark[]>                 // own ∪ entitled (for the picker, D7)
+                                                   // returns Mark[] until #488 renames the type
 getMySubmissions(): Promise<GlyphSubmission[]>      // for Mine-tab status badges
 submitGlyph(glyphId: string): Promise<GlyphSubmission>
 buyGlyph(glyphId: string): Promise<{ entitlementId: string; karma: number }>
@@ -337,7 +338,7 @@ default `mine`) so the purchase pill and favourites are deep-linkable. New
 
 ### 7.2 Picker (D7)
 
-`GlyphPickerDialog`/`GlyphPickerGrid` source from `listUsableMarks()` (own ∪ entitled) so a
+`GlyphPickerDialog`/`GlyphPickerGrid` source from `listUsableGlyphs()` (own ∪ entitled) so a
 bought glyph is attachable to pebbles/souls. (Confirm exact current data source during
 implementation.)
 
