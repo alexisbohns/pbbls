@@ -8,7 +8,7 @@ import { useTranslations } from "next-intl"
 import { useSoul } from "@/lib/data/useSoul"
 import { usePebbles } from "@/lib/data/usePebbles"
 import { useSouls } from "@/lib/data/useSouls"
-import { useMarks } from "@/lib/data/useMarks"
+import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
 import { SoulDetailHeader } from "@/components/souls/SoulDetailHeader"
 import { SoulPebbleList } from "@/components/souls/SoulPebbleList"
 import { SoulNotFound } from "@/components/souls/SoulNotFound"
@@ -28,7 +28,7 @@ export default function SoulDetailPage({
   const { soul, loading: soulLoading, updateSoul } = useSoul(id)
   const { pebbles, loading: pebblesLoading } = usePebbles()
   const { souls, loading: soulsLoading, removeSoul } = useSouls()
-  const { marks } = useMarks()
+  const { glyphs: marks } = useUsableGlyphs()
 
   const loading = soulLoading || pebblesLoading || soulsLoading
 

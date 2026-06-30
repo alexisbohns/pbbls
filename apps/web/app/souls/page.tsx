@@ -4,7 +4,7 @@ import { useMemo } from "react"
 import { useTranslations } from "next-intl"
 import { useSouls } from "@/lib/data/useSouls"
 import { usePebbles } from "@/lib/data/usePebbles"
-import { useMarks } from "@/lib/data/useMarks"
+import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
 import { AddSoulForm } from "@/components/souls/AddSoulForm"
 import { SoulList } from "@/components/souls/SoulList"
 import { SoulsEmptyState } from "@/components/souls/SoulsEmptyState"
@@ -14,7 +14,7 @@ import { PageHeader } from "@/components/layout/PageHeader"
 export default function SoulsPage() {
   const { souls, loading: soulsLoading, addSoul } = useSouls()
   const { pebbles, loading: pebblesLoading } = usePebbles()
-  const { marks } = useMarks()
+  const { glyphs: marks } = useUsableGlyphs()
   const t = useTranslations("souls")
 
   const loading = soulsLoading || pebblesLoading

@@ -6,7 +6,7 @@ import { useTranslations } from "next-intl"
 import { usePebble } from "@/lib/data/usePebble"
 import { useSouls } from "@/lib/data/useSouls"
 import { useCollections } from "@/lib/data/useCollections"
-import { useMarks } from "@/lib/data/useMarks"
+import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
 import { PebbleDetail } from "@/components/pebble/PebbleDetail"
 import { PebbleNotFound } from "@/components/pebble/PebbleNotFound"
 import { PageLayout } from "@/components/layout/PageLayout"
@@ -22,7 +22,7 @@ export default function PebbleDetailPage({
   const { pebble, loading: pebbleLoading, updatePebble, uploadSnap } = usePebble(id)
   const { souls, loading: soulsLoading, addSoul } = useSouls()
   const { collections, loading: collectionsLoading } = useCollections()
-  const { marks, loading: marksLoading } = useMarks()
+  const { glyphs: marks, loading: marksLoading } = useUsableGlyphs()
 
   const loading = pebbleLoading || soulsLoading || collectionsLoading || marksLoading
 

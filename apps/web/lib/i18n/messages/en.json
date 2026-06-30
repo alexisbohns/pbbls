@@ -105,7 +105,11 @@
   "activity": {
     "amount": "+{amount} karma",
     "srEarned": "Earned {amount} karma — {reason}.",
-    "viewWallet": "View wallet"
+    "viewWallet": "View wallet",
+    "glyphUnlocked": "Glyph unlocked",
+    "spent": "−{amount} karma",
+    "srUnlocked": "Unlocked {name} — {amount} karma spent.",
+    "viewGlyph": "View glyph"
   },
   "wallet": {
     "title": "Wallet",
@@ -136,7 +140,11 @@
     "empty": {
       "title": "No glyphs yet",
       "description": "Glyphs are symbols you carve on pebble surfaces. Create your first one.",
-      "cta": "Carve a glyph"
+      "cta": "Carve a glyph",
+      "marketTitle": "No glyphs for sale yet",
+      "marketDescription": "Community glyphs will appear here once they're approved.",
+      "favouritesTitle": "No favourites yet",
+      "favouritesDescription": "Glyphs you buy or favourite from the Market show up here."
     },
     "detail": {
       "back": "← Back to Glyphs",
@@ -157,6 +165,36 @@
       "label": "Glyphs",
       "empty": "No glyphs yet. Carve one from the Glyphs page.",
       "fallbackName": "Glyph {short}"
+    },
+    "tabs": { "mine": "Mine", "favourites": "Favourites", "market": "Market" },
+    "submit": {
+      "cta": "Submit to community",
+      "pending": "Pending review",
+      "approved": "Listed",
+      "rejected": "Not accepted",
+      "locked": "Listed — locked",
+      "confirmTitle": "Submit this glyph to the community?",
+      "confirmDescription": "It will be reviewed before appearing in the Market. Once submitted, you can no longer edit or delete it.",
+      "confirm": "Submit",
+      "cancel": "Cancel"
+    }
+  },
+  "market": {
+    "price": "{amount} karma",
+    "buy": "Buy",
+    "owned": "Owned",
+    "buyTitle": "Buy this glyph?",
+    "buyDescription": "This spends {amount} karma. You'll be able to use it on your pebbles and souls.",
+    "buyConfirm": "Buy for {amount} karma",
+    "cancel": "Cancel",
+    "favourite": "Add to favourites",
+    "unfavourite": "Remove from favourites",
+    "errors": {
+      "insufficient": "You don't have enough karma for this glyph.",
+      "notInMarket": "This glyph is no longer available.",
+      "cannotBuyOwn": "You can't buy your own glyph.",
+      "alreadyOwned": "You already own this glyph.",
+      "generic": "Something went wrong. Please try again."
     }
   },
   "carve": {

@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 import { usePebble } from "@/lib/data/usePebble"
 import { useSouls } from "@/lib/data/useSouls"
 import { useCollections } from "@/lib/data/useCollections"
-import { useMarks } from "@/lib/data/useMarks"
+import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
 import { PebbleEdit } from "@/components/pebble/PebbleEdit"
 import { PebbleNotFound } from "@/components/pebble/PebbleNotFound"
 import { PageLayout } from "@/components/layout/PageLayout"
@@ -26,7 +26,7 @@ export default function PebbleEditPage({
   } = usePebble(id)
   const { souls, loading: soulsLoading, addSoul } = useSouls()
   const { collections, loading: collectionsLoading } = useCollections()
-  const { marks, loading: marksLoading } = useMarks()
+  const { glyphs: marks, loading: marksLoading } = useUsableGlyphs()
 
   const loading = pebbleLoading || soulsLoading || collectionsLoading || marksLoading
   const mark = pebble ? marks.find((m) => m.id === pebble.mark_id) : undefined

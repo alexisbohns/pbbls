@@ -19,6 +19,8 @@ import type {
   Soul,
   Collection,
   Mark,
+  MarketGlyph,
+  GlyphSubmission,
   KarmaEvent,
   WalletSnapshot,
 } from "@/lib/types"
@@ -72,6 +74,7 @@ export class SupabaseProvider implements DataProvider {
       collectionsRes,
       collectionPebblesRes,
       glyphsRes,
+      entitledRes,
       karmaRes,
       bounceRes,
     ] = await Promise.all([
@@ -84,6 +87,7 @@ export class SupabaseProvider implements DataProvider {
       this.supabase.from("collections").select("*").eq("user_id", this.userId),
       this.supabase.from("collection_pebbles").select("*, collections!inner(user_id)").eq("collections.user_id", this.userId),
       this.supabase.from("glyphs").select("*").eq("user_id", this.userId),
+      this.supabase.from("v_glyph_market").select("*").eq("owned", true),
       this.supabase.from("v_karma_summary").select("*").eq("user_id", this.userId).maybeSingle(),
       this.supabase.from("v_bounce").select("*").eq("user_id", this.userId).maybeSingle(),
     ])
@@ -93,6 +97,7 @@ export class SupabaseProvider implements DataProvider {
     if (soulsRes.error) throw new Error(`Failed to load souls: ${soulsRes.error.message}`)
     if (collectionsRes.error) throw new Error(`Failed to load collections: ${collectionsRes.error.message}`)
     if (glyphsRes.error) throw new Error(`Failed to load glyphs: ${glyphsRes.error.message}`)
+    if (entitledRes.error) throw new Error(`Failed to load entitled glyphs: ${entitledRes.error.message}`)
 
     const renderById = new Map<
       string,
@@ -214,6 +219,10 @@ export class SupabaseProvider implements DataProvider {
       updated_at: row.updated_at as string,
     }))
 
+    const entitledMarks: Mark[] = (entitledRes.data ?? []).map((row) =>
+      this.rowToMark(row as Record<string, unknown>),
+    )
+
     const karma = (karmaRes.data as Record<string, unknown>)?.total_karma as number ?? 0
     const pebblesCount = (karmaRes.data as Record<string, unknown>)?.pebbles_count as number ?? 0
     const bounce = (bounceRes.data as Record<string, unknown>)?.bounce_level as number ?? 0
@@ -223,6 +232,7 @@ export class SupabaseProvider implements DataProvider {
       souls,
       collections,
       marks,
+      entitledMarks,
       pebbles_count: pebblesCount,
       karma,
       karma_log: [],
@@ -594,6 +604,18 @@ export class SupabaseProvider implements DataProvider {
   // Mark mutations (DB table: glyphs)
   // ---------------------------------------------------------------------------
 
+  private rowToMark(row: Record<string, unknown>): Mark {
+    return {
+      id: row.id as string,
+      name: (row.name as string) ?? undefined,
+      shape_id: row.shape_id as string,
+      strokes: row.strokes as Mark["strokes"],
+      viewBox: row.view_box as string,
+      created_at: row.created_at as string,
+      updated_at: row.updated_at as string,
+    }
+  }
+
   async createMark(input: CreateMarkInput): Promise<Mark> {
     const result = await this.supabase
       .from("glyphs")
@@ -646,5 +668,96 @@ export class SupabaseProvider implements DataProvider {
     this.unwrap(await this.supabase.from("glyphs").delete().eq("id", id))
     const marks = this.store.marks.filter((m) => m.id !== id)
     this.mutate({ ...this.store, marks })
+  }
+
+  // ---------------------------------------------------------------------------
+  // Glyph marketplace (#496)
+  // ---------------------------------------------------------------------------
+
+  private rowToMarketGlyph(row: Record<string, unknown>): MarketGlyph {
+    return {
+      ...this.rowToMark(row),
+      price: row.price as number,
+      owned: Boolean(row.owned),
+      favourited: Boolean(row.favourited),
+    }
+  }
+
+  async listMarketGlyphs(): Promise<MarketGlyph[]> {
+    const { data, error } = await this.supabase.from("v_glyph_market").select("*")
+    if (error) throw new Error(`Failed to load market glyphs: ${error.message}`)
+    // Hide the caller's own creations — they live under Mine, not the Market.
+    return (data ?? [])
+      .filter((row) => (row as Record<string, unknown>).user_id !== this.userId)
+      .map((row) => this.rowToMarketGlyph(row as Record<string, unknown>))
+  }
+
+  async listFavouriteGlyphs(): Promise<MarketGlyph[]> {
+    // Bought (owned) ∪ favourited, both drawn from approved listings. (A glyph
+    // delisted after purchase would drop out — acceptable for V1; D doesn't exist yet.)
+    const { data, error } = await this.supabase
+      .from("v_glyph_market")
+      .select("*")
+      .or("owned.eq.true,favourited.eq.true")
+    if (error) throw new Error(`Failed to load favourites: ${error.message}`)
+    return (data ?? []).map((row) => this.rowToMarketGlyph(row as Record<string, unknown>))
+  }
+
+  async getMySubmissions(): Promise<GlyphSubmission[]> {
+    const { data, error } = await this.supabase
+      .from("glyph_submissions")
+      .select("id, glyph_id, status, price, created_at")
+      .eq("submitter_id", this.userId)
+      .order("created_at", { ascending: false }) // newest first → page's .find picks the active row
+    if (error) throw new Error(`Failed to load submissions: ${error.message}`)
+    return (data ?? []).map((row) => {
+      const r = row as Record<string, unknown>
+      return {
+        id: r.id as string,
+        glyph_id: r.glyph_id as string,
+        status: r.status as GlyphSubmission["status"],
+        price: r.price as number,
+        created_at: r.created_at as string,
+      }
+    })
+  }
+
+  async submitGlyph(glyphId: string): Promise<GlyphSubmission> {
+    const { data, error } = await this.supabase.rpc("submit_glyph", { p_glyph_id: glyphId })
+    if (error) throw new Error(error.message)
+    const r = data as Record<string, unknown>
+    return {
+      id: r.id as string,
+      glyph_id: r.glyph_id as string,
+      status: r.status as GlyphSubmission["status"],
+      price: r.price as number,
+      created_at: r.created_at as string,
+    }
+  }
+
+  async buyGlyph(glyphId: string): Promise<{ entitlementId: string; karma: number }> {
+    const { data, error } = await this.supabase.rpc("buy_glyph", { p_glyph_id: glyphId })
+    if (error) throw new Error(error.message)
+    const r = data as { entitlement_id: string; balance: number }
+    // Reload so karma and entitledMarks refresh together (the bought glyph
+    // becomes usable in the picker).
+    await this.loadFromSupabase()
+    return { entitlementId: r.entitlement_id, karma: this.store.karma }
+  }
+
+  async setFavourite(glyphId: string, favourite: boolean): Promise<void> {
+    if (favourite) {
+      const { error } = await this.supabase
+        .from("glyph_favourites")
+        .upsert({ user_id: this.userId, glyph_id: glyphId }, { onConflict: "user_id,glyph_id" })
+      if (error) throw new Error(error.message)
+    } else {
+      const { error } = await this.supabase
+        .from("glyph_favourites")
+        .delete()
+        .eq("user_id", this.userId)
+        .eq("glyph_id", glyphId)
+      if (error) throw new Error(error.message)
+    }
   }
 }

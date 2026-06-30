@@ -105,7 +105,11 @@
   "activity": {
     "amount": "+{amount} karma",
     "srEarned": "Vous avez gagné {amount} karma — {reason}.",
-    "viewWallet": "Voir le porte-karma"
+    "viewWallet": "Voir le porte-karma",
+    "glyphUnlocked": "Glyphe débloqué",
+    "spent": "−{amount} karma",
+    "srUnlocked": "{name} débloqué — {amount} karma dépensés.",
+    "viewGlyph": "Voir le glyphe"
   },
   "wallet": {
     "title": "Porte-karma",
@@ -136,7 +140,11 @@
     "empty": {
       "title": "Aucun glyphe pour l'instant",
       "description": "Les glyphes sont des symboles que vous gravez à la surface des galets. Créez le premier.",
-      "cta": "Graver un glyphe"
+      "cta": "Graver un glyphe",
+      "marketTitle": "Aucun glyphe en vente",
+      "marketDescription": "Les glyphes de la communauté apparaîtront ici après validation.",
+      "favouritesTitle": "Aucun favori",
+      "favouritesDescription": "Les glyphes achetés ou mis en favori depuis le Marché apparaissent ici."
     },
     "detail": {
       "back": "← Retour aux glyphes",
@@ -157,6 +165,36 @@
       "label": "Glyphes",
       "empty": "Aucun glyphe pour l'instant. Gravez-en un depuis la page Glyphes.",
       "fallbackName": "Glyphe {short}"
+    },
+    "tabs": { "mine": "Mes glyphes", "favourites": "Favoris", "market": "Marché" },
+    "submit": {
+      "cta": "Proposer à la communauté",
+      "pending": "En attente de validation",
+      "approved": "Publié",
+      "rejected": "Refusé",
+      "locked": "Publié — verrouillé",
+      "confirmTitle": "Proposer ce glyphe à la communauté ?",
+      "confirmDescription": "Il sera examiné avant d'apparaître dans le Marché. Une fois proposé, vous ne pourrez plus le modifier ni le supprimer.",
+      "confirm": "Proposer",
+      "cancel": "Annuler"
+    }
+  },
+  "market": {
+    "price": "{amount} karma",
+    "buy": "Acheter",
+    "owned": "Acquis",
+    "buyTitle": "Acheter ce glyphe ?",
+    "buyDescription": "Cela dépense {amount} karma. Vous pourrez l'utiliser sur vos cailloux et vos âmes.",
+    "buyConfirm": "Acheter pour {amount} karma",
+    "cancel": "Annuler",
+    "favourite": "Ajouter aux favoris",
+    "unfavourite": "Retirer des favoris",
+    "errors": {
+      "insufficient": "Vous n'avez pas assez de karma pour ce glyphe.",
+      "notInMarket": "Ce glyphe n'est plus disponible.",
+      "cannotBuyOwn": "Vous ne pouvez pas acheter votre propre glyphe.",
+      "alreadyOwned": "Vous possédez déjà ce glyphe.",
+      "generic": "Une erreur est survenue. Veuillez réessayer."
     }
   },
   "carve": {
