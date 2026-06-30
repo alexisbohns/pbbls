@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { listShapes, listSubmissions } from "@/lib/pebblestore/fetchers"
+import { listSubmissions } from "@/lib/pebblestore/fetchers"
 import type { SubmissionStatus } from "@/lib/pebblestore/types"
 import { ModerationQueue } from "./_components/ModerationQueue"
 
@@ -18,7 +18,7 @@ export default async function GlyphModerationPage({
   const { status } = await searchParams
   const active: SubmissionStatus = isStatus(status) ? status : "pending"
 
-  const [submissions, shapes] = await Promise.all([listSubmissions(active), listShapes()])
+  const submissions = await listSubmissions(active)
 
   return (
     <div className="space-y-6">
@@ -40,7 +40,7 @@ export default async function GlyphModerationPage({
         ))}
       </nav>
 
-      <ModerationQueue submissions={submissions} shapes={shapes} />
+      <ModerationQueue submissions={submissions} />
     </div>
   )
 }

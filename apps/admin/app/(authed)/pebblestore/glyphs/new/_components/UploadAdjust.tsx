@@ -5,16 +5,10 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
 import { GlyphPreview } from "@/components/pebblestore/GlyphPreview"
 import {
+  GLYPH_CANVAS_VIEWBOX,
   GLYPH_PRICE_DEFAULT,
   IDENTITY_ADJUST,
   type Adjust,
@@ -27,24 +21,33 @@ import { publishGlyph } from "../../actions"
 
 export function UploadAdjust({ shapes }: { shapes: PebbleShape[] }) {
   const [strokes, setStrokes] = useState<GlyphStroke[]>([])
-  const [viewBox, setViewBox] = useState("0 0 100 100")
+  const [viewBox, setViewBox] = useState(GLYPH_CANVAS_VIEWBOX)
   const [skipped, setSkipped] = useState<string[]>([])
   const [parseError, setParseError] = useState<string | null>(null)
 
   const [name, setName] = useState("")
   const [price, setPrice] = useState(String(GLYPH_PRICE_DEFAULT))
-  const [shapeId, setShapeId] = useState(shapes[0]?.id ?? "")
   const [adjust, setAdjust] = useState<Adjust>(IDENTITY_ADJUST)
 
   const [formError, setFormError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
-  const shape = useMemo(() => shapes.find((s) => s.id === shapeId) ?? null, [shapes, shapeId])
+  // Glyphs are shape-agnostic, but glyphs.shape_id is still NOT NULL until the
+  // shape column is dropped (tracked separately). Default it silently — the
+  // value is vestigial; the render scales the square glyph into the slot.
+  const shapeId = shapes[0]?.id ?? ""
   const numericPrice = Number(price)
   // Karma prices are whole numbers; the RPC arg is `integer` so a decimal would
   // be rejected server-side with an opaque cast error. Gate it on the client.
   const priceValid = Number.isInteger(numericPrice) && numericPrice > 0
   const canPublish = strokes.length > 0 && shapeId !== "" && priceValid
+
+  // Live preview shows exactly what publish stores: the baked (adjusted) strokes
+  // in the square viewBox, stroke held at 6 in glyph space.
+  const previewStrokes = useMemo(
+    () => bakeAdjust(strokes, viewBox, adjust),
+    [strokes, viewBox, adjust],
+  )
 
   const onFile = async (file: File | undefined) => {
     if (!file) return
@@ -110,10 +113,8 @@ export function UploadAdjust({ shapes }: { shapes: PebbleShape[] }) {
       {strokes.length > 0 ? (
         <>
           <GlyphPreview
-            strokes={strokes}
-            glyphViewBox={viewBox}
-            shape={shape}
-            adjust={adjust}
+            strokes={previewStrokes}
+            viewBox={viewBox}
             className="mx-auto aspect-square w-48 rounded-md border bg-card text-foreground"
           />
 
@@ -132,21 +133,6 @@ export function UploadAdjust({ shapes }: { shapes: PebbleShape[] }) {
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
               />
-            </div>
-            <div className="space-y-2">
-              <Label>Shape</Label>
-              <Select value={shapeId} onValueChange={(v) => setShapeId(v ?? "")}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Choose a shape" />
-                </SelectTrigger>
-                <SelectContent>
-                  {shapes.map((s) => (
-                    <SelectItem key={s.id} value={s.id}>
-                      {s.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
           </div>
 

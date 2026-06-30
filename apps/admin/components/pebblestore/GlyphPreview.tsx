@@ -1,54 +1,35 @@
 // apps/admin/components/pebblestore/GlyphPreview.tsx
-import type { Adjust, GlyphStroke, PebbleShape } from "@/lib/pebblestore/types"
-import { buildAdjustMatrix, matrixToTransform } from "@/lib/pebblestore/transform-path"
-import { fitTransform, parseViewBox } from "@/lib/pebblestore/render-preview"
-
-const STROKE_WIDTH = 6
+import { DEFAULT_STROKE_WIDTH, type GlyphStroke } from "@/lib/pebblestore/types"
 
 type Props = {
+  /** Strokes to render, already baked (the live editor passes adjusted strokes). */
   strokes: GlyphStroke[]
-  glyphViewBox: string
-  shape: PebbleShape | null
-  adjust?: Adjust
+  /** The glyph's square viewBox (e.g. "0 0 100 100"). */
+  viewBox: string
   className?: string
 }
 
-export function GlyphPreview({ strokes, glyphViewBox, shape, adjust, className }: Props) {
-  // Shape provides the canvas + outline; fall back to the glyph's own box if absent.
-  const canvasViewBox = shape?.view_box ?? glyphViewBox
-  const zone = parseViewBox(canvasViewBox)
-  const fit = fitTransform(glyphViewBox, zone)
-  const adjustTransform = adjust ? matrixToTransform(buildAdjustMatrix(glyphViewBox, adjust)) : undefined
-
-  // Pre-divide so the fit scale yields ~STROKE_WIDTH px in canvas coords.
-  const fitScale = Math.min(zone.width / parseViewBox(glyphViewBox).width, zone.height / parseViewBox(glyphViewBox).height)
-  const strokeWidth = STROKE_WIDTH / (fitScale || 1)
-
+/**
+ * Renders a glyph inside its canonical square viewBox. The stroke is a CONSTANT
+ * 6 units in glyph space (never scaled by adjust) — the SVG viewBox→viewport
+ * mapping uniformly scales the whole drawing, including the stroke, exactly as
+ * the pebble slot does at render time. Glyphs are shape-agnostic, so there is no
+ * pebble-outline clip here.
+ */
+export function GlyphPreview({ strokes, viewBox, className }: Props) {
   return (
-    <svg
-      viewBox={canvasViewBox}
-      className={className}
-      role="img"
-      aria-label="Glyph preview"
-    >
-      {shape ? (
-        <path d={shape.path} fill="none" className="text-muted-foreground/40" stroke="currentColor" strokeWidth={2} />
-      ) : null}
-      <g transform={fit}>
-        <g transform={adjustTransform}>
-          {strokes.map((s, i) => (
-            <path
-              key={i}
-              d={s.d}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={strokeWidth}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          ))}
-        </g>
-      </g>
+    <svg viewBox={viewBox} className={className} role="img" aria-label="Glyph preview">
+      {strokes.map((s, i) => (
+        <path
+          key={i}
+          d={s.d}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={DEFAULT_STROKE_WIDTH}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      ))}
     </svg>
   )
 }

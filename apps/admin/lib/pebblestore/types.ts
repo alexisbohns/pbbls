@@ -51,5 +51,11 @@ export const IDENTITY_ADJUST: Adjust = {
 /** Display/sanity mirror of the SQL default; the server is authoritative. */
 export const GLYPH_PRICE_DEFAULT = 25
 
-/** SVG coordinate-space stroke width used when a source path has none. */
+/** Stroke width in glyph coordinate space — constant for every glyph. */
 export const DEFAULT_STROKE_WIDTH = 6
+
+/** Side of the canonical square viewBox every glyph is normalized into. */
+export const GLYPH_CANVAS = 100
+
+/** The canonical square viewBox string (`"0 0 100 100"`). */
+export const GLYPH_CANVAS_VIEWBOX = `0 0 ${GLYPH_CANVAS} ${GLYPH_CANVAS}`

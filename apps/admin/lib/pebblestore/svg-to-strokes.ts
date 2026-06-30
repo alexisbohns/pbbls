@@ -6,11 +6,15 @@
 //   • <path> with commands M L H V Q C Z (absolute + relative). A path using any
 //     other command (arcs A, smooth S/T) is SKIPPED and reported.
 //   • <line>, <polyline>, <polygon> — converted to an equivalent path `d`.
-//   • viewBox: taken from <svg viewBox>; else from width/height; else a padded
-//     bounds computed from the parsed strokes; else a 0 0 100 100 fallback.
-//   • stroke-width → the stroke's width (DEFAULT_STROKE_WIDTH when absent).
-//     NOTE: renderGlyphPaths normalizes width at market-render time, so width is
-//     cosmetic here.
+//
+// NORMALIZATION (the glyph model — see the shape-deprecation decision):
+//   • Glyphs are shape-agnostic. Content is fitted + centered into a CANONICAL
+//     SQUARE viewBox (`0 0 100 100`); the source SVG's own viewBox/width/height
+//     are used only as a last-resort fallback when there is no geometry.
+//   • Stroke width is ALWAYS 6 in glyph space — the source `stroke-width` is
+//     ignored. Scaling/adjusting a glyph changes the drawing's footprint within
+//     the square, never the stroke weight; the render scales the whole square
+//     into the pebble slot via a uniform transform.
 //
 // NOT SUPPORTED (skipped + reported): <rect> <circle> <ellipse> <text> <image>
 //   <use>, gradients/patterns/<style>, CSS classes, and fills. The model is
@@ -19,8 +23,15 @@
 //
 // Throws only on unparseable input (no <svg> root / malformed XML).
 
-import { DEFAULT_STROKE_WIDTH, type GlyphStroke } from "./types"
-import { parsePath, serializePath, pathBounds, UnsupportedPathError } from "./path"
+import { DEFAULT_STROKE_WIDTH, GLYPH_CANVAS, GLYPH_CANVAS_VIEWBOX, type GlyphStroke } from "./types"
+import {
+  parsePath,
+  serializePath,
+  pathBounds,
+  transformPath,
+  UnsupportedPathError,
+  type Matrix,
+} from "./path"
 
 export type SvgImportResult = {
   strokes: GlyphStroke[]
@@ -54,28 +65,15 @@ function elementToD(el: Element): string | null {
   return null
 }
 
-function readWidth(el: Element): number {
-  const w = parseFloat(el.getAttribute("stroke-width") ?? "")
-  return Number.isFinite(w) && w > 0 ? w : DEFAULT_STROKE_WIDTH
-}
+/** Fraction of the square the content fills (leaves a margin for stroke caps). */
+const FILL = 0.9
 
-function resolveViewBox(root: Element, strokes: GlyphStroke[]): string {
-  // Only trust the attribute if it is four finite numbers with a positive
-  // width/height — otherwise it would propagate NaN/Infinity into the fit and
-  // adjust matrices. Anything malformed falls through to the safe paths below.
-  const vb = root.getAttribute("viewBox")
-  if (vb) {
-    const parts = vb.trim().split(/[\s,]+/).map(Number)
-    if (parts.length === 4 && parts.every(Number.isFinite) && parts[2] > 0 && parts[3] > 0) {
-      return parts.join(" ")
-    }
-  }
-
-  const w = parseFloat(root.getAttribute("width") ?? "")
-  const h = parseFloat(root.getAttribute("height") ?? "")
-  if (Number.isFinite(w) && Number.isFinite(h) && w > 0 && h > 0) return `0 0 ${w} ${h}`
-
-  // Compute padded bounds from the parsed strokes.
+/**
+ * Fit + centre all strokes into the canonical `GLYPH_CANVAS`×`GLYPH_CANVAS`
+ * square, preserving aspect ratio. Returns the transformed strokes + the square
+ * viewBox. With no geometry, returns the strokes untouched in the square box.
+ */
+function normalizeToSquare(strokes: GlyphStroke[]): { strokes: GlyphStroke[]; viewBox: string } {
   let minX = Infinity
   let minY = Infinity
   let maxX = -Infinity
@@ -90,9 +88,20 @@ function resolveViewBox(root: Element, strokes: GlyphStroke[]): string {
     maxX = Math.max(maxX, b.maxX)
     maxY = Math.max(maxY, b.maxY)
   }
-  if (!has) return "0 0 100 100"
-  const pad = Math.max(maxX - minX, maxY - minY) * 0.06 || 1
-  return `${minX - pad} ${minY - pad} ${maxX - minX + pad * 2} ${maxY - minY + pad * 2}`
+  if (!has) return { strokes, viewBox: GLYPH_CANVAS_VIEWBOX }
+
+  const span = Math.max(maxX - minX, maxY - minY) || 1
+  const scale = (GLYPH_CANVAS * FILL) / span
+  const cx = (minX + maxX) / 2
+  const cy = (minY + maxY) / 2
+  const half = GLYPH_CANVAS / 2
+  // p' = canvasCentre + scale·(p - contentCentre)
+  const m: Matrix = [scale, 0, 0, scale, half - scale * cx, half - scale * cy]
+
+  return {
+    strokes: strokes.map((s) => ({ ...s, d: serializePath(transformPath(parsePath(s.d), m)) })),
+    viewBox: GLYPH_CANVAS_VIEWBOX,
+  }
 }
 
 export function svgToStrokes(svg: string): SvgImportResult {
@@ -125,7 +134,8 @@ export function svgToStrokes(svg: string): SvgImportResult {
         skipped.push(`${tag} (empty)`)
         continue
       }
-      strokes.push({ d: serializePath(cmds), width: readWidth(el) })
+      // Stroke width is always 6 in glyph space — the source value is ignored.
+      strokes.push({ d: serializePath(cmds), width: DEFAULT_STROKE_WIDTH })
     } catch (e) {
       if (e instanceof UnsupportedPathError) {
         skipped.push(`${tag} (${e.command})`)
@@ -135,5 +145,6 @@ export function svgToStrokes(svg: string): SvgImportResult {
     }
   }
 
-  return { strokes, viewBox: resolveViewBox(root, strokes), skipped }
+  const square = normalizeToSquare(strokes)
+  return { strokes: square.strokes, viewBox: square.viewBox, skipped }
 }

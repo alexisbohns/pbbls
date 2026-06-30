@@ -1,7 +1,6 @@
 // apps/admin/app/(authed)/playground/glyphs/page.tsx
 import { svgToStrokes } from "@/lib/pebblestore/svg-to-strokes"
 import { GlyphPreview } from "@/components/pebblestore/GlyphPreview"
-import { IDENTITY_ADJUST } from "@/lib/pebblestore/types"
 
 const SAMPLES: { label: string; svg: string }[] = [
   {
@@ -38,9 +37,7 @@ export default function GlyphPlayground() {
               <div className="font-medium">{s.label}</div>
               <GlyphPreview
                 strokes={r.strokes}
-                glyphViewBox={r.viewBox}
-                shape={null}
-                adjust={{ ...IDENTITY_ADJUST, scale: 0.8 }}
+                viewBox={r.viewBox}
                 className="aspect-square w-full text-foreground"
               />
               <div className="text-muted-foreground">strokes: {r.strokes.length}</div>

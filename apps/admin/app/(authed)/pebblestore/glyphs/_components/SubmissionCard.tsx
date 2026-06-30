@@ -17,18 +17,12 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { GlyphPreview } from "@/components/pebblestore/GlyphPreview"
-import type { AdminSubmission, PebbleShape } from "@/lib/pebblestore/types"
+import type { AdminSubmission } from "@/lib/pebblestore/types"
 import { approveGlyph, rejectGlyph, setGlyphPrice } from "../actions"
 
 type Mode = "approve" | "reject" | "reprice" | null
 
-export function SubmissionCard({
-  submission,
-  shape,
-}: {
-  submission: AdminSubmission
-  shape: PebbleShape | null
-}) {
+export function SubmissionCard({ submission }: { submission: AdminSubmission }) {
   const [mode, setMode] = useState<Mode>(null)
   const [price, setPrice] = useState(String(submission.price))
   const [note, setNote] = useState("")
@@ -71,8 +65,7 @@ export function SubmissionCard({
       <CardContent className="space-y-2">
         <GlyphPreview
           strokes={submission.strokes}
-          glyphViewBox={submission.view_box}
-          shape={shape}
+          viewBox={submission.view_box}
           className="aspect-square w-full rounded-md border bg-card text-foreground"
         />
         <div className="text-xs text-muted-foreground">
