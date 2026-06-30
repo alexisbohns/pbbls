@@ -41,8 +41,10 @@ export function UploadAdjust({ shapes }: { shapes: PebbleShape[] }) {
 
   const shape = useMemo(() => shapes.find((s) => s.id === shapeId) ?? null, [shapes, shapeId])
   const numericPrice = Number(price)
-  const canPublish =
-    strokes.length > 0 && shapeId !== "" && Number.isFinite(numericPrice) && numericPrice > 0
+  // Karma prices are whole numbers; the RPC arg is `integer` so a decimal would
+  // be rejected server-side with an opaque cast error. Gate it on the client.
+  const priceValid = Number.isInteger(numericPrice) && numericPrice > 0
+  const canPublish = strokes.length > 0 && shapeId !== "" && priceValid
 
   const onFile = async (file: File | undefined) => {
     if (!file) return
@@ -126,6 +128,7 @@ export function UploadAdjust({ shapes }: { shapes: PebbleShape[] }) {
                 id="glyph-price"
                 type="number"
                 min={1}
+                step={1}
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
               />

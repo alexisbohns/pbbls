@@ -56,6 +56,9 @@ export function SubmissionCard({
   }
 
   const numericPrice = Number(price)
+  // Karma prices are whole numbers; the RPC arg is `integer`, so block decimals
+  // client-side rather than surfacing an opaque server cast error.
+  const priceValid = Number.isInteger(numericPrice) && numericPrice > 0
 
   return (
     <Card>
@@ -110,6 +113,7 @@ export function SubmissionCard({
               id="approve-price"
               type="number"
               min={1}
+              step={1}
               value={price}
               onChange={(e) => setPrice(e.target.value)}
             />
@@ -120,7 +124,7 @@ export function SubmissionCard({
               Cancel
             </Button>
             <Button
-              disabled={pending || !Number.isFinite(numericPrice) || numericPrice <= 0}
+              disabled={pending || !priceValid}
               onClick={() => run(() => approveGlyph(submission.submission_id, numericPrice), "Glyph approved")}
             >
               {pending ? "Approving…" : "Approve"}
@@ -169,6 +173,7 @@ export function SubmissionCard({
               id="reprice-price"
               type="number"
               min={1}
+              step={1}
               value={price}
               onChange={(e) => setPrice(e.target.value)}
             />
@@ -179,7 +184,7 @@ export function SubmissionCard({
               Cancel
             </Button>
             <Button
-              disabled={pending || !Number.isFinite(numericPrice) || numericPrice <= 0}
+              disabled={pending || !priceValid}
               onClick={() => run(() => setGlyphPrice(submission.submission_id, numericPrice), "Price updated")}
             >
               {pending ? "Saving…" : "Save"}
