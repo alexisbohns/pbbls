@@ -37,4 +37,33 @@ struct ComposePebbleResponseDecodingTests {
         #expect(decoded.renderSvg == nil)
         #expect(decoded.renderVersion == nil)
     }
+
+    @Test("decodes karma_delta when present")
+    func decodesKarmaDelta() throws {
+        let json = Data("""
+        {
+          "pebble_id": "550e8400-e29b-41d4-a716-446655440000",
+          "render_svg": "<svg/>",
+          "render_version": "v1",
+          "karma_delta": 5
+        }
+        """.utf8)
+
+        let decoded = try JSONDecoder().decode(ComposePebbleResponse.self, from: json)
+
+        #expect(decoded.karmaDelta == 5)
+    }
+
+    @Test("karma_delta is nil when absent or null")
+    func karmaDeltaNilWhenAbsent() throws {
+        let json = Data("""
+        {
+          "pebble_id": "550e8400-e29b-41d4-a716-446655440000"
+        }
+        """.utf8)
+
+        let decoded = try JSONDecoder().decode(ComposePebbleResponse.self, from: json)
+
+        #expect(decoded.karmaDelta == nil)
+    }
 }

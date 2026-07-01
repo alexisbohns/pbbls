@@ -10,10 +10,12 @@ struct ComposePebbleResponse: Decodable {
     let pebbleId: UUID
     let renderSvg: String?
     let renderVersion: String?
+    let karmaDelta: Int?
 
     enum CodingKeys: String, CodingKey {
         case pebbleId = "pebble_id"
         case renderSvg = "render_svg"
         case renderVersion = "render_version"
+        case karmaDelta = "karma_delta"
     }
 }
