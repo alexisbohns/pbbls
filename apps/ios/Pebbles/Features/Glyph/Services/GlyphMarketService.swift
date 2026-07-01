@@ -13,11 +13,11 @@ struct GlyphMarketService {
 
     /// Glyphs I created (any submission state), newest first, with cost badge.
     func listMine() async throws -> [GlyphGridItem] {
-        guard let me = supabase.session?.user.id else { throw GlyphMarketError.missingSession }
+        guard let userId = supabase.session?.user.id else { throw GlyphMarketError.missingSession }
         let rows: [MineGlyphRow] = try await supabase.client
             .from("glyphs")
             .select("id, name, strokes, view_box, user_id, created_at, glyph_submissions(price, status, listed)")
-            .eq("user_id", value: me)
+            .eq("user_id", value: userId)
             .order("created_at", ascending: false)
             .execute()
             .value
@@ -37,11 +37,11 @@ struct GlyphMarketService {
 
     /// Community marketplace (approved + listed), excluding my own creations.
     func listCommunity() async throws -> [GlyphGridItem] {
-        guard let me = supabase.session?.user.id else { throw GlyphMarketError.missingSession }
+        guard let userId = supabase.session?.user.id else { throw GlyphMarketError.missingSession }
         let rows: [MarketGlyphRow] = try await supabase.client
             .from("v_glyph_market")
             .select("id, user_id, name, strokes, view_box, created_at, price, owned")
-            .neq("user_id", value: me)
+            .neq("user_id", value: userId)
             .order("created_at", ascending: false)
             .execute()
             .value

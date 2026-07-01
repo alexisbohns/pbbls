@@ -8,9 +8,9 @@ struct GlyphSwapDecodingTests {
     @Test("decodes { entitlement_id, balance } from the RPC")
     func decodeResult() throws {
         let id = UUID()
-        let json = """
+        let json = Data("""
         { "entitlement_id": "\(id.uuidString)", "balance": 33 }
-        """.data(using: .utf8)!
+        """.utf8)
         let result = try JSONDecoder().decode(BuyGlyphResult.self, from: json)
         #expect(result.entitlementId == id)
         #expect(result.balance == 33)

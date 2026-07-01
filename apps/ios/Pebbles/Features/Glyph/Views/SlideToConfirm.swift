@@ -53,7 +53,7 @@ struct SlideToConfirm: View {
             GeometryReader { geo in
                 Color.clear
                     .onAppear { trackWidth = geo.size.width }
-                    .onChange(of: geo.size.width) { _, w in trackWidth = w }
+                    .onChange(of: geo.size.width) { _, width in trackWidth = width }
             }
         )
         .opacity(isEnabled ? 1 : 0.5)
@@ -91,8 +91,8 @@ struct SlideToConfirm: View {
             .onEnded { _ in
                 guard isEnabled else { return }
                 isSliding = false
-                let p = SlideMath.progress(dragX: dragX, trackWidth: trackWidth, thumb: thumb)
-                if SlideMath.isConfirmed(p) {
+                let progress = SlideMath.progress(dragX: dragX, trackWidth: trackWidth, thumb: thumb)
+                if SlideMath.isConfirmed(progress) {
                     feedback.success()
                     withAnimation(.snappy) { dragX = max(1, trackWidth - thumb) }
                     Task { await onConfirm() }

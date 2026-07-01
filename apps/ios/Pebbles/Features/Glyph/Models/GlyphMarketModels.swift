@@ -139,7 +139,10 @@ struct EntitlementRow: Decodable {
 
     func toGridItem() -> GlyphGridItem {
         GlyphGridItem(
-            glyph: Glyph(id: glyph.id, name: glyph.name, strokes: glyph.strokes, viewBox: glyph.viewBox, userId: glyph.userId),
+            glyph: Glyph(
+                id: glyph.id, name: glyph.name, strokes: glyph.strokes,
+                viewBox: glyph.viewBox, userId: glyph.userId
+            ),
             price: pricePaid,
             owned: true,
             createdAt: GlyphTimestamp.parse(glyph.createdAt),
@@ -155,15 +158,15 @@ struct EntitlementRow: Decodable {
 /// milliseconds, so we normalize the fraction to 3 digits before parsing.
 enum GlyphTimestamp {
     private static let withFraction: ISO8601DateFormatter = {
-        let f = ISO8601DateFormatter()
-        f.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        return f
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        return formatter
     }()
 
     private static let plain: ISO8601DateFormatter = {
-        let f = ISO8601DateFormatter()
-        f.formatOptions = [.withInternetDateTime]
-        return f
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime]
+        return formatter
     }()
 
     static func parse(_ raw: String?) -> Date? {
@@ -173,14 +176,14 @@ enum GlyphTimestamp {
     }
 
     /// Truncates any `.dddddd` fractional-seconds group to 3 digits.
-    private static func normalizeFraction(_ s: String) -> String {
-        guard let dot = s.firstIndex(of: ".") else { return s }
-        let after = s.index(after: dot)
+    private static func normalizeFraction(_ raw: String) -> String {
+        guard let dot = raw.firstIndex(of: ".") else { return raw }
+        let after = raw.index(after: dot)
         var end = after
-        while end < s.endIndex, s[end].isNumber { end = s.index(after: end) }
-        let digits = s[after..<end]
-        guard digits.count > 3 else { return s }
-        let keep = s.index(after: s.index(after: s.index(after: after))) // after + 3
-        return String(s[s.startIndex..<keep]) + String(s[end...])
+        while end < raw.endIndex, raw[end].isNumber { end = raw.index(after: end) }
+        let digits = raw[after..<end]
+        guard digits.count > 3 else { return raw }
+        let keep = raw.index(after: raw.index(after: raw.index(after: after))) // after + 3
+        return String(raw[raw.startIndex..<keep]) + String(raw[end...])
     }
 }

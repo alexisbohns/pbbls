@@ -29,9 +29,10 @@ struct GlyphsListView: View {
             .pebblesToolbarTitle("Glyphs")
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    PebbleToolbarButton(action: { showCarveSheet = true }) {
-                        Image(systemName: "plus")
-                    }
+                    PebbleToolbarButton(
+                        action: { showCarveSheet = true },
+                        label: { Image(systemName: "plus") }
+                    )
                     .accessibilityLabel("Carve new glyph")
                 }
             }
@@ -155,7 +156,8 @@ struct GlyphsListView: View {
             }
             itemsByTab[which] = result
         } catch {
-            logger.error("glyphs fetch failed (\(which.rawValue, privacy: .public)): \(error.localizedDescription, privacy: .private)")
+            let reason = error.localizedDescription
+            logger.error("glyphs fetch failed (\(which.rawValue, privacy: .public)): \(reason, privacy: .private)")
             if (itemsByTab[which] ?? []).isEmpty { loadError = "Please try again." }
         }
         isLoading = false
@@ -178,7 +180,10 @@ struct GlyphsListView: View {
         let optimisticName: String? = trimmed.isEmpty ? nil : trimmed
 
         itemsByTab[.mine]![index] = GlyphGridItem(
-            glyph: Glyph(id: glyph.id, name: optimisticName, strokes: glyph.strokes, viewBox: glyph.viewBox, userId: glyph.userId),
+            glyph: Glyph(
+                id: glyph.id, name: optimisticName, strokes: glyph.strokes,
+                viewBox: glyph.viewBox, userId: glyph.userId
+            ),
             price: original.price, owned: original.owned, createdAt: original.createdAt, acquiredAt: original.acquiredAt
         )
 

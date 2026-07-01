@@ -63,7 +63,9 @@ final class AudioService {
             self.player = player
             player.play()
         } catch {
-            logger.error("sound \(name, privacy: .public) playback failed: \(error.localizedDescription, privacy: .public)")
+            logger.error(
+                "sound \(name, privacy: .public) playback failed: \(error.localizedDescription, privacy: .public)"
+            )
         }
     }
 
