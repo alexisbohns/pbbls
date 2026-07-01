@@ -8,9 +8,8 @@ import {
 } from "react"
 import { Pencil, Trash2 } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { PEBBLE_SHAPES } from "@/lib/config"
 import type { Mark } from "@/lib/types"
-import { useFormatDate, useShapeName } from "@/lib/i18n"
+import { useFormatDate } from "@/lib/i18n"
 import { GlyphPreview } from "@/components/glyphs/GlyphPreview"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -37,8 +36,6 @@ export function GlyphDetail({
   const tSubmit = useTranslations("glyphs.submit")
   const tCard = useTranslations("glyphs.card")
   const formatDate = useFormatDate()
-  const shape = PEBBLE_SHAPES.find((s) => s.id === mark.shape_id)
-  const shapeName = useShapeName(shape ?? { slug: "", name: "" })
   const created = formatDate(mark.created_at, { dateStyle: "long" })
 
   const [isEditing, setIsEditing] = useState(false)
@@ -115,7 +112,6 @@ export function GlyphDetail({
         )}
 
         <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          {shape && <span>{shapeName}</span>}
           <span>{tCard("strokeCount", { count: mark.strokes.length })}</span>
           <time dateTime={mark.created_at}>{created}</time>
         </div>
