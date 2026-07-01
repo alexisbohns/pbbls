@@ -2577,6 +2577,70 @@
         }
       }
     },
+    "+%lld karma" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld karma"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "+%lld karma"
+          }
+        }
+      }
+    },
+    "Earned %lld karma, %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Earned %lld karma, %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$lld karma gagné, %2$@"
+          }
+        }
+      }
+    },
+    "Pebble created" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pebble created"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caillou créé"
+          }
+        }
+      }
+    },
+    "Pebble enriched" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pebble enriched"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Caillou enrichi"
+          }
+        }
+      }
+    },
     "karma" : {
       "extractionState" : "manual",
       "localizations" : {
