@@ -136,3 +136,14 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** New admin-curated store goods reuse this RPC shape (gated read + gated mutations). `review_note` is now part of the submission contract (web reads it via the existing submitter RLS). A filled-glyph render mode remains a future, separate decision. The admin SVG path parser supports only the documented command subset; arcs/smooth curves are skipped, not approximated.
 - **Supersedes / Superseded-by:** —
 - **Refs:** #497, `docs/superpowers/specs/2026-06-30-issue-497-admin-glyph-moderation-design.md`, `docs/superpowers/plans/2026-06-30-admin-glyph-moderation.md`, `packages/supabase/supabase/migrations/20260630084718_admin_glyph_moderation.sql`.
+
+## 2026-07-01 — Glyph sales pay the creator via a net-zero karma transfer; attribution transfers ownership (#497)
+
+- **Status:** taken
+- **Scope:** db, admin, webapp
+- **Context:** M36 sub-project D gained curation needs: creators should earn from glyph sales, admins should be able to attribute a first-party (admin-uploaded) glyph to the real creator, delist a glyph without deleting it, and hard-delete glyphs.
+- **Decision:** A glyph sale **credits the glyph owner (`glyphs.user_id`) the full price** as a `glyph_sale` karma credit inside `buy_glyph`, in the same transaction as the buyer's `spend_karma` withdraw — a **net-zero transfer** (no minting), consistent with the wallet rules (#494). **Attribution transfers ownership**: `admin_attribute_glyph` sets `glyphs.user_id` to a looked-up user, so they become the creator (glyph appears in their gallery, `cannot_buy_own` protects them, payouts route to them); admin-owned (unattributed) glyphs pay the admin account. **Delisting** is a new `glyph_submissions.listed` flag: `v_glyph_market` + `buy_glyph` require `approved AND listed`, so a delisted glyph leaves the market but existing owners keep it. **Delete** is a `security definer` admin RPC that cascades to the submission + entitlements.
+- **Why:** Reusing `glyphs.user_id` as the payout target (rather than a separate `credited_to`) keeps ownership, gallery visibility, `cannot_buy_own`, and payouts consistent from one column. Crediting inside `buy_glyph` (vs a separate call) makes the transfer atomic with the spend. Net-zero keeps the economy closed. A `listed` flag (vs flipping `status`) preserves the `approved` audit + entitlements while removing buyability.
+- **Consequences:** New `glyph_sale` reason on the `karma_events` CHECK. Payout amount is bounded by `delta`'s `smallint` (same as the existing spend path). Delisting is reversible; deletion is not (buyers lose access — the admin UI warns). Future royalty/revenue-share models would build on `glyphs.user_id` as the creator.
+- **Supersedes / Superseded-by:** —
+- **Refs:** #497, `packages/supabase/supabase/migrations/20260701102810_glyph_marketplace_curation.sql`.
