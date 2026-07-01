@@ -2,29 +2,22 @@
 
 import { useCallback, useRef, useState } from "react"
 import { useTranslations } from "next-intl"
-import type { PebbleShape } from "@/lib/config"
+import { GLYPH_CANVAS, GLYPH_STROKE_WIDTH, GLYPH_VIEWBOX } from "@/lib/config"
 import type { MarkStroke } from "@/lib/types"
 import { simplifyPath, pointsToSvgPath, type Point } from "@/lib/utils/simplify-path"
-import { PebbleOutline } from "@/components/carve/PebbleOutline"
 import { StrokeRenderer } from "@/components/carve/StrokeRenderer"
 import { ActiveStroke } from "@/components/carve/ActiveStroke"
 
 const RDP_EPSILON = 1.5
-const PRESSURE_MULTIPLIER = 4
 
 type DrawingCanvasProps = {
-  shape: PebbleShape
   strokes: MarkStroke[]
-  strokeWidth: number
   onStrokeComplete: (stroke: MarkStroke) => void
 }
 
-export function DrawingCanvas({
-  shape,
-  strokes,
-  strokeWidth,
-  onStrokeComplete,
-}: DrawingCanvasProps) {
+const clamp = (v: number) => Math.max(0, Math.min(GLYPH_CANVAS, v))
+
+export function DrawingCanvas({ strokes, onStrokeComplete }: DrawingCanvasProps) {
   const svgRef = useRef<SVGSVGElement>(null)
   const pointsRef = useRef<Point[]>([])
   const drawingRef = useRef(false)
@@ -32,6 +25,8 @@ export function DrawingCanvas({
   const [activePoints, setActivePoints] = useState<Point[]>([])
   const t = useTranslations("carve")
 
+  // Map a pointer event into the 200×200 glyph coordinate space, clamped to the
+  // canvas so strokes never spill past the square (mirrors iOS clamping).
   const toSvgCoords = useCallback((e: React.PointerEvent): Point | null => {
     const svg = svgRef.current
     if (!svg) return null
@@ -39,8 +34,8 @@ export function DrawingCanvas({
     if (!ctm) return null
     const inv = ctm.inverse()
     return {
-      x: Math.round((e.clientX * inv.a + e.clientY * inv.c + inv.e) * 100) / 100,
-      y: Math.round((e.clientX * inv.b + e.clientY * inv.d + inv.f) * 100) / 100,
+      x: clamp(Math.round((e.clientX * inv.a + e.clientY * inv.c + inv.e) * 100) / 100),
+      y: clamp(Math.round((e.clientX * inv.b + e.clientY * inv.d + inv.f) * 100) / 100),
       pressure: e.pressure,
     }
   }, [])
@@ -86,22 +81,17 @@ export function DrawingCanvas({
     const simplified = simplifyPath(raw, RDP_EPSILON)
     const d = pointsToSvgPath(simplified)
 
-    // Compute effective width from average pressure
-    const avgPressure = raw.reduce((sum, p) => sum + (p.pressure ?? 0.5), 0) / raw.length
-    const effectiveWidth = strokeWidth + avgPressure * PRESSURE_MULTIPLIER
-
-    onStrokeComplete({ d, width: Math.round(effectiveWidth * 10) / 10 })
+    // Stroke width is a constant 6 in glyph space (#278) — no pressure variation.
+    onStrokeComplete({ d, width: GLYPH_STROKE_WIDTH })
     pointsRef.current = []
     setActivePoints([])
-  }, [strokeWidth, onStrokeComplete])
-
-  const clipId = `pebble-clip-${shape.id}`
+  }, [onStrokeComplete])
 
   return (
     <svg
       ref={svgRef}
-      viewBox={shape.viewBox}
-      className="w-full max-w-[300px] aspect-square cursor-crosshair"
+      viewBox={GLYPH_VIEWBOX}
+      className="w-full max-w-[300px] aspect-square cursor-crosshair rounded-2xl border border-border bg-card"
       style={{ touchAction: "none" }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
@@ -110,11 +100,8 @@ export function DrawingCanvas({
       role="img"
       aria-label={t("canvasAria")}
     >
-      <PebbleOutline shape={shape} clipId={clipId} />
-      <g clipPath={`url(#${clipId})`}>
-        <StrokeRenderer strokes={strokes} />
-        <ActiveStroke points={activePoints} width={strokeWidth} />
-      </g>
+      <StrokeRenderer strokes={strokes} />
+      <ActiveStroke points={activePoints} width={GLYPH_STROKE_WIDTH} />
     </svg>
   )
 }

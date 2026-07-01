@@ -1,9 +1,9 @@
 "use client"
 
-import { useCallback, useMemo, useState } from "react"
+import { useCallback, useState } from "react"
 import { motion, useReducedMotion } from "framer-motion"
 import { useTranslations } from "next-intl"
-import { PEBBLE_SHAPES } from "@/lib/config"
+import { GLYPH_VIEWBOX } from "@/lib/config"
 import { useMarks } from "@/lib/data/useMarks"
 import { useHaptics } from "@/lib/hooks/useHaptics"
 import type { MarkStroke } from "@/lib/types"
@@ -24,16 +24,9 @@ export function CarveEditor({ onSaved }: CarveEditorProps) {
   const t = useTranslations("carve")
 
   const [strokes, setStrokes] = useState<MarkStroke[]>([])
-  const [strokeWidth, setStrokeWidth] = useState(4)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [name, setName] = useState("")
-
-  // Pick a consistent shape for this editor session
-  const shape = useMemo(
-    () => PEBBLE_SHAPES[Math.floor(Math.random() * PEBBLE_SHAPES.length)],
-    [],
-  )
 
   const handleStrokeComplete = useCallback(
     (stroke: MarkStroke) => {
@@ -67,9 +60,9 @@ export function CarveEditor({ onSaved }: CarveEditorProps) {
     try {
       const trimmed = name.trim()
       const mark = await addMark({
-        shape_id: shape.id,
+        shape_id: null, // shapeless — the canonical model (#278)
         strokes,
-        viewBox: shape.viewBox,
+        viewBox: GLYPH_VIEWBOX,
         name: trimmed.length > 0 ? trimmed : undefined,
       })
       vibrate([10, 50, 10])
@@ -78,7 +71,7 @@ export function CarveEditor({ onSaved }: CarveEditorProps) {
     } finally {
       setSaving(false)
     }
-  }, [saving, strokes, addMark, shape, vibrate, onSaved, name])
+  }, [saving, strokes, addMark, vibrate, onSaved, name])
 
   const handleNewMark = useCallback(() => {
     setStrokes([])
@@ -99,31 +92,22 @@ export function CarveEditor({ onSaved }: CarveEditorProps) {
           {name.trim() ? t("savedNamed", { name: name.trim() }) : t("saved")}
         </p>
         <svg
-          viewBox={shape.viewBox}
+          viewBox={GLYPH_VIEWBOX}
           className="w-full max-w-[200px] aspect-square"
           aria-hidden="true"
         >
-          <path
-            d={shape.path}
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            className="text-border"
-          />
-          <g>
-            {strokes.map((s, i) => (
-              <path
-                key={i}
-                d={s.d}
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={s.width}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="text-foreground"
-              />
-            ))}
-          </g>
+          {strokes.map((s, i) => (
+            <path
+              key={i}
+              d={s.d}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={s.width}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="text-foreground"
+            />
+          ))}
         </svg>
         <button
           onClick={handleNewMark}
@@ -144,9 +128,7 @@ export function CarveEditor({ onSaved }: CarveEditorProps) {
     >
       <figure className="flex flex-col items-center gap-2">
         <DrawingCanvas
-          shape={shape}
           strokes={strokes}
-          strokeWidth={strokeWidth}
           onStrokeComplete={handleStrokeComplete}
         />
         <figcaption className="sr-only">
@@ -171,10 +153,8 @@ export function CarveEditor({ onSaved }: CarveEditorProps) {
 
       <CarveToolbar
         strokeCount={strokes.length}
-        strokeWidth={strokeWidth}
         onUndo={handleUndo}
         onClear={handleClear}
-        onWidthChange={setStrokeWidth}
         onSave={handleSave}
         saving={saving}
       />

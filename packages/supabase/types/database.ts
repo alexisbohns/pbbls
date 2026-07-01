@@ -426,7 +426,9 @@ export type Database = {
           created_at: string
           glyph_id: string
           id: string
+          listed: boolean
           price: number
+          review_note: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
@@ -436,7 +438,9 @@ export type Database = {
           created_at?: string
           glyph_id: string
           id?: string
+          listed?: boolean
           price?: number
+          review_note?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
@@ -446,7 +450,9 @@ export type Database = {
           created_at?: string
           glyph_id?: string
           id?: string
+          listed?: boolean
           price?: number
+          review_note?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
@@ -1613,6 +1619,20 @@ export type Database = {
       }
     }
     Functions: {
+      admin_attribute_glyph: {
+        Args: { p_glyph_id: string; p_user_id: string }
+        Returns: Json
+      }
+      admin_delete_glyph: { Args: { p_glyph_id: string }; Returns: undefined }
+      admin_find_user: { Args: { p_email: string }; Returns: Json }
+      admin_list_glyph_submissions: {
+        Args: { p_status?: string }
+        Returns: Json
+      }
+      approve_glyph: {
+        Args: { p_price?: number; p_submission_id: string }
+        Returns: Json
+      }
       buy_glyph: { Args: { p_glyph_id: string }; Returns: Json }
       compute_karma_delta: {
         Args: {
@@ -1814,9 +1834,31 @@ export type Database = {
           render_svg: string
         }[]
       }
+      publish_admin_glyph: {
+        Args: {
+          p_name: string
+          p_price: number
+          p_shape_id: string
+          p_strokes: Json
+          p_view_box: string
+        }
+        Returns: Json
+      }
       refund_karma: {
         Args: { p_amount: number; p_ref_id: string }
         Returns: string
+      }
+      reject_glyph: {
+        Args: { p_note: string; p_submission_id: string }
+        Returns: Json
+      }
+      set_glyph_listed: {
+        Args: { p_listed: boolean; p_submission_id: string }
+        Returns: Json
+      }
+      set_glyph_price: {
+        Args: { p_price: number; p_submission_id: string }
+        Returns: Json
       }
       spend_karma: {
         Args: { p_amount: number; p_reason: string; p_ref_id?: string }

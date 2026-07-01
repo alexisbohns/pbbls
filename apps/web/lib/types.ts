@@ -96,7 +96,7 @@ export type MarkStroke = {
 export type Mark = {
   id: string
   name?: string
-  shape_id: string
+  shape_id: string | null // null = shapeless (the canonical model, #278); legacy glyphs carry a shape
   strokes: MarkStroke[]
   viewBox: string
   created_at: string
@@ -119,6 +119,7 @@ export type GlyphSubmission = {
   status: GlyphSubmissionStatus
   price: number
   created_at: string
+  review_note?: string | null // admin's reason when status === "rejected"
 }
 
 // ---------------------------------------------------------------------------

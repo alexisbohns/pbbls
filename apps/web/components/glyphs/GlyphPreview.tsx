@@ -1,6 +1,4 @@
-import { PEBBLE_SHAPES } from "@/lib/config"
 import type { Mark } from "@/lib/types"
-import { PebbleOutline } from "@/components/carve/PebbleOutline"
 import { StrokeRenderer } from "@/components/carve/StrokeRenderer"
 
 type GlyphPreviewProps = {
@@ -8,33 +6,16 @@ type GlyphPreviewProps = {
   className?: string
 }
 
+/**
+ * Renders a glyph as plain strokes in its own (square) viewBox — no pebble
+ * shape, no clip, no background. Mirrors the canonical model (#278) and the iOS
+ * GlyphThumbnail: glyphs are shapeless squares scaled into whatever slot the
+ * caller provides via `className`.
+ */
 export function GlyphPreview({ mark, className }: GlyphPreviewProps) {
-  const shape = PEBBLE_SHAPES.find((s) => s.id === mark.shape_id)
-
-  if (!shape) {
-    return (
-      <svg
-        viewBox={mark.viewBox}
-        className={className}
-        aria-hidden="true"
-      >
-        <StrokeRenderer strokes={mark.strokes} />
-      </svg>
-    )
-  }
-
-  const clipId = `glyph-${mark.id}`
-
   return (
-    <svg
-      viewBox={shape.viewBox}
-      className={className}
-      aria-hidden="true"
-    >
-      <PebbleOutline shape={shape} clipId={clipId} />
-      <g clipPath={`url(#${clipId})`}>
-        <StrokeRenderer strokes={mark.strokes} />
-      </g>
+    <svg viewBox={mark.viewBox} className={className} aria-hidden="true">
+      <StrokeRenderer strokes={mark.strokes} />
     </svg>
   )
 }

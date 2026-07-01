@@ -212,7 +212,7 @@ export class SupabaseProvider implements DataProvider {
     const marks: Mark[] = (glyphsRes.data ?? []).map((row: Record<string, unknown>) => ({
       id: row.id as string,
       name: (row.name as string) ?? undefined,
-      shape_id: row.shape_id as string,
+      shape_id: row.shape_id as string | null,
       strokes: row.strokes as Mark["strokes"],
       viewBox: row.view_box as string,
       created_at: row.created_at as string,
@@ -608,7 +608,7 @@ export class SupabaseProvider implements DataProvider {
     return {
       id: row.id as string,
       name: (row.name as string) ?? undefined,
-      shape_id: row.shape_id as string,
+      shape_id: row.shape_id as string | null,
       strokes: row.strokes as Mark["strokes"],
       viewBox: row.view_box as string,
       created_at: row.created_at as string,
@@ -632,7 +632,7 @@ export class SupabaseProvider implements DataProvider {
     const created: Mark = {
       id: row.id as string,
       name: (row.name as string) ?? undefined,
-      shape_id: row.shape_id as string,
+      shape_id: row.shape_id as string | null,
       strokes: row.strokes as Mark["strokes"],
       viewBox: row.view_box as string,
       created_at: row.created_at as string,
@@ -653,7 +653,7 @@ export class SupabaseProvider implements DataProvider {
     const updated: Mark = {
       id: row.id as string,
       name: (row.name as string) ?? undefined,
-      shape_id: row.shape_id as string,
+      shape_id: row.shape_id as string | null,
       strokes: row.strokes as Mark["strokes"],
       viewBox: row.view_box as string,
       created_at: row.created_at as string,
@@ -706,7 +706,7 @@ export class SupabaseProvider implements DataProvider {
   async getMySubmissions(): Promise<GlyphSubmission[]> {
     const { data, error } = await this.supabase
       .from("glyph_submissions")
-      .select("id, glyph_id, status, price, created_at")
+      .select("id, glyph_id, status, price, created_at, review_note")
       .eq("submitter_id", this.userId)
       .order("created_at", { ascending: false }) // newest first → page's .find picks the active row
     if (error) throw new Error(`Failed to load submissions: ${error.message}`)
@@ -718,6 +718,7 @@ export class SupabaseProvider implements DataProvider {
         status: r.status as GlyphSubmission["status"],
         price: r.price as number,
         created_at: r.created_at as string,
+        review_note: (r.review_note as string | null) ?? null,
       }
     })
   }

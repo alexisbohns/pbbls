@@ -6,7 +6,7 @@
     "root_node_id": "V-landing",
     "metadata": { "view_card_variant": "large" },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-06-29T00:00:00.000Z"
+    "updated_at": "2026-06-30T00:00:00.000Z"
   },
   "nodes": [
     {
@@ -1115,6 +1115,87 @@
       "platforms": ["web"]
     },
     {
+      "id": "V-admin-glyph-moderation",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Admin · Glyph moderation",
+      "description": "Back-office moderation queue for community glyph submissions (#497, M36 sub-project D). Admin-only. Status-filtered list (pending/approved/rejected) of submissions, each previewed inside its pebble shape. Approve (publishes to Market, optional price override), Reject (required reason stored in review_note, shown to the submitter), and Re-price approved listings. All mutations go through is_admin-gated SECURITY DEFINER RPCs; the queue reads via admin_list_glyph_submissions because the widened glyphs SELECT policy does not expose pending submissions' strokes to admins via RLS.",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "V-admin-glyph-upload",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Admin · Upload glyph",
+      "description": "Back-office authoring flow (#497, M36 sub-project D). Admin-only. Imports a raw SVG, parses it into the stroke-only glyph model (supported subset: path/line/polyline/polygon, commands M L H V Q C Z; fills/other elements skipped and reported), previews it inside a pebble shape, adjusts name/price/shape plus scale/recenter/flip transforms (baked into geometry at publish), and publishes a first-party (admin-owned) community glyph via publish_admin_glyph.",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "API-admin-list-glyph-submissions",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "RPC admin_list_glyph_submissions",
+      "description": "is_admin-gated SECURITY DEFINER RPC. Returns submissions joined to glyph geometry (strokes/view_box/name) + submitter email, ordered oldest-first. The moderation queue's read path — bypasses the RLS gap that hides pending submissions' strokes from admins.",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "API-approve-glyph",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "RPC approve_glyph",
+      "description": "is_admin-gated SECURITY DEFINER RPC. Sets a pending submission to approved (live in Market), stamps reviewed_at/reviewed_by, with an optional price override.",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "API-reject-glyph",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "RPC reject_glyph",
+      "description": "is_admin-gated SECURITY DEFINER RPC. Sets a pending submission to rejected with a required review_note (surfaced to the submitter), stamping reviewed_at/reviewed_by.",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "API-set-glyph-price",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "RPC set_glyph_price",
+      "description": "is_admin-gated SECURITY DEFINER RPC. Re-prices an approved listing. Existing entitlements' price_paid snapshots are untouched.",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "API-publish-admin-glyph",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "RPC publish_admin_glyph",
+      "description": "is_admin-gated SECURITY DEFINER RPC. Atomically inserts a glyph owned by the admin + an auto-approved submission, publishing a first-party community glyph from an uploaded SVG.",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
+      "id": "DM-glyphs",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "glyphs",
+      "description": "User-drawn (or admin-uploaded) glyph marks: stroke-only geometry (strokes JSONB of {d,width} + view_box), shape_id, optional name, nullable user_id (NULL = system seed). Rendered recolored by emotion. SELECT widened (D8) to own ∪ seeds ∪ approved-listed ∪ entitled; UPDATE/DELETE locked once listed/bought (admin-exempt).",
+      "status": "development",
+      "platforms": ["web", "ios"]
+    },
+    {
+      "id": "DM-glyph-submissions",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "glyph_submissions",
+      "description": "A community glyph submission and its market listing (#496). Columns: glyph_id, submitter_id, status (pending/approved/rejected), price, review_note (#497 admin reason), reviewed_at/reviewed_by. At most one active (pending|approved) submission per glyph.",
+      "status": "development",
+      "platforms": ["web"]
+    },
+    {
       "id": "DM-v-analytics-kpi-daily",
       "project_id": "pebbles",
       "species": "data-model",
@@ -1569,6 +1650,22 @@
     { "id": "e-API-spend-karma-DM-karma-events", "project_id": "pebbles", "source_id": "API-spend-karma", "target_id": "DM-karma-events", "edge_type": "queries" },
     { "id": "e-API-spend-karma-DM-wallet-balances", "project_id": "pebbles", "source_id": "API-spend-karma", "target_id": "DM-wallet-balances", "edge_type": "queries" },
     { "id": "e-API-refund-karma-DM-karma-events", "project_id": "pebbles", "source_id": "API-refund-karma", "target_id": "DM-karma-events", "edge_type": "queries" },
-    { "id": "e-API-refund-karma-DM-wallet-balances", "project_id": "pebbles", "source_id": "API-refund-karma", "target_id": "DM-wallet-balances", "edge_type": "queries" }
+    { "id": "e-API-refund-karma-DM-wallet-balances", "project_id": "pebbles", "source_id": "API-refund-karma", "target_id": "DM-wallet-balances", "edge_type": "queries" },
+    { "id": "e-V-admin-glyph-moderation-API-admin-list-glyph-submissions", "project_id": "pebbles", "source_id": "V-admin-glyph-moderation", "target_id": "API-admin-list-glyph-submissions", "edge_type": "calls" },
+    { "id": "e-V-admin-glyph-moderation-API-approve-glyph", "project_id": "pebbles", "source_id": "V-admin-glyph-moderation", "target_id": "API-approve-glyph", "edge_type": "calls" },
+    { "id": "e-V-admin-glyph-moderation-API-reject-glyph", "project_id": "pebbles", "source_id": "V-admin-glyph-moderation", "target_id": "API-reject-glyph", "edge_type": "calls" },
+    { "id": "e-V-admin-glyph-moderation-API-set-glyph-price", "project_id": "pebbles", "source_id": "V-admin-glyph-moderation", "target_id": "API-set-glyph-price", "edge_type": "calls" },
+    { "id": "e-V-admin-glyph-moderation-DM-glyph-submissions", "project_id": "pebbles", "source_id": "V-admin-glyph-moderation", "target_id": "DM-glyph-submissions", "edge_type": "displays" },
+    { "id": "e-V-admin-glyph-moderation-DM-glyphs", "project_id": "pebbles", "source_id": "V-admin-glyph-moderation", "target_id": "DM-glyphs", "edge_type": "displays" },
+    { "id": "e-V-admin-glyph-upload-API-publish-admin-glyph", "project_id": "pebbles", "source_id": "V-admin-glyph-upload", "target_id": "API-publish-admin-glyph", "edge_type": "calls" },
+    { "id": "e-V-admin-glyph-upload-DM-glyphs", "project_id": "pebbles", "source_id": "V-admin-glyph-upload", "target_id": "DM-glyphs", "edge_type": "displays" },
+    { "id": "e-V-admin-glyph-upload-DM-glyph-submissions", "project_id": "pebbles", "source_id": "V-admin-glyph-upload", "target_id": "DM-glyph-submissions", "edge_type": "displays" },
+    { "id": "e-API-admin-list-glyph-submissions-DM-glyph-submissions", "project_id": "pebbles", "source_id": "API-admin-list-glyph-submissions", "target_id": "DM-glyph-submissions", "edge_type": "queries" },
+    { "id": "e-API-admin-list-glyph-submissions-DM-glyphs", "project_id": "pebbles", "source_id": "API-admin-list-glyph-submissions", "target_id": "DM-glyphs", "edge_type": "queries" },
+    { "id": "e-API-approve-glyph-DM-glyph-submissions", "project_id": "pebbles", "source_id": "API-approve-glyph", "target_id": "DM-glyph-submissions", "edge_type": "queries" },
+    { "id": "e-API-reject-glyph-DM-glyph-submissions", "project_id": "pebbles", "source_id": "API-reject-glyph", "target_id": "DM-glyph-submissions", "edge_type": "queries" },
+    { "id": "e-API-set-glyph-price-DM-glyph-submissions", "project_id": "pebbles", "source_id": "API-set-glyph-price", "target_id": "DM-glyph-submissions", "edge_type": "queries" },
+    { "id": "e-API-publish-admin-glyph-DM-glyphs", "project_id": "pebbles", "source_id": "API-publish-admin-glyph", "target_id": "DM-glyphs", "edge_type": "queries" },
+    { "id": "e-API-publish-admin-glyph-DM-glyph-submissions", "project_id": "pebbles", "source_id": "API-publish-admin-glyph", "target_id": "DM-glyph-submissions", "edge_type": "queries" }
   ]
 }

@@ -15,7 +15,7 @@ import { useFormatDate } from "@/lib/i18n"
 import { usePebbles } from "@/lib/data/usePebbles"
 import { useSouls } from "@/lib/data/useSouls"
 import { useCollections } from "@/lib/data/useCollections"
-import { useMarks } from "@/lib/data/useMarks"
+import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
 import { Button } from "@/components/ui/button"
 import { ValenceIntensityGrid } from "@/components/record/ValenceIntensityGrid"
 import { CustomizationTile } from "@/components/record/CustomizationTile"
@@ -54,7 +54,7 @@ export function QuickPebbleEditor({
   const { addPebble, uploadSnap } = usePebbles()
   const { souls, addSoul } = useSouls()
   const { collections } = useCollections()
-  const { marks } = useMarks()
+  const { glyphs: marks } = useUsableGlyphs()
   const prefersReducedMotion = useReducedMotion()
   const t = useTranslations("record")
   const tPath = useTranslations("path")

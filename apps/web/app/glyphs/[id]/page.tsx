@@ -61,6 +61,7 @@ export default function GlyphDetailPage({
           submitSlot={
             <SubmitToCommunity
               status={submission?.status}
+              reviewNote={submission?.review_note}
               onSubmit={() => submit(id).then(() => {})}
             />
           }
