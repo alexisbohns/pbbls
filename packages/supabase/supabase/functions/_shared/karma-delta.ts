@@ -27,7 +27,7 @@ export async function readKarmaDelta(
     .maybeSingle();
 
   if (error) {
-    console.error("readKarmaDelta failed:", error);
+    console.error("karma-delta: readKarmaDelta failed:", error);
     return null;
   }
   return data?.delta ?? null;
