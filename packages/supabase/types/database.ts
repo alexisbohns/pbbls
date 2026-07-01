@@ -426,6 +426,7 @@ export type Database = {
           created_at: string
           glyph_id: string
           id: string
+          listed: boolean
           price: number
           review_note: string | null
           reviewed_at: string | null
@@ -437,6 +438,7 @@ export type Database = {
           created_at?: string
           glyph_id: string
           id?: string
+          listed?: boolean
           price?: number
           review_note?: string | null
           reviewed_at?: string | null
@@ -448,6 +450,7 @@ export type Database = {
           created_at?: string
           glyph_id?: string
           id?: string
+          listed?: boolean
           price?: number
           review_note?: string | null
           reviewed_at?: string | null
@@ -1616,6 +1619,12 @@ export type Database = {
       }
     }
     Functions: {
+      admin_attribute_glyph: {
+        Args: { p_glyph_id: string; p_user_id: string }
+        Returns: Json
+      }
+      admin_delete_glyph: { Args: { p_glyph_id: string }; Returns: undefined }
+      admin_find_user: { Args: { p_email: string }; Returns: Json }
       admin_list_glyph_submissions: {
         Args: { p_status?: string }
         Returns: Json
@@ -1841,6 +1850,10 @@ export type Database = {
       }
       reject_glyph: {
         Args: { p_note: string; p_submission_id: string }
+        Returns: Json
+      }
+      set_glyph_listed: {
+        Args: { p_listed: boolean; p_submission_id: string }
         Returns: Json
       }
       set_glyph_price: {
