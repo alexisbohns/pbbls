@@ -53,7 +53,10 @@ final class KarmaLiveActivityController: KarmaLiveActivityPresenting {
 
     private func end() async {
         guard let activity = current else { return }
-        await activity.end(nil, dismissalPolicy: .immediate)
+        // Clear `current` BEFORE awaiting the teardown: a re-earn that
+        // interleaves at this suspension point must see no running activity
+        // and request a fresh one, rather than update an activity mid-end.
         current = nil
+        await activity.end(nil, dismissalPolicy: .immediate)
     }
 }

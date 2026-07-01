@@ -7,7 +7,7 @@ import Foundation
 /// `ContentState` directly through request/update/end for this local,
 /// non-push use case.
 struct KarmaActivityAttributes: ActivityAttributes {
-    public struct ContentState: Codable, Hashable {
+    struct ContentState: Codable, Hashable {
         var amount: Int
         var reasonRawValue: String
     }
