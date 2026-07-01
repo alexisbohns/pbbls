@@ -59,6 +59,17 @@ struct SVGPathParsingTests {
         #expect(!path.isEmpty)
     }
 
+    @Test("closes a subpath on Z instead of dropping the stroke")
+    func parseClosePath() {
+        // Admin-uploaded closed shapes (a nose, an ice cube) serialize with a
+        // trailing Z; the whole stroke used to vanish. It must now parse (as an
+        // outline — closeSubpath, never a fill).
+        let path = SVGPath.path(from: "M10,10 L90,10 C90,50 50,90 10,50 Z")
+        #expect(!path.isEmpty)
+        // Lowercase z too.
+        #expect(!SVGPath.path(from: "M10,10 L90,10 L50,90 z").isEmpty)
+    }
+
     @Test("malformed input returns an empty path")
     func malformed() {
         let path = SVGPath.path(from: "totally not an svg path !")

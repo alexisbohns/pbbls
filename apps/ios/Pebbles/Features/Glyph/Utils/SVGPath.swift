@@ -66,17 +66,28 @@ enum SVGPath {
         var path = Path()
         var index = d.startIndex
         var current = CGPoint.zero
+        var subpathStart = CGPoint.zero
 
         while index < d.endIndex {
             while index < d.endIndex, d[index].isWhitespace { index = d.index(after: index) }
             guard index < d.endIndex else { break }
 
             let command = d[index]
-            guard "MLQCmlqc".contains(command) else {
+            guard "MLQCZmlqcz".contains(command) else {
                 logger.warning("unknown svg command \(command, privacy: .public) — aborting parse")
                 return Path()
             }
             index = d.index(after: index)
+
+            // `Z`/`z` (closepath) carries no coordinates: close the current subpath
+            // and return to its start. Admin-uploaded glyphs serialize closed shapes
+            // (a nose, an ice cube) with a trailing `Z`; without this the parser hit
+            // the unknown-command guard and dropped the entire stroke.
+            if command == "Z" || command == "z" {
+                path.closeSubpath()
+                current = subpathStart
+                continue
+            }
 
             guard let (nextIndex, nextCurrent) = apply(
                 command: command, to: &path, from: index, in: d, current: current
@@ -85,6 +96,7 @@ enum SVGPath {
             }
             index = nextIndex
             current = nextCurrent
+            if command == "M" || command == "m" { subpathStart = nextCurrent }
         }
 
         return path
