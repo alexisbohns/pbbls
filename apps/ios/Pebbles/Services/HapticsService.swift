@@ -19,9 +19,14 @@ final class HapticsService {
     private var engine: CHHapticEngine?
     private var karmaPattern: CHHapticPattern?
 
-    /// Long-lived continuous player for the swap slider; its intensity is ramped
-    /// via a dynamic parameter while the user drags, then stopped on release.
+    /// Bonus continuous background buzz for the swap slider; its intensity is
+    /// ramped via a dynamic parameter while the user drags, then stopped on release.
     private var slidePlayer: CHHapticAdvancedPatternPlayer?
+
+    /// Waveform-synced looping texture for the swap slider — a haptic pattern
+    /// derived from the pebble sound so the vibration rides the same envelope as
+    /// the looping audio. Overall intensity scales with the thumb's X position.
+    private var slideWavePlayer: CHHapticAdvancedPatternPlayer?
 
     init() {
         guard supportsHaptics else { return }
@@ -50,49 +55,69 @@ final class HapticsService {
         }
     }
 
-    /// Starts a low continuous buzz for the swap slider. Intensity begins near
-    /// zero and is raised with `updateGlyphSlide(progress:)` as the thumb moves.
+    /// Starts the swap-slider feedback the moment the thumb is pressed: a light
+    /// continuous background buzz plus a waveform-synced looping texture derived
+    /// from the pebble sound. Both intensities are then raised with
+    /// `updateGlyphSlide(progress:)` as the thumb travels right.
     func beginGlyphSlide() {
         guard supportsHaptics, let engine else { return }
         do {
             try engine.start()
-            let body = CHHapticEvent(
+
+            // Bonus continuous background buzz — soft, always present while sliding.
+            let background = CHHapticEvent(
                 eventType: .hapticContinuous,
                 parameters: [
                     CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0),
-                    CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.4)
+                    CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.3)
                 ],
                 relativeTime: 0,
-                duration: 30 // long-lived; stopped manually on release
+                duration: 60 // long-lived; stopped manually on release
             )
-            let pattern = try CHHapticPattern(events: [body], parameters: [])
-            let player = try engine.makeAdvancedPlayer(with: pattern)
-            slidePlayer = player
-            try player.start(atTime: CHHapticTimeImmediate)
+            let bgPlayer = try engine.makeAdvancedPlayer(with: CHHapticPattern(events: [background], parameters: []))
+            slidePlayer = bgPlayer
+            try bgPlayer.start(atTime: CHHapticTimeImmediate)
+
+            // Waveform-synced texture: a haptic pattern built from the same pebble
+            // sound, looped so it rides the looping audio's envelope in lockstep.
+            if let url = AudioService.glyphSlideSoundURL {
+                let wavePlayer = try engine.makeAdvancedPlayer(with: Self.pattern(fromAudioAt: url))
+                wavePlayer.loopEnabled = true
+                slideWavePlayer = wavePlayer
+                try wavePlayer.start(atTime: CHHapticTimeImmediate)
+            }
+
             updateGlyphSlide(progress: 0)
         } catch {
             logger.error("glyph slide haptic start failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 
-    /// Ramps the slide buzz. `progress` is 0…1. Uses the intensity *control*
-    /// parameter (a multiplier on the event's base intensity).
+    /// Ramps both slide players. `progress` is 0…1. Uses the intensity *control*
+    /// parameter (a multiplier on each event's base intensity): the waveform
+    /// texture grows strongly toward the right, the background buzz grows gently.
     func updateGlyphSlide(progress: Float) {
-        guard let slidePlayer else { return }
         let clamped = max(0, min(1, progress))
-        let value = 0.1 + clamped * 0.9 // never fully silent; peaks at release
+        send(control: 0.08 + clamped * 0.30, to: slidePlayer)     // background buzz
+        send(control: 0.15 + clamped * 0.85, to: slideWavePlayer) // waveform texture
+    }
+
+    private func send(control value: Float, to player: CHHapticAdvancedPatternPlayer?) {
+        guard let player else { return }
         let param = CHHapticDynamicParameter(
             parameterID: .hapticIntensityControl,
             value: value,
             relativeTime: 0
         )
-        try? slidePlayer.sendParameters([param], atTime: CHHapticTimeImmediate)
+        try? player.sendParameters([param], atTime: CHHapticTimeImmediate)
     }
 
-    /// Stops the slide buzz (release or cancel).
+    /// Stops both slide players (release or cancel).
     func endGlyphSlide() {
         try? slidePlayer?.stop(atTime: CHHapticTimeImmediate)
+        try? slideWavePlayer?.stop(atTime: CHHapticTimeImmediate)
         slidePlayer = nil
+        slideWavePlayer = nil
     }
 
     /// A crisp, high-sharpness transient for a completed swap.

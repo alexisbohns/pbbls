@@ -69,42 +69,40 @@ final class AudioService {
         }
     }
 
-    /// Dedicated player for the swap-slide scrub, kept separate from `player` so a
+    /// URL of the swap-slide pebble sound. Shared with `HapticsService` so the
+    /// slide vibration envelope is derived from the exact same waveform.
+    static var glyphSlideSoundURL: URL? {
+        Bundle.main.url(forResource: "pbbls-sfx-pebbles_drop", withExtension: "m4a")
+    }
+
+    /// Dedicated player for the swap-slide loop, kept separate from `player` so the
     /// success/other sound can't clobber it mid-drag.
     private var slidePlayer: AVAudioPlayer?
 
-    /// Prepares the pebble-drop sound as a scrubbable track for the swap slider.
-    /// Playback position is driven by `scrubGlyphSlide(progress:)` so the audio
-    /// tracks the thumb instead of restarting on every step.
-    func beginGlyphSlideScrub() {
-        guard let url = Bundle.main.url(forResource: "pbbls-sfx-pebbles_drop", withExtension: "m4a") else {
-            logger.error("slide scrub sound missing from bundle")
+    /// Starts the pebble sound looping for the duration of the slide (from the
+    /// moment the thumb is pressed until release). The haptics ride the same
+    /// waveform, so the two stay in lockstep.
+    func beginGlyphSlideLoop() {
+        guard let url = Self.glyphSlideSoundURL else {
+            logger.error("slide sound missing from bundle")
             return
         }
         do {
             let session = AVAudioSession.sharedInstance()
             try session.setCategory(.ambient, options: [.mixWithOthers])
             try session.setActive(true)
-            let scrubber = try AVAudioPlayer(contentsOf: url)
-            scrubber.prepareToPlay()
-            scrubber.currentTime = 0
-            slidePlayer = scrubber
+            let looper = try AVAudioPlayer(contentsOf: url)
+            looper.numberOfLoops = -1
+            looper.prepareToPlay()
+            looper.play()
+            slidePlayer = looper
         } catch {
-            logger.error("slide scrub prepare failed: \(error.localizedDescription, privacy: .public)")
+            logger.error("slide loop playback failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 
-    /// Maps slide progress (0…1) onto the sound's timeline — the slider behaves like
-    /// the sound's own progress bar. Starts playback lazily on first advance.
-    func scrubGlyphSlide(progress: Double) {
-        guard let slidePlayer else { return }
-        let clamped = max(0, min(1, progress))
-        slidePlayer.currentTime = clamped * slidePlayer.duration
-        if !slidePlayer.isPlaying { slidePlayer.play() }
-    }
-
-    /// Stops the scrub track on release/cancel.
-    func endGlyphSlideScrub() {
+    /// Stops the slide loop on release/cancel/success.
+    func endGlyphSlideLoop() {
         slidePlayer?.stop()
         slidePlayer = nil
     }

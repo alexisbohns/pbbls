@@ -60,6 +60,8 @@ struct SlideToConfirm: View {
         )
         .opacity(isEnabled ? 1 : 0.5)
         .clipShape(Capsule())
+        // Gesture stays on the stationary track so translation tracks all the way
+        // to the end; it only *engages* when the press starts on the thumb (below).
         .gesture(drag)
         .accessibilityElement()
         .accessibilityLabel("Slide to confirm swap")
@@ -82,6 +84,9 @@ struct SlideToConfirm: View {
         DragGesture(minimumDistance: 0)
             .onChanged { value in
                 guard isEnabled else { return }
+                // Engage only when the press started on the thumb (the circle sits
+                // at x 0…thumb while at rest). Once sliding, keep tracking.
+                guard isSliding || value.startLocation.x <= thumb else { return }
                 if !isSliding {
                     isSliding = true
                     feedback.begin()
@@ -91,7 +96,7 @@ struct SlideToConfirm: View {
                 feedback.update(progress: SlideMath.progress(dragX: dragX, trackWidth: trackWidth, thumb: thumb))
             }
             .onEnded { _ in
-                guard isEnabled else { return }
+                guard isEnabled, isSliding else { return }
                 isSliding = false
                 let progress = SlideMath.progress(dragX: dragX, trackWidth: trackWidth, thumb: thumb)
                 if SlideMath.isConfirmed(progress) {

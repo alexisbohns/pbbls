@@ -14,28 +14,29 @@ final class GlyphSwapFeedback {
         self.audio = audio
     }
 
-    /// Drag began: start the rising buzz and arm the scrubbable pebble sound.
+    /// Thumb pressed: loop the pebble sound and start the (waveform-synced +
+    /// background) slide haptics.
     func begin() {
         haptics.beginGlyphSlide()
-        audio.beginGlyphSlideScrub()
+        audio.beginGlyphSlideLoop()
     }
 
-    /// Drag moved: ramp the buzz and scrub the pebble sound to match progress.
+    /// Drag moved: ramp the haptic intensity with X. The pebble sound keeps
+    /// looping untouched — only the vibration tracks position.
     func update(progress: Double) {
         haptics.updateGlyphSlide(progress: Float(progress))
-        audio.scrubGlyphSlide(progress: progress)
     }
 
     /// Drag released below the threshold.
     func cancel() {
         haptics.endGlyphSlide()
-        audio.endGlyphSlideScrub()
+        audio.endGlyphSlideLoop()
     }
 
     /// Drag completed — the irreversible moment: sharp haptic + bamboo clack.
     func success() {
         haptics.endGlyphSlide()
-        audio.endGlyphSlideScrub()
+        audio.endGlyphSlideLoop()
         haptics.playGlyphSwapSuccess()
         audio.playGlyphSwapSuccessSound()
     }
