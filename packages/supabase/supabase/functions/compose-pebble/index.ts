@@ -16,6 +16,7 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
 import { createAuthForwardedClient, createAdminClient } from "../_shared/supabase-client.ts";
 import { composeAndWriteRender } from "../_shared/compose-and-write.ts";
+import { readKarmaDelta } from "../_shared/karma-delta.ts";
 
 interface RequestBody {
   // deno-lint-ignore no-explicit-any
@@ -64,7 +65,8 @@ serve(async (req: Request) => {
   const admin = createAdminClient();
   try {
     const rendered = await composeAndWriteRender(admin, pebbleId as string);
-    return json({ pebble_id: pebbleId, ...rendered }, 200);
+    const karmaDelta = await readKarmaDelta(authClient, pebbleId as string, "pebble_created");
+    return json({ pebble_id: pebbleId, karma_delta: karmaDelta, ...rendered }, 200);
   } catch (err) {
     console.error("compose-pebble: composeAndWrite failed:", err);
     // Soft-success: pebble exists, render failed. Return 500 with pebble_id
