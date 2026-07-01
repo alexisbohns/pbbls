@@ -46,4 +46,30 @@ final class AudioService {
             logger.error("karma sound playback failed: \(error.localizedDescription, privacy: .public)")
         }
     }
+
+    /// Plays a short bundled sound over the shared `.ambient` / `.mixWithOthers`
+    /// session (same policy as the karma sound: obeys the Ring/Silent switch,
+    /// never ducks other apps' audio). Retains the player for its lifetime.
+    private func playBundled(_ name: String, ext: String = "m4a") {
+        guard let url = Bundle.main.url(forResource: name, withExtension: ext) else {
+            logger.error("sound asset \(name, privacy: .public) missing from bundle")
+            return
+        }
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.ambient, options: [.mixWithOthers])
+            try session.setActive(true)
+            let player = try AVAudioPlayer(contentsOf: url)
+            self.player = player
+            player.play()
+        } catch {
+            logger.error("sound \(name, privacy: .public) playback failed: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    /// A single pebble-drop tick, retriggered as the swap slider advances.
+    func playGlyphSlideTick() { playBundled("pbbls-sfx-pebbles_drop") }
+
+    /// The bamboo "clack" on a completed swap.
+    func playGlyphSwapSuccessSound() { playBundled("pbbls-sfx-bamboo") }
 }
