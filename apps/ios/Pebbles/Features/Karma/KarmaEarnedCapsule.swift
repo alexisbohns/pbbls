@@ -19,16 +19,39 @@ struct KarmaEarnedCapsule: View {
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 11)
-        // Glassy pastille: translucent material + a bright hairline rim and a
-        // soft shadow to lift it off the content behind.
-        .background(.regularMaterial, in: Capsule())
-        .overlay(Capsule().strokeBorder(.white.opacity(0.22), lineWidth: 0.5))
-        .shadow(color: .black.opacity(0.18), radius: 16, y: 6)
+        .karmaPastilleGlass()
         .contentShape(Capsule())
         .onTapGesture(perform: onTap)
         .accessibilityElement()
         .accessibilityLabel("Earned \(content.amount) karma, \(String(localized: content.reason.label))")
         .accessibilityAddTraits(.isStaticText)
+    }
+}
+
+private extension View {
+    /// Liquid Glass pastille background. Uses the real `.glassEffect` (which
+    /// renders its own edge, refraction, and shadow) on iOS 26+, and falls back
+    /// to a translucent material capsule below 26. The `if #available` guard is
+    /// a deliberate, localized exception to the "iOS 17 APIs only" rule so the
+    /// flash can adopt Liquid Glass without raising the deployment floor.
+    @ViewBuilder
+    func karmaPastilleGlass() -> some View {
+        if #available(iOS 26.0, *) {
+            self.glassEffect(.regular, in: Capsule())
+        } else {
+            self
+                // Opaque base under the material so the drop shadow can't bleed
+                // through the translucency; compositingGroup flattens the pill
+                // so the shadow is cast once as a single capsule silhouette.
+                .background {
+                    Capsule()
+                        .fill(Color.system.background)
+                        .overlay(Capsule().fill(.regularMaterial))
+                        .overlay(Capsule().strokeBorder(.white.opacity(0.22), lineWidth: 0.5))
+                }
+                .compositingGroup()
+                .shadow(color: .black.opacity(0.16), radius: 12, y: 4)
+        }
     }
 }
 
