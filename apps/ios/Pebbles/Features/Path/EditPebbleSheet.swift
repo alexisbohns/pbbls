@@ -18,6 +18,7 @@ struct EditPebbleSheet: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(ReferenceDataService.self) private var refs
+    @Environment(KarmaNotificationService.self) private var karma
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
 
@@ -226,6 +227,7 @@ struct EditPebbleSheet: View {
                     decoder: decoder
                 )
             self.renderSvg = response.renderSvg ?? self.renderSvg
+            karma.notifyEarned(amount: response.karmaDelta ?? 0, reason: .pebbleEnriched)
             onSaved()
             dismiss()
         } catch let functionsError as FunctionsError {
@@ -279,4 +281,5 @@ private struct ComposePebbleUpdateRequest: Encodable {
     return EditPebbleSheet(pebbleId: UUID(), onSaved: {})
         .environment(supabase)
         .environment(ReferenceDataService(client: supabase.client))
+        .environment(KarmaNotificationService())
 }
