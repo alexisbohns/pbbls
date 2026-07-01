@@ -40,18 +40,14 @@ struct GlyphDetailDrawer: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: Spacing.lg) {
-                    GlyphView(case: .profile, strokes: item.glyph.strokes, side: 96)
-
-                    VStack(spacing: 2) {
-                        Text(item.glyph.name ?? String(localized: "Untitled glyph"))
-                            .font(.title2.weight(.semibold))
-                        Text("BY @community")
-                            .font(.caption)
-                            .foregroundStyle(Color.system.muted)
-                    }
+                    GlyphBanner(
+                        strokes: item.glyph.strokes,
+                        title: item.glyph.name ?? String(localized: "Untitled glyph"),
+                        subtitle: String(localized: "BY @community")
+                    )
 
                     statCards
-                    Divider().overlay(costOrSeal)
+                    dividerWithBadge
                     meVsCreatorRow
 
                     if isOwned {
@@ -93,31 +89,25 @@ struct GlyphDetailDrawer: View {
 
     private var statCards: some View {
         HStack(spacing: Spacing.sm) {
-            statCard(system: "calendar", value: createdText)
-            statCard(system: "chart.bar.fill", value: Text("Soon"), muted: true)   // 🐚 usage
-            statCard(system: "person.2.fill", value: Text("Soon"), muted: true)    // 👥 owners
+            SurfaceTile(systemImage: "calendar") { createdText }                    // 📅 created
+            SurfaceTile(systemImage: "chart.bar.fill", muted: true) { Text("Soon") } // 🐚 usage
+            SurfaceTile(systemImage: "person.2.fill", muted: true) { Text("Soon") }  // 👥 owners
         }
-    }
-
-    private func statCard(system: String, value: Text, muted: Bool = false) -> some View {
-        VStack(spacing: Spacing.xs) {
-            Image(systemName: system)
-                .foregroundStyle(muted ? Color.system.muted : Color.accent.primary)
-            value
-                .font(.footnote.weight(.medium))
-                .foregroundStyle(muted ? Color.system.muted : Color.system.foreground)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, Spacing.md)
-        .background(Color.accent.surface)
-        .clipShape(RoundedRectangle(cornerRadius: Spacing.md, style: .continuous))
     }
 
     private var createdText: Text {
         if let createdAt = item.createdAt {
             return Text(createdAt, format: .dateTime.month(.abbreviated).year())
         }
-        return Text("—")
+        return Text(verbatim: "—")
+    }
+
+    /// Dotted rule with the cost (swap) or seal (owned) badge floating centered on it.
+    private var dividerWithBadge: some View {
+        ZStack {
+            DottedRule()
+            costOrSeal
+        }
     }
 
     @ViewBuilder private var costOrSeal: some View {
@@ -139,7 +129,8 @@ struct GlyphDetailDrawer: View {
     }
 
     private var meVsCreatorRow: some View {
-        HStack {
+        // Both columns flex-grow equally so the trade arrow sits at the true center.
+        HStack(spacing: Spacing.sm) {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Me").font(.caption).foregroundStyle(Color.system.secondary)
                 HStack(spacing: 2) {
@@ -147,13 +138,15 @@ struct GlyphDetailDrawer: View {
                     Text("\(currentBalance)")
                 }.font(.subheadline.weight(.medium))
             }
-            Spacer()
+            .frame(maxWidth: .infinity, alignment: .leading)
+
             Image(systemName: "arrow.left.arrow.right").foregroundStyle(Color.system.muted)
-            Spacer()
+
             VStack(alignment: .trailing, spacing: 2) {
                 Text("Creator").font(.caption).foregroundStyle(Color.system.secondary)
                 Text("@community").font(.subheadline.weight(.medium)).foregroundStyle(Color.system.muted)
             }
+            .frame(maxWidth: .infinity, alignment: .trailing)
         }
     }
 
@@ -196,5 +189,27 @@ struct GlyphDetailDrawer: View {
         if text.contains("already_owned") { return String(localized: "You already own this glyph") }
         if text.contains("cannot_buy_own") { return String(localized: "This is your own glyph") }
         return String(localized: "Couldn't complete the swap. Please try again.")
+    }
+}
+
+/// Horizontal dotted rule — 4pt round dots in `accent.secondary`, the design's
+/// divider treatment (replaces the default hairline `Divider`).
+private struct DottedRule: View {
+    var body: some View {
+        DottedLineShape()
+            .stroke(
+                Color.accent.secondary,
+                style: StrokeStyle(lineWidth: 4, lineCap: .round, dash: [0.1, 8])
+            )
+            .frame(height: 4)
+    }
+}
+
+private struct DottedLineShape: Shape {
+    func path(in rect: CGRect) -> Path {
+        var path = Path()
+        path.move(to: CGPoint(x: 0, y: rect.midY))
+        path.addLine(to: CGPoint(x: rect.maxX, y: rect.midY))
+        return path
     }
 }

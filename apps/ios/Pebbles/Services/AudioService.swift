@@ -69,8 +69,45 @@ final class AudioService {
         }
     }
 
-    /// A single pebble-drop tick, retriggered as the swap slider advances.
-    func playGlyphSlideTick() { playBundled("pbbls-sfx-pebbles_drop") }
+    /// Dedicated player for the swap-slide scrub, kept separate from `player` so a
+    /// success/other sound can't clobber it mid-drag.
+    private var slidePlayer: AVAudioPlayer?
+
+    /// Prepares the pebble-drop sound as a scrubbable track for the swap slider.
+    /// Playback position is driven by `scrubGlyphSlide(progress:)` so the audio
+    /// tracks the thumb instead of restarting on every step.
+    func beginGlyphSlideScrub() {
+        guard let url = Bundle.main.url(forResource: "pbbls-sfx-pebbles_drop", withExtension: "m4a") else {
+            logger.error("slide scrub sound missing from bundle")
+            return
+        }
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.ambient, options: [.mixWithOthers])
+            try session.setActive(true)
+            let scrubber = try AVAudioPlayer(contentsOf: url)
+            scrubber.prepareToPlay()
+            scrubber.currentTime = 0
+            slidePlayer = scrubber
+        } catch {
+            logger.error("slide scrub prepare failed: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    /// Maps slide progress (0…1) onto the sound's timeline — the slider behaves like
+    /// the sound's own progress bar. Starts playback lazily on first advance.
+    func scrubGlyphSlide(progress: Double) {
+        guard let slidePlayer else { return }
+        let clamped = max(0, min(1, progress))
+        slidePlayer.currentTime = clamped * slidePlayer.duration
+        if !slidePlayer.isPlaying { slidePlayer.play() }
+    }
+
+    /// Stops the scrub track on release/cancel.
+    func endGlyphSlideScrub() {
+        slidePlayer?.stop()
+        slidePlayer = nil
+    }
 
     /// The bamboo "clack" on a completed swap.
     func playGlyphSwapSuccessSound() { playBundled("pbbls-sfx-bamboo") }
