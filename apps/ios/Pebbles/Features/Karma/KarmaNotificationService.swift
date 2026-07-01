@@ -1,5 +1,6 @@
 import Foundation
 import ActivityKit
+import os
 
 /// Abstraction over the Live Activity path so the service is testable without
 /// ActivityKit and so the controller can be injected after it exists (a later
@@ -30,6 +31,7 @@ final class KarmaNotificationService {
     private let hasDynamicIsland: Bool
     private let audio: AudioService
     private var capsuleDismissTask: Task<Void, Never>?
+    private let logger = Logger(subsystem: "app.pbbls.ios", category: "karma-notify")
 
     /// Seconds the capsule stays up. Tune-on-device; mirrors the Live Activity
     /// dismiss window so both paths feel the same.
@@ -42,11 +44,15 @@ final class KarmaNotificationService {
     }
 
     func notifyEarned(amount: Int, reason: KarmaReason) {
+        let activitiesEnabled = ActivityAuthorizationInfo().areActivitiesEnabled
         let decision = karmaPresentationDecision(
             amount: amount,
             hasDynamicIsland: hasDynamicIsland,
-            activitiesEnabled: ActivityAuthorizationInfo().areActivitiesEnabled
+            activitiesEnabled: activitiesEnabled
         )
+        // Diagnostic: shows why a flash did/didn't fire. If amount <= 0 here,
+        // the caller received no karma_delta (e.g. edge functions not deployed).
+        logger.info("notifyEarned amount=\(amount, privacy: .public) reason=\(reason.rawValue, privacy: .public) hasDynamicIsland=\(self.hasDynamicIsland, privacy: .public) activitiesEnabled=\(activitiesEnabled, privacy: .public) decision=\(String(describing: decision), privacy: .public)")
         guard decision != .none else { return }
 
         hapticTrigger &+= 1

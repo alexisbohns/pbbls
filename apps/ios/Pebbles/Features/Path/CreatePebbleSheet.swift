@@ -139,6 +139,7 @@ struct CreatePebbleSheet: View {
                     options: FunctionInvokeOptions(body: requestBody),
                     decoder: decoder
                 )
+            logger.info("compose-pebble response karmaDelta=\(response.karmaDelta.map(String.init) ?? "nil", privacy: .public)")
             karma.notifyEarned(amount: response.karmaDelta ?? 0, reason: .pebbleCreated)
             onCreated(response.pebbleId)
             dismiss()

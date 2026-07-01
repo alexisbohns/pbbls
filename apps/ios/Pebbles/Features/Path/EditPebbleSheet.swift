@@ -227,6 +227,7 @@ struct EditPebbleSheet: View {
                     decoder: decoder
                 )
             self.renderSvg = response.renderSvg ?? self.renderSvg
+            logger.info("compose-pebble-update response karmaDelta=\(response.karmaDelta.map(String.init) ?? "nil", privacy: .public)")
             karma.notifyEarned(amount: response.karmaDelta ?? 0, reason: .pebbleEnriched)
             onSaved()
             dismiss()
