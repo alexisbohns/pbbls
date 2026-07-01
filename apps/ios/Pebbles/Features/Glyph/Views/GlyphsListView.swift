@@ -1,22 +1,28 @@
 import SwiftUI
 import os
 
-/// Profile → Glyphs. Grid of thumbnails; toolbar "+" carves a new glyph.
+/// Profile → Glyphs. Three tabs (Mine / Owned / Commu). Mine keeps carve + rename;
+/// Owned and Commu cells open the detail drawer (swap or owned state).
 struct GlyphsListView: View {
     @Environment(SupabaseService.self) private var supabase
+    @Environment(PathStatsService.self) private var stats
 
-    @State private var glyphs: [Glyph] = []
-    @State private var isLoading = true
+    @State private var tab: GlyphTab = .mine
+    @State private var itemsByTab: [GlyphTab: [GlyphGridItem]] = [:]
+    @State private var isLoading = false
     @State private var loadError: String?
     @State private var showCarveSheet = false
     @State private var renaming: Glyph?
-    @State private var renameDraft: String = ""
+    @State private var renameDraft = ""
     @State private var renameError: String?
+    @State private var selected: GlyphGridItem?
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.glyphs")
-    private var service: GlyphService { GlyphService(supabase: supabase) }
-
+    private var glyphService: GlyphService { GlyphService(supabase: supabase) }
+    private var market: GlyphMarketService { GlyphMarketService(supabase: supabase) }
     private let columns = [GridItem(.adaptive(minimum: 96), spacing: 12)]
+
+    private var items: [GlyphGridItem] { itemsByTab[tab] ?? [] }
 
     var body: some View {
         content
@@ -29,33 +35,39 @@ struct GlyphsListView: View {
                     .accessibilityLabel("Carve new glyph")
                 }
             }
-            .task { await load() }
+            .safeAreaInset(edge: .bottom) {
+                GlyphTabBar(selection: $tab)
+            }
+            .task { await stats.load() }
+            .task(id: tab) { await load(tab) }
             .fullScreenCover(isPresented: $showCarveSheet) {
                 GlyphCarveSheet(onSaved: { glyph in
-                    glyphs.insert(glyph, at: 0)
+                    let item = GlyphGridItem(glyph: glyph, price: 0, owned: false, createdAt: nil, acquiredAt: nil)
+                    itemsByTab[.mine, default: []].insert(item, at: 0)
+                    tab = .mine
                 })
+            }
+            .sheet(item: $selected) { item in
+                GlyphDetailDrawer(item: item, balance: stats.karma ?? 0) { result in
+                    await onSwapped(item: item, result: result)
+                }
             }
             .pebblesScreen()
             .alert(
                 "Rename glyph",
-                isPresented: Binding(
-                    get: { renaming != nil },
-                    set: { if !$0 { renaming = nil } }
-                ),
+                isPresented: Binding(get: { renaming != nil }, set: { if !$0 { renaming = nil } }),
                 presenting: renaming
             ) { glyph in
                 TextField("Name (optional)", text: $renameDraft)
                     .textInputAutocapitalization(.words)
                 Button("Cancel", role: .cancel) {}
-                Button("Save") {
-                    Task { await commitRename(glyph) }
-                }
+                Button("Save") { Task { await commitRename(glyph) } }
             }
     }
 
     @ViewBuilder
     private var content: some View {
-        if isLoading {
+        if isLoading && items.isEmpty {
             ProgressView().frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if let loadError {
             ContentUnavailableView(
@@ -63,26 +75,20 @@ struct GlyphsListView: View {
                 systemImage: "exclamationmark.triangle",
                 description: Text(loadError)
             )
-        } else if glyphs.isEmpty {
-            ContentUnavailableView(
-                "No glyphs yet",
-                systemImage: "scribble",
-                description: Text("Tap + to carve your first glyph.")
-            )
+        } else if items.isEmpty {
+            emptyState
         } else {
             VStack(spacing: 0) {
                 if let renameError {
                     Text(renameError)
-                        .font(.callout)
-                        .foregroundStyle(.red)
-                        .padding(.horizontal)
-                        .padding(.top, 8)
+                        .font(.callout).foregroundStyle(.red)
+                        .padding(.horizontal).padding(.top, 8)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 12) {
-                        ForEach(glyphs) { glyph in
-                            cell(for: glyph)
+                        ForEach(items) { item in
+                            cell(for: item)
                         }
                     }
                     .padding()
@@ -91,76 +97,102 @@ struct GlyphsListView: View {
         }
     }
 
+    private var emptyState: some View {
+        switch tab {
+        case .mine:
+            return ContentUnavailableView("No glyphs yet", systemImage: "scribble",
+                description: Text("Tap + to carve your first glyph."))
+        case .owned:
+            return ContentUnavailableView("Nothing owned yet", systemImage: "checkmark.seal",
+                description: Text("Swap a community glyph to see it here."))
+        case .commu:
+            return ContentUnavailableView("No community glyphs", systemImage: "person.3",
+                description: Text("Check back soon."))
+        }
+    }
+
     @ViewBuilder
-    private func cell(for glyph: Glyph) -> some View {
-        if glyph.userId != nil {
-            Button {
-                renameDraft = glyph.name ?? ""
-                renaming = glyph
-            } label: {
-                thumbnail(for: glyph)
+    private func cell(for item: GlyphGridItem) -> some View {
+        Button {
+            switch tab {
+            case .mine:
+                // Mine keeps the rename flow.
+                renameDraft = item.glyph.name ?? ""
+                renaming = item.glyph
+            case .owned, .commu:
+                selected = item
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel(glyph.name ?? "Untitled glyph")
-            .accessibilityHint("Double tap to rename")
-        } else {
-            thumbnail(for: glyph)
-                .accessibilityElement(children: .combine)
-                .accessibilityLabel(glyph.name ?? "Untitled glyph")
-        }
-    }
-
-    private func thumbnail(for glyph: Glyph) -> some View {
-        VStack(spacing: 4) {
-            GlyphView(case: .default, strokes: glyph.strokes, side: 96)
-            if let name = glyph.name {
-                Text(name)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+        } label: {
+            VStack(spacing: 4) {
+                GlyphView(case: .default, strokes: item.glyph.strokes, side: 96)
+                if let name = item.glyph.name {
+                    Text(name).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                }
+                HStack(spacing: 2) {
+                    Image(systemName: "sparkle")
+                    Text("\(item.price)")
+                }
+                .font(.caption2)
+                .foregroundStyle(Color.system.muted)
             }
         }
+        .buttonStyle(.plain)
+        .accessibilityLabel(item.glyph.name ?? "Untitled glyph")
+        .accessibilityHint(tab == .mine ? "Double tap to rename" : "Double tap to open")
     }
 
-    private func load() async {
+    // MARK: - Loading
+
+    private func load(_ which: GlyphTab) async {
         isLoading = true
         loadError = nil
         do {
-            self.glyphs = try await service.list()
+            let result: [GlyphGridItem]
+            switch which {
+            case .mine:  result = try await market.listMine()
+            case .owned: result = try await market.listOwned()
+            case .commu: result = try await market.listCommunity()
+            }
+            itemsByTab[which] = result
         } catch {
-            logger.error("glyphs fetch failed: \(error.localizedDescription, privacy: .private)")
-            self.loadError = "Please try again."
+            logger.error("glyphs fetch failed (\(which.rawValue, privacy: .public)): \(error.localizedDescription, privacy: .private)")
+            if (itemsByTab[which] ?? []).isEmpty { loadError = "Please try again." }
         }
-        self.isLoading = false
+        isLoading = false
     }
+
+    private func onSwapped(item: GlyphGridItem, result: BuyGlyphResult) async {
+        stats.karma = result.balance
+        // Remove from Commu's buyable list; refresh Owned lazily on next visit.
+        itemsByTab[.commu]?.removeAll { $0.id == item.id }
+        itemsByTab[.owned] = nil
+    }
+
+    // MARK: - Rename (Mine only)
 
     private func commitRename(_ glyph: Glyph) async {
         renameError = nil
-        guard let index = glyphs.firstIndex(where: { $0.id == glyph.id }) else { return }
-        let original = glyphs[index]
+        guard let index = (itemsByTab[.mine] ?? []).firstIndex(where: { $0.glyph.id == glyph.id }) else { return }
+        let original = itemsByTab[.mine]![index]
         let trimmed = renameDraft.trimmingCharacters(in: .whitespacesAndNewlines)
         let optimisticName: String? = trimmed.isEmpty ? nil : trimmed
 
-        // Optimistic update
-        glyphs[index] = Glyph(
-            id: glyph.id,
-            name: optimisticName,
-            strokes: glyph.strokes,
-            viewBox: glyph.viewBox,
-            userId: glyph.userId
+        itemsByTab[.mine]![index] = GlyphGridItem(
+            glyph: Glyph(id: glyph.id, name: optimisticName, strokes: glyph.strokes, viewBox: glyph.viewBox, userId: glyph.userId),
+            price: original.price, owned: original.owned, createdAt: original.createdAt, acquiredAt: original.acquiredAt
         )
 
         do {
-            let updated = try await service.updateName(id: glyph.id, name: renameDraft)
-            if let idx = glyphs.firstIndex(where: { $0.id == updated.id }) {
-                glyphs[idx] = updated
+            let updated = try await glyphService.updateName(id: glyph.id, name: renameDraft)
+            if let idx = (itemsByTab[.mine] ?? []).firstIndex(where: { $0.glyph.id == updated.id }) {
+                itemsByTab[.mine]![idx] = GlyphGridItem(
+                    glyph: updated, price: original.price, owned: original.owned,
+                    createdAt: original.createdAt, acquiredAt: original.acquiredAt
+                )
             }
         } catch {
             logger.error("glyph rename failed: \(error.localizedDescription, privacy: .private)")
-            // Revert
-            if let idx = glyphs.firstIndex(where: { $0.id == glyph.id }) {
-                glyphs[idx] = original
-            }
+            itemsByTab[.mine]![index] = original
             renameError = "Couldn't rename glyph. Please try again."
         }
     }
@@ -170,5 +202,6 @@ struct GlyphsListView: View {
     NavigationStack {
         GlyphsListView()
             .environment(SupabaseService())
+            .environment(PathStatsService(supabase: SupabaseService()))
     }
 }
