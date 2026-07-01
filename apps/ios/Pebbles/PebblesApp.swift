@@ -17,7 +17,9 @@ struct PebblesApp: App {
         self._refs     = State(initialValue: ReferenceDataService(client: supabase.client))
         self._stats    = State(initialValue: PathStatsService(supabase: supabase))
         self._snapURLs = State(initialValue: SnapURLCache(client: supabase.client))
-        self._karma    = State(initialValue: KarmaNotificationService())
+        let karma = KarmaNotificationService()
+        karma.liveActivityPresenter = KarmaLiveActivityController()
+        self._karma    = State(initialValue: karma)
         Self.configureSegmentedControlAppearance()
         Self.configureNavigationBarAppearance()
     }

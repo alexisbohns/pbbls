@@ -1,0 +1,12 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "karma" : {
+      "localizations" : {
+        "en" : { "stringUnit" : { "state" : "translated", "value" : "karma" } },
+        "fr" : { "stringUnit" : { "state" : "translated", "value" : "karma" } }
+      }
+    }
+  },
+  "version" : "1.0"
+}

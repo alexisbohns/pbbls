@@ -42,6 +42,7 @@ targets:
     deploymentTarget: "17.0"
     sources:
       - path: Pebbles
+      - path: Shared
     configFiles:
       Debug: Config/Secrets.xcconfig
       Release: Config/Secrets.xcconfig
@@ -64,6 +65,28 @@ targets:
         product: SVGView
       - package: RiveRuntime
         product: RiveRuntime
+      - target: PebblesWidget
+        embed: true
+
+  PebblesWidget:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: PebblesWidget
+      - path: Shared
+    configFiles:
+      Debug: Config/Secrets.xcconfig
+      Release: Config/Secrets.xcconfig
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: app.pbbls.ios.widget
+        PRODUCT_NAME: PebblesWidget
+        INFOPLIST_FILE: PebblesWidget/Info.plist
+        CODE_SIGN_STYLE: Automatic
+        SWIFT_EMIT_LOC_STRINGS: YES
+        LOCALIZATION_PREFERS_STRING_CATALOGS: YES
+        TARGETED_DEVICE_FAMILY: "1"
 
   PebblesTests:
     type: bundle.unit-test
