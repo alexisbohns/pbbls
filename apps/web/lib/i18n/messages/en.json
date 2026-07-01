@@ -236,14 +236,6 @@
       "heart": "Heart"
     }
   },
-  "shape": {
-    "river-smooth": { "name": "River Smooth" },
-    "creek-flat":   { "name": "Creek Flat" },
-    "moss-round":   { "name": "Moss Round" },
-    "canyon-long":  { "name": "Canyon Long" },
-    "shore-wide":   { "name": "Shore Wide" },
-    "dusk-pebble":  { "name": "Dusk Pebble" }
-  },
   "landing": {
     "tagline": "Collect meaningful moments.",
     "exampleAria": "Example pebbles",
