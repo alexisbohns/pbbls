@@ -54,8 +54,8 @@ export const GLYPH_PRICE_DEFAULT = 25
 /** Stroke width in glyph coordinate space — constant for every glyph. */
 export const DEFAULT_STROKE_WIDTH = 6
 
-/** Side of the canonical square viewBox every glyph is normalized into. */
-export const GLYPH_CANVAS = 100
+/** Side of the canonical square viewBox every glyph is normalized into (#278). */
+export const GLYPH_CANVAS = 200
 
 /** The canonical square viewBox string (`"0 0 100 100"`). */
 export const GLYPH_CANVAS_VIEWBOX = `0 0 ${GLYPH_CANVAS} ${GLYPH_CANVAS}`

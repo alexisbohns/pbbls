@@ -13,13 +13,12 @@ import {
   IDENTITY_ADJUST,
   type Adjust,
   type GlyphStroke,
-  type PebbleShape,
 } from "@/lib/pebblestore/types"
 import { svgToStrokes } from "@/lib/pebblestore/svg-to-strokes"
 import { bakeAdjust } from "@/lib/pebblestore/transform-path"
 import { publishGlyph } from "../../actions"
 
-export function UploadAdjust({ shapes }: { shapes: PebbleShape[] }) {
+export function UploadAdjust() {
   const [strokes, setStrokes] = useState<GlyphStroke[]>([])
   const [viewBox, setViewBox] = useState(GLYPH_CANVAS_VIEWBOX)
   const [skipped, setSkipped] = useState<string[]>([])
@@ -32,15 +31,11 @@ export function UploadAdjust({ shapes }: { shapes: PebbleShape[] }) {
   const [formError, setFormError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
-  // Glyphs are shape-agnostic, but glyphs.shape_id is still NOT NULL until the
-  // shape column is dropped (tracked separately). Default it silently — the
-  // value is vestigial; the render scales the square glyph into the slot.
-  const shapeId = shapes[0]?.id ?? ""
   const numericPrice = Number(price)
   // Karma prices are whole numbers; the RPC arg is `integer` so a decimal would
   // be rejected server-side with an opaque cast error. Gate it on the client.
   const priceValid = Number.isInteger(numericPrice) && numericPrice > 0
-  const canPublish = strokes.length > 0 && shapeId !== "" && priceValid
+  const canPublish = strokes.length > 0 && priceValid
 
   // Live preview shows exactly what publish stores: the baked (adjusted) strokes
   // in the square viewBox, stroke held at 6 in glyph space.
@@ -77,7 +72,6 @@ export function UploadAdjust({ shapes }: { shapes: PebbleShape[] }) {
     startTransition(async () => {
       const res = await publishGlyph({
         name: name.trim(),
-        shapeId,
         strokes: baked,
         viewBox,
         price: numericPrice,

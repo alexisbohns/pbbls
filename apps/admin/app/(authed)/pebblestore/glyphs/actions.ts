@@ -73,7 +73,6 @@ export async function setGlyphPrice(submissionId: string, price: number): Promis
 
 export async function publishGlyph(input: {
   name: string
-  shapeId: string
   strokes: GlyphStroke[]
   viewBox: string
   price: number
@@ -81,7 +80,9 @@ export async function publishGlyph(input: {
   const supabase = await createServerSupabaseClient()
   const { error } = await supabase.rpc("publish_admin_glyph", {
     p_name: input.name,
-    p_shape_id: input.shapeId,
+    // Glyphs are shapeless (#278). The column is nullable; the generated arg
+    // type is non-null only because the RPC signature predates shapelessness.
+    p_shape_id: null as unknown as string,
     p_strokes: input.strokes as unknown as never, // jsonb
     p_view_box: input.viewBox,
     p_price: input.price,

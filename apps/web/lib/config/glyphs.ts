@@ -8,6 +8,16 @@
 export const DEFAULT_GLYPH_ID = "4759c37c-68a6-46a6-b4fc-046bd0316752"
 
 /**
+ * Canonical glyph coordinate space (#278): every glyph is a shapeless square in
+ * a `0 0 200 200` viewBox with a constant 6-unit stroke. Matches iOS carve, the
+ * system seeds, and the admin uploader. Rendered by scaling this square into the
+ * pebble slot (`renderGlyphPaths` fits it into the 140/150/160 template zone).
+ */
+export const GLYPH_VIEWBOX = "0 0 200 200"
+export const GLYPH_CANVAS = 200
+export const GLYPH_STROKE_WIDTH = 6
+
+/**
  * Flat community-glyph price in karma. Mirrors the `price` DEFAULT in
  * `<timestamp>_glyph_marketplace.sql`. Server (`buy_glyph`) is authoritative;
  * this is for display only. Keep both in sync.

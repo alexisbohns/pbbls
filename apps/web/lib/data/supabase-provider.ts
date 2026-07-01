@@ -212,7 +212,7 @@ export class SupabaseProvider implements DataProvider {
     const marks: Mark[] = (glyphsRes.data ?? []).map((row: Record<string, unknown>) => ({
       id: row.id as string,
       name: (row.name as string) ?? undefined,
-      shape_id: row.shape_id as string,
+      shape_id: row.shape_id as string | null,
       strokes: row.strokes as Mark["strokes"],
       viewBox: row.view_box as string,
       created_at: row.created_at as string,
@@ -608,7 +608,7 @@ export class SupabaseProvider implements DataProvider {
     return {
       id: row.id as string,
       name: (row.name as string) ?? undefined,
-      shape_id: row.shape_id as string,
+      shape_id: row.shape_id as string | null,
       strokes: row.strokes as Mark["strokes"],
       viewBox: row.view_box as string,
       created_at: row.created_at as string,
@@ -632,7 +632,7 @@ export class SupabaseProvider implements DataProvider {
     const created: Mark = {
       id: row.id as string,
       name: (row.name as string) ?? undefined,
-      shape_id: row.shape_id as string,
+      shape_id: row.shape_id as string | null,
       strokes: row.strokes as Mark["strokes"],
       viewBox: row.view_box as string,
       created_at: row.created_at as string,
@@ -653,7 +653,7 @@ export class SupabaseProvider implements DataProvider {
     const updated: Mark = {
       id: row.id as string,
       name: (row.name as string) ?? undefined,
-      shape_id: row.shape_id as string,
+      shape_id: row.shape_id as string | null,
       strokes: row.strokes as Mark["strokes"],
       viewBox: row.view_box as string,
       created_at: row.created_at as string,
