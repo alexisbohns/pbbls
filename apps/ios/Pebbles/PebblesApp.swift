@@ -8,6 +8,8 @@ struct PebblesApp: App {
     @State private var refs: ReferenceDataService
     @State private var stats: PathStatsService
     @State private var snapURLs: SnapURLCache
+    @State private var karma: KarmaNotificationService
+    @State private var karmaOverlay = KarmaOverlayWindowController()
 
     init() {
         let supabase = SupabaseService()
@@ -16,6 +18,7 @@ struct PebblesApp: App {
         self._refs     = State(initialValue: ReferenceDataService(client: supabase.client))
         self._stats    = State(initialValue: PathStatsService(supabase: supabase))
         self._snapURLs = State(initialValue: SnapURLCache(client: supabase.client))
+        self._karma    = State(initialValue: KarmaNotificationService())
         Self.configureSegmentedControlAppearance()
         Self.configureNavigationBarAppearance()
     }
@@ -28,6 +31,8 @@ struct PebblesApp: App {
                 .environment(refs)
                 .environment(stats)
                 .environment(snapURLs)
+                .environment(karma)
+                .onAppear { karmaOverlay.attachIfNeeded(service: karma) }
         }
     }
 

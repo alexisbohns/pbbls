@@ -106,4 +106,5 @@ struct RootView: View {
         .environment(EmotionPaletteService(client: supabase.client))
         .environment(ReferenceDataService(client: supabase.client))
         .environment(SnapURLCache(client: supabase.client))
+        .environment(KarmaNotificationService())
 }

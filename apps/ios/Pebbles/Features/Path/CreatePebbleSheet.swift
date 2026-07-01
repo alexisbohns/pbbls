@@ -7,6 +7,7 @@ struct CreatePebbleSheet: View {
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(ReferenceDataService.self) private var refs
+    @Environment(KarmaNotificationService.self) private var karma
     @Environment(\.dismiss) private var dismiss
 
     @State private var draft = PebbleDraft()
@@ -138,6 +139,7 @@ struct CreatePebbleSheet: View {
                     options: FunctionInvokeOptions(body: requestBody),
                     decoder: decoder
                 )
+            karma.notifyEarned(amount: response.karmaDelta ?? 0, reason: .pebbleCreated)
             onCreated(response.pebbleId)
             dismiss()
         } catch let functionsError as FunctionsError {
@@ -190,6 +192,7 @@ private struct PebbleIdPartial: Decodable {
     return CreatePebbleSheet(onCreated: { _ in })
         .environment(supabase)
         .environment(ReferenceDataService(client: supabase.client))
+        .environment(KarmaNotificationService())
 }
 
 /// Maps a thrown error to a user-facing localized string. Module-private so

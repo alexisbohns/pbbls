@@ -425,7 +425,8 @@
         "playlist": {
           "entries": [
             { "type": "view", "view_id": "V-quick-pebble-editor" },
-            { "type": "view", "view_id": "V-pebble-detail" }
+            { "type": "view", "view_id": "V-pebble-detail" },
+            { "type": "view", "view_id": "V-karma-flash" }
           ]
         }
       }
@@ -1364,7 +1365,7 @@
       "title": "karma_events",
       "description": "Postgres append-only karma ledger. Each row carries a smallint delta plus a type axis (credit = earn-side: pebble_created/pebble_enriched/pebble_deleted/grant; withdraw = spend-side: purchase/refund), making karma a spendable currency. balance = Σ delta; earned = Σ delta where credit; spent = -Σ delta where withdraw. Inserts fire two triggers: apply_karma_event_to_wallet (all events) and apply_karma_event_to_bounce (credit-only, so the bounce snapshot stays earned-karma). Indexed on (user_id, type) and (user_id, created_at desc).",
       "status": "development",
-      "platforms": ["web"]
+      "platforms": ["web", "ios"]
     },
     {
       "id": "DM-wallet-balances",
@@ -1401,9 +1402,20 @@
       "description": "PostgREST select on public.v_wallet_summary, filtered to auth.uid() and granted to authenticated. Returns one row: balance (from wallet_balances) plus total_earned (Σ credit delta) and total_spent (-Σ withdraw delta) computed from karma_events. Backs the Wallet page summary card in one round-trip.",
       "status": "development",
       "platforms": ["web"]
+    },
+    {
+      "id": "V-karma-flash",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Karma Earned Flash",
+      "description": "iOS-only delight surface (M36, #505) shown when a user earns karma by creating or enriching a pebble. Renders an in-app \"liquid glass\" pastille that pops up bottom-center (real .glassEffect on iOS 26, translucent-material fallback below), hosted in a pass-through overlay window so it floats above the create/edit/detail sheets. Shows a sparkle + \"+N karma\" with an accent-color countdown ring that drains over its ~2.5s lifetime; tap to dismiss. Fires a Core-Haptics vibration matched to a ceramic sound (sound only in ringtone mode, never interrupting other audio). Works on every device and iOS 17+ — the Dynamic Island is deliberately NOT used, because iOS won't render a foreground app's own Live Activity and karma is always earned by a foreground action. The \"+N\" amount is the exact server-computed delta returned as karma_delta by the compose-pebble / compose-pebble-update edge functions (read back from karma_events); delight-only, never authoritative over the balance. Non-positive deltas (deletions/clawbacks) stay silent. The ActivityKit/PebblesWidget stack is retained, unused, as the reference for a future Glyph-purchase Live Activity.",
+      "status": "development",
+      "platforms": ["ios"]
     }
   ],
   "edges": [
+    { "id": "e-F-record-pebble-V-karma-flash", "project_id": "pebbles", "source_id": "F-record-pebble", "target_id": "V-karma-flash", "edge_type": "composes" },
+    { "id": "e-V-karma-flash-DM-karma-events", "project_id": "pebbles", "source_id": "V-karma-flash", "target_id": "DM-karma-events", "edge_type": "displays" },
     { "id": "e-V-home-F-record-pebble", "project_id": "pebbles", "source_id": "V-home", "target_id": "F-record-pebble", "edge_type": "composes" },
     { "id": "e-V-home-F-manage-collections", "project_id": "pebbles", "source_id": "V-home", "target_id": "F-manage-collections", "edge_type": "composes" },
     { "id": "e-V-home-F-manage-souls", "project_id": "pebbles", "source_id": "V-home", "target_id": "F-manage-souls", "edge_type": "composes" },

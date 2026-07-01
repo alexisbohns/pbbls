@@ -5,7 +5,7 @@
  * 1. Auth-forwards the caller's JWT so the RPC runs as the end user
  * 2. Calls create_pebble(payload) → returns pebble_id
  * 3. Calls compose-and-write → writes render columns + returns composed output
- * 4. Responds with { pebble_id, render_svg, render_version }
+ * 4. Responds with { pebble_id, karma_delta, render_svg, render_version }
  *
  * On RPC failure: 4xx with the RPC error.
  * On compose failure after successful insert: 500 with pebble_id in the body
@@ -16,6 +16,7 @@ import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
 import { createAuthForwardedClient, createAdminClient } from "../_shared/supabase-client.ts";
 import { composeAndWriteRender } from "../_shared/compose-and-write.ts";
+import { readKarmaDelta } from "../_shared/karma-delta.ts";
 
 interface RequestBody {
   // deno-lint-ignore no-explicit-any
@@ -64,7 +65,8 @@ serve(async (req: Request) => {
   const admin = createAdminClient();
   try {
     const rendered = await composeAndWriteRender(admin, pebbleId as string);
-    return json({ pebble_id: pebbleId, ...rendered }, 200);
+    const karmaDelta = await readKarmaDelta(authClient, pebbleId as string, "pebble_created");
+    return json({ pebble_id: pebbleId, karma_delta: karmaDelta, ...rendered }, 200);
   } catch (err) {
     console.error("compose-pebble: composeAndWrite failed:", err);
     // Soft-success: pebble exists, render failed. Return 500 with pebble_id
