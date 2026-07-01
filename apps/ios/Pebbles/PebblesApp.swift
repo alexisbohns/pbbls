@@ -17,7 +17,7 @@ struct PebblesApp: App {
         self._refs     = State(initialValue: ReferenceDataService(client: supabase.client))
         self._stats    = State(initialValue: PathStatsService(supabase: supabase))
         self._snapURLs = State(initialValue: SnapURLCache(client: supabase.client))
-        let karma = KarmaNotificationService()
+        let karma = KarmaNotificationService(haptics: HapticsService())
         karma.liveActivityPresenter = KarmaLiveActivityController()
         self._karma    = State(initialValue: karma)
         Self.configureSegmentedControlAppearance()
@@ -33,7 +33,6 @@ struct PebblesApp: App {
                 .environment(stats)
                 .environment(snapURLs)
                 .environment(karma)
-                .sensoryFeedback(.success, trigger: karma.hapticTrigger)
         }
     }
 

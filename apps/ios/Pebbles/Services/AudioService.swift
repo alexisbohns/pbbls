@@ -18,11 +18,14 @@ final class AudioService {
     /// Bundled karma-earned sound (see `apps/ios/Pebbles/Resources/`).
     private static let karmaEarnedSound = (name: "pbbls-sfx-ceramic", ext: "m4a")
 
+    /// URL of the bundled karma sound. Shared with `HapticsService` so the
+    /// vibration envelope is derived from the exact same waveform.
+    static var karmaEarnedSoundURL: URL? {
+        Bundle.main.url(forResource: karmaEarnedSound.name, withExtension: karmaEarnedSound.ext)
+    }
+
     func playKarmaEarnedSound() {
-        guard let url = Bundle.main.url(
-            forResource: Self.karmaEarnedSound.name,
-            withExtension: Self.karmaEarnedSound.ext
-        ) else {
+        guard let url = Self.karmaEarnedSoundURL else {
             logger.error("karma sound asset missing from bundle")
             return
         }

@@ -15,7 +15,10 @@ final class KarmaLiveActivityController: KarmaLiveActivityPresenting {
     private let visibleDuration: Duration = .milliseconds(2500)
 
     func present(_ content: KarmaEarnedContent) async -> Bool {
-        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return false }
+        let enabled = ActivityAuthorizationInfo().areActivitiesEnabled
+        let hasCurrent = current != nil
+        logger.info("present laEnabled=\(enabled, privacy: .public) hasCurrent=\(hasCurrent, privacy: .public)")
+        guard enabled else { return false }
 
         let state = KarmaActivityAttributes.ContentState(
             amount: content.amount,
@@ -29,11 +32,18 @@ final class KarmaLiveActivityController: KarmaLiveActivityPresenting {
         }
 
         do {
-            current = try Activity.request(
+            let activity = try Activity.request(
                 attributes: KarmaActivityAttributes(),
                 content: ActivityContent(state: state, staleDate: nil),
                 pushType: nil
             )
+            current = activity
+            // If this logs an id but nothing shows in the notch, the Live
+            // Activity was created but the system suppressed it because the app
+            // is frontmost (the DI shows a foreground app's own activity only
+            // once it's backgrounded).
+            let diag = "Activity.request OK id=\(activity.id) state=\(String(describing: activity.activityState))"
+            logger.info("\(diag, privacy: .public)")
             scheduleDismiss()
             return true
         } catch {

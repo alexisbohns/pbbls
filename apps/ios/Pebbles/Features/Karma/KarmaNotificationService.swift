@@ -22,7 +22,8 @@ final class KarmaNotificationService {
     /// by `RootView`.
     private(set) var activeCapsule: KarmaEarnedContent?
 
-    /// Monotonic counter driving `.sensoryFeedback(.success, trigger:)`.
+    /// Counts how many times feedback (haptic + sound) has fired. Observable
+    /// so tests can assert the guard without reaching into CoreHaptics/audio.
     private(set) var hapticTrigger: Int = 0
 
     /// Injected in a later task; nil means capsule-only.
@@ -30,6 +31,7 @@ final class KarmaNotificationService {
 
     private let hasDynamicIsland: Bool
     private let audio: AudioService
+    private let haptics: HapticsService
     private var capsuleDismissTask: Task<Void, Never>?
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "karma-notify")
 
@@ -38,9 +40,11 @@ final class KarmaNotificationService {
     private let capsuleDuration: Duration = .milliseconds(2500)
 
     init(hasDynamicIsland: Bool = DeviceCapabilities.hasDynamicIsland,
-         audio: AudioService = AudioService()) {
+         audio: AudioService = AudioService(),
+         haptics: HapticsService = HapticsService()) {
         self.hasDynamicIsland = hasDynamicIsland
         self.audio = audio
+        self.haptics = haptics
     }
 
     func notifyEarned(amount: Int, reason: KarmaReason) {
@@ -52,10 +56,14 @@ final class KarmaNotificationService {
         )
         // Diagnostic: shows why a flash did/didn't fire. If amount <= 0 here,
         // the caller received no karma_delta (e.g. edge functions not deployed).
-        logger.info("notifyEarned amount=\(amount, privacy: .public) reason=\(reason.rawValue, privacy: .public) hasDynamicIsland=\(self.hasDynamicIsland, privacy: .public) activitiesEnabled=\(activitiesEnabled, privacy: .public) decision=\(String(describing: decision), privacy: .public)")
+        let diag = "notifyEarned amount=\(amount) di=\(hasDynamicIsland) laEnabled=\(activitiesEnabled) decision=\(String(describing: decision))"
+        logger.info("\(diag, privacy: .public)")
         guard decision != .none else { return }
 
+        // Fire haptic + sound together so the waveform-matched vibration lands
+        // in sync with the ceramic sound.
         hapticTrigger &+= 1
+        haptics.playKarmaEarned()
         audio.playKarmaEarnedSound()
 
         let content = KarmaEarnedContent(amount: amount, reason: reason)
