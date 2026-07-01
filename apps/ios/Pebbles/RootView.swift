@@ -73,7 +73,6 @@ struct RootView: View {
                 }
             }
         }
-        .karmaCapsuleOverlay()
         .task {
             await supabase.start()
         }

@@ -2,23 +2,25 @@ import ActivityKit
 import Foundation
 import os
 
-/// Drives the transient karma Live Activity: request → (system auto-expands)
-/// → end(.immediate) after ~2.5s. A second earn within the window UPDATES the
-/// running activity in place (replace-not-stack) and resets the dismiss timer.
+/// Drives a transient Live Activity: request → (system auto-expands) →
+/// end(.immediate) after ~2.5s, updating in place on a repeat (replace-not-stack).
+///
+/// RETAINED, NOT CURRENTLY INVOKED. The karma-earned flash uses an in-app
+/// pastille instead, because iOS does not render a foreground app's own Live
+/// Activity in the Dynamic Island and karma is always earned by a foreground
+/// action. Kept as the reference implementation for the upcoming Glyph-purchase
+/// notification (M36 follow-up), which can surface while the app is backgrounded.
 @MainActor
-final class KarmaLiveActivityController: KarmaLiveActivityPresenting {
+final class KarmaLiveActivityController {
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "karma-activity")
     private var current: Activity<KarmaActivityAttributes>?
     private var dismissTask: Task<Void, Never>?
 
-    /// Tune-on-device. TEMPORARY 30s for diagnosis (was 2500ms) — restore before merge.
-    private let visibleDuration: Duration = .seconds(30)
+    /// Tune-on-device.
+    private let visibleDuration: Duration = .milliseconds(2500)
 
     func present(_ content: KarmaEarnedContent) async -> Bool {
-        let enabled = ActivityAuthorizationInfo().areActivitiesEnabled
-        let hasCurrent = current != nil
-        logger.info("present laEnabled=\(enabled, privacy: .public) hasCurrent=\(hasCurrent, privacy: .public)")
-        guard enabled else { return false }
+        guard ActivityAuthorizationInfo().areActivitiesEnabled else { return false }
 
         let state = KarmaActivityAttributes.ContentState(
             amount: content.amount,
@@ -32,18 +34,11 @@ final class KarmaLiveActivityController: KarmaLiveActivityPresenting {
         }
 
         do {
-            let activity = try Activity.request(
+            current = try Activity.request(
                 attributes: KarmaActivityAttributes(),
                 content: ActivityContent(state: state, staleDate: nil),
                 pushType: nil
             )
-            current = activity
-            // If this logs an id but nothing shows in the notch, the Live
-            // Activity was created but the system suppressed it because the app
-            // is frontmost (the DI shows a foreground app's own activity only
-            // once it's backgrounded).
-            let diag = "Activity.request OK id=\(activity.id) state=\(String(describing: activity.activityState))"
-            logger.info("\(diag, privacy: .public)")
             scheduleDismiss()
             return true
         } catch {
