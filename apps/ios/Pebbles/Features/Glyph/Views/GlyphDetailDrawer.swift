@@ -169,20 +169,23 @@ struct GlyphDetailDrawer: View {
 
     // MARK: - Swap
 
-    private func performSwap() async {
+    /// Returns `true` on success so `SlideToConfirm` can spring the thumb back on failure.
+    private func performSwap() async -> Bool {
         isBuying = true
         errorText = nil
+        defer { isBuying = false }
         do {
             let result = try await market.buy(id: item.glyph.id)
             currentBalance = result.balance
             acquiredAt = Date()
             withAnimation(.snappy) { isOwned = true }
             await onSwapped(result)
+            return true
         } catch {
             logger.error("glyph swap failed: \(error.localizedDescription, privacy: .private)")
             errorText = Self.friendlyMessage(for: error)
+            return false
         }
-        isBuying = false
     }
 
     /// Maps `buy_glyph`'s Postgres error hints to user copy.

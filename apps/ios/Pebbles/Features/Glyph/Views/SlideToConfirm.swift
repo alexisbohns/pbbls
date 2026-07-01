@@ -23,7 +23,9 @@ struct SlideToConfirm: View {
     let cost: Int
     let isEnabled: Bool
     let feedback: GlyphSwapFeedback
-    let onConfirm: () async -> Void
+    /// Runs the confirmed action; returns `true` on success. On `false` the thumb
+    /// springs back so the user can retry (e.g. the swap failed server-side).
+    let onConfirm: () async -> Bool
 
     @State private var dragX: CGFloat = 0
     @State private var trackWidth: CGFloat = 0
@@ -63,7 +65,7 @@ struct SlideToConfirm: View {
         .accessibilityLabel("Slide to confirm swap")
         .accessibilityValue("\(cost) karma")
         .accessibilityAddTraits(.isButton)
-        .accessibilityAction { if isEnabled { Task { await onConfirm() } } }
+        .accessibilityAction { if isEnabled { Task { _ = await onConfirm() } } }
     }
 
     private var thumbView: some View {
@@ -95,7 +97,10 @@ struct SlideToConfirm: View {
                 if SlideMath.isConfirmed(progress) {
                     feedback.success()
                     withAnimation(.snappy) { dragX = max(1, trackWidth - thumb) }
-                    Task { await onConfirm() }
+                    Task {
+                        let success = await onConfirm()
+                        if !success { withAnimation(.snappy) { dragX = 0 } }
+                    }
                 } else {
                     feedback.cancel()
                     withAnimation(.snappy) { dragX = 0 }
@@ -105,6 +110,6 @@ struct SlideToConfirm: View {
 }
 
 #Preview {
-    SlideToConfirm(cost: 7, isEnabled: true, feedback: GlyphSwapFeedback(), onConfirm: {})
+    SlideToConfirm(cost: 7, isEnabled: true, feedback: GlyphSwapFeedback(), onConfirm: { true })
         .padding()
 }

@@ -76,6 +76,9 @@ struct GlyphMarketMappingTests {
         #expect(GlyphTimestamp.parse("2026-07-01T12:00:00+00:00") != nil)
         #expect(GlyphTimestamp.parse("2026-07-01T12:00:00.123+00:00") != nil)
         #expect(GlyphTimestamp.parse("2026-07-01T12:00:00.123456+00:00") != nil)
+        // Postgres trims trailing zeros, so 1–2 fractional digits reach us; must still parse.
+        #expect(GlyphTimestamp.parse("2026-07-01T12:00:00.5+00:00") != nil)
+        #expect(GlyphTimestamp.parse("2026-07-01T12:00:00.12Z") != nil)
         #expect(GlyphTimestamp.parse(nil) == nil)
         #expect(GlyphTimestamp.parse("not-a-date") == nil)
     }

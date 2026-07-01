@@ -175,15 +175,22 @@ enum GlyphTimestamp {
         return withFraction.date(from: normalized) ?? plain.date(from: normalized)
     }
 
-    /// Truncates any `.dddddd` fractional-seconds group to 3 digits.
+    /// Normalizes any fractional-seconds group to exactly 3 digits. Postgres emits
+    /// 0–6 digits and trims trailing zeros, so we both truncate longer fractions
+    /// and pad shorter ones (e.g. `.5` → `.500`) — `ISO8601DateFormatter` with
+    /// `.withFractionalSeconds` only accepts exactly milliseconds.
     private static func normalizeFraction(_ raw: String) -> String {
         guard let dot = raw.firstIndex(of: ".") else { return raw }
         let after = raw.index(after: dot)
         var end = after
         while end < raw.endIndex, raw[end].isNumber { end = raw.index(after: end) }
-        let digits = raw[after..<end]
-        guard digits.count > 3 else { return raw }
-        let keep = raw.index(after: raw.index(after: raw.index(after: after))) // after + 3
-        return String(raw[raw.startIndex..<keep]) + String(raw[end...])
+        var digits = String(raw[after..<end])
+        guard !digits.isEmpty else { return raw }
+        if digits.count > 3 {
+            digits = String(digits.prefix(3))
+        } else {
+            digits += String(repeating: "0", count: 3 - digits.count)
+        }
+        return String(raw[raw.startIndex..<after]) + digits + String(raw[end...])
     }
 }

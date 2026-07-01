@@ -129,12 +129,14 @@ struct GlyphsListView: View {
                 if let name = item.glyph.name {
                     Text(name).font(.caption).foregroundStyle(.secondary).lineLimit(1)
                 }
-                HStack(spacing: 2) {
-                    Image(systemName: "sparkle")
-                    Text("\(item.price)")
+                if item.price > 0 {
+                    HStack(spacing: 2) {
+                        Image(systemName: "sparkle")
+                        Text("\(item.price)")
+                    }
+                    .font(.caption2)
+                    .foregroundStyle(Color.system.muted)
                 }
-                .font(.caption2)
-                .foregroundStyle(Color.system.muted)
             }
         }
         .buttonStyle(.plain)
