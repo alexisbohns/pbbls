@@ -11,8 +11,8 @@ final class KarmaLiveActivityController: KarmaLiveActivityPresenting {
     private var current: Activity<KarmaActivityAttributes>?
     private var dismissTask: Task<Void, Never>?
 
-    /// Tune-on-device.
-    private let visibleDuration: Duration = .milliseconds(2500)
+    /// Tune-on-device. TEMPORARY 30s for diagnosis (was 2500ms) — restore before merge.
+    private let visibleDuration: Duration = .seconds(30)
 
     func present(_ content: KarmaEarnedContent) async -> Bool {
         let enabled = ActivityAuthorizationInfo().areActivitiesEnabled
