@@ -236,14 +236,6 @@
       "heart": "Cœur"
     }
   },
-  "shape": {
-    "river-smooth": { "name": "Rivière lisse" },
-    "creek-flat":   { "name": "Ruisseau plat" },
-    "moss-round":   { "name": "Rond mousse" },
-    "canyon-long":  { "name": "Canyon long" },
-    "shore-wide":   { "name": "Rivage large" },
-    "dusk-pebble":  { "name": "Galet du soir" }
-  },
   "landing": {
     "tagline": "Collectionnez vos moments précieux.",
     "exampleAria": "Galets en exemple",

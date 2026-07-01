@@ -212,7 +212,6 @@ export class SupabaseProvider implements DataProvider {
     const marks: Mark[] = (glyphsRes.data ?? []).map((row: Record<string, unknown>) => ({
       id: row.id as string,
       name: (row.name as string) ?? undefined,
-      shape_id: row.shape_id as string | null,
       strokes: row.strokes as Mark["strokes"],
       viewBox: row.view_box as string,
       created_at: row.created_at as string,
@@ -608,7 +607,6 @@ export class SupabaseProvider implements DataProvider {
     return {
       id: row.id as string,
       name: (row.name as string) ?? undefined,
-      shape_id: row.shape_id as string | null,
       strokes: row.strokes as Mark["strokes"],
       viewBox: row.view_box as string,
       created_at: row.created_at as string,
@@ -622,7 +620,6 @@ export class SupabaseProvider implements DataProvider {
       .insert({
         user_id: this.userId,
         name: input.name ?? null,
-        shape_id: input.shape_id,
         strokes: input.strokes,
         view_box: input.viewBox,
       })
@@ -632,7 +629,6 @@ export class SupabaseProvider implements DataProvider {
     const created: Mark = {
       id: row.id as string,
       name: (row.name as string) ?? undefined,
-      shape_id: row.shape_id as string | null,
       strokes: row.strokes as Mark["strokes"],
       viewBox: row.view_box as string,
       created_at: row.created_at as string,
@@ -645,7 +641,6 @@ export class SupabaseProvider implements DataProvider {
   async updateMark(id: string, input: UpdateMarkInput): Promise<Mark> {
     const updates: Record<string, unknown> = {}
     if (input.name !== undefined) updates.name = input.name
-    if (input.shape_id !== undefined) updates.shape_id = input.shape_id
     if (input.strokes !== undefined) updates.strokes = input.strokes
     if (input.viewBox !== undefined) updates.view_box = input.viewBox
     const result = await this.supabase.from("glyphs").update(updates).eq("id", id).select().single()
@@ -653,7 +648,6 @@ export class SupabaseProvider implements DataProvider {
     const updated: Mark = {
       id: row.id as string,
       name: (row.name as string) ?? undefined,
-      shape_id: row.shape_id as string | null,
       strokes: row.strokes as Mark["strokes"],
       viewBox: row.view_box as string,
       created_at: row.created_at as string,

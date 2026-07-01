@@ -6,7 +6,7 @@
     "root_node_id": "V-landing",
     "metadata": { "view_card_variant": "large" },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-06-30T00:00:00.000Z"
+    "updated_at": "2026-07-01T00:00:00.000Z"
   },
   "nodes": [
     {
@@ -246,7 +246,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Glyphs",
-      "description": "Browse all user-created glyphs (carved marks on pebble shapes).",
+      "description": "Browse all user-created glyphs (shape-agnostic carved marks).",
       "status": "development",
       "platforms": ["web", "ios", "android"]
     },
@@ -527,7 +527,7 @@
       "project_id": "pebbles",
       "species": "flow",
       "title": "Manage Glyphs",
-      "description": "Browse, carve, and view glyphs (custom marks on pebble shapes).",
+      "description": "Browse, carve, and view glyphs (shape-agnostic custom marks).",
       "status": "idea",
       "platforms": ["web", "ios", "android"],
       "metadata": {
@@ -743,7 +743,7 @@
       "project_id": "pebbles",
       "species": "data-model",
       "title": "Mark",
-      "description": "A glyph on a pebble shape, stored as SVG strokes. The is_custom flag (generated from user_id IS NOT NULL) distinguishes user-drawn glyphs from per-domain system seeds, and powers the % custom-glyph creativity signal in admin analytics.",
+      "description": "A glyph rendered into a pebble slot (shape-agnostic square), stored as SVG strokes. The is_custom flag (generated from user_id IS NOT NULL) distinguishes user-drawn glyphs from per-domain system seeds, and powers the % custom-glyph creativity signal in admin analytics.",
       "status": "idea",
       "platforms": ["web", "ios", "android"]
     },
@@ -1119,7 +1119,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Admin · Glyph moderation",
-      "description": "Back-office moderation queue for community glyph submissions (#497, M36 sub-project D). Admin-only. Status-filtered list (pending/approved/rejected) of submissions, each previewed inside its pebble shape. Approve (publishes to Market, optional price override), Reject (required reason stored in review_note, shown to the submitter), and Re-price approved listings. All mutations go through is_admin-gated SECURITY DEFINER RPCs; the queue reads via admin_list_glyph_submissions because the widened glyphs SELECT policy does not expose pending submissions' strokes to admins via RLS.",
+      "description": "Back-office moderation queue for community glyph submissions (#497, M36 sub-project D). Admin-only. Status-filtered list (pending/approved/rejected) of submissions, each previewed as its shapeless square glyph. Approve (publishes to Market, optional price override), Reject (required reason stored in review_note, shown to the submitter), and Re-price approved listings. All mutations go through is_admin-gated SECURITY DEFINER RPCs; the queue reads via admin_list_glyph_submissions because the widened glyphs SELECT policy does not expose pending submissions' strokes to admins via RLS.",
       "status": "development",
       "platforms": ["web"]
     },
@@ -1128,7 +1128,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Admin · Upload glyph",
-      "description": "Back-office authoring flow (#497, M36 sub-project D). Admin-only. Imports a raw SVG, parses it into the stroke-only glyph model (supported subset: path/line/polyline/polygon, commands M L H V Q C Z; fills/other elements skipped and reported), previews it inside a pebble shape, adjusts name/price/shape plus scale/recenter/flip transforms (baked into geometry at publish), and publishes a first-party (admin-owned) community glyph via publish_admin_glyph.",
+      "description": "Back-office authoring flow (#497, M36 sub-project D). Admin-only. Imports a raw SVG, parses it into the stroke-only glyph model (supported subset: path/line/polyline/polygon, commands M L H V Q C Z; fills/other elements skipped and reported), previews it as a shapeless square glyph, adjusts name/price plus scale/recenter/flip transforms (baked into geometry at publish), and publishes a first-party (admin-owned) community glyph via publish_admin_glyph.",
       "status": "development",
       "platforms": ["web"]
     },
@@ -1182,7 +1182,7 @@
       "project_id": "pebbles",
       "species": "data-model",
       "title": "glyphs",
-      "description": "User-drawn (or admin-uploaded) glyph marks: stroke-only geometry (strokes JSONB of {d,width} + view_box), shape_id, optional name, nullable user_id (NULL = system seed). Rendered recolored by emotion. SELECT widened (D8) to own ∪ seeds ∪ approved-listed ∪ entitled; UPDATE/DELETE locked once listed/bought (admin-exempt).",
+      "description": "User-drawn (or admin-uploaded) glyph marks: stroke-only geometry (strokes JSONB of {d,width} + view_box), optional name, nullable user_id (NULL = system seed). Rendered recolored by emotion. SELECT widened (D8) to own ∪ seeds ∪ approved-listed ∪ entitled; UPDATE/DELETE locked once listed/bought (admin-exempt).",
       "status": "development",
       "platforms": ["web", "ios"]
     },

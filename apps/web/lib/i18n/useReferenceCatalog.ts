@@ -3,7 +3,6 @@
 import { useTranslations } from "next-intl"
 import type { Emotion } from "@/lib/config/emotions"
 import type { Domain } from "@/lib/config/domains"
-import type { PebbleShape } from "@/lib/config/pebble-shapes"
 
 type LocalizedEntry = { name: string; label: string }
 
@@ -66,17 +65,4 @@ export function useEmotionCategoryName(
   }
   const key = `emotionCategory.${category.slug}.name`
   return t.has(key) ? t(key) : category.name
-}
-
-/**
- * Resolve a pebble shape's display name for the active locale.
- * Falls back to the static `name` when the slug isn't in the catalog.
- */
-export function useShapeName(shape: Pick<PebbleShape, "slug" | "name">): string {
-  const t = useTranslations() as unknown as {
-    (key: string): string
-    has(key: string): boolean
-  }
-  const key = `shape.${shape.slug}.name`
-  return t.has(key) ? t(key) : shape.name
 }

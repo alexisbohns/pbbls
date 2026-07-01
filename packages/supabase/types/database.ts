@@ -523,7 +523,6 @@ export type Database = {
           id: string
           is_custom: boolean | null
           name: string | null
-          shape_id: string | null
           strokes: Json
           updated_at: string
           user_id: string | null
@@ -534,7 +533,6 @@ export type Database = {
           id?: string
           is_custom?: boolean | null
           name?: string | null
-          shape_id?: string | null
           strokes?: Json
           updated_at?: string
           user_id?: string | null
@@ -545,20 +543,12 @@ export type Database = {
           id?: string
           is_custom?: boolean | null
           name?: string | null
-          shape_id?: string | null
           strokes?: Json
           updated_at?: string
           user_id?: string | null
           view_box?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "glyphs_shape_id_fkey"
-            columns: ["shape_id"]
-            isOneToOne: false
-            referencedRelation: "pebble_shapes"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "glyphs_user_id_fkey"
             columns: ["user_id"]
@@ -837,30 +827,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      pebble_shapes: {
-        Row: {
-          id: string
-          name: string
-          path: string
-          slug: string
-          view_box: string
-        }
-        Insert: {
-          id?: string
-          name: string
-          path: string
-          slug: string
-          view_box: string
-        }
-        Update: {
-          id?: string
-          name?: string
-          path?: string
-          slug?: string
-          view_box?: string
-        }
-        Relationships: []
       }
       pebble_souls: {
         Row: {
@@ -1406,20 +1372,12 @@ export type Database = {
           name: string | null
           owned: boolean | null
           price: number | null
-          shape_id: string | null
           strokes: Json | null
           updated_at: string | null
           user_id: string | null
           view_box: string | null
         }
         Relationships: [
-          {
-            foreignKeyName: "glyphs_shape_id_fkey"
-            columns: ["shape_id"]
-            isOneToOne: false
-            referencedRelation: "pebble_shapes"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "glyphs_user_id_fkey"
             columns: ["user_id"]
@@ -1838,7 +1796,6 @@ export type Database = {
         Args: {
           p_name: string
           p_price: number
-          p_shape_id: string
           p_strokes: Json
           p_view_box: string
         }

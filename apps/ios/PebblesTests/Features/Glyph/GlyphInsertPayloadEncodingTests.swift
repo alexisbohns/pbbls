@@ -22,7 +22,7 @@ struct GlyphInsertPayloadEncodingTests {
         )
         let json = try encode(payload)
         #expect((json["user_id"] as? String) == userId.uuidString)
-        #expect(json["shape_id"] == nil, "shape_id must be omitted so the DB stores NULL")
+        #expect(json["shape_id"] == nil, "payload must not carry a shape column (dropped in #503)")
         #expect((json["view_box"] as? String) == "0 0 200 200")
         #expect(json["name"] is NSNull)
     }

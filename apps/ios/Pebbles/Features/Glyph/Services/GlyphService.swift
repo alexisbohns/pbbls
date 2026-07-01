@@ -7,9 +7,8 @@ import os
 /// Single-table reads/writes only (see `AGENTS.md` — multi-table ops must
 /// become RPCs, but glyphs don't cross table boundaries).
 ///
-/// iOS-carved glyphs are stored with `shape_id = NULL` (made nullable in
-/// migration `20260415000001`), matching the issue #278 constraint that the
-/// glyph zone is always a square — no per-glyph shape.
+/// Glyphs are shape-agnostic squares (#278, #503) — there is no shape column;
+/// the glyph zone is always a square.
 @MainActor
 struct GlyphService {
     let supabase: SupabaseService

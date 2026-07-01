@@ -13,7 +13,6 @@ export {
   useEmotionLocalized,
   useEmotionCategoryName,
   useDomainLocalized,
-  useShapeName,
 } from "./useReferenceCatalog"
 export {
   formatDate,

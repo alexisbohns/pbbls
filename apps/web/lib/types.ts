@@ -96,7 +96,6 @@ export type MarkStroke = {
 export type Mark = {
   id: string
   name?: string
-  shape_id: string | null // null = shapeless (the canonical model, #278); legacy glyphs carry a shape
   strokes: MarkStroke[]
   viewBox: string
   created_at: string

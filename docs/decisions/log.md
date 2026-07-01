@@ -147,3 +147,14 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** New `glyph_sale` reason on the `karma_events` CHECK. Payout amount is bounded by `delta`'s `smallint` (same as the existing spend path). Delisting is reversible; deletion is not (buyers lose access — the admin UI warns). Future royalty/revenue-share models would build on `glyphs.user_id` as the creator.
 - **Supersedes / Superseded-by:** —
 - **Refs:** #497, `packages/supabase/supabase/migrations/20260701102810_glyph_marketplace_curation.sql`.
+
+## 2026-07-01 — Deprecated the glyph shape: dropped glyphs.shape_id and the pebble_shapes table (#503)
+
+- **Status:** taken
+- **Scope:** db, ui, ios
+- **Context:** A glyph is strokes in a square viewBox scaled into the pebble slot at render time (issue #278). The `glyphs.shape_id` FK to `pebble_shapes` was long deprecated — every surface (web /carve, admin upload, iOS carve, the system seeds) already wrote `shape_id = null`, and pebble *outlines* are rendered from baked-in engine templates (`apps/web/lib/engine/templates.ts`), not from `pebble_shapes`.
+- **Decision:** Dropped `glyphs.shape_id` and the now-orphaned `pebble_shapes` table system-wide. Updated the dependent RPCs/views to stop referencing the column: `create_pebble` no longer reads `new_glyph.shape_id`; `publish_admin_glyph` lost its `p_shape_id` parameter; `admin_list_glyph_submissions`, `v_pebbles_full`, and `v_glyph_market` no longer project `shape_id`. Removed all web/admin readers (`Mark.shape_id`, provider mappings, `PEBBLE_SHAPES` config, `useShapeName`, the dead `carve/PebbleOutline.tsx`, shape i18n strings) and tidied iOS comments/tests.
+- **Why:** No live data flowed through `shape_id` — it was pure backward-compat cruft, and `pebble_shapes` had no reader after the FK went away. Removing both eliminates a misleading data model (glyphs are shape-agnostic).
+- **Consequences:** Legacy glyph rows keep their original (sometimes non-square) `view_box`; they render fine because the engine fits by viewBox. Geometry was intentionally NOT normalized. Reintroducing a glyph→shape association is out of the question — glyphs are squares.
+- **Supersedes / Superseded-by:** —
+- **Refs:** #503, `docs/superpowers/specs/2026-07-01-remove-glyph-shape-design.md`, `docs/superpowers/plans/2026-07-01-remove-glyph-shape.md`, `packages/supabase/supabase/migrations/20260701114205_drop_glyph_shape.sql`.

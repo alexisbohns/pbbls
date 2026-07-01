@@ -20,17 +20,7 @@ export type AdminSubmission = {
   owner_id: string | null // the glyph's current owner (creator); payouts route here
   owner_email: string | null
   name: string | null
-  shape_id: string | null
   strokes: GlyphStroke[]
-  view_box: string
-}
-
-/** A pebble shape (reference data) for the shape dropdown + preview clip. */
-export type PebbleShape = {
-  id: string
-  slug: string
-  name: string
-  path: string
   view_box: string
 }
 
