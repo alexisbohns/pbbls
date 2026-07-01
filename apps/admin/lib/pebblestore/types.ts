@@ -10,12 +10,15 @@ export type AdminSubmission = {
   submission_id: string
   glyph_id: string
   status: SubmissionStatus
+  listed: boolean
   price: number
   review_note: string | null
   created_at: string
   reviewed_at: string | null
   submitter_id: string
   submitter_email: string | null
+  owner_id: string | null // the glyph's current owner (creator); payouts route here
+  owner_email: string | null
   name: string | null
   shape_id: string | null
   strokes: GlyphStroke[]
