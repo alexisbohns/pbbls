@@ -60,7 +60,6 @@ export function CarveEditor({ onSaved }: CarveEditorProps) {
     try {
       const trimmed = name.trim()
       const mark = await addMark({
-        shape_id: null, // shapeless — the canonical model (#278)
         strokes,
         viewBox: GLYPH_VIEWBOX,
         name: trimmed.length > 0 ? trimmed : undefined,
