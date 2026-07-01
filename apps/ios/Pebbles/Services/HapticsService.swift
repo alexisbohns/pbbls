@@ -19,6 +19,10 @@ final class HapticsService {
     private var engine: CHHapticEngine?
     private var karmaPattern: CHHapticPattern?
 
+    /// Long-lived continuous player for the swap slider; its intensity is ramped
+    /// via a dynamic parameter while the user drags, then stopped on release.
+    private var slidePlayer: CHHapticAdvancedPatternPlayer?
+
     init() {
         guard supportsHaptics else { return }
         do {
@@ -43,6 +47,72 @@ final class HapticsService {
             try player.start(atTime: CHHapticTimeImmediate)
         } catch {
             logger.error("haptic play failed: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    /// Starts a low continuous buzz for the swap slider. Intensity begins near
+    /// zero and is raised with `updateGlyphSlide(progress:)` as the thumb moves.
+    func beginGlyphSlide() {
+        guard supportsHaptics, let engine else { return }
+        do {
+            try engine.start()
+            let body = CHHapticEvent(
+                eventType: .hapticContinuous,
+                parameters: [
+                    CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0),
+                    CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.4)
+                ],
+                relativeTime: 0,
+                duration: 30 // long-lived; stopped manually on release
+            )
+            let pattern = try CHHapticPattern(events: [body], parameters: [])
+            let player = try engine.makeAdvancedPlayer(with: pattern)
+            slidePlayer = player
+            try player.start(atTime: CHHapticTimeImmediate)
+            updateGlyphSlide(progress: 0)
+        } catch {
+            logger.error("glyph slide haptic start failed: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    /// Ramps the slide buzz. `progress` is 0…1. Uses the intensity *control*
+    /// parameter (a multiplier on the event's base intensity).
+    func updateGlyphSlide(progress: Float) {
+        guard let slidePlayer else { return }
+        let clamped = max(0, min(1, progress))
+        let value = 0.1 + clamped * 0.9 // never fully silent; peaks at release
+        let param = CHHapticDynamicParameter(
+            parameterID: .hapticIntensityControl,
+            value: value,
+            relativeTime: 0
+        )
+        try? slidePlayer.sendParameters([param], atTime: CHHapticTimeImmediate)
+    }
+
+    /// Stops the slide buzz (release or cancel).
+    func endGlyphSlide() {
+        try? slidePlayer?.stop(atTime: CHHapticTimeImmediate)
+        slidePlayer = nil
+    }
+
+    /// A crisp, high-sharpness transient for a completed swap.
+    func playGlyphSwapSuccess() {
+        guard supportsHaptics, let engine else { return }
+        do {
+            try engine.start()
+            let event = CHHapticEvent(
+                eventType: .hapticTransient,
+                parameters: [
+                    CHHapticEventParameter(parameterID: .hapticIntensity, value: 1.0),
+                    CHHapticEventParameter(parameterID: .hapticSharpness, value: 0.9)
+                ],
+                relativeTime: 0
+            )
+            let pattern = try CHHapticPattern(events: [event], parameters: [])
+            let player = try engine.makePlayer(with: pattern)
+            try player.start(atTime: CHHapticTimeImmediate)
+        } catch {
+            logger.error("glyph swap success haptic failed: \(error.localizedDescription, privacy: .public)")
         }
     }
 
