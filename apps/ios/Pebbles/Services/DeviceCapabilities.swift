@@ -15,7 +15,7 @@ enum DeviceCapabilities {
         "iPhone15,4", "iPhone15,5",   // iPhone 15 / 15 Plus
         "iPhone16,1", "iPhone16,2",   // iPhone 15 Pro / Pro Max
         "iPhone17,3", "iPhone17,4",   // iPhone 16 / 16 Plus
-        "iPhone17,1", "iPhone17,2",   // iPhone 16 Pro / Pro Max
+        "iPhone17,1", "iPhone17,2"    // iPhone 16 Pro / Pro Max
     ]
 
     /// Pure, testable membership check.
@@ -32,8 +32,8 @@ enum DeviceCapabilities {
         var systemInfo = utsname()
         uname(&systemInfo)
         let machine = withUnsafeBytes(of: &systemInfo.machine) { raw -> String in
-            let bytes = raw.prefix { $0 != 0 }
-            return String(decoding: bytes, as: UTF8.self)
+            let bytes = Array(raw.prefix { $0 != 0 })
+            return String(bytes: bytes, encoding: .utf8) ?? ""
         }
         return machine
     }
