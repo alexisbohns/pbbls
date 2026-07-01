@@ -24,8 +24,9 @@ final class KarmaNotificationService {
     private let haptics: HapticsService
     private var capsuleDismissTask: Task<Void, Never>?
 
-    /// How long the pastille stays up. Tune-on-device.
-    private let capsuleDuration: Duration = .milliseconds(2500)
+    /// How long the pastille stays up. Tune-on-device. Exposed so the pastille's
+    /// countdown ring can drain over exactly this window.
+    let capsuleDuration: Duration = .milliseconds(2500)
 
     init(audio: AudioService = AudioService(),
          haptics: HapticsService = HapticsService()) {

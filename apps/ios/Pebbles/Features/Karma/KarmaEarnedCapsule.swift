@@ -7,7 +7,12 @@ import UIKit
 /// in `PathBottomBar` (sparkle + accent). Tap to dismiss; VoiceOver announces.
 struct KarmaEarnedCapsule: View {
     let content: KarmaEarnedContent
+    /// The pastille's on-screen lifetime; the countdown ring drains over it.
+    var duration: Duration = .milliseconds(2500)
     let onTap: () -> Void
+
+    /// 1 = full ring, 0 = drained. Animated from 1→0 over `duration`.
+    @State private var ringProgress: CGFloat = 1
 
     var body: some View {
         HStack(spacing: 6) {
@@ -20,11 +25,35 @@ struct KarmaEarnedCapsule: View {
         .padding(.horizontal, 18)
         .padding(.vertical, 11)
         .karmaPastilleGlass()
+        .overlay { countdownRing }
         .contentShape(Capsule())
         .onTapGesture(perform: onTap)
+        .onAppear(perform: startCountdown)
+        // Restart the drain when a fresh earn replaces the content in place.
+        .onChange(of: content) { startCountdown() }
         .accessibilityElement()
         .accessibilityLabel("Earned \(content.amount) karma, \(String(localized: content.reason.label))")
         .accessibilityAddTraits(.isStaticText)
+    }
+
+    /// Accent-color border that trims from full to empty as the pastille's time
+    /// runs out — a glanceable countdown around the glass.
+    private var countdownRing: some View {
+        Capsule()
+            .trim(from: 0, to: ringProgress)
+            .stroke(Color.accent.primary, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
+            .padding(1.25)  // keep the stroke inside the pastille edge
+            .allowsHitTesting(false)
+    }
+
+    private func startCountdown() {
+        ringProgress = 1
+        withAnimation(.linear(duration: durationSeconds)) { ringProgress = 0 }
+    }
+
+    private var durationSeconds: Double {
+        let parts = duration.components
+        return Double(parts.seconds) + Double(parts.attoseconds) / 1_000_000_000_000_000_000
     }
 }
 
@@ -65,9 +94,11 @@ struct KarmaOverlayRoot: View {
         ZStack(alignment: .bottom) {
             Color.clear
             if let earned = karma.activeCapsule {
-                KarmaEarnedCapsule(content: earned) { karma.dismissCapsule() }
-                    .padding(.bottom, 44)
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                KarmaEarnedCapsule(content: earned, duration: karma.capsuleDuration) {
+                    karma.dismissCapsule()
+                }
+                .padding(.bottom, 44)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
             }
         }
         .animation(.spring(response: 0.42, dampingFraction: 0.72), value: karma.activeCapsule)
