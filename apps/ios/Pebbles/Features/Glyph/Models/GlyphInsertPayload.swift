@@ -3,9 +3,8 @@ import Foundation
 /// Body for a direct `INSERT INTO public.glyphs` via the Supabase Swift SDK.
 /// Single-table write — no RPC needed (see `AGENTS.md`).
 ///
-/// `shape_id` is omitted (encoded as null). Migration `20260415000001` made
-/// the column nullable specifically to support shapeless glyphs, which matches
-/// the issue #278 constraint: "Glyph zone is a square, no such thing as shape".
+/// The glyphs table has no shape column — glyphs are shape-agnostic squares
+/// (issue #278, #503). The payload carries only user_id, strokes, view_box, name.
 struct GlyphInsertPayload: Encodable {
     let userId: UUID
     let strokes: [GlyphStroke]
