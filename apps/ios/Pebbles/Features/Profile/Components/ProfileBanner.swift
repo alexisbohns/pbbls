@@ -6,30 +6,13 @@ struct ProfileBanner: View {
     let glyphStrokes: [GlyphStroke]?
 
     var body: some View {
-        VStack(spacing: Spacing.xxl) {
-            glyph
-
-            VStack(spacing: Spacing.xs) {
-                Text(displayName ?? "")
-                    .pebblesFont(.title)
-                    .foregroundStyle(Color.system.foreground)
-                if let memberSince {
-                    Text("Member since \(memberSince.formatted(.dateTime.month(.wide).year()))")
-                        .pebblesFont(.meta)
-                        .foregroundStyle(Color.system.secondary)
-                }
+        GlyphBanner(
+            strokes: glyphStrokes,
+            title: displayName ?? "",
+            subtitle: memberSince.map {
+                String(localized: "Member since \($0.formatted(.dateTime.month(.wide).year()))")
             }
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    @ViewBuilder
-    private var glyph: some View {
-        if let strokes = glyphStrokes, !strokes.isEmpty {
-            GlyphView(case: .profile, strokes: strokes, side: 96)
-        } else {
-            GlyphView(case: .carve, side: 96)
-        }
+        )
     }
 }
 

@@ -46,4 +46,67 @@ final class AudioService {
             logger.error("karma sound playback failed: \(error.localizedDescription, privacy: .public)")
         }
     }
+
+    /// Plays a short bundled sound over the shared `.ambient` / `.mixWithOthers`
+    /// session (same policy as the karma sound: obeys the Ring/Silent switch,
+    /// never ducks other apps' audio). Retains the player for its lifetime.
+    private func playBundled(_ name: String, ext: String = "m4a") {
+        guard let url = Bundle.main.url(forResource: name, withExtension: ext) else {
+            logger.error("sound asset \(name, privacy: .public) missing from bundle")
+            return
+        }
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.ambient, options: [.mixWithOthers])
+            try session.setActive(true)
+            let player = try AVAudioPlayer(contentsOf: url)
+            self.player = player
+            player.play()
+        } catch {
+            logger.error(
+                "sound \(name, privacy: .public) playback failed: \(error.localizedDescription, privacy: .public)"
+            )
+        }
+    }
+
+    /// URL of the swap-slide pebble sound. Shared with `HapticsService` so the
+    /// slide vibration envelope is derived from the exact same waveform.
+    static var glyphSlideSoundURL: URL? {
+        Bundle.main.url(forResource: "pbbls-sfx-pebbles_drop", withExtension: "m4a")
+    }
+
+    /// Dedicated player for the swap-slide loop, kept separate from `player` so the
+    /// success/other sound can't clobber it mid-drag.
+    private var slidePlayer: AVAudioPlayer?
+
+    /// Starts the pebble sound looping for the duration of the slide (from the
+    /// moment the thumb is pressed until release). The haptics ride the same
+    /// waveform, so the two stay in lockstep.
+    func beginGlyphSlideLoop() {
+        guard let url = Self.glyphSlideSoundURL else {
+            logger.error("slide sound missing from bundle")
+            return
+        }
+        do {
+            let session = AVAudioSession.sharedInstance()
+            try session.setCategory(.ambient, options: [.mixWithOthers])
+            try session.setActive(true)
+            let looper = try AVAudioPlayer(contentsOf: url)
+            looper.numberOfLoops = -1
+            looper.prepareToPlay()
+            looper.play()
+            slidePlayer = looper
+        } catch {
+            logger.error("slide loop playback failed: \(error.localizedDescription, privacy: .public)")
+        }
+    }
+
+    /// Stops the slide loop on release/cancel/success.
+    func endGlyphSlideLoop() {
+        slidePlayer?.stop()
+        slidePlayer = nil
+    }
+
+    /// The bamboo "clack" on a completed swap.
+    func playGlyphSwapSuccessSound() { playBundled("pbbls-sfx-bamboo") }
 }
