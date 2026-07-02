@@ -223,9 +223,11 @@ Add to `apps/ios/PebblesTests/PebbleStrokeTests.swift` (inside the `PebbleStroke
     }
 
     @Test func modelParsesAWellFormedPebbleSvg() {
+        // Real composed pebble layers always carry an explicit stroke;
+        // PebbleSVGModel deliberately drops fill="none" paths with no stroke.
         let svg = """
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 260">
-          <g id="layer:shape"><path d="M 20 20 L 240 240" fill="none"/></g>
+          <g id="layer:shape"><path d="M 20 20 L 240 240" fill="none" stroke="currentColor"/></g>
         </svg>
         """
         let model = PebbleSVGModel(svg: svg)
@@ -303,10 +305,10 @@ struct PebbleStaticRenderView: View {
         svg: """
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 260" width="260" height="260">
           <g id="layer:shape">
-            <path d="M 20 130 C 20 70 70 20 130 20 C 190 20 240 70 240 130 C 240 190 190 240 130 240 C 70 240 20 190 20 130 Z" fill="none"/>
+            <path d="M 20 130 C 20 70 70 20 130 20 C 190 20 240 70 240 130 C 240 190 190 240 130 240 C 70 240 20 190 20 130 Z" fill="none" stroke="currentColor"/>
           </g>
           <g id="layer:glyph" transform="translate(78, 78) scale(0.52)">
-            <path d="M 0 0 L 200 200 M 0 200 L 200 0" fill="none"/>
+            <path d="M 0 0 L 200 200 M 0 200 L 200 0" fill="none" stroke="currentColor"/>
           </g>
         </svg>
         """,
