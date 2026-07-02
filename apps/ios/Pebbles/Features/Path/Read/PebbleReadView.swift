@@ -9,8 +9,6 @@ import SwiftUI
 struct PebbleReadView: View {
     let detail: PebbleDetail
 
-    @Environment(EmotionPaletteService.self) private var palettes
-
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -44,46 +42,38 @@ struct PebbleReadView: View {
         .background(Color.system.background)
     }
 
+    /// Emotion / domain / collection as the shared `SurfaceTile`s — the same
+    /// tiles used for the profile shortcuts and glyph swap stats (issue #513).
+    /// Page-wide emotion palette coloring is intentionally out of scope, so the
+    /// emotion tile keeps the default accent surface like its neighbours.
     @ViewBuilder
     private var metadataRow: some View {
-        PebblePillFlow {
+        HStack(spacing: Spacing.sm) {
             // Emotion — always present.
-            let palette = palettes.palette(for: detail.emotion.id)
-            PebbleMetaPill(
-                icon: .system("heart.fill"),
-                label: LocalizedStringResource(stringLiteral: detail.emotion.localizedName),
-                style: .emotion(
-                    background: palette?.accentBackground ?? Color.accent.primary,
-                    foreground: palette?.accentForeground ?? .white
-                )
-            )
+            SurfaceTile(systemImage: "heart.fill") {
+                Text(LocalizedStringResource(stringLiteral: detail.emotion.localizedName))
+            }
 
-            // Domain — always rendered. Set when non-empty, else dashed unset.
+            // Domain — always rendered. Muted placeholder when unset.
             if detail.domains.isEmpty {
-                PebbleMetaPill(
-                    icon: .system("square.grid.2x2"),
-                    label: "No domain",
-                    style: .unset
-                )
+                SurfaceTile(systemImage: "tag.fill", muted: true) {
+                    Text("No domain")
+                }
             } else {
-                PebbleMetaPill(
-                    icon: .system("square.grid.2x2"),
-                    label: LocalizedStringResource(
+                SurfaceTile(systemImage: "tag.fill") {
+                    Text(LocalizedStringResource(
                         stringLiteral: detail.domains.map(\.localizedName).joined(separator: ", ")
-                    ),
-                    style: .neutral
-                )
+                    ))
+                }
             }
 
             // Collections — only when non-empty.
             if !detail.collections.isEmpty {
-                PebbleMetaPill(
-                    icon: .system("folder.fill"),
-                    label: LocalizedStringResource(
+                SurfaceTile(systemImage: "square.stack.3d.up.fill") {
+                    Text(LocalizedStringResource(
                         stringLiteral: detail.collections.map(\.name).joined(separator: ", ")
-                    ),
-                    style: .neutral
-                )
+                    ))
+                }
             }
         }
     }

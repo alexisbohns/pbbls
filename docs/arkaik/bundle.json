@@ -8,7 +8,7 @@
       "view_card_variant": "large"
     },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-07-02T00:00:00.000Z"
+    "updated_at": "2026-07-02T22:00:00.000Z"
   },
   "nodes": [
     {
@@ -206,7 +206,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Pebble Detail",
-      "description": "Read-only display of a recorded pebble: rendered shape, title, picture, emotion/domain/collections/souls metadata, and description. Edit button stacks the editor.",
+      "description": "Read-only display of a recorded pebble: rendered shape, title, picture, emotion/domain/collections/souls metadata shown as shared tiles, and description. Edit button stacks the editor.",
       "status": "live",
       "platforms": [
         "web",
