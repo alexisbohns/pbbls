@@ -82,8 +82,13 @@ struct PathPebbleRow: View {
                 fillOpacity: frameColors?.fillOpacity ?? 1
             )
             if let svg = pebble.renderSvg {
-                PebbleRenderView(svg: svg, strokeColor: frameColors?.strokeHex ?? Color.accent.primaryHex)
-                    .scaleEffect(PebbleOutlineGeometry.pebbleScale(for: pebble.valence.sizeGroup))
+                let strokeHex = frameColors?.strokeHex ?? Color.accent.primaryHex
+                PebbleStaticRenderView(
+                    svg: svg,
+                    strokeColor: Color(hex: strokeHex) ?? Color.accent.primary,
+                    strokeColorHex: strokeHex
+                )
+                .scaleEffect(PebbleOutlineGeometry.pebbleScale(for: pebble.valence.sizeGroup))
             }
         }
         .aspectRatio(PebbleOutlineGeometry.aspectRatio(for: pebble.valence.sizeGroup), contentMode: .fit)
