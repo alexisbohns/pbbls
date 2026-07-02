@@ -16,9 +16,16 @@ struct SurfaceTile<Label: View>: View {
             Image(systemName: systemImage)
                 .pebblesIcon(.large)
                 .foregroundStyle(muted ? Color.system.muted : Color.accent.primary)
+                // Fixed icon slot so tiles stay equal height regardless of which
+                // SF Symbol they carry (heart/tag/stack render at different
+                // intrinsic heights). Matches the Figma tile spec (30×30).
+                .frame(width: 30, height: 30)
             label()
                 .pebblesFont(.callout)
                 .foregroundStyle(muted ? Color.system.muted : Color.system.secondary)
+                // Clamp to one line so tiles stay equal height even when a label
+                // (e.g. multiple joined domains/collections) would otherwise wrap.
+                .lineLimit(1)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, Spacing.md)
