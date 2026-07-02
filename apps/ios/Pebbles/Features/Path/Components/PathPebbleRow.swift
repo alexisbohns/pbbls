@@ -7,8 +7,11 @@ import SwiftUI
 ///     `palette.secondary` glyph stroke; name color follows the scheme
 ///     (light=primary, dark=light).
 ///   - intensity 3 (large): 96pt thumbnail with `palette.primary` fill and
-///     `palette.light` glyph stroke; name color is `palette.light` in both
-///     schemes (the primary fill carries scheme contrast).
+///     `palette.light` glyph stroke.
+///
+/// Only the glyph render differs by size — the name/time color follows the
+/// scheme at every size (light=primary, dark=light), because the text sits on
+/// the row background rather than the pebble fill (#510).
 ///
 /// Colors are sourced from `palette.pebbleFrameColors(forIntensity:)`.
 ///
@@ -119,8 +122,7 @@ struct PathPebbleRow: View {
 
     private var nameColor: Color {
         guard let palette else { return Color.system.foreground }
-        if isLarge { return palette.light }
-        return colorScheme == .dark ? palette.light : palette.primary
+        return PathPebbleRow.nameColor(palette: palette, isLarge: isLarge, colorScheme: colorScheme)
     }
 
     /// Weekday + time only — the focused week is already known from
@@ -160,6 +162,15 @@ struct PathPebbleRow: View {
 }
 
 extension PathPebbleRow {
+
+    /// Name + time text color. The text sits on the row background — not on
+    /// the pebble's `primary` fill, which only backs the glyph thumbnail — so
+    /// it must contrast the scheme background at *every* size. `isLarge` is
+    /// accepted only to prove size doesn't change the answer (#510): light
+    /// scheme → `primary` (dark ink), dark scheme → `light` (pale ink).
+    static func nameColor(palette: EmotionPalette, isLarge: Bool, colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark ? palette.light : palette.primary
+    }
 
     /// Photo rotation by row position. Even indices (0, 2, 4...) lean
     /// counter-clockwise (-7°); odd lean clockwise (+4°).
