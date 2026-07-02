@@ -29,4 +29,21 @@ struct PebbleStrokeTests {
         // scaleX = 125/250 = 0.5, scaleY = 125/200 = 0.625 → min = 0.5 → 6 * 0.5 = 3
         #expect(abs(width - 3) < 0.0001)
     }
+
+    @Test func modelIsNilForMalformedSvgSoStaticViewFallsBack() {
+        // No viewBox / no layers → PebbleSVGModel returns nil, and
+        // PebbleStaticRenderView renders the PebbleRenderView fallback.
+        #expect(PebbleSVGModel(svg: "not svg at all") == nil)
+    }
+
+    @Test func modelParsesAWellFormedPebbleSvg() {
+        let svg = """
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 260">
+          <g id="layer:shape"><path d="M 20 20 L 240 240" fill="none" stroke="currentColor"/></g>
+        </svg>
+        """
+        let model = PebbleSVGModel(svg: svg)
+        #expect(model != nil)
+        #expect(model?.viewBox == CGRect(x: 0, y: 0, width: 260, height: 260))
+    }
 }
