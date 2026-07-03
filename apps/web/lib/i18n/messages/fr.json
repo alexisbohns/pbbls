@@ -540,6 +540,7 @@
   },
   "record": {
     "srTitle": "Capturer l'instant",
+    "back": "Retour au chemin",
     "editorAria": "Éditeur de galet",
     "triggerAria": "Que s'est-il passé ?",
     "namePlaceholder": "Que s'est-il passé ?",

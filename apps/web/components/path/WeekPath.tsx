@@ -1,6 +1,5 @@
 "use client"
 
-import { useEffect, type MutableRefObject } from "react"
 import { motion, useReducedMotion } from "framer-motion"
 import { useLookupMaps } from "@/lib/data/useLookupMaps"
 import { useMarks } from "@/lib/data/useMarks"
@@ -14,8 +13,6 @@ type WeekPathProps = {
   souls: Soul[]
   isFocused: boolean
   onSelectPebble: (id: string) => void
-  onCarvePebble: () => void
-  scrollTargetRef: MutableRefObject<string | null>
 }
 
 export function WeekPath({
@@ -23,8 +20,6 @@ export function WeekPath({
   souls,
   isFocused,
   onSelectPebble,
-  onCarvePebble,
-  scrollTargetRef,
 }: WeekPathProps) {
   const prefersReducedMotion = useReducedMotion()
   const { marks } = useMarks()
@@ -39,18 +34,8 @@ export function WeekPath({
     ? `${entry.weekStartIso}-focused-${entry.pebbles.length}`
     : `${entry.weekStartIso}-unfocused`
 
-  useEffect(() => {
-    const targetId = scrollTargetRef.current
-    if (!targetId) return
-    const el = document.getElementById(`pebble-${targetId}`)
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "center" })
-      scrollTargetRef.current = null
-    }
-  }, [entry.pebbles, scrollTargetRef])
-
   if (entry.pebbles.length === 0) {
-    return <PathEmptyState onCarve={onCarvePebble} />
+    return <PathEmptyState />
   }
 
   return (

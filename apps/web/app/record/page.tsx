@@ -1,29 +1,28 @@
 "use client"
 
-import { useState } from "react"
+import { useRouter } from "next/navigation"
+import Link from "next/link"
+import { ArrowLeft } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { QuickPebbleEditor } from "@/components/path/QuickPebbleEditor"
-import { PebblePeek } from "@/components/path/PebblePeek"
 
 export default function RecordPage() {
-  const [selectedPebbleId, setSelectedPebbleId] = useState<string | null>(null)
-  // /record is a dedicated capture route — auto-open the overlay on mount so
-  // the user lands on the editor itself, not its collapsed trigger.
-  const [editorExpanded, setEditorExpanded] = useState(true)
+  const router = useRouter()
   const t = useTranslations("record")
 
   return (
-    <section className="mx-auto max-w-lg px-4 py-8">
-      <h1 className="sr-only">{t("srTitle")}</h1>
-      <QuickPebbleEditor
-        expanded={editorExpanded}
-        onExpandedChange={setEditorExpanded}
-        onPebbleCreated={(pebble) => setSelectedPebbleId(pebble.id)}
-      />
-      <PebblePeek
-        pebbleId={selectedPebbleId}
-        onClose={() => setSelectedPebbleId(null)}
-      />
+    <section className="mx-auto w-full max-w-lg">
+      <header className="mb-4 flex items-center gap-2">
+        <Link
+          href="/path"
+          aria-label={t("back")}
+          className="-ml-2 inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <ArrowLeft className="size-5" aria-hidden />
+        </Link>
+        <h1 className="font-heading text-lg font-semibold">{t("srTitle")}</h1>
+      </header>
+      <QuickPebbleEditor onPebbleCreated={() => router.push("/path")} />
     </section>
   )
 }

@@ -8,7 +8,6 @@ import {
   Image,
   Users,
 } from "lucide-react"
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion"
 import { useTranslations } from "next-intl"
 import type { Pebble, PebbleSnap } from "@/lib/types"
 import { useFormatDate } from "@/lib/i18n"
@@ -36,8 +35,6 @@ type Intensity = 1 | 2 | 3
 type Valence = -1 | 0 | 1
 
 type QuickPebbleEditorProps = {
-  expanded?: boolean
-  onExpandedChange?: (next: boolean) => void
   onPebbleCreated?: (pebble: Pebble) => void
 }
 
@@ -47,35 +44,19 @@ function isNow(dateStr: string): boolean {
 }
 
 export function QuickPebbleEditor({
-  expanded: expandedProp,
-  onExpandedChange,
   onPebbleCreated,
 }: QuickPebbleEditorProps) {
   const { addPebble, uploadSnap } = usePebbles()
   const { souls, addSoul } = useSouls()
   const { collections } = useCollections()
   const { glyphs: marks } = useUsableGlyphs()
-  const prefersReducedMotion = useReducedMotion()
   const t = useTranslations("record")
-  const tPath = useTranslations("path")
   const tGlyph = useTranslations("record.glyph")
   const tPhoto = useTranslations("record.photo")
   const tSouls = useTranslations("record.souls")
   const tEmotion = useTranslations("record.emotion")
   const formatDate = useFormatDate()
 
-  // Collapse state — controlled-or-uncontrolled
-  const [expandedInternal, setExpandedInternal] = useState(false)
-  const isControlled = expandedProp !== undefined
-  const expanded = isControlled ? expandedProp : expandedInternal
-  const setExpanded = useCallback(
-    (next: boolean) => {
-      if (!isControlled) setExpandedInternal(next)
-      onExpandedChange?.(next)
-    },
-    [isControlled, onExpandedChange],
-  )
-  const sectionRef = useRef<HTMLElement>(null)
   const titleInputRef = useRef<HTMLTextAreaElement>(null)
 
   // Form state
@@ -164,7 +145,6 @@ export function QuickPebbleEditor({
       const pebble = await addPebble(input)
 
       resetForm()
-      setExpanded(false)
       titleInputRef.current?.blur()
       onPebbleCreated?.(pebble)
     } finally {
@@ -173,7 +153,7 @@ export function QuickPebbleEditor({
   }, [
     name, description, happenedAt, intensity, valence, visibility,
     emotionId, soulIds, domainIds, markId, collectionIds, pendingSnap,
-    saving, snapUploading, addPebble, resetForm, onPebbleCreated, setExpanded,
+    saving, snapUploading, addPebble, resetForm, onPebbleCreated,
   ])
 
   const toggleSoul = useCallback((id: string) => {
@@ -220,26 +200,6 @@ export function QuickPebbleEditor({
     setPendingSnap(undefined)
   }, [])
 
-  // Focus tracking — expand on focus, collapse on blur when empty
-  const handleFocusCapture = useCallback(() => {
-    if (!expanded) setExpanded(true)
-  }, [expanded, setExpanded])
-
-  const handleBlurCapture = useCallback(() => {
-    // rAF lets the browser settle focus after portal transitions
-    requestAnimationFrame(() => {
-      const active = document.activeElement
-      if (active && sectionRef.current?.contains(active)) return
-      if (active instanceof HTMLElement) {
-        const inPortal = active.closest(
-          '[data-slot="popover-content"], [data-slot="popover-positioner"], [data-slot="dialog-content"], [data-slot="sheet-content"], [role="dialog"]',
-        )
-        if (inPortal) return
-      }
-      if (!name.trim()) setExpanded(false)
-    })
-  }, [name, setExpanded])
-
   const dateLabel = isNow(happenedAt)
     ? t("now")
     : formatDate(happenedAt, {
@@ -251,193 +211,151 @@ export function QuickPebbleEditor({
 
   return (
     <>
-      {/* Collapsed trigger — hidden while the overlay is open.
-          Light mode: brand-light bg with brand accent label.
-          Dark mode: brand foreground (near-white) bg with brand accent label. */}
-      {!expanded && (
-        <button
-          type="button"
-          onClick={() => setExpanded(true)}
-          className="block w-full rounded-2xl bg-surface py-3 text-center font-heading text-[17px] font-bold text-primary transition-colors hover:bg-muted dark:bg-accent dark:text-primary"
-        >
-          {tPath("newPebble")}
-        </button>
-      )}
+      <section aria-label={t("editorAria")}>
+        {/* Header: date + intensity/valence grid */}
+        <div className="mb-3 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => setDateOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <CalendarDays className="size-3.5" aria-hidden />
+            {dateLabel}
+          </button>
+          <ValenceIntensityGrid
+            intensity={intensity}
+            valence={valence}
+            onIntensityChange={setIntensity}
+            onValenceChange={setValence}
+          />
+        </div>
 
-      {/* Expanded overlay */}
-      <AnimatePresence>
-        {expanded && (
-          <>
-            <motion.div
-              key="backdrop"
-              className="fixed inset-0 z-30 bg-background/60 backdrop-blur-sm"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: prefersReducedMotion ? 0 : 0.15 }}
-              onClick={() => {
-                if (!name.trim()) setExpanded(false)
-              }}
-            />
-            <motion.section
-              key="overlay"
-              ref={sectionRef}
-              aria-label={t("editorAria")}
-              className="fixed inset-x-0 bottom-0 z-40 max-h-[min(72vh,640px)] overflow-y-auto rounded-t-2xl border-t bg-card p-4 pb-[calc(1rem+var(--safe-area-bottom))]"
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ duration: prefersReducedMotion ? 0 : 0.25, ease: "easeOut" }}
-              onFocusCapture={handleFocusCapture}
-              onBlurCapture={handleBlurCapture}
-            >
-              {/* Header: date + intensity/valence grid */}
-              <div className="mb-3 flex items-center justify-between">
-                <button
-                  type="button"
-                  onClick={() => setDateOpen(true)}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-                >
-                  <CalendarDays className="size-3.5" aria-hidden />
-                  {dateLabel}
-                </button>
-                <ValenceIntensityGrid
-                  intensity={intensity}
-                  valence={valence}
-                  onIntensityChange={setIntensity}
-                  onValenceChange={setValence}
-                />
-              </div>
+        {/* Title input */}
+        <textarea
+          ref={titleInputRef}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder={t("namePlaceholder")}
+          className="mb-2 w-full resize-none border-none bg-transparent font-heading text-xl font-semibold text-foreground outline-none field-sizing-content placeholder:text-muted-foreground/50"
+          rows={1}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault()
+              void handleSubmit()
+            }
+          }}
+        />
 
-              {/* Title input */}
-              <textarea
-                ref={titleInputRef}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder={t("namePlaceholder")}
-                className="mb-2 w-full resize-none border-none bg-transparent font-heading text-xl font-semibold text-foreground outline-none field-sizing-content placeholder:text-muted-foreground/50"
-                rows={1}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) {
-                    e.preventDefault()
-                    void handleSubmit()
-                  }
-                }}
-              />
+        {/* Qualification pills */}
+        <div className="mb-3 flex items-center gap-2">
+          <DomainSheet value={domainIds} onChange={setDomainIds} />
+          <button
+            type="button"
+            onClick={() => setEmotionPickerOpen(true)}
+            aria-label={
+              selectedEmotion
+                ? tEmotion("selectedAria", { name: selectedEmotion.name })
+                : tEmotion("pickAria")
+            }
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+              selectedEmotion
+                ? "border border-border bg-background text-foreground"
+                : "border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-muted-foreground/50",
+            )}
+          >
+            {selectedEmotion ? (
+              <>
+                <span aria-hidden>{selectedEmotion.emoji}</span>
+                {selectedEmotion.name}
+              </>
+            ) : (
+              tEmotion("label")
+            )}
+          </button>
+        </div>
 
-              {/* Qualification pills */}
-              <div className="mb-3 flex items-center gap-2">
-                <DomainSheet value={domainIds} onChange={setDomainIds} />
-                <button
-                  type="button"
-                  onClick={() => setEmotionPickerOpen(true)}
-                  aria-label={
-                    selectedEmotion
-                      ? tEmotion("selectedAria", { name: selectedEmotion.name })
-                      : tEmotion("pickAria")
-                  }
-                  className={cn(
-                    "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
-                    selectedEmotion
-                      ? "border border-border bg-background text-foreground"
-                      : "border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-muted-foreground/50",
-                  )}
-                >
-                  {selectedEmotion ? (
-                    <>
-                      <span aria-hidden>{selectedEmotion.emoji}</span>
-                      {selectedEmotion.name}
-                    </>
-                  ) : (
-                    tEmotion("label")
-                  )}
-                </button>
-              </div>
+        {/* Description */}
+        <textarea
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder={t("descriptionPlaceholder")}
+          className="mb-4 w-full resize-none border-none bg-transparent text-sm text-foreground outline-none field-sizing-content placeholder:text-muted-foreground/50"
+          rows={1}
+        />
 
-              {/* Description */}
-              <textarea
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder={t("descriptionPlaceholder")}
-                className="mb-4 w-full resize-none border-none bg-transparent text-sm text-foreground outline-none field-sizing-content placeholder:text-muted-foreground/50"
-                rows={1}
-              />
+        {/* Customization tiles */}
+        <div className="mb-4 grid grid-cols-4 gap-2">
+          <CustomizationTile
+            icon={Fingerprint}
+            filled={!!selectedMark}
+            onClick={() => setGlyphOpen(true)}
+            ariaLabel={selectedMark ? tGlyph("changeAria") : tGlyph("addAria")}
+          >
+            {selectedMark && <GlyphPreview mark={selectedMark} className="size-full p-2" />}
+          </CustomizationTile>
+          <CollectionSheet
+            value={collectionIds}
+            onChange={setCollectionIds}
+            collections={collections}
+          />
+          <CustomizationTile
+            icon={Users}
+            filled={soulIds.length > 0}
+            onClick={() => setSoulsOpen(true)}
+            ariaLabel={soulIds.length > 0 ? tSouls("selectedAria", { count: soulIds.length }) : tSouls("addAria")}
+          >
+            {soulIds.length > 0 && (
+              <span className="text-xs font-medium text-muted-foreground">{soulIds.length}</span>
+            )}
+          </CustomizationTile>
+          <CustomizationTile
+            icon={Image}
+            filled={!!snapPreview}
+            onClick={() => {
+              if (snapPreview) {
+                clearSnap()
+              } else {
+                fileInputRef.current?.click()
+              }
+            }}
+            ariaLabel={snapPreview ? tPhoto("removeAria") : tPhoto("addAria")}
+          >
+            {snapPreview && (
+              /* eslint-disable-next-line @next/next/no-img-element -- object URL */
+              <img src={snapPreview} alt={tPhoto("alt")} className="size-full object-cover" />
+            )}
+          </CustomizationTile>
+        </div>
 
-              {/* Customization tiles */}
-              <div className="mb-4 grid grid-cols-4 gap-2">
-                <CustomizationTile
-                  icon={Fingerprint}
-                  filled={!!selectedMark}
-                  onClick={() => setGlyphOpen(true)}
-                  ariaLabel={selectedMark ? tGlyph("changeAria") : tGlyph("addAria")}
-                >
-                  {selectedMark && <GlyphPreview mark={selectedMark} className="size-full p-2" />}
-                </CustomizationTile>
-                <CollectionSheet
-                  value={collectionIds}
-                  onChange={setCollectionIds}
-                  collections={collections}
-                />
-                <CustomizationTile
-                  icon={Users}
-                  filled={soulIds.length > 0}
-                  onClick={() => setSoulsOpen(true)}
-                  ariaLabel={soulIds.length > 0 ? tSouls("selectedAria", { count: soulIds.length }) : tSouls("addAria")}
-                >
-                  {soulIds.length > 0 && (
-                    <span className="text-xs font-medium text-muted-foreground">{soulIds.length}</span>
-                  )}
-                </CustomizationTile>
-                <CustomizationTile
-                  icon={Image}
-                  filled={!!snapPreview}
-                  onClick={() => {
-                    if (snapPreview) {
-                      clearSnap()
-                    } else {
-                      fileInputRef.current?.click()
-                    }
-                  }}
-                  ariaLabel={snapPreview ? tPhoto("removeAria") : tPhoto("addAria")}
-                >
-                  {snapPreview && (
-                    /* eslint-disable-next-line @next/next/no-img-element -- object URL */
-                    <img src={snapPreview} alt={tPhoto("alt")} className="size-full object-cover" />
-                  )}
-                </CustomizationTile>
-              </div>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          aria-hidden="true"
+          tabIndex={-1}
+          onChange={(e) => {
+            void handleFileChange(e.target.files)
+            e.target.value = ""
+          }}
+        />
 
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                aria-hidden="true"
-                tabIndex={-1}
-                onChange={(e) => {
-                  void handleFileChange(e.target.files)
-                  e.target.value = ""
-                }}
-              />
-
-              {/* Footer */}
-              <div className="flex items-center justify-between">
-                <VisibilityPicker value={visibility} onChange={setVisibility} />
-                <Button
-                  variant="default"
-                  size="icon"
-                  disabled={!name.trim() || saving || snapUploading}
-                  onClick={() => void handleSubmit()}
-                  aria-label={t("save")}
-                  className="size-9 rounded-full"
-                >
-                  <Check className="size-5" aria-hidden />
-                </Button>
-              </div>
-            </motion.section>
-          </>
-        )}
-      </AnimatePresence>
+        {/* Footer */}
+        <div className="flex items-center justify-between">
+          <VisibilityPicker value={visibility} onChange={setVisibility} />
+          <Button
+            variant="default"
+            size="icon"
+            disabled={!name.trim() || saving || snapUploading}
+            onClick={() => void handleSubmit()}
+            aria-label={t("save")}
+            className="size-9 rounded-full"
+          >
+            <Check className="size-5" aria-hidden />
+          </Button>
+        </div>
+      </section>
 
       {/* Dialogs / sheets (unchanged) */}
       <DatePickerDialog
