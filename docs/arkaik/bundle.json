@@ -1685,6 +1685,62 @@
       ]
     },
     {
+      "id": "V-admin-domains",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Admin · Domains",
+      "description": "Back-office domain management (#518). Admin-only. Lists every domain with its current glyph thumbnail; a per-domain editor edits name + description (the domains.label column) and uploads/replaces the domain's glyph. The glyph reuses the stroke-only SVG pipeline (svgToStrokes + scale/recenter/flip adjust baked into geometry) shared with the glyph uploader. Text edits update the DB fallback only — localized domain names/labels still come from the client i18n catalogs; the glyph is language-neutral and newly DB-sourced. All mutations go through is_admin-gated SECURITY DEFINER RPCs.",
+      "status": "development",
+      "platforms": [
+        "web"
+      ]
+    },
+    {
+      "id": "API-admin-list-domains",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "RPC admin_list_domains",
+      "description": "is_admin-gated SECURITY DEFINER RPC. Returns every domain (id, slug, name, label, default_glyph_id) left-joined to its glyph geometry (strokes, view_box), ordered by name. The admin Domains list + editor read path.",
+      "status": "development",
+      "platforms": [
+        "web"
+      ]
+    },
+    {
+      "id": "API-admin-update-domain",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "RPC admin_update_domain",
+      "description": "is_admin-gated SECURITY DEFINER RPC. Updates a domain's name and label (description); trims input and rejects an empty name (bad_name) or unknown domain (not_found).",
+      "status": "development",
+      "platforms": [
+        "web"
+      ]
+    },
+    {
+      "id": "API-admin-set-domain-glyph",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "RPC admin_set_domain_glyph",
+      "description": "is_admin-gated SECURITY DEFINER RPC. Sets/replaces a domain's glyph in place: when default_glyph_id is null it inserts a system-owned (NULL user_id), shapeless glyph and links it; otherwise it overwrites that glyph row's strokes/view_box (same glyph_id — no orphans, and every consumer updates). Rejects empty strokes (empty_glyph) or unknown domain (not_found).",
+      "status": "development",
+      "platforms": [
+        "web"
+      ]
+    },
+    {
+      "id": "DM-v-domains-with-glyph",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "v_domains_with_glyph",
+      "description": "Postgres view (security_invoker): one row per domain — id, slug, name, label, default_glyph_id — left-joined to its glyph's strokes + view_box. Domain glyphs are system-owned (NULL user_id) so they read under the widened glyphs SELECT policy. Web reads this via useDomainGlyphs to render each domain's glyph beside its name; also available to iOS.",
+      "status": "development",
+      "platforms": [
+        "web",
+        "ios"
+      ]
+    },
+    {
       "id": "API-admin-list-glyph-submissions",
       "project_id": "pebbles",
       "species": "api-endpoint",
@@ -3866,6 +3922,90 @@
       "source_id": "API-publish-admin-glyph",
       "target_id": "DM-glyph-submissions",
       "edge_type": "queries"
+    },
+    {
+      "id": "e-V-admin-domains-API-admin-list-domains",
+      "project_id": "pebbles",
+      "source_id": "V-admin-domains",
+      "target_id": "API-admin-list-domains",
+      "edge_type": "calls"
+    },
+    {
+      "id": "e-V-admin-domains-API-admin-update-domain",
+      "project_id": "pebbles",
+      "source_id": "V-admin-domains",
+      "target_id": "API-admin-update-domain",
+      "edge_type": "calls"
+    },
+    {
+      "id": "e-V-admin-domains-API-admin-set-domain-glyph",
+      "project_id": "pebbles",
+      "source_id": "V-admin-domains",
+      "target_id": "API-admin-set-domain-glyph",
+      "edge_type": "calls"
+    },
+    {
+      "id": "e-V-admin-domains-DM-domain",
+      "project_id": "pebbles",
+      "source_id": "V-admin-domains",
+      "target_id": "DM-domain",
+      "edge_type": "displays"
+    },
+    {
+      "id": "e-V-admin-domains-DM-glyphs",
+      "project_id": "pebbles",
+      "source_id": "V-admin-domains",
+      "target_id": "DM-glyphs",
+      "edge_type": "displays"
+    },
+    {
+      "id": "e-API-admin-list-domains-DM-domain",
+      "project_id": "pebbles",
+      "source_id": "API-admin-list-domains",
+      "target_id": "DM-domain",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-admin-list-domains-DM-glyphs",
+      "project_id": "pebbles",
+      "source_id": "API-admin-list-domains",
+      "target_id": "DM-glyphs",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-admin-update-domain-DM-domain",
+      "project_id": "pebbles",
+      "source_id": "API-admin-update-domain",
+      "target_id": "DM-domain",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-admin-set-domain-glyph-DM-domain",
+      "project_id": "pebbles",
+      "source_id": "API-admin-set-domain-glyph",
+      "target_id": "DM-domain",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-admin-set-domain-glyph-DM-glyphs",
+      "project_id": "pebbles",
+      "source_id": "API-admin-set-domain-glyph",
+      "target_id": "DM-glyphs",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-V-pebble-detail-DM-v-domains-with-glyph",
+      "project_id": "pebbles",
+      "source_id": "V-pebble-detail",
+      "target_id": "DM-v-domains-with-glyph",
+      "edge_type": "displays"
+    },
+    {
+      "id": "e-V-quick-pebble-editor-DM-v-domains-with-glyph",
+      "project_id": "pebbles",
+      "source_id": "V-quick-pebble-editor",
+      "target_id": "DM-v-domains-with-glyph",
+      "edge_type": "displays"
     },
     {
       "id": "e-F-manage-glyphs-V-glyph-swap-drawer",
