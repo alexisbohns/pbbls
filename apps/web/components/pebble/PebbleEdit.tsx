@@ -21,8 +21,9 @@ import {
   useSnapStaging,
 } from "@/components/pebble/PebbleEditPicture"
 import { PebbleEditSoulsGrid } from "@/components/pebble/PebbleEditSoulsGrid"
-import { Sheet } from "@/components/ui/sheet"
-import { ValencePickerBody } from "@/components/record/ValenceIntensityGrid"
+import { SheetTrigger } from "@/components/ui/sheet"
+import { PickerSheet } from "@/components/ui/PickerSheet"
+import { ValenceGrid } from "@/components/record/ValenceIntensityGrid"
 import { EmotionPickerSheet } from "@/components/record/EmotionPicker"
 import { SoulsSheet } from "@/components/record/SoulsSheet"
 import {
@@ -65,6 +66,7 @@ export function PebbleEdit({
 }: PebbleEditProps) {
   const t = useTranslations("pebble.edit")
   const tPebble = useTranslations("pebble")
+  const tValencePicker = useTranslations("record.valencePicker")
   const router = useRouter()
 
   const { draft, setField, setFields, isDirty, buildPayload } =
@@ -146,8 +148,6 @@ export function PebbleEdit({
   // on select, close it and open the Emotion picker prefilled with the new
   // valence/intensity; on emotion-pick, write everything into the draft in
   // one dispatch.
-  const handleGlyphTap = () => setValenceOpen(true)
-
   const handleValenceSelect = (
     intensity: Pebble["intensity"],
     positiveness: Pebble["positiveness"],
@@ -193,28 +193,33 @@ export function PebbleEdit({
           onPick={(file) => void snap.pickFile(file)}
           onRemove={() => void snap.remove()}
         />
-        <Sheet open={valenceOpen} onOpenChange={setValenceOpen}>
-          <button
-            type="button"
-            onClick={handleGlyphTap}
-            aria-label={tPebble("editIntensityAria")}
-            className="mt-4 cursor-pointer rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <PebbleFramed
-              pebble={draftPebble}
-              mark={draftMark}
-              tier="detail"
-              className="size-24 rotate-[7.52deg]"
-            />
-          </button>
+        <PickerSheet
+          open={valenceOpen}
+          onOpenChange={setValenceOpen}
+          title={tValencePicker("title")}
+          closeLabel={tValencePicker("close")}
+          trigger={
+            <SheetTrigger
+              aria-label={tPebble("editIntensityAria")}
+              className="mt-4 cursor-pointer rounded-2xl outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            >
+              <PebbleFramed
+                pebble={draftPebble}
+                mark={draftMark}
+                tier="detail"
+                className="size-24 rotate-[7.52deg]"
+              />
+            </SheetTrigger>
+          }
+        >
           {valenceOpen && (
-            <ValencePickerBody
+            <ValenceGrid
               intensity={draft.intensity}
               valence={draft.positiveness}
               onSelect={handleValenceSelect}
             />
           )}
-        </Sheet>
+        </PickerSheet>
       </section>
 
       <PebbleEditTitle

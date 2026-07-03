@@ -551,7 +551,9 @@
       "pickerLabel": "Domains",
       "pickerAria": "Life domains",
       "pickAria": "Pick domains",
-      "selectedAria": "Domains: {names}"
+      "selectedAria": "Domains: {names}",
+      "title": "Domains",
+      "close": "Close"
     },
     "emotion": {
       "label": "Emotion",
@@ -571,11 +573,14 @@
       "selectedAria": "Collections: {names}",
       "tilePickAria": "Add to collection",
       "tileSelectedAria": "{count, plural, one {# collection selected} other {# collections selected}}",
-      "empty": "No collections yet"
+      "empty": "No collections yet",
+      "title": "Collections",
+      "close": "Close"
     },
     "souls": {
       "label": "Souls",
       "title": "Souls",
+      "close": "Close",
       "addAria": "Add souls",
       "selectedAria": "{count, plural, one {# soul selected} other {# souls selected}}",
       "selectedListAria": "Selected souls",
@@ -623,6 +628,7 @@
     },
     "valencePicker": {
       "title": "Choose a valence",
+      "close": "Close",
       "optionAria": "{section}, {polarity}",
       "highlight": "Highlight",
       "neutral": "Neutral",
