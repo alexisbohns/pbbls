@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { Loader2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { Pebble, Soul } from "@/lib/types"
@@ -50,8 +50,6 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
   // no setState-during-render, no useEffect setState ping-pong.
   const [focusedKey, setFocusedKey] = useState<string>(() => isoWeekKey(today))
   const [selectedPebbleId, setSelectedPebbleId] = useState<string | null>(null)
-  const [editorExpanded, setEditorExpanded] = useState(false)
-  const scrollTargetRef = useRef<string | null>(null)
 
   const focusedEntry = entries.find((e) => e.weekStartIso === focusedKey)
     ?? (entries.length > 0 ? closestEntry(entries, isoWeekStart(today)) : undefined)
@@ -82,17 +80,6 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
   const setFocusedFromDate = useCallback((date: Date) => {
     setFocusedKey(isoWeekKey(date))
   }, [])
-
-  const handlePebbleCreated = useCallback((pebble: Pebble) => {
-    // If the new pebble landed in a different week than the focused one,
-    // jump focus to that week so the user sees their just-created row.
-    const pebbleWeek = isoWeekKey(new Date(pebble.happened_at))
-    if (pebbleWeek !== focusedKey) setFocusedKey(pebbleWeek)
-    scrollTargetRef.current = pebble.id
-    setSelectedPebbleId(pebble.id)
-  }, [focusedKey])
-
-  const handleCarvePebble = useCallback(() => setEditorExpanded(true), [])
 
   const handleClosePeek = useCallback(() => setSelectedPebbleId(null), [])
 
@@ -141,15 +128,9 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
           souls={souls}
           onFocusChange={setFocusedFromDate}
           onSelectPebble={setSelectedPebbleId}
-          onCarvePebble={handleCarvePebble}
-          scrollTargetRef={scrollTargetRef}
         />
       </div>
-      <PathBottomDock
-        editorExpanded={editorExpanded}
-        onEditorExpandedChange={setEditorExpanded}
-        onPebbleCreated={handlePebbleCreated}
-      />
+      <PathBottomDock />
       <PebblePeek
         pebbleId={selectedPebbleId}
         onClose={handleClosePeek}

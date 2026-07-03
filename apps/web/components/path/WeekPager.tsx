@@ -1,7 +1,6 @@
 "use client"
 
 import { motion, useReducedMotion, type PanInfo } from "framer-motion"
-import { type MutableRefObject } from "react"
 import { useMediaQuery } from "@/lib/hooks/useMediaQuery"
 import type { Soul } from "@/lib/types"
 import { WeekPath } from "@/components/path/WeekPath"
@@ -16,8 +15,6 @@ type WeekPagerProps = {
   souls: Soul[]
   onFocusChange: (weekStart: Date) => void
   onSelectPebble: (id: string) => void
-  onCarvePebble: () => void
-  scrollTargetRef: MutableRefObject<string | null>
 }
 
 export function WeekPager({
@@ -26,8 +23,6 @@ export function WeekPager({
   souls,
   onFocusChange,
   onSelectPebble,
-  onCarvePebble,
-  scrollTargetRef,
 }: WeekPagerProps) {
   const focusedIndex = weekIndex(entries, focused)
   const prefersReducedMotion = useReducedMotion()
@@ -81,8 +76,6 @@ export function WeekPager({
                 souls={souls}
                 isFocused={i === focusedIndex}
                 onSelectPebble={onSelectPebble}
-                onCarvePebble={onCarvePebble}
-                scrollTargetRef={scrollTargetRef}
               />
             ) : null}
           </div>

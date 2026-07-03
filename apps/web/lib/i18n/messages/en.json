@@ -540,6 +540,7 @@
   },
   "record": {
     "srTitle": "Record a pebble",
+    "back": "Back to Path",
     "editorAria": "Pebble editor",
     "triggerAria": "What happened?",
     "namePlaceholder": "What happened?",

@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { Compass } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { DOMAINS, type Domain } from "@/lib/config/domains"
@@ -40,13 +40,17 @@ function DomainOption({ domain, glyph, selected, onSelect }: {
 }
 
 /**
- * Multi-select domain picker presented in the shared drawer. Toggling a row
- * keeps the sheet open; the header `X` (or a backdrop tap) dismisses it.
+ * Single-select domain picker presented in the shared drawer. Picking a row
+ * commits it and dismisses the sheet (mirrors the emotion picker); re-tapping
+ * the selected row clears it. The interface stays array-based (`value`/
+ * `onChange` over `string[]`) so the create payload's `domain_ids` is unchanged,
+ * but at most one id is ever held.
  */
 export function DomainSheet({ value, onChange }: DomainSheetProps) {
   const t = useTranslations("record.domain")
   const glyphs = useDomainGlyphs()
   const localizedNames = useLocalizedDomainMap()
+  const [open, setOpen] = useState(false)
   const selectedDomains = DOMAINS.filter((d) => value.includes(d.id))
   const selectedNames = useMemo(
     () => selectedDomains.map((d) => localizedNames.get(d.slug) ?? d.name),
@@ -54,13 +58,14 @@ export function DomainSheet({ value, onChange }: DomainSheetProps) {
   )
 
   const toggle = (id: string) => {
-    onChange(
-      value.includes(id) ? value.filter((d) => d !== id) : [...value, id],
-    )
+    onChange(value.includes(id) ? [] : [id])
+    setOpen(false)
   }
 
   return (
     <PickerSheet
+      open={open}
+      onOpenChange={setOpen}
       title={t("title")}
       closeLabel={t("close")}
       trigger={
