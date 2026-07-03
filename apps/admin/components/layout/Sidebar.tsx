@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BarChart3, Megaphone, Sparkles, Store } from "lucide-react"
+import { BarChart3, Megaphone, Shapes, Sparkles, Store } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -26,6 +26,10 @@ const LOG_ITEMS = [
 
 const PEBBLESTORE_ITEMS = [
   { href: "/pebblestore/glyphs", label: "Glyph moderation", icon: Store },
+] as const
+
+const REFERENCE_ITEMS = [
+  { href: "/domains", label: "Domains", icon: Shapes },
 ] as const
 
 export function AppSidebar() {
@@ -60,6 +64,24 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {PEBBLESTORE_ITEMS.map(({ href, label, icon: Icon }) => {
+                const active = pathname === href || pathname.startsWith(`${href}/`)
+                return (
+                  <SidebarMenuItem key={href}>
+                    <SidebarMenuButton render={<Link href={href} />} isActive={active}>
+                      <Icon aria-hidden />
+                      <span>{label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Reference</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {REFERENCE_ITEMS.map(({ href, label, icon: Icon }) => {
                 const active = pathname === href || pathname.startsWith(`${href}/`)
                 return (
                   <SidebarMenuItem key={href}>
