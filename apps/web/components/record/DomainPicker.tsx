@@ -5,14 +5,17 @@ import { useTranslations } from "next-intl"
 import { DOMAINS, type Domain } from "@/lib/config/domains"
 import { useDomainLocalized } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
+import { useDomainGlyphs, type DomainGlyph as DomainGlyphData } from "@/lib/data/useDomainGlyphs"
+import { DomainGlyph } from "@/components/record/DomainGlyph"
 
 type DomainPickerProps = {
   value: string[]
   onChange: (ids: string[]) => void
 }
 
-function DomainTile({ domain, selected, onToggle }: {
+function DomainTile({ domain, glyph, selected, onToggle }: {
   domain: Domain
+  glyph?: DomainGlyphData
   selected: boolean
   onToggle: () => void
 }) {
@@ -24,20 +27,29 @@ function DomainTile({ domain, selected, onToggle }: {
         aria-pressed={selected}
         onClick={onToggle}
         className={cn(
-          "flex w-full flex-col items-start rounded-lg px-3 py-2 text-sm transition-all duration-100 active:scale-[0.97] outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
+          "flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-100 active:scale-[0.97] outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
           selected
             ? "bg-primary/10 text-primary ring-2 ring-primary"
             : "bg-muted/50 hover:bg-muted",
         )}
       >
-        <span className="font-medium">{name}</span>
-        <span
-          className={cn(
-            "text-xs",
-            selected ? "text-primary/70" : "text-muted-foreground",
-          )}
-        >
-          {label}
+        {glyph ? (
+          <DomainGlyph
+            strokes={glyph.strokes}
+            viewBox={glyph.viewBox}
+            className="size-8 shrink-0"
+          />
+        ) : null}
+        <span className="flex min-w-0 flex-col items-start">
+          <span className="font-medium">{name}</span>
+          <span
+            className={cn(
+              "text-xs",
+              selected ? "text-primary/70" : "text-muted-foreground",
+            )}
+          >
+            {label}
+          </span>
         </span>
       </button>
     </li>
@@ -46,6 +58,7 @@ function DomainTile({ domain, selected, onToggle }: {
 
 export function DomainPicker({ value, onChange }: DomainPickerProps) {
   const t = useTranslations("record.domain")
+  const glyphs = useDomainGlyphs()
 
   const toggle = useCallback(
     (id: string) => {
@@ -68,6 +81,7 @@ export function DomainPicker({ value, onChange }: DomainPickerProps) {
           <DomainTile
             key={domain.id}
             domain={domain}
+            glyph={glyphs?.get(domain.slug)}
             selected={value.includes(domain.id)}
             onToggle={() => toggle(domain.id)}
           />

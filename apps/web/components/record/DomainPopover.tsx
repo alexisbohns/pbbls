@@ -12,23 +12,31 @@ import {
   PopoverContent,
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
+import { useDomainGlyphs, type DomainGlyph as DomainGlyphData } from "@/lib/data/useDomainGlyphs"
+import { DomainGlyph } from "@/components/record/DomainGlyph"
 
 type DomainPopoverProps = {
   value: string[]
   onChange: (ids: string[]) => void
 }
 
-function DomainOption({ domain, selected, onSelect }: {
+function DomainOption({ domain, glyph, selected, onSelect }: {
   domain: Domain
+  glyph?: DomainGlyphData
   selected: boolean
   onSelect: () => void
 }) {
   const { name, label } = useDomainLocalized(domain)
   return (
     <SelectableItem selected={selected} onSelect={onSelect}>
-      <span className="flex flex-col items-start">
-        <span>{name}</span>
-        <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="flex items-center gap-2">
+        {glyph ? (
+          <DomainGlyph strokes={glyph.strokes} viewBox={glyph.viewBox} className="size-6 shrink-0" />
+        ) : null}
+        <span className="flex flex-col items-start">
+          <span>{name}</span>
+          <span className="text-xs text-muted-foreground">{label}</span>
+        </span>
       </span>
     </SelectableItem>
   )
@@ -36,6 +44,7 @@ function DomainOption({ domain, selected, onSelect }: {
 
 export function DomainPopover({ value, onChange }: DomainPopoverProps) {
   const t = useTranslations("record.domain")
+  const glyphs = useDomainGlyphs()
   const localizedNames = useLocalizedDomainMap()
   const selectedDomains = DOMAINS.filter((d) => value.includes(d.id))
   const selectedNames = useMemo(
@@ -70,6 +79,7 @@ export function DomainPopover({ value, onChange }: DomainPopoverProps) {
           <DomainOption
             key={domain.id}
             domain={domain}
+            glyph={glyphs?.get(domain.slug)}
             selected={value.includes(domain.id)}
             onSelect={() => toggle(domain.id)}
           />
