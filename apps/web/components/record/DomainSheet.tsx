@@ -6,16 +6,13 @@ import { useTranslations } from "next-intl"
 import { DOMAINS, type Domain } from "@/lib/config/domains"
 import { useDomainLocalized } from "@/lib/i18n"
 import { SelectableItem } from "@/components/ui/SelectableItem"
-import {
-  Popover,
-  PopoverTrigger,
-  PopoverContent,
-} from "@/components/ui/popover"
+import { PickerSheet } from "@/components/ui/PickerSheet"
+import { SheetTrigger } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { useDomainGlyphs, type DomainGlyph as DomainGlyphData } from "@/lib/data/useDomainGlyphs"
 import { DomainGlyph } from "@/components/record/DomainGlyph"
 
-type DomainPopoverProps = {
+type DomainSheetProps = {
   value: string[]
   onChange: (ids: string[]) => void
 }
@@ -28,7 +25,7 @@ function DomainOption({ domain, glyph, selected, onSelect }: {
 }) {
   const { name, label } = useDomainLocalized(domain)
   return (
-    <SelectableItem selected={selected} onSelect={onSelect}>
+    <SelectableItem selected={selected} onSelect={onSelect} className="py-2">
       <span className="flex items-center gap-2">
         {glyph ? (
           <DomainGlyph strokes={glyph.strokes} viewBox={glyph.viewBox} className="size-6 shrink-0" />
@@ -42,7 +39,11 @@ function DomainOption({ domain, glyph, selected, onSelect }: {
   )
 }
 
-export function DomainPopover({ value, onChange }: DomainPopoverProps) {
+/**
+ * Multi-select domain picker presented in the shared drawer. Toggling a row
+ * keeps the sheet open; the header `X` (or a backdrop tap) dismisses it.
+ */
+export function DomainSheet({ value, onChange }: DomainSheetProps) {
   const t = useTranslations("record.domain")
   const glyphs = useDomainGlyphs()
   const localizedNames = useLocalizedDomainMap()
@@ -59,22 +60,25 @@ export function DomainPopover({ value, onChange }: DomainPopoverProps) {
   }
 
   return (
-    <Popover>
-      <PopoverTrigger
-        className={cn(
-          "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
-          value.length > 0
-            ? "border border-border bg-background text-foreground"
-            : "border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-muted-foreground/50",
-        )}
-        aria-label={value.length > 0 ? t("selectedAria", { names: selectedNames.join(", ") }) : t("pickAria")}
-      >
-        <Compass className="size-3.5" aria-hidden />
-        {selectedDomains.length > 0
-          ? selectedNames.join(", ")
-          : t("label")}
-      </PopoverTrigger>
-      <PopoverContent align="start" className="min-w-[180px]">
+    <PickerSheet
+      title={t("title")}
+      closeLabel={t("close")}
+      trigger={
+        <SheetTrigger
+          className={cn(
+            "inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-medium transition-colors",
+            value.length > 0
+              ? "border border-border bg-background text-foreground"
+              : "border border-dashed border-muted-foreground/30 text-muted-foreground hover:border-muted-foreground/50",
+          )}
+          aria-label={value.length > 0 ? t("selectedAria", { names: selectedNames.join(", ") }) : t("pickAria")}
+        >
+          <Compass className="size-3.5" aria-hidden />
+          {selectedDomains.length > 0 ? selectedNames.join(", ") : t("label")}
+        </SheetTrigger>
+      }
+    >
+      <div className="flex flex-col gap-0.5">
         {DOMAINS.map((domain) => (
           <DomainOption
             key={domain.id}
@@ -84,8 +88,8 @@ export function DomainPopover({ value, onChange }: DomainPopoverProps) {
             onSelect={() => toggle(domain.id)}
           />
         ))}
-      </PopoverContent>
-    </Popover>
+      </div>
+    </PickerSheet>
   )
 }
 

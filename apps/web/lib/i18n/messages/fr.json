@@ -551,7 +551,9 @@
       "pickerLabel": "Domaines",
       "pickerAria": "Domaines de vie",
       "pickAria": "Choisir des domaines",
-      "selectedAria": "Domaines : {names}"
+      "selectedAria": "Domaines : {names}",
+      "title": "Domaines",
+      "close": "Fermer"
     },
     "emotion": {
       "label": "Émotion",
@@ -571,11 +573,14 @@
       "selectedAria": "Collections : {names}",
       "tilePickAria": "Ajouter à une collection",
       "tileSelectedAria": "{count, plural, one {# collection sélectionnée} other {# collections sélectionnées}}",
-      "empty": "Aucune collection pour l'instant"
+      "empty": "Aucune collection pour l'instant",
+      "title": "Collections",
+      "close": "Fermer"
     },
     "souls": {
       "label": "Âmes",
       "title": "Âmes",
+      "close": "Fermer",
       "addAria": "Ajouter des âmes",
       "selectedAria": "{count, plural, one {# âme sélectionnée} other {# âmes sélectionnées}}",
       "selectedListAria": "Âmes sélectionnées",
@@ -623,6 +628,7 @@
     },
     "valencePicker": {
       "title": "Choisir une valence",
+      "close": "Fermer",
       "optionAria": "{section}, {polarity}",
       "highlight": "Temps fort",
       "neutral": "Neutre",

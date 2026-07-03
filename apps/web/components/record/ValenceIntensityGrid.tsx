@@ -3,13 +3,8 @@
 import { useEffect, useId, useRef, useState } from "react"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet"
+import { PickerSheet } from "@/components/ui/PickerSheet"
+import { SheetTrigger } from "@/components/ui/sheet"
 
 type Intensity = 1 | 2 | 3
 type Valence = -1 | 0 | 1
@@ -61,6 +56,10 @@ function shapeUrl(size: Intensity, polarity: Valence): string {
   return `${SHAPE_BASE_URL}/${SHAPE_INTENSITY[size]}-${SHAPE_POLARITY[polarity]}.svg`
 }
 
+/**
+ * Self-contained valence/intensity picker: a chip trigger that opens the
+ * shared drawer hosting the 3×3 grid. Selection commits both axes and closes.
+ */
 export function ValenceIntensityGrid({
   intensity,
   valence,
@@ -76,21 +75,27 @@ export function ValenceIntensityGrid({
   const valenceLabel = tPicker(VALENCE_KEY[valence]).toLowerCase()
 
   return (
-    <Sheet open={open} onOpenChange={setOpen}>
-      <SheetTrigger
-        className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
-        aria-label={tIntensity("ariaSelected", {
-          intensity: tIntensity(INTENSITY_KEY[intensity]),
-          valence: tValence(VALENCE_KEY[valence]),
-        })}
-      >
-        <span>{`${longIntensity} ${valenceLabel}`}</span>
-      </SheetTrigger>
-
-      {/* Remount the picker body each time the sheet opens so the initial
-          focus target is always derived fresh from the current selection. */}
+    <PickerSheet
+      open={open}
+      onOpenChange={setOpen}
+      title={tPicker("title")}
+      closeLabel={tPicker("close")}
+      trigger={
+        <SheetTrigger
+          className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+          aria-label={tIntensity("ariaSelected", {
+            intensity: tIntensity(INTENSITY_KEY[intensity]),
+            valence: tValence(VALENCE_KEY[valence]),
+          })}
+        >
+          <span>{`${longIntensity} ${valenceLabel}`}</span>
+        </SheetTrigger>
+      }
+    >
+      {/* Remount the grid each time the sheet opens so the initial focus
+          target is always derived fresh from the current selection. */}
       {open && (
-        <ValencePickerBody
+        <ValenceGrid
           intensity={intensity}
           valence={valence}
           onSelect={(size, polarity) => {
@@ -100,26 +105,29 @@ export function ValenceIntensityGrid({
           }}
         />
       )}
-    </Sheet>
+    </PickerSheet>
   )
 }
 
-type ValencePickerBodyProps = {
+type ValenceGridProps = {
   intensity: Intensity
   valence: Valence
   onSelect: (size: Intensity, polarity: Valence) => void
 }
 
-// Exported so callers can host the picker inside their own controlled Sheet
-// when they want a different trigger surface (e.g. PebbleDetail opens it from
-// the pebble visual itself instead of a separate chip button).
-export function ValencePickerBody({
+/**
+ * The 3 rows × 3 cells valence/intensity grid body. Rendered inside a
+ * `PickerSheet` — either via the self-contained `ValenceIntensityGrid` chip
+ * trigger, or hosted directly by callers with a different trigger surface
+ * (e.g. PebbleDetail opens it from the pebble visual itself).
+ */
+export function ValenceGrid({
   intensity,
   valence,
   onSelect,
-}: ValencePickerBodyProps) {
+}: ValenceGridProps) {
   const tPicker = useTranslations("record.valencePicker")
-  const titleId = useId()
+  const groupId = useId()
 
   // cellsRef[row][col] where row = polarity index, col = size index.
   const cellsRef = useRef<Array<Array<HTMLButtonElement | null>>>(
@@ -144,106 +152,100 @@ export function ValencePickerBody({
   }
 
   return (
-    <SheetContent
-      aria-labelledby={titleId}
-      className="motion-reduce:transition-none"
-    >
-      <SheetHeader>
-        <SheetTitle id={titleId}>{tPicker("title")}</SheetTitle>
-      </SheetHeader>
+    <div role="group" aria-labelledby={groupId} className="flex flex-col gap-6">
+      <span id={groupId} className="sr-only">
+        {tPicker("title")}
+      </span>
+      {SIZE_GROUPS.map((size, colIndex) => (
+        <section key={size} className="flex flex-col gap-3">
+          <header className="flex flex-col gap-1">
+            <h3 className="font-heading text-sm font-semibold text-foreground">
+              {tPicker(`${INTENSITY_KEY[size]}.name`)}
+            </h3>
+            <p className="text-xs text-muted-foreground">
+              {tPicker(`${INTENSITY_KEY[size]}.description`)}
+            </p>
+          </header>
 
-      <div role="group" aria-labelledby={titleId} className="flex flex-col gap-6">
-        {SIZE_GROUPS.map((size, colIndex) => (
-          <section key={size} className="flex flex-col gap-3">
-            <header className="flex flex-col gap-1">
-              <h3 className="font-heading text-sm font-semibold text-foreground">
-                {tPicker(`${INTENSITY_KEY[size]}.name`)}
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                {tPicker(`${INTENSITY_KEY[size]}.description`)}
-              </p>
-            </header>
-
-            <div className="grid grid-cols-3 gap-2">
-              {POLARITIES.map((polarity, rowIndex) => {
-                const selected = intensity === size && valence === polarity
-                const isFocusTarget =
-                  focus.row === rowIndex && focus.col === colIndex
-                return (
-                  <button
-                    key={polarity}
-                    ref={(el) => {
-                      cellsRef.current[rowIndex]![colIndex] = el
+          <div className="grid grid-cols-3 gap-2">
+            {POLARITIES.map((polarity, rowIndex) => {
+              const selected = intensity === size && valence === polarity
+              const isFocusTarget =
+                focus.row === rowIndex && focus.col === colIndex
+              return (
+                <button
+                  key={polarity}
+                  ref={(el) => {
+                    cellsRef.current[rowIndex]![colIndex] = el
+                  }}
+                  type="button"
+                  role="radio"
+                  aria-checked={selected}
+                  tabIndex={isFocusTarget ? 0 : -1}
+                  onClick={() => onSelect(size, polarity)}
+                  onKeyDown={(e) => {
+                    switch (e.key) {
+                      case "ArrowRight":
+                        e.preventDefault()
+                        moveFocus(0, 1)
+                        break
+                      case "ArrowLeft":
+                        e.preventDefault()
+                        moveFocus(0, -1)
+                        break
+                      case "ArrowDown":
+                        e.preventDefault()
+                        moveFocus(1, 0)
+                        break
+                      case "ArrowUp":
+                        e.preventDefault()
+                        moveFocus(-1, 0)
+                        break
+                      case " ":
+                      case "Enter":
+                        e.preventDefault()
+                        onSelect(size, polarity)
+                        break
+                    }
+                  }}
+                  aria-label={tPicker("optionAria", {
+                    section: tPicker(`${INTENSITY_KEY[size]}.name`),
+                    polarity: tPicker(VALENCE_KEY[polarity]),
+                  })}
+                  className={cn(
+                    "flex flex-col items-center gap-2 rounded-xl border px-2 py-3 outline-none transition-colors",
+                    "focus-visible:ring-2 focus-visible:ring-ring",
+                    selected
+                      ? "border-primary bg-primary/10 text-primary"
+                      : "border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground",
+                  )}
+                >
+                  {/* SVG rendered as a CSS mask so its color follows
+                      the button's text color (muted-foreground when
+                      idle, primary when selected). */}
+                  <span
+                    aria-hidden
+                    className="size-12 bg-current"
+                    style={{
+                      WebkitMaskImage: `url(${shapeUrl(size, polarity)})`,
+                      maskImage: `url(${shapeUrl(size, polarity)})`,
+                      WebkitMaskRepeat: "no-repeat",
+                      maskRepeat: "no-repeat",
+                      WebkitMaskPosition: "center",
+                      maskPosition: "center",
+                      WebkitMaskSize: "contain",
+                      maskSize: "contain",
                     }}
-                    type="button"
-                    role="radio"
-                    aria-checked={selected}
-                    tabIndex={isFocusTarget ? 0 : -1}
-                    onClick={() => onSelect(size, polarity)}
-                    onKeyDown={(e) => {
-                      switch (e.key) {
-                        case "ArrowRight":
-                          e.preventDefault()
-                          moveFocus(0, 1)
-                          break
-                        case "ArrowLeft":
-                          e.preventDefault()
-                          moveFocus(0, -1)
-                          break
-                        case "ArrowDown":
-                          e.preventDefault()
-                          moveFocus(1, 0)
-                          break
-                        case "ArrowUp":
-                          e.preventDefault()
-                          moveFocus(-1, 0)
-                          break
-                        case " ":
-                        case "Enter":
-                          e.preventDefault()
-                          onSelect(size, polarity)
-                          break
-                      }
-                    }}
-                    aria-label={tPicker("optionAria", {
-                      section: tPicker(`${INTENSITY_KEY[size]}.name`),
-                      polarity: tPicker(VALENCE_KEY[polarity]),
-                    })}
-                    className={cn(
-                      "flex flex-col items-center gap-2 rounded-xl border px-2 py-3 outline-none transition-colors",
-                      "focus-visible:ring-2 focus-visible:ring-ring",
-                      selected
-                        ? "border-primary bg-primary/10 text-primary"
-                        : "border-border bg-card text-muted-foreground hover:bg-muted hover:text-foreground",
-                    )}
-                  >
-                    {/* SVG rendered as a CSS mask so its color follows
-                        the button's text color (muted-foreground when
-                        idle, primary when selected). */}
-                    <span
-                      aria-hidden
-                      className="size-12 bg-current"
-                      style={{
-                        WebkitMaskImage: `url(${shapeUrl(size, polarity)})`,
-                        maskImage: `url(${shapeUrl(size, polarity)})`,
-                        WebkitMaskRepeat: "no-repeat",
-                        maskRepeat: "no-repeat",
-                        WebkitMaskPosition: "center",
-                        maskPosition: "center",
-                        WebkitMaskSize: "contain",
-                        maskSize: "contain",
-                      }}
-                    />
-                    <span className="text-xs font-medium">
-                      {tPicker(VALENCE_KEY[polarity])}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-          </section>
-        ))}
-      </div>
-    </SheetContent>
+                  />
+                  <span className="text-xs font-medium">
+                    {tPicker(VALENCE_KEY[polarity])}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </section>
+      ))}
+    </div>
   )
 }

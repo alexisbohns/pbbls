@@ -19,12 +19,12 @@ import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
 import { Button } from "@/components/ui/button"
 import { ValenceIntensityGrid } from "@/components/record/ValenceIntensityGrid"
 import { CustomizationTile } from "@/components/record/CustomizationTile"
-import { DomainPopover } from "@/components/record/DomainPopover"
+import { DomainSheet } from "@/components/record/DomainSheet"
 import {
   EmotionPickerSheet,
   useSelectedEmotionDisplay,
 } from "@/components/record/EmotionPicker"
-import { CollectionPopover } from "@/components/record/CollectionPopover"
+import { CollectionSheet } from "@/components/record/CollectionSheet"
 import { VisibilityPicker } from "@/components/record/VisibilityPicker"
 import { DatePickerDialog } from "@/components/record/DatePickerDialog"
 import { GlyphPickerDialog } from "@/components/record/GlyphPickerDialog"
@@ -327,7 +327,7 @@ export function QuickPebbleEditor({
 
               {/* Qualification pills */}
               <div className="mb-3 flex items-center gap-2">
-                <DomainPopover value={domainIds} onChange={setDomainIds} />
+                <DomainSheet value={domainIds} onChange={setDomainIds} />
                 <button
                   type="button"
                   onClick={() => setEmotionPickerOpen(true)}
@@ -373,7 +373,7 @@ export function QuickPebbleEditor({
                 >
                   {selectedMark && <GlyphPreview mark={selectedMark} className="size-full p-2" />}
                 </CustomizationTile>
-                <CollectionPopover
+                <CollectionSheet
                   value={collectionIds}
                   onChange={setCollectionIds}
                   collections={collections}

@@ -14,8 +14,9 @@ import {
 } from "@/components/pebble/PebbleDetailTiles"
 import { PebbleDetailSoulsGrid } from "@/components/pebble/PebbleDetailSoulsGrid"
 import { PebbleDetailAddToolbar } from "@/components/pebble/PebbleDetailAddToolbar"
-import { Sheet } from "@/components/ui/sheet"
-import { ValencePickerBody } from "@/components/record/ValenceIntensityGrid"
+import { SheetTrigger } from "@/components/ui/sheet"
+import { PickerSheet } from "@/components/ui/PickerSheet"
+import { ValenceGrid } from "@/components/record/ValenceIntensityGrid"
 import { SoulsSheet } from "@/components/record/SoulsSheet"
 import { cn } from "@/lib/utils"
 
@@ -49,6 +50,7 @@ export function PebbleDetail({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const t = useTranslations("pebble")
   const tVisibility = useTranslations("record.visibility")
+  const tValencePicker = useTranslations("record.valencePicker")
   const formatPeekDate = useFormatPeekDate()
   const formattedDate = formatPeekDate(pebble.happened_at)
 
@@ -159,41 +161,46 @@ export function PebbleDetail({
       </header>
 
       {/* Pebble visual (and snap if present) — opens valence/intensity sheet */}
-      <Sheet open={valenceOpen} onOpenChange={setValenceOpen}>
-        <button
-          type="button"
-          onClick={() => setValenceOpen(true)}
-          className="mx-auto mt-8 mb-4 block cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-2xl"
-          aria-label={t("editIntensityAria")}
-        >
-          {hasPicture ? (
-            <div className="relative mx-auto w-[240px]">
-              {/* eslint-disable-next-line @next/next/no-img-element -- base64 data URL, next/image optimization not applicable */}
-              <img
-                src={snap}
-                alt={t("photoAlt")}
-                className="aspect-square w-full rounded-2xl object-cover scale-90 -rotate-4"
-              />
+      <PickerSheet
+        open={valenceOpen}
+        onOpenChange={setValenceOpen}
+        title={tValencePicker("title")}
+        closeLabel={tValencePicker("close")}
+        trigger={
+          <SheetTrigger
+            className="mx-auto mt-8 mb-4 block cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-2xl"
+            aria-label={t("editIntensityAria")}
+          >
+            {hasPicture ? (
+              <div className="relative mx-auto w-[240px]">
+                {/* eslint-disable-next-line @next/next/no-img-element -- base64 data URL, next/image optimization not applicable */}
+                <img
+                  src={snap}
+                  alt={t("photoAlt")}
+                  className="aspect-square w-full rounded-2xl object-cover scale-90 -rotate-4"
+                />
+                <PebbleFramed
+                  pebble={pebble}
+                  mark={mark}
+                  tier="detail"
+                  className="absolute -right-4 -top-4 size-[100px] rotate-7"
+                  animateIn
+                />
+              </div>
+            ) : (
               <PebbleFramed
                 pebble={pebble}
                 mark={mark}
                 tier="detail"
-                className="absolute -right-4 -top-4 size-[100px] rotate-7"
+                className="mx-auto size-[100px]"
                 animateIn
               />
-            </div>
-          ) : (
-            <PebbleFramed
-              pebble={pebble}
-              mark={mark}
-              tier="detail"
-              className="mx-auto size-[100px]"
-              animateIn
-            />
-          )}
-        </button>
+            )}
+          </SheetTrigger>
+        }
+      >
         {valenceOpen && (
-          <ValencePickerBody
+          <ValenceGrid
             intensity={pebble.intensity}
             valence={pebble.positiveness}
             onSelect={(size, polarity) => {
@@ -202,7 +209,7 @@ export function PebbleDetail({
             }}
           />
         )}
-      </Sheet>
+      </PickerSheet>
 
       {/* Title */}
       <h1 className="text-center font-heading text-2xl font-semibold text-foreground">

@@ -2,14 +2,7 @@
 
 import { useMemo } from "react"
 import { useLocale, useTranslations } from "next-intl"
-import { X } from "lucide-react"
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetClose,
-} from "@/components/ui/sheet"
+import { PickerSheet } from "@/components/ui/PickerSheet"
 import { useEmotionsWithPalette, type EmotionWithPalette } from "@/lib/data/useEmotionsWithPalette"
 import {
   emotionCategoryOrder,
@@ -113,38 +106,29 @@ export function EmotionPickerSheet({
   }
 
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent>
-        <SheetHeader className="relative">
-          <SheetTitle>{t("title")}</SheetTitle>
-          <SheetClose
-            aria-label={t("close")}
-            variant="ghost"
-            size="icon-sm"
-            className="absolute right-0 top-0"
-          >
-            <X aria-hidden />
-          </SheetClose>
-        </SheetHeader>
-
-        {loading || groups.length === 0 ? (
-          <EmotionPickerEmpty />
-        ) : (
-          <div className="flex flex-col gap-6 pb-4">
-            {groups.map((group) => (
-              <EmotionPickerSection
-                key={group.slug}
-                categorySlug={group.slug}
-                categoryName={group.name}
-                primaryColor={group.primaryColor}
-                rows={group.rows}
-                selectedId={value}
-                onSelect={handleChipSelect}
-              />
-            ))}
-          </div>
-        )}
-      </SheetContent>
-    </Sheet>
+    <PickerSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t("title")}
+      closeLabel={t("close")}
+    >
+      {loading || groups.length === 0 ? (
+        <EmotionPickerEmpty />
+      ) : (
+        <div className="flex flex-col gap-6 pb-4">
+          {groups.map((group) => (
+            <EmotionPickerSection
+              key={group.slug}
+              categorySlug={group.slug}
+              categoryName={group.name}
+              primaryColor={group.primaryColor}
+              rows={group.rows}
+              selectedId={value}
+              onSelect={handleChipSelect}
+            />
+          ))}
+        </div>
+      )}
+    </PickerSheet>
   )
 }
