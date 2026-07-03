@@ -34,6 +34,23 @@
     "signedOut": "Connectez-vous pour voir votre profil.",
     "email": "E-mail",
     "memberSince": "Membre depuis",
+    "memberSinceValue": "Membre depuis {date}",
+    "settingsAria": "Réglages",
+    "stats": {
+      "title": "Stats",
+      "ripplesLevel": "Niveau Ripples {level}",
+      "ripplesProgress": "{count, plural, one {# galet avant le niveau {next}} other {# galets avant le niveau {next}}}",
+      "ripplesMax": "Niveau maximal atteint",
+      "days": "Jours",
+      "pebbles": "Galets",
+      "karma": "Karma"
+    },
+    "collectionsTitle": "Collections",
+    "newCollection": "Nouvelle collection",
+    "lab": {
+      "title": "Lab",
+      "subtitle": "Actus & communauté"
+    },
     "appearance": "Apparence",
     "language": "Langue",
     "theme": {
@@ -52,6 +69,30 @@
     "resetConfirm": "Réinitialiser",
     "logout": "Me déconnecter",
     "loggingOut": "Déconnexion…"
+  },
+  "settings": {
+    "title": "Réglages",
+    "save": "Enregistrer",
+    "saving": "Enregistrement…",
+    "saved": "Réglages enregistrés",
+    "saveError": "Impossible d'enregistrer vos modifications. Veuillez réessayer.",
+    "glyphAria": "Changer votre glyphe",
+    "glyphPickerTitle": "Choisir un glyphe",
+    "informations": "Informations",
+    "name": "Nom",
+    "namePlaceholder": "Votre nom",
+    "email": "E-mail",
+    "providers": "Fournisseurs",
+    "providerApple": "Identifiant Apple",
+    "providerGoogle": "Compte Google",
+    "password": "Mot de passe",
+    "newPassword": "Nouveau mot de passe",
+    "passwordHint": "Laissez vide pour conserver votre mot de passe actuel.",
+    "legal": "Légal",
+    "appearance": "Apparence",
+    "theme": "Thème",
+    "language": "Langue",
+    "colorWorld": "Univers de couleurs"
   },
   "errors": {
     "title": "Une erreur est survenue",

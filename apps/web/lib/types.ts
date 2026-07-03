@@ -88,6 +88,22 @@ export type WalletSnapshot = {
   totalSpent: number
 }
 
+// Read-only ripple summary projected from v_ripple. Mirrors the iOS
+// `RippleSummary`: pebbles created in the trailing 28 days bucketed into
+// 7 levels (0–6), plus whether the user created any pebble today.
+export type RippleSummary = {
+  level: number
+  activeToday: boolean
+  pebbles28d: number
+}
+
+// Read-only engagement stats projected from the get_profile_engagement RPC.
+// `assiduity` is a 28-element window (index 0 = 27 days ago … index 27 = today).
+export type ProfileEngagement = {
+  daysPracticed: number
+  assiduity: boolean[]
+}
+
 export type MarkStroke = {
   d: string
   width: number
@@ -157,12 +173,20 @@ export type Account = {
   id: string
   email: string
   created_at: string
+  /**
+   * Linked auth providers for this account (e.g. `["email"]`, `["apple"]`,
+   * `["google", "email"]`). Derived from the Supabase session identities.
+   * Drives the Settings surface's Providers vs. Password sections.
+   */
+  providers?: string[]
 }
 
 export type Profile = {
   id: string
   user_id: string
   display_name: string
+  /** FK to the user's chosen profile glyph (glyphs.id). Null when unset. */
+  glyph_id: string | null
   onboarding_completed: boolean
   color_world: ColorWorld
   terms_accepted_at: string | null

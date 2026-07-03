@@ -36,6 +36,8 @@ export type AuthContextValue = {
   signInWithGoogle(): Promise<void>
   logout(): Promise<void>
   updateProfile(input: UpdateProfileInput): Promise<Profile>
+  /** Change the signed-in user's password (email accounts). */
+  updatePassword(password: string): Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)

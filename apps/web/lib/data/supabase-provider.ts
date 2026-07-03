@@ -23,6 +23,8 @@ import type {
   GlyphSubmission,
   KarmaEvent,
   WalletSnapshot,
+  RippleSummary,
+  ProfileEngagement,
 } from "@/lib/types"
 import { DEFAULT_GLYPH_ID } from "@/lib/config/glyphs"
 import { processPebbleImage } from "@/lib/utils/process-pebble-image"
@@ -255,6 +257,37 @@ export class SupabaseProvider implements DataProvider {
   async getPebblesCount(): Promise<number> { return this.store.pebbles_count }
   async getKarma(): Promise<number> { return this.store.karma }
   async getBounce(): Promise<number> { return this.store.bounce }
+
+  // ---------------------------------------------------------------------------
+  // Profile dashboard reads — ripple summary (v_ripple) and engagement stats
+  // (get_profile_engagement RPC). Both are scoped to the caller by RLS.
+  // ---------------------------------------------------------------------------
+
+  async getRipple(): Promise<RippleSummary> {
+    const { data } = await this.supabase
+      .from("v_ripple")
+      .select("ripple_level, active_today, pebbles_28d")
+      .eq("user_id", this.userId)
+      .maybeSingle()
+    return {
+      level: (data?.ripple_level as number) ?? 0,
+      activeToday: (data?.active_today as boolean) ?? false,
+      pebbles28d: (data?.pebbles_28d as number) ?? 0,
+    }
+  }
+
+  async getProfileEngagement(tz: string): Promise<ProfileEngagement> {
+    // The RPC `returns table(...)`, so PostgREST yields an array of rows.
+    const { data, error } = await this.supabase.rpc("get_profile_engagement", {
+      p_tz: tz,
+    })
+    if (error) throw new Error(`getProfileEngagement failed: ${error.message}`)
+    const row = Array.isArray(data) ? data[0] : data
+    return {
+      daysPracticed: (row?.days_practiced as number) ?? 0,
+      assiduity: (row?.assiduity as boolean[]) ?? [],
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // Wallet — read summary + on-demand paginated history, and spend via RPC.

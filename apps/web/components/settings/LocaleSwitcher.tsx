@@ -32,15 +32,9 @@ export function LocaleSwitcher() {
       />
       <DropdownMenuContent align="end">
         {SUPPORTED_LOCALES.map((value) => (
-          <DropdownMenuItem
-            key={value}
-            onClick={() => setLocale(value as Locale)}
-          >
+          <DropdownMenuItem key={value} onClick={() => setLocale(value as Locale)}>
             <Check
-              className={
-                "size-4 " +
-                (value === locale ? "opacity-100" : "opacity-0")
-              }
+              className={"size-4 " + (value === locale ? "opacity-100" : "opacity-0")}
               aria-hidden
             />
             {LOCALE_LABELS[value]}

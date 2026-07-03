@@ -8,6 +8,8 @@ import type {
   MarketGlyph,
   GlyphSubmission,
   WalletSnapshot,
+  RippleSummary,
+  ProfileEngagement,
 } from "@/lib/types"
 
 // ---------------------------------------------------------------------------
@@ -97,6 +99,12 @@ export interface DataProvider {
   getPebblesCount(): Promise<number>
   getKarma(): Promise<number>
   getBounce(): Promise<number>
+
+  // Profile dashboard reads (on-demand, not part of the eager store):
+  // ripple level/activity from v_ripple, and days-practiced + 28-day
+  // assiduity from the get_profile_engagement RPC.
+  getRipple(): Promise<RippleSummary>
+  getProfileEngagement(tz: string): Promise<ProfileEngagement>
 
   listPebbles(): Promise<Pebble[]>
   getPebble(id: string): Promise<Pebble | undefined>
