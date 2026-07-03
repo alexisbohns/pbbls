@@ -813,6 +813,13 @@ export type Database = {
             referencedColumns: ["domain_id"]
           },
           {
+            foreignKeyName: "pebble_domains_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "v_domains_with_glyph"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "pebble_domains_pebble_id_fkey"
             columns: ["pebble_id"]
             isOneToOne: false
@@ -1347,6 +1354,33 @@ export type Database = {
         }
         Relationships: []
       }
+      v_domains_with_glyph: {
+        Row: {
+          default_glyph_id: string | null
+          id: string | null
+          label: string | null
+          name: string | null
+          slug: string | null
+          strokes: Json | null
+          view_box: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "domains_default_glyph_id_fkey"
+            columns: ["default_glyph_id"]
+            isOneToOne: false
+            referencedRelation: "glyphs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "domains_default_glyph_id_fkey"
+            columns: ["default_glyph_id"]
+            isOneToOne: false
+            referencedRelation: "v_glyph_market"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       v_emotions_with_palette: {
         Row: {
           category_id: string | null
@@ -1583,9 +1617,29 @@ export type Database = {
       }
       admin_delete_glyph: { Args: { p_glyph_id: string }; Returns: undefined }
       admin_find_user: { Args: { p_email: string }; Returns: Json }
+      admin_list_domains: {
+        Args: never
+        Returns: {
+          default_glyph_id: string
+          id: string
+          label: string
+          name: string
+          slug: string
+          strokes: Json
+          view_box: string
+        }[]
+      }
       admin_list_glyph_submissions: {
         Args: { p_status?: string }
         Returns: Json
+      }
+      admin_set_domain_glyph: {
+        Args: { p_domain_id: string; p_strokes: Json; p_view_box: string }
+        Returns: string
+      }
+      admin_update_domain: {
+        Args: { p_domain_id: string; p_label: string; p_name: string }
+        Returns: undefined
       }
       approve_glyph: {
         Args: { p_price?: number; p_submission_id: string }
