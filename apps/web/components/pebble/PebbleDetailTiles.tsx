@@ -17,6 +17,8 @@ import {
   useSelectedEmotionDisplay,
 } from "@/components/record/EmotionPicker"
 import { cn } from "@/lib/utils"
+import { useDomainGlyphs, type DomainGlyph as DomainGlyphData } from "@/lib/data/useDomainGlyphs"
+import { DomainGlyph } from "@/components/record/DomainGlyph"
 
 // Vertical tile shared by emotion / domain / collection triggers in the
 // pebble detail view. Icon on top, label below — matches the design in
@@ -128,19 +130,26 @@ type DomainTileProps = {
 
 function DomainOption({
   domain,
+  glyph,
   selected,
   onSelect,
 }: {
   domain: (typeof DOMAINS)[number]
+  glyph?: DomainGlyphData
   selected: boolean
   onSelect: () => void
 }) {
   const { name, label } = useDomainLocalized(domain)
   return (
     <SelectableItem selected={selected} onSelect={onSelect}>
-      <span className="flex flex-col items-start">
-        <span>{name}</span>
-        <span className="text-xs text-muted-foreground">{label}</span>
+      <span className="flex items-center gap-2">
+        {glyph ? (
+          <DomainGlyph strokes={glyph.strokes} viewBox={glyph.viewBox} className="size-6 shrink-0" />
+        ) : null}
+        <span className="flex flex-col items-start">
+          <span>{name}</span>
+          <span className="text-xs text-muted-foreground">{label}</span>
+        </span>
       </span>
     </SelectableItem>
   )
@@ -163,6 +172,7 @@ function useLocalizedDomainMap(): Map<string, string> {
 
 export function DomainTile({ value, onChange, editing, className }: DomainTileProps) {
   const t = useTranslations("record.domain")
+  const domainGlyphs = useDomainGlyphs()
   const localizedNames = useLocalizedDomainMap()
   const selectedDomains = DOMAINS.filter((d) => value.includes(d.id))
   const selectedNames = useMemo(
@@ -199,6 +209,7 @@ export function DomainTile({ value, onChange, editing, className }: DomainTilePr
           <DomainOption
             key={domain.id}
             domain={domain}
+            glyph={domainGlyphs?.get(domain.slug)}
             selected={value.includes(domain.id)}
             onSelect={() => toggle(domain.id)}
           />
