@@ -91,7 +91,7 @@ struct SoulDetailView: View {
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 4) {
                 Text(soulWithGlyph.name)
-                    .font(.headline)
+                    .pebblesFont(.bodyLeadHand)
                 Text("^[\(pebbles.count) pebbles](inflect: true)")
                     .font(.caption)
                     .foregroundStyle(.secondary)

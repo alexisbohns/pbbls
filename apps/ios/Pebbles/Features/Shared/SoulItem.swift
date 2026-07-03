@@ -14,6 +14,8 @@ struct SoulItem: View {
     let count: Int?
     var onTap: (() -> Void)? = nil
 
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
         Group {
             if let onTap {
@@ -51,7 +53,8 @@ struct SoulItem: View {
                 if `case` != .create, let count {
                     HStack(spacing: Spacing.xs) {
                         Image(systemName: "fossil.shell")
-                            .foregroundStyle(Color.accent.primary)
+                            .font(.system(size: 11))
+                            .foregroundStyle(fossilColor)
                         Text("\(count)")
                             .pebblesFont(.meta)
                             .foregroundStyle(Color.system.secondary)
@@ -78,12 +81,17 @@ struct SoulItem: View {
         }
     }
 
-    private var nameToken: PebblesFont {
-        `case` == .selected ? .subheadEmphasized : .subhead
-    }
+    // A name always renders in the handwritten face (issue #515); selection is
+    // carried by `nameColor`, not weight.
+    private var nameToken: PebblesFont { .bodyLeadHand }
 
     private var nameColor: Color {
         `case` == .selected ? Color.accent.primary : Color.system.secondary
+    }
+
+    /// Count icon uses AccentSecondary in light, AccentShaded in dark.
+    private var fossilColor: Color {
+        colorScheme == .dark ? Color.accent.shaded : Color.accent.secondary
     }
 }
 

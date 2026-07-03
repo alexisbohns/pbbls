@@ -9,8 +9,9 @@ struct ProfileBanner: View {
         GlyphBanner(
             strokes: glyphStrokes,
             title: displayName ?? "",
+            titleFont: .largeTitleHand,
             subtitle: memberSince.map {
-                String(localized: "Member since \($0.formatted(.dateTime.month(.wide).year()))")
+                .meta(String(localized: "Member since \($0.formatted(.dateTime.month(.wide).year()))"))
             }
         )
     }

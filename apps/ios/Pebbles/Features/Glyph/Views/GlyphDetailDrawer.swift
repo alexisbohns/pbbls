@@ -43,7 +43,7 @@ struct GlyphDetailDrawer: View {
                     GlyphBanner(
                         strokes: item.glyph.strokes,
                         title: item.glyph.name ?? String(localized: "Untitled glyph"),
-                        subtitle: String(localized: "BY @community")
+                        subtitle: .byline(name: "@community")
                     )
 
                     statCards
@@ -144,7 +144,7 @@ struct GlyphDetailDrawer: View {
 
             VStack(alignment: .trailing, spacing: 2) {
                 Text("Creator").font(.caption).foregroundStyle(Color.system.secondary)
-                Text("@community").font(.subheadline.weight(.medium)).foregroundStyle(Color.system.muted)
+                Text("@community").pebblesFont(.bodyLeadHand).foregroundStyle(Color.system.muted)
             }
             .frame(maxWidth: .infinity, alignment: .trailing)
         }
