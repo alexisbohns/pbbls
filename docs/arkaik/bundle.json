@@ -8,7 +8,7 @@
       "view_card_variant": "large"
     },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-07-02T22:00:00.000Z"
+    "updated_at": "2026-07-03T00:00:00.000Z"
   },
   "nodes": [
     {
@@ -578,9 +578,10 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Settings",
-      "description": "Profile settings sheet. iOS (#452): Edit-mode sheet presented from Profile's gear button. Sections: header glyph (tap → GlyphPickerSheet), Informations (editable display_name, read-only email), Providers (read-only Apple/Google list for SSO accounts) or Password (new password field for email-only accounts), Legal (Terms, Privacy). Persists name+glyph via update_profile RPC and password via auth.update.",
+      "description": "Profile settings. iOS (#452): edit-mode sheet presented from Profile's gear button. Web: a dedicated /settings route reached from the Profile gear button, with a Save action enabled when dirty. Sections mirror iOS — header glyph (tap → glyph picker dialog), Informations (editable display_name, read-only email), Providers (read-only Apple/Google list for SSO accounts) or Password (new password field for email-only accounts), Legal (Terms, Privacy) — plus a web-only Appearance section (theme, language, colour world). Persists name+glyph via the profiles update (update_profile RPC on iOS) and password via auth.updateUser.",
       "status": "development",
       "platforms": [
+        "web",
         "ios"
       ]
     },
@@ -588,8 +589,7 @@
       "id": "V-profile",
       "project_id": "pebbles",
       "species": "view",
-      "title": "Profile",
-      "description": "User profile page. Stats (karma, bounce), Discover section (Lab), Lists (Collections, Souls, Glyphs), Legal (Replay onboarding, Terms, Privacy), and logout. iOS (#388): pushed from PathView's bottom bar; hosts the Lab navigation link and the onboarding replay full-screen cover.",
+      "description": "User profile dashboard. Banner (glyph + display name in the Reenie Beanie script face + member-since), a shortcuts row (Collections / Souls / Glyphs), a Stats card (ripple-level badge + 28-day assiduity grid + Days / Pebbles / Karma counters), a horizontal Collections carousel, a Lab card, and a logout button; a gear button opens Settings. Web aligns to the iOS token refactor (issues #465 / #467). iOS (#388): pushed from PathView's bottom bar; hosts the Lab navigation link and the onboarding replay full-screen cover.",
       "status": "development",
       "platforms": [
         "web",

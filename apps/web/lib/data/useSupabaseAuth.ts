@@ -75,11 +75,21 @@ export function useSupabaseAuth(): AuthContextValue {
         return
       }
 
+      // Linked auth providers drive the Settings Providers/Password sections.
+      // Prefer the identities array; fall back to app_metadata.
+      const providers =
+        session.user.identities?.map((i) => i.provider) ??
+        (session.user.app_metadata?.providers as string[] | undefined) ??
+        (session.user.app_metadata?.provider
+          ? [session.user.app_metadata.provider]
+          : [])
+
       // Set auth state synchronously — unblocks rendering immediately
       setUser({
         id: session.user.id,
         email: session.user.email ?? "",
         created_at: session.user.created_at,
+        providers,
       })
       setIsLoading(false)
       setIsProfileLoading(true)
@@ -162,6 +172,13 @@ export function useSupabaseAuth(): AuthContextValue {
     if (error) throw new Error(error.message)
   }, [])
 
+  const updatePassword = useCallback(async (password: string) => {
+    const supabase = getSupabase()
+    if (!supabase) throw new Error("Supabase client not available")
+    const { error } = await supabase.auth.updateUser({ password })
+    if (error) throw new Error(error.message)
+  }, [])
+
   const updateProfile = useCallback(
     async (input: UpdateProfileInput): Promise<Profile> => {
       const supabase = getSupabase()
@@ -216,5 +233,6 @@ export function useSupabaseAuth(): AuthContextValue {
     signInWithGoogle,
     logout,
     updateProfile,
+    updatePassword,
   }
 }
