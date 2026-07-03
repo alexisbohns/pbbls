@@ -22,6 +22,11 @@ enum PebblesFont {
     case captionEmphasized
     case title
     case buttonLabel
+    /// Handwritten (Reenie Beanie) name label, 22pt. Any user's name — soul,
+    /// creator — renders in the hand font. See issue #515.
+    case bodyLeadHand
+    /// Handwritten (Reenie Beanie) large title, 41pt. Profile display name.
+    case largeTitleHand
 }
 
 // MARK: - View modifier
@@ -67,6 +72,8 @@ private extension PebblesFont {
         case .captionEmphasized:     return .sfProRounded(12, .semibold)
         case .title:                 return .ysabeauSemibold(28)
         case .buttonLabel:           return .ysabeauSemibold(17)
+        case .bodyLeadHand:          return .reenieBeanie(22)
+        case .largeTitleHand:        return .reenieBeanie(41)
         }
     }
 
@@ -81,6 +88,10 @@ private extension PebblesFont {
         case .cardHeading, .cardHeadingEmphasized:                return 1.50   // 10% of 15
         case .captionEmphasized:                                  return 0.24   // 2% of 12
         case .title:                                              return -0.56  // -2% of 28
+        // Reenie Beanie sits loose by default; these tighten it toward
+        // connected handwriting (issue #515 speced -2%, dialed in on review).
+        case .bodyLeadHand:                                       return -1.0   // 22pt
+        case .largeTitleHand:                                     return -2.0   // 41pt
         }
     }
 
@@ -113,6 +124,17 @@ extension Font {
                 ],
             ])
         return Font(UIFont(descriptor: descriptor, size: size))
+    }
+
+    /// Reenie Beanie — handwritten display face used for names (souls,
+    /// creators, profile). Bundled TTF (`Resources/ReenieBeanie-Regular.ttf`,
+    /// registered in Info.plist `UIAppFonts`). Falls back to the system font
+    /// if the face is missing from the build.
+    fileprivate static func reenieBeanie(_ size: CGFloat) -> Font {
+        if let custom = UIFont(name: "ReenieBeanie", size: size) {
+            return Font(custom)
+        }
+        return Font(UIFont.systemFont(ofSize: size))
     }
 
     /// SF Pro Rounded — system rounded design.

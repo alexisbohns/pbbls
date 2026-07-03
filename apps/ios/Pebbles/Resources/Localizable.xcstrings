@@ -440,19 +440,19 @@
         }
       }
     },
-    "BY @community" : {
+    "BY" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "BY @community"
+            "value" : "BY"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "PAR @community"
+            "value" : "PAR"
           }
         }
       }

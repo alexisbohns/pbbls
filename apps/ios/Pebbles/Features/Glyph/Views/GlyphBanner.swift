@@ -5,9 +5,19 @@ import SwiftUI
 /// and the glyph swap drawer (glyph, name, creator handle). Falls back to the
 /// `.carve` placeholder when there are no strokes.
 struct GlyphBanner: View {
+    /// A byline renders its name half in the handwritten face (a name is
+    /// always hand — issue #515); meta is a plain small-caps line.
+    enum Subtitle {
+        case meta(String)
+        case byline(name: String)
+    }
+
     let strokes: [GlyphStroke]?
     let title: String
-    let subtitle: String?
+    /// Token for the title. Profile uses `.largeTitleHand`; the glyph swap
+    /// drawer keeps the serif `.title` for the glyph name.
+    var titleFont: PebblesFont = .title
+    let subtitle: Subtitle?
 
     var body: some View {
         VStack(spacing: Spacing.xxl) {
@@ -15,16 +25,33 @@ struct GlyphBanner: View {
 
             VStack(spacing: Spacing.xs) {
                 Text(title)
-                    .pebblesFont(.title)
+                    .pebblesFont(titleFont)
                     .foregroundStyle(Color.system.foreground)
-                if let subtitle {
-                    Text(subtitle)
-                        .pebblesFont(.meta)
-                        .foregroundStyle(Color.system.secondary)
-                }
+                subtitleView
             }
         }
         .frame(maxWidth: .infinity)
+    }
+
+    @ViewBuilder
+    private var subtitleView: some View {
+        switch subtitle {
+        case .none:
+            EmptyView()
+        case .meta(let text):
+            Text(text)
+                .pebblesFont(.meta)
+                .foregroundStyle(Color.system.secondary)
+        case .byline(let name):
+            HStack(alignment: .firstTextBaseline, spacing: Spacing.xs) {
+                Text("BY")
+                    .pebblesFont(.meta)
+                    .foregroundStyle(Color.system.secondary)
+                Text(name)
+                    .pebblesFont(.bodyLeadHand)
+                    .foregroundStyle(Color.system.secondary)
+            }
+        }
     }
 
     @ViewBuilder
@@ -40,8 +67,8 @@ struct GlyphBanner: View {
 #Preview {
     GlyphBanner(
         strokes: [GlyphStroke(d: "M40,40 L160,160", width: 6)],
-        title: "Molly",
-        subtitle: "BY @community"
+        title: "Creature",
+        subtitle: .byline(name: "Galadriel")
     )
     .padding()
 }

@@ -1,9 +1,9 @@
 import SwiftUI
 
-/// Canonical glyph chrome component. Renders a 2XL-radius (34pt) frame
-/// with state-driven border (continuous/dashed, weight, color) and either
-/// the user's glyph strokes or an SF Symbol overlay (scribble for `.carve`,
-/// plus for `.create`).
+/// Canonical glyph chrome component. Renders either the user's glyph strokes
+/// or an SF Symbol overlay (scribble for `.carve`, plus for `.create`). Only
+/// the carving/empty states (`.carve`, `.create`) draw a dashed 2XL-radius
+/// (34pt) frame; glyph-bearing states render chromeless (issue #515).
 ///
 /// Named `GlyphView` (not `Glyph`) because the model type at
 /// `Features/Glyph/Models/Glyph.swift` already owns the `Glyph` symbol
@@ -13,12 +13,12 @@ import SwiftUI
 /// `docs/superpowers/specs/2026-05-17-issue-459-glyph-souls-consistency-design.md` §2.
 struct GlyphView: View {
     enum Case {
-        case profile      // continuous 1pt system.muted; glyph in accent.primary
+        case profile      // no frame; glyph in accent.primary
         case carve        // dashed 2pt system.muted; sf.scribble in system.secondary
         case create       // dashed 2pt system.muted; sf.plus in system.muted
-        case selected     // continuous 2pt accent.primary; glyph in accent.primary
-        case unselected   // continuous 1pt system.muted; glyph in system.muted
-        case `default`    // continuous 1pt system.muted; glyph in system.secondary
+        case selected     // no frame; glyph in accent.primary
+        case unselected   // no frame; glyph in system.muted
+        case `default`    // no frame; glyph in system.secondary
     }
 
     let `case`: Case
@@ -39,19 +39,21 @@ struct GlyphView: View {
         .frame(width: side, height: side)
     }
 
+    /// Frame is kept only on the carving module and the empty/placeholder
+    /// states (`.carve`, `.create`). Glyph-bearing states render chromeless so
+    /// the drawing "lives" unframed (issue #515); selection in the picker is
+    /// carried by glyph color + the a11y `isSelected` trait instead.
     @ViewBuilder
     private var border: some View {
         let shape = RoundedRectangle(cornerRadius: Spacing.xxl, style: .continuous)
         switch `case` {
-        case .selected:
-            shape.strokeBorder(Color.accent.primary, lineWidth: 2)
         case .carve, .create:
             shape.strokeBorder(
                 Color.system.muted,
                 style: StrokeStyle(lineWidth: 2, dash: [10, 10])
             )
-        case .profile, .unselected, .default:
-            shape.strokeBorder(Color.system.muted, lineWidth: 1)
+        case .profile, .selected, .unselected, .default:
+            EmptyView()
         }
     }
 

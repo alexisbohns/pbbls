@@ -82,7 +82,7 @@ struct PebbleReadView: View {
     private var soulsRow: some View {
         LazyVGrid(columns: SoulPillGrid.columns, spacing: SoulPillGrid.spacing) {
             ForEach(detail.souls) { soulWithGlyph in
-                SoulPill(glyph: soulWithGlyph.glyph, name: soulWithGlyph.name)
+                SoulItem(case: .default, soul: soulWithGlyph, count: nil)
             }
         }
     }
