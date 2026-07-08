@@ -31,7 +31,7 @@ function DomainOption({ domain, selected, muted, onSelect }: {
             strokes={domain.glyph.strokes}
             viewBox={domain.glyph.viewBox}
             className="size-7 shrink-0"
-            strokeClassName={selected ? "text-accent" : "text-foreground"}
+            strokeClassName={selected ? "text-primary" : "text-foreground"}
           />
         ) : null}
         <span className="flex flex-col items-start">
