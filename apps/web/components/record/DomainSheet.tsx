@@ -3,13 +3,12 @@
 import { useMemo, useState } from "react"
 import { Compass } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { DOMAINS, type Domain } from "@/lib/config/domains"
 import { useDomainLocalized } from "@/lib/i18n"
 import { SelectableItem } from "@/components/ui/SelectableItem"
 import { PickerSheet } from "@/components/ui/PickerSheet"
 import { SheetTrigger } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
-import { useDomainGlyphs, type DomainGlyph as DomainGlyphData } from "@/lib/data/useDomainGlyphs"
+import { useDomains, type DomainRow } from "@/lib/data/useDomains"
 import { DomainGlyph } from "@/components/record/DomainGlyph"
 
 type DomainSheetProps = {
@@ -17,9 +16,8 @@ type DomainSheetProps = {
   onChange: (ids: string[]) => void
 }
 
-function DomainOption({ domain, glyph, selected, onSelect }: {
-  domain: Domain
-  glyph?: DomainGlyphData
+function DomainOption({ domain, selected, onSelect }: {
+  domain: DomainRow
   selected: boolean
   onSelect: () => void
 }) {
@@ -27,8 +25,8 @@ function DomainOption({ domain, glyph, selected, onSelect }: {
   return (
     <SelectableItem selected={selected} onSelect={onSelect} className="py-2">
       <span className="flex items-center gap-2">
-        {glyph ? (
-          <DomainGlyph strokes={glyph.strokes} viewBox={glyph.viewBox} className="size-6 shrink-0" />
+        {domain.glyph ? (
+          <DomainGlyph strokes={domain.glyph.strokes} viewBox={domain.glyph.viewBox} className="size-6 shrink-0" />
         ) : null}
         <span className="flex flex-col items-start">
           <span>{name}</span>
@@ -48,10 +46,10 @@ function DomainOption({ domain, glyph, selected, onSelect }: {
  */
 export function DomainSheet({ value, onChange }: DomainSheetProps) {
   const t = useTranslations("record.domain")
-  const glyphs = useDomainGlyphs()
-  const localizedNames = useLocalizedDomainMap()
+  const { rows } = useDomains()
+  const localizedNames = useLocalizedDomainMap(rows)
   const [open, setOpen] = useState(false)
-  const selectedDomains = DOMAINS.filter((d) => value.includes(d.id))
+  const selectedDomains = rows.filter((d) => value.includes(d.id))
   const selectedNames = useMemo(
     () => selectedDomains.map((d) => localizedNames.get(d.slug) ?? d.name),
     [selectedDomains, localizedNames],
@@ -84,11 +82,10 @@ export function DomainSheet({ value, onChange }: DomainSheetProps) {
       }
     >
       <div className="flex flex-col gap-0.5">
-        {DOMAINS.map((domain) => (
+        {rows.map((domain) => (
           <DomainOption
             key={domain.id}
             domain={domain}
-            glyph={glyphs?.get(domain.slug)}
             selected={value.includes(domain.id)}
             onSelect={() => toggle(domain.id)}
           />
@@ -98,17 +95,17 @@ export function DomainSheet({ value, onChange }: DomainSheetProps) {
   )
 }
 
-function useLocalizedDomainMap(): Map<string, string> {
+function useLocalizedDomainMap(rows: DomainRow[]): Map<string, string> {
   const t = useTranslations() as unknown as {
     (key: string): string
     has(key: string): boolean
   }
   return useMemo(() => {
     const map = new Map<string, string>()
-    for (const d of DOMAINS) {
+    for (const d of rows) {
       const key = `domain.${d.slug}.name`
       map.set(d.slug, t.has(key) ? t(key) : d.name)
     }
     return map
-  }, [t])
+  }, [rows, t])
 }

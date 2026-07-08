@@ -2,10 +2,9 @@
 
 import { useCallback } from "react"
 import { useTranslations } from "next-intl"
-import { DOMAINS, type Domain } from "@/lib/config/domains"
 import { useDomainLocalized } from "@/lib/i18n"
 import { cn } from "@/lib/utils"
-import { useDomainGlyphs, type DomainGlyph as DomainGlyphData } from "@/lib/data/useDomainGlyphs"
+import { useDomains, type DomainRow } from "@/lib/data/useDomains"
 import { DomainGlyph } from "@/components/record/DomainGlyph"
 
 type DomainPickerProps = {
@@ -13,9 +12,8 @@ type DomainPickerProps = {
   onChange: (ids: string[]) => void
 }
 
-function DomainTile({ domain, glyph, selected, onToggle }: {
-  domain: Domain
-  glyph?: DomainGlyphData
+function DomainTile({ domain, selected, onToggle }: {
+  domain: DomainRow
   selected: boolean
   onToggle: () => void
 }) {
@@ -33,10 +31,10 @@ function DomainTile({ domain, glyph, selected, onToggle }: {
             : "bg-muted/50 hover:bg-muted",
         )}
       >
-        {glyph ? (
+        {domain.glyph ? (
           <DomainGlyph
-            strokes={glyph.strokes}
-            viewBox={glyph.viewBox}
+            strokes={domain.glyph.strokes}
+            viewBox={domain.glyph.viewBox}
             className="size-8 shrink-0"
           />
         ) : null}
@@ -58,7 +56,7 @@ function DomainTile({ domain, glyph, selected, onToggle }: {
 
 export function DomainPicker({ value, onChange }: DomainPickerProps) {
   const t = useTranslations("record.domain")
-  const glyphs = useDomainGlyphs()
+  const { rows } = useDomains()
 
   const toggle = useCallback(
     (id: string) => {
@@ -77,11 +75,10 @@ export function DomainPicker({ value, onChange }: DomainPickerProps) {
         aria-label={t("pickerAria")}
         className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2"
       >
-        {DOMAINS.map((domain) => (
+        {rows.map((domain) => (
           <DomainTile
             key={domain.id}
             domain={domain}
-            glyph={glyphs?.get(domain.slug)}
             selected={value.includes(domain.id)}
             onToggle={() => toggle(domain.id)}
           />

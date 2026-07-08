@@ -4,7 +4,6 @@ import { useMemo, useState, type ReactNode } from "react"
 import { Heart, Tag, Layers } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { Collection } from "@/lib/types"
-import { DOMAINS } from "@/lib/config/domains"
 import { useDomainLocalized } from "@/lib/i18n"
 import { SelectableItem } from "@/components/ui/SelectableItem"
 import {
@@ -17,7 +16,7 @@ import {
   useSelectedEmotionDisplay,
 } from "@/components/record/EmotionPicker"
 import { cn } from "@/lib/utils"
-import { useDomainGlyphs, type DomainGlyph as DomainGlyphData } from "@/lib/data/useDomainGlyphs"
+import { useDomains, type DomainRow } from "@/lib/data/useDomains"
 import { DomainGlyph } from "@/components/record/DomainGlyph"
 
 // Vertical tile shared by emotion / domain / collection triggers in the
@@ -130,12 +129,10 @@ type DomainTileProps = {
 
 function DomainOption({
   domain,
-  glyph,
   selected,
   onSelect,
 }: {
-  domain: (typeof DOMAINS)[number]
-  glyph?: DomainGlyphData
+  domain: DomainRow
   selected: boolean
   onSelect: () => void
 }) {
@@ -143,8 +140,8 @@ function DomainOption({
   return (
     <SelectableItem selected={selected} onSelect={onSelect}>
       <span className="flex items-center gap-2">
-        {glyph ? (
-          <DomainGlyph strokes={glyph.strokes} viewBox={glyph.viewBox} className="size-6 shrink-0" />
+        {domain.glyph ? (
+          <DomainGlyph strokes={domain.glyph.strokes} viewBox={domain.glyph.viewBox} className="size-6 shrink-0" />
         ) : null}
         <span className="flex flex-col items-start">
           <span>{name}</span>
@@ -155,26 +152,26 @@ function DomainOption({
   )
 }
 
-function useLocalizedDomainMap(): Map<string, string> {
+function useLocalizedDomainMap(rows: DomainRow[]): Map<string, string> {
   const t = useTranslations() as unknown as {
     (key: string): string
     has(key: string): boolean
   }
   return useMemo(() => {
     const map = new Map<string, string>()
-    for (const d of DOMAINS) {
+    for (const d of rows) {
       const key = `domain.${d.slug}.name`
       map.set(d.slug, t.has(key) ? t(key) : d.name)
     }
     return map
-  }, [t])
+  }, [rows, t])
 }
 
 export function DomainTile({ value, onChange, editing, className }: DomainTileProps) {
   const t = useTranslations("record.domain")
-  const domainGlyphs = useDomainGlyphs()
-  const localizedNames = useLocalizedDomainMap()
-  const selectedDomains = DOMAINS.filter((d) => value.includes(d.id))
+  const { rows } = useDomains()
+  const localizedNames = useLocalizedDomainMap(rows)
+  const selectedDomains = rows.filter((d) => value.includes(d.id))
   const selectedNames = useMemo(
     () => selectedDomains.map((d) => localizedNames.get(d.slug) ?? d.name),
     [selectedDomains, localizedNames],
@@ -205,11 +202,10 @@ export function DomainTile({ value, onChange, editing, className }: DomainTilePr
         }
       />
       <PopoverContent align="center" className="min-w-[200px]">
-        {DOMAINS.map((domain) => (
+        {rows.map((domain) => (
           <DomainOption
             key={domain.id}
             domain={domain}
-            glyph={domainGlyphs?.get(domain.slug)}
             selected={value.includes(domain.id)}
             onSelect={() => toggle(domain.id)}
           />
