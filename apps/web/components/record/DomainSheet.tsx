@@ -16,17 +16,23 @@ type DomainSheetProps = {
   onChange: (ids: string[]) => void
 }
 
-function DomainOption({ domain, selected, onSelect }: {
+function DomainOption({ domain, selected, muted, onSelect }: {
   domain: DomainRow
   selected: boolean
+  muted: boolean
   onSelect: () => void
 }) {
   const { name, label } = useDomainLocalized(domain)
   return (
-    <SelectableItem selected={selected} onSelect={onSelect} className="py-2">
-      <span className="flex items-center gap-2">
+    <SelectableItem selected={selected} onSelect={onSelect} showCheck={false} muted={muted} className="py-2">
+      <span className="flex items-center gap-3">
         {domain.glyph ? (
-          <DomainGlyph strokes={domain.glyph.strokes} viewBox={domain.glyph.viewBox} className="size-6 shrink-0" />
+          <DomainGlyph
+            strokes={domain.glyph.strokes}
+            viewBox={domain.glyph.viewBox}
+            className="size-7 shrink-0"
+            strokeClassName={selected ? "text-accent" : "text-foreground"}
+          />
         ) : null}
         <span className="flex flex-col items-start">
           <span>{name}</span>
@@ -87,6 +93,7 @@ export function DomainSheet({ value, onChange }: DomainSheetProps) {
             key={domain.id}
             domain={domain}
             selected={value.includes(domain.id)}
+            muted={value.length > 0 && !value.includes(domain.id)}
             onSelect={() => toggle(domain.id)}
           />
         ))}
