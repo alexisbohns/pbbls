@@ -715,12 +715,12 @@
   },
   "domain": {
     "health": { "name": "Santé", "label": "Votre corps, votre énergie et votre bien-être physique" },
-    "finance": { "name": "Finances", "label": "Argent, stabilité et sécurité matérielle" },
+    "money": { "name": "Finances", "label": "Argent, stabilité et sécurité matérielle" },
     "friends": { "name": "Amis", "label": "Les personnes que vous choisissez d'avoir à vos côtés" },
     "work": { "name": "Travail", "label": "Votre emploi, votre carrière et votre vie professionnelle" },
-    "passions": { "name": "Passions", "label": "Activités créatives et choses que vous aimez faire" },
-    "self-care": { "name": "Bien-être", "label": "Rituels et habitudes qui vous ressourcent" },
-    "event": { "name": "Actualité", "label": "Ce qui se passe dans le monde qui vous entoure" },
+    "hobbies": { "name": "Passions", "label": "Activités créatives et choses que vous aimez faire" },
+    "selfcare": { "name": "Bien-être", "label": "Rituels et habitudes qui vous ressourcent" },
+    "currentevents": { "name": "Actualité", "label": "Ce qui se passe dans le monde qui vous entoure" },
     "tasks": { "name": "Tâches", "label": "Les choses que vous devez accomplir" },
     "weather": { "name": "Météo", "label": "Soleil ou pluie, saisons et ciels" },
     "identity": { "name": "Identité", "label": "Qui vous êtes et qui vous devenez" },
@@ -731,6 +731,6 @@
     "family": { "name": "Famille", "label": "Celles et ceux qui vous sont liés par le sang ou par le cœur" },
     "partner": { "name": "Partenaire", "label": "Votre moitié ou relation amoureuse" },
     "education": { "name": "Éducation", "label": "Apprentissage, croissance et quête intellectuelle" },
-    "sport": { "name": "Sport", "label": "Activité physique, jeux et compétition" }
+    "fitness": { "name": "Sport", "label": "Activité physique, jeux et compétition" }
   }
 }

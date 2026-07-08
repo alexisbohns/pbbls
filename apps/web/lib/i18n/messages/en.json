@@ -715,12 +715,12 @@
   },
   "domain": {
     "health": { "name": "Health", "label": "Your body, energy, and physical well-being" },
-    "finance": { "name": "Finance", "label": "Money, stability, and material security" },
+    "money": { "name": "Finance", "label": "Money, stability, and material security" },
     "friends": { "name": "Friends", "label": "People you choose to walk alongside" },
     "work": { "name": "Work", "label": "Your job, career, and professional life" },
-    "passions": { "name": "Passions", "label": "Creative pursuits and things you love doing" },
-    "self-care": { "name": "Self-Care", "label": "Rituals and habits that restore you" },
-    "event": { "name": "Event", "label": "What's happening in the world around you" },
+    "hobbies": { "name": "Passions", "label": "Creative pursuits and things you love doing" },
+    "selfcare": { "name": "Self-Care", "label": "Rituals and habits that restore you" },
+    "currentevents": { "name": "Event", "label": "What's happening in the world around you" },
     "tasks": { "name": "Tasks", "label": "Things you need to get done" },
     "weather": { "name": "Weather", "label": "Sun or rain, seasons and skies" },
     "identity": { "name": "Identity", "label": "Who you are and who you're becoming" },
@@ -731,6 +731,6 @@
     "family": { "name": "Family", "label": "Those connected to you by blood or soul" },
     "partner": { "name": "Partner", "label": "Your significant other or love relationship" },
     "education": { "name": "Education", "label": "Learning, growth, and intellectual pursuits" },
-    "sport": { "name": "Sport", "label": "Physical activity, games, and competition" }
+    "fitness": { "name": "Sport", "label": "Physical activity, games, and competition" }
   }
 }
