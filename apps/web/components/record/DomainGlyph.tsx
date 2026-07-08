@@ -5,6 +5,7 @@ type DomainGlyphProps = {
   strokes: MarkStroke[]
   viewBox: string
   className?: string
+  strokeClassName?: string
 }
 
 /**
@@ -12,10 +13,10 @@ type DomainGlyphProps = {
  * as the glyphs GlyphPreview, but takes raw strokes (the domain hook returns
  * strokes + viewBox, not a full Mark).
  */
-export function DomainGlyph({ strokes, viewBox, className }: DomainGlyphProps) {
+export function DomainGlyph({ strokes, viewBox, className, strokeClassName }: DomainGlyphProps) {
   return (
     <svg viewBox={viewBox} className={className} aria-hidden="true">
-      <StrokeRenderer strokes={strokes} />
+      <StrokeRenderer strokes={strokes} className={strokeClassName} />
     </svg>
   )
 }

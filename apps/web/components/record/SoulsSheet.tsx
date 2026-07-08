@@ -99,6 +99,7 @@ export function SoulsSheet({
           <SelectableItem
             key={soul.id}
             selected={selectedIds.includes(soul.id)}
+            muted={selectedIds.length > 0 && !selectedIds.includes(soul.id)}
             onSelect={() => onToggle(soul.id)}
             className="py-2"
           >

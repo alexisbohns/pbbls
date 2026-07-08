@@ -8,6 +8,8 @@ type SelectableItemProps = {
   children: ReactNode
   role?: "option" | "radio" | "menuitemradio"
   className?: string
+  showCheck?: boolean
+  muted?: boolean
 }
 
 export function SelectableItem({
@@ -16,6 +18,8 @@ export function SelectableItem({
   children,
   role,
   className,
+  showCheck = true,
+  muted = false,
 }: SelectableItemProps) {
   const ariaProps = role === "option"
     ? { role: "option" as const, "aria-selected": selected }
@@ -30,15 +34,18 @@ export function SelectableItem({
       type="button"
       onClick={onSelect}
       className={cn(
-        "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none transition-colors hover:bg-muted",
+        "flex w-full items-center gap-2 rounded-lg px-2 py-1.5 text-sm outline-none transition-colors transition-opacity hover:bg-muted",
         selected && "font-medium",
+        muted && "opacity-50 hover:opacity-100",
         className,
       )}
       {...ariaProps}
     >
-      <span className="flex size-4 shrink-0 items-center justify-center">
-        {selected && <Check className="size-4" />}
-      </span>
+      {showCheck && (
+        <span className="flex size-4 shrink-0 items-center justify-center">
+          {selected && <Check className="size-4" />}
+        </span>
+      )}
       {children}
     </button>
   )
