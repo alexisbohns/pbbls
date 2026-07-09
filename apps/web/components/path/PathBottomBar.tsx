@@ -3,8 +3,11 @@
 import Link from "next/link"
 import { CircleUser, CirclePile, Sparkle } from "lucide-react"
 import { useTranslations } from "next-intl"
+import { useAuth } from "@/lib/data/auth-context"
 import { useBounce } from "@/lib/data/useBounce"
 import { useKarma } from "@/lib/data/useKarma"
+import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
+import { GlyphPreview } from "@/components/glyphs/GlyphPreview"
 
 function Stat({
   icon: Icon,
@@ -26,8 +29,14 @@ function Stat({
 
 export function PathBottomBar() {
   const t = useTranslations("path")
+  const { profile } = useAuth()
+  const { glyphs } = useUsableGlyphs()
   const { bounce, loading: bounceLoading } = useBounce()
   const { karma, loading: karmaLoading } = useKarma()
+
+  const glyph = profile?.glyph_id
+    ? glyphs.find((g) => g.id === profile.glyph_id) ?? null
+    : null
 
   return (
     <nav
@@ -39,7 +48,11 @@ export function PathBottomBar() {
         aria-label={t("bottomBar.profileAria")}
         className="inline-flex size-10 items-center justify-center text-primary"
       >
-        <CircleUser className="size-7" />
+        {glyph && glyph.strokes.length > 0 ? (
+          <GlyphPreview mark={glyph} className="size-7" />
+        ) : (
+          <CircleUser className="size-7" />
+        )}
       </Link>
       <Link
         href="/wallet"
