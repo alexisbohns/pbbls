@@ -285,6 +285,7 @@ export function PebbleDetail({
         selectedIds={pebble.soul_ids}
         onToggle={handleSoulToggle}
         souls={souls}
+        marks={marks}
         onAddSoul={onAddSoul}
       />
     </article>

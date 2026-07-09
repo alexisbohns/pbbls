@@ -33,7 +33,7 @@ export function SearchableList({
           onKeyDown={onKeyDown}
         />
       </div>
-      <div className="max-h-[200px] overflow-y-auto">
+      <div className="max-h-[320px] overflow-y-auto">
         {children}
         {isEmpty && (
           <p className="px-2 py-4 text-center text-sm text-muted-foreground">
