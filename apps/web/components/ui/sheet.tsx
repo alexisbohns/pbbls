@@ -26,7 +26,7 @@ function SheetOverlay({
     <DialogPrimitive.Backdrop
       data-slot="sheet-overlay"
       className={cn(
-        "fixed inset-0 z-[60] bg-black/10 supports-backdrop-filter:backdrop-blur-xs transition-opacity duration-200 data-open:opacity-100 data-closed:opacity-0",
+        "fixed inset-0 z-[60] bg-black/10 supports-backdrop-filter:backdrop-blur-xs duration-200 data-open:animate-in data-open:fade-in-0 data-closed:animate-out data-closed:fade-out-0",
         className
       )}
       {...props}
@@ -54,10 +54,10 @@ function SheetContent({
           "fixed z-[60] bg-background text-popover-foreground ring-1 ring-foreground/10 outline-none",
           // Mobile: bottom sheet
           "inset-x-0 bottom-0 max-h-[92dvh] overflow-y-auto rounded-t-2xl p-4 pt-2",
-          "translate-y-full data-open:translate-y-0 transition-transform duration-200 ease-out",
+          "duration-200 ease-out data-open:animate-in data-open:slide-in-from-bottom-full data-closed:animate-out data-closed:slide-out-to-bottom-full",
           // Desktop: side sheet from right — full height, scrollable
           "md:top-0 md:bottom-0 md:right-0 md:left-auto md:max-h-none md:h-full md:w-[420px] md:overflow-y-auto md:rounded-t-none md:rounded-l-2xl md:p-6",
-          "md:translate-y-0 md:translate-x-full md:data-open:translate-x-0",
+          "md:data-open:slide-in-from-right-full md:data-closed:slide-out-to-right-full",
           className
         )}
         {...props}
