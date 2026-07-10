@@ -598,6 +598,7 @@
     },
     "glyph": {
       "title": "Glyphe",
+      "close": "Fermer",
       "addAria": "Ajouter un glyphe",
       "changeAria": "Changer de glyphe"
     },
@@ -649,6 +650,7 @@
     },
     "date": {
       "title": "Quand",
+      "close": "Fermer",
       "now": "Maintenant",
       "cancel": "Annuler",
       "done": "Terminé",
