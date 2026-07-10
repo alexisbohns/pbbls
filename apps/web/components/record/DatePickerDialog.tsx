@@ -45,6 +45,19 @@ export function DatePickerDialog({ open, onOpenChange, initialDate, onSave }: Da
       onOpenChange={handleOpenChange}
       title={t("title")}
       closeLabel={t("close")}
+      footer={
+        <div className="flex justify-end gap-2">
+          <SheetClose>{t("cancel")}</SheetClose>
+          <Button
+            onClick={() => {
+              onSave(tempDate)
+              onOpenChange(false)
+            }}
+          >
+            {t("done")}
+          </Button>
+        </div>
+      }
     >
       <div className="space-y-4">
         <InlineDatePicker value={tempDate} onChange={handleDateChange} />
@@ -57,17 +70,6 @@ export function DatePickerDialog({ open, onOpenChange, initialDate, onSave }: Da
             {t("now")}
           </Button>
         </div>
-      </div>
-      <div className="mt-4 flex justify-end gap-2">
-        <SheetClose>{t("cancel")}</SheetClose>
-        <Button
-          onClick={() => {
-            onSave(tempDate)
-            onOpenChange(false)
-          }}
-        >
-          {t("done")}
-        </Button>
       </div>
     </PickerSheet>
   )

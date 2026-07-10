@@ -98,6 +98,11 @@ export function SoulsSheet({
       onOpenChange={handleOpenChange}
       title={t("title")}
       closeLabel={t("close")}
+      footer={
+        <div className="flex justify-end">
+          <SheetClose aria-label={t("done")}>{t("done")}</SheetClose>
+        </div>
+      }
     >
       <SearchableList
         query={query}
@@ -160,12 +165,6 @@ export function SoulsSheet({
           </button>
         )}
       </SearchableList>
-
-      <div className="mt-4 flex justify-end">
-        <SheetClose aria-label={t("done")}>
-          {t("done")}
-        </SheetClose>
-      </div>
     </PickerSheet>
   )
 }

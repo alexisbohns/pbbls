@@ -21,8 +21,8 @@ export function SearchableList({
   onKeyDown,
 }: SearchableListProps) {
   return (
-    <>
-      <div className="flex items-center gap-2 border-b border-border pb-2 mb-1">
+    <div className="flex h-full flex-col">
+      <div className="mb-1 flex shrink-0 items-center gap-2 border-b border-border pb-2">
         <Search className="size-4 shrink-0 text-muted-foreground" aria-hidden />
         <input
           type="text"
@@ -33,7 +33,7 @@ export function SearchableList({
           onKeyDown={onKeyDown}
         />
       </div>
-      <div className="max-h-[320px] overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto">
         {children}
         {isEmpty && (
           <p className="px-2 py-4 text-center text-sm text-muted-foreground">
@@ -41,6 +41,6 @@ export function SearchableList({
           </p>
         )}
       </div>
-    </>
+    </div>
   )
 }
