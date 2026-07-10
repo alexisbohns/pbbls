@@ -53,7 +53,7 @@ function SheetContent({
           // Shared
           "fixed z-[60] bg-background text-popover-foreground ring-1 ring-foreground/10 outline-none",
           // Mobile: bottom sheet
-          "inset-x-0 bottom-0 max-h-[92dvh] overflow-y-auto rounded-t-2xl p-4 pt-2",
+          "inset-x-0 bottom-0 h-[92dvh] overflow-y-auto rounded-t-2xl p-4 pt-2",
           "duration-200 ease-out data-open:animate-in data-open:slide-in-from-bottom-full data-closed:animate-out data-closed:slide-out-to-bottom-full",
           // Desktop: side sheet from right — full height, scrollable
           "md:top-0 md:bottom-0 md:right-0 md:left-auto md:max-h-none md:h-full md:w-[420px] md:overflow-y-auto md:rounded-t-none md:rounded-l-2xl md:p-6",
