@@ -21,19 +21,19 @@ export function SearchableList({
   onKeyDown,
 }: SearchableListProps) {
   return (
-    <>
-      <div className="flex items-center gap-2 border-b border-border pb-2 mb-1">
+    <div className="flex h-full flex-col">
+      <div className="mb-1 flex shrink-0 items-center gap-2 border-b border-border pb-2">
         <Search className="size-4 shrink-0 text-muted-foreground" aria-hidden />
         <input
           type="text"
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
           placeholder={placeholder}
-          className="h-7 w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          className="h-7 w-full min-w-0 bg-transparent text-base outline-none placeholder:text-muted-foreground md:text-sm"
           onKeyDown={onKeyDown}
         />
       </div>
-      <div className="max-h-[200px] overflow-y-auto">
+      <div className="min-h-0 flex-1 overflow-y-auto">
         {children}
         {isEmpty && (
           <p className="px-2 py-4 text-center text-sm text-muted-foreground">
@@ -41,6 +41,6 @@ export function SearchableList({
           </p>
         )}
       </div>
-    </>
+    </div>
   )
 }

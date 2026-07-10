@@ -300,6 +300,7 @@ export function PebbleEdit({
         selectedIds={draft.soul_ids}
         onToggle={handleSoulToggle}
         souls={souls}
+        marks={marks}
         onAddSoul={async (name) => {
           await handleAddSoul(name)
         }}

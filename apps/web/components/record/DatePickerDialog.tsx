@@ -3,14 +3,8 @@
 import { useState, useCallback } from "react"
 import { useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog"
+import { PickerSheet } from "@/components/ui/PickerSheet"
+import { SheetClose } from "@/components/ui/sheet"
 import { InlineDatePicker } from "@/components/record/InlineDatePicker"
 import { TimeStepPicker } from "@/components/record/TimeStepPicker"
 
@@ -46,25 +40,14 @@ export function DatePickerDialog({ open, onOpenChange, initialDate, onSave }: Da
   }, [])
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t("title")}</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <InlineDatePicker value={tempDate} onChange={handleDateChange} />
-          <div className="flex items-center justify-center gap-3">
-            <TimeStepPicker value={tempDate} onChange={handleTimeChange} />
-            <Button
-              variant="outline"
-              onClick={() => setTempDate(new Date())}
-            >
-              {t("now")}
-            </Button>
-          </div>
-        </div>
-        <DialogFooter>
-          <DialogClose>{t("cancel")}</DialogClose>
+    <PickerSheet
+      open={open}
+      onOpenChange={handleOpenChange}
+      title={t("title")}
+      closeLabel={t("close")}
+      footer={
+        <div className="flex justify-end gap-2">
+          <SheetClose>{t("cancel")}</SheetClose>
           <Button
             onClick={() => {
               onSave(tempDate)
@@ -73,8 +56,21 @@ export function DatePickerDialog({ open, onOpenChange, initialDate, onSave }: Da
           >
             {t("done")}
           </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+      }
+    >
+      <div className="space-y-4">
+        <InlineDatePicker value={tempDate} onChange={handleDateChange} />
+        <div className="flex items-center justify-center gap-3">
+          <TimeStepPicker value={tempDate} onChange={handleTimeChange} />
+          <Button
+            variant="outline"
+            onClick={() => setTempDate(new Date())}
+          >
+            {t("now")}
+          </Button>
+        </div>
+      </div>
+    </PickerSheet>
   )
 }

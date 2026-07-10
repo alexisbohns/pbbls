@@ -1,17 +1,8 @@
 "use client"
 
-import { useState, useCallback } from "react"
 import { useTranslations } from "next-intl"
 import type { Mark } from "@/lib/types"
-import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog"
+import { PickerSheet } from "@/components/ui/PickerSheet"
 import { GlyphPickerGrid } from "@/components/glyphs/GlyphPickerGrid"
 
 type GlyphPickerDialogProps = {
@@ -29,43 +20,25 @@ export function GlyphPickerDialog({
   selectedMarkId,
   onSave,
 }: GlyphPickerDialogProps) {
-  const [localMarkId, setLocalMarkId] = useState<string | undefined>(selectedMarkId)
   const t = useTranslations("record.glyph")
-  const tCommon = useTranslations("common")
 
-  const handleOpenChange = useCallback(
-    (nextOpen: boolean) => {
-      onOpenChange(nextOpen)
-      if (nextOpen) setLocalMarkId(selectedMarkId)
-    },
-    [selectedMarkId, onOpenChange],
-  )
+  const handleSelect = (id: string | undefined) => {
+    onSave(id)
+    onOpenChange(false)
+  }
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t("title")}</DialogTitle>
-        </DialogHeader>
-
-        <GlyphPickerGrid
-          marks={marks}
-          selectedMarkId={localMarkId}
-          onSelect={setLocalMarkId}
-        />
-
-        <DialogFooter>
-          <DialogClose>{tCommon("cancel")}</DialogClose>
-          <Button
-            onClick={() => {
-              onSave(localMarkId)
-              onOpenChange(false)
-            }}
-          >
-            {tCommon("save")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+    <PickerSheet
+      open={open}
+      onOpenChange={onOpenChange}
+      title={t("title")}
+      closeLabel={t("close")}
+    >
+      <GlyphPickerGrid
+        marks={marks}
+        selectedMarkId={selectedMarkId}
+        onSelect={handleSelect}
+      />
+    </PickerSheet>
   )
 }

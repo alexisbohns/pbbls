@@ -1,13 +1,14 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Plus, X } from "lucide-react"
+import { Check, Plus, X } from "lucide-react"
 import { useTranslations } from "next-intl"
-import type { Soul } from "@/lib/types"
-import { SelectableItem } from "@/components/ui/SelectableItem"
+import type { Mark, Soul } from "@/lib/types"
 import { SearchableList } from "@/components/ui/SearchableList"
 import { PickerSheet } from "@/components/ui/PickerSheet"
 import { SheetClose } from "@/components/ui/sheet"
+import { SoulGlyphThumbnail } from "@/components/souls/SoulGlyphThumbnail"
+import { cn } from "@/lib/utils"
 
 type SoulsSheetProps = {
   open: boolean
@@ -15,7 +16,45 @@ type SoulsSheetProps = {
   selectedIds: string[]
   onToggle: (id: string) => void
   souls: Soul[]
+  marks: Mark[]
   onAddSoul: (name: string) => Promise<void>
+}
+
+function SoulOption({ soul, mark, selected, muted, onSelect }: {
+  soul: Soul
+  mark: Mark | undefined
+  selected: boolean
+  muted: boolean
+  onSelect: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-pressed={selected}
+      aria-label={soul.name}
+      className={cn(
+        "flex w-full flex-col items-center gap-1.5 rounded-xl p-2 text-center outline-none transition-colors transition-opacity hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
+        muted && "opacity-50 hover:opacity-100",
+      )}
+    >
+      <span className="grid aspect-square w-full place-items-center rounded-lg bg-muted/60 p-2.5">
+        <SoulGlyphThumbnail
+          mark={mark}
+          className="size-full"
+          strokeClassName={selected ? "text-primary" : "text-foreground"}
+        />
+      </span>
+      <span
+        className={cn(
+          "line-clamp-1 w-full text-xs text-foreground",
+          selected && "font-medium text-primary",
+        )}
+      >
+        {soul.name}
+      </span>
+    </button>
+  )
 }
 
 export function SoulsSheet({
@@ -24,6 +63,7 @@ export function SoulsSheet({
   selectedIds,
   onToggle,
   souls,
+  marks,
   onAddSoul,
 }: SoulsSheetProps) {
   const [query, setQuery] = useState("")
@@ -58,6 +98,18 @@ export function SoulsSheet({
       onOpenChange={handleOpenChange}
       title={t("title")}
       closeLabel={t("close")}
+      overlay={
+        selectedIds.length > 0 && (
+          <SheetClose
+            aria-label={t("done")}
+            variant="default"
+            size="icon-lg"
+            className="rounded-full shadow-lg"
+          >
+            <Check className="size-5" aria-hidden />
+          </SheetClose>
+        )
+      }
     >
       <SearchableList
         query={query}
@@ -95,17 +147,19 @@ export function SoulsSheet({
           </ul>
         )}
 
-        {filtered.map((soul) => (
-          <SelectableItem
-            key={soul.id}
-            selected={selectedIds.includes(soul.id)}
-            muted={selectedIds.length > 0 && !selectedIds.includes(soul.id)}
-            onSelect={() => onToggle(soul.id)}
-            className="py-2"
-          >
-            {soul.name}
-          </SelectableItem>
-        ))}
+        <ul role="list" className="grid grid-cols-3 gap-3">
+          {filtered.map((soul) => (
+            <li key={soul.id}>
+              <SoulOption
+                soul={soul}
+                mark={marks.find((m) => m.id === soul.glyph_id)}
+                selected={selectedIds.includes(soul.id)}
+                muted={selectedIds.length > 0 && !selectedIds.includes(soul.id)}
+                onSelect={() => onToggle(soul.id)}
+              />
+            </li>
+          ))}
+        </ul>
 
         {canAddNew && (
           <button
@@ -118,12 +172,6 @@ export function SoulsSheet({
           </button>
         )}
       </SearchableList>
-
-      <div className="mt-4 flex justify-end">
-        <SheetClose aria-label={t("done")}>
-          {t("done")}
-        </SheetClose>
-      </div>
     </PickerSheet>
   )
 }

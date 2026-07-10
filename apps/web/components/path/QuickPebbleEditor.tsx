@@ -377,6 +377,7 @@ export function QuickPebbleEditor({
         selectedIds={soulIds}
         onToggle={toggleSoul}
         souls={souls}
+        marks={marks}
         onAddSoul={handleAddSoul}
       />
       <EmotionPickerSheet

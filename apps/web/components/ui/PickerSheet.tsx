@@ -9,6 +9,7 @@ import {
   SheetTitle,
   SheetClose,
 } from "@/components/ui/sheet"
+import { cn } from "@/lib/utils"
 
 type PickerSheetProps = {
   title: string
@@ -24,13 +25,24 @@ type PickerSheetProps = {
   open?: boolean
   onOpenChange?: (open: boolean) => void
   contentClassName?: string
+  /** Optional footer (e.g. a "Done" button), pinned below the scrollable body. */
+  footer?: ReactNode
+  /**
+   * Optional floating element (e.g. a FAB) absolutely positioned over the
+   * bottom-right of the scrollable body, instead of occupying its own row.
+   */
+  overlay?: ReactNode
 }
 
 /**
  * Shared drawer shell for all pickers. Captures the identical Sheet chrome —
  * responsive panel, header with title + `X` close — so every picker (domain,
- * collection, valence, emotion, souls) opens the same drawer; only the body
- * differs. When `open`/`onOpenChange` are omitted the Sheet runs uncontrolled.
+ * collection, valence, emotion, souls) opens the same drawer at the same
+ * size; only the body differs. The body sits in a flex-1 scroll region so
+ * short content (e.g. a handful of souls) fills the available height instead
+ * of leaving blank space below it, and `footer` — when provided — stays
+ * pinned below that region instead of scrolling away with the content. When
+ * `open`/`onOpenChange` are omitted the Sheet runs uncontrolled.
  */
 export function PickerSheet({
   title,
@@ -40,12 +52,14 @@ export function PickerSheet({
   open,
   onOpenChange,
   contentClassName,
+  footer,
+  overlay,
 }: PickerSheetProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       {trigger}
-      <SheetContent className={contentClassName}>
-        <SheetHeader className="relative">
+      <SheetContent className={cn("flex h-[92dvh] flex-col md:h-full", contentClassName)}>
+        <SheetHeader className="relative shrink-0">
           <SheetTitle>{title}</SheetTitle>
           <SheetClose
             aria-label={closeLabel}
@@ -56,7 +70,13 @@ export function PickerSheet({
             <X aria-hidden />
           </SheetClose>
         </SheetHeader>
-        {children}
+        <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
+        {footer && <div className="mt-4 shrink-0">{footer}</div>}
+        {overlay && (
+          <div className="absolute right-4 bottom-4 z-10 md:right-6 md:bottom-6">
+            {overlay}
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   )

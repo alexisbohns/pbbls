@@ -4,6 +4,7 @@ import { StrokeRenderer } from "@/components/carve/StrokeRenderer"
 type GlyphPreviewProps = {
   mark: Mark
   className?: string
+  strokeClassName?: string
 }
 
 /**
@@ -12,10 +13,10 @@ type GlyphPreviewProps = {
  * GlyphThumbnail: glyphs are shapeless squares scaled into whatever slot the
  * caller provides via `className`.
  */
-export function GlyphPreview({ mark, className }: GlyphPreviewProps) {
+export function GlyphPreview({ mark, className, strokeClassName }: GlyphPreviewProps) {
   return (
     <svg viewBox={mark.viewBox} className={className} aria-hidden="true">
-      <StrokeRenderer strokes={mark.strokes} />
+      <StrokeRenderer strokes={mark.strokes} className={strokeClassName} />
     </svg>
   )
 }
