@@ -1,7 +1,7 @@
 "use client"
 
 import { useMemo, useState } from "react"
-import { Plus, X } from "lucide-react"
+import { Check, Plus, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { Mark, Soul } from "@/lib/types"
 import { SearchableList } from "@/components/ui/SearchableList"
@@ -98,10 +98,17 @@ export function SoulsSheet({
       onOpenChange={handleOpenChange}
       title={t("title")}
       closeLabel={t("close")}
-      footer={
-        <div className="flex justify-end">
-          <SheetClose aria-label={t("done")}>{t("done")}</SheetClose>
-        </div>
+      overlay={
+        selectedIds.length > 0 && (
+          <SheetClose
+            aria-label={t("done")}
+            variant="default"
+            size="icon-lg"
+            className="rounded-full shadow-lg"
+          >
+            <Check className="size-5" aria-hidden />
+          </SheetClose>
+        )
       }
     >
       <SearchableList

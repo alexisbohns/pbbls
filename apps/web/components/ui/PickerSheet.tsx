@@ -27,6 +27,11 @@ type PickerSheetProps = {
   contentClassName?: string
   /** Optional footer (e.g. a "Done" button), pinned below the scrollable body. */
   footer?: ReactNode
+  /**
+   * Optional floating element (e.g. a FAB) absolutely positioned over the
+   * bottom-right of the scrollable body, instead of occupying its own row.
+   */
+  overlay?: ReactNode
 }
 
 /**
@@ -48,6 +53,7 @@ export function PickerSheet({
   onOpenChange,
   contentClassName,
   footer,
+  overlay,
 }: PickerSheetProps) {
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -66,6 +72,11 @@ export function PickerSheet({
         </SheetHeader>
         <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
         {footer && <div className="mt-4 shrink-0">{footer}</div>}
+        {overlay && (
+          <div className="absolute right-4 bottom-4 z-10 md:right-6 md:bottom-6">
+            {overlay}
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   )

@@ -29,7 +29,7 @@ export function SearchableList({
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
           placeholder={placeholder}
-          className="h-7 w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          className="h-7 w-full min-w-0 bg-transparent text-base outline-none placeholder:text-muted-foreground md:text-sm"
           onKeyDown={onKeyDown}
         />
       </div>
