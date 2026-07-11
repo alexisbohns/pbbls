@@ -191,3 +191,14 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** Don't "fix" this by hunting for missing `nunito_medium.ttf`/`nunito_semibold.ttf`/etc. — there is no static source to add, and the single-file approach is intentional. If a future weight is needed, add another `Font()` entry with the matching `FontVariation.weight(...)`, not a new file.
 - **Supersedes / Superseded-by:** —
 - **Refs:** #529, `docs/superpowers/plans/2026-07-11-android-design-system.md`, `apps/android/app/src/main/kotlin/app/pbbls/android/theme/PebblesTypography.kt`.
+
+## 2026-07-11 — Android CI bakes Supabase config into the debug APK
+
+- **Status:** taken
+- **Scope:** android, infra
+- **Context:** M37 sub-project C (#530) makes the app construct the supabase-kt auth client at launch (`PebblesApp.onCreate` → `SupabaseService`), so `AppEnvironment` throws on blank keys. The milestone design (D8/D12) built the CI debug APK **secretless**, on the premise that the maintainer would build locally with `secrets.properties` for device testing (risk 4). That premise is false: the maintainer has no Android Studio / local Android toolchain and can only download-and-install the CI artifact — which then crashes instantly on launch, and could not authenticate even if it didn't.
+- **Decision:** CI now injects `SUPABASE_URL` + `SUPABASE_ANON_KEY` from GitHub Actions **repository secrets** into the `assembleDebug` step's environment; `build.gradle.kts`'s `secret()` reads an env var of the same name when `secrets.properties` is absent (a local file still wins when present). The debug-APK artifact is therefore config-baked and functional on-device.
+- **Why:** It is the only way to give the SDK-less maintainer a runnable, authenticating APK. The anon key is a **publishable** key — it already ships in the deployed web bundle and the iOS app — so embedding it in a debug artifact adds no real exposure; row-level security, not key secrecy, protects data.
+- **Consequences:** The maintainer must add the two values as repo Actions secrets (Settings → Secrets and variables → Actions) or the APK stays secretless and fails loud at launch. Reverses only the "no secrets needed in CI / secretless debug APK" aspect of D8/D12; the empty-string build default and the fail-loud-at-launch contract are retained (forks with no secrets still build green and crash at launch). Release/signed builds and Play distribution remain out of scope.
+- **Supersedes / Superseded-by:** Revises the CI-secrets aspect of **D8** and **D12** in the M37 Android bootstrap design (`docs/superpowers/specs/2026-07-10-android-bootstrap-design.md`).
+- **Refs:** #530, #535, `.github/workflows/android.yml`, `apps/android/app/build.gradle.kts`.

@@ -42,8 +42,18 @@ jobs:
           # Validate the committed wrapper JAR against known-good checksums.
           validate-wrappers: true
 
+      # Bake the Supabase config into the debug APK from repo Actions secrets so
+      # the CI artifact is installable-and-functional (the maintainer has no
+      # local Android SDK). build.gradle.kts reads these env vars when
+      # secrets.properties is absent. Both values are publishable — the anon key
+      # already ships in the web and iOS clients — so a downloadable debug
+      # artifact adds no exposure. If the secrets are unset (e.g. a fork), the
+      # values default to empty and AppEnvironment fails loud at launch (D8).
       - name: ktlint, unit tests, assemble debug APK
         working-directory: apps/android
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: ./gradlew ktlintCheck testDebugUnitTest assembleDebug
 
       - name: Upload debug APK
