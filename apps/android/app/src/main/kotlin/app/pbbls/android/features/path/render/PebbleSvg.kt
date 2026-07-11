@@ -18,11 +18,6 @@ private const val TAG = "pebble-svg"
  * (6-digit `#RRGGBB`) *before* AndroidSVG parses the markup, mirroring the iOS
  * substitution exactly.
  *
- * Parse + render-to-[Picture] happen once per (svg, strokeHex) via [remember];
- * drawing replays the recorded picture. The picture is scaled uniformly to fit
- * the composable's bounds and centered (the `.aspectRatio(contentMode: .fit)`
- * analog), so callers control sizing entirely through [modifier].
- *
  * A malformed SVG logs once and renders nothing — the outline backdrop behind
  * the render still gives the row a silhouette, so failure degrades gracefully
  * instead of crashing the timeline.
@@ -33,7 +28,22 @@ fun PebbleSvg(
     strokeHex: String,
     modifier: Modifier = Modifier,
 ) {
-    val picture = remember(svg, strokeHex) { parseToPicture(svg, strokeHex) }
+    SvgCanvas(markup = SvgColors.injectStrokeColor(svg, strokeHex), modifier = modifier)
+}
+
+/**
+ * Parse + render-to-[Picture] once per markup string (via [remember]), then
+ * replay the recorded picture scaled uniformly to fit the composable's bounds
+ * and centered — the `.aspectRatio(contentMode: .fit)` analog. Callers control
+ * sizing entirely through [modifier]. Shared by [PebbleSvg] (stroke-injected
+ * `render_svg`) and [PebbleOutlineBackdrop] (fill-injected outline assets).
+ */
+@Composable
+internal fun SvgCanvas(
+    markup: String,
+    modifier: Modifier = Modifier,
+) {
+    val picture = remember(markup) { parseToPicture(markup) }
     if (picture == null || picture.width <= 0 || picture.height <= 0) return
 
     Canvas(modifier = modifier) {
@@ -62,14 +72,10 @@ fun PebbleSvg(
  * internal references at render time), and every failure mode has the same
  * remedy here.
  */
-@Suppress("TooGenericExceptionCaught")
-private fun parseToPicture(
-    svg: String,
-    strokeHex: String,
-): Picture? =
+private fun parseToPicture(markup: String): Picture? =
     try {
-        SVG.getFromString(SvgColors.injectStrokeColor(svg, strokeHex)).renderToPicture()
+        SVG.getFromString(markup).renderToPicture()
     } catch (e: Exception) {
-        Log.e(TAG, "render_svg parse/render failed — rendering nothing", e)
+        Log.e(TAG, "SVG parse/render failed — rendering nothing", e)
         null
     }
