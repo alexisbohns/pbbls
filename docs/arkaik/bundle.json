@@ -55,7 +55,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Home",
-      "description": "Main dashboard. iOS (#388) is now the post-auth root: horizontal weeks roll of cairns at top, paginated per-week pebble list (TabView page style) in the body, full-width 'New pebble' button and a custom bottom bar (glyph + bounce + karma) replacing the system tab bar. Glyph and stats push the Profile screen; Lab is reachable as a NavigationLink inside Profile.",
+      "description": "Main dashboard. iOS (#388) is now the post-auth root: horizontal weeks roll of cairns at top, paginated per-week pebble list (TabView page style) in the body, full-width 'New pebble' button and a custom bottom bar (glyph + bounce + karma) replacing the system tab bar. Glyph and stats push the Profile screen; Lab is reachable as a NavigationLink inside Profile. Android lands the read-only Path timeline as the post-auth root in M37 sub-project D (no New-pebble button or bottom bar yet).",
       "status": "idea",
       "platforms": [
         "web",
@@ -68,7 +68,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Path",
-      "description": "Week-paginated path of pebbles. Top: horizontal weeks roll of cairn animations centered on the focused week. Middle: date-range header with prev/next chevrons and a per-week scrollable list of pebble rows that pages horizontally between weeks. Bottom: in-view dock combining the quick pebble editor (collapsed as a 'What happened?' trigger; expanded as a bottom-sheet overlay) and a stats bar (profile glyph link, bounce, karma — all link to Profile).",
+      "description": "Week-paginated path of pebbles. Top: horizontal weeks roll of cairn animations centered on the focused week. Middle: date-range header with prev/next chevrons and a per-week scrollable list of pebble rows that pages horizontally between weeks. Bottom: in-view dock combining the quick pebble editor (collapsed as a 'What happened?' trigger; expanded as a bottom-sheet overlay) and a stats bar (profile glyph link, bounce, karma — all link to Profile). Android (M37 sub-project D, #531) implements the read-only subset: path_pebbles() rows grouped by ISO week (WeekRollBuilder port), static-cairn week roll, date-range header with chevrons, HorizontalPager week pages, palette-tinted outline+render_svg rows (AndroidSVG, currentColor substitution) with snap thumbnails, and a temporary sign-out; no dock, stats, create or detail yet.",
       "status": "development",
       "platforms": [
         "web",
