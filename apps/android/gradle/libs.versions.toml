@@ -14,6 +14,10 @@ coroutines = "1.11.0"
 # Google's official Compose Preview Screenshot Testing (renders @Preview to PNG
 # on the JVM, no device/emulator, no Robolectric). Still alpha — see CLAUDE.md.
 screenshot = "0.0.1-alpha15"
+# Rive (D14) — bundled logo animation on the Welcome screen. Requires
+# androidx-startup for Rive.init(); see PebblesApp.onCreate().
+rive = "11.7.2"
+androidxStartup = "1.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -28,6 +32,8 @@ androidx-compose-material3 = { group = "androidx.compose.material3", name = "mat
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 screenshot-validation-api = { group = "com.android.tools.screenshot", name = "screenshot-validation-api", version.ref = "screenshot" }
+rive-android = { group = "app.rive", name = "rive-android", version.ref = "rive" }
+androidx-startup-runtime = { group = "androidx.startup", name = "startup-runtime", version.ref = "androidxStartup" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- French reference-data names — see values/strings.xml for provenance. -->
+
+    <!-- Domains (18) -->
+    <string name="domain_community_name">Communauté</string>
+    <string name="domain_currentevents_name">Actualité</string>
+    <string name="domain_dating_name">Rencontres</string>
+    <string name="domain_education_name">Éducation</string>
+    <string name="domain_family_name">Famille</string>
+    <string name="domain_fitness_name">Sport</string>
+    <string name="domain_friends_name">Amis</string>
+    <string name="domain_health_name">Santé</string>
+    <string name="domain_hobbies_name">Passions</string>
+    <string name="domain_identity_name">Identité</string>
+    <string name="domain_money_name">Finances</string>
+    <string name="domain_partner_name">Partenaire</string>
+    <string name="domain_selfcare_name">Bien-être</string>
+    <string name="domain_spirituality_name">Spiritualité</string>
+    <string name="domain_tasks_name">Tâches</string>
+    <string name="domain_travel_name">Voyage</string>
+    <string name="domain_weather_name">Météo</string>
+    <string name="domain_work_name">Travail</string>
+
+    <!-- Emotions (38) -->
+    <string name="emotion_amazed_name">Émerveillement</string>
+    <string name="emotion_amused_name">Amusement</string>
+    <string name="emotion_angry_name">Colère</string>
+    <string name="emotion_annoyed_name">Agacement</string>
+    <string name="emotion_anxious_name">Anxiété</string>
+    <string name="emotion_ashamed_name">Honte</string>
+    <string name="emotion_brave_name">Courage</string>
+    <string name="emotion_calm_name">Calme</string>
+    <string name="emotion_confident_name">Confiance</string>
+    <string name="emotion_content_name">Contentement</string>
+    <string name="emotion_disappointed_name">Déception</string>
+    <string name="emotion_discouraged_name">Découragement</string>
+    <string name="emotion_disgusted_name">Dégoût</string>
+    <string name="emotion_drained_name">Épuisement</string>
+    <string name="emotion_embarrassed_name">Embarras</string>
+    <string name="emotion_excited_name">Excitation</string>
+    <string name="emotion_frustrated_name">Frustration</string>
+    <string name="emotion_grateful_name">Gratitude</string>
+    <string name="emotion_guilty_name">Culpabilité</string>
+    <string name="emotion_happy_name">Bonheur</string>
+    <string name="emotion_hopeful_name">Espoir</string>
+    <string name="emotion_hopeless_name">Désespoir</string>
+    <string name="emotion_indifferent_name">Indifférence</string>
+    <string name="emotion_irritated_name">Irritation</string>
+    <string name="emotion_jealous_name">Jalousie</string>
+    <string name="emotion_joyful_name">Joie</string>
+    <string name="emotion_lonely_name">Solitude</string>
+    <string name="emotion_overwhelmed_name">Accablement</string>
+    <string name="emotion_passionate_name">Passion</string>
+    <string name="emotion_peaceful_name">Sérénité</string>
+    <string name="emotion_proud_name">Fierté</string>
+    <string name="emotion_relieved_name">Soulagement</string>
+    <string name="emotion_sad_name">Tristesse</string>
+    <string name="emotion_satisfied_name">Satisfaction</string>
+    <string name="emotion_scared_name">Peur</string>
+    <string name="emotion_stressed_name">Stress</string>
+    <string name="emotion_surprised_name">Surprise</string>
+    <string name="emotion_worried_name">Inquiétude</string>
+
+    <!-- Emotion categories (7) -->
+    <string name="emotionCategory_anger_name">Colère</string>
+    <string name="emotionCategory_fear_name">Peur</string>
+    <string name="emotionCategory_joy_name">Joie</string>
+    <string name="emotionCategory_peace_name">Paix</string>
+    <string name="emotionCategory_pride_name">Fierté</string>
+    <string name="emotionCategory_sadness_name">Tristesse</string>
+    <string name="emotionCategory_shame_name">Honte</string>
+</resources>

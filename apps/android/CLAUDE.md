@@ -79,13 +79,22 @@ happens in a separate coroutine, not inline in the collector.
 - **User-facing strings live in `res/values/strings.xml` (en, default) and
   `res/values-fr/strings.xml`.** Brand strings (the word "Pebbles") are
   `translatable="false"`.
-- **Reference-data names resolve through a slug-keyed map**, never `.name`
-  directly on a read path: `emotion.<slug>.name` → `R.string.emotion_<slug>_name`,
-  falling back to the DB `name`. Explicit map (compile-checked, greppable) over
-  `getIdentifier()`.
-- **`android:localeConfig`** enables per-app language (added in B). Unit tests
-  assert en/fr key-set parity and that every reference-slug entry has both
-  translations.
+- **Reference-data names resolve through `ReferenceStrings.referenceName(type,
+  slug, fallbackDbName)`**, never `.name`/DB value directly on a read path:
+  slug → `R.string.emotion_<slug>_name` / `domain_<slug>_name` /
+  `emotionCategory_<slug>_name`, falling back to `fallbackDbName` when no
+  catalog entry exists (new server-side rows before Android catches up).
+  `ReferenceStrings` is an explicit, compile-checked `Map<String, Int>` per
+  type (over `getIdentifier()`) — mirrors iOS `Emotion+Localized.swift` /
+  `Domain+Localized.swift`. `ReferenceSlugs.kt` is the compile-time mirror of
+  the live Supabase slugs (ported from the iOS file of the same name); adding
+  a reference row server-side means updating `ReferenceSlugs.kt` AND both
+  `strings.xml` files in the same change, or `LocalizationParityTest` fails.
+- **`android:localeConfig`** (`res/xml/locales_config.xml`) enables per-app
+  language (added in B). `LocalizationParityTest` (JVM unit test, no
+  Robolectric — parses the `strings.xml` files directly since there's no
+  Android resource system on the plain JVM) asserts en/fr key-set parity and
+  that every `ReferenceSlugs` entry maps to a real resource id.
 - Dates/numbers localize via the active `Locale` — never pin a formatter to a
   fixed locale.
 
@@ -93,15 +102,55 @@ happens in a separate coroutine, not inline in the collector.
 
 ```
 app/src/main/kotlin/app/pbbls/android/
-  PebblesApp.kt          Application entry — constructs the service graph
+  PebblesApp.kt          Application entry — constructs the service graph, Rive.init()
   MainActivity.kt        Single activity, hosts the Compose tree + auth gate
+  DebugTokenPreviewScreen.kt  Design-system screenshot preview (B's temporary MainActivity home)
   features/<feature>/     welcome, auth, onboarding, path (matches Pebbles/Features)
   services/              SupabaseService, EmotionPaletteService, … (non-view code)
-  components/            PebblesTextInput, PebblesPrimaryButton, … (Pebbles/Components)
-  theme/                PebblesTheme, palettes, spacing, typography (Pebbles/Theme)
+  components/            PebblesTextInput, PebblesCheckbox, PebblesPrimaryButton, CheckGlyph (Pebbles/Components)
+  theme/                 PebblesTheme, Palettes, Spacing, Typography, PebblesText,
+                          ReferenceSlugs, ReferenceStrings (Pebbles/Theme +
+                          Pebbles/Features/Path/Models localization helpers)
+  rive/                  RiveLogo (Pebbles Rive usage, e.g. WelcomeView.swift)
 ```
 
 A 1:1 map of `apps/ios/Pebbles/{Features,Services,Components,Theme}`.
+
+### Theme (sub-project B)
+
+- `PebblesTheme` is both an object (`PebblesTheme.colors.system.*`,
+  `.colors.accent.*`, `.spacing.*`, `.type.*`) and a `@Composable` wrapper
+  (`PebblesTheme { content }`) that resolves light/dark from
+  `isSystemInDarkTheme()` and provides all four CompositionLocals — same
+  dual object+function pattern Compose's own `MaterialTheme` uses. Material 3
+  is the rendering engine only; no dynamic color, no Material color roles in
+  app code (D6).
+- `PebblesTypography` exposes 18 `TextStyle` tokens directly (`.body`,
+  `.headlineEmphasized`, …) rather than an enum + lookup — call `PebblesText`
+  (not raw `Text`) so uppercase tokens (`meta`, `metaEmphasized`,
+  `cardHeading`, `cardHeadingEmphasized`) get their case transform; Compose
+  `TextStyle` has no text-case property.
+- All "rounded" iOS tokens (SF Pro/Compact Rounded) map to **Nunito**
+  (maintainer-approved 2026-07-11) — a single variable-font TTF
+  (`res/font/nunito.ttf`, OFL, from the Google Fonts repo) declared at four
+  weights via `FontVariation` in `Typography.kt`, not four separate files.
+- Reference-data names (`emotion.<slug>`, `domain.<slug>`,
+  `emotionCategory.<slug>`) resolve through `ReferenceStrings.referenceName`,
+  never the DB `name` column directly — see Localization below.
+
+### Rive rename map (D14)
+
+Only the logo ships in B; the cairn (`pbbls-cairn.riv`) is D-optional and not
+bundled. Android resource filenames must be lowercase
+`[a-z0-9_]`, so the source is renamed on copy:
+
+| iOS source (`apps/ios/Pebbles/Resources/`) | Android (`res/raw/`)          |
+| ------------------------------------------- | ------------------------------ |
+| `pbbls-logo-appear_idle.riv`                | `pbbls_logo_appear_idle.riv`   |
+
+`RiveLogo` loads it with the default artboard + default timeline, autoplay
+(no named state machine in the file) — mirrors `WelcomeView.swift`'s
+`RiveViewModel(fileName:)` call, which also passes no artboard/SM args.
 
 ## Lint & test
 
@@ -120,9 +169,12 @@ A 1:1 map of `apps/ios/Pebbles/{Features,Services,Components,Theme}`.
   change. To adopt visual-regression later, commit the references and switch CI to
   `validateDebugScreenshotTest`. Add a preview per screen/state as real UI lands.
 
-## What's scaffolded but not used yet (sub-project A)
+## What's scaffolded but not used yet (sub-project A/B)
 
-- `PebblesApp` is an empty `Application` — the service graph lands in C.
+- `PebblesApp` only initializes Rive — the rest of the service graph
+  (`SupabaseService` and friends) lands in C.
 - No app icon slot — the launcher shows the default system icon. Expected.
-- `PlaceholderScreen` uses default Material 3 color schemes only because the token
-  system doesn't exist yet; the real `PebblesTheme` tokens replace it in B.
+- `DebugTokenPreviewScreen` is `MainActivity`'s temporary home (design-system
+  screenshot review); the real home (auth gate / NavHost) lands in C.
+- `PebblesTextInput`/`PebblesCheckbox`/`PebblesPrimaryButton` are unconsumed
+  until the entry funnel (C) wires them into real screens.
