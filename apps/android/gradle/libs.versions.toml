@@ -11,6 +11,9 @@ lifecycleRuntimeKtx = "2.11.0"
 composeBom = "2026.06.00"
 junit = "4.13.2"
 coroutines = "1.11.0"
+# Google's official Compose Preview Screenshot Testing (renders @Preview to PNG
+# on the JVM, no device/emulator, no Robolectric). Still alpha — see CLAUDE.md.
+screenshot = "0.0.1-alpha15"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -24,6 +27,7 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
+screenshot-validation-api = { group = "com.android.tools.screenshot", name = "screenshot-validation-api", version.ref = "screenshot" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -31,3 +35,4 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 # still be applied, pinned to the same version as the Kotlin compiler in use.
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
+screenshot = { id = "com.android.compose.screenshot", version.ref = "screenshot" }

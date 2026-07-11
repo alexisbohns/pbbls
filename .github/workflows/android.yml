@@ -52,3 +52,19 @@ jobs:
           name: app-debug
           path: apps/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      # Renders the @PreviewTest composables to PNGs so the UI is reviewable
+      # without a device (the maintainer has no local Android SDK). This uses
+      # `update` (not `validate`) deliberately: it always re-renders the current
+      # UI and never diffs against a committed baseline — render-to-view, not a
+      # regression gate. Baseline-diff regression testing is a future opt-in.
+      - name: Render UI screenshots
+        working-directory: apps/android
+        run: ./gradlew updateDebugScreenshotTest
+
+      - name: Upload UI screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-screenshots
+          path: apps/android/app/src/screenshotTestDebug/reference/**
+          if-no-files-found: error

@@ -108,9 +108,17 @@ A 1:1 map of `apps/ios/Pebbles/{Features,Services,Components,Theme}`.
 - **ktlint, stock ruleset (D11).** `./gradlew ktlintCheck`; `./gradlew
   ktlintFormat` auto-fixes. No detekt yet.
 - **JUnit4 + `kotlinx-coroutines-test`, JVM unit tests only.** No Robolectric, no
-  instrumented tests, no screenshot tests (mirrors the iOS "no UI tests" rule).
-  Test pure logic (auth `canSubmit`, week grouping, valence mapping, palette
-  parsing, slug resolution) and localization parity.
+  instrumented tests. Test pure logic (auth `canSubmit`, week grouping, valence
+  mapping, palette parsing, slug resolution) and localization parity.
+- **Compose Preview Screenshot Testing** (`com.android.compose.screenshot`)
+  renders `@PreviewTest` composables in `src/screenshotTest/` to PNGs on the JVM
+  (no device, no Robolectric). CI runs `updateDebugScreenshotTest` and uploads the
+  `ui-screenshots` artifact so the UI is reviewable without a local SDK — this
+  deliberately re-enables screenshot tooling that the milestone design (D17)
+  deferred, so the SDK-less maintainer can review UI. It is **render-to-view**,
+  not a regression gate: references are git-ignored and nothing fails on a visual
+  change. To adopt visual-regression later, commit the references and switch CI to
+  `validateDebugScreenshotTest`. Add a preview per screen/state as real UI lands.
 
 ## What's scaffolded but not used yet (sub-project A)
 

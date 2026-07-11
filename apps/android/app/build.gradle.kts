@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.ktlint)
+    alias(libs.plugins.screenshot)
 }
 
 // Secrets chain (D8): read the git-ignored secrets.properties if present,
@@ -50,6 +51,10 @@ android {
         compose = true
         buildConfig = true
     }
+
+    // Compose Preview Screenshot Testing (experimental/alpha). Also flagged in
+    // gradle.properties; set here so the :app module opts in explicitly.
+    experimentalProperties["android.experimental.enableScreenshotTest"] = true
 }
 
 // jvmToolchain sets sourceCompatibility/targetCompatibility for Java and the
@@ -73,4 +78,9 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+
+    // Compose Preview Screenshot Testing renders the @PreviewTest composables in
+    // src/screenshotTest/ to PNGs. ui-tooling supplies the @Preview runtime.
+    screenshotTestImplementation(libs.screenshot.validation.api)
+    screenshotTestImplementation(libs.androidx.compose.ui.tooling)
 }

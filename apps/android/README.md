@@ -64,6 +64,18 @@ Actions run and side-load it:
 adb install -r app-debug.apk
 ```
 
+## Seeing the UI without a device
+
+Every CI run also **renders the app's screens to images** (Compose Preview
+Screenshot Testing) and uploads them as the **`ui-screenshots`** artifact — so you
+can review the UI as PNGs without Android Studio, an emulator, or a device.
+Download it from the PR's Actions run, alongside `app-debug`. Today it renders the
+placeholder in light and dark; each new screen adds a preview under
+`app/src/screenshotTest/`.
+
+This renders-to-view — nothing fails on a visual diff. Committed baselines for
+visual-regression testing are a future opt-in (see `CLAUDE.md`).
+
 ## npm / Turbo
 
 `@pbbls/android` exposes `build` / `lint` / `test` scripts (via
