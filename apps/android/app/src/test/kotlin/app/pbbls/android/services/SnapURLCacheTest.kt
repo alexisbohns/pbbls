@@ -1,7 +1,10 @@
 package app.pbbls.android.services
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -10,6 +13,14 @@ import org.junit.Test
 import java.io.IOException
 
 class SnapURLCacheTest {
+    /**
+     * The cache's scope in production carries a SupervisorJob, so a failed
+     * sign never cancels anything else. Mirror that here — handing the cache
+     * the raw TestScope would fail the whole test when the provider throws,
+     * even though every caller catches the awaited exception.
+     */
+    private fun TestScope.cacheScope(): CoroutineScope = CoroutineScope(coroutineContext + SupervisorJob())
+
     private class FakeProvider : SignedUrlProviding {
         var signCount = 0
         var failNext = false
@@ -34,7 +45,7 @@ class SnapURLCacheTest {
     fun `concurrent requests for one path coalesce onto a single sign`() =
         runTest {
             val provider = FakeProvider()
-            val cache = SnapURLCache(provider, this, nowMillis = { 0L })
+            val cache = SnapURLCache(provider, cacheScope(), nowMillis = { 0L })
 
             val results = (1..5).map { async { cache.signedUrls("user/snap") } }.map { it.await() }
 
@@ -47,7 +58,7 @@ class SnapURLCacheTest {
         runTest {
             var now = 0L
             val provider = FakeProvider()
-            val cache = SnapURLCache(provider, this, nowMillis = { now })
+            val cache = SnapURLCache(provider, cacheScope(), nowMillis = { now })
 
             cache.signedUrls("p")
             now = (SnapURLCache.TTL_SECONDS - SnapURLCache.SAFETY_MARGIN_SECONDS) * 1_000 - 1
@@ -64,7 +75,7 @@ class SnapURLCacheTest {
     fun `distinct paths sign independently`() =
         runTest {
             val provider = FakeProvider()
-            val cache = SnapURLCache(provider, this, nowMillis = { 0L })
+            val cache = SnapURLCache(provider, cacheScope(), nowMillis = { 0L })
 
             cache.signedUrls("a")
             cache.signedUrls("b")
@@ -76,7 +87,7 @@ class SnapURLCacheTest {
     fun `a failure reaches every coalesced caller and the next call retries`() =
         runTest {
             val provider = FakeProvider().apply { failNext = true }
-            val cache = SnapURLCache(provider, this, nowMillis = { 0L })
+            val cache = SnapURLCache(provider, cacheScope(), nowMillis = { 0L })
 
             val callers = (1..3).map { async { runCatching { cache.signedUrls("p") } } }
             val outcomes = callers.map { it.await() }
@@ -94,7 +105,7 @@ class SnapURLCacheTest {
     fun `invalidateAll forces a re-sign`() =
         runTest {
             val provider = FakeProvider()
-            val cache = SnapURLCache(provider, this, nowMillis = { 0L })
+            val cache = SnapURLCache(provider, cacheScope(), nowMillis = { 0L })
 
             cache.signedUrls("p")
             cache.invalidateAll()
