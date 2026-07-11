@@ -6,6 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.CompositionLocalProvider
+import app.pbbls.android.services.LocalEmotionPaletteService
+import app.pbbls.android.services.LocalPathService
 import app.pbbls.android.services.LocalSupabaseService
 import app.pbbls.android.theme.PebblesTheme
 import io.github.jan.supabase.auth.handleDeeplinks
@@ -19,7 +21,8 @@ import io.github.jan.supabase.auth.handleDeeplinks
  * this activity and arrives at [onNewIntent].
  */
 class MainActivity : ComponentActivity() {
-    private val supabase get() = (application as PebblesApp).supabase
+    private val app get() = application as PebblesApp
+    private val supabase get() = app.supabase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,7 +30,11 @@ class MainActivity : ComponentActivity() {
         supabase.client.handleDeeplinks(intent)
         setContent {
             PebblesTheme {
-                CompositionLocalProvider(LocalSupabaseService provides supabase) {
+                CompositionLocalProvider(
+                    LocalSupabaseService provides supabase,
+                    LocalEmotionPaletteService provides app.palettes,
+                    LocalPathService provides app.pathService,
+                ) {
                     RootScreen()
                 }
             }
