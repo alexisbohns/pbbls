@@ -2,4 +2,78 @@
 <resources>
     <!-- Brand name — never translated (D3/D9). -->
     <string name="app_name" translatable="false">Pebbles</string>
+
+    <!-- Reference-data names (D9). Resolved via ReferenceStrings, keyed by DB slug —
+         never render the DB `name` column directly on a read path. Source: iOS
+         Localizable.xcstrings (`emotion.<slug>.name`, `domain.<slug>.name`,
+         `emotionCategory.<slug>.name`). Keep in sync with ReferenceSlugs.kt. -->
+
+    <!-- Domains (18) -->
+    <string name="domain_community_name">Community</string>
+    <string name="domain_currentevents_name">Events</string>
+    <string name="domain_dating_name">Dating</string>
+    <string name="domain_education_name">Education</string>
+    <string name="domain_family_name">Family</string>
+    <string name="domain_fitness_name">Sport</string>
+    <string name="domain_friends_name">Friends</string>
+    <string name="domain_health_name">Health</string>
+    <string name="domain_hobbies_name">Passions</string>
+    <string name="domain_identity_name">Identity</string>
+    <string name="domain_money_name">Finance</string>
+    <string name="domain_partner_name">Partner</string>
+    <string name="domain_selfcare_name">Self Care</string>
+    <string name="domain_spirituality_name">Spirituality</string>
+    <string name="domain_tasks_name">Tasks</string>
+    <string name="domain_travel_name">Travel</string>
+    <string name="domain_weather_name">Weather</string>
+    <string name="domain_work_name">Work</string>
+
+    <!-- Emotions (38) -->
+    <string name="emotion_amazed_name">Awe</string>
+    <string name="emotion_amused_name">Amused</string>
+    <string name="emotion_angry_name">Anger</string>
+    <string name="emotion_annoyed_name">Annoyed</string>
+    <string name="emotion_anxious_name">Anxiety</string>
+    <string name="emotion_ashamed_name">Shame</string>
+    <string name="emotion_brave_name">Brave</string>
+    <string name="emotion_calm_name">Calm</string>
+    <string name="emotion_confident_name">Confident</string>
+    <string name="emotion_content_name">Content</string>
+    <string name="emotion_disappointed_name">Disappointed</string>
+    <string name="emotion_discouraged_name">Discouraged</string>
+    <string name="emotion_disgusted_name">Disgust</string>
+    <string name="emotion_drained_name">Drained</string>
+    <string name="emotion_embarrassed_name">Embarrassed</string>
+    <string name="emotion_excited_name">Excitement</string>
+    <string name="emotion_frustrated_name">Frustrated</string>
+    <string name="emotion_grateful_name">Gratitude</string>
+    <string name="emotion_guilty_name">Guilt</string>
+    <string name="emotion_happy_name">Happy</string>
+    <string name="emotion_hopeful_name">Hopeful</string>
+    <string name="emotion_hopeless_name">Hopeless</string>
+    <string name="emotion_indifferent_name">Indifferent</string>
+    <string name="emotion_irritated_name">Irritated</string>
+    <string name="emotion_jealous_name">Jealous</string>
+    <string name="emotion_joyful_name">Joy</string>
+    <string name="emotion_lonely_name">Loneliness</string>
+    <string name="emotion_overwhelmed_name">Overwhelmed</string>
+    <string name="emotion_passionate_name">Passion</string>
+    <string name="emotion_peaceful_name">Peaceful</string>
+    <string name="emotion_proud_name">Pride</string>
+    <string name="emotion_relieved_name">Relieved</string>
+    <string name="emotion_sad_name">Sadness</string>
+    <string name="emotion_satisfied_name">Satisfied</string>
+    <string name="emotion_scared_name">Fear</string>
+    <string name="emotion_stressed_name">Stressed</string>
+    <string name="emotion_surprised_name">Surprise</string>
+    <string name="emotion_worried_name">Worried</string>
+
+    <!-- Emotion categories (7) -->
+    <string name="emotionCategory_anger_name">Anger</string>
+    <string name="emotionCategory_fear_name">Fear</string>
+    <string name="emotionCategory_joy_name">Joy</string>
+    <string name="emotionCategory_peace_name">Peace</string>
+    <string name="emotionCategory_pride_name">Pride</string>
+    <string name="emotionCategory_sadness_name">Sadness</string>
+    <string name="emotionCategory_shame_name">Shame</string>
 </resources>

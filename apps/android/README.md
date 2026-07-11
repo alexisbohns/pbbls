@@ -6,9 +6,9 @@ backend. See `CLAUDE.md` for conventions and
 `docs/superpowers/specs/2026-07-10-android-bootstrap-design.md` for the milestone
 design.
 
-At this stage the app is a scaffold: it builds, lints, unit-tests, and launches to
-a placeholder screen showing the app name. The design system, auth funnel, and
-Path timeline arrive in later sub-projects.
+At this stage the app builds, lints, unit-tests, and launches to a debug preview
+of the design system (theme tokens, typography, components, the Rive logo). The
+auth funnel and Path timeline arrive in later sub-projects.
 
 ## Prerequisites
 
@@ -70,8 +70,8 @@ Every CI run also **renders the app's screens to images** (Compose Preview
 Screenshot Testing) and uploads them as the **`ui-screenshots`** artifact — so you
 can review the UI as PNGs without Android Studio, an emulator, or a device.
 Download it from the PR's Actions run, alongside `app-debug`. Today it renders the
-placeholder in light and dark; each new screen adds a preview under
-`app/src/screenshotTest/`.
+design-system token preview (colors, type ramp, Rive logo) in light and dark;
+each new screen adds a preview under `app/src/screenshotTest/`.
 
 This renders-to-view — nothing fails on a visual diff. Committed baselines for
 visual-regression testing are a future opt-in (see `CLAUDE.md`).

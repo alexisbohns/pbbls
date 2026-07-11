@@ -180,3 +180,14 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** Android joins the web+iOS lockstep cadence on schema/RPC changes ("keep sibling RPCs symmetric" now spans three surfaces). Models and query strings are hand-written per surface by design — do not build a codegen/shared-types bridge without a new decision. RN/Flutter proposals for Android are settled-rejected. Scaffolding `apps/android` (Gradle project, CI, auth + Path skeleton, `apps/android/CLAUDE.md` conventions) is a separate future milestone with its own issue and plan.
 - **Supersedes / Superseded-by:** —
 - **Refs:** `apps/ios/CLAUDE.md`, 2026-05-26 "Prefer RPCs for multi-table or multi-statement Supabase writes".
+
+## 2026-07-11 — Android Nunito: one variable-font file, not four static weights
+
+- **Status:** taken
+- **Scope:** android
+- **Context:** #529 (Android design system, sub-project B) needed Nunito at four weights (400/500/600/700) for every "rounded" typography token. The plan's Risks section anticipated fetching separate static-weight TTFs, or the maintainer dropping them in manually if the sandbox couldn't reach GitHub. The fetch succeeded, but the current Google Fonts source for Nunito ships only a single variable-font file (`Nunito[wght].ttf`) — no static per-weight instances exist in the repo to fetch.
+- **Decision:** We will bundle the one variable-font TTF (`res/font/nunito.ttf`) and declare all four weights in `PebblesTypography.kt` via `Font(R.font.nunito, weight = …, variationSettings = FontVariation.Settings(FontVariation.weight(…)))` — four `Font()` entries in one `FontFamily`, all pointing at the same file. `@OptIn(ExperimentalTextApi::class)` guards the declaration.
+- **Why:** This is Android's documented, supported mechanism for multi-weight variable fonts and needs no static-instance files that Google Fonts no longer publishes for this family. One file is also a smaller APK footprint than four near-identical TTFs would have been.
+- **Consequences:** Don't "fix" this by hunting for missing `nunito_medium.ttf`/`nunito_semibold.ttf`/etc. — there is no static source to add, and the single-file approach is intentional. If a future weight is needed, add another `Font()` entry with the matching `FontVariation.weight(...)`, not a new file.
+- **Supersedes / Superseded-by:** —
+- **Refs:** #529, `docs/superpowers/plans/2026-07-11-android-design-system.md`, `apps/android/app/src/main/kotlin/app/pbbls/android/theme/PebblesTypography.kt`.

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Per-app language (API 33) — lets the user pick English or French from
+     system settings independent of the device locale. Referenced by
+     android:localeConfig on <application> in AndroidManifest.xml (D9). -->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="en" />
+    <locale android:name="fr" />
+</locale-config>
