@@ -3,6 +3,52 @@
     <!-- Brand name — never translated (D3/D9). -->
     <string name="app_name" translatable="false">Pebbles</string>
 
+    <!-- ==== Entry funnel (sub-project C) — Welcome ==== -->
+    <string name="welcome_step_record_title">Record in seconds.</string>
+    <string name="welcome_step_record_description">Capture moments as they happen — no blank page, no pressure.</string>
+    <string name="welcome_step_enrich_title">Enrich with meaning.</string>
+    <string name="welcome_step_enrich_description">Add emotions, people, and reflections to each pebble.</string>
+    <string name="welcome_step_grow_title">Grow your path.</string>
+    <string name="welcome_step_grow_description">Look back at your journey, at your own pace.</string>
+    <string name="welcome_create_account">Create an account</string>
+    <string name="welcome_log_in">Log in</string>
+    <string name="welcome_continue_google">Continue with Google</string>
+    <!-- {terms} and {privacy} are replaced in-Compose with tappable links; keep
+         both tokens and let word order follow the translation. -->
+    <string name="welcome_legal_disclaimer">Read our {terms} and {privacy} before creating an account with Google.</string>
+    <string name="legal_link_terms">Terms</string>
+    <string name="legal_link_privacy">Privacy</string>
+
+    <!-- ==== Entry funnel — Auth ==== -->
+    <string name="auth_mode_login">Log In</string>
+    <string name="auth_mode_signup">Sign Up</string>
+    <string name="auth_email_placeholder">Email</string>
+    <string name="auth_password_placeholder">Password</string>
+    <string name="auth_email_plus_error">The \'+\' character is not allowed in email addresses.</string>
+    <string name="auth_consent_prefix">I accept the </string>
+    <string name="auth_consent_terms_link">Terms of Service</string>
+    <string name="auth_consent_privacy_link">Privacy Policy</string>
+    <string name="auth_submit_login">Connect</string>
+    <string name="auth_submit_signup">Create an account</string>
+
+    <!-- ==== Entry funnel — Onboarding ==== -->
+    <string name="onboarding_intro_title">Your life is a path.</string>
+    <string name="onboarding_intro_description">Every moment matters — the big ones and the quiet ones. But most of them slip away before you even notice. Pebbles helps you collect them, one by one.</string>
+    <string name="onboarding_concept_title">Drop a pebble, keep the moment.</string>
+    <string name="onboarding_concept_description">A coffee with a friend. A concert that gave you chills. A tough conversation. Record it in seconds — no blank page, no pressure, no audience.</string>
+    <string name="onboarding_qualify_title">Qualify and relate.</string>
+    <string name="onboarding_qualify_description">Associate your moment with an emotion and a domain, relate with people and add your pebble to a stack or a collection.</string>
+    <string name="onboarding_carving_title">Get your pebble.</string>
+    <string name="onboarding_carving_description">Choose or carve a glyph to mark the moment. Then reveal a unique pebble illustration to remember your moment.</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_close">Close onboarding</string>
+    <string name="onboarding_start">Start your path</string>
+
+    <!-- ==== Entry funnel — Path placeholder (real timeline lands in sub-project D) ==== -->
+    <string name="path_placeholder_title">Your path</string>
+    <string name="path_placeholder_subtitle">Your timeline lands in the next update. This placeholder lets the entry funnel be tested end to end.</string>
+    <string name="path_sign_out">Sign out</string>
+
     <!-- Reference-data names (D9). Resolved via ReferenceStrings, keyed by DB slug —
          never render the DB `name` column directly on a read path. Source: iOS
          Localizable.xcstrings (`emotion.<slug>.name`, `domain.<slug>.name`,

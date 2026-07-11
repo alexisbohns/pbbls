@@ -16,7 +16,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Landing",
-      "description": "Public landing page with app branding, login button, and create-account link. Redirects authenticated users to the home view. iOS (PR #281) implements this as WelcomeView: persistent logo header, auto-advancing 3-step carousel, and two CTAs that push AuthView with the correct mode preselected.",
+      "description": "Public landing page with app branding, login button, and create-account link. Redirects authenticated users to the home view. iOS (PR #281) implements this as WelcomeView: persistent logo header, auto-advancing 3-step carousel, and two CTAs that push AuthView with the correct mode preselected. Android (M37 sub-project C) ports this as WelcomeScreen: Rive logo, timed 6-step reveal (honors reduced motion), HorizontalPager carousel, Create/Log in/Google CTAs, and the in-app legal disclaimer (Custom Tabs). No Apple button (settled non-goal).",
       "status": "development",
       "platforms": [
         "web",
@@ -29,7 +29,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Login",
-      "description": "Login page with username and password form. Redirects to path or onboarding based on profile completion status.",
+      "description": "Login page with username and password form. Redirects to path or onboarding based on profile completion status. Android (M37 sub-project C) implements this as AuthScreen in login mode (segmented switcher), with live email normalization and Google hosted OAuth.",
       "status": "development",
       "platforms": [
         "web",
@@ -42,7 +42,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Register",
-      "description": "Registration page with username, password, confirm password, and consent checkboxes (terms + privacy). Auto-logs in and redirects to onboarding on success.",
+      "description": "Registration page with username, password, confirm password, and consent checkboxes (terms + privacy). Auto-logs in and redirects to onboarding on success. Android (M37 sub-project C) implements this as AuthScreen in signup mode: the two consent checkboxes gate submit and write terms_accepted_at/privacy_accepted_at into user metadata.",
       "status": "development",
       "platforms": [
         "web",
@@ -534,10 +534,11 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Onboarding — Your life is a path",
-      "description": "First onboarding screen introducing the pebble/path metaphor.",
+      "description": "First onboarding screen introducing the pebble/path metaphor. Android (M37 sub-project C) ports this as the first page of OnboardingScreen (HorizontalPager).",
       "status": "development",
       "platforms": [
-        "ios"
+        "ios",
+        "android"
       ]
     },
     {
@@ -545,10 +546,11 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Onboarding — Drop a pebble, keep the moment",
-      "description": "Second onboarding screen framing pebble recording as low-friction.",
+      "description": "Second onboarding screen framing pebble recording as low-friction. Android (M37 sub-project C) ports this as the second page of OnboardingScreen.",
       "status": "development",
       "platforms": [
-        "ios"
+        "ios",
+        "android"
       ]
     },
     {
@@ -556,10 +558,11 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Onboarding — Qualify and relate",
-      "description": "Third onboarding screen explaining emotion, domain, souls, collections.",
+      "description": "Third onboarding screen explaining emotion, domain, souls, collections. Android (M37 sub-project C) ports this as the third page of OnboardingScreen.",
       "status": "development",
       "platforms": [
-        "ios"
+        "ios",
+        "android"
       ]
     },
     {
@@ -567,10 +570,11 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Onboarding — Get your pebble",
-      "description": "Fourth onboarding screen explaining glyph carving and pebble illustration.",
+      "description": "Fourth onboarding screen explaining glyph carving and pebble illustration. Android (M37 sub-project C) ports this as the fourth page of OnboardingScreen, with the 'Start your path' CTA.",
       "status": "development",
       "platforms": [
-        "ios"
+        "ios",
+        "android"
       ]
     },
     {

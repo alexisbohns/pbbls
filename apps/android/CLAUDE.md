@@ -169,12 +169,23 @@ bundled. Android resource filenames must be lowercase
   change. To adopt visual-regression later, commit the references and switch CI to
   `validateDebugScreenshotTest`. Add a preview per screen/state as real UI lands.
 
-## What's scaffolded but not used yet (sub-project A/B)
+## What's scaffolded but not used yet (post sub-project C)
 
-- `PebblesApp` only initializes Rive — the rest of the service graph
-  (`SupabaseService` and friends) lands in C.
+- `PebblesApp` now constructs `SupabaseService` (entry funnel, sub-project C) and
+  provides it via `LocalSupabaseService`. The remaining services
+  (`EmotionPaletteService`, `PathService`, `SnapURLCache`) land with the
+  read-only Path (sub-project D).
 - No app icon slot — the launcher shows the default system icon. Expected.
-- `DebugTokenPreviewScreen` is `MainActivity`'s temporary home (design-system
-  screenshot review); the real home (auth gate / NavHost) lands in C.
-- `PebblesTextInput`/`PebblesCheckbox`/`PebblesPrimaryButton` are unconsumed
-  until the entry funnel (C) wires them into real screens.
+- `MainActivity` now hosts `RootScreen` (the auth gate / single NavHost) and
+  forwards `pebbles://auth-callback` deep links to supabase-kt's
+  `handleDeeplinks` (`onCreate` + `onNewIntent`, `launchMode="singleTask"`).
+  `DebugTokenPreviewScreen` is retained only as a screenshot-test preview.
+- `features/path/PathScreen.kt` is a placeholder (logo + a temporary sign-out so
+  the funnel is re-testable on device); the real read-only timeline
+  (`path_pebbles()` → week-grouped list) lands in D.
+- Onboarding illustrations render a placeholder surface — the iOS asset-catalog
+  artwork is not yet exported to Android drawable densities (milestone risk 6,
+  needs the maintainer's design sources).
+- Funnel screens take plain action lambdas rather than reading the service
+  directly, so they stay previewable (screenshot tests) and keep the supabase-kt
+  calls at the `RootScreen`/NavHost binding layer.

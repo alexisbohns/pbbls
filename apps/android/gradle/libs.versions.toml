@@ -18,6 +18,17 @@ screenshot = "0.0.1-alpha15"
 # androidx-startup for Rive.init(); see PebblesApp.onCreate().
 rive = "11.7.2"
 androidxStartup = "1.2.0"
+# Entry funnel (sub-project C). supabase-kt is the auth/data client; it needs a
+# Ktor engine on the classpath — supabase-kt 3.1.4 is built against Ktor 3.1.2,
+# so the OkHttp engine is pinned to the same version to avoid Ktor version skew.
+supabase = "3.1.4"
+ktor = "3.1.2"
+kotlinxSerializationJson = "1.8.0"
+# Single-activity NavHost for the unauthenticated Welcome -> Auth flow (D5).
+navigationCompose = "2.9.8"
+# Custom Tabs — the in-app-browser analog of iOS SFSafariViewController, used
+# for the legal document links (D15).
+browser = "1.10.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -34,6 +45,19 @@ kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-cor
 screenshot-validation-api = { group = "com.android.tools.screenshot", name = "screenshot-validation-api", version.ref = "screenshot" }
 rive-android = { group = "app.rive", name = "rive-android", version.ref = "rive" }
 androidx-startup-runtime = { group = "androidx.startup", name = "startup-runtime", version.ref = "androidxStartup" }
+
+# Compose (BOM-managed; no version here). foundation supplies HorizontalPager.
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
+androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
+androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
+
+# supabase-kt entry-funnel stack (sub-project C).
+supabase-bom = { group = "io.github.jan-tennert.supabase", name = "bom", version.ref = "supabase" }
+supabase-auth = { group = "io.github.jan-tennert.supabase", name = "auth-kt" }
+supabase-postgrest = { group = "io.github.jan-tennert.supabase", name = "postgrest-kt" }
+ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

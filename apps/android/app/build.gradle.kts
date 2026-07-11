@@ -8,10 +8,15 @@ plugins {
 }
 
 // Secrets chain (D8): read the git-ignored secrets.properties if present,
-// otherwise default every key to an empty string so the build NEVER fails
-// without secrets (CI has none). AppEnvironment turns an empty value into a
-// loud runtime crash with setup instructions — the iOS contract: setup bugs
-// fail at launch, never at build.
+// otherwise fall back to an environment variable of the same name, otherwise
+// default to an empty string so the build NEVER fails without secrets.
+// AppEnvironment turns an empty value into a loud runtime crash with setup
+// instructions — the iOS contract: setup bugs fail at launch, never at build.
+//
+// The env-var fallback lets CI bake real config into the debug APK from GitHub
+// Actions secrets (the maintainer has no local Android SDK and installs the CI
+// artifact directly), while local builds keep using secrets.properties. Local
+// file wins over env when both are set.
 val secretsFile = rootProject.file("secrets.properties")
 val secrets =
     Properties().apply {
@@ -20,7 +25,11 @@ val secrets =
         }
     }
 
-fun secret(key: String): String = secrets.getProperty(key, "")
+fun secret(key: String): String {
+    val fromFile = secrets.getProperty(key)
+    if (!fromFile.isNullOrBlank()) return fromFile
+    return System.getenv(key).orEmpty()
+}
 
 android {
     namespace = "app.pbbls.android"
@@ -69,6 +78,8 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.rive.android)
     implementation(libs.androidx.startup.runtime)
+    implementation(libs.androidx.browser)
+    implementation(libs.kotlinx.coroutines.android)
 
     val composeBom = platform(libs.androidx.compose.bom)
     implementation(composeBom)
@@ -76,7 +87,17 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.navigation.compose)
     debugImplementation(libs.androidx.compose.ui.tooling)
+
+    // supabase-kt: BOM pins the module versions; OkHttp is the Ktor engine and
+    // kotlinx-serialization-json backs the consent-metadata JSON block.
+    implementation(platform(libs.supabase.bom))
+    implementation(libs.supabase.auth)
+    implementation(libs.supabase.postgrest)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

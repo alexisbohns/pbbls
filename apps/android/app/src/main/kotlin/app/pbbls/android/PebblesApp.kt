@@ -1,17 +1,27 @@
 package app.pbbls.android
 
 import android.app.Application
+import app.pbbls.android.services.SupabaseService
 import app.rive.runtime.kotlin.core.Rive
 
 /**
- * Application entry point — the `PebblesApp.swift` analog. The service graph
- * (`SupabaseService` and friends, wired the way `PebblesApp.swift` constructs
- * and injects them) lands with the entry funnel (sub-project C); for now this
- * only initializes Rive (D14) so `RiveLogo` can load `.riv` resources.
+ * Application entry point — the `PebblesApp.swift` analog. Initializes Rive (D14)
+ * and constructs the service graph exactly like `PebblesApp.swift`:
+ * [SupabaseService] first, dependents (added in sub-project D) taking it by
+ * constructor. `MainActivity` reads the graph off this instance and provides it
+ * to Compose via CompositionLocals (D4).
+ *
+ * [SupabaseService]'s constructor reads Supabase secrets through `AppEnvironment`,
+ * which throws with setup instructions if they are blank — a setup bug that fails
+ * loud at launch, never at build (D8).
  */
 class PebblesApp : Application() {
+    lateinit var supabase: SupabaseService
+        private set
+
     override fun onCreate() {
         super.onCreate()
         Rive.init(this)
+        supabase = SupabaseService()
     }
 }
