@@ -152,6 +152,32 @@ bundled. Android resource filenames must be lowercase
 (no named state machine in the file) — mirrors `WelcomeView.swift`'s
 `RiveViewModel(fileName:)` call, which also passes no artboard/SM args.
 
+### Path rendering (sub-project D)
+
+- **`render_svg` renders through `PebbleSvg`** (`features/path/render/`):
+  AndroidSVG parses the RPC string after a literal `currentColor` →
+  palette-hex substitution (D10, mirrors iOS `PebbleRenderView`). Injected
+  hex must be **6-digit** — `EmotionPalette` truncates the DB's 8-digit
+  `#RRGGBBAA` before anything reaches SVG markup (8-digit misparses).
+- **Outline silhouettes** (the row backdrop) are byte-identical copies of the
+  iOS assets, renamed on copy like the Rive files:
+
+| iOS source (`apps/ios/Pebbles/Resources/Outlines/`) | Android (`res/raw/`) |
+| --- | --- |
+| `{size}-{polarity}.svg` (9 files) | `outline_{size}_{polarity}.svg` |
+
+  Their `#FF00FF` sentinel fill is string-replaced with the palette fill hex
+  (`PebbleOutlineBackdrop`); fill alpha rides separately as view alpha.
+- **The valence-picker PDFs are deliberately not ported** — the iOS Path row
+  never uses them (they're create-flow picker assets); the row is outline +
+  `render_svg`. Port them only when the create flow lands.
+- **The week-roll cairn is a static drawable** (`res/drawable/cairn_static.xml`)
+  in v1; the iOS Rive state machine (`pbbls-cairn-states.riv`, with an
+  `isSelected` input + `strokeColor` data binding) is a known fast-follow.
+- **Engine-composed SVG fixtures** for screenshot tests regenerate via
+  `npx tsx apps/android/scripts/gen-pebble-svg-fixtures.ts` (uses the real
+  compositor sources in `packages/supabase`) — rerun when the engine changes.
+
 ## Lint & test
 
 - **ktlint, stock ruleset (D11).** `./gradlew ktlintCheck`; `./gradlew
@@ -169,20 +195,28 @@ bundled. Android resource filenames must be lowercase
   change. To adopt visual-regression later, commit the references and switch CI to
   `validateDebugScreenshotTest`. Add a preview per screen/state as real UI lands.
 
-## What's scaffolded but not used yet (post sub-project C)
+## Current state (post sub-project D — milestone M37 complete)
 
-- `PebblesApp` now constructs `SupabaseService` (entry funnel, sub-project C) and
-  provides it via `LocalSupabaseService`. The remaining services
-  (`EmotionPaletteService`, `PathService`, `SnapURLCache`) land with the
-  read-only Path (sub-project D).
+- `PebblesApp` constructs the full service graph — `SupabaseService`, then
+  `EmotionPaletteService`, `PathService`, `SnapURLCache` (by constructor) —
+  and implements Coil's `SingletonImageLoader.Factory` (OkHttp fetcher
+  registered explicitly). `MainActivity` provides one CompositionLocal per
+  service; `LocalSnapURLCache` is **nullable-default** so previews render
+  without it.
+- `features/path/PathScreen.kt` is the real read-only timeline
+  (`path_pebbles()` → `WeekRollBuilder` → week roll + header + pager). The
+  stateless `PathContent` layer is what screenshot previews drive. The
+  temporary sign-out button stays until Profile exists. No create / edit /
+  delete / detail / stats yet.
+- `RootScreen` warms the palette cache concurrently with the splash hold and
+  flushes the signed-URL cache when the session drops to null.
+- Leaf path composables take `palette` / data as **parameters**, not service
+  reads — same previewability rule as the funnel screens.
 - No app icon slot — the launcher shows the default system icon. Expected.
-- `MainActivity` now hosts `RootScreen` (the auth gate / single NavHost) and
+- `MainActivity` hosts `RootScreen` (the auth gate / single NavHost) and
   forwards `pebbles://auth-callback` deep links to supabase-kt's
   `handleDeeplinks` (`onCreate` + `onNewIntent`, `launchMode="singleTask"`).
   `DebugTokenPreviewScreen` is retained only as a screenshot-test preview.
-- `features/path/PathScreen.kt` is a placeholder (logo + a temporary sign-out so
-  the funnel is re-testable on device); the real read-only timeline
-  (`path_pebbles()` → week-grouped list) lands in D.
 - Onboarding illustrations render a placeholder surface — the iOS asset-catalog
   artwork is not yet exported to Android drawable densities (milestone risk 6,
   needs the maintainer's design sources).

@@ -24,6 +24,8 @@ import app.pbbls.android.features.onboarding.OnboardingScreen
 import app.pbbls.android.features.onboarding.OnboardingSteps
 import app.pbbls.android.features.path.PathScreen
 import app.pbbls.android.features.welcome.WelcomeScreen
+import app.pbbls.android.services.LocalEmotionPaletteService
+import app.pbbls.android.services.LocalSnapURLCache
 import app.pbbls.android.services.LocalSupabaseService
 import app.pbbls.android.services.OnboardingPreferences
 import app.pbbls.android.theme.PebblesTheme
@@ -49,6 +51,8 @@ private const val ROUTE_AUTH = "auth"
 @Composable
 fun RootScreen() {
     val supabase = LocalSupabaseService.current
+    val palettes = LocalEmotionPaletteService.current
+    val snapUrls = LocalSnapURLCache.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
@@ -58,6 +62,10 @@ fun RootScreen() {
 
     // supabase.start() collects the auth-status stream for the app's lifetime.
     LaunchedEffect(Unit) { supabase.start() }
+    // Warm the emotion-palette cache concurrently with the splash hold — the
+    // RootView `.task { await palettes.load() }` analog. Path renders with a
+    // warm cache; misses fall back to accent.
+    LaunchedEffect(Unit) { palettes.load() }
     LaunchedEffect(Unit) {
         delay(MIN_SPLASH_MILLIS)
         minSplashDone = true
@@ -75,6 +83,12 @@ fun RootScreen() {
     LaunchedEffect(userId) {
         if (OnboardingGate.shouldPresent(userId, hasSeenOnboarding)) {
             isPresentingOnboarding = true
+        }
+        // Sign-out flushes the signed-URL cache (the iOS RootView
+        // `.onChange(of: session == nil)` analog). Firing on the initial null
+        // is a harmless clear of an empty cache.
+        if (userId == null) {
+            snapUrls?.invalidateAll()
         }
     }
 

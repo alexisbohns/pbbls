@@ -44,9 +44,15 @@
     <string name="onboarding_close">Close onboarding</string>
     <string name="onboarding_start">Start your path</string>
 
-    <!-- ==== Entry funnel — Path placeholder (real timeline lands in sub-project D) ==== -->
-    <string name="path_placeholder_title">Your path</string>
-    <string name="path_placeholder_subtitle">Your timeline lands in the next update. This placeholder lets the entry funnel be tested end to end.</string>
+    <!-- ==== Path timeline (sub-project D) ==== -->
+    <!-- iOS never localized the load-error copy (plain String literal) — Android does. -->
+    <string name="path_load_error">Couldn\'t load your pebbles.</string>
+    <string name="path_empty_week_title">Fresh week</string>
+    <string name="path_empty_week_subtitle">Collect a new pebble</string>
+    <string name="path_week_previous">Previous week</string>
+    <string name="path_week_next">Next week</string>
+    <!-- a11y label for a week-roll cairn cell: ISO week number + pebble count. -->
+    <string name="path_week_cell_a11y">Week %1$d, %2$d pebbles</string>
     <string name="path_sign_out">Sign out</string>
 
     <!-- Reference-data names (D9). Resolved via ReferenceStrings, keyed by DB slug —

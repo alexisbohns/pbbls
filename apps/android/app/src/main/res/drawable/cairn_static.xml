@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Static cairn for the week roll — three stacked stone outlines, tinted at
+     the call site (accent when focused, system.secondary otherwise). v1 of
+     issue #531: "static cairn imagery acceptable"; the iOS Rive state machine
+     (pbbls-cairn-states.riv) is a fast-follow. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="56dp"
+    android:height="56dp"
+    android:viewportWidth="56"
+    android:viewportHeight="56">
+    <!-- Bottom stone -->
+    <path
+        android:pathData="M 12,44 a 16,7 0 1 0 32,0 a 16,7 0 1 0 -32,0"
+        android:strokeColor="#FF000000"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent" />
+    <!-- Middle stone, nudged left for an organic stack -->
+    <path
+        android:pathData="M 15,31.5 a 12,6.5 0 1 0 24,0 a 12,6.5 0 1 0 -24,0"
+        android:strokeColor="#FF000000"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent" />
+    <!-- Top stone, nudged right -->
+    <path
+        android:pathData="M 21.5,20.5 a 8.5,5.5 0 1 0 17,0 a 8.5,5.5 0 1 0 -17,0"
+        android:strokeColor="#FF000000"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:fillColor="@android:color/transparent" />
+</vector>
