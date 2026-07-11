@@ -1,0 +1,11 @@
+# Scoped to the Android app. `root = true` stops editorconfig/ktlint from
+# walking further up the monorepo.
+root = true
+
+[*.{kt,kts}]
+# ktlint runs its stock ruleset (D11 — default rules, no style debate). The one
+# necessary accommodation: Jetpack Compose @Composable functions are PascalCase
+# by convention, which the stock function-naming rule would otherwise reject.
+# This is a framework requirement (every composable in the app), not a
+# preference, so it lives in config rather than a @Suppress on each function.
+ktlint_function_naming_ignore_when_annotated_with = Composable
