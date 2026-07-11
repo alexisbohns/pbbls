@@ -78,5 +78,8 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 # AGP 9 has built-in Kotlin but does NOT bundle the Compose compiler — it must
 # still be applied, pinned to the same version as the Kotlin compiler in use.
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+# Generates serializers for the hand-written @Serializable models (sub-project
+# D — the funnel only ever decoded JsonObject, which needs no codegen).
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 screenshot = { id = "com.android.compose.screenshot", version.ref = "screenshot" }
