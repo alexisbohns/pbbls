@@ -80,6 +80,7 @@ dependencies {
     implementation(libs.androidx.startup.runtime)
     implementation(libs.androidx.browser)
     implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.androidsvg)
 
     val composeBom = platform(libs.androidx.compose.bom)
     implementation(composeBom)

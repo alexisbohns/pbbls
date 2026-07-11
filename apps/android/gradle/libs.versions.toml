@@ -29,6 +29,10 @@ navigationCompose = "2.9.8"
 # Custom Tabs — the in-app-browser analog of iOS SFSafariViewController, used
 # for the legal document links (D15).
 browser = "1.10.0"
+# render_svg rendering (D10, sub-project D) — parses the server-composed pebble
+# SVG strings straight from the RPC rows (the iOS SVGView analog). The -aar
+# artifact is the maintained one; the plain jar is legacy.
+androidsvg = "1.4"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -58,6 +62,9 @@ supabase-postgrest = { group = "io.github.jan-tennert.supabase", name = "postgre
 ktor-client-okhttp = { group = "io.ktor", name = "ktor-client-okhttp", version.ref = "ktor" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines" }
+
+# Read-only Path timeline (sub-project D).
+androidsvg = { group = "com.caverock", name = "androidsvg-aar", version.ref = "androidsvg" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
