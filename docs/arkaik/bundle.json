@@ -1080,19 +1080,6 @@
       ]
     },
     {
-      "id": "DM-bounce",
-      "project_id": "pebbles",
-      "species": "data-model",
-      "title": "Bounce",
-      "description": "User's regularity karma tracking engagement tempo.",
-      "status": "idea",
-      "platforms": [
-        "web",
-        "ios",
-        "android"
-      ]
-    },
-    {
       "id": "DM-cairn",
       "project_id": "pebbles",
       "species": "data-model",
