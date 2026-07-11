@@ -1,0 +1,38 @@
+# Single source of truth for dependency versions (D2).
+# Kept minimal for sub-project A (scaffold). supabase-kt, rive-android,
+# AndroidSVG and Coil arrive with the design system / Path work (B/D).
+[versions]
+agp = "9.2.0"
+kotlin = "2.4.0"
+ktlint = "14.2.0"
+coreKtx = "1.19.0"
+activityCompose = "1.13.0"
+lifecycleRuntimeKtx = "2.11.0"
+composeBom = "2026.06.00"
+junit = "4.13.2"
+coroutines = "1.11.0"
+# Google's official Compose Preview Screenshot Testing (renders @Preview to PNG
+# on the JVM, no device/emulator, no Robolectric). Still alpha — see CLAUDE.md.
+screenshot = "0.0.1-alpha15"
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activityCompose" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
+screenshot-validation-api = { group = "com.android.tools.screenshot", name = "screenshot-validation-api", version.ref = "screenshot" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+# AGP 9 has built-in Kotlin but does NOT bundle the Compose compiler — it must
+# still be applied, pinned to the same version as the Kotlin compiler in use.
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
+screenshot = { id = "com.android.compose.screenshot", version.ref = "screenshot" }

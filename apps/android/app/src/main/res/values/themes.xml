@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Base window theme. Compose draws the actual UI, so this only needs to be a
+      valid DayNight theme with no action bar. A platform DeviceDefault base
+      avoids depending on the Material Components (com.google.android.material)
+      XML themes. The design-system theme (sub-project B) supersedes this.
+    -->
+    <style name="Theme.Pebbles" parent="android:Theme.DeviceDefault.DayNight">
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+</resources>

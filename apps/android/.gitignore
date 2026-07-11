@@ -1,0 +1,25 @@
+# Build output
+build/
+.gradle/
+.kotlin/
+
+# Local SDK location (machine-specific, written by Android Studio)
+local.properties
+
+# Secrets (D8) — copy secrets.example.properties → secrets.properties
+secrets.properties
+
+# APKs / bundles
+*.apk
+*.aab
+
+# Compose screenshot-test reference images (rendered in CI and uploaded as the
+# ui-screenshots artifact, not committed — see CLAUDE.md "Seeing the UI").
+# Remove this line to adopt committed baselines for regression testing.
+app/src/screenshotTest*/reference/
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+.cxx/
+captures/

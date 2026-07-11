@@ -1,0 +1,10 @@
+{
+  "name": "@pbbls/android",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "build": "scripts/gradle-if-sdk.sh assembleDebug",
+    "lint": "scripts/gradle-if-sdk.sh ktlintCheck",
+    "test": "scripts/gradle-if-sdk.sh testDebugUnitTest"
+  }
+}
