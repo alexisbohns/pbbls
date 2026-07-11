@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- supabase-kt (auth, OAuth, Postgrest) requires network access. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".PebblesApp"
         android:allowBackup="true"
@@ -12,10 +15,26 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:launchMode="singleTask"
             android:theme="@style/Theme.Pebbles">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!--
+              OAuth deep-link return (D15). The Google hosted-OAuth custom tab
+              redirects to pebbles://auth-callback; singleTask + this filter route
+              it back to the existing MainActivity, where supabase-kt's
+              handleDeeplinks(intent) parses the session. Scheme+host are shared
+              with iOS, so the Supabase dashboard allowlist needs no change
+              (verify on device — risk 1 in the milestone design).
+            -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="pebbles" android:host="auth-callback" />
             </intent-filter>
         </activity>
     </application>

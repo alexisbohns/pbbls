@@ -69,6 +69,8 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.rive.android)
     implementation(libs.androidx.startup.runtime)
+    implementation(libs.androidx.browser)
+    implementation(libs.kotlinx.coroutines.android)
 
     val composeBom = platform(libs.androidx.compose.bom)
     implementation(composeBom)
@@ -76,7 +78,17 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.foundation)
+    implementation(libs.androidx.navigation.compose)
     debugImplementation(libs.androidx.compose.ui.tooling)
+
+    // supabase-kt: BOM pins the module versions; OkHttp is the Ktor engine and
+    // kotlinx-serialization-json backs the consent-metadata JSON block.
+    implementation(platform(libs.supabase.bom))
+    implementation(libs.supabase.auth)
+    implementation(libs.supabase.postgrest)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.kotlinx.serialization.json)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

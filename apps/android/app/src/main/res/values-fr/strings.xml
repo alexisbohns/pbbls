@@ -1,5 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- ==== Entry funnel (sub-project C) — Welcome ==== -->
+    <string name="welcome_step_record_title">Notez en quelques secondes.</string>
+    <string name="welcome_step_record_description">Capturez les moments quand ils arrivent — pas de page blanche, sans pression.</string>
+    <string name="welcome_step_enrich_title">Enrichissez de sens.</string>
+    <string name="welcome_step_enrich_description">Ajoutez des émotions, des personnes et des réflexions à chaque pebble.</string>
+    <string name="welcome_step_grow_title">Faites grandir votre chemin.</string>
+    <string name="welcome_step_grow_description">Revenez sur votre parcours, à votre rythme.</string>
+    <string name="welcome_create_account">Créer un compte</string>
+    <string name="welcome_log_in">Se connecter</string>
+    <string name="welcome_continue_google">Continuer avec Google</string>
+    <string name="welcome_legal_disclaimer">Lisez nos {terms} et notre {privacy} avant de créer un compte avec Google.</string>
+    <string name="legal_link_terms">Conditions</string>
+    <string name="legal_link_privacy">Confidentialité</string>
+
+    <!-- ==== Entry funnel — Auth ==== -->
+    <string name="auth_mode_login">Connexion</string>
+    <string name="auth_mode_signup">Inscription</string>
+    <string name="auth_email_placeholder">E-mail</string>
+    <string name="auth_password_placeholder">Mot de passe</string>
+    <string name="auth_email_plus_error">Le caractère \'+\' n\'est pas autorisé dans les adresses e-mail.</string>
+    <string name="auth_consent_prefix">J\'accepte </string>
+    <string name="auth_consent_terms_link">les Conditions d\'utilisation</string>
+    <string name="auth_consent_privacy_link">la politique de confidentialité</string>
+    <string name="auth_submit_login">Se connecter</string>
+    <string name="auth_submit_signup">Créer un compte</string>
+
+    <!-- ==== Entry funnel — Onboarding ==== -->
+    <string name="onboarding_intro_title">Votre vie est un chemin.</string>
+    <string name="onboarding_intro_description">Chaque moment compte — les grands comme les plus discrets. Mais la plupart s\'effacent avant même qu\'on les remarque. Pebbles vous aide à les collecter, un par un.</string>
+    <string name="onboarding_concept_title">Posez un pebble, gardez le moment.</string>
+    <string name="onboarding_concept_description">Un café avec un ami. Un concert qui donne des frissons. Une conversation difficile. Notez-le en quelques secondes — pas de page blanche, sans pression, sans audience.</string>
+    <string name="onboarding_qualify_title">Qualifiez et reliez.</string>
+    <string name="onboarding_qualify_description">Associez votre moment à une émotion et un domaine, reliez des personnes et ajoutez votre pebble à une pile ou une collection.</string>
+    <string name="onboarding_carving_title">Obtenez votre pebble.</string>
+    <string name="onboarding_carving_description">Choisissez ou gravez un glyphe pour marquer le moment. Puis révélez une illustration de pebble unique pour vous en souvenir.</string>
+    <string name="onboarding_skip">Passer</string>
+    <string name="onboarding_close">Fermer l\'introduction</string>
+    <string name="onboarding_start">Commencer votre chemin</string>
+
+    <!-- ==== Entry funnel — Path placeholder ==== -->
+    <string name="path_placeholder_title">Votre chemin</string>
+    <string name="path_placeholder_subtitle">Votre journal arrive dans la prochaine mise à jour. Cet écran temporaire permet de tester le parcours de bout en bout.</string>
+    <string name="path_sign_out">Se déconnecter</string>
+
     <!-- French reference-data names — see values/strings.xml for provenance. -->
 
     <!-- Domains (18) -->
