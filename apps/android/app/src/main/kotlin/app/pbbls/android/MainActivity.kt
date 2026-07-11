@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.CompositionLocalProvider
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalPathService
+import app.pbbls.android.services.LocalSnapURLCache
 import app.pbbls.android.services.LocalSupabaseService
 import app.pbbls.android.theme.PebblesTheme
 import io.github.jan.supabase.auth.handleDeeplinks
@@ -34,6 +35,7 @@ class MainActivity : ComponentActivity() {
                     LocalSupabaseService provides supabase,
                     LocalEmotionPaletteService provides app.palettes,
                     LocalPathService provides app.pathService,
+                    LocalSnapURLCache provides app.snapUrls,
                 ) {
                     RootScreen()
                 }

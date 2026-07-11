@@ -1,14 +1,20 @@
 package app.pbbls.android.features.path.components
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.features.path.PathRowFormatting
@@ -23,9 +29,8 @@ import app.pbbls.android.theme.ReferenceType
 import java.time.ZoneId
 
 /**
- * Path-specific pebble row — ports iOS `PathPebbleRow.swift` minus tap,
- * delete and the photo thumb (read-only milestone; the photo lands with the
- * snap-URL work). Three states by intensity:
+ * Path-specific pebble row — ports iOS `PathPebbleRow.swift` minus tap and
+ * delete (read-only milestone). Three states by intensity:
  * - intensity 1–2: 56dp thumbnail, `secondary` glyph stroke over a `surface`
  *   wash.
  * - intensity 3: 96dp thumbnail, `light` stroke over an opaque `primary`
@@ -33,7 +38,9 @@ import java.time.ZoneId
  *
  * Name/time color follows the scheme at every size (light=`primary`,
  * dark=`light`; the text sits on the row background, not the pebble fill —
- * iOS #510), falling back to `system.foreground` without a palette.
+ * iOS #510), falling back to `system.foreground` without a palette. A first
+ * snap renders as a 64dp white-bordered photo on the trailing edge, rotated
+ * by row parity.
  *
  * Deviation from iOS (flagged in the PR): the meta line appends the
  * localized emotion name — "MONDAY · 3:42 PM · JOY" — so the fr-localization
@@ -81,7 +88,10 @@ fun PathPebbleRow(
             palette = palette,
             modifier = Modifier.size(if (isLarge) 96.dp else 56.dp),
         )
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.weight(1f),
+        ) {
             PebblesText(
                 text = pebble.name,
                 style = PebblesTypography.buttonLabel,
@@ -91,6 +101,20 @@ fun PathPebbleRow(
                 text = metaLine,
                 style = PebblesTypography.meta,
                 color = nameColor.copy(alpha = 0.5f),
+            )
+        }
+        if (pebble.firstSnapPath != null) {
+            val shape = RoundedCornerShape(8.dp)
+            PathSnapThumb(
+                storagePath = pebble.firstSnapPath,
+                modifier =
+                    Modifier
+                        .size(64.dp)
+                        .graphicsLayer {
+                            rotationZ = PathPebbleRowMetrics.rotationDegrees(positionIndex)
+                        }.shadow(elevation = 6.dp, shape = shape)
+                        .border(4.dp, Color.White, shape)
+                        .clip(shape),
             )
         }
     }

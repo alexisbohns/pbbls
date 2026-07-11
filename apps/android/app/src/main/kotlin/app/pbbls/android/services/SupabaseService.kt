@@ -18,6 +18,7 @@ import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.storage.Storage
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -55,6 +56,8 @@ class SupabaseService {
                 host = "auth-callback"
             }
             install(Postgrest)
+            // Storage signs the private pebbles-media snap URLs (sub-project D).
+            install(Storage)
         }
 
     /** The current Supabase session, or null when signed out. */

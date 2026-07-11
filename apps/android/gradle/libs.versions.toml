@@ -33,6 +33,10 @@ browser = "1.10.0"
 # SVG strings straight from the RPC rows (the iOS SVGView analog). The -aar
 # artifact is the maintained one; the plain jar is legacy.
 androidsvg = "1.4"
+# Snap thumbnails (sub-project D) — Coil 3 loads the signed storage URLs; the
+# okhttp fetcher reuses the OkHttp already on the classpath via ktor-client-okhttp
+# (the AsyncImage analog of iOS AsyncImage + SnapURLCache).
+coil = "3.3.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -65,6 +69,9 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 
 # Read-only Path timeline (sub-project D).
 androidsvg = { group = "com.caverock", name = "androidsvg-aar", version.ref = "androidsvg" }
+coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
+supabase-storage = { group = "io.github.jan-tennert.supabase", name = "storage-kt" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
