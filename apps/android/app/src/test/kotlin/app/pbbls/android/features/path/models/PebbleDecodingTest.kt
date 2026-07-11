@@ -1,5 +1,6 @@
 package app.pbbls.android.features.path.models
 
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
