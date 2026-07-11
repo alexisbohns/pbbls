@@ -1,5 +1,6 @@
 package app.pbbls.android.theme
 
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -18,13 +19,22 @@ import javax.xml.parsers.DocumentBuilderFactory
  * is the module root (`apps/android/app`), so paths are relative to that.
  */
 class LocalizationParityTest {
-    private fun stringKeys(relativePath: String): Set<String> {
+    private fun stringElements(relativePath: String): List<Element> {
         val file = File(relativePath)
         check(file.exists()) { "Missing resource file: ${file.absolutePath}" }
         val document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(file)
         val nodes = document.getElementsByTagName("string")
-        return (0 until nodes.length).map { (nodes.item(it) as Element).getAttribute("name") }.toSet()
+        return (0 until nodes.length).map { nodes.item(it) as Element }
     }
+
+    private fun stringKeys(relativePath: String): Set<String> = stringElements(relativePath).map { it.getAttribute("name") }.toSet()
+
+    /** Keys excluding `translatable="false"` entries (brand strings live only in en). */
+    private fun translatableKeys(relativePath: String): Set<String> =
+        stringElements(relativePath)
+            .filter { it.getAttribute("translatable") != "false" }
+            .map { it.getAttribute("name") }
+            .toSet()
 
     private val enKeys by lazy { stringKeys("src/main/res/values/strings.xml") }
     private val frKeys by lazy { stringKeys("src/main/res/values-fr/strings.xml") }
@@ -46,6 +56,22 @@ class LocalizationParityTest {
         referenceKeys().forEach { key ->
             assertTrue("values-fr/strings.xml missing key: $key", frKeys.contains(key))
         }
+    }
+
+    /**
+     * Full en/fr key-set equality (added with the Path timeline, #531) — any
+     * UI string landing in one locale but not the other fails here, not on a
+     * device in the wrong language.
+     */
+    @Test
+    fun enAndFrTranslatableKeySetsAreIdentical() {
+        val en = translatableKeys("src/main/res/values/strings.xml")
+        val fr = translatableKeys("src/main/res/values-fr/strings.xml")
+        assertEquals(
+            "en/fr key sets diverge — missing in fr: ${en - fr}; extra in fr: ${fr - en}",
+            en,
+            fr,
+        )
     }
 
     @Test

@@ -39,9 +39,13 @@
     <string name="onboarding_close">Fermer l\'introduction</string>
     <string name="onboarding_start">Commencer votre chemin</string>
 
-    <!-- ==== Entry funnel — Path placeholder ==== -->
-    <string name="path_placeholder_title">Votre chemin</string>
-    <string name="path_placeholder_subtitle">Votre journal arrive dans la prochaine mise à jour. Cet écran temporaire permet de tester le parcours de bout en bout.</string>
+    <!-- ==== Path timeline (sub-project D) ==== -->
+    <string name="path_load_error">Impossible de charger vos pebbles.</string>
+    <string name="path_empty_week_title">Nouvelle semaine</string>
+    <string name="path_empty_week_subtitle">Des galets en vue ?</string>
+    <string name="path_week_previous">Semaine précédente</string>
+    <string name="path_week_next">Semaine suivante</string>
+    <string name="path_week_cell_a11y">Semaine %1$d, %2$d pebbles</string>
     <string name="path_sign_out">Se déconnecter</string>
 
     <!-- French reference-data names — see values/strings.xml for provenance. -->

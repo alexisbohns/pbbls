@@ -1,69 +1,223 @@
 package app.pbbls.android.features.path
 
+import android.util.Log
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Text
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.rive.RiveLogo
+import app.pbbls.android.features.path.components.WeekHeader
+import app.pbbls.android.features.path.components.WeekPebbleList
+import app.pbbls.android.features.path.components.WeekRoll
+import app.pbbls.android.features.path.models.EmotionPalette
+import app.pbbls.android.features.path.models.Pebble
+import app.pbbls.android.features.path.models.WeekRollEntry
+import app.pbbls.android.services.LocalEmotionPaletteService
+import app.pbbls.android.services.LocalPathService
+import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography
+import java.time.LocalDate
+import java.time.ZoneId
+import kotlin.math.abs
+
+private const val TAG = "path"
 
 /**
- * Authenticated landing surface — a placeholder for sub-project C. The real
- * read-only Path timeline (`path_pebbles()` → week-grouped list) lands in
- * sub-project D; this proves the session gate and provides a temporary sign-out
- * so the funnel can be re-tested on device until Profile exists.
+ * The read-only Path timeline — the authenticated landing surface (issue
+ * #531, `PathView.swift` analog minus create/detail/delete/stats). Loads
+ * every pebble once via `path_pebbles()`, groups by ISO week, and pages the
+ * body by week. The temporary sign-out stays until Profile exists.
  */
 @Composable
 fun PathScreen(
     onSignOut: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val pathService = LocalPathService.current
+    val palettes = LocalEmotionPaletteService.current
     val system = PebblesTheme.colors.system
     val accent = PebblesTheme.colors.accent
 
-    Column(
+    val today = remember { LocalDate.now() }
+    var entries by remember { mutableStateOf<List<WeekRollEntry>>(emptyList()) }
+    var focusedWeekStart by remember { mutableStateOf<LocalDate?>(null) }
+    var isLoading by remember { mutableStateOf(true) }
+    var didLoadFail by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        try {
+            val pebbles = pathService.loadPathPebbles()
+            val built = WeekRollBuilder.build(pebbles, ZoneId.systemDefault(), today)
+            entries = built
+            focusedWeekStart = refocusedWeekStart(built, focusedWeekStart, today)
+            didLoadFail = false
+        } catch (e: Exception) {
+            Log.e(TAG, "path_pebbles load failed", e)
+            didLoadFail = true
+        } finally {
+            isLoading = false
+        }
+    }
+
+    Box(
         modifier =
             modifier
                 .fillMaxSize()
                 .background(system.background)
-                .safeDrawingPadding()
-                .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
+                .safeDrawingPadding(),
     ) {
-        RiveLogo(modifier = Modifier.size(120.dp))
-        Text(
-            text = stringResource(R.string.path_placeholder_title),
-            style = PebblesTypography.title,
-            color = system.foreground,
-            modifier = Modifier.padding(top = 24.dp),
+        val focused = focusedWeekStart
+        when {
+            isLoading ->
+                CircularProgressIndicator(
+                    color = accent.primary,
+                    modifier = Modifier.align(Alignment.Center),
+                )
+
+            didLoadFail || focused == null ->
+                PebblesText(
+                    text = stringResource(R.string.path_load_error),
+                    style = PebblesTypography.body,
+                    color = system.secondary,
+                    modifier = Modifier.align(Alignment.Center),
+                )
+
+            else ->
+                PathContent(
+                    entries = entries,
+                    initialWeekStart = focused,
+                    focusedWeekStart = focused,
+                    today = today,
+                    onFocusChange = { focusedWeekStart = it },
+                    paletteFor = { pebble -> pebble.emotion?.let { palettes.palette(it.id) } },
+                    onSignOut = onSignOut,
+                )
+        }
+    }
+}
+
+/**
+ * Stateless timeline layout — separated from [PathScreen] so screenshot
+ * previews can drive it with fixture data (no services, no network).
+ *
+ * Week-focus has a single source of truth (the caller's `focusedWeekStart`);
+ * the pager and the roll/header both follow it: a swipe reports the new page
+ * through [onFocusChange], a chevron/cairn tap changes focus and the pager
+ * animates to it. Scrolling to the already-current page is a no-op, so the
+ * two effects settle.
+ */
+@Composable
+fun PathContent(
+    entries: List<WeekRollEntry>,
+    initialWeekStart: LocalDate,
+    focusedWeekStart: LocalDate,
+    today: LocalDate,
+    onFocusChange: (LocalDate) -> Unit,
+    paletteFor: (Pebble) -> EmotionPalette?,
+    onSignOut: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val accent = PebblesTheme.colors.accent
+    val initialIndex =
+        entries.indexOfFirst { it.weekStart == initialWeekStart }.coerceAtLeast(0)
+    val pagerState = rememberPagerState(initialPage = initialIndex) { entries.size }
+
+    // Swipe → focus. Keyed on entries so a (future) reload re-subscribes.
+    LaunchedEffect(pagerState, entries) {
+        snapshotFlow { pagerState.currentPage }.collect { page ->
+            entries.getOrNull(page)?.let { onFocusChange(it.weekStart) }
+        }
+    }
+    // Focus (chevron / cairn tap) → pager.
+    LaunchedEffect(focusedWeekStart) {
+        val index = entries.indexOfFirst { it.weekStart == focusedWeekStart }
+        if (index >= 0 && index != pagerState.currentPage) {
+            pagerState.animateScrollToPage(index)
+        }
+    }
+
+    Column(modifier = modifier.fillMaxSize()) {
+        WeekRoll(
+            entries = entries,
+            focusedWeekStart = focusedWeekStart,
+            onFocusChange = onFocusChange,
+            modifier = Modifier.fillMaxWidth(),
         )
-        Text(
-            text = stringResource(R.string.path_placeholder_subtitle),
-            style = PebblesTypography.body,
-            color = system.secondary,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(top = 8.dp),
+        WeekHeader(
+            entries = entries,
+            focusedWeekStart = focusedWeekStart,
+            today = today,
+            onFocusChange = onFocusChange,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+                    .padding(horizontal = 16.dp),
         )
-        TextButton(onClick = onSignOut, modifier = Modifier.padding(top = 24.dp)) {
-            Text(
+        HorizontalPager(
+            state = pagerState,
+            key = { entries[it].weekStart.toEpochDay() },
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(top = 16.dp),
+        ) { page ->
+            WeekPebbleList(
+                entry = entries[page],
+                paletteFor = paletteFor,
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+        // Temporary affordance until Profile exists — re-testing the funnel
+        // on device requires a way back to Welcome.
+        TextButton(
+            onClick = onSignOut,
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+        ) {
+            PebblesText(
                 text = stringResource(R.string.path_sign_out),
                 style = PebblesTypography.buttonLabel,
                 color = accent.primary,
             )
         }
     }
+}
+
+/**
+ * The iOS `PathView.load()` refocus rule: keep the focused week if it still
+ * exists; otherwise prefer the current week; otherwise the entry closest in
+ * time. Null only for an empty roll (unreachable — the builder always emits
+ * the current week).
+ */
+internal fun refocusedWeekStart(
+    entries: List<WeekRollEntry>,
+    focused: LocalDate?,
+    today: LocalDate,
+): LocalDate? {
+    if (entries.isEmpty()) return null
+    if (focused != null && entries.any { it.weekStart == focused }) return focused
+    val currentStart = WeekRollBuilder.weekStart(today)
+    entries.firstOrNull { it.weekStart == currentStart }?.let { return it.weekStart }
+    val anchor = focused ?: currentStart
+    return entries.minByOrNull { abs(it.weekStart.toEpochDay() - anchor.toEpochDay()) }?.weekStart
 }
