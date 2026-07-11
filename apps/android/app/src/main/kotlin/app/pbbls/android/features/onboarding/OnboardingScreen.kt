@@ -123,19 +123,20 @@ fun OnboardingScreen(
                 }
             }
 
-            Box(
+            // Direct child of the Column (not wrapped in a Box) so this resolves
+            // to ColumnScope.AnimatedVisibility with the innermost receiver.
+            AnimatedVisibility(
+                visible = pagerState.currentPage == steps.size - 1,
                 modifier =
                     Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp)
                         .padding(bottom = 24.dp),
             ) {
-                AnimatedVisibility(visible = pagerState.currentPage == steps.size - 1) {
-                    PebblesPrimaryButton(
-                        text = stringResource(R.string.onboarding_start),
-                        onClick = onFinish,
-                    )
-                }
+                PebblesPrimaryButton(
+                    text = stringResource(R.string.onboarding_start),
+                    onClick = onFinish,
+                )
             }
         }
     }
