@@ -367,7 +367,6 @@ export function QuickPebbleEditor({
       <GlyphPickerDialog
         open={glyphOpen}
         onOpenChange={setGlyphOpen}
-        marks={marks}
         selectedMarkId={markId}
         onSave={setMarkId}
       />
