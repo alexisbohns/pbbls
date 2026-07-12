@@ -139,4 +139,56 @@
     <string name="pebble_detail_no_domain">Aucun domaine</string>
     <string name="pebble_detail_load_error">Impossible de charger ce pebble.</string>
     <string name="pebble_detail_retry">Réessayer</string>
+
+    <!-- ==== Create pebble (M39 sub-project C) ==== -->
+    <!-- Shell + shared actions. -->
+    <string name="create_new_pebble">Nouveau pebble</string>
+    <string name="action_save">Enregistrer</string>
+    <string name="action_done">Valider</string>
+    <string name="action_next">Suivant</string>
+    <!-- When row (D15 date-then-time). -->
+    <string name="create_when_label">Quand</string>
+    <string name="create_when_a11y">Quand</string>
+    <!-- Basics. -->
+    <string name="create_name_placeholder">Nom</string>
+    <string name="create_description_placeholder">Description (facultatif)</string>
+    <!-- Mood section (emotion, domain, valence). -->
+    <string name="create_mood_header">Humeur</string>
+    <string name="create_emotion_label">Émotion</string>
+    <string name="create_emotion_title">Émotions</string>
+    <string name="create_domain_label">Domaine</string>
+    <string name="create_collection_label">Collection</string>
+    <string name="create_valence_label">Valence</string>
+    <string name="create_valence_title">Choisir une valence</string>
+    <string name="create_choose">Choisir…</string>
+    <string name="create_none">Aucune</string>
+    <!-- Glyph section. -->
+    <string name="create_glyph_header">Glyphe</string>
+    <string name="create_glyph_title">Choisir un glyphe</string>
+    <string name="create_glyph_placeholder">Choisir un glyphe</string>
+    <string name="create_glyph_untitled">Glyphe sans nom</string>
+    <string name="create_glyph_remove">Retirer le glyphe</string>
+    <string name="create_glyph_load_error">Impossible de charger les glyphes.</string>
+    <!-- Souls section + inline create. -->
+    <string name="create_souls_header">Âmes</string>
+    <string name="create_souls_title">Choisir des âmes</string>
+    <string name="create_souls_empty">Ajoutez une première âme à relier à ce pebble</string>
+    <string name="create_soul_add">Nouvelle âme</string>
+    <string name="create_soul_title">Nouvelle âme</string>
+    <string name="create_soul_name_placeholder">Nom</string>
+    <!-- Optional section (collection). -->
+    <string name="create_optional_header">Facultatif</string>
+    <!-- Valence polarity + size-group labels (3×3 picker). -->
+    <string name="valence_highlight">Temps fort</string>
+    <string name="valence_neutral">Neutre</string>
+    <string name="valence_lowlight">Creux</string>
+    <string name="valence_group_small_name">Évènement du jour</string>
+    <string name="valence_group_medium_name">Évènement de la semaine</string>
+    <string name="valence_group_large_name">Évènement du mois</string>
+    <string name="valence_group_small_desc">Ce moment a marqué ma journée et sera réuni dans mon Cairn hebdomadaire</string>
+    <string name="valence_group_medium_desc">Ce moment a marqué toute ma semaine et sera réuni dans mon Cairn mensuel</string>
+    <string name="valence_group_large_desc">Ce moment a marqué tout mon mois et sera réuni dans mon Cairn annuel</string>
+    <!-- Karma-earned flash (D9). -->
+    <string name="karma_flash_amount">+%1$d karma</string>
+    <string name="karma_flash_a11y">%1$d karma gagné, %2$s</string>
 </resources>

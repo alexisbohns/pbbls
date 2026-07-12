@@ -19,6 +19,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import app.pbbls.android.features.auth.AuthMode
 import app.pbbls.android.features.auth.AuthScreen
+import app.pbbls.android.features.karma.KarmaOverlayHost
+import app.pbbls.android.features.karma.LocalKarmaNotificationService
 import app.pbbls.android.features.onboarding.OnboardingGate
 import app.pbbls.android.features.onboarding.OnboardingScreen
 import app.pbbls.android.features.onboarding.OnboardingSteps
@@ -54,6 +56,7 @@ fun RootScreen() {
     val supabase = LocalSupabaseService.current
     val palettes = LocalEmotionPaletteService.current
     val referenceData = LocalReferenceDataService.current
+    val karma = LocalKarmaNotificationService.current
     val snapUrls = LocalSnapURLCache.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -122,6 +125,9 @@ fun RootScreen() {
                     },
                 )
             }
+            // Karma flash floats above the authed surfaces (create/detail live
+            // inside PathScreen, so they're below it) — drawn last for z-order (D9).
+            KarmaOverlayHost(service = karma, modifier = Modifier.fillMaxSize())
         } else {
             WelcomeAuthNavHost(
                 contentRevealed = welcomeContentRevealed,

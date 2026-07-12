@@ -40,6 +40,8 @@ fun PebblesTextInput(
     contentType: ContentType? = null,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions.Default,
+    singleLine: Boolean = true,
+    maxLines: Int = 1,
 ) {
     val system = PebblesTheme.colors.system
     val accent = PebblesTheme.colors.accent
@@ -67,7 +69,8 @@ fun PebblesTextInput(
             onValueChange = onValueChange,
             modifier = fieldModifier,
             textStyle = PebblesTypography.body.copy(color = system.secondary),
-            singleLine = true,
+            singleLine = singleLine,
+            maxLines = maxLines,
             cursorBrush = SolidColor(accent.primary),
             visualTransformation = if (isSecure) PasswordVisualTransformation() else VisualTransformation.None,
             keyboardOptions = keyboardOptions,

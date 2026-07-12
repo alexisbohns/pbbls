@@ -26,9 +26,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.features.path.components.NewPebbleButton
 import app.pbbls.android.features.path.components.WeekHeader
 import app.pbbls.android.features.path.components.WeekPebbleList
 import app.pbbls.android.features.path.components.WeekRoll
+import app.pbbls.android.features.path.create.CreatePebbleScreen
 import app.pbbls.android.features.path.models.EmotionPalette
 import app.pbbls.android.features.path.models.Pebble
 import app.pbbls.android.features.path.models.WeekRollEntry
@@ -73,6 +75,7 @@ fun PathScreen(
     var selectedPebbleId by remember { mutableStateOf<String?>(null) }
     var pendingDeletion by remember { mutableStateOf<Pebble?>(null) }
     var deleteError by remember { mutableStateOf(false) }
+    var isPresentingCreate by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         try {
@@ -144,6 +147,7 @@ fun PathScreen(
                         onSignOut = onSignOut,
                         onPebbleTap = { pebble -> selectedPebbleId = pebble.id },
                         onPebbleDelete = { pebble -> pendingDeletion = pebble },
+                        onCreatePebble = { isPresentingCreate = true },
                     )
             }
         }
@@ -156,6 +160,22 @@ fun PathScreen(
                 pebbleId = detailId,
                 onDismiss = { selectedPebbleId = null },
                 onEditRequested = {},
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+
+        // Full-screen create cover — sibling of the detail cover, also in the
+        // OUTER (unpadded) Box since it self-applies safeDrawingPadding/imePadding
+        // (C, the fullScreenCover analog D5). On success it reveals the new pebble
+        // through the detail cover and reloads the timeline.
+        if (isPresentingCreate) {
+            CreatePebbleScreen(
+                onCreated = { newId ->
+                    isPresentingCreate = false
+                    selectedPebbleId = newId
+                    reload()
+                },
+                onCancel = { isPresentingCreate = false },
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -205,6 +225,7 @@ fun PathContent(
     onSignOut: () -> Unit,
     onPebbleTap: (Pebble) -> Unit = {},
     onPebbleDelete: (Pebble) -> Unit = {},
+    onCreatePebble: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val accent = PebblesTheme.colors.accent
@@ -258,9 +279,15 @@ fun PathContent(
                 paletteFor = paletteFor,
                 onPebbleTap = onPebbleTap,
                 onPebbleDelete = onPebbleDelete,
+                onCreatePebble = onCreatePebble,
                 modifier = Modifier.fillMaxSize(),
             )
         }
+        // Pinned "New pebble" entry — the PathView.safeAreaInset(.bottom) analog.
+        NewPebbleButton(
+            onTap = onCreatePebble,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        )
         // Temporary affordance until Profile exists — re-testing the funnel
         // on device requires a way back to Welcome.
         TextButton(

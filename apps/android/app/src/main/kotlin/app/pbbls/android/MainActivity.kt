@@ -6,6 +6,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.CompositionLocalProvider
+import app.pbbls.android.features.glyph.services.LocalGlyphService
+import app.pbbls.android.features.karma.LocalKarmaNotificationService
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalPathService
 import app.pbbls.android.services.LocalPebbleDetailService
@@ -42,6 +44,8 @@ class MainActivity : ComponentActivity() {
                     LocalReferenceDataService provides app.referenceData,
                     LocalPebbleWriteService provides app.pebbleWrite,
                     LocalPebbleDetailService provides app.pebbleDetailService,
+                    LocalGlyphService provides app.glyphService,
+                    LocalKarmaNotificationService provides app.karma,
                 ) {
                     RootScreen()
                 }

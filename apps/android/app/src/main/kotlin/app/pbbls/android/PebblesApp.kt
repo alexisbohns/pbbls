@@ -1,6 +1,8 @@
 package app.pbbls.android
 
 import android.app.Application
+import app.pbbls.android.features.glyph.services.GlyphService
+import app.pbbls.android.features.karma.KarmaNotificationService
 import app.pbbls.android.services.EmotionPaletteService
 import app.pbbls.android.services.PathService
 import app.pbbls.android.services.PebbleDetailService
@@ -50,6 +52,12 @@ class PebblesApp :
     lateinit var pebbleWrite: PebbleWriteService
         private set
 
+    lateinit var glyphService: GlyphService
+        private set
+
+    lateinit var karma: KarmaNotificationService
+        private set
+
     override fun onCreate() {
         super.onCreate()
         Rive.init(this)
@@ -60,6 +68,8 @@ class PebblesApp :
         snapUrls = SnapURLCache(supabase)
         referenceData = ReferenceDataService(supabase)
         pebbleWrite = PebbleWriteService(supabase)
+        glyphService = GlyphService(supabase)
+        karma = KarmaNotificationService()
     }
 
     /**
