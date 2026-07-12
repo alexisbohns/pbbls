@@ -74,7 +74,6 @@ export function AddSoulForm({ marks, onAdd }: AddSoulFormProps) {
       <GlyphPickerDialog
         open={pickerOpen}
         onOpenChange={setPickerOpen}
-        marks={marks}
         selectedMarkId={glyphId === DEFAULT_GLYPH_ID ? undefined : glyphId}
         onSave={(markId) => setGlyphId(markId ?? DEFAULT_GLYPH_ID)}
       />

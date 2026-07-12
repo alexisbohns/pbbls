@@ -120,7 +120,6 @@ export function SoulDetailHeader({
       <GlyphPickerDialog
         open={pickerOpen}
         onOpenChange={setPickerOpen}
-        marks={marks}
         selectedMarkId={
           soul.glyph_id === DEFAULT_GLYPH_ID ? undefined : soul.glyph_id
         }

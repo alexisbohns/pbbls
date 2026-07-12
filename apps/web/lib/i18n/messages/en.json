@@ -600,7 +600,11 @@
       "title": "Glyph",
       "close": "Close",
       "addAria": "Add glyph",
-      "changeAria": "Change glyph"
+      "changeAria": "Change glyph",
+      "tabs": { "mine": "Mine", "owned": "Owned", "community": "Community" },
+      "emptyMine": "No glyphs yet. Carve one from the Glyphs page.",
+      "emptyOwned": "You haven't bought any glyphs yet.",
+      "emptyCommunity": "No community glyphs available to buy right now."
     },
     "photo": {
       "addAria": "Add photo",

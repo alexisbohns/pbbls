@@ -600,7 +600,11 @@
       "title": "Glyphe",
       "close": "Fermer",
       "addAria": "Ajouter un glyphe",
-      "changeAria": "Changer de glyphe"
+      "changeAria": "Changer de glyphe",
+      "tabs": { "mine": "Les miens", "owned": "Achetés", "community": "Communauté" },
+      "emptyMine": "Aucun glyphe pour l'instant. Gravez-en un depuis la page Glyphes.",
+      "emptyOwned": "Vous n'avez encore acheté aucun glyphe.",
+      "emptyCommunity": "Aucun glyphe communautaire à acheter pour le moment."
     },
     "photo": {
       "addAria": "Ajouter une photo",

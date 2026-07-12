@@ -1,14 +1,12 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import type { Mark } from "@/lib/types"
 import { PickerSheet } from "@/components/ui/PickerSheet"
-import { GlyphPickerGrid } from "@/components/glyphs/GlyphPickerGrid"
+import { GlyphPickerTabs } from "@/components/record/GlyphPickerTabs"
 
 type GlyphPickerDialogProps = {
   open: boolean
   onOpenChange: (open: boolean) => void
-  marks: Mark[]
   selectedMarkId: string | undefined
   onSave: (markId: string | undefined) => void
 }
@@ -16,7 +14,6 @@ type GlyphPickerDialogProps = {
 export function GlyphPickerDialog({
   open,
   onOpenChange,
-  marks,
   selectedMarkId,
   onSave,
 }: GlyphPickerDialogProps) {
@@ -34,11 +31,7 @@ export function GlyphPickerDialog({
       title={t("title")}
       closeLabel={t("close")}
     >
-      <GlyphPickerGrid
-        marks={marks}
-        selectedMarkId={selectedMarkId}
-        onSelect={handleSelect}
-      />
+      <GlyphPickerTabs selectedMarkId={selectedMarkId} onSelect={handleSelect} />
     </PickerSheet>
   )
 }

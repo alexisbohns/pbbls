@@ -9,15 +9,17 @@ type GlyphPickerGridProps = {
   marks: Mark[]
   selectedMarkId: string | undefined
   onSelect: (id: string | undefined) => void
+  /** Empty-state copy; defaults to the generic "no glyphs" message. */
+  emptyMessage?: string
 }
 
-export function GlyphPickerGrid({ marks, selectedMarkId, onSelect }: GlyphPickerGridProps) {
+export function GlyphPickerGrid({ marks, selectedMarkId, onSelect, emptyMessage }: GlyphPickerGridProps) {
   const t = useTranslations("glyphs.picker")
 
   if (marks.length === 0) {
     return (
       <p className="text-sm text-muted-foreground">
-        {t("empty")}
+        {emptyMessage ?? t("empty")}
       </p>
     )
   }

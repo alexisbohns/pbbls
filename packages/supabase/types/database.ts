@@ -1646,6 +1646,10 @@ export type Database = {
         Returns: Json
       }
       buy_glyph: { Args: { p_glyph_id: string }; Returns: Json }
+      can_use_glyph: {
+        Args: { p_glyph_id: string; p_user: string }
+        Returns: boolean
+      }
       compute_karma_delta: {
         Args: {
           p_cards_count: number
