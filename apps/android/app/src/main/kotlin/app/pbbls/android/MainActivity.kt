@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.CompositionLocalProvider
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalPathService
+import app.pbbls.android.services.LocalPebbleDetailService
 import app.pbbls.android.services.LocalPebbleWriteService
 import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSnapURLCache
@@ -40,6 +41,7 @@ class MainActivity : ComponentActivity() {
                     LocalSnapURLCache provides app.snapUrls,
                     LocalReferenceDataService provides app.referenceData,
                     LocalPebbleWriteService provides app.pebbleWrite,
+                    LocalPebbleDetailService provides app.pebbleDetailService,
                 ) {
                     RootScreen()
                 }

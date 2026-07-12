@@ -36,6 +36,8 @@ import app.pbbls.android.theme.PebblesTypography
 fun WeekPebbleList(
     entry: WeekRollEntry,
     paletteFor: (Pebble) -> EmotionPalette?,
+    onPebbleTap: (Pebble) -> Unit = {},
+    onPebbleDelete: (Pebble) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     if (entry.pebbles.isEmpty()) {
@@ -54,6 +56,8 @@ fun WeekPebbleList(
                         Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp, horizontal = 24.dp),
+                    onTap = { onPebbleTap(pebble) },
+                    onRequestDelete = { onPebbleDelete(pebble) },
                 )
             }
         }

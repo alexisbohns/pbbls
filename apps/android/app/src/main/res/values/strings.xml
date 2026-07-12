@@ -136,4 +136,17 @@
     <!-- Pebble save-error messages (PebbleWriteService.pebbleSaveErrorMessage, D16). -->
     <string name="pebble_save_error_generic">Couldn\'t save your pebble. Please try again.</string>
     <string name="pebble_save_error_media_quota">Photo limit reached on this pebble.</string>
+
+    <!-- ==== Pebble detail + delete (sub-project B) ==== -->
+    <string name="pebble_delete">Delete</string>
+    <string name="pebble_delete_confirm_title">Delete %1$s?</string>
+    <string name="pebble_delete_confirm_message">This can\'t be undone.</string>
+    <string name="pebble_delete_error">Something went wrong. Please try again.</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="pebble_detail_edit">Edit</string>
+    <string name="pebble_detail_back_a11y">Back</string>
+    <string name="pebble_detail_privacy_a11y">Private pebble</string>
+    <string name="pebble_detail_no_domain">No domain</string>
+    <string name="pebble_detail_load_error">Couldn\'t load this pebble.</string>
+    <string name="pebble_detail_retry">Retry</string>
 </resources>

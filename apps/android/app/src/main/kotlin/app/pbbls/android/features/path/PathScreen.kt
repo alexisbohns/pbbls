@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -17,6 +18,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -32,12 +34,15 @@ import app.pbbls.android.features.path.models.Pebble
 import app.pbbls.android.features.path.models.WeekRollEntry
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalPathService
+import app.pbbls.android.services.LocalPebbleWriteService
+import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography
 import java.time.LocalDate
 import java.time.ZoneId
 import kotlin.math.abs
+import kotlinx.coroutines.launch
 
 private const val TAG = "path"
 
@@ -63,6 +68,12 @@ fun PathScreen(
     var isLoading by remember { mutableStateOf(true) }
     var didLoadFail by remember { mutableStateOf(false) }
 
+    val writeService = LocalPebbleWriteService.current
+    val scope = rememberCoroutineScope()
+    var selectedPebbleId by remember { mutableStateOf<String?>(null) }
+    var pendingDeletion by remember { mutableStateOf<Pebble?>(null) }
+    var deleteError by remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         try {
             val pebbles = pathService.loadPathPebbles()
@@ -78,40 +89,98 @@ fun PathScreen(
         }
     }
 
+    // Hoisted so the delete flow (and, later, create/edit in C/D) can refresh the
+    // timeline without re-triggering the first-load spinner: isLoading is left
+    // untouched, mirroring iOS PathView.load() after the initial fetch.
+    val reload: () -> Unit = {
+        scope.launch {
+            try {
+                val pebbles = pathService.loadPathPebbles()
+                val built = WeekRollBuilder.build(pebbles, ZoneId.systemDefault(), today)
+                entries = built
+                focusedWeekStart = refocusedWeekStart(built, focusedWeekStart, today)
+            } catch (e: Exception) {
+                Log.e(TAG, "path reload failed", e)
+            }
+        }
+    }
+
     Box(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(system.background)
-                .safeDrawingPadding(),
+                .background(system.background),
     ) {
-        val focused = focusedWeekStart
-        when {
-            isLoading ->
-                CircularProgressIndicator(
-                    color = accent.primary,
-                    modifier = Modifier.align(Alignment.Center),
-                )
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .safeDrawingPadding(),
+        ) {
+            val focused = focusedWeekStart
+            when {
+                isLoading ->
+                    CircularProgressIndicator(
+                        color = accent.primary,
+                        modifier = Modifier.align(Alignment.Center),
+                    )
 
-            didLoadFail || focused == null ->
-                PebblesText(
-                    text = stringResource(R.string.path_load_error),
-                    style = PebblesTypography.body,
-                    color = system.secondary,
-                    modifier = Modifier.align(Alignment.Center),
-                )
+                didLoadFail || focused == null ->
+                    PebblesText(
+                        text = stringResource(R.string.path_load_error),
+                        style = PebblesTypography.body,
+                        color = system.secondary,
+                        modifier = Modifier.align(Alignment.Center),
+                    )
 
-            else ->
-                PathContent(
-                    entries = entries,
-                    initialWeekStart = focused,
-                    focusedWeekStart = focused,
-                    today = today,
-                    onFocusChange = { focusedWeekStart = it },
-                    paletteFor = { pebble -> pebble.emotion?.let { palettes.palette(it.id) } },
-                    onSignOut = onSignOut,
-                )
+                else ->
+                    PathContent(
+                        entries = entries,
+                        initialWeekStart = focused,
+                        focusedWeekStart = focused,
+                        today = today,
+                        onFocusChange = { focusedWeekStart = it },
+                        paletteFor = { pebble -> pebble.emotion?.let { palettes.palette(it.id) } },
+                        onSignOut = onSignOut,
+                        onPebbleTap = { pebble -> selectedPebbleId = pebble.id },
+                        onPebbleDelete = { pebble -> pendingDeletion = pebble },
+                    )
+            }
         }
+
+        // Full-screen detail cover (self-applies safeDrawingPadding, so it lives in
+        // the OUTER Box) — the fullScreenCover analog (D5).
+        val detailId = selectedPebbleId
+        if (detailId != null) {
+            PebbleDetailScreen(
+                pebbleId = detailId,
+                onDismiss = { selectedPebbleId = null },
+                onEditRequested = {},
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+
+        val target = pendingDeletion
+        if (target != null) {
+            DeleteConfirmDialog(
+                pebbleName = target.name,
+                onConfirm = {
+                    pendingDeletion = null
+                    scope.launch {
+                        try {
+                            writeService.delete(target.id)
+                            if (selectedPebbleId == target.id) selectedPebbleId = null
+                            reload()
+                        } catch (e: Exception) {
+                            Log.e(TAG, "delete pebble failed", e)
+                            deleteError = true
+                        }
+                    }
+                },
+                onDismiss = { pendingDeletion = null },
+            )
+        }
+        if (deleteError) DeleteErrorDialog(onDismiss = { deleteError = false })
     }
 }
 
@@ -134,6 +203,8 @@ fun PathContent(
     onFocusChange: (LocalDate) -> Unit,
     paletteFor: (Pebble) -> EmotionPalette?,
     onSignOut: () -> Unit,
+    onPebbleTap: (Pebble) -> Unit = {},
+    onPebbleDelete: (Pebble) -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val accent = PebblesTheme.colors.accent
@@ -185,6 +256,8 @@ fun PathContent(
             WeekPebbleList(
                 entry = entries[page],
                 paletteFor = paletteFor,
+                onPebbleTap = onPebbleTap,
+                onPebbleDelete = onPebbleDelete,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -220,4 +293,82 @@ internal fun refocusedWeekStart(
     entries.firstOrNull { it.weekStart == currentStart }?.let { return it.weekStart }
     val anchor = focused ?: currentStart
     return entries.minByOrNull { abs(it.weekStart.toEpochDay() - anchor.toEpochDay()) }?.weekStart
+}
+
+/**
+ * Destructive-delete confirmation — the `PathView.confirmationDialog` analog
+ * (D8): "Delete <name>? This can't be undone." with a destructive Delete and a
+ * Cancel. `internal` (not `private`) so the screenshot preview can drive it.
+ */
+@Composable
+internal fun DeleteConfirmDialog(
+    pebbleName: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val system = PebblesTheme.colors.system
+    val accent = PebblesTheme.colors.accent
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = system.background,
+        title = {
+            PebblesText(
+                text = stringResource(R.string.pebble_delete_confirm_title, pebbleName),
+                style = PebblesTypography.headlineEmphasized,
+                color = system.foreground,
+            )
+        },
+        text = {
+            PebblesText(
+                text = stringResource(R.string.pebble_delete_confirm_message),
+                style = PebblesTypography.body,
+                color = system.secondary,
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                PebblesText(
+                    text = stringResource(R.string.pebble_delete),
+                    style = PebblesTypography.buttonLabel,
+                    color = PebblesDestructive,
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                PebblesText(
+                    text = stringResource(R.string.action_cancel),
+                    style = PebblesTypography.buttonLabel,
+                    color = accent.primary,
+                )
+            }
+        },
+    )
+}
+
+/** Delete-failure notice — a single-action AlertDialog dismissing back to the timeline. */
+@Composable
+private fun DeleteErrorDialog(onDismiss: () -> Unit) {
+    val system = PebblesTheme.colors.system
+    val accent = PebblesTheme.colors.accent
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = system.background,
+        text = {
+            PebblesText(
+                text = stringResource(R.string.pebble_delete_error),
+                style = PebblesTypography.body,
+                color = system.secondary,
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                PebblesText(
+                    text = stringResource(R.string.action_cancel),
+                    style = PebblesTypography.buttonLabel,
+                    color = accent.primary,
+                )
+            }
+        },
+    )
 }

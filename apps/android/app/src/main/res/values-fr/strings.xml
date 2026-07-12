@@ -126,4 +126,17 @@
     <!-- Pebble save-error messages (PebbleWriteService.pebbleSaveErrorMessage, D16). -->
     <string name="pebble_save_error_generic">Impossible d\'enregistrer votre caillou. Veuillez réessayer.</string>
     <string name="pebble_save_error_media_quota">Limite de photos atteinte pour ce caillou.</string>
+
+    <!-- ==== Pebble detail + delete (sub-project B) ==== -->
+    <string name="pebble_delete">Supprimer</string>
+    <string name="pebble_delete_confirm_title">Supprimer %1$s ?</string>
+    <string name="pebble_delete_confirm_message">Cette action est irréversible.</string>
+    <string name="pebble_delete_error">Une erreur est survenue. Veuillez réessayer.</string>
+    <string name="action_cancel">Annuler</string>
+    <string name="pebble_detail_edit">Modifier</string>
+    <string name="pebble_detail_back_a11y">Retour</string>
+    <string name="pebble_detail_privacy_a11y">Pebble privé</string>
+    <string name="pebble_detail_no_domain">Aucun domaine</string>
+    <string name="pebble_detail_load_error">Impossible de charger ce pebble.</string>
+    <string name="pebble_detail_retry">Réessayer</string>
 </resources>

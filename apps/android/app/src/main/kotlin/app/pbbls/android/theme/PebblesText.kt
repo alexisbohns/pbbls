@@ -6,6 +6,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import java.util.Locale
 
 /**
@@ -20,7 +22,18 @@ fun PebblesText(
     style: TextStyle,
     modifier: Modifier = Modifier,
     color: Color = LocalContentColor.current,
+    textAlign: TextAlign? = null,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
 ) {
     val displayText = if (style in PebblesTypography.uppercaseTokens) text.uppercase(Locale.getDefault()) else text
-    Text(text = displayText, style = style, modifier = modifier, color = color)
+    Text(
+        text = displayText,
+        style = style,
+        modifier = modifier,
+        color = color,
+        textAlign = textAlign,
+        maxLines = maxLines,
+        overflow = overflow,
+    )
 }
