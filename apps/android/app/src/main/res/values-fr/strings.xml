@@ -118,4 +118,12 @@
     <string name="emotionCategory_pride_name">Fierté</string>
     <string name="emotionCategory_sadness_name">Tristesse</string>
     <string name="emotionCategory_shame_name">Honte</string>
+
+    <!-- ==== Record pebble (M39 sub-project A) ==== -->
+    <!-- Karma flash reason labels — web/iOS verbatim ("Caillou créé" / "Caillou enrichi"). -->
+    <string name="karma_reason_pebble_created">Caillou créé</string>
+    <string name="karma_reason_pebble_enriched">Caillou enrichi</string>
+    <!-- Pebble save-error messages (PebbleWriteService.pebbleSaveErrorMessage, D16). -->
+    <string name="pebble_save_error_generic">Impossible d\'enregistrer votre caillou. Veuillez réessayer.</string>
+    <string name="pebble_save_error_media_quota">Limite de photos atteinte pour ce caillou.</string>
 </resources>

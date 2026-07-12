@@ -25,6 +25,7 @@ import app.pbbls.android.features.onboarding.OnboardingSteps
 import app.pbbls.android.features.path.PathScreen
 import app.pbbls.android.features.welcome.WelcomeScreen
 import app.pbbls.android.services.LocalEmotionPaletteService
+import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSnapURLCache
 import app.pbbls.android.services.LocalSupabaseService
 import app.pbbls.android.services.OnboardingPreferences
@@ -52,6 +53,7 @@ private const val ROUTE_AUTH = "auth"
 fun RootScreen() {
     val supabase = LocalSupabaseService.current
     val palettes = LocalEmotionPaletteService.current
+    val referenceData = LocalReferenceDataService.current
     val snapUrls = LocalSnapURLCache.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -89,6 +91,16 @@ fun RootScreen() {
         // is a harmless clear of an empty cache.
         if (userId == null) {
             snapUrls?.invalidateAll()
+        }
+    }
+
+    // Warm the create/edit reference lists (domains, souls, collections) once a
+    // user id resolves — souls/collections are RLS-scoped, so this waits for the
+    // session rather than firing on Unit like the palette cache (D11). Kept in
+    // its own effect so its network suspension never delays the onboarding gate.
+    LaunchedEffect(userId) {
+        if (userId != null) {
+            referenceData.load()
         }
     }
 

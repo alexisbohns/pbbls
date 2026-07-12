@@ -128,4 +128,12 @@
     <string name="emotionCategory_pride_name">Pride</string>
     <string name="emotionCategory_sadness_name">Sadness</string>
     <string name="emotionCategory_shame_name">Shame</string>
+
+    <!-- ==== Record pebble (M39 sub-project A) ==== -->
+    <!-- Karma flash reason labels (KarmaReason) — mirror web/iOS verbatim. -->
+    <string name="karma_reason_pebble_created">Pebble created</string>
+    <string name="karma_reason_pebble_enriched">Pebble enriched</string>
+    <!-- Pebble save-error messages (PebbleWriteService.pebbleSaveErrorMessage, D16). -->
+    <string name="pebble_save_error_generic">Couldn\'t save your pebble. Please try again.</string>
+    <string name="pebble_save_error_media_quota">Photo limit reached on this pebble.</string>
 </resources>

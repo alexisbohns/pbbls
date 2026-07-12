@@ -15,6 +15,7 @@ import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.auth.status.SessionStatus
 import io.github.jan.supabase.auth.user.UserSession
 import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.functions.Functions
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
@@ -58,6 +59,11 @@ class SupabaseService {
             install(Postgrest)
             // Storage signs the private pebbles-media snap URLs (sub-project D).
             install(Storage)
+            // Functions registers the compose-pebble / compose-pebble-update
+            // edge-function surface (M39 sub-project A). PebbleWriteService posts
+            // via raw Ktor to read the 5xx soft-success body (D2), but the plugin
+            // is installed so the standard functions surface is available.
+            install(Functions)
         }
 
     /** The current Supabase session, or null when signed out. */

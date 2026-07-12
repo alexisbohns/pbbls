@@ -73,6 +73,11 @@ coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref 
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 supabase-storage = { group = "io.github.jan-tennert.supabase", name = "storage-kt" }
 
+# Pebble write path (M39 sub-project A). The Functions plugin registers the
+# compose-pebble / compose-pebble-update edge-function surface; PebbleWriteService
+# posts via raw Ktor to read the 5xx soft-success body (D2).
+supabase-functions = { group = "io.github.jan-tennert.supabase", name = "functions-kt" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 # AGP 9 has built-in Kotlin but does NOT bundle the Compose compiler — it must

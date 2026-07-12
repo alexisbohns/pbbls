@@ -3,6 +3,8 @@ package app.pbbls.android
 import android.app.Application
 import app.pbbls.android.services.EmotionPaletteService
 import app.pbbls.android.services.PathService
+import app.pbbls.android.services.PebbleWriteService
+import app.pbbls.android.services.ReferenceDataService
 import app.pbbls.android.services.SnapURLCache
 import app.pbbls.android.services.SupabaseService
 import app.rive.runtime.kotlin.core.Rive
@@ -38,6 +40,12 @@ class PebblesApp :
     lateinit var snapUrls: SnapURLCache
         private set
 
+    lateinit var referenceData: ReferenceDataService
+        private set
+
+    lateinit var pebbleWrite: PebbleWriteService
+        private set
+
     override fun onCreate() {
         super.onCreate()
         Rive.init(this)
@@ -45,6 +53,8 @@ class PebblesApp :
         palettes = EmotionPaletteService(supabase)
         pathService = PathService(supabase)
         snapUrls = SnapURLCache(supabase)
+        referenceData = ReferenceDataService(supabase)
+        pebbleWrite = PebbleWriteService(supabase)
     }
 
     /**
