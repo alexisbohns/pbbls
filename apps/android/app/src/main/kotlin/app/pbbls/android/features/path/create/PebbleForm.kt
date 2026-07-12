@@ -337,8 +337,7 @@ private fun GlyphRow(
                     .combinedClickable(
                         onClick = onTap,
                         onLongClick = { if (onRemove != null) menuExpanded = true },
-                    )
-                    .padding(vertical = 12.dp, horizontal = 4.dp),
+                    ).padding(vertical = 12.dp, horizontal = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -539,9 +538,7 @@ private fun SoulPill(
 }
 
 @Composable
-private fun AddSoulPill(
-    onClick: () -> Unit,
-) {
+private fun AddSoulPill(onClick: () -> Unit) {
     val system = PebblesTheme.colors.system
     Column(
         modifier =
