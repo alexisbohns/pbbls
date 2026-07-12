@@ -191,4 +191,6 @@
     <!-- Karma-earned flash (D9). -->
     <string name="karma_flash_amount">+%1$d karma</string>
     <string name="karma_flash_a11y">%1$d karma gagné, %2$s</string>
+    <!-- ==== Edit pebble (sub-project D) ==== -->
+    <string name="edit_pebble_title">Modifier le caillou</string>
 </resources>

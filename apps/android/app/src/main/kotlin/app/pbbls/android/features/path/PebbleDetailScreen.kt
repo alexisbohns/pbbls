@@ -56,6 +56,7 @@ fun PebbleDetailScreen(
     pebbleId: String,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    reloadKey: Int = 0,
     onEditRequested: () -> Unit = {},
 ) {
     val detailService = LocalPebbleDetailService.current
@@ -73,7 +74,7 @@ fun PebbleDetailScreen(
     // Re-runs on retry (reloadToken++). isLoading gates the spinner; loadError
     // gates the error view. The caller (PathScreen) closes this cover when the
     // pebble is deleted, so a load against a stale id never renders.
-    LaunchedEffect(pebbleId, reloadToken) {
+    LaunchedEffect(pebbleId, reloadToken, reloadKey) {
         isLoading = true
         loadError = false
         try {

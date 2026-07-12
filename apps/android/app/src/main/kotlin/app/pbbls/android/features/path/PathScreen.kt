@@ -16,6 +16,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -73,6 +74,8 @@ fun PathScreen(
     val writeService = LocalPebbleWriteService.current
     val scope = rememberCoroutineScope()
     var selectedPebbleId by remember { mutableStateOf<String?>(null) }
+    var editingPebbleId by remember { mutableStateOf<String?>(null) }
+    var detailReloadKey by remember { mutableIntStateOf(0) }
     var pendingDeletion by remember { mutableStateOf<Pebble?>(null) }
     var deleteError by remember { mutableStateOf(false) }
     var isPresentingCreate by remember { mutableStateOf(false) }
@@ -158,8 +161,28 @@ fun PathScreen(
         if (detailId != null) {
             PebbleDetailScreen(
                 pebbleId = detailId,
+                reloadKey = detailReloadKey,
                 onDismiss = { selectedPebbleId = null },
-                onEditRequested = {},
+                onEditRequested = { editingPebbleId = detailId },
+                modifier = Modifier.fillMaxSize(),
+            )
+        }
+
+        // Full-screen edit cover — stacked over the detail cover (both opaque, so
+        // the detail stays alive underneath, matching iOS EditPebbleSheet). Also
+        // in the OUTER Box since EditPebbleScreen self-applies safeDrawingPadding.
+        // On save it swaps back to the detail (D5), bumps detailReloadKey to reload
+        // the revealed detail in place, and reloads the timeline.
+        val editId = editingPebbleId
+        if (editId != null) {
+            EditPebbleScreen(
+                pebbleId = editId,
+                onDismiss = { editingPebbleId = null },
+                onSaved = {
+                    editingPebbleId = null
+                    detailReloadKey++
+                    reload()
+                },
                 modifier = Modifier.fillMaxSize(),
             )
         }
