@@ -38,17 +38,13 @@ Native iOS app for Pebbles. SwiftUI, iOS 17+, iPhone-only.
 
 ```
 Pebbles/
-  PebblesApp.swift          @main entry
-  RootView.swift            Top-level TabView
+  PebblesApp.swift          @main entry — constructs and injects the @Observable service graph
+  RootView.swift            Auth gate (session + splash) + root composition
   Features/<Feature>/       One folder per feature; matches web apps/web/components/<feature>/
-  Services/                 Non-view code (Supabase, environment, future repositories)
-  Resources/                Info.plist, Assets.xcassets, entitlements-adjacent files
+  Services/                 Non-view code (Supabase, environment, palette/reference-data services)
+  Resources/                Info.plist, Assets.xcassets, fonts, Rive/SVG assets
 ```
 
-Features map roughly to the web app's navigation structure: Path (home/timeline), Profile (access to Collections, Glyphs, Souls).
+Features map roughly to the web app's navigation structure: Path (home/timeline), Profile (access to Collections, Glyphs, Souls). The authed root is `PathView` with a custom bottom bar (not a system `TabView`); sheets and full-screen covers do most secondary navigation.
 
-## What's scaffolded but not used yet
-
-- `SupabaseService` is created and injected; no view calls it yet.
-- `Pebbles.entitlements` declares Sign in with Apple; no sign-in UI yet.
-- Asset catalog has an empty `AppIcon` slot — Xcode warns at build time. Expected.
+`apps/android` mirrors this app 1:1 (see `apps/android/CLAUDE.md`) — when changing a schema/RPC contract or a cross-surface behavior here, check whether the Android mirror needs the same change.

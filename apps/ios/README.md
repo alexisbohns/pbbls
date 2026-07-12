@@ -29,7 +29,7 @@ Native iOS app for Pebbles. SwiftUI, iOS 17+, iPhone-only.
 
 4. Select an iOS 17 iPhone simulator and hit ⌘R.
 
-You should see a two-tab app: Path and Profile.
+You should see the Welcome screen (Rive logo + carousel); after signing in you land on the Path timeline.
 
 ## Project structure
 
@@ -37,12 +37,13 @@ You should see a two-tab app: Path and Profile.
 apps/ios/
   project.yml              XcodeGen source of truth — edit this, not .xcodeproj
   Pebbles/
-    PebblesApp.swift       @main entry
-    RootView.swift         Top-level TabView
-    Features/              Feature folders (placeholder views for now)
-    Services/              SupabaseService, AppEnvironment
-    Resources/             Info.plist, Assets.xcassets
+    PebblesApp.swift       @main entry — constructs and injects the service graph
+    RootView.swift         Auth gate + root composition
+    Features/              One folder per feature (Path, Profile, Auth, Welcome, Onboarding, Glyph, …)
+    Services/              SupabaseService, AppEnvironment, palette/reference-data services
+    Resources/             Info.plist, Assets.xcassets, fonts, Rive/SVG assets
     Pebbles.entitlements   Sign in with Apple
+  PebblesWidget/           Widget extension (Live Activity, retained for future use)
   PebblesTests/            Unit tests (Swift Testing)
   Config/
     Secrets.example.xcconfig  Committed template
@@ -68,4 +69,4 @@ apps/ios/
 
 ## Status
 
-V1 shell. Two empty tabs, Supabase SDK wired but not used. Features will be added in subsequent PRs.
+Full production app: auth (email, Apple, Google), Path timeline with pebble create/edit/detail, Profile (collections, souls, glyphs), glyph carving + marketplace, karma, Lab feed — localized en/fr. Builds on Xcode Cloud (`ci_scripts/ci_post_clone.sh`).

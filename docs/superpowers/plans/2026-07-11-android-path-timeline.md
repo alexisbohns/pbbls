@@ -67,4 +67,10 @@ Screenshot previews (CI `ui-screenshots`): fidelity grid, row variants (sizes/ph
 
 ## Lessons learned
 
-_(filled at completion)_
+_(filled at the M38 milestone-boundary grooming pass, from PR #536)_
+
+- **PostgREST timestamps need `OffsetDateTime`, not `Instant`.** `java.time.Instant.parse` rejects the `+00:00` offset form PostgREST emits; decode timestamptz columns as `OffsetDateTime` via a custom kotlinx serializer.
+- **Palette hexes must be normalized at the model boundary.** `v_emotions_with_palette` returns 8-digit `#RRGGBBAA` strings that may carry stray whitespace; trim + reorder to ARGB when parsing, and truncate to **6-digit** hex before injecting into SVG markup — AndroidSVG misparses 8-digit color literals.
+- **The SVG fidelity spike passed** — AndroidSVG renders the server-composed `render_svg` subset (incl. clipPath and fill-rule cases) faithfully; neither fallback (server-side SVG tweak, custom renderer) was needed. Fixtures generate from the real compositor sources via `apps/android/scripts/gen-pebble-svg-fixtures.ts` — rerun when the engine changes.
+- **Keep leaf composables service-free.** Passing `palette`/data as parameters (with `LocalSnapURLCache` nullable-default) is what lets screenshot tests render without secret-requiring service construction — worth preserving as new screens land.
+- **Requiring a valid Arkaik bundle surfaced a pre-existing defect** (duplicate DM-bounce node had `validate-bundle.js` failing on main); running the validator as part of every Arkaik edit catches drift that otherwise accumulates silently.

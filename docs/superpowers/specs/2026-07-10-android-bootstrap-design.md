@@ -1,6 +1,6 @@
 # Android app bootstrap — scaffold, funnel, and a read-only Path
 
-> Milestone-level design for **M37 · Android app bootstrap** (numbering follows M36 · Pebblestore & Karma Economy; renumber if taken). Four sub-projects **A–D**, each its own issue + spec + plan + PR, per the M36 precedent. Foundation: decision-log entry **2026-07-10 — Android app: native Kotlin + Jetpack Compose, mirroring the iOS architecture** (`docs/decisions/log.md`). Issues: to be created when the milestone is opened.
+> Milestone-level design for the Android bootstrap — drafted as "M37"; created on GitHub as **M38 · Android App** (docs referring to "M37" mean this milestone). Four sub-projects **A–D**, each its own issue + spec + plan + PR, per the M36 precedent. Foundation: decision-log entry **2026-07-10 — Android app: native Kotlin + Jetpack Compose, mirroring the iOS architecture** (`docs/decisions/log.md`). Issues: #528 (A) · #529 (B) · #530 (C) · #531 (D) — all shipped (PRs #533–#536).
 
 ## Goal
 
