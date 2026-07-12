@@ -99,8 +99,7 @@ fun PebbleDetailScreen(
                         awaitPointerEvent().changes.forEach { it.consume() }
                     }
                 }
-            }
-            .safeDrawingPadding(),
+            }.safeDrawingPadding(),
     ) {
         DetailTopBar(
             visibility = detail?.visibility,
