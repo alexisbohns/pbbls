@@ -21,4 +21,4 @@ Before writing any Supabase query that touches more than one table, or that does
 - **If no RPC exists but the operation is multi-table or multi-statement:** create a new RPC in a migration rather than stitching multiple client calls together. Client-stitched multi-table writes are not atomic (PostgREST has no client-side transactions), so a partial failure leaves the database in an inconsistent state. RPCs run in a single Postgres transaction and can enforce ownership checks past `security definer`.
 - **If the operation is a single-table, single-statement read or write:** direct client calls are fine. No RPC needed.
 
-This rule applies to both the web app and iOS. When extending an existing RPC, keep its sibling RPCs symmetric (e.g. if you add a payload key to `update_pebble`, add the same key to `create_pebble`) so future readers don't have to hunt down asymmetries.
+This rule applies to every client surface — web, iOS, and Android. When extending an existing RPC, keep its sibling RPCs symmetric (e.g. if you add a payload key to `update_pebble`, add the same key to `create_pebble`) so future readers don't have to hunt down asymmetries.

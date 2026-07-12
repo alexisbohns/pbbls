@@ -81,3 +81,11 @@ Debug composable: swatch grid — **System** (4) + **Accent** (6) sections, adap
 
 ## Delivery
 Merge #533 → branch B off `main` → address issue #529. Branch name suggestion: `claude/issue-529-android-design-system-<suffix>` (or `feat/529-android-design-system`). Standard flow from there: implement, ktlint locally, push, open PR (`Resolves #529`, inherit `feat`/`ui`/`android` labels + M38 milestone), iterate CI to green, hand device checks to the maintainer.
+
+## Lessons learned
+
+_(filled at the M38 milestone-boundary grooming pass, from PR #534)_
+
+- **Google Fonts no longer publishes static per-weight Nunito TTFs** — bundle the single variable-font file and declare weights via `FontVariation.Settings` (see the 2026-07-11 "Android Nunito: one variable-font file" decision-log entry; don't hunt for `nunito_semibold.ttf` files that don't exist).
+- **Compose `TextStyle` has no text-case property** — uppercase tokens go through the `PebblesText` helper, so raw `Text` calls silently lose the case transform. Rule captured in `apps/android/CLAUDE.md`.
+- **The screenshot-test artifact (`ui-screenshots`) is the practical review channel for an SDK-less maintainer** — the token-preview screen doubled as the design-system sign-off surface without a device install.

@@ -10,10 +10,13 @@ A Turborepo monorepo for **Pebbles**, an app where you record life moments as "p
 pbbls/
   apps/
     web/         ← Next.js PWA (the main application)
-    ios/         ← iOS app (placeholder)
+    ios/         ← Native iOS app (SwiftUI, iOS 17+)
+    android/     ← Native Android app (Kotlin + Jetpack Compose, minSdk 33)
+    admin/       ← Next.js back-office (analytics, Lab logs, glyph moderation)
   packages/
     shared/      ← Shared types & utilities (placeholder)
-    supabase/    ← Supabase client, types & migrations
+    supabase/    ← Supabase types, migrations & edge functions
+    rive/        ← Shared .riv animation assets (consumed by copy per surface)
   turbo.json     ← Turborepo task configuration
   package.json   ← Workspace root
 ```
@@ -25,7 +28,7 @@ npm install
 npm run dev
 ```
 
-Open https://localhost:3000. On first launch, seed data is loaded automatically.
+Open http://localhost:3000.
 
 ## Commands
 
@@ -37,9 +40,9 @@ Open https://localhost:3000. On first launch, seed data is loaded automatically.
 
 ## Web app (`apps/web/`)
 
-The web app is a local-first PWA built with Next.js (App Router), React, Tailwind CSS, and shadcn/ui. Data is stored in localStorage with background sync to Supabase for authenticated users. The DataProvider interface abstracts the storage layer — `LocalProvider` for anonymous/offline use, `SupabaseProvider` for authenticated users.
+The web app is a PWA built with Next.js (App Router), React, Tailwind CSS, and shadcn/ui. Data lives in Supabase (Postgres + RLS); business logic that spans tables lives in Postgres RPCs shared by all client surfaces. The `DataProvider` interface abstracts the data layer — `SupabaseProvider` is its sole implementation.
 
-See [`apps/web/`](apps/web/) for the full web app documentation.
+See [`apps/web/`](apps/web/) for the full web app documentation. The native apps (`apps/ios`, `apps/android`) are independent codebases that mirror each other's architecture and share only the database contract — see the 2026-07-10 entry in `docs/decisions/log.md`.
 
 ### Concepts
 
@@ -74,7 +77,7 @@ apps/web/
   lib/
     types.ts              → Domain entity types (Pebble, Soul, Collection)
     config/               → Static configs (emotions, domains, card types, navigation)
-    data/                 → DataProvider interface, LocalProvider, hooks
+    data/                 → DataProvider interface, SupabaseProvider, hooks
     hooks/                → Reusable hooks (useRecordForm, useStepNavigation)
     utils/                → Utilities (formatters, group-pebbles-by-date)
     seed/                 → Seed data with dev-mode validation
@@ -85,9 +88,9 @@ apps/web/
 ```
 in-memory Store (React context)
 ↕
-LocalProvider (localStorage) ──or── SupabaseProvider (localStorage + Supabase sync)
-↕                                   ↕
-React hooks (usePebbles, etc.)      Background push/pull to Supabase
+SupabaseProvider (PostgREST reads + RPCs for multi-table writes)
+↕
+React hooks (usePebbles, etc.)
 ↕
 Page components → UI
 ```
@@ -98,7 +101,7 @@ Page components → UI
 |-------------|--------|
 | Framework   | Next.js (App Router) |
 | UI          | React + Tailwind CSS + shadcn/ui |
-| Storage     | localStorage + Supabase (local-first) |
+| Storage     | Supabase (Postgres + RLS + RPCs) |
 | Theming     | next-themes |
 | Monorepo    | Turborepo + npm workspaces |
 
@@ -121,7 +124,7 @@ Private — not open source yet.
 **Thesis:** specification-driven, agentic execution. Match ceremony to blast radius. Architecture lives as code-adjacent artifacts, not folklore.
 
 ### 1. Conception
-- GitHub issue: `[Type] Description` + species label (`feat`/`fix`/...) + scope label (`core`/`ui`/`db`/`api`/`auth`/`facility`) + milestone.
+- GitHub issue: `[Type] Description` + species label (`feat`/`fix`/...) + scope label (`core`/`ui`/`db`/`api`/`auth`/`facility`/`android`) + milestone.
 - Living product graph (`docs/arkaik/bundle.json`) — screens, flows, models, APIs as nodes/edges. Updated whenever architecture moves.
 
 ### 2. Spec — `docs/superpowers/specs/<date>-<slug>-design.md`
@@ -174,7 +177,3 @@ Operationalizes the spec. Checkboxable, copy-pasteable.
 4. **Atomicity is a primitive.** RPCs over client-stitching. Strict types over runtime guards.
 5. **Every ship teaches the next one.** Post-ship lessons annotate the plan, not a separate retro.
 
----
-
-### Verification
-After ExitPlanMode I will paste the section above (`# Pebbles — Engineering Paradigm` onward) directly in chat. No files written, no commits.

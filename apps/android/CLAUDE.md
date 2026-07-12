@@ -5,12 +5,11 @@ portrait. It mirrors `apps/ios` 1:1 — same architecture, same tokens, same fun
 When this file says "mirror X", read the named iOS file under `apps/ios/Pebbles/`
 and port its structure, not just its behavior.
 
-> This app is built up across milestone **M37** (design:
+> This app was bootstrapped in milestone **M38 · Android App** (design doc:
 > `docs/superpowers/specs/2026-07-10-android-bootstrap-design.md`, decisions
-> D1–D18). Sub-project **A** is the scaffold; B adds the design system, C the
-> entry funnel, D the read-only Path. Much of what this file mandates (services,
-> localization, the deadlock rule) has no code yet — it is the contract B–D work
-> under.
+> D1–D18 — the doc's draft numbering "M37" means this milestone). Sub-project
+> **A** is the scaffold; B adds the design system, C the entry funnel, D the
+> read-only Path. All four have shipped (PRs #533–#536).
 
 ## Source of truth
 
@@ -195,7 +194,7 @@ bundled. Android resource filenames must be lowercase
   change. To adopt visual-regression later, commit the references and switch CI to
   `validateDebugScreenshotTest`. Add a preview per screen/state as real UI lands.
 
-## Current state (post sub-project D — milestone M37 complete)
+## Current state (post sub-project D — bootstrap milestone complete)
 
 - `PebblesApp` constructs the full service graph — `SupabaseService`, then
   `EmotionPaletteService`, `PathService`, `SnapURLCache` (by constructor) —
