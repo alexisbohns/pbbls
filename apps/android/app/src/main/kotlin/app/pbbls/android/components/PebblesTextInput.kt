@@ -15,7 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.ContentType
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.semantics.contentType
 import androidx.compose.ui.semantics.semantics
@@ -27,8 +26,10 @@ import app.pbbls.android.theme.PebblesTypography
 
 /**
  * Rounded-rectangle text input with a static 1dp border (no focus state, to
- * match iOS 1:1). White fill, `system.secondary` for both placeholder and
- * typed content. Ports `apps/ios/Pebbles/Components/Inputs/PebblesTextInput.swift`.
+ * match iOS 1:1). `system.background` fill (white in light, dark in dark —
+ * never a hardcoded white, which is unreadable in dark mode), `system.secondary`
+ * for both placeholder and typed content. Ports
+ * `apps/ios/Pebbles/Components/Inputs/PebblesTextInput.swift`.
  */
 @Composable
 fun PebblesTextInput(
@@ -60,7 +61,7 @@ fun PebblesTextInput(
             modifier
                 .fillMaxWidth()
                 .heightIn(min = minHeight)
-                .background(Color.White, shape)
+                .background(system.background, shape)
                 .border(1.dp, system.muted, shape),
         contentAlignment = Alignment.CenterStart,
     ) {
