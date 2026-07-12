@@ -41,11 +41,12 @@ class SoulWithGlyphDecodingTest {
         assertEquals("11111111-1111-1111-1111-111111111111", soul.id)
         assertEquals("Sam", soul.name)
         assertEquals("22222222-2222-2222-2222-222222222222", soul.glyphId)
+        val strokes = soul.glyph.strokes
         assertEquals(soul.glyphId, soul.glyph.id)
         assertEquals("wave", soul.glyph.name)
         assertEquals("0 0 200 200", soul.glyph.viewBox)
-        assertEquals(1, soul.glyph.strokes.size)
-        assertEquals("M0,0 L10,10", soul.glyph.strokes.first().d)
+        assertEquals(1, strokes.size)
+        assertEquals("M0,0 L10,10", strokes.first().d)
         assertEquals(12, soul.pebblesCount)
     }
 

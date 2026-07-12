@@ -165,7 +165,8 @@ class PebbleWriteService(
          */
         fun softSuccessPebbleId(body: String): String? =
             runCatching {
-                Json.parseToJsonElement(body).jsonObject["pebble_id"]?.jsonPrimitive?.contentOrNull
+                val element = Json.parseToJsonElement(body).jsonObject["pebble_id"]
+                element?.jsonPrimitive?.contentOrNull
             }.getOrNull()
 
         /**

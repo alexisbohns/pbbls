@@ -45,11 +45,9 @@ class PebblePayloadTest {
             visibility = Visibility.PRIVATE,
         )
 
-    private fun encode(payload: PebbleCreatePayload): JsonObject =
-        json.parseToJsonElement(json.encodeToString(payload)).jsonObject
+    private fun encode(payload: PebbleCreatePayload): JsonObject = json.parseToJsonElement(json.encodeToString(payload)).jsonObject
 
-    private fun encode(payload: PebbleUpdatePayload): JsonObject =
-        json.parseToJsonElement(json.encodeToString(payload)).jsonObject
+    private fun encode(payload: PebbleUpdatePayload): JsonObject = json.parseToJsonElement(json.encodeToString(payload)).jsonObject
 
     @Test
     fun `create payload emits exactly the eleven keys and no snaps`() {
@@ -97,7 +95,8 @@ class PebblePayloadTest {
             obj.keys,
         )
 
-        val snap = obj.getValue("snaps").jsonArray.single().jsonObject
+        val snapsArray = obj.getValue("snaps").jsonArray
+        val snap = snapsArray.single().jsonObject
         assertEquals(setOf("id", "storage_path", "sort_order"), snap.keys)
         assertEquals("snap-1", snap.getValue("id").jsonPrimitive.content)
         assertEquals("user/snap", snap.getValue("storage_path").jsonPrimitive.content)
@@ -133,8 +132,9 @@ class PebblePayloadTest {
         assertFalse(obj.getValue("intensity").jsonPrimitive.isString)
         assertFalse(obj.getValue("positiveness").jsonPrimitive.isString)
 
-        assertEquals(1, obj.getValue("domain_ids").jsonArray.size)
-        assertEquals("d1", obj.getValue("domain_ids").jsonArray.single().jsonPrimitive.content)
+        val domainIds = obj.getValue("domain_ids").jsonArray
+        assertEquals(1, domainIds.size)
+        assertEquals("d1", domainIds.single().jsonPrimitive.content)
         assertEquals(
             listOf("s1", "s2"),
             obj.getValue("soul_ids").jsonArray.map { it.jsonPrimitive.content },

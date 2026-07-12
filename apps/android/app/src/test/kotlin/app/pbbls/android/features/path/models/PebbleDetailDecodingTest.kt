@@ -103,9 +103,10 @@ class PebbleDetailDecodingTest {
             )
 
         val soul = detail.souls.single()
+        val strokes = soul.glyph.strokes
         assertEquals("g1", soul.glyph.id)
-        assertEquals(1, soul.glyph.strokes.size)
-        assertEquals("M0,0 L10,10", soul.glyph.strokes.first().d)
+        assertEquals(1, strokes.size)
+        assertEquals("M0,0 L10,10", strokes.first().d)
     }
 
     @Test
