@@ -128,4 +128,79 @@
     <string name="emotionCategory_pride_name">Pride</string>
     <string name="emotionCategory_sadness_name">Sadness</string>
     <string name="emotionCategory_shame_name">Shame</string>
+
+    <!-- ==== Record pebble (M39 sub-project A) ==== -->
+    <!-- Karma flash reason labels (KarmaReason) — mirror web/iOS verbatim. -->
+    <string name="karma_reason_pebble_created">Pebble created</string>
+    <string name="karma_reason_pebble_enriched">Pebble enriched</string>
+    <!-- Pebble save-error messages (PebbleWriteService.pebbleSaveErrorMessage, D16). -->
+    <string name="pebble_save_error_generic">Couldn\'t save your pebble. Please try again.</string>
+    <string name="pebble_save_error_media_quota">Photo limit reached on this pebble.</string>
+
+    <!-- ==== Pebble detail + delete (sub-project B) ==== -->
+    <string name="pebble_delete">Delete</string>
+    <string name="pebble_delete_confirm_title">Delete %1$s?</string>
+    <string name="pebble_delete_confirm_message">This can\'t be undone.</string>
+    <string name="pebble_delete_error">Something went wrong. Please try again.</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="pebble_detail_edit">Edit</string>
+    <string name="pebble_detail_back_a11y">Back</string>
+    <string name="pebble_detail_privacy_a11y">Private pebble</string>
+    <string name="pebble_detail_no_domain">No domain</string>
+    <string name="pebble_detail_load_error">Couldn\'t load this pebble.</string>
+    <string name="pebble_detail_retry">Retry</string>
+
+    <!-- ==== Create pebble (M39 sub-project C) ==== -->
+    <!-- Shell + shared actions. -->
+    <string name="create_new_pebble">New pebble</string>
+    <string name="action_save">Save</string>
+    <string name="action_done">Done</string>
+    <string name="action_next">Next</string>
+    <!-- When row (D15 date-then-time). -->
+    <string name="create_when_label">When</string>
+    <string name="create_when_a11y">When</string>
+    <!-- Basics. -->
+    <string name="create_name_placeholder">Name</string>
+    <string name="create_description_placeholder">Description (optional)</string>
+    <!-- Mood section (emotion, domain, valence). -->
+    <string name="create_mood_header">Mood</string>
+    <string name="create_emotion_label">Emotion</string>
+    <string name="create_emotion_title">Emotions</string>
+    <string name="create_domain_label">Domain</string>
+    <string name="create_collection_label">Collection</string>
+    <string name="create_valence_label">Valence</string>
+    <string name="create_valence_title">Choose a valence</string>
+    <string name="create_choose">Choose…</string>
+    <string name="create_none">None</string>
+    <!-- Glyph section. -->
+    <string name="create_glyph_header">Glyph</string>
+    <string name="create_glyph_title">Choose a glyph</string>
+    <string name="create_glyph_placeholder">Pick a glyph</string>
+    <string name="create_glyph_untitled">Untitled glyph</string>
+    <string name="create_glyph_remove">Remove glyph</string>
+    <string name="create_glyph_load_error">Couldn\'t load glyphs.</string>
+    <!-- Souls section + inline create. -->
+    <string name="create_souls_header">Souls</string>
+    <string name="create_souls_title">Choose souls</string>
+    <string name="create_souls_empty">Add the first soul to tag this pebble with</string>
+    <string name="create_soul_add">New soul</string>
+    <string name="create_soul_title">New soul</string>
+    <string name="create_soul_name_placeholder">Name</string>
+    <!-- Optional section (collection). -->
+    <string name="create_optional_header">Optional</string>
+    <!-- Valence polarity + size-group labels (3×3 picker). -->
+    <string name="valence_highlight">Highlight</string>
+    <string name="valence_neutral">Neutral</string>
+    <string name="valence_lowlight">Lowlight</string>
+    <string name="valence_group_small_name">Day event</string>
+    <string name="valence_group_medium_name">Week event</string>
+    <string name="valence_group_large_name">Month event</string>
+    <string name="valence_group_small_desc">This moment impacted my day and will be wrapped in my weekly Cairn</string>
+    <string name="valence_group_medium_desc">This moment impacted my whole week and will be wrapped in my monthly Cairn</string>
+    <string name="valence_group_large_desc">This moment impacted my whole month and will be wrapped in my yearly Cairn</string>
+    <!-- Karma-earned flash (D9). -->
+    <string name="karma_flash_amount">+%1$d karma</string>
+    <string name="karma_flash_a11y">Earned %1$d karma, %2$s</string>
+    <!-- ==== Edit pebble (sub-project D) ==== -->
+    <string name="edit_pebble_title">Edit pebble</string>
 </resources>

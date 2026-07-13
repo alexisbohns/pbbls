@@ -1,8 +1,13 @@
 package app.pbbls.android
 
 import android.app.Application
+import app.pbbls.android.features.glyph.services.GlyphService
+import app.pbbls.android.features.karma.KarmaNotificationService
 import app.pbbls.android.services.EmotionPaletteService
 import app.pbbls.android.services.PathService
+import app.pbbls.android.services.PebbleDetailService
+import app.pbbls.android.services.PebbleWriteService
+import app.pbbls.android.services.ReferenceDataService
 import app.pbbls.android.services.SnapURLCache
 import app.pbbls.android.services.SupabaseService
 import app.rive.runtime.kotlin.core.Rive
@@ -35,7 +40,22 @@ class PebblesApp :
     lateinit var pathService: PathService
         private set
 
+    lateinit var pebbleDetailService: PebbleDetailService
+        private set
+
     lateinit var snapUrls: SnapURLCache
+        private set
+
+    lateinit var referenceData: ReferenceDataService
+        private set
+
+    lateinit var pebbleWrite: PebbleWriteService
+        private set
+
+    lateinit var glyphService: GlyphService
+        private set
+
+    lateinit var karma: KarmaNotificationService
         private set
 
     override fun onCreate() {
@@ -44,7 +64,12 @@ class PebblesApp :
         supabase = SupabaseService()
         palettes = EmotionPaletteService(supabase)
         pathService = PathService(supabase)
+        pebbleDetailService = PebbleDetailService(supabase)
         snapUrls = SnapURLCache(supabase)
+        referenceData = ReferenceDataService(supabase)
+        pebbleWrite = PebbleWriteService(supabase)
+        glyphService = GlyphService(supabase)
+        karma = KarmaNotificationService()
     }
 
     /**

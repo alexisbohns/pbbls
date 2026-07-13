@@ -55,3 +55,11 @@ internal val AccentPaletteShared =
         surface = Color(0x1AC07A7A),
         primaryHex = "#C07A7A",
     )
+
+/**
+ * Destructive-action accent (delete). iOS renders this via SwiftUI's
+ * `.destructive` button role, which has no design-system token; this is the
+ * Android stand-in. Warm red tuned toward the mauve system palette. Graduate to
+ * a SystemPalette field if a second destructive surface appears.
+ */
+internal val PebblesDestructive = Color(0xFFD1453B)

@@ -19,12 +19,15 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import app.pbbls.android.features.auth.AuthMode
 import app.pbbls.android.features.auth.AuthScreen
+import app.pbbls.android.features.karma.KarmaOverlayHost
+import app.pbbls.android.features.karma.LocalKarmaNotificationService
 import app.pbbls.android.features.onboarding.OnboardingGate
 import app.pbbls.android.features.onboarding.OnboardingScreen
 import app.pbbls.android.features.onboarding.OnboardingSteps
 import app.pbbls.android.features.path.PathScreen
 import app.pbbls.android.features.welcome.WelcomeScreen
 import app.pbbls.android.services.LocalEmotionPaletteService
+import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSnapURLCache
 import app.pbbls.android.services.LocalSupabaseService
 import app.pbbls.android.services.OnboardingPreferences
@@ -52,6 +55,8 @@ private const val ROUTE_AUTH = "auth"
 fun RootScreen() {
     val supabase = LocalSupabaseService.current
     val palettes = LocalEmotionPaletteService.current
+    val referenceData = LocalReferenceDataService.current
+    val karma = LocalKarmaNotificationService.current
     val snapUrls = LocalSnapURLCache.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -92,6 +97,16 @@ fun RootScreen() {
         }
     }
 
+    // Warm the create/edit reference lists (domains, souls, collections) once a
+    // user id resolves — souls/collections are RLS-scoped, so this waits for the
+    // session rather than firing on Unit like the palette cache (D11). Kept in
+    // its own effect so its network suspension never delays the onboarding gate.
+    LaunchedEffect(userId) {
+        if (userId != null) {
+            referenceData.load()
+        }
+    }
+
     Box(
         modifier =
             Modifier
@@ -110,6 +125,9 @@ fun RootScreen() {
                     },
                 )
             }
+            // Karma flash floats above the authed surfaces (create/detail live
+            // inside PathScreen, so they're below it) — drawn last for z-order (D9).
+            KarmaOverlayHost(service = karma, modifier = Modifier.fillMaxSize())
         } else {
             WelcomeAuthNavHost(
                 contentRevealed = welcomeContentRevealed,

@@ -24,10 +24,9 @@ import app.pbbls.android.theme.PebblesTypography
 
 /**
  * One pager page: the focused week's pebble list — the `WeekPathView`
- * analog. The iOS reveal cascade and bottom fade mask are skipped in v1
- * (both choreograph the create button, which doesn't exist on the read-only
- * surface); the empty state keeps the copy but drops the create button for
- * the same reason.
+ * analog. The iOS reveal cascade and bottom fade mask are skipped in v1 (both
+ * choreograph the create button); the empty state keeps the copy and re-adds
+ * the create affordance (C) via [onCreatePebble].
  *
  * [paletteFor] keeps the list previewable — screenshot tests pass a fixture
  * lookup instead of a live palette service.
@@ -36,10 +35,13 @@ import app.pbbls.android.theme.PebblesTypography
 fun WeekPebbleList(
     entry: WeekRollEntry,
     paletteFor: (Pebble) -> EmotionPalette?,
+    onPebbleTap: (Pebble) -> Unit = {},
+    onPebbleDelete: (Pebble) -> Unit = {},
+    onCreatePebble: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     if (entry.pebbles.isEmpty()) {
-        EmptyWeek(modifier = modifier)
+        EmptyWeek(onCreate = onCreatePebble, modifier = modifier)
     } else {
         LazyColumn(
             modifier = modifier,
@@ -54,6 +56,8 @@ fun WeekPebbleList(
                         Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp, horizontal = 24.dp),
+                    onTap = { onPebbleTap(pebble) },
+                    onRequestDelete = { onPebbleDelete(pebble) },
                 )
             }
         }
@@ -61,7 +65,10 @@ fun WeekPebbleList(
 }
 
 @Composable
-private fun EmptyWeek(modifier: Modifier = Modifier) {
+private fun EmptyWeek(
+    onCreate: () -> Unit = {},
+    modifier: Modifier = Modifier,
+) {
     val system = PebblesTheme.colors.system
     Column(
         modifier = modifier.fillMaxSize(),
@@ -78,6 +85,10 @@ private fun EmptyWeek(modifier: Modifier = Modifier) {
             text = stringResource(R.string.path_empty_week_subtitle),
             style = PebblesTypography.meta,
             color = system.secondary,
+        )
+        NewPebbleButton(
+            onTap = onCreate,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 48.dp),
         )
     }
 }

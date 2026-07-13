@@ -40,8 +40,13 @@ android {
         applicationId = "app.pbbls.android"
         minSdk = 33
         targetSdk = 37
-        versionCode = 1
-        versionName = "0.1.0"
+        // Derive the version from the CI run number so every uploaded debug APK
+        // is a strictly-increasing, distinct version. A static versionCode makes
+        // Android treat a reinstall as the same version and silently keep the old
+        // code — the "I installed it but nothing changed" trap. Local builds (no
+        // GITHUB_RUN_NUMBER) fall back to 1 / "0.1.0".
+        versionCode = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull() ?: 1
+        versionName = System.getenv("GITHUB_RUN_NUMBER")?.let { "0.1.0.$it" } ?: "0.1.0"
 
         buildConfigField("String", "SUPABASE_URL", "\"${secret("SUPABASE_URL")}\"")
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${secret("SUPABASE_ANON_KEY")}\"")
@@ -99,6 +104,7 @@ dependencies {
     implementation(libs.supabase.auth)
     implementation(libs.supabase.postgrest)
     implementation(libs.supabase.storage)
+    implementation(libs.supabase.functions)
     implementation(libs.ktor.client.okhttp)
     implementation(libs.kotlinx.serialization.json)
 
