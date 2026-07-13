@@ -107,6 +107,8 @@ Page components → UI
 
 ## Deployment
 
+### Web (`apps/web/`)
+
 The web app deploys to **Vercel**. After the monorepo migration, the Vercel project's **Root Directory** must be set to `apps/web` in the dashboard. This makes Vercel:
 
 1. Install dependencies at the repo root (respecting npm workspaces)
@@ -114,6 +116,10 @@ The web app deploys to **Vercel**. After the monorepo migration, the Vercel proj
 3. Serve output from `apps/web/.next`
 
 Preview URLs remain unchanged.
+
+### Android (`apps/android/`)
+
+The native Android app ships to **Google Play internal testing** from CI: merges to `main` touching `apps/android/**` build a signed release AAB and publish it via `.github/workflows/android-release.yml`, and a PR labelled `deploy-beta` deploys that branch on demand. The pipeline and its one-time console setup are documented in [`docs/android-play-deploy.md`](docs/android-play-deploy.md).
 
 ## License
 

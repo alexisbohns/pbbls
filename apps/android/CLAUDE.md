@@ -194,6 +194,26 @@ bundled. Android resource filenames must be lowercase
   change. To adopt visual-regression later, commit the references and switch CI to
   `validateDebugScreenshotTest`. Add a preview per screen/state as real UI lands.
 
+## Release & distribution (Play internal testing)
+
+- **The app auto-ships to Play internal testing from CI.**
+  `.github/workflows/android-release.yml` builds a **signed release AAB**
+  (`bundleRelease`) and publishes it on every push to `main`, on a PR labelled
+  `deploy-beta`, or via manual dispatch. It is separate from `android.yml`, which
+  stays the debug / lint / test / screenshot CI. Full setup + troubleshooting:
+  the [`docs/android-play-deploy.md`](../../docs/android-play-deploy.md) runbook.
+- **`versionCode` derives from `GITHUB_RUN_NUMBER`** (`build.gradle.kts`) — Play
+  requires every upload to strictly increase, so never pin it to a constant.
+  Re-running a release run reuses its number, which only matters once a publish
+  has actually reached Play (a failed publish leaves the code unused).
+- **Release signing flows like the Supabase secrets (D8).** The `release`
+  `signingConfig` reads the upload keystore + passwords from `KEYSTORE_FILE` /
+  `KEYSTORE_PASSWORD` / `KEY_ALIAS` / `KEY_PASSWORD` — env vars in CI (decoded
+  from the `KEYSTORE_BASE64` secret), or `secrets.properties` locally. With no
+  keystore the release build stays **unsigned** rather than failing — the same
+  fail-soft contract as the config secrets. Never commit a keystore (`*.jks` is
+  git-ignored).
+
 ## Current state (post sub-project D — bootstrap milestone complete)
 
 - `PebblesApp` constructs the full service graph — `SupabaseService`, then
