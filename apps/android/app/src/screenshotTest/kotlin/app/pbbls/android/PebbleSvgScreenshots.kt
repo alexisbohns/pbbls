@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.pbbls.android.features.path.render.PebbleStaticRender
 import app.pbbls.android.features.path.render.PebbleSvg
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography
@@ -97,4 +98,55 @@ fun PebbleSvgFidelityLight() {
 fun PebbleSvgFidelityDark() {
     // Dark mode strokes with the palette *secondary* role, as production does.
     PebblesTheme { FidelityGrid(strokeHex = "#AE91CC") }
+}
+
+/**
+ * The same nine fixtures rendered through [PebbleStaticRender] — the
+ * layer-tracing renderer the Path and detail pages now use. Compared against
+ * [FidelityGrid] above, the glyph strokes read at the *outline's* weight instead
+ * of their authored (custom-heavy / domain-light) width, so glyph == outline
+ * and custom vs domain glyphs match. The outline itself is unchanged.
+ */
+@Composable
+private fun TracedGrid(strokeHex: String) {
+    val system = PebblesTheme.colors.system
+    Column(
+        modifier = Modifier.padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        PebbleSvgFixtures.all.chunked(3).forEach { rowFixtures ->
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                rowFixtures.forEach { (name, svg) ->
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(modifier = Modifier.size(96.dp)) {
+                            PebbleStaticRender(
+                                svg = svg,
+                                strokeHex = strokeHex,
+                                modifier = Modifier.fillMaxSize(),
+                            )
+                        }
+                        Text(
+                            text = name,
+                            style = PebblesTypography.captionEmphasized,
+                            color = system.secondary,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@PreviewTest
+@Preview(showBackground = true, heightDp = 900)
+@Composable
+fun PebbleTracedFidelityLight() {
+    PebblesTheme { TracedGrid(strokeHex = "#7B5E99") }
+}
+
+@PreviewTest
+@Preview(showBackground = true, heightDp = 900, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun PebbleTracedFidelityDark() {
+    PebblesTheme { TracedGrid(strokeHex = "#AE91CC") }
 }

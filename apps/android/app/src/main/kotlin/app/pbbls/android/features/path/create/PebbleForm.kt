@@ -51,7 +51,7 @@ import app.pbbls.android.features.path.models.PebbleDraft
 import app.pbbls.android.features.path.models.Valence
 import app.pbbls.android.features.path.models.ValencePolarity
 import app.pbbls.android.features.path.render.GlyphImage
-import app.pbbls.android.features.path.render.PebbleSvg
+import app.pbbls.android.features.path.render.PebbleStaticRender
 import app.pbbls.android.features.path.render.ValenceGlyph
 import app.pbbls.android.features.profile.models.SoulWithGlyph
 import app.pbbls.android.theme.PebblesDestructive
@@ -100,7 +100,10 @@ fun PebbleForm(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         if (renderSvg != null && strokeColor != null) {
-            PebbleSvg(
+            // Trace at the outline weight so the live preview's glyph matches the
+            // outline (and the saved pebble on the Path / detail), keeping custom
+            // and domain glyphs consistent.
+            PebbleStaticRender(
                 svg = renderSvg,
                 strokeHex = strokeColor,
                 modifier = Modifier.fillMaxWidth().height(renderHeight),
