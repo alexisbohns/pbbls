@@ -49,22 +49,35 @@ struct PebbleAnimatedRenderView: View {
         .aspectRatio(PebbleOutlineGeometry.aspectRatio(for: size), contentMode: .fit)
         .onAppear {
             if model == nil {
-                model = PebbleSVGModel(svg: svg)
-                if model == nil {
-                    Logger(subsystem: "app.pbbls.ios", category: "pebble-render")
-                        .info("PebbleAnimatedRenderView: parse failed; using SVGView fallback")
-                }
-            }
-            if WobbleFlags.isEnabled, wobbleArt == nil, let model {
-                wobbleArt = WobbleRenderer.pebbleArt(svg: svg, model: model)
+                parse()
             }
             startEntryAnimation()
+            startAnimation()
+        }
+        // Twin of PebbleStaticRenderView's reactivity fix: if the host swaps
+        // the svg in place (stable identity, no re-appear), re-parse and
+        // replay the draw-on instead of keeping the previous artwork.
+        .onChange(of: svg) { _, _ in
+            parse()
             startAnimation()
         }
         .onDisappear {
             resetProgress()
             backdropIn = false
             pebbleIn = false
+        }
+    }
+
+    private func parse() {
+        model = PebbleSVGModel(svg: svg)
+        if model == nil {
+            Logger(subsystem: "app.pbbls.ios", category: "pebble-render")
+                .info("PebbleAnimatedRenderView: parse failed; using SVGView fallback")
+        }
+        if WobbleFlags.isEnabled, let model {
+            wobbleArt = WobbleRenderer.pebbleArt(svg: svg, model: model)
+        } else {
+            wobbleArt = nil
         }
     }
 

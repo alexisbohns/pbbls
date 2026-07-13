@@ -18,7 +18,6 @@ struct PebbleStaticRenderView: View {
 
     @State private var model: PebbleSVGModel?
     @State private var wobbleArt: WobblePebbleArt?
-    @State private var parseAttempted = false
 
     var body: some View {
         Group {
@@ -57,17 +56,26 @@ struct PebbleStaticRenderView: View {
             }
         }
         .accessibilityHidden(true)
-        .onAppear {
-            guard !parseAttempted else { return }
-            parseAttempted = true
-            model = PebbleSVGModel(svg: svg)
-            if model == nil {
-                Logger(subsystem: "app.pbbls.ios", category: "pebble-render")
-                    .info("PebbleStaticRenderView: parse failed; using SVGView fallback")
-            }
-            if WobbleFlags.isEnabled, let model {
-                wobbleArt = WobbleRenderer.pebbleArt(svg: svg, model: model)
-            }
+        // Re-parse whenever the composed svg changes, not just on first
+        // appearance: the Path reloads its list in place after an edit
+        // (stable row identity, no teardown), so a parse-once onAppear kept
+        // rendering the previous artwork. `initial: true` covers the first
+        // appearance synchronously, like onAppear did.
+        .onChange(of: svg, initial: true) { _, _ in
+            parse()
+        }
+    }
+
+    private func parse() {
+        model = PebbleSVGModel(svg: svg)
+        if model == nil {
+            Logger(subsystem: "app.pbbls.ios", category: "pebble-render")
+                .info("PebbleStaticRenderView: parse failed; using SVGView fallback")
+        }
+        if WobbleFlags.isEnabled, let model {
+            wobbleArt = WobbleRenderer.pebbleArt(svg: svg, model: model)
+        } else {
+            wobbleArt = nil
         }
     }
 }
