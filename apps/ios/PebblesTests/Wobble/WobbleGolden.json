@@ -1,0 +1,406 @@
+{
+  "comment": "Golden values for the SVG 1.1 §15.19 fractalNoise port (issue #555 wobble). Generated from the design playground's reference JS. Regenerate with the script in the PR description if the algorithm ever changes.",
+  "seed": 3,
+  "lcg": [
+    50421,
+    847425747,
+    572982925,
+    807347327,
+    1284843143,
+    1410633816,
+    303082632,
+    78585340,
+    81366475,
+    1726745833
+  ],
+  "latticePrefix": [
+    153,
+    245,
+    237,
+    129,
+    190,
+    122,
+    232,
+    177,
+    142,
+    97,
+    223,
+    234,
+    158,
+    233,
+    98,
+    53
+  ],
+  "gradientSamples": [
+    {
+      "channel": 0,
+      "index": 0,
+      "x": -0.23745309047699006,
+      "y": -0.9713990064967775
+    },
+    {
+      "channel": 1,
+      "index": 0,
+      "x": -0.9596285438852137,
+      "y": 0.28127043527670054
+    },
+    {
+      "channel": 0,
+      "index": 255,
+      "x": 0.6933422110959913,
+      "y": 0.7206084778244853
+    },
+    {
+      "channel": 1,
+      "index": 511,
+      "x": 0.8918272423909417,
+      "y": -0.4523761374446806
+    }
+  ],
+  "turbulence": [
+    {
+      "channel": 0,
+      "x": 0,
+      "y": 0,
+      "frequency": 0.024,
+      "octaves": 5,
+      "value": 0
+    },
+    {
+      "channel": 0,
+      "x": 10.5,
+      "y": 20.25,
+      "frequency": 0.024,
+      "octaves": 5,
+      "value": 0.18838218822234745
+    },
+    {
+      "channel": 0,
+      "x": 50,
+      "y": 50,
+      "frequency": 0.024,
+      "octaves": 5,
+      "value": 0.08299357848410477
+    },
+    {
+      "channel": 0,
+      "x": 123.456,
+      "y": 78.9,
+      "frequency": 0.024,
+      "octaves": 5,
+      "value": -0.02899392361449355
+    },
+    {
+      "channel": 0,
+      "x": 199,
+      "y": 3.75,
+      "frequency": 0.024,
+      "octaves": 5,
+      "value": 0.2232306418680975
+    },
+    {
+      "channel": 0,
+      "x": 260,
+      "y": 310,
+      "frequency": 0.024,
+      "octaves": 5,
+      "value": -0.0723071624679829
+    },
+    {
+      "channel": 1,
+      "x": 0,
+      "y": 0,
+      "frequency": 0.024,
+      "octaves": 5,
+      "value": 0
+    },
+    {
+      "channel": 1,
+      "x": 10.5,
+      "y": 20.25,
+      "frequency": 0.024,
+      "octaves": 5,
+      "value": 0.04551141080019032
+    },
+    {
+      "channel": 1,
+      "x": 50,
+      "y": 50,
+      "frequency": 0.024,
+      "octaves": 5,
+      "value": 0.36949423792173397
+    },
+    {
+      "channel": 1,
+      "x": 123.456,
+      "y": 78.9,
+      "frequency": 0.024,
+      "octaves": 5,
+      "value": 0.06305283995791416
+    },
+    {
+      "channel": 1,
+      "x": 199,
+      "y": 3.75,
+      "frequency": 0.024,
+      "octaves": 5,
+      "value": -0.1398656166041451
+    },
+    {
+      "channel": 1,
+      "x": 260,
+      "y": 310,
+      "frequency": 0.024,
+      "octaves": 5,
+      "value": 0.08156449977271564
+    },
+    {
+      "channel": 0,
+      "x": 0,
+      "y": 0,
+      "frequency": 0.024,
+      "octaves": 1,
+      "value": 0
+    },
+    {
+      "channel": 0,
+      "x": 10.5,
+      "y": 20.25,
+      "frequency": 0.024,
+      "octaves": 1,
+      "value": -0.0009228992146396026
+    },
+    {
+      "channel": 0,
+      "x": 50,
+      "y": 50,
+      "frequency": 0.024,
+      "octaves": 1,
+      "value": 0.04375626049253826
+    },
+    {
+      "channel": 0,
+      "x": 123.456,
+      "y": 78.9,
+      "frequency": 0.024,
+      "octaves": 1,
+      "value": -0.06831204223238257
+    },
+    {
+      "channel": 0,
+      "x": 199,
+      "y": 3.75,
+      "frequency": 0.024,
+      "octaves": 1,
+      "value": 0.21747182058393044
+    },
+    {
+      "channel": 0,
+      "x": 260,
+      "y": 310,
+      "frequency": 0.024,
+      "octaves": 1,
+      "value": 0.20324762266163648
+    },
+    {
+      "channel": 1,
+      "x": 0,
+      "y": 0,
+      "frequency": 0.024,
+      "octaves": 1,
+      "value": 0
+    },
+    {
+      "channel": 1,
+      "x": 10.5,
+      "y": 20.25,
+      "frequency": 0.024,
+      "octaves": 1,
+      "value": 0.10795596163599738
+    },
+    {
+      "channel": 1,
+      "x": 50,
+      "y": 50,
+      "frequency": 0.024,
+      "octaves": 1,
+      "value": 0.25191707396817964
+    },
+    {
+      "channel": 1,
+      "x": 123.456,
+      "y": 78.9,
+      "frequency": 0.024,
+      "octaves": 1,
+      "value": 0.13842217802614254
+    },
+    {
+      "channel": 1,
+      "x": 199,
+      "y": 3.75,
+      "frequency": 0.024,
+      "octaves": 1,
+      "value": -0.0715833518117924
+    },
+    {
+      "channel": 1,
+      "x": 260,
+      "y": 310,
+      "frequency": 0.024,
+      "octaves": 1,
+      "value": 0.07869911812015118
+    },
+    {
+      "channel": 0,
+      "x": 0,
+      "y": 0,
+      "frequency": 0.05,
+      "octaves": 3,
+      "value": 0
+    },
+    {
+      "channel": 0,
+      "x": 10.5,
+      "y": 20.25,
+      "frequency": 0.05,
+      "octaves": 3,
+      "value": 0.34596219673827633
+    },
+    {
+      "channel": 0,
+      "x": 50,
+      "y": 50,
+      "frequency": 0.05,
+      "octaves": 3,
+      "value": 0.23825661504920304
+    },
+    {
+      "channel": 0,
+      "x": 123.456,
+      "y": 78.9,
+      "frequency": 0.05,
+      "octaves": 3,
+      "value": 0.2805668878765744
+    },
+    {
+      "channel": 0,
+      "x": 199,
+      "y": 3.75,
+      "frequency": 0.05,
+      "octaves": 3,
+      "value": -0.1779311079461383
+    },
+    {
+      "channel": 0,
+      "x": 260,
+      "y": 310,
+      "frequency": 0.05,
+      "octaves": 3,
+      "value": -0.12108509786251015
+    },
+    {
+      "channel": 1,
+      "x": 0,
+      "y": 0,
+      "frequency": 0.05,
+      "octaves": 3,
+      "value": 0
+    },
+    {
+      "channel": 1,
+      "x": 10.5,
+      "y": 20.25,
+      "frequency": 0.05,
+      "octaves": 3,
+      "value": -0.06492939427224079
+    },
+    {
+      "channel": 1,
+      "x": 50,
+      "y": 50,
+      "frequency": 0.05,
+      "octaves": 3,
+      "value": 0.2403259677200646
+    },
+    {
+      "channel": 1,
+      "x": 123.456,
+      "y": 78.9,
+      "frequency": 0.05,
+      "octaves": 3,
+      "value": -0.019156743237803496
+    },
+    {
+      "channel": 1,
+      "x": 199,
+      "y": 3.75,
+      "frequency": 0.05,
+      "octaves": 3,
+      "value": 0.11171485078176954
+    },
+    {
+      "channel": 1,
+      "x": 260,
+      "y": 310,
+      "frequency": 0.05,
+      "octaves": 3,
+      "value": 0.03479009424787066
+    }
+  ],
+  "displaced": [
+    {
+      "x": 10,
+      "y": 10,
+      "amplitude": 18,
+      "frequency": 0.024,
+      "octaves": 5,
+      "xOut": 9.750638084807921,
+      "yOut": 11.343723348810332
+    },
+    {
+      "x": 100,
+      "y": 100,
+      "amplitude": 18,
+      "frequency": 0.024,
+      "octaves": 5,
+      "xOut": 99.56741289200951,
+      "yOut": 97.90535533528978
+    },
+    {
+      "x": 150.5,
+      "y": 42.25,
+      "amplitude": 18,
+      "frequency": 0.024,
+      "octaves": 5,
+      "xOut": 147.9840260570191,
+      "yOut": 41.67115151705082
+    },
+    {
+      "x": 199,
+      "y": 199,
+      "amplitude": 18,
+      "frequency": 0.024,
+      "octaves": 5,
+      "xOut": 200.84898144369353,
+      "yOut": 199.0452463683827
+    },
+    {
+      "x": 130,
+      "y": 155,
+      "amplitude": 27.900000000000002,
+      "frequency": 0.015483870967741935,
+      "octaves": 5,
+      "xOut": 122.57984429447768,
+      "yOut": 158.4086809277309
+    },
+    {
+      "x": 42.5,
+      "y": 297.75,
+      "amplitude": 27.900000000000002,
+      "frequency": 0.015483870967741935,
+      "octaves": 5,
+      "xOut": 41.74204120998505,
+      "yOut": 296.58008636449443
+    }
+  ]
+}
