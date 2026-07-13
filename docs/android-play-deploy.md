@@ -118,10 +118,15 @@ This is the credential CI uses to publish.
 2. Google Cloud Console → **IAM & Admin → Service Accounts → Create service
    account** (e.g. `github-play-publisher`). No project-level roles needed.
    Then **Keys → Add key → JSON** and download the file.
-3. Back in Play Console → **Users and permissions → Invite new users** → enter
+3. **Enable the Play API in that project:** Google Cloud Console → **APIs &
+   Services → Library** → search **"Google Play Android Developer API"** →
+   **Enable**. Miss this and the publish step fails with *"…API has not been used
+   in project … or it is disabled"* — reusing an existing Cloud project (e.g. your
+   Supabase one) does *not* enable it for you.
+4. Back in Play Console → **Users and permissions → Invite new users** → enter
    the service account's email → grant **app access to `app.pbbls.android`**
    with permission to **Release to testing tracks** (Release manager is fine).
-4. Add the **entire JSON file contents** as a repo secret named
+5. Add the **entire JSON file contents** as a repo secret named
    **`PLAY_SERVICE_ACCOUNT_JSON`**.
 
 Give it a few minutes to propagate.
@@ -141,9 +146,10 @@ Give it a few minutes to propagate.
 | Symptom | Cause / fix |
 |---|---|
 | Upload rejected: "not signed" / "unsigned" | A `KEYSTORE_*` secret is missing or mistyped — check the run's *Decode upload keystore* and *Assemble signed release AAB* steps ran. |
-| "Version code N has already been used" | Don't **re-run** a release run (same `run_number` → same `versionCode`). Push a new commit instead — a fresh run gets a higher code. |
+| "Version code N has already been used" | That `versionCode` already reached Play. Re-running a run reuses its `run_number`, so push a new commit for a higher one. (Re-running a run whose publish *failed* before it reached Play is fine — the code was never consumed.) |
+| Publish step: "Google Play Android Developer API has not been used in project … or it is disabled" | Enable the **Google Play Android Developer API** in the Cloud project the service account belongs to (the error links straight to it), wait a few minutes, then re-run. See step 5.3. |
 | First upload errors about "existing users can't upgrade" | The manual seed (step 4) hasn't happened yet — the API can't create the first release. |
-| Publish step: "caller does not have permission" | Service account not granted app access in Play Console (step 5.3), or still propagating — wait a few minutes. |
+| Publish step: "caller does not have permission" | Service account not granted app access in Play Console (step 5.4), or still propagating — wait a few minutes. |
 | Nothing publishes, job green | `PLAY_SERVICE_ACCOUNT_JSON` not set yet — the publish step self-skips by design. |
 
 ## Security notes

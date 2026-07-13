@@ -6,9 +6,9 @@ backend. See `CLAUDE.md` for conventions and
 `docs/superpowers/specs/2026-07-10-android-bootstrap-design.md` for the milestone
 design.
 
-At this stage the app builds, lints, unit-tests, and launches to a debug preview
-of the design system (theme tokens, typography, components, the Rive logo). The
-auth funnel and Path timeline arrive in later sub-projects.
+The bootstrap milestone (M38) has shipped: the app builds, lints, unit-tests, and
+runs the entry funnel (Welcome → Auth → Onboarding) and the read-only Path
+timeline against live Supabase. Create / edit / detail / stats are not built yet.
 
 ## Prerequisites
 
@@ -52,8 +52,25 @@ Run on a device/emulator from Android Studio (Run ▶), or:
 ./gradlew installDebug         # install on a connected device
 ```
 
+## Releasing to Google Play (internal testing)
+
+Merges to `main` that touch `apps/android/**` are built into a **signed release
+AAB** and published to the **Play internal testing** track automatically by
+`.github/workflows/android-release.yml` — the maintainer's phone then updates via
+the Play Store, no manual steps. To push a branch to the phone before merging,
+label its PR **`deploy-beta`**; for an ad-hoc build use the workflow's **Run
+workflow** button.
+
+Release signing reads the upload keystore from CI secrets via the same
+env-var / `secrets.properties` chain as the Supabase config, and `versionCode`
+derives from the CI run number. The one-time console setup (upload keystore, Play
+service account, seeding the first release by hand) lives in the
+[`docs/android-play-deploy.md`](../../docs/android-play-deploy.md) runbook.
+
 ## Installing without a local SDK (CI artifact)
 
+The **debug** APK below is for quick PR-time side-loading and UI review; the Play
+internal-testing track above is the day-to-day path for the maintainer's device.
 The shared dev container has no Android SDK, so the debug APK is produced by CI.
 On every pull request touching `apps/android/**`, the **Android** workflow
 (`.github/workflows/android.yml`) runs ktlint + unit tests + `assembleDebug` and
