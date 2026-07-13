@@ -39,7 +39,17 @@ struct PebbleOutlineBackdropView: View {
 
     var body: some View {
         Group {
-            if let svg = coloredSvg {
+            if WobbleFlags.isEnabled, let art = WobbleRenderer.backdropArt(size: size, polarity: polarity) {
+                // Wobble experiment (#555): native fill of the displaced
+                // silhouette. Asset or parse failure falls through to the
+                // SVGView branch below.
+                WobbledBackdropShape(art: art)
+                    .fill(
+                        Color(hex: fillHex) ?? .clear,
+                        style: FillStyle(eoFill: art.usesEvenOddFill)
+                    )
+                    .aspectRatio(art.viewBox.width / art.viewBox.height, contentMode: .fit)
+            } else if let svg = coloredSvg {
                 SVGView(string: svg)
                     .aspectRatio(contentMode: .fit)
             } else {

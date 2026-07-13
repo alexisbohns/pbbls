@@ -23,6 +23,17 @@ struct GlyphCanvasView: View {
             // Already-committed strokes
             let scale = size.width / 200.0
             for stroke in committedStrokes {
+                if WobbleFlags.isEnabled,
+                   let ink = WobbleRenderer.glyphInk(d: stroke.d, width: stroke.width) {
+                    // Wobble experiment (#555): committed strokes take the
+                    // wobbled ink; the in-progress stroke below stays raw so
+                    // drag latency is untouched.
+                    ctx.fill(
+                        Path(ink).applying(CGAffineTransform(scaleX: scale, y: scale)),
+                        with: .color(strokeColor)
+                    )
+                    continue
+                }
                 var path = SVGPath.path(from: stroke.d)
                 path = path.applying(CGAffineTransform(scaleX: scale, y: scale))
                 ctx.stroke(

@@ -52,8 +52,19 @@ struct PebbleRow: View {
                     fillHex: frameColors?.fillHex ?? Color.accent.primaryHex,
                     fillOpacity: frameColors?.fillOpacity ?? 1
                 )
-                PebbleRenderView(svg: svg, strokeColor: frameColors?.strokeHex ?? Color.accent.primaryHex)
+                if WobbleFlags.isEnabled {
+                    // Wobble experiment (#555): route through the model-based
+                    // static renderer, which self-falls-back to SVGView.
+                    PebbleStaticRenderView(
+                        svg: svg,
+                        strokeColor: Color(hex: frameColors?.strokeHex ?? Color.accent.primaryHex) ?? Color.accent.primary,
+                        strokeColorHex: frameColors?.strokeHex ?? Color.accent.primaryHex
+                    )
                     .scaleEffect(PebbleOutlineGeometry.pebbleScale(for: pebble.valence.sizeGroup))
+                } else {
+                    PebbleRenderView(svg: svg, strokeColor: frameColors?.strokeHex ?? Color.accent.primaryHex)
+                        .scaleEffect(PebbleOutlineGeometry.pebbleScale(for: pebble.valence.sizeGroup))
+                }
             }
             .aspectRatio(PebbleOutlineGeometry.aspectRatio(for: pebble.valence.sizeGroup), contentMode: .fit)
             .frame(width: 40, height: 40)

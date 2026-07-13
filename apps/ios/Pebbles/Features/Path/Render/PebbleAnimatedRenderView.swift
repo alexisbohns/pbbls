@@ -28,6 +28,7 @@ struct PebbleAnimatedRenderView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var model: PebbleSVGModel?
+    @State private var wobbleArt: WobblePebbleArt?
     @State private var glyphProgress: Double = 0
     @State private var shapeProgress: Double = 0
     @State private var fossilProgress: Double = 0
@@ -54,6 +55,9 @@ struct PebbleAnimatedRenderView: View {
                         .info("PebbleAnimatedRenderView: parse failed; using SVGView fallback")
                 }
             }
+            if WobbleFlags.isEnabled, wobbleArt == nil, let model {
+                wobbleArt = WobbleRenderer.pebbleArt(svg: svg, model: model)
+            }
             startEntryAnimation()
             startAnimation()
         }
@@ -68,6 +72,10 @@ struct PebbleAnimatedRenderView: View {
     private var pebbleLayer: some View {
         if let model, let timings = PebbleAnimationTimings.forVersion(renderVersion), !reduceMotion {
             animatedBody(model: model, timings: timings)
+        } else if let model, let wobbleArt {
+            // Wobble experiment (#555) under Reduce Motion or unknown timings:
+            // static wobbled ink — no reveal, no timers.
+            staticWobbledBody(model: model, art: wobbleArt)
         } else {
             PebbleRenderView(svg: svg, strokeColor: strokeColorHex)
         }
@@ -91,15 +99,66 @@ struct PebbleAnimatedRenderView: View {
 
     @ViewBuilder
     private func animatedBody(model: PebbleSVGModel, timings: PebbleAnimationTimings.Timings) -> some View {
-        ZStack {
-            ForEach(Array(model.layers.enumerated()), id: \.offset) { _, layer in
-                LayerShape(layer: layer, viewBox: model.viewBox)
-                    .trim(from: 0, to: progress(for: layer.kind))
-                    .stroke(stroke, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
-                    .opacity(layer.opacity)
+        Group {
+            if let wobbleArt {
+                // Wobble experiment (#555): the leaky filled ink cannot be
+                // trim-stroked, so the draw-on becomes a fat trimmed mask
+                // stroking along the wobbled centerline — same progress
+                // states and per-layer timings as the classic path below.
+                GeometryReader { proxy in
+                    let maskWidth = WobbleMask.lineWidth(viewBox: model.viewBox, frame: proxy.size)
+                    ZStack {
+                        ForEach(Array(model.layers.enumerated()), id: \.offset) { index, layer in
+                            WobbledPathShape(
+                                path: wobbleArt.layers[index].ink,
+                                layerTransform: layer.transform,
+                                viewBox: model.viewBox
+                            )
+                            .fill(stroke)
+                            .mask {
+                                WobbledPathShape(
+                                    path: wobbleArt.layers[index].centerline,
+                                    layerTransform: layer.transform,
+                                    viewBox: model.viewBox
+                                )
+                                .trim(from: 0, to: progress(for: layer.kind))
+                                .stroke(
+                                    Color.white,
+                                    style: StrokeStyle(lineWidth: maskWidth, lineCap: .round, lineJoin: .round)
+                                )
+                            }
+                            .opacity(layer.opacity)
+                        }
+                    }
+                }
+            } else {
+                ZStack {
+                    ForEach(Array(model.layers.enumerated()), id: \.offset) { _, layer in
+                        LayerShape(layer: layer, viewBox: model.viewBox)
+                            .trim(from: 0, to: progress(for: layer.kind))
+                            .stroke(stroke, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
+                            .opacity(layer.opacity)
+                    }
+                }
             }
         }
         .scaleEffect(settleScale)
+        .accessibilityHidden(true)
+    }
+
+    @ViewBuilder
+    private func staticWobbledBody(model: PebbleSVGModel, art: WobblePebbleArt) -> some View {
+        ZStack {
+            ForEach(Array(model.layers.enumerated()), id: \.offset) { index, layer in
+                WobbledPathShape(
+                    path: art.layers[index].ink,
+                    layerTransform: layer.transform,
+                    viewBox: model.viewBox
+                )
+                .fill(stroke)
+                .opacity(layer.opacity)
+            }
+        }
         .accessibilityHidden(true)
     }
 

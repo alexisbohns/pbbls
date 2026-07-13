@@ -18,6 +18,16 @@ struct GlyphThumbnail: View {
         Canvas { ctx, size in
             let scale = size.width / 200.0
             for stroke in strokes {
+                if WobbleFlags.isEnabled,
+                   let ink = WobbleRenderer.glyphInk(d: stroke.d, width: stroke.width) {
+                    // Wobble experiment (#555): thickness is baked into the
+                    // filled outline; scale it like the stroked path below.
+                    ctx.fill(
+                        Path(ink).applying(CGAffineTransform(scaleX: scale, y: scale)),
+                        with: .color(strokeColor)
+                    )
+                    continue
+                }
                 var path = SVGPath.path(from: stroke.d)
                 path = path.applying(CGAffineTransform(scaleX: scale, y: scale))
                 ctx.stroke(

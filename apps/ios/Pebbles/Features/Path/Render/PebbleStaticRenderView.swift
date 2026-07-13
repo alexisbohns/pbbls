@@ -17,21 +17,38 @@ struct PebbleStaticRenderView: View {
     let strokeColorHex: String
 
     @State private var model: PebbleSVGModel?
+    @State private var wobbleArt: WobblePebbleArt?
     @State private var parseAttempted = false
 
     var body: some View {
         Group {
             if let model {
                 GeometryReader { proxy in
-                    let lineWidth = PebbleStroke.lineWidth(viewBox: model.viewBox, frame: proxy.size)
-                    ZStack {
-                        ForEach(Array(model.layers.enumerated()), id: \.offset) { _, layer in
-                            LayerShape(layer: layer, viewBox: model.viewBox)
-                                .stroke(
-                                    strokeColor,
-                                    style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round)
+                    if let wobbleArt {
+                        // Wobble experiment (#555): geometry-true filled ink —
+                        // thickness is baked into the outline, not stroked.
+                        ZStack {
+                            ForEach(Array(model.layers.enumerated()), id: \.offset) { index, layer in
+                                WobbledPathShape(
+                                    path: wobbleArt.layers[index].ink,
+                                    layerTransform: layer.transform,
+                                    viewBox: model.viewBox
                                 )
+                                .fill(strokeColor)
                                 .opacity(layer.opacity)
+                            }
+                        }
+                    } else {
+                        let lineWidth = PebbleStroke.lineWidth(viewBox: model.viewBox, frame: proxy.size)
+                        ZStack {
+                            ForEach(Array(model.layers.enumerated()), id: \.offset) { _, layer in
+                                LayerShape(layer: layer, viewBox: model.viewBox)
+                                    .stroke(
+                                        strokeColor,
+                                        style: StrokeStyle(lineWidth: lineWidth, lineCap: .round, lineJoin: .round)
+                                    )
+                                    .opacity(layer.opacity)
+                            }
                         }
                     }
                 }
@@ -47,6 +64,9 @@ struct PebbleStaticRenderView: View {
             if model == nil {
                 Logger(subsystem: "app.pbbls.ios", category: "pebble-render")
                     .info("PebbleStaticRenderView: parse failed; using SVGView fallback")
+            }
+            if WobbleFlags.isEnabled, let model {
+                wobbleArt = WobbleRenderer.pebbleArt(svg: svg, model: model)
             }
         }
     }
