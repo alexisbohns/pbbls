@@ -52,6 +52,30 @@ android {
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"${secret("SUPABASE_ANON_KEY")}\"")
     }
 
+    // Release signing for Play distribution. Signing material flows the same way
+    // secrets do (D8): the release CI job decodes the base64 upload keystore to a
+    // file and passes KEYSTORE_FILE / KEYSTORE_PASSWORD / KEY_ALIAS / KEY_PASSWORD
+    // as env vars; a local release build could instead put them in
+    // secrets.properties. When no keystore is present the config stays empty and
+    // the release build is left UNSIGNED — the same fail-soft contract as the
+    // Supabase secrets, so a fork (or a run before the keystore secret exists)
+    // still builds green. Only a run with the secrets produces an installable,
+    // Play-uploadable AAB.
+    val keystorePath = secret("KEYSTORE_FILE").ifBlank { "upload-keystore.jks" }
+    val keystoreFile = rootProject.file(keystorePath)
+    val hasKeystore = keystoreFile.exists() && secret("KEYSTORE_PASSWORD").isNotBlank()
+
+    signingConfigs {
+        if (hasKeystore) {
+            create("release") {
+                storeFile = keystoreFile
+                storePassword = secret("KEYSTORE_PASSWORD")
+                keyAlias = secret("KEY_ALIAS")
+                keyPassword = secret("KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -59,6 +83,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            // Attach the upload key only when it was configured above; a keyless
+            // build produces an unsigned AAB rather than failing configuration.
+            if (hasKeystore) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 

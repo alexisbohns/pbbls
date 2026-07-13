@@ -1,0 +1,108 @@
+name: Android Release
+
+# Builds a SIGNED release AAB and publishes it to Google Play internal testing,
+# so the maintainer's phone auto-updates via the Play Store instead of the manual
+# download/unzip/upload/verify/install loop.
+#
+# Three ways in:
+#   • push to main (apps/android/**)  → auto-publish to internal testing
+#   • a PR labelled `deploy-beta`     → publish THAT branch to the phone (opt-in)
+#   • manual "Run workflow"           → workflow_dispatch, pick any branch
+#
+# The AAB is ALWAYS uploaded as a workflow artifact too. The Play Publishing API
+# refuses to create an app's first-ever release, so the very first upload must be
+# done by hand in the Console — download this artifact once and upload it there to
+# seed internal testing. After that, every run publishes automatically.
+#
+# Bootstrap is fail-soft: before the keystore / service-account secrets exist the
+# job still runs — it just produces an (unsigned) AAB artifact and skips the
+# publish step — so nothing goes red while the one-time console setup is pending.
+# See docs/android-play-deploy.md for the full runbook.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/android/**'
+      - '.github/workflows/android-release.yml'
+  pull_request:
+    types: [labeled, synchronize]
+    paths:
+      - 'apps/android/**'
+  workflow_dispatch:
+
+concurrency:
+  group: android-release-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: bundle · sign · publish (internal)
+    runs-on: ubuntu-latest
+    # PRs only build when they carry the `deploy-beta` label; push and manual
+    # dispatch always run. (A `labeled` event for any other label starts the
+    # workflow but this guard skips the job.)
+    if: >-
+      github.event_name != 'pull_request' ||
+      contains(github.event.pull_request.labels.*.name, 'deploy-beta')
+    env:
+      # Mirror the two "does the secret exist yet?" values into env so later steps
+      # can gate on them — a step `if:` can read `env.*` but not `secrets.*`.
+      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+      PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          validate-wrappers: true
+
+      - name: Decode upload keystore
+        if: ${{ env.KEYSTORE_BASE64 != '' }}
+        working-directory: apps/android
+        run: echo "$KEYSTORE_BASE64" | base64 -d > upload-keystore.jks
+
+      # bundleRelease reads the Supabase config (baked into BuildConfig, same as
+      # the debug APK) and the upload key. versionCode/versionName derive from
+      # GITHUB_RUN_NUMBER — monotonic within this workflow, which is exactly what
+      # Play requires (every upload must have a strictly higher versionCode).
+      - name: Assemble signed release AAB
+        working-directory: apps/android
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+          KEYSTORE_FILE: upload-keystore.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: ./gradlew bundleRelease
+
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-aab
+          path: apps/android/app/build/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+
+      # Skips until the Play service-account secret exists, so the pre-setup runs
+      # still hand you the AAB artifact to seed the first release manually without
+      # failing the job. Once the secret is set, every run publishes to internal.
+      - name: Publish to Play internal testing
+        if: ${{ env.PLAY_SERVICE_ACCOUNT_JSON != '' }}
+        uses: r0adkll/upload-google-play@v1
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: app.pbbls.android
+          releaseFiles: apps/android/app/build/outputs/bundle/release/app-release.aab
+          track: internal
+          status: completed
