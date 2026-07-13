@@ -27,6 +27,11 @@ build
 .DS_Store
 *.pem
 
+# android release signing — never commit the upload keystore or its passwords
+*.jks
+*.keystore
+keystore.properties
+
 # debug
 npm-debug.log*
 yarn-debug.log*
