@@ -9,7 +9,8 @@ private final class WobbleFixtureProbe: NSObject {}
 
 /// Decoded `WobbleGolden.json` — reference values generated from the issue
 /// #555 design playground's JS implementation of the SVG 1.1 §15.19 noise.
-/// Regeneration script: see the branch/PR description for issue #555.
+/// Regenerate with `node apps/ios/Scripts/generate-wobble-golden.mjs
+/// apps/ios/PebblesTests/Wobble/WobbleGolden.json` — never edit by hand.
 struct WobbleGolden: Decodable {
     struct GradientSample: Decodable {
         let channel: Int
