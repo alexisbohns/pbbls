@@ -11,7 +11,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.features.path.models.EmotionPalette
 import app.pbbls.android.features.path.models.Valence
 import app.pbbls.android.features.path.models.ValenceSizeGroup
-import app.pbbls.android.features.path.render.PebbleSvg
+import app.pbbls.android.features.path.render.PebbleStaticRender
 import app.pbbls.android.theme.PebblesTheme
 
 /**
@@ -38,9 +38,15 @@ fun PebbleReadBanner(
         }
     Box(modifier.fillMaxWidth().heightIn(min = 120.dp), contentAlignment = Alignment.Center) {
         if (renderSvg != null) {
-            // PebbleSvg fit-scales + centers, so a wide/short box lets height
-            // dominate: the pebble sits at heightDp, centered.
-            PebbleSvg(svg = renderSvg, strokeHex = strokeHex, modifier = Modifier.fillMaxWidth().height(heightDp))
+            // PebbleStaticRender fit-scales + centers, so a wide/short box lets
+            // height dominate: the pebble sits at heightDp, centered. Tracing at
+            // the outline weight keeps the glyph consistent with the outline
+            // (and with the Path row), matching custom and domain glyphs.
+            PebbleStaticRender(
+                svg = renderSvg,
+                strokeHex = strokeHex,
+                modifier = Modifier.fillMaxWidth().height(heightDp),
+            )
         }
     }
 }

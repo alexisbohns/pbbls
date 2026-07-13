@@ -47,7 +47,10 @@ fun PebbleThumbnail(
                 modifier = Modifier.fillMaxSize(),
             )
             if (pebble.renderSvg != null) {
-                PebbleSvg(
+                // Traces every layer at the outline weight so the glyph reads the
+                // same thickness as the outline (custom == domain glyphs); falls
+                // back to raw AndroidSVG on parse failure.
+                PebbleStaticRender(
                     svg = pebble.renderSvg,
                     strokeHex = frame.strokeHex,
                     modifier =
