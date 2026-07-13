@@ -46,9 +46,12 @@ class PebbleSvgModelTest {
     }
 
     @Test
-    fun `extracts the three layers in document order with their opacity`() {
+    fun `extracts the three layers in document order with their kind and opacity`() {
         val model = parsePebbleSvg(composed)!!
         assertEquals(3, model.layers.size)
+        assertEquals(PebbleSvgModel.Layer.Kind.SHAPE, model.layers[0].kind)
+        assertEquals(PebbleSvgModel.Layer.Kind.FOSSIL, model.layers[1].kind)
+        assertEquals(PebbleSvgModel.Layer.Kind.GLYPH, model.layers[2].kind)
         assertEquals(1f, model.layers[0].opacity, EPS) // shape
         assertEquals(0.3f, model.layers[1].opacity, EPS) // fossil
         assertEquals(1f, model.layers[2].opacity, EPS) // glyph
@@ -64,16 +67,27 @@ class PebbleSvgModelTest {
     }
 
     @Test
-    fun `flattens nested glyph transforms into a single affine`() {
+    fun `splits the glyph transform into the layer's own affine and the inner one`() {
+        // The layer's own <g transform> stays on Layer.transform (the renderer —
+        // and the wobble port, which needs the glyph's raw slot space — applies
+        // it separately); only the inner normalization <g> lands on the path.
         val model = parsePebbleSvg(composed)!!
-        val t =
+        val layer = model.layers[2].transform
+        assertEquals(0.7f, layer.a, EPS)
+        assertEquals(30f, layer.e, EPS)
+        assertEquals(30f, layer.f, EPS)
+        val inner =
             model.layers[2]
                 .paths
                 .single()
                 .transform
-        // outer translate(30,30) scale(0.7) ∘ inner translate(10,20) scale(0.5):
+        assertEquals(0.5f, inner.a, EPS)
+        assertEquals(10f, inner.e, EPS)
+        assertEquals(20f, inner.f, EPS)
+        // Their composition is the flattened transform the renderer bakes in:
         //   scale = 0.7 * 0.5 = 0.35
         //   e = 0.7*10 + 30 = 37 ; f = 0.7*20 + 30 = 44
+        val t = layer.concat(inner)
         assertEquals(0.35f, t.a, EPS)
         assertEquals(0.35f, t.d, EPS)
         assertEquals(0f, t.b, EPS)
