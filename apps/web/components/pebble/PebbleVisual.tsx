@@ -9,6 +9,7 @@ import { EMOTIONS } from "@/lib/config/emotions"
 import { useEmotionLocalized } from "@/lib/i18n"
 import { useEmotionPalettes } from "@/lib/data/useEmotionPalettes"
 import { usePebbleVisual } from "@/lib/hooks/usePebbleVisual"
+import { WOBBLE_ENABLED, wobblePebbleSvg } from "@/lib/wobble"
 import { cn } from "@/lib/utils"
 
 type PebbleVisualProps = {
@@ -35,7 +36,10 @@ export function PebbleVisual({
   // seed pebbles) where no render exists yet.
   const fallback = usePebbleVisual(pebble, mark, tier)
   const isServerRender = pebble.render_svg !== null
-  const svg = pebble.render_svg ?? fallback.svg
+  const rawSvg = pebble.render_svg ?? fallback.svg
+  // Petroglyph wobble (#555): dev-only, content-cached. Rewrites the composed
+  // SVG's stroked paths into leaky filled ink; compiled out in production.
+  const svg = WOBBLE_ENABLED ? wobblePebbleSvg(rawSvg) : rawSvg
 
   const t = useTranslations("pebble")
   const tCommon = useTranslations("common")

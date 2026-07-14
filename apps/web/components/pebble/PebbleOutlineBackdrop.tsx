@@ -1,5 +1,6 @@
 import { getOutline } from "@/lib/config/pebble-outlines"
 import type { Size, Polarity } from "@/lib/config/pebble-geometry"
+import { WOBBLE_ENABLED, wobbleBackdrop } from "@/lib/wobble"
 import { cn } from "@/lib/utils"
 
 type PebbleOutlineBackdropProps = {
@@ -29,6 +30,10 @@ export function PebbleOutlineBackdrop({
   className,
 }: PebbleOutlineBackdropProps) {
   const { path, width, height, fillRule } = getOutline(size, polarity)
+  // Petroglyph wobble (#555): dev-only closed-contour displacement of the
+  // silhouette. `fillRule` is untouched, so the evenodd `large-lowlight` hole
+  // still carves. Falls back to the flat path on parse failure.
+  const wobbled = WOBBLE_ENABLED ? wobbleBackdrop(path, width, height) : null
   return (
     <svg
       aria-hidden
@@ -37,7 +42,7 @@ export function PebbleOutlineBackdrop({
       className={cn("size-full", className)}
       style={{ opacity: fillOpacity }}
     >
-      <path d={path} fill={fillColor} fillRule={fillRule} />
+      <path d={wobbled ?? path} fill={fillColor} fillRule={fillRule} />
     </svg>
   )
 }
