@@ -77,6 +77,11 @@ android {
     }
 
     buildTypes {
+        debug {
+            // The petroglyph wobble experiment (#555) is always on in debug —
+            // the analog of iOS WobbleFlags' `#if DEBUG`.
+            buildConfigField("boolean", "WOBBLE_ENABLED", "true")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
@@ -88,6 +93,17 @@ android {
             if (hasKeystore) {
                 signingConfig = signingConfigs.getByName("release")
             }
+            // Wobble in release is opt-in per build via the D8 env/secrets
+            // chain: android-release.yml sets WOBBLE_ENABLED=true so the
+            // maintainer's Play-updated phone shows the experiment (the Android
+            // device loop has no debug channel, unlike iOS/Xcode — see the
+            // 2026-07-14 decisions-log entry). Any other release build (fork,
+            // local, a future production pipeline) stays wobble-free.
+            buildConfigField(
+                "boolean",
+                "WOBBLE_ENABLED",
+                if (secret("WOBBLE_ENABLED").equals("true", ignoreCase = true)) "true" else "false",
+            )
         }
     }
 

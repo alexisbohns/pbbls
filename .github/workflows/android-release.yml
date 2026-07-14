@@ -85,6 +85,11 @@ jobs:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          # Bake the petroglyph wobble experiment (#555) into internal-testing
+          # builds — the maintainer's only on-device channel (2026-07-14
+          # decisions-log entry). Flip to 'false' (or delete) before promoting
+          # a build to any public track.
+          WOBBLE_ENABLED: 'true'
         run: ./gradlew bundleRelease
 
       - name: Upload AAB artifact
