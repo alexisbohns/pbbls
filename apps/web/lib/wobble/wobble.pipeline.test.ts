@@ -147,4 +147,26 @@ describe("composed pebble SVG rewrite", () => {
     const plain = `<svg viewBox="0 0 10 10"><g id="x"></g></svg>`
     expect(wobblePebbleSvg(plain)).toBe(plain)
   })
+
+  it("traces glyph strokes at the outline weight regardless of authored width", () => {
+    // Custom glyphs are authored heavier than the outline; the wobble must
+    // ignore the authored stroke-width and trace at OUTLINE_WIDTH (iOS #511 /
+    // Android #552), so varying only the authored width leaves the ink identical.
+    const make = (w: number) =>
+      `<svg viewBox="0 0 200 200"><g id="glyph"><g transform="translate(10, 10) scale(0.5)"><path id="g" d="M20 20 L180 180" stroke="currentColor" stroke-width="${w}" stroke-linecap="round"/></g></g></svg>`
+    const thin = /id="g" d="([^"]+)"/.exec(wobblePebbleSvg(make(6)))![1]
+    const heavy = /id="g" d="([^"]+)"/.exec(wobblePebbleSvg(make(24)))![1]
+    expect(heavy).toBe(thin)
+  })
+
+  it("divides the outline weight by the group scale (transform-aware)", () => {
+    // Same glyph path and canonical params at two transform scales differ only
+    // in half-width (OUTLINE_WIDTH/2/scale), so the ink must differ — proving the
+    // scale is applied rather than ignored.
+    const at = (s: number) =>
+      `<svg viewBox="0 0 200 200"><g id="glyph"><g transform="scale(${s})"><path id="g" d="M0 100 L200 100" stroke="currentColor" stroke-width="6"/></g></g></svg>`
+    const half = /id="g" d="([^"]+)"/.exec(wobblePebbleSvg(at(0.5)))![1]
+    const full = /id="g" d="([^"]+)"/.exec(wobblePebbleSvg(at(1)))![1]
+    expect(half).not.toBe(full)
+  })
 })

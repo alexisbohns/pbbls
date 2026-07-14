@@ -14,6 +14,14 @@ import { SVGTurbulence } from "./turbulence"
 // One noise field for the whole app: the static look is seed 3 (§1).
 const noise = new SVGTurbulence(SEED)
 
+// The single weight every composed-pebble layer is traced at, in canvas units —
+// mirrors the `6` on every shape path in the engine templates (and iOS
+// `PebbleStroke.outlineWidth` / Android `PebbleStroke.OUTLINE_WIDTH`). Custom
+// carved glyphs are authored heavier than the outline, so honoring each layer's
+// own stroke-width renders the glyph too thick (iOS PR #511 / Android #552);
+// tracing every layer at this weight makes glyph == outline everywhere.
+const OUTLINE_WIDTH = 6
+
 // ── Content-keyed caches ────────────────────────────────────────────
 
 type Cache<T> = {
@@ -117,11 +125,13 @@ export function wobbleBackdrop(path: string, width: number, height: number): str
 
 /**
  * Rewrites a composed pebble SVG string, replacing each drawn `<path>` with its
- * wobbled form: stroked paths become leaky filled ink, filled regions (fossil)
- * get closed-contour displacement. The glyph subtree (`<g id="glyph">`) wobbles
- * with canonical params in its own slot space (matching iOS's glyph rule); all
- * other geometry uses §2.1-scaled canvas params. Falls back to the original SVG
- * on any failure. Content-keyed by the whole SVG string.
+ * wobbled form: stroked paths become leaky filled ink at the uniform outline
+ * weight (OUTLINE_WIDTH, ignoring each layer's authored stroke-width so custom
+ * glyphs stop rendering too thick — iOS PR #511 / Android #552), filled regions
+ * (fossil) get closed-contour displacement. The glyph subtree (`<g id="glyph">`)
+ * wobbles with canonical params in its own slot space (matching iOS's glyph
+ * rule); all other geometry uses §2.1-scaled canvas params. Falls back to the
+ * original SVG on any failure. Content-keyed by the whole SVG string.
  */
 export function wobblePebbleSvg(svg: string): string {
   const cached = pebbleCache.get(svg)
@@ -146,6 +156,10 @@ function rewritePebbleSvg(svg: string): string {
   let lastIndex = 0
   let depth = 0
   let glyphDepth = -1
+  // Accumulated uniform scale of the enclosing `<g transform>` stack, so the
+  // outline weight can be expressed in the layer's own (pre-transform) units.
+  let scale = 1
+  const scaleStack: number[] = []
   let match: RegExpExecArray | null
 
   while ((match = tagRe.exec(svg)) !== null) {
@@ -154,13 +168,16 @@ function rewritePebbleSvg(svg: string): string {
     if (tag.startsWith("</g")) {
       if (depth === glyphDepth) glyphDepth = -1
       depth -= 1
+      scale = scaleStack.pop() ?? 1
       out += tag
     } else if (tag.startsWith("<g")) {
       depth += 1
       if (glyphDepth < 0 && /(?<![\w-])id="glyph"/.test(tag)) glyphDepth = depth
+      scaleStack.push(scale)
+      scale *= groupScale(tag)
       out += tag
     } else {
-      out += wobblePathElement(tag, glyphDepth >= 0, canvasParams)
+      out += wobblePathElement(tag, glyphDepth >= 0, scale, canvasParams)
     }
     lastIndex = match.index + tag.length
   }
@@ -168,7 +185,23 @@ function rewritePebbleSvg(svg: string): string {
   return out
 }
 
-function wobblePathElement(tag: string, inGlyph: boolean, canvasParams: WobbleParams): string {
+/** Uniform scale factor of a `<g transform="… scale(s) …">`, 1 when absent. The
+ * engine only emits translate + uniform scale, matching Android's Affine
+ * assumption; a degenerate/zero scale degrades to 1. */
+function groupScale(tag: string): number {
+  const transform = attr(tag, "transform")
+  if (!transform) return 1
+  const match = /scale\(\s*([-\d.eE]+)/.exec(transform)
+  const s = match ? Number(match[1]) : 1
+  return Number.isFinite(s) && s > 0 ? s : 1
+}
+
+function wobblePathElement(
+  tag: string,
+  inGlyph: boolean,
+  scale: number,
+  canvasParams: WobbleParams,
+): string {
   const d = attr(tag, "d")
   if (!d) return tag
   const elements = parsePath(d)
@@ -177,16 +210,17 @@ function wobblePathElement(tag: string, inGlyph: boolean, canvasParams: WobblePa
   const id = attr(tag, "id")
   const idAttr = id ? `id="${id}" ` : ""
   const stroke = attr(tag, "stroke")
-  const strokeWidth = attr(tag, "stroke-width")
   const fill = attr(tag, "fill")
 
-  const isStroke = stroke !== null && stroke !== "none" && strokeWidth !== null
+  const isStroke = stroke !== null && stroke !== "none"
   if (isStroke) {
-    const width = Number(strokeWidth)
-    if (!Number.isFinite(width) || width <= 0) return tag
     const params = inGlyph ? CANONICAL : canvasParams
+    // Uniform outline weight, ignoring the layer's authored stroke-width (which
+    // is heavy for custom glyphs). OUTLINE_WIDTH is a canvas-space weight; divide
+    // by the group's accumulated scale so it lands at 6 after the transform.
+    const halfWidth = OUTLINE_WIDTH / 2 / scale
     const polylines = flatten(elements, params.flattenStep)
-    const ink = buildInk(polylines, width / 2, noise, params)
+    const ink = buildInk(polylines, halfWidth, noise, params)
     if (!ink) return tag
     return `<path ${idAttr}d="${ink}" fill="${stroke}" stroke="none"/>`
   }
