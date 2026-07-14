@@ -8,9 +8,10 @@ import javax.xml.parsers.SAXParserFactory
 
 /**
  * Typed, render-agnostic view of a server-composed pebble SVG: the viewBox plus
- * the ordered `layer:*` groups, each carrying its opacity and its descendant
- * `<path>`s (path data + the flattened `translate`/`scale` transform inherited
- * from every enclosing `<g>`). The Android analog of iOS `PebbleSVGModel`.
+ * the ordered `layer:*` groups, each carrying its kind, own transform and
+ * opacity, and its descendant `<path>`s (path data + the flattened
+ * `translate`/`scale` transform inherited from the non-layer `<g>`s inside the
+ * layer). The Android analog of iOS `PebbleSVGModel`.
  *
  * Deliberately pure — no Compose or `android.graphics` types — so the parse can
  * be unit-tested on the plain JVM (no Robolectric). [PebbleStaticRender] turns
@@ -31,16 +32,29 @@ internal data class PebbleSvgModel(
         val height: Float,
     )
 
-    /** One `layer:*` group. [opacity] is the `<g opacity>` (1 when absent). */
+    /**
+     * One `layer:*` group. [opacity] is the `<g opacity>` (1 when absent).
+     * [kind] is derived from the group id (`layer:shape` / `layer:fossil` /
+     * `layer:glyph`; anything else is [Kind.OTHER]) and [transform] is the
+     * layer `<g>`'s own transform — kept separate from the per-path inner
+     * transforms, mirroring iOS `PebbleSVGModel.Layer`, so the wobble
+     * renderer can work in the glyph's raw 200-slot space.
+     */
     data class Layer(
+        val kind: Kind,
+        val transform: Affine,
         val opacity: Float,
         val paths: List<PathSpec>,
-    )
+    ) {
+        enum class Kind { SHAPE, FOSSIL, GLYPH, OTHER }
+    }
 
     /**
      * One traceable `<path>`: its `d` data and the [transform] flattened from
-     * every enclosing `<g transform>` (identity when none). Stroke width is
-     * deliberately dropped — the renderer overrides it with the outline weight.
+     * the enclosing non-layer `<g transform>`s *inside* the layer (identity
+     * when none) — the layer's own transform lives on [Layer.transform].
+     * Stroke width is deliberately dropped — the renderer overrides it with
+     * the outline weight.
      */
     data class PathSpec(
         val d: String,
@@ -119,11 +133,14 @@ internal fun parsePebbleSvg(svg: String): PebbleSvgModel? {
 // ── SAX handler ─────────────────────────────────────────────
 
 private class MutableLayer(
+    val kind: PebbleSvgModel.Layer.Kind,
+    val transform: Affine,
     val opacity: Float,
 ) {
     val paths = mutableListOf<PebbleSvgModel.PathSpec>()
 
-    fun toLayerOrNull(): PebbleSvgModel.Layer? = if (paths.isEmpty()) null else PebbleSvgModel.Layer(opacity, paths.toList())
+    fun toLayerOrNull(): PebbleSvgModel.Layer? =
+        if (paths.isEmpty()) null else PebbleSvgModel.Layer(kind, transform, opacity, paths.toList())
 }
 
 /** One `<g>` frame: the flattened transform in effect, and the layer it feeds. */
@@ -147,20 +164,21 @@ private class PebbleSvgHandler : DefaultHandler() {
             "svg" -> viewBox = parseViewBox(attributes.getValue("viewBox"))
             "g" -> {
                 val parent = stack.lastOrNull()
-                val parentTransform = parent?.transform ?: Affine.IDENTITY
                 val own = attributes.getValue("transform")?.let(::parseTransform) ?: Affine.IDENTITY
-                val transform = parentTransform.concat(own)
                 val id = attributes.getValue("id")
-                val layer =
-                    if (id != null && id.startsWith("layer:")) {
-                        val opacity = attributes.getValue("opacity")?.toFloatOrNull() ?: 1f
-                        MutableLayer(opacity).also { layers.add(it) }
-                    } else {
-                        // A non-layer group (e.g. the glyph's inner normalization
-                        // <g>) feeds whatever layer its parent belongs to.
-                        parent?.layer
-                    }
-                stack.addLast(GroupFrame(transform, layer))
+                if (id != null && id.startsWith("layer:")) {
+                    val opacity = attributes.getValue("opacity")?.toFloatOrNull() ?: 1f
+                    val layer = MutableLayer(layerKind(id), own, opacity).also { layers.add(it) }
+                    // Paths inside a layer record transforms relative to the
+                    // layer's own <g>; the layer transform is applied by the
+                    // renderer (mirrors iOS `PebbleSVGModel` / `LayerShape`).
+                    stack.addLast(GroupFrame(Affine.IDENTITY, layer))
+                } else {
+                    // A non-layer group (e.g. the glyph's inner normalization
+                    // <g>) feeds whatever layer its parent belongs to.
+                    val parentTransform = parent?.transform ?: Affine.IDENTITY
+                    stack.addLast(GroupFrame(parentTransform.concat(own), parent?.layer))
+                }
             }
             "path" -> {
                 val frame = stack.lastOrNull() ?: return
@@ -184,6 +202,14 @@ private class PebbleSvgHandler : DefaultHandler() {
         if (qName == "g") stack.removeLastOrNull()
     }
 }
+
+private fun layerKind(id: String): PebbleSvgModel.Layer.Kind =
+    when (id) {
+        "layer:shape" -> PebbleSvgModel.Layer.Kind.SHAPE
+        "layer:fossil" -> PebbleSvgModel.Layer.Kind.FOSSIL
+        "layer:glyph" -> PebbleSvgModel.Layer.Kind.GLYPH
+        else -> PebbleSvgModel.Layer.Kind.OTHER
+    }
 
 // ── Attribute parsing ───────────────────────────────────────
 
