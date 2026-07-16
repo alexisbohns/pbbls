@@ -167,9 +167,10 @@ bundled. Android resource filenames must be lowercase
 
   Their `#FF00FF` sentinel fill is string-replaced with the palette fill hex
   (`PebbleOutlineBackdrop`); fill alpha rides separately as view alpha.
-- **The valence-picker PDFs are deliberately not ported** — the iOS Path row
-  never uses them (they're create-flow picker assets); the row is outline +
-  `render_svg`. Port them only when the create flow lands.
+- **The valence-picker imagery shipped with the create flow (M39)** as
+  res/raw SVGs normalized from the web line art and tinted via `currentColor`
+  injection (`ValenceGlyph`/`ValenceAssets`) — not the iOS PDF assets. The iOS
+  Path row still never uses them; the row is outline + `render_svg`.
 - **The week-roll cairn is a static drawable** (`res/drawable/cairn_static.xml`)
   in v1; the iOS Rive state machine (`pbbls-cairn-states.riv`, with an
   `isSelected` input + `strokeColor` data binding) is a known fast-follow.
@@ -214,19 +215,25 @@ bundled. Android resource filenames must be lowercase
   fail-soft contract as the config secrets. Never commit a keystore (`*.jks` is
   git-ignored).
 
-## Current state (post sub-project D — bootstrap milestone complete)
+## Current state (post M39 · Android Record Flow)
 
 - `PebblesApp` constructs the full service graph — `SupabaseService`, then
-  `EmotionPaletteService`, `PathService`, `SnapURLCache` (by constructor) —
-  and implements Coil's `SingletonImageLoader.Factory` (OkHttp fetcher
-  registered explicitly). `MainActivity` provides one CompositionLocal per
-  service; `LocalSnapURLCache` is **nullable-default** so previews render
-  without it.
-- `features/path/PathScreen.kt` is the real read-only timeline
-  (`path_pebbles()` → `WeekRollBuilder` → week roll + header + pager). The
-  stateless `PathContent` layer is what screenshot previews drive. The
-  temporary sign-out button stays until Profile exists. No create / edit /
-  delete / detail / stats yet.
+  `EmotionPaletteService`, `PathService`, `PebbleDetailService`, `SnapURLCache`,
+  `ReferenceDataService`, `PebbleWriteService`, `GlyphService`, and
+  `KarmaNotificationService` (by constructor) — and implements Coil's
+  `SingletonImageLoader.Factory` (OkHttp fetcher registered explicitly).
+  `MainActivity` provides one CompositionLocal per service; `LocalSnapURLCache`
+  is **nullable-default** so previews render without it.
+- `features/path/PathScreen.kt` is the timeline plus the M39 record flow:
+  `path_pebbles()` → `WeekRollBuilder` → week roll + header + pager, with
+  full-screen conditionally-composed covers for create (`CreatePebbleScreen`
+  hosting the shared `PebbleForm` + modal picker sheets), detail
+  (`PebbleDetailScreen`), and edit (`EditPebbleScreen`), long-press delete, and
+  the karma flash pastille overlaid in `RootScreen`. The stateless
+  `PathContent` layer is what screenshot previews drive. The temporary
+  sign-out button stays until Profile exists. Still missing: stats bar, photo
+  attach, glyph carving/store — see the parity audit
+  (`docs/superpowers/specs/2026-07-16-android-parity-audit.md`).
 - `RootScreen` warms the palette cache concurrently with the splash hold and
   flushes the signed-URL cache when the session drops to null.
 - Leaf path composables take `palette` / data as **parameters**, not service

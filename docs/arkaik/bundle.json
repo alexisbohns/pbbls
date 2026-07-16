@@ -8,7 +8,7 @@
       "view_card_variant": "large"
     },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-07-03T00:00:00.000Z"
+    "updated_at": "2026-07-16T00:00:00.000Z"
   },
   "nodes": [
     {
@@ -68,7 +68,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Path",
-      "description": "Week-paginated path of pebbles. Top: horizontal weeks roll of cairn animations centered on the focused week. Middle: date-range header with prev/next chevrons and a per-week scrollable list of pebble rows that pages horizontally between weeks. Bottom: in-view dock combining the quick pebble editor (collapsed as a 'What happened?' trigger; expanded as a bottom-sheet overlay) and a stats bar (profile glyph link, bounce, karma — all link to Profile). Android (M37 sub-project D, #531) implements the read-only subset: path_pebbles() rows grouped by ISO week (WeekRollBuilder port), static-cairn week roll, date-range header with chevrons, HorizontalPager week pages, palette-tinted outline+render_svg rows (AndroidSVG, currentColor substitution) with snap thumbnails, and a temporary sign-out; no dock, stats, create or detail yet.",
+      "description": "Week-paginated path of pebbles. Top: horizontal weeks roll of cairn animations centered on the focused week. Middle: date-range header with prev/next chevrons and a per-week scrollable list of pebble rows that pages horizontally between weeks. Bottom: in-view dock combining the quick pebble editor (collapsed as a 'What happened?' trigger; expanded as a bottom-sheet overlay) and a stats bar (profile glyph link, bounce, karma — all link to Profile). Android (M37 sub-project D, #531) implements the read-only subset: path_pebbles() rows grouped by ISO week (WeekRollBuilder port), static-cairn week roll, date-range header with chevrons, HorizontalPager week pages, palette-tinted outline+render_svg rows (AndroidSVG, currentColor substitution) with snap thumbnails, and a temporary sign-out. Android M39 (record flow, #550) added the write surface on top: New-pebble button → full-screen create form with modal picker sheets, row tap → detail, edit, long-press delete, and the karma flash; the bottom dock/stats bar is still iOS/web-only on Android.",
       "status": "development",
       "platforms": [
         "web",
@@ -193,7 +193,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Quick Pebble Editor",
-      "description": "Single-page pebble creation editor (V2) combining all enrichment steps. On /path the editor is anchored to the bottom dock — collapsed as a 'What happened?' trigger that opens an overlay bottom-sheet on tap; on /record it auto-opens as the route's primary affordance.",
+      "description": "Single-page pebble creation editor (V2) combining all enrichment steps. On /path the editor is anchored to the bottom dock — collapsed as a 'What happened?' trigger that opens an overlay bottom-sheet on tap; on /record it auto-opens as the route's primary affordance. Android (M39, #541/#542): full-screen CreatePebbleScreen/EditPebbleScreen hosting the shared PebbleForm with modal bottom-sheet pickers — full-screen surfaces instead of a bottom-sheet dock (M39 design D5).",
       "status": "live",
       "platforms": [
         "web",
@@ -216,8 +216,8 @@
       "metadata": {
         "platformStatuses": {
           "ios": "live",
-          "web": "idea",
-          "android": "idea"
+          "web": "development",
+          "android": "live"
         }
       }
     },
@@ -336,7 +336,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Add Soul",
-      "description": "Create a new soul entry for someone in your life.",
+      "description": "Create a new soul entry for someone in your life. Android (M39 D12, #541): inline name-only create dialog in the soul picker (relies on the souls.glyph_id system default); the full create sheet with the glyph row belongs to the Profile milestone.",
       "status": "live",
       "platforms": [
         "web",
@@ -593,6 +593,7 @@
       "id": "V-profile",
       "project_id": "pebbles",
       "species": "view",
+      "title": "Profile",
       "description": "User profile dashboard. Banner (glyph + display name in the Reenie Beanie script face + member-since), a shortcuts row (Collections / Souls / Glyphs), a Stats card (ripple-level badge + 28-day assiduity grid + Days / Pebbles / Karma counters), a horizontal Collections carousel, a Lab card, and a logout button; a gear button opens Settings. Web aligns to the iOS token refactor (issues #465 / #467). iOS (#388): pushed from PathView's bottom bar; hosts the Lab navigation link and the onboarding replay full-screen cover.",
       "status": "development",
       "platforms": [
@@ -606,7 +607,7 @@
       "project_id": "pebbles",
       "species": "flow",
       "title": "Record Pebble",
-      "description": "Core flow to capture a new pebble via the single-page Quick Pebble V2 editor with all enrichments inline.",
+      "description": "Core flow to capture a new pebble via the single-page Quick Pebble V2 editor with all enrichments inline. Android (M39, #550): live end-to-end — create → karma flash → detail reveal → timeline reload.",
       "status": "live",
       "platforms": [
         "web",
@@ -2072,10 +2073,11 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Karma Earned Flash",
-      "description": "iOS-only delight surface (M36, #505) shown when a user earns karma by creating or enriching a pebble. Renders an in-app \"liquid glass\" pastille that pops up bottom-center (real .glassEffect on iOS 26, translucent-material fallback below), hosted in a pass-through overlay window so it floats above the create/edit/detail sheets. Shows a sparkle + \"+N karma\" with an accent-color countdown ring that drains over its ~2.5s lifetime; tap to dismiss. Fires a Core-Haptics vibration matched to a ceramic sound (sound only in ringtone mode, never interrupting other audio). Works on every device and iOS 17+ — the Dynamic Island is deliberately NOT used, because iOS won't render a foreground app's own Live Activity and karma is always earned by a foreground action. The \"+N\" amount is the exact server-computed delta returned as karma_delta by the compose-pebble / compose-pebble-update edge functions (read back from karma_events); delight-only, never authoritative over the balance. Non-positive deltas (deletions/clawbacks) stay silent. The ActivityKit/PebblesWidget stack is retained, unused, as the reference for a future Glyph-purchase Live Activity.",
+      "description": "Delight surface (M36, #505) shown when a user earns karma by creating or enriching a pebble. Renders an in-app \"liquid glass\" pastille that pops up bottom-center (real .glassEffect on iOS 26, translucent-material fallback below), hosted in a pass-through overlay window so it floats above the create/edit/detail sheets. Shows a sparkle + \"+N karma\" with an accent-color countdown ring that drains over its ~2.5s lifetime; tap to dismiss. Fires a Core-Haptics vibration matched to a ceramic sound (sound only in ringtone mode, never interrupting other audio). Works on every device and iOS 17+ — the Dynamic Island is deliberately NOT used, because iOS won't render a foreground app's own Live Activity and karma is always earned by a foreground action. The \"+N\" amount is the exact server-computed delta returned as karma_delta by the compose-pebble / compose-pebble-update edge functions (read back from karma_events); delight-only, never authoritative over the balance. Non-positive deltas (deletions/clawbacks) stay silent. The ActivityKit/PebblesWidget stack is retained, unused, as the reference for a future Glyph-purchase Live Activity. Android (M39 D9, #541): the analog pastille — Material tonal-elevation capsule + countdown ring overlaid in RootScreen's authed branch, one system CONFIRM haptic, no sound (named v1 reduction; ceramic sound + waveform haptic are deferred fast-follows).",
       "status": "development",
       "platforms": [
-        "ios"
+        "ios",
+        "android"
       ]
     },
     {
