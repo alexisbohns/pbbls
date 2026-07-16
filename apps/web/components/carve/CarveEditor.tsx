@@ -8,6 +8,7 @@ import { useMarks } from "@/lib/data/useMarks"
 import { useHaptics } from "@/lib/hooks/useHaptics"
 import type { MarkStroke } from "@/lib/types"
 import { DrawingCanvas } from "@/components/carve/DrawingCanvas"
+import { StrokeRenderer } from "@/components/carve/StrokeRenderer"
 import { CarveToolbar } from "@/components/carve/CarveToolbar"
 import { StampPicker } from "@/components/carve/StampPicker"
 import { Input } from "@/components/ui/input"
@@ -90,23 +91,15 @@ export function CarveEditor({ onSaved }: CarveEditorProps) {
         <p className="text-lg font-medium" aria-live="polite">
           {name.trim() ? t("savedNamed", { name: name.trim() }) : t("saved")}
         </p>
+        {/* Reuse StrokeRenderer (like the live DrawingCanvas) so the saved
+            preview matches the canvas — including the petroglyph wobble (#555)
+            when enabled; it falls back to the plain stroke in production. */}
         <svg
           viewBox={GLYPH_VIEWBOX}
           className="w-full max-w-[200px] aspect-square"
           aria-hidden="true"
         >
-          {strokes.map((s, i) => (
-            <path
-              key={i}
-              d={s.d}
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={s.width}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="text-foreground"
-            />
-          ))}
+          <StrokeRenderer strokes={strokes} />
         </svg>
         <button
           onClick={handleNewMark}
