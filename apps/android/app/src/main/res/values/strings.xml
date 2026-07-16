@@ -112,6 +112,25 @@
     <string name="soul_form_glyph_choose">Tap to choose</string>
     <string name="soul_save_error">Couldn\'t save the soul. Please try again.</string>
 
+    <!-- ==== Collections management (M41 sub-project E). Stack/Pack/Track are
+         product vocabulary — FR stays identical pending the maintainer's word
+         (never machine-translate them). -->
+    <string name="collections_add_a11y">Add collection</string>
+    <string name="collections_empty_title">No collections yet</string>
+    <string name="collections_empty_message">Your collections will appear here.</string>
+    <string name="collections_load_error">Couldn\'t load collections.</string>
+    <string name="collections_delete_message">Linked pebbles stay; only the collection and its links are removed.</string>
+    <string name="collection_detail_empty_message">Pebbles added to this collection will appear here.</string>
+    <string name="collection_edit_title">Edit collection</string>
+    <string name="collection_save_error">Couldn\'t save the collection. Please try again.</string>
+    <string name="collection_count_zero">No pebbles</string>
+    <string name="collection_mode_header">Mode</string>
+    <string name="collection_mode_none">None</string>
+    <string name="collection_mode_stack">Stack</string>
+    <string name="collection_mode_pack">Pack</string>
+    <string name="collection_mode_track">Track</string>
+    <string name="collection_mode_a11y">Mode: %1$s</string>
+
     <!-- Reference-data names (D9). Resolved via ReferenceStrings, keyed by DB slug —
          never render the DB `name` column directly on a read path. Source: iOS
          Localizable.xcstrings (`emotion.<slug>.name`, `domain.<slug>.name`,

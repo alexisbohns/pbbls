@@ -104,6 +104,24 @@
     <string name="soul_form_glyph_choose">Touchez pour choisir</string>
     <string name="soul_save_error">Impossible d\'enregistrer l\'âme. Veuillez réessayer.</string>
 
+    <!-- ==== Gestion des collections (M41 sous-projet E). Stack/Pack/Track :
+         vocabulaire produit — identique en FR en attendant le mot du mainteneur. -->
+    <string name="collections_add_a11y">Ajouter une collection</string>
+    <string name="collections_empty_title">Pas encore de collections</string>
+    <string name="collections_empty_message">Vos collections apparaîtront ici.</string>
+    <string name="collections_load_error">Impossible de charger les collections.</string>
+    <string name="collections_delete_message">Les pebbles liés restent ; seuls la collection et ses liens sont supprimés.</string>
+    <string name="collection_detail_empty_message">Les pebbles ajoutés à cette collection apparaîtront ici.</string>
+    <string name="collection_edit_title">Modifier la collection</string>
+    <string name="collection_save_error">Impossible d\'enregistrer la collection. Veuillez réessayer.</string>
+    <string name="collection_count_zero">Aucun pebble</string>
+    <string name="collection_mode_header">Mode</string>
+    <string name="collection_mode_none">Aucun</string>
+    <string name="collection_mode_stack">Stack</string>
+    <string name="collection_mode_pack">Pack</string>
+    <string name="collection_mode_track">Track</string>
+    <string name="collection_mode_a11y">Mode : %1$s</string>
+
     <!-- French reference-data names — see values/strings.xml for provenance. -->
 
     <!-- Domains (18) -->

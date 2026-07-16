@@ -259,7 +259,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Collections",
-      "description": "Browse and manage all pebble collections.",
+      "description": "Browse and manage all pebble collections. Android (M41 E, #569): pushed NavHost route from the Profile carousel header — bordered rows (name + mode badge + count), \"+\" top-bar create, pull-to-refresh, long-press delete with confirm (the unified D7 idiom over iOS's swipe action).",
       "status": "development",
       "platforms": [
         "web",
@@ -272,7 +272,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Collection Detail",
-      "description": "View a collection and its pebbles grouped by month; rename / re-mode / delete entry points.",
+      "description": "View a collection and its pebbles grouped by month; rename / re-mode / delete entry points. Android (M41 E, #569): pushed route (collectionId argument, fetches its own row) — mode badge + live count subheader, locale-formatted month sections on the shared PebbleRow (tap opens the edit-pebble cover; long-press deletes via delete_pebble), Edit top-bar action opens the collection form as a cover (D9).",
       "status": "development",
       "platforms": [
         "web",
@@ -285,7 +285,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Create Collection",
-      "description": "Create a new collection to group pebbles.",
+      "description": "Create a new collection to group pebbles. Android (M41 E, #569): full-screen cover sharing one form surface with edit — name field + None/Stack/Pack/Track mode picker; reachable from the collections list and the Profile carousel's empty tile.",
       "status": "development",
       "platforms": [
         "web",
@@ -298,7 +298,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Edit Collection",
-      "description": "Rename or re-mode an existing collection. Web renders inline on the detail page; iOS presents as a sheet.",
+      "description": "Rename or re-mode an existing collection. Web renders inline on the detail page; iOS presents as a sheet. Android (M41 E, #569): full-screen cover sharing one form surface with create; clearing the mode encodes an explicit JSON null so the column really clears.",
       "status": "development",
       "platforms": [
         "web",
@@ -596,7 +596,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Profile",
-      "description": "User profile dashboard. Banner (glyph + display name in the Reenie Beanie script face + member-since), a shortcuts row (Collections / Souls / Glyphs), a Stats card (ripple-level badge + 28-day assiduity grid + Days / Pebbles / Karma counters), a horizontal Collections carousel, a Lab card, and a logout button; a gear button opens Settings. Web aligns to the iOS token refactor (issues #465 / #467). iOS (#388): pushed from PathView's bottom bar; hosts the Lab navigation link and the onboarding replay full-screen cover. Android (M41 C, #567): pushed as an authed NavHost route from the bottom bar — banner, stats card, collections carousel (read-only until E), logout, and Settings as a full-screen cover. The shortcuts row landed with D (#568) showing only wired tiles (souls now; collections with E, glyphs with its milestone — D11); the Lab card arrives with the Lab milestone.",
+      "description": "User profile dashboard. Banner (glyph + display name in the Reenie Beanie script face + member-since), a shortcuts row (Collections / Souls / Glyphs), a Stats card (ripple-level badge + 28-day assiduity grid + Days / Pebbles / Karma counters), a horizontal Collections carousel, a Lab card, and a logout button; a gear button opens Settings. Web aligns to the iOS token refactor (issues #465 / #467). iOS (#388): pushed from PathView's bottom bar; hosts the Lab navigation link and the onboarding replay full-screen cover. Android (M41 C, #567): pushed as an authed NavHost route from the bottom bar — banner, stats card, collections carousel (header → list, card → detail, empty tile → create), logout, and Settings as a full-screen cover. The shortcuts row landed with D (#568) and shows only wired tiles (souls; glyphs arrives with its milestone — D11); the Lab card arrives with the Lab milestone.",
       "status": "development",
       "platforms": [
         "web",
