@@ -150,4 +150,24 @@ class PebblePayloadTest {
         val obj = encode(PebbleCreatePayload.from(validDraft().copy(collectionId = null)))
         assertEquals(0, obj.getValue("collection_ids").jsonArray.size)
     }
+
+    // ---- create snaps (M42 D5): key absent without a photo, present with one ----
+
+    @Test
+    fun `create without a snap omits the snaps key entirely`() {
+        val obj = encode(PebbleCreatePayload.from(validDraft()))
+        assertFalse("snaps" in obj)
+    }
+
+    @Test
+    fun `create with an uploaded snap encodes the snaps array`() {
+        val snap = PebbleSnapPayload(id = "snap1", storagePath = "uid/snap1", sortOrder = 0)
+        val obj = encode(PebbleCreatePayload.from(validDraft(), snaps = listOf(snap)))
+        val snaps = obj.getValue("snaps").jsonArray
+        assertEquals(1, snaps.size)
+        val entry = snaps.single().jsonObject
+        assertEquals("snap1", entry.getValue("id").jsonPrimitive.content)
+        assertEquals("uid/snap1", entry.getValue("storage_path").jsonPrimitive.content)
+        assertEquals("0", entry.getValue("sort_order").jsonPrimitive.content)
+    }
 }
