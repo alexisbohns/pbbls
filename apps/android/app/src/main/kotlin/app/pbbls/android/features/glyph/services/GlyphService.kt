@@ -2,6 +2,7 @@ package app.pbbls.android.features.glyph.services
 
 import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.features.glyph.models.Glyph
+import app.pbbls.android.features.glyph.models.GlyphStroke
 import app.pbbls.android.services.SupabaseService
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
@@ -10,12 +11,16 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.put
 
 /**
- * Lists glyphs the current user can attach to a pebble (D13) — the
- * `GlyphService.list()` analog. Selection-only in this milestone; no
- * carve/create. `list()` throws to the caller — the glyph picker's
- * `LaunchedEffect` catches and logs (keeps the seam JVM-testable). Mirrors
+ * Glyph CRUD — the iOS `GlyphService` analog: the attachable-glyph list
+ * (D13), plus M43's carve insert and rename. Market reads/buys live in
+ * `GlyphMarketService` (M43 design D9). Methods throw to the caller, which
+ * owns view state (keeps the seam JVM-testable). Mirrors
  * ReferenceDataService.fetchSouls's supabase-kt call shape.
  */
 class GlyphService(
@@ -57,6 +62,47 @@ class GlyphService(
             withEntitled(ownAndSystem.await(), entitled.await())
         }
 
+    /**
+     * Carve insert — ports `GlyphService.create`: exactly four keys
+     * (`user_id`, `strokes`, literal `view_box`, `name` as string or explicit
+     * JSON null — never a shape key, #503), select-back so the fresh glyph
+     * lands in pickers without a refetch.
+     */
+    suspend fun create(
+        strokes: List<GlyphStroke>,
+        name: String?,
+    ): Glyph {
+        val userId =
+            supabase.session?.user?.id
+                ?: throw IllegalStateException("glyph save without session")
+        return supabase.client
+            .from("glyphs")
+            .insert(
+                buildJsonObject {
+                    put("user_id", userId)
+                    put("strokes", Json.encodeToJsonElement(ListSerializer(GlyphStroke.serializer()), strokes))
+                    put("view_box", "0 0 200 200")
+                    put("name", normalizedName(name))
+                },
+            ) {
+                select(Columns.raw("id, name, strokes, view_box, user_id"))
+            }.decodeSingle<Glyph>()
+    }
+
+    /** Rename — empty/whitespace input CLEARS the name (explicit null; M43 D8). */
+    suspend fun updateName(
+        glyphId: String,
+        name: String?,
+    ): Glyph =
+        supabase.client
+            .from("glyphs")
+            .update(
+                buildJsonObject { put("name", normalizedName(name)) },
+            ) {
+                filter { eq("id", glyphId) }
+                select(Columns.raw("id, name, strokes, view_box, user_id"))
+            }.decodeSingle<Glyph>()
+
     companion object {
         private const val TAG = "glyph-service"
 
@@ -72,6 +118,9 @@ class GlyphService(
             val seen = base.mapTo(mutableSetOf()) { it.id }
             return base + entitled.filter { seen.add(it.id) }
         }
+
+        /** iOS name normalization: trim; empty → null (JVM-tested). */
+        fun normalizedName(name: String?): String? = name?.trim()?.takeIf { it.isNotEmpty() }
     }
 }
 
