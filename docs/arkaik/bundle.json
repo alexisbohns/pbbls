@@ -1,4 +1,5 @@
 {
+  "schema_version": 2,
   "project": {
     "id": "pebbles",
     "title": "Pebbles",
@@ -593,6 +594,7 @@
       "id": "V-profile",
       "project_id": "pebbles",
       "species": "view",
+      "title": "Profile",
       "description": "User profile dashboard. Banner (glyph + display name in the Reenie Beanie script face + member-since), a shortcuts row (Collections / Souls / Glyphs), a Stats card (ripple-level badge + 28-day assiduity grid + Days / Pebbles / Karma counters), a horizontal Collections carousel, a Lab card, and a logout button; a gear button opens Settings. Web aligns to the iOS token refactor (issues #465 / #467). iOS (#388): pushed from PathView's bottom bar; hosts the Lab navigation link and the onboarding replay full-screen cover.",
       "status": "development",
       "platforms": [

@@ -1,0 +1,26 @@
+name: arkaik
+
+# Gate the Arkaik product-graph map: a broken bundle or a snapshot the journal
+# contradicts cannot land. Runs the zero-dependency validator shipped with the
+# skill (no npm install needed).
+on:
+  pull_request:
+    paths:
+      - "docs/arkaik/**"
+      - ".claude/skills/arkaik/**"
+  push:
+    branches: [main]
+    paths:
+      - "docs/arkaik/**"
+      - ".claude/skills/arkaik/**"
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Validate Arkaik bundle + journal
+        run: node .claude/skills/arkaik/scripts/validate-bundle.js docs/arkaik/bundle.json
