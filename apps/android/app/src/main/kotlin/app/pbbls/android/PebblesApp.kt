@@ -8,6 +8,7 @@ import app.pbbls.android.services.PathService
 import app.pbbls.android.services.PathStatsService
 import app.pbbls.android.services.PebbleDetailService
 import app.pbbls.android.services.PebbleWriteService
+import app.pbbls.android.services.ProfileService
 import app.pbbls.android.services.ReferenceDataService
 import app.pbbls.android.services.SnapURLCache
 import app.pbbls.android.services.SupabaseService
@@ -44,6 +45,9 @@ class PebblesApp :
     lateinit var pathStats: PathStatsService
         private set
 
+    lateinit var profileService: ProfileService
+        private set
+
     lateinit var pebbleDetailService: PebbleDetailService
         private set
 
@@ -69,6 +73,7 @@ class PebblesApp :
         palettes = EmotionPaletteService(supabase)
         pathService = PathService(supabase)
         pathStats = PathStatsService(supabase)
+        profileService = ProfileService(supabase)
         pebbleDetailService = PebbleDetailService(supabase)
         snapUrls = SnapURLCache(supabase)
         referenceData = ReferenceDataService(supabase)

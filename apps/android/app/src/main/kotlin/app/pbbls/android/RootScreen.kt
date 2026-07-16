@@ -25,6 +25,7 @@ import app.pbbls.android.features.onboarding.OnboardingGate
 import app.pbbls.android.features.onboarding.OnboardingScreen
 import app.pbbls.android.features.onboarding.OnboardingSteps
 import app.pbbls.android.features.path.PathScreen
+import app.pbbls.android.features.profile.ProfileScreen
 import app.pbbls.android.features.welcome.WelcomeScreen
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalReferenceDataService
@@ -38,6 +39,8 @@ import kotlinx.coroutines.launch
 private const val MIN_SPLASH_MILLIS = 2_500L
 private const val ROUTE_WELCOME = "welcome"
 private const val ROUTE_AUTH = "auth"
+private const val ROUTE_PATH = "path"
+private const val ROUTE_PROFILE = "profile"
 
 /**
  * Top-level auth gate — the `RootView` analog (D5). The gate is conditional
@@ -114,7 +117,7 @@ fun RootScreen() {
                 .background(PebblesTheme.colors.system.background),
     ) {
         if (canShowAuthedTabs) {
-            PathScreen(onSignOut = { scope.launch { supabase.signOut() } })
+            AuthedNavHost(onSignOut = { scope.launch { supabase.signOut() } })
             if (isPresentingOnboarding) {
                 OnboardingScreen(
                     steps = OnboardingSteps.all,
@@ -138,6 +141,30 @@ fun RootScreen() {
                         AuthMode.SIGNUP -> supabase.signUp(email, password)
                     }
                 },
+            )
+        }
+    }
+}
+
+/**
+ * Authed navigation (D1): pushes — Path → Profile (souls/collections routes
+ * arrive with sub-projects D/E) — are real NavHost routes so predictive back
+ * and the back stack behave natively; modal pebble surfaces stay
+ * conditionally-composed covers inside PathScreen (the M39 D5 pattern).
+ * Sign-out lives on the Profile screen now; the session dropping to null
+ * flips RootScreen's gate and unmounts this host.
+ */
+@Composable
+private fun AuthedNavHost(onSignOut: () -> Unit) {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = ROUTE_PATH) {
+        composable(ROUTE_PATH) {
+            PathScreen(onProfile = { navController.navigate(ROUTE_PROFILE) })
+        }
+        composable(ROUTE_PROFILE) {
+            ProfileScreen(
+                onBack = { navController.popBackStack() },
+                onSignOut = onSignOut,
             )
         }
     }

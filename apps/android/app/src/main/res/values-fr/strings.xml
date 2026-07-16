@@ -46,13 +46,48 @@
     <string name="path_week_previous">Semaine précédente</string>
     <string name="path_week_next">Semaine suivante</string>
     <string name="path_week_cell_a11y">Semaine %1$d, %2$d pebbles</string>
-    <string name="path_sign_out">Se déconnecter</string>
     <!-- Barre de stats du bas (sous-projet B). « karma » et « Ripple » sont du vocabulaire produit. -->
     <string name="path_profile">Profil</string>
     <string name="path_karma_caption">karma</string>
     <string name="path_karma_a11y">Karma %1$s</string>
     <string name="ripple_badge_active">Ripple niveau %1$d, actif aujourd\'hui</string>
     <string name="ripple_badge_inactive">Ripple niveau %1$d, inactif aujourd\'hui</string>
+    <!-- ==== Profil + Réglages (sous-projet C). « Pebbles »/« Karma »/« Ripples » : vocabulaire produit. ==== -->
+    <string name="profile_title">Profil</string>
+    <string name="profile_back_a11y">Retour</string>
+    <string name="profile_member_since">Membre depuis %1$s</string>
+    <string name="profile_stats_header">Stats</string>
+    <string name="profile_ripples_level">Ripples niveau %1$d</string>
+    <plurals name="profile_ripples_progress">
+        <item quantity="one">Encore %1$d pebble avant le niveau %2$d</item>
+        <item quantity="other">Encore %1$d pebbles avant le niveau %2$d</item>
+    </plurals>
+    <string name="profile_ripples_max">Niveau maximum atteint</string>
+    <string name="profile_ripples_loading">Chargement…</string>
+    <string name="profile_assiduity_a11y">Grille d\'assiduité, 28 derniers jours</string>
+    <string name="profile_counter_days">Jours</string>
+    <string name="profile_counter_pebbles">Pebbles</string>
+    <string name="profile_counter_karma">Karma</string>
+    <string name="profile_collections_header">Collections</string>
+    <plurals name="profile_collection_count">
+        <item quantity="one">%1$d pebble</item>
+        <item quantity="other">%1$d pebbles</item>
+    </plurals>
+    <string name="profile_collection_new">Nouvelle collection</string>
+    <string name="profile_log_out">Se déconnecter</string>
+    <string name="profile_load_error">Impossible de charger votre profil.</string>
+    <string name="profile_retry">Réessayer</string>
+    <string name="settings_title">Réglages</string>
+    <string name="settings_informations_header">Informations</string>
+    <string name="settings_name_label">Nom</string>
+    <string name="settings_name_placeholder">Votre nom</string>
+    <string name="settings_email_label">E-mail</string>
+    <string name="settings_password_header">Mot de passe</string>
+    <string name="settings_password_placeholder">Nouveau mot de passe</string>
+    <string name="settings_password_footer">Laissez vide pour conserver votre mot de passe actuel.</string>
+    <string name="settings_providers_header">Fournisseurs</string>
+    <string name="settings_legal_header">Mentions légales</string>
+    <string name="settings_save_error">Impossible d\'enregistrer vos modifications. Veuillez réessayer.</string>
 
     <!-- French reference-data names — see values/strings.xml for provenance. -->
 

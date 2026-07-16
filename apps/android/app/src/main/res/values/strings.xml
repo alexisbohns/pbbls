@@ -53,13 +53,48 @@
     <string name="path_week_next">Next week</string>
     <!-- a11y label for a week-roll cairn cell: ISO week number + pebble count. -->
     <string name="path_week_cell_a11y">Week %1$d, %2$d pebbles</string>
-    <string name="path_sign_out">Sign out</string>
     <!-- Bottom stats bar (sub-project B). "karma" and "Ripple" are product vocabulary. -->
     <string name="path_profile">Profile</string>
     <string name="path_karma_caption">karma</string>
     <string name="path_karma_a11y">Karma %1$s</string>
     <string name="ripple_badge_active">Ripple level %1$d, active today</string>
     <string name="ripple_badge_inactive">Ripple level %1$d, inactive today</string>
+    <!-- ==== Profile + Settings (sub-project C). "Pebbles"/"Karma"/"Ripples" are product vocabulary. ==== -->
+    <string name="profile_title">Profile</string>
+    <string name="profile_back_a11y">Back</string>
+    <string name="profile_member_since">Member since %1$s</string>
+    <string name="profile_stats_header">Stats</string>
+    <string name="profile_ripples_level">Ripples Level %1$d</string>
+    <plurals name="profile_ripples_progress">
+        <item quantity="one">%1$d more pebble to level %2$d</item>
+        <item quantity="other">%1$d more pebbles to level %2$d</item>
+    </plurals>
+    <string name="profile_ripples_max">Max level reached</string>
+    <string name="profile_ripples_loading">Loading…</string>
+    <string name="profile_assiduity_a11y">Assiduity grid, last 28 days</string>
+    <string name="profile_counter_days">Days</string>
+    <string name="profile_counter_pebbles">Pebbles</string>
+    <string name="profile_counter_karma">Karma</string>
+    <string name="profile_collections_header">Collections</string>
+    <plurals name="profile_collection_count">
+        <item quantity="one">%1$d pebble</item>
+        <item quantity="other">%1$d pebbles</item>
+    </plurals>
+    <string name="profile_collection_new">New collection</string>
+    <string name="profile_log_out">Log out</string>
+    <string name="profile_load_error">Couldn\'t load your profile.</string>
+    <string name="profile_retry">Retry</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_informations_header">Informations</string>
+    <string name="settings_name_label">Name</string>
+    <string name="settings_name_placeholder">Your name</string>
+    <string name="settings_email_label">Email</string>
+    <string name="settings_password_header">Password</string>
+    <string name="settings_password_placeholder">New password</string>
+    <string name="settings_password_footer">Leave blank to keep your current password.</string>
+    <string name="settings_providers_header">Providers</string>
+    <string name="settings_legal_header">Legal</string>
+    <string name="settings_save_error">Couldn\'t save your changes. Please try again.</string>
 
     <!-- Reference-data names (D9). Resolved via ReferenceStrings, keyed by DB slug —
          never render the DB `name` column directly on a read path. Source: iOS

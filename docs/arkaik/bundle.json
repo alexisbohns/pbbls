@@ -69,7 +69,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Path",
-      "description": "Week-paginated path of pebbles. Top: horizontal weeks roll of cairn animations centered on the focused week. Middle: date-range header with prev/next chevrons and a per-week scrollable list of pebble rows that pages horizontally between weeks. Bottom: in-view dock combining the quick pebble editor (collapsed as a 'What happened?' trigger; expanded as a bottom-sheet overlay) and a stats bar (profile glyph link, bounce, karma — all link to Profile). Android (M37 sub-project D, #531) implements the read-only subset: path_pebbles() rows grouped by ISO week (WeekRollBuilder port), static-cairn week roll, date-range header with chevrons, HorizontalPager week pages, palette-tinted outline+render_svg rows (AndroidSVG, currentColor substitution) with snap thumbnails, and a temporary sign-out. Android M39 (record flow, #550) added the write surface on top: New-pebble button → full-screen create form with modal picker sheets, row tap → detail, edit, long-press delete, and the karma flash. M41 sub-project B (#566) added the bottom stats bar: karma total + Ripples badge from PathStatsService (v_karma_summary / v_ripple / get_profile_engagement), refreshed after every write, with the profile tap stubbed until the Profile screen lands (C).",
+      "description": "Week-paginated path of pebbles. Top: horizontal weeks roll of cairn animations centered on the focused week. Middle: date-range header with prev/next chevrons and a per-week scrollable list of pebble rows that pages horizontally between weeks. Bottom: in-view dock combining the quick pebble editor (collapsed as a 'What happened?' trigger; expanded as a bottom-sheet overlay) and a stats bar (profile glyph link, bounce, karma — all link to Profile). Android (M37 sub-project D, #531) implements the read-only subset: path_pebbles() rows grouped by ISO week (WeekRollBuilder port), static-cairn week roll, date-range header with chevrons, HorizontalPager week pages, palette-tinted outline+render_svg rows (AndroidSVG, currentColor substitution) with snap thumbnails, and a temporary sign-out. Android M39 (record flow, #550) added the write surface on top: New-pebble button → full-screen create form with modal picker sheets, row tap → detail, edit, long-press delete, and the karma flash. M41 sub-project B (#566) added the bottom stats bar: karma total + Ripples badge from PathStatsService (v_karma_summary / v_ripple / get_profile_engagement), refreshed after every write, with all three taps pushing the Profile route since M41 sub-project C (#567); the temporary sign-out retired to Profile.",
       "status": "development",
       "platforms": [
         "web",
@@ -583,11 +583,12 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Settings",
-      "description": "Profile settings. iOS (#452): edit-mode sheet presented from Profile's gear button. Web: a dedicated /settings route reached from the Profile gear button, with a Save action enabled when dirty. Sections mirror iOS — header glyph (tap → glyph picker dialog), Informations (editable display_name, read-only email), Providers (read-only Apple/Google list for SSO accounts) or Password (new password field for email-only accounts), Legal (Terms, Privacy) — plus a web-only Appearance section (theme, language, colour world). Persists name+glyph via the profiles update (update_profile RPC on iOS) and password via auth.updateUser.",
+      "description": "Profile settings. iOS (#452): edit-mode sheet presented from Profile's gear button. Web: a dedicated /settings route reached from the Profile gear button, with a Save action enabled when dirty. Sections mirror iOS — header glyph (tap → glyph picker dialog), Informations (editable display_name, read-only email), Providers (read-only Apple/Google list for SSO accounts) or Password (new password field for email-only accounts), Legal (Terms, Privacy) — plus a web-only Appearance section (theme, language, colour world). Persists name+glyph via the profiles update (update_profile RPC on iOS) and password via auth.updateUser. Android (M41 C, #567): full-screen cover from Profile's gear button (never a stacked sheet, per the D5 rule); same sections minus Appearance; providers render as text-only brand labels.",
       "status": "development",
       "platforms": [
         "web",
-        "ios"
+        "ios",
+        "android"
       ]
     },
     {
@@ -595,7 +596,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Profile",
-      "description": "User profile dashboard. Banner (glyph + display name in the Reenie Beanie script face + member-since), a shortcuts row (Collections / Souls / Glyphs), a Stats card (ripple-level badge + 28-day assiduity grid + Days / Pebbles / Karma counters), a horizontal Collections carousel, a Lab card, and a logout button; a gear button opens Settings. Web aligns to the iOS token refactor (issues #465 / #467). iOS (#388): pushed from PathView's bottom bar; hosts the Lab navigation link and the onboarding replay full-screen cover.",
+      "description": "User profile dashboard. Banner (glyph + display name in the Reenie Beanie script face + member-since), a shortcuts row (Collections / Souls / Glyphs), a Stats card (ripple-level badge + 28-day assiduity grid + Days / Pebbles / Karma counters), a horizontal Collections carousel, a Lab card, and a logout button; a gear button opens Settings. Web aligns to the iOS token refactor (issues #465 / #467). iOS (#388): pushed from PathView's bottom bar; hosts the Lab navigation link and the onboarding replay full-screen cover. Android (M41 C, #567): pushed as an authed NavHost route from the bottom bar — banner, stats card, collections carousel (read-only until E), logout, and Settings as a full-screen cover; the shortcuts row and Lab card arrive with sub-projects D/E and the Lab milestone.",
       "status": "development",
       "platforms": [
         "web",

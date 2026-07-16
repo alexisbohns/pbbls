@@ -86,7 +86,6 @@ private fun ScreenPreview(entries: List<WeekRollEntry>) {
         today = today,
         onFocusChange = {},
         paletteFor = { screenPalette },
-        onSignOut = {},
         modifier = Modifier.fillMaxSize().background(PebblesTheme.colors.system.background),
     )
 }
