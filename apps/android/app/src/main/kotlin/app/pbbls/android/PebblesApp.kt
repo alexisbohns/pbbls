@@ -5,6 +5,7 @@ import app.pbbls.android.features.glyph.services.GlyphService
 import app.pbbls.android.features.karma.KarmaNotificationService
 import app.pbbls.android.services.EmotionPaletteService
 import app.pbbls.android.services.PathService
+import app.pbbls.android.services.PathStatsService
 import app.pbbls.android.services.PebbleDetailService
 import app.pbbls.android.services.PebbleWriteService
 import app.pbbls.android.services.ReferenceDataService
@@ -40,6 +41,9 @@ class PebblesApp :
     lateinit var pathService: PathService
         private set
 
+    lateinit var pathStats: PathStatsService
+        private set
+
     lateinit var pebbleDetailService: PebbleDetailService
         private set
 
@@ -64,6 +68,7 @@ class PebblesApp :
         supabase = SupabaseService()
         palettes = EmotionPaletteService(supabase)
         pathService = PathService(supabase)
+        pathStats = PathStatsService(supabase)
         pebbleDetailService = PebbleDetailService(supabase)
         snapUrls = SnapURLCache(supabase)
         referenceData = ReferenceDataService(supabase)

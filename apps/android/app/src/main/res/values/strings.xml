@@ -54,6 +54,12 @@
     <!-- a11y label for a week-roll cairn cell: ISO week number + pebble count. -->
     <string name="path_week_cell_a11y">Week %1$d, %2$d pebbles</string>
     <string name="path_sign_out">Sign out</string>
+    <!-- Bottom stats bar (sub-project B). "karma" and "Ripple" are product vocabulary. -->
+    <string name="path_profile">Profile</string>
+    <string name="path_karma_caption">karma</string>
+    <string name="path_karma_a11y">Karma %1$s</string>
+    <string name="ripple_badge_active">Ripple level %1$d, active today</string>
+    <string name="ripple_badge_inactive">Ripple level %1$d, inactive today</string>
 
     <!-- Reference-data names (D9). Resolved via ReferenceStrings, keyed by DB slug —
          never render the DB `name` column directly on a read path. Source: iOS
