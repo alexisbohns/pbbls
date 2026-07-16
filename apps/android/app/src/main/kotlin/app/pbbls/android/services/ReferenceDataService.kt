@@ -96,7 +96,11 @@ class ReferenceDataService(
                 supabase.client
                     .from("souls")
                     .insert(payload) {
-                        select(Columns.raw("id, name, glyph_id, glyphs(id, name, strokes, view_box)"))
+                        select(
+                            Columns.raw(
+                                "id, name, glyph_id, glyphs(id, name, strokes, view_box), pebbles_count:pebble_souls(count)",
+                            ),
+                        )
                     }.decodeSingle<SoulRow>()
                     .toSoulWithGlyph()
             souls = (souls + inserted).sortedBy { it.name }
@@ -114,10 +118,15 @@ class ReferenceDataService(
                 order("name", Order.ASCENDING)
             }.decodeList<Domain>()
 
+    // The pebbles_count aggregate rides along because SoulTile renders it —
+    // omitting it showed a permanent 0 for every soul (#563). Mirrors the iOS
+    // SoulPickerSheet.load() select.
     private suspend fun fetchSouls(): List<SoulWithGlyph> =
         supabase.client
             .from("souls")
-            .select(Columns.raw("id, name, glyph_id, glyphs(id, name, strokes, view_box)")) {
+            .select(
+                Columns.raw("id, name, glyph_id, glyphs(id, name, strokes, view_box), pebbles_count:pebble_souls(count)"),
+            ) {
                 order("name", Order.ASCENDING)
             }.decodeList<SoulRow>()
             .map { it.toSoulWithGlyph() }

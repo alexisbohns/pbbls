@@ -16,7 +16,7 @@ data class SoulWithGlyph(
 /**
  * Wire row for `souls` selects. PostgREST nests the joined glyph under the FK
  * relation name `glyphs` and returns `pebble_souls(count)` as `[{ "count": N }]`;
- * absent (the reference-data select doesn't ask for it) decodes to 0.
+ * an absent aggregate (a select that doesn't ask for it) decodes to 0 defensively.
  */
 @Serializable
 data class SoulRow(
