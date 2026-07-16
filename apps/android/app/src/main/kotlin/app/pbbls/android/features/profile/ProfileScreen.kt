@@ -197,7 +197,13 @@ fun ProfileScreen(
             initialGlyphId = profile?.glyphId,
             initialGlyphStrokes = glyphStrokes,
             email = supabase.session?.user?.email,
-            providers = linkedProviders(supabase.session?.user?.identities?.map { it.provider }),
+            providers =
+                linkedProviders(
+                    supabase.session
+                        ?.user
+                        ?.identities
+                        ?.map { it.provider },
+                ),
             onDismiss = { isPresentingSettings = false },
             onSaved = { newName, newGlyph ->
                 profile = profile?.copy(displayName = newName, glyphId = newGlyph?.id ?: profile?.glyphId)

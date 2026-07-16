@@ -7,8 +7,8 @@ import app.pbbls.android.services.EmotionPaletteService
 import app.pbbls.android.services.PathService
 import app.pbbls.android.services.PathStatsService
 import app.pbbls.android.services.PebbleDetailService
-import app.pbbls.android.services.ProfileService
 import app.pbbls.android.services.PebbleWriteService
+import app.pbbls.android.services.ProfileService
 import app.pbbls.android.services.ReferenceDataService
 import app.pbbls.android.services.SnapURLCache
 import app.pbbls.android.services.SupabaseService
