@@ -69,7 +69,8 @@
     <string name="profile_counter_pebbles">Pebbles</string>
     <string name="profile_counter_karma">Karma</string>
     <string name="profile_collections_header">Collections</string>
-    <plurals name="profile_collection_count">
+    <!-- Décompte « N pebble(s) » partagé — cartes de collection, entête du détail d'âme. -->
+    <plurals name="pebbles_count">
         <item quantity="one">%1$d pebble</item>
         <item quantity="other">%1$d pebbles</item>
     </plurals>
@@ -88,6 +89,20 @@
     <string name="settings_providers_header">Fournisseurs</string>
     <string name="settings_legal_header">Mentions légales</string>
     <string name="settings_save_error">Impossible d\'enregistrer vos modifications. Veuillez réessayer.</string>
+
+    <!-- ==== Gestion des âmes (M41 sous-projet D). -->
+    <string name="souls_title">Âmes</string>
+    <string name="souls_add_a11y">Ajouter une âme</string>
+    <string name="souls_empty_title">Pas encore d\'âmes</string>
+    <string name="souls_empty_message">Les personnes et les êtres que vous associez à vos pebbles apparaîtront ici.</string>
+    <string name="souls_load_error">Impossible de charger les âmes.</string>
+    <string name="souls_delete_message">Les pebbles liés restent ; seuls l\'âme et ses liens sont supprimés.</string>
+    <string name="soul_detail_empty_title">Pas encore de pebbles</string>
+    <string name="soul_detail_empty_message">Les pebbles que vous associez à cette âme apparaîtront ici.</string>
+    <string name="soul_detail_load_error">Impossible de charger les pebbles.</string>
+    <string name="soul_edit_title">Modifier l\'âme</string>
+    <string name="soul_form_glyph_choose">Touchez pour choisir</string>
+    <string name="soul_save_error">Impossible d\'enregistrer l\'âme. Veuillez réessayer.</string>
 
     <!-- French reference-data names — see values/strings.xml for provenance. -->
 

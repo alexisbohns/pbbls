@@ -311,7 +311,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Souls Directory",
-      "description": "Browse and manage all souls (people in your life) as a 3-column glyph grid.",
+      "description": "Browse and manage all souls (people in your life) as a 3-column glyph grid. Android (M41 D, #568): pushed NavHost route from the Profile shortcuts row — adaptive-96 grid of the shared SoulItem cell with live pebble counts, \"+\" top-bar create, long-press delete with confirm (the unified D7 idiom).",
       "status": "live",
       "platforms": [
         "web",
@@ -324,7 +324,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Soul Detail",
-      "description": "View a soul's profile and all linked pebbles.",
+      "description": "View a soul's profile and all linked pebbles. Android (M41 D, #568): pushed route (soulId argument, fetches its own row) — 56dp glyph header + name + live count, tagged pebbles on the shared PebbleRow (tap opens the edit-pebble cover; long-press deletes via delete_pebble), Edit top-bar action opens the soul form as a cover (D9 surface swap).",
       "status": "live",
       "platforms": [
         "web",
@@ -337,7 +337,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Add Soul",
-      "description": "Create a new soul entry for someone in your life. Android (M39 D12, #541): inline name-only create dialog in the soul picker (relies on the souls.glyph_id system default); the full create sheet with the glyph row belongs to the Profile milestone.",
+      "description": "Create a new soul entry for someone in your life. Android: the pebble form's soul picker keeps the inline name-only create dialog (M39 D12, #541 — relies on the souls.glyph_id system default); the full create form with the glyph row landed with M41 D (#568) as a full-screen cover off the souls list.",
       "status": "live",
       "platforms": [
         "web",
@@ -350,7 +350,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Edit Soul",
-      "description": "Rename an existing soul. Web renders inline on the detail page; iOS presents as a sheet.",
+      "description": "Rename an existing soul and swap its glyph. Web renders inline on the detail page; iOS presents as a sheet. Android (M41 D, #568): full-screen cover sharing one form surface with create (name field + glyph row → glyph picker).",
       "status": "live",
       "platforms": [
         "web",
@@ -596,7 +596,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Profile",
-      "description": "User profile dashboard. Banner (glyph + display name in the Reenie Beanie script face + member-since), a shortcuts row (Collections / Souls / Glyphs), a Stats card (ripple-level badge + 28-day assiduity grid + Days / Pebbles / Karma counters), a horizontal Collections carousel, a Lab card, and a logout button; a gear button opens Settings. Web aligns to the iOS token refactor (issues #465 / #467). iOS (#388): pushed from PathView's bottom bar; hosts the Lab navigation link and the onboarding replay full-screen cover. Android (M41 C, #567): pushed as an authed NavHost route from the bottom bar — banner, stats card, collections carousel (read-only until E), logout, and Settings as a full-screen cover; the shortcuts row and Lab card arrive with sub-projects D/E and the Lab milestone.",
+      "description": "User profile dashboard. Banner (glyph + display name in the Reenie Beanie script face + member-since), a shortcuts row (Collections / Souls / Glyphs), a Stats card (ripple-level badge + 28-day assiduity grid + Days / Pebbles / Karma counters), a horizontal Collections carousel, a Lab card, and a logout button; a gear button opens Settings. Web aligns to the iOS token refactor (issues #465 / #467). iOS (#388): pushed from PathView's bottom bar; hosts the Lab navigation link and the onboarding replay full-screen cover. Android (M41 C, #567): pushed as an authed NavHost route from the bottom bar — banner, stats card, collections carousel (read-only until E), logout, and Settings as a full-screen cover. The shortcuts row landed with D (#568) showing only wired tiles (souls now; collections with E, glyphs with its milestone — D11); the Lab card arrives with the Lab milestone.",
       "status": "development",
       "platforms": [
         "web",

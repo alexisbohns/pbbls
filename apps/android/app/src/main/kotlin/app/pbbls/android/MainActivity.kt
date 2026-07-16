@@ -16,6 +16,7 @@ import app.pbbls.android.services.LocalPebbleWriteService
 import app.pbbls.android.services.LocalProfileService
 import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSnapURLCache
+import app.pbbls.android.services.LocalSoulsService
 import app.pbbls.android.services.LocalSupabaseService
 import app.pbbls.android.theme.PebblesTheme
 import io.github.jan.supabase.auth.handleDeeplinks
@@ -48,6 +49,7 @@ class MainActivity : ComponentActivity() {
                     LocalReferenceDataService provides app.referenceData,
                     LocalPebbleWriteService provides app.pebbleWrite,
                     LocalPebbleDetailService provides app.pebbleDetailService,
+                    LocalSoulsService provides app.soulsService,
                     LocalGlyphService provides app.glyphService,
                     LocalKarmaNotificationService provides app.karma,
                 ) {

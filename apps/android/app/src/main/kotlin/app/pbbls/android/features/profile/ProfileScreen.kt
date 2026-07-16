@@ -29,6 +29,7 @@ import app.pbbls.android.features.glyph.models.GlyphStroke
 import app.pbbls.android.features.profile.components.ProfileBanner
 import app.pbbls.android.features.profile.components.ProfileCollectionsCard
 import app.pbbls.android.features.profile.components.ProfileLogoutButton
+import app.pbbls.android.features.profile.components.ProfileShortcutsRow
 import app.pbbls.android.features.profile.components.ProfileStatsCard
 import app.pbbls.android.features.profile.models.Collection
 import app.pbbls.android.services.LocalPathStatsService
@@ -45,10 +46,10 @@ private const val TAG = "profile"
 
 /**
  * The Profile screen — ports iOS `ProfileView.swift` (sub-project C): banner,
- * stats card, collections carousel, and log out, with the gear button opening
- * [SettingsScreen] as a full-screen cover (the D5 surface pattern). The
- * shortcuts row and Lab card arrive with their own sub-projects/milestones
- * (D11 — no dead chrome in the interim).
+ * shortcuts row (tiles appear as their destinations land — D11), stats card,
+ * collections carousel, and log out, with the gear button opening
+ * [SettingsScreen] as a full-screen cover (the D5 surface pattern). The Lab
+ * card arrives with its own milestone.
  *
  * Deviation from iOS (design D13): a failed profile fetch shows the standard
  * error + Retry treatment instead of iOS's silent empty banner.
@@ -57,6 +58,7 @@ private const val TAG = "profile"
 fun ProfileScreen(
     onBack: () -> Unit,
     onSignOut: () -> Unit,
+    onOpenSouls: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val profileService = LocalProfileService.current
@@ -175,6 +177,7 @@ fun ProfileScreen(
                         memberSince = profile?.createdAt,
                         glyphStrokes = glyphStrokes,
                     )
+                    ProfileShortcutsRow(onOpenSouls = onOpenSouls)
                     ProfileStatsCard(
                         ripple = stats.ripple,
                         assiduity = stats.assiduity,

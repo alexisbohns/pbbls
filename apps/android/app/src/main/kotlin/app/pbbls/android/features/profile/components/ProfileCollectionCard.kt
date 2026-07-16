@@ -98,7 +98,7 @@ fun ProfileCollectionCard(
                 PebblesText(
                     text =
                         pluralStringResource(
-                            R.plurals.profile_collection_count,
+                            R.plurals.pebbles_count,
                             collection.pebbleCount,
                             collection.pebbleCount,
                         ),

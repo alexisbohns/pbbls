@@ -11,6 +11,7 @@ import app.pbbls.android.services.PebbleWriteService
 import app.pbbls.android.services.ProfileService
 import app.pbbls.android.services.ReferenceDataService
 import app.pbbls.android.services.SnapURLCache
+import app.pbbls.android.services.SoulsService
 import app.pbbls.android.services.SupabaseService
 import app.rive.runtime.kotlin.core.Rive
 import coil3.ImageLoader
@@ -60,6 +61,9 @@ class PebblesApp :
     lateinit var pebbleWrite: PebbleWriteService
         private set
 
+    lateinit var soulsService: SoulsService
+        private set
+
     lateinit var glyphService: GlyphService
         private set
 
@@ -78,6 +82,7 @@ class PebblesApp :
         snapUrls = SnapURLCache(supabase)
         referenceData = ReferenceDataService(supabase)
         pebbleWrite = PebbleWriteService(supabase)
+        soulsService = SoulsService(supabase)
         glyphService = GlyphService(supabase)
         karma = KarmaNotificationService()
     }
