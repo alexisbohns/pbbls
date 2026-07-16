@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +35,7 @@ import app.pbbls.android.features.profile.components.ProfileStatsCard
 import app.pbbls.android.features.profile.models.Collection
 import app.pbbls.android.services.LocalPathStatsService
 import app.pbbls.android.services.LocalProfileService
+import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSupabaseService
 import app.pbbls.android.services.ProfileRow
 import app.pbbls.android.theme.PebblesScreen
@@ -41,15 +43,19 @@ import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar
 import app.pbbls.android.theme.PebblesTypography
+import kotlinx.coroutines.launch
 
 private const val TAG = "profile"
 
 /**
  * The Profile screen — ports iOS `ProfileView.swift` (sub-project C): banner,
  * shortcuts row (tiles appear as their destinations land — D11), stats card,
- * collections carousel, and log out, with the gear button opening
- * [SettingsScreen] as a full-screen cover (the D5 surface pattern). The Lab
- * card arrives with its own milestone.
+ * collections carousel (header → list, card → detail, empty tile → the create
+ * form as a cover), and log out, with the gear button opening [SettingsScreen]
+ * as a full-screen cover (the D5 surface pattern). The Lab card arrives with
+ * its own milestone. Navigating away disposes this destination, so returning
+ * re-runs the load — the carousel stays fresh after edits in the pushed
+ * screens.
  *
  * Deviation from iOS (design D13): a failed profile fetch shows the standard
  * error + Retry treatment instead of iOS's silent empty banner.
@@ -59,11 +65,15 @@ fun ProfileScreen(
     onBack: () -> Unit,
     onSignOut: () -> Unit,
     onOpenSouls: () -> Unit,
+    onOpenCollections: () -> Unit,
+    onOpenCollection: (Collection) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val profileService = LocalProfileService.current
     val stats = LocalPathStatsService.current
     val supabase = LocalSupabaseService.current
+    val refs = LocalReferenceDataService.current
+    val scope = rememberCoroutineScope()
     val system = PebblesTheme.colors.system
 
     var profile by remember { mutableStateOf<ProfileRow?>(null) }
@@ -73,6 +83,7 @@ fun ProfileScreen(
     var loadFailed by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(true) }
     var isPresentingSettings by remember { mutableStateOf(false) }
+    var isPresentingCreateCollection by remember { mutableStateOf(false) }
     var loadKey by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(loadKey) {
@@ -177,7 +188,10 @@ fun ProfileScreen(
                         memberSince = profile?.createdAt,
                         glyphStrokes = glyphStrokes,
                     )
-                    ProfileShortcutsRow(onOpenSouls = onOpenSouls)
+                    ProfileShortcutsRow(
+                        onOpenCollections = onOpenCollections,
+                        onOpenSouls = onOpenSouls,
+                    )
                     ProfileStatsCard(
                         ripple = stats.ripple,
                         assiduity = stats.assiduity,
@@ -188,10 +202,26 @@ fun ProfileScreen(
                     ProfileCollectionsCard(
                         collections = collections,
                         hasLoaded = collectionsLoaded,
+                        onOpenList = onOpenCollections,
+                        onOpenCollection = onOpenCollection,
+                        onCreate = { isPresentingCreateCollection = true },
                     )
                     ProfileLogoutButton(onClick = onSignOut)
                 }
         }
+    }
+
+    if (isPresentingCreateCollection) {
+        CollectionFormScreen(
+            original = null,
+            onDismiss = { isPresentingCreateCollection = false },
+            onSaved = {
+                isPresentingCreateCollection = false
+                loadKey++
+                scope.launch { refs.refreshCollections() }
+            },
+            modifier = Modifier.fillMaxSize(),
+        )
     }
 
     if (isPresentingSettings) {

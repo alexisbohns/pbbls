@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.CompositionLocalProvider
 import app.pbbls.android.features.glyph.services.LocalGlyphService
 import app.pbbls.android.features.karma.LocalKarmaNotificationService
+import app.pbbls.android.services.LocalCollectionsService
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalPathService
 import app.pbbls.android.services.LocalPathStatsService
@@ -50,6 +51,7 @@ class MainActivity : ComponentActivity() {
                     LocalPebbleWriteService provides app.pebbleWrite,
                     LocalPebbleDetailService provides app.pebbleDetailService,
                     LocalSoulsService provides app.soulsService,
+                    LocalCollectionsService provides app.collectionsService,
                     LocalGlyphService provides app.glyphService,
                     LocalKarmaNotificationService provides app.karma,
                 ) {

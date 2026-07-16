@@ -3,6 +3,7 @@ package app.pbbls.android
 import android.app.Application
 import app.pbbls.android.features.glyph.services.GlyphService
 import app.pbbls.android.features.karma.KarmaNotificationService
+import app.pbbls.android.services.CollectionsService
 import app.pbbls.android.services.EmotionPaletteService
 import app.pbbls.android.services.PathService
 import app.pbbls.android.services.PathStatsService
@@ -64,6 +65,9 @@ class PebblesApp :
     lateinit var soulsService: SoulsService
         private set
 
+    lateinit var collectionsService: CollectionsService
+        private set
+
     lateinit var glyphService: GlyphService
         private set
 
@@ -83,6 +87,7 @@ class PebblesApp :
         referenceData = ReferenceDataService(supabase)
         pebbleWrite = PebbleWriteService(supabase)
         soulsService = SoulsService(supabase)
+        collectionsService = CollectionsService(supabase)
         glyphService = GlyphService(supabase)
         karma = KarmaNotificationService()
     }
