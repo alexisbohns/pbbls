@@ -283,4 +283,15 @@
     <string name="photo_remove_error">Impossible de retirer la photo. Veuillez réessayer.</string>
     <string name="pebble_save_error_photo_uploading">La photo est encore en cours d\'envoi.</string>
     <string name="pebble_save_error_photo_failed">L\'envoi de la photo a échoué. Réessayez ou retirez-la.</string>
+
+    <!-- ==== Atelier de glyphes (M43 · Android Glyph Studio &amp; Store) ==== -->
+    <string name="carve_title">Nouveau glyphe</string>
+    <string name="carve_name_placeholder">Nom (facultatif)</string>
+    <string name="carve_undo">Défaire</string>
+    <string name="carve_clear">Effacer</string>
+    <string name="carve_canvas_strokes_a11y">Zone de dessin, %1$d traits dessinés</string>
+    <string name="carve_discard_title">Abandonner votre glyphe ?</string>
+    <string name="carve_keep_editing">Continuer</string>
+    <string name="carve_discard">Abandonner</string>
+    <string name="carve_save_error">Impossible d\'enregistrer votre glyphe. Veuillez réessayer.</string>
 </resources>
