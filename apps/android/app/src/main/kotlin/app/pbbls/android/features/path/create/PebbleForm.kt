@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.pbbls.android.R
+import app.pbbls.android.components.DashedPlaceholder
 import app.pbbls.android.components.PebblesTextInput
 import app.pbbls.android.features.glyph.models.Glyph
 import app.pbbls.android.features.path.create.pickers.EmotionPickerSheet
@@ -566,12 +567,6 @@ private fun AddSoulPill(onClick: () -> Unit) {
             maxLines = 1,
         )
     }
-}
-
-@Composable
-private fun DashedPlaceholder(modifier: Modifier = Modifier) {
-    val color = PebblesTheme.colors.system.secondary
-    Box(modifier = modifier.size(32.dp).border(1.dp, color, RoundedCornerShape(6.dp)))
 }
 
 /** Polarity → localized label; `internal` so [ValencePickerSheet] reuses it. */

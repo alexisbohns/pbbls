@@ -179,6 +179,8 @@
     <string name="create_glyph_untitled">Untitled glyph</string>
     <string name="create_glyph_remove">Remove glyph</string>
     <string name="create_glyph_load_error">Couldn\'t load glyphs.</string>
+    <!-- GlyphBanner byline lead-in ("BY <name>", uppercased by the meta token; design-system pass 2). -->
+    <string name="glyph_banner_by">By</string>
     <!-- Souls section + inline create. -->
     <string name="create_souls_header">Souls</string>
     <string name="create_souls_title">Choose souls</string>
