@@ -63,3 +63,10 @@ internal val AccentPaletteShared =
  * a SystemPalette field if a second destructive surface appears.
  */
 internal val PebblesDestructive = Color(0xFFD1453B)
+
+/**
+ * Success/confirmation accent — the [PebblesDestructive] counterpart for iOS's
+ * `.green` (the photo section's "Ready"/"Saved" state labels, M42). Same
+ * graduate-to-token rule.
+ */
+internal val PebblesSuccess = Color(0xFF34A853)

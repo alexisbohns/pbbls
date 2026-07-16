@@ -54,6 +54,9 @@ import app.pbbls.android.features.path.models.ValencePolarity
 import app.pbbls.android.features.path.render.GlyphImage
 import app.pbbls.android.features.path.render.PebbleStaticRender
 import app.pbbls.android.features.path.render.ValenceGlyph
+import app.pbbls.android.features.pebblemedia.AttachedPhotoView
+import app.pbbls.android.features.pebblemedia.ExistingSnapRow
+import app.pbbls.android.features.pebblemedia.models.FormSnap
 import app.pbbls.android.features.profile.models.SoulWithGlyph
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesText
@@ -88,6 +91,12 @@ fun PebbleForm(
     renderSvg: String? = null,
     strokeColor: String? = null,
     renderHeight: Dp = 260.dp,
+    formSnap: FormSnap? = null,
+    onAddPhoto: () -> Unit = {},
+    onRetryPending: () -> Unit = {},
+    onRemovePending: () -> Unit = {},
+    isRemovingExistingSnap: Boolean = false,
+    onRemoveExistingSnap: () -> Unit = {},
 ) {
     var activePicker by remember { mutableStateOf<PickerKind?>(null) }
 
@@ -160,6 +169,23 @@ fun PebbleForm(
             selectedId = draft.collectionId,
             onSelect = { onDraftChange(draft.copy(collectionId = it)) },
         )
+        // Photo section (M42) — after Optional, before the inline error (iOS order).
+        FormSectionHeader(stringResource(R.string.create_photo_header))
+        when (formSnap) {
+            null -> AddPhotoRow(onClick = onAddPhoto)
+            is FormSnap.Existing ->
+                ExistingSnapRow(
+                    storagePath = formSnap.storagePath,
+                    isRemoving = isRemovingExistingSnap,
+                    onRemove = onRemoveExistingSnap,
+                )
+            is FormSnap.Pending ->
+                AttachedPhotoView(
+                    snap = formSnap.snap,
+                    onRetry = onRetryPending,
+                    onRemove = onRemovePending,
+                )
+        }
         if (saveError != null) {
             PebblesText(
                 text = saveError,
@@ -263,6 +289,34 @@ private fun FormSectionHeader(
         color = PebblesTheme.colors.system.secondary,
         modifier = modifier,
     )
+}
+
+/** The empty photo slot — iOS `Label("Add a photo", systemImage: "photo.badge.plus")` row. */
+@Composable
+private fun AddPhotoRow(onClick: () -> Unit) {
+    val system = PebblesTheme.colors.system
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(12.dp))
+                .clickable(onClick = onClick)
+                .padding(vertical = 12.dp, horizontal = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            painter = painterResource(R.drawable.ic_image),
+            contentDescription = null,
+            tint = PebblesTheme.colors.accent.primary,
+            modifier = Modifier.size(24.dp),
+        )
+        PebblesText(
+            text = stringResource(R.string.photo_add),
+            style = PebblesTypography.body,
+            color = system.foreground,
+        )
+    }
 }
 
 @Composable
