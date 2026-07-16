@@ -13,6 +13,7 @@ import app.pbbls.android.services.LocalPathService
 import app.pbbls.android.services.LocalPathStatsService
 import app.pbbls.android.services.LocalPebbleDetailService
 import app.pbbls.android.services.LocalPebbleWriteService
+import app.pbbls.android.services.LocalProfileService
 import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSnapURLCache
 import app.pbbls.android.services.LocalSupabaseService
@@ -42,6 +43,7 @@ class MainActivity : ComponentActivity() {
                     LocalEmotionPaletteService provides app.palettes,
                     LocalPathService provides app.pathService,
                     LocalPathStatsService provides app.pathStats,
+                    LocalProfileService provides app.profileService,
                     LocalSnapURLCache provides app.snapUrls,
                     LocalReferenceDataService provides app.referenceData,
                     LocalPebbleWriteService provides app.pebbleWrite,

@@ -53,14 +53,15 @@ import kotlin.math.abs
 private const val TAG = "path"
 
 /**
- * The read-only Path timeline — the authenticated landing surface (issue
- * #531, `PathView.swift` analog minus create/detail/delete/stats). Loads
- * every pebble once via `path_pebbles()`, groups by ISO week, and pages the
- * body by week. The temporary sign-out stays until Profile exists.
+ * The Path timeline — the authenticated landing surface (`PathView.swift`
+ * analog). Loads every pebble once via `path_pebbles()`, groups by ISO week,
+ * pages the body by week, and hosts the create/detail/edit covers plus the
+ * bottom stats bar. Sign-out moved to the Profile screen (sub-project C);
+ * [onProfile] navigates there.
  */
 @Composable
 fun PathScreen(
-    onSignOut: () -> Unit,
+    onProfile: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val pathService = LocalPathService.current
@@ -174,12 +175,12 @@ fun PathScreen(
                         today = today,
                         onFocusChange = { focusedWeekStart = it },
                         paletteFor = { pebble -> pebble.emotion?.let { palettes.palette(it.id) } },
-                        onSignOut = onSignOut,
                         onPebbleTap = { pebble -> selectedPebbleId = pebble.id },
                         onPebbleDelete = { pebble -> pendingDeletion = pebble },
                         onCreatePebble = { isPresentingCreate = true },
                         karma = stats.karma,
                         ripple = rippleWithLocalActiveToday,
+                        onProfile = onProfile,
                     )
             }
         }
@@ -274,7 +275,6 @@ fun PathContent(
     today: LocalDate,
     onFocusChange: (LocalDate) -> Unit,
     paletteFor: (Pebble) -> EmotionPalette?,
-    onSignOut: () -> Unit,
     onPebbleTap: (Pebble) -> Unit = {},
     onPebbleDelete: (Pebble) -> Unit = {},
     onCreatePebble: () -> Unit = {},
@@ -283,7 +283,6 @@ fun PathContent(
     onProfile: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    val accent = PebblesTheme.colors.accent
     val initialIndex =
         entries.indexOfFirst { it.weekStart == initialWeekStart }.coerceAtLeast(0)
     val pagerState = rememberPagerState(initialPage = initialIndex) { entries.size }
@@ -343,26 +342,14 @@ fun PathContent(
             onTap = onCreatePebble,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         )
-        // Bottom stats bar (sub-project B) — karma + ripple; the profile tap
-        // is a stub until the Profile screen lands (sub-project C).
+        // Bottom stats bar (sub-project B) — karma + ripple; all taps push
+        // Profile (sub-project C), which now owns sign-out.
         PathBottomBar(
             karma = karma,
             ripple = ripple,
             onProfile = onProfile,
             modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
         )
-        // Temporary affordance until Profile exists — re-testing the funnel
-        // on device requires a way back to Welcome.
-        TextButton(
-            onClick = onSignOut,
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-        ) {
-            PebblesText(
-                text = stringResource(R.string.path_sign_out),
-                style = PebblesTypography.buttonLabel,
-                color = accent.primary,
-            )
-        }
     }
 }
 
