@@ -194,7 +194,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Quick Pebble Editor",
-      "description": "Single-page pebble creation editor (V2) combining all enrichment steps. On /path the editor is anchored to the bottom dock — collapsed as a 'What happened?' trigger that opens an overlay bottom-sheet on tap; on /record it auto-opens as the route's primary affordance. Android (M39, #541/#542): full-screen CreatePebbleScreen/EditPebbleScreen hosting the shared PebbleForm with modal bottom-sheet pickers — full-screen surfaces instead of a bottom-sheet dock (M39 design D5).",
+      "description": "Single-page pebble creation editor (V2) combining all enrichment steps. On /path the editor is anchored to the bottom dock — collapsed as a 'What happened?' trigger that opens an overlay bottom-sheet on tap; on /record it auto-opens as the route's primary affordance. Android (M39, #541/#542): full-screen CreatePebbleScreen/EditPebbleScreen hosting the shared PebbleForm with modal bottom-sheet pickers — full-screen surfaces instead of a bottom-sheet dock (M39 design D5). M42 (#581): the shared Android form gains the Photo section — single-photo attach via the system photo picker (client-side compression to 1024px/420px JPEG renditions, upload with compensating deletes), existing-snap row with eager delete_pebble_media removal, and save gates while an upload is pending or failed.",
       "status": "live",
       "platforms": [
         "web",
@@ -207,7 +207,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Pebble Detail",
-      "description": "Read-only display of a recorded pebble: rendered shape, title, picture, emotion/domain/collections/souls metadata shown as shared tiles, and description. Edit button stacks the editor.",
+      "description": "Read-only display of a recorded pebble: rendered shape, title, picture, emotion/domain/collections/souls metadata shown as shared tiles, and description. Edit button stacks the editor. Android (M42, #582): the read banner gains the iOS two-phase photo reveal — the attached photo slides in behind the pebble in the BannerAspect bucket (16:9 / 4:3 / 1:1) nearest its intrinsic ratio; photo-less pebbles are unchanged.",
       "status": "live",
       "platforms": [
         "web",

@@ -57,6 +57,7 @@ fun PebbleReadView(
             valence = Valence.fromOrDefault(detail.positiveness, detail.intensity),
             palette = palette,
             modifier = Modifier.fillMaxWidth(),
+            snapStoragePath = detail.sortedSnaps.firstOrNull()?.storagePath,
         )
         PebbleReadTitle(name = detail.name, happenedAt = detail.happenedAt)
         PebbleReadMeta(detail = detail)
