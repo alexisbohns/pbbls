@@ -3,25 +3,19 @@ package app.pbbls.android.features.path.create
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.features.glyph.models.Glyph
@@ -32,8 +26,9 @@ import app.pbbls.android.services.ComposeResult
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalPebbleWriteService
 import app.pbbls.android.services.LocalReferenceDataService
-import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
+import app.pbbls.android.theme.PebblesTopBar
+import app.pbbls.android.theme.PebblesTopBarTextButton
 import app.pbbls.android.theme.PebblesTypography
 import kotlinx.coroutines.launch
 
@@ -122,7 +117,10 @@ fun CreatePebbleScreen(
 /**
  * Create-surface top bar: Cancel (left), the title (centered), and a Save
  * button that swaps to an inline spinner while [isSaving] and is disabled until
- * the draft is valid. Ports `CreatePebbleSheet`'s toolbar.
+ * the draft is valid. Ports `CreatePebbleSheet`'s toolbar, composed on the
+ * shared [PebblesTopBar]; keeps the shipped M39 look (headline title, accent
+ * buttons) via the style overrides — see the PebblesTopBar doc for the
+ * iOS-idiom defaults new screens should use.
  */
 @Composable
 private fun CreateTopBar(
@@ -133,41 +131,32 @@ private fun CreateTopBar(
 ) {
     val system = PebblesTheme.colors.system
     val accent = PebblesTheme.colors.accent
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        TextButton(onClick = onCancel) {
-            PebblesText(
+    PebblesTopBar(
+        title = stringResource(R.string.create_new_pebble),
+        titleStyle = PebblesTypography.headlineEmphasized,
+        titleColor = system.foreground,
+        leading = {
+            PebblesTopBarTextButton(
                 text = stringResource(R.string.action_cancel),
-                style = PebblesTypography.buttonLabel,
+                onClick = onCancel,
                 color = accent.primary,
             )
-        }
-        PebblesText(
-            text = stringResource(R.string.create_new_pebble),
-            style = PebblesTypography.headlineEmphasized,
-            color = system.foreground,
-            modifier = Modifier.weight(1f),
-            textAlign = TextAlign.Center,
-        )
-        if (isSaving) {
-            CircularProgressIndicator(
-                color = accent.primary,
-                strokeWidth = 2.dp,
-                modifier = Modifier.size(20.dp),
-            )
-        } else {
-            TextButton(onClick = onSave, enabled = saveEnabled) {
-                PebblesText(
+        },
+        trailing = {
+            if (isSaving) {
+                CircularProgressIndicator(
+                    color = accent.primary,
+                    strokeWidth = 2.dp,
+                    modifier = Modifier.size(20.dp),
+                )
+            } else {
+                PebblesTopBarTextButton(
                     text = stringResource(R.string.action_save),
-                    style = PebblesTypography.buttonLabel,
+                    onClick = onSave,
+                    enabled = saveEnabled,
                     color = if (saveEnabled) accent.primary else system.muted,
                 )
             }
-        }
-    }
+        },
+    )
 }

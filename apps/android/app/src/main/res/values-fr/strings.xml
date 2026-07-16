@@ -169,6 +169,8 @@
     <string name="create_glyph_untitled">Glyphe sans nom</string>
     <string name="create_glyph_remove">Retirer le glyphe</string>
     <string name="create_glyph_load_error">Impossible de charger les glyphes.</string>
+    <!-- Amorce de la signature du GlyphBanner (« PAR <nom> », mis en capitales par le jeton meta). -->
+    <string name="glyph_banner_by">Par</string>
     <!-- Souls section + inline create. -->
     <string name="create_souls_header">Âmes</string>
     <string name="create_souls_title">Choisir des âmes</string>

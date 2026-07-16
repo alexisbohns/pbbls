@@ -1,0 +1,14 @@
+<!--
+  Layer stack for the Collections shortcut tile (sub-project C) — the
+  sf.square.stack.3d analog (design-system pass 2). Standard Material layers
+  path; tinted at the call site.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#000000"
+        android:pathData="M11.99,18.54l-7.37,-5.73L3,14.07l9,7 9,-7 -1.63,-1.27 -7.38,5.73zM12,16l7.36,-5.73L21,9l-9,-7 -9,7 1.63,1.27L12,16z" />
+</vector>
