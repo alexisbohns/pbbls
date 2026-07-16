@@ -281,4 +281,18 @@
     <string name="karma_flash_a11y">Earned %1$d karma, %2$s</string>
     <!-- ==== Edit pebble (sub-project D) ==== -->
     <string name="edit_pebble_title">Edit pebble</string>
+
+    <!-- ==== Pebble photos (M42 · Android Snaps) ==== -->
+    <string name="create_photo_header">Photo</string>
+    <string name="photo_add">Add a photo</string>
+    <string name="photo_label">Photo</string>
+    <string name="photo_state_uploading">Uploading…</string>
+    <string name="photo_state_ready">Ready</string>
+    <string name="photo_state_failed">Upload failed</string>
+    <string name="photo_state_saved">Saved</string>
+    <string name="photo_retry_a11y">Retry</string>
+    <string name="photo_remove_a11y">Remove photo</string>
+    <string name="photo_remove_error">Couldn\'t remove the photo. Please try again.</string>
+    <string name="pebble_save_error_photo_uploading">Photo is still uploading.</string>
+    <string name="pebble_save_error_photo_failed">Photo upload failed. Retry or remove it.</string>
 </resources>
