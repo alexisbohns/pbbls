@@ -26,6 +26,8 @@ import app.pbbls.android.features.onboarding.OnboardingScreen
 import app.pbbls.android.features.onboarding.OnboardingSteps
 import app.pbbls.android.features.path.PathScreen
 import app.pbbls.android.features.profile.ProfileScreen
+import app.pbbls.android.features.profile.SoulDetailScreen
+import app.pbbls.android.features.profile.SoulsListScreen
 import app.pbbls.android.features.welcome.WelcomeScreen
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalReferenceDataService
@@ -41,6 +43,8 @@ private const val ROUTE_WELCOME = "welcome"
 private const val ROUTE_AUTH = "auth"
 private const val ROUTE_PATH = "path"
 private const val ROUTE_PROFILE = "profile"
+private const val ROUTE_SOULS = "souls"
+private const val ROUTE_SOUL_DETAIL = "souls/{soulId}"
 
 /**
  * Top-level auth gate — the `RootView` analog (D5). The gate is conditional
@@ -147,12 +151,13 @@ fun RootScreen() {
 }
 
 /**
- * Authed navigation (D1): pushes — Path → Profile (souls/collections routes
- * arrive with sub-projects D/E) — are real NavHost routes so predictive back
- * and the back stack behave natively; modal pebble surfaces stay
- * conditionally-composed covers inside PathScreen (the M39 D5 pattern).
- * Sign-out lives on the Profile screen now; the session dropping to null
- * flips RootScreen's gate and unmounts this host.
+ * Authed navigation (D1): pushes — Path → Profile → souls list → soul detail
+ * (collections routes arrive with sub-project E) — are real NavHost routes so
+ * predictive back and the back stack behave natively; modal surfaces (pebble
+ * create/detail/edit, soul create/edit) stay conditionally-composed covers
+ * inside their screens (the M39 D5 pattern). Sign-out lives on the Profile
+ * screen now; the session dropping to null flips RootScreen's gate and
+ * unmounts this host.
  */
 @Composable
 private fun AuthedNavHost(onSignOut: () -> Unit) {
@@ -165,6 +170,22 @@ private fun AuthedNavHost(onSignOut: () -> Unit) {
             ProfileScreen(
                 onBack = { navController.popBackStack() },
                 onSignOut = onSignOut,
+                onOpenSouls = { navController.navigate(ROUTE_SOULS) },
+            )
+        }
+        composable(ROUTE_SOULS) {
+            SoulsListScreen(
+                onBack = { navController.popBackStack() },
+                onOpenSoul = { soul -> navController.navigate("$ROUTE_SOULS/${soul.id}") },
+            )
+        }
+        composable(
+            route = ROUTE_SOUL_DETAIL,
+            arguments = listOf(navArgument("soulId") { type = NavType.StringType }),
+        ) { backStackEntry ->
+            SoulDetailScreen(
+                soulId = backStackEntry.arguments?.getString("soulId").orEmpty(),
+                onBack = { navController.popBackStack() },
             )
         }
     }

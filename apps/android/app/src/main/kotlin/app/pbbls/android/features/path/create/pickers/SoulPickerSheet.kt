@@ -1,18 +1,12 @@
 package app.pbbls.android.features.path.create.pickers
 
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -25,16 +19,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.components.PebblesTextInput
-import app.pbbls.android.features.path.render.GlyphImage
 import app.pbbls.android.features.profile.models.SoulWithGlyph
+import app.pbbls.android.features.shared.SoulItem
+import app.pbbls.android.features.shared.SoulItemCase
 import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
@@ -43,12 +35,13 @@ import kotlinx.coroutines.launch
 
 /**
  * The souls picker (D5/D12) — ports iOS `SoulPickerSheet` + `CreateSoulSheet`.
- * A multi-select `ModalBottomSheet` over the reference-data souls, plus a
- * leading "create" tile that opens the third-level [CreateSoulDialog] (a plain
- * dialog, well-behaved over the sheet). Inline creation inserts a name-only
- * soul and auto-selects it (D11 — `createSoul` updates the souls cache so the
- * new tile renders immediately). Pure [SoulPickerBody] powers screenshot
- * previews.
+ * A multi-select `ModalBottomSheet` over the reference-data souls on the
+ * shared [SoulItem] cell (the M41 #459-contract lift that replaced this file's
+ * private tiles), plus a leading create tile that opens the third-level
+ * [CreateSoulDialog] (a plain dialog, well-behaved over the sheet). Inline
+ * creation inserts a name-only soul and auto-selects it (D11 — `createSoul`
+ * updates the souls cache so the new tile renders immediately). Pure
+ * [SoulPickerBody] powers screenshot previews.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -106,7 +99,6 @@ fun SoulPickerBody(
     modifier: Modifier = Modifier,
 ) {
     val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
     Column(
         modifier = modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -122,76 +114,29 @@ fun SoulPickerBody(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            CreateSoulTile(onClick = onCreateTap)
+            SoulItem(
+                case = SoulItemCase.CREATE,
+                soul = null,
+                count = null,
+                onTap = onCreateTap,
+            )
             souls.forEach { soul ->
-                val tint =
+                // No selection anywhere → everything reads as available
+                // (DEFAULT); once a selection exists, unselected souls mute.
+                val case =
                     when {
-                        selection.isEmpty() -> system.secondary
-                        soul.id in selection -> accent.primary
-                        else -> system.muted
+                        soul.id in selection -> SoulItemCase.SELECTED
+                        selection.isEmpty() -> SoulItemCase.DEFAULT
+                        else -> SoulItemCase.UNSELECTED
                     }
-                SoulTile(soul = soul, tint = tint, onClick = { onToggle(soul.id) })
+                SoulItem(
+                    case = case,
+                    soul = soul,
+                    count = soul.pebblesCount,
+                    onTap = { onToggle(soul.id) },
+                )
             }
         }
-    }
-}
-
-@Composable
-private fun SoulTile(
-    soul: SoulWithGlyph,
-    tint: Color,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Column(
-        modifier =
-            modifier
-                .width(84.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .clickable(onClick = onClick)
-                .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        GlyphImage(
-            strokes = soul.glyph.strokes,
-            viewBox = soul.glyph.viewBox,
-            strokeColor = tint,
-            modifier = Modifier.size(64.dp),
-        )
-        PebblesText(soul.name, PebblesTypography.bodyLeadHand, color = tint, maxLines = 1)
-        PebblesText(soul.pebblesCount.toString(), PebblesTypography.meta, color = tint)
-    }
-}
-
-@Composable
-private fun CreateSoulTile(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val system = PebblesTheme.colors.system
-    Column(
-        modifier =
-            modifier
-                .width(84.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .clickable(onClick = onClick)
-                .padding(8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        Box(
-            modifier = Modifier.size(64.dp).border(1.dp, system.secondary, RoundedCornerShape(12.dp)),
-            contentAlignment = Alignment.Center,
-        ) {
-            PebblesText("+", PebblesTypography.title, color = system.secondary)
-        }
-        PebblesText(
-            text = stringResource(R.string.create_soul_add),
-            style = PebblesTypography.meta,
-            color = system.secondary,
-            maxLines = 1,
-        )
     }
 }
 

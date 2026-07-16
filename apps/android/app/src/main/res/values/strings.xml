@@ -76,7 +76,8 @@
     <string name="profile_counter_pebbles">Pebbles</string>
     <string name="profile_counter_karma">Karma</string>
     <string name="profile_collections_header">Collections</string>
-    <plurals name="profile_collection_count">
+    <!-- Shared "N pebble(s)" count — collection cards, soul detail header. -->
+    <plurals name="pebbles_count">
         <item quantity="one">%1$d pebble</item>
         <item quantity="other">%1$d pebbles</item>
     </plurals>
@@ -95,6 +96,21 @@
     <string name="settings_providers_header">Providers</string>
     <string name="settings_legal_header">Legal</string>
     <string name="settings_save_error">Couldn\'t save your changes. Please try again.</string>
+
+    <!-- ==== Souls management (M41 sub-project D). "Souls" is product vocabulary
+         but localizes ("Âmes"), unlike "Pebbles". ==== -->
+    <string name="souls_title">Souls</string>
+    <string name="souls_add_a11y">Add soul</string>
+    <string name="souls_empty_title">No souls yet</string>
+    <string name="souls_empty_message">People and beings you tag on your pebbles will appear here.</string>
+    <string name="souls_load_error">Couldn\'t load souls.</string>
+    <string name="souls_delete_message">Linked pebbles stay; only the soul and its links are removed.</string>
+    <string name="soul_detail_empty_title">No pebbles yet</string>
+    <string name="soul_detail_empty_message">Pebbles you tag with this soul will appear here.</string>
+    <string name="soul_detail_load_error">Couldn\'t load pebbles.</string>
+    <string name="soul_edit_title">Edit soul</string>
+    <string name="soul_form_glyph_choose">Tap to choose</string>
+    <string name="soul_save_error">Couldn\'t save the soul. Please try again.</string>
 
     <!-- Reference-data names (D9). Resolved via ReferenceStrings, keyed by DB slug —
          never render the DB `name` column directly on a read path. Source: iOS
