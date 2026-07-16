@@ -10,6 +10,7 @@ import app.pbbls.android.features.glyph.services.LocalGlyphService
 import app.pbbls.android.features.karma.LocalKarmaNotificationService
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalPathService
+import app.pbbls.android.services.LocalPathStatsService
 import app.pbbls.android.services.LocalPebbleDetailService
 import app.pbbls.android.services.LocalPebbleWriteService
 import app.pbbls.android.services.LocalReferenceDataService
@@ -40,6 +41,7 @@ class MainActivity : ComponentActivity() {
                     LocalSupabaseService provides supabase,
                     LocalEmotionPaletteService provides app.palettes,
                     LocalPathService provides app.pathService,
+                    LocalPathStatsService provides app.pathStats,
                     LocalSnapURLCache provides app.snapUrls,
                     LocalReferenceDataService provides app.referenceData,
                     LocalPebbleWriteService provides app.pebbleWrite,

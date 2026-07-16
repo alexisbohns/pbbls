@@ -47,6 +47,12 @@
     <string name="path_week_next">Semaine suivante</string>
     <string name="path_week_cell_a11y">Semaine %1$d, %2$d pebbles</string>
     <string name="path_sign_out">Se déconnecter</string>
+    <!-- Barre de stats du bas (sous-projet B). « karma » et « Ripple » sont du vocabulaire produit. -->
+    <string name="path_profile">Profil</string>
+    <string name="path_karma_caption">karma</string>
+    <string name="path_karma_a11y">Karma %1$s</string>
+    <string name="ripple_badge_active">Ripple niveau %1$d, actif aujourd\'hui</string>
+    <string name="ripple_badge_inactive">Ripple niveau %1$d, inactif aujourd\'hui</string>
 
     <!-- French reference-data names — see values/strings.xml for provenance. -->
 

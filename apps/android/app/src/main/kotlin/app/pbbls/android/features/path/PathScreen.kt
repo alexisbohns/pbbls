@@ -28,6 +28,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.features.path.components.NewPebbleButton
+import app.pbbls.android.features.path.components.PathBottomBar
 import app.pbbls.android.features.path.components.WeekHeader
 import app.pbbls.android.features.path.components.WeekPebbleList
 import app.pbbls.android.features.path.components.WeekRoll
@@ -35,8 +36,10 @@ import app.pbbls.android.features.path.create.CreatePebbleScreen
 import app.pbbls.android.features.path.models.EmotionPalette
 import app.pbbls.android.features.path.models.Pebble
 import app.pbbls.android.features.path.models.WeekRollEntry
+import app.pbbls.android.features.shared.ripples.RippleSummary
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalPathService
+import app.pbbls.android.services.LocalPathStatsService
 import app.pbbls.android.services.LocalPebbleWriteService
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesText
@@ -62,6 +65,7 @@ fun PathScreen(
 ) {
     val pathService = LocalPathService.current
     val palettes = LocalEmotionPaletteService.current
+    val stats = LocalPathStatsService.current
     val system = PebblesTheme.colors.system
     val accent = PebblesTheme.colors.accent
 
@@ -94,10 +98,15 @@ fun PathScreen(
             isLoading = false
         }
     }
+    // Stats load rides its own effect so a slow/failed stats fetch never
+    // delays the timeline (the iOS `.task { await stats.load() }` analog).
+    LaunchedEffect(Unit) { stats.load() }
 
-    // Hoisted so the delete flow (and, later, create/edit in C/D) can refresh the
-    // timeline without re-triggering the first-load spinner: isLoading is left
+    // Hoisted so the delete flow and create/edit can refresh the timeline
+    // without re-triggering the first-load spinner: isLoading is left
     // untouched, mirroring iOS PathView.load() after the initial fetch.
+    // Every write also refreshes the stats bar (iOS parity: stats.refresh()
+    // after each create/edit/delete).
     val reload: () -> Unit = {
         scope.launch {
             try {
@@ -109,7 +118,25 @@ fun PathScreen(
                 Log.e(TAG, "path reload failed", e)
             }
         }
+        scope.launch { stats.refresh() }
     }
+
+    // Overrides the server's `active_today` flag (which compares against UTC
+    // `current_date`) with a device-local check so users in non-UTC timezones
+    // don't see "active today" after local midnight — ports iOS
+    // `PathView.rippleWithLocalActiveToday` (see M22 follow-up for the proper
+    // server-side timezone fix).
+    val rippleWithLocalActiveToday =
+        stats.ripple?.let { server ->
+            val localToday = LocalDate.now()
+            val activeToday =
+                entries.any { entry ->
+                    entry.pebbles.any {
+                        it.createdAt.atZoneSameInstant(ZoneId.systemDefault()).toLocalDate() == localToday
+                    }
+                }
+            server.copy(activeToday = activeToday)
+        }
 
     Box(
         modifier =
@@ -151,6 +178,8 @@ fun PathScreen(
                         onPebbleTap = { pebble -> selectedPebbleId = pebble.id },
                         onPebbleDelete = { pebble -> pendingDeletion = pebble },
                         onCreatePebble = { isPresentingCreate = true },
+                        karma = stats.karma,
+                        ripple = rippleWithLocalActiveToday,
                     )
             }
         }
@@ -249,6 +278,9 @@ fun PathContent(
     onPebbleTap: (Pebble) -> Unit = {},
     onPebbleDelete: (Pebble) -> Unit = {},
     onCreatePebble: () -> Unit = {},
+    karma: Int? = null,
+    ripple: RippleSummary? = null,
+    onProfile: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val accent = PebblesTheme.colors.accent
@@ -310,6 +342,14 @@ fun PathContent(
         NewPebbleButton(
             onTap = onCreatePebble,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+        )
+        // Bottom stats bar (sub-project B) — karma + ripple; the profile tap
+        // is a stub until the Profile screen lands (sub-project C).
+        PathBottomBar(
+            karma = karma,
+            ripple = ripple,
+            onProfile = onProfile,
+            modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
         )
         // Temporary affordance until Profile exists — re-testing the funnel
         // on device requires a way back to Welcome.
