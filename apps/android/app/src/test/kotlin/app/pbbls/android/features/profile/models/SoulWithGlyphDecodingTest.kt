@@ -11,8 +11,8 @@ import org.junit.Test
  * Decodes the raw PostgREST [SoulRow] — the joined `glyphs` object plus the
  * `pebbles_count` aggregate PostgREST returns as `[{ "count": N }]` — and checks
  * [SoulRow.toSoulWithGlyph] flattens it into the clean [SoulWithGlyph] domain
- * type, including the aggregate wrapper and its absent-array zero fallback (the
- * reference-data select shape, which omits the count).
+ * type, including the aggregate wrapper and its absent-array zero fallback
+ * (defensive — every shipped select now asks for the count, #563).
  */
 class SoulWithGlyphDecodingTest {
     private val json = Json { ignoreUnknownKeys = true }
@@ -71,7 +71,7 @@ class SoulWithGlyphDecodingTest {
 
     @Test
     fun `an absent pebbles_count aggregate decodes to zero`() {
-        // The reference-data select does not ask for the count.
+        // Defensive: a select that omits the aggregate must still decode.
         val row =
             json.decodeFromString<SoulRow>(
                 """
