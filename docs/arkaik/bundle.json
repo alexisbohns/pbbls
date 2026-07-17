@@ -9,7 +9,7 @@
       "view_card_variant": "large"
     },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-07-17T08:30:30.000Z"
+    "updated_at": "2026-07-17T14:00:00.000Z"
   },
   "nodes": [
     {
@@ -2002,6 +2002,72 @@
         "web",
         "ios",
         "android"
+      ]
+    },
+    {
+      "id": "V-admin-palettes",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Admin · Palettes",
+      "description": "Back-office emotion palette editor (#608). Admin-only page at /emotions/palettes. Lists every emotion category with a live swatch preview and edits its five hand-tuned variants (primary, secondary, light, shaded, dark) via hex text inputs plus native colour pickers that preserve the alpha byte. surface_color is not edited — it is re-derived from primary (RGB + 1A ≈10%) server-side on every save. Reads via admin_list_emotion_categories; writes via the is_admin-gated admin_update_emotion_palette RPC.",
+      "status": "development",
+      "platforms": [
+        "web"
+      ]
+    },
+    {
+      "id": "V-admin-emojis",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Admin · Emojis",
+      "description": "Back-office emotion emoji editor (#608). Admin-only page at /emotions/emojis. Lists all emotions grouped by category, each with an inline emoji editor. Reads via admin_list_emotions; writes via the is_admin-gated admin_update_emotion_emoji RPC.",
+      "status": "development",
+      "platforms": [
+        "web"
+      ]
+    },
+    {
+      "id": "API-admin-list-emotion-categories",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "RPC admin_list_emotion_categories",
+      "description": "is_admin-gated SECURITY DEFINER RPC. Returns every emotion_categories row with all palette columns (primary, secondary, light, surface, shaded, dark), ordered by name. The admin Emotions Palettes-tab read path.",
+      "status": "development",
+      "platforms": [
+        "web"
+      ]
+    },
+    {
+      "id": "API-admin-update-emotion-palette",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "RPC admin_update_emotion_palette",
+      "description": "is_admin-gated SECURITY DEFINER RPC. Updates a category's five palette variants (primary, secondary, light, shaded, dark) and re-derives surface_color from primary (RGB + 1A alpha, ~10%). Each colour must be 8-digit hex #RRGGBBAA (bad_color); unknown category raises not_found.",
+      "status": "development",
+      "platforms": [
+        "web"
+      ]
+    },
+    {
+      "id": "API-admin-list-emotions",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "RPC admin_list_emotions",
+      "description": "is_admin-gated SECURITY DEFINER RPC. Returns every emotion joined to its category (id, slug, name, emoji, plus category id/slug/name/primary_color), ordered by category then emotion name. The admin Emotions Emojis-tab read path.",
+      "status": "development",
+      "platforms": [
+        "web"
+      ]
+    },
+    {
+      "id": "API-admin-update-emotion-emoji",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "RPC admin_update_emotion_emoji",
+      "description": "is_admin-gated SECURITY DEFINER RPC. Updates one emotion's emoji; trims input and rejects empty or >16-char values (bad_emoji) or an unknown emotion (not_found).",
+      "status": "development",
+      "platforms": [
+        "web"
       ]
     },
     {
@@ -4054,6 +4120,76 @@
       "source_id": "V-admin-domains",
       "target_id": "DM-glyphs",
       "edge_type": "displays"
+    },
+    {
+      "id": "e-V-admin-palettes-API-admin-list-emotion-categories",
+      "project_id": "pebbles",
+      "source_id": "V-admin-palettes",
+      "target_id": "API-admin-list-emotion-categories",
+      "edge_type": "calls"
+    },
+    {
+      "id": "e-V-admin-palettes-API-admin-update-emotion-palette",
+      "project_id": "pebbles",
+      "source_id": "V-admin-palettes",
+      "target_id": "API-admin-update-emotion-palette",
+      "edge_type": "calls"
+    },
+    {
+      "id": "e-V-admin-palettes-DM-emotion-category",
+      "project_id": "pebbles",
+      "source_id": "V-admin-palettes",
+      "target_id": "DM-emotion-category",
+      "edge_type": "displays"
+    },
+    {
+      "id": "e-V-admin-emojis-API-admin-list-emotions",
+      "project_id": "pebbles",
+      "source_id": "V-admin-emojis",
+      "target_id": "API-admin-list-emotions",
+      "edge_type": "calls"
+    },
+    {
+      "id": "e-V-admin-emojis-API-admin-update-emotion-emoji",
+      "project_id": "pebbles",
+      "source_id": "V-admin-emojis",
+      "target_id": "API-admin-update-emotion-emoji",
+      "edge_type": "calls"
+    },
+    {
+      "id": "e-V-admin-emojis-DM-emotion-category",
+      "project_id": "pebbles",
+      "source_id": "V-admin-emojis",
+      "target_id": "DM-emotion-category",
+      "edge_type": "displays"
+    },
+    {
+      "id": "e-API-admin-list-emotion-categories-DM-emotion-category",
+      "project_id": "pebbles",
+      "source_id": "API-admin-list-emotion-categories",
+      "target_id": "DM-emotion-category",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-admin-update-emotion-palette-DM-emotion-category",
+      "project_id": "pebbles",
+      "source_id": "API-admin-update-emotion-palette",
+      "target_id": "DM-emotion-category",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-admin-list-emotions-DM-emotion-category",
+      "project_id": "pebbles",
+      "source_id": "API-admin-list-emotions",
+      "target_id": "DM-emotion-category",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-admin-update-emotion-emoji-DM-emotion-category",
+      "project_id": "pebbles",
+      "source_id": "API-admin-update-emotion-emoji",
+      "target_id": "DM-emotion-category",
+      "edge_type": "queries"
     },
     {
       "id": "e-API-admin-list-domains-DM-domain",

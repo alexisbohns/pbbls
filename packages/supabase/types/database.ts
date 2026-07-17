@@ -1637,6 +1637,33 @@ export type Database = {
           view_box: string
         }[]
       }
+      admin_list_emotion_categories: {
+        Args: never
+        Returns: {
+          dark_color: string
+          id: string
+          light_color: string
+          name: string
+          primary_color: string
+          secondary_color: string
+          shaded_color: string
+          slug: string
+          surface_color: string
+        }[]
+      }
+      admin_list_emotions: {
+        Args: never
+        Returns: {
+          category_id: string
+          category_name: string
+          category_primary_color: string
+          category_slug: string
+          emoji: string
+          id: string
+          name: string
+          slug: string
+        }[]
+      }
       admin_list_glyph_submissions: {
         Args: { p_status?: string }
         Returns: Json
@@ -1647,6 +1674,21 @@ export type Database = {
       }
       admin_update_domain: {
         Args: { p_domain_id: string; p_label: string; p_name: string }
+        Returns: undefined
+      }
+      admin_update_emotion_emoji: {
+        Args: { p_emoji: string; p_emotion_id: string }
+        Returns: undefined
+      }
+      admin_update_emotion_palette: {
+        Args: {
+          p_category_id: string
+          p_dark: string
+          p_light: string
+          p_primary: string
+          p_secondary: string
+          p_shaded: string
+        }
         Returns: undefined
       }
       approve_glyph: {
