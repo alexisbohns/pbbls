@@ -352,6 +352,9 @@
     <string name="lab_section_backlog">Backlog</string>
     <string name="lab_see_all">See all</string>
     <string name="lab_load_error">Couldn\'t load the Lab.</string>
+    <string name="lab_list_load_error">Couldn\'t load the list.</string>
+    <string name="lab_list_empty">Nothing here yet.</string>
+    <string name="lab_card_subtitle">News &amp; community</string>
     <string name="lab_reaction_upvote_a11y">Upvote</string>
     <string name="lab_reaction_remove_a11y">Remove rock</string>
     <string name="lab_reaction_count_a11y">%1$d upvotes</string>

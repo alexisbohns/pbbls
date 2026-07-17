@@ -339,6 +339,9 @@
     <string name="lab_section_backlog">Réserve d\'améliorations</string>
     <string name="lab_see_all">Voir tout</string>
     <string name="lab_load_error">Couldn\'t load the Lab.</string>
+    <string name="lab_list_load_error">Couldn\'t load the list.</string>
+    <string name="lab_list_empty">Pas grand chose pour le moment.</string>
+    <string name="lab_card_subtitle">Actus &amp; communauté</string>
     <string name="lab_reaction_upvote_a11y">Voter</string>
     <string name="lab_reaction_remove_a11y">Ôter mon vote</string>
     <string name="lab_reaction_count_a11y">%1$d rocks</string>

@@ -9,7 +9,7 @@
       "view_card_variant": "large"
     },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-07-16T00:00:00.000Z"
+    "updated_at": "2026-07-17T08:30:30.000Z"
   },
   "nodes": [
     {
@@ -596,7 +596,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Profile",
-      "description": "User profile dashboard. Banner (glyph + display name in the Reenie Beanie script face + member-since), a shortcuts row (Collections / Souls / Glyphs), a Stats card (ripple-level badge + 28-day assiduity grid + Days / Pebbles / Karma counters), a horizontal Collections carousel, a Lab card, and a logout button; a gear button opens Settings. Web aligns to the iOS token refactor (issues #465 / #467). iOS (#388): pushed from PathView's bottom bar; hosts the Lab navigation link and the onboarding replay full-screen cover. Android (M41 C, #567): pushed as an authed NavHost route from the bottom bar — banner, stats card, collections carousel (header → list, card → detail, empty tile → create), logout, and Settings as a full-screen cover. The shortcuts row landed with D (#568) and shows only wired tiles (souls; glyphs arrives with its milestone — D11); the Lab card arrives with the Lab milestone.",
+      "description": "User profile dashboard. Banner (glyph + display name in the Reenie Beanie script face + member-since), a shortcuts row (Collections / Souls / Glyphs), a Stats card (ripple-level badge + 28-day assiduity grid + Days / Pebbles / Karma counters), a horizontal Collections carousel, a Lab card, and a logout button; a gear button opens Settings. Web aligns to the iOS token refactor (issues #465 / #467). iOS (#388): pushed from PathView's bottom bar; hosts the Lab navigation link and the onboarding replay full-screen cover. Android (M41 C, #567): pushed as an authed NavHost route from the bottom bar — banner, stats card, collections carousel (header → list, card → detail, empty tile → create), logout, and Settings as a full-screen cover. The shortcuts row landed with D (#568) and shows only wired tiles (souls; glyphs arrives with its milestone — D11); the Lab card arrives with the Lab milestone. Android (M44) un-hides the Lab card — the last M41 D11 omission.",
       "status": "development",
       "platforms": [
         "web",
@@ -1638,11 +1638,12 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Lab",
-      "description": "Living product-transparency view. Featured community card, then announcements, changelog (top 5 + see all), ongoing initiatives, and backlog (top 5 by upvotes). iOS (#388): no longer a tab; pushed from Profile's Discover section.",
+      "description": "Living product-transparency view. Featured community card (WhatsApp invite, external open), then announcements, changelog (top 5 + see all), ongoing initiatives, and backlog (top 5 by upvotes with optimistic reactions). iOS (#388): no longer a tab; pushed from Profile. Android (M44): pushed route from the Profile Lab card; announcement detail and see-all lists render as content swaps inside this single route (design D9); the fullscreen error appears only when all four content feeds fail.",
       "status": "development",
       "platforms": [
+        "web",
         "ios",
-        "web"
+        "android"
       ]
     },
     {
@@ -2143,6 +2144,107 @@
         }
       },
       "project_id": "pebbles"
+    },
+    {
+      "id": "V-announcement-detail",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Announcement Detail",
+      "description": "Announcement page: 200pt cover, display title, subtitle summary, and the body rendered through the V1 markdown subset (blank-line blocks, #/##/### headings as plain text, inline-only bold/italic/code/links/strikethrough — match, don't exceed). No toolbar title (iOS quirk, matched). Android (M44) renders it as a content swap inside the Lab route rather than a NavHost sub-route.",
+      "status": "development",
+      "platforms": [
+        "ios",
+        "android"
+      ]
+    },
+    {
+      "id": "V-log-list",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Log List",
+      "description": "See-all list for the changelog or backlog: the unlimited feed + the viewer's reactions load together and, unlike the Lab screen, ANY failure shows the error state. Reactions toggle only in backlog mode. Android (M44): a content swap inside the Lab route.",
+      "status": "development",
+      "platforms": [
+        "ios",
+        "android"
+      ]
+    },
+    {
+      "id": "DM-v-logs-with-counts",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "v_logs_with_counts",
+      "description": "View over public.logs adding reaction_count. All four Lab feeds read it (announcements, changelog with released_at DESC NULLS LAST, initiatives, backlog by upvotes). Mobile clients decode rows lossily: a row with an unknown platform/species/status (incl. the project/infra platform values) is dropped whole — a deliberate cross-surface decision (M44 design D1).",
+      "status": "development",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ]
+    },
+    {
+      "id": "DM-log-reactions",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "log_reactions",
+      "description": "Backlog upvotes, PK (log_id, user_id). Written by direct single-table insert/delete from every client — the sanctioned no-RPC pattern; clients toggle optimistically and revert both the reacted set and the count on error (no refetch).",
+      "status": "development",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ]
+    },
+    {
+      "id": "F-follow-lab",
+      "project_id": "pebbles",
+      "species": "flow",
+      "title": "Follow the Lab",
+      "description": "Product-transparency journey: from the Profile Lab card into the Lab feeds, then deeper into an announcement or the full changelog/backlog lists, upvoting backlog entries along the way.",
+      "status": "development",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ],
+      "metadata": {
+        "playlist": {
+          "entries": [
+            {
+              "type": "view",
+              "view_id": "V-profile"
+            },
+            {
+              "type": "view",
+              "view_id": "V-lab"
+            },
+            {
+              "type": "junction",
+              "label": "Dig deeper?",
+              "cases": [
+                {
+                  "label": "Open announcement",
+                  "entries": [
+                    {
+                      "type": "view",
+                      "view_id": "V-announcement-detail"
+                    }
+                  ]
+                },
+                {
+                  "label": "See all changelog/backlog",
+                  "entries": [
+                    {
+                      "type": "view",
+                      "view_id": "V-log-list"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
     }
   ],
   "edges": [
@@ -4092,6 +4194,83 @@
       "source_id": "API-buy-glyph",
       "target_id": "DM-karma-events",
       "edge_type": "queries"
+    },
+    {
+      "id": "e-F-follow-lab-V-profile",
+      "project_id": "pebbles",
+      "source_id": "F-follow-lab",
+      "target_id": "V-profile",
+      "edge_type": "composes"
+    },
+    {
+      "id": "e-F-follow-lab-V-lab",
+      "project_id": "pebbles",
+      "source_id": "F-follow-lab",
+      "target_id": "V-lab",
+      "edge_type": "composes"
+    },
+    {
+      "id": "e-F-follow-lab-V-announcement-detail",
+      "project_id": "pebbles",
+      "source_id": "F-follow-lab",
+      "target_id": "V-announcement-detail",
+      "edge_type": "composes"
+    },
+    {
+      "id": "e-F-follow-lab-V-log-list",
+      "project_id": "pebbles",
+      "source_id": "F-follow-lab",
+      "target_id": "V-log-list",
+      "edge_type": "composes"
+    },
+    {
+      "id": "e-V-lab-V-announcement-detail",
+      "project_id": "pebbles",
+      "source_id": "V-lab",
+      "target_id": "V-announcement-detail",
+      "edge_type": "composes"
+    },
+    {
+      "id": "e-V-lab-V-log-list",
+      "project_id": "pebbles",
+      "source_id": "V-lab",
+      "target_id": "V-log-list",
+      "edge_type": "composes"
+    },
+    {
+      "id": "e-V-lab-DM-v-logs-with-counts",
+      "project_id": "pebbles",
+      "source_id": "V-lab",
+      "target_id": "DM-v-logs-with-counts",
+      "edge_type": "displays"
+    },
+    {
+      "id": "e-V-lab-DM-log-reactions",
+      "project_id": "pebbles",
+      "source_id": "V-lab",
+      "target_id": "DM-log-reactions",
+      "edge_type": "displays"
+    },
+    {
+      "id": "e-V-log-list-DM-v-logs-with-counts",
+      "project_id": "pebbles",
+      "source_id": "V-log-list",
+      "target_id": "DM-v-logs-with-counts",
+      "edge_type": "displays"
+    },
+    {
+      "id": "e-V-log-list-DM-log-reactions",
+      "project_id": "pebbles",
+      "source_id": "V-log-list",
+      "target_id": "DM-log-reactions",
+      "edge_type": "displays"
+    },
+    {
+      "id": "e-V-announcement-detail-DM-v-logs-with-counts",
+      "project_id": "pebbles",
+      "source_id": "V-announcement-detail",
+      "target_id": "DM-v-logs-with-counts",
+      "edge_type": "displays"
     }
   ]
 }
