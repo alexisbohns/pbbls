@@ -258,9 +258,10 @@ private fun SoulBodyPreview() {
 private fun GlyphBodyPreview() {
     val system = PebblesTheme.colors.system
     GlyphPickerGrid(
-        items = glyphs.mapIndexed { index, glyph ->
-            GlyphGridItem(glyph = glyph, price = index * 5, owned = false, createdAt = null, acquiredAt = null)
-        },
+        items =
+            glyphs.mapIndexed { index, glyph ->
+                GlyphGridItem(glyph = glyph, price = index * 5, owned = false, createdAt = null, acquiredAt = null)
+            },
         currentGlyphId = "glyph-1",
         showCarveRow = true,
         onCarve = {},
