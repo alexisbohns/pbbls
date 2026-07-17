@@ -6,10 +6,11 @@ import os
 /// Caches the three reference lists used by `CreatePebbleSheet` and
 /// `EditPebbleSheet` (`domains`, `souls`, `collections`) for the session.
 ///
-/// Loaded once from `RootView.task` alongside `EmotionPaletteService`, hidden
-/// behind the splash. Subsequent sheet opens read directly from the cached
-/// arrays — no per-open round-trips. `domains` is seed data and never refreshes
-/// at runtime; `souls` and `collections` are refreshed via `refreshSouls()` /
+/// Loaded once from `RootView.task` alongside `EmotionPaletteService`, during
+/// the handcrafted logo loader; the loader gates on `didFinishLoading`.
+/// Subsequent sheet opens read directly from the cached arrays — no per-open
+/// round-trips. `domains` is seed data and never refreshes at runtime;
+/// `souls` and `collections` are refreshed via `refreshSouls()` /
 /// `refreshCollections()` after the matching Profile mutations succeed.
 ///
 /// No retry on failure: a failed `load()` leaves the arrays empty and pickers
@@ -22,6 +23,10 @@ final class ReferenceDataService {
     private(set) var souls: [SoulWithGlyph] = []
     private(set) var collections: [PebbleCollection] = []
     private(set) var hasLoaded: Bool = false
+    /// True once a load attempt has settled — success OR failure. The launch
+    /// loader gates on this (not `hasLoaded`) so a failed reference fetch still
+    /// lets the app open with an empty cache instead of boiling forever.
+    private(set) var didFinishLoading: Bool = false
 
     private let client: SupabaseClient
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "reference-data")
@@ -34,6 +39,7 @@ final class ReferenceDataService {
     /// the splash-driven call site only fires once, but safe to call again
     /// (e.g. for retry after a transient launch-time failure).
     func load() async {
+        defer { didFinishLoading = true }
         do {
             async let domainsQuery: [Domain] = client
                 .from("domains")

@@ -6,6 +6,11 @@ private enum PathRoute: Hashable {
 }
 
 struct PathView: View {
+    /// Fired when the initial timeline load settles (success or failure), so
+    /// `RootView` can keep the launch loader up until the home feed is ready
+    /// instead of flashing this view's own spinner.
+    var onFirstLoad: () -> Void = {}
+
     @Environment(SupabaseService.self) private var supabase
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(PathStatsService.self) private var stats
@@ -51,7 +56,10 @@ struct PathView: View {
                 .toolbar(.hidden, for: .navigationBar)
                 .pebblesScreen()
         }
-        .task { await load() }
+        .task {
+            await load()
+            onFirstLoad()
+        }
         .task { await stats.load() }
         .sheet(isPresented: $isPresentingCreate) {
             CreatePebbleSheet(onCreated: { newPebbleId in
@@ -107,7 +115,11 @@ struct PathView: View {
     @ViewBuilder
     private var content: some View {
         if isLoading {
-            ProgressView()
+            // No spinner: the launch loader (RootView's handcrafted-logo cover)
+            // owns the loading visual and stays up until `onFirstLoad`. Showing
+            // the plain background here means the hand-off to the feed can't
+            // flash a spinner even for a frame (#598).
+            Color.system.background
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if let loadError {
             Text(loadError)
