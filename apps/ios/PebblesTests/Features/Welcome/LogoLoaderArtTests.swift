@@ -19,12 +19,16 @@ extension LogoLoaderArtTests {
         let parsed = try #require(LogoLoaderArt.parseGroups())
         // viewBox is the issue's 251-box.
         #expect(parsed.viewBox == CGRect(x: 0, y: 0, width: 251, height: 251))
-        // Every group's combined stroke path is non-empty (`isEmptyGroup` is
-        // the internal CGPath helper defined in LogoLoaderArt.swift).
-        #expect(!parsed.outline.isEmptyGroup)
-        #expect(!parsed.creatureStrokes.isEmptyGroup)
-        #expect(!parsed.fossilAndVeins.isEmptyGroup)
-        // The two eyes are fills.
+        // Each SVG path is kept separate (per-path masking, #598). The logo
+        // has 1 outline, 10 creature strokes (12 minus the two eyes), and
+        // 12 fossil+vein strokes (10 fossil lines + 2 veins).
+        #expect(parsed.outline.count == 1)
+        #expect(parsed.creatureStrokes.count == 10)
+        #expect(parsed.fossilAndVeins.count == 12)
+        #expect(parsed.outline.allSatisfy { !$0.isEmptyGroup })
+        #expect(parsed.creatureStrokes.allSatisfy { !$0.isEmptyGroup })
+        #expect(parsed.fossilAndVeins.allSatisfy { !$0.isEmptyGroup })
+        // The two eyes are fills, kept combined.
         #expect(!parsed.eyeFills.isEmptyGroup)
     }
 }
@@ -36,13 +40,16 @@ extension LogoLoaderArtTests {
         #expect(art.variants.count == 3)
         // swiftlint:disable:next identifier_name
         for v in art.variants {
-            #expect(!v.outline.ink.isEmptyGroup)
-            #expect(!v.creature.ink.isEmptyGroup)
-            #expect(!v.fossilVeins.ink.isEmptyGroup)
+            #expect(v.outline.count == 1)
+            #expect(v.creature.count == 10)
+            #expect(v.fossilVeins.count == 12)
+            #expect(v.outline.allSatisfy { !$0.ink.isEmptyGroup })
+            #expect(v.creature.allSatisfy { !$0.ink.isEmptyGroup })
+            #expect(v.fossilVeins.allSatisfy { !$0.ink.isEmptyGroup })
             #expect(!v.eyes.isEmptyGroup)
         }
         // Seeds 3/4/5 must produce different geometry (boil, not a freeze).
-        #expect(art.variants[0].outline.ink.boundingBoxOfPath
-                != art.variants[1].outline.ink.boundingBoxOfPath)
+        #expect(art.variants[0].outline[0].ink.boundingBoxOfPath
+                != art.variants[1].outline[0].ink.boundingBoxOfPath)
     }
 }

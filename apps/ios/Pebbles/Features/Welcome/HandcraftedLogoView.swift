@@ -27,6 +27,12 @@ struct HandcraftedLogoView: View {
     @State private var creatureProgress: Double = 0
     @State private var fossilVeinProgress: Double = 0
     @State private var eyesIn = false
+    /// Fresh @State mirror of `shouldSettle` — the running `.task` captures the
+    /// view by value, so it can't observe input changes; onChange keeps this
+    /// current for `settleIfReady()`.
+    @State private var wantsSettle = false
+    /// True once the guaranteed minimum boil has played.
+    @State private var minBoilElapsed = false
 
     private enum Phase { case drawing, boiling, settled }
 
@@ -40,6 +46,9 @@ struct HandcraftedLogoView: View {
     // Boil: 4fps ping-pong (#555 §1/§3).
     private static let boilFPS: Double = 4
     private static let boilOrder = [0, 1, 2, 1]
+    /// Minimum boil after the draw-on so it's always visibly alive before
+    /// settling — never an instant cut to static (~5 frames at 4fps). Tunable.
+    private static let minBoilSeconds: Double = 1.25
 
     var body: some View {
         Group {
@@ -56,31 +65,46 @@ struct HandcraftedLogoView: View {
         .aspectRatio(1, contentMode: .fit)
         .accessibilityHidden(true)
         .task { await run() }
-        .onChange(of: shouldSettle) { _, settle in
-            if settle && phase == .boiling { phase = .settled }
+        .onChange(of: shouldSettle) { _, newValue in
+            wantsSettle = newValue
+            settleIfReady()
         }
     }
 
     // MARK: - Orchestration
 
     private func run() async {
+        wantsSettle = shouldSettle
         if model == nil { model = LogoLoaderArt.build() }
         guard model != nil else { onDrawComplete(); return }
 
         if reduceMotion || startSettled {
             outlineProgress = 1; creatureProgress = 1; fossilVeinProgress = 1; eyesIn = true
+            minBoilElapsed = true
             onDrawComplete()
             // Reduce Motion never boils (#555 §3.1); startSettled boils until
-            // the parent signals ready.
-            phase = (reduceMotion || shouldSettle) ? .settled : .boiling
+            // the parent signals ready (or removes the view).
+            phase = (reduceMotion || wantsSettle) ? .settled : .boiling
             return
         }
 
         startDrawOn()
         try? await Task.sleep(for: .seconds(Self.totalDrawDuration))
         onDrawComplete()
-        // Draw finished: boil unless the app is already ready.
-        phase = shouldSettle ? .settled : .boiling
+        phase = .boiling
+        // Guarantee the boil is actually seen — never an instant cut to static,
+        // even when the app was ready before the draw-on finished.
+        try? await Task.sleep(for: .seconds(Self.minBoilSeconds))
+        minBoilElapsed = true
+        settleIfReady()
+    }
+
+    /// Settle to static only once the minimum boil has elapsed AND the app is
+    /// ready. Driven by the min-boil timer and by `shouldSettle` changes.
+    private func settleIfReady() {
+        if phase == .boiling && minBoilElapsed && wantsSettle {
+            phase = .settled
+        }
     }
 
     private func startDrawOn() {
@@ -108,15 +132,25 @@ struct HandcraftedLogoView: View {
         GeometryReader { proxy in
             let maskWidth = WobbleMask.lineWidth(viewBox: model.viewBox, frame: proxy.size)
             ZStack {
-                revealGroup(variant.outline, progress: outlineProgress, maskWidth: maskWidth, viewBox: model.viewBox)
-                revealGroup(variant.creature, progress: creatureProgress, maskWidth: maskWidth, viewBox: model.viewBox)
-                revealGroup(
+                revealPhase(variant.outline, progress: outlineProgress, maskWidth: maskWidth, viewBox: model.viewBox)
+                revealPhase(variant.creature, progress: creatureProgress, maskWidth: maskWidth, viewBox: model.viewBox)
+                revealPhase(
                     variant.fossilVeins, progress: fossilVeinProgress, maskWidth: maskWidth, viewBox: model.viewBox
                 )
                 eyeShape(variant.eyes, viewBox: model.viewBox)
                     .opacity(eyesIn ? 1 : 0)
                     .scaleEffect(eyesIn ? 1 : 0.6)
             }
+        }
+    }
+
+    /// Reveals every stroke in a phase against the shared phase progress. Each
+    /// stroke is masked by its OWN centerline so a fat reveal mask can never
+    /// expose a neighbour stroke's ink (#598 bleed fix).
+    @ViewBuilder
+    private func revealPhase(_ arts: [WobbleArt], progress: Double, maskWidth: CGFloat, viewBox: CGRect) -> some View {
+        ForEach(Array(arts.enumerated()), id: \.offset) { _, art in
+            revealGroup(art, progress: progress, maskWidth: maskWidth, viewBox: viewBox)
         }
     }
 
@@ -144,10 +178,17 @@ struct HandcraftedLogoView: View {
     @ViewBuilder
     private func filledLogo(_ variant: LogoLoaderVariant, model: LogoLoaderModel) -> some View {
         ZStack {
-            inkShape(variant.outline.ink, viewBox: model.viewBox)
-            inkShape(variant.creature.ink, viewBox: model.viewBox)
-            inkShape(variant.fossilVeins.ink, viewBox: model.viewBox)
+            inkPhase(variant.outline, viewBox: model.viewBox)
+            inkPhase(variant.creature, viewBox: model.viewBox)
+            inkPhase(variant.fossilVeins, viewBox: model.viewBox)
             eyeShape(variant.eyes, viewBox: model.viewBox)
+        }
+    }
+
+    @ViewBuilder
+    private func inkPhase(_ arts: [WobbleArt], viewBox: CGRect) -> some View {
+        ForEach(Array(arts.enumerated()), id: \.offset) { _, art in
+            inkShape(art.ink, viewBox: viewBox)
         }
     }
 

@@ -2,17 +2,18 @@ import CoreGraphics
 import Foundation
 
 /// The logo split into reveal groups, in the SVG's own viewBox space, before
-/// wobbling. Combined `CGPath`s per group so the reveal trim runs across
-/// subpaths in draw order.
+/// wobbling. Each stroke is kept as its OWN `CGPath` (one per SVG `<path>`) so
+/// the draw-on can mask every stroke by its own centerline — a combined path
+/// would let one stroke's fat reveal mask expose a neighbour's ink (#598).
 struct LogoParsedGroups {
     let viewBox: CGRect
-    /// The enclosing stone outline (reveal phase 1).
-    let outline: CGPath
-    /// All creature strokes except the eyes (reveal phase 2).
-    let creatureStrokes: CGPath
+    /// The enclosing stone outline (reveal phase 1) — one stroke.
+    let outline: [CGPath]
+    /// The creature strokes except the eyes (reveal phase 2).
+    let creatureStrokes: [CGPath]
     /// Fossil strokes + the two pebble veins (reveal phase 3).
-    let fossilAndVeins: CGPath
-    /// The two eyes — filled regions, no trim reveal.
+    let fossilAndVeins: [CGPath]
+    /// The two eyes — filled regions, no trim reveal (revealed together).
     let eyeFills: CGPath
 }
 
@@ -34,26 +35,26 @@ enum LogoLoaderArt {
             let viewBox = parseViewBox(in: raw)
         else { return nil }
 
-        let outline = CGMutablePath()
-        let creature = CGMutablePath()
-        let fossilVeins = CGMutablePath()
+        var outline: [CGPath] = []
+        var creature: [CGPath] = []
+        var fossilVeins: [CGPath] = []
         let eyes = CGMutablePath()
 
         for element in pathElements(in: raw) {
             guard let path = SVGPathParser.parse(element.d) else { continue }
             switch bucket(for: element) {
-            case .outline:      outline.addPath(path)
-            case .creature:     creature.addPath(path)
-            case .fossilVeins:  fossilVeins.addPath(path)
+            case .outline:      outline.append(path)
+            case .creature:     creature.append(path)
+            case .fossilVeins:  fossilVeins.append(path)
             case .eyes:         eyes.addPath(path)
             }
         }
 
         return LogoParsedGroups(
             viewBox: viewBox,
-            outline: outline.copy() ?? outline,
-            creatureStrokes: creature.copy() ?? creature,
-            fossilAndVeins: fossilVeins.copy() ?? fossilVeins,
+            outline: outline,
+            creatureStrokes: creature,
+            fossilAndVeins: fossilVeins,
             eyeFills: eyes.copy() ?? eyes
         )
     }
@@ -108,11 +109,12 @@ enum LogoLoaderArt {
     }
 }
 
-/// Wobbled artwork for the whole logo at one boil seed.
+/// Wobbled artwork for the whole logo at one boil seed. Stroke groups hold one
+/// `WobbleArt` per SVG path so each is masked independently during the draw-on.
 struct LogoLoaderVariant {
-    let outline: WobbleArt        // reveal phase 1 (ink + centerline)
-    let creature: WobbleArt       // reveal phase 2
-    let fossilVeins: WobbleArt    // reveal phase 3
+    let outline: [WobbleArt]      // reveal phase 1
+    let creature: [WobbleArt]     // reveal phase 2
+    let fossilVeins: [WobbleArt]  // reveal phase 3
     let eyes: CGPath              // displaced fill regions (no reveal)
 }
 
@@ -173,9 +175,9 @@ extension LogoLoaderArt {
         let variants = seeds.map { seed -> LogoLoaderVariant in
             let noise = SVGTurbulence(seed: seed)
             return LogoLoaderVariant(
-                outline: strokeArt(groups.outline, params: params, noise: noise),
-                creature: strokeArt(groups.creatureStrokes, params: params, noise: noise),
-                fossilVeins: strokeArt(groups.fossilAndVeins, params: params, noise: noise),
+                outline: groups.outline.map { strokeArt($0, params: params, noise: noise) },
+                creature: groups.creatureStrokes.map { strokeArt($0, params: params, noise: noise) },
+                fossilVeins: groups.fossilAndVeins.map { strokeArt($0, params: params, noise: noise) },
                 eyes: displacedFill(groups.eyeFills, params: params, noise: noise)
             )
         }
