@@ -2,9 +2,10 @@ import SwiftUI
 
 /// Presentational top-zone layout for the pebble page (issue #599).
 ///
-/// - **With a snap:** the photo fills the content width at its `BannerAspect`
-///   bucket (cover-cropped, rounded), tilted −4°, with the petroglyph
-///   overlapping the top-right corner, tilted +7°.
+/// - **With a snap:** the photo sits at ~half the screen width — centered, so it
+///   breathes with generous side margins rather than spanning edge-to-edge — at
+///   its `BannerAspect` bucket (cover-cropped, rounded), tilted −4°, with the
+///   petroglyph perched on and poking past its top-right corner, tilted +7°.
 /// - **Without a snap:** the petroglyph is centered as the page heading.
 ///
 /// Pure layout — it loads nothing. `PebbleReadBanner` owns the async snap load
@@ -24,6 +25,13 @@ struct SnapPetroglyphHeader<Petroglyph: View>: View {
     private let petroglyphInset: CGFloat = 16
     private let snapTilt: Double = -4
     private let petroglyphTilt: Double = 7
+    /// Snap width cap. The design (issue #599) keeps the photo at roughly half
+    /// the screen so it reads as a framed keepsake with breathing room, not a
+    /// full-bleed banner; the rest of the width is the centering margin on
+    /// either side. A fixed cap (rather than a screen fraction) keeps the photo
+    /// from ballooning on the largest phones while still breathing on the
+    /// smallest — ~51% on a 390pt screen, ~47% on a 430pt Pro Max.
+    private let snapMaxWidth: CGFloat = 200
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -38,15 +46,22 @@ struct SnapPetroglyphHeader<Petroglyph: View>: View {
             // is preserved when `hasSnapSlot` flips (e.g. a settled snap-load
             // failure). Only its placement modifiers change between states:
             // top-right + tilted with a snap, centered + straight without.
+            //
+            // With a snap the ZStack sizes to the (half-width) snap and aligns
+            // the petroglyph to its top-trailing corner; the +16/−16 offset then
+            // pokes it out past that corner. Without a snap the ZStack holds only
+            // the petroglyph.
             petroglyph()
                 .frame(width: petroglyphBox, height: petroglyphBox)
                 .rotationEffect(.degrees(hasSnapSlot ? petroglyphTilt : 0))
                 .offset(x: hasSnapSlot ? petroglyphInset : 0,
                         y: hasSnapSlot ? -petroglyphInset : 0)
-                .frame(maxWidth: .infinity, alignment: hasSnapSlot ? .trailing : .center)
         }
+        // Center the whole composition in the content width so the half-width
+        // snap floats with equal margins instead of hugging the leading edge.
+        .frame(maxWidth: .infinity, alignment: .center)
+        // Headroom for the petroglyph's upward poke so it clears the nav zone.
         .padding(.top, hasSnapSlot ? petroglyphInset : 0)
-        .padding(.trailing, hasSnapSlot ? petroglyphInset : 0)
     }
 
     @ViewBuilder
@@ -59,8 +74,6 @@ struct SnapPetroglyphHeader<Petroglyph: View>: View {
             BannerAspect.nearest(to: $0.size.width / max($0.size.height, 1))
         }
         Color.system.muted
-            .aspectRatio(aspect?.cgRatio ?? 1, contentMode: .fit)
-            .frame(maxWidth: .infinity)
             .overlay {
                 if let snapImage {
                     Image(uiImage: snapImage)
@@ -69,6 +82,11 @@ struct SnapPetroglyphHeader<Petroglyph: View>: View {
                         .transition(.opacity)
                 }
             }
+            .aspectRatio(aspect?.cgRatio ?? 1, contentMode: .fit)
+            // Cap at ~half the screen width, not the full content width — the
+            // source of the "let the picture breathe" correction. Height follows
+            // the bucket ratio above.
+            .frame(maxWidth: snapMaxWidth)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
             .accessibilityHidden(true)
             .animation(.easeOut(duration: 0.25), value: snapImage)
