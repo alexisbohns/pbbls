@@ -11,9 +11,9 @@ import androidx.compose.ui.graphics.Color
  * brand accent.
  *
  * [dark] is the #599 addition: the small/medium Petroglyph backfill in dark
- * mode (the "palette.dark" role). The sibling `shaded_color` column also exists
- * on the view but has no Android consumer yet, so it is intentionally not
- * modelled here.
+ * mode (the "palette.dark" role). [shaded] is the #605 addition: a deeper tint
+ * used for the read-page title / tile label / description in light mode (the
+ * "shaded_color" role on the view).
  */
 data class EmotionPalette(
     val primary: Color,
@@ -21,11 +21,13 @@ data class EmotionPalette(
     val light: Color,
     val surface: Color,
     val dark: Color,
+    val shaded: Color,
     val primaryHex: String,
     val secondaryHex: String,
     val lightHex: String,
     val surfaceHex: String,
     val darkHex: String,
+    val shadedHex: String,
 ) {
     /** Pebble stroke color: `primary` in light mode, `secondary` in dark. */
     fun stroke(isDark: Boolean): Color = if (isDark) secondary else primary
@@ -67,23 +69,27 @@ data class EmotionPalette(
             lightHex: String,
             surfaceHex: String,
             darkHex: String,
+            shadedHex: String,
         ): EmotionPalette? {
             val trimmedPrimary = primaryHex.trim()
             val trimmedSecondary = secondaryHex.trim()
             val trimmedLight = lightHex.trim()
             val trimmedSurface = surfaceHex.trim()
             val trimmedDark = darkHex.trim()
+            val trimmedShaded = shadedHex.trim()
             return EmotionPalette(
                 primary = parseColor(trimmedPrimary) ?: return null,
                 secondary = parseColor(trimmedSecondary) ?: return null,
                 light = parseColor(trimmedLight) ?: return null,
                 surface = parseColor(trimmedSurface) ?: return null,
                 dark = parseColor(trimmedDark) ?: return null,
+                shaded = parseColor(trimmedShaded) ?: return null,
                 primaryHex = trimmedPrimary,
                 secondaryHex = trimmedSecondary,
                 lightHex = trimmedLight,
                 surfaceHex = trimmedSurface,
                 darkHex = trimmedDark,
+                shadedHex = trimmedShaded,
             )
         }
 

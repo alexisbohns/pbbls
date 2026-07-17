@@ -3,6 +3,7 @@ package app.pbbls.android.features.path
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +35,7 @@ import app.pbbls.android.features.path.models.PebbleDetail
 import app.pbbls.android.features.path.models.Visibility
 import app.pbbls.android.features.path.read.PebblePrivacyBadge
 import app.pbbls.android.features.path.read.PebbleReadView
+import app.pbbls.android.features.path.read.pebblePageColors
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalPebbleDetailService
 import app.pbbls.android.theme.PebblesText
@@ -87,10 +89,19 @@ fun PebbleDetailScreen(
         }
     }
 
+    // Once loaded, the whole page (top bar + insets included) tints to the
+    // emotion palette background (#605); before load / on a cache miss it stays
+    // on the system background. PebbleReadView repaints the same tint over its
+    // own body, so the two meet seamlessly.
+    val pageBackground =
+        detail?.let { palettes.palette(it.emotion.id) }?.let {
+            pebblePageColors(it, isSystemInDarkTheme()).background
+        } ?: system.background
+
     Column(
         modifier
             .fillMaxSize()
-            .background(system.background)
+            .background(pageBackground)
             // Swallow all pointer input so this cover is input-opaque like the
             // iOS fullScreenCover (D5) — without it, taps over the loading/error
             // states fall through to the PathScreen rows' combinedClickable.

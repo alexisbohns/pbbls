@@ -41,6 +41,10 @@ import java.time.OffsetDateTime
  * flat [ColorPainter] standing in for the decoded snap (a real photo needs a
  * network load the screenshot renderer can't do) — square / landscape / portrait
  * across light and dark.
+ *
+ * [previewPalette]'s `darkHex` mirrors the design's dark page-background
+ * (#19131F, e.g. the "Anxiété" category) so the dark preview reads as dark as
+ * production; the real per-category hexes are hand-entered in Supabase Studio.
  */
 private val previewPalette: EmotionPalette =
     requireNotNull(
@@ -49,7 +53,8 @@ private val previewPalette: EmotionPalette =
             secondaryHex = "#AE91CCFF",
             lightHex = "#F2EFF5FF",
             surfaceHex = "#7B5E991A",
-            darkHex = "#2A2138FF",
+            darkHex = "#19131FFF",
+            shadedHex = "#4A3A5CFF",
         ),
     )
 
@@ -173,11 +178,12 @@ private val noDomainDetail: PebbleDetail =
 
 @Composable
 private fun DetailPreview(detail: PebbleDetail) {
-    val system = PebblesTheme.colors.system
+    // PebbleReadView paints the emotion-palette page background itself (#605), so
+    // the preview needs no explicit backdrop.
     PebbleReadView(
         detail = detail,
         palette = previewPalette,
-        modifier = Modifier.fillMaxSize().background(system.background),
+        modifier = Modifier.fillMaxSize(),
     )
 }
 

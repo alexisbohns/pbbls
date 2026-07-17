@@ -48,6 +48,7 @@ private fun palette(
     light: String,
     surface: String,
     dark: String = "#2A2138FF",
+    shaded: String = "#4A3A5CFF",
 ): EmotionPalette =
     requireNotNull(
         EmotionPalette.fromHex(
@@ -56,6 +57,7 @@ private fun palette(
             lightHex = light,
             surfaceHex = surface,
             darkHex = dark,
+            shadedHex = shaded,
         ),
     )
 
