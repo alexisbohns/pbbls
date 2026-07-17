@@ -104,7 +104,7 @@ When creating a PR, you MUST follow this checklist:
    - If the PR does not resolve an issue, ask the user which species label, scope label(s), and milestone to apply.
    - Never create a PR without labels and a milestone (except if user confirmed there's no milestone).
 5. **Build and lint**: always run `npm run build` and `npm run lint` and confirm they pass before opening the PR.
-6. **Lab Note (EN/FR)**: only for user-facing PRs. Gate: the PR has the `feat` label, **or** it touches a user-visible Arkaik view node (`docs/arkaik/bundle.json`). If gated in, draft a short bilingual end-user blurb (title + 1–2 sentence summary, EN and FR) in the **Lab Note** section of the PR body. It's a **proposal only** — a human publishes the approved copy via the Lab admin (`logs` table, `released_at`) at release time. Never write to Supabase / `logs` from the dev loop. If the PR is not user-facing, delete the section entirely.
+6. **Lab Note (EN/FR)**: only for user-facing PRs. Gate: the PR has the `feat` label, **or** it touches a user-visible Arkaik view node (`docs/arkaik/bundle.json`). If gated in, author the note as the **YAML snippet** in the **Lab Note** section of the PR body — use the `lab-note` skill (`.claude/skills/lab-note/`) for the schema, allowed values, and tone (French uses "Tu"). It's a **proposal only** — a human publishes it via the Lab admin (paste the snippet → "New log" prefills the form) at release time. Never write to Supabase / `logs` from the dev loop. If the PR is not user-facing, delete the section entirely.
 
 # Product Architecture Map (Arkaik)
 
