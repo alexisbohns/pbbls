@@ -64,6 +64,25 @@ fun GlyphDetailDrawer(
     onSwapped: (BuyGlyphResult) -> Unit,
     onDismiss: () -> Unit,
 ) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    ) {
+        GlyphSwapPanel(item = item, balance = balance, onSwapped = onSwapped)
+    }
+}
+
+/**
+ * The stateful swap body without the sheet wrapper — the tabbed picker embeds
+ * this as a content swap (D5: never stack ModalBottomSheets). Owns the buy
+ * flow: on success the panel morphs to Owned in place and [onSwapped] fires.
+ */
+@Composable
+internal fun GlyphSwapPanel(
+    item: GlyphGridItem,
+    balance: Int,
+    onSwapped: (BuyGlyphResult) -> Unit,
+) {
     val market = LocalGlyphMarketService.current
 
     var isOwned by remember(item.id) { mutableStateOf(item.owned) }
@@ -72,38 +91,33 @@ fun GlyphDetailDrawer(
     var isBuying by remember(item.id) { mutableStateOf(false) }
     var errorRes by remember(item.id) { mutableStateOf<Int?>(null) }
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-    ) {
-        GlyphDetailDrawerContent(
-            item = item,
-            isOwned = isOwned,
-            acquiredAt = acquiredAt,
-            currentBalance = currentBalance,
-            isBuying = isBuying,
-            errorRes = errorRes,
-            onConfirm = {
-                isBuying = true
-                errorRes = null
-                try {
-                    val result = market.buy(item.glyph.id)
-                    currentBalance = result.balance
-                    // iOS stamps the client's now, not a server timestamp.
-                    acquiredAt = OffsetDateTime.now()
-                    isOwned = true
-                    onSwapped(result)
-                    true
-                } catch (e: Exception) {
-                    Log.e(TAG, "glyph swap failed", e)
-                    errorRes = glyphMarketErrorMessage(e.message)
-                    false
-                } finally {
-                    isBuying = false
-                }
-            },
-        )
-    }
+    GlyphDetailDrawerContent(
+        item = item,
+        isOwned = isOwned,
+        acquiredAt = acquiredAt,
+        currentBalance = currentBalance,
+        isBuying = isBuying,
+        errorRes = errorRes,
+        onConfirm = {
+            isBuying = true
+            errorRes = null
+            try {
+                val result = market.buy(item.glyph.id)
+                currentBalance = result.balance
+                // iOS stamps the client's now, not a server timestamp.
+                acquiredAt = OffsetDateTime.now()
+                isOwned = true
+                onSwapped(result)
+                true
+            } catch (e: Exception) {
+                Log.e(TAG, "glyph swap failed", e)
+                errorRes = glyphMarketErrorMessage(e.message)
+                false
+            } finally {
+                isBuying = false
+            }
+        },
+    )
 }
 
 /** Pure drawer body — split from the sheet so screenshots can drive both states. */

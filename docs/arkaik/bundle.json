@@ -363,7 +363,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Glyphs",
-      "description": "Glyphs page with three tabs — Mine (glyphs I created), Owned (glyphs I swapped, my entitlements), and Commu (community marketplace, approved+listed, excluding my own). Mine keeps carve + rename; Owned/Commu open the swap/owned drawer.",
+      "description": "Glyphs page with three tabs — Mine (glyphs I created), Owned (glyphs I swapped, my entitlements), and Commu (community marketplace, approved+listed, excluding my own). Mine keeps carve + rename; Owned/Commu open the swap/owned drawer. Android (M43 C, #586): pushed NavHost route from the Profile Glyphs tile (the last shortcuts-row un-hide) — Mine/Owned/Commu tabs with stale-while-refetch caches, adaptive grid with price badges, carve entry, rename dialog on own glyphs (system glyphs inert).",
       "status": "development",
       "platforms": [
         "web",
@@ -389,7 +389,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Carve Glyph",
-      "description": "Draw a new glyph on a pebble surface using the carve editor.",
+      "description": "Draw a new glyph on a pebble surface using the carve editor. Android (M43 A, #584): full-screen carve cover — hard-white 280dp canvas, byte-parity RDP + quadratic-midpoint serializer (fixture-locked against iOS/web), undo/clear, discard alert.",
       "status": "idea",
       "platforms": [
         "web",
@@ -402,7 +402,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Attach Glyph",
-      "description": "Draw a new glyph or select an existing one to attach to a pebble during recording.",
+      "description": "Draw a new glyph or select an existing one to attach to a pebble during recording. Android (M43 D, #587, closes #549): the picker is now the tabbed store surface inside the caller's sheet — inline buy and carve as content swaps (never stacked sheets); Mine keeps system glyphs (named deviation); the M39 API (currentGlyphId + onSelected) is unchanged at all three call sites.",
       "status": "archived",
       "platforms": [
         "web",
@@ -2110,7 +2110,7 @@
       "id": "V-glyph-swap-drawer",
       "species": "view",
       "title": "Glyph Swap Drawer",
-      "description": "Community glyph swap drawer. Slide-to-confirm karma swap with rising haptics + pebble/bamboo sound; morphs SWAP → OWNED in place on success. Usage/owners/creator shown as placeholders until a detail RPC lands.",
+      "description": "Community glyph swap drawer. Slide-to-confirm karma swap with rising haptics + pebble/bamboo sound; morphs SWAP → OWNED in place on success. Usage/owners/creator shown as placeholders until a detail RPC lands. Android (M43 C, #586): the store's single ModalBottomSheet — banner, stat tiles, dotted price/seal rule, me-vs-creator row, slide-to-confirm (haptic-only feedback v1); a successful swap morphs to Owned in place and applies the returned balance to the shared stats.",
       "status": "development",
       "platforms": [
         "web",
