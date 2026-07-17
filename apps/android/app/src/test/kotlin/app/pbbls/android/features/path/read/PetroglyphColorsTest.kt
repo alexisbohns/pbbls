@@ -19,6 +19,7 @@ class PetroglyphColorsTest {
                 lightHex = "#F2EFF5FF",
                 surfaceHex = "#7B5E991A",
                 darkHex = "#2A2138FF",
+                shadedHex = "#4A3A5CFF",
             ),
         )
 

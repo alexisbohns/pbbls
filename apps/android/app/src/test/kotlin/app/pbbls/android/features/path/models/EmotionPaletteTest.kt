@@ -18,6 +18,7 @@ class EmotionPaletteTest {
             lightHex = "#F2EFF5FF",
             surfaceHex = "#7B5E991A",
             darkHex = "#2A2138FF",
+            shadedHex = "#4A3A5CFF",
         )
 
     // parseColor
@@ -64,6 +65,7 @@ class EmotionPaletteTest {
                 lightHex = "#F2EFF5FF",
                 surfaceHex = "#7B5E991A",
                 darkHex = "#2A2138FF",
+                shadedHex = "#4A3A5CFF",
             ),
         )
     }
@@ -77,10 +79,12 @@ class EmotionPaletteTest {
                 lightHex = "#F2EFF5FF\n",
                 surfaceHex = "#7B5E991A ",
                 darkHex = "  #2A2138FF ",
+                shadedHex = " #4A3A5CFF ",
             )
         assertEquals("#7B5E99FF", palette?.primaryHex)
         assertEquals("#7B5E991A", palette?.surfaceHex)
         assertEquals("#2A2138FF", palette?.darkHex)
+        assertEquals("#4A3A5CFF", palette?.shadedHex)
         assertEquals("#7B5E99", palette?.strokeHex(isDark = false))
     }
 
@@ -94,6 +98,23 @@ class EmotionPaletteTest {
                 lightHex = "#F2EFF5FF",
                 surfaceHex = "#7B5E991A",
                 darkHex = "not-hex",
+                shadedHex = "#4A3A5CFF",
+            ),
+        )
+    }
+
+    @Test
+    fun `fromHex captures the shaded slot and rejects a malformed one`() {
+        assertEquals("#4A3A5CFF", makePalette()?.shadedHex)
+        assertEquals(Color(0xFF4A3A5C), makePalette()?.shaded)
+        assertNull(
+            EmotionPalette.fromHex(
+                primaryHex = "#7B5E99FF",
+                secondaryHex = "#AE91CCFF",
+                lightHex = "#F2EFF5FF",
+                surfaceHex = "#7B5E991A",
+                darkHex = "#2A2138FF",
+                shadedHex = "not-hex",
             ),
         )
     }

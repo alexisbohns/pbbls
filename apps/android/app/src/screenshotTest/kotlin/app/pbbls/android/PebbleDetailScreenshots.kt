@@ -50,6 +50,7 @@ private val previewPalette: EmotionPalette =
             lightHex = "#F2EFF5FF",
             surfaceHex = "#7B5E991A",
             darkHex = "#2A2138FF",
+            shadedHex = "#4A3A5CFF",
         ),
     )
 
@@ -173,11 +174,12 @@ private val noDomainDetail: PebbleDetail =
 
 @Composable
 private fun DetailPreview(detail: PebbleDetail) {
-    val system = PebblesTheme.colors.system
+    // PebbleReadView paints the emotion-palette page background itself (#605), so
+    // the preview needs no explicit backdrop.
     PebbleReadView(
         detail = detail,
         palette = previewPalette,
-        modifier = Modifier.fillMaxSize().background(system.background),
+        modifier = Modifier.fillMaxSize(),
     )
 }
 

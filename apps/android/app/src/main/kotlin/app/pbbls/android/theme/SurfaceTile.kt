@@ -10,6 +10,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -20,6 +21,12 @@ import androidx.compose.ui.unit.dp
  * dependency; same `painterResource` convention as `WeekRoll`/`CheckGlyph`).
  * Width comes from the caller's `Modifier.weight(1f)`; content is centered. Set
  * [muted] to render a placeholder tile (e.g. the "No domain" empty state).
+ *
+ * [backgroundColor] / [iconTint] / [labelColor] override the default chrome
+ * colors — the pebble read page tints its tiles to the emotion palette (#605).
+ * Each is null by default, reproducing the accent-surface chrome elsewhere.
+ * [muted] still wins for the icon/label so an empty placeholder reads muted even
+ * on a tinted background.
  */
 @Composable
 fun SurfaceTile(
@@ -27,25 +34,31 @@ fun SurfaceTile(
     label: String,
     modifier: Modifier = Modifier,
     muted: Boolean = false,
+    backgroundColor: Color? = null,
+    iconTint: Color? = null,
+    labelColor: Color? = null,
 ) {
     val system = PebblesTheme.colors.system
     val accent = PebblesTheme.colors.accent
     val spacing = PebblesTheme.spacing
+    val tileBackground = backgroundColor ?: accent.surface
+    val resolvedIconTint = if (muted) system.muted else (iconTint ?: accent.primary)
+    val resolvedLabelColor = if (muted) system.muted else (labelColor ?: system.secondary)
     Column(
-        modifier.background(accent.surface, RoundedCornerShape(spacing.lg)).padding(vertical = spacing.md),
+        modifier.background(tileBackground, RoundedCornerShape(spacing.lg)).padding(vertical = spacing.md),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(spacing.xs),
     ) {
         Icon(
             painter = iconPainter,
             contentDescription = null,
-            tint = if (muted) system.muted else accent.primary,
+            tint = resolvedIconTint,
             modifier = Modifier.size(30.dp),
         )
         PebblesText(
             label,
             style = PebblesTypography.callout,
-            color = if (muted) system.muted else system.secondary,
+            color = resolvedLabelColor,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(horizontal = 4.dp),

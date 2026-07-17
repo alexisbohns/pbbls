@@ -33,6 +33,8 @@ data class EmotionWithPaletteRow(
     val surfaceColor: String? = null,
     @SerialName("dark_color")
     val darkColor: String? = null,
+    @SerialName("shaded_color")
+    val shadedColor: String? = null,
 ) {
     fun toEmotionWithPalette(): EmotionWithPalette? {
         val palette =
@@ -42,6 +44,7 @@ data class EmotionWithPaletteRow(
                 lightHex = lightColor ?: return null,
                 surfaceHex = surfaceColor ?: return null,
                 darkHex = darkColor ?: return null,
+                shadedHex = shadedColor ?: return null,
             ) ?: return null
         return EmotionWithPalette(
             id = id ?: return null,

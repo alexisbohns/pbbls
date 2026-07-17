@@ -105,18 +105,21 @@ class PebbleDecodingTest {
                   "category_id": "c1", "category_slug": "joy", "category_name": "Joy",
                   "primary_color": "#7B5E99FF", "secondary_color": "#AE91CCFF",
                   "light_color": "#F2EFF5FF", "surface_color": "#7B5E991A",
-                  "dark_color": "#2A2138FF"
+                  "dark_color": "#2A2138FF", "shaded_color": "#4A3A5CFF"
                 }
                 """.trimIndent(),
             )
         val mapped = goodRow.toEmotionWithPalette()
         assertEquals("joyful", mapped?.slug)
         assertEquals("#7B5E99FF", mapped?.palette?.primaryHex)
+        assertEquals("#4A3A5CFF", mapped?.palette?.shadedHex)
 
         // A null column (view types are all-nullable) drops the row.
         assertNull(goodRow.copy(name = null).toEmotionWithPalette())
         // The dark_color slot (#599) is required like the rest of the palette.
         assertNull(goodRow.copy(darkColor = null).toEmotionWithPalette())
+        // The shaded_color slot (#605) is required like the rest of the palette.
+        assertNull(goodRow.copy(shadedColor = null).toEmotionWithPalette())
         // An unparseable hex drops the row.
         assertNull(goodRow.copy(primaryColor = "oops").toEmotionWithPalette())
     }

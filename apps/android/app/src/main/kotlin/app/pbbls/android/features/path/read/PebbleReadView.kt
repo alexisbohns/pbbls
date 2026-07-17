@@ -1,5 +1,7 @@
 package app.pbbls.android.features.path.read
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +15,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -36,6 +39,10 @@ import app.pbbls.android.theme.SurfaceTile
  * banner, title, meta tiles, optional description, and a souls grid, stacked in
  * a scrolling column. The souls grid is chunked [Row]s, never a lazy grid — a
  * lazy grid inside a `verticalScroll` [Column] throws "infinite height".
+ *
+ * The whole page tints to the pebble's emotion palette (#605) — background plus
+ * every text/tile/soul color resolves through [pebblePageColors]. On a palette
+ * cache miss ([palette] null) the page falls back to the system/accent chrome.
  */
 @Composable
 fun PebbleReadView(
@@ -44,9 +51,11 @@ fun PebbleReadView(
     modifier: Modifier = Modifier,
 ) {
     val system = PebblesTheme.colors.system
+    val pageColors = palette?.let { pebblePageColors(it, isSystemInDarkTheme()) }
     Column(
         modifier
             .fillMaxSize()
+            .background(pageColors?.background ?: system.background)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp)
             .padding(top = 8.dp, bottom = 32.dp),
@@ -59,19 +68,28 @@ fun PebbleReadView(
             modifier = Modifier.fillMaxWidth(),
             snapStoragePath = detail.sortedSnaps.firstOrNull()?.storagePath,
         )
-        PebbleReadTitle(name = detail.name, happenedAt = detail.happenedAt)
-        PebbleReadMeta(detail = detail)
+        PebbleReadTitle(
+            name = detail.name,
+            happenedAt = detail.happenedAt,
+            nameColor = pageColors?.title,
+            dateColor = pageColors?.date,
+        )
+        PebbleReadMeta(detail = detail, pageColors = pageColors)
         val desc = detail.description
         if (!desc.isNullOrEmpty()) {
             PebblesText(
                 desc,
                 style = PebblesTypography.body,
-                color = system.foreground,
+                color = pageColors?.description ?: system.foreground,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
         if (detail.souls.isNotEmpty()) {
-            PebbleReadSouls(souls = detail.souls)
+            PebbleReadSouls(
+                souls = detail.souls,
+                glyphColor = pageColors?.soulGlyph,
+                nameColor = pageColors?.soulName,
+            )
         }
     }
 }
@@ -85,7 +103,10 @@ fun PebbleReadView(
  * inside a non-inline `joinToString` transform lambda.
  */
 @Composable
-private fun PebbleReadMeta(detail: PebbleDetail) {
+private fun PebbleReadMeta(
+    detail: PebbleDetail,
+    pageColors: PebblePageColors?,
+) {
     val spacing = PebblesTheme.spacing
     val emotionLabel = ReferenceStrings.referenceName(ReferenceType.EMOTION, detail.emotion.slug, detail.emotion.name)
     val domainNames = mutableListOf<String>()
@@ -100,6 +121,9 @@ private fun PebbleReadMeta(detail: PebbleDetail) {
             iconPainter = painterResource(R.drawable.ic_pebble_emotion),
             label = emotionLabel,
             modifier = Modifier.weight(1f),
+            backgroundColor = pageColors?.tileBackground,
+            iconTint = pageColors?.tileIcon,
+            labelColor = pageColors?.tileLabel,
         )
         if (domainNames.isEmpty()) {
             SurfaceTile(
@@ -107,12 +131,16 @@ private fun PebbleReadMeta(detail: PebbleDetail) {
                 label = stringResource(R.string.pebble_detail_no_domain),
                 modifier = Modifier.weight(1f),
                 muted = true,
+                backgroundColor = pageColors?.tileBackground,
             )
         } else {
             SurfaceTile(
                 iconPainter = painterResource(R.drawable.ic_pebble_domain),
                 label = domainNames.joinToString(", "),
                 modifier = Modifier.weight(1f),
+                backgroundColor = pageColors?.tileBackground,
+                iconTint = pageColors?.tileIcon,
+                labelColor = pageColors?.tileLabel,
             )
         }
         if (detail.collections.isNotEmpty()) {
@@ -120,6 +148,9 @@ private fun PebbleReadMeta(detail: PebbleDetail) {
                 iconPainter = painterResource(R.drawable.ic_pebble_collection),
                 label = detail.collections.joinToString(", ") { it.name },
                 modifier = Modifier.weight(1f),
+                backgroundColor = pageColors?.tileBackground,
+                iconTint = pageColors?.tileIcon,
+                labelColor = pageColors?.tileLabel,
             )
         }
     }
@@ -131,7 +162,11 @@ private fun PebbleReadMeta(detail: PebbleDetail) {
  * keep a stable third-of-width regardless of count.
  */
 @Composable
-private fun PebbleReadSouls(souls: List<SoulWithGlyph>) {
+private fun PebbleReadSouls(
+    souls: List<SoulWithGlyph>,
+    glyphColor: Color?,
+    nameColor: Color?,
+) {
     Column(
         Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -141,7 +176,14 @@ private fun PebbleReadSouls(souls: List<SoulWithGlyph>) {
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                rowSouls.forEach { soul -> DetailSoulCell(soul = soul, modifier = Modifier.weight(1f)) }
+                rowSouls.forEach { soul ->
+                    DetailSoulCell(
+                        soul = soul,
+                        modifier = Modifier.weight(1f),
+                        glyphColor = glyphColor,
+                        nameColor = nameColor,
+                    )
+                }
                 repeat(3 - rowSouls.size) { Spacer(Modifier.weight(1f)) }
             }
         }
@@ -149,13 +191,16 @@ private fun PebbleReadSouls(souls: List<SoulWithGlyph>) {
 }
 
 /**
- * One soul cell — ports iOS `SoulItem(case: .default)`: the soul's glyph in
- * `system.secondary` above its name in the hand font, no pebble count.
+ * One soul cell — ports iOS `SoulItem(case: .default)`: the soul's glyph above
+ * its name in the hand font, no pebble count. [glyphColor] / [nameColor] tint to
+ * the emotion palette on the read page (#605); null keeps `system.secondary`.
  */
 @Composable
 private fun DetailSoulCell(
     soul: SoulWithGlyph,
     modifier: Modifier = Modifier,
+    glyphColor: Color? = null,
+    nameColor: Color? = null,
 ) {
     val system = PebblesTheme.colors.system
     Column(
@@ -166,13 +211,13 @@ private fun DetailSoulCell(
         GlyphImage(
             strokes = soul.glyph.strokes,
             viewBox = soul.glyph.viewBox,
-            strokeColor = system.secondary,
+            strokeColor = glyphColor ?: system.secondary,
             modifier = Modifier.size(72.dp),
         )
         PebblesText(
             soul.name,
             style = PebblesTypography.bodyLeadHand,
-            color = system.secondary,
+            color = nameColor ?: system.secondary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )
