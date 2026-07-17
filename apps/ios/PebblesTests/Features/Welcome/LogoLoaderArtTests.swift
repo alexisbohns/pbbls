@@ -28,3 +28,21 @@ extension LogoLoaderArtTests {
         #expect(!parsed.eyeFills.isEmptyGroup)
     }
 }
+
+extension LogoLoaderArtTests {
+    @Test("Builds three distinct boil variants")
+    func boilVariants() throws {
+        let art = try #require(LogoLoaderArt.build())
+        #expect(art.variants.count == 3)
+        // swiftlint:disable:next identifier_name
+        for v in art.variants {
+            #expect(!v.outline.ink.isEmptyGroup)
+            #expect(!v.creature.ink.isEmptyGroup)
+            #expect(!v.fossilVeins.ink.isEmptyGroup)
+            #expect(!v.eyes.isEmptyGroup)
+        }
+        // Seeds 3/4/5 must produce different geometry (boil, not a freeze).
+        #expect(art.variants[0].outline.ink.boundingBoxOfPath
+                != art.variants[1].outline.ink.boundingBoxOfPath)
+    }
+}

@@ -107,3 +107,67 @@ enum LogoLoaderArt {
         return CGRect(x: parts[0], y: parts[1], width: parts[2], height: parts[3])
     }
 }
+
+/// Wobbled artwork for the whole logo at one boil seed.
+struct LogoLoaderVariant {
+    let outline: WobbleArt        // reveal phase 1 (ink + centerline)
+    let creature: WobbleArt       // reveal phase 2
+    let fossilVeins: WobbleArt    // reveal phase 3
+    let eyes: CGPath              // displaced fill regions (no reveal)
+}
+
+/// The parsed logo plus its three boil variants. Built once, cached.
+struct LogoLoaderModel {
+    let viewBox: CGRect
+    let variants: [LogoLoaderVariant]
+}
+
+extension LogoLoaderArt {
+
+    /// SVG-authored stroke half-width, in the logo's own viewBox units.
+    private static let strokeHalfWidth = Double(PebbleStroke.outlineWidth) / 2   // 3
+    /// Boil variant seeds (issue #555 §2.3: variant k → seed 3 + k).
+    private static let seeds = [3, 4, 5]
+
+    private static let cached: LogoLoaderModel? = buildUncached()
+
+    /// Cached accessor — the wobble build runs at most once per process.
+    static func build() -> LogoLoaderModel? { cached }
+
+    private static func buildUncached() -> LogoLoaderModel? {
+        guard let groups = parseGroups() else { return nil }
+        // Wobble in the SVG's own viewBox with §2.1-scaled params — the
+        // established backdrop pattern (WobbleRenderer.backdropArt), visually
+        // equivalent to normalizing into the 200-box.
+        let params = WobbleParams.scaled(for: groups.viewBox.size)
+        let variants = seeds.map { seed -> LogoLoaderVariant in
+            let noise = SVGTurbulence(seed: seed)
+            return LogoLoaderVariant(
+                outline: strokeArt(groups.outline, params: params, noise: noise),
+                creature: strokeArt(groups.creatureStrokes, params: params, noise: noise),
+                fossilVeins: strokeArt(groups.fossilAndVeins, params: params, noise: noise),
+                eyes: displacedFill(groups.eyeFills, params: params, noise: noise)
+            )
+        }
+        return LogoLoaderModel(viewBox: groups.viewBox, variants: variants)
+    }
+
+    private static func strokeArt(_ path: CGPath, params: WobbleParams, noise: SVGTurbulence) -> WobbleArt {
+        let polylines = WobblePathFlattener.flatten(path, step: params.flattenStep)
+        return WobbleOutlineBuilder.art(for: polylines, halfWidth: strokeHalfWidth, params: params, noise: noise)
+    }
+
+    /// Displace a fill region's contours directly (mirrors
+    /// `WobbleRenderer.backdropArt` — fills wobble their edge, no outline).
+    private static func displacedFill(_ path: CGPath, params: WobbleParams, noise: SVGTurbulence) -> CGPath {
+        let out = CGMutablePath()
+        for polyline in WobblePathFlattener.flatten(path, step: params.flattenStep) {
+            let displaced = polyline.points.map { params.displace($0, using: noise) }
+            guard displaced.count > 2, let first = displaced.first else { continue }
+            out.move(to: first)
+            for point in displaced.dropFirst() { out.addLine(to: point) }
+            out.closeSubpath()
+        }
+        return out.copy() ?? out
+    }
+}
