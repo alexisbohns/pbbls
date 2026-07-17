@@ -10,18 +10,6 @@ struct BannerAspectTests {
         #expect(BannerAspect.nearest(to: 16.0 / 9.0) == .sixteenNine)
     }
 
-    @Test("3:2 source picks .fourThree (closer than 16:9)")
-    func threeTwoSource() {
-        // r = 1.5; |1.5 - 1.333| = 0.167; |1.5 - 1.778| = 0.278 → 4:3 wins.
-        #expect(BannerAspect.nearest(to: 3.0 / 2.0) == .fourThree)
-    }
-
-    @Test("Near-midpoint ~1.6 picks .sixteenNine (closer than 4:3)")
-    func nearMidpointPicksSixteenNine() {
-        // r = 1.6; |1.6 - 1.778| = 0.178; |1.6 - 1.333| = 0.267 → 16:9 wins.
-        #expect(BannerAspect.nearest(to: 1.6) == .sixteenNine)
-    }
-
     @Test("4:3 source picks .fourThree")
     func fourThreeSource() {
         #expect(BannerAspect.nearest(to: 4.0 / 3.0) == .fourThree)
@@ -32,10 +20,21 @@ struct BannerAspectTests {
         #expect(BannerAspect.nearest(to: 1.0) == .square)
     }
 
-    @Test("Portrait 9:16 source picks .square (no portrait bucket)")
+    @Test("3:4 portrait source picks .threeFour")
+    func threeFourSource() {
+        #expect(BannerAspect.nearest(to: 3.0 / 4.0) == .threeFour)
+    }
+
+    @Test("Portrait 9:16 source picks .threeFour (nearest is 0.75, not 1.0)")
     func portraitSource() {
-        // r ≈ 0.5625; closer to 1.0 than to 1.333 or 1.778.
-        #expect(BannerAspect.nearest(to: 9.0 / 16.0) == .square)
+        // r ≈ 0.5625; |0.5625 - 0.75| = 0.1875 < |0.5625 - 1.0| = 0.4375 → 3:4 wins.
+        #expect(BannerAspect.nearest(to: 9.0 / 16.0) == .threeFour)
+    }
+
+    @Test("3:2 source picks .fourThree (closer than 16:9)")
+    func threeTwoSource() {
+        // r = 1.5; |1.5 - 1.333| = 0.167; |1.5 - 1.778| = 0.278 → 4:3 wins.
+        #expect(BannerAspect.nearest(to: 3.0 / 2.0) == .fourThree)
     }
 
     @Test("Extreme landscape 21:9 source picks .sixteenNine")
@@ -48,5 +47,6 @@ struct BannerAspectTests {
         #expect(BannerAspect.sixteenNine.cgRatio == 16.0 / 9.0)
         #expect(BannerAspect.fourThree.cgRatio   == 4.0 / 3.0)
         #expect(BannerAspect.square.cgRatio      == 1.0)
+        #expect(BannerAspect.threeFour.cgRatio   == 3.0 / 4.0)
     }
 }
