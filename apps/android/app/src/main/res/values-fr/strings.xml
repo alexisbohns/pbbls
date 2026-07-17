@@ -269,4 +269,60 @@
     <string name="karma_flash_a11y">%1$d karma gagné, %2$s</string>
     <!-- ==== Edit pebble (sub-project D) ==== -->
     <string name="edit_pebble_title">Modifier le caillou</string>
+
+    <!-- ==== Photos de pebble (M42 · Android Snaps) ==== -->
+    <string name="create_photo_header">Photo</string>
+    <string name="photo_add">Ajouter une photo</string>
+    <string name="photo_label">Photo</string>
+    <string name="photo_state_uploading">Envoi…</string>
+    <string name="photo_state_ready">Prête</string>
+    <string name="photo_state_failed">Échec de l\'envoi</string>
+    <string name="photo_state_saved">Enregistrée</string>
+    <string name="photo_retry_a11y">Réessayer</string>
+    <string name="photo_remove_a11y">Retirer la photo</string>
+    <string name="photo_remove_error">Impossible de retirer la photo. Veuillez réessayer.</string>
+    <string name="pebble_save_error_photo_uploading">La photo est encore en cours d\'envoi.</string>
+    <string name="pebble_save_error_photo_failed">L\'envoi de la photo a échoué. Réessayez ou retirez-la.</string>
+
+    <!-- ==== Atelier de glyphes (M43 · Android Glyph Studio &amp; Store) ==== -->
+    <string name="carve_title">Nouveau glyphe</string>
+    <string name="carve_name_placeholder">Nom (facultatif)</string>
+    <string name="carve_undo">Défaire</string>
+    <string name="carve_clear">Effacer</string>
+    <string name="carve_canvas_strokes_a11y">Zone de dessin, %1$d traits dessinés</string>
+    <string name="carve_discard_title">Abandonner votre glyphe ?</string>
+    <string name="carve_keep_editing">Continuer</string>
+    <string name="carve_discard">Abandonner</string>
+    <string name="carve_save_error">Impossible d\'enregistrer votre glyphe. Veuillez réessayer.</string>
+    <!-- Copie d'erreur buy_glyph — friendlyMessage iOS. -->
+    <string name="glyph_error_insufficient_karma">Pas assez de karma</string>
+    <string name="glyph_error_not_in_market">Ce glyphe n\'est plus disponible</string>
+    <string name="glyph_error_already_owned">Vous possédez déjà ce glyphe</string>
+    <string name="glyph_error_cannot_buy_own">C\'est votre propre glyphe</string>
+    <string name="glyph_error_generic">Impossible de finaliser l\'échange. Veuillez réessayer.</string>
+    <string name="glyph_error_not_signed_in">Veuillez vous reconnecter.</string>
+    <!-- Boutique. « Commu » : libellé d'onglet iOS, verbatim. -->
+    <string name="glyphs_title">Glyphes</string>
+    <string name="glyphs_carve_a11y">Graver un nouveau glyphe</string>
+    <string name="glyph_tab_mine">À moi</string>
+    <string name="glyph_tab_owned">Possédés</string>
+    <string name="glyph_tab_commu">Commu</string>
+    <string name="glyphs_empty_mine_title">Pas encore de glyphes</string>
+    <string name="glyphs_empty_mine_message">Touchez + pour graver votre premier glyphe.</string>
+    <string name="glyphs_empty_owned_title">Rien de possédé pour l\'instant</string>
+    <string name="glyphs_empty_owned_message">Échangez un glyphe de la communauté pour le voir ici.</string>
+    <string name="glyphs_empty_commu_title">Aucun glyphe de la communauté</string>
+    <string name="glyphs_empty_commu_message">Revenez bientôt.</string>
+    <string name="glyphs_load_error">Impossible de charger les glyphes</string>
+    <string name="glyphs_load_error_hint">Veuillez réessayer.</string>
+    <string name="glyph_rename_title">Renommer le glyphe</string>
+    <string name="glyph_rename_error">Impossible de renommer le glyphe. Veuillez réessayer.</string>
+    <string name="glyph_drawer_swap">Échanger</string>
+    <string name="glyph_drawer_owned">Possédé</string>
+    <string name="glyph_drawer_me">Moi</string>
+    <string name="glyph_drawer_creator">Créateur</string>
+    <string name="glyph_drawer_soon">Bientôt</string>
+    <string name="glyph_drawer_acquired">Acquis · %1$s</string>
+    <string name="glyph_drawer_slide">Glissez pour confirmer</string>
+    <string name="glyph_drawer_slide_a11y">Glissez pour confirmer l\'échange</string>
 </resources>

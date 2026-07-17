@@ -1,6 +1,7 @@
 package app.pbbls.android
 
 import android.app.Application
+import app.pbbls.android.features.glyph.services.GlyphMarketService
 import app.pbbls.android.features.glyph.services.GlyphService
 import app.pbbls.android.features.karma.KarmaNotificationService
 import app.pbbls.android.services.CollectionsService
@@ -71,6 +72,9 @@ class PebblesApp :
     lateinit var glyphService: GlyphService
         private set
 
+    lateinit var glyphMarket: GlyphMarketService
+        private set
+
     lateinit var karma: KarmaNotificationService
         private set
 
@@ -89,6 +93,7 @@ class PebblesApp :
         soulsService = SoulsService(supabase)
         collectionsService = CollectionsService(supabase)
         glyphService = GlyphService(supabase)
+        glyphMarket = GlyphMarketService(supabase)
         karma = KarmaNotificationService()
     }
 

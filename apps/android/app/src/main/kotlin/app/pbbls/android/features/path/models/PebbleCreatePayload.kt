@@ -9,12 +9,14 @@ import java.time.OffsetDateTime
  * RPC (via the `compose-pebble` edge function) — mirrors iOS
  * `PebbleCreatePayload.swift`.
  *
- * Declares **no default values** (D3): the write service's `Json` sets
- * `explicitNulls = true`, so [description] / [glyphId] encode as literal JSON
- * `null` rather than being omitted. [visibility] serializes to `"private"` via
- * the [Visibility] enum's `@SerialName`; [happenedAt] encodes as an ISO-8601
- * string via [OffsetDateTimeSerializer]. `snaps` is deliberately absent — Android
- * omits it on create (no photo section this milestone).
+ * Declares **no default values** (D3) — except [snaps]: the write service's
+ * `Json` sets `explicitNulls = true` (so [description] / [glyphId] encode as
+ * literal JSON `null` rather than being omitted) but leaves `encodeDefaults`
+ * false, so [snaps]' null default makes the key **absent** on photo-less
+ * creates and present only when an uploaded snap exists (M42 design D5).
+ * [visibility] serializes to `"private"` via the [Visibility] enum's
+ * `@SerialName`; [happenedAt] encodes as an ISO-8601 string via
+ * [OffsetDateTimeSerializer].
  */
 @Serializable
 data class PebbleCreatePayload(
@@ -36,9 +38,13 @@ data class PebbleCreatePayload(
     val collectionIds: List<String>,
     @SerialName("glyph_id")
     val glyphId: String?,
+    val snaps: List<PebbleSnapPayload>? = null,
 ) {
     companion object {
-        fun from(draft: PebbleDraft): PebbleCreatePayload {
+        fun from(
+            draft: PebbleDraft,
+            snaps: List<PebbleSnapPayload>? = null,
+        ): PebbleCreatePayload {
             require(draft.isValid) { "PebbleCreatePayload.from called with an invalid draft" }
             val valence = draft.valence!!
             val trimmedDescription = draft.description.trim()
@@ -54,6 +60,7 @@ data class PebbleCreatePayload(
                 soulIds = draft.soulIds,
                 collectionIds = draft.collectionId?.let { listOf(it) } ?: emptyList(),
                 glyphId = draft.glyphId,
+                snaps = snaps,
             )
         }
     }

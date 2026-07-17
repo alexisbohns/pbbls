@@ -67,8 +67,11 @@ class PebbleWriteService(
     private val json = Json { explicitNulls = true }
     private val decodeJson = Json { ignoreUnknownKeys = true }
 
-    suspend fun create(draft: PebbleDraft): ComposeResult {
-        val body = json.encodeToString(CreateRequest(PebbleCreatePayload.from(draft)))
+    suspend fun create(
+        draft: PebbleDraft,
+        snaps: List<PebbleSnapPayload>? = null,
+    ): ComposeResult {
+        val body = json.encodeToString(CreateRequest(PebbleCreatePayload.from(draft, snaps)))
         val (status, text) = post(FUNCTION_CREATE, body) ?: return failGeneric()
         if (status in 200..299) return ComposeResult.Success(decodeJson.decodeFromString(text))
         // Create soft-success = the (500) body carries pebble_id (iOS parity).

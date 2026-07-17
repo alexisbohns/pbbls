@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.tooling.preview.Preview
 import app.pbbls.android.features.glyph.models.Glyph
+import app.pbbls.android.features.glyph.models.GlyphGridItem
 import app.pbbls.android.features.glyph.models.GlyphStroke
 import app.pbbls.android.features.karma.KarmaEarnedCapsule
 import app.pbbls.android.features.karma.KarmaEarnedContent
@@ -18,7 +19,7 @@ import app.pbbls.android.features.path.create.CategoryGroup
 import app.pbbls.android.features.path.create.PebbleForm
 import app.pbbls.android.features.path.create.pickers.CreateSoulDialog
 import app.pbbls.android.features.path.create.pickers.EmotionPickerBody
-import app.pbbls.android.features.path.create.pickers.GlyphPickerBody
+import app.pbbls.android.features.path.create.pickers.GlyphPickerGrid
 import app.pbbls.android.features.path.create.pickers.SoulPickerBody
 import app.pbbls.android.features.path.create.pickers.ValencePickerBody
 import app.pbbls.android.features.path.models.Domain
@@ -35,7 +36,7 @@ import java.time.OffsetDateTime
 /**
  * Previews for the create funnel (#541): the pure [PebbleForm] (empty, filled,
  * and error states), the four picker bodies ([ValencePickerBody],
- * [EmotionPickerBody], [SoulPickerBody], [GlyphPickerBody]), the inline
+ * [EmotionPickerBody], [SoulPickerBody], [GlyphPickerGrid]), the inline
  * [CreateSoulDialog], and the [KarmaEarnedCapsule] flash — light and dark,
  * driven with fixtures so no services are needed. The service-backed sheets and
  * `CreatePebbleScreen` are deliberately not previewed. Glyph and valence shapes
@@ -256,9 +257,14 @@ private fun SoulBodyPreview() {
 @Composable
 private fun GlyphBodyPreview() {
     val system = PebblesTheme.colors.system
-    GlyphPickerBody(
-        glyphs = glyphs,
+    GlyphPickerGrid(
+        items =
+            glyphs.mapIndexed { index, glyph ->
+                GlyphGridItem(glyph = glyph, price = index * 5, owned = false, createdAt = null, acquiredAt = null)
+            },
         currentGlyphId = "glyph-1",
+        showCarveRow = true,
+        onCarve = {},
         onSelect = {},
         modifier = Modifier.fillMaxSize().background(system.background),
     )

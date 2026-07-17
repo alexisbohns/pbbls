@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.CompositionLocalProvider
+import app.pbbls.android.features.glyph.services.LocalGlyphMarketService
 import app.pbbls.android.features.glyph.services.LocalGlyphService
 import app.pbbls.android.features.karma.LocalKarmaNotificationService
 import app.pbbls.android.services.LocalCollectionsService
@@ -53,6 +54,7 @@ class MainActivity : ComponentActivity() {
                     LocalSoulsService provides app.soulsService,
                     LocalCollectionsService provides app.collectionsService,
                     LocalGlyphService provides app.glyphService,
+                    LocalGlyphMarketService provides app.glyphMarket,
                     LocalKarmaNotificationService provides app.karma,
                 ) {
                     RootScreen()

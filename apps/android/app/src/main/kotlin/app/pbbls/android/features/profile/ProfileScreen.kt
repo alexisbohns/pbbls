@@ -67,6 +67,7 @@ fun ProfileScreen(
     onOpenSouls: () -> Unit,
     onOpenCollections: () -> Unit,
     onOpenCollection: (Collection) -> Unit,
+    onOpenGlyphs: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val profileService = LocalProfileService.current
@@ -191,6 +192,7 @@ fun ProfileScreen(
                     ProfileShortcutsRow(
                         onOpenCollections = onOpenCollections,
                         onOpenSouls = onOpenSouls,
+                        onOpenGlyphs = onOpenGlyphs,
                     )
                     ProfileStatsCard(
                         ripple = stats.ripple,

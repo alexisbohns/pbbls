@@ -2,6 +2,9 @@ package app.pbbls.android.features.path
 
 import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -25,6 +28,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
@@ -35,15 +39,22 @@ import app.pbbls.android.features.path.create.PebbleForm
 import app.pbbls.android.features.path.models.PebbleDraft
 import app.pbbls.android.features.path.models.PebbleSnapPayload
 import app.pbbls.android.features.path.models.renderHeightDp
+import app.pbbls.android.features.pebblemedia.ImagePipeline
+import app.pbbls.android.features.pebblemedia.SnapUploadCoordinator
+import app.pbbls.android.features.pebblemedia.models.FormSnap
 import app.pbbls.android.services.ComposeResult
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalPebbleDetailService
 import app.pbbls.android.services.LocalPebbleWriteService
 import app.pbbls.android.services.LocalReferenceDataService
+import app.pbbls.android.services.LocalSupabaseService
+import app.pbbls.android.services.PebbleSnapRepository
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private const val TAG = "edit-pebble"
 
@@ -68,6 +79,8 @@ fun EditPebbleScreen(
     val referenceData = LocalReferenceDataService.current
     val palettes = LocalEmotionPaletteService.current
     val karma = LocalKarmaNotificationService.current
+    val supabase = LocalSupabaseService.current
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val isDark = isSystemInDarkTheme()
     val system = PebblesTheme.colors.system
@@ -78,15 +91,44 @@ fun EditPebbleScreen(
     var renderSvg by remember(pebbleId) { mutableStateOf<String?>(null) }
     var strokeColor by remember(pebbleId) { mutableStateOf<String?>(null) }
     var renderHeight by remember(pebbleId) { mutableStateOf(260.dp) }
-    var snaps by remember(pebbleId) { mutableStateOf<List<PebbleSnapPayload>>(emptyList()) }
 
     var isLoading by remember(pebbleId) { mutableStateOf(true) }
     var loadError by remember(pebbleId) { mutableStateOf(false) }
     var isSaving by remember(pebbleId) { mutableStateOf(false) }
     var saveErrorRes by remember(pebbleId) { mutableStateOf<Int?>(null) }
     var reloadToken by remember(pebbleId) { mutableIntStateOf(0) }
+    var isRemovingExistingSnap by remember(pebbleId) { mutableStateOf(false) }
 
-    BackHandler { onDismiss() }
+    // Form-scoped (M42 D6); seeded with the existing snap once the detail loads.
+    val snaps = remember(pebbleId) { SnapUploadCoordinator(repo = PebbleSnapRepository(supabase)) }
+    val photoPicker =
+        rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
+            val userId = supabase.session?.user?.id
+            if (uri != null && userId != null) {
+                scope.launch {
+                    try {
+                        val processed = withContext(Dispatchers.IO) { ImagePipeline.process(context, uri) }
+                        snaps.attach(processed, userId)
+                    } catch (e: Exception) {
+                        // iOS parity: a failed pick/decode logs and drops silently.
+                        Log.e(TAG, "photo pick processing failed", e)
+                    }
+                }
+            }
+        }
+
+    fun dismiss() {
+        if (isSaving) return
+        scope.launch {
+            supabase.session
+                ?.user
+                ?.id
+                ?.let { snaps.cancelAndCleanup(it) }
+            onDismiss()
+        }
+    }
+
+    BackHandler(enabled = !isSaving) { dismiss() }
 
     LaunchedEffect(pebbleId, reloadToken) {
         isLoading = true
@@ -102,7 +144,10 @@ fun EditPebbleScreen(
             // Extracted so neither line exceeds ktlint's 3-dot chain limit.
             val sizeGroup = detail.valence.sizeGroup
             renderHeight = sizeGroup.renderHeightDp.dp
-            snaps = detail.sortedSnaps.map { PebbleSnapPayload(it.id, it.storagePath, it.sortOrder) }
+            // iOS seeds only the first saved snap (at most one photo — M42 D1).
+            snaps.seedExisting(
+                detail.sortedSnaps.firstOrNull()?.let { FormSnap.Existing(id = it.id, storagePath = it.storagePath) },
+            )
             isLoading = false
         } catch (e: Exception) {
             Log.e(TAG, "edit pebble load failed", e)
@@ -121,10 +166,31 @@ fun EditPebbleScreen(
 
     fun save() {
         if (!draft.isValid || isSaving) return
+        // Snap gates (M42): distinct copy per state, checked before isSaving.
+        if (snaps.isUploading) {
+            saveErrorRes = R.string.pebble_save_error_photo_uploading
+            return
+        }
+        if (snaps.hasFailed) {
+            saveErrorRes = R.string.pebble_save_error_photo_failed
+            return
+        }
         isSaving = true
         saveErrorRes = null
         scope.launch {
-            when (val result = writeService.update(pebbleId, draft, snaps)) {
+            val userId = supabase.session?.user?.id
+            // Always-echo contract (M42 D5): existing echoes verbatim, a fresh
+            // upload sends its pair, no snap sends [] (which deletes server-side).
+            val snapPayload =
+                when (val formSnap = snaps.formSnap) {
+                    is FormSnap.Existing -> listOf(PebbleSnapPayload(formSnap.id, formSnap.storagePath, 0))
+                    is FormSnap.Pending ->
+                        snaps.pendingSnapForPayload()?.let { snap ->
+                            userId?.let { listOf(PebbleSnapPayload(snap.id, snap.storagePrefix(it), 0)) }
+                        } ?: emptyList()
+                    null -> emptyList()
+                }
+            when (val result = writeService.update(pebbleId, draft, snapPayload)) {
                 is ComposeResult.Success -> {
                     renderSvg = result.response.renderSvg ?: renderSvg
                     karma.notifyEarned(result.response.karmaDelta ?: 0, KarmaReason.PEBBLE_ENRICHED)
@@ -134,6 +200,7 @@ fun EditPebbleScreen(
                 is ComposeResult.Failure -> {
                     saveErrorRes = result.messageRes
                     isSaving = false
+                    userId?.let { snaps.handleSaveFailure(it) }
                 }
             }
         }
@@ -148,7 +215,7 @@ fun EditPebbleScreen(
         EditTopBar(
             isSaving = isSaving,
             saveEnabled = draft.isValid && !isLoading,
-            onCancel = onDismiss,
+            onCancel = { dismiss() },
             onSave = { save() },
         )
         when {
@@ -173,6 +240,38 @@ fun EditPebbleScreen(
                     strokeColor = strokeColor,
                     renderHeight = renderHeight,
                     modifier = Modifier.fillMaxSize(),
+                    formSnap = snaps.formSnap,
+                    onAddPhoto = {
+                        photoPicker.launch(
+                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                        )
+                    },
+                    onRetryPending = {
+                        supabase.session
+                            ?.user
+                            ?.id
+                            ?.let { id -> scope.launch { snaps.retryCurrent(id) } }
+                    },
+                    onRemovePending = {
+                        supabase.session
+                            ?.user
+                            ?.id
+                            ?.let { id -> scope.launch { snaps.removePending(id) } }
+                    },
+                    isRemovingExistingSnap = isRemovingExistingSnap,
+                    onRemoveExistingSnap = {
+                        scope.launch {
+                            isRemovingExistingSnap = true
+                            try {
+                                snaps.removeExisting()
+                            } catch (e: Exception) {
+                                Log.e(TAG, "delete_pebble_media failed", e)
+                                saveErrorRes = R.string.photo_remove_error
+                            } finally {
+                                isRemovingExistingSnap = false
+                            }
+                        }
+                    },
                 )
         }
     }

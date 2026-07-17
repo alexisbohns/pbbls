@@ -16,17 +16,16 @@ import app.pbbls.android.theme.SurfaceTile
 
 /**
  * The Profile shortcut tiles — ports iOS `ProfileShortcutsRow.swift`
- * (Collections · Souls · Glyphs, in that order). Each destination arrives
- * with its own sub-project/milestone, so handlers are optional and a tile
- * renders only when its handler is wired (D11 — no dead chrome): souls lands
- * with sub-project D, collections with E; the glyphs tile (and its param)
- * arrives with the glyph-management milestone.
+ * (Collections · Souls · Glyphs, in that order). Handlers are optional and a
+ * tile renders only when its handler is wired (D11 — no dead chrome); all
+ * three are live as of M43 (the Glyphs tile reversed the last omission).
  */
 @Composable
 fun ProfileShortcutsRow(
     modifier: Modifier = Modifier,
     onOpenCollections: (() -> Unit)? = null,
     onOpenSouls: (() -> Unit)? = null,
+    onOpenGlyphs: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier,
@@ -44,6 +43,13 @@ fun ProfileShortcutsRow(
                 iconRes = R.drawable.ic_person_pair,
                 label = stringResource(R.string.souls_title),
                 onClick = onOpenSouls,
+            )
+        }
+        if (onOpenGlyphs != null) {
+            ShortcutTile(
+                iconRes = R.drawable.ic_scribble,
+                label = stringResource(R.string.glyphs_title),
+                onClick = onOpenGlyphs,
             )
         }
     }
