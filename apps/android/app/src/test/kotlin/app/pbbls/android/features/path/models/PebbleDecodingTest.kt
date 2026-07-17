@@ -104,7 +104,8 @@ class PebbleDecodingTest {
                   "id": "e1", "slug": "joyful", "name": "Joyful", "emoji": "😊",
                   "category_id": "c1", "category_slug": "joy", "category_name": "Joy",
                   "primary_color": "#7B5E99FF", "secondary_color": "#AE91CCFF",
-                  "light_color": "#F2EFF5FF", "surface_color": "#7B5E991A"
+                  "light_color": "#F2EFF5FF", "surface_color": "#7B5E991A",
+                  "dark_color": "#2A2138FF"
                 }
                 """.trimIndent(),
             )
@@ -114,6 +115,8 @@ class PebbleDecodingTest {
 
         // A null column (view types are all-nullable) drops the row.
         assertNull(goodRow.copy(name = null).toEmotionWithPalette())
+        // The dark_color slot (#599) is required like the rest of the palette.
+        assertNull(goodRow.copy(darkColor = null).toEmotionWithPalette())
         // An unparseable hex drops the row.
         assertNull(goodRow.copy(primaryColor = "oops").toEmotionWithPalette())
     }
