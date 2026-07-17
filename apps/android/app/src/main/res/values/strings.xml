@@ -313,4 +313,28 @@
     <string name="glyph_error_cannot_buy_own">This is your own glyph</string>
     <string name="glyph_error_generic">Couldn\'t complete the swap. Please try again.</string>
     <string name="glyph_error_not_signed_in">Please sign in again.</string>
+    <!-- Store surface. "Commu" is the iOS tab label, verbatim. -->
+    <string name="glyphs_title">Glyphs</string>
+    <string name="glyphs_carve_a11y">Carve new glyph</string>
+    <string name="glyph_tab_mine">Mine</string>
+    <string name="glyph_tab_owned">Owned</string>
+    <string name="glyph_tab_commu">Commu</string>
+    <string name="glyphs_empty_mine_title">No glyphs yet</string>
+    <string name="glyphs_empty_mine_message">Tap + to carve your first glyph.</string>
+    <string name="glyphs_empty_owned_title">Nothing owned yet</string>
+    <string name="glyphs_empty_owned_message">Swap a community glyph to see it here.</string>
+    <string name="glyphs_empty_commu_title">No community glyphs</string>
+    <string name="glyphs_empty_commu_message">Check back soon.</string>
+    <string name="glyphs_load_error">Couldn\'t load glyphs</string>
+    <string name="glyphs_load_error_hint">Please try again.</string>
+    <string name="glyph_rename_title">Rename glyph</string>
+    <string name="glyph_rename_error">Couldn\'t rename glyph. Please try again.</string>
+    <string name="glyph_drawer_swap">Swap</string>
+    <string name="glyph_drawer_owned">Owned</string>
+    <string name="glyph_drawer_me">Me</string>
+    <string name="glyph_drawer_creator">Creator</string>
+    <string name="glyph_drawer_soon">Soon</string>
+    <string name="glyph_drawer_acquired">Acquired · %1$s</string>
+    <string name="glyph_drawer_slide">Slide to confirm</string>
+    <string name="glyph_drawer_slide_a11y">Slide to confirm swap</string>
 </resources>
