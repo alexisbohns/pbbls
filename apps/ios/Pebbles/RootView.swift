@@ -5,10 +5,11 @@ import SwiftUI
 /// the logo plays a draw-on, then boils in place until the app is ready.
 ///
 /// At cold launch `WelcomeView` is rendered with `contentRevealed: false`
-/// — only the logo is visible, centered, drawing on then boiling. Once
-/// `canProceed` is true (auth resolved AND both reference-data services
-/// settled — success or failure — OR the safety ceiling elapsed, AND the
-/// logo's draw-on has completed), one of two things happens:
+/// — only the logo is visible, centered, drawing on then boiling. It boils
+/// against `dataReady` (auth resolved AND both reference-data services
+/// settled — success or failure — OR the safety ceiling elapsed) and, once it
+/// has also boiled its minimum, emits `onLoaderSettled`. That event sets
+/// `loaderSettled`, making `canProceed` true, and one of two things happens:
 ///   - if the user is unauthenticated, `contentRevealed` flips true and
 ///     `WelcomeView` slides the carousel + sign-in buttons + disclaimer
 ///     in from the bottom, pushing the logo up to its header position;
@@ -23,7 +24,7 @@ struct RootView: View {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @State private var isPresentingOnboarding = false
     @State private var authPath = NavigationPath()
-    @State private var logoDrawComplete = false
+    @State private var loaderSettled = false
     @State private var loaderCeilingReached = false
     /// For authed launches: the loader stays over `PathView` until its first
     /// timeline load settles, so the home feed's own spinner never shows.
@@ -45,9 +46,10 @@ struct RootView: View {
             || loaderCeilingReached
     }
 
-    /// The loader dismisses only once the draw-on has played AND the app is
-    /// ready — the handcrafted logo IS the loader (no spinner).
-    private var canProceed: Bool { dataReady && logoDrawComplete }
+    /// The app is shown only once the loader has fully settled — drawn on AND
+    /// boiled the minimum AND `dataReady`. The handcrafted logo IS the loader,
+    /// so its own settle event (not a computed time) drives the transition.
+    private var canProceed: Bool { loaderSettled }
 
     private var canShowAuthedTabs: Bool {
         supabase.session != nil && canProceed
@@ -85,8 +87,8 @@ struct RootView: View {
                 NavigationStack(path: $authPath) {
                     WelcomeView(
                         contentRevealed: welcomeContentRevealed,
-                        appReady: canProceed,
-                        onLogoDrawComplete: { logoDrawComplete = true },
+                        appReady: dataReady,
+                        onLoaderSettled: { loaderSettled = true },
                         onCreateAccount: { authPath.append(AuthRoute.auth(.signup)) },
                         onLogin: { authPath.append(AuthRoute.auth(.login)) }
                     )

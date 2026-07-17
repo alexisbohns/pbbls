@@ -18,8 +18,9 @@ struct WelcomeView: View {
     let contentRevealed: Bool
     /// True once the app is ready to be shown (drives boil → settle).
     let appReady: Bool
-    /// Fired when the logo draw-on completes (bubbles to RootView's gate).
-    var onLogoDrawComplete: () -> Void = {}
+    /// Fired when the loader fully settles (draw + boil done, app ready) —
+    /// bubbles to RootView's gate.
+    var onLoaderSettled: () -> Void = {}
     let onCreateAccount: () -> Void
     let onLogin: () -> Void
 
@@ -57,7 +58,7 @@ struct WelcomeView: View {
 
                 HandcraftedLogoView(
                     shouldSettle: appReady,
-                    onDrawComplete: onLogoDrawComplete
+                    onSettled: onLoaderSettled
                 )
                 .containerRelativeFrame(.horizontal) { width, _ in width * 0.33 }
 

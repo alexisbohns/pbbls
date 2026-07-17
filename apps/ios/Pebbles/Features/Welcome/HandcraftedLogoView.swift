@@ -1,17 +1,18 @@
 import SwiftUI
 
 /// The handcrafted logo loader. Plays a phased draw-on reveal, then boils
-/// (#555) until `shouldSettle` flips true, then holds static. Under Reduce
-/// Motion it renders static variant 0 immediately and never boils.
-///
-/// The view does not dismiss itself — `RootView` gates the launch on
-/// `onDrawComplete` + real readiness. `shouldSettle` only tells the logo to
-/// stop boiling.
+/// (#555) for at least `minBoilTicks` and until `shouldSettle` is true, then
+/// holds static. Under Reduce Motion it renders static variant 0 and never
+/// boils. The view does not dismiss itself — it emits `onSettled` once the
+/// whole sequence is done, which is what `RootView` gates the app on.
 struct HandcraftedLogoView: View {
-    /// Parent → "app is ready; stop boiling and settle to static."
+    /// Parent → "app data is ready; the loader may settle once it has boiled
+    /// enough." (Drives boil → settle; not the app transition itself.)
     let shouldSettle: Bool
-    /// Fired once the draw-on finishes (immediately under Reduce Motion).
-    var onDrawComplete: () -> Void = {}
+    /// Fired once the loader has fully settled — i.e. drawn on AND boiled the
+    /// minimum AND the app is ready. This is the "ok to show the app" event the
+    /// parent gates its transition on (not the earlier draw-on completion).
+    var onSettled: () -> Void = {}
     /// Skip the draw-on and start fully revealed — used when the loader is
     /// re-shown to cover a later load (e.g. the authed home feed) after the
     /// draw-on has already played once, so it holds/boils without redrawing.
@@ -83,46 +84,60 @@ struct HandcraftedLogoView: View {
     private func run() async {
         wantsSettle = shouldSettle
         if model == nil { model = LogoLoaderArt.build() }
-        guard model != nil else { onDrawComplete(); return }
+        guard model != nil else { onSettled(); return }   // no art: never block launch
 
-        // Reduce Motion: static logo, never boils (#555 §3.1).
+        // Reduce Motion: static logo, no boil (#555 §3.1). Still wait for the
+        // app to be ready before settling so nothing shows early.
         if reduceMotion {
             revealAll()
-            onDrawComplete()
             phase = .settled
+            await waitUntilReady()
+            onSettled()
             return
         }
 
+        // Cover mode (authed feed): skip the draw-on, reveal fully, boil until
+        // the parent removes this view. It never settles itself.
         if startSettled {
-            // Cover mode: skip the draw-on, reveal fully, then boil. The parent
-            // removes this view when its work finishes, so it just boils.
             revealAll()
-            onDrawComplete()
-        } else {
-            startDrawOn()
-            try? await Task.sleep(for: .seconds(Self.totalDrawDuration))
-            onDrawComplete()
+            phase = .boiling
+            await boil(until: { _ in false })
+            return
         }
 
-        await boilUntilReady()
+        // Main loader: draw on, then boil until we've boiled at least
+        // `minBoilTicks` AND the app is ready, landing on a variant-0 frame so
+        // the settle is seamless. THEN emit `onSettled` — this is what gates the
+        // app transition, so the full boil is always played.
+        startDrawOn()
+        try? await Task.sleep(for: .seconds(Self.totalDrawDuration))
+        phase = .boiling
+        await boil(until: { ticks in
+            ticks >= Self.minBoilTicks
+                && wantsSettle
+                && Self.boilOrder[boilFrame % Self.boilOrder.count] == 0
+        })
+        phase = .settled
+        onSettled()
     }
 
-    /// Boil until enough ticks have played AND the app is ready, then settle —
-    /// event/count-driven, not duration-driven. Settles only on a variant-0
-    /// frame so the switch to the static logo is invisible. The cover
-    /// (`shouldSettle` never true) simply boils until the parent removes it.
-    private func boilUntilReady() async {
-        phase = .boiling
+    /// Advance the discrete boil one tick at a time (one ping-pong swap each)
+    /// until `stop` returns true or the task is cancelled.
+    private func boil(until stop: (_ ticks: Int) -> Bool) async {
         var ticks = 0
         while !Task.isCancelled {
             try? await Task.sleep(for: .seconds(1.0 / Self.boilFPS))
             boilFrame += 1
             ticks += 1
-            let onSettleFrame = Self.boilOrder[boilFrame % Self.boilOrder.count] == 0
-            if ticks >= Self.minBoilTicks && wantsSettle && onSettleFrame {
-                phase = .settled
-                return
-            }
+            if stop(ticks) { return }
+        }
+    }
+
+    /// Poll until the app signals ready — the Reduce Motion path, which doesn't
+    /// boil but must still hold until the data is loaded.
+    private func waitUntilReady() async {
+        while !Task.isCancelled && !wantsSettle {
+            try? await Task.sleep(for: .seconds(0.1))
         }
     }
 
