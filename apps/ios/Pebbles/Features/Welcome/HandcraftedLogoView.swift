@@ -59,7 +59,7 @@ struct HandcraftedLogoView: View {
     /// settle — a count, not a duration. The logo keeps boiling past this
     /// until the app is ready, and only ever settles on a variant-0 frame so
     /// the transition to the static logo is seamless (no brutal cut). Tunable.
-    private static let minBoilTicks = 20
+    private static let minBoilTicks = 8
 
     var body: some View {
         Group {
