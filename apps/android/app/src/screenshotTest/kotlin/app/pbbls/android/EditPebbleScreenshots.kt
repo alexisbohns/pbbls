@@ -35,6 +35,7 @@ private fun palette(
     secondary: String,
     light: String,
     surface: String,
+    dark: String = "#2A2138FF",
 ): EmotionPalette =
     requireNotNull(
         EmotionPalette.fromHex(
@@ -42,6 +43,7 @@ private fun palette(
             secondaryHex = secondary,
             lightHex = light,
             surfaceHex = surface,
+            darkHex = dark,
         ),
     )
 
