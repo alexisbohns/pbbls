@@ -57,7 +57,8 @@ struct EmotionPaletteTests {
             primaryHex: "#7B5E99FF",
             secondaryHex: "#AE91CCFF",
             lightHex: "#F2EFF5FF",
-            surfaceHex: "#7B5E991A"
+            surfaceHex: "#7B5E991A",
+            darkHex: "#2A2138FF"
         )
     }
 
@@ -72,7 +73,20 @@ struct EmotionPaletteTests {
             primaryHex: "not-hex",
             secondaryHex: "#AE91CCFF",
             lightHex: "#F2EFF5FF",
-            surfaceHex: "#7B5E991A"
+            surfaceHex: "#7B5E991A",
+            darkHex: "#2A2138FF"
+        )
+        #expect(palette == nil)
+    }
+
+    @Test("init returns nil when the dark_color hex is malformed (#599)")
+    func initFailsOnBadDarkHex() {
+        let palette = EmotionPalette(
+            primaryHex: "#7B5E99FF",
+            secondaryHex: "#AE91CCFF",
+            lightHex: "#F2EFF5FF",
+            surfaceHex: "#7B5E991A",
+            darkHex: "not-hex"
         )
         #expect(palette == nil)
     }
@@ -102,10 +116,12 @@ struct EmotionPaletteTests {
             primaryHex:   "#7B5E99FF  ",
             secondaryHex: "  #AE91CCFF",
             lightHex:     "#F2EFF5FF\n",
-            surfaceHex:   "#7B5E991A "
+            surfaceHex:   "#7B5E991A ",
+            darkHex:      "  #2A2138FF "
         )
         #expect(palette?.primaryHex == "#7B5E99FF")
         #expect(palette?.surfaceHex == "#7B5E991A")
+        #expect(palette?.darkHex == "#2A2138FF")
         #expect(palette?.strokeHex(for: .light) == "#7B5E99")
     }
 }

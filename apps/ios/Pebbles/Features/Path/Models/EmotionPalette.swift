@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The four colors of an emotion category palette, plus role-named accessors
+/// The colors of an emotion category palette, plus role-named accessors
 /// that map to the design-token contract:
 ///
 /// - **Accent context** (used by the emotion meta pill on the read view):
@@ -11,26 +11,34 @@ import SwiftUI
 ///   raw hex `String` (for SVG-text injection in `PebbleRenderView`, which
 ///   replaces `currentColor` literally inside the SVG markup).
 ///
-/// Initialized from the four 8-digit hex strings stored on
+/// Initialized from the 8-digit hex strings stored on
 /// `public.emotion_categories`. Returns `nil` if any hex fails to parse —
 /// callers treat the palette as unavailable and fall back to
 /// `Color.accent.primary` / `Color.accent.primaryHex`.
+///
+/// `dark` is the #599 addition: the small/medium read-view Petroglyph backfill
+/// in dark mode (the "palette.dark" role, from the `dark_color` column). The
+/// sibling `shaded_color` column also exists on the view but has no iOS
+/// consumer yet, so it is intentionally not modelled here.
 struct EmotionPalette: Equatable {
     let primary: Color
     let secondary: Color
     let light: Color
     let surface: Color
+    let dark: Color
 
     let primaryHex: String
     let secondaryHex: String
     let lightHex: String
     let surfaceHex: String
+    let darkHex: String
 
     init?(
         primaryHex: String,
         secondaryHex: String,
         lightHex: String,
-        surfaceHex: String
+        surfaceHex: String,
+        darkHex: String
     ) {
         // The palette hex columns on `emotion_categories` are populated by
         // hand in Supabase Studio and can carry stray surrounding whitespace.
@@ -42,11 +50,13 @@ struct EmotionPalette: Equatable {
         let secondaryHex = secondaryHex.trimmingCharacters(in: .whitespacesAndNewlines)
         let lightHex = lightHex.trimmingCharacters(in: .whitespacesAndNewlines)
         let surfaceHex = surfaceHex.trimmingCharacters(in: .whitespacesAndNewlines)
+        let darkHex = darkHex.trimmingCharacters(in: .whitespacesAndNewlines)
         guard
             let primary = Color(hex: primaryHex),
             let secondary = Color(hex: secondaryHex),
             let light = Color(hex: lightHex),
-            let surface = Color(hex: surfaceHex)
+            let surface = Color(hex: surfaceHex),
+            let dark = Color(hex: darkHex)
         else {
             return nil
         }
@@ -54,10 +64,12 @@ struct EmotionPalette: Equatable {
         self.secondary = secondary
         self.light = light
         self.surface = surface
+        self.dark = dark
         self.primaryHex = primaryHex
         self.secondaryHex = secondaryHex
         self.lightHex = lightHex
         self.surfaceHex = surfaceHex
+        self.darkHex = darkHex
     }
 
     var accentBackground: Color { primary }
@@ -99,6 +111,35 @@ struct PebbleFrameColors: Equatable {
     let fillOpacity: Double
 }
 
+/// Render-ready colors for the read-view Petroglyph (issue #599) — the framed
+/// pebble (backfill + outline + glyph) shown as the page heading, or
+/// overlapping the snap's top-right. Same shape as `PebbleFrameColors` (all
+/// sanitized for SVG injection), but resolved per size group AND color scheme,
+/// per the issue table:
+///
+/// | layer                 | light             | dark                |
+/// | --------------------- | ----------------- | ------------------- |
+/// | small/medium strokes  | palette.primary   | palette.secondary   |
+/// | small/medium backfill | palette.light     | palette.dark        |
+/// | large strokes         | palette.light     | palette.light       |
+/// | large backfill        | palette.primary   | palette.primary     |
+///
+/// "palette.dark" is the dedicated `dark_color` column (added for #599), not
+/// the faint `surface_color` wash — so the dark-mode backfill is a solid dark
+/// tint, mirroring the solid `light` backfill in light mode.
+///
+/// Deliberately distinct from the theme-neutral `pebbleFrameColors` used by the
+/// Path rows (which still washes small/medium with `surface`): #599 scopes the
+/// new theme-dependent coloring to the read view.
+struct PetroglyphColors: Equatable {
+    /// 6-digit `#RRGGBB` for the outline + glyph strokes.
+    let strokeHex: String
+    /// 6-digit `#RRGGBB` for the backfill silhouette.
+    let fillHex: String
+    /// The backfill fill color's alpha (0...1), applied as backdrop view opacity.
+    let fillOpacity: Double
+}
+
 extension EmotionPalette {
 
     /// Single source of truth for the intensity → role mapping.
@@ -120,6 +161,38 @@ extension EmotionPalette {
                 fillHex:     EmotionPalette.rgbHex(surfaceHex),
                 fillOpacity: EmotionPalette.alphaComponent(surfaceHex)
             )
+        }
+    }
+
+    /// Read-view Petroglyph colors (issue #599) for the given size group and
+    /// color scheme — see `PetroglyphColors` for the full role table.
+    ///
+    /// - large: `light` stroke over an opaque `primary` backfill, both schemes
+    ///   (the same hero treatment `pebbleFrameColors(forIntensity: 3)` gives).
+    /// - small/medium: theme-dependent — light mode uses a `primary` stroke over
+    ///   a solid `light` backfill; dark a `secondary` stroke over a solid `dark`.
+    func petroglyphColors(forSize size: ValenceSizeGroup, scheme: ColorScheme) -> PetroglyphColors {
+        switch size {
+        case .large:
+            return PetroglyphColors(
+                strokeHex:   EmotionPalette.rgbHex(lightHex),
+                fillHex:     EmotionPalette.rgbHex(primaryHex),
+                fillOpacity: EmotionPalette.alphaComponent(primaryHex)
+            )
+        case .small, .medium:
+            if scheme == .dark {
+                return PetroglyphColors(
+                    strokeHex:   EmotionPalette.rgbHex(secondaryHex),
+                    fillHex:     EmotionPalette.rgbHex(darkHex),
+                    fillOpacity: EmotionPalette.alphaComponent(darkHex)
+                )
+            } else {
+                return PetroglyphColors(
+                    strokeHex:   EmotionPalette.rgbHex(primaryHex),
+                    fillHex:     EmotionPalette.rgbHex(lightHex),
+                    fillOpacity: EmotionPalette.alphaComponent(lightHex)
+                )
+            }
         }
     }
 

@@ -4,8 +4,9 @@ import Foundation
 ///
 /// PostgREST types every view column as nullable in `database.ts`, but the
 /// underlying invariants — `emotions.category_id NOT NULL` (shipped in #367),
-/// `emotions.emoji NOT NULL` (shipped in #370), and the four palette `text NOT NULL`
-/// columns on `emotion_categories` — guarantee non-null values in practice. This
+/// `emotions.emoji NOT NULL` (shipped in #370), and the palette `text NOT NULL`
+/// columns on `emotion_categories` (including `dark_color`, added for #599) —
+/// guarantee non-null values in practice. This
 /// decoder enforces that invariant at the boundary: rows with any null required
 /// field throw `DecodingError`, which `EmotionPaletteService` logs and skips so
 /// the bad row simply isn't cached. Access sites read non-optional values from the
@@ -29,6 +30,7 @@ struct EmotionWithPalette: Identifiable, Decodable {
         case secondaryColor = "secondary_color"
         case lightColor    = "light_color"
         case surfaceColor  = "surface_color"
+        case darkColor     = "dark_color"
     }
 
     init(from decoder: Decoder) throws {
@@ -45,12 +47,14 @@ struct EmotionWithPalette: Identifiable, Decodable {
         let secondary = try container.decode(String.self, forKey: .secondaryColor)
         let light = try container.decode(String.self, forKey: .lightColor)
         let surface = try container.decode(String.self, forKey: .surfaceColor)
+        let dark = try container.decode(String.self, forKey: .darkColor)
 
         guard let palette = EmotionPalette(
             primaryHex: primary,
             secondaryHex: secondary,
             lightHex: light,
-            surfaceHex: surface
+            surfaceHex: surface,
+            darkHex: dark
         ) else {
             throw DecodingError.dataCorruptedError(
                 forKey: .primaryColor,
