@@ -22,7 +22,9 @@ struct EmotionWithPaletteDecodingTests {
       "primary_color": "#7B5E99FF",
       "secondary_color": "#AE91CCFF",
       "light_color": "#F2EFF5FF",
-      "surface_color": "#7B5E991A"
+      "surface_color": "#7B5E991A",
+      "shaded_color": "#AE91CCFF",
+      "dark_color": "#7B5E99FF"
     }
     """
 

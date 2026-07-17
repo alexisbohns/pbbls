@@ -20,17 +20,23 @@ struct EmotionPalette: Equatable {
     let secondary: Color
     let light: Color
     let surface: Color
+    let shaded: Color
+    let dark: Color
 
     let primaryHex: String
     let secondaryHex: String
     let lightHex: String
     let surfaceHex: String
+    let shadedHex: String
+    let darkHex: String
 
     init?(
         primaryHex: String,
         secondaryHex: String,
         lightHex: String,
-        surfaceHex: String
+        surfaceHex: String,
+        shadedHex: String,
+        darkHex: String
     ) {
         // The palette hex columns on `emotion_categories` are populated by
         // hand in Supabase Studio and can carry stray surrounding whitespace.
@@ -42,11 +48,15 @@ struct EmotionPalette: Equatable {
         let secondaryHex = secondaryHex.trimmingCharacters(in: .whitespacesAndNewlines)
         let lightHex = lightHex.trimmingCharacters(in: .whitespacesAndNewlines)
         let surfaceHex = surfaceHex.trimmingCharacters(in: .whitespacesAndNewlines)
+        let shadedHex = shadedHex.trimmingCharacters(in: .whitespacesAndNewlines)
+        let darkHex = darkHex.trimmingCharacters(in: .whitespacesAndNewlines)
         guard
             let primary = Color(hex: primaryHex),
             let secondary = Color(hex: secondaryHex),
             let light = Color(hex: lightHex),
-            let surface = Color(hex: surfaceHex)
+            let surface = Color(hex: surfaceHex),
+            let shaded = Color(hex: shadedHex),
+            let dark = Color(hex: darkHex)
         else {
             return nil
         }
@@ -54,10 +64,14 @@ struct EmotionPalette: Equatable {
         self.secondary = secondary
         self.light = light
         self.surface = surface
+        self.shaded = shaded
+        self.dark = dark
         self.primaryHex = primaryHex
         self.secondaryHex = secondaryHex
         self.lightHex = lightHex
         self.surfaceHex = surfaceHex
+        self.shadedHex = shadedHex
+        self.darkHex = darkHex
     }
 
     var accentBackground: Color { primary }
@@ -119,6 +133,35 @@ extension EmotionPalette {
                 strokeHex:   EmotionPalette.rgbHex(secondaryHex),
                 fillHex:     EmotionPalette.rgbHex(surfaceHex),
                 fillOpacity: EmotionPalette.alphaComponent(surfaceHex)
+            )
+        }
+    }
+
+    /// Theme-aware petroglyph colors for the pebble **page** (issue #599).
+    /// "Stroke" = outline + glyph paths (one color); "backfill" = the
+    /// silhouette fill behind them. Distinct from `pebbleFrameColors`, which
+    /// keeps the older theme-neutral mapping for the timeline row.
+    ///
+    /// | intensity      | stroke (light / dark) | backfill (light / dark) |
+    /// |----------------|-----------------------|-------------------------|
+    /// | small, medium  | primary / secondary   | light / dark            |
+    /// | large (3)      | light / light         | primary / primary       |
+    func petroglyphColors(forIntensity intensity: Int, scheme: ColorScheme) -> PebbleFrameColors {
+        let isDark = scheme == .dark
+        switch intensity {
+        case 3:
+            return PebbleFrameColors(
+                strokeHex:   EmotionPalette.rgbHex(lightHex),
+                fillHex:     EmotionPalette.rgbHex(primaryHex),
+                fillOpacity: EmotionPalette.alphaComponent(primaryHex)
+            )
+        default:
+            let strokeSource = isDark ? secondaryHex : primaryHex
+            let fillSource   = isDark ? darkHex : lightHex
+            return PebbleFrameColors(
+                strokeHex:   EmotionPalette.rgbHex(strokeSource),
+                fillHex:     EmotionPalette.rgbHex(fillSource),
+                fillOpacity: EmotionPalette.alphaComponent(fillSource)
             )
         }
     }

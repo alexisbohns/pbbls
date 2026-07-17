@@ -57,7 +57,9 @@ struct EmotionPaletteTests {
             primaryHex: "#7B5E99FF",
             secondaryHex: "#AE91CCFF",
             lightHex: "#F2EFF5FF",
-            surfaceHex: "#7B5E991A"
+            surfaceHex: "#7B5E991A",
+            shadedHex: "#AE91CCFF",
+            darkHex: "#7B5E99FF"
         )
     }
 
@@ -72,7 +74,9 @@ struct EmotionPaletteTests {
             primaryHex: "not-hex",
             secondaryHex: "#AE91CCFF",
             lightHex: "#F2EFF5FF",
-            surfaceHex: "#7B5E991A"
+            surfaceHex: "#7B5E991A",
+            shadedHex: "#AE91CCFF",
+            darkHex: "#7B5E99FF"
         )
         #expect(palette == nil)
     }
@@ -102,7 +106,9 @@ struct EmotionPaletteTests {
             primaryHex:   "#7B5E99FF  ",
             secondaryHex: "  #AE91CCFF",
             lightHex:     "#F2EFF5FF\n",
-            surfaceHex:   "#7B5E991A "
+            surfaceHex:   "#7B5E991A ",
+            shadedHex:    "#AE91CCFF",
+            darkHex:      "#7B5E99FF"
         )
         #expect(palette?.primaryHex == "#7B5E99FF")
         #expect(palette?.surfaceHex == "#7B5E991A")

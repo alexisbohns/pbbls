@@ -29,6 +29,8 @@ struct EmotionWithPalette: Identifiable, Decodable {
         case secondaryColor = "secondary_color"
         case lightColor    = "light_color"
         case surfaceColor  = "surface_color"
+        case shadedColor   = "shaded_color"
+        case darkColor     = "dark_color"
     }
 
     init(from decoder: Decoder) throws {
@@ -45,12 +47,16 @@ struct EmotionWithPalette: Identifiable, Decodable {
         let secondary = try container.decode(String.self, forKey: .secondaryColor)
         let light = try container.decode(String.self, forKey: .lightColor)
         let surface = try container.decode(String.self, forKey: .surfaceColor)
+        let shaded = try container.decode(String.self, forKey: .shadedColor)
+        let dark = try container.decode(String.self, forKey: .darkColor)
 
         guard let palette = EmotionPalette(
             primaryHex: primary,
             secondaryHex: secondary,
             lightHex: light,
-            surfaceHex: surface
+            surfaceHex: surface,
+            shadedHex: shaded,
+            darkHex: dark
         ) else {
             throw DecodingError.dataCorruptedError(
                 forKey: .primaryColor,
