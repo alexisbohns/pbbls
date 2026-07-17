@@ -129,6 +129,36 @@ extension LogoLoaderArt {
     /// Boil variant seeds (issue #555 §2.3: variant k → seed 3 + k).
     private static let seeds = [3, 4, 5]
 
+    // Logo-specific wobble tuning (issue #598 polish). The loader logo has
+    // finer features than a pebble glyph, so the canonical amplitude (#555:
+    // 18 in the 200-box) reads as jagged here. A gentler amplitude smooths the
+    // rendition WITHOUT touching pebble/glyph wobble, which keeps using
+    // `WobbleParams.canonical`. Authored in the normalized 200-box; mapped into
+    // the logo's own viewBox by `logoParams(for:)`. Tunable in the simulator.
+    private static let logoAmplitude: Double = 9
+    private static let logoFrequency: Double = 0.02
+    private static let logoOctaves: Int = 5
+    private static let logoFlattenStep: Double = 2
+
+    /// The logo tuning mapped into the SVG's own viewBox — same §2.1 rule as
+    /// `WobbleParams.scaled(for:)`, but off the logo-specific base above rather
+    /// than the shared canonical params.
+    private static func logoParams(for spaceSize: CGSize) -> WobbleParams {
+        let base = WobbleParams(
+            amplitude: logoAmplitude, frequency: logoFrequency,
+            octaves: logoOctaves, flattenStep: logoFlattenStep
+        )
+        let longest = Double(max(spaceSize.width, spaceSize.height))
+        guard longest > 0 else { return base }
+        let normalization = 200 / longest
+        return WobbleParams(
+            amplitude: base.amplitude / normalization,
+            frequency: base.frequency * normalization,
+            octaves: base.octaves,
+            flattenStep: base.flattenStep / normalization
+        )
+    }
+
     private static let cached: LogoLoaderModel? = buildUncached()
 
     /// Cached accessor — the wobble build runs at most once per process.
@@ -136,10 +166,10 @@ extension LogoLoaderArt {
 
     private static func buildUncached() -> LogoLoaderModel? {
         guard let groups = parseGroups() else { return nil }
-        // Wobble in the SVG's own viewBox with §2.1-scaled params — the
-        // established backdrop pattern (WobbleRenderer.backdropArt), visually
-        // equivalent to normalizing into the 200-box.
-        let params = WobbleParams.scaled(for: groups.viewBox.size)
+        // Wobble in the SVG's own viewBox with logo-tuned params — the
+        // established backdrop pattern (WobbleRenderer.backdropArt), gentler
+        // than the canonical glyph wobble so fine features read cleanly.
+        let params = logoParams(for: groups.viewBox.size)
         let variants = seeds.map { seed -> LogoLoaderVariant in
             let noise = SVGTurbulence(seed: seed)
             return LogoLoaderVariant(

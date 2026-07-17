@@ -12,8 +12,12 @@ struct HandcraftedLogoView: View {
     let shouldSettle: Bool
     /// Fired once the draw-on finishes (immediately under Reduce Motion).
     var onDrawComplete: () -> Void = {}
-    /// Logo ink colour. The artwork is authored black; default adapts to scheme.
-    var color: Color = .system.foreground
+    /// Skip the draw-on and start fully revealed — used when the loader is
+    /// re-shown to cover a later load (e.g. the authed home feed) after the
+    /// draw-on has already played once, so it holds/boils without redrawing.
+    var startSettled: Bool = false
+    /// Logo ink colour. Tinted with the brand accent by default.
+    var color: Color = .accent.primary
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -26,10 +30,11 @@ struct HandcraftedLogoView: View {
 
     private enum Phase { case drawing, boiling, settled }
 
-    // Draw-on choreography (seconds). Tunable in the simulator.
-    private static let outline = (delay: 0.0, duration: 0.55)
-    private static let creature = (delay: 0.45, duration: 0.70)
-    private static let fossilVein = (delay: 1.00, duration: 0.55)
+    // Draw-on choreography (seconds). Slow, gentle easeInOut hand-drawing.
+    // Tunable in the simulator.
+    private static let outline = (delay: 0.0, duration: 1.2)
+    private static let creature = (delay: 1.0, duration: 1.6)
+    private static let fossilVein = (delay: 2.4, duration: 1.3)
     private static var totalDrawDuration: Double { fossilVein.delay + fossilVein.duration }
 
     // Boil: 4fps ping-pong (#555 §1/§3).
@@ -62,10 +67,12 @@ struct HandcraftedLogoView: View {
         if model == nil { model = LogoLoaderArt.build() }
         guard model != nil else { onDrawComplete(); return }
 
-        if reduceMotion {
+        if reduceMotion || startSettled {
             outlineProgress = 1; creatureProgress = 1; fossilVeinProgress = 1; eyesIn = true
-            phase = .settled                 // static; never boil (#555 §3.1)
             onDrawComplete()
+            // Reduce Motion never boils (#555 §3.1); startSettled boils until
+            // the parent signals ready.
+            phase = (reduceMotion || shouldSettle) ? .settled : .boiling
             return
         }
 
@@ -77,16 +84,16 @@ struct HandcraftedLogoView: View {
     }
 
     private func startDrawOn() {
-        withAnimation(.easeOut(duration: Self.outline.duration).delay(Self.outline.delay)) {
+        withAnimation(.easeInOut(duration: Self.outline.duration).delay(Self.outline.delay)) {
             outlineProgress = 1
         }
-        withAnimation(.easeOut(duration: Self.creature.duration).delay(Self.creature.delay)) {
+        withAnimation(.easeInOut(duration: Self.creature.duration).delay(Self.creature.delay)) {
             creatureProgress = 1
         }
-        withAnimation(.easeOut(duration: 0.25).delay(Self.creature.delay + Self.creature.duration - 0.1)) {
+        withAnimation(.easeInOut(duration: 0.35).delay(Self.creature.delay + Self.creature.duration - 0.15)) {
             eyesIn = true    // eyes pop in at the tail of the creature phase
         }
-        withAnimation(.easeOut(duration: Self.fossilVein.duration).delay(Self.fossilVein.delay)) {
+        withAnimation(.easeInOut(duration: Self.fossilVein.duration).delay(Self.fossilVein.delay)) {
             fossilVeinProgress = 1
         }
     }
@@ -162,6 +169,13 @@ struct HandcraftedLogoView: View {
 
 #Preview("Settled (static)") {
     HandcraftedLogoView(shouldSettle: true)
+        .frame(width: 160, height: 160)
+        .padding()
+        .background(Color.system.background)
+}
+
+#Preview("Cover (boil, no draw-on)") {
+    HandcraftedLogoView(shouldSettle: false, startSettled: true)
         .frame(width: 160, height: 160)
         .padding()
         .background(Color.system.background)

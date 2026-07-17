@@ -12,8 +12,9 @@ import SwiftUI
 ///   - if the user is unauthenticated, `contentRevealed` flips true and
 ///     `WelcomeView` slides the carousel + sign-in buttons + disclaimer
 ///     in from the bottom, pushing the logo up to its header position;
-///   - if the user is authenticated, the whole view stack swaps to
-///     `PathView`.
+///   - if the user is authenticated, the stack swaps to `PathView`, with the
+///     loader held over it (via `startSettled`) until the first timeline load
+///     settles — so `PathView`'s own spinner never flashes.
 struct RootView: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(EmotionPaletteService.self) private var palettes
@@ -24,6 +25,9 @@ struct RootView: View {
     @State private var authPath = NavigationPath()
     @State private var logoDrawComplete = false
     @State private var loaderCeilingReached = false
+    /// For authed launches: the loader stays over `PathView` until its first
+    /// timeline load settles, so the home feed's own spinner never shows.
+    @State private var pathFeedLoaded = false
 
     /// Safety ceiling: if reference data never settles (e.g. a wedged
     /// network beyond the client's own timeout), open the app anyway rather
@@ -56,13 +60,27 @@ struct RootView: View {
     var body: some View {
         ZStack {
             if canShowAuthedTabs {
-                PathView()
-                    .fullScreenCover(isPresented: $isPresentingOnboarding) {
-                        OnboardingView(steps: OnboardingSteps.all) {
-                            hasSeenOnboarding = true
-                            isPresentingOnboarding = false
+                ZStack {
+                    PathView(onFirstLoad: { pathFeedLoaded = true })
+                        .fullScreenCover(isPresented: $isPresentingOnboarding) {
+                            OnboardingView(steps: OnboardingSteps.all) {
+                                hasSeenOnboarding = true
+                                isPresentingOnboarding = false
+                            }
                         }
+
+                    if !pathFeedLoaded {
+                        // Hold the loader over the home feed load so its own
+                        // spinner never flashes. `startSettled` skips a second
+                        // draw-on — the logo just boils, then fades out.
+                        HandcraftedLogoView(shouldSettle: false, startSettled: true)
+                            .containerRelativeFrame(.horizontal) { width, _ in width * 0.33 }
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Color.system.background.ignoresSafeArea())
+                            .transition(.opacity)
                     }
+                }
+                .animation(.easeInOut(duration: 0.35), value: pathFeedLoaded)
             } else {
                 NavigationStack(path: $authPath) {
                     WelcomeView(
@@ -102,6 +120,8 @@ struct RootView: View {
         .onChange(of: supabase.session == nil) { wasSignedOut, isSignedOut in
             if !wasSignedOut && isSignedOut {
                 snapURLs.invalidateAll()
+                // Re-arm the home-feed loader cover for the next sign-in.
+                pathFeedLoaded = false
             }
         }
     }
