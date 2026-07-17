@@ -9,6 +9,20 @@ import SwiftUI
 struct PebbleReadView: View {
     let detail: PebbleDetail
 
+    /// Flips true once `PebbleReadBanner` reports the snap + pebble are ready.
+    /// Drives the whole-page reveal cascade. Kept false until then so the
+    /// placeholder→image settling happens off-screen (no visible reflow), and
+    /// the content then slides+fades in progressively rather than popping in.
+    @State private var revealed = false
+
+    // Cascade step indices — the order the page reveals in. Tiles and souls
+    // each advance the step per element ("one by one").
+    private let stepBanner = 0
+    private let stepTitle = 1
+    private let stepTilesBase = 2      // emotion, domain, collection → 2, 3, 4
+    private let stepDescription = 5
+    private let stepSoulsBase = 6      // then one step per soul
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
@@ -17,10 +31,13 @@ struct PebbleReadView: View {
                     renderSvg: detail.renderSvg,
                     renderVersion: detail.renderVersion,
                     emotionId: detail.emotion.id,
-                    valence: detail.valence
+                    valence: detail.valence,
+                    onReady: { revealed = true }
                 )
+                .cascade(step: stepBanner, revealed: revealed)
 
                 PebbleReadTitle(name: detail.name, happenedAt: detail.happenedAt)
+                    .cascade(step: stepTitle, revealed: revealed)
 
                 metadataRow
 
@@ -29,6 +46,7 @@ struct PebbleReadView: View {
                         .font(.system(size: 17, weight: .regular, design: .serif))
                         .foregroundStyle(Color.system.foreground)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                        .cascade(step: stepDescription, revealed: revealed)
                 }
 
                 if !detail.souls.isEmpty {
@@ -53,19 +71,23 @@ struct PebbleReadView: View {
             SurfaceTile(systemImage: "heart.fill") {
                 Text(LocalizedStringResource(stringLiteral: detail.emotion.localizedName))
             }
+            .cascade(step: stepTilesBase, revealed: revealed)
 
             // Domain — always rendered. Muted placeholder when unset.
-            if detail.domains.isEmpty {
-                SurfaceTile(systemImage: "tag.fill", muted: true) {
-                    Text("No domain")
-                }
-            } else {
-                SurfaceTile(systemImage: "tag.fill") {
-                    Text(LocalizedStringResource(
-                        stringLiteral: detail.domains.map(\.localizedName).joined(separator: ", ")
-                    ))
+            Group {
+                if detail.domains.isEmpty {
+                    SurfaceTile(systemImage: "tag.fill", muted: true) {
+                        Text("No domain")
+                    }
+                } else {
+                    SurfaceTile(systemImage: "tag.fill") {
+                        Text(LocalizedStringResource(
+                            stringLiteral: detail.domains.map(\.localizedName).joined(separator: ", ")
+                        ))
+                    }
                 }
             }
+            .cascade(step: stepTilesBase + 1, revealed: revealed)
 
             // Collections — only when non-empty.
             if !detail.collections.isEmpty {
@@ -74,6 +96,7 @@ struct PebbleReadView: View {
                         stringLiteral: detail.collections.map(\.name).joined(separator: ", ")
                     ))
                 }
+                .cascade(step: stepTilesBase + 2, revealed: revealed)
             }
         }
     }
@@ -81,9 +104,39 @@ struct PebbleReadView: View {
     @ViewBuilder
     private var soulsRow: some View {
         LazyVGrid(columns: SoulPillGrid.columns, spacing: SoulPillGrid.spacing) {
-            ForEach(detail.souls) { soulWithGlyph in
+            ForEach(Array(detail.souls.enumerated()), id: \.element.id) { index, soulWithGlyph in
                 SoulItem(case: .default, soul: soulWithGlyph, count: nil)
+                    .cascade(step: stepSoulsBase + index, revealed: revealed)
             }
         }
+    }
+}
+
+/// Staggered slide-fade reveal for the pebble page. Each element declares its
+/// `step` in the cascade; when `revealed` flips true they animate in one after
+/// another. The transform (opacity + a small upward slide) never changes layout,
+/// so the page never reflows — it only progressively appears.
+private struct CascadeReveal: ViewModifier {
+    let step: Int
+    let revealed: Bool
+
+    /// The banner (step 0) reveals immediately; the text below waits a beat so
+    /// the picture + pebble read as "displayed first", then cascades.
+    private var delay: Double {
+        guard step > 0 else { return 0 }
+        return 0.3 + Double(step - 1) * 0.08
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(revealed ? 1 : 0)
+            .offset(y: revealed ? 0 : 12)
+            .animation(.easeOut(duration: 0.5).delay(delay), value: revealed)
+    }
+}
+
+private extension View {
+    func cascade(step: Int, revealed: Bool) -> some View {
+        modifier(CascadeReveal(step: step, revealed: revealed))
     }
 }

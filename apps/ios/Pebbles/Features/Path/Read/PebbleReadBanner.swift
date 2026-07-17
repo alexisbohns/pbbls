@@ -18,6 +18,10 @@ struct PebbleReadBanner: View {
     let renderVersion: String?
     let emotionId: UUID
     let valence: Valence
+    /// Fired once the snap load has settled (decoded, failed, or there was no
+    /// snap to load). The parent uses this to start the page's reveal cascade
+    /// only after the picture + pebble are ready to be shown together.
+    var onReady: () -> Void = {}
 
     @Environment(SnapURLCache.self) private var snapURLs
     @Environment(EmotionPaletteService.self) private var palettes
@@ -44,6 +48,11 @@ struct PebbleReadBanner: View {
         .frame(maxWidth: .infinity)
         .task(id: snapStoragePath) {
             await loadPhotoIfNeeded()
+            // Signal readiness once the load settles — but not on cancellation
+            // (the .task id changed or the view is tearing down; a newer load
+            // or a fresh view owns the reveal now).
+            guard !Task.isCancelled else { return }
+            onReady()
         }
     }
 

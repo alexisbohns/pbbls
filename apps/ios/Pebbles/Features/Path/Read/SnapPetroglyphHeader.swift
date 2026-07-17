@@ -2,10 +2,12 @@ import SwiftUI
 
 /// Presentational top-zone layout for the pebble page (issue #599).
 ///
-/// - **With a snap:** the photo sits at ~half the screen width — centered, so it
-///   breathes with generous side margins rather than spanning edge-to-edge — at
-///   its `BannerAspect` bucket (cover-cropped, rounded), tilted −4°, with the
-///   petroglyph perched on and poking past its top-right corner, tilted +7°.
+/// - **With a snap:** the photo is fit inside a bounding box (max 230×200) at
+///   its `BannerAspect` bucket, so wide ratios (16:9, 4:3) read big and portrait
+///   (3:4) reads narrow-tall instead of every ratio sharing one width. It is
+///   cover-cropped, rounded, tilted −4°, and centered so it breathes. The
+///   petroglyph is centered *on* the snap's top-right corner — half overlapping
+///   the photo, half poking past it — tilted +7°.
 /// - **Without a snap:** the petroglyph is centered as the page heading.
 ///
 /// Pure layout — it loads nothing. `PebbleReadBanner` owns the async snap load
@@ -22,16 +24,20 @@ struct SnapPetroglyphHeader<Petroglyph: View>: View {
 
     private let cornerRadius: CGFloat = 24
     private let petroglyphBox: CGFloat = 120
-    private let petroglyphInset: CGFloat = 16
     private let snapTilt: Double = -4
     private let petroglyphTilt: Double = 7
-    /// Snap width cap. The design (issue #599) keeps the photo at roughly half
-    /// the screen so it reads as a framed keepsake with breathing room, not a
-    /// full-bleed banner; the rest of the width is the centering margin on
-    /// either side. A fixed cap (rather than a screen fraction) keeps the photo
-    /// from ballooning on the largest phones while still breathing on the
-    /// smallest — ~51% on a 390pt screen, ~47% on a 430pt Pro Max.
-    private let snapMaxWidth: CGFloat = 200
+    /// The snap is fit inside this bounding box, preserving its bucket ratio.
+    /// A box (not a flat width cap) is what lets a 16:9 read as wide and a 3:4
+    /// as narrow-tall — otherwise a short-wide 16:9 shares the portrait's width
+    /// and looks tiny beside it (issue #599 follow-up feedback). Landscape
+    /// buckets bind on width (230), portrait/square bind on height (200), so
+    /// nothing spans the full content width — the rest is the breathing margin.
+    private let snapMaxWidth: CGFloat = 230
+    private let snapMaxHeight: CGFloat = 200
+    /// Air above the composition, on top of the pebble's upward overhang. This
+    /// is the visible gap between the nav zone and the pebble — the "more space
+    /// on top" the design calls for.
+    private let topGap: CGFloat = 32
 
     var body: some View {
         ZStack(alignment: .topTrailing) {
@@ -44,32 +50,32 @@ struct SnapPetroglyphHeader<Petroglyph: View>: View {
             // second element of this ZStack, never inside an if/else branch) so
             // its identity — and `PebbleAnimatedRenderView`'s entry animation —
             // is preserved when `hasSnapSlot` flips (e.g. a settled snap-load
-            // failure). Only its placement modifiers change between states:
-            // top-right + tilted with a snap, centered + straight without.
+            // failure). Only its placement modifiers change between states.
             //
-            // With a snap the ZStack sizes to the (half-width) snap and aligns
-            // the petroglyph to its top-trailing corner; the +16/−16 offset then
-            // pokes it out past that corner. Without a snap the ZStack holds only
-            // the petroglyph.
+            // With a snap, `.topTrailing` pins the box's top-right to the snap's
+            // top-right corner; nudging out by half the box in each axis brings
+            // the box CENTER onto that corner — half over the photo, half past
+            // it, per the design. The +7° tilt pivots on that same center.
+            // Without a snap the ZStack holds only the (centered, straight) box.
             petroglyph()
                 .frame(width: petroglyphBox, height: petroglyphBox)
                 .rotationEffect(.degrees(hasSnapSlot ? petroglyphTilt : 0))
-                .offset(x: hasSnapSlot ? petroglyphInset : 0,
-                        y: hasSnapSlot ? -petroglyphInset : 0)
+                .offset(x: hasSnapSlot ? petroglyphBox / 2 : 0,
+                        y: hasSnapSlot ? -petroglyphBox / 2 : 0)
         }
-        // Center the whole composition in the content width so the half-width
-        // snap floats with equal margins instead of hugging the leading edge.
+        // Center the whole composition in the content width so the snap floats
+        // with equal margins instead of hugging the leading edge.
         .frame(maxWidth: .infinity, alignment: .center)
-        // Headroom for the petroglyph's upward poke so it clears the nav zone.
-        .padding(.top, hasSnapSlot ? petroglyphInset : 0)
+        // Reserve the pebble's upward overhang (half the box) plus a gap, so it
+        // clears the nav zone and the page has real air at the top.
+        .padding(.top, hasSnapSlot ? petroglyphBox / 2 + topGap : topGap)
     }
 
     @ViewBuilder
     private var snapArea: some View {
         // Bucket ratio is known only once the image decodes; until then the
-        // placeholder holds a neutral square so the petroglyph already sits
-        // top-right. On decode the image cross-fades in and the container
-        // settles to its bucket ratio.
+        // placeholder holds a neutral square. The parent gates visibility on
+        // load-complete, so this placeholder→image settling never shows.
         let aspect = snapImage.map {
             BannerAspect.nearest(to: $0.size.width / max($0.size.height, 1))
         }
@@ -79,17 +85,14 @@ struct SnapPetroglyphHeader<Petroglyph: View>: View {
                     Image(uiImage: snapImage)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
-                        .transition(.opacity)
                 }
             }
             .aspectRatio(aspect?.cgRatio ?? 1, contentMode: .fit)
-            // Cap at ~half the screen width, not the full content width — the
-            // source of the "let the picture breathe" correction. Height follows
-            // the bucket ratio above.
-            .frame(maxWidth: snapMaxWidth)
+            // Fit inside the bounding box — landscape binds on width, portrait
+            // on height — so the photo breathes and ratios keep their character.
+            .frame(maxWidth: snapMaxWidth, maxHeight: snapMaxHeight)
             .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
             .accessibilityHidden(true)
-            .animation(.easeOut(duration: 0.25), value: snapImage)
     }
 }
 
