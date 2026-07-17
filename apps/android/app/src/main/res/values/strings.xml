@@ -306,4 +306,11 @@
     <string name="carve_keep_editing">Keep editing</string>
     <string name="carve_discard">Discard</string>
     <string name="carve_save_error">Couldn\'t save your glyph. Please try again.</string>
+    <!-- buy_glyph error copy — iOS friendlyMessage verbatim. -->
+    <string name="glyph_error_insufficient_karma">Not enough karma</string>
+    <string name="glyph_error_not_in_market">This glyph is no longer available</string>
+    <string name="glyph_error_already_owned">You already own this glyph</string>
+    <string name="glyph_error_cannot_buy_own">This is your own glyph</string>
+    <string name="glyph_error_generic">Couldn\'t complete the swap. Please try again.</string>
+    <string name="glyph_error_not_signed_in">Please sign in again.</string>
 </resources>

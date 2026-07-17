@@ -69,6 +69,15 @@ class PathStatsService(
         performLoad()
     }
 
+    /**
+     * Applies the wallet balance a write RPC returned — iOS assigns
+     * `stats.karma = result.balance` after `buy_glyph` (M43 D5): server truth
+     * riding the response, no refetch. Display-only, never a flash source (D2).
+     */
+    fun applyKarmaBalance(balance: Int) {
+        karma = balance
+    }
+
     private suspend fun performLoad() {
         isLoading = true
         try {

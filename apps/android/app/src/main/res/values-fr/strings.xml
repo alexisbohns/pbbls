@@ -294,4 +294,11 @@
     <string name="carve_keep_editing">Continuer</string>
     <string name="carve_discard">Abandonner</string>
     <string name="carve_save_error">Impossible d\'enregistrer votre glyphe. Veuillez réessayer.</string>
+    <!-- Copie d'erreur buy_glyph — friendlyMessage iOS. -->
+    <string name="glyph_error_insufficient_karma">Pas assez de karma</string>
+    <string name="glyph_error_not_in_market">Ce glyphe n\'est plus disponible</string>
+    <string name="glyph_error_already_owned">Vous possédez déjà ce glyphe</string>
+    <string name="glyph_error_cannot_buy_own">C\'est votre propre glyphe</string>
+    <string name="glyph_error_generic">Impossible de finaliser l\'échange. Veuillez réessayer.</string>
+    <string name="glyph_error_not_signed_in">Veuillez vous reconnecter.</string>
 </resources>
