@@ -14,6 +14,7 @@ struct PebbleDetailSheet: View {
     var onPebbleUpdated: (() -> Void)?
 
     @Environment(SupabaseService.self) private var supabase
+    @Environment(EmotionPaletteService.self) private var palettes
     @Environment(\.dismiss) private var dismiss
 
     @State private var detail: PebbleDetail?
@@ -62,7 +63,9 @@ struct PebbleDetailSheet: View {
                 Button("Retry") { Task { await load() } }
             }
         } else if let detail {
-            PebbleReadView(detail: detail)
+            // Look up the pebble's emotion palette so the whole read page tints
+            // to it (#605). A cache miss (nil) leaves the page on system chrome.
+            PebbleReadView(detail: detail, palette: palettes.palette(for: detail.emotion.id))
         }
     }
 
@@ -96,6 +99,9 @@ struct PebbleDetailSheet: View {
 }
 
 #Preview {
-    PebbleDetailSheet(pebbleId: UUID())
-        .environment(SupabaseService())
+    let supabase = SupabaseService()
+    return PebbleDetailSheet(pebbleId: UUID())
+        .environment(supabase)
+        .environment(EmotionPaletteService(client: supabase.client))
+        .environment(SnapURLCache(client: supabase.client))
 }

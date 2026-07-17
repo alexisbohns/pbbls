@@ -3,21 +3,26 @@ import SwiftUI
 /// Title block for the pebble read view: serif name + uppercase tracked
 /// date, both centered. Sized smaller than the original header so the
 /// banner above it can carry the visual weight (issue #331).
+///
+/// `nameColor` / `dateColor` override the default chrome colors — the read page
+/// tints them to the emotion palette (#605). `nil` keeps the system chrome.
 struct PebbleReadTitle: View {
     let name: String
     let happenedAt: Date
+    var nameColor: Color? = nil
+    var dateColor: Color? = nil
 
     var body: some View {
         VStack(spacing: 6) {
             Text(name)
                 .font(.custom("Ysabeau-SemiBold", size: 24))
                 .multilineTextAlignment(.center)
-                .foregroundStyle(Color.system.foreground)
+                .foregroundStyle(nameColor ?? Color.system.foreground)
             Text(formattedDate)
                 .font(.caption)
                 .tracking(1.2)
                 .textCase(.uppercase)
-                .foregroundStyle(Color.system.secondary)
+                .foregroundStyle(dateColor ?? Color.system.secondary)
         }
         .frame(maxWidth: .infinity)
     }
