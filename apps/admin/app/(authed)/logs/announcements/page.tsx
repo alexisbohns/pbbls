@@ -1,11 +1,9 @@
 import { Suspense } from "react"
-import Link from "next/link"
-import { Plus } from "lucide-react"
-import { buttonVariants } from "@/components/ui/button"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 import type { LogRow } from "@/lib/logs/types"
 import { LogSection } from "../_components/LogSection"
 import { LogSectionSkeleton } from "../_components/LogSectionSkeleton"
+import { NewLogButton } from "../_components/NewLogButton"
 import { AnnouncementsPublishedSection } from "./_components/AnnouncementsPublishedSection"
 
 export default async function AnnouncementsPage() {
@@ -28,10 +26,7 @@ export default async function AnnouncementsPage() {
     <section className="space-y-6">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Announcements</h1>
-        <Link href="/logs/new?species=announcement" className={buttonVariants()}>
-          <Plus className="size-4" aria-hidden />
-          New log
-        </Link>
+        <NewLogButton species="announcement" />
       </header>
       <div className="space-y-8">
         <LogSection title="Drafts" logs={drafts} emptyLabel="No drafts." variant="drafts" />
