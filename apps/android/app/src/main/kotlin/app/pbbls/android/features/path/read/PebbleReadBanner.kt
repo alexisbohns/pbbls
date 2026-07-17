@@ -1,21 +1,9 @@
 package app.pbbls.android.features.path.read
 
-import android.provider.Settings
 import android.util.Log
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.slideInVertically
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,18 +12,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.features.path.models.EmotionPalette
 import app.pbbls.android.features.path.models.Valence
-import app.pbbls.android.features.path.models.ValenceSizeGroup
-import app.pbbls.android.features.path.render.PebbleStaticRender
 import app.pbbls.android.services.LocalSnapURLCache
-import app.pbbls.android.theme.PebblesTheme
 import coil3.SingletonImageLoader
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
@@ -43,28 +27,29 @@ import coil3.toBitmap
 
 private const val TAG = "pebble-read-banner"
 
-/** The decoded photo + its bucketed frame, resolved before layout (design D7). */
+/** Slot for the Petroglyph when it is the page heading (no snap). */
+private val HEADING_PETROGLYPH = 150.dp
+
+/** The decoded snap plus its bucketed frame, resolved before layout. */
 private data class BannerPhoto(
     val bitmap: ImageBitmap,
     val aspect: BannerAspect,
 )
 
 /**
- * Render banner for the detail sheet — ports iOS `PebbleReadBanner.swift`,
- * now with the two-phase photo reveal (M42 #582):
+ * Top zone of the pebble read view — the #599 redesign.
  *
- * 1. Phase 1 — the pebble render in its fixed 120dp slot, snap or not.
- * 2. Phase 2 — once the ORIGINAL rendition is signed + decoded, the photo
- *    slides in above the pebble in the [BannerAspect] bucket nearest its
- *    intrinsic ratio, bottom-padded by half the slot so the pebble overlaps
- *    its lower edge; the slot gains a rounded system-background backdrop.
+ * - **No snap** (or one that hasn't loaded / failed to load): the framed
+ *   [PebbleReadPetroglyph] centred as the page heading.
+ * - **Snap present**: once the ORIGINAL rendition is signed + decoded, the whole
+ *   picture shows at its nearest [BannerAspect] bucket with the Petroglyph
+ *   overlapping its top-right ([PebbleSnapFrame]).
  *
- * Android's pebble render is static, so iOS's animation-finished gate is
- * trivially satisfied (its own static-pebble branch) — the reveal fires as
- * soon as the photo is ready. Any failure (null path, null cache in
- * previews, sign/download/decode) just leaves Phase 1 — no error UI. The
- * pebble slot stays structurally stable across the reveal, and the photo is
- * hidden from accessibility (iOS parity).
+ * This replaces the previous two-phase reveal (the snap sliding in over the
+ * pebble after the stroke animation, M42 #582): the page now frames the picture
+ * outright, so there is no mask/slide. A failed load simply stays on the
+ * Petroglyph heading — no error UI — and the pebble render is static on Android,
+ * so nothing gates the swap but the decode itself.
  */
 @Composable
 fun PebbleReadBanner(
@@ -74,25 +59,9 @@ fun PebbleReadBanner(
     modifier: Modifier = Modifier,
     snapStoragePath: String? = null,
 ) {
-    val system = PebblesTheme.colors.system
-    val accentHex = PebblesTheme.colors.accent.primaryHex
-    val strokeHex = palette?.pebbleFrameColors(valence.intensity)?.strokeHex ?: accentHex
-    val heightDp =
-        when (valence.sizeGroup) {
-            ValenceSizeGroup.SMALL -> 80.dp
-            ValenceSizeGroup.MEDIUM -> 100.dp
-            ValenceSizeGroup.LARGE -> 116.dp
-        }
-
     val context = LocalContext.current
     val snapUrls = LocalSnapURLCache.current
     var photo by remember(snapStoragePath) { mutableStateOf<BannerPhoto?>(null) }
-    // Reveal timing honors the platform's remove-animations setting (the iOS
-    // reduce-motion analog): shorter fade, no slide.
-    val reduceMotion =
-        remember(context) {
-            Settings.Global.getFloat(context.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
-        }
 
     LaunchedEffect(snapStoragePath, snapUrls) {
         photo = null
@@ -115,58 +84,24 @@ fun PebbleReadBanner(
         }
     }
 
-    val revealPhoto = photo != null
-    Box(
-        modifier = modifier.fillMaxWidth().heightIn(min = 120.dp),
-        contentAlignment = Alignment.BottomCenter,
-    ) {
-        AnimatedVisibility(
-            visible = revealPhoto,
-            enter =
-                if (reduceMotion) {
-                    fadeIn(tween(durationMillis = 250))
-                } else {
-                    fadeIn(tween(durationMillis = 450)) +
-                        slideInVertically(tween(durationMillis = 450)) { fullHeight -> -fullHeight / 3 }
-                },
-        ) {
-            photo?.let { loaded ->
-                Image(
-                    bitmap = loaded.bitmap,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 60.dp)
-                            .aspectRatio(loaded.aspect.ratio)
-                            .clip(RoundedCornerShape(24.dp)),
-                )
-            }
+    val loaded = photo
+    if (loaded == null) {
+        Box(modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            PebbleReadPetroglyph(
+                renderSvg = renderSvg,
+                valence = valence,
+                palette = palette,
+                modifier = Modifier.size(HEADING_PETROGLYPH),
+            )
         }
-        // The pebble slot keeps composition identity across the reveal.
-        Box(
-            modifier =
-                Modifier
-                    .size(120.dp)
-                    .then(
-                        if (revealPhoto) {
-                            Modifier.background(system.background, RoundedCornerShape(24.dp))
-                        } else {
-                            Modifier
-                        },
-                    ),
-            contentAlignment = Alignment.Center,
-        ) {
-            if (renderSvg != null) {
-                // PebbleStaticRender fit-scales + centers within the slot (the
-                // iOS 120pt pebbleStableSlot), the pebble sized by valence.
-                PebbleStaticRender(
-                    svg = renderSvg,
-                    strokeHex = strokeHex,
-                    modifier = Modifier.fillMaxWidth().height(heightDp),
-                )
-            }
-        }
+    } else {
+        PebbleSnapFrame(
+            photo = remember(loaded.bitmap) { BitmapPainter(loaded.bitmap) },
+            aspect = loaded.aspect,
+            renderSvg = renderSvg,
+            valence = valence,
+            palette = palette,
+            modifier = modifier,
+        )
     }
 }

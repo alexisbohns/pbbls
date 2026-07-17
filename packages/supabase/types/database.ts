@@ -227,29 +227,35 @@ export type Database = {
       }
       emotion_categories: {
         Row: {
+          dark_color: string
           id: string
           light_color: string
           name: string
           primary_color: string
           secondary_color: string
+          shaded_color: string
           slug: string
           surface_color: string
         }
         Insert: {
+          dark_color: string
           id?: string
           light_color: string
           name: string
           primary_color: string
           secondary_color: string
+          shaded_color: string
           slug: string
           surface_color: string
         }
         Update: {
+          dark_color?: string
           id?: string
           light_color?: string
           name?: string
           primary_color?: string
           secondary_color?: string
+          shaded_color?: string
           slug?: string
           surface_color?: string
         }
@@ -1387,12 +1393,14 @@ export type Database = {
           category_name: string | null
           category_slug: string | null
           color: string | null
+          dark_color: string | null
           emoji: string | null
           id: string | null
           light_color: string | null
           name: string | null
           primary_color: string | null
           secondary_color: string | null
+          shaded_color: string | null
           slug: string | null
           surface_color: string | null
         }

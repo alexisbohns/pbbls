@@ -1,19 +1,21 @@
 import SwiftUI
 
-/// Top-level auth gate. The splash and pre-login welcome are merged into
-/// a single `WelcomeView` so the Rive logo plays continuously without a
-/// view-swap glitch on the splash→welcome boundary.
+/// Top-level auth gate. The loader and pre-login welcome are merged into
+/// a single `WelcomeView`, which hosts `HandcraftedLogoView` as its splash:
+/// the logo plays a draw-on, then boils in place until the app is ready.
 ///
 /// At cold launch `WelcomeView` is rendered with `contentRevealed: false`
-/// — only the Rive logo is visible, centered. After
-/// `Self.minSplashSeconds` AND `supabase.isInitializing` flips false, one
-/// of two things happens:
+/// — only the logo is visible, centered, drawing on then boiling. It boils
+/// against `dataReady` (auth resolved AND both reference-data services
+/// settled — success or failure — OR the safety ceiling elapsed) and, once it
+/// has also boiled its minimum, emits `onLoaderSettled`. That event sets
+/// `loaderSettled`, making `canProceed` true, and one of two things happens:
 ///   - if the user is unauthenticated, `contentRevealed` flips true and
 ///     `WelcomeView` slides the carousel + sign-in buttons + disclaimer
 ///     in from the bottom, pushing the logo up to its header position;
-///   - if the user is authenticated, the whole view stack swaps to
-///     `PathView`. The Rive will have played for at least
-///     `minSplashSeconds`, satisfying the "splash before Path" intent.
+///   - if the user is authenticated, the stack swaps to `PathView`, with the
+///     loader held over it (via `startSettled`) until the first timeline load
+///     settles — so `PathView`'s own spinner never flashes.
 struct RootView: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(EmotionPaletteService.self) private var palettes
@@ -22,45 +24,71 @@ struct RootView: View {
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @State private var isPresentingOnboarding = false
     @State private var authPath = NavigationPath()
-    @State private var minSplashDone = false
+    @State private var loaderSettled = false
+    @State private var loaderCeilingReached = false
+    /// For authed launches: the loader stays over `PathView` until its first
+    /// timeline load settles, so the home feed's own spinner never shows.
+    @State private var pathFeedLoaded = false
 
-    /// Minimum time the Rive logo is held centered before the welcome
-    /// content reveals (or, for authenticated users, before swapping to
-    /// `PathView`). Tuned to roughly match the bundled `pbbls-logo.riv`
-    /// timeline.
-    private static let minSplashSeconds: TimeInterval = 2.5
+    /// Safety ceiling: if reference data never settles (e.g. a wedged
+    /// network beyond the client's own timeout), open the app anyway rather
+    /// than boiling indefinitely. Normal launches settle in well under this.
+    private static let loaderCeilingSeconds: TimeInterval = 8
 
     private enum AuthRoute: Hashable {
         case auth(AuthView.Mode)
     }
 
-    /// True once the user is signed in AND auth resolution has settled
-    /// AND the splash hold has elapsed. Until all three, we keep showing
-    /// `WelcomeView` so the Rive plays out.
-    private var canShowAuthedTabs: Bool {
-        supabase.session != nil && !supabase.isInitializing && minSplashDone
+    /// Auth resolved AND both reference-data load attempts settled (success or
+    /// failure), OR the safety ceiling elapsed.
+    private var dataReady: Bool {
+        (!supabase.isInitializing && palettes.didFinishLoading && refs.didFinishLoading)
+            || loaderCeilingReached
     }
 
-    /// True once the splash hold has elapsed AND auth resolution settled
-    /// to "no session". Drives WelcomeView's reveal sequence.
+    /// The app is shown only once the loader has fully settled — drawn on AND
+    /// boiled the minimum AND `dataReady`. The handcrafted logo IS the loader,
+    /// so its own settle event (not a computed time) drives the transition.
+    private var canProceed: Bool { loaderSettled }
+
+    private var canShowAuthedTabs: Bool {
+        supabase.session != nil && canProceed
+    }
+
     private var welcomeContentRevealed: Bool {
-        supabase.session == nil && !supabase.isInitializing && minSplashDone
+        supabase.session == nil && canProceed
     }
 
     var body: some View {
         ZStack {
             if canShowAuthedTabs {
-                PathView()
-                    .fullScreenCover(isPresented: $isPresentingOnboarding) {
-                        OnboardingView(steps: OnboardingSteps.all) {
-                            hasSeenOnboarding = true
-                            isPresentingOnboarding = false
+                ZStack {
+                    PathView(onFirstLoad: { pathFeedLoaded = true })
+                        .fullScreenCover(isPresented: $isPresentingOnboarding) {
+                            OnboardingView(steps: OnboardingSteps.all) {
+                                hasSeenOnboarding = true
+                                isPresentingOnboarding = false
+                            }
                         }
+
+                    if !pathFeedLoaded {
+                        // Hold the loader over the home feed load so its own
+                        // spinner never flashes. `startSettled` skips a second
+                        // draw-on — the logo just boils, then fades out.
+                        HandcraftedLogoView(shouldSettle: false, startSettled: true)
+                            .containerRelativeFrame(.horizontal) { width, _ in width * 0.33 }
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Color.system.background.ignoresSafeArea())
+                            .transition(.opacity)
                     }
+                }
+                .animation(.easeInOut(duration: 0.35), value: pathFeedLoaded)
             } else {
                 NavigationStack(path: $authPath) {
                     WelcomeView(
                         contentRevealed: welcomeContentRevealed,
+                        appReady: dataReady,
+                        onLoaderSettled: { loaderSettled = true },
                         onCreateAccount: { authPath.append(AuthRoute.auth(.signup)) },
                         onLogin: { authPath.append(AuthRoute.auth(.login)) }
                     )
@@ -77,8 +105,8 @@ struct RootView: View {
             await supabase.start()
         }
         .task {
-            try? await Task.sleep(for: .seconds(Self.minSplashSeconds))
-            minSplashDone = true
+            try? await Task.sleep(for: .seconds(Self.loaderCeilingSeconds))
+            loaderCeilingReached = true
         }
         .task { await palettes.load() }
         .task { await refs.load() }
@@ -94,6 +122,8 @@ struct RootView: View {
         .onChange(of: supabase.session == nil) { wasSignedOut, isSignedOut in
             if !wasSignedOut && isSignedOut {
                 snapURLs.invalidateAll()
+                // Re-arm the home-feed loader cover for the next sign-in.
+                pathFeedLoaded = false
             }
         }
     }
