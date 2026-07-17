@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -67,15 +68,14 @@ private const val FEED_LIMIT = 5
  * only when ALL FOUR content feeds fail (a reactions-only failure just means
  * an empty reacted set). Sections render only when non-empty. The optimistic
  * reaction toggle adjusts only the backlog list (D4). Announcement detail and
- * the see-all lists are the caller's surfaces (sub-project C wires them as
- * content swaps inside the Lab route).
+ * the see-all lists render as content swaps inside this single route (D9) —
+ * back (gesture or bar button) unwinds the swap before popping the route, and
+ * the feed state stays resident across swaps (iOS keeps the pushed-from view
+ * alive the same way).
  */
 @Composable
 fun LabScreen(
     onBack: () -> Unit,
-    onOpenAnnouncement: (Log) -> Unit,
-    onSeeAllChangelog: () -> Unit,
-    onSeeAllBacklog: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val logsService = LocalLogsService.current
@@ -91,6 +91,8 @@ fun LabScreen(
     var isLoading by remember { mutableStateOf(true) }
     var allFeedsFailed by remember { mutableStateOf(false) }
     var loadKey by remember { mutableIntStateOf(0) }
+    var openAnnouncement by remember { mutableStateOf<Log?>(null) }
+    var seeAllMode by remember { mutableStateOf<LogListMode?>(null) }
 
     LaunchedEffect(loadKey) {
         isLoading = true
@@ -138,65 +140,90 @@ fun LabScreen(
         }
     }
 
-    PebblesScreen(
-        modifier = modifier,
-        topBar = {
-            PebblesTopBar(
-                title = stringResource(R.string.lab_title),
-                leading = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = stringResource(R.string.profile_back_a11y),
-                            tint = system.secondary,
-                            modifier = Modifier.size(24.dp),
-                        )
-                    }
-                },
+    // Content swaps unwind before the route itself pops (design D9).
+    val announcement = openAnnouncement
+    val listMode = seeAllMode
+    BackHandler(enabled = announcement != null || listMode != null) {
+        if (announcement != null) openAnnouncement = null else seeAllMode = null
+    }
+
+    when {
+        announcement != null ->
+            AnnouncementDetailScreen(
+                log = announcement,
+                coverUrl = logsService.coverImageUrl(announcement),
+                onBack = { openAnnouncement = null },
+                modifier = modifier,
             )
-        },
-    ) {
-        when {
-            isLoading ->
-                Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
-                }
 
-            allFeedsFailed ->
-                Column(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    PebblesText(
-                        text = stringResource(R.string.lab_load_error),
-                        style = PebblesTypography.body,
-                        color = system.secondary,
+        listMode != null ->
+            LogListScreen(
+                mode = listMode,
+                onBack = { seeAllMode = null },
+                modifier = modifier,
+            )
+
+        else ->
+            PebblesScreen(
+                modifier = modifier,
+                topBar = {
+                    PebblesTopBar(
+                        title = stringResource(R.string.lab_title),
+                        leading = {
+                            IconButton(onClick = onBack) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_arrow_back),
+                                    contentDescription = stringResource(R.string.profile_back_a11y),
+                                    tint = system.secondary,
+                                    modifier = Modifier.size(24.dp),
+                                )
+                            }
+                        },
                     )
-                    TextButton(onClick = { loadKey++ }) {
-                        PebblesText(
-                            text = stringResource(R.string.profile_retry),
-                            style = PebblesTypography.buttonLabel,
-                            color = PebblesTheme.colors.accent.primary,
-                        )
-                    }
-                }
+                },
+            ) {
+                when {
+                    isLoading ->
+                        Box(Modifier.fillMaxSize(), Alignment.Center) {
+                            CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
+                        }
 
-            else ->
-                LabContent(
-                    announcements = announcements,
-                    changelog = changelog,
-                    initiatives = initiatives,
-                    backlog = backlog,
-                    reactedIds = reactedIds,
-                    coverUrl = { logsService.coverImageUrl(it) },
-                    onOpenAnnouncement = onOpenAnnouncement,
-                    onToggleReaction = { toggleReaction(it) },
-                    onOpenCommunity = { openCommunityInvite(context) },
-                    onSeeAllChangelog = onSeeAllChangelog,
-                    onSeeAllBacklog = onSeeAllBacklog,
-                )
-        }
+                    allFeedsFailed ->
+                        Column(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            PebblesText(
+                                text = stringResource(R.string.lab_load_error),
+                                style = PebblesTypography.body,
+                                color = system.secondary,
+                            )
+                            TextButton(onClick = { loadKey++ }) {
+                                PebblesText(
+                                    text = stringResource(R.string.profile_retry),
+                                    style = PebblesTypography.buttonLabel,
+                                    color = PebblesTheme.colors.accent.primary,
+                                )
+                            }
+                        }
+
+                    else ->
+                        LabContent(
+                            announcements = announcements,
+                            changelog = changelog,
+                            initiatives = initiatives,
+                            backlog = backlog,
+                            reactedIds = reactedIds,
+                            coverUrl = { logsService.coverImageUrl(it) },
+                            onOpenAnnouncement = { openAnnouncement = it },
+                            onToggleReaction = { toggleReaction(it) },
+                            onOpenCommunity = { openCommunityInvite(context) },
+                            onSeeAllChangelog = { seeAllMode = LogListMode.CHANGELOG },
+                            onSeeAllBacklog = { seeAllMode = LogListMode.BACKLOG },
+                        )
+                }
+            }
     }
 }
 

@@ -29,6 +29,7 @@ import app.pbbls.android.R
 import app.pbbls.android.features.glyph.models.GlyphStroke
 import app.pbbls.android.features.profile.components.ProfileBanner
 import app.pbbls.android.features.profile.components.ProfileCollectionsCard
+import app.pbbls.android.features.profile.components.ProfileLabCard
 import app.pbbls.android.features.profile.components.ProfileLogoutButton
 import app.pbbls.android.features.profile.components.ProfileShortcutsRow
 import app.pbbls.android.features.profile.components.ProfileStatsCard
@@ -52,10 +53,10 @@ private const val TAG = "profile"
  * shortcuts row (tiles appear as their destinations land — D11), stats card,
  * collections carousel (header → list, card → detail, empty tile → the create
  * form as a cover), and log out, with the gear button opening [SettingsScreen]
- * as a full-screen cover (the D5 surface pattern). The Lab card arrives with
- * its own milestone. Navigating away disposes this destination, so returning
- * re-runs the load — the carousel stays fresh after edits in the pushed
- * screens.
+ * as a full-screen cover (the D5 surface pattern), and the Lab card (M44 —
+ * the last M41 D11 reversal) pushing the Lab. Navigating away disposes this
+ * destination, so returning re-runs the load — the carousel stays fresh after
+ * edits in the pushed screens.
  *
  * Deviation from iOS (design D13): a failed profile fetch shows the standard
  * error + Retry treatment instead of iOS's silent empty banner.
@@ -68,6 +69,7 @@ fun ProfileScreen(
     onOpenCollections: () -> Unit,
     onOpenCollection: (Collection) -> Unit,
     onOpenGlyphs: () -> Unit,
+    onOpenLab: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val profileService = LocalProfileService.current
@@ -208,6 +210,7 @@ fun ProfileScreen(
                         onOpenCollection = onOpenCollection,
                         onCreate = { isPresentingCreateCollection = true },
                     )
+                    ProfileLabCard(onOpen = onOpenLab)
                     ProfileLogoutButton(onClick = onSignOut)
                 }
         }
