@@ -24,7 +24,9 @@ struct HandcraftedLogoView: View {
     @State private var model: LogoLoaderModel?
     @State private var phase: Phase = .drawing
     @State private var outlineProgress: Double = 0
-    @State private var creatureProgress: Double = 0
+    /// Linear 0→1 clock for the creature phase; each stroke derives its own
+    /// staggered trim from it so the creature draws one line at a time.
+    @State private var creatureClock: Double = 0
     @State private var fossilVeinProgress: Double = 0
     @State private var eyesIn = false
     /// Fresh @State mirror of `shouldSettle` — the running `.task` captures the
@@ -36,12 +38,15 @@ struct HandcraftedLogoView: View {
 
     private enum Phase { case drawing, boiling, settled }
 
-    // Draw-on choreography (seconds). Slow, gentle easeInOut hand-drawing.
-    // Tunable in the simulator.
+    // Draw-on choreography (seconds). Slow, gentle hand-drawing. The creature
+    // window is longer because its strokes draw one at a time. Tunable.
     private static let outline = (delay: 0.0, duration: 1.2)
-    private static let creature = (delay: 1.0, duration: 1.6)
-    private static let fossilVein = (delay: 2.4, duration: 1.3)
+    private static let creature = (delay: 1.0, duration: 2.2)
+    private static let fossilVein = (delay: 3.0, duration: 1.3)
     private static var totalDrawDuration: Double { fossilVein.delay + fossilVein.duration }
+    /// Per-stroke overlap within the creature phase: 1.0 = strictly one-then-
+    /// next; >1 lets the next line start before the previous finishes.
+    private static let creatureStrokeOverlap: Double = 1.25
 
     // Boil: 4fps ping-pong (#555 §1/§3).
     private static let boilFPS: Double = 4
@@ -79,7 +84,7 @@ struct HandcraftedLogoView: View {
         guard model != nil else { onDrawComplete(); return }
 
         if reduceMotion || startSettled {
-            outlineProgress = 1; creatureProgress = 1; fossilVeinProgress = 1; eyesIn = true
+            outlineProgress = 1; creatureClock = 1; fossilVeinProgress = 1; eyesIn = true
             minBoilElapsed = true
             onDrawComplete()
             // Reduce Motion never boils (#555 §3.1); startSettled boils until
@@ -111,8 +116,9 @@ struct HandcraftedLogoView: View {
         withAnimation(.easeInOut(duration: Self.outline.duration).delay(Self.outline.delay)) {
             outlineProgress = 1
         }
-        withAnimation(.easeInOut(duration: Self.creature.duration).delay(Self.creature.delay)) {
-            creatureProgress = 1
+        // Linear clock so each creature stroke gets an even slice of the phase.
+        withAnimation(.linear(duration: Self.creature.duration).delay(Self.creature.delay)) {
+            creatureClock = 1
         }
         withAnimation(.easeInOut(duration: 0.35).delay(Self.creature.delay + Self.creature.duration - 0.15)) {
             eyesIn = true    // eyes pop in at the tail of the creature phase
@@ -133,7 +139,7 @@ struct HandcraftedLogoView: View {
             let maskWidth = WobbleMask.lineWidth(viewBox: model.viewBox, frame: proxy.size)
             ZStack {
                 revealPhase(variant.outline, progress: outlineProgress, maskWidth: maskWidth, viewBox: model.viewBox)
-                revealPhase(variant.creature, progress: creatureProgress, maskWidth: maskWidth, viewBox: model.viewBox)
+                revealCreature(variant.creature, clock: creatureClock, maskWidth: maskWidth, viewBox: model.viewBox)
                 revealPhase(
                     variant.fossilVeins, progress: fossilVeinProgress, maskWidth: maskWidth, viewBox: model.viewBox
                 )
@@ -152,6 +158,33 @@ struct HandcraftedLogoView: View {
         ForEach(Array(arts.enumerated()), id: \.offset) { _, art in
             revealGroup(art, progress: progress, maskWidth: maskWidth, viewBox: viewBox)
         }
+    }
+
+    /// Reveals the creature strokes one at a time: each stroke draws over its
+    /// own staggered slice of the linear `clock`, so the creature is sketched
+    /// line by line rather than all at once.
+    @ViewBuilder
+    private func revealCreature(_ arts: [WobbleArt], clock: Double, maskWidth: CGFloat, viewBox: CGRect) -> some View {
+        ForEach(Array(arts.enumerated()), id: \.offset) { index, art in
+            revealGroup(
+                art,
+                progress: Self.strokeProgress(clock: clock, index: index, count: arts.count),
+                maskWidth: maskWidth,
+                viewBox: viewBox
+            )
+        }
+    }
+
+    /// Stroke `index` of `count`'s local 0→1 reveal, derived from the phase
+    /// clock: each stroke owns a `1/count` slot (widened by the overlap factor)
+    /// and eases across it with a smoothstep.
+    private static func strokeProgress(clock: Double, index: Int, count: Int) -> Double {
+        guard count > 0 else { return clock }
+        let step = 1.0 / Double(count)
+        let start = Double(index) * step
+        let span = step * creatureStrokeOverlap
+        let local = min(1, max(0, (clock - start) / span))
+        return local * local * (3 - 2 * local)   // smoothstep ease per stroke
     }
 
     @ViewBuilder
