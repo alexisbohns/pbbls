@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BarChart3, Megaphone, Shapes, Sparkles, Store } from "lucide-react"
+import { BarChart3, Megaphone, Palette, Shapes, Sparkles, Store } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -30,6 +30,7 @@ const PEBBLESTORE_ITEMS = [
 
 const REFERENCE_ITEMS = [
   { href: "/domains", label: "Domains", icon: Shapes },
+  { href: "/emotions", label: "Emotions", icon: Palette },
 ] as const
 
 export function AppSidebar() {
