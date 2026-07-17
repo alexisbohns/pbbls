@@ -24,9 +24,11 @@ struct HandcraftedLogoView: View {
     @State private var model: LogoLoaderModel?
     @State private var phase: Phase = .drawing
     @State private var outlineProgress: Double = 0
-    /// Linear 0→1 clock for the creature phase; each stroke derives its own
-    /// staggered trim from it so the creature draws one line at a time.
-    @State private var creatureClock: Double = 0
+    /// One 0→1 reveal per creature stroke, each animated with its own delay so
+    /// the creature is sketched line by line. (A single shared scalar can't
+    /// stagger them: SwiftUI evaluates the body only at the animation endpoint,
+    /// so every derived trim would animate together.)
+    @State private var creatureProgress: [Double] = []
     @State private var fossilVeinProgress: Double = 0
     @State private var eyesIn = false
     /// Fresh @State mirror of `shouldSettle` — the running `.task` captures the
@@ -44,9 +46,9 @@ struct HandcraftedLogoView: View {
     private static let creature = (delay: 1.0, duration: 2.2)
     private static let fossilVein = (delay: 3.0, duration: 1.3)
     private static var totalDrawDuration: Double { fossilVein.delay + fossilVein.duration }
-    /// Per-stroke overlap within the creature phase: 1.0 = strictly one-then-
-    /// next; >1 lets the next line start before the previous finishes.
-    private static let creatureStrokeOverlap: Double = 1.25
+    /// How long a single creature line takes to draw. Consecutive lines start
+    /// `creature.duration` apart / (count-1), so they overlap slightly.
+    private static let creatureStrokeDuration: Double = 0.55
 
     // Boil: 4fps ping-pong (#555 §1/§3).
     private static let boilFPS: Double = 4
@@ -84,7 +86,9 @@ struct HandcraftedLogoView: View {
         guard model != nil else { onDrawComplete(); return }
 
         if reduceMotion || startSettled {
-            outlineProgress = 1; creatureClock = 1; fossilVeinProgress = 1; eyesIn = true
+            outlineProgress = 1
+            creatureProgress = Array(repeating: 1, count: creatureCount)
+            fossilVeinProgress = 1; eyesIn = true
             minBoilElapsed = true
             onDrawComplete()
             // Reduce Motion never boils (#555 §3.1); startSettled boils until
@@ -112,14 +116,26 @@ struct HandcraftedLogoView: View {
         }
     }
 
+    /// Number of creature strokes in the built art (0 until the model loads).
+    private var creatureCount: Int { model?.variants.first?.creature.count ?? 0 }
+
     private func startDrawOn() {
         withAnimation(.easeInOut(duration: Self.outline.duration).delay(Self.outline.delay)) {
             outlineProgress = 1
         }
-        // Linear clock so each creature stroke gets an even slice of the phase.
-        withAnimation(.linear(duration: Self.creature.duration).delay(Self.creature.delay)) {
-            creatureClock = 1
+
+        // One animation per creature stroke, each with its own delay, so the
+        // lines draw in sequence rather than all together.
+        let count = creatureCount
+        creatureProgress = Array(repeating: 0, count: count)
+        let strokeDuration = Self.creatureStrokeDuration
+        let stagger = count > 1 ? (Self.creature.duration - strokeDuration) / Double(count - 1) : 0
+        for index in 0..<count {
+            withAnimation(.easeInOut(duration: strokeDuration).delay(Self.creature.delay + Double(index) * stagger)) {
+                creatureProgress[index] = 1
+            }
         }
+
         withAnimation(.easeInOut(duration: 0.35).delay(Self.creature.delay + Self.creature.duration - 0.15)) {
             eyesIn = true    // eyes pop in at the tail of the creature phase
         }
@@ -139,7 +155,9 @@ struct HandcraftedLogoView: View {
             let maskWidth = WobbleMask.lineWidth(viewBox: model.viewBox, frame: proxy.size)
             ZStack {
                 revealPhase(variant.outline, progress: outlineProgress, maskWidth: maskWidth, viewBox: model.viewBox)
-                revealCreature(variant.creature, clock: creatureClock, maskWidth: maskWidth, viewBox: model.viewBox)
+                revealCreature(
+                    variant.creature, progress: creatureProgress, maskWidth: maskWidth, viewBox: model.viewBox
+                )
                 revealPhase(
                     variant.fossilVeins, progress: fossilVeinProgress, maskWidth: maskWidth, viewBox: model.viewBox
                 )
@@ -160,31 +178,20 @@ struct HandcraftedLogoView: View {
         }
     }
 
-    /// Reveals the creature strokes one at a time: each stroke draws over its
-    /// own staggered slice of the linear `clock`, so the creature is sketched
-    /// line by line rather than all at once.
+    /// Reveals the creature strokes one at a time: each stroke reads its own
+    /// entry in `progress`, animated on its own delay in `startDrawOn`.
     @ViewBuilder
-    private func revealCreature(_ arts: [WobbleArt], clock: Double, maskWidth: CGFloat, viewBox: CGRect) -> some View {
+    private func revealCreature(
+        _ arts: [WobbleArt], progress: [Double], maskWidth: CGFloat, viewBox: CGRect
+    ) -> some View {
         ForEach(Array(arts.enumerated()), id: \.offset) { index, art in
             revealGroup(
                 art,
-                progress: Self.strokeProgress(clock: clock, index: index, count: arts.count),
+                progress: index < progress.count ? progress[index] : 0,
                 maskWidth: maskWidth,
                 viewBox: viewBox
             )
         }
-    }
-
-    /// Stroke `index` of `count`'s local 0→1 reveal, derived from the phase
-    /// clock: each stroke owns a `1/count` slot (widened by the overlap factor)
-    /// and eases across it with a smoothstep.
-    private static func strokeProgress(clock: Double, index: Int, count: Int) -> Double {
-        guard count > 0 else { return clock }
-        let step = 1.0 / Double(count)
-        let start = Double(index) * step
-        let span = step * creatureStrokeOverlap
-        let local = min(1, max(0, (clock - start) / span))
-        return local * local * (3 - 2 * local)   // smoothstep ease per stroke
     }
 
     @ViewBuilder
