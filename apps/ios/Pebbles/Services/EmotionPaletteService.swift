@@ -5,8 +5,8 @@ import os
 
 /// Caches the contents of `public.v_emotions_with_palette` for the session.
 ///
-/// Loaded once from `RootView.task` while the splash holds (≥ 2.5s, see
-/// `RootView.minSplashSeconds`). Render surfaces look up by `emotion.id`
+/// Loaded once from `RootView.task` during the handcrafted logo loader; the
+/// loader gates on `didFinishLoading`. Render surfaces look up by `emotion.id`
 /// via `palette(for:)`. A miss (cache not warm yet, or a bad row that the
 /// decoder rejected) returns `nil` — callers fall back to
 /// `Color.accent.primary` / `Color.accent.primaryHex`. No retry on failure;
@@ -16,6 +16,10 @@ import os
 final class EmotionPaletteService {
     private(set) var byEmotionId: [UUID: EmotionWithPalette] = [:]
     private(set) var hasLoaded: Bool = false
+    /// True once a load attempt has settled — success OR failure. The launch
+    /// loader gates on this (not `hasLoaded`) so a failed reference fetch still
+    /// lets the app open with an empty cache instead of boiling forever.
+    private(set) var didFinishLoading: Bool = false
 
     private let client: SupabaseClient
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "emotion-palette")
@@ -27,6 +31,7 @@ final class EmotionPaletteService {
     /// Fetch the view and populate the cache. Idempotent — safe to call
     /// more than once, though the splash-driven call site only fires once.
     func load() async {
+        defer { didFinishLoading = true }
         do {
             let rows: [EmotionWithPalette] = try await client
                 .from("v_emotions_with_palette")
