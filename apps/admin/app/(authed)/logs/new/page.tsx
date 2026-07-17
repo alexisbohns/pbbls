@@ -8,8 +8,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { isLogSpecies } from "@/lib/logs/options"
-import { LogForm } from "../_components/LogForm"
-import { createLog } from "../actions"
+import { PrefillableLogForm } from "../_components/PrefillableLogForm"
 
 type SearchParams = Promise<{ species?: string }>
 
@@ -37,7 +36,7 @@ export default async function NewLogPage({ searchParams }: { searchParams: Searc
         <h1 className="text-2xl font-semibold">New log</h1>
         <p className="text-muted-foreground text-sm">Create a changelog entry or announcement.</p>
       </header>
-      <LogForm log={null} action={createLog} submitLabel="Save draft" initialSpecies={initialSpecies} />
+      <PrefillableLogForm initialSpecies={initialSpecies} />
     </section>
   )
 }

@@ -236,6 +236,17 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Supersedes / Superseded-by:** Revises the Debug-only/"unshippable by construction" aspect of the **2026-07-13 — Petroglyph wobble is generated at runtime on-device** entry, for Android only.
 - **Refs:** #555, PR #558, `apps/android/app/build.gradle.kts`, `apps/android/app/src/main/kotlin/app/pbbls/android/features/path/render/wobble/WobbleFlags.kt`, `.github/workflows/android-release.yml`.
 
+## 2026-07-17 — Lab Notes are a YAML snippet that prefills the admin from the clipboard (#601)
+
+- **Status:** taken
+- **Scope:** docs, admin
+- **Context:** #601 — the Lab Note step produced an ad-hoc EN/FR markdown blurb that the maintainer had to re-key into the Lab admin by hand, and the PR template's "voice anchors" mechanism (paste 2–3 recent shipped entries as tone reference) was clunky and the resulting tone unsatisfying.
+- **Decision:** The PR Lab Note is now a **strict YAML snippet** matching the `logs` columns (`species`/`platform`/`status`/`release-date`→`released_at`/`published`/`en`/`fr`), authored via the new `lab-note` skill (`.claude/skills/lab-note/`) which carries the schema, allowed values, and a friendly casual tone (French uses "Tu"). In the admin, clicking **"New log"** reads the clipboard during the click gesture and, if it holds a matching snippet, opens the existing New-log form **prefilled** — no separate import page, no new server action; submission still goes through the unchanged `createLog`.
+- **Why:** A copy-paste-once flow removes the manual re-keying; a skill-owned schema + tone fixes the voice at the source and keeps CLAUDE.md tiny. Prefilling the existing form (vs. a bespoke import page/action) reuses all validation and the `published_at`/`released_at` auto-stamp with the least surface area.
+- **Consequences:** The clipboard parser is tolerant of both idiomatic YAML and the issue's list-of-dashes style. Clipboard read needs a user gesture + secure context (reliable in Chromium; Firefox may prompt); any failure falls back to a blank form. The old markdown Lab Note shape is retired — `blog-dossier` harvesting now expects the YAML block.
+- **Supersedes / Superseded-by:** Retires the free-form markdown Lab Note blurb + PR-template "voice anchors" mechanism.
+- **Refs:** #601, `.claude/skills/lab-note/SKILL.md`, `apps/admin/lib/logs/parse-lab-note.ts`, `apps/admin/app/(authed)/logs/_components/NewLogButton.tsx`, `apps/admin/app/(authed)/logs/_components/PrefillableLogForm.tsx`, `.github/PULL_REQUEST_TEMPLATE.md`.
+
 ## 2026-07-17 — App-open loader is a native handcrafted-glyph animation, gated on a loader-settle event (#598)
 
 - **Status:** taken

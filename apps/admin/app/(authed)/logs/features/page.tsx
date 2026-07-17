@@ -1,12 +1,10 @@
 import { Suspense } from "react"
-import Link from "next/link"
-import { Plus } from "lucide-react"
-import { buttonVariants } from "@/components/ui/button"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { isPlatformFilter } from "@/lib/logs/options"
 import type { LogRow, LogStatus } from "@/lib/logs/types"
 import { LogSection } from "../_components/LogSection"
 import { LogSectionSkeleton } from "../_components/LogSectionSkeleton"
+import { NewLogButton } from "../_components/NewLogButton"
 import { PlatformFilter } from "./_components/PlatformFilter"
 import { FeaturesShippedSection } from "./_components/FeaturesShippedSection"
 
@@ -53,10 +51,7 @@ export default async function FeaturesPage({ searchParams }: { searchParams: Sea
     <section className="space-y-6">
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Features</h1>
-        <Link href="/logs/new?species=feature" className={buttonVariants()}>
-          <Plus className="size-4" aria-hidden />
-          New log
-        </Link>
+        <NewLogButton species="feature" />
       </header>
       <PlatformFilter />
       <div className="space-y-8">
