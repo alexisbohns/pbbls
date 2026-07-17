@@ -15,16 +15,18 @@ import app.pbbls.android.features.path.models.ValenceSizeGroup
  * | large strokes         | palette.light     | palette.light       |
  * | large backfill        | palette.primary   | palette.primary     |
  *
- * "palette.dark" in the spec is the DB `surface_color` — the fourth palette
- * slot (seeded as primary at ~10% alpha), the only dark-mode backfill
- * candidate in the four-color palette. Its low alpha rides in [fillOpacity]
- * because a 6-digit hex can't carry it.
+ * "palette.dark" is the dedicated `dark_color` column (added for #599), not the
+ * faint `surface_color` wash — so the dark-mode backfill is a solid dark tint,
+ * mirroring the solid `light` backfill in light mode. Any alpha still rides in
+ * [fillOpacity] because a 6-digit hex can't carry it.
  *
  * This is deliberately distinct from the shared, theme-neutral
- * [EmotionPalette.pebbleFrameColors] used by the Path rows: #599 scopes the new
- * theme-dependent coloring to the read view. Large is identical to
- * `pebbleFrameColors` (light stroke + opaque primary fill); only small/medium
- * diverges, and only in light mode (primary stroke + solid `light` backfill).
+ * [EmotionPalette.pebbleFrameColors] used by the Path rows (which still washes
+ * small/medium with `surface_color`): #599 scopes the new theme-dependent
+ * coloring to the read view. Large is identical to `pebbleFrameColors` (light
+ * stroke + opaque primary fill); small/medium diverges — light mode uses a
+ * primary stroke over a solid `light` backfill, dark a secondary stroke over
+ * `dark`.
  */
 data class PetroglyphColors(
     /** 6-digit `#RRGGBB` for the outline + glyph strokes. */
@@ -54,15 +56,15 @@ fun petroglyphColors(
                 fillHex = EmotionPalette.rgbHex(palette.primaryHex),
                 fillOpacity = EmotionPalette.alphaComponent(palette.primaryHex),
             )
-        // Small / medium: theme-dependent. Dark keeps the current secondary
-        // stroke + faint `surface` wash; light switches to a primary stroke over
-        // a solid `light` backfill.
+        // Small / medium: theme-dependent. Dark uses a secondary stroke over a
+        // solid `dark` backfill; light a primary stroke over a solid `light`
+        // backfill.
         else ->
             if (isDark) {
                 PetroglyphColors(
                     strokeHex = EmotionPalette.rgbHex(palette.secondaryHex),
-                    fillHex = EmotionPalette.rgbHex(palette.surfaceHex),
-                    fillOpacity = EmotionPalette.alphaComponent(palette.surfaceHex),
+                    fillHex = EmotionPalette.rgbHex(palette.darkHex),
+                    fillOpacity = EmotionPalette.alphaComponent(palette.darkHex),
                 )
             } else {
                 PetroglyphColors(

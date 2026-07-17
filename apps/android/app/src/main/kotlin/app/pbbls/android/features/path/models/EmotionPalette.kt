@@ -3,22 +3,29 @@ package app.pbbls.android.features.path.models
 import androidx.compose.ui.graphics.Color
 
 /**
- * The four colors of an emotion category palette — mirrors iOS
- * `EmotionPalette.swift`. Initialized from the 8-digit `#RRGGBBAA` hex
- * strings stored on `emotion_categories` (hand-entered in Supabase Studio —
- * may carry stray whitespace, trimmed at this boundary). [fromHex] returns
- * `null` if any hex fails to parse; callers treat the palette as unavailable
- * and fall back to the brand accent.
+ * The colors of an emotion category palette — mirrors iOS `EmotionPalette.swift`.
+ * Initialized from the 8-digit `#RRGGBBAA` hex strings stored on
+ * `emotion_categories` (hand-entered in Supabase Studio — may carry stray
+ * whitespace, trimmed at this boundary). [fromHex] returns `null` if any hex
+ * fails to parse; callers treat the palette as unavailable and fall back to the
+ * brand accent.
+ *
+ * [dark] is the #599 addition: the small/medium Petroglyph backfill in dark
+ * mode (the "palette.dark" role). The sibling `shaded_color` column also exists
+ * on the view but has no Android consumer yet, so it is intentionally not
+ * modelled here.
  */
 data class EmotionPalette(
     val primary: Color,
     val secondary: Color,
     val light: Color,
     val surface: Color,
+    val dark: Color,
     val primaryHex: String,
     val secondaryHex: String,
     val lightHex: String,
     val surfaceHex: String,
+    val darkHex: String,
 ) {
     /** Pebble stroke color: `primary` in light mode, `secondary` in dark. */
     fun stroke(isDark: Boolean): Color = if (isDark) secondary else primary
@@ -53,26 +60,30 @@ data class EmotionPalette(
         }
 
     companion object {
-        /** Builds a palette from the four DB hex columns; null if any fails. */
+        /** Builds a palette from the DB hex columns; null if any fails. */
         fun fromHex(
             primaryHex: String,
             secondaryHex: String,
             lightHex: String,
             surfaceHex: String,
+            darkHex: String,
         ): EmotionPalette? {
             val trimmedPrimary = primaryHex.trim()
             val trimmedSecondary = secondaryHex.trim()
             val trimmedLight = lightHex.trim()
             val trimmedSurface = surfaceHex.trim()
+            val trimmedDark = darkHex.trim()
             return EmotionPalette(
                 primary = parseColor(trimmedPrimary) ?: return null,
                 secondary = parseColor(trimmedSecondary) ?: return null,
                 light = parseColor(trimmedLight) ?: return null,
                 surface = parseColor(trimmedSurface) ?: return null,
+                dark = parseColor(trimmedDark) ?: return null,
                 primaryHex = trimmedPrimary,
                 secondaryHex = trimmedSecondary,
                 lightHex = trimmedLight,
                 surfaceHex = trimmedSurface,
+                darkHex = trimmedDark,
             )
         }
 

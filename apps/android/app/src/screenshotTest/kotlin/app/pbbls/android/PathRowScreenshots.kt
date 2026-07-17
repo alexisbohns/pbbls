@@ -30,6 +30,7 @@ private val previewPalette: EmotionPalette =
             secondaryHex = "#AE91CCFF",
             lightHex = "#F2EFF5FF",
             surfaceHex = "#7B5E991A",
+            darkHex = "#2A2138FF",
         ),
     )
 
