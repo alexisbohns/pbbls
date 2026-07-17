@@ -115,7 +115,11 @@ struct PathView: View {
     @ViewBuilder
     private var content: some View {
         if isLoading {
-            ProgressView()
+            // No spinner: the launch loader (RootView's handcrafted-logo cover)
+            // owns the loading visual and stays up until `onFirstLoad`. Showing
+            // the plain background here means the hand-off to the feed can't
+            // flash a spinner even for a frame (#598).
+            Color.system.background
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         } else if let loadError {
             Text(loadError)

@@ -58,16 +58,12 @@ struct HandcraftedLogoView: View {
     /// settle — a count, not a duration. The logo keeps boiling past this
     /// until the app is ready, and only ever settles on a variant-0 frame so
     /// the transition to the static logo is seamless (no brutal cut). Tunable.
-    private static let minBoilTicks = 4
+    private static let minBoilTicks = 20
 
     var body: some View {
         Group {
             if let model {
-                switch phase {
-                case .drawing: drawingBody(model)
-                case .boiling: boilingBody(model)
-                case .settled: filledLogo(model.variants[0], model: model)
-                }
+                logoBody(model)
             } else {
                 Color.clear   // asset missing: render nothing, gate still proceeds
             }
@@ -168,12 +164,21 @@ struct HandcraftedLogoView: View {
 
     // MARK: - Rendering
 
-    /// Draw-on: variant 0, each stroke group's ink revealed by a trimmed
-    /// centerline mask (mirrors PebbleAnimatedRenderView.animatedBody).
-    @ViewBuilder
-    private func drawingBody(_ model: LogoLoaderModel) -> some View {
-        let variant = model.variants[0]
-        GeometryReader { proxy in
+    /// Which variant's geometry is shown right now: the boil cycles variants,
+    /// every other phase shows variant 0.
+    private var currentVariantIndex: Int {
+        phase == .boiling ? Self.boilOrder[boilFrame % Self.boilOrder.count] : 0
+    }
+
+    /// Single render path for EVERY phase — the view structure never changes,
+    /// only the data (per-stroke `progress`, `variant` index). This is what
+    /// keeps the draw-on → boil hand-off from flashing: at the boundary the
+    /// progress is already all-1 and the variant is still 0, so nothing in the
+    /// tree is torn down and rebuilt. Each stroke stays masked by its own
+    /// centerline (trim = 1 fully reveals its ink) so there's no bleed.
+    private func logoBody(_ model: LogoLoaderModel) -> some View {
+        let variant = model.variants[currentVariantIndex]
+        return GeometryReader { proxy in
             let maskWidth = WobbleMask.lineWidth(viewBox: model.viewBox, frame: proxy.size)
             ZStack {
                 revealPhase(variant.outline, progress: outlineProgress, maskWidth: maskWidth, viewBox: model.viewBox)
@@ -225,36 +230,6 @@ struct HandcraftedLogoView: View {
                     .trim(from: 0, to: progress)
                     .stroke(Color.white, style: StrokeStyle(lineWidth: maskWidth, lineCap: .round, lineJoin: .round))
             }
-    }
-
-    /// Boil: show the variant for the current boil tick. `boilFrame` advances
-    /// in `boilUntilReady()`, so each increment is one discrete ping-pong swap
-    /// (#555 §3 — no interpolation between frames).
-    private func boilingBody(_ model: LogoLoaderModel) -> some View {
-        let index = Self.boilOrder[boilFrame % Self.boilOrder.count]
-        return filledLogo(model.variants[index], model: model)
-    }
-
-    /// Static fully-revealed logo for one variant.
-    @ViewBuilder
-    private func filledLogo(_ variant: LogoLoaderVariant, model: LogoLoaderModel) -> some View {
-        ZStack {
-            inkPhase(variant.outline, viewBox: model.viewBox)
-            inkPhase(variant.creature, viewBox: model.viewBox)
-            inkPhase(variant.fossilVeins, viewBox: model.viewBox)
-            eyeShape(variant.eyes, viewBox: model.viewBox)
-        }
-    }
-
-    @ViewBuilder
-    private func inkPhase(_ arts: [WobbleArt], viewBox: CGRect) -> some View {
-        ForEach(Array(arts.enumerated()), id: \.offset) { _, art in
-            inkShape(art.ink, viewBox: viewBox)
-        }
-    }
-
-    private func inkShape(_ path: CGPath, viewBox: CGRect) -> some View {
-        WobbledPathShape(path: path, layerTransform: .identity, viewBox: viewBox).fill(color)
     }
 
     private func eyeShape(_ path: CGPath, viewBox: CGRect) -> some View {
