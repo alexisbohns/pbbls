@@ -94,12 +94,15 @@ The petroglyph is the composed pebble artwork:
 (`PebbleOutlineBackdropView`) + the outline/glyph strokes. #599 changes only the
 **colors it is fed**, and makes them **scheme-dependent**.
 
-- **Migration**: `alter table public.emotion_categories add column if not exists
-  shaded_color text` and `dark_color text` (mirrors what was added in Studio);
-  `create or replace view public.v_emotions_with_palette` to expose both;
-  extend the `emotion_categories` seed inserts with the real values (read from
-  the remote DB); regenerate types with `db:types:remote` and commit
-  `packages/supabase/types/database.ts`.
+- **Migration (out of this iOS branch):** the `shaded_color`/`dark_color`
+  columns + the `v_emotions_with_palette` change are already applied on the
+  remote, and the git migration + regenerated `database.ts` land via the
+  parallel Android branch (`claude/issue-599-android-pebble-52orio`, migration
+  `20260717000000_emotion_categories_shaded_dark.sql`). This iOS branch adds
+  **no migration and no type regen** — the Swift client decodes the JSON columns
+  directly (it does not consume `database.ts`) and iOS unit tests use hardcoded
+  palettes, so there is no DB dependency to reproduce here. A duplicate
+  same-timestamp migration would collide, so we deliberately avoid one.
 - `EmotionWithPalette` / `EmotionPalette` decode `darkHex` (+ `shadedHex`,
   carried but unused by #599 — kept so the Swift model mirrors the row).
 - New `EmotionPalette.petroglyphColors(intensity:scheme:)` implementing the
