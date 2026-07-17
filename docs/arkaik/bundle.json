@@ -9,7 +9,7 @@
       "view_card_variant": "large"
     },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-07-17T13:00:00.000Z"
+    "updated_at": "2026-07-17T14:00:00.000Z"
   },
   "nodes": [
     {
@@ -2005,11 +2005,22 @@
       ]
     },
     {
-      "id": "V-admin-emotions",
+      "id": "V-admin-palettes",
       "project_id": "pebbles",
       "species": "view",
-      "title": "Admin · Emotions",
-      "description": "Back-office emotion & palette management (#608). Admin-only. Two tabs. Palettes lists every emotion category with a live swatch preview and edits its five hand-tuned variants (primary, secondary, light, shaded, dark) via hex text inputs plus native colour pickers that preserve the alpha byte; surface_color is not edited — it is re-derived from primary (RGB + 1A ≈10%) server-side on every save. Emojis lists all emotions grouped by category, each with an inline emoji editor. All mutations go through is_admin-gated SECURITY DEFINER RPCs; reads use admin_list_emotion_categories / admin_list_emotions.",
+      "title": "Admin · Palettes",
+      "description": "Back-office emotion palette editor (#608). Admin-only page at /emotions/palettes. Lists every emotion category with a live swatch preview and edits its five hand-tuned variants (primary, secondary, light, shaded, dark) via hex text inputs plus native colour pickers that preserve the alpha byte. surface_color is not edited — it is re-derived from primary (RGB + 1A ≈10%) server-side on every save. Reads via admin_list_emotion_categories; writes via the is_admin-gated admin_update_emotion_palette RPC.",
+      "status": "development",
+      "platforms": [
+        "web"
+      ]
+    },
+    {
+      "id": "V-admin-emojis",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Admin · Emojis",
+      "description": "Back-office emotion emoji editor (#608). Admin-only page at /emotions/emojis. Lists all emotions grouped by category, each with an inline emoji editor. Reads via admin_list_emotions; writes via the is_admin-gated admin_update_emotion_emoji RPC.",
       "status": "development",
       "platforms": [
         "web"
@@ -4111,37 +4122,44 @@
       "edge_type": "displays"
     },
     {
-      "id": "e-V-admin-emotions-API-admin-list-emotion-categories",
+      "id": "e-V-admin-palettes-API-admin-list-emotion-categories",
       "project_id": "pebbles",
-      "source_id": "V-admin-emotions",
+      "source_id": "V-admin-palettes",
       "target_id": "API-admin-list-emotion-categories",
       "edge_type": "calls"
     },
     {
-      "id": "e-V-admin-emotions-API-admin-update-emotion-palette",
+      "id": "e-V-admin-palettes-API-admin-update-emotion-palette",
       "project_id": "pebbles",
-      "source_id": "V-admin-emotions",
+      "source_id": "V-admin-palettes",
       "target_id": "API-admin-update-emotion-palette",
       "edge_type": "calls"
     },
     {
-      "id": "e-V-admin-emotions-API-admin-list-emotions",
+      "id": "e-V-admin-palettes-DM-emotion-category",
       "project_id": "pebbles",
-      "source_id": "V-admin-emotions",
+      "source_id": "V-admin-palettes",
+      "target_id": "DM-emotion-category",
+      "edge_type": "displays"
+    },
+    {
+      "id": "e-V-admin-emojis-API-admin-list-emotions",
+      "project_id": "pebbles",
+      "source_id": "V-admin-emojis",
       "target_id": "API-admin-list-emotions",
       "edge_type": "calls"
     },
     {
-      "id": "e-V-admin-emotions-API-admin-update-emotion-emoji",
+      "id": "e-V-admin-emojis-API-admin-update-emotion-emoji",
       "project_id": "pebbles",
-      "source_id": "V-admin-emotions",
+      "source_id": "V-admin-emojis",
       "target_id": "API-admin-update-emotion-emoji",
       "edge_type": "calls"
     },
     {
-      "id": "e-V-admin-emotions-DM-emotion-category",
+      "id": "e-V-admin-emojis-DM-emotion-category",
       "project_id": "pebbles",
-      "source_id": "V-admin-emotions",
+      "source_id": "V-admin-emojis",
       "target_id": "DM-emotion-category",
       "edge_type": "displays"
     },

@@ -6,7 +6,8 @@ import { emotionErrorMessage } from "@/lib/emotions/types"
 
 export type ActionResult = { error: string } | undefined
 
-const PATH = "/emotions"
+const PALETTES_PATH = "/emotions/palettes"
+const EMOJIS_PATH = "/emotions/emojis"
 
 export async function updateEmotionPalette(input: {
   id: string
@@ -29,7 +30,7 @@ export async function updateEmotionPalette(input: {
     console.error("[emotions] updateEmotionPalette failed:", error.message)
     return { error: emotionErrorMessage(error.message) }
   }
-  revalidatePath(PATH)
+  revalidatePath(PALETTES_PATH)
   return undefined
 }
 
@@ -46,6 +47,6 @@ export async function updateEmotionEmoji(input: {
     console.error("[emotions] updateEmotionEmoji failed:", error.message)
     return { error: emotionErrorMessage(error.message) }
   }
-  revalidatePath(PATH)
+  revalidatePath(EMOJIS_PATH)
   return undefined
 }
