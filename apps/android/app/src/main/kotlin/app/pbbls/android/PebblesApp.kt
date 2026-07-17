@@ -4,6 +4,7 @@ import android.app.Application
 import app.pbbls.android.features.glyph.services.GlyphMarketService
 import app.pbbls.android.features.glyph.services.GlyphService
 import app.pbbls.android.features.karma.KarmaNotificationService
+import app.pbbls.android.features.lab.services.LogsService
 import app.pbbls.android.services.CollectionsService
 import app.pbbls.android.services.EmotionPaletteService
 import app.pbbls.android.services.PathService
@@ -75,6 +76,9 @@ class PebblesApp :
     lateinit var glyphMarket: GlyphMarketService
         private set
 
+    lateinit var logsService: LogsService
+        private set
+
     lateinit var karma: KarmaNotificationService
         private set
 
@@ -94,6 +98,7 @@ class PebblesApp :
         collectionsService = CollectionsService(supabase)
         glyphService = GlyphService(supabase)
         glyphMarket = GlyphMarketService(supabase)
+        logsService = LogsService(supabase)
         karma = KarmaNotificationService()
     }
 

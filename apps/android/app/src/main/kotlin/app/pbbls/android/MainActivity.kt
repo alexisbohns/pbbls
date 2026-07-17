@@ -9,6 +9,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import app.pbbls.android.features.glyph.services.LocalGlyphMarketService
 import app.pbbls.android.features.glyph.services.LocalGlyphService
 import app.pbbls.android.features.karma.LocalKarmaNotificationService
+import app.pbbls.android.features.lab.services.LocalLogsService
 import app.pbbls.android.services.LocalCollectionsService
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalPathService
@@ -55,6 +56,7 @@ class MainActivity : ComponentActivity() {
                     LocalCollectionsService provides app.collectionsService,
                     LocalGlyphService provides app.glyphService,
                     LocalGlyphMarketService provides app.glyphMarket,
+                    LocalLogsService provides app.logsService,
                     LocalKarmaNotificationService provides app.karma,
                 ) {
                     RootScreen()
