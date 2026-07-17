@@ -26,30 +26,27 @@ struct SnapPetroglyphHeader<Petroglyph: View>: View {
     private let petroglyphTilt: Double = 7
 
     var body: some View {
-        if hasSnapSlot {
-            withSnapLayout
-        } else {
-            // No snap → petroglyph centered as heading content, no tilt.
-            petroglyph()
-                .frame(width: petroglyphBox, height: petroglyphBox)
-                .frame(maxWidth: .infinity)
-        }
-    }
-
-    private var withSnapLayout: some View {
         ZStack(alignment: .topTrailing) {
-            snapArea
-                .rotationEffect(.degrees(snapTilt))
+            if hasSnapSlot {
+                snapArea
+                    .rotationEffect(.degrees(snapTilt))
+            }
 
+            // The petroglyph lives at a STABLE structural position (always the
+            // second element of this ZStack, never inside an if/else branch) so
+            // its identity — and `PebbleAnimatedRenderView`'s entry animation —
+            // is preserved when `hasSnapSlot` flips (e.g. a settled snap-load
+            // failure). Only its placement modifiers change between states:
+            // top-right + tilted with a snap, centered + straight without.
             petroglyph()
                 .frame(width: petroglyphBox, height: petroglyphBox)
-                .rotationEffect(.degrees(petroglyphTilt))
-                .offset(x: petroglyphInset, y: -petroglyphInset)
+                .rotationEffect(.degrees(hasSnapSlot ? petroglyphTilt : 0))
+                .offset(x: hasSnapSlot ? petroglyphInset : 0,
+                        y: hasSnapSlot ? -petroglyphInset : 0)
+                .frame(maxWidth: .infinity, alignment: hasSnapSlot ? .trailing : .center)
         }
-        // Reserve the inset so the petroglyph poking past the top-right corner
-        // isn't clipped by the ZStack bounds / surrounding VStack spacing.
-        .padding(.top, petroglyphInset)
-        .padding(.trailing, petroglyphInset)
+        .padding(.top, hasSnapSlot ? petroglyphInset : 0)
+        .padding(.trailing, hasSnapSlot ? petroglyphInset : 0)
     }
 
     @ViewBuilder

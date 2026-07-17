@@ -65,8 +65,20 @@ struct PebbleReadBanner: View {
                 polarity: valence.polarity,
                 renderVersion: renderVersion
             )
+            .frame(height: pebbleHeight)
         } else {
             EmptyView()
+        }
+    }
+
+    /// Pebble height inside the petroglyph slot, scaled by valence size group
+    /// so higher-intensity pebbles read bigger than lower-intensity ones
+    /// (preserved from the pre-#599 read banner).
+    private var pebbleHeight: CGFloat {
+        switch valence.sizeGroup {
+        case .small:  return 80
+        case .medium: return 100
+        case .large:  return 116
         }
     }
 
@@ -78,9 +90,11 @@ struct PebbleReadBanner: View {
         guard let path = snapStoragePath else { return }
         do {
             let urls = try await snapURLs.signedURLs(storagePath: path)
+            guard !Task.isCancelled else { return }
             var request = URLRequest(url: urls.original)
             request.timeoutInterval = 30
             let (data, _) = try await URLSession.shared.data(for: request)
+            guard !Task.isCancelled else { return }
             guard let image = UIImage(data: data) else {
                 Self.logger.error("decode failed for \(path, privacy: .public)")
                 loadFailed = true
@@ -88,6 +102,11 @@ struct PebbleReadBanner: View {
             }
             loadedImage = image
         } catch {
+            // A cancelled load (the .task id changed or the view went away) must
+            // not flip loadFailed — a newer load or teardown owns the state now.
+            if error is CancellationError || (error as? URLError)?.code == .cancelled {
+                return
+            }
             Self.logger.error(
                 "photo load failed for \(path, privacy: .public): \(error.localizedDescription, privacy: .private)"
             )
