@@ -86,6 +86,7 @@ object LabMarkdown {
     ): List<Span> {
         val spans = mutableListOf<Span>()
         val plain = StringBuilder()
+
         fun flush() {
             if (plain.isNotEmpty()) {
                 spans += span(plain.toString(), style)
