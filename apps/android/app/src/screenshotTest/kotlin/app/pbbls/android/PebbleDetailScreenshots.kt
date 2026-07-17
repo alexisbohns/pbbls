@@ -3,9 +3,14 @@ package app.pbbls.android
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import app.pbbls.android.features.glyph.models.Glyph
 import app.pbbls.android.features.glyph.models.GlyphStroke
 import app.pbbls.android.features.path.DeleteConfirmDialog
@@ -14,8 +19,11 @@ import app.pbbls.android.features.path.models.EmotionPalette
 import app.pbbls.android.features.path.models.EmotionRef
 import app.pbbls.android.features.path.models.PebbleCollection
 import app.pbbls.android.features.path.models.PebbleDetail
+import app.pbbls.android.features.path.models.Valence
 import app.pbbls.android.features.path.models.Visibility
+import app.pbbls.android.features.path.read.BannerAspect
 import app.pbbls.android.features.path.read.PebbleReadView
+import app.pbbls.android.features.path.read.PebbleSnapFrame
 import app.pbbls.android.features.profile.models.SoulRow
 import app.pbbls.android.theme.PebblesTheme
 import com.android.tools.screenshot.PreviewTest
@@ -28,6 +36,11 @@ import java.time.OffsetDateTime
  * [DeleteConfirmDialog]. Light and dark, driven with fixture [PebbleDetail]s so
  * no services are needed. The stateful `PebbleDetailScreen` (service-backed) is
  * deliberately not previewed.
+ *
+ * The #599 snap-overlay frame is covered separately via [PebbleSnapFrame] with a
+ * flat [ColorPainter] standing in for the decoded snap (a real photo needs a
+ * network load the screenshot renderer can't do) — square / landscape / portrait
+ * across light and dark.
  */
 private val previewPalette: EmotionPalette =
     requireNotNull(
@@ -247,4 +260,64 @@ fun PebbleDeleteDialogDark() {
             onDismiss = {},
         )
     }
+}
+
+// A neutral fill stands in for the decoded snap — the screenshot renderer has no
+// network, so a real rendition can't load in a preview.
+private val previewSnap = ColorPainter(Color(0xFF6B7A8F))
+
+@Composable
+private fun SnapFramePreview(
+    aspect: BannerAspect,
+    valence: Valence,
+    renderSvg: String,
+) {
+    val system = PebblesTheme.colors.system
+    PebbleSnapFrame(
+        photo = previewSnap,
+        aspect = aspect,
+        renderSvg = renderSvg,
+        valence = valence,
+        palette = previewPalette,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .background(system.background)
+                .padding(vertical = 24.dp),
+    )
+}
+
+@PreviewTest
+@Preview(showBackground = true)
+@Composable
+fun PebbleSnapSquareLight() {
+    PebblesTheme { SnapFramePreview(BannerAspect.SQUARE, Valence.NEUTRAL_MEDIUM, PebbleSvgFixtures.mediumNeutral) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun PebbleSnapSquareDark() {
+    PebblesTheme { SnapFramePreview(BannerAspect.SQUARE, Valence.NEUTRAL_MEDIUM, PebbleSvgFixtures.mediumNeutral) }
+}
+
+@PreviewTest
+@Preview(showBackground = true)
+@Composable
+fun PebbleSnapLandscapeLight() {
+    PebblesTheme { SnapFramePreview(BannerAspect.FOUR_THREE, Valence.NEUTRAL_MEDIUM, PebbleSvgFixtures.mediumNeutral) }
+}
+
+@PreviewTest
+@Preview(showBackground = true)
+@Composable
+fun PebbleSnapPortraitLargeLight() {
+    PebblesTheme { SnapFramePreview(BannerAspect.THREE_FOUR, Valence.HIGHLIGHT_LARGE, PebbleSvgFixtures.largeHighlight) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun PebbleSnapPortraitLargeDark() {
+    PebblesTheme { SnapFramePreview(BannerAspect.THREE_FOUR, Valence.HIGHLIGHT_LARGE, PebbleSvgFixtures.largeHighlight) }
 }
