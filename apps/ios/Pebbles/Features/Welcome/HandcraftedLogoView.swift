@@ -33,10 +33,11 @@ struct HandcraftedLogoView: View {
     @State private var eyesIn = false
     /// Fresh @State mirror of `shouldSettle` — the running `.task` captures the
     /// view by value, so it can't observe input changes; onChange keeps this
-    /// current for `settleIfReady()`.
+    /// current for the boil loop to poll.
     @State private var wantsSettle = false
-    /// True once the guaranteed minimum boil has played.
-    @State private var minBoilElapsed = false
+    /// Discrete boil frame counter — one increment per boil "tick". Drives the
+    /// boil render and, via a count, the settle decision.
+    @State private var boilFrame = 0
 
     private enum Phase { case drawing, boiling, settled }
 
@@ -53,9 +54,11 @@ struct HandcraftedLogoView: View {
     // Boil: 4fps ping-pong (#555 §1/§3).
     private static let boilFPS: Double = 4
     private static let boilOrder = [0, 1, 2, 1]
-    /// Minimum boil after the draw-on so it's always visibly alive before
-    /// settling — never an instant cut to static (~5 frames at 4fps). Tunable.
-    private static let minBoilSeconds: Double = 1.25
+    /// Minimum number of boil ticks after the draw-on before the logo may
+    /// settle — a count, not a duration. The logo keeps boiling past this
+    /// until the app is ready, and only ever settles on a variant-0 frame so
+    /// the transition to the static logo is seamless (no brutal cut). Tunable.
+    private static let minBoilTicks = 4
 
     var body: some View {
         Group {
@@ -73,8 +76,9 @@ struct HandcraftedLogoView: View {
         .accessibilityHidden(true)
         .task { await run() }
         .onChange(of: shouldSettle) { _, newValue in
+            // Just keep the mirror fresh; the boil loop reacts to it. (@State is
+            // read live from the running task; the `let` input can't be.)
             wantsSettle = newValue
-            settleIfReady()
         }
     }
 
@@ -85,35 +89,53 @@ struct HandcraftedLogoView: View {
         if model == nil { model = LogoLoaderArt.build() }
         guard model != nil else { onDrawComplete(); return }
 
-        if reduceMotion || startSettled {
-            outlineProgress = 1
-            creatureProgress = Array(repeating: 1, count: creatureCount)
-            fossilVeinProgress = 1; eyesIn = true
-            minBoilElapsed = true
+        // Reduce Motion: static logo, never boils (#555 §3.1).
+        if reduceMotion {
+            revealAll()
             onDrawComplete()
-            // Reduce Motion never boils (#555 §3.1); startSettled boils until
-            // the parent signals ready (or removes the view).
-            phase = (reduceMotion || wantsSettle) ? .settled : .boiling
+            phase = .settled
             return
         }
 
-        startDrawOn()
-        try? await Task.sleep(for: .seconds(Self.totalDrawDuration))
-        onDrawComplete()
-        phase = .boiling
-        // Guarantee the boil is actually seen — never an instant cut to static,
-        // even when the app was ready before the draw-on finished.
-        try? await Task.sleep(for: .seconds(Self.minBoilSeconds))
-        minBoilElapsed = true
-        settleIfReady()
+        if startSettled {
+            // Cover mode: skip the draw-on, reveal fully, then boil. The parent
+            // removes this view when its work finishes, so it just boils.
+            revealAll()
+            onDrawComplete()
+        } else {
+            startDrawOn()
+            try? await Task.sleep(for: .seconds(Self.totalDrawDuration))
+            onDrawComplete()
+        }
+
+        await boilUntilReady()
     }
 
-    /// Settle to static only once the minimum boil has elapsed AND the app is
-    /// ready. Driven by the min-boil timer and by `shouldSettle` changes.
-    private func settleIfReady() {
-        if phase == .boiling && minBoilElapsed && wantsSettle {
-            phase = .settled
+    /// Boil until enough ticks have played AND the app is ready, then settle —
+    /// event/count-driven, not duration-driven. Settles only on a variant-0
+    /// frame so the switch to the static logo is invisible. The cover
+    /// (`shouldSettle` never true) simply boils until the parent removes it.
+    private func boilUntilReady() async {
+        phase = .boiling
+        var ticks = 0
+        while !Task.isCancelled {
+            try? await Task.sleep(for: .seconds(1.0 / Self.boilFPS))
+            boilFrame += 1
+            ticks += 1
+            let onSettleFrame = Self.boilOrder[boilFrame % Self.boilOrder.count] == 0
+            if ticks >= Self.minBoilTicks && wantsSettle && onSettleFrame {
+                phase = .settled
+                return
+            }
         }
+    }
+
+    /// Fully reveal every group (no draw-on) — for Reduce Motion and cover mode.
+    private func revealAll() {
+        outlineProgress = 1
+        creatureProgress = Array(repeating: 1, count: creatureCount)
+        fossilVeinProgress = 1
+        eyesIn = true
     }
 
     /// Number of creature strokes in the built art (0 until the model loads).
@@ -205,13 +227,12 @@ struct HandcraftedLogoView: View {
             }
     }
 
-    /// Boil: cycle the three variant inks on a wall-clock timer (#555 §3).
+    /// Boil: show the variant for the current boil tick. `boilFrame` advances
+    /// in `boilUntilReady()`, so each increment is one discrete ping-pong swap
+    /// (#555 §3 — no interpolation between frames).
     private func boilingBody(_ model: LogoLoaderModel) -> some View {
-        TimelineView(.periodic(from: .now, by: 1.0 / Self.boilFPS)) { context in
-            let tick = Int(context.date.timeIntervalSinceReferenceDate * Self.boilFPS)
-            let index = Self.boilOrder[tick % Self.boilOrder.count]
-            filledLogo(model.variants[index], model: model)
-        }
+        let index = Self.boilOrder[boilFrame % Self.boilOrder.count]
+        return filledLogo(model.variants[index], model: model)
     }
 
     /// Static fully-revealed logo for one variant.
