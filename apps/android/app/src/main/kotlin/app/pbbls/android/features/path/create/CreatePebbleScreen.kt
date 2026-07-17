@@ -98,7 +98,10 @@ fun CreatePebbleScreen(
     fun cancel() {
         if (isSaving) return
         scope.launch {
-            supabase.session?.user?.id?.let { snaps.cancelAndCleanup(it) }
+            supabase.session
+                ?.user
+                ?.id
+                ?.let { snaps.cancelAndCleanup(it) }
             onCancel()
         }
     }
@@ -172,10 +175,16 @@ fun CreatePebbleScreen(
                 photoPicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
             },
             onRetryPending = {
-                supabase.session?.user?.id?.let { id -> scope.launch { snaps.retryCurrent(id) } }
+                supabase.session
+                    ?.user
+                    ?.id
+                    ?.let { id -> scope.launch { snaps.retryCurrent(id) } }
             },
             onRemovePending = {
-                supabase.session?.user?.id?.let { id -> scope.launch { snaps.removePending(id) } }
+                supabase.session
+                    ?.user
+                    ?.id
+                    ?.let { id -> scope.launch { snaps.removePending(id) } }
             },
         )
     }

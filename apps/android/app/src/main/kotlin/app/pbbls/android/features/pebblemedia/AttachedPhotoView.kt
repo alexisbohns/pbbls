@@ -136,12 +136,13 @@ internal fun MediaThumb(thumb: ImageBitmap?) {
 
 @Composable
 internal fun MediaThumbPlaceholder() {
+    val system = PebblesTheme.colors.system
     Box(
         modifier =
             Modifier
                 .size(56.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(PebblesTheme.colors.system.secondary.copy(alpha = 0.2f)),
+                .background(system.secondary.copy(alpha = 0.2f)),
     )
 }
 

@@ -109,7 +109,8 @@ fun SlideToConfirm(
                         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                         val travel = SlideMath.travel(trackWidthPx.toFloat(), thumbPx)
                         drag(down.id) { change ->
-                            val next = (dragX.value + change.positionChange().x).coerceIn(0f, travel)
+                            val delta = change.position.x - change.previousPosition.x
+                            val next = (dragX.value + delta).coerceIn(0f, travel)
                             scope.launch { dragX.snapTo(next) }
                             change.consume()
                         }

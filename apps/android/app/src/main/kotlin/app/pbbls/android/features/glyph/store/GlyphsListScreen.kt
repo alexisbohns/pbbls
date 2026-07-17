@@ -174,15 +174,16 @@ fun GlyphsListScreen(
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
                             items(items, key = { it.id }) { item ->
+                                val startRename: () -> Unit = {
+                                    renameError = false
+                                    renaming = item.glyph
+                                }
                                 GlyphStoreCell(
                                     item = item,
                                     onTap =
                                         when {
                                             tab != GlyphTab.MINE -> ({ selected = item })
-                                            item.glyph.userId != null -> ({
-                                                renameError = false
-                                                renaming = item.glyph
-                                            })
+                                            item.glyph.userId != null -> startRename
                                             else -> null
                                         },
                                 )
