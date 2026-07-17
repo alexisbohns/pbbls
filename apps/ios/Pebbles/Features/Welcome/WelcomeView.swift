@@ -1,14 +1,14 @@
-import RiveRuntime
 import SwiftUI
 
-/// Pre-login landing AND splash. `RootView` keeps this view mounted for
-/// the entire splash hold so the bundled `pbbls-logo.riv` plays through
-/// without an interrupting view-swap. While `contentRevealed` is false
-/// only the Rive logo is visible, centered at 33% width. When the parent
-/// flips `contentRevealed` true, the carousel + sign-in buttons +
-/// disclaimer are inserted with a `move(.bottom)` transition that pushes
-/// the logo up to its final header position; individual elements then
-/// fade in one-by-one via a `revealStep` state machine.
+/// Pre-login landing AND loader. `RootView` keeps this view mounted for
+/// the entire loader hold so `HandcraftedLogoView` plays through without
+/// an interrupting view-swap: it draws on, then boils in place until the
+/// app is ready. While `contentRevealed` is false only the logo is
+/// visible, centered at 33% width. When the parent flips `contentRevealed`
+/// true, the carousel + sign-in buttons + disclaimer are inserted with a
+/// `move(.bottom)` transition that pushes the logo up to its final header
+/// position; individual elements then fade in one-by-one via a
+/// `revealStep` state machine.
 ///
 /// Email entry buttons (`onCreateAccount` / `onLogin`) push `AuthView` via
 /// the parent's `NavigationPath`. OAuth buttons call `SupabaseService`
@@ -16,6 +16,10 @@ import SwiftUI
 /// swaps to the tab bar.
 struct WelcomeView: View {
     let contentRevealed: Bool
+    /// True once the app is ready to be shown (drives boil → settle).
+    let appReady: Bool
+    /// Fired when the logo draw-on completes (bubbles to RootView's gate).
+    var onLogoDrawComplete: () -> Void = {}
     let onCreateAccount: () -> Void
     let onLogin: () -> Void
 
@@ -27,7 +31,6 @@ struct WelcomeView: View {
     @State private var presentedLegalDoc: LegalDoc?
     @State private var revealStep: Int = 0
     @State private var authError: String?
-    @State private var logoViewModel = RiveViewModel(fileName: "pbbls-logo-appear_idle")
 
     /// Reveal cadence (seconds from the moment `contentRevealed` flips
     /// true). One row per UI element in the order they fade in.
@@ -52,10 +55,11 @@ struct WelcomeView: View {
             VStack(spacing: 0) {
                 Spacer(minLength: 0)
 
-                logoViewModel.view()
-                    .containerRelativeFrame(.horizontal) { width, _ in width * 0.33 }
-                    .aspectRatio(1, contentMode: .fit)
-                    .accessibilityHidden(true)
+                HandcraftedLogoView(
+                    shouldSettle: appReady,
+                    onDrawComplete: onLogoDrawComplete
+                )
+                .containerRelativeFrame(.horizontal) { width, _ in width * 0.33 }
 
                 Spacer(minLength: 0)
 
@@ -77,7 +81,6 @@ struct WelcomeView: View {
             }
         }
         .onAppear {
-            logoViewModel.play()
             if contentRevealed && revealStep == 0 {
                 Task { await runReveal() }
             }
@@ -223,6 +226,7 @@ struct WelcomeView: View {
 #Preview("Splash phase") {
     WelcomeView(
         contentRevealed: false,
+        appReady: false,
         onCreateAccount: {},
         onLogin: {}
     )
@@ -232,6 +236,7 @@ struct WelcomeView: View {
 #Preview("Revealed") {
     WelcomeView(
         contentRevealed: true,
+        appReady: true,
         onCreateAccount: {},
         onLogin: {}
     )
