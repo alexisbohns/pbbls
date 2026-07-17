@@ -24,6 +24,7 @@ import app.pbbls.android.features.karma.LocalKarmaNotificationService
 import app.pbbls.android.features.onboarding.OnboardingGate
 import app.pbbls.android.features.onboarding.OnboardingScreen
 import app.pbbls.android.features.onboarding.OnboardingSteps
+import app.pbbls.android.features.glyph.store.GlyphsListScreen
 import app.pbbls.android.features.path.PathScreen
 import app.pbbls.android.features.profile.CollectionDetailScreen
 import app.pbbls.android.features.profile.CollectionsListScreen
@@ -49,6 +50,7 @@ private const val ROUTE_SOULS = "souls"
 private const val ROUTE_SOUL_DETAIL = "souls/{soulId}"
 private const val ROUTE_COLLECTIONS = "collections"
 private const val ROUTE_COLLECTION_DETAIL = "collections/{collectionId}"
+private const val ROUTE_GLYPHS = "glyphs"
 
 /**
  * Top-level auth gate — the `RootView` analog (D5). The gate is conditional
@@ -178,7 +180,11 @@ private fun AuthedNavHost(onSignOut: () -> Unit) {
                 onOpenCollection = { collection ->
                     navController.navigate("$ROUTE_COLLECTIONS/${collection.id}")
                 },
+                onOpenGlyphs = { navController.navigate(ROUTE_GLYPHS) },
             )
+        }
+        composable(ROUTE_GLYPHS) {
+            GlyphsListScreen(onBack = { navController.popBackStack() })
         }
         composable(ROUTE_SOULS) {
             SoulsListScreen(
