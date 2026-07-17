@@ -325,4 +325,21 @@
     <string name="glyph_drawer_acquired">Acquis · %1$s</string>
     <string name="glyph_drawer_slide">Glissez pour confirmer</string>
     <string name="glyph_drawer_slide_a11y">Glissez pour confirmer l\'échange</string>
+
+    <!-- Lab (M44). lab_load_error reste volontairement en anglais — parité
+         iOS (design D6) ; les libellés de réaction portent les valeurs du
+         catalogue iOS ("rocks"). -->
+    <string name="lab_title">Lab</string>
+    <string name="lab_community_title">Rejoindre la communauté</string>
+    <string name="lab_community_subtitle">Aide-nous à façonner Pebbles sur WhatsApp.</string>
+    <string name="lab_community_button">Ouvrir dans WhatsApp</string>
+    <string name="lab_section_announcements">Annonces</string>
+    <string name="lab_section_changelog">Registre des changements</string>
+    <string name="lab_section_in_progress">En cours</string>
+    <string name="lab_section_backlog">Réserve d\'améliorations</string>
+    <string name="lab_see_all">Voir tout</string>
+    <string name="lab_load_error">Couldn\'t load the Lab.</string>
+    <string name="lab_reaction_upvote_a11y">Voter</string>
+    <string name="lab_reaction_remove_a11y">Ôter mon vote</string>
+    <string name="lab_reaction_count_a11y">%1$d rocks</string>
 </resources>

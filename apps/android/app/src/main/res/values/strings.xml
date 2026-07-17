@@ -337,4 +337,22 @@
     <string name="glyph_drawer_acquired">Acquired · %1$s</string>
     <string name="glyph_drawer_slide">Slide to confirm</string>
     <string name="glyph_drawer_slide_a11y">Slide to confirm swap</string>
+
+    <!-- Lab (M44). lab_load_error stays English in BOTH locales — iOS assigns
+         it as a raw string bypassing its catalog, a named parity quirk
+         (design D6). Reaction a11y strings carry the iOS catalog's displayed
+         values ("Remove rock" / "rocks"), not the source keys. -->
+    <string name="lab_title">Lab</string>
+    <string name="lab_community_title">Join the community</string>
+    <string name="lab_community_subtitle">Shape Pebbles with other pebblers on WhatsApp.</string>
+    <string name="lab_community_button">Open in WhatsApp</string>
+    <string name="lab_section_announcements">Announcements</string>
+    <string name="lab_section_changelog">Changelog</string>
+    <string name="lab_section_in_progress">In progress</string>
+    <string name="lab_section_backlog">Backlog</string>
+    <string name="lab_see_all">See all</string>
+    <string name="lab_load_error">Couldn\'t load the Lab.</string>
+    <string name="lab_reaction_upvote_a11y">Upvote</string>
+    <string name="lab_reaction_remove_a11y">Remove rock</string>
+    <string name="lab_reaction_count_a11y">%1$d upvotes</string>
 </resources>
