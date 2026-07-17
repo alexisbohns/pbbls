@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The four colors of an emotion category palette, plus role-named accessors
+/// The six colors of an emotion category palette, plus role-named accessors
 /// that map to the design-token contract:
 ///
 /// - **Accent context** (used by the emotion meta pill on the read view):
@@ -11,7 +11,7 @@ import SwiftUI
 ///   raw hex `String` (for SVG-text injection in `PebbleRenderView`, which
 ///   replaces `currentColor` literally inside the SVG markup).
 ///
-/// Initialized from the four 8-digit hex strings stored on
+/// Initialized from the six 8-digit hex strings stored on
 /// `public.emotion_categories`. Returns `nil` if any hex fails to parse —
 /// callers treat the palette as unavailable and fall back to
 /// `Color.accent.primary` / `Color.accent.primaryHex`.
@@ -107,9 +107,13 @@ struct PebbleFrameColors: Equatable {
     /// (replaces the `#FF00FF` sentinel in the outline SVG).
     let fillHex: String
     /// The fill color's alpha (0...1), applied as view opacity by
-    /// `PebbleOutlineBackdropView`. Large pebbles fill with opaque
-    /// `primary` (1.0); small/medium fill with `surface`, which the
-    /// palette seeds at ~10% alpha for a faint silhouette wash.
+    /// `PebbleOutlineBackdropView`. Value depends on the producer:
+    /// - `pebbleFrameColors` (timeline row): large → opaque `primary` (1.0);
+    ///   small/medium → `surface`, which the palette seeds at ~10% alpha for a
+    ///   faint silhouette wash.
+    /// - `petroglyphColors` (pebble page, #599): large → opaque `primary`;
+    ///   small/medium → opaque `light`/`dark`, so the backfill reads as a solid
+    ///   tint rather than a wash.
     let fillOpacity: Double
 }
 
