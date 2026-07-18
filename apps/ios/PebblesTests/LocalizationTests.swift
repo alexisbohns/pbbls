@@ -55,7 +55,8 @@ struct LocalizationPatternCTests {
                 secondaryHex: "#000000FF",
                 lightHex: "#FFFFFFFF",
                 surfaceHex: "#0000001A",
-                darkHex: "#000000FF"
+                darkHex: "#000000FF",
+                shadedHex: "#000000FF"
             )!
         )
         #expect(category.localizedName == "Fallback Name")

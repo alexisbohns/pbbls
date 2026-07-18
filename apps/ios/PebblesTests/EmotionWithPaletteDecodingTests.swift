@@ -23,7 +23,8 @@ struct EmotionWithPaletteDecodingTests {
       "secondary_color": "#AE91CCFF",
       "light_color": "#F2EFF5FF",
       "surface_color": "#7B5E991A",
-      "dark_color": "#2A2138FF"
+      "dark_color": "#2A2138FF",
+      "shaded_color": "#4A3A5CFF"
     }
     """
 
@@ -34,6 +35,7 @@ struct EmotionWithPaletteDecodingTests {
         #expect(row.categorySlug == "fear")
         #expect(row.palette.primaryHex == "#7B5E99FF")
         #expect(row.palette.darkHex == "#2A2138FF")
+        #expect(row.palette.shadedHex == "#4A3A5CFF")
         #expect(row.palette.strokeHex(for: .dark) == "#AE91CC")
     }
 
@@ -42,6 +44,15 @@ struct EmotionWithPaletteDecodingTests {
         let json = validJson.replacingOccurrences(
             of: "\"dark_color\": \"#2A2138FF\"",
             with: "\"dark_color\": null"
+        )
+        #expect(throws: DecodingError.self) { try decode(json) }
+    }
+
+    @Test("rejects null shaded_color (#605 — required like the rest of the palette)")
+    func rejectsNullShadedColor() {
+        let json = validJson.replacingOccurrences(
+            of: "\"shaded_color\": \"#4A3A5CFF\"",
+            with: "\"shaded_color\": null"
         )
         #expect(throws: DecodingError.self) { try decode(json) }
     }

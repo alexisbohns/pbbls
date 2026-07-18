@@ -10,7 +10,8 @@ struct PathPebbleRowNameColorTests {
         secondaryHex: "#9B5C5CFF",
         lightHex:     "#E8B8B8FF",
         surfaceHex:   "#C07A7A1A",
-        darkHex:      "#3A2222FF"
+        darkHex:      "#3A2222FF",
+        shadedHex:    "#5A3A3AFF"
     )!
 
     // Regression (#510): large pebble name/time were unreadable in light

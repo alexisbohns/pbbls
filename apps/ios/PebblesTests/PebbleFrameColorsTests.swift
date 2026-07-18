@@ -12,7 +12,8 @@ struct PebbleFrameColorsTests {
         secondaryHex: "#9B5C5CFF",
         lightHex:     "#E8B8B8FF",
         surfaceHex:   "#C07A7A1A",
-        darkHex:      "#3A2222FF"
+        darkHex:      "#3A2222FF",
+        shadedHex:    "#5A3A3AFF"
     )!
 
     @Test func intensity3UsesLightStrokeAndOpaquePrimaryFill() {
@@ -60,7 +61,8 @@ struct PebbleFrameColorsTests {
             secondaryHex: "#80BF96FF\n",
             lightHex:     "  #EDF2EEFF",
             surfaceHex:   "#487C5A1A                    ",
-            darkHex:      "  #1E3326FF "
+            darkHex:      "  #1E3326FF ",
+            shadedHex:    "  #2E4B38FF "
         )!
         let small = padded.pebbleFrameColors(forIntensity: 1)
         #expect(small.fillHex == "#487C5A")
@@ -81,7 +83,8 @@ struct PebbleFrameColorsTests {
             secondaryHex: "#445566",
             lightHex:     "#778899",
             surfaceHex:   "#AABBCC",
-            darkHex:      "#223344"
+            darkHex:      "#223344",
+            shadedHex:    "#556677"
         )!
         let colors = sixDigit.pebbleFrameColors(forIntensity: 2)
         #expect(colors.fillHex   == "#AABBCC")

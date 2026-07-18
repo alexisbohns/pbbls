@@ -17,28 +17,32 @@ import SwiftUI
 /// `Color.accent.primary` / `Color.accent.primaryHex`.
 ///
 /// `dark` is the #599 addition: the small/medium read-view Petroglyph backfill
-/// in dark mode (the "palette.dark" role, from the `dark_color` column). The
-/// sibling `shaded_color` column also exists on the view but has no iOS
-/// consumer yet, so it is intentionally not modelled here.
+/// in dark mode (the "palette.dark" role, from the `dark_color` column).
+/// `shaded` is the #605 addition: a deeper tint used for the pebble read-page
+/// title / tile label / description in light mode (the "shaded_color" role on
+/// the view).
 struct EmotionPalette: Equatable {
     let primary: Color
     let secondary: Color
     let light: Color
     let surface: Color
     let dark: Color
+    let shaded: Color
 
     let primaryHex: String
     let secondaryHex: String
     let lightHex: String
     let surfaceHex: String
     let darkHex: String
+    let shadedHex: String
 
     init?(
         primaryHex: String,
         secondaryHex: String,
         lightHex: String,
         surfaceHex: String,
-        darkHex: String
+        darkHex: String,
+        shadedHex: String
     ) {
         // The palette hex columns on `emotion_categories` are populated by
         // hand in Supabase Studio and can carry stray surrounding whitespace.
@@ -51,12 +55,14 @@ struct EmotionPalette: Equatable {
         let lightHex = lightHex.trimmingCharacters(in: .whitespacesAndNewlines)
         let surfaceHex = surfaceHex.trimmingCharacters(in: .whitespacesAndNewlines)
         let darkHex = darkHex.trimmingCharacters(in: .whitespacesAndNewlines)
+        let shadedHex = shadedHex.trimmingCharacters(in: .whitespacesAndNewlines)
         guard
             let primary = Color(hex: primaryHex),
             let secondary = Color(hex: secondaryHex),
             let light = Color(hex: lightHex),
             let surface = Color(hex: surfaceHex),
-            let dark = Color(hex: darkHex)
+            let dark = Color(hex: darkHex),
+            let shaded = Color(hex: shadedHex)
         else {
             return nil
         }
@@ -65,11 +71,13 @@ struct EmotionPalette: Equatable {
         self.light = light
         self.surface = surface
         self.dark = dark
+        self.shaded = shaded
         self.primaryHex = primaryHex
         self.secondaryHex = secondaryHex
         self.lightHex = lightHex
         self.surfaceHex = surfaceHex
         self.darkHex = darkHex
+        self.shadedHex = shadedHex
     }
 
     var accentBackground: Color { primary }
