@@ -7,9 +7,11 @@ description: >
   PR has the `feat` label, or it touches a user-visible Arkaik view node
   (`docs/arkaik/bundle.json`) — and you need to fill the `## Lab Note (EN/FR)`
   section of the PR body. It defines the exact schema (the fields the `logs`
-  table accepts), the allowed values, and the friendly, casual tone of voice
-  (French uses "Tu"). It does NOT publish anything — the note is a proposal a
-  human pastes into the Lab admin at release time.
+  table accepts plus the optional `suggested:` block for the Ariko vault), the
+  allowed values, and the friendly, casual tone of voice (French uses "Tu").
+  One block serves two destinations: on merge it auto-posts to the Ariko
+  changelog vault, and a human pastes the same YAML into the Pebbles Lab admin
+  at release time. The skill itself publishes nothing — it only authors the note.
 ---
 
 # Lab Note Authoring
@@ -21,6 +23,23 @@ publishes it via the Lab admin (the `logs` table that drives the iOS Lab tab).
 Your job here: produce **one YAML snippet** in the PR's `## Lab Note (EN/FR)`
 section, following the schema and tone below. It is a **proposal only** (never
 write to Supabase / the `logs` table from the dev loop).
+
+## One block, two destinations
+
+The single snippet you write serves **both** delivery legs:
+
+1. **Ariko inbox (automatic, on merge):** the repo's `.github/workflows/lab-note.yml`
+   watches for merged PRs, reads this section, and posts the note to the Ariko
+   changelog vault (idempotent upsert on `owner/repo#N`). No human action beyond
+   merging. Ariko's gate is a heading that starts with `## Lab Note` holding one
+   fenced `yaml` block — which our `## Lab Note (EN/FR)` heading already matches.
+   Ariko requires `en.title` + `en.summary`; it reads the optional `suggested:`
+   block and **ignores every other top-level key** (`species`, `platform`, etc.).
+2. **Pebbles Lab admin (manual, at release):** the maintainer copies the same
+   YAML and publishes it via the Lab admin, unchanged (see "Where it goes").
+
+So you write one block with the full Pebbles key set **plus** the `suggested:`
+block; each destination reads the keys it cares about and ignores the rest.
 
 ## Both languages are mandatory
 
@@ -67,6 +86,11 @@ en:
 fr:
   title: Échange des glyphes avec la communauté
   summary: Ta page Glyphes propose désormais les onglets Miens, Acquis et Commu. Trouve un glyphe qui te plaît pour l'échanger contre du karma.
+suggested:                  # optional; for the Ariko vault only
+  molecule: pbbls
+  atom: glyphs              # only when confidently known
+  type: feature
+  tags: [glyphs, community, karma]
 ```
 
 | Field | Required | Allowed values / format | Notes |
@@ -80,10 +104,18 @@ fr:
 | `en.summary` | yes | 1–2 sentences | Required. |
 | `fr.title` | yes | short string | The DB falls back to EN if absent, but the note is incomplete without it. Always write it. |
 | `fr.summary` | yes | 1–2 sentences | The DB tolerates its absence, but the note is incomplete without it. Always write it. |
+| `suggested.molecule` | no | `pbbls` | Always `pbbls` for this repo. Routing hint for the Ariko vault; ignored by the Lab admin. |
+| `suggested.atom` | no | short string | The feature area (`glyphs`, `path`, `read-view`, …). Include **only when confidently known** — omit rather than guess. |
+| `suggested.type` | no | short string | The kind of change, e.g. `feature`, `announcement`. |
+| `suggested.tags` | no | list of short strings | A few free-form topic tags for the vault. |
 
 **PR-time defaults:** `status: in_progress`, `published: false`, and omit
 `release-date`. Those three are the maintainer's release-time switches — draft
 them safe.
+
+**The `suggested:` block** is optional and read **only by the Ariko vault** (the
+Lab admin ignores it). Always set `molecule: pbbls`. Add `atom`, `type`, and
+`tags` when you can fill them meaningfully; leave `atom` out rather than guess.
 
 ## Tone of voice
 
@@ -136,7 +168,12 @@ fr:
 
 1. Put the finished snippet in the PR body's `## Lab Note (EN/FR)` section
    (inside a ```yaml fence). That's the whole deliverable for the dev loop.
-2. **At release time (a human):** copy the YAML, open the Lab admin, and click
+2. **On merge (automatic):** `.github/workflows/lab-note.yml` reads this section
+   and posts the note to the Ariko changelog vault. The upsert is keyed on
+   `owner/repo#N`, so merging (or re-running the job) never duplicates the
+   capture. A chore PR with no `## Lab Note` section makes the job log
+   "skipped" — nothing is posted. No human action beyond merging.
+3. **At release time (a human):** copy the YAML, open the Lab admin, and click
    **"New log"** on the Features or Announcements list. If the snippet is on the
    clipboard, the New-log form opens **prefilled** from it — review, set
    `status: shipped` / the release date / `published`, and Save.
