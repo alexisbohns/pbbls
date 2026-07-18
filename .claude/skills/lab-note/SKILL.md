@@ -19,8 +19,26 @@ You draft it in the PR body; at release time the maintainer copies the YAML and
 publishes it via the Lab admin (the `logs` table that drives the iOS Lab tab).
 
 Your job here: produce **one YAML snippet** in the PR's `## Lab Note (EN/FR)`
-section, following the schema and tone below. It is a **proposal only** — never
-write to Supabase / the `logs` table from the dev loop.
+section, following the schema and tone below. It is a **proposal only** (never
+write to Supabase / the `logs` table from the dev loop).
+
+## Both languages are mandatory
+
+Every Lab Note **must** contain a complete `en:` block **and** a complete `fr:`
+block, each with its own `title` and `summary`. A note with only English is
+**incomplete** and must not be shipped. Do not treat French as optional or as a
+"nice to have" step you can skip when short on time. If you emit the snippet, it
+has all four fields (`en.title`, `en.summary`, `fr.title`, `fr.summary`).
+
+## No em dashes — use parentheses
+
+Do **not** use the em dash (`—`) anywhere in a Lab Note, in either language. For
+an aside or parenthetical, use round brackets `( )` instead. For a hard break
+between two clauses, use a period and start a new sentence. This applies to
+`title` and `summary` in both `en:` and `fr:`.
+
+- Wrong: `The whole detail view — background, title, tiles — now tints.`
+- Right: `The whole detail view (background, title, tiles) now tints.`
 
 ## When to use
 
@@ -60,8 +78,8 @@ fr:
 | `published` | yes | `true` / `false` | **`false` at PR time** — a draft. The maintainer flips it to `true` when publishing. |
 | `en.title` | yes | short string | Required. |
 | `en.summary` | yes | 1–2 sentences | Required. |
-| `fr.title` | recommended | short string | Optional in the DB (falls back to EN), but always write it. |
-| `fr.summary` | recommended | 1–2 sentences | Optional in the DB, but always write it. |
+| `fr.title` | yes | short string | The DB falls back to EN if absent, but the note is incomplete without it. Always write it. |
+| `fr.summary` | yes | 1–2 sentences | The DB tolerates its absence, but the note is incomplete without it. Always write it. |
 
 **PR-time defaults:** `status: in_progress`, `published: false`, and omit
 `release-date`. Those three are the maintainer's release-time switches — draft
