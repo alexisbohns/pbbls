@@ -1,6 +1,6 @@
 # Store-launch roadmap — the road to v1.0 on the App Store & Play Store
 
-> Planning spec for everything that ships before the public v1.0 store release: achievements, public profiles, mutual connections, secret notes, soul seaming, aggregated pebbles, per-pebble privacy grades, drafts + local autosave, and full Apple/Google compliance. Built from a three-way codebase audit (data layer, product surfaces, store-compliance state) with every headline claim verified against `packages/supabase/supabase/migrations/`, `docs/arkaik/bundle.json`, and the parity audit (`2026-07-16-android-parity-audit.md` §4–5). **Maintainer decision: all ten vision points gate v1.0 — nothing here is post-launch.** This doc is the planning input for milestones M1–M12 below; each milestone gets its own design doc/spec when it starts.
+> Planning spec for everything that ships before the public v1.0 store release: achievements, public profiles, mutual connections, secret notes, soul seaming, aggregated pebbles, per-pebble privacy grades, drafts + local autosave, and full Apple/Google compliance. Built from a three-way codebase audit (data layer, product surfaces, store-compliance state) with every headline claim verified against `packages/supabase/supabase/migrations/`, `docs/arkaik/bundle.json`, and the parity audit (`2026-07-16-android-parity-audit.md` §4–5). **Maintainer decision: all ten vision points gate v1.0 — nothing here is post-launch.** This doc is the planning input for GitHub milestones **M45–M57**; each milestone gets its own design doc/spec when it starts, and its issues are cut just-in-time from that design.
 
 ## 1. Product decisions already made (maintainer, 2026-07-28)
 
@@ -29,50 +29,50 @@ House constraints the design honors throughout: no Postgres enums (text + CHECK)
 
 ## 3. Milestones
 
-Sizing per repo triage: S ≤ ~150 LOC, M ≤ ~500, L = cross-app/schema. House cadence per L milestone: migration + types regen → web reference implementation → iOS → Android, with Arkaik updates and Lab Notes per user-facing PR.
+Numbering matches the repository's GitHub milestones (M45–M57). Sizing per repo triage: S ≤ ~150 LOC, M ≤ ~500, L = cross-app/schema. House cadence per L milestone: migration + types regen → web reference implementation → iOS → Android, with Arkaik updates and Lab Notes per user-facing PR.
 
 | M | Title | Size | Gated by | Gates |
 |---|---|---|---|---|
-| M1 | Foundation & leak fixes | M | — | everything |
-| M2 | Account deletion | L | M1 | store submission; extended by every later milestone |
-| M3 | Drafts & local autosave | L | M1 | — |
-| M4 | Achievements | L | M1 | M6 content |
-| M5 | Mutual connections | L | M1 | M6b `private` tier, M7, M8 |
-| M6 | Public profiles | L | M1 (full content: M4) | — |
-| M6b | Privacy grades | L | M1 (UX coherence: M5) | M8 |
-| M7 | Soul seaming | M | M5 | — |
-| M8 | Aggregated pebbles ("pairs") | L | M5 + M6b | — |
-| M9 | Secret notes ("whispers") | M/L | M1 | — |
-| M10 | Compliance batch A | M each | — | — |
-| M11 | Compliance batch B | M | feature freeze (M3–M9) | M12 |
-| M12 | Store readiness | M | M11 | ship |
+| M45 | Foundations & leak fixes | M | — | everything |
+| M46 | Account deletion | L | M45 | store submission; extended by every later milestone |
+| M47 | Drafts & local autosave | L | M45 | — |
+| M48 | Achievements | L | M45 | M50 content |
+| M49 | Mutual connections | L | M45 | M51 `private` tier, M52, M53 |
+| M50 | Public profiles | L | M45 (full content: M48) | — |
+| M51 | Privacy grades | L | M45 (UX coherence: M49) | M53 |
+| M52 | Soul seaming | M | M49 | — |
+| M53 | Aggregated pebbles ("pairs") | L | M49 + M51 | — |
+| M54 | Secret notes ("whispers") | M/L | M45 | — |
+| M55 | Compliance batch A | M each | — | — |
+| M56 | Compliance batch B | M | feature freeze (M47–M54) | M57 |
+| M57 | Store readiness | M | M56 | ship |
 
-**Critical path: M1 → M5 → M8 → M11 → M12**, with M2 running alongside the whole program. Parallel lanes fill against it: {M3}, {M4 → M6}, {M6b}, {M7}, {M9}, {M10}.
+**Critical path: M45 → M49 → M53 → M56 → M57**, with M46 running alongside the whole program. Parallel lanes fill against it: {M47}, {M48 → M50}, {M51}, {M52}, {M54}, {M55}.
 
-### M1 — Foundation & leak fixes
+### M45 — Foundations & leak fixes
 
-- **F1** Recreate `v_pebbles_full` `with (security_invoker = true)` (pattern: `v_glyph_market`, `20260630003348`). Audit all remaining views for the definer-rights class.
-- **F2** `handle_new_user()` persists `terms_accepted_at` / `privacy_accepted_at` from `raw_user_meta_data` (GDPR accountability bug).
-- **F3** Fix `create_pebble` quota lookup (`profiles.id` → `profiles.user_id`).
-- **F4** Fix the web `"serenity"` emotion fallback; give the editor a real "no emotion yet" state (drafts need it anyway).
-- **F5** Decisions-log entry: offline is a non-goal (asked for by audit §4.6; prevents drafts/autosave being misread as offline mode).
-- **F6** Re-align `apps/web/lib/data/karma.ts` with SQL `compute_karma_delta`.
+- **F1** Recreate `v_pebbles_full` `with (security_invoker = true)` (pattern: `v_glyph_market`, `20260630003348`). Audit all remaining views for the definer-rights class. (#616)
+- **F2** `handle_new_user()` persists `terms_accepted_at` / `privacy_accepted_at` from `raw_user_meta_data` (GDPR accountability bug). (#617)
+- **F3** Fix `create_pebble` quota lookup (`profiles.id` → `profiles.user_id`). (#618)
+- **F4** Fix the web `"serenity"` emotion fallback; give the editor a real "no emotion yet" state (drafts need it anyway). (#619)
+- **F5** Decisions-log entry: offline is a non-goal (asked for by audit §4.6; prevents drafts/autosave being misread as offline mode). (#620)
+- **F6** Re-align `apps/web/lib/data/karma.ts` with SQL `compute_karma_delta`. (#621)
 
-### M2 — Account deletion
+### M46 — Account deletion
 
 - `purge_account(p_user_id)` security-definer RPC (service-role only) + a `delete-account` edge function orchestrating SQL purge → storage prefix `pebbles-media/{user_id}/` → `auth.admin.deleteUser`. Idempotent and resumable — re-running after a partial failure converges.
 - **Anonymize, don't delete: sold glyphs.** Set `user_id = null` (the existing system-seed state; buyers' entitlements keep rendering) and delist their submissions (`listed = false`, preserving the approved audit trail). Delete everything else in FK order — the user's own entitlements before their `karma_events` (no-cascade FK). Ledger rows are per-user; net-zero transfers survive in counterparties' rows.
 - Settings entry point on all three surfaces + web, destructive confirm, easy to find (Apple requirement).
 - **Standing rule: every later milestone appends its new tables to the purge** (drafts, unlocks, connections, invites, blocks, seams, pairs, whispers, reports).
 
-### M3 — Drafts & local autosave
+### M47 — Drafts & local autosave
 
 - **Separate `pebble_drafts` table with a jsonb `payload`** (the exact `create_pebble` payload shape, partial). Decisively *not* a status column on `pebbles`: five NOT NULL semantic columns would need relaxing; every view/analytics migration would need a forever `status` filter; drafts must earn zero karma (`create_pebble` is the only emitter and a draft never touches it); coalesce-based `update_pebble` can't null scalars but wholesale jsonb replace can; no `render_svg` exists pre-publish; and autosave wants the same partial payload.
 - Owner-only CRUD RLS, direct client calls (single-table convention). Publish = the normal `compose-pebble` edge flow with the draft's payload, then delete the draft on success.
 - Local autosave, same payload shape: web `localStorage` (color-world precedent), debounced, restore-on-mount prompt; iOS file/UserDefaults snapshot; Android symmetric. **Local snapshot = crash/offline insurance for the open composer; server `pebble_drafts` = intentional "save as draft". No merge logic, no cross-device local sync.** Cleared on publish or server-draft save. The service worker stays untouched (Supabase remains NetworkOnly — cached-401 precedent).
 - Composer ×3: skippable mandatory fields in draft mode only, drafts list, resume-to-composer hydration, quick-capture ("just a name" → draft), placeholder chip for draft rows.
 
-### M4 — Achievements
+### M48 — Achievements
 
 - `achievements` reference table seeded by migration (deterministic-id convention): `slug`, `family` CHECK in (`pebble_count`, `emotion_first`, `domain_first`, `first_collection`, `first_glyph`, `first_soul`, `glyph_count`, `glyph_sales`), nullable `threshold` (pebble ranges; glyph 10/25/50/75/100; sales tiers), nullable `emotion_id`/`domain_id`, `sort_order`. Public-read RLS like emotions/domains.
 - `achievement_unlocks` with `primary key (user_id, achievement_id)` (structural idempotency) and `unlocked_at`; select owner-only; writes only via RPC.
@@ -82,7 +82,7 @@ Sizing per repo triage: S ≤ ~150 LOC, M ≤ ~500, L = cross-app/schema. House 
 - Karma payout via the reserved `grant` reason: deferred — badges are cosmetic in v1 (decision-log entry).
 - UI ×3: achievements grid + unlock moment (karma-pastille / Sonner explicit-fire pattern). Arkaik: flip the four gamification nodes as they ship.
 
-### M5 — Mutual connections
+### M49 — Mutual connections
 
 - **Single-row symmetric table**: `connections (user_a, user_b, check (user_a < user_b), unique (user_a, user_b))`. No status column — accepting the invite is the mutual consent; there is no pending state between two known users.
 - `connection_invites`: `inviter_id`, unique server-generated `token` (32 random bytes, base64url), `expires_at` (default 7 days), `revoked_at`. Multi-use until revoked/expired (one QR at a dinner table serves several friends); one active invite per user.
@@ -90,14 +90,14 @@ Sizing per repo triage: S ≤ ~150 LOC, M ≤ ~500, L = cross-app/schema. House 
 - `connection_blocks (blocker_id, blocked_id)` checked by accept — cheap now, painful retrofit, and needed for Apple UGC review.
 - UI ×3: invite screen (link + QR), accept flow (web `/invite/[token]` including the sign-up-first path; universal/app links on mobile), connections list with remove/block. No push — accepted connections surface on next app open (no-realtime decision).
 
-### M6 — Public profiles
+### M50 — Public profiles
 
 - `profiles` additions: nullable `handle text unique` (`^[a-z0-9][a-z0-9_]{1,28}[a-z0-9]$`), `public_profile boolean not null default false`; a `reserved_handles` table seeded by migration (admin-extensible without a migration); `set_handle(p_handle)` invoker RPC — the unique index settles races.
 - **Never widen `profiles` RLS.** All cross-user reads go through definer-RPC projections (`profiles` carries `is_admin`, consent timestamps, quotas). `get_public_profile(p_handle) returns jsonb`, granted to `anon` and `authenticated`, null unless opted in. Projects: display name, handle, avatar glyph geometry, pebble count, ripple + bounce levels (the evolutive rings), the 28-day assiduity grid (UTC in the public variant; the owner's tz-aware `get_profile_engagement` is untouched), achievements.
 - Do **not** un-scope `v_ripple` / `v_bounce` / `get_profile_engagement` — the public RPC recomputes internally for the target user.
 - Web `/u/[handle]` server-rendered route (anon key server-side; OG share cards). iOS/Android: handle claim + public toggle + share sheet in settings; viewing others' profiles in-app uses the same RPC authenticated.
 
-### M6b — Privacy grades
+### M51 — Privacy grades
 
 - Add `check (visibility in ('secret','private','public'))`. **Backfill every existing pebble to `'secret'` and flip the column + `create_pebble` coalesce default from `'private'` to `'secret'`** — existing pebbles were created under owner-only expectations; letting them become connection-visible the day connections ship would be a privacy regression.
 - New `pebbles_select` policy: owner, OR `visibility = 'private'` AND a `connections` row links viewer↔owner, OR `visibility = 'public'`. Writes stay owner-only. **Enrichment tables (cards, souls joins, snaps, whispers) keep owner-only RLS deliberately**: a shared pebble exposes core + `render_svg` (the glyph is already baked into the SVG — sidesteps cross-user glyph/snap RLS entirely), name, emotion, date. Post-F1, `v_pebbles_full` returns empty enrichments for non-owners automatically.
@@ -105,13 +105,13 @@ Sizing per repo triage: S ≤ ~150 LOC, M ≤ ~500, L = cross-app/schema. House 
 - Snaps on public pebbles: **excluded from public shares in v1** (avoids service-role signed-URL plumbing); revisit later.
 - UI ×3: three-state grade selector in composers (default `secret`), grade badge in read view, share sheet for public, connection-detail "shared pebbles" list (legal under the widened RLS).
 
-### M7 — Soul seaming
+### M52 — Soul seaming
 
 - `alter table souls add column seamed_user_id uuid references auth.users(id) on delete set null`. Souls keep strictly owner-only RLS, so the private one-way mapping needs zero policy work — the seamed user structurally cannot see it.
 - `seam_soul(p_soul_id, p_user_id)` definer RPC (verifies soul ownership + an existing connection — multi-table check ⇒ RPC), `unseam_soul`. `remove_connection` nulls seams both directions; peer account deletion degrades via `on delete set null`.
-- UI ×3: "seam with a connection" picker on soul detail, seamed badge, unseam. Convergence: the pair composer (M8) pre-attaches the seamed soul for that connection.
+- UI ×3: "seam with a connection" picker on soul detail, seamed badge, unseam. Convergence: the pair composer (M53) pre-attaches the seamed soul for that connection.
 
-### M8 — Aggregated pebbles ("pebble pairs")
+### M53 — Aggregated pebbles ("pebble pairs")
 
 - `pebble_pairs (pebble_a unique, pebble_b unique, both on delete cascade)` link table — exactly-two semantics, `pebbles` untouched (no ×3 model churn) — plus `pair_invites (from_user, to_user, pebble_id, status pending|accepted|declined)`.
 - `invite_pebble_pair(p_pebble_id, p_to_user)`: owns pebble, connection exists, **grade ≥ `private` enforced** (a paired pebble your partner can't see is meaningless).
@@ -120,24 +120,24 @@ Sizing per repo triage: S ≤ ~150 LOC, M ≤ ~500, L = cross-app/schema. House 
 - Read via `get_pebble_pair(p_pebble_id)` definer projection (name, emotion color, `render_svg`, owner display) so "paired but private" still renders a stub. Karma: the normal per-side path; `compute_karma_delta` untouched.
 - UI ×3 (heaviest of the social set): invite sheet from pebble detail, pending-invite inbox, accept flow opening the composer with locked date, paired badge on path rows, pair display in read view. No push — invites surface on app open.
 
-### M9 — Secret notes ("whispers")
+### M54 — Secret notes ("whispers")
 
 - **Separate `pebble_whispers` table** (`pebble_id pk → pebbles on delete cascade`, `user_id`, `body_enc bytea`, `key_id default 'whisper-key-v1'`) — never a column on `pebbles`, so ciphertext is structurally excluded from `v_pebbles_full`, `path_pebbles`, the compose pipeline, and all three model layers.
 - One symmetric key in Supabase Vault; definer RPCs `set_pebble_whisper` (pgp_sym_encrypt upsert), `get_pebble_whisper` (owner-only decrypt — lazy, on tap, never in list payloads), `delete_pebble_whisper`. Select-only owner RLS (enables a `has_whisper` flag); **no insert/update policies**, so plaintext can never land via a client write path.
 - Whispers stay author-only at every grade including `public` (structural + UI copy). **Never enters the compose payload or `render_svg`** — guard comments in both edge functions. Written after `create_pebble` returns (second call; retry acceptable). Draft notes ride in the draft jsonb until publish (accepted plaintext window). No karma for whispers. `key_id` future-proofs rotation.
 
-### M10 — Compliance batch A (parallel from M1)
+### M55 — Compliance batch A (parallel from M45)
 
 - Password reset (web + deep links into native), email change, enable email confirmations (`enable_confirmations = false` today).
 - **Age gate**: date-of-birth at signup, block under-15 (GDPR-K France), declare ratings accordingly in both consoles.
 - Consent: F2 plus a re-consent surface for the rewritten policy.
 
-### M11 — Compliance batch B (after feature freeze — the policy must describe M3–M9)
+### M56 — Compliance batch B (after feature freeze — the policy must describe M47–M54)
 
 - UGC safeguards (Apple 1.2, more binding with public profiles/pebbles + marketplace): `content_reports` table + report affordance on marketplace glyphs, public profiles, and public pebbles; admin moderation queue in `apps/admin`; blocks surfaced; EULA/terms zero-tolerance clause; moderation contact.
 - Privacy-policy rewrite (EN/FR): drop the fictional sections (Therapist, Decisions, Cairns), add marketplace, karma, connections, public profiles, server-side-encrypted notes, drafts, and deletion.
 
-### M12 — Store readiness
+### M57 — Store readiness
 
 - iOS: `PrivacyInfo.xcprivacy` (+ third-party SDK manifests), App Store metadata/screenshots, version/build automation, privacy-strings audit, decide stripping the unused `PebblesWidget` target from the submitted build, App Review notes asserting karma is a closed earned-only economy (no IAP).
 - Android: Play Data Safety form, Apple sign-in via supabase-kt (~100–150 LOC; iOS-created Apple accounts are locked out of Android today), real launcher icon (**needs maintainer design assets**), **flip `WOBBLE_ENABLED` to `false` in `android-release.yml` before any public track** (2026-07-14 decision), store listing, optionally enable R8.
@@ -146,14 +146,14 @@ Sizing per repo triage: S ≤ ~150 LOC, M ≤ ~500, L = cross-app/schema. House 
 
 | Foundation | Consumed by |
 |---|---|
-| F1 `v_pebbles_full` invoker fix | everything that widens any read (M5, M6, M6b, M8) |
-| `connections` + invites + blocks | M6b `private` tier, M7, M8, M11 |
-| Definer-RPC projection pattern (never widen `profiles`/enrichment RLS) | M5, M6, M6b, M8 |
-| `handle` + `public_profile` | M6, M6b share links, M5 invite display |
-| `pebble_drafts` jsonb payload | M3 server drafts and local autosave (same shape) |
-| `achievements` + `check_achievements()` | M4, displayed by M6 |
-| `render_svg` as the cross-user visual | M6b shared pebbles, M8 pair display (avoids glyph/snap RLS entanglement) |
-| `purge_account` | must cover every table above — lands early, extended by each milestone |
+| F1 `v_pebbles_full` invoker fix | everything that widens any read (M49, M50, M51, M53) |
+| `connections` + invites + blocks | M51 `private` tier, M52, M53, M56 |
+| Definer-RPC projection pattern (never widen `profiles`/enrichment RLS) | M49, M50, M51, M53 |
+| `handle` + `public_profile` | M50, M51 share links, M49 invite display |
+| `pebble_drafts` jsonb payload | M47 server drafts and local autosave (same shape) |
+| `achievements` + `check_achievements()` | M48, displayed by M50 |
+| `render_svg` as the cross-user visual | M51 shared pebbles, M53 pair display (avoids glyph/snap RLS entanglement) |
+| `purge_account` | must cover every table above — lands early (M46), extended by each milestone |
 
 ## 5. Decision-log entries to write along the way
 
