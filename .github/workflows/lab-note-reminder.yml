@@ -1,0 +1,18 @@
+# Advisory Lab Note reminder (Ariko slice C1d). Non-blocking: comments on a PR
+# that lacks a valid "## Lab Note" section, and surfaces malformed notes at
+# PR-open instead of loudly at merge time in lab-note.yml. Opt out with the
+# "no-lab-note" label. Needs no ARIKO_INBOX_TOKEN — commenting uses the built-in
+# GITHUB_TOKEN granted by the permissions block below.
+name: lab-note-reminder
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, labeled, unlabeled, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  lab-note-reminder:
+    uses: alexisbohns/ariko/.github/workflows/lab-note-reminder.yml@main
