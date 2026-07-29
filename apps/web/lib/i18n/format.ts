@@ -53,6 +53,35 @@ export function useFormatTime() {
 }
 
 /**
+ * Locale-aware relative time, coarsest sensible unit ("2 hours ago", "il y a
+ * 3 jours"). Used for a draft's last-saved stamp, where the exact minute
+ * matters far less than "recent" vs "a while back".
+ */
+export function useFormatRelativeTime() {
+  const { locale } = useLocale()
+  return useCallback(
+    (date: Date | string | number) => {
+      const value = date instanceof Date ? date : new Date(date)
+      const seconds = (value.getTime() - Date.now()) / 1000
+      const fmt = new Intl.RelativeTimeFormat(locale, { numeric: "auto" })
+      const units: Array<[Intl.RelativeTimeFormatUnit, number]> = [
+        ["year", 31_536_000],
+        ["month", 2_592_000],
+        ["week", 604_800],
+        ["day", 86_400],
+        ["hour", 3_600],
+        ["minute", 60],
+      ]
+      for (const [unit, size] of units) {
+        if (Math.abs(seconds) >= size) return fmt.format(Math.round(seconds / size), unit)
+      }
+      return fmt.format(Math.round(seconds), "second")
+    },
+    [locale],
+  )
+}
+
+/**
  * Peek date format: "SUNDAY 5 APRIL · 10:00".
  * Day/month words from `Intl.DateTimeFormat`; time stays 24h regardless of
  * locale to match the existing visual identity.

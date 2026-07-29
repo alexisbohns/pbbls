@@ -1,13 +1,71 @@
 "use client"
 
-import { useRouter } from "next/navigation"
+import { Suspense, useEffect, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft } from "lucide-react"
+import { ArrowLeft, Loader2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { QuickPebbleEditor } from "@/components/path/QuickPebbleEditor"
+import { useDataProvider } from "@/lib/data/provider-context"
+import type { PebbleDraftPayload } from "@/lib/data/data-provider"
+
+/**
+ * `?draft=<id>` resumes a server draft (M47). Reading search params requires a
+ * Suspense boundary in the App Router, hence the split.
+ */
+function RecordEditor() {
+  const router = useRouter()
+  const { provider } = useDataProvider()
+  const draftId = useSearchParams().get("draft") ?? undefined
+
+  const [payload, setPayload] = useState<PebbleDraftPayload | undefined>(undefined)
+  const [loadingDraft, setLoadingDraft] = useState(draftId !== undefined)
+
+  useEffect(() => {
+    if (!draftId || !provider) return
+    let cancelled = false
+    void (async () => {
+      await Promise.resolve()
+      if (cancelled) return
+      setLoadingDraft(true)
+      try {
+        const draft = await provider.getPebbleDraft(draftId)
+        if (cancelled) return
+        // A draft deleted from another tab/device just opens a blank composer;
+        // there is nothing useful to say about it.
+        setPayload(draft?.payload ?? {})
+        setLoadingDraft(false)
+      } catch (err) {
+        if (cancelled) return
+        console.error("[record] failed to load draft", err)
+        setPayload({})
+        setLoadingDraft(false)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [draftId, provider])
+
+  if (loadingDraft) {
+    return (
+      <div className="flex justify-center py-12" aria-live="polite">
+        <Loader2 className="size-5 animate-spin text-muted-foreground" aria-hidden />
+      </div>
+    )
+  }
+
+  return (
+    <QuickPebbleEditor
+      draftId={draftId}
+      initialPayload={payload}
+      onPebbleCreated={() => router.push("/path")}
+      onDraftSaved={() => router.push("/drafts")}
+    />
+  )
+}
 
 export default function RecordPage() {
-  const router = useRouter()
   const t = useTranslations("record")
 
   return (
@@ -22,7 +80,9 @@ export default function RecordPage() {
         </Link>
         <h1 className="font-heading text-lg font-semibold">{t("srTitle")}</h1>
       </header>
-      <QuickPebbleEditor onPebbleCreated={() => router.push("/path")} />
+      <Suspense fallback={null}>
+        <RecordEditor />
+      </Suspense>
     </section>
   )
 }

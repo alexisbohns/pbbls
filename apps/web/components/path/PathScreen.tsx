@@ -9,6 +9,7 @@ import { WeekHeader } from "@/components/path/WeekHeader"
 import { WeekPager } from "@/components/path/WeekPager"
 import { PathBottomDock } from "@/components/path/PathBottomDock"
 import { PebblePeek } from "@/components/path/PebblePeek"
+import { DraftsEntry } from "@/components/drafts/DraftsEntry"
 import {
   buildWeekRollEntries,
   isoWeekKey,
@@ -120,6 +121,9 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
           onPrev={handlePrev}
           onNext={handleNext}
         />
+      </div>
+      <div className="flex justify-center px-4 pt-2 empty:hidden">
+        <DraftsEntry />
       </div>
       <div className="min-h-0 flex-1">
         <WeekPager

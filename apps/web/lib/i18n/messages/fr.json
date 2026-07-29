@@ -545,7 +545,31 @@
       "uploadFailed": "Échec de l'envoi de la photo. Réessayez."
     }
   },
+  "drafts": {
+    "title": "Brouillons",
+    "back": "Retour au Chemin",
+    "entry": "{count, plural, one {# brouillon} other {# brouillons}}",
+    "untitled": "Encore sans nom",
+    "savedAgo": "Gardé {ago}",
+    "empty": "Aucun brouillon. Tout ce que tu commences à garder apparaît ici.",
+    "loading": "Chargement des brouillons",
+    "loadError": "Impossible de charger tes brouillons. Réessaie.",
+    "deleteAria": "Supprimer le brouillon",
+    "deleteTitle": "Supprimer ce brouillon ?",
+    "deleteDescription": "Il n'est gardé nulle part ailleurs.",
+    "deleteConfirm": "Supprimer",
+    "deleteCancel": "Le garder"
+  },
   "record": {
+    "draft": {
+      "save": "Garder pour plus tard",
+      "saveFailed": "Impossible de garder ce brouillon. Réessaie.",
+      "publishFailed": "Impossible d'enregistrer ce caillou. Réessaie.",
+      "restoreTitle": "On reprend où tu t'étais arrêté ?",
+      "restoreDescription": "Ce que tu écrivais est resté sur cet appareil. La photo n'en fait pas partie, pense à la remettre.",
+      "restoreConfirm": "Reprendre",
+      "restoreDiscard": "Repartir de zéro"
+    },
     "srTitle": "Capturer l'instant",
     "back": "Retour au chemin",
     "editorAria": "Éditeur de galet",

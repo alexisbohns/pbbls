@@ -9,7 +9,7 @@
       "view_card_variant": "large"
     },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-07-29T18:38:36.000Z"
+    "updated_at": "2026-07-29T21:55:00.000Z"
   },
   "nodes": [
     {
@@ -190,11 +190,37 @@
       }
     },
     {
+      "id": "V-pebble-drafts",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Pebble Drafts",
+      "description": "List of unpublished quick captures, most recently saved first. Each row shows a placeholder chip (a draft has no render_svg \u2014 nothing is carved until it publishes), the draft name or a \"no name yet\" fallback, and a relative saved-at stamp; tapping resumes it in the Quick Pebble Editor, and rows are deletable behind a confirm. Deliberately its own surface rather than a section inside the Path timeline, whose week grouping, ripple, bounce and stats all assume real pebbles (M47 design D4). Reached from a Path header entry that only appears when drafts exist. Web (M47, #640): /drafts route.",
+      "status": "development",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ]
+    },
+    {
+      "id": "DM-pebble-drafts",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "pebble_drafts",
+      "description": "Unpublished pebble drafts: owner-scoped rows holding a PARTIAL compose-pebble wire payload as jsonb, with created_at/updated_at (trigger-maintained, the list orders on it). Deliberately a separate table rather than a status column on pebbles \u2014 five NOT NULL semantic columns a draft may all lack, and create_pebble is the schema's only karma emitter, so keeping drafts off it makes zero karma structural (M47 design D1). Payload is intentionally unvalidated; create_pebble stays the validation authority at publish time.",
+      "status": "development",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ]
+    },
+    {
       "id": "V-quick-pebble-editor",
       "project_id": "pebbles",
       "species": "view",
       "title": "Quick Pebble Editor",
-      "description": "Single-page pebble creation editor (V2) combining all enrichment steps. On /path the editor is anchored to the bottom dock — collapsed as a 'What happened?' trigger that opens an overlay bottom-sheet on tap; on /record it auto-opens as the route's primary affordance. Android (M39, #541/#542): full-screen CreatePebbleScreen/EditPebbleScreen hosting the shared PebbleForm with modal bottom-sheet pickers — full-screen surfaces instead of a bottom-sheet dock (M39 design D5). M42 (#581): the shared Android form gains the Photo section — single-photo attach via the system photo picker (client-side compression to 1024px/420px JPEG renditions, upload with compensating deletes), existing-snap row with eager delete_pebble_media removal, and save gates while an upload is pending or failed.",
+      "description": "Single-page pebble creation editor (V2) combining all enrichment steps. On /path the editor is anchored to the bottom dock — collapsed as a 'What happened?' trigger that opens an overlay bottom-sheet on tap; on /record it auto-opens as the route's primary affordance. Android (M39, #541/#542): full-screen CreatePebbleScreen/EditPebbleScreen hosting the shared PebbleForm with modal bottom-sheet pickers — full-screen surfaces instead of a bottom-sheet dock (M39 design D5). M42 (#581): the shared Android form gains the Photo section — single-photo attach via the system photo picker (client-side compression to 1024px/420px JPEG renditions, upload with compensating deletes), existing-snap row with eager delete_pebble_media removal, and save gates while an upload is pending or failed. M47 (#640): the composer gains draft mode \u2014 a \"Save as draft\" action ungated by the publish requirements (name + emotion), so \"just a name\" is a valid quick capture, plus debounced local autosave of the open form as crash insurance (text and ids only, no media) with a restore prompt on return. Resuming a draft hydrates the form from its jsonb payload, dropping souls/collections/glyphs the user no longer owns. Publishing runs the normal compose-pebble path once and deletes the draft row.",
       "status": "live",
       "platforms": [
         "web",
@@ -2327,6 +2353,41 @@
     }
   ],
   "edges": [
+    {
+      "id": "e-V-pebble-drafts-DM-pebble-drafts",
+      "project_id": "pebbles",
+      "source_id": "V-pebble-drafts",
+      "target_id": "DM-pebble-drafts",
+      "edge_type": "displays"
+    },
+    {
+      "id": "e-V-pebble-drafts-V-quick-pebble-editor",
+      "project_id": "pebbles",
+      "source_id": "V-pebble-drafts",
+      "target_id": "V-quick-pebble-editor",
+      "edge_type": "composes"
+    },
+    {
+      "id": "e-V-timeline-V-pebble-drafts",
+      "project_id": "pebbles",
+      "source_id": "V-timeline",
+      "target_id": "V-pebble-drafts",
+      "edge_type": "composes"
+    },
+    {
+      "id": "e-V-quick-pebble-editor-DM-pebble-drafts",
+      "project_id": "pebbles",
+      "source_id": "V-quick-pebble-editor",
+      "target_id": "DM-pebble-drafts",
+      "edge_type": "displays"
+    },
+    {
+      "id": "e-API-delete-account-DM-pebble-drafts",
+      "project_id": "pebbles",
+      "source_id": "API-delete-account",
+      "target_id": "DM-pebble-drafts",
+      "edge_type": "queries"
+    },
     {
       "id": "e-F-record-pebble-V-karma-flash",
       "project_id": "pebbles",

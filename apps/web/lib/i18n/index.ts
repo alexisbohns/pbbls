@@ -21,4 +21,5 @@ export {
   useFormatNumber,
   useFormatTime,
   useFormatPeekDate,
+  useFormatRelativeTime,
 } from "./format"

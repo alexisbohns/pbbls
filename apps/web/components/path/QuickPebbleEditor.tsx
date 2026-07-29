@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   CalendarDays,
   Check,
@@ -15,7 +15,28 @@ import { usePebbles } from "@/lib/data/usePebbles"
 import { useSouls } from "@/lib/data/useSouls"
 import { useCollections } from "@/lib/data/useCollections"
 import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
+import { usePebbleDrafts } from "@/lib/data/usePebbleDrafts"
+import { useDataProvider } from "@/lib/data/provider-context"
+import { useComposerAutosave } from "@/lib/hooks/useComposerAutosave"
+import {
+  applyDraftPayload,
+  buildAutosavePayload,
+  buildDraftPayload,
+  isDraftEmpty,
+  type ComposerState,
+} from "@/components/record/draft-payload"
+import type { PebbleDraftPayload } from "@/lib/data/data-provider"
 import { Button } from "@/components/ui/button"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { ValenceIntensityGrid } from "@/components/record/ValenceIntensityGrid"
 import { CustomizationTile } from "@/components/record/CustomizationTile"
 import { DomainSheet } from "@/components/record/DomainSheet"
@@ -36,6 +57,14 @@ type Valence = -1 | 0 | 1
 
 type QuickPebbleEditorProps = {
   onPebbleCreated?: (pebble: Pebble) => void
+  /**
+   * Resume a server draft (M47). `draftId` is deleted once the pebble
+   * publishes; `initialPayload` hydrates the form. Both come from /drafts.
+   */
+  draftId?: string
+  initialPayload?: PebbleDraftPayload
+  /** Fired after an intentional "save as draft" (the route navigates away). */
+  onDraftSaved?: () => void
 }
 
 function isNow(dateStr: string): boolean {
@@ -45,12 +74,21 @@ function isNow(dateStr: string): boolean {
 
 export function QuickPebbleEditor({
   onPebbleCreated,
+  draftId,
+  initialPayload,
+  onDraftSaved,
 }: QuickPebbleEditorProps) {
   const { addPebble, uploadSnap } = usePebbles()
   const { souls, addSoul } = useSouls()
   const { collections } = useCollections()
   const { glyphs: marks } = useUsableGlyphs()
+  const { provider, loading: storeLoading } = useDataProvider()
+  const { saveDraft, removeDraft } = usePebbleDrafts()
+  // Destructured so effects can depend on the stable callbacks rather than on
+  // the hook's result object, which is a fresh literal every render.
+  const { snapshot, save: saveSnapshot, clear: clearSnapshot } = useComposerAutosave()
   const t = useTranslations("record")
+  const tDraft = useTranslations("record.draft")
   const tGlyph = useTranslations("record.glyph")
   const tPhoto = useTranslations("record.photo")
   const tSouls = useTranslations("record.souls")
@@ -80,6 +118,15 @@ export function QuickPebbleEditor({
   const [snapUploading, setSnapUploading] = useState(false)
   const [visibility, setVisibility] = useState<"private" | "public">("private")
   const [saving, setSaving] = useState(false)
+  // Publish failures were silent before M47 (no catch at all), which made
+  // "delete the draft once it published" unimplementable. Surfaced inline, per
+  // the PebbleEdit precedent.
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [savingDraft, setSavingDraft] = useState(false)
+  // Set once a resumed/created server draft is in play, so publishing knows
+  // which row to delete.
+  const [serverDraftId, setServerDraftId] = useState<string | undefined>(draftId)
+  const [restorePromptOpen, setRestorePromptOpen] = useState(false)
 
   // Dialog/sheet state
   const [dateOpen, setDateOpen] = useState(false)
@@ -119,11 +166,150 @@ export function QuickPebbleEditor({
     }
   }, [snapPreview])
 
+  // -------------------------------------------------------------------------
+  // Drafts (M47). `state` is the single projection of the flat form state; the
+  // server-draft path and the localStorage snapshot both derive from it.
+  // -------------------------------------------------------------------------
+
+  const state = useMemo<ComposerState>(
+    () => ({
+      name,
+      description,
+      happenedAt,
+      intensity,
+      valence,
+      emotionId,
+      domainIds,
+      soulIds,
+      markId,
+      collectionIds,
+      visibility,
+      pendingSnap,
+    }),
+    [
+      name, description, happenedAt, intensity, valence, emotionId,
+      domainIds, soulIds, markId, collectionIds, visibility, pendingSnap,
+    ],
+  )
+
+  const isEmpty = useMemo(() => isDraftEmpty(buildDraftPayload(state)), [state])
+
+  const applyPayload = useCallback(
+    (payload: PebbleDraftPayload) => {
+      // Sanitize against what the user actually still owns (D7): a soul or
+      // glyph deleted behind the draft's back costs a chip, not an opaque FK
+      // error at publish time.
+      const next = applyDraftPayload(payload, {
+        soulIds: new Set(souls.map((s) => s.id)),
+        collectionIds: new Set(collections.map((c) => c.id)),
+        markIds: new Set(marks.map((m) => m.id)),
+      })
+      setName(next.name)
+      setDescription(next.description)
+      setHappenedAt(next.happenedAt)
+      setIntensity(next.intensity)
+      setValence(next.valence)
+      setEmotionId(next.emotionId)
+      setDomainIds(next.domainIds)
+      setSoulIds(next.soulIds)
+      setMarkId(next.markId)
+      setCollectionIds(next.collectionIds)
+      setVisibility(next.visibility)
+      setPendingSnap(next.pendingSnap)
+    },
+    [souls, collections, marks],
+  )
+
+  // Hydrate a resumed server draft. Gated on the store being loaded, otherwise
+  // sanitizing would run against empty sets and drop every reference. Keyed by
+  // draft id so it runs once per resumed draft.
+  const hydratedDraftRef = useRef<string | undefined>(undefined)
+  useEffect(() => {
+    if (!initialPayload || !draftId || storeLoading) return
+    if (hydratedDraftRef.current === draftId) return
+    hydratedDraftRef.current = draftId
+    applyPayload(initialPayload)
+  }, [initialPayload, draftId, storeLoading, applyPayload])
+
+  // A restored draft's photo is already in Storage but has no `blob:` preview —
+  // mint a signed URL so the photo tile shows it (mirrors the edit screen).
+  useEffect(() => {
+    if (!provider || !pendingSnap || snapPreview) return
+    let cancelled = false
+    void (async () => {
+      const url = await provider.getDraftSnapUrl(pendingSnap.storage_path)
+      if (!cancelled && url) setSnapPreview(url)
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [provider, pendingSnap, snapPreview])
+
+  // Offer to restore the local snapshot — but never on top of a resumed server
+  // draft, which is the more deliberate of the two. Asked once per mount: the
+  // snapshot is rewritten as the user types, so re-prompting on every change
+  // would be maddening.
+  const askedToRestoreRef = useRef(false)
+  const restorableRef = useRef<PebbleDraftPayload | null>(null)
+  useEffect(() => {
+    if (askedToRestoreRef.current || draftId || storeLoading) return
+    askedToRestoreRef.current = true
+    if (!snapshot || isDraftEmpty(snapshot)) return
+    restorableRef.current = snapshot
+    setRestorePromptOpen(true)
+  }, [snapshot, draftId, storeLoading])
+
+  // Autosave the open composer, debounced inside the hook. Held off while the
+  // restore prompt is up so the pending answer cannot be overwritten first.
+  useEffect(() => {
+    if (restorePromptOpen || isEmpty) return
+    saveSnapshot(buildAutosavePayload(state))
+  }, [state, isEmpty, restorePromptOpen, saveSnapshot])
+
+  const handleRestore = useCallback(() => {
+    const restorable = restorableRef.current
+    if (restorable) applyPayload(restorable)
+    setRestorePromptOpen(false)
+  }, [applyPayload])
+
+  const handleDiscardSnapshot = useCallback(() => {
+    clearSnapshot()
+    setRestorePromptOpen(false)
+  }, [clearSnapshot])
+
+  /** Intentional "save as draft" — ungated, unlike publishing (D5). */
+  const handleSaveDraft = useCallback(async () => {
+    if (isEmpty || savingDraft || saving || snapUploading) return
+    setSavingDraft(true)
+    setSubmitError(null)
+    try {
+      const saved = await saveDraft(buildDraftPayload(state), serverDraftId)
+      setServerDraftId(saved.id)
+      // The snapshot exists to survive a crash in the open composer; once the
+      // draft is on the server it is redundant.
+      clearSnapshot()
+      resetForm()
+      titleInputRef.current?.blur()
+      onDraftSaved?.()
+    } catch (err) {
+      console.error("[quick-pebble-editor] draft save failed", err)
+      setSubmitError(tDraft("saveFailed"))
+    } finally {
+      setSavingDraft(false)
+    }
+  }, [
+    isEmpty, savingDraft, saving, snapUploading, state, serverDraftId,
+    saveDraft, clearSnapshot, resetForm, onDraftSaved, tDraft,
+  ])
+
   const handleSubmit = useCallback(async () => {
     if (!name.trim() || !emotionId || saving || snapUploading) return
     setSaving(true)
+    setSubmitError(null)
 
     try {
+      // A resumed draft keeps its captured timestamp (D6): only a genuinely
+      // "now" value gets re-stamped at submit.
       const finalHappenedAt = isNow(happenedAt) ? new Date().toISOString() : happenedAt
 
       const input = {
@@ -144,9 +330,27 @@ export function QuickPebbleEditor({
 
       const pebble = await addPebble(input)
 
+      // The pebble exists (`addPebble` resolves on soft-success too, keyed off
+      // pebble_id), so the draft has served its purpose. A failure to delete
+      // must not fail the publish — worst case a stale draft is left behind.
+      if (serverDraftId) {
+        try {
+          await removeDraft(serverDraftId)
+        } catch (err) {
+          console.warn("[quick-pebble-editor] draft cleanup after publish failed", err)
+        }
+        setServerDraftId(undefined)
+      }
+      clearSnapshot()
+
       resetForm()
       titleInputRef.current?.blur()
       onPebbleCreated?.(pebble)
+    } catch (err) {
+      // Before M47 this was swallowed entirely: no catch, no toast, form left
+      // as-is with no explanation.
+      console.error("[quick-pebble-editor] create failed", err)
+      setSubmitError(tDraft("publishFailed"))
     } finally {
       setSaving(false)
     }
@@ -154,6 +358,7 @@ export function QuickPebbleEditor({
     name, description, happenedAt, intensity, valence, visibility,
     emotionId, soulIds, domainIds, markId, collectionIds, pendingSnap,
     saving, snapUploading, addPebble, resetForm, onPebbleCreated,
+    serverDraftId, removeDraft, clearSnapshot, tDraft,
   ])
 
   const toggleSoul = useCallback((id: string) => {
@@ -341,21 +546,62 @@ export function QuickPebbleEditor({
           }}
         />
 
+        {submitError && (
+          <p
+            role="alert"
+            className="mb-3 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive"
+          >
+            {submitError}
+          </p>
+        )}
+
         {/* Footer */}
         <div className="flex items-center justify-between">
           <VisibilityPicker value={visibility} onChange={setVisibility} />
-          <Button
-            variant="default"
-            size="icon"
-            disabled={!name.trim() || !emotionId || saving || snapUploading}
-            onClick={() => void handleSubmit()}
-            aria-label={t("save")}
-            className="size-9 rounded-full"
-          >
-            <Check className="size-5" aria-hidden />
-          </Button>
+          <div className="flex items-center gap-2">
+            {/* Quick capture: ungated, unlike publishing (D5). "Just a name" —
+                or just a glyph — is a valid draft. */}
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={isEmpty || saving || savingDraft || snapUploading}
+              onClick={() => void handleSaveDraft()}
+              className="text-muted-foreground"
+            >
+              {tDraft("save")}
+            </Button>
+            <Button
+              variant="default"
+              size="icon"
+              disabled={!name.trim() || !emotionId || saving || snapUploading}
+              onClick={() => void handleSubmit()}
+              aria-label={t("save")}
+              className="size-9 rounded-full"
+            >
+              <Check className="size-5" aria-hidden />
+            </Button>
+          </div>
         </div>
       </section>
+
+      {/* Crash-insurance restore. Only offered when not already resuming a
+          server draft, and only once per mount. */}
+      <AlertDialog open={restorePromptOpen} onOpenChange={setRestorePromptOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{tDraft("restoreTitle")}</AlertDialogTitle>
+            <AlertDialogDescription>{tDraft("restoreDescription")}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleDiscardSnapshot}>
+              {tDraft("restoreDiscard")}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleRestore}>
+              {tDraft("restoreConfirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Dialogs / sheets (unchanged) */}
       <DatePickerDialog
