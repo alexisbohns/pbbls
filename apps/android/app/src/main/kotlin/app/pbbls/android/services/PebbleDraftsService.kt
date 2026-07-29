@@ -123,16 +123,16 @@ class PebbleDraftsService(
             ).decodeAs()
 }
 
-/**
- * `user_id` is explicitly encoded so the RLS `with check` sees it; `payload`
- * rides along as the nested jsonb.
- */
-/** Minimal projection for the count query. */
+/** Minimal projection for the count query — no payloads pulled. */
 @Serializable
 private data class DraftIdRow(
     val id: String,
 )
 
+/**
+ * `user_id` is explicitly encoded so the RLS `with check` sees it; `payload`
+ * rides along as the nested jsonb.
+ */
 @Serializable
 private data class DraftUpsertPayload(
     val id: String,
