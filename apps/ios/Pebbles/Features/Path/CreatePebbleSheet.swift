@@ -84,6 +84,10 @@ struct CreatePebbleSheet: View {
             }
             hydrateOrOfferRestore()
         }
+        .onChange(of: refs.hasLoaded) { _, _ in
+            // `.task` may have run before the reference fetch settled.
+            hydrateOrOfferRestore()
+        }
         .onChange(of: draftPayload) { _, newValue in
             // Debounced inside ComposerAutosave. Held off while the restore
             // prompt is up so the pending answer is not overwritten first.
@@ -224,14 +228,12 @@ struct CreatePebbleSheet: View {
 
 // MARK: - Drafts (M47)
 
-/// The **server** draft (`pebble_drafts`, an intentional "save as draft") and the
-/// **local** snapshot (crash insurance for the open composer) share one payload
-/// shape and nothing else. Design:
+/// The **server** draft (an intentional "save as draft") and the **local**
+/// snapshot (crash insurance) share one payload shape and nothing else. Design:
 /// docs/superpowers/specs/2026-07-29-drafts-and-autosave-design.md.
 extension CreatePebbleSheet {
 
-    /// The form projected onto the wire payload. Drives both autosave and the
-    /// server draft, so the two can never disagree about the shape.
+    /// Drives both autosave and the server draft, so the two cannot disagree.
     fileprivate var draftPayload: PebbleDraftPayload {
         PebbleDraftPayload(from: draft, formSnap: snaps?.formSnap, userId: currentUserId)
     }
@@ -240,8 +242,8 @@ extension CreatePebbleSheet {
         draft.isSavableAsDraft(formSnap: snaps?.formSnap, userId: currentUserId)
     }
 
-    /// Souls and collections are user-owned and deletable, so a resumed draft may
-    /// reference ones that are gone. Glyphs are verified server-side below.
+    /// Souls/collections are deletable, so a draft can outlive them. Glyphs are
+    /// verified server-side below.
     fileprivate var knownIds: PebbleDraft.KnownIds {
         PebbleDraft.KnownIds(
             soulIds: Set(refs.souls.map(\.id)),
@@ -249,10 +251,13 @@ extension CreatePebbleSheet {
         )
     }
 
-    /// Resuming a server draft wins over the local snapshot — it is the more
-    /// deliberate of the two, so we never prompt on top of it.
+    /// Resuming a server draft wins over the local snapshot — the more deliberate
+    /// of the two, so we never prompt on top of it.
+    /// Gated on `refs.hasLoaded` (#647): hydrating before reference data arrives
+    /// would sanitize against empty sets and silently drop every soul and
+    /// collection — the exact failure D7 exists to prevent.
     fileprivate func hydrateOrOfferRestore() {
-        guard !hasCheckedSnapshot else { return }
+        guard !hasCheckedSnapshot, refs.hasLoaded else { return }
         hasCheckedSnapshot = true
 
         if let resuming {
@@ -284,8 +289,8 @@ extension CreatePebbleSheet {
     }
 
     /// Drop a glyph the user can no longer use, and load the one they can for the
-    /// form's preview (design D7). `can_use_glyph` is the predicate
-    /// `create_pebble` enforces, so passing here means publish cannot 42501.
+    /// form's preview (D7). `can_use_glyph` is what `create_pebble` enforces, so
+    /// passing here means publish cannot 42501.
     fileprivate func verifyGlyph() async {
         guard let glyphId = draft.glyphId, let userId = currentUserId else { return }
         do {
@@ -318,8 +323,7 @@ extension CreatePebbleSheet {
     }
 
     /// Intentional "save as draft". Deliberately does NOT run
-    /// `snaps.cancelAndCleanup` — that would delete from Storage the very object
-    /// the draft references (design D3).
+    /// `snaps.cancelAndCleanup`, which would delete the snap the draft references.
     fileprivate func saveAsDraft() async {
         guard isSavableAsDraft else { return }
         guard let userId = currentUserId else {
@@ -345,9 +349,8 @@ extension CreatePebbleSheet {
         }
     }
 
-    /// Publishing consumed the draft. Runs on the soft-success path too: a 5xx
-    /// carrying a `pebble_id` still created the pebble, so leaving the draft
-    /// would duplicate it in the list.
+    /// Publishing consumed the draft. Runs on soft-success too: a 5xx carrying a
+    /// `pebble_id` still created the pebble, so a kept draft would duplicate it.
     fileprivate func consumeDraftAfterPublish() async {
         autosave?.clear()
         guard let serverDraftId else { return }
