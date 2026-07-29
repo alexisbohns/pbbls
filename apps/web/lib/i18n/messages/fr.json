@@ -92,7 +92,14 @@
     "appearance": "Apparence",
     "theme": "Thème",
     "language": "Langue",
-    "colorWorld": "Univers de couleurs"
+    "colorWorld": "Univers de couleurs",
+    "account": "Compte",
+    "deleteAccount": "Supprimer le compte",
+    "deleteAccountTitle": "Supprimer votre compte ?",
+    "deleteAccountBody": "Votre compte et tout ce qu'il contient seront supprimés définitivement : galets, photos, âmes, collections, glyphes et karma. Les glyphes achetés par d'autres personnes restent disponibles pour elles, sans votre nom. Cette action est irréversible.",
+    "deleteAccountConfirm": "Supprimer définitivement",
+    "deleteAccountDeleting": "Suppression…",
+    "deleteAccountError": "Impossible de supprimer votre compte. Rien n'a été supprimé. Veuillez réessayer."
   },
   "errors": {
     "title": "Une erreur est survenue",

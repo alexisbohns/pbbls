@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/data/auth-context"
@@ -15,9 +16,11 @@ import { ProvidersSection } from "@/components/settings/ProvidersSection"
 import { PasswordSection } from "@/components/settings/PasswordSection"
 import { LegalSection } from "@/components/settings/LegalSection"
 import { AppearanceSection } from "@/components/settings/AppearanceSection"
+import { DeleteAccountSection } from "@/components/settings/DeleteAccountSection"
 
 export default function SettingsPage() {
   const { user, profile, isAuthenticated, isLoading, updateProfile, updatePassword } = useAuth()
+  const router = useRouter()
   const { glyphs } = useUsableGlyphs()
   const t = useTranslations("settings")
   const tProfile = useTranslations("profile")
@@ -107,6 +110,7 @@ export default function SettingsPage() {
           {showPassword && <PasswordSection value={password} onChange={setPassword} />}
           <LegalSection />
           <AppearanceSection />
+          <DeleteAccountSection onDeleted={() => router.push("/")} />
         </div>
       </section>
     </PageLayout>

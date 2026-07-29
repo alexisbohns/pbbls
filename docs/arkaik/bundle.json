@@ -9,7 +9,7 @@
       "view_card_variant": "large"
     },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-07-29T18:24:23.000Z"
+    "updated_at": "2026-07-29T18:38:36.000Z"
   },
   "nodes": [
     {
@@ -4504,6 +4504,13 @@
       "source_id": "API-delete-account",
       "target_id": "DM-log-reactions",
       "edge_type": "queries"
+    },
+    {
+      "id": "e-V-settings-API-delete-account",
+      "project_id": "pebbles",
+      "source_id": "V-settings",
+      "target_id": "API-delete-account",
+      "edge_type": "calls"
     }
   ]
 }
