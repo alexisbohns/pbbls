@@ -841,6 +841,52 @@ export type Database = {
           },
         ]
       }
+      pebble_drafts: {
+        Row: {
+          created_at: string
+          id: string
+          payload: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          payload?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pebble_drafts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pebble_drafts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pebble_drafts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       pebble_souls: {
         Row: {
           pebble_id: string
