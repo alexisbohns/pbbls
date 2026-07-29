@@ -164,6 +164,8 @@ export interface DataProvider {
   // None of these touch karma: `create_pebble` is the only emitter and a draft
   // never reaches it.
   listPebbleDrafts(): Promise<PebbleDraftRecord[]>
+  /** Cheap count for the Path entry badge — selects `id` only, no payloads. */
+  countPebbleDrafts(): Promise<number>
   getPebbleDraft(id: string): Promise<PebbleDraftRecord | undefined>
   savePebbleDraft(payload: PebbleDraftPayload, id?: string): Promise<PebbleDraftRecord>
   deletePebbleDraft(id: string): Promise<void>

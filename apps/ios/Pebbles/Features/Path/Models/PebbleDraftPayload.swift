@@ -58,22 +58,15 @@ struct PebbleDraftPayload: Codable, Equatable {
         case snaps
     }
 
-    /// Same `.withInternetDateTime` convention as `PebbleCreatePayload`. Sharing
-    /// it is load-bearing: a draft encoded one way and published the other would
-    /// drift by the offset format alone.
-    private static let iso8601: ISO8601DateFormatter = {
-        let formatter = ISO8601DateFormatter()
-        formatter.formatOptions = [.withInternetDateTime]
-        return formatter
-    }()
-
     /// `encodeIfPresent` throughout — that is the "omit unset keys" rule.
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(name, forKey: .name)
         try container.encodeIfPresent(description, forKey: .description)
+        // Whole seconds, matching PebbleCreatePayload byte-for-byte so the publish
+        // path is unchanged and the other surfaces parse it happily.
         try container.encodeIfPresent(
-            happenedAt.map { Self.iso8601.string(from: $0) }, forKey: .happenedAt
+            happenedAt.map { ISO8601Flexible.string(from: $0) }, forKey: .happenedAt
         )
         try container.encodeIfPresent(intensity, forKey: .intensity)
         try container.encodeIfPresent(positiveness, forKey: .positiveness)
@@ -87,14 +80,17 @@ struct PebbleDraftPayload: Codable, Equatable {
     }
 
     /// Tolerant by design: a payload written by another surface (or an older
-    /// build) must never fail to decode. A `happened_at` we cannot parse is
-    /// dropped rather than thrown, leaving hydration to fall back to "now".
+    /// build) must never fail to decode. `happened_at` goes through
+    /// `ISO8601Flexible` because web writes milliseconds and Postgres writes
+    /// microseconds — a fixed-precision formatter silently nils both (#649). A
+    /// genuinely unparseable value is still dropped rather than thrown, leaving
+    /// hydration to fall back to "now".
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         name = try container.decodeIfPresent(String.self, forKey: .name)
         description = try container.decodeIfPresent(String.self, forKey: .description)
         happenedAt = try container.decodeIfPresent(String.self, forKey: .happenedAt)
-            .flatMap { Self.iso8601.date(from: $0) }
+            .flatMap { ISO8601Flexible.parse($0) }
         intensity = try container.decodeIfPresent(Int.self, forKey: .intensity)
         positiveness = try container.decodeIfPresent(Int.self, forKey: .positiveness)
         visibility = try container.decodeIfPresent(String.self, forKey: .visibility)

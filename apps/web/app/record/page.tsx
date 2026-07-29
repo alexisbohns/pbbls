@@ -19,7 +19,11 @@ function RecordEditor() {
   const draftId = useSearchParams().get("draft") ?? undefined
 
   const [payload, setPayload] = useState<PebbleDraftPayload | undefined>(undefined)
-  const [loadingDraft, setLoadingDraft] = useState(draftId !== undefined)
+
+  // Derived, not stored: a `loadingDraft` state variable had to be cleared from
+  // inside the effect for every early return, and the branch where `provider` is
+  // still null had no such return — so the spinner ran forever.
+  const loadingDraft = draftId !== undefined && provider !== null && payload === undefined
 
   useEffect(() => {
     if (!draftId || !provider) return
@@ -27,19 +31,17 @@ function RecordEditor() {
     void (async () => {
       await Promise.resolve()
       if (cancelled) return
-      setLoadingDraft(true)
       try {
         const draft = await provider.getPebbleDraft(draftId)
         if (cancelled) return
         // A draft deleted from another tab/device just opens a blank composer;
-        // there is nothing useful to say about it.
+        // there is nothing useful to say about it. `{}` also resolves the
+        // spinner, which `undefined` would not.
         setPayload(draft?.payload ?? {})
-        setLoadingDraft(false)
       } catch (err) {
         if (cancelled) return
         console.error("[record] failed to load draft", err)
         setPayload({})
-        setLoadingDraft(false)
       }
     })()
     return () => {
