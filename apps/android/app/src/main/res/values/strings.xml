@@ -96,6 +96,12 @@
     <string name="settings_providers_header">Providers</string>
     <string name="settings_legal_header">Legal</string>
     <string name="settings_save_error">Couldn\'t save your changes. Please try again.</string>
+    <string name="settings_account_header">Account</string>
+    <string name="settings_delete_account">Delete account</string>
+    <string name="settings_delete_account_title">Delete your account?</string>
+    <string name="settings_delete_account_message">This permanently deletes your account and everything in it: pebbles, snaps, souls, collections, glyphs and karma. Glyphs other pebblers bought stay available to them, without your name attached. This cannot be undone.</string>
+    <string name="settings_delete_account_confirm">Delete forever</string>
+    <string name="settings_delete_account_error">We couldn\'t delete your account. Nothing was removed. Please try again.</string>
 
     <!-- ==== Souls management (M41 sub-project D). "Souls" is product vocabulary
          but localizes ("Âmes"), unlike "Pebbles". ==== -->

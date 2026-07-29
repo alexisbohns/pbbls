@@ -89,6 +89,12 @@
     <string name="settings_providers_header">Fournisseurs</string>
     <string name="settings_legal_header">Mentions légales</string>
     <string name="settings_save_error">Impossible d\'enregistrer vos modifications. Veuillez réessayer.</string>
+    <string name="settings_account_header">Compte</string>
+    <string name="settings_delete_account">Supprimer le compte</string>
+    <string name="settings_delete_account_title">Supprimer votre compte ?</string>
+    <string name="settings_delete_account_message">Votre compte et tout ce qu\'il contient seront supprimés définitivement : galets, photos, âmes, collections, glyphes et karma. Les glyphes achetés par d\'autres personnes restent disponibles pour elles, sans votre nom. Cette action est irréversible.</string>
+    <string name="settings_delete_account_confirm">Supprimer définitivement</string>
+    <string name="settings_delete_account_error">Impossible de supprimer votre compte. Rien n\'a été supprimé. Veuillez réessayer.</string>
 
     <!-- ==== Gestion des âmes (M41 sous-projet D). -->
     <string name="souls_title">Âmes</string>

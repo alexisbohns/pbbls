@@ -14,7 +14,8 @@ import app.pbbls.android.theme.PebblesTypography
  * Destructive-action confirmation for the profile surfaces — the same chrome
  * as PathScreen's pebble-delete dialog (M39 D8 idiom) with the title/message
  * parameterized, because souls and pebbles carry different consequences
- * ("linked pebbles stay" vs "can't be undone").
+ * ("linked pebbles stay" vs "can't be undone"). `confirmText` defaults to the
+ * generic Delete label; account deletion passes its own.
  */
 @Composable
 internal fun ConfirmDeleteDialog(
@@ -22,6 +23,7 @@ internal fun ConfirmDeleteDialog(
     message: String,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
+    confirmText: String? = null,
 ) {
     val system = PebblesTheme.colors.system
     val accent = PebblesTheme.colors.accent
@@ -45,7 +47,7 @@ internal fun ConfirmDeleteDialog(
         confirmButton = {
             TextButton(onClick = onConfirm) {
                 PebblesText(
-                    text = stringResource(R.string.pebble_delete),
+                    text = confirmText ?: stringResource(R.string.pebble_delete),
                     style = PebblesTypography.buttonLabel,
                     color = PebblesDestructive,
                 )
@@ -65,7 +67,10 @@ internal fun ConfirmDeleteDialog(
 
 /** Delete-failure notice — mirrors PathScreen's single-action error dialog. */
 @Composable
-internal fun DeleteErrorDialog(onDismiss: () -> Unit) {
+internal fun DeleteErrorDialog(
+    onDismiss: () -> Unit,
+    message: String? = null,
+) {
     val system = PebblesTheme.colors.system
     val accent = PebblesTheme.colors.accent
     AlertDialog(
@@ -73,7 +78,7 @@ internal fun DeleteErrorDialog(onDismiss: () -> Unit) {
         containerColor = system.background,
         text = {
             PebblesText(
-                text = stringResource(R.string.pebble_delete_error),
+                text = message ?: stringResource(R.string.pebble_delete_error),
                 style = PebblesTypography.body,
                 color = system.secondary,
             )

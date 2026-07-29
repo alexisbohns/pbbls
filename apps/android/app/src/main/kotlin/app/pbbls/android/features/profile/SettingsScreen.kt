@@ -44,7 +44,10 @@ import app.pbbls.android.features.glyph.models.GlyphStroke
 import app.pbbls.android.features.glyph.views.GlyphView
 import app.pbbls.android.features.glyph.views.GlyphViewCase
 import app.pbbls.android.features.path.create.pickers.GlyphPickerSheet
+import app.pbbls.android.features.profile.components.ConfirmDeleteDialog
+import app.pbbls.android.features.profile.components.DeleteErrorDialog
 import app.pbbls.android.services.LocalProfileService
+import app.pbbls.android.services.LocalSupabaseService
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesListSection
 import app.pbbls.android.theme.PebblesScreen
@@ -53,6 +56,7 @@ import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar
 import app.pbbls.android.theme.PebblesTopBarTextButton
 import app.pbbls.android.theme.PebblesTypography
+import io.github.jan.supabase.functions.functions
 import kotlinx.coroutines.launch
 
 private const val TAG = "settings"
@@ -78,6 +82,7 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
 ) {
     val profileService = LocalProfileService.current
+    val supabase = LocalSupabaseService.current
     val system = PebblesTheme.colors.system
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -88,6 +93,9 @@ fun SettingsScreen(
     var isSaving by remember { mutableStateOf(false) }
     var showSaveError by remember { mutableStateOf(false) }
     var isPresentingGlyphPicker by remember { mutableStateOf(false) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+    var isDeleting by remember { mutableStateOf(false) }
+    var showDeleteError by remember { mutableStateOf(false) }
 
     val isDirty =
         settingsIsDirty(
@@ -99,7 +107,7 @@ fun SettingsScreen(
         )
     val currentStrokes = pickedGlyph?.strokes ?: initialGlyphStrokes
 
-    BackHandler(enabled = !isSaving) { onDismiss() }
+    BackHandler(enabled = !isSaving && !isDeleting) { onDismiss() }
 
     fun save() {
         if (!isDirty || isSaving) return
@@ -121,6 +129,27 @@ fun SettingsScreen(
                 Log.e(TAG, "settings save failed", e)
                 showSaveError = true
                 isSaving = false
+            }
+        }
+    }
+
+    /**
+     * Full erasure via the delete-account edge function (purge + storage +
+     * auth user), then a local sign-out: the server session is already gone,
+     * and `sessionStatus` dropping unmounts the authed NavHost to Welcome —
+     * no navigation code needed here.
+     */
+    fun deleteAccount() {
+        if (isDeleting) return
+        scope.launch {
+            isDeleting = true
+            try {
+                supabase.client.functions.invoke("delete-account")
+                supabase.signOut()
+            } catch (e: Exception) {
+                Log.e(TAG, "account deletion failed", e)
+                showDeleteError = true
+                isDeleting = false
             }
         }
     }
@@ -346,7 +375,58 @@ fun SettingsScreen(
                         },
                     ),
             )
+
+            // Store-mandated account deletion entry (Play hard blocker;
+            // parity with iOS Settings → Account).
+            PebblesListSection(
+                header = stringResource(R.string.settings_account_header),
+                rows =
+                    listOf(
+                        {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .clickable(enabled = !isDeleting) { showDeleteConfirm = true },
+                            ) {
+                                PebblesText(
+                                    text = stringResource(R.string.settings_delete_account),
+                                    style = PebblesTypography.body,
+                                    color = PebblesDestructive,
+                                )
+                                Spacer(Modifier.weight(1f))
+                                if (isDeleting) {
+                                    CircularProgressIndicator(
+                                        color = PebblesDestructive,
+                                        strokeWidth = 2.dp,
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                }
+                            }
+                        },
+                    ),
+            )
         }
+    }
+
+    if (showDeleteConfirm) {
+        ConfirmDeleteDialog(
+            title = stringResource(R.string.settings_delete_account_title),
+            message = stringResource(R.string.settings_delete_account_message),
+            confirmText = stringResource(R.string.settings_delete_account_confirm),
+            onConfirm = {
+                showDeleteConfirm = false
+                deleteAccount()
+            },
+            onDismiss = { showDeleteConfirm = false },
+        )
+    }
+    if (showDeleteError) {
+        DeleteErrorDialog(
+            message = stringResource(R.string.settings_delete_account_error),
+            onDismiss = { showDeleteError = false },
+        )
     }
 
     if (isPresentingGlyphPicker) {
