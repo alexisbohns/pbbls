@@ -279,3 +279,14 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** Reads through `v_pebbles_full` now depend on base-table RLS. This is safe by construction: `emotions`/`domains` are `using (true)`, and `can_use_glyph` (20260712000000) gates pebble glyphs to own ∪ system ∪ entitled, a strict subset of what `glyphs_select` permits — so no glyph disappears. `service_role` still bypasses RLS, so admin and analytics reads are unaffected. Client-side `.eq("user_id", …)` filters become redundant but stay harmless. A view audit at the time of this entry found no other unprotected view; `v_emotions_with_palette` remains definer-rights but exposes only `using (true)` reference data.
 - **Supersedes / Superseded-by:** Generalises the one-off `v_ripple` hotfix (#442) into a standing rule for all views.
 - **Refs:** #616, #442, `packages/supabase/supabase/migrations/20260729000000_v_pebbles_full_security_invoker.sql`, `20260516000001_v_ripple_security_filter.sql`, `apps/web/lib/data/supabase-provider.ts`.
+
+## 2026-07-29 — Offline is a non-goal on every surface (#620)
+
+- **Status:** taken
+- **Scope:** docs, webapp, ios, android
+- **Context:** The store-launch parity audit (§4.6) flagged that offline is a non-goal on every surface but was recorded nowhere, so it kept getting re-litigated. This matters now because the drafts + local-autosave milestone (roadmap M3) introduces a local snapshot that could be misread as offline capability.
+- **Decision:** Offline is **not** a goal on web, iOS, or Android. Local autosave and the server `pebble_drafts` table do not change that: the local snapshot is crash/offline **insurance for the open composer** only (no merge logic, no cross-device local sync, cleared on publish or server-draft save), not an offline mode. The web service worker keeps Supabase requests **`NetworkOnly`** — the cached-401 precedent (`apps/web/app/sw.ts`) stays untouched.
+- **Why:** A cached-401-after-sign-in bug already proved that caching Supabase responses is unsafe; treating offline as explicitly out of scope keeps that fix intact and stops future work from reintroducing response caching in the name of "offline support."
+- **Consequences:** Do not add a Supabase caching strategy to `sw.ts`, or local-first sync logic to autosave/drafts, without first superseding this entry. Composer crash/offline insurance stays local-only and single-device.
+- **Supersedes / Superseded-by:** —
+- **Refs:** #620, `docs/superpowers/specs/2026-07-28-store-launch-roadmap.md` (§4.6, F5, M3), `apps/web/app/sw.ts`.
