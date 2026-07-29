@@ -24,6 +24,9 @@ struct SettingsSheet: View {
     @State private var saveError: String?
     @State private var presentedLegalDoc: LegalDoc?
     @State private var isPresentingGlyphPicker = false
+    @State private var isPresentingDeleteConfirm = false
+    @State private var isDeleting = false
+    @State private var deleteError: String?
     @FocusState private var focusedField: Field?
 
     private enum Field: Hashable { case displayName, newPassword }
@@ -79,6 +82,7 @@ struct SettingsSheet: View {
                     }
                 }
                 legalSection
+                deleteAccountSection
             }
             .pebblesList()
             .scrollDismissesKeyboard(.interactively)
@@ -114,6 +118,30 @@ struct SettingsSheet: View {
             .sheet(item: $presentedLegalDoc) { doc in
                 LegalDocumentSheet(url: doc.url)
                     .ignoresSafeArea()
+            }
+            .confirmationDialog(
+                "Delete your account?",
+                isPresented: $isPresentingDeleteConfirm,
+                titleVisibility: .visible
+            ) {
+                Button("Delete forever", role: .destructive) {
+                    Task { await deleteAccount() }
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This permanently deletes your account and everything in it: pebbles, snaps, souls, collections, glyphs and karma. Glyphs other pebblers bought stay available to them, without your name attached. This cannot be undone.")
+            }
+            .alert(
+                "Couldn't delete",
+                isPresented: Binding(
+                    get: { deleteError != nil },
+                    set: { if !$0 { deleteError = nil } }
+                ),
+                presenting: deleteError
+            ) { _ in
+                Button("OK", role: .cancel) { deleteError = nil }
+            } message: { message in
+                Text(message)
             }
         }
     }
@@ -244,6 +272,46 @@ struct SettingsSheet: View {
             .pebblesListRow(position: .bottom)
         } header: {
             Text("Legal").pebblesSectionHeader()
+        }
+    }
+
+    /// Store-mandated account deletion entry (Apple 5.1.1(v): easy to find).
+    private var deleteAccountSection: some View {
+        Section {
+            Button(role: .destructive) {
+                isPresentingDeleteConfirm = true
+            } label: {
+                HStack {
+                    Label("Delete account", systemImage: "trash")
+                        .foregroundStyle(.red)
+                    Spacer()
+                    if isDeleting {
+                        ProgressView()
+                    }
+                }
+            }
+            .buttonStyle(.plain)
+            .disabled(isDeleting)
+            .pebblesListRow(position: .only)
+        } header: {
+            Text("Account").pebblesSectionHeader()
+        }
+    }
+
+    /// Full erasure via the delete-account edge function (purge + storage +
+    /// auth user), then a local sign-out: the server session is already gone,
+    /// and the session stream flipping to signed-out swaps RootView to Welcome.
+    private func deleteAccount() async {
+        guard !isDeleting else { return }
+        isDeleting = true
+        do {
+            try await supabase.client.functions.invoke("delete-account")
+            await supabase.signOut()
+            dismiss()
+        } catch {
+            logger.error("account deletion failed: \(error.localizedDescription, privacy: .private)")
+            deleteError = String(localized: "We couldn't delete your account. Nothing was removed. Please try again.")
+            isDeleting = false
         }
     }
 
