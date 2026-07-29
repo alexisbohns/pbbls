@@ -28,8 +28,10 @@ class PebbleDraftPayloadTest {
     private val domainA = "44444444-4444-4444-4444-444444444444"
     private val glyphA = "55555555-5555-5555-5555-555555555555"
 
-    private fun keysOf(payload: PebbleDraftPayload): Set<String> =
-        json.parseToJsonElement(json.encodeToString(payload)).jsonObject.keys
+    private fun keysOf(payload: PebbleDraftPayload): Set<String> {
+        val encoded = json.encodeToString(payload)
+        return json.parseToJsonElement(encoded).jsonObject.keys
+    }
 
     // --- omitted keys ---------------------------------------------------------
 
@@ -42,12 +44,20 @@ class PebbleDraftPayloadTest {
         assertTrue(keys.contains("visibility"))
 
         // Absent, not null: nothing has been set.
-        for (key in
-            listOf(
-                "name", "description", "emotion_id", "domain_ids", "soul_ids",
-                "collection_ids", "glyph_id", "snaps", "intensity", "positiveness",
+        val optional =
+            setOf(
+                "name",
+                "description",
+                "emotion_id",
+                "domain_ids",
+                "soul_ids",
+                "collection_ids",
+                "glyph_id",
+                "snaps",
+                "intensity",
+                "positiveness",
             )
-        ) {
+        for (key in optional) {
             assertFalse("$key should be omitted, not encoded as null", keys.contains(key))
         }
     }

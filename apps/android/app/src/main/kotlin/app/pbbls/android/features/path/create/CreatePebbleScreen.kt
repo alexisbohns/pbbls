@@ -77,12 +77,18 @@ private const val AUTOSAVE_DEBOUNCE_MS = 800L
  * surfaces an inline error (D16). Self-applies `safeDrawingPadding()` +
  * `imePadding()`, so the caller composes it in an edge-to-edge (unpadded) slot,
  * sibling to the detail cover in `PathScreen`'s OUTER Box.
+ *
+ * M47 adds draft mode: a "Save as draft" action ungated by the publish
+ * requirements (design D5), a debounced local snapshot of the open form as crash
+ * insurance, and [resuming] to hydrate from a server draft.
  */
 @Composable
 fun CreatePebbleScreen(
     onCreated: (String) -> Unit,
     onCancel: () -> Unit,
     modifier: Modifier = Modifier,
+    resuming: PebbleDraftRecord? = null,
+    onDraftSaved: () -> Unit = onCancel,
 ) {
     val writeService = LocalPebbleWriteService.current
     val refs = LocalReferenceDataService.current
