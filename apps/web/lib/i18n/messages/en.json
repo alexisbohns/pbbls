@@ -545,7 +545,31 @@
       "uploadFailed": "Picture upload failed. Try again."
     }
   },
+  "drafts": {
+    "title": "Drafts",
+    "back": "Back to Path",
+    "entry": "{count, plural, one {# draft} other {# drafts}}",
+    "untitled": "No name yet",
+    "savedAgo": "Saved {ago}",
+    "empty": "No drafts yet. Anything you start keeping shows up here.",
+    "loading": "Loading drafts",
+    "loadError": "Couldn't load your drafts. Please try again.",
+    "deleteAria": "Delete draft",
+    "deleteTitle": "Delete this draft?",
+    "deleteDescription": "It won't be kept anywhere else.",
+    "deleteConfirm": "Delete",
+    "deleteCancel": "Keep it"
+  },
   "record": {
+    "draft": {
+      "save": "Save as draft",
+      "saveFailed": "Couldn't save that draft. Please try again.",
+      "publishFailed": "Couldn't save that pebble. Please try again.",
+      "restoreTitle": "Pick up where you left off?",
+      "restoreDescription": "We kept what you were writing on this device. Your photo isn't part of it, so you'll want to add that again.",
+      "restoreConfirm": "Restore it",
+      "restoreDiscard": "Start fresh"
+    },
     "srTitle": "Record a pebble",
     "back": "Back to Path",
     "editorAria": "Pebble editor",

@@ -12,6 +12,8 @@ import {
   type CreateMarkInput,
   type UpdateMarkInput,
   type WalletHistoryPage,
+  type PebbleDraftPayload,
+  type PebbleDraftRecord,
 } from "@/lib/data/data-provider"
 import type {
   Pebble,
@@ -31,6 +33,26 @@ import { processPebbleImage } from "@/lib/utils/process-pebble-image"
 
 const PEBBLE_MEDIA_BUCKET = "pebbles-media"
 const SNAP_URL_TTL_SECONDS = 3600
+
+/**
+ * `pebble_drafts.payload` is `Json` to the generated types — deliberately
+ * unvalidated in SQL (a draft is partial by definition and `create_pebble`
+ * stays the validation authority at publish time). Narrow it once here rather
+ * than asserting at every call site; a non-object payload is treated as empty.
+ */
+function toDraftRecord(row: Record<string, unknown>): PebbleDraftRecord {
+  const raw = row.payload
+  const payload =
+    raw !== null && typeof raw === "object" && !Array.isArray(raw)
+      ? (raw as PebbleDraftPayload)
+      : {}
+  return {
+    id: row.id as string,
+    payload,
+    created_at: row.created_at as string,
+    updated_at: row.updated_at as string,
+  }
+}
 
 export class SupabaseProvider implements DataProvider {
   private store: Store
@@ -462,6 +484,61 @@ export class SupabaseProvider implements DataProvider {
       }
     }
     await this.loadFromSupabase()
+  }
+
+  // ---------------------------------------------------------------------------
+  // Drafts (M47) — direct single-table CRUD on `pebble_drafts`, owner-scoped by
+  // RLS. Deliberately outside the eager store and outside `createPebble`: a
+  // draft must never reach `create_pebble`, the schema's only karma emitter.
+  // ---------------------------------------------------------------------------
+
+  async listPebbleDrafts(): Promise<PebbleDraftRecord[]> {
+    const { data, error } = await this.supabase
+      .from("pebble_drafts")
+      .select("id, payload, created_at, updated_at")
+      .order("updated_at", { ascending: false })
+    if (error) throw new Error(error.message)
+    return (data ?? []).map(toDraftRecord)
+  }
+
+  async getPebbleDraft(id: string): Promise<PebbleDraftRecord | undefined> {
+    const { data, error } = await this.supabase
+      .from("pebble_drafts")
+      .select("id, payload, created_at, updated_at")
+      .eq("id", id)
+      .maybeSingle()
+    if (error) throw new Error(error.message)
+    return data ? toDraftRecord(data) : undefined
+  }
+
+  async savePebbleDraft(payload: PebbleDraftPayload, id?: string): Promise<PebbleDraftRecord> {
+    // `user_id` is explicit because the RLS `with check` compares it to
+    // auth.uid(). The payload is replaced wholesale, which is the whole point
+    // of the jsonb column — `update_pebble`'s coalesce could not clear a field.
+    const row = { ...(id ? { id } : {}), user_id: this.userId, payload }
+    const { data, error } = await this.supabase
+      .from("pebble_drafts")
+      .upsert(row, { onConflict: "id" })
+      .select("id, payload, created_at, updated_at")
+      .single()
+    if (error) throw new Error(error.message)
+    return toDraftRecord(data)
+  }
+
+  async deletePebbleDraft(id: string): Promise<void> {
+    const { error } = await this.supabase.from("pebble_drafts").delete().eq("id", id)
+    if (error) throw new Error(error.message)
+  }
+
+  async getDraftSnapUrl(storagePath: string): Promise<string | undefined> {
+    const { data, error } = await this.supabase.storage
+      .from(PEBBLE_MEDIA_BUCKET)
+      .createSignedUrl(`${storagePath}/original.jpg`, SNAP_URL_TTL_SECONDS)
+    if (error) {
+      console.warn("[pebbles] failed to sign draft snap URL", error)
+      return undefined
+    }
+    return data?.signedUrl
   }
 
   /**
