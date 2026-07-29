@@ -92,7 +92,14 @@
     "appearance": "Appearance",
     "theme": "Theme",
     "language": "Language",
-    "colorWorld": "Color world"
+    "colorWorld": "Color world",
+    "account": "Account",
+    "deleteAccount": "Delete account",
+    "deleteAccountTitle": "Delete your account?",
+    "deleteAccountBody": "This permanently deletes your account and everything in it: pebbles, snaps, souls, collections, glyphs and karma. Glyphs other pebblers bought stay available to them, without your name attached. This cannot be undone.",
+    "deleteAccountConfirm": "Delete forever",
+    "deleteAccountDeleting": "Deleting…",
+    "deleteAccountError": "We couldn't delete your account. Nothing was removed. Please try again."
   },
   "errors": {
     "title": "Something went wrong",

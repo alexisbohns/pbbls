@@ -38,6 +38,12 @@ export type AuthContextValue = {
   updateProfile(input: UpdateProfileInput): Promise<Profile>
   /** Change the signed-in user's password (email accounts). */
   updatePassword(password: string): Promise<void>
+  /**
+   * Permanently delete the signed-in user's account via the delete-account
+   * edge function (server-side purge + storage + auth user), then clear the
+   * local session. Irreversible; safe to retry on failure.
+   */
+  deleteAccount(): Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)

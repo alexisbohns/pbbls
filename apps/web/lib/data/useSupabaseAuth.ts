@@ -172,6 +172,24 @@ export function useSupabaseAuth(): AuthContextValue {
     if (error) throw new Error(error.message)
   }, [])
 
+  const deleteAccount = useCallback(async () => {
+    const supabase = getSupabase()
+    if (!supabase) throw new Error("Supabase client not available")
+    const { data, error } = await withTimeout(
+      supabase.functions.invoke<{ ok?: boolean; error?: string }>("delete-account"),
+      30000,
+      "account deletion",
+    )
+    if (error || !data?.ok) {
+      console.error("[auth] delete-account failed:", error ?? data?.error)
+      throw new Error(data?.error ?? error?.message ?? "delete-account failed")
+    }
+    // The server side is fully gone (purge + storage + auth user); only the
+    // local session remains. A global sign-out would round-trip to a revoke
+    // endpoint that no longer knows the user, so clear locally.
+    await supabase.auth.signOut({ scope: "local" })
+  }, [])
+
   const updatePassword = useCallback(async (password: string) => {
     const supabase = getSupabase()
     if (!supabase) throw new Error("Supabase client not available")
@@ -234,5 +252,6 @@ export function useSupabaseAuth(): AuthContextValue {
     logout,
     updateProfile,
     updatePassword,
+    deleteAccount,
   }
 }
