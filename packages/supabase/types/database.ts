@@ -438,7 +438,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           status: string
-          submitter_id: string
+          submitter_id: string | null
         }
         Insert: {
           created_at?: string
@@ -450,7 +450,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
-          submitter_id: string
+          submitter_id?: string | null
         }
         Update: {
           created_at?: string
@@ -462,7 +462,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           status?: string
-          submitter_id?: string
+          submitter_id?: string | null
         }
         Relationships: [
           {
@@ -1909,6 +1909,7 @@ export type Database = {
         }
         Returns: Json
       }
+      purge_account: { Args: { p_user_id: string }; Returns: Json }
       refund_karma: {
         Args: { p_amount: number; p_ref_id: string }
         Returns: string
