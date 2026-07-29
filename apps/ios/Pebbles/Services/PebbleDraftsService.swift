@@ -4,6 +4,12 @@ import Supabase
 import os
 
 /// A `pebble_drafts` row as the drafts list needs it.
+///
+/// `updated_at` is decoded from its **string** form through `ISO8601Flexible`
+/// rather than left to whatever date strategy the ambient decoder happens to
+/// carry (#649). Postgres returns microsecond precision, and a decoder expecting
+/// a numeric or fixed-precision date fails the whole row — which would break the
+/// drafts list outright, not just the timestamp.
 struct PebbleDraftRecord: Identifiable, Decodable, Equatable {
     let id: UUID
     let payload: PebbleDraftPayload
@@ -13,6 +19,27 @@ struct PebbleDraftRecord: Identifiable, Decodable, Equatable {
         case id
         case payload
         case updatedAt = "updated_at"
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        payload = try container.decode(PebbleDraftPayload.self, forKey: .payload)
+        let raw = try container.decode(String.self, forKey: .updatedAt)
+        guard let parsed = ISO8601Flexible.parse(raw) else {
+            throw DecodingError.dataCorruptedError(
+                forKey: .updatedAt, in: container,
+                debugDescription: "unparseable updated_at: \(raw)"
+            )
+        }
+        updatedAt = parsed
+    }
+
+    /// Memberwise init, for tests and previews.
+    init(id: UUID, payload: PebbleDraftPayload, updatedAt: Date) {
+        self.id = id
+        self.payload = payload
+        self.updatedAt = updatedAt
     }
 }
 
@@ -41,8 +68,6 @@ final class PebbleDraftsService {
     /// Most recently saved first — `updated_at` is trigger-maintained server-side,
     /// so this ordering does not depend on client clocks.
     func list() async throws -> [PebbleDraftRecord] {
-        let decoder = JSONDecoder()
-        decoder.dateDecodingStrategy = .iso8601
         let rows: [PebbleDraftRecord] = try await client
             .from("pebble_drafts")
             .select("id, payload, updated_at")
@@ -101,9 +126,19 @@ final class PebbleDraftsService {
 
     /// Refresh `count` without surfacing an error — it only drives an entry
     /// point's badge, and a missing badge beats an error state on the Path.
+    ///
+    /// Selects `id` alone rather than reusing `list()`: this runs on every Path
+    /// appearance, and pulling every draft's full jsonb payload to render one
+    /// number is waste on the app's home screen.
     func refreshCount() async {
+        struct IdRow: Decodable { let id: UUID }
         do {
-            _ = try await list()
+            let rows: [IdRow] = try await client
+                .from("pebble_drafts")
+                .select("id")
+                .execute()
+                .value
+            count = rows.count
         } catch {
             logger.error("draft count refresh failed: \(error.localizedDescription, privacy: .private)")
         }

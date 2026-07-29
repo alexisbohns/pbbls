@@ -501,6 +501,16 @@ export class SupabaseProvider implements DataProvider {
     return (data ?? []).map(toDraftRecord)
   }
 
+  async countPebbleDrafts(): Promise<number> {
+    // `head: true` sends no rows at all — the badge needs the number, and /path
+    // is the app's home screen, so pulling every draft's payload for it is waste.
+    const { count, error } = await this.supabase
+      .from("pebble_drafts")
+      .select("id", { count: "exact", head: true })
+    if (error) throw new Error(error.message)
+    return count ?? 0
+  }
+
   async getPebbleDraft(id: string): Promise<PebbleDraftRecord | undefined> {
     const { data, error } = await this.supabase
       .from("pebble_drafts")

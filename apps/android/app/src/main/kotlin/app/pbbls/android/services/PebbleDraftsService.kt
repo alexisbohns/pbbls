@@ -90,8 +90,17 @@ class PebbleDraftsService(
             }
     }
 
-    /** Count for the Path entry point. */
-    suspend fun count(): Int = list().size
+    /**
+     * Count for the Path entry point. Selects `id` alone rather than reusing
+     * [list]: this runs on every Path composition, and pulling every draft's full
+     * jsonb payload to render one number is waste on the app's home screen.
+     */
+    suspend fun count(): Int =
+        supabase.client
+            .from(TABLE)
+            .select(Columns.raw("id"))
+            .decodeList<DraftIdRow>()
+            .size
 
     /**
      * Whether a resumed draft's glyph is still usable (own ∪ system ∪ entitled).
@@ -118,6 +127,12 @@ class PebbleDraftsService(
  * `user_id` is explicitly encoded so the RLS `with check` sees it; `payload`
  * rides along as the nested jsonb.
  */
+/** Minimal projection for the count query. */
+@Serializable
+private data class DraftIdRow(
+    val id: String,
+)
+
 @Serializable
 private data class DraftUpsertPayload(
     val id: String,
