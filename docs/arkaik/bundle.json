@@ -9,7 +9,7 @@
       "view_card_variant": "large"
     },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-07-17T14:00:00.000Z"
+    "updated_at": "2026-07-29T18:24:23.000Z"
   },
   "nodes": [
     {
@@ -2311,6 +2311,19 @@
           ]
         }
       }
+    },
+    {
+      "id": "API-delete-account",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "POST /delete-account",
+      "description": "Edge function: full account erasure for the calling user (JWT identity). Orchestrates the purge_account RPC (FK-ordered SQL purge; externally-referenced glyphs anonymized to the user_id = null system state and delisted), storage prefix removal (pebbles-media/{user_id}/), then auth user deletion. Idempotent and resumable.",
+      "status": "live",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ]
     }
   ],
   "edges": [
@@ -4407,6 +4420,90 @@
       "source_id": "V-announcement-detail",
       "target_id": "DM-v-logs-with-counts",
       "edge_type": "displays"
+    },
+    {
+      "id": "e-API-delete-account-DM-account",
+      "project_id": "pebbles",
+      "source_id": "API-delete-account",
+      "target_id": "DM-account",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-delete-account-DM-profile",
+      "project_id": "pebbles",
+      "source_id": "API-delete-account",
+      "target_id": "DM-profile",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-delete-account-DM-pebble",
+      "project_id": "pebbles",
+      "source_id": "API-delete-account",
+      "target_id": "DM-pebble",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-delete-account-DM-soul",
+      "project_id": "pebbles",
+      "source_id": "API-delete-account",
+      "target_id": "DM-soul",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-delete-account-DM-collection",
+      "project_id": "pebbles",
+      "source_id": "API-delete-account",
+      "target_id": "DM-collection",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-delete-account-DM-glyphs",
+      "project_id": "pebbles",
+      "source_id": "API-delete-account",
+      "target_id": "DM-glyphs",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-delete-account-DM-glyph-submissions",
+      "project_id": "pebbles",
+      "source_id": "API-delete-account",
+      "target_id": "DM-glyph-submissions",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-delete-account-DM-glyph-entitlements",
+      "project_id": "pebbles",
+      "source_id": "API-delete-account",
+      "target_id": "DM-glyph-entitlements",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-delete-account-DM-karma-events",
+      "project_id": "pebbles",
+      "source_id": "API-delete-account",
+      "target_id": "DM-karma-events",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-delete-account-DM-wallet-balances",
+      "project_id": "pebbles",
+      "source_id": "API-delete-account",
+      "target_id": "DM-wallet-balances",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-delete-account-DM-bounce",
+      "project_id": "pebbles",
+      "source_id": "API-delete-account",
+      "target_id": "DM-bounce",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-delete-account-DM-log-reactions",
+      "project_id": "pebbles",
+      "source_id": "API-delete-account",
+      "target_id": "DM-log-reactions",
+      "edge_type": "queries"
     }
   ]
 }
