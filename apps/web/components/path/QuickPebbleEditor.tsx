@@ -120,7 +120,7 @@ export function QuickPebbleEditor({
   }, [snapPreview])
 
   const handleSubmit = useCallback(async () => {
-    if (!name.trim() || saving || snapUploading) return
+    if (!name.trim() || !emotionId || saving || snapUploading) return
     setSaving(true)
 
     try {
@@ -133,7 +133,7 @@ export function QuickPebbleEditor({
         intensity,
         positiveness: valence,
         visibility,
-        emotion_id: emotionId || "serenity",
+        emotion_id: emotionId,
         soul_ids: soulIds,
         domain_ids: domainIds,
         collection_ids: collectionIds,
@@ -347,7 +347,7 @@ export function QuickPebbleEditor({
           <Button
             variant="default"
             size="icon"
-            disabled={!name.trim() || saving || snapUploading}
+            disabled={!name.trim() || !emotionId || saving || snapUploading}
             onClick={() => void handleSubmit()}
             aria-label={t("save")}
             className="size-9 rounded-full"
