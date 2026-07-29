@@ -43,6 +43,30 @@ enum Valence: String, CaseIterable, Identifiable, Hashable {
     }
 }
 
+extension Valence {
+    /// Rebuild a valence from the decomposed `(positiveness, intensity)` pair the
+    /// wire and `pebble_drafts.payload` store (M47). Returns nil for any pair
+    /// outside the 3×3 grid so a malformed draft leaves the picker unset rather
+    /// than silently claiming a value the user never chose.
+    ///
+    /// Note: `PebbleDetail.valence` carries the same mapping inline for the
+    /// non-optional read path; worth collapsing into this one day.
+    static func from(positiveness: Int, intensity: Int) -> Valence? {
+        switch (positiveness, intensity) {
+        case (-1, 1): return .lowlightSmall
+        case (-1, 2): return .lowlightMedium
+        case (-1, 3): return .lowlightLarge
+        case (0, 1):  return .neutralSmall
+        case (0, 2):  return .neutralMedium
+        case (0, 3):  return .neutralLarge
+        case (1, 1):  return .highlightSmall
+        case (1, 2):  return .highlightMedium
+        case (1, 3):  return .highlightLarge
+        default:      return nil
+        }
+    }
+}
+
 /// Groups the nine `Valence` cases by size for the picker sheet.
 /// Drives the three section headers ("Day event" / "Week event" / "Month event").
 enum ValenceSizeGroup: String, CaseIterable, Identifiable {
