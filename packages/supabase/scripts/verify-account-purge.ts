@@ -215,6 +215,14 @@ try {
     .from("glyph_favourites").insert({ user_id: sellerId, glyph_id: soldGlyph.id });
   if (favSellerErr) throw new Error(`seller favourite: ${favSellerErr.message}`);
 
+  // An unpublished draft (M47). Inserted as the signed-in seller so the
+  // owner-only pebble_drafts_all policy is exercised, not bypassed.
+  const { error: draftErr } = await seller.from("pebble_drafts").insert({
+    user_id: sellerId,
+    payload: { name: `purge-test draft ${runId}`, emotion_id: emotion.id },
+  });
+  if (draftErr) throw new Error(`insert draft: ${draftErr.message}`);
+
   // -------------------------------------------------------------------------
   // 3. The sale: fund the buyer, buy through the real RPC, favourite.
   // -------------------------------------------------------------------------
@@ -265,6 +273,7 @@ try {
     ["wallet_balances", "user_id"],
     ["bounces", "user_id"],
     ["log_reactions", "user_id"],
+    ["pebble_drafts", "user_id"],
   ];
   for (const [table, column] of sellerScoped) {
     const n = await countRows(table, column, sellerId);
