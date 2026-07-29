@@ -364,4 +364,19 @@
     <string name="lab_reaction_upvote_a11y">Upvote</string>
     <string name="lab_reaction_remove_a11y">Remove rock</string>
     <string name="lab_reaction_count_a11y">%1$d upvotes</string>
+    <!-- ==== Drafts & composer autosave (M47) ==== -->
+    <string name="action_retry">Try again</string>
+    <string name="action_delete">Delete</string>
+    <string name="draft_save">Save as draft</string>
+    <string name="draft_save_error">Couldn\'t save that draft. Please try again.</string>
+    <string name="draft_restore_title">Pick up where you left off?</string>
+    <string name="draft_restore_body">We kept what you were writing here. Add your photo again when you\'re ready.</string>
+    <string name="draft_restore_confirm">Restore it</string>
+    <string name="draft_restore_discard">Start fresh</string>
+    <string name="drafts_title">Drafts</string>
+    <string name="drafts_entry">%1$d saved for later</string>
+    <string name="drafts_untitled">No name yet</string>
+    <string name="drafts_saved_ago">Saved %1$s ago</string>
+    <string name="drafts_empty">No drafts yet. Anything you start keeping shows up here.</string>
+    <string name="drafts_load_error">Couldn\'t load your drafts. Please try again.</string>
 </resources>
