@@ -5,9 +5,16 @@ import os
 struct CreatePebbleSheet: View {
     let onCreated: (UUID) -> Void
 
+    /// Resuming a server draft (M47): its payload hydrates the form, and the row
+    /// is deleted once the pebble publishes.
+    var resuming: PebbleDraftRecord?
+
     @Environment(SupabaseService.self) private var supabase
     @Environment(ReferenceDataService.self) private var refs
     @Environment(KarmaNotificationService.self) private var karma
+    @Environment(PebbleDraftsService.self) private var draftsService
+    @Environment(ComposerSnapshotStore.self) private var snapshots
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(\.dismiss) private var dismiss
 
     @State private var draft = PebbleDraft()
@@ -17,6 +24,15 @@ struct CreatePebbleSheet: View {
     @State private var saveError: String?
 
     @State private var isPhotoPickerPresented = false
+
+    @State private var isSavingDraft = false
+    /// The server draft this composer is bound to — the resumed one, or the one
+    /// created by the first "Save as draft".
+    @State private var serverDraftId: UUID?
+    @State private var autosave: ComposerAutosave?
+    @State private var restorableSnapshot: PebbleDraftPayload?
+    @State private var isRestorePromptPresented = false
+    @State private var hasCheckedSnapshot = false
 
     /// Lazily constructed in `.task` so we have access to `supabase.client`.
     /// Nil only for the very first body render before `.task` fires.
@@ -39,7 +55,7 @@ struct CreatePebbleSheet: View {
                         }
                     }
                     ToolbarItem(placement: .confirmationAction) {
-                        if isSaving {
+                        if isSaving || isSavingDraft {
                             ProgressView()
                         } else {
                             PebbleToolbarButton("Save") {
@@ -48,6 +64,14 @@ struct CreatePebbleSheet: View {
                             .disabled(!draft.isValid)
                         }
                     }
+                    // Quick capture: ungated, unlike Save (design D5). "Just a
+                    // name" is a valid draft.
+                    ToolbarItem(placement: .bottomBar) {
+                        PebbleToolbarButton("Save as draft") {
+                            Task { await saveAsDraft() }
+                        }
+                        .disabled(!isSavableAsDraft || isSaving || isSavingDraft)
+                    }
                 }
                 .pebblesScreen()
         }
@@ -55,6 +79,26 @@ struct CreatePebbleSheet: View {
             if snaps == nil {
                 snaps = SnapUploadCoordinator(repo: PebbleSnapRepository(client: supabase.client))
             }
+            if autosave == nil {
+                autosave = ComposerAutosave(store: snapshots)
+            }
+            hydrateOrOfferRestore()
+        }
+        .onChange(of: draftPayload) { _, newValue in
+            // Debounced inside ComposerAutosave. Held off while the restore
+            // prompt is up so the pending answer is not overwritten first.
+            guard !isRestorePromptPresented else { return }
+            autosave?.schedule(newValue)
+        }
+        .onChange(of: scenePhase) { _, phase in
+            // Last reliable moment before a process kill.
+            if phase != .active { autosave?.flush() }
+        }
+        .alert("Pick up where you left off?", isPresented: $isRestorePromptPresented) {
+            Button("Restore it") { restoreSnapshot() }
+            Button("Start fresh", role: .destructive) { discardSnapshot() }
+        } message: {
+            Text("We kept what you were writing here. Add your photo again when you're ready.")
         }
         .sheet(isPresented: $isPhotoPickerPresented) {
             PhotoPickerView { picked in
@@ -140,11 +184,13 @@ struct CreatePebbleSheet: View {
                     decoder: decoder
                 )
             karma.notifyEarned(amount: response.karmaDelta ?? 0, reason: .pebbleCreated)
+            await consumeDraftAfterPublish()
             onCreated(response.pebbleId)
             dismiss()
         } catch let functionsError as FunctionsError {
             if let pebbleId = softSuccessPebbleId(from: functionsError) {
                 logger.warning("compose-pebble returned 5xx but pebble_id found — advancing to detail sheet")
+                await consumeDraftAfterPublish()
                 onCreated(pebbleId)
                 dismiss()
             } else {
@@ -176,6 +222,141 @@ struct CreatePebbleSheet: View {
     }
 }
 
+// MARK: - Drafts (M47)
+
+/// The **server** draft (`pebble_drafts`, an intentional "save as draft") and the
+/// **local** snapshot (crash insurance for the open composer) share one payload
+/// shape and nothing else. Design:
+/// docs/superpowers/specs/2026-07-29-drafts-and-autosave-design.md.
+extension CreatePebbleSheet {
+
+    /// The form projected onto the wire payload. Drives both autosave and the
+    /// server draft, so the two can never disagree about the shape.
+    fileprivate var draftPayload: PebbleDraftPayload {
+        PebbleDraftPayload(from: draft, formSnap: snaps?.formSnap, userId: currentUserId)
+    }
+
+    fileprivate var isSavableAsDraft: Bool {
+        draft.isSavableAsDraft(formSnap: snaps?.formSnap, userId: currentUserId)
+    }
+
+    /// Souls and collections are user-owned and deletable, so a resumed draft may
+    /// reference ones that are gone. Glyphs are verified server-side below.
+    fileprivate var knownIds: PebbleDraft.KnownIds {
+        PebbleDraft.KnownIds(
+            soulIds: Set(refs.souls.map(\.id)),
+            collectionIds: Set(refs.collections.map(\.id))
+        )
+    }
+
+    /// Resuming a server draft wins over the local snapshot — it is the more
+    /// deliberate of the two, so we never prompt on top of it.
+    fileprivate func hydrateOrOfferRestore() {
+        guard !hasCheckedSnapshot else { return }
+        hasCheckedSnapshot = true
+
+        if let resuming {
+            serverDraftId = resuming.id
+            draft = PebbleDraft(payload: resuming.payload, known: knownIds)
+            if let existing = resuming.payload.existingSnap {
+                snaps?.seedExisting(.existing(id: existing.id, storagePath: existing.storagePath))
+            }
+            Task { await verifyGlyph() }
+            return
+        }
+
+        if let snapshot = snapshots.load(), !snapshot.isEmpty {
+            restorableSnapshot = snapshot
+            isRestorePromptPresented = true
+        }
+    }
+
+    fileprivate func restoreSnapshot() {
+        guard let snapshot = restorableSnapshot else { return }
+        draft = PebbleDraft(payload: snapshot, known: knownIds)
+        restorableSnapshot = nil
+        Task { await verifyGlyph() }
+    }
+
+    fileprivate func discardSnapshot() {
+        restorableSnapshot = nil
+        autosave?.clear()
+    }
+
+    /// Drop a glyph the user can no longer use, and load the one they can for the
+    /// form's preview (design D7). `can_use_glyph` is the predicate
+    /// `create_pebble` enforces, so passing here means publish cannot 42501.
+    fileprivate func verifyGlyph() async {
+        guard let glyphId = draft.glyphId, let userId = currentUserId else { return }
+        do {
+            let usable: Bool = try await supabase.client
+                .rpc(
+                    "can_use_glyph",
+                    params: ["p_glyph_id": glyphId.uuidString, "p_user": userId.uuidString]
+                )
+                .execute()
+                .value
+            guard usable else {
+                logger.notice("resumed draft referenced an unusable glyph — dropping it")
+                draft.glyphId = nil
+                selectedGlyph = nil
+                return
+            }
+            let glyphs: [Glyph] = try await supabase.client
+                .from("glyphs")
+                .select("id, name, strokes, view_box, user_id")
+                .eq("id", value: glyphId)
+                .limit(1)
+                .execute()
+                .value
+            selectedGlyph = glyphs.first
+        } catch {
+            // A verification failure is not a reason to lose the user's glyph;
+            // publishing will surface a clear message if it really is unusable.
+            logger.error("glyph verification failed: \(error.localizedDescription, privacy: .private)")
+        }
+    }
+
+    /// Intentional "save as draft". Deliberately does NOT run
+    /// `snaps.cancelAndCleanup` — that would delete from Storage the very object
+    /// the draft references (design D3).
+    fileprivate func saveAsDraft() async {
+        guard isSavableAsDraft else { return }
+        guard let userId = currentUserId else {
+            logger.error("save draft: no current user id")
+            saveError = "You must be signed in to save."
+            return
+        }
+
+        isSavingDraft = true
+        saveError = nil
+        do {
+            serverDraftId = try await draftsService.save(
+                payload: draftPayload, id: serverDraftId, userId: userId
+            )
+            // Once the draft is on the server the local snapshot is redundant.
+            autosave?.clear()
+            await draftsService.refreshCount()
+            dismiss()
+        } catch {
+            logger.error("save draft failed: \(error.localizedDescription, privacy: .private)")
+            saveError = "Couldn't save that draft. Please try again."
+            isSavingDraft = false
+        }
+    }
+
+    /// Publishing consumed the draft. Runs on the soft-success path too: a 5xx
+    /// carrying a `pebble_id` still created the pebble, so leaving the draft
+    /// would duplicate it in the list.
+    fileprivate func consumeDraftAfterPublish() async {
+        autosave?.clear()
+        guard let serverDraftId else { return }
+        await draftsService.deleteIgnoringFailure(id: serverDraftId)
+        self.serverDraftId = nil
+        await draftsService.refreshCount()
+    }
+}
+
 private struct ComposePebbleRequest: Encodable {
     let payload: PebbleCreatePayload
 }
@@ -193,6 +374,8 @@ private struct PebbleIdPartial: Decodable {
         .environment(supabase)
         .environment(ReferenceDataService(client: supabase.client))
         .environment(KarmaNotificationService())
+        .environment(PebbleDraftsService(client: supabase.client))
+        .environment(ComposerSnapshotStore())
 }
 
 /// Maps a thrown error to a user-facing localized string. Module-private so

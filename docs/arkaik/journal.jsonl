@@ -209,3 +209,5 @@
 {"id": "01KYQZ07VRKPKP75TNFDCJ66TD", "ts": "2026-07-29T21:55:00.000Z", "actor": "claude-code", "type": "edge.added", "edge_id": "e-V-timeline-V-pebble-drafts", "source_id": "V-timeline", "target_id": "V-pebble-drafts", "edge_type": "composes"}
 {"id": "01KYQZ08S77W0FSJ2Y3C8YCSG0", "ts": "2026-07-29T21:55:00.000Z", "actor": "claude-code", "type": "edge.added", "edge_id": "e-V-quick-pebble-editor-DM-pebble-drafts", "source_id": "V-quick-pebble-editor", "target_id": "DM-pebble-drafts", "edge_type": "displays"}
 {"id": "01KYQZ09SNRKGXPB5X00M34AJG", "ts": "2026-07-29T21:55:00.000Z", "actor": "claude-code", "type": "edge.added", "edge_id": "e-API-delete-account-DM-pebble-drafts", "source_id": "API-delete-account", "target_id": "DM-pebble-drafts", "edge_type": "queries"}
+{"id": "01KYR0A1QJKMNPQRSTVWXYZ234", "ts": "2026-07-30T00:30:00.000Z", "actor": "claude-code", "type": "node.updated", "node_id": "V-pebble-drafts", "fields": ["description"]}
+{"id": "01KYR0A1QK5MNPQRSTVWXYZ235", "ts": "2026-07-30T00:30:00.000Z", "actor": "claude-code", "type": "node.updated", "node_id": "V-quick-pebble-editor", "fields": ["description"]}

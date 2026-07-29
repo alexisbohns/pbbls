@@ -14,12 +14,14 @@ struct PathView: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(PathStatsService.self) private var stats
+    @Environment(PebbleDraftsService.self) private var draftsService
 
     @State private var pebbles: [Pebble] = []
     @State private var entries: [WeekRollEntry] = []
     @State private var focusedWeekStart: Date = Date()
     @State private var navPath = NavigationPath()
     @State private var isPresentingCreate = false
+    @State private var isPresentingDrafts = false
     @State private var selectedPebbleId: UUID?
     @State private var pendingDeletion: Pebble?
     @State private var deleteError: String?
@@ -61,8 +63,19 @@ struct PathView: View {
             onFirstLoad()
         }
         .task { await stats.load() }
+        .task { await draftsService.refreshCount() }
         .sheet(isPresented: $isPresentingCreate) {
             CreatePebbleSheet(onCreated: { newPebbleId in
+                selectedPebbleId = newPebbleId
+                Task {
+                    async let timeline: Void = load()
+                    async let statsReload: Void = stats.refresh()
+                    _ = await (timeline, statsReload)
+                }
+            })
+        }
+        .sheet(isPresented: $isPresentingDrafts) {
+            DraftsListSheet(onPebbleCreated: { newPebbleId in
                 selectedPebbleId = newPebbleId
                 Task {
                     async let timeline: Void = load()
@@ -154,6 +167,21 @@ struct PathView: View {
             }
             .safeAreaInset(edge: .bottom) {
                 VStack(spacing: 12) {
+                    if draftsService.count > 0 {
+                        Button {
+                            isPresentingDrafts = true
+                        } label: {
+                            Label {
+                                // Count is verbatim so this needs no plural
+                                // entry in the catalog.
+                                Text("Drafts") + Text(verbatim: " (\(draftsService.count))")
+                            } icon: {
+                                Image(systemName: "square.dashed")
+                            }
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
+                        }
+                    }
                     NewPebbleButton(onTap: { isPresentingCreate = true })
                     PathBottomBar(
                         karma: stats.karma,
