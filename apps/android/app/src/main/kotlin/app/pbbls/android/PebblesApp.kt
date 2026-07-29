@@ -6,10 +6,12 @@ import app.pbbls.android.features.glyph.services.GlyphService
 import app.pbbls.android.features.karma.KarmaNotificationService
 import app.pbbls.android.features.lab.services.LogsService
 import app.pbbls.android.services.CollectionsService
+import app.pbbls.android.services.ComposerSnapshotStore
 import app.pbbls.android.services.EmotionPaletteService
 import app.pbbls.android.services.PathService
 import app.pbbls.android.services.PathStatsService
 import app.pbbls.android.services.PebbleDetailService
+import app.pbbls.android.services.PebbleDraftsService
 import app.pbbls.android.services.PebbleWriteService
 import app.pbbls.android.services.ProfileService
 import app.pbbls.android.services.ReferenceDataService
@@ -68,6 +70,10 @@ class PebblesApp :
         private set
 
     lateinit var collectionsService: CollectionsService
+
+    lateinit var draftsService: PebbleDraftsService
+
+    lateinit var composerSnapshots: ComposerSnapshotStore
         private set
 
     lateinit var glyphService: GlyphService
@@ -96,6 +102,8 @@ class PebblesApp :
         pebbleWrite = PebbleWriteService(supabase)
         soulsService = SoulsService(supabase)
         collectionsService = CollectionsService(supabase)
+        draftsService = PebbleDraftsService(supabase)
+        composerSnapshots = ComposerSnapshotStore(this)
         glyphService = GlyphService(supabase)
         glyphMarket = GlyphMarketService(supabase)
         logsService = LogsService(supabase)

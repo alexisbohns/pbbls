@@ -2,8 +2,10 @@ package app.pbbls.android.features.path
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -40,7 +42,9 @@ import app.pbbls.android.features.shared.ripples.RippleSummary
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalPathService
 import app.pbbls.android.services.LocalPathStatsService
+import app.pbbls.android.services.LocalPebbleDraftsService
 import app.pbbls.android.services.LocalPebbleWriteService
+import app.pbbls.android.services.PebbleDraftRecord
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
@@ -77,6 +81,7 @@ fun PathScreen(
     var didLoadFail by remember { mutableStateOf(false) }
 
     val writeService = LocalPebbleWriteService.current
+    val draftsService = LocalPebbleDraftsService.current
     val scope = rememberCoroutineScope()
     var selectedPebbleId by remember { mutableStateOf<String?>(null) }
     var editingPebbleId by remember { mutableStateOf<String?>(null) }
@@ -84,6 +89,10 @@ fun PathScreen(
     var pendingDeletion by remember { mutableStateOf<Pebble?>(null) }
     var deleteError by remember { mutableStateOf(false) }
     var isPresentingCreate by remember { mutableStateOf(false) }
+    var isPresentingDrafts by remember { mutableStateOf(false) }
+    var resumingDraft by remember { mutableStateOf<PebbleDraftRecord?>(null) }
+    var draftsReloadKey by remember { mutableIntStateOf(0) }
+    var draftCount by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
         try {
@@ -102,6 +111,19 @@ fun PathScreen(
     // Stats load rides its own effect so a slow/failed stats fetch never
     // delays the timeline (the iOS `.task { await stats.load() }` analog).
     LaunchedEffect(Unit) { stats.load() }
+
+    // Drafts count for the entry point (M47) — its own effect for the same reason
+    // stats has one: a slow or failed fetch must not delay the timeline. Re-keyed
+    // on draftsReloadKey so every draft write refreshes the badge.
+    LaunchedEffect(draftsReloadKey) {
+        draftCount =
+            try {
+                draftsService.count()
+            } catch (e: Exception) {
+                Log.e(TAG, "draft count failed", e)
+                0
+            }
+    }
 
     // Hoisted so the delete flow and create/edit can refresh the timeline
     // without re-triggering the first-load spinner: isLoading is left
@@ -178,6 +200,8 @@ fun PathScreen(
                         onPebbleTap = { pebble -> selectedPebbleId = pebble.id },
                         onPebbleDelete = { pebble -> pendingDeletion = pebble },
                         onCreatePebble = { isPresentingCreate = true },
+                        onOpenDrafts = { isPresentingDrafts = true },
+                        draftCount = draftCount,
                         karma = stats.karma,
                         ripple = rippleWithLocalActiveToday,
                         onProfile = onProfile,
@@ -225,11 +249,39 @@ fun PathScreen(
             CreatePebbleScreen(
                 onCreated = { newId ->
                     isPresentingCreate = false
+                    resumingDraft = null
+                    isPresentingDrafts = false
                     selectedPebbleId = newId
+                    draftsReloadKey++
                     reload()
                 },
-                onCancel = { isPresentingCreate = false },
+                onCancel = {
+                    isPresentingCreate = false
+                    resumingDraft = null
+                    draftsReloadKey++
+                },
                 modifier = Modifier.fillMaxSize(),
+                resuming = resumingDraft,
+                onDraftSaved = {
+                    isPresentingCreate = false
+                    resumingDraft = null
+                    draftsReloadKey++
+                },
+            )
+        }
+
+        // Full-screen drafts cover (M47) — self-applies safeDrawingPadding, so it
+        // belongs in the OUTER Box like its siblings. Composed BEFORE the create
+        // cover in z-order so resuming a draft stacks the composer on top of it.
+        if (isPresentingDrafts && !isPresentingCreate) {
+            DraftsScreen(
+                onResume = { record ->
+                    resumingDraft = record
+                    isPresentingCreate = true
+                },
+                onDismiss = { isPresentingDrafts = false },
+                modifier = Modifier.fillMaxSize(),
+                reloadKey = draftsReloadKey,
             )
         }
 
@@ -278,6 +330,8 @@ fun PathContent(
     onPebbleTap: (Pebble) -> Unit = {},
     onPebbleDelete: (Pebble) -> Unit = {},
     onCreatePebble: () -> Unit = {},
+    onOpenDrafts: () -> Unit = {},
+    draftCount: Int = 0,
     karma: Int? = null,
     ripple: RippleSummary? = null,
     onProfile: () -> Unit = {},
@@ -336,6 +390,22 @@ fun PathContent(
                 onCreatePebble = onCreatePebble,
                 modifier = Modifier.fillMaxSize(),
             )
+        }
+        // Drafts entry (M47), above the create button so it reads as "unfinished
+        // business first". Hidden at zero so it is never dead chrome.
+        if (draftCount > 0) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.Center,
+            ) {
+                TextButton(onClick = onOpenDrafts) {
+                    PebblesText(
+                        text = stringResource(R.string.drafts_entry, draftCount),
+                        style = PebblesTypography.meta,
+                        color = PebblesTheme.colors.system.secondary,
+                    )
+                }
+            }
         }
         // Pinned "New pebble" entry — the PathView.safeAreaInset(.bottom) analog.
         NewPebbleButton(

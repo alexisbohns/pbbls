@@ -11,10 +11,12 @@ import app.pbbls.android.features.glyph.services.LocalGlyphService
 import app.pbbls.android.features.karma.LocalKarmaNotificationService
 import app.pbbls.android.features.lab.services.LocalLogsService
 import app.pbbls.android.services.LocalCollectionsService
+import app.pbbls.android.services.LocalComposerSnapshotStore
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalPathService
 import app.pbbls.android.services.LocalPathStatsService
 import app.pbbls.android.services.LocalPebbleDetailService
+import app.pbbls.android.services.LocalPebbleDraftsService
 import app.pbbls.android.services.LocalPebbleWriteService
 import app.pbbls.android.services.LocalProfileService
 import app.pbbls.android.services.LocalReferenceDataService
@@ -54,6 +56,8 @@ class MainActivity : ComponentActivity() {
                     LocalPebbleDetailService provides app.pebbleDetailService,
                     LocalSoulsService provides app.soulsService,
                     LocalCollectionsService provides app.collectionsService,
+                    LocalPebbleDraftsService provides app.draftsService,
+                    LocalComposerSnapshotStore provides app.composerSnapshots,
                     LocalGlyphService provides app.glyphService,
                     LocalGlyphMarketService provides app.glyphMarket,
                     LocalLogsService provides app.logsService,

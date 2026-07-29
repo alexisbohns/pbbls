@@ -72,5 +72,19 @@ enum class Valence(
         ): Valence =
             entries.firstOrNull { it.positiveness == positiveness && it.intensity == intensity }
                 ?: NEUTRAL_MEDIUM
+
+        /**
+         * Null-returning variant for drafts (M47), where the pair may be absent
+         * entirely. Deliberately does NOT fall back to [NEUTRAL_MEDIUM]: a draft
+         * with no valence picked yet must hydrate the picker as unset rather than
+         * claim a value the user never chose.
+         */
+        fun orNull(
+            positiveness: Int?,
+            intensity: Int?,
+        ): Valence? {
+            if (positiveness == null || intensity == null) return null
+            return entries.firstOrNull { it.positiveness == positiveness && it.intensity == intensity }
+        }
     }
 }
