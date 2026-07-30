@@ -84,91 +84,6 @@ private extension View {
     }
 }
 
-/// Achievement-unlocked pastille, visual sibling of `KarmaEarnedCapsule`:
-/// same glass, trophy instead of sparkle, the badge title (or a count phrase
-/// for several unlocks) and the karma actually granted when > 0.
-struct AchievementUnlockedCapsule: View {
-    let content: AchievementUnlockedContent
-    var duration: Duration = .milliseconds(3200)
-    let onTap: () -> Void
-
-    @State private var ringProgress: CGFloat = 1
-
-    var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "trophy")
-                .foregroundStyle(Color.accent.primary)
-            Text(headline)
-                .font(.ysabeauSemibold(16))
-                .foregroundStyle(Color.system.foreground)
-                .lineLimit(1)
-            if content.karmaTotal > 0 {
-                Text("+\(content.karmaTotal) karma")
-                    .font(.ysabeauSemibold(16))
-                    .foregroundStyle(Color.accent.primary)
-            }
-        }
-        .padding(.horizontal, 18)
-        .padding(.vertical, 11)
-        .karmaPastilleGlass()
-        .overlay { countdownRing }
-        .contentShape(Capsule())
-        .onTapGesture(perform: onTap)
-        .onAppear(perform: startCountdown)
-        .onChange(of: content) { startCountdown() }
-        .accessibilityElement()
-        .accessibilityLabel(accessibilityText)
-        .accessibilityAddTraits(.isStaticText)
-    }
-
-    private var headline: String {
-        if content.count == 1, let title = content.title {
-            return title
-        }
-        return String(format: NSLocalizedString(
-            "achievement.capsule.countPhrase",
-            value: "%lld achievements unlocked", comment: ""
-        ), content.count)
-    }
-
-    private var accessibilityText: String {
-        var parts: [String] = []
-        if content.count == 1, let title = content.title {
-            parts.append(String(format: NSLocalizedString(
-                "achievement.capsule.a11y.single",
-                value: "Achievement unlocked: %@", comment: ""
-            ), title))
-        } else {
-            parts.append(headline)
-        }
-        if content.karmaTotal > 0 {
-            parts.append(String(format: NSLocalizedString(
-                "achievement.capsule.a11y.karma",
-                value: "Earned %lld karma", comment: ""
-            ), content.karmaTotal))
-        }
-        return parts.joined(separator: ", ")
-    }
-
-    private var countdownRing: some View {
-        Capsule()
-            .trim(from: 0, to: ringProgress)
-            .stroke(Color.accent.primary, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
-            .padding(1.25)
-            .allowsHitTesting(false)
-    }
-
-    private func startCountdown() {
-        ringProgress = 1
-        withAnimation(.linear(duration: durationSeconds)) { ringProgress = 0 }
-    }
-
-    private var durationSeconds: Double {
-        let parts = duration.components
-        return Double(parts.seconds) + Double(parts.attoseconds) / 1_000_000_000_000_000_000
-    }
-}
-
 /// SwiftUI root hosted inside the overlay window: renders the active pastilles
 /// pinned to the bottom-center, animating in/out. `Color.clear` fills the space
 /// so the window has a hit-testable (but pass-through) root. The achievement
@@ -181,30 +96,33 @@ struct KarmaOverlayRoot: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             Color.clear
-            VStack(spacing: Spacing.sm) {
-                if let unlocked = achievements.activeCapsule {
-                    AchievementUnlockedCapsule(content: unlocked, duration: achievements.capsuleDuration) {
-                        achievements.dismissCapsule()
-                    }
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
+            if let earned = karma.activeCapsule {
+                KarmaEarnedCapsule(content: earned, duration: karma.capsuleDuration) {
+                    karma.dismissCapsule()
                 }
-                if let earned = karma.activeCapsule {
-                    KarmaEarnedCapsule(content: earned, duration: karma.capsuleDuration) {
-                        karma.dismissCapsule()
-                    }
-                    .transition(.move(edge: .bottom).combined(with: .opacity))
-                }
+                .padding(.bottom, 44)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
             }
-            .padding(.bottom, 44)
+            // The unlock moment covers the screen, so it sits above the
+            // pastille rather than beside it: a mutation that earns karma AND
+            // unlocks a badge shows the flash behind the card, and the card's
+            // own "+N karma" line is the badge's, never the pebble's.
+            if achievements.currentCard != nil {
+                AchievementMomentView()
+                    .transition(.opacity)
+            }
         }
         .animation(.spring(response: 0.42, dampingFraction: 0.72), value: karma.activeCapsule)
-        .animation(.spring(response: 0.42, dampingFraction: 0.72), value: achievements.activeCapsule)
+        .animation(.easeInOut(duration: 0.2), value: achievements.currentCard)
     }
 }
 
 /// A window whose empty areas pass touches through to the app below; only the
-/// pastille itself is interactive. Lets the karma flash float above presented
-/// sheets (create/edit/detail) without blocking interaction with them.
+/// overlay's own content is interactive. Lets the karma flash and the unlock
+/// moment float above presented sheets (create/edit/detail) — the composer
+/// dismisses itself on the very success that fires them, so presenting from the
+/// view tree would race that dismissal. The moment's full-screen scrim is a
+/// real subview, so it correctly captures touches while it is up.
 final class KarmaPassthroughWindow: UIWindow {
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         guard let hit = super.hitTest(point, with: event) else { return nil }
