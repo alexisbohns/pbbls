@@ -11,6 +11,7 @@ struct GlyphCarveSheet: View {
     let onSaved: (Glyph) -> Void
 
     @Environment(SupabaseService.self) private var supabase
+    @Environment(AchievementsService.self) private var achievements
     @Environment(\.dismiss) private var dismiss
 
     @State private var strokes: [GlyphStroke] = []
@@ -138,6 +139,7 @@ struct GlyphCarveSheet: View {
         saveError = nil
         do {
             let glyph = try await service.create(strokes: strokes, name: name)
+            achievements.fireCheck()
             onSaved(glyph)
             dismiss()
         } catch {
