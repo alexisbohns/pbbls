@@ -243,12 +243,20 @@ fun ProfileScreen(
                         ?.map { it.provider },
                 ),
             onDismiss = { isPresentingSettings = false },
-            onSaved = { newName, newGlyph ->
-                profile = profile?.copy(displayName = newName, glyphId = newGlyph?.id ?: profile?.glyphId)
+            onSaved = { newName, newGlyph, newHandle, isPublic ->
+                profile =
+                    profile?.copy(
+                        displayName = newName,
+                        glyphId = newGlyph?.id ?: profile?.glyphId,
+                        handle = newHandle,
+                        publicProfile = isPublic,
+                    )
                 newGlyph?.strokes?.let { glyphStrokes = it }
                 isPresentingSettings = false
             },
             modifier = Modifier.fillMaxSize(),
+            initialHandle = profile?.handle,
+            initialPublicProfile = profile?.publicProfile ?: false,
         )
     }
 }

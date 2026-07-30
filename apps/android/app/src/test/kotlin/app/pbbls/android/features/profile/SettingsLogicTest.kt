@@ -1,7 +1,9 @@
 package app.pbbls.android.features.profile
 
+import app.pbbls.android.R
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -38,6 +40,73 @@ class SettingsLogicTest {
     @Test
     fun `a non-empty password is dirty`() {
         assertTrue(settingsIsDirty("Alexis", "Alexis", "g1", null, "hunter2"))
+    }
+
+    /** Claiming, releasing, and case-only edits, with the other fields pristine. */
+    private fun handleDirty(
+        initialHandle: String?,
+        handle: String,
+    ): Boolean = settingsIsDirty("A", "A", null, null, "", initialHandle, handle)
+
+    @Test
+    fun `a changed handle is dirty, compared normalized like the DB stores it`() {
+        assertTrue(handleDirty(initialHandle = null, handle = "sam"))
+        // Same handle in a different case is not a change — the RPC would store
+        // the identical normalized value.
+        assertFalse(handleDirty(initialHandle = "sam", handle = "  SAM  "))
+        // Clearing the field is the release path, which is a change.
+        assertTrue(handleDirty(initialHandle = "sam", handle = ""))
+        // No handle before, still none: not dirty.
+        assertFalse(handleDirty(initialHandle = null, handle = "   "))
+    }
+
+    @Test
+    fun `a flipped public-profile toggle is dirty`() {
+        assertTrue(
+            settingsIsDirty(
+                initialName = "A",
+                name = "A",
+                initialGlyphId = null,
+                pickedGlyphId = null,
+                newPassword = "",
+                initialHandle = "sam",
+                handle = "sam",
+                initialPublicProfile = false,
+                isPublicProfile = true,
+            ),
+        )
+        assertFalse(
+            settingsIsDirty(
+                initialName = "A",
+                name = "A",
+                initialGlyphId = null,
+                pickedGlyphId = null,
+                newPassword = "",
+                initialHandle = "sam",
+                handle = "sam",
+                initialPublicProfile = true,
+                isPublicProfile = true,
+            ),
+        )
+    }
+
+    @Test
+    fun `set_handle codes map to inline errors, everything else falls through`() {
+        assertEquals(
+            R.string.settings_handle_error_taken,
+            handleErrorStringRes(RuntimeException("...handle_taken...")),
+        )
+        assertEquals(
+            R.string.settings_handle_error_reserved,
+            handleErrorStringRes(RuntimeException("...handle_reserved...")),
+        )
+        assertEquals(
+            R.string.settings_handle_error_invalid,
+            handleErrorStringRes(RuntimeException("...invalid_handle...")),
+        )
+        // not_found, timeouts and transport failures are not handle verdicts.
+        assertNull(handleErrorStringRes(RuntimeException("not_found")))
+        assertNull(handleErrorStringRes(RuntimeException("timeout")))
     }
 
     @Test
