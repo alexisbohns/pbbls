@@ -12,6 +12,7 @@ import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import java.time.OffsetDateTime
@@ -30,7 +31,7 @@ class ProfileService(
     suspend fun loadProfile(): ProfileRow =
         supabase.client
             .from("profiles")
-            .select(Columns.raw("display_name, created_at, glyph_id"))
+            .select(Columns.raw("display_name, created_at, glyph_id, handle, public_profile"))
             .decodeSingle()
 
     /** Stroke data for the profile glyph — mirrors `ProfileView.loadGlyphStrokes`. */
@@ -81,6 +82,36 @@ class ProfileService(
         }
     }
 
+    /**
+     * Claims, changes, or releases (null) the public handle — mirrors
+     * `SettingsSheet.save()`'s `set_handle` call. The RPC normalizes and
+     * validates, raising the stable codes `invalid_handle` / `handle_taken` /
+     * `handle_reserved`; a null handle releases it and drops `public_profile`
+     * in the same statement. Throws on failure; the screen maps the code.
+     */
+    suspend fun setHandle(handle: String?) {
+        supabase.client.postgrest.rpc(
+            "set_handle",
+            buildJsonObject {
+                if (handle == null) put("p_handle", JsonNull) else put("p_handle", handle)
+            },
+        )
+    }
+
+    /**
+     * Flips the public-profile opt-in. A single-column owner-scoped write is
+     * the sanctioned direct-client case (root `AGENTS.md`) — no RPC. The DB
+     * CHECK rejects `true` without a handle, so callers claim first.
+     */
+    suspend fun setPublicProfile(isPublic: Boolean) {
+        val userId = supabase.session?.user?.id ?: error("not authenticated")
+        supabase.client
+            .from("profiles")
+            .update(buildJsonObject { put("public_profile", isPublic) }) {
+                filter { eq("user_id", userId) }
+            }
+    }
+
     @Serializable
     private data class GlyphStrokesRow(
         val strokes: List<GlyphStroke>,
@@ -97,6 +128,9 @@ data class ProfileRow(
     val createdAt: OffsetDateTime,
     @SerialName("glyph_id")
     val glyphId: String? = null,
+    val handle: String? = null,
+    @SerialName("public_profile")
+    val publicProfile: Boolean = false,
 )
 
 /** CompositionLocal for [ProfileService] — see [LocalSupabaseService] (D4). */

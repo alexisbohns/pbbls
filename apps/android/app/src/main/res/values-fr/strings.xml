@@ -86,6 +86,16 @@
     <string name="settings_password_header">Mot de passe</string>
     <string name="settings_password_placeholder">Nouveau mot de passe</string>
     <string name="settings_password_footer">Laissez vide pour conserver votre mot de passe actuel.</string>
+    <string name="settings_public_profile_header">Profil public</string>
+    <string name="settings_handle_label">Pseudo</string>
+    <string name="settings_handle_placeholder">votre_pseudo</string>
+    <string name="settings_handle_footer">3 à 30 caractères : minuscules, chiffres, tirets bas. Laissez vide pour libérer votre pseudo.</string>
+    <string name="settings_public_profile_toggle">Rendre mon profil public</string>
+    <string name="settings_public_profile_needs_handle">Choisissez d\'abord un pseudo pour passer en public.</string>
+    <string name="settings_public_profile_share">Partager mon profil</string>
+    <string name="settings_handle_error_invalid">Ce pseudo n\'est pas valide. Utilisez 3 à 30 minuscules, chiffres ou tirets bas, en commençant et terminant par une lettre ou un chiffre.</string>
+    <string name="settings_handle_error_taken">Ce pseudo est déjà pris.</string>
+    <string name="settings_handle_error_reserved">Ce pseudo est réservé.</string>
     <string name="settings_providers_header">Fournisseurs</string>
     <string name="settings_legal_header">Mentions légales</string>
     <string name="settings_save_error">Impossible d\'enregistrer vos modifications. Veuillez réessayer.</string>

@@ -1,5 +1,7 @@
 package app.pbbls.android.features.profile
 
+import android.content.Context
+import android.content.Intent
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -20,6 +22,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -78,8 +82,10 @@ fun SettingsScreen(
     email: String?,
     providers: List<String>,
     onDismiss: () -> Unit,
-    onSaved: (displayName: String, glyph: Glyph?) -> Unit,
+    onSaved: (displayName: String, glyph: Glyph?, handle: String?, isPublic: Boolean) -> Unit,
     modifier: Modifier = Modifier,
+    initialHandle: String? = null,
+    initialPublicProfile: Boolean = false,
 ) {
     val profileService = LocalProfileService.current
     val supabase = LocalSupabaseService.current
@@ -90,6 +96,9 @@ fun SettingsScreen(
     var displayName by remember { mutableStateOf(initialDisplayName) }
     var pickedGlyph by remember { mutableStateOf<Glyph?>(null) }
     var newPassword by remember { mutableStateOf("") }
+    var handle by remember { mutableStateOf(initialHandle ?: "") }
+    var isPublicProfile by remember { mutableStateOf(initialPublicProfile) }
+    var handleErrorRes by remember { mutableStateOf<Int?>(null) }
     var isSaving by remember { mutableStateOf(false) }
     var showSaveError by remember { mutableStateOf(false) }
     var isPresentingGlyphPicker by remember { mutableStateOf(false) }
@@ -97,6 +106,9 @@ fun SettingsScreen(
     var isDeleting by remember { mutableStateOf(false) }
     var showDeleteError by remember { mutableStateOf(false) }
 
+    // Handles are stored normalized (DB CHECK), so comparisons and writes use
+    // the lowercased, trimmed form.
+    val normalizedHandle = handle.trim().lowercase()
     val isDirty =
         settingsIsDirty(
             initialName = initialDisplayName,
@@ -104,8 +116,19 @@ fun SettingsScreen(
             initialGlyphId = initialGlyphId,
             pickedGlyphId = pickedGlyph?.id,
             newPassword = newPassword,
+            initialHandle = initialHandle,
+            handle = handle,
+            initialPublicProfile = initialPublicProfile,
+            isPublicProfile = isPublicProfile,
         )
     val currentStrokes = pickedGlyph?.strokes ?: initialGlyphStrokes
+
+    // The share row reflects what is live on the server, not staged edits — a
+    // link to an unsaved handle would 404.
+    val shareUrl =
+        initialHandle
+            ?.takeIf { initialPublicProfile && it.isNotEmpty() }
+            ?.let { "https://www.pbbls.app/u/$it" }
 
     BackHandler(enabled = !isSaving && !isDeleting) { onDismiss() }
 
@@ -114,17 +137,46 @@ fun SettingsScreen(
         scope.launch {
             isSaving = true
             showSaveError = false
+            handleErrorRes = null
             val trimmed = displayName.trim()
             val nameToSend = trimmed.takeIf { it != initialDisplayName && it.isNotEmpty() }
             val glyphToSend = pickedGlyph?.takeIf { it.id != initialGlyphId }
             val passwordToSend = newPassword.takeIf { it.isNotEmpty() }
+
+            // Handle first: claiming and going public in one save needs the
+            // handle stored before the public_profile write passes the CHECK.
+            var savedHandle = initialHandle
+            if (normalizedHandle != (initialHandle ?: "")) {
+                val claimed = normalizedHandle.takeIf { it.isNotEmpty() }
+                try {
+                    profileService.setHandle(claimed)
+                    savedHandle = claimed
+                } catch (e: Exception) {
+                    Log.e(TAG, "set_handle failed", e)
+                    val code = handleErrorStringRes(e)
+                    if (code != null) handleErrorRes = code else showSaveError = true
+                    isSaving = false
+                    return@launch
+                }
+            }
+
             try {
                 profileService.saveSettings(
                     displayName = nameToSend,
                     glyphId = glyphToSend?.id,
                     password = passwordToSend,
                 )
-                onSaved(nameToSend ?: initialDisplayName, pickedGlyph)
+                // Releasing the handle already cleared the flag server-side, so
+                // only write the toggle while a handle exists.
+                if (isPublicProfile != initialPublicProfile && savedHandle != null) {
+                    profileService.setPublicProfile(isPublicProfile)
+                }
+                onSaved(
+                    nameToSend ?: initialDisplayName,
+                    pickedGlyph,
+                    savedHandle,
+                    if (savedHandle == null) false else isPublicProfile,
+                )
             } catch (e: Exception) {
                 Log.e(TAG, "settings save failed", e)
                 showSaveError = true
@@ -264,6 +316,129 @@ fun SettingsScreen(
                         },
                     ),
             )
+
+            // Public profile (M50): claim a handle, opt in, then share the link.
+            Column(verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.sm)) {
+                val publicProfileRows: List<@Composable () -> Unit> =
+                    buildList {
+                        add {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                PebblesText(
+                                    text = stringResource(R.string.settings_handle_label),
+                                    style = PebblesTypography.body,
+                                    color = system.secondary,
+                                )
+                                Spacer(Modifier.weight(1f))
+                                PebblesText(
+                                    text = "@",
+                                    style = PebblesTypography.body,
+                                    color = system.secondary,
+                                )
+                                BasicTextField(
+                                    value = handle,
+                                    onValueChange = {
+                                        handle = it
+                                        handleErrorRes = null
+                                        // Emptying the field means "release my handle",
+                                        // which the server pairs with dropping the public
+                                        // flag. Mirror it so a save can never carry
+                                        // "public, no handle".
+                                        if (it.trim().isEmpty()) isPublicProfile = false
+                                    },
+                                    singleLine = true,
+                                    textStyle =
+                                        PebblesTypography.body.copy(
+                                            color = system.foreground,
+                                            textAlign = TextAlign.End,
+                                        ),
+                                    cursorBrush = SolidColor(PebblesTheme.colors.accent.primary),
+                                    keyboardOptions =
+                                        KeyboardOptions(
+                                            capitalization = KeyboardCapitalization.None,
+                                            autoCorrectEnabled = false,
+                                        ),
+                                    decorationBox = { inner ->
+                                        if (handle.isEmpty()) {
+                                            PebblesText(
+                                                text = stringResource(R.string.settings_handle_placeholder),
+                                                style = PebblesTypography.body,
+                                                color = system.muted,
+                                            )
+                                        }
+                                        inner()
+                                    },
+                                    modifier = Modifier.weight(2f),
+                                )
+                            }
+                        }
+                        add {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .clickable(enabled = initialHandle != null) {
+                                            isPublicProfile = !isPublicProfile
+                                        },
+                            ) {
+                                PebblesText(
+                                    text = stringResource(R.string.settings_public_profile_toggle),
+                                    style = PebblesTypography.body,
+                                    color = if (initialHandle != null) system.foreground else system.muted,
+                                )
+                                Spacer(Modifier.weight(1f))
+                                Switch(
+                                    checked = isPublicProfile,
+                                    onCheckedChange = { isPublicProfile = it },
+                                    enabled = initialHandle != null,
+                                    colors =
+                                        SwitchDefaults.colors(
+                                            checkedTrackColor = PebblesTheme.colors.accent.primary,
+                                        ),
+                                )
+                            }
+                        }
+                        if (shareUrl != null) {
+                            add {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .clickable { sharePublicProfile(context, shareUrl) },
+                                ) {
+                                    PebblesText(
+                                        text = stringResource(R.string.settings_public_profile_share),
+                                        style = PebblesTypography.body,
+                                        color = system.foreground,
+                                    )
+                                    Spacer(Modifier.weight(1f))
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_chevron_right),
+                                        contentDescription = null,
+                                        tint = system.secondary,
+                                        modifier = Modifier.size(16.dp),
+                                    )
+                                }
+                            }
+                        }
+                    }
+                PebblesListSection(
+                    header = stringResource(R.string.settings_public_profile_header),
+                    rows = publicProfileRows,
+                )
+                PebblesText(
+                    text =
+                        handleErrorRes?.let { stringResource(it) }
+                            ?: if (initialHandle == null) {
+                                stringResource(R.string.settings_public_profile_needs_handle)
+                            } else {
+                                stringResource(R.string.settings_handle_footer)
+                            },
+                    style = PebblesTypography.subhead,
+                    color = if (handleErrorRes != null) PebblesDestructive else system.secondary,
+                )
+            }
 
             if (providers.isNotEmpty()) {
                 PebblesListSection(
@@ -443,7 +618,8 @@ fun SettingsScreen(
 
 /**
  * Pure dirty-check — mirrors `SettingsSheet.isDirty`: a trimmed, non-empty
- * name change, a different picked glyph, or a non-empty new password.
+ * name change, a different picked glyph, a non-empty new password, a changed
+ * handle (compared normalized, as the DB stores it), or a flipped public flag.
  */
 internal fun settingsIsDirty(
     initialName: String,
@@ -451,9 +627,47 @@ internal fun settingsIsDirty(
     initialGlyphId: String?,
     pickedGlyphId: String?,
     newPassword: String,
+    initialHandle: String? = null,
+    handle: String = initialHandle ?: "",
+    initialPublicProfile: Boolean = false,
+    isPublicProfile: Boolean = initialPublicProfile,
 ): Boolean {
     val trimmed = name.trim()
     val nameChanged = trimmed != initialName && trimmed.isNotEmpty()
     val glyphChanged = pickedGlyphId != null && pickedGlyphId != initialGlyphId
-    return nameChanged || glyphChanged || newPassword.isNotEmpty()
+    val handleChanged = handle.trim().lowercase() != (initialHandle ?: "")
+    val publicChanged = isPublicProfile != initialPublicProfile
+    return nameChanged || glyphChanged || newPassword.isNotEmpty() || handleChanged || publicChanged
+}
+
+/**
+ * Maps a `set_handle` rejection to its inline string resource. The RPC raises
+ * stable codes; anything else (`not_found`, a dropped connection) is not a
+ * verdict on the handle, so it returns null and the caller falls back to the
+ * generic save error.
+ */
+internal fun handleErrorStringRes(error: Throwable): Int? {
+    val description = error.message ?: error.toString()
+    return when {
+        description.contains("handle_taken") -> R.string.settings_handle_error_taken
+        description.contains("handle_reserved") -> R.string.settings_handle_error_reserved
+        description.contains("invalid_handle") -> R.string.settings_handle_error_invalid
+        else -> null
+    }
+}
+
+/**
+ * Android's share affordance for the public profile — the app's first
+ * `ACTION_SEND` chooser (iOS uses `ShareLink`).
+ */
+private fun sharePublicProfile(
+    context: Context,
+    url: String,
+) {
+    val intent =
+        Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, url)
+        }
+    context.startActivity(Intent.createChooser(intent, null))
 }
