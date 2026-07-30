@@ -392,6 +392,11 @@
     <!-- Achievements (M48) -->
     <string name="achievements_title">Achievements</string>
     <string name="achievements_card_subtitle">Badges along your path</string>
+    <string name="achievements_shelf_count">%1$d earned</string>
+    <string name="achievement_moment_eyebrow">Achievement unlocked</string>
+    <string name="achievement_moment_next">Next</string>
+    <string name="achievement_moment_done">Nice</string>
+    <string name="achievement_moment_progress">%1$d of %2$d</string>
     <string name="achievements_load_error">Couldn\'t load your achievements. Please try again.</string>
     <string name="achievement_locked">Locked</string>
     <string name="achievement_unlocked_on">Unlocked %1$s</string>

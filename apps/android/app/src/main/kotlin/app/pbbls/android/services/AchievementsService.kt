@@ -2,6 +2,7 @@ package app.pbbls.android.services
 
 import android.util.Log
 import androidx.compose.runtime.staticCompositionLocalOf
+import app.pbbls.android.features.karma.AchievementMomentCard
 import app.pbbls.android.features.karma.AchievementNotificationService
 import app.pbbls.android.features.path.models.OffsetDateTimeSerializer
 import io.github.jan.supabase.postgrest.from
@@ -134,28 +135,41 @@ class AchievementsService(
 
     /**
      * Mutation-path variant: fire-and-forget from a success handler. Never
-     * throws, never blocks the caller; new unlocks collapse into one capsule
-     * (web parity). Karma notifies stay untouched — the capsule carries its
-     * own "+N karma" line. A single unlock rides with its catalog row so the
-     * capsule can resolve the localized badge title; the one extra catalog
-     * read per actual unlock (rare) keeps i18n out of six call sites.
+     * throws, never blocks the caller. New unlocks open the chained moment
+     * (D13); karma notifies stay untouched — each card carries the badge's own
+     * "+N karma" line, never the pebble's.
+     *
+     * Cards carry their catalog row so the composition can resolve localized
+     * copy; the one extra catalog read per actual unlock (rare) keeps i18n out
+     * of six call sites.
      */
     fun fireCheck() {
         scope.launch {
             try {
                 val results = check()
                 if (results.isEmpty()) return@launch
-                val karmaTotal = results.sumOf { it.karmaGranted }
-                val single =
-                    results.singleOrNull()?.let { result ->
-                        try {
-                            loadCatalog().firstOrNull { it.slug == result.slug }
-                        } catch (e: Exception) {
-                            Log.w(TAG, "catalog fetch for unlock capsule failed", e)
-                            null
-                        }
+                val bySlug =
+                    try {
+                        loadCatalog().associateBy { it.slug }
+                    } catch (e: Exception) {
+                        Log.w(TAG, "catalog fetch for the unlock moment failed", e)
+                        emptyMap()
                     }
-                notify.notifyUnlocked(count = results.size, single = single, karmaTotal = karmaTotal)
+                val cards =
+                    results
+                        // Chain in the order the ladder reads, so a multi-tier
+                        // unlock walks up rather than arriving shuffled. A slug
+                        // the catalog does not know (a check racing a catalog
+                        // change) still celebrates, and sorts last.
+                        .sortedBy { bySlug[it.slug]?.sortOrder ?: Int.MAX_VALUE }
+                        .map { result ->
+                            AchievementMomentCard(
+                                slug = result.slug,
+                                record = bySlug[result.slug],
+                                karmaGranted = result.karmaGranted,
+                            )
+                        }
+                notify.present(cards)
             } catch (e: Exception) {
                 Log.w(TAG, "achievement check failed (self-heals on next call)", e)
             }

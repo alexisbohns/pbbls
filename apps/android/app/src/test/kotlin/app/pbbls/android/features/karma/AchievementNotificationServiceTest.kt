@@ -1,72 +1,85 @@
 package app.pbbls.android.features.karma
 
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.advanceTimeBy
-import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * The achievement-unlock capsule entry point (M48): zero-count calls never
- * surface, a shown capsule auto-dismisses after
- * [AchievementNotificationService.CAPSULE_DURATION_MS], `dismiss` clears it
- * immediately, and a fresh unlock replaces the current one and resets the
- * timer — mirrors [KarmaNotificationServiceTest]'s virtual-clock approach.
+ * The unlock moment's queue (D13): an empty response never presents, cards
+ * advance one at a time, the last card ends the moment, and dismissing skips
+ * the rest of the queue. No virtual clock here — unlike the karma pastille the
+ * moment has no auto-dismiss; the user taps through it.
  */
 class AchievementNotificationServiceTest {
-    @Test
-    fun `a zero count never surfaces a capsule`() =
-        runTest {
-            val service = AchievementNotificationService(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
-
-            service.notifyUnlocked(count = 0, single = null, karmaTotal = 0)
-            assertNull(service.activeCapsule)
-        }
+    private fun card(
+        slug: String,
+        karma: Int = 0,
+    ) = AchievementMomentCard(slug = slug, record = null, karmaGranted = karma)
 
     @Test
-    fun `an unlock shows the capsule and auto-dismisses after the duration`() =
-        runTest {
-            val service = AchievementNotificationService(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
+    fun `an empty result set never presents`() {
+        val service = AchievementNotificationService()
 
-            service.notifyUnlocked(count = 2, single = null, karmaTotal = 5)
-            assertEquals(
-                AchievementUnlockedContent(count = 2, single = null, karmaTotal = 5),
-                service.activeCapsule,
-            )
-
-            advanceTimeBy(AchievementNotificationService.CAPSULE_DURATION_MS + 1)
-            runCurrent()
-            assertNull(service.activeCapsule)
-        }
+        service.present(emptyList())
+        assertNull(service.currentCard)
+        assertTrue(service.cards.isEmpty())
+    }
 
     @Test
-    fun `dismiss clears the capsule immediately`() =
-        runTest {
-            val service = AchievementNotificationService(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
+    fun `a single unlock shows one card and ends on advance`() {
+        val service = AchievementNotificationService()
 
-            service.notifyUnlocked(count = 1, single = null, karmaTotal = 0)
-            service.dismiss()
-            assertNull(service.activeCapsule)
-        }
+        service.present(listOf(card("first-soul", karma = 5)))
+        assertEquals("first-soul", service.currentCard?.slug)
+        assertEquals(5, service.currentCard?.karmaGranted)
+        assertTrue(service.isShowingLastCard)
+
+        service.advance()
+        assertNull(service.currentCard)
+    }
 
     @Test
-    fun `a fresh unlock replaces the capsule and resets the timer`() =
-        runTest {
-            val service = AchievementNotificationService(CoroutineScope(UnconfinedTestDispatcher(testScheduler)))
+    fun `several unlocks chain in the order they were given`() {
+        val service = AchievementNotificationService()
 
-            service.notifyUnlocked(count = 1, single = null, karmaTotal = 0)
-            advanceTimeBy(AchievementNotificationService.CAPSULE_DURATION_MS - 100)
-            service.notifyUnlocked(count = 3, single = null, karmaTotal = 7)
+        service.present(listOf(card("pebble-count-1"), card("pebble-count-10"), card("first-glyph")))
+        assertEquals("pebble-count-1", service.currentCard?.slug)
+        assertTrue(!service.isShowingLastCard)
 
-            advanceTimeBy(200)
-            runCurrent()
-            assertEquals(3, service.activeCapsule?.count)
+        service.advance()
+        assertEquals("pebble-count-10", service.currentCard?.slug)
 
-            advanceTimeBy(AchievementNotificationService.CAPSULE_DURATION_MS)
-            runCurrent()
-            assertNull(service.activeCapsule)
-        }
+        service.advance()
+        assertEquals("first-glyph", service.currentCard?.slug)
+        assertTrue(service.isShowingLastCard)
+
+        service.advance()
+        assertNull(service.currentCard)
+    }
+
+    @Test
+    fun `dismissing skips the rest of the queue`() {
+        val service = AchievementNotificationService()
+
+        service.present(listOf(card("a"), card("b"), card("c")))
+        service.dismiss()
+
+        assertNull(service.currentCard)
+        assertTrue(service.cards.isEmpty())
+    }
+
+    @Test
+    fun `a fresh moment replaces the previous queue`() {
+        val service = AchievementNotificationService()
+
+        service.present(listOf(card("a"), card("b")))
+        service.advance()
+        assertEquals("b", service.currentCard?.slug)
+
+        service.present(listOf(card("c")))
+        assertEquals("c", service.currentCard?.slug)
+        assertEquals(1, service.cards.size)
+        assertTrue(service.isShowingLastCard)
+    }
 }

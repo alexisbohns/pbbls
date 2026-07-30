@@ -1,70 +1,72 @@
 package app.pbbls.android.features.karma
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.services.AchievementRecord
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 /**
- * One achievement unlock moment. Several unlocks in a single
- * `check_achievements()` response collapse into one content value (web
- * parity): [single] carries the catalog row when exactly one badge unlocked —
- * the capsule resolves its localized title — else a count phrase shows.
- * [karmaTotal] is the sum the server actually emitted.
+ * One card of an unlock moment: a badge that just unlocked, with the karma it
+ * actually paid (as reported by `check_achievements()`, never the catalog's
+ * current value).
+ *
+ * [record] carries the catalog row so the card can resolve its localized copy
+ * in the composition (`achievementTitle` is `@Composable`); it is null only
+ * when a check raced a catalog change, in which case [slug] headlines the card.
  */
-data class AchievementUnlockedContent(
-    val count: Int,
-    val single: AchievementRecord?,
-    val karmaTotal: Int,
+data class AchievementMomentCard(
+    val slug: String,
+    val record: AchievementRecord?,
+    val karmaGranted: Int,
 )
 
 /**
- * Explicit-fire entry point for the achievement unlock capsule. Sibling of
- * [KarmaNotificationService] — same presentation contract, its own slot so an
- * achievement moment and a karma flash fired by the same mutation coexist
- * instead of one replacing the other (the overlay stacks them; see
- * `KarmaOverlayHost`). Delight only — never authoritative over what is
- * unlocked.
+ * Explicit-fire entry point for the achievement unlock moment (D13).
+ *
+ * Sibling of [KarmaNotificationService], but a different shape of celebration:
+ * where karma flashes a pastille that times out, an unlock opens a chained card
+ * per badge that the user taps through, so there is no auto-dismiss here.
+ *
+ * Only the mutation path celebrates: the screen-open call in `AchievementsScreen`
+ * is the retroactive grant and can return a veteran's whole history at once, so
+ * it renders in the grid instead of chaining twenty cards.
  */
-class AchievementNotificationService(
-    private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate),
-) {
-    /** Content shown in the pastille (null = hidden). Observed by the overlay. */
-    var activeCapsule: AchievementUnlockedContent? by mutableStateOf(null)
+class AchievementNotificationService {
+    /** The queue being celebrated (empty = nothing showing). */
+    var cards: List<AchievementMomentCard> by mutableStateOf(emptyList())
         private set
 
-    private var dismissJob: Job? = null
+    /** Index of the card on screen. */
+    var index: Int by mutableIntStateOf(0)
+        private set
 
-    fun notifyUnlocked(
-        count: Int,
-        single: AchievementRecord?,
-        karmaTotal: Int,
-    ) {
-        if (count <= 0) return
-        activeCapsule = AchievementUnlockedContent(count, single, karmaTotal)
-        dismissJob?.cancel()
-        dismissJob =
-            scope.launch {
-                delay(CAPSULE_DURATION_MS)
-                activeCapsule = null
-            }
+    /** The card on screen, or null when the moment is idle. */
+    val currentCard: AchievementMomentCard?
+        get() = cards.getOrNull(index)
+
+    val isShowingLastCard: Boolean
+        get() = index + 1 >= cards.size
+
+    fun present(cards: List<AchievementMomentCard>) {
+        if (cards.isEmpty()) return
+        this.cards = cards
+        this.index = 0
     }
 
+    /** Advances to the next card, ending the moment after the last one. */
+    fun advance() {
+        if (isShowingLastCard) dismiss() else index += 1
+    }
+
+    /**
+     * Ends the moment immediately — tapping the scrim or pressing back skips
+     * the rest of the queue. Dismissal is never blocking.
+     */
     fun dismiss() {
-        dismissJob?.cancel()
-        activeCapsule = null
-    }
-
-    companion object {
-        /** Slightly longer than the karma flash: a badge title takes a beat more to read. */
-        const val CAPSULE_DURATION_MS = 3_200L
+        cards = emptyList()
+        index = 0
     }
 }
 
