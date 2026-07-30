@@ -9,7 +9,7 @@
       "view_card_variant": "large"
     },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-07-30T01:15:00.000Z"
+    "updated_at": "2026-07-30T08:00:00.000Z"
   },
   "nodes": [
     {
@@ -194,7 +194,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Pebble Drafts",
-      "description": "List of unpublished quick captures, most recently saved first. Each row shows a placeholder chip (a draft has no render_svg \u2014 nothing is carved until it publishes), the draft name or a \"no name yet\" fallback, and a relative saved-at stamp; tapping resumes it in the Quick Pebble Editor, and rows are deletable behind a confirm. Deliberately its own surface rather than a section inside the Path timeline, whose week grouping, ripple, bounce and stats all assume real pebbles (M47 design D4). Reached from a Path header entry that only appears when drafts exist. Web (M47, #640): /drafts route. iOS (M47, #641): DraftsListSheet presented from the Path, swipe-to-delete, resume into CreatePebbleSheet. Android (M47, #642): DraftsScreen full-screen cover with a stateless DraftsContent for previews, per-row delete, resume stacking the composer on top.",
+      "description": "List of unpublished quick captures, most recently saved first. Each row shows a placeholder chip (a draft has no render_svg — nothing is carved until it publishes), the draft name or a \"no name yet\" fallback, and a relative saved-at stamp; tapping resumes it in the Quick Pebble Editor, and rows are deletable behind a confirm. Deliberately its own surface rather than a section inside the Path timeline, whose week grouping, ripple, bounce and stats all assume real pebbles (M47 design D4). Reached from a Path header entry that only appears when drafts exist. Web (M47, #640): /drafts route. iOS (M47, #641): DraftsListSheet presented from the Path, swipe-to-delete, resume into CreatePebbleSheet. Android (M47, #642): DraftsScreen full-screen cover with a stateless DraftsContent for previews, per-row delete, resume stacking the composer on top.",
       "status": "development",
       "platforms": [
         "web",
@@ -207,7 +207,7 @@
       "project_id": "pebbles",
       "species": "data-model",
       "title": "pebble_drafts",
-      "description": "Unpublished pebble drafts: owner-scoped rows holding a PARTIAL compose-pebble wire payload as jsonb, with created_at/updated_at (trigger-maintained, the list orders on it). Deliberately a separate table rather than a status column on pebbles \u2014 five NOT NULL semantic columns a draft may all lack, and create_pebble is the schema's only karma emitter, so keeping drafts off it makes zero karma structural (M47 design D1). Payload is intentionally unvalidated; create_pebble stays the validation authority at publish time.",
+      "description": "Unpublished pebble drafts: owner-scoped rows holding a PARTIAL compose-pebble wire payload as jsonb, with created_at/updated_at (trigger-maintained, the list orders on it). Deliberately a separate table rather than a status column on pebbles — five NOT NULL semantic columns a draft may all lack, and create_pebble is the schema's only karma emitter, so keeping drafts off it makes zero karma structural (M47 design D1). Payload is intentionally unvalidated; create_pebble stays the validation authority at publish time.",
       "status": "development",
       "platforms": [
         "web",
@@ -220,7 +220,7 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Quick Pebble Editor",
-      "description": "Single-page pebble creation editor (V2) combining all enrichment steps. On /path the editor is anchored to the bottom dock — collapsed as a 'What happened?' trigger that opens an overlay bottom-sheet on tap; on /record it auto-opens as the route's primary affordance. Android (M39, #541/#542): full-screen CreatePebbleScreen/EditPebbleScreen hosting the shared PebbleForm with modal bottom-sheet pickers — full-screen surfaces instead of a bottom-sheet dock (M39 design D5). M42 (#581): the shared Android form gains the Photo section — single-photo attach via the system photo picker (client-side compression to 1024px/420px JPEG renditions, upload with compensating deletes), existing-snap row with eager delete_pebble_media removal, and save gates while an upload is pending or failed. M47 (#640): the composer gains draft mode \u2014 a \"Save as draft\" action ungated by the publish requirements (name + emotion), so \"just a name\" is a valid quick capture, plus debounced local autosave of the open form as crash insurance (text and ids only, no media) with a restore prompt on return. Resuming a draft hydrates the form from its jsonb payload, dropping souls/collections/glyphs the user no longer owns. Publishing runs the normal compose-pebble path once and deletes the draft row. iOS (M47, #641): a bottom-bar \"Save as draft\" action, a file-backed snapshot flushed on scene-phase change, and server-side glyph verification via can_use_glyph on resume. Android (M47, #642): symmetric \u2014 a footer \"Save as draft\" action, a SharedPreferences-backed snapshot debounced in a LaunchedEffect, and the same can_use_glyph check.",
+      "description": "Single-page pebble creation editor (V2) combining all enrichment steps. On /path the editor is anchored to the bottom dock — collapsed as a 'What happened?' trigger that opens an overlay bottom-sheet on tap; on /record it auto-opens as the route's primary affordance. Android (M39, #541/#542): full-screen CreatePebbleScreen/EditPebbleScreen hosting the shared PebbleForm with modal bottom-sheet pickers — full-screen surfaces instead of a bottom-sheet dock (M39 design D5). M42 (#581): the shared Android form gains the Photo section — single-photo attach via the system photo picker (client-side compression to 1024px/420px JPEG renditions, upload with compensating deletes), existing-snap row with eager delete_pebble_media removal, and save gates while an upload is pending or failed. M47 (#640): the composer gains draft mode — a \"Save as draft\" action ungated by the publish requirements (name + emotion), so \"just a name\" is a valid quick capture, plus debounced local autosave of the open form as crash insurance (text and ids only, no media) with a restore prompt on return. Resuming a draft hydrates the form from its jsonb payload, dropping souls/collections/glyphs the user no longer owns. Publishing runs the normal compose-pebble path once and deletes the draft row. iOS (M47, #641): a bottom-bar \"Save as draft\" action, a file-backed snapshot flushed on scene-phase change, and server-side glyph verification via can_use_glyph on resume. Android (M47, #642): symmetric — a footer \"Save as draft\" action, a SharedPreferences-backed snapshot debounced in a LaunchedEffect, and the same can_use_glyph check.",
       "status": "live",
       "platforms": [
         "web",
@@ -2350,6 +2350,194 @@
         "ios",
         "android"
       ]
+    },
+    {
+      "id": "V-connections-list",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Connections",
+      "description": "The people you're connected with, newest first, each with their display name and avatar glyph. Removing severs the connection for both sides; removing with a block additionally stops that person re-entering through a live invite. Discovery is invite-only by design (M49): no search, no directory, no follower graph.",
+      "status": "development",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ]
+    },
+    {
+      "id": "V-connection-invite",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Connection Invite",
+      "description": "Your invite link, shown as copyable text and as a QR so someone across the table can scan it. The same invite is handed back on every open until it is rotated or expires (7 days), so a link already shared stays alive; \"get a new link\" revokes the current one. Multi-use: one code serves a whole table.",
+      "status": "development",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ]
+    },
+    {
+      "id": "V-invite-accept",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Invite Accept",
+      "description": "The landing surface for an invite link. Shows who is inviting (display name plus avatar glyph, via an anon-callable preview) before any explicit accept tap. Signed-out visitors on web get the sign-up-first path and return here afterwards. Expired, revoked and blocked tokens all render one indistinguishable dark state.",
+      "status": "development",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ]
+    },
+    {
+      "id": "DM-connections",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "connections",
+      "description": "Single-row symmetric link between two users: (user_a, user_b) with a user_a < user_b CHECK and a unique pair. No status column — accepting the invite IS the mutual consent, so there is no pending state between two known users. Written only by the definer RPCs; SELECT-only RLS scoped to either member.",
+      "status": "development",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ]
+    },
+    {
+      "id": "DM-connection-invites",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "connection_invites",
+      "description": "Invite tokens: inviter_id, a unique 32-byte base64url token, created_at, expires_at (default 7 days) and revoked_at. Multi-use until revoked or expired, with a partial unique index enforcing at most one live invite per user. SELECT-only RLS scoped to the inviter, which is what keeps the plaintext token safe.",
+      "status": "development",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ]
+    },
+    {
+      "id": "DM-connection-blocks",
+      "project_id": "pebbles",
+      "species": "data-model",
+      "title": "connection_blocks",
+      "description": "Directed blocks, PK (blocker_id, blocked_id), recorded when a connection is removed with the block option. Checked by accept in BOTH directions, surfaced as invite_expired so a block is never confirmed to the blocked user. Present from day one for the store UGC requirements; management UI lands with M56.",
+      "status": "development",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ]
+    },
+    {
+      "id": "API-create-connection-invite",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "RPC create_connection_invite",
+      "description": "Definer RPC returning the caller's live invite {token, expires_at, created_at}, minting one only when none exists and auto-revoking an expired one. p_rotate revokes the live invite and issues a fresh token — the entire revocation surface.",
+      "status": "development",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ]
+    },
+    {
+      "id": "API-preview-connection-invite",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "RPC preview_connection_invite",
+      "description": "Definer RPC granted to anon: projects the inviter's display name and avatar glyph geometry for a token, so the accept page can say who is inviting before an account exists. Never raises — returns {status: valid | expired | not_found}; expired and revoked go fully dark. Cross-user reads stay a narrow projection, never a profiles row.",
+      "status": "development",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ]
+    },
+    {
+      "id": "API-accept-connection-invite",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "RPC accept_connection_invite",
+      "description": "Definer RPC that validates the token live, rejects self-accept, rejects a block in either direction as invite_expired, and inserts the ordered pair on conflict do nothing. A repeat accept succeeds with already_connected — re-scanning a shared QR is the normal case. Returns the peer projection.",
+      "status": "development",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ]
+    },
+    {
+      "id": "API-get-connections",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "RPC get_connections",
+      "description": "Definer RPC returning the caller's connections as a jsonb array, newest first, each with the peer's display name and avatar glyph. A definer projection rather than a view because profiles RLS is owner-only and a definer-rights view would leak cross-user.",
+      "status": "development",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ]
+    },
+    {
+      "id": "API-remove-connection",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "RPC remove_connection",
+      "description": "Definer RPC that severs a connection the caller belongs to, optionally recording a block from the remover against the removed. Carries the extension marker where M52 seams and M53 pairs will be severed in the same transaction.",
+      "status": "development",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ]
+    },
+    {
+      "id": "F-connect",
+      "project_id": "pebbles",
+      "species": "flow",
+      "title": "Connect with someone",
+      "description": "The invite-only path to a mutual connection: open your invite, share the link or QR, and the person who opens it sees who is inviting and taps to connect. Accepting is the mutual consent — there is no request queue and no directory to search.",
+      "status": "development",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ],
+      "metadata": {
+        "playlist": {
+          "entries": [
+            {
+              "type": "view",
+              "view_id": "V-profile"
+            },
+            {
+              "type": "view",
+              "view_id": "V-connections-list"
+            },
+            {
+              "type": "view",
+              "view_id": "V-connection-invite"
+            },
+            {
+              "type": "junction",
+              "label": "How does the invite reach them?",
+              "cases": [
+                {
+                  "label": "Shared link",
+                  "view_id": "V-invite-accept"
+                },
+                {
+                  "label": "Scanned QR",
+                  "view_id": "V-invite-accept"
+                }
+              ]
+            }
+          ]
+        }
+      }
     }
   ],
   "edges": [
@@ -4572,6 +4760,139 @@
       "source_id": "V-settings",
       "target_id": "API-delete-account",
       "edge_type": "calls"
+    },
+    {
+      "id": "e-V-connections-list-DM-connections",
+      "project_id": "pebbles",
+      "source_id": "V-connections-list",
+      "target_id": "DM-connections",
+      "edge_type": "displays"
+    },
+    {
+      "id": "e-V-connections-list-API-get-connections",
+      "project_id": "pebbles",
+      "source_id": "V-connections-list",
+      "target_id": "API-get-connections",
+      "edge_type": "calls"
+    },
+    {
+      "id": "e-V-connections-list-API-remove-connection",
+      "project_id": "pebbles",
+      "source_id": "V-connections-list",
+      "target_id": "API-remove-connection",
+      "edge_type": "calls"
+    },
+    {
+      "id": "e-V-connection-invite-DM-connection-invites",
+      "project_id": "pebbles",
+      "source_id": "V-connection-invite",
+      "target_id": "DM-connection-invites",
+      "edge_type": "displays"
+    },
+    {
+      "id": "e-V-connection-invite-API-create-connection-invite",
+      "project_id": "pebbles",
+      "source_id": "V-connection-invite",
+      "target_id": "API-create-connection-invite",
+      "edge_type": "calls"
+    },
+    {
+      "id": "e-V-invite-accept-API-preview-connection-invite",
+      "project_id": "pebbles",
+      "source_id": "V-invite-accept",
+      "target_id": "API-preview-connection-invite",
+      "edge_type": "calls"
+    },
+    {
+      "id": "e-V-invite-accept-API-accept-connection-invite",
+      "project_id": "pebbles",
+      "source_id": "V-invite-accept",
+      "target_id": "API-accept-connection-invite",
+      "edge_type": "calls"
+    },
+    {
+      "id": "e-API-create-connection-invite-DM-connection-invites",
+      "project_id": "pebbles",
+      "source_id": "API-create-connection-invite",
+      "target_id": "DM-connection-invites",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-preview-connection-invite-DM-connection-invites",
+      "project_id": "pebbles",
+      "source_id": "API-preview-connection-invite",
+      "target_id": "DM-connection-invites",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-accept-connection-invite-DM-connections",
+      "project_id": "pebbles",
+      "source_id": "API-accept-connection-invite",
+      "target_id": "DM-connections",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-accept-connection-invite-DM-connection-invites",
+      "project_id": "pebbles",
+      "source_id": "API-accept-connection-invite",
+      "target_id": "DM-connection-invites",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-accept-connection-invite-DM-connection-blocks",
+      "project_id": "pebbles",
+      "source_id": "API-accept-connection-invite",
+      "target_id": "DM-connection-blocks",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-get-connections-DM-connections",
+      "project_id": "pebbles",
+      "source_id": "API-get-connections",
+      "target_id": "DM-connections",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-remove-connection-DM-connections",
+      "project_id": "pebbles",
+      "source_id": "API-remove-connection",
+      "target_id": "DM-connections",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-remove-connection-DM-connection-blocks",
+      "project_id": "pebbles",
+      "source_id": "API-remove-connection",
+      "target_id": "DM-connection-blocks",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-F-connect-V-profile",
+      "project_id": "pebbles",
+      "source_id": "F-connect",
+      "target_id": "V-profile",
+      "edge_type": "composes"
+    },
+    {
+      "id": "e-F-connect-V-connections-list",
+      "project_id": "pebbles",
+      "source_id": "F-connect",
+      "target_id": "V-connections-list",
+      "edge_type": "composes"
+    },
+    {
+      "id": "e-F-connect-V-connection-invite",
+      "project_id": "pebbles",
+      "source_id": "F-connect",
+      "target_id": "V-connection-invite",
+      "edge_type": "composes"
+    },
+    {
+      "id": "e-F-connect-V-invite-accept",
+      "project_id": "pebbles",
+      "source_id": "F-connect",
+      "target_id": "V-invite-accept",
+      "edge_type": "composes"
     }
   ]
 }
