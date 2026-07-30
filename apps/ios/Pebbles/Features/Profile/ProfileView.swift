@@ -5,11 +5,15 @@ private struct ProfileRow: Decodable {
     var displayName: String?
     let createdAt: Date
     var glyphId: UUID?
+    var handle: String?
+    var publicProfile: Bool
 
     enum CodingKeys: String, CodingKey {
-        case displayName = "display_name"
-        case createdAt   = "created_at"
-        case glyphId     = "glyph_id"
+        case displayName   = "display_name"
+        case createdAt     = "created_at"
+        case glyphId       = "glyph_id"
+        case handle        = "handle"
+        case publicProfile = "public_profile"
     }
 }
 
@@ -74,11 +78,15 @@ struct ProfileView: View {
                 initialDisplayName: profile?.displayName ?? "",
                 initialGlyphId: profile?.glyphId,
                 initialGlyphStrokes: glyphStrokes,
+                initialHandle: profile?.handle,
+                initialPublicProfile: profile?.publicProfile ?? false,
                 email: supabase.session?.user.email,
-                onSaved: { newName, newGlyph in
+                onSaved: { newName, newGlyph, newHandle, isPublic in
                     if var current = profile {
                         current.displayName = newName
                         current.glyphId = newGlyph?.id ?? current.glyphId
+                        current.handle = newHandle
+                        current.publicProfile = isPublic
                         profile = current
                     }
                     if let strokes = newGlyph?.strokes {
@@ -94,7 +102,7 @@ struct ProfileView: View {
         do {
             let row: ProfileRow = try await supabase.client
                 .from("profiles")
-                .select("display_name, created_at, glyph_id")
+                .select("display_name, created_at, glyph_id, handle, public_profile")
                 .single().execute().value
             self.profile = row
             self.hasLoadedProfile = true

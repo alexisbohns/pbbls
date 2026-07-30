@@ -10,8 +10,10 @@ struct SettingsSheet: View {
     let initialDisplayName: String
     let initialGlyphId: UUID?
     let initialGlyphStrokes: [GlyphStroke]?
+    let initialHandle: String?
+    let initialPublicProfile: Bool
     let email: String?
-    let onSaved: (_ displayName: String, _ glyph: Glyph?) -> Void
+    let onSaved: (_ displayName: String, _ glyph: Glyph?, _ handle: String?, _ isPublic: Bool) -> Void
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(\.dismiss) private var dismiss
@@ -20,6 +22,9 @@ struct SettingsSheet: View {
     @State private var pickedGlyph: Glyph?
     @State private var currentPassword: String = ""
     @State private var newPassword: String = ""
+    @State private var handle: String
+    @State private var isPublicProfile: Bool
+    @State private var handleError: String?
     @State private var isSaving = false
     @State private var saveError: String?
     @State private var presentedLegalDoc: LegalDoc?
@@ -29,7 +34,7 @@ struct SettingsSheet: View {
     @State private var deleteError: String?
     @FocusState private var focusedField: Field?
 
-    private enum Field: Hashable { case displayName, newPassword }
+    private enum Field: Hashable { case displayName, newPassword, handle }
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "settings-sheet")
 
@@ -37,26 +42,53 @@ struct SettingsSheet: View {
         initialDisplayName: String,
         initialGlyphId: UUID?,
         initialGlyphStrokes: [GlyphStroke]?,
+        initialHandle: String? = nil,
+        initialPublicProfile: Bool = false,
         email: String?,
-        onSaved: @escaping (_ displayName: String, _ glyph: Glyph?) -> Void
+        onSaved: @escaping (_ displayName: String, _ glyph: Glyph?, _ handle: String?, _ isPublic: Bool) -> Void
     ) {
         self.initialDisplayName = initialDisplayName
         self.initialGlyphId = initialGlyphId
         self.initialGlyphStrokes = initialGlyphStrokes
+        self.initialHandle = initialHandle
+        self.initialPublicProfile = initialPublicProfile
         self.email = email
         self.onSaved = onSaved
         self._displayName = State(initialValue: initialDisplayName)
+        self._handle = State(initialValue: initialHandle ?? "")
+        self._isPublicProfile = State(initialValue: initialPublicProfile)
     }
 
     private var trimmedDisplayName: String {
         displayName.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
+    /// Handles are stored normalized (see the DB CHECK), so every comparison
+    /// and write uses the lowercased, trimmed form.
+    private var normalizedHandle: String {
+        handle.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+    }
+
+    private var handleChanged: Bool {
+        normalizedHandle != (initialHandle ?? "")
+    }
+
+    private var publicProfileChanged: Bool {
+        isPublicProfile != initialPublicProfile
+    }
+
     private var isDirty: Bool {
         let nameChanged = trimmedDisplayName != initialDisplayName && !trimmedDisplayName.isEmpty
         let glyphChanged = pickedGlyph != nil && pickedGlyph?.id != initialGlyphId
         let passwordSet = !newPassword.isEmpty
-        return nameChanged || glyphChanged || passwordSet
+        return nameChanged || glyphChanged || passwordSet || handleChanged || publicProfileChanged
+    }
+
+    /// The share row reflects what is actually live on the server, not staged
+    /// edits — a link to an unsaved handle would 404.
+    private var shareURL: URL? {
+        guard initialPublicProfile, let saved = initialHandle, !saved.isEmpty else { return nil }
+        return URL(string: "https://www.pbbls.app/u/\(saved)")
     }
 
     private var currentStrokes: [GlyphStroke]? {
@@ -68,6 +100,7 @@ struct SettingsSheet: View {
             List {
                 headerSection
                 informationsSection
+                publicProfileSection
                 if isSSO {
                     providersSection
                 } else {
@@ -241,6 +274,73 @@ struct SettingsSheet: View {
         }
     }
 
+    /// Public profile (M50): claim a handle, opt in, then share the link.
+    /// The toggle stays disabled until a handle is live on the server — the DB
+    /// CHECK rejects `public_profile = true` with no handle.
+    private var publicProfileSection: some View {
+        Section {
+            HStack {
+                Text("Handle")
+                    .foregroundStyle(Color.system.secondary)
+                Spacer()
+                Text(verbatim: "@")
+                    .foregroundStyle(Color.system.secondary)
+                TextField("your_handle", text: $handle)
+                    .multilineTextAlignment(.trailing)
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled(true)
+                    .focused($focusedField, equals: .handle)
+                    .submitLabel(.done)
+                    .onSubmit { focusedField = nil }
+                    .onChange(of: handle) { _, newValue in
+                        handleError = nil
+                        // Emptying the field means "release my handle", which the
+                        // server pairs with dropping the public flag. Mirror it so
+                        // a save can never carry "public, no handle".
+                        if newValue.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            isPublicProfile = false
+                        }
+                    }
+            }
+            .pebblesListRow(position: .top)
+
+            Toggle(isOn: $isPublicProfile) {
+                Text("Make my profile public")
+                    .foregroundStyle(
+                        initialHandle == nil ? Color.system.secondary : Color.system.foreground
+                    )
+            }
+            .tint(Color.accent.primary)
+            .disabled(initialHandle == nil)
+            .pebblesListRow(position: shareURL == nil ? .bottom : .middle)
+
+            if let shareURL {
+                ShareLink(item: shareURL) {
+                    HStack {
+                        Label("Share my profile", systemImage: "square.and.arrow.up")
+                        Spacer()
+                        Text(verbatim: shareURL.absoluteString)
+                            .font(.footnote)
+                            .foregroundStyle(Color.system.secondary)
+                            .lineLimit(1)
+                            .truncationMode(.middle)
+                    }
+                }
+                .pebblesListRow(position: .bottom)
+            }
+        } header: {
+            Text("Public profile").pebblesSectionHeader()
+        } footer: {
+            if let handleError {
+                Text(handleError).foregroundStyle(.red)
+            } else if initialHandle == nil {
+                Text("Claim a handle first to go public.")
+            } else {
+                Text("3 to 30 characters: lowercase letters, numbers, underscores. Leave empty to release your handle.")
+            }
+        }
+    }
+
     private var passwordSection: some View {
         Section {
             SecureField("New password", text: $newPassword)
@@ -315,10 +415,29 @@ struct SettingsSheet: View {
         }
     }
 
+    /// Maps a `set_handle` rejection to its user-facing reason. The RPC raises
+    /// stable codes (`invalid_handle` / `handle_taken` / `handle_reserved`);
+    /// anything else — `not_found`, a timeout, a dropped connection — is not a
+    /// verdict on the handle, so it falls through to the generic save error.
+    private func handleErrorMessage(for error: Error) -> String? {
+        let description = "\(error)"
+        if description.contains("handle_taken") {
+            return String(localized: "That handle is already taken.")
+        }
+        if description.contains("handle_reserved") {
+            return String(localized: "That handle is reserved.")
+        }
+        if description.contains("invalid_handle") {
+            return String(localized: "That handle isn't valid. Use 3 to 30 lowercase letters, numbers or underscores, starting and ending with a letter or number.")
+        }
+        return nil
+    }
+
     private func save() async {
         guard isDirty, !isSaving else { return }
         isSaving = true
         saveError = nil
+        handleError = nil
 
         let nameToSend: String? = {
             let trimmed = trimmedDisplayName
@@ -329,6 +448,28 @@ struct SettingsSheet: View {
             return picked.id.uuidString
         }()
         let passwordToSend: String? = newPassword.isEmpty ? nil : newPassword
+
+        // Handle first: claiming and going public in one save needs the handle
+        // stored before the public_profile write can pass the DB CHECK.
+        var savedHandle = initialHandle
+        if handleChanged {
+            do {
+                let claimed = normalizedHandle.isEmpty ? nil : normalizedHandle
+                try await supabase.client
+                    .rpc("set_handle", params: SetHandleParams(p_handle: claimed))
+                    .execute()
+                savedHandle = claimed
+            } catch {
+                logger.error("set_handle failed: \(error.localizedDescription, privacy: .private)")
+                if let message = handleErrorMessage(for: error) {
+                    handleError = message
+                } else {
+                    saveError = String(localized: "Couldn't save your changes. Please try again.")
+                }
+                isSaving = false
+                return
+            }
+        }
 
         do {
             if nameToSend != nil || glyphIdToSend != nil {
@@ -341,20 +482,42 @@ struct SettingsSheet: View {
                     .execute()
             }
 
+            // Single-column toggle: the sanctioned direct-update case (root
+            // AGENTS.md). Releasing the handle already cleared the flag
+            // server-side, so only write it while a handle exists.
+            if publicProfileChanged, savedHandle != nil, let userId = supabase.session?.user.id {
+                try await supabase.client
+                    .from("profiles")
+                    .update(["public_profile": isPublicProfile])
+                    .eq("user_id", value: userId)
+                    .execute()
+            }
+
             if let passwordToSend {
                 _ = try await supabase.client.auth.update(
                     user: UserAttributes(password: passwordToSend)
                 )
             }
 
-            onSaved(nameToSend ?? initialDisplayName, pickedGlyph)
+            onSaved(
+                nameToSend ?? initialDisplayName,
+                pickedGlyph,
+                savedHandle,
+                savedHandle == nil ? false : isPublicProfile
+            )
             dismiss()
         } catch {
             logger.error("settings save failed: \(error.localizedDescription, privacy: .private)")
-            saveError = "Couldn't save your changes. Please try again."
+            saveError = String(localized: "Couldn't save your changes. Please try again.")
             isSaving = false
         }
     }
+}
+
+/// Wire shape for `set_handle`. A null handle releases it (and drops the
+/// public flag) server-side.
+private struct SetHandleParams: Encodable {
+    let p_handle: String?
 }
 
 /// Wire shape for `update_profile` RPC. Null fields tell Postgres "don't change".
@@ -368,8 +531,10 @@ private struct UpdateProfileParams: Encodable {
         initialDisplayName: "Alexis",
         initialGlyphId: nil,
         initialGlyphStrokes: nil,
+        initialHandle: "alexis",
+        initialPublicProfile: true,
         email: "hello@bohns.design",
-        onSaved: { _, _ in }
+        onSaved: { _, _, _, _ in }
     )
     .environment(SupabaseService())
 }
