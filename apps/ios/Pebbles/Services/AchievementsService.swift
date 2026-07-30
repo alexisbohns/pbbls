@@ -181,6 +181,10 @@ final class AchievementsService {
         }
     }
 
+    /// Builds one card per newly unlocked badge and hands the queue to the
+    /// moment (D13). One extra catalog read per actual unlock (rare) buys the
+    /// localized copy without threading i18n through five call sites — the same
+    /// trade the web moment makes.
     private func presentUnlockMoment(for results: [AchievementCheckResult]) {
         guard let notify else {
             logger.error("achievement notify service not bound; dropping unlock moment")
@@ -188,25 +192,45 @@ final class AchievementsService {
         }
         Task { [weak self] in
             guard let self else { return }
-            let karmaTotal = results.reduce(0) { $0 + $1.karmaGranted }
-            var title: String?
-            if results.count == 1, let slug = results.first?.slug {
-                // One extra catalog read per actual unlock (rare) buys the
-                // localized badge title without threading i18n through six
-                // call sites — same trade the web pill makes.
-                do {
-                    let catalog = try await self.loadCatalog()
-                    if let record = catalog.first(where: { $0.slug == slug }) {
-                        title = record.localizedTitle(
-                            emotionName: self.emotionName(for: record),
-                            domainName: self.domainName(for: record)
+            var catalog: [AchievementRecord] = []
+            do {
+                catalog = try await self.loadCatalog()
+            } catch {
+                self.logger.warning("catalog fetch for the unlock moment failed: \(error.localizedDescription, privacy: .private)")
+            }
+            let bySlug = Dictionary(catalog.map { ($0.slug, $0) }, uniquingKeysWith: { first, _ in first })
+
+            let cards = results
+                .map { result -> (card: AchievementMomentCard, sortOrder: Int) in
+                    guard let record = bySlug[result.slug] else {
+                        // A check racing a catalog change: still celebrate,
+                        // headlined by the slug, and sort last.
+                        return (
+                            AchievementMomentCard(
+                                id: result.slug, title: result.slug,
+                                description: nil, karmaGranted: result.karmaGranted
+                            ),
+                            Int.max
                         )
                     }
-                } catch {
-                    self.logger.warning("catalog fetch for unlock capsule failed: \(error.localizedDescription, privacy: .private)")
+                    let emotionName = self.emotionName(for: record)
+                    let domainName = self.domainName(for: record)
+                    return (
+                        AchievementMomentCard(
+                            id: record.slug,
+                            title: record.localizedTitle(emotionName: emotionName, domainName: domainName),
+                            description: record.localizedDescription(emotionName: emotionName, domainName: domainName),
+                            karmaGranted: result.karmaGranted
+                        ),
+                        record.sortOrder
+                    )
                 }
-            }
-            notify.notifyUnlocked(count: results.count, title: title, karmaTotal: karmaTotal)
+                // Chain in the order the ladder reads, so a multi-tier unlock
+                // walks up rather than arriving shuffled.
+                .sorted { $0.sortOrder < $1.sortOrder }
+                .map(\.card)
+
+            notify.present(cards: cards)
         }
     }
 

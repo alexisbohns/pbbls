@@ -13,7 +13,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "3 \u00e0 30 caract\u00e8res : minuscules, chiffres, tirets bas. Laissez vide pour lib\u00e9rer votre pseudo."
+            "value" : "3 à 30 caractères : minuscules, chiffres, tirets bas. Laissez vide pour libérer votre pseudo."
           }
         }
       }
@@ -115,7 +115,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ce pseudo est d\u00e9j\u00e0 pris."
+            "value" : "Ce pseudo est déjà pris."
           }
         }
       }
@@ -132,7 +132,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ce pseudo est r\u00e9serv\u00e9."
+            "value" : "Ce pseudo est réservé."
           }
         }
       }
@@ -149,7 +149,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ce pseudo n'est pas valide. Utilisez 3 \u00e0 30 minuscules, chiffres ou tirets bas, en commen\u00e7ant et terminant par une lettre ou un chiffre."
+            "value" : "Ce pseudo n'est pas valide. Utilisez 3 à 30 minuscules, chiffres ou tirets bas, en commençant et terminant par une lettre ou un chiffre."
           }
         }
       }
@@ -6144,6 +6144,108 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tes glyphes trouvent preneur %lld fois."
+          }
+        }
+      }
+    },
+    "Achievement unlocked" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Achievement unlocked"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Succès débloqué"
+          }
+        }
+      }
+    },
+    "Next" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suivant"
+          }
+        }
+      }
+    },
+    "Nice" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nice"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Super"
+          }
+        }
+      }
+    },
+    "%lld of %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld of %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sur %lld"
+          }
+        }
+      }
+    },
+    "achievement.moment.a11y.karma" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Earned %lld karma"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu as gagné %lld karma"
+          }
+        }
+      }
+    },
+    "achievement.shelf.unlockedCount" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld earned"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld décrochés"
           }
         }
       }
