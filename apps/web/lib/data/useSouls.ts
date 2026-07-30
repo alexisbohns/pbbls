@@ -1,6 +1,7 @@
 "use client"
 
 import { useDataProvider } from "@/lib/data/provider-context"
+import { fireAchievementCheck } from "@/lib/activity/fire-achievement-check"
 import type { CreateSoulInput, UpdateSoulInput } from "@/lib/data/data-provider"
 import type { Soul } from "@/lib/types"
 
@@ -11,6 +12,7 @@ export function useSouls() {
     if (!provider) throw new Error("Not authenticated")
     const soul = await provider.createSoul(input)
     setStore(provider.getStore())
+    fireAchievementCheck(provider)
     return soul
   }
 

@@ -104,6 +104,48 @@ export type ProfileEngagement = {
   assiduity: boolean[]
 }
 
+// ---------------------------------------------------------------------------
+// Achievements (M48) — public catalog + owner-scoped unlock ledger
+// ---------------------------------------------------------------------------
+
+export type AchievementFamily =
+  | "pebble_count"
+  | "emotion_first"
+  | "domain_first"
+  | "first_collection"
+  | "first_glyph"
+  | "first_soul"
+  | "glyph_count"
+  | "glyph_sales"
+
+// One row of the public `achievements` catalog. Copy is composed client-side
+// from family-keyed i18n; the nullable EN/FR pairs are admin overrides that
+// win when present (D7). `isActive: false` retires a badge: it stops
+// evaluating and the grid hides it while locked, but earned unlocks keep
+// rendering.
+export type Achievement = {
+  id: string
+  slug: string
+  family: AchievementFamily
+  threshold: number | null
+  emotionId: string | null // emotion_first only
+  domainId: string | null // domain_first only
+  sortOrder: number
+  glyphId: string | null // system-owned visual; null → family fallback icon
+  karmaReward: number
+  isActive: boolean
+  titleEn: string | null
+  titleFr: string | null
+  descriptionEn: string | null
+  descriptionFr: string | null
+}
+
+// One row of the caller's `achievement_unlocks` ledger (permanent by design).
+export type AchievementUnlock = {
+  achievementId: string
+  unlockedAt: string
+}
+
 export type MarkStroke = {
   d: string
   width: number
