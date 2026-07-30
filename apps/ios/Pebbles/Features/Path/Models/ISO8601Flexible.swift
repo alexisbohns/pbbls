@@ -3,7 +3,7 @@ import Foundation
 /// Parses the ISO-8601 timestamps that reach this app from surfaces that do not
 /// agree on precision, and emits the one form they all accept.
 ///
-/// Why this exists (#649): `pebble_drafts.payload` is written by three clients
+/// Why this exists (#651): `pebble_drafts.payload` is written by three clients
 /// and read back by all three, plus `updated_at` comes straight from Postgres.
 /// The precisions in play are all different:
 ///
