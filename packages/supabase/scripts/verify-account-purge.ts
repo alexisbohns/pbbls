@@ -4,7 +4,8 @@
  *
  * Seeds a throwaway SELLER with every entity type (profile, soul, collection,
  * pebble + cards/domains/soul-link/collection-link/snap, storage files, a SOLD
- * glyph bought by a throwaway BUYER, an unsold glyph, favourites, karma), then
+ * glyph bought by a throwaway BUYER, an unsold glyph, favourites, karma,
+ * achievement unlocks), then
  * deletes the seller through the real delete-account edge function and asserts
  * the roadmap §6 bar: every seller row gone, the buyer's glyph still renders
  * (user_id = null + entitlement + delisted-but-approved submission), the
@@ -223,6 +224,15 @@ try {
   });
   if (draftErr) throw new Error(`insert draft: ${draftErr.message}`);
 
+  // Achievement unlocks (M48). Earned through the real RPC as the signed-in
+  // seller (achievement_unlocks has no client insert policy): the pebble,
+  // soul, collection and glyphs above qualify several badges in one call.
+  const { data: unlockRows, error: unlockErr } = await seller.rpc("check_achievements");
+  if (unlockErr) throw new Error(`check_achievements: ${unlockErr.message}`);
+  if (!Array.isArray(unlockRows) || unlockRows.length === 0) {
+    throw new Error("check_achievements unlocked nothing — seed should qualify several badges");
+  }
+
   // -------------------------------------------------------------------------
   // 3. The sale: fund the buyer, buy through the real RPC, favourite.
   // -------------------------------------------------------------------------
@@ -274,6 +284,7 @@ try {
     ["bounces", "user_id"],
     ["log_reactions", "user_id"],
     ["pebble_drafts", "user_id"],
+    ["achievement_unlocks", "user_id"],
   ];
   for (const [table, column] of sellerScoped) {
     const n = await countRows(table, column, sellerId);
