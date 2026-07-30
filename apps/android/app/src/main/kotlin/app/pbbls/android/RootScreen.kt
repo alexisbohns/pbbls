@@ -20,6 +20,7 @@ import androidx.navigation.navArgument
 import app.pbbls.android.features.auth.AuthMode
 import app.pbbls.android.features.auth.AuthScreen
 import app.pbbls.android.features.glyph.store.GlyphsListScreen
+import app.pbbls.android.features.karma.AchievementMomentOverlay
 import app.pbbls.android.features.karma.KarmaOverlayHost
 import app.pbbls.android.features.karma.LocalAchievementNotificationService
 import app.pbbls.android.features.karma.LocalKarmaNotificationService
@@ -147,9 +148,9 @@ fun RootScreen() {
             // Karma + achievement flashes float above the authed surfaces
             // (create/detail live inside PathScreen, so they're below) —
             // drawn last for z-order (D9).
-            KarmaOverlayHost(
-                service = karma,
-                achievements = achievementNotify,
+            KarmaOverlayHost(service = karma, modifier = Modifier.fillMaxSize())
+            AchievementMomentOverlay(
+                service = achievementNotify,
                 modifier = Modifier.fillMaxSize(),
             )
         } else {
