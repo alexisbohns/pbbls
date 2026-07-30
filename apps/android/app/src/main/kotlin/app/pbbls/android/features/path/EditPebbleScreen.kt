@@ -43,6 +43,7 @@ import app.pbbls.android.features.pebblemedia.ImagePipeline
 import app.pbbls.android.features.pebblemedia.SnapUploadCoordinator
 import app.pbbls.android.features.pebblemedia.models.FormSnap
 import app.pbbls.android.services.ComposeResult
+import app.pbbls.android.services.LocalAchievementsService
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalPebbleDetailService
 import app.pbbls.android.services.LocalPebbleWriteService
@@ -79,6 +80,7 @@ fun EditPebbleScreen(
     val referenceData = LocalReferenceDataService.current
     val palettes = LocalEmotionPaletteService.current
     val karma = LocalKarmaNotificationService.current
+    val achievements = LocalAchievementsService.current
     val supabase = LocalSupabaseService.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -194,9 +196,15 @@ fun EditPebbleScreen(
                 is ComposeResult.Success -> {
                     renderSvg = result.response.renderSvg ?: renderSvg
                     karma.notifyEarned(result.response.karmaDelta ?: 0, KarmaReason.PEBBLE_ENRICHED)
+                    // An edit can change the pebble's emotion, newly
+                    // qualifying an emotion_first badge.
+                    achievements.fireCheck()
                     onSaved()
                 }
-                is ComposeResult.SoftSuccess -> onSaved()
+                is ComposeResult.SoftSuccess -> {
+                    achievements.fireCheck()
+                    onSaved()
+                }
                 is ComposeResult.Failure -> {
                     saveErrorRes = result.messageRes
                     isSaving = false

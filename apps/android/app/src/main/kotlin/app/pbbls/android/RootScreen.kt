@@ -21,12 +21,14 @@ import app.pbbls.android.features.auth.AuthMode
 import app.pbbls.android.features.auth.AuthScreen
 import app.pbbls.android.features.glyph.store.GlyphsListScreen
 import app.pbbls.android.features.karma.KarmaOverlayHost
+import app.pbbls.android.features.karma.LocalAchievementNotificationService
 import app.pbbls.android.features.karma.LocalKarmaNotificationService
 import app.pbbls.android.features.lab.LabScreen
 import app.pbbls.android.features.onboarding.OnboardingGate
 import app.pbbls.android.features.onboarding.OnboardingScreen
 import app.pbbls.android.features.onboarding.OnboardingSteps
 import app.pbbls.android.features.path.PathScreen
+import app.pbbls.android.features.profile.AchievementsScreen
 import app.pbbls.android.features.profile.CollectionDetailScreen
 import app.pbbls.android.features.profile.CollectionsListScreen
 import app.pbbls.android.features.profile.ProfileScreen
@@ -53,6 +55,7 @@ private const val ROUTE_COLLECTIONS = "collections"
 private const val ROUTE_COLLECTION_DETAIL = "collections/{collectionId}"
 private const val ROUTE_GLYPHS = "glyphs"
 private const val ROUTE_LAB = "lab"
+private const val ROUTE_ACHIEVEMENTS = "achievements"
 
 /**
  * Top-level auth gate — the `RootView` analog (D5). The gate is conditional
@@ -72,6 +75,7 @@ fun RootScreen() {
     val palettes = LocalEmotionPaletteService.current
     val referenceData = LocalReferenceDataService.current
     val karma = LocalKarmaNotificationService.current
+    val achievementNotify = LocalAchievementNotificationService.current
     val snapUrls = LocalSnapURLCache.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -140,9 +144,14 @@ fun RootScreen() {
                     },
                 )
             }
-            // Karma flash floats above the authed surfaces (create/detail live
-            // inside PathScreen, so they're below it) — drawn last for z-order (D9).
-            KarmaOverlayHost(service = karma, modifier = Modifier.fillMaxSize())
+            // Karma + achievement flashes float above the authed surfaces
+            // (create/detail live inside PathScreen, so they're below) —
+            // drawn last for z-order (D9).
+            KarmaOverlayHost(
+                service = karma,
+                achievements = achievementNotify,
+                modifier = Modifier.fillMaxSize(),
+            )
         } else {
             WelcomeAuthNavHost(
                 contentRevealed = welcomeContentRevealed,
@@ -184,6 +193,7 @@ private fun AuthedNavHost(onSignOut: () -> Unit) {
                 },
                 onOpenGlyphs = { navController.navigate(ROUTE_GLYPHS) },
                 onOpenLab = { navController.navigate(ROUTE_LAB) },
+                onOpenAchievements = { navController.navigate(ROUTE_ACHIEVEMENTS) },
             )
         }
         composable(ROUTE_GLYPHS) {
@@ -191,6 +201,9 @@ private fun AuthedNavHost(onSignOut: () -> Unit) {
         }
         composable(ROUTE_LAB) {
             LabScreen(onBack = { navController.popBackStack() })
+        }
+        composable(ROUTE_ACHIEVEMENTS) {
+            AchievementsScreen(onBack = { navController.popBackStack() })
         }
         composable(ROUTE_SOULS) {
             SoulsListScreen(
