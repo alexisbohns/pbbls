@@ -27,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.features.glyph.models.GlyphStroke
+import app.pbbls.android.features.profile.components.ProfileAchievementsCard
 import app.pbbls.android.features.profile.components.ProfileBanner
 import app.pbbls.android.features.profile.components.ProfileCollectionsCard
 import app.pbbls.android.features.profile.components.ProfileLabCard
@@ -71,6 +72,7 @@ fun ProfileScreen(
     onOpenGlyphs: () -> Unit,
     onOpenConnections: () -> Unit,
     onOpenLab: () -> Unit,
+    onOpenAchievements: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val profileService = LocalProfileService.current
@@ -205,6 +207,7 @@ fun ProfileScreen(
                         pebbles = stats.pebbles,
                         karma = stats.karma,
                     )
+                    ProfileAchievementsCard(onOpen = onOpenAchievements)
                     ProfileCollectionsCard(
                         collections = collections,
                         hasLoaded = collectionsLoaded,

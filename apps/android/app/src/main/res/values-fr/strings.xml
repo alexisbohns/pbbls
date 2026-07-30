@@ -407,4 +407,53 @@
     <string name="connections_error_invite_unusable">Ce lien d\'invitation n\'est plus valide. Demandes-en un nouveau.</string>
     <string name="connections_error_own_invite">C\'est ton propre lien d\'invitation.</string>
     <string name="connections_error_session">Reconnecte-toi.</string>
+
+    <!-- Achievements (M48) -->
+    <string name="achievements_title">Succès</string>
+    <string name="achievements_card_subtitle">Tes badges le long du chemin</string>
+    <string name="achievements_load_error">Impossible de charger tes succès. Réessaie.</string>
+    <string name="achievement_locked">À débloquer</string>
+    <string name="achievement_unlocked_on">Débloqué le %1$s</string>
+    <string name="achievement_group_pebble_count">Galets</string>
+    <string name="achievement_group_emotion_first">Émotions</string>
+    <string name="achievement_group_domain_first">Domaines</string>
+    <string name="achievement_group_first_collection">Collections</string>
+    <string name="achievement_group_first_glyph">Glyphes</string>
+    <string name="achievement_group_first_soul">Âmes</string>
+    <string name="achievement_group_glyph_count">Gravure</string>
+    <string name="achievement_group_glyph_sales">Marché</string>
+    <plurals name="achievement_family_pebble_count_title">
+        <item quantity="one">Premier galet</item>
+        <item quantity="other">%1$d galets</item>
+    </plurals>
+    <plurals name="achievement_family_pebble_count_description">
+        <item quantity="one">Dépose ton tout premier galet sur ton chemin.</item>
+        <item quantity="other">Rassemble %1$d galets sur ton chemin.</item>
+    </plurals>
+    <string name="achievement_family_emotion_first_title">Première fois : %1$s</string>
+    <string name="achievement_family_emotion_first_description">Capture ton premier galet teinté par l\'émotion %1$s.</string>
+    <string name="achievement_family_domain_first_title">Premiers pas : %1$s</string>
+    <string name="achievement_family_domain_first_description">Capture ton premier galet dans le domaine %1$s.</string>
+    <string name="achievement_family_first_collection_title">Première collection</string>
+    <string name="achievement_family_first_collection_description">Crée ta toute première collection.</string>
+    <string name="achievement_family_first_glyph_title">Premier glyphe</string>
+    <string name="achievement_family_first_glyph_description">Grave ton tout premier glyphe.</string>
+    <string name="achievement_family_first_soul_title">Première âme</string>
+    <string name="achievement_family_first_soul_description">Ajoute ta toute première âme.</string>
+    <string name="achievement_family_glyph_count_title">%1$d glyphes</string>
+    <string name="achievement_family_glyph_count_description">Grave %1$d glyphes de ta main.</string>
+    <plurals name="achievement_family_glyph_sales_title">
+        <item quantity="one">Première vente</item>
+        <item quantity="other">%1$d ventes</item>
+    </plurals>
+    <plurals name="achievement_family_glyph_sales_description">
+        <item quantity="one">Un pebbler adopte l\'un de tes glyphes.</item>
+        <item quantity="other">Tes glyphes trouvent preneur %1$d fois.</item>
+    </plurals>
+    <plurals name="achievement_capsule_count">
+        <item quantity="one">%1$d succès débloqué</item>
+        <item quantity="other">%1$d succès débloqués</item>
+    </plurals>
+    <string name="achievement_capsule_a11y_single">Succès débloqué : %1$s</string>
+    <string name="achievement_capsule_a11y_karma">Tu as gagné %1$d karma</string>
 </resources>

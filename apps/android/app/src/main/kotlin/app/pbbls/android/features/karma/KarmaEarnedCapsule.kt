@@ -12,6 +12,7 @@ import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -49,33 +50,57 @@ import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography
 
 /**
- * Bottom-center overlay hosting the "+N karma" pastille — the iOS
- * `KarmaOverlayRoot` analog (D9). Drawn last in `RootScreen`'s authed branch so
- * it floats above the create/detail surfaces. Observes
- * [KarmaNotificationService.activeCapsule]; the service owns the auto-dismiss.
+ * Bottom-center overlay hosting the "+N karma" pastille and its M48 sibling,
+ * the achievement-unlocked pastille — the iOS `KarmaOverlayRoot` analog (D9).
+ * Drawn last in `RootScreen`'s authed branch so it floats above the
+ * create/detail surfaces. The achievement capsule stacks above the karma one
+ * so a mutation that fires both shows both (web parity: two toasts with
+ * distinct ids), each on its own lifetime; the services own the auto-dismiss.
  */
 @Composable
 fun KarmaOverlayHost(
     service: KarmaNotificationService,
+    achievements: AchievementNotificationService,
     modifier: Modifier = Modifier,
 ) {
     val content = service.activeCapsule
-    // Retain the last content during the exit animation so it doesn't blank out.
+    val unlocked = achievements.activeCapsule
+    // Retain the last contents during the exit animations so they don't blank out.
     var lastContent by remember { mutableStateOf(KarmaEarnedContent(0, KarmaReason.PEBBLE_CREATED)) }
     if (content != null) lastContent = content
+    var lastUnlocked by remember { mutableStateOf<AchievementUnlockedContent?>(null) }
+    if (unlocked != null) lastUnlocked = unlocked
 
     Box(modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
-        AnimatedVisibility(
-            visible = content != null,
-            enter = fadeIn() + slideInVertically { it / 2 },
-            exit = fadeOut() + slideOutVertically { it / 2 },
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            modifier = Modifier.padding(bottom = 44.dp),
         ) {
-            val shown = content ?: lastContent
-            KarmaEarnedCapsule(
-                content = shown,
-                onTap = { service.dismiss() },
-                modifier = Modifier.padding(bottom = 44.dp),
-            )
+            AnimatedVisibility(
+                visible = unlocked != null,
+                enter = fadeIn() + slideInVertically { it / 2 },
+                exit = fadeOut() + slideOutVertically { it / 2 },
+            ) {
+                val shown = unlocked ?: lastUnlocked
+                if (shown != null) {
+                    AchievementUnlockedCapsule(
+                        content = shown,
+                        onTap = { achievements.dismiss() },
+                    )
+                }
+            }
+            AnimatedVisibility(
+                visible = content != null,
+                enter = fadeIn() + slideInVertically { it / 2 },
+                exit = fadeOut() + slideOutVertically { it / 2 },
+            ) {
+                val shown = content ?: lastContent
+                KarmaEarnedCapsule(
+                    content = shown,
+                    onTap = { service.dismiss() },
+                )
+            }
         }
     }
 }
@@ -148,9 +173,10 @@ fun KarmaEarnedCapsule(
 /**
  * Draws the capsule-outline countdown stroke trimmed to [progress] (1 → 0)
  * via [PathMeasure]. A full-perimeter round-rect matching the pastille's pill
- * shape, drained clockwise from the top.
+ * shape, drained clockwise from the top. Internal so the achievement capsule
+ * (its M48 sibling) shares the exact same drain.
  */
-private fun DrawScope.drawKarmaRing(
+internal fun DrawScope.drawKarmaRing(
     progress: Float,
     color: Color,
 ) {

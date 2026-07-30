@@ -40,6 +40,7 @@ import app.pbbls.android.features.glyph.views.GlyphView
 import app.pbbls.android.features.glyph.views.GlyphViewCase
 import app.pbbls.android.features.path.create.pickers.GlyphPickerSheet
 import app.pbbls.android.features.profile.models.SoulWithGlyph
+import app.pbbls.android.services.LocalAchievementsService
 import app.pbbls.android.services.LocalSoulsService
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesListSection
@@ -74,6 +75,7 @@ fun SoulFormScreen(
     modifier: Modifier = Modifier,
 ) {
     val soulsService = LocalSoulsService.current
+    val achievements = LocalAchievementsService.current
     val system = PebblesTheme.colors.system
     val scope = rememberCoroutineScope()
 
@@ -121,6 +123,7 @@ fun SoulFormScreen(
             try {
                 if (original == null) {
                     soulsService.create(name = trimmed, glyphId = glyphId)
+                    achievements.fireCheck()
                 } else {
                     soulsService.update(soulId = original.id, name = trimmed, glyphId = glyphId)
                 }

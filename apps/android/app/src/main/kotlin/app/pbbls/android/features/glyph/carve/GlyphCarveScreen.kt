@@ -56,6 +56,7 @@ import app.pbbls.android.features.glyph.models.Glyph
 import app.pbbls.android.features.glyph.models.GlyphStroke
 import app.pbbls.android.features.glyph.services.LocalGlyphService
 import app.pbbls.android.features.path.render.GlyphImage
+import app.pbbls.android.services.LocalAchievementsService
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesScreen
 import app.pbbls.android.theme.PebblesText
@@ -89,6 +90,7 @@ fun GlyphCarveScreen(
     modifier: Modifier = Modifier,
 ) {
     val glyphService = LocalGlyphService.current
+    val achievements = LocalAchievementsService.current
     val system = PebblesTheme.colors.system
     val scope = rememberCoroutineScope()
 
@@ -110,6 +112,7 @@ fun GlyphCarveScreen(
             showSaveError = false
             try {
                 val glyph = glyphService.create(strokes = strokes, name = name)
+                achievements.fireCheck()
                 onSaved(glyph)
             } catch (e: Exception) {
                 Log.e(TAG, "glyph save failed", e)
