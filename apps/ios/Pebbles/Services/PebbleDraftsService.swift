@@ -7,7 +7,7 @@ import os
 ///
 /// `updated_at` is decoded from its **string** form through `ISO8601Flexible`
 /// rather than left to whatever date strategy the ambient decoder happens to
-/// carry (#649). Postgres returns microsecond precision, and a decoder expecting
+/// carry (#651). Postgres returns microsecond precision, and a decoder expecting
 /// a numeric or fixed-precision date fails the whole row — which would break the
 /// drafts list outright, not just the timestamp.
 struct PebbleDraftRecord: Identifiable, Decodable, Equatable {
