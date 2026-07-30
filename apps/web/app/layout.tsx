@@ -9,6 +9,7 @@ import { AuthProvider } from "@/components/layout/AuthProvider";
 import { SerwistRegistration } from "@/components/layout/SerwistRegistration";
 import { MainContent } from "@/components/layout/MainContent";
 import { Toaster } from "@/components/ui/sonner";
+import { AchievementMomentHost } from "@/components/activity/AchievementMomentHost";
 import { LocaleProvider } from "@/lib/i18n/LocaleProvider";
 import "./globals.css";
 
@@ -94,6 +95,7 @@ export default function RootLayout({
                   <ThemeProvider>
                     <ThemeColorSync />
                     <Toaster />
+                    <AchievementMomentHost />
                     <div className="flex h-full pl-[var(--safe-area-left)] pr-[var(--safe-area-right)]">
                       <MainContent>{children}</MainContent>
                     </div>

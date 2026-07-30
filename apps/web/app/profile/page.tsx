@@ -15,7 +15,7 @@ import { ProfileBanner } from "@/components/profile/ProfileBanner"
 import { ShortcutsRow } from "@/components/profile/ShortcutsRow"
 import { StatsCard } from "@/components/profile/StatsCard"
 import { CollectionsCard } from "@/components/profile/CollectionsCard"
-import { AchievementsCard } from "@/components/profile/AchievementsCard"
+import { AchievementsShelf } from "@/components/profile/AchievementsShelf"
 import { LabCard } from "@/components/profile/LabCard"
 import { LogoutButton } from "@/components/profile/LogoutButton"
 import { PageLayout } from "@/components/layout/PageLayout"
@@ -93,7 +93,7 @@ export default function ProfilePage() {
             pebbles={pebblesCount}
             karma={karma}
           />
-          <AchievementsCard />
+          <AchievementsShelf />
           <CollectionsCard />
           <LabCard />
           <LogoutButton onLogout={handleLogout} />

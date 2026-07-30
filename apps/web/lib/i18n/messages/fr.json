@@ -49,7 +49,9 @@
     "newCollection": "Nouvelle collection",
     "achievements": {
       "title": "Succès",
-      "subtitle": "Tes badges et jalons"
+      "subtitle": "Tes badges et jalons",
+      "loading": "On compte tes badges…",
+      "unlockedCount": "{count, plural, one {# badge décroché} other {# badges décrochés}}"
     },
     "lab": {
       "title": "Lab",
@@ -189,7 +191,11 @@
     "srAchievementUnlocked": "Succès débloqué : {title}.",
     "srAchievementsUnlocked": "{count, plural, one {# succès débloqué} other {# succès débloqués}}.",
     "srAchievementKarma": "Tu as gagné {amount} karma.",
-    "viewAchievements": "Voir tes succès"
+    "viewAchievements": "Voir tes succès",
+    "achievementUnlockedEyebrow": "Succès débloqué",
+    "achievementMomentNext": "Suivant",
+    "achievementMomentDone": "Super",
+    "achievementMomentProgress": "{current} sur {total}"
   },
   "achievements": {
     "title": "Succès",
