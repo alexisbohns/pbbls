@@ -11,14 +11,12 @@ import app.pbbls.android.theme.ReferenceStrings
 import app.pbbls.android.theme.ReferenceType
 import java.util.Locale
 
-/**
- * Display copy for a badge (design D7): the admin's `title_*`/`description_*`
- * overrides win by the active locale, else the family-keyed string resources
- * with the threshold or the localized emotion/domain name interpolated
- * ([ReferenceStrings.referenceName], never the DB `name`). Unknown families
- * degrade to the slug rather than crash — a family can ship server-side
- * before this client catches up.
- */
+// Display copy for a badge (design D7): the admin's `title_*`/`description_*`
+// overrides win by the active locale, else the family-keyed string resources
+// with the threshold or the localized emotion/domain name interpolated
+// (`ReferenceStrings.referenceName`, never the DB `name`). Unknown families
+// degrade to the slug rather than crash — a family can ship server-side
+// before this client catches up.
 
 /**
  * Pure override pick, mirrored from web/iOS: `fr` prefers the French override,
