@@ -65,7 +65,13 @@ Numbering matches the repository's GitHub milestones (M45–M57). Sizing per rep
 - Settings entry point on all three surfaces + web, destructive confirm, easy to find (Apple requirement).
 - **Standing rule: every later milestone appends its new tables to the purge** (drafts, unlocks, connections, invites, blocks, seams, pairs, whispers, reports).
 
-### M47 — Drafts & local autosave
+### M47 — Drafts & local autosave — **shipped 2026-07-30**
+
+Design: `2026-07-29-drafts-and-autosave-design.md` (D1–D14). Backend #639, web
+#640, iOS #641, Android #642, plus two hardening follow-ups: #647 (hydration
+raced the reference-data load) and #651 (iOS could not decode web- or
+Postgres-written timestamps — see that design's D12 and "Lessons learned").
+Cross-surface regression harness: `packages/supabase/scripts/verify-pebble-drafts.ts`.
 
 - **Separate `pebble_drafts` table with a jsonb `payload`** (the exact `create_pebble` payload shape, partial). Decisively *not* a status column on `pebbles`: five NOT NULL semantic columns would need relaxing; every view/analytics migration would need a forever `status` filter; drafts must earn zero karma (`create_pebble` is the only emitter and a draft never touches it); coalesce-based `update_pebble` can't null scalars but wholesale jsonb replace can; no `render_svg` exists pre-publish; and autosave wants the same partial payload.
 - Owner-only CRUD RLS, direct client calls (single-table convention). Publish = the normal `compose-pebble` edge flow with the draft's payload, then delete the draft on success.
@@ -150,7 +156,7 @@ Numbering matches the repository's GitHub milestones (M45–M57). Sizing per rep
 | `connections` + invites + blocks | M51 `private` tier, M52, M53, M56 |
 | Definer-RPC projection pattern (never widen `profiles`/enrichment RLS) | M49, M50, M51, M53 |
 | `handle` + `public_profile` | M50, M51 share links, M49 invite display |
-| `pebble_drafts` jsonb payload | M47 server drafts and local autosave (same shape) |
+| `pebble_drafts` jsonb payload | M47 server drafts and local autosave (same shape); contract guarded by `verify-pebble-drafts.ts` |
 | `achievements` + `check_achievements()` | M48, displayed by M50 |
 | `render_svg` as the cross-user visual | M51 shared pebbles, M53 pair display (avoids glyph/snap RLS entanglement) |
 | `purge_account` | must cover every table above — lands early (M46), extended by each milestone |
@@ -162,7 +168,7 @@ Numbering matches the repository's GitHub milestones (M45–M57). Sizing per rep
 3. Whispers are server-side encrypted (Vault + pgcrypto), explicitly not E2E; no karma for whispers.
 4. Connections: single-row symmetric, invite/QR only, no search; blocks from day one.
 5. Achievements: client-called idempotent RPC, no triggers/cron; badges permanent; karma `grant` deferred.
-6. Drafts: separate jsonb table, never a status column on `pebbles`; local autosave is insurance only.
+6. Drafts: separate jsonb table, never a status column on `pebbles`; local autosave is insurance only. ✅ written (#639), plus a second entry on cross-surface timestamp precision (#651).
 7. Pairs sync `happened_at` only; pairing requires grade ≥ `private`; sever on disconnect.
 8. Cross-user reads only via definer-RPC projections; never widen `profiles` RLS.
 9. Account deletion: anonymize sold glyphs via the `user_id = null` system state; delete personal ledger rows.
