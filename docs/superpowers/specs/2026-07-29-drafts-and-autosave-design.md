@@ -240,7 +240,7 @@ reset. Publish-then-delete-draft cannot be built correctly on top of that, so
 the web issue adds the `catch` and surfaces the failure with the inline
 `role="alert"` banner precedent from `PebbleEdit.tsx:279-286`.
 
-## D13 — Timestamp precision is a cross-surface hazard (#649)
+## D12 — Timestamp precision is a cross-surface hazard (#649)
 
 The three surfaces do not agree on sub-second precision, and nothing in a single
 app's test suite can notice:
@@ -273,7 +273,7 @@ Rules that follow:
   its own output. An iOS-only round-trip cannot catch an iOS-only formatter bug —
   that is precisely how this shipped.
 
-## D14 — The badge count does not fetch payloads
+## D13 — The badge count does not fetch payloads
 
 The Path entry point renders one integer, on the app's home screen, on every
 appearance. All three surfaces first implemented it by reusing the full list,
@@ -282,7 +282,7 @@ pulling every draft's jsonb to count rows. They now select `id` alone (web uses 
 there is no precedent for one in this repo and Android cannot be compiled
 locally, so the cheap projection buys the same win with no new surface.
 
-## D15 — Verification
+## D14 — Verification
 
 Per surface, beyond lint/build:
 
@@ -308,3 +308,33 @@ Android cannot be verified locally (no SDK; `scripts/gradle-if-sdk.sh` exits 0
 with a warning), so `android.yml` — `ktlintCheck testDebugUnitTest
 assembleDebug`, all blocking, plus `LocalizationParityTest` — is the gate, and
 new logic stays in pure JVM-testable functions.
+
+## Lessons learned
+
+Kept here rather than promoted into `CLAUDE.md` — per the repo's own cadence,
+promotion happens during the milestone-boundary monorepo-audit grooming pass, not
+per-PR. The first item below clears both bars (durable + action-guiding) and is
+the candidate to promote.
+
+1. **A same-surface round-trip proves nothing about a cross-surface contract.**
+   M47 shipped with every iOS decoding test passing while iOS could not read a
+   single web- or Postgres-written timestamp (D12). The tests encoded with the
+   same formatter they decoded with, so the bug was invisible by construction. Any
+   shape shared by the three clients needs tests fed **real foreign payloads
+   verbatim**, including precision variants and explicit nulls. `#649`.
+2. **A model that depends on its decoder's configuration is a model that breaks
+   when the SDK changes it.** `PebbleDraftRecord` originally left `updated_at` to
+   whatever date strategy supabase-swift happened to hand it, and a dead
+   `let decoder = JSONDecoder()` sat unused in `list()` as evidence of the
+   half-finished fix. Decode timestamps from their string form explicitly.
+3. **Compare `jsonb` canonically.** Postgres does not preserve key order at any
+   depth, so a `JSON.stringify` equality check reports an intact payload as
+   changed — twice, in this milestone's own harness, before the assertion was
+   fixed rather than the product.
+4. **Silent `str.replace` no-ops are a real failure mode when patching code by
+   script.** The Android composer shipped to CI missing both new parameters
+   because a search string was one backtick off and the replace quietly did
+   nothing. Assert the match count.
+5. **Two rounds of shaving comments to fit a line-count limit is the limit
+   telling you to split the file.** `CreatePebbleSheet` needed
+   `+Drafts.swift`, not shorter prose (#648, #652).
