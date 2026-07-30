@@ -14,6 +14,7 @@ export {
   useEmotionCategoryName,
   useDomainLocalized,
 } from "./useReferenceCatalog"
+export { useAchievementCopy, type AchievementCopy } from "./useAchievementCopy"
 export {
   formatDate,
   formatNumber,

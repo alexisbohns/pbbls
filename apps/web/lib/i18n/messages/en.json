@@ -47,6 +47,10 @@
     },
     "collectionsTitle": "Collections",
     "newCollection": "New collection",
+    "achievements": {
+      "title": "Achievements",
+      "subtitle": "Badges & milestones"
+    },
     "lab": {
       "title": "Lab",
       "subtitle": "News & community"
@@ -157,7 +161,63 @@
     "glyphUnlocked": "Glyph unlocked",
     "spent": "−{amount} karma",
     "srUnlocked": "Unlocked {name} — {amount} karma spent.",
-    "viewGlyph": "View glyph"
+    "viewGlyph": "View glyph",
+    "achievementsUnlocked": "{count, plural, one {Achievement unlocked} other {# achievements unlocked}}",
+    "srAchievementUnlocked": "Achievement unlocked: {title}.",
+    "srAchievementsUnlocked": "{count, plural, one {# achievement unlocked} other {# achievements unlocked}}.",
+    "srAchievementKarma": "Earned {amount} karma.",
+    "viewAchievements": "View achievements"
+  },
+  "achievements": {
+    "title": "Achievements",
+    "loading": "Loading…",
+    "error": "Couldn't load your achievements. Please try again.",
+    "locked": "Locked",
+    "unlockedOn": "Unlocked {date}",
+    "group": {
+      "pebble_count": "Pebbles",
+      "emotion_first": "Emotions",
+      "domain_first": "Domains",
+      "first_collection": "Collections",
+      "first_glyph": "Glyphs",
+      "first_soul": "Souls",
+      "glyph_count": "Carving",
+      "glyph_sales": "Market"
+    },
+    "family": {
+      "pebble_count": {
+        "title": "{threshold, plural, one {First pebble} other {# pebbles}}",
+        "description": "{threshold, plural, one {Drop your first pebble on the path.} other {Collect # pebbles along your path.}}"
+      },
+      "emotion_first": {
+        "title": "First {name}",
+        "description": "Record your first pebble carrying {name}."
+      },
+      "domain_first": {
+        "title": "First steps in {name}",
+        "description": "Record your first pebble in {name}."
+      },
+      "first_collection": {
+        "title": "First collection",
+        "description": "Create your first collection."
+      },
+      "first_glyph": {
+        "title": "First glyph",
+        "description": "Carve your first glyph."
+      },
+      "first_soul": {
+        "title": "First soul",
+        "description": "Add your first soul."
+      },
+      "glyph_count": {
+        "title": "{threshold} glyphs",
+        "description": "Carve {threshold} glyphs of your own."
+      },
+      "glyph_sales": {
+        "title": "{threshold, plural, one {First sale} other {# sales}}",
+        "description": "{threshold, plural, one {Sell your first glyph in the market.} other {Make # glyph sales in the market.}}"
+      }
+    }
   },
   "wallet": {
     "title": "Wallet",

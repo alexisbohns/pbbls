@@ -213,3 +213,10 @@
 {"id": "01KYR0A1QK5MNPQRSTVWXYZ235", "ts": "2026-07-30T00:30:00.000Z", "actor": "claude-code", "type": "node.updated", "node_id": "V-quick-pebble-editor", "fields": ["description"]}
 {"id": "01KYR1B2QJKMNPQRSTVWXYZ236", "ts": "2026-07-30T01:15:00.000Z", "actor": "claude-code", "type": "node.updated", "node_id": "V-pebble-drafts", "fields": ["description"]}
 {"id": "01KYR1B2QK5MNPQRSTVWXYZ237", "ts": "2026-07-30T01:15:00.000Z", "actor": "claude-code", "type": "node.updated", "node_id": "V-quick-pebble-editor", "fields": ["description"]}
+{"id": "01KYS2C3QJKMNPQRSTVWXYZ240", "ts": "2026-07-30T12:00:00.000Z", "actor": "claude-code", "type": "node.status_changed", "node_id": "V-achievements", "from": "idea", "to": "development"}
+{"id": "01KYS2C3QKKMNPQRSTVWXYZ241", "ts": "2026-07-30T12:00:00.000Z", "actor": "claude-code", "type": "node.status_changed", "node_id": "DM-achievement", "from": "idea", "to": "development"}
+{"id": "01KYS2C3QMKMNPQRSTVWXYZ242", "ts": "2026-07-30T12:00:00.000Z", "actor": "claude-code", "type": "node.status_changed", "node_id": "API-get-achievements", "from": "idea", "to": "development"}
+{"id": "01KYS2C3QNKMNPQRSTVWXYZ243", "ts": "2026-07-30T12:00:00.000Z", "actor": "claude-code", "type": "node.status_changed", "node_id": "F-gamification", "from": "idea", "to": "development"}
+{"id": "01KYS2C3QPKMNPQRSTVWXYZ244", "ts": "2026-07-30T12:00:00.000Z", "actor": "claude-code", "type": "node.created", "node_id": "API-check-achievements", "species": "api-endpoint", "title": "POST /achievements/check"}
+{"id": "01KYS2C3QQKMNPQRSTVWXYZ245", "ts": "2026-07-30T12:00:00.000Z", "actor": "claude-code", "type": "edge.added", "edge_id": "e-V-achievements-API-check-achievements", "source_id": "V-achievements", "target_id": "API-check-achievements", "edge_type": "calls"}
+{"id": "01KYS2C3QRKMNPQRSTVWXYZ246", "ts": "2026-07-30T12:00:00.000Z", "actor": "claude-code", "type": "edge.added", "edge_id": "e-API-check-achievements-DM-achievement", "source_id": "API-check-achievements", "target_id": "DM-achievement", "edge_type": "queries"}

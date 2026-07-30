@@ -10,6 +10,8 @@ import type {
   WalletSnapshot,
   RippleSummary,
   ProfileEngagement,
+  Achievement,
+  AchievementUnlock,
 } from "@/lib/types"
 
 // ---------------------------------------------------------------------------
@@ -82,6 +84,14 @@ export type WalletHistoryPage = {
   nextCursor: string | null
 }
 
+// One newly granted badge from `check_achievements()`. `karmaGranted` is what
+// the ledger actually received at unlock time (0 for reward-less badges),
+// never the catalog's current value.
+export type AchievementUnlockResult = {
+  slug: string
+  karmaGranted: number
+}
+
 // ---------------------------------------------------------------------------
 // Drafts (M47) — a draft is a PARTIAL compose-pebble wire payload, stored as
 // jsonb in `pebble_drafts.payload`. Deliberately keyed like the wire and not
@@ -143,6 +153,15 @@ export interface DataProvider {
   // assiduity from the get_profile_engagement RPC.
   getRipple(): Promise<RippleSummary>
   getProfileEngagement(tz: string): Promise<ProfileEngagement>
+
+  // Achievements (on-demand, not part of the eager store): the full public
+  // catalog including inactive rows (clients decide what to render), the
+  // caller's unlock ledger, and the idempotent evaluation RPC — it inserts
+  // whatever the caller now qualifies for and returns only what it NEWLY
+  // granted (empty array = nothing new).
+  getAchievements(): Promise<Achievement[]>
+  getAchievementUnlocks(): Promise<AchievementUnlock[]>
+  checkAchievements(): Promise<AchievementUnlockResult[]>
 
   listPebbles(): Promise<Pebble[]>
   getPebble(id: string): Promise<Pebble | undefined>

@@ -47,6 +47,10 @@
     },
     "collectionsTitle": "Collections",
     "newCollection": "Nouvelle collection",
+    "achievements": {
+      "title": "Succès",
+      "subtitle": "Tes badges et jalons"
+    },
     "lab": {
       "title": "Lab",
       "subtitle": "Actus & communauté"
@@ -157,7 +161,63 @@
     "glyphUnlocked": "Glyphe débloqué",
     "spent": "−{amount} karma",
     "srUnlocked": "{name} débloqué — {amount} karma dépensés.",
-    "viewGlyph": "Voir le glyphe"
+    "viewGlyph": "Voir le glyphe",
+    "achievementsUnlocked": "{count, plural, one {Succès débloqué} other {# succès débloqués}}",
+    "srAchievementUnlocked": "Succès débloqué : {title}.",
+    "srAchievementsUnlocked": "{count, plural, one {# succès débloqué} other {# succès débloqués}}.",
+    "srAchievementKarma": "Tu as gagné {amount} karma.",
+    "viewAchievements": "Voir tes succès"
+  },
+  "achievements": {
+    "title": "Succès",
+    "loading": "Chargement…",
+    "error": "Impossible de charger tes succès. Réessaie un peu plus tard.",
+    "locked": "À débloquer",
+    "unlockedOn": "Débloqué le {date}",
+    "group": {
+      "pebble_count": "Galets",
+      "emotion_first": "Émotions",
+      "domain_first": "Domaines",
+      "first_collection": "Collections",
+      "first_glyph": "Glyphes",
+      "first_soul": "Âmes",
+      "glyph_count": "Gravure",
+      "glyph_sales": "Marché"
+    },
+    "family": {
+      "pebble_count": {
+        "title": "{threshold, plural, one {Premier galet} other {# galets}}",
+        "description": "{threshold, plural, one {Dépose ton tout premier galet sur ton chemin.} other {Rassemble # galets sur ton chemin.}}"
+      },
+      "emotion_first": {
+        "title": "Première fois : {name}",
+        "description": "Capture ton premier galet teinté par l'émotion {name}."
+      },
+      "domain_first": {
+        "title": "Premiers pas : {name}",
+        "description": "Capture ton premier galet dans le domaine {name}."
+      },
+      "first_collection": {
+        "title": "Première collection",
+        "description": "Crée ta toute première collection."
+      },
+      "first_glyph": {
+        "title": "Premier glyphe",
+        "description": "Grave ton tout premier glyphe."
+      },
+      "first_soul": {
+        "title": "Première âme",
+        "description": "Ajoute ta toute première âme."
+      },
+      "glyph_count": {
+        "title": "{threshold} glyphes",
+        "description": "Grave {threshold} glyphes de ta main."
+      },
+      "glyph_sales": {
+        "title": "{threshold, plural, one {Première vente} other {# ventes}}",
+        "description": "{threshold, plural, one {Un pebbler adopte l'un de tes glyphes.} other {Tes glyphes trouvent preneur # fois.}}"
+      }
+    }
   },
   "wallet": {
     "title": "Porte-karma",

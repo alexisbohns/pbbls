@@ -9,7 +9,7 @@
       "view_card_variant": "large"
     },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-07-30T01:15:00.000Z"
+    "updated_at": "2026-07-30T12:00:00.000Z"
   },
   "nodes": [
     {
@@ -471,7 +471,7 @@
       "species": "view",
       "title": "Achievements",
       "description": "Gallery of unlocked and upcoming achievements.",
-      "status": "idea",
+      "status": "development",
       "platforms": [
         "web",
         "ios",
@@ -945,7 +945,7 @@
       "species": "flow",
       "title": "Gamification Hub",
       "description": "Access bounce tempo, collection rise, and achievements.",
-      "status": "idea",
+      "status": "development",
       "platforms": [
         "web",
         "ios",
@@ -1127,7 +1127,7 @@
       "species": "data-model",
       "title": "Achievement",
       "description": "Unlockable reward earned through collecting and engagement.",
-      "status": "idea",
+      "status": "development",
       "platforms": [
         "web",
         "ios",
@@ -1413,7 +1413,20 @@
       "species": "api-endpoint",
       "title": "GET /achievements",
       "description": "Retrieve unlocked and available achievements.",
-      "status": "idea",
+      "status": "development",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ]
+    },
+    {
+      "id": "API-check-achievements",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "POST /achievements/check",
+      "description": "Evaluate the caller's live stats against the active catalog, insert new unlocks with their karma grants, and return what was newly granted (check_achievements RPC).",
+      "status": "development",
       "platforms": [
         "web",
         "ios",
@@ -2865,6 +2878,13 @@
       "edge_type": "calls"
     },
     {
+      "id": "e-V-achievements-API-check-achievements",
+      "project_id": "pebbles",
+      "source_id": "V-achievements",
+      "target_id": "API-check-achievements",
+      "edge_type": "calls"
+    },
+    {
       "id": "e-V-weekly-cairn-API-get-weekly-cairn",
       "project_id": "pebbles",
       "source_id": "V-weekly-cairn",
@@ -3212,6 +3232,13 @@
       "project_id": "pebbles",
       "source_id": "API-get-bounce",
       "target_id": "DM-bounce",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-check-achievements-DM-achievement",
+      "project_id": "pebbles",
+      "source_id": "API-check-achievements",
+      "target_id": "DM-achievement",
       "edge_type": "queries"
     },
     {
