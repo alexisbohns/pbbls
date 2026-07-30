@@ -240,7 +240,7 @@ reset. Publish-then-delete-draft cannot be built correctly on top of that, so
 the web issue adds the `catch` and surfaces the failure with the inline
 `role="alert"` banner precedent from `PebbleEdit.tsx:279-286`.
 
-## D12 — Timestamp precision is a cross-surface hazard (#649)
+## D12 — Timestamp precision is a cross-surface hazard (#651)
 
 The three surfaces do not agree on sub-second precision, and nothing in a single
 app's test suite can notice:
@@ -321,7 +321,7 @@ the candidate to promote.
    single web- or Postgres-written timestamp (D12). The tests encoded with the
    same formatter they decoded with, so the bug was invisible by construction. Any
    shape shared by the three clients needs tests fed **real foreign payloads
-   verbatim**, including precision variants and explicit nulls. `#649`.
+   verbatim**, including precision variants and explicit nulls. `#651`.
 2. **A model that depends on its decoder's configuration is a model that breaks
    when the SDK changes it.** `PebbleDraftRecord` originally left `updated_at` to
    whatever date strategy supabase-swift happened to hand it, and a dead
