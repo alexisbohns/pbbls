@@ -82,7 +82,7 @@ struct PebbleDraftPayload: Codable, Equatable {
     /// Tolerant by design: a payload written by another surface (or an older
     /// build) must never fail to decode. `happened_at` goes through
     /// `ISO8601Flexible` because web writes milliseconds and Postgres writes
-    /// microseconds — a fixed-precision formatter silently nils both (#649). A
+    /// microseconds — a fixed-precision formatter silently nils both (#651). A
     /// genuinely unparseable value is still dropped rather than thrown, leaving
     /// hydration to fall back to "now".
     init(from decoder: Decoder) throws {

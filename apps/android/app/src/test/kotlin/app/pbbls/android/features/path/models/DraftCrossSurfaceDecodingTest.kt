@@ -12,7 +12,7 @@ import java.time.ZoneOffset
 /**
  * A draft written by ANOTHER surface must decode here. iOS shipped a
  * fixed-precision ISO-8601 formatter and silently nil'd every web- and
- * Postgres-written `happened_at` (#649); an Android-only round-trip test could
+ * Postgres-written `happened_at` (#651); an Android-only round-trip test could
  * not have caught it either, so these use real foreign payloads verbatim.
  *
  * The precisions in play all differ: web `toISOString()` emits milliseconds,

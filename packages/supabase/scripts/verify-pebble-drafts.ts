@@ -217,7 +217,7 @@ try {
     JSON.stringify(stored.snaps));
 
   // Web writes millisecond precision, which a fixed-precision ISO-8601 parser
-  // silently drops (the #649 class of bug). Assert both that the DB preserves it
+  // silently drops (the #651 class of bug). Assert both that the DB preserves it
   // and that it really is the precision web produces.
   const webHappenedAt = new Date(Date.now() - 5 * 3600 * 1000).toISOString();
   check("web's toISOString really does carry milliseconds", /\.\d{3}Z$/.test(webHappenedAt), webHappenedAt);
