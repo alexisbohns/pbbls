@@ -1842,8 +1842,52 @@ export type Database = {
         Args: { p_glyph_id: string; p_user_id: string }
         Returns: Json
       }
+      admin_create_achievement: {
+        Args: {
+          p_description_en?: string
+          p_description_fr?: string
+          p_domain_id?: string
+          p_emotion_id?: string
+          p_family: string
+          p_karma_reward: number
+          p_slug: string
+          p_sort_order: number
+          p_threshold?: number
+          p_title_en: string
+          p_title_fr: string
+        }
+        Returns: string
+      }
+      admin_delete_achievement: {
+        Args: { p_achievement_id: string }
+        Returns: undefined
+      }
       admin_delete_glyph: { Args: { p_glyph_id: string }; Returns: undefined }
       admin_find_user: { Args: { p_email: string }; Returns: Json }
+      admin_list_achievements: {
+        Args: never
+        Returns: {
+          description_en: string
+          description_fr: string
+          domain_id: string
+          domain_slug: string
+          emotion_id: string
+          emotion_slug: string
+          family: string
+          glyph_id: string
+          id: string
+          is_active: boolean
+          karma_reward: number
+          slug: string
+          sort_order: number
+          strokes: Json
+          threshold: number
+          title_en: string
+          title_fr: string
+          unlock_count: number
+          view_box: string
+        }[]
+      }
       admin_list_domains: {
         Args: never
         Returns: {
@@ -1887,9 +1931,26 @@ export type Database = {
         Args: { p_status?: string }
         Returns: Json
       }
+      admin_set_achievement_glyph: {
+        Args: { p_achievement_id: string; p_strokes: Json; p_view_box: string }
+        Returns: string
+      }
       admin_set_domain_glyph: {
         Args: { p_domain_id: string; p_strokes: Json; p_view_box: string }
         Returns: string
+      }
+      admin_update_achievement: {
+        Args: {
+          p_achievement_id: string
+          p_description_en?: string
+          p_description_fr?: string
+          p_is_active?: boolean
+          p_karma_reward: number
+          p_sort_order?: number
+          p_title_en: string
+          p_title_fr: string
+        }
+        Returns: undefined
       }
       admin_update_domain: {
         Args: { p_domain_id: string; p_label: string; p_name: string }
