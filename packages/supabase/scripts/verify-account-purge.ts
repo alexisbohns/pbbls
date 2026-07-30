@@ -223,6 +223,20 @@ try {
   });
   if (draftErr) throw new Error(`insert draft: ${draftErr.message}`);
 
+  // A public profile (M50). Claimed through the real RPC + direct toggle so
+  // the purge run also proves the handle frees up (profiles-row delete).
+  const handle = `purgetest${runId}`;
+  const { error: handleErr } = await seller.rpc("set_handle", { p_handle: handle });
+  if (handleErr) throw new Error(`set_handle: ${handleErr.message}`);
+  const { error: publicErr } = await seller
+    .from("profiles").update({ public_profile: true }).eq("user_id", sellerId);
+  if (publicErr) throw new Error(`public_profile toggle: ${publicErr.message}`);
+  const { data: livePublic, error: livePublicErr } = await seller
+    .rpc("get_public_profile", { p_handle: handle });
+  if (livePublicErr || !livePublic) {
+    throw new Error(`get_public_profile pre-purge: ${livePublicErr?.message ?? "null"}`);
+  }
+
   // -------------------------------------------------------------------------
   // 3. The sale: fund the buyer, buy through the real RPC, favourite.
   // -------------------------------------------------------------------------
@@ -308,6 +322,14 @@ try {
 
   const leftover = await listStorageFiles(sellerId);
   check("storage prefix empty", leftover.length === 0, `found ${leftover.join(", ")}`);
+
+  // M50: the profiles-row delete freed the handle — the public projection
+  // resolves null (indistinguishable from never-existed).
+  const { data: freedHandle, error: freedHandleErr } = await admin
+    .rpc("get_public_profile", { p_handle: handle });
+  check("purged handle resolves null via get_public_profile",
+    !freedHandleErr && freedHandle === null,
+    freedHandleErr ? freedHandleErr.message : JSON.stringify(freedHandle));
 
   const { data: goneUser } = await admin.auth.admin.getUserById(sellerId);
   check("auth user gone", !goneUser?.user);
