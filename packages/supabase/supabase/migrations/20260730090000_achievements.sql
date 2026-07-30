@@ -31,7 +31,10 @@ create table public.achievements (
   domain_id      uuid references public.domains(id),       -- domain_first only
   sort_order     integer not null,
   glyph_id       uuid references public.glyphs(id),        -- system-owned visual (D12)
-  karma_reward   integer not null default 0 check (karma_reward >= 0),  -- D9
+  -- Upper bound mirrors karma_events.delta (smallint): an out-of-range reward
+  -- must fail at catalog-write time, not explode inside check_achievements().
+  karma_reward   integer not null default 0
+                   check (karma_reward between 0 and 32767),            -- D9
   is_active      boolean not null default true,            -- retirement, never delete (D12)
   title_en       text,
   title_fr       text,
@@ -162,7 +165,8 @@ create policy achievement_unlocks_select_self on public.achievement_unlocks
 -- else), type 'credit', delta = karma_reward read AT UNLOCK TIME (admin edits
 -- never retro-pay), ref_id = the achievement id. The existing wallet/bounce
 -- AFTER INSERT triggers fold the grant automatically. delta is smallint, so
--- rewards cap at 32767 — same ledger decision as every other reason.
+-- rewards cap at 32767 — the catalog's karma_reward check enforces that
+-- bound, so this insert can never hit smallint overflow.
 --
 -- The return value reports what was actually emitted, not the catalog's
 -- current value, so the rewarding screen can never display a number the
