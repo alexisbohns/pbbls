@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/data/auth-context"
+import { isSafeRelativePath } from "@/lib/utils/safe-relative-path"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
@@ -27,12 +28,20 @@ export default function LoginPage() {
       : null
   })
   const [submitting, setSubmitting] = useState(false)
+  // Optional validated post-auth destination (M49, D12) — e.g. back to a
+  // pending /invite/<token> page. Non-relative values are dropped.
+  const [next] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null
+    const params = new URLSearchParams(window.location.search)
+    const value = params.get("next")
+    return isSafeRelativePath(value) ? value : null
+  })
 
   useEffect(() => {
     if (!isLoading && !isProfileLoading && isAuthenticated) {
-      router.replace(profile?.onboarding_completed ? "/path" : "/onboarding")
+      router.replace(profile?.onboarding_completed ? next ?? "/path" : "/onboarding")
     }
-  }, [isLoading, isProfileLoading, isAuthenticated, profile, router])
+  }, [isLoading, isProfileLoading, isAuthenticated, profile, router, next])
 
   if (isLoading || isAuthenticated) return null
 
@@ -59,7 +68,7 @@ export default function LoginPage() {
   const handleGoogleSignIn = async () => {
     setError(null)
     try {
-      await signInWithGoogle()
+      await signInWithGoogle(next ?? undefined)
     } catch (err) {
       const message =
         err instanceof Error ? err.message : tErrors("generic")
@@ -70,7 +79,7 @@ export default function LoginPage() {
   const handleAppleSignIn = async () => {
     setError(null)
     try {
-      await signInWithApple()
+      await signInWithApple(next ?? undefined)
     } catch (err) {
       const message =
         err instanceof Error ? err.message : tErrors("generic")

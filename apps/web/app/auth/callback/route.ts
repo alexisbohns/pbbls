@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
+import { isSafeRelativePath } from "@/lib/utils/safe-relative-path"
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get("code")
+
+  // Optional post-auth destination (M49, design D12). Anything that is not
+  // strictly relative is ignored — never redirect off-origin from here.
+  const nextParam = searchParams.get("next")
+  const next = isSafeRelativePath(nextParam) ? nextParam : null
 
   if (!code) {
     console.error("[auth/callback] No code parameter in callback URL")
@@ -49,6 +55,8 @@ export async function GET(request: Request) {
     }
   }
 
-  const destination = profile?.onboarding_completed ? "/path" : "/onboarding"
+  // `next` applies to onboarded users only: an un-onboarded user always goes
+  // to /onboarding first, and the pending-invite mechanism brings them back.
+  const destination = profile?.onboarding_completed ? next ?? "/path" : "/onboarding"
   return NextResponse.redirect(`${origin}${destination}`)
 }

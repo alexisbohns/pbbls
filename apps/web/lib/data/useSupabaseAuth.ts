@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { withTimeout } from "@/lib/utils/with-timeout"
+import { isSafeRelativePath } from "@/lib/utils/safe-relative-path"
 
 import type {
   Account,
@@ -19,6 +20,16 @@ function getSupabase() {
   if (typeof window === "undefined") return null
   if (!supabaseInstance) supabaseInstance = createClient()
   return supabaseInstance
+}
+
+/**
+ * OAuth callback URL, optionally carrying a validated post-auth destination
+ * (M49, design D12). A `next` that is not strictly relative is dropped — the
+ * callback route re-validates on its side regardless.
+ */
+function buildCallbackUrl(next?: string): string {
+  const base = `${window.location.origin}/auth/callback`
+  return isSafeRelativePath(next) ? `${base}?next=${encodeURIComponent(next)}` : base
 }
 
 export function useSupabaseAuth(): AuthContextValue {
@@ -145,22 +156,22 @@ export function useSupabaseAuth(): AuthContextValue {
     if (error) throw new Error(error.message)
   }, [])
 
-  const signInWithApple = useCallback(async () => {
+  const signInWithApple = useCallback(async (next?: string) => {
     const supabase = getSupabase()
     if (!supabase) throw new Error("Supabase client not available")
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "apple",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: buildCallbackUrl(next) },
     })
     if (error) throw new Error(error.message)
   }, [])
 
-  const signInWithGoogle = useCallback(async () => {
+  const signInWithGoogle = useCallback(async (next?: string) => {
     const supabase = getSupabase()
     if (!supabase) throw new Error("Supabase client not available")
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: buildCallbackUrl(next) },
     })
     if (error) throw new Error(error.message)
   }, [])

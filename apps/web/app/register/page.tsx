@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/data/auth-context"
+import { isSafeRelativePath } from "@/lib/utils/safe-relative-path"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
@@ -24,6 +25,15 @@ export default function RegisterPage() {
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  // Optional validated post-auth destination for the OAuth round-trip (M49,
+  // D12). The client-side redirect below deliberately stays /onboarding — the
+  // pending-invite mechanism handles the return after onboarding.
+  const [next] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null
+    const params = new URLSearchParams(window.location.search)
+    const value = params.get("next")
+    return isSafeRelativePath(value) ? value : null
+  })
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -71,7 +81,7 @@ export default function RegisterPage() {
   const handleGoogleSignIn = async () => {
     setError(null)
     try {
-      await signInWithGoogle()
+      await signInWithGoogle(next ?? undefined)
     } catch (err) {
       const message =
         err instanceof Error ? err.message : tErrors("generic")
@@ -82,7 +92,7 @@ export default function RegisterPage() {
   const handleAppleSignIn = async () => {
     setError(null)
     try {
-      await signInWithApple()
+      await signInWithApple(next ?? undefined)
     } catch (err) {
       const message =
         err instanceof Error ? err.message : tErrors("generic")
