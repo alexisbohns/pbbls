@@ -36,6 +36,7 @@ import app.pbbls.android.R
 import app.pbbls.android.features.profile.components.labelRes
 import app.pbbls.android.features.profile.models.Collection
 import app.pbbls.android.features.profile.models.CollectionMode
+import app.pbbls.android.services.LocalAchievementsService
 import app.pbbls.android.services.LocalCollectionsService
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesListSection
@@ -70,6 +71,7 @@ fun CollectionFormScreen(
     modifier: Modifier = Modifier,
 ) {
     val collectionsService = LocalCollectionsService.current
+    val achievements = LocalAchievementsService.current
     val system = PebblesTheme.colors.system
     val scope = rememberCoroutineScope()
 
@@ -97,6 +99,7 @@ fun CollectionFormScreen(
             try {
                 if (original == null) {
                     collectionsService.create(name = trimmed, mode = mode)
+                    achievements.fireCheck()
                 } else {
                     collectionsService.update(collectionId = original.id, name = trimmed, mode = mode)
                 }

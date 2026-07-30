@@ -27,6 +27,7 @@ import app.pbbls.android.components.PebblesTextInput
 import app.pbbls.android.features.profile.models.SoulWithGlyph
 import app.pbbls.android.features.shared.SoulItem
 import app.pbbls.android.features.shared.SoulItemCase
+import app.pbbls.android.services.LocalAchievementsService
 import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
@@ -51,6 +52,7 @@ fun SoulPickerSheet(
     onConfirm: (List<String>) -> Unit,
 ) {
     val refs = LocalReferenceDataService.current
+    val achievements = LocalAchievementsService.current
     val scope = rememberCoroutineScope()
     var selection by remember { mutableStateOf(currentSelection.toSet()) }
     var showCreate by remember { mutableStateOf(false) }
@@ -80,6 +82,7 @@ fun SoulPickerSheet(
                 scope.launch {
                     val created = refs.createSoul(name)
                     if (created != null) {
+                        achievements.fireCheck()
                         selection = selection + created.id
                         showCreate = false
                     }

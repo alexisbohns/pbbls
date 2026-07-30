@@ -379,4 +379,52 @@
     <string name="drafts_saved_ago">Saved %1$s ago</string>
     <string name="drafts_empty">No drafts yet. Anything you start keeping shows up here.</string>
     <string name="drafts_load_error">Couldn\'t load your drafts. Please try again.</string>
+    <!-- Achievements (M48) -->
+    <string name="achievements_title">Achievements</string>
+    <string name="achievements_card_subtitle">Badges along your path</string>
+    <string name="achievements_load_error">Couldn\'t load your achievements. Please try again.</string>
+    <string name="achievement_locked">Locked</string>
+    <string name="achievement_unlocked_on">Unlocked %1$s</string>
+    <string name="achievement_group_pebble_count">Pebbles</string>
+    <string name="achievement_group_emotion_first">Emotions</string>
+    <string name="achievement_group_domain_first">Domains</string>
+    <string name="achievement_group_first_collection">Collections</string>
+    <string name="achievement_group_first_glyph">Glyphs</string>
+    <string name="achievement_group_first_soul">Souls</string>
+    <string name="achievement_group_glyph_count">Carving</string>
+    <string name="achievement_group_glyph_sales">Market</string>
+    <plurals name="achievement_family_pebble_count_title">
+        <item quantity="one">First pebble</item>
+        <item quantity="other">%1$d pebbles</item>
+    </plurals>
+    <plurals name="achievement_family_pebble_count_description">
+        <item quantity="one">Drop your first pebble on the path.</item>
+        <item quantity="other">Collect %1$d pebbles along your path.</item>
+    </plurals>
+    <string name="achievement_family_emotion_first_title">First %1$s</string>
+    <string name="achievement_family_emotion_first_description">Record your first pebble carrying %1$s.</string>
+    <string name="achievement_family_domain_first_title">First steps in %1$s</string>
+    <string name="achievement_family_domain_first_description">Record your first pebble in %1$s.</string>
+    <string name="achievement_family_first_collection_title">First collection</string>
+    <string name="achievement_family_first_collection_description">Create your first collection.</string>
+    <string name="achievement_family_first_glyph_title">First glyph</string>
+    <string name="achievement_family_first_glyph_description">Carve your first glyph.</string>
+    <string name="achievement_family_first_soul_title">First soul</string>
+    <string name="achievement_family_first_soul_description">Add your first soul.</string>
+    <string name="achievement_family_glyph_count_title">%1$d glyphs</string>
+    <string name="achievement_family_glyph_count_description">Carve %1$d glyphs of your own.</string>
+    <plurals name="achievement_family_glyph_sales_title">
+        <item quantity="one">First sale</item>
+        <item quantity="other">%1$d sales</item>
+    </plurals>
+    <plurals name="achievement_family_glyph_sales_description">
+        <item quantity="one">Sell your first glyph in the market.</item>
+        <item quantity="other">Make %1$d glyph sales in the market.</item>
+    </plurals>
+    <plurals name="achievement_capsule_count">
+        <item quantity="one">%1$d achievement unlocked</item>
+        <item quantity="other">%1$d achievements unlocked</item>
+    </plurals>
+    <string name="achievement_capsule_a11y_single">Achievement unlocked: %1$s</string>
+    <string name="achievement_capsule_a11y_karma">You earned %1$d karma</string>
 </resources>

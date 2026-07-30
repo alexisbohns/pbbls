@@ -8,8 +8,10 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.CompositionLocalProvider
 import app.pbbls.android.features.glyph.services.LocalGlyphMarketService
 import app.pbbls.android.features.glyph.services.LocalGlyphService
+import app.pbbls.android.features.karma.LocalAchievementNotificationService
 import app.pbbls.android.features.karma.LocalKarmaNotificationService
 import app.pbbls.android.features.lab.services.LocalLogsService
+import app.pbbls.android.services.LocalAchievementsService
 import app.pbbls.android.services.LocalCollectionsService
 import app.pbbls.android.services.LocalComposerSnapshotStore
 import app.pbbls.android.services.LocalEmotionPaletteService
@@ -62,6 +64,8 @@ class MainActivity : ComponentActivity() {
                     LocalGlyphMarketService provides app.glyphMarket,
                     LocalLogsService provides app.logsService,
                     LocalKarmaNotificationService provides app.karma,
+                    LocalAchievementNotificationService provides app.achievementNotify,
+                    LocalAchievementsService provides app.achievements,
                 ) {
                     RootScreen()
                 }

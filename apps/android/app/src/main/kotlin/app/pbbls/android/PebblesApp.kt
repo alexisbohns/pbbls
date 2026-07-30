@@ -3,7 +3,9 @@ package app.pbbls.android
 import android.app.Application
 import app.pbbls.android.features.glyph.services.GlyphMarketService
 import app.pbbls.android.features.glyph.services.GlyphService
+import app.pbbls.android.features.karma.AchievementNotificationService
 import app.pbbls.android.features.karma.KarmaNotificationService
+import app.pbbls.android.services.AchievementsService
 import app.pbbls.android.features.lab.services.LogsService
 import app.pbbls.android.services.CollectionsService
 import app.pbbls.android.services.ComposerSnapshotStore
@@ -88,6 +90,12 @@ class PebblesApp :
     lateinit var karma: KarmaNotificationService
         private set
 
+    lateinit var achievementNotify: AchievementNotificationService
+        private set
+
+    lateinit var achievements: AchievementsService
+        private set
+
     override fun onCreate() {
         super.onCreate()
         Rive.init(this)
@@ -108,6 +116,8 @@ class PebblesApp :
         glyphMarket = GlyphMarketService(supabase)
         logsService = LogsService(supabase)
         karma = KarmaNotificationService()
+        achievementNotify = AchievementNotificationService()
+        achievements = AchievementsService(supabase, achievementNotify)
     }
 
     /**
