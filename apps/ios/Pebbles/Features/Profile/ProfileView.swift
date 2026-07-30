@@ -44,6 +44,8 @@ struct ProfileView: View {
                     karma: stats.karma
                 )
 
+                ProfileAchievementsCard()
+
                 ProfileCollectionsCard()
 
                 ProfileLabCard()

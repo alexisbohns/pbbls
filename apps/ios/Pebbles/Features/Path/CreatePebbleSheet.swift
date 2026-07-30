@@ -12,6 +12,7 @@ struct CreatePebbleSheet: View {
     @Environment(SupabaseService.self) var supabase
     @Environment(ReferenceDataService.self) var refs
     @Environment(KarmaNotificationService.self) private var karma
+    @Environment(AchievementsService.self) private var achievements
     @Environment(PebbleDraftsService.self) var draftsService
     @Environment(ComposerSnapshotStore.self) var snapshots
     @Environment(\.scenePhase) private var scenePhase
@@ -188,12 +189,15 @@ struct CreatePebbleSheet: View {
                     decoder: decoder
                 )
             karma.notifyEarned(amount: response.karmaDelta ?? 0, reason: .pebbleCreated)
+            achievements.fireCheck()
             await consumeDraftAfterPublish()
             onCreated(response.pebbleId)
             dismiss()
         } catch let functionsError as FunctionsError {
             if let pebbleId = softSuccessPebbleId(from: functionsError) {
                 logger.warning("compose-pebble returned 5xx but pebble_id found — advancing to detail sheet")
+                // Soft success still inserted the pebble, so counts changed.
+                achievements.fireCheck()
                 await consumeDraftAfterPublish()
                 onCreated(pebbleId)
                 dismiss()

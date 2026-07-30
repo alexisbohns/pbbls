@@ -7,6 +7,7 @@ struct CreateCollectionSheet: View {
     let onCreated: () -> Void
 
     @Environment(SupabaseService.self) private var supabase
+    @Environment(AchievementsService.self) private var achievements
     @Environment(\.dismiss) private var dismiss
 
     @State private var name: String = ""
@@ -92,6 +93,7 @@ struct CreateCollectionSheet: View {
                 .from("collections")
                 .insert(payload)
                 .execute()
+            achievements.fireCheck()
             onCreated()
             dismiss()
         } catch {
