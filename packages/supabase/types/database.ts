@@ -1193,11 +1193,13 @@ export type Database = {
           created_at: string
           display_name: string
           glyph_id: string | null
+          handle: string | null
           id: string
           is_admin: boolean
           max_media_per_pebble: number
           onboarding_completed: boolean
           privacy_accepted_at: string | null
+          public_profile: boolean
           terms_accepted_at: string | null
           updated_at: string
           user_id: string
@@ -1207,11 +1209,13 @@ export type Database = {
           created_at?: string
           display_name: string
           glyph_id?: string | null
+          handle?: string | null
           id?: string
           is_admin?: boolean
           max_media_per_pebble?: number
           onboarding_completed?: boolean
           privacy_accepted_at?: string | null
+          public_profile?: boolean
           terms_accepted_at?: string | null
           updated_at?: string
           user_id: string
@@ -1221,11 +1225,13 @@ export type Database = {
           created_at?: string
           display_name?: string
           glyph_id?: string | null
+          handle?: string | null
           id?: string
           is_admin?: boolean
           max_media_per_pebble?: number
           onboarding_completed?: boolean
           privacy_accepted_at?: string | null
+          public_profile?: boolean
           terms_accepted_at?: string | null
           updated_at?: string
           user_id?: string
@@ -1267,6 +1273,18 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      reserved_handles: {
+        Row: {
+          handle: string
+        }
+        Insert: {
+          handle: string
+        }
+        Update: {
+          handle?: string
+        }
+        Relationships: []
       }
       snaps: {
         Row: {
@@ -2042,6 +2060,7 @@ export type Database = {
           days_practiced: number
         }[]
       }
+      get_public_profile: { Args: { p_handle: string }; Returns: Json }
       get_quality_signals_today: {
         Args: never
         Returns: {
@@ -2134,6 +2153,7 @@ export type Database = {
         Args: { p_price: number; p_submission_id: string }
         Returns: Json
       }
+      set_handle: { Args: { p_handle?: string }; Returns: string }
       spend_karma: {
         Args: { p_amount: number; p_reason: string; p_ref_id?: string }
         Returns: string
@@ -2158,11 +2178,13 @@ export type Database = {
           created_at: string
           display_name: string
           glyph_id: string | null
+          handle: string | null
           id: string
           is_admin: boolean
           max_media_per_pebble: number
           onboarding_completed: boolean
           privacy_accepted_at: string | null
+          public_profile: boolean
           terms_accepted_at: string | null
           updated_at: string
           user_id: string
