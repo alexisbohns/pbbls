@@ -160,7 +160,8 @@ fun inviteUrl(token: String): String = "https://$INVITE_HOST/invite/$token"
 fun parseInviteToken(url: String?): String? {
     val uri = runCatching { java.net.URI(url ?: return null) }.getOrNull() ?: return null
     if (uri.scheme != "https" || uri.host != INVITE_HOST) return null
-    val parts = uri.path.orEmpty().split('/').filter { it.isNotEmpty() }
+    val segments = uri.path.orEmpty().split('/')
+    val parts = segments.filter { it.isNotEmpty() }
     if (parts.size != 2 || parts[0] != "invite") return null
     return parts[1].ifEmpty { null }
 }

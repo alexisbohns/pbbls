@@ -12,19 +12,19 @@ import app.pbbls.android.features.karma.LocalKarmaNotificationService
 import app.pbbls.android.features.lab.services.LocalLogsService
 import app.pbbls.android.services.LocalCollectionsService
 import app.pbbls.android.services.LocalComposerSnapshotStore
+import app.pbbls.android.services.LocalConnectionsService
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalPathService
 import app.pbbls.android.services.LocalPathStatsService
 import app.pbbls.android.services.LocalPebbleDetailService
-import app.pbbls.android.services.LocalConnectionsService
 import app.pbbls.android.services.LocalPebbleDraftsService
-import app.pbbls.android.services.parseInviteToken
 import app.pbbls.android.services.LocalPebbleWriteService
 import app.pbbls.android.services.LocalProfileService
 import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSnapURLCache
 import app.pbbls.android.services.LocalSoulsService
 import app.pbbls.android.services.LocalSupabaseService
+import app.pbbls.android.services.parseInviteToken
 import app.pbbls.android.theme.PebblesTheme
 import io.github.jan.supabase.auth.handleDeeplinks
 

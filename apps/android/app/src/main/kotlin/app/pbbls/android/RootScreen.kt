@@ -19,6 +19,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import app.pbbls.android.features.auth.AuthMode
 import app.pbbls.android.features.auth.AuthScreen
+import app.pbbls.android.features.connections.AcceptInviteScreen
+import app.pbbls.android.features.connections.ConnectionsScreen
 import app.pbbls.android.features.glyph.store.GlyphsListScreen
 import app.pbbls.android.features.karma.KarmaOverlayHost
 import app.pbbls.android.features.karma.LocalKarmaNotificationService
@@ -33,8 +35,6 @@ import app.pbbls.android.features.profile.ProfileScreen
 import app.pbbls.android.features.profile.SoulDetailScreen
 import app.pbbls.android.features.profile.SoulsListScreen
 import app.pbbls.android.features.welcome.WelcomeScreen
-import app.pbbls.android.features.connections.AcceptInviteScreen
-import app.pbbls.android.features.connections.ConnectionsScreen
 import app.pbbls.android.services.LocalConnectionsService
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalReferenceDataService

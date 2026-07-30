@@ -7,11 +7,11 @@ import app.pbbls.android.features.karma.KarmaNotificationService
 import app.pbbls.android.features.lab.services.LogsService
 import app.pbbls.android.services.CollectionsService
 import app.pbbls.android.services.ComposerSnapshotStore
+import app.pbbls.android.services.ConnectionsService
 import app.pbbls.android.services.EmotionPaletteService
 import app.pbbls.android.services.PathService
 import app.pbbls.android.services.PathStatsService
 import app.pbbls.android.services.PebbleDetailService
-import app.pbbls.android.services.ConnectionsService
 import app.pbbls.android.services.PebbleDraftsService
 import app.pbbls.android.services.PebbleWriteService
 import app.pbbls.android.services.ProfileService
