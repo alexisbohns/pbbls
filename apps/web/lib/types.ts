@@ -187,12 +187,39 @@ export type Profile = {
   display_name: string
   /** FK to the user's chosen profile glyph (glyphs.id). Null when unset. */
   glyph_id: string | null
+  /** Public URL identity (/u/<handle>). Null until claimed via set_handle. */
+  handle: string | null
+  /** Opt-in flag for the public profile page. Requires a handle (DB CHECK). */
+  public_profile: boolean
   onboarding_completed: boolean
   color_world: ColorWorld
   terms_accepted_at: string | null
   privacy_accepted_at: string | null
   created_at: string
   updated_at: string
+}
+
+/**
+ * The `get_public_profile` RPC projection, verbatim wire shape (M50). Null
+ * from the RPC means "unknown or not public" — indistinguishable by design.
+ */
+export type PublicProfile = {
+  display_name: string
+  handle: string
+  /** Avatar glyph geometry, or null when the owner has none set. */
+  glyph: { strokes: MarkStroke[]; view_box: string } | null
+  pebbles_count: number
+  /** 0–6, same buckets as v_ripple. */
+  ripple_level: number
+  /** 0–7, same buckets as v_bounce. */
+  bounce_level: number
+  /** 28 booleans, index 0 = 27 days ago … index 27 = today (UTC). */
+  assiduity: boolean[]
+  days_practiced: number
+  /** ISO date (YYYY-MM-DD). */
+  member_since: string
+  /** Empty until M48 fills it; shape then defined by the achievements design. */
+  achievements: unknown[]
 }
 
 export type RegisterInput = {
@@ -202,6 +229,10 @@ export type RegisterInput = {
   privacy_accepted: boolean
 }
 export type LoginInput = { email: string; password: string }
+// `handle` is deliberately excluded: claiming/releasing a handle goes through
+// the `set_handle` RPC (normalization + stable error codes), never a direct
+// column write. `public_profile` stays here — a single-column toggle is the
+// sanctioned direct-update case, guarded by the DB CHECK.
 export type UpdateProfileInput = Partial<
-  Omit<Profile, "id" | "user_id" | "created_at" | "updated_at">
+  Omit<Profile, "id" | "user_id" | "handle" | "created_at" | "updated_at">
 >

@@ -16,6 +16,9 @@ export function MainContent({ children }: MainContentProps) {
   const isOnboarding = pathname.startsWith("/onboarding")
   const isAuth = pathname === "/login" || pathname === "/register"
   const isDocs = pathname.startsWith("/docs")
+  // Public profile pages serve anonymous visitors and signed-in users alike —
+  // never bounce a mid-onboarding viewer away from someone's public page.
+  const isPublicProfile = pathname.startsWith("/u/")
   // /path owns its own sticky bottom dock and scrollable interior — it should
   // fill the dynamic viewport edge-to-edge, with no body-level scrolling.
   const isPath = pathname === "/path" || pathname.startsWith("/path/")
@@ -45,7 +48,7 @@ export function MainContent({ children }: MainContentProps) {
             : "pt-[var(--safe-area-top)] pb-[calc(2rem+var(--safe-area-bottom))]",
       )}
     >
-      {!isLanding && !isAuth && !isDocs && <OnboardingGate />}
+      {!isLanding && !isAuth && !isDocs && !isPublicProfile && <OnboardingGate />}
       <AuthGate>{children}</AuthGate>
     </main>
   )

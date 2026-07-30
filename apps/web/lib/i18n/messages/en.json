@@ -70,6 +70,14 @@
     "logout": "Log out",
     "loggingOut": "Logging out…"
   },
+  "publicProfile": {
+    "memberSince": "Member since {date}",
+    "rippleLevel": "Ripples Level {level}",
+    "bounceLevel": "Bounce Level {level}",
+    "days": "Days",
+    "pebbles": "Pebbles",
+    "madeWith": "Made with Pebbles"
+  },
   "settings": {
     "title": "Settings",
     "save": "Save",
@@ -82,6 +90,21 @@
     "name": "Name",
     "namePlaceholder": "Your name",
     "email": "Email",
+    "publicProfile": "Public profile",
+    "handle": "Handle",
+    "handlePlaceholder": "your_handle",
+    "handleHint": "3–30 characters: lowercase letters, numbers, underscores. Leave empty to release your handle.",
+    "handleError": {
+      "invalid_handle": "That handle isn't valid. Use 3–30 lowercase letters, numbers or underscores, starting and ending with a letter or number.",
+      "handle_taken": "That handle is already taken.",
+      "handle_reserved": "That handle is reserved."
+    },
+    "publicToggle": "Make my profile public",
+    "publicToggleNeedsHandle": "Claim a handle first to go public.",
+    "publicProfileCopy": "Copy your public profile link",
+    "publicProfileShare": "Share your public profile",
+    "publicProfileLinkCopied": "Link copied",
+    "publicProfileLinkCopyError": "Couldn't copy the link. Please try again.",
     "providers": "Providers",
     "providerApple": "Apple ID",
     "providerGoogle": "Google Account",

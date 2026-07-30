@@ -70,6 +70,14 @@
     "logout": "Me déconnecter",
     "loggingOut": "Déconnexion…"
   },
+  "publicProfile": {
+    "memberSince": "Membre depuis {date}",
+    "rippleLevel": "Niveau Ripples {level}",
+    "bounceLevel": "Niveau ricochet {level}",
+    "days": "Jours",
+    "pebbles": "Galets",
+    "madeWith": "Créé avec Pebbles"
+  },
   "settings": {
     "title": "Réglages",
     "save": "Enregistrer",
@@ -82,6 +90,21 @@
     "name": "Nom",
     "namePlaceholder": "Votre nom",
     "email": "E-mail",
+    "publicProfile": "Profil public",
+    "handle": "Pseudo",
+    "handlePlaceholder": "votre_pseudo",
+    "handleHint": "3 à 30 caractères : minuscules, chiffres, tirets bas. Laissez vide pour libérer votre pseudo.",
+    "handleError": {
+      "invalid_handle": "Ce pseudo n'est pas valide. Utilisez 3 à 30 minuscules, chiffres ou tirets bas, en commençant et terminant par une lettre ou un chiffre.",
+      "handle_taken": "Ce pseudo est déjà pris.",
+      "handle_reserved": "Ce pseudo est réservé."
+    },
+    "publicToggle": "Rendre mon profil public",
+    "publicToggleNeedsHandle": "Choisissez d'abord un pseudo pour passer en public.",
+    "publicProfileCopy": "Copier le lien de votre profil public",
+    "publicProfileShare": "Partager votre profil public",
+    "publicProfileLinkCopied": "Lien copié",
+    "publicProfileLinkCopyError": "Impossible de copier le lien. Veuillez réessayer.",
     "providers": "Fournisseurs",
     "providerApple": "Identifiant Apple",
     "providerGoogle": "Compte Google",
