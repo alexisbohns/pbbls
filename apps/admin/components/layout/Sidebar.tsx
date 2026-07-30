@@ -2,7 +2,16 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BarChart3, Megaphone, Palette, Shapes, Smile, Sparkles, Store } from "lucide-react"
+import {
+  BarChart3,
+  Megaphone,
+  Palette,
+  Shapes,
+  Smile,
+  Sparkles,
+  Store,
+  Trophy,
+} from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -32,6 +41,7 @@ const REFERENCE_ITEMS = [
   { href: "/domains", label: "Domains", icon: Shapes },
   { href: "/emotions/palettes", label: "Palettes", icon: Palette },
   { href: "/emotions/emojis", label: "Emojis", icon: Smile },
+  { href: "/achievements", label: "Achievements", icon: Trophy },
 ] as const
 
 export function AppSidebar() {
