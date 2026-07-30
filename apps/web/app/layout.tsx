@@ -21,6 +21,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  // Absolute-URL base for OG/twitter cards (first consumer: /u/[handle]).
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.pbbls.app"),
   title: "pbbls",
   description: "Collect meaningful moments, one pebble at a time",
   manifest: "/manifest.webmanifest",
