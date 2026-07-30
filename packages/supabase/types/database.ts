@@ -39,6 +39,161 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievement_unlocks: {
+        Row: {
+          achievement_id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "achievement_unlocks_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "achievement_unlocks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "achievement_unlocks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "achievement_unlocks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      achievements: {
+        Row: {
+          description_en: string | null
+          description_fr: string | null
+          domain_id: string | null
+          emotion_id: string | null
+          family: string
+          glyph_id: string | null
+          id: string
+          is_active: boolean
+          karma_reward: number
+          slug: string
+          sort_order: number
+          threshold: number | null
+          title_en: string | null
+          title_fr: string | null
+        }
+        Insert: {
+          description_en?: string | null
+          description_fr?: string | null
+          domain_id?: string | null
+          emotion_id?: string | null
+          family: string
+          glyph_id?: string | null
+          id?: string
+          is_active?: boolean
+          karma_reward?: number
+          slug: string
+          sort_order: number
+          threshold?: number | null
+          title_en?: string | null
+          title_fr?: string | null
+        }
+        Update: {
+          description_en?: string | null
+          description_fr?: string | null
+          domain_id?: string | null
+          emotion_id?: string | null
+          family?: string
+          glyph_id?: string | null
+          id?: string
+          is_active?: boolean
+          karma_reward?: number
+          slug?: string
+          sort_order?: number
+          threshold?: number | null
+          title_en?: string | null
+          title_fr?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "achievements_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "domains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "achievements_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "v_analytics_domain_share_weekly"
+            referencedColumns: ["domain_id"]
+          },
+          {
+            foreignKeyName: "achievements_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "v_domains_with_glyph"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "achievements_emotion_id_fkey"
+            columns: ["emotion_id"]
+            isOneToOne: false
+            referencedRelation: "emotions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "achievements_emotion_id_fkey"
+            columns: ["emotion_id"]
+            isOneToOne: false
+            referencedRelation: "v_analytics_emotion_share_weekly"
+            referencedColumns: ["emotion_id"]
+          },
+          {
+            foreignKeyName: "achievements_emotion_id_fkey"
+            columns: ["emotion_id"]
+            isOneToOne: false
+            referencedRelation: "v_emotions_with_palette"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "achievements_glyph_id_fkey"
+            columns: ["glyph_id"]
+            isOneToOne: false
+            referencedRelation: "glyphs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "achievements_glyph_id_fkey"
+            columns: ["glyph_id"]
+            isOneToOne: false
+            referencedRelation: "v_glyph_market"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bounces: {
         Row: {
           score: number
@@ -1746,6 +1901,13 @@ export type Database = {
         Args: { p_glyph_id: string; p_user: string }
         Returns: boolean
       }
+      check_achievements: {
+        Args: never
+        Returns: {
+          karma_granted: number
+          slug: string
+        }[]
+      }
       compute_karma_delta: {
         Args: {
           p_cards_count: number
@@ -1984,6 +2146,7 @@ export type Database = {
           deleted_count: number
         }[]
       }
+      sync_achievement_catalog: { Args: never; Returns: undefined }
       update_pebble: {
         Args: { p_pebble_id: string; payload: Json }
         Returns: undefined
