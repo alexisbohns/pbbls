@@ -40,6 +40,20 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="pebbles" android:host="auth-callback" />
             </intent-filter>
+
+            <!--
+              Invite App Links (M49). The one canonical invite URL is
+              https://www.pbbls.app/invite/<token> — no custom scheme, because
+              the https link is its own fallback: not-installed users land on
+              the web accept page instead of a browser error. autoVerify pairs
+              with /.well-known/assetlinks.json served by apps/web.
+            -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="www.pbbls.app" android:pathPrefix="/invite/" />
+            </intent-filter>
         </activity>
     </application>
 

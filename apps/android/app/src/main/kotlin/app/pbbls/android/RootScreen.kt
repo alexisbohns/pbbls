@@ -33,6 +33,9 @@ import app.pbbls.android.features.profile.ProfileScreen
 import app.pbbls.android.features.profile.SoulDetailScreen
 import app.pbbls.android.features.profile.SoulsListScreen
 import app.pbbls.android.features.welcome.WelcomeScreen
+import app.pbbls.android.features.connections.AcceptInviteScreen
+import app.pbbls.android.features.connections.ConnectionsScreen
+import app.pbbls.android.services.LocalConnectionsService
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSnapURLCache
@@ -53,6 +56,7 @@ private const val ROUTE_COLLECTIONS = "collections"
 private const val ROUTE_COLLECTION_DETAIL = "collections/{collectionId}"
 private const val ROUTE_GLYPHS = "glyphs"
 private const val ROUTE_LAB = "lab"
+private const val ROUTE_CONNECTIONS = "connections"
 
 /**
  * Top-level auth gate — the `RootView` analog (D5). The gate is conditional
@@ -73,6 +77,7 @@ fun RootScreen() {
     val referenceData = LocalReferenceDataService.current
     val karma = LocalKarmaNotificationService.current
     val snapUrls = LocalSnapURLCache.current
+    val connections = LocalConnectionsService.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
@@ -143,6 +148,15 @@ fun RootScreen() {
             // Karma flash floats above the authed surfaces (create/detail live
             // inside PathScreen, so they're below it) — drawn last for z-order (D9).
             KarmaOverlayHost(service = karma, modifier = Modifier.fillMaxSize())
+            // An invite link can land at any moment; the accept surface sits
+            // above the nav host so it is reachable from any screen, and only
+            // once there is a session to accept with (M49, design D12).
+            connections.pendingInviteToken?.let { token ->
+                AcceptInviteScreen(
+                    token = token,
+                    onDismiss = { connections.pendingInviteToken = null },
+                )
+            }
         } else {
             WelcomeAuthNavHost(
                 contentRevealed = welcomeContentRevealed,
@@ -183,8 +197,12 @@ private fun AuthedNavHost(onSignOut: () -> Unit) {
                     navController.navigate("$ROUTE_COLLECTIONS/${collection.id}")
                 },
                 onOpenGlyphs = { navController.navigate(ROUTE_GLYPHS) },
+                onOpenConnections = { navController.navigate(ROUTE_CONNECTIONS) },
                 onOpenLab = { navController.navigate(ROUTE_LAB) },
             )
+        }
+        composable(ROUTE_CONNECTIONS) {
+            ConnectionsScreen(onDismiss = { navController.popBackStack() })
         }
         composable(ROUTE_GLYPHS) {
             GlyphsListScreen(onBack = { navController.popBackStack() })

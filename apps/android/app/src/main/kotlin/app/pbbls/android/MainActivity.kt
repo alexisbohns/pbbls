@@ -16,7 +16,9 @@ import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalPathService
 import app.pbbls.android.services.LocalPathStatsService
 import app.pbbls.android.services.LocalPebbleDetailService
+import app.pbbls.android.services.LocalConnectionsService
 import app.pbbls.android.services.LocalPebbleDraftsService
+import app.pbbls.android.services.parseInviteToken
 import app.pbbls.android.services.LocalPebbleWriteService
 import app.pbbls.android.services.LocalProfileService
 import app.pbbls.android.services.LocalReferenceDataService
@@ -42,6 +44,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         supabase.client.handleDeeplinks(intent)
+        captureInviteToken(intent)
         setContent {
             PebblesTheme {
                 CompositionLocalProvider(
@@ -57,6 +60,7 @@ class MainActivity : ComponentActivity() {
                     LocalSoulsService provides app.soulsService,
                     LocalCollectionsService provides app.collectionsService,
                     LocalPebbleDraftsService provides app.draftsService,
+                    LocalConnectionsService provides app.connectionsService,
                     LocalComposerSnapshotStore provides app.composerSnapshots,
                     LocalGlyphService provides app.glyphService,
                     LocalGlyphMarketService provides app.glyphMarket,
@@ -73,5 +77,17 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         supabase.client.handleDeeplinks(intent)
+        captureInviteToken(intent)
+    }
+
+    /**
+     * Parks an invite App Link token on the service (M49). `handleDeeplinks`
+     * only reacts to `pebbles://auth-callback`, so both run safely on every
+     * intent. `RootScreen` presents the accept surface once a session exists,
+     * which is why this only stores rather than navigating.
+     */
+    private fun captureInviteToken(intent: Intent) {
+        val token = parseInviteToken(intent.data?.toString()) ?: return
+        app.connectionsService.pendingInviteToken = token
     }
 }
