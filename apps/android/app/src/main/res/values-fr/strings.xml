@@ -376,6 +376,38 @@
     <string name="drafts_saved_ago">Gardé il y a %1$s</string>
     <string name="drafts_empty">Aucun brouillon. Tout ce que tu commences à garder apparaît ici.</string>
     <string name="drafts_load_error">Impossible de charger tes brouillons. Réessaie.</string>
+    <!-- ==== Connexions (M49) ==== -->
+    <string name="action_close">Fermer</string>
+    <string name="connections_title">Connexions</string>
+    <string name="connections_empty">Partage ton lien d\'invitation : les personnes qui l\'acceptent apparaissent ici.</string>
+    <string name="connections_load_error">Impossible de charger tes connexions. Réessaie.</string>
+    <string name="connections_unnamed_peer">Quelqu\'un</string>
+    <string name="connections_remove_action">Retirer</string>
+    <string name="connections_remove_title">Retirer %1$s ?</string>
+    <string name="connections_remove_message">Vous perdrez tous les deux la connexion. Bloquer l\'empêche aussi de revenir par ton lien d\'invitation.</string>
+    <string name="connections_remove_confirm">Retirer</string>
+    <string name="connections_remove_block_confirm">Retirer et bloquer</string>
+    <string name="connections_invite_action">Inviter</string>
+    <string name="connections_invite_title">Invitation</string>
+    <string name="connections_invite_explainer">Toute personne qui ouvre ce lien peut se connecter avec toi. Il fonctionne pour plusieurs personnes : un seul code suffit pour toute une tablée.</string>
+    <string name="connections_invite_qr_alt">QR code de ton lien d\'invitation</string>
+    <string name="connections_invite_copy">Copier le lien</string>
+    <string name="connections_invite_share">Partager</string>
+    <string name="connections_invite_rotate">Obtenir un nouveau lien</string>
+    <string name="connections_invite_rotate_note">Un nouveau lien remplace celui-ci. Les personnes qui l\'ont encore ne pourront plus se connecter.</string>
+    <string name="connections_accept_title">Invitation</string>
+    <string name="connections_accept_prompt">%1$s t\'invite à te connecter.</string>
+    <string name="connections_accept_explainer">Vous vous verrez tous les deux dans vos connexions. Tu peux retirer la connexion quand tu veux.</string>
+    <string name="connections_accept_action">Se connecter</string>
+    <string name="connections_accept_done">Te voilà connecté avec %1$s.</string>
+    <string name="connections_accept_already">Tu es déjà connecté avec %1$s.</string>
+    <string name="connections_accept_unusable">Ce lien d\'invitation n\'est plus valide.</string>
+    <string name="connections_accept_unusable_hint">Demandes-en un nouveau et réessaie.</string>
+    <string name="connections_error_generic">Quelque chose n\'a pas fonctionné. Réessaie.</string>
+    <string name="connections_error_invite_unusable">Ce lien d\'invitation n\'est plus valide. Demandes-en un nouveau.</string>
+    <string name="connections_error_own_invite">C\'est ton propre lien d\'invitation.</string>
+    <string name="connections_error_session">Reconnecte-toi.</string>
+
     <!-- Achievements (M48) -->
     <string name="achievements_title">Succès</string>
     <string name="achievements_card_subtitle">Tes badges le long du chemin</string>

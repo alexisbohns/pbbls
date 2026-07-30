@@ -3,6 +3,8 @@ import type {
   PebbleSnap,
   Soul,
   Collection,
+  Connection,
+  ConnectionPeer,
   KarmaEvent,
   Mark,
   MarketGlyph,
@@ -131,6 +133,28 @@ export type PebbleDraftRecord = {
 }
 
 // ---------------------------------------------------------------------------
+// Connections (M49) — operation results for the definer-RPC wire contract.
+// See docs/superpowers/specs/2026-07-29-mutual-connections-design.md.
+// ---------------------------------------------------------------------------
+
+// The caller's live multi-use invite. The client composes the share URL
+// (`${origin}/invite/<token>`) — the server returns only the token (D11).
+export type ConnectionInvite = {
+  token: string
+  expiresAt: string
+  createdAt: string
+}
+
+// Accept is idempotent: a repeat accept SUCCEEDS with `alreadyConnected: true`
+// (re-scans and retries are the normal case for a multi-use QR, D5).
+export type AcceptConnectionInviteResult = {
+  connectionId: string
+  alreadyConnected: boolean
+  connectedAt: string
+  peer: ConnectionPeer
+}
+
+// ---------------------------------------------------------------------------
 // DataProvider interface — implemented by SupabaseProvider.
 // All mutation methods return Promises to match async Supabase calls.
 // ---------------------------------------------------------------------------
@@ -190,6 +214,20 @@ export interface DataProvider {
   deletePebbleDraft(id: string): Promise<void>
   /** Signed read URL for a draft snap's thumb (drafts have no `instants`). */
   getDraftSnapUrl(storagePath: string): Promise<string | undefined>
+
+  // Connections (M49): definer-RPC-only — every write is multi-table validated
+  // logic (accept touches invites, blocks and connections), so there are no
+  // direct table writes on any surface. Reads return display projections
+  // (name + glyph geometry), never a profiles row. Error slugs
+  // (invite_not_found, invite_expired, cannot_accept_own_invite, not_found)
+  // arrive as substrings of the thrown message — match with `.includes` on the
+  // lowercased message. None of these touch karma (D9).
+  listConnections(): Promise<Connection[]>
+  /** Returns the live invite; `rotate` revokes it and mints a fresh one. */
+  createConnectionInvite(rotate?: boolean): Promise<ConnectionInvite>
+  acceptConnectionInvite(token: string): Promise<AcceptConnectionInviteResult>
+  /** Severs for both sides; `block` additionally blocks the removed peer. */
+  removeConnection(id: string, block?: boolean): Promise<void>
 
   listSouls(): Promise<Soul[]>
   getSoul(id: string): Promise<Soul | undefined>

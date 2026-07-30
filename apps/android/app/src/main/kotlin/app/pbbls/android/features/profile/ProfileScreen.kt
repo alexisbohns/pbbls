@@ -70,6 +70,7 @@ fun ProfileScreen(
     onOpenCollections: () -> Unit,
     onOpenCollection: (Collection) -> Unit,
     onOpenGlyphs: () -> Unit,
+    onOpenConnections: () -> Unit,
     onOpenLab: () -> Unit,
     onOpenAchievements: () -> Unit,
     modifier: Modifier = Modifier,
@@ -197,6 +198,7 @@ fun ProfileScreen(
                         onOpenCollections = onOpenCollections,
                         onOpenSouls = onOpenSouls,
                         onOpenGlyphs = onOpenGlyphs,
+                        onOpenConnections = onOpenConnections,
                     )
                     ProfileStatsCard(
                         ripple = stats.ripple,

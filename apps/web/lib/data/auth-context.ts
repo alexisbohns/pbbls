@@ -32,8 +32,13 @@ export type AuthContextValue = {
   isProfileLoading: boolean
   login(input: LoginInput): Promise<void>
   register(input: RegisterInput): Promise<void>
-  signInWithApple(): Promise<void>
-  signInWithGoogle(): Promise<void>
+  /**
+   * OAuth sign-in. `next` is an optional, strictly relative post-auth
+   * destination threaded through the callback's `?next=` param (M49, D12);
+   * anything not strictly relative is dropped.
+   */
+  signInWithApple(next?: string): Promise<void>
+  signInWithGoogle(next?: string): Promise<void>
   logout(): Promise<void>
   updateProfile(input: UpdateProfileInput): Promise<Profile>
   /**

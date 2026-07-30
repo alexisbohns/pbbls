@@ -180,6 +180,32 @@ export type GlyphSubmission = {
 }
 
 // ---------------------------------------------------------------------------
+// Connections (M49) — mutual connections between users.
+// ---------------------------------------------------------------------------
+
+// The cross-user glyph projection returned by the connections RPCs: render
+// geometry only (strokes + view_box), never a full Mark — the RPC deliberately
+// omits id/created_at/ownership (design D5/D7). Same narrow shape as
+// `DomainGlyph` in `useDomains.ts`.
+export type PeerGlyph = {
+  strokes: MarkStroke[]
+  viewBox: string
+}
+
+// A peer's display projection — display name + avatar glyph geometry, never a
+// profiles row (roadmap §5 item 8).
+export type ConnectionPeer = {
+  displayName: string
+  glyph: PeerGlyph | null
+}
+
+export type Connection = {
+  id: string
+  connectedAt: string
+  peer: ConnectionPeer
+}
+
+// ---------------------------------------------------------------------------
 // Lab — product-transparency feed (announcements, changelog, backlog)
 // ---------------------------------------------------------------------------
 

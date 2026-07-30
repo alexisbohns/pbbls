@@ -389,6 +389,38 @@
     <string name="drafts_saved_ago">Saved %1$s ago</string>
     <string name="drafts_empty">No drafts yet. Anything you start keeping shows up here.</string>
     <string name="drafts_load_error">Couldn\'t load your drafts. Please try again.</string>
+    <!-- ==== Connections (M49) ==== -->
+    <string name="action_close">Close</string>
+    <string name="connections_title">Connections</string>
+    <string name="connections_empty">Share your invite link and whoever accepts shows up here.</string>
+    <string name="connections_load_error">Couldn\'t load your connections. Please try again.</string>
+    <string name="connections_unnamed_peer">Someone</string>
+    <string name="connections_remove_action">Remove</string>
+    <string name="connections_remove_title">Remove %1$s?</string>
+    <string name="connections_remove_message">You\'ll both lose the connection. Blocking also stops them joining again through your invite link.</string>
+    <string name="connections_remove_confirm">Remove</string>
+    <string name="connections_remove_block_confirm">Remove and block</string>
+    <string name="connections_invite_action">Invite</string>
+    <string name="connections_invite_title">Invite</string>
+    <string name="connections_invite_explainer">Anyone who opens this link can connect with you. It works for several people, so one code is enough for a whole table.</string>
+    <string name="connections_invite_qr_alt">QR code for your invite link</string>
+    <string name="connections_invite_copy">Copy link</string>
+    <string name="connections_invite_share">Share</string>
+    <string name="connections_invite_rotate">Get a new link</string>
+    <string name="connections_invite_rotate_note">A new link retires this one. Anyone still holding it won\'t be able to connect.</string>
+    <string name="connections_accept_title">Invitation</string>
+    <string name="connections_accept_prompt">%1$s invites you to connect.</string>
+    <string name="connections_accept_explainer">You\'ll both see each other in your connections. You can remove the connection at any time.</string>
+    <string name="connections_accept_action">Connect</string>
+    <string name="connections_accept_done">You\'re connected with %1$s.</string>
+    <string name="connections_accept_already">You\'re already connected with %1$s.</string>
+    <string name="connections_accept_unusable">This invite link isn\'t valid anymore.</string>
+    <string name="connections_accept_unusable_hint">Ask for a fresh one and try again.</string>
+    <string name="connections_error_generic">Something went wrong. Please try again.</string>
+    <string name="connections_error_invite_unusable">This invite link isn\'t valid anymore. Ask for a fresh one.</string>
+    <string name="connections_error_own_invite">That\'s your own invite link.</string>
+    <string name="connections_error_session">Please sign in again.</string>
+
     <!-- Achievements (M48) -->
     <string name="achievements_title">Achievements</string>
     <string name="achievements_card_subtitle">Badges along your path</string>

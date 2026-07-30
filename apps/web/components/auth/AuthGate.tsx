@@ -13,6 +13,9 @@ const PROTECTED_PREFIXES = [
   "/glyphs",
   "/carve",
   "/profile",
+  // "/invite" is deliberately NOT protected: the invite preview is the
+  // sign-up-first landing page for signed-out visitors (M49, design D12).
+  "/connections",
 ]
 
 interface AuthGateProps {

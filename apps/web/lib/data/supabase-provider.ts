@@ -14,6 +14,8 @@ import {
   type WalletHistoryPage,
   type PebbleDraftPayload,
   type PebbleDraftRecord,
+  type ConnectionInvite,
+  type AcceptConnectionInviteResult,
   type AchievementUnlockResult,
 } from "@/lib/data/data-provider"
 import type {
@@ -21,6 +23,7 @@ import type {
   PebbleSnap,
   Soul,
   Collection,
+  Connection,
   Mark,
   MarketGlyph,
   GlyphSubmission,
@@ -31,6 +34,7 @@ import type {
   Achievement,
   AchievementUnlock,
 } from "@/lib/types"
+import { toConnectionPeer } from "@/lib/data/invite-api"
 import { DEFAULT_GLYPH_ID } from "@/lib/config/glyphs"
 import { processPebbleImage } from "@/lib/utils/process-pebble-image"
 
@@ -611,6 +615,61 @@ export class SupabaseProvider implements DataProvider {
       return undefined
     }
     return data?.signedUrl
+  }
+
+  // ---------------------------------------------------------------------------
+  // Connections (M49) — definer-RPC-only, no direct table access: every write
+  // is multi-table validated logic (accept touches invites, blocks and
+  // connections), and cross-user reads are display projections, never a
+  // profiles row. Deliberately outside the eager store (their own surface,
+  // refreshed on screen open — no realtime). Error slugs (invite_not_found,
+  // invite_expired, cannot_accept_own_invite, not_found) survive as substrings
+  // of the thrown message for callers to `.includes`-match. Zero karma (D9).
+  // ---------------------------------------------------------------------------
+
+  async listConnections(): Promise<Connection[]> {
+    // The RPC returns a jsonb array ordered connected_at desc (newest first).
+    const { data, error } = await this.supabase.rpc("get_connections")
+    if (error) throw new Error(`get_connections failed: ${error.message}`)
+    const rows = Array.isArray(data) ? (data as Record<string, unknown>[]) : []
+    return rows.map((row) => ({
+      id: row.connection_id as string,
+      connectedAt: row.connected_at as string,
+      peer: toConnectionPeer(row.peer),
+    }))
+  }
+
+  async createConnectionInvite(rotate = false): Promise<ConnectionInvite> {
+    // Returns the live invite if one exists; `p_rotate` revokes it and mints
+    // fresh (the entire revocation surface — there is no separate revoke RPC).
+    const { data, error } = await this.supabase.rpc("create_connection_invite", {
+      p_rotate: rotate,
+    })
+    if (error) throw new Error(`create_connection_invite failed: ${error.message}`)
+    const r = data as { token: string; expires_at: string; created_at: string }
+    return { token: r.token, expiresAt: r.expires_at, createdAt: r.created_at }
+  }
+
+  async acceptConnectionInvite(token: string): Promise<AcceptConnectionInviteResult> {
+    const { data, error } = await this.supabase.rpc("accept_connection_invite", {
+      p_token: token,
+    })
+    if (error) throw new Error(`accept_connection_invite failed: ${error.message}`)
+    const r = data as Record<string, unknown>
+    return {
+      connectionId: r.connection_id as string,
+      alreadyConnected: Boolean(r.already_connected),
+      connectedAt: r.connected_at as string,
+      peer: toConnectionPeer(r.peer),
+    }
+  }
+
+  async removeConnection(id: string, block = false): Promise<void> {
+    const { error } = await this.supabase.rpc("remove_connection", {
+      p_connection_id: id,
+      p_block: block,
+    })
+    if (error) throw new Error(`remove_connection failed: ${error.message}`)
   }
 
   /**

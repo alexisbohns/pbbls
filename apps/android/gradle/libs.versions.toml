@@ -38,6 +38,11 @@ androidsvg = "1.4"
 # (the AsyncImage analog of iOS AsyncImage + SnapURLCache).
 coil = "3.3.0"
 
+# Invite QR codes (M49). Encode-only use of the pure-JVM `core` artifact — no
+# `android-core`, no camera/scanning: a stock camera app reads the code, and the
+# encoder stays unit-testable off-device.
+zxing = "3.5.3"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
@@ -71,6 +76,9 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 androidsvg = { group = "com.caverock", name = "androidsvg-aar", version.ref = "androidsvg" }
 coil-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
+
+# Invite QR codes (M49).
+zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
 supabase-storage = { group = "io.github.jan-tennert.supabase", name = "storage-kt" }
 
 # Pebble write path (M39 sub-project A). The Functions plugin registers the

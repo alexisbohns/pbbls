@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { AuthGate } from "@/components/auth/AuthGate"
 import { OnboardingGate } from "@/components/onboarding/OnboardingGate"
+import { PendingInviteRedirect } from "@/components/connections/PendingInviteRedirect"
 
 interface MainContentProps {
   children: React.ReactNode
@@ -49,6 +50,7 @@ export function MainContent({ children }: MainContentProps) {
       )}
     >
       {!isLanding && !isAuth && !isDocs && !isPublicProfile && <OnboardingGate />}
+      {!isLanding && !isAuth && !isDocs && !isPublicProfile && <PendingInviteRedirect />}
       <AuthGate>{children}</AuthGate>
     </main>
   )

@@ -26,6 +26,7 @@ fun ProfileShortcutsRow(
     onOpenCollections: (() -> Unit)? = null,
     onOpenSouls: (() -> Unit)? = null,
     onOpenGlyphs: (() -> Unit)? = null,
+    onOpenConnections: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier,
@@ -50,6 +51,13 @@ fun ProfileShortcutsRow(
                 iconRes = R.drawable.ic_scribble,
                 label = stringResource(R.string.glyphs_title),
                 onClick = onOpenGlyphs,
+            )
+        }
+        if (onOpenConnections != null) {
+            ShortcutTile(
+                iconRes = R.drawable.ic_person_pair,
+                label = stringResource(R.string.connections_title),
+                onClick = onOpenConnections,
             )
         }
     }
