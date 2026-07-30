@@ -41,6 +41,15 @@ export type AuthContextValue = {
   signInWithGoogle(next?: string): Promise<void>
   logout(): Promise<void>
   updateProfile(input: UpdateProfileInput): Promise<Profile>
+  /**
+   * Claim, change, or release (null) the public handle via the `set_handle`
+   * RPC. Rejections carry a stable code in the error message —
+   * `invalid_handle`, `handle_taken`, `handle_reserved`, or `not_found` when
+   * the caller has no profile row. Callers must also expect transport
+   * failures (timeout, network), which carry no code. Releasing the handle
+   * also flips `public_profile` off server-side (DB invariant).
+   */
+  setHandle(handle: string | null): Promise<string | null>
   /** Change the signed-in user's password (email accounts). */
   updatePassword(password: string): Promise<void>
   /**

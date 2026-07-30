@@ -12,6 +12,8 @@ import type {
   WalletSnapshot,
   RippleSummary,
   ProfileEngagement,
+  Achievement,
+  AchievementUnlock,
 } from "@/lib/types"
 
 // ---------------------------------------------------------------------------
@@ -82,6 +84,14 @@ export type UpdateMarkInput = Partial<
 export type WalletHistoryPage = {
   events: KarmaEvent[]
   nextCursor: string | null
+}
+
+// One newly granted badge from `check_achievements()`. `karmaGranted` is what
+// the ledger actually received at unlock time (0 for reward-less badges),
+// never the catalog's current value.
+export type AchievementUnlockResult = {
+  slug: string
+  karmaGranted: number
 }
 
 // ---------------------------------------------------------------------------
@@ -168,6 +178,15 @@ export interface DataProvider {
   getRipple(): Promise<RippleSummary>
   getProfileEngagement(tz: string): Promise<ProfileEngagement>
 
+  // Achievements (on-demand, not part of the eager store): the full public
+  // catalog including inactive rows (clients decide what to render), the
+  // caller's unlock ledger, and the idempotent evaluation RPC — it inserts
+  // whatever the caller now qualifies for and returns only what it NEWLY
+  // granted (empty array = nothing new).
+  getAchievements(): Promise<Achievement[]>
+  getAchievementUnlocks(): Promise<AchievementUnlock[]>
+  checkAchievements(): Promise<AchievementUnlockResult[]>
+
   listPebbles(): Promise<Pebble[]>
   getPebble(id: string): Promise<Pebble | undefined>
   createPebble(input: CreatePebbleInput): Promise<Pebble>
@@ -188,6 +207,8 @@ export interface DataProvider {
   // None of these touch karma: `create_pebble` is the only emitter and a draft
   // never reaches it.
   listPebbleDrafts(): Promise<PebbleDraftRecord[]>
+  /** Cheap count for the Path entry badge — selects `id` only, no payloads. */
+  countPebbleDrafts(): Promise<number>
   getPebbleDraft(id: string): Promise<PebbleDraftRecord | undefined>
   savePebbleDraft(payload: PebbleDraftPayload, id?: string): Promise<PebbleDraftRecord>
   deletePebbleDraft(id: string): Promise<void>

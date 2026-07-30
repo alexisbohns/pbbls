@@ -261,10 +261,21 @@ struct LocalizationCatalogFileTests {
             // Skip entries explicitly marked as not-translatable
             // (e.g. the empty-string fallback)
             guard let localizations = entry.localizations else { continue }
-            let englishValue = localizations["en"]?.stringUnit?.value ?? ""
-            let frenchValue = localizations["fr"]?.stringUnit?.value ?? ""
-            #expect(!englishValue.isEmpty, "catalog key '\(key)' missing EN value")
-            #expect(!frenchValue.isEmpty, "catalog key '\(key)' missing FR value")
+            // The key IS the English source string (sourceLanguage: "en"), so an
+            // absent `en` localization is normal and correct — Xcode only writes
+            // one when the English copy diverges from the key. What must never be
+            // absent is the translation.
+            for (locale, localization) in localizations {
+                let values = localization.values
+                #expect(!values.isEmpty, "catalog key '\(key)' has an empty \(locale) localization")
+                for value in values {
+                    #expect(!value.isEmpty, "catalog key '\(key)' has a blank \(locale) value")
+                }
+            }
+            #expect(
+                localizations["fr"] != nil || key.isEmpty,
+                "catalog key '\(key)' is missing its FR localization"
+            )
         }
     }
 
@@ -285,6 +296,23 @@ struct LocalizationCatalogFileTests {
 
     private struct Localization: Decodable {
         let stringUnit: StringUnit?
+        let variations: Variations?
+
+        /// Every value this localization actually provides. A plural entry has no
+        /// `stringUnit` — its copy lives under `variations.plural.<category>` —
+        /// so reading `stringUnit` alone reports a fully translated plural as
+        /// missing, which is what made this suite fail on `main`.
+        var values: [String] {
+            if let stringUnit { return [stringUnit.value] }
+            guard let variations else { return [] }
+            return (variations.plural ?? [:]).values.compactMap { $0.stringUnit?.value }
+                + (variations.device ?? [:]).values.compactMap { $0.stringUnit?.value }
+        }
+    }
+
+    private struct Variations: Decodable {
+        let plural: [String: Localization]?
+        let device: [String: Localization]?
     }
 
     private struct StringUnit: Decodable {

@@ -2,6 +2,7 @@
 
 import { useDataProvider } from "@/lib/data/provider-context"
 import { notifyKarma } from "@/lib/activity/karma-activity"
+import { fireAchievementCheck } from "@/lib/activity/fire-achievement-check"
 import type { UpdatePebbleInput } from "@/lib/data/data-provider"
 import type { Pebble, PebbleSnap } from "@/lib/types"
 
@@ -22,6 +23,7 @@ export function usePebble(id: string) {
     setStore(after)
     const delta = after.karma - before
     if (delta > 0) notifyKarma(delta, "pebble_enriched")
+    fireAchievementCheck(provider)
     return updated
   }
 

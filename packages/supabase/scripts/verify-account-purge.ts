@@ -4,7 +4,8 @@
  *
  * Seeds a throwaway SELLER with every entity type (profile, soul, collection,
  * pebble + cards/domains/soul-link/collection-link/snap, storage files, a SOLD
- * glyph bought by a throwaway BUYER, an unsold glyph, favourites, karma), then
+ * glyph bought by a throwaway BUYER, an unsold glyph, favourites, karma,
+ * achievement unlocks), then
  * deletes the seller through the real delete-account edge function and asserts
  * the roadmap §6 bar: every seller row gone, the buyer's glyph still renders
  * (user_id = null + entitlement + delisted-but-approved submission), the
@@ -243,6 +244,29 @@ try {
     if (blockErr) throw new Error(`insert block ${blocker}->${blocked}: ${blockErr.message}`);
   }
 
+  // A public profile (M50). Claimed through the real RPC + direct toggle so
+  // the purge run also proves the handle frees up (profiles-row delete).
+  const handle = `purgetest${runId}`;
+  const { error: handleErr } = await seller.rpc("set_handle", { p_handle: handle });
+  if (handleErr) throw new Error(`set_handle: ${handleErr.message}`);
+  const { error: publicErr } = await seller
+    .from("profiles").update({ public_profile: true }).eq("user_id", sellerId);
+  if (publicErr) throw new Error(`public_profile toggle: ${publicErr.message}`);
+  const { data: livePublic, error: livePublicErr } = await seller
+    .rpc("get_public_profile", { p_handle: handle });
+  if (livePublicErr || !livePublic) {
+    throw new Error(`get_public_profile pre-purge: ${livePublicErr?.message ?? "null"}`);
+  }
+
+  // Achievement unlocks (M48). Earned through the real RPC as the signed-in
+  // seller (achievement_unlocks has no client insert policy): the pebble,
+  // soul, collection and glyphs above qualify several badges in one call.
+  const { data: unlockRows, error: unlockErr } = await seller.rpc("check_achievements");
+  if (unlockErr) throw new Error(`check_achievements: ${unlockErr.message}`);
+  if (!Array.isArray(unlockRows) || unlockRows.length === 0) {
+    throw new Error("check_achievements unlocked nothing — seed should qualify several badges");
+  }
+
   // -------------------------------------------------------------------------
   // 3. The sale: fund the buyer, buy through the real RPC, favourite.
   // -------------------------------------------------------------------------
@@ -312,6 +336,7 @@ try {
     ["log_reactions", "user_id"],
     ["pebble_drafts", "user_id"],
     ["connection_invites", "inviter_id"],
+    ["achievement_unlocks", "user_id"],
   ];
   for (const [table, column] of sellerScoped) {
     const n = await countRows(table, column, sellerId);
@@ -363,6 +388,14 @@ try {
 
   const leftover = await listStorageFiles(sellerId);
   check("storage prefix empty", leftover.length === 0, `found ${leftover.join(", ")}`);
+
+  // M50: the profiles-row delete freed the handle — the public projection
+  // resolves null (indistinguishable from never-existed).
+  const { data: freedHandle, error: freedHandleErr } = await admin
+    .rpc("get_public_profile", { p_handle: handle });
+  check("purged handle resolves null via get_public_profile",
+    !freedHandleErr && freedHandle === null,
+    freedHandleErr ? freedHandleErr.message : JSON.stringify(freedHandle));
 
   const { data: goneUser } = await admin.auth.admin.getUserById(sellerId);
   check("auth user gone", !goneUser?.user);

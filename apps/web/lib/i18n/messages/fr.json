@@ -48,6 +48,10 @@
     },
     "collectionsTitle": "Collections",
     "newCollection": "Nouvelle collection",
+    "achievements": {
+      "title": "Succès",
+      "subtitle": "Tes badges et jalons"
+    },
     "lab": {
       "title": "Lab",
       "subtitle": "Actus & communauté"
@@ -71,6 +75,14 @@
     "logout": "Me déconnecter",
     "loggingOut": "Déconnexion…"
   },
+  "publicProfile": {
+    "memberSince": "Membre depuis {date}",
+    "rippleLevel": "Niveau Ripples {level}",
+    "bounceLevel": "Niveau ricochet {level}",
+    "days": "Jours",
+    "pebbles": "Galets",
+    "madeWith": "Créé avec Pebbles"
+  },
   "settings": {
     "title": "Réglages",
     "save": "Enregistrer",
@@ -83,6 +95,21 @@
     "name": "Nom",
     "namePlaceholder": "Votre nom",
     "email": "E-mail",
+    "publicProfile": "Profil public",
+    "handle": "Pseudo",
+    "handlePlaceholder": "votre_pseudo",
+    "handleHint": "3 à 30 caractères : minuscules, chiffres, tirets bas. Laissez vide pour libérer votre pseudo.",
+    "handleError": {
+      "invalid_handle": "Ce pseudo n'est pas valide. Utilisez 3 à 30 minuscules, chiffres ou tirets bas, en commençant et terminant par une lettre ou un chiffre.",
+      "handle_taken": "Ce pseudo est déjà pris.",
+      "handle_reserved": "Ce pseudo est réservé."
+    },
+    "publicToggle": "Rendre mon profil public",
+    "publicToggleNeedsHandle": "Choisissez d'abord un pseudo pour passer en public.",
+    "publicProfileCopy": "Copier le lien de votre profil public",
+    "publicProfileShare": "Partager votre profil public",
+    "publicProfileLinkCopied": "Lien copié",
+    "publicProfileLinkCopyError": "Impossible de copier le lien. Veuillez réessayer.",
     "providers": "Fournisseurs",
     "providerApple": "Identifiant Apple",
     "providerGoogle": "Compte Google",
@@ -158,7 +185,63 @@
     "glyphUnlocked": "Glyphe débloqué",
     "spent": "−{amount} karma",
     "srUnlocked": "{name} débloqué — {amount} karma dépensés.",
-    "viewGlyph": "Voir le glyphe"
+    "viewGlyph": "Voir le glyphe",
+    "achievementsUnlocked": "{count, plural, one {Succès débloqué} other {# succès débloqués}}",
+    "srAchievementUnlocked": "Succès débloqué : {title}.",
+    "srAchievementsUnlocked": "{count, plural, one {# succès débloqué} other {# succès débloqués}}.",
+    "srAchievementKarma": "Tu as gagné {amount} karma.",
+    "viewAchievements": "Voir tes succès"
+  },
+  "achievements": {
+    "title": "Succès",
+    "loading": "Chargement…",
+    "error": "Impossible de charger tes succès. Réessaie un peu plus tard.",
+    "locked": "À débloquer",
+    "unlockedOn": "Débloqué le {date}",
+    "group": {
+      "pebble_count": "Galets",
+      "emotion_first": "Émotions",
+      "domain_first": "Domaines",
+      "first_collection": "Collections",
+      "first_glyph": "Glyphes",
+      "first_soul": "Âmes",
+      "glyph_count": "Gravure",
+      "glyph_sales": "Marché"
+    },
+    "family": {
+      "pebble_count": {
+        "title": "{threshold, plural, one {Premier galet} other {# galets}}",
+        "description": "{threshold, plural, one {Dépose ton tout premier galet sur ton chemin.} other {Rassemble # galets sur ton chemin.}}"
+      },
+      "emotion_first": {
+        "title": "Première fois : {name}",
+        "description": "Capture ton premier galet teinté par l'émotion {name}."
+      },
+      "domain_first": {
+        "title": "Premiers pas : {name}",
+        "description": "Capture ton premier galet dans le domaine {name}."
+      },
+      "first_collection": {
+        "title": "Première collection",
+        "description": "Crée ta toute première collection."
+      },
+      "first_glyph": {
+        "title": "Premier glyphe",
+        "description": "Grave ton tout premier glyphe."
+      },
+      "first_soul": {
+        "title": "Première âme",
+        "description": "Ajoute ta toute première âme."
+      },
+      "glyph_count": {
+        "title": "{threshold} glyphes",
+        "description": "Grave {threshold} glyphes de ta main."
+      },
+      "glyph_sales": {
+        "title": "{threshold, plural, one {Première vente} other {# ventes}}",
+        "description": "{threshold, plural, one {Un pebbler adopte l'un de tes glyphes.} other {Tes glyphes trouvent preneur # fois.}}"
+      }
+    }
   },
   "wallet": {
     "title": "Porte-karma",

@@ -16,6 +16,7 @@ import {
   type PebbleDraftRecord,
   type ConnectionInvite,
   type AcceptConnectionInviteResult,
+  type AchievementUnlockResult,
 } from "@/lib/data/data-provider"
 import type {
   Pebble,
@@ -30,6 +31,8 @@ import type {
   WalletSnapshot,
   RippleSummary,
   ProfileEngagement,
+  Achievement,
+  AchievementUnlock,
 } from "@/lib/types"
 import { toConnectionPeer } from "@/lib/data/invite-api"
 import { DEFAULT_GLYPH_ID } from "@/lib/config/glyphs"
@@ -316,6 +319,65 @@ export class SupabaseProvider implements DataProvider {
   }
 
   // ---------------------------------------------------------------------------
+  // Achievements (M48) — public catalog, owner-scoped unlock ledger, and the
+  // idempotent check_achievements() evaluation RPC.
+  // ---------------------------------------------------------------------------
+
+  async getAchievements(): Promise<Achievement[]> {
+    const { data, error } = await this.supabase
+      .from("achievements")
+      .select("*")
+      .order("sort_order", { ascending: true })
+    if (error) throw new Error(`getAchievements failed: ${error.message}`)
+    return (data ?? []).map((row) => {
+      const r = row as Record<string, unknown>
+      return {
+        id: r.id as string,
+        slug: r.slug as string,
+        // The `family` CHECK constraint on the catalog makes this cast sound.
+        family: r.family as Achievement["family"],
+        threshold: (r.threshold as number | null) ?? null,
+        emotionId: (r.emotion_id as string | null) ?? null,
+        domainId: (r.domain_id as string | null) ?? null,
+        sortOrder: r.sort_order as number,
+        glyphId: (r.glyph_id as string | null) ?? null,
+        karmaReward: (r.karma_reward as number) ?? 0,
+        isActive: Boolean(r.is_active),
+        titleEn: (r.title_en as string | null) ?? null,
+        titleFr: (r.title_fr as string | null) ?? null,
+        descriptionEn: (r.description_en as string | null) ?? null,
+        descriptionFr: (r.description_fr as string | null) ?? null,
+      }
+    })
+  }
+
+  async getAchievementUnlocks(): Promise<AchievementUnlock[]> {
+    const { data, error } = await this.supabase
+      .from("achievement_unlocks")
+      .select("achievement_id, unlocked_at")
+      .eq("user_id", this.userId)
+    if (error) throw new Error(`getAchievementUnlocks failed: ${error.message}`)
+    return (data ?? []).map((row) => {
+      const r = row as Record<string, unknown>
+      return {
+        achievementId: r.achievement_id as string,
+        unlockedAt: r.unlocked_at as string,
+      }
+    })
+  }
+
+  async checkAchievements(): Promise<AchievementUnlockResult[]> {
+    // The RPC `returns table(...)`, so PostgREST yields an array of rows —
+    // empty when nothing newly unlocked.
+    const { data, error } = await this.supabase.rpc("check_achievements")
+    if (error) throw new Error(`check_achievements failed: ${error.message}`)
+    return ((data ?? []) as Record<string, unknown>[]).map((row) => ({
+      slug: row.slug as string,
+      karmaGranted: (row.karma_granted as number) ?? 0,
+    }))
+  }
+
+  // ---------------------------------------------------------------------------
   // Wallet — read summary + on-demand paginated history, and spend via RPC.
   // ---------------------------------------------------------------------------
 
@@ -503,6 +565,16 @@ export class SupabaseProvider implements DataProvider {
       .order("updated_at", { ascending: false })
     if (error) throw new Error(error.message)
     return (data ?? []).map(toDraftRecord)
+  }
+
+  async countPebbleDrafts(): Promise<number> {
+    // `head: true` sends no rows at all — the badge needs the number, and /path
+    // is the app's home screen, so pulling every draft's payload for it is waste.
+    const { count, error } = await this.supabase
+      .from("pebble_drafts")
+      .select("id", { count: "exact", head: true })
+    if (error) throw new Error(error.message)
+    return count ?? 0
   }
 
   async getPebbleDraft(id: string): Promise<PebbleDraftRecord | undefined> {

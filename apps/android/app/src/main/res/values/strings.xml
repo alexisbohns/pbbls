@@ -93,6 +93,16 @@
     <string name="settings_password_header">Password</string>
     <string name="settings_password_placeholder">New password</string>
     <string name="settings_password_footer">Leave blank to keep your current password.</string>
+    <string name="settings_public_profile_header">Public profile</string>
+    <string name="settings_handle_label">Handle</string>
+    <string name="settings_handle_placeholder">your_handle</string>
+    <string name="settings_handle_footer">3 to 30 characters: lowercase letters, numbers, underscores. Leave empty to release your handle.</string>
+    <string name="settings_public_profile_toggle">Make my profile public</string>
+    <string name="settings_public_profile_needs_handle">Claim a handle first to go public.</string>
+    <string name="settings_public_profile_share">Share my profile</string>
+    <string name="settings_handle_error_invalid">That handle isn\'t valid. Use 3 to 30 lowercase letters, numbers or underscores, starting and ending with a letter or number.</string>
+    <string name="settings_handle_error_taken">That handle is already taken.</string>
+    <string name="settings_handle_error_reserved">That handle is reserved.</string>
     <string name="settings_providers_header">Providers</string>
     <string name="settings_legal_header">Legal</string>
     <string name="settings_save_error">Couldn\'t save your changes. Please try again.</string>

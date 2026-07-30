@@ -201,6 +201,35 @@ export function useSupabaseAuth(): AuthContextValue {
     await supabase.auth.signOut({ scope: "local" })
   }, [])
 
+  const setHandle = useCallback(
+    async (handle: string | null): Promise<string | null> => {
+      const supabase = getSupabase()
+      if (!supabase) throw new Error("Supabase client not available")
+      // The RPC raises with a stable code (invalid_handle / handle_taken /
+      // handle_reserved) that the settings UI maps to inline copy.
+      const { data, error } = await withTimeout(
+        supabase.rpc("set_handle", { p_handle: handle ?? undefined }),
+        10000,
+        "set handle",
+      )
+      if (error) throw new Error(error.message)
+      const stored = (data as string | null) ?? null
+      // Mirror the server-side invariant locally: releasing the handle also
+      // dropped public_profile in the same statement.
+      setProfile((prev) =>
+        prev
+          ? {
+              ...prev,
+              handle: stored,
+              public_profile: stored === null ? false : prev.public_profile,
+            }
+          : prev,
+      )
+      return stored
+    },
+    [],
+  )
+
   const updatePassword = useCallback(async (password: string) => {
     const supabase = getSupabase()
     if (!supabase) throw new Error("Supabase client not available")
@@ -262,6 +291,7 @@ export function useSupabaseAuth(): AuthContextValue {
     signInWithGoogle,
     logout,
     updateProfile,
+    setHandle,
     updatePassword,
     deleteAccount,
   }

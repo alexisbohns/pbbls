@@ -1,6 +1,7 @@
 "use client"
 
 import { notifyKarma } from "@/lib/activity/karma-activity"
+import { fireAchievementCheck } from "@/lib/activity/fire-achievement-check"
 import { useDataProvider } from "@/lib/data/provider-context"
 import type { CreatePebbleInput, UpdatePebbleInput } from "@/lib/data/data-provider"
 import type { Pebble, PebbleSnap } from "@/lib/types"
@@ -16,6 +17,7 @@ export function usePebbles() {
     setStore(after)
     const delta = after.karma - before
     if (delta > 0) notifyKarma(delta, "pebble_created")
+    fireAchievementCheck(provider)
     return pebble
   }
 
@@ -30,6 +32,7 @@ export function usePebbles() {
     setStore(after)
     const delta = after.karma - before
     if (delta > 0) notifyKarma(delta, "pebble_enriched")
+    fireAchievementCheck(provider)
     return pebble
   }
 

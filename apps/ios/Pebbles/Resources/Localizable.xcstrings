@@ -579,6 +579,176 @@
         }
       }
     },
+    "3 to 30 characters: lowercase letters, numbers, underscores. Leave empty to release your handle." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 to 30 characters: lowercase letters, numbers, underscores. Leave empty to release your handle."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 \u00e0 30 caract\u00e8res : minuscules, chiffres, tirets bas. Laissez vide pour lib\u00e9rer votre pseudo."
+          }
+        }
+      }
+    },
+    "Claim a handle first to go public." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claim a handle first to go public."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisissez d'abord un pseudo pour passer en public."
+          }
+        }
+      }
+    },
+    "Handle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Handle"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pseudo"
+          }
+        }
+      }
+    },
+    "Make my profile public" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make my profile public"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rendre mon profil public"
+          }
+        }
+      }
+    },
+    "Public profile" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Public profile"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profil public"
+          }
+        }
+      }
+    },
+    "Share my profile" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share my profile"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partager mon profil"
+          }
+        }
+      }
+    },
+    "That handle is already taken." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That handle is already taken."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce pseudo est d\u00e9j\u00e0 pris."
+          }
+        }
+      }
+    },
+    "That handle is reserved." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That handle is reserved."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce pseudo est r\u00e9serv\u00e9."
+          }
+        }
+      }
+    },
+    "That handle isn't valid. Use 3 to 30 lowercase letters, numbers or underscores, starting and ending with a letter or number." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That handle isn't valid. Use 3 to 30 lowercase letters, numbers or underscores, starting and ending with a letter or number."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce pseudo n'est pas valide. Utilisez 3 \u00e0 30 minuscules, chiffres ou tirets bas, en commen\u00e7ant et terminant par une lettre ou un chiffre."
+          }
+        }
+      }
+    },
+    "your_handle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "your_handle"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "votre_pseudo"
+          }
+        }
+      }
+    },
     "" : {
 
     },
@@ -611,7 +781,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Aucun brouillon. Tout ce que tu commences \u00e0 garder appara\u00eet ici."
+            "value" : "Aucun brouillon. Tout ce que tu commences à garder apparaît ici."
           }
         }
       }
@@ -645,7 +815,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "On reprend o\u00f9 tu t'\u00e9tais arr\u00eat\u00e9 ?"
+            "value" : "On reprend où tu t'étais arrêté ?"
           }
         }
       }
@@ -696,7 +866,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Repartir de z\u00e9ro"
+            "value" : "Repartir de zéro"
           }
         }
       }
@@ -713,7 +883,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "R\u00e9essayer"
+            "value" : "Réessayer"
           }
         }
       }
@@ -730,7 +900,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "On a gard\u00e9 ce que tu \u00e9crivais ici. Remets ta photo quand tu veux."
+            "value" : "On a gardé ce que tu écrivais ici. Remets ta photo quand tu veux."
           }
         }
       }
@@ -5940,6 +6110,618 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Votre nom"
+          }
+        }
+      }
+    },
+    "Achievements" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Achievements"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Succès"
+          }
+        }
+      }
+    },
+    "Badges along your path" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Badges along your path"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tes badges le long du chemin"
+          }
+        }
+      }
+    },
+    "Couldn't load achievements" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't load achievements"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de charger tes succès"
+          }
+        }
+      }
+    },
+    "Locked" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locked"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À débloquer"
+          }
+        }
+      }
+    },
+    "Unlocked" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlocked"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Débloqué le"
+          }
+        }
+      }
+    },
+    "achievement.capsule.countPhrase" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld achievements unlocked"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld succès débloqués"
+          }
+        }
+      }
+    },
+    "achievement.capsule.a11y.single" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Achievement unlocked: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Succès débloqué : %@"
+          }
+        }
+      }
+    },
+    "achievement.capsule.a11y.karma" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Earned %lld karma"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu as gagné %lld karma"
+          }
+        }
+      }
+    },
+    "achievement.group.pebble_count" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pebbles"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Galets"
+          }
+        }
+      }
+    },
+    "achievement.group.emotion_first" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emotions"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Émotions"
+          }
+        }
+      }
+    },
+    "achievement.group.domain_first" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Domains"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Domaines"
+          }
+        }
+      }
+    },
+    "achievement.group.first_collection" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collections"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collections"
+          }
+        }
+      }
+    },
+    "achievement.group.first_glyph" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glyphs"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glyphes"
+          }
+        }
+      }
+    },
+    "achievement.group.first_soul" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Souls"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Âmes"
+          }
+        }
+      }
+    },
+    "achievement.group.glyph_count" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carving"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gravure"
+          }
+        }
+      }
+    },
+    "achievement.group.glyph_sales" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Market"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marché"
+          }
+        }
+      }
+    },
+    "achievement.family.pebble_count.title.one" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First pebble"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premier galet"
+          }
+        }
+      }
+    },
+    "achievement.family.pebble_count.title.other" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pebbles"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld galets"
+          }
+        }
+      }
+    },
+    "achievement.family.pebble_count.description.one" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drop your first pebble on the path."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dépose ton tout premier galet sur ton chemin."
+          }
+        }
+      }
+    },
+    "achievement.family.pebble_count.description.other" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collect %lld pebbles along your path."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rassemble %lld galets sur ton chemin."
+          }
+        }
+      }
+    },
+    "achievement.family.emotion_first.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Première fois : %@"
+          }
+        }
+      }
+    },
+    "achievement.family.emotion_first.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record your first pebble carrying %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capture ton premier galet teinté par l'émotion %@."
+          }
+        }
+      }
+    },
+    "achievement.family.domain_first.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First steps in %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premiers pas : %@"
+          }
+        }
+      }
+    },
+    "achievement.family.domain_first.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record your first pebble in %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capture ton premier galet dans le domaine %@."
+          }
+        }
+      }
+    },
+    "achievement.family.first_collection.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First collection"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Première collection"
+          }
+        }
+      }
+    },
+    "achievement.family.first_collection.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create your first collection."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crée ta toute première collection."
+          }
+        }
+      }
+    },
+    "achievement.family.first_glyph.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First glyph"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premier glyphe"
+          }
+        }
+      }
+    },
+    "achievement.family.first_glyph.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carve your first glyph."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grave ton tout premier glyphe."
+          }
+        }
+      }
+    },
+    "achievement.family.first_soul.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First soul"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Première âme"
+          }
+        }
+      }
+    },
+    "achievement.family.first_soul.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add your first soul."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajoute ta toute première âme."
+          }
+        }
+      }
+    },
+    "achievement.family.glyph_count.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld glyphs"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld glyphes"
+          }
+        }
+      }
+    },
+    "achievement.family.glyph_count.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carve %lld glyphs of your own."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grave %lld glyphes de ta main."
+          }
+        }
+      }
+    },
+    "achievement.family.glyph_sales.title.one" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First sale"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Première vente"
+          }
+        }
+      }
+    },
+    "achievement.family.glyph_sales.title.other" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sales"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ventes"
+          }
+        }
+      }
+    },
+    "achievement.family.glyph_sales.description.one" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sell your first glyph in the market."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un pebbler adopte l'un de tes glyphes."
+          }
+        }
+      }
+    },
+    "achievement.family.glyph_sales.description.other" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make %lld glyph sales in the market."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tes glyphes trouvent preneur %lld fois."
           }
         }
       }
