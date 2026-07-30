@@ -186,6 +186,180 @@ export type Database = {
           },
         ]
       }
+      connection_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connection_blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connection_blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connection_blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connection_blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connection_blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connection_blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      connection_invites: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          inviter_id: string
+          revoked_at: string | null
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          inviter_id: string
+          revoked_at?: string | null
+          token: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          inviter_id?: string
+          revoked_at?: string | null
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connection_invites_inviter_id_fkey"
+            columns: ["inviter_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connection_invites_inviter_id_fkey"
+            columns: ["inviter_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connection_invites_inviter_id_fkey"
+            columns: ["inviter_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      connections: {
+        Row: {
+          created_at: string
+          id: string
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connections_user_a_fkey"
+            columns: ["user_a"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connections_user_a_fkey"
+            columns: ["user_a"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connections_user_a_fkey"
+            columns: ["user_a"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connections_user_b_fkey"
+            columns: ["user_b"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connections_user_b_fkey"
+            columns: ["user_b"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connections_user_b_fkey"
+            columns: ["user_b"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       domains: {
         Row: {
           default_glyph_id: string | null
@@ -1665,6 +1839,7 @@ export type Database = {
       }
     }
     Functions: {
+      accept_connection_invite: { Args: { p_token: string }; Returns: Json }
       admin_attribute_glyph: {
         Args: { p_glyph_id: string; p_user_id: string }
         Returns: Json
@@ -1757,6 +1932,7 @@ export type Database = {
         }
         Returns: number
       }
+      create_connection_invite: { Args: { p_rotate?: boolean }; Returns: Json }
       create_pebble: { Args: { payload: Json }; Returns: string }
       delete_pebble: { Args: { p_pebble_id: string }; Returns: undefined }
       delete_pebble_media: { Args: { p_snap_id: string }; Returns: string }
@@ -1793,6 +1969,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_connections: { Args: never; Returns: Json }
       get_domain_share: {
         Args: { p_end: string; p_start: string }
         Returns: {
@@ -1946,6 +2123,7 @@ export type Database = {
           render_svg: string
         }[]
       }
+      preview_connection_invite: { Args: { p_token: string }; Returns: Json }
       publish_admin_glyph: {
         Args: {
           p_name: string
@@ -1963,6 +2141,10 @@ export type Database = {
       reject_glyph: {
         Args: { p_note: string; p_submission_id: string }
         Returns: Json
+      }
+      remove_connection: {
+        Args: { p_block?: boolean; p_connection_id: string }
+        Returns: undefined
       }
       set_glyph_listed: {
         Args: { p_listed: boolean; p_submission_id: string }
