@@ -12,6 +12,9 @@ struct ProfileShortcutsRow: View {
             ProfileShortcutTile(title: "Glyphs", systemImage: "scribble") {
                 GlyphsListView()
             }
+            ProfileShortcutTile(title: "Circle", systemImage: "person.2.badge.plus") {
+                ConnectionsListView()
+            }
         }
     }
 }
