@@ -96,7 +96,7 @@ Cadence: promote during the periodic monorepo-audit grooming pass at **milestone
 
 **The gate.** The PR has the `feat` label, **or** it touches a user-visible Arkaik view node (`docs/arkaik/bundle.json`) → write a note. Chore, refactor, infra, or docs-only → **no note**: delete the section from the PR body (if the advisory `lab-note-reminder` still comments, add the **`no-lab-note`** label to silence it).
 
-**The contract.** One `## Lab Note (EN/FR)` section holding exactly one ` ```yaml ` fence. Both languages are mandatory (`en.title`, `en.summary`, `fr.title`, `fr.summary`) — French is a real adaptation using the informal "Tu", never a literal translation. **No em dashes** in either language; use parentheses or a new sentence. PR-time defaults: `status: in_progress`, `published: false`, omit `release-date` (the maintainer's release-time switches).
+**The contract.** One `## Lab Note (EN/FR)` section holding exactly one ` ```yaml ` fence. Both languages are mandatory (`en.title`, `en.summary`, `fr.title`, `fr.summary`) — French is a real adaptation using the informal "Tu", never a literal translation. **No em dashes** in either language; use parentheses or a new sentence. **Always double-quote every title and summary**, as the skeleton below does: a colon is the natural way to write a sentence ("Heads up: it moved", "ton compte : ceux que...") and it is exactly what an unquoted YAML value cannot hold, so the parser reads `key: value` and the whole note fails. Quoting removes the failure mode outright, apostrophes included; slug-ish values need no quotes. PR-time defaults: `status: in_progress`, `published: false`, omit `release-date` (the maintainer's release-time switches).
 
 ```yaml
 species: feature          # announcement | feature — a user-facing fix is a `feature`
@@ -104,11 +104,11 @@ platform: ios             # all | webapp | ios | android | project | infra
 status: in_progress       # backlog | planned | in_progress | shipped
 published: false
 en:
-  title: Short, benefit-first title
-  summary: One or two sentences, user-facing.
+  title: "Short, benefit-first title"
+  summary: "One or two sentences, user-facing."
 fr:
-  title: Titre court, orienté bénéfice
-  summary: Une ou deux phrases, adaptées, pas traduites littéralement.
+  title: "Titre court, orienté bénéfice"
+  summary: "Une ou deux phrases, adaptées, pas traduites littéralement."
 suggested:                # optional; read only by the Ariko vault
   molecule: pbbls         # THIS repo's molecule slug
   type: feature           # feature | improvement | fix | announcement

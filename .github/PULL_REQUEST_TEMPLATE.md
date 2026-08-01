@@ -24,6 +24,8 @@ Resolves #
   the allowed values, and the friendly casual tone (French uses "Tu"). PR-time defaults:
   status: in_progress, published: false, and omit release-date (the maintainer sets those
   at release). Both languages are mandatory; no em dashes in either.
+  Keep the quotes around every title and summary: a colon in a sentence breaks an
+  unquoted YAML value, and that is the most common malformed note.
 -->
 
 ```yaml
@@ -32,11 +34,11 @@ platform: ios             # all | webapp | ios | android | project | infra
 status: in_progress       # backlog | planned | in_progress | shipped
 published: false
 en:
-  title:
-  summary:
+  title: ""
+  summary: ""
 fr:
-  title:
-  summary:
+  title: ""
+  summary: ""
 suggested:                # optional; read only by the Ariko vault
   molecule: pbbls
   type: feature           # feature | improvement | fix | announcement

@@ -59,6 +59,21 @@ between two clauses, use a period and start a new sentence. This applies to
 - Wrong: `The whole detail view — background, title, tiles — now tints.`
 - Right: `The whole detail view (background, title, tiles) now tints.`
 
+## Always quote titles and summaries
+
+Wrap every `title` and `summary` in double quotes, in both languages, as every
+example below does. A colon is the natural way to write a sentence ("Heads up:
+it moved", "ton compte : ceux que...") and it is exactly what an unquoted YAML
+value cannot hold: the parser reads `key: value` and the whole note fails to
+parse, which fails the post-on-merge job. Quoting costs nothing and takes the
+failure mode off the table, apostrophes included.
+
+- Wrong: `summary: Heads up: the widget moved.`
+- Right: `summary: "Heads up: the widget moved."`
+
+Slug-ish values (`species`, `platform`, `status`, `molecule`, `type`, `tags`)
+need no quotes.
+
 ## When to use
 
 Only for **user-facing** PRs. Gate (same as the PR checklist):
@@ -81,11 +96,11 @@ status: in_progress       # backlog | planned | in_progress | shipped
 release-date: 2026-07-17T20:00:00   # optional; maps to released_at
 published: false          # boolean
 en:
-  title: Swap glyphs with the community
-  summary: Your Glyphs page now has Mine, Owned, and Commu tabs. Find a community glyph you love and swap it for karma.
+  title: "Swap glyphs with the community"
+  summary: "Your Glyphs page now has Mine, Owned, and Commu tabs. Find a community glyph you love and swap it for karma."
 fr:
-  title: Échange des glyphes avec la communauté
-  summary: Ta page Glyphes propose désormais les onglets Miens, Acquis et Commu. Trouve un glyphe qui te plaît pour l'échanger contre du karma.
+  title: "Échange des glyphes avec la communauté"
+  summary: "Ta page Glyphes propose désormais les onglets Miens, Acquis et Commu. Trouve un glyphe qui te plaît pour l'échanger contre du karma."
 suggested:                  # optional; for the Ariko vault only
   molecule: pbbls
   atom: glyphs              # only when confidently known
@@ -143,11 +158,11 @@ platform: webapp
 status: in_progress
 published: false
 en:
-  title: Your path, now on a timeline
-  summary: See every pebble you've placed in order, and jump back to any moment in your journey.
+  title: "Your path, now on a timeline"
+  summary: "See every pebble you've placed in order, and jump back to any moment in your journey."
 fr:
-  title: Ton chemin, maintenant en frise
-  summary: Retrouve chaque galet que tu as posé dans l'ordre, et reviens à n'importe quel moment de ton parcours.
+  title: "Ton chemin, maintenant en frise"
+  summary: "Retrouve chaque galet que tu as posé dans l'ordre, et reviens à n'importe quel moment de ton parcours."
 ```
 
 ```yaml
@@ -157,11 +172,11 @@ platform: android
 status: in_progress
 published: false
 en:
-  title: Widgets land on Android
-  summary: Drop a Pebbles widget on your home screen to see today's prompt without opening the app.
+  title: "Widgets land on Android"
+  summary: "Drop a Pebbles widget on your home screen to see today's prompt without opening the app."
 fr:
-  title: Les widgets débarquent sur Android
-  summary: Ajoute un widget Pebbles sur ton écran d'accueil pour voir la question du jour sans ouvrir l'app.
+  title: "Les widgets débarquent sur Android"
+  summary: "Ajoute un widget Pebbles sur ton écran d'accueil pour voir la question du jour sans ouvrir l'app."
 ```
 
 ## Where it goes
