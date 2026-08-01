@@ -26,10 +26,12 @@ This project uses **Next.js 16.2.0** which has breaking changes from earlier ver
 
 | Command | Description |
 |---------|-------------|
-| `npm run dev` | Start dev server with HTTPS (`next dev --experimental-https`) |
+| `npm run dev` | Start dev server (`next dev`) on port 3000 |
 | `npm run build` | Production build (`next build`) |
 | `npm run start` | Start production server (`next start`) |
 | `npm run lint` | Run ESLint (flat config, ESLint 9) |
+| `npm run test` | Run the Vitest suite (`vitest run`) |
+| `npm run test:week-roll` | Week-roll fixture script (`tsx scripts/test-week-roll.ts`) |
 | `npm run generate:splash` | Generate iOS splash screens from config |
 
 Run commands from the **repo root** — Turborepo delegates to workspaces automatically.
