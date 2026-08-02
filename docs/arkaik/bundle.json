@@ -9,7 +9,7 @@
       "view_card_variant": "large"
     },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-07-30T13:00:00.000Z"
+    "updated_at": "2026-07-31T07:06:04.000Z"
   },
   "nodes": [
     {
@@ -1963,7 +1963,7 @@
       ]
     },
     {
-      "id": "DM-bounce",
+      "id": "DM-bounces",
       "project_id": "pebbles",
       "species": "data-model",
       "title": "bounces",
@@ -3101,10 +3101,10 @@
       "edge_type": "displays"
     },
     {
-      "id": "e-V-home-DM-bounce",
+      "id": "e-V-home-DM-bounces",
       "project_id": "pebbles",
       "source_id": "V-home",
-      "target_id": "DM-bounce",
+      "target_id": "DM-bounces",
       "edge_type": "displays"
     },
     {
@@ -3234,10 +3234,10 @@
       "edge_type": "displays"
     },
     {
-      "id": "e-V-bounce-tempo-DM-bounce",
+      "id": "e-V-bounce-tempo-DM-bounces",
       "project_id": "pebbles",
       "source_id": "V-bounce-tempo",
-      "target_id": "DM-bounce",
+      "target_id": "DM-bounces",
       "edge_type": "displays"
     },
     {
@@ -3290,10 +3290,10 @@
       "edge_type": "displays"
     },
     {
-      "id": "e-V-profile-DM-bounce",
+      "id": "e-V-profile-DM-bounces",
       "project_id": "pebbles",
       "source_id": "V-profile",
-      "target_id": "DM-bounce",
+      "target_id": "DM-bounces",
       "edge_type": "displays"
     },
     {
@@ -3416,10 +3416,10 @@
       "edge_type": "queries"
     },
     {
-      "id": "e-API-get-bounce-DM-bounce",
+      "id": "e-API-get-bounce-DM-bounces",
       "project_id": "pebbles",
       "source_id": "API-get-bounce",
-      "target_id": "DM-bounce",
+      "target_id": "DM-bounces",
       "edge_type": "queries"
     },
     {
@@ -3647,10 +3647,10 @@
       "edge_type": "composes"
     },
     {
-      "id": "e-V-mechanic-sheet-DM-bounce",
+      "id": "e-V-mechanic-sheet-DM-bounces",
       "project_id": "pebbles",
       "source_id": "V-mechanic-sheet",
-      "target_id": "DM-bounce",
+      "target_id": "DM-bounces",
       "edge_type": "displays"
     },
     {
@@ -4068,10 +4068,10 @@
       "edge_type": "queries"
     },
     {
-      "id": "e-API-get-bounce-distribution-today-DM-bounce",
+      "id": "e-API-get-bounce-distribution-today-DM-bounces",
       "project_id": "pebbles",
       "source_id": "API-get-bounce-distribution-today",
-      "target_id": "DM-bounce",
+      "target_id": "DM-bounces",
       "edge_type": "queries"
     },
     {
@@ -4768,10 +4768,10 @@
       "edge_type": "queries"
     },
     {
-      "id": "e-API-delete-account-DM-bounce",
+      "id": "e-API-delete-account-DM-bounces",
       "project_id": "pebbles",
       "source_id": "API-delete-account",
-      "target_id": "DM-bounce",
+      "target_id": "DM-bounces",
       "edge_type": "queries"
     },
     {
