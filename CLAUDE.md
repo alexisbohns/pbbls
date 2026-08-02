@@ -2,6 +2,35 @@
 
 # Project Guidelines
 
+## What this repo is
+
+**Pebbles** — you record life moments as "pebbles" (time, intensity, positiveness, an emotion, related souls, life domains, reflective cards). Four client surfaces sit on one Supabase database; the database contract is the only thing they share.
+
+| Workspace | What it is | Read before working here |
+|---|---|---|
+| `apps/web` | `@pbbls/web` — Next.js 16 App Router PWA, the main app | `apps/web/CLAUDE.md` |
+| `apps/ios` | `@pbbls/ios` — SwiftUI, iOS 17+, iPhone-only | `apps/ios/CLAUDE.md` |
+| `apps/android` | `@pbbls/android` — Kotlin + Compose, minSdk 33; mirrors iOS 1:1 | `apps/android/CLAUDE.md` |
+| `apps/admin` | `@pbbls/admin` — Next.js back-office (analytics, Lab logs, moderation), port 3001 | `apps/admin/CLAUDE.md` |
+| `packages/supabase` | Migrations, generated `database.ts`, edge functions, DB verify harnesses | `packages/supabase/CLAUDE.md` |
+| `packages/shared` | Stub — no code yet | `packages/shared/CLAUDE.md` |
+| `packages/rive` | `.riv` animation assets, copied per surface (not an npm workspace) | — |
+
+Turborepo + npm workspaces at the root. Web and admin deploy to Vercel (root directory set per app); Android ships to Play internal testing from CI (`docs/android-play-deploy.md`).
+
+## Commands
+
+| Command | Description |
+|---|---|
+| `npm run dev` / `build` / `lint` | Turborepo, all workspaces (the only root tasks — there is no root `test`) |
+| `npm run lint --workspace=apps/web` | Workspace-scoped lint — the default for small/medium changes |
+| `npm run test --workspace=apps/web` | Vitest (`apps/web/**/*.test.ts`) |
+| `npm run build --workspace=@pbbls/ios` | `xcodegen generate` + `xcodebuild`; `test` runs Swift Testing, `lint` runs SwiftLint |
+| `npm run build --workspace=@pbbls/android` | Gradle via `scripts/gradle-if-sdk.sh` (no-ops without an SDK); `lint` = ktlint, `test` = unit tests |
+| `npm run db:* --workspace=packages/supabase` | Supabase CLI: `db:start`, `db:reset`, `db:types`, `db:push`, `db:migration:new`, … |
+
+Tests: Vitest on web, Swift Testing on iOS (never XCTest), JUnit + screenshot previews on Android. Database contract harnesses live in `packages/supabase/scripts/` (`verify-account-purge.ts`, `verify-pebble-drafts.ts`) and run against the linked project — they are the proof for anything crossing a surface boundary.
+
 ## Before you start
 
 - Check the issue description for the specific task and its dependencies.
@@ -27,13 +56,31 @@ Match ceremony to task size. Heavy workflows on small tasks are the main reason 
 - Full `npm run build` and `npm run lint` from the repo root.
 - Update Arkaik (`docs/arkaik/bundle.json`) as part of the same change — see the `arkaik` skill.
 
-## Topical references (load on demand)
+## Where knowledge lives (load on demand)
 
 Keep CLAUDE.md short. Read these when relevant — don't pre-load:
 
 - **UI / styling / a11y** → `docs/agents/ui-and-styling.md` (atomic design, shadcn-first, base-nova quirks, theming, WCAG)
 - **Data layer / Supabase / async** → `docs/agents/data-and-async.md` (DataProvider, auth deadlock, withTimeout, error logging)
-- **Product architecture map** → `arkaik` skill (see `.claude/skills/arkaik/`)
+- **Product architecture map** → `arkaik` skill (`.claude/skills/arkaik/`), bundle at `docs/arkaik/bundle.json`
+- **Why something is the way it is** → `docs/decisions/log.md`. Read it before making an architectural call — it is append-only and supersede-don't-edit, so the *last* entry on a topic wins.
+- **How a feature was designed / built** → `docs/superpowers/specs/<date>-<slug>-design.md` and `docs/superpowers/plans/<date>-<slug>.md`. Post-ship "Lessons learned" live in the plan.
+- **Postgres / Supabase technique** → `.agents/skills/supabase-postgres-best-practices/` (RLS, indexing, locking, pooling).
+- **PR Lab Notes** → `lab-note` skill (`.claude/skills/lab-note/`); see the Lab Note section below.
+
+CI gates worth knowing about: `arkaik.yml` validates the bundle + journal on any `docs/arkaik/**` change, `android.yml` builds on `apps/android/**`, `lab-note-reminder.yml` advises at PR-open and `lab-note.yml` posts the note at merge.
+
+## Standing cross-surface rules
+
+The database is the contract between four clients. These are hardened rules promoted from `docs/decisions/log.md` — breaking one is a regression, not a style choice.
+
+- **iOS and Android mirror each other 1:1.** Changing a schema/RPC contract or a cross-surface behavior on one surface means checking whether the other three need the same change.
+- **Test a shared data shape against real payloads produced by the other surfaces**, verbatim — including precision variants and explicit nulls. A same-surface round-trip is structurally incapable of catching a same-surface formatter bug.
+- **Timestamps crossing a surface boundary are parsed tolerantly and emitted at the narrowest precision every reader accepts** (whole seconds). Never leave a timestamp to whatever date strategy the ambient decoder happens to carry.
+- **Cross-user reads go through `security definer` RPC projections** that build an explicit jsonb allowlist (`get_public_profile` is the template). Never widen `profiles` RLS, never return `user_id`, never add a view instead.
+- **Two migrations that re-emit the same whole function body silently drop each other's appends.** `create or replace` has no merge semantics and git reports no conflict. Before applying a batch containing more than one re-emission of the same function (`purge_account`, `remove_connection` — both use in-body append markers), diff the bodies pairwise and union them manually in a new migration.
+- **A table added to `purge_account` gains its seed and its zero-row assertion in `verify-account-purge.ts` in the same change.** Run that harness against the linked project after any batch touching `purge_account`.
+- **Any migration or admin RPC that inserts an emotion or a domain re-runs `sync_achievement_catalog()` in the same transaction**, or the achievement catalog drifts from the reference tables.
 
 ## Editing CLAUDE.md / AGENTS.md
 
@@ -64,7 +111,7 @@ Cadence: promote during the periodic monorepo-audit grooming pass at **milestone
 - One logical change per commit.
 - Conventional commits, lowercase, no period: `type(scope): description`.
 - Types: `feat`, `fix`, `chore`, `docs`, `test`, `quality`.
-- Scope (optional): `core`, `ui`, `db`, `api`, `auth`, `facility`.
+- Scope (optional): a domain (`core`, `ui`, `db`, `api`, `auth`, `facility`, `legal`) or a surface (`web`, `ios`, `android`, `admin`).
 - Examples: `feat(ui): add emotion picker grid component`, `fix(db): correct seed data validation`.
 
 ### Branches
@@ -75,7 +122,8 @@ Cadence: promote during the periodic monorepo-audit grooming pass at **milestone
 ### Issues & labels
 
 - Issue titles: `[Type] Description`.
-- Apply one species label (`feat`, `fix`, `bug`, `chore`, `docs`, `test`, `quality`) plus one or more scope labels (`core`, `ui`, `db`, `api`, `auth`, `facility`).
+- Apply one species label (`feat`, `fix`, `bug`, `chore`, `docs`, `test`, `quality`) plus one or more scope labels — domain (`core`, `ui`, `db`, `api`, `auth`, `facility`, `legal`) and/or surface (`web`, `ios`, `android`, `supabase`).
+- A feature that lands on every surface is one backend issue plus one issue per client, each carrying its own surface label — that split is what keeps the milestone readable.
 
 ### PR checklist
 
