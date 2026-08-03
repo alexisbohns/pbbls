@@ -1,11 +1,14 @@
 import CoreGraphics
 import Foundation
-import SwiftUI
 import os
 
 /// Per-layer wobbled artwork for a composed pebble SVG, index-aligned with
 /// `PebbleSVGModel.layers`.
-final class WobblePebbleArt {
+///
+/// `@unchecked Sendable`: every stored property is a `let`, and the `CGPath`s
+/// they transitively hold are immutable copies (`CGMutablePath.copy()`) that
+/// nothing mutates after `init`. CGPath simply predates `Sendable`.
+final class WobblePebbleArt: @unchecked Sendable {
     let layers: [WobbleArt]
 
     init(layers: [WobbleArt]) {
@@ -14,7 +17,8 @@ final class WobblePebbleArt {
 }
 
 /// Wobbled backdrop silhouette, in its asset's viewBox space.
-final class WobbleBackdropArt {
+/// `@unchecked Sendable` for the same reason as `WobblePebbleArt`.
+final class WobbleBackdropArt: @unchecked Sendable {
     let path: CGPath
     let viewBox: CGRect
     /// `large-lowlight.svg` carves a hole with `fill-rule="evenodd"`; the
@@ -39,6 +43,29 @@ enum WobbleRenderer {
     /// One noise field for the whole app: the static look is seed 3 (§1).
     private static let noise = SVGTurbulence(seed: WobbleParams.seed)
 
+    /// Guards every memoize below. `NSCache` is individually thread-safe, but
+    /// look-up → build → store is not: the wobble entry points are called from
+    /// SwiftUI `View` bodies *and* from `Canvas` renderer closures, which run
+    /// off the main actor and concurrently with each other. Without this,
+    /// two threads race to build and publish competing art for one key
+    /// (issue #650). Held across the build so the memoize is single-flight —
+    /// the cost is paid once per artwork by design, never per frame.
+    private static let cacheLock = NSLock()
+
+    /// Look-up-or-build under `cacheLock`.
+    private static func memoized<Value: AnyObject>(
+        _ cache: NSCache<NSString, Value>,
+        key: NSString,
+        build: () -> Value?
+    ) -> Value? {
+        cacheLock.lock()
+        defer { cacheLock.unlock() }
+        if let cached = cache.object(forKey: key) { return cached }
+        guard let built = build() else { return nil }
+        cache.setObject(built, forKey: key)
+        return built
+    }
+
     // Keys are content strings: collision-proof, and a few KB per key is
     // negligible next to the cached paths. NSCache additionally evicts
     // under memory pressure.
@@ -57,9 +84,14 @@ enum WobbleRenderer {
     // MARK: - Pebble render (layer:shape / layer:fossil / layer:glyph)
 
     static func pebbleArt(svg: String, model: PebbleSVGModel) -> WobblePebbleArt {
-        if let cached = pebbleCache.object(forKey: svg as NSString) {
-            return cached
+        let art = memoized(pebbleCache, key: svg as NSString) {
+            buildPebbleArt(model: model)
         }
+        // `build` never returns nil here; the fallback keeps the API non-optional.
+        return art ?? buildPebbleArt(model: model)
+    }
+
+    private static func buildPebbleArt(model: PebbleSVGModel) -> WobblePebbleArt {
         let canvasParams = WobbleParams.scaled(for: model.viewBox.size)
         let layers = model.layers.map { layer -> WobbleArt in
             let params: WobbleParams
@@ -82,29 +114,25 @@ enum WobbleRenderer {
             let polylines = WobblePathFlattener.flatten(layer.combinedPath, step: params.flattenStep)
             return WobbleOutlineBuilder.art(for: polylines, halfWidth: halfWidth, params: params, noise: noise)
         }
-        let art = WobblePebbleArt(layers: layers)
-        pebbleCache.setObject(art, forKey: svg as NSString)
-        return art
+        return WobblePebbleArt(layers: layers)
     }
 
     // MARK: - Backdrop silhouettes (bundled assets)
 
     static func backdropArt(size: ValenceSizeGroup, polarity: ValencePolarity) -> WobbleBackdropArt? {
         let name = "\(size.rawValue)-\(polarity.rawValue)"
-        if let cached = backdropCache.object(forKey: name as NSString) {
-            return cached
+        return memoized(backdropCache, key: name as NSString) {
+            guard let url = Bundle.main.url(forResource: name, withExtension: "svg"),
+                  let raw = try? String(contentsOf: url, encoding: .utf8) else {
+                logger.error("wobble backdrop: missing outline asset \(name, privacy: .public).svg")
+                return nil
+            }
+            guard let art = backdropArt(fromAsset: raw) else {
+                logger.error("wobble backdrop: could not parse outline asset \(name, privacy: .public).svg")
+                return nil
+            }
+            return art
         }
-        guard let url = Bundle.main.url(forResource: name, withExtension: "svg"),
-              let raw = try? String(contentsOf: url, encoding: .utf8) else {
-            logger.error("wobble backdrop: missing outline asset \(name, privacy: .public).svg")
-            return nil
-        }
-        guard let art = backdropArt(fromAsset: raw) else {
-            logger.error("wobble backdrop: could not parse outline asset \(name, privacy: .public).svg")
-            return nil
-        }
-        backdropCache.setObject(art, forKey: name as NSString)
-        return art
     }
 
     /// Parses one outline asset — a single filled `<path>`, the verified shape
@@ -149,17 +177,19 @@ enum WobbleRenderer {
     // swiftlint:disable:next identifier_name
     static func glyphInk(d: String, width: Double) -> CGPath? {
         let key = "\(width)|\(d)" as NSString
-        if let cached = glyphCache.object(forKey: key) {
-            return cached.ink
-        }
-        let path = SVGPath.path(from: d).cgPath
-        guard !path.isEmpty else { return nil }
-        let params = WobbleParams.canonical
-        let polylines = WobblePathFlattener.flatten(path, step: params.flattenStep)
-        guard !polylines.isEmpty else { return nil }
-        let art = WobbleOutlineBuilder.art(for: polylines, halfWidth: width / 2, params: params, noise: noise)
-        glyphCache.setObject(art, forKey: key)
-        return art.ink
+        return memoized(glyphCache, key: key) {
+            // `SVGPathParser` rather than `SVGPath` (SwiftUI `Path`): this runs
+            // inside `Canvas` renderer closures, off the main actor, and the
+            // wobble renderer must stay pure CoreGraphics there. It also parses
+            // a superset of the same grammar, so no glyph regresses.
+            guard let path = SVGPathParser.parse(d), !path.isEmpty else { return nil }
+            let params = WobbleParams.canonical
+            let polylines = WobblePathFlattener.flatten(path, step: params.flattenStep)
+            guard !polylines.isEmpty else { return nil }
+            return WobbleOutlineBuilder.art(
+                for: polylines, halfWidth: width / 2, params: params, noise: noise
+            )
+        }?.ink
     }
 
     // MARK: - Minimal asset scanning

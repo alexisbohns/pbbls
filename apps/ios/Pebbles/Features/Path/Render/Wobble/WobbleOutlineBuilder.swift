@@ -3,7 +3,9 @@ import Foundation
 
 /// The wobbled render of one artwork piece: the leaky filled ink, plus the
 /// displaced centerline the appear animation's reveal mask strokes along.
-final class WobbleArt {
+/// `@unchecked Sendable`: both stored properties are immutable `CGPath` copies
+/// that nothing mutates after `init`. CGPath simply predates `Sendable`.
+final class WobbleArt: @unchecked Sendable {
     let ink: CGPath
     let centerline: CGPath
 
