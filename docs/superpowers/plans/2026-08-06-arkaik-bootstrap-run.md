@@ -941,3 +941,51 @@ Restored. New version 8.
 ```
 
 No `412` occurred, so no re-run was needed.
+
+---
+
+## Landed
+
+- **PR #696** — `chore(facility): bootstrap the arkaik map from the repo's own history`, labels `docs, chore, facility, no-lab-note`, milestone `M50 · Public profiles`. Resolves #690 and #683; leaves #691 open with this run as evidence.
+- **Hosted** `prj_5dDiZc-G6lseF3cb` at version 8. Backup at `docs/arkaik/.backups/2026-08-06T00-20-19-342Z-bundle.json` (gitignored, local only).
+- **`arkaik init --remove-bootstrap`** run; the one-time skill is gone and the maintenance `arkaik` skill remains.
+
+## The findings, ranked
+
+Nineteen findings against the method. The ones worth acting on first:
+
+**Correctness — these let a bad run look clean:**
+
+1. **Finding 18** — `arkaik validate` passes bundles the hosted validator rejects (`JunctionCase` shape). Every wave gate in this run was measured against a weaker bar than the landing step.
+2. **Finding 19** — a hosted brownfield run must diff against the **hosted export**, not the committed cache. `restore --dry-run` showed `-1` node / `-7` edges; the history-loss guard compares event *counts* and never fires on it.
+3. **Finding 13** — the skill's edge table is stale and, read literally, forbids every `decision` edge. An agent obeying the doc produces a decisions wave with zero edges and reports it as a finding.
+4. **Finding 15** — `has_lab_note` is a substring match that fires on refusals ("Not user-facing… Delete this section"), and the skill says to trust it without judgment. 6 of 45 flagged PRs are false positives.
+
+**Coverage — these silently starve a wave:**
+
+5. **Finding 1** — a repo that moved its own directory layout needs the *historical* paths in the profile; the wave-0 checklist passes against today's tree while the slice starves. Check *corpus* coverage instead.
+6. **Finding 4** — `corpus` never inventories dot-directories, so `.well-known/` route handlers are invisible to every slice in every run.
+7. **Finding 16** — `bootstrap index` omits `status`, so `w3-status-arcs` cannot see the very field its rule is written against.
+
+**Contract and coordination:**
+
+8. **Finding 8** — the id-convergence model catches same-id/different-title loudly, but is blind to different-id/**same-concept**, which lands two nodes for one screen silently.
+9. **Finding 9** — merge detects structural conflicts, not semantic ones: two units held opposite verdicts (retire vs retitle) on one node and both would have applied.
+10. **Finding 3** — `SKILL.md` tells every unit to write `manifest.json`, under a driver the method itself recommends that runs 10 units concurrently.
+11. **Finding 7** — the churn guard is per-unit; ten units each under 20% rewrote 58% of the map with no stop firing.
+12. **Finding 5** — a reconcile can shrink a flow's playlist but can never remove the orphaned `composes` edges: `edges` is add-only and `validate` checks one direction.
+13. **Finding 17** — a `retire` on an already-archived node emits no event, so the map gains a documented cause of death no timeline shows.
+
+**Papercuts:** Finding 2 (era `to` is inclusive-of-day, contradicting the walkthrough), Finding 6 (the skill's own `slice.json` example collides across concurrent units), Finding 10 (no `data-model → data-model` edge, so DB lineage is inexpressible), Finding 12 (`validate`'s species breakdown omits `acceptance` and `decision` — 192 of 448 nodes uncounted), Finding 14 (two platform vocabularies sharing one field name, unvalidated).
+
+**And one that is not the method's fault:** Finding 11's corollary — **node birth ≠ promise birth**. A view keeps the instant the surface first existed; an acceptance takes the instant the promise first held. Nothing in the skill says which to use, and a brownfield run hits it whenever a surface shipped before the behavior it now guarantees.
+
+## What the method got right
+
+Worth recording, because the findings above are all failures:
+
+- **The slice/fragment split held.** Ten units, ~1.3MB of corpus, no unit ever read the bundle, and merge resolved every cross-fragment edge without any unit coordinating with another.
+- **Byte-identical convergence worked.** `DM-achievements`, `DM-achievement-unlocks` and five achievement admin RPCs were declared independently by two units each and merged as silent no-ops.
+- **The wave gate caught what unit self-validation could not.** All 27 illegal `DM-→DM-` edges passed each unit's own checks and failed at merge, because the rule broken was a *schema* rule, not a fragment-shape one.
+- **Telling workers the wave-level stake shaped the work.** The values gate never had to fire: 27 of 30 elements used, top element 19.6%, `simplifies` once in 153 acceptances against a documented ~90% failure mode.
+- **"Never invent a transition"** survived contact with a large temptation: 396 of 408 nodes were left alone rather than given a plausible staircase.
