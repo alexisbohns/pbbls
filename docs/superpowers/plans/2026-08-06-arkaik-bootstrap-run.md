@@ -989,3 +989,36 @@ Worth recording, because the findings above are all failures:
 - **The wave gate caught what unit self-validation could not.** All 27 illegal `DM-→DM-` edges passed each unit's own checks and failed at merge, because the rule broken was a *schema* rule, not a fragment-shape one.
 - **Telling workers the wave-level stake shaped the work.** The values gate never had to fire: 27 of 30 elements used, top element 19.6%, `simplifies` once in 153 acceptances against a documented ~90% failure mode.
 - **"Never invent a transition"** survived contact with a large temptation: 396 of 408 nodes were left alone rather than given a plausible staircase.
+
+---
+
+## Issues filed
+
+**pbbls — product bugs surfaced by the run** (each verified in source before filing):
+
+| | |
+|---|---|
+| #697 | Android App Links cannot verify: `assetlinks.json` still ships the SHA-256 placeholder |
+| #698 | The `+` email ban is not implemented on web |
+| #699 | iOS and Android Lab feeds never filter by platform, so entries leak across surfaces |
+| #700 | One failing feed blanks the entire web Lab |
+
+**arkaik — the method's own defects**, the run's real deliverable:
+
+| | |
+|---|---|
+| #347 | Local validator accepts bundles the hosted validator rejects (`JunctionCase` shape) |
+| #348 | A hosted brownfield restore can silently destroy hosted-only state; the guard is count-based |
+| #349 | Schema docs: the edge-type table is stale and forbids every decision edge |
+| #350 | `has_lab_note` is a substring match and fires on explicit refusals |
+| #351 | Slices silently under-read the repo (dot-dirs skipped; historical layouts unmatched) |
+| #352 | Coordination: manifest races, silent near-duplicates, semantic conflicts, per-unit churn guard |
+| #353 | Graph model: DB lineage inexpressible; composes edges orphaned but unremovable; no-op retire silent |
+| #354 | Ergonomics: index lacks `status`, era-boundary doc wrong, slice example collides, validate hides species, two platform vocabularies |
+| #355 | Promote the three rules this run invented into the skill |
+
+Not filed, recorded here as candidates: web's `deletePebble` has no caller (pebble deletion is
+mobile-only despite the DataProvider interface); `v_analytics_pebble_volume_daily` and
+`v_analytics_pebble_enrichment_daily` exist as views nothing reads; Android's connection row
+omits the connected-at date web and iOS show; Android's karma flash has no ceramic sound;
+`DM-mark` may want renaming now that `Mark` is the live type.
