@@ -16,6 +16,7 @@ import {
 } from "@/lib/data/logs-api"
 import type { Log } from "@/lib/types"
 import { LAB_CONFIG } from "@/lib/config/lab"
+import { allFailedError, settledOr } from "@/lib/data/settled-feed"
 
 // Lazy module-level singleton — `createClient()` reads env vars and must
 // not run during SSR/static prerender (where they're absent). Mirrors the
@@ -72,7 +73,10 @@ export function useLabFeed() {
       setLoading(true)
       setError(null)
       try {
-        const [ann, chg, init, back, reactions] = await Promise.all([
+        // allSettled, not all: each feed lands on its own so one failing
+        // section never blanks the four that loaded (#700, mirroring iOS #420
+        // and Android #596).
+        const [ann, chg, init, back, reactions] = await Promise.allSettled([
           fetchAnnouncements(supabase),
           fetchChangelog(supabase, { limit: LAB_CONFIG.feedLimit }),
           fetchInitiatives(supabase),
@@ -80,11 +84,16 @@ export function useLabFeed() {
           fetchMyReactions(supabase, userId),
         ])
         if (cancelled || activeUserIdRef.current !== userId) return
-        setAnnouncements(ann)
-        setChangelog(chg)
-        setInitiatives(init)
-        setBacklog(back)
-        setReactedIds(reactions)
+        setAnnouncements(settledOr(ann, [], "useLabFeed:announcements"))
+        setChangelog(settledOr(chg, [], "useLabFeed:changelog"))
+        setInitiatives(settledOr(init, [], "useLabFeed:initiatives"))
+        setBacklog(settledOr(back, [], "useLabFeed:backlog"))
+        // Enrichment, not content: losing the upvote state costs the filled-in
+        // hearts, never the feeds themselves.
+        setReactedIds(settledOr(reactions, new Set<string>(), "useLabFeed:reactions"))
+        // `LabFeed` renders the error state INSTEAD of the sections, so this
+        // is reserved for the case where there is genuinely nothing to show.
+        setError(allFailedError([ann, chg, init, back], "Failed to load Lab"))
         setLoading(false)
       } catch (err) {
         if (cancelled) return
@@ -159,13 +168,19 @@ export function useLogList(mode: LogListMode) {
       setLoading(true)
       setError(null)
       try {
-        const [list, reactions] = await Promise.all([
+        // Same isolation as the feed: the list is the content, the reactions
+        // lookup is enrichment. A failing reactions query used to take the
+        // whole list down with it even though the list had loaded.
+        const [list, reactions] = await Promise.allSettled([
           fetchLogs(supabase),
           fetchMyReactions(supabase, userId),
         ])
         if (cancelled) return
-        setLogs(list)
-        setReactedIds(reactions)
+        setLogs(settledOr(list, [], `useLogList:${mode}`))
+        setReactedIds(settledOr(reactions, new Set<string>(), `useLogList:${mode}:reactions`))
+        // Here the list IS the page, so its failure is genuinely fatal — the
+        // single-content-feed case of the same rule.
+        setError(allFailedError([list], "Failed to load list"))
         setLoading(false)
       } catch (err) {
         if (cancelled) return
