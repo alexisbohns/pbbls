@@ -1,8 +1,8 @@
 ---
 name: arkaik
-version: 3.0.0
+version: 3.2.0
 description: >
-  Maintain the Arkaik product graph map for Pebbles — add, update, or
+  Maintain the Arkaik product graph map for Pbbls — add, update, or
   remove nodes and edges in the ProjectBundle JSON that describes its screens,
   flows, data models, and API endpoints, and record every change as a journal
   event. Use this skill whenever you create, rename, move, or delete a
@@ -16,7 +16,7 @@ description: >
 # Arkaik Map Maintenance
 
 You are maintaining an **Arkaik ProjectBundle** — a JSON file that describes the
-product architecture of Pebbles as a graph of nodes (screens, flows,
+product architecture of Pbbls as a graph of nodes (screens, flows,
 data models, API endpoints) and edges (relationships between them) — plus a
 **journal**, an append-only log of typed events recording how that graph changed
 over time.
@@ -39,10 +39,30 @@ one the first time you make a change (see [Dual-write](#dual-write-snapshot--jou
 >
 > | Parameter | Meaning | Default |
 > |---|---|---|
-> | `Pebbles` | The product this map describes | the current product |
-> | `pebbles` | Kebab-case `project.id` for this map (distinct from the display name above) | a kebab-case slug of the product name |
+> | `Pbbls` | The product this map describes | the current product |
+> | `pbbls` | Kebab-case `project.id` for this map (distinct from the display name above) | a kebab-case slug of the product name |
 > | `docs/arkaik/bundle.json` | Path to the snapshot | `docs/arkaik/bundle.json` |
 > | `docs/arkaik/journal.jsonl` | Path to the journal sidecar | `docs/arkaik/journal.jsonl` |
+
+> **Check this first: is the map a file, or an account project?**
+>
+> If `docs/arkaik/arkaik.json` exists in this repository, the map is **hosted** —
+> it lives in an arkaik account, not in a file here. Everything below about
+> *what* to record still applies; everything about *how* to write it does not.
+>
+> | | File map | Hosted map (`docs/arkaik/arkaik.json` present) |
+> |---|---|---|
+> | Where it lives | `docs/arkaik/bundle.json` in this repo | the account, reached over HTTP |
+> | How you edit it | patch the JSON, append to the journal | the `arkaik-mcp` tools (`create_node`, `update_node`, …) |
+> | Dual-write | you do it, by hand | the server does it — every mutation derives its own journal events |
+>
+> **Do not create or edit `docs/arkaik/bundle.json` for a hosted map.** Nothing reads it,
+> the account never sees the change, and the next person to look finds two maps
+> disagreeing. If the MCP tools are unavailable, say so and stop rather than
+> falling back to the file — a silent fallback is the failure nobody notices.
+>
+> The tool catalog is identical in both modes, so the rest of this skill reads
+> the same either way. Setup: [hosted-projects.md](https://github.com/alexisbohns/arkaik/blob/main/docs/hosted-projects.md).
 
 ## When to Update the Map
 
@@ -154,6 +174,9 @@ larger restructuring. Follow these rules strictly:
   capitalized words; physical tables/views use the exact DB identifier verbatim.
 - Every `node.project_id` must match `project.id`
 - `platforms` must contain at least one of: `"web"`, `"ios"`, `"android"`
+- If the project declares products (`project.metadata.products`), flows and views
+  also carry `metadata.product` and their `platforms` stay inside that product's
+  menu — see [Products](#products--which-app-does-this-node-belong-to)
 - Flow nodes must have `metadata.playlist` with at least one entry
 
 **Edge rules:**
@@ -161,7 +184,7 @@ larger restructuring. Follow these rules strictly:
 - Every `source_id` and `target_id` must reference existing node IDs
 - Edge type semantics:
   - `composes`: flow -> view, flow -> flow (sub-flow), view -> flow (triggers)
-  - `calls`: view -> api-endpoint, flow -> api-endpoint, api-endpoint -> api-endpoint (endpoint fan-out to internal/external APIs)
+  - `calls`: view -> api-endpoint, flow -> api-endpoint, api-endpoint -> api-endpoint (endpoint fan-out to internal/external APIs), api-endpoint -> view (the server initiates: webhook, SSE, push)
   - `displays`: view -> data-model
   - `queries`: api-endpoint -> data-model
   - `covers`: acceptance -> view, acceptance -> flow
@@ -251,8 +274,10 @@ Creating a new acceptance + covers edge is itself a dual-write: append
 - `Given` encodes render variants ("Given the pebble has a picture attached…").
 - `platforms` lists only the platforms where the behavior is *expected* — a
   mobile-only behavior is `["ios", "android"]`, not backlog-on-web.
-- `covers` edges: acceptance → view or acceptance → flow. Zero edges = a
-  product-level acceptance (legal). Several = the behavior spans surfaces.
+- `covers` edges: acceptance → view or acceptance → flow. Zero edges = an
+  anchorless acceptance in **intake** (legal): an idea filed before its flows and
+  views exist, carrying `metadata.product` until it has anchors to derive
+  membership from. Several = the behavior spans surfaces.
 - Statuses reuse the standard lifecycle; "shipped" = `live`.
 
 **Example** — iOS ships the draw-in animation:
@@ -260,7 +285,7 @@ Creating a new acceptance + covers edge is itself a dual-write: append
 ```json
 {
   "id": "AC-pebble-draw-in-animation",
-  "project_id": "pebbles",
+  "project_id": "pbbls",
   "species": "acceptance",
   "title": "Pebble draw-in animation",
   "status": "backlog",
@@ -283,6 +308,72 @@ acceptance. **If unsure, omit them** — enrichment passes exist; a wrong value 
 worse than a missing one. Consult `references/values.md` (one-line definitions
 per element) only when actually mapping — do not load it otherwise.
 <!-- values:end -->
+
+## Products — which app does this node belong to?
+
+A project may describe a **family** of apps sharing one graph: an end-user app, a
+web-only back office, a public API. Each is a **product**, declared once in
+`project.metadata.products` with an `id`, a `title`, and the `platforms` it may
+ship on. Most projects declare none, and a project with no `products` key behaves
+exactly as it always has — do not invent products for one.
+
+But when a project *does* declare them, **you are the only author of membership**:
+no form, panel, or dialog in the app writes any of the fields below. If you don't
+write them, nobody does.
+
+**Where membership is stored — and where it must never be:**
+
+| Species | What you write |
+|---|---|
+| `flow`, `view` | `metadata.product` — exactly one declared product id |
+| `acceptance` | Usually **nothing**. Membership comes from the views and flows its `covers` edges reach. Write `metadata.product` only when the acceptance covers nothing (below) |
+| `data-model`, `api-endpoint` | **Never.** Membership is derived from whoever consumes them, walking `calls` / `displays` / `queries` inward from the flows and views. Writing `metadata.product` here is a validator warning (`product-membership-wrong-species`) |
+
+That last row is the one to get right. The system layer is shared substrate: a
+data model both the end-user app and the admin touch belongs to both, and a
+stored key could only ever claim one of them.
+
+**Keep `platforms` inside the product's menu.** `node.platforms` stays
+authoritative and unchanged in meaning, but it *should* be a subset of its
+product's `platforms`. A view in a web-only admin product is `["web"]`, not
+`["web", "ios", "android"]`. Readers intersect the two lists, so an out-of-menu
+platform is dropped from every display anyway and only earns you a
+`product-platform-not-in-menu` warning.
+
+**An anchorless acceptance should name its product.** An acceptance with zero
+`covers` edges is legal — a product-level promise — but it has no anchor to
+derive membership from, so it sits under "All products" only until you say which
+app it is about (`acceptance-product-unassigned`):
+
+```json
+{
+  "id": "AC-audit-log-retention",
+  "project_id": "pbbls",
+  "species": "acceptance",
+  "title": "Audit log retention",
+  "status": "backlog",
+  "platforms": ["web"],
+  "metadata": {
+    "gherkin": "Given an admin action older than 90 days, When I open the audit log, Then it is no longer listed.",
+    "values": ["reduces-risk"],
+    "product": "admin"
+  }
+}
+```
+
+This is the one rule no example project can teach you by imitation: in the
+Pebbles seed all three acceptances anchor on a view or flow via `covers`, so
+every one of them derives its product and stores nothing. The anchorless case has
+no worked example anywhere — write the key yourself.
+
+**Stored maps take a product too.** A `MapDefinition` in `project.metadata.maps`
+has an optional `product`, which makes "the admin systems map" data rather than a
+feature request. As with everything above, there is no UI control for it: a map's
+`product` is set by writing it.
+
+When in doubt, leave membership off. An unassigned flow or view is a visible
+triage state the validator names (`unassigned-membership`); a *wrongly* assigned
+one is invisible, and quietly wrong in every rollup that reads it.
 
 ## Full Schema Reference
 
@@ -321,6 +412,12 @@ known type whenever one fits.
 
 ## Bootstrap: Generating a Map from Scratch
 
+**Check for the bootstrap skill first.** If the `arkaik-bootstrap` skill is
+installed beside this one — or can be installed with `arkaik init --bootstrap` —
+the bootstrap method supersedes this section for from-scratch and
+retro-population runs. The steps below remain the fallback when the bootstrap
+tooling is unavailable.
+
 If the project doesn't have a map yet and the user asks you to create one:
 
 1. Scan the codebase for routes/pages, models, and API endpoints
@@ -340,5 +437,6 @@ If the project doesn't have a map yet and the user asks you to create one:
 6. Save the snapshot to `docs/arkaik/bundle.json` and the journal to `docs/arkaik/journal.jsonl`
    (or ask the user where they want them)
 
-Full generation is the **only** sanctioned non-surgical case. For every
-subsequent change, use a surgical patch paired with an appended event.
+Full generation — via this section or the bootstrap method — is the **only**
+sanctioned non-surgical case. For every subsequent change, use a surgical patch
+paired with an appended event.

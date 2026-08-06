@@ -18,10 +18,10 @@ block below — run `npm run generate`.
 
 <!-- GENERATED:SCHEMA:START -->
 ```typescript
-type SpeciesId = "flow" | "view" | "data-model" | "api-endpoint" | "acceptance";
-type StatusId = "idea" | "backlog" | "prioritized" | "development" | "releasing" | "live" | "archived" | "blocked";
+type SpeciesId = "flow" | "view" | "data-model" | "api-endpoint" | "acceptance" | "decision";
+type StatusId = "idea" | "discovery" | "backlog" | "development" | "releasing" | "live" | "archived";
 type PlatformId = "web" | "ios" | "android";
-type EdgeTypeId = "composes" | "calls" | "displays" | "queries" | "covers";
+type EdgeTypeId = "composes" | "calls" | "displays" | "queries" | "covers" | "supersedes" | "generates" | "impacts";
 
 type PlaylistEntry =
   | { type: "view"; view_id: string }
@@ -72,6 +72,8 @@ interface Ref {
 
 interface NodeMetadata extends Record<string, unknown> {
   stage?: string;
+  /** Non-empty = the node is blocked at its current status. A node id (rendered as a link) or free text. */
+  blocked_by?: string;
   playlist?: FlowPlaylist;
   platformNotes?: PlatformNotesMap;
   platformStatuses?: PlatformStatusMap;
@@ -81,6 +83,16 @@ interface NodeMetadata extends Record<string, unknown> {
   gherkin?: string;
   /** Acceptance nodes: value elements served — the Why (spec §3.2). */
   values?: ValueId[];
+  /** Product membership; meaningful on flow, view, and acceptance only. */
+  product?: string;
+  /** Decision nodes: the decision's own status (spec §2). Not a lifecycle status. */
+  decision_status?: DecisionStatusId;
+  /** Decision nodes: Context — the Why (markdown). */
+  context?: string;
+  /** Decision nodes: Consequences — the How (markdown). */
+  consequences?: string;
+  /** Decision nodes: ISO 8601 date the decision was actually made (backfill-friendly; node.created events carry the write date, not this). */
+  decided_at?: string;
 }
 
 interface Node {
@@ -103,9 +115,65 @@ interface Edge {
   metadata?: Record<string, unknown>;
 }
 
+type MapKind = "journey" | "system";
+
+interface MapLayoutHints extends Record<string, unknown> {
+  direction?: "DOWN" | "RIGHT" | (string & {});
+  /**
+   * Canvas layout algorithm: `"organic"` (force-directed with overlap
+   * removal) or `"layered"` (hierarchical tiers). Renderers fall back to the
+   * kind's default for unknown values (docs/spec/maps.md § MapDefinition).
+   */
+  algorithm?: "layered" | "organic" | (string & {});
+}
+
+type MapFlowPlatformsMode = "rings" | "bars";
+
+type MapViewPlatformsMode = "chips" | "rows";
+
+interface MapDisplayOptions extends Record<string, unknown> {
+  /** Screenshot (or cover) art on view cards. */
+  images?: boolean;
+  /** A flow card's platform delivery: the Pyramid's rings, or stacked bars. */
+  flow_platforms?: MapFlowPlatformsMode | (string & {});
+  /** A view card's platform availability: circular chips, or labelled rows. */
+  view_platforms?: MapViewPlatformsMode | (string & {});
+  /** What a minimap node's fill encodes: its status, or its species. */
+  minimap_color?: MapMinimapColorMode | (string & {});
+}
+
+interface MapDefinition extends Record<string, unknown> {
+  /** Kebab-case, unique within the project; built-in ids are reserved. */
+  id: string;
+  title: string;
+  description?: string;
+  /** Selects the renderer and the selection defaults below. */
+  kind: MapKind | (string & {});
+  /** Node filter; defaults by kind (docs/spec/maps.md § MapDefinition). */
+  species?: (SpeciesId | (string & {}))[];
+  /** Edge filter; defaults by kind. */
+  edge_types?: (EdgeTypeId | (string & {}))[];
+  /** Scope anchor; the journey renderer falls back to `project.root_node_id`. */
+  root_node_id?: string;
+  /** Product scope; absent = every product (docs/spec/bundle-format.md § Products). */
+  product?: string;
+  /** Traversal bound from the root; absent = unbounded. */
+  depth?: number;
+  layout?: MapLayoutHints;
+  /** Card rendering; the human twin is `project.metadata.map_display[id]`. */
+  display?: MapDisplayOptions;
+}
+
 interface ProjectMetadata extends Record<string, unknown> {
+  /**
+   * @deprecated Superseded by the per-map `map_display` below. Still parsed,
+   * validated, and round-tripped; no renderer reads it.
+   */
   view_card_variant?: "compact" | "large";
   maps?: MapDefinition[];
+  /** Per-map display overrides keyed by map id — built-ins included. */
+  map_display?: Record<string, MapDisplayOptions>;
+  products?: ProductDefinition[];
 }
 
 interface Project {
@@ -229,10 +297,12 @@ type KnownJournalEvent =
   | NodeCreatedEvent
   | NodeUpdatedEvent
   | NodeStatusChangedEvent
+  | DecisionStatusChangedEvent
   | NodeDeletedEvent
   | EdgeAddedEvent
   | EdgeRemovedEvent
   | ReleaseTaggedEvent
+  | DeliverableShippedEvent
   | IdeaProposedEvent
   | RequestFiledEvent
   | RefAddedEvent
@@ -282,8 +352,11 @@ exist in the bundle's `nodes` array.
 | `calls` | view → api-endpoint | View calls this API |
 | `calls` | flow → api-endpoint | Flow calls this API |
 | `calls` | api-endpoint → api-endpoint | Endpoint calls another (internal or third-party) API — e.g. a server action / BFF route fanning out to external APIs |
+| `calls` | api-endpoint → view | The server initiates: a webhook, an SSE stream, a push landing on this view (the View card's inbound/read affordance) |
 | `displays` | view → data-model | View displays data from this model |
 | `queries` | api-endpoint → data-model | API reads or writes this model |
+| `covers` | acceptance → view | Acceptance anchors a testable promise to this view |
+| `covers` | acceptance → flow | Acceptance anchors a testable promise to this flow |
 
 Any other source → target combination for a given edge type is invalid.
 
