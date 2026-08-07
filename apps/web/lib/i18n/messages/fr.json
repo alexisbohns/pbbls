@@ -407,7 +407,8 @@
       "passwordsMismatch": "Les mots de passe ne correspondent pas.",
       "mustAcceptLegal": "Vous devez accepter les Conditions Générales d'Utilisation et la Politique de Confidentialité.",
       "generic": "Une erreur est survenue.",
-      "callbackFailed": "La connexion a échoué. Veuillez réessayer."
+      "callbackFailed": "La connexion a échoué. Veuillez réessayer.",
+      "emailPlusNotAllowed": "Le caractère « + » n’est pas autorisé dans les adresses e-mail."
     },
     "login": {
       "title": "Me connecter",

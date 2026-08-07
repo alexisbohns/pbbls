@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/data/auth-context"
 import { isSafeRelativePath } from "@/lib/utils/safe-relative-path"
+import { hasDisallowedEmailChar, normalizeEmailInput } from "@/lib/utils/email-input"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
@@ -27,6 +28,7 @@ export default function LoginPage() {
       ? tErrors("callbackFailed")
       : null
   })
+  const [emailError, setEmailError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   // Optional validated post-auth destination (M49, D12) — e.g. back to a
   // pending /invite/<token> page. Non-relative values are dropped.
@@ -45,18 +47,32 @@ export default function LoginPage() {
 
   if (isLoading || isAuthenticated) return null
 
+  // Strip '+' as it is typed, and explain why — the strip is the only
+  // normalization a user would otherwise experience as a keystroke silently
+  // going missing. Lowercasing stays silent on purpose. Mirrors iOS
+  // `AuthView.onChange(of: email)` and Android `AuthLogic.normalizeEmailInput`.
+  const handleEmailChange = (raw: string) => {
+    setEmailError(hasDisallowedEmailChar(raw) ? tErrors("emailPlusNotAllowed") : null)
+    setEmail(normalizeEmailInput(raw))
+  }
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError(null)
 
-    if (!email.trim() || !password) {
+    // Normalize again at the boundary rather than trusting the field: a
+    // password manager or autofill can set the value without firing React's
+    // change handler, which is exactly the path the input-time strip misses.
+    const submittedEmail = normalizeEmailInput(email.trim())
+
+    if (!submittedEmail || !password) {
       setError(tErrors("fillFields"))
       return
     }
 
     setSubmitting(true)
     try {
-      await login({ email: email.trim(), password })
+      await login({ email: submittedEmail, password })
     } catch (err) {
       const message =
         err instanceof Error ? err.message : tErrors("generic")
@@ -109,10 +125,16 @@ export default function LoginPage() {
             autoComplete="email"
             autoCapitalize="none"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            aria-invalid={error ? true : undefined}
+            onChange={(e) => handleEmailChange(e.target.value)}
+            aria-invalid={error || emailError ? true : undefined}
+            aria-describedby={emailError ? "login-email-error" : undefined}
             disabled={submitting}
           />
+          {emailError && (
+            <p id="login-email-error" role="alert" className="text-sm text-destructive">
+              {emailError}
+            </p>
+          )}
         </div>
 
         <div className="flex flex-col gap-1.5 text-left">

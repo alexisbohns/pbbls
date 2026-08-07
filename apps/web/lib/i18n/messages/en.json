@@ -407,7 +407,8 @@
       "passwordsMismatch": "Passwords do not match.",
       "mustAcceptLegal": "You must accept the Terms of Service and Privacy Policy.",
       "generic": "Something went wrong.",
-      "callbackFailed": "Sign-in failed. Please try again."
+      "callbackFailed": "Sign-in failed. Please try again.",
+      "emailPlusNotAllowed": "The '+' character is not allowed in email addresses."
     },
     "login": {
       "title": "Log in",
