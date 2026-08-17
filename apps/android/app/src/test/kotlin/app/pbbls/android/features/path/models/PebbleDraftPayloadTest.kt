@@ -182,7 +182,7 @@ class PebbleDraftPayloadTest {
         val hydrated = PebbleDraftPayload().toDraft(KnownDraftIds(emptySet(), emptySet()))
         assertTrue(hydrated.name.isEmpty())
         assertNull(hydrated.valence)
-        assertEquals(Visibility.PRIVATE, hydrated.visibility)
+        assertEquals(Visibility.SECRET, hydrated.visibility)
         assertFalse(hydrated.isValid)
     }
 

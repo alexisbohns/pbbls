@@ -8349,7 +8349,8 @@
         ],
         "platformStatuses": {
           "web": "live",
-          "ios": "live"
+          "ios": "live",
+          "android": "live"
         }
       }
     },
