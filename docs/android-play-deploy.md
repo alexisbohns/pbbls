@@ -25,13 +25,18 @@ work through this list. The debug-APK workflow (`android.yml`) is untouched.
 
 ```
 1. Generate upload keystore  →  2. Add signing secrets  →  3. First CI AAB
-        →  4. Seed the FIRST release by hand  →  5. Create service account
+        →  4. Seed the FIRST release by hand  →  4b. Publish the App Links
+        fingerprint  →  5. Create service account
         →  6. Done: everything is automatic
 ```
 
 The reason for the hand-upload in step 4: the Play Publishing API **refuses to
 create an app's first-ever release**. One manual upload seeds it; the API takes
 over after that.
+
+Step 4b hangs off step 4 because Play App Signing only generates the app-signing
+key when you accept it during that first release — the fingerprint does not
+exist before then.
 
 ---
 
@@ -109,6 +114,47 @@ upload key. (Publish is still skipped — no service account yet. Expected.)
 > still prompt for a few app-level declarations before the first rollout — just
 > follow its prompts.
 
+## Step 4b — Publish the App Links fingerprint (invite links)
+
+**Skip this and invite links never open in the Android app.** The
+`autoVerify` intent-filter in `AndroidManifest.xml` claims
+`https://www.pbbls.app/invite/*`, and Android only honours the claim if
+`https://www.pbbls.app/.well-known/assetlinks.json` names the certificate the
+installed app was signed with. Because the accept sheet is presented *only* from
+the deep-link handler, an unverified link doesn't degrade the mobile entry
+point — it removes invite-accept from the Android app entirely (#697).
+
+1. Play Console → your app → **Test and release → Setup → App signing**.
+2. Under **App signing key certificate**, copy the **SHA-256 certificate
+   fingerprint** (the colon-separated `AA:BB:…` string). This is Google's
+   signing key, *not* your upload key — the upload key's fingerprint is on the
+   same page and is the wrong one for installed apps.
+3. Vercel → the **web** project → **Settings → Environment Variables** → add
+   **`ANDROID_ASSETLINKS_SHA256`** with that value, for **Production** (add it
+   to Preview too if you want to verify against a preview deployment).
+4. Redeploy (or wait for the next deploy) and check it:
+
+   ```bash
+   curl https://www.pbbls.app/.well-known/assetlinks.json
+   ```
+
+   It must return your fingerprint. A **404** means the env var is unset or
+   isn't a valid 32-byte hex fingerprint — the route serves 404 rather than a
+   file that can never verify, so an unconfigured environment looks
+   unconfigured.
+5. Reinstall the app from Play (verification runs at install time) and confirm
+   an invite link opens the app instead of the browser:
+
+   ```bash
+   adb shell pm get-app-links app.pbbls.android   # want: www.pbbls.app  verified
+   ```
+
+> The env var accepts **several** fingerprints, comma- or space-separated, and
+> they all end up in one statement. Useful when you want your debug key to
+> verify on a dev device alongside the Play key, or during a key rotation.
+> Google's verifier caches the file, so a correction can take a while to reach
+> devices; a reinstall forces a re-check.
+
 ## Step 5 — Create the Play service account (turns on automation)
 
 This is the credential CI uses to publish.
@@ -151,6 +197,7 @@ Give it a few minutes to propagate.
 | First upload errors about "existing users can't upgrade" | The manual seed (step 4) hasn't happened yet — the API can't create the first release. |
 | Publish step: "caller does not have permission" | Service account not granted app access in Play Console (step 5.4), or still propagating — wait a few minutes. |
 | Nothing publishes, job green | `PLAY_SERVICE_ACCOUNT_JSON` not set yet — the publish step self-skips by design. |
+| Invite links open the browser, not the app | App Links didn't verify. `curl https://www.pbbls.app/.well-known/assetlinks.json` — a 404 means `ANDROID_ASSETLINKS_SHA256` is unset or malformed (step 4b); a fingerprint that doesn't match `adb shell pm get-app-links app.pbbls.android` means you copied the *upload* key instead of the *app signing* key. Reinstall after fixing — verification only runs at install. |
 
 ## Security notes
 
@@ -159,3 +206,7 @@ Give it a few minutes to propagate.
 - The **service account JSON** can publish to your Play account — treat it like
   a password. It only ever lives as the `PLAY_SERVICE_ACCOUNT_JSON` GitHub
   secret; don't download it into the repo.
+- The **App Links fingerprint** (`ANDROID_ASSETLINKS_SHA256`) is *not* a secret:
+  it's a public certificate hash, and `assetlinks.json` publishes it to the world
+  by design. It lives in Vercel env vars for operability (settable and rotatable
+  without a deploy), not for confidentiality.
