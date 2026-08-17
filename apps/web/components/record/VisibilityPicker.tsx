@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl"
 import type { Visibility } from "@/lib/types"
 import {
-  VISIBILITY_GRADES,
+  VISIBILITY_ICONS,
   VisibilityMenu,
 } from "@/components/record/VisibilityMenu"
 import {
@@ -19,9 +19,7 @@ type VisibilityPickerProps = {
 
 export function VisibilityPicker({ value, onChange }: VisibilityPickerProps) {
   const t = useTranslations("record.visibility")
-  const CurrentIcon = (
-    VISIBILITY_GRADES.find((g) => g.value === value) ?? VISIBILITY_GRADES[0]
-  ).icon
+  const CurrentIcon = VISIBILITY_ICONS[value]
 
   return (
     <Popover>

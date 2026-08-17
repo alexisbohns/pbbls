@@ -20,7 +20,7 @@ import { PickerSheet } from "@/components/ui/PickerSheet"
 import { ValenceGrid } from "@/components/record/ValenceIntensityGrid"
 import { SoulsSheet } from "@/components/record/SoulsSheet"
 import {
-  VISIBILITY_GRADES,
+  VISIBILITY_ICONS,
   VisibilityMenu,
 } from "@/components/record/VisibilityMenu"
 import {
@@ -136,24 +136,23 @@ export function PebbleDetail({
 
   const handleShare = useCallback(async () => {
     const url = `${window.location.origin}/p/${pebble.id}`
-    // navigator.share needs a secure context and user gesture; clipboard is
-    // the universal fallback (pattern: InviteSection).
+    // navigator.share needs a secure context and user gesture; when it is
+    // unavailable we fall back to copying the link.
     try {
       await navigator.share({ url })
-    } catch {
+    } catch (err) {
+      // The user dismissed the share sheet — not a failure, nothing to copy.
+      if (err instanceof DOMException && err.name === "AbortError") return
       try {
         await navigator.clipboard.writeText(url)
         toast.success(t("shareCopied"))
-      } catch (err) {
-        console.error("[pebble-detail] share failed", err)
+      } catch (copyErr) {
+        console.error("[pebble-detail] share failed", copyErr)
       }
     }
   }, [pebble.id, t])
 
-  const VisibilityIconComponent = (
-    VISIBILITY_GRADES.find((g) => g.value === pebble.visibility) ??
-    VISIBILITY_GRADES[0]
-  ).icon
+  const VisibilityIconComponent = VISIBILITY_ICONS[pebble.visibility]
 
   return (
     <article>

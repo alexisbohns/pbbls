@@ -6,16 +6,17 @@ import { useTranslations } from "next-intl"
 import type { Visibility } from "@/lib/types"
 import { SelectableItem } from "@/components/ui/SelectableItem"
 
-// Order = disclosure order: each step down shares with more people.
-export const VISIBILITY_GRADES: { value: Visibility; icon: LucideIcon }[] = [
-  { value: "secret", icon: Lock },
-  { value: "private", icon: Users },
-  { value: "public", icon: Globe },
-]
-
-export function visibilityIcon(value: Visibility): LucideIcon {
-  return (VISIBILITY_GRADES.find((g) => g.value === value) ?? VISIBILITY_GRADES[0]).icon
+export const VISIBILITY_ICONS: Record<Visibility, LucideIcon> = {
+  secret: Lock,
+  private: Users,
+  public: Globe,
 }
+
+// Order = disclosure order: each step down shares with more people.
+const VISIBILITY_ORDER: Visibility[] = ["secret", "private", "public"]
+
+export const VISIBILITY_GRADES: { value: Visibility; icon: LucideIcon }[] =
+  VISIBILITY_ORDER.map((value) => ({ value, icon: VISIBILITY_ICONS[value] }))
 
 type VisibilityMenuProps = {
   value: Visibility
