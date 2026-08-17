@@ -3,7 +3,7 @@
 import { Compass, Gem, Heart, Layers, PenTool, Shapes, Store, Trophy, Users } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useAchievementCopy } from "@/lib/i18n"
-import type { Achievement, AchievementFamily } from "@/lib/types"
+import type { AchievementDisplay, AchievementFamily } from "@/lib/types"
 
 // Same family mapping as the grid's badge; unknown families degrade to the
 // trophy so a server ahead of this build can't break the shelf.
@@ -23,7 +23,7 @@ const FAMILY_ICONS: Record<AchievementFamily, LucideIcon> = {
  * carried as the accessible name (and the native tooltip) since the shelf has
  * no room for labels.
  */
-export function AchievementShelfBadge({ achievement }: { achievement: Achievement }) {
+export function AchievementShelfBadge({ achievement }: { achievement: AchievementDisplay }) {
   const resolveCopy = useAchievementCopy()
   const Icon = FAMILY_ICONS[achievement.family] ?? Trophy
   const { title } = resolveCopy(achievement)

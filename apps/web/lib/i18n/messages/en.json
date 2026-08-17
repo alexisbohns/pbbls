@@ -83,6 +83,8 @@
     "bounceLevel": "Bounce Level {level}",
     "days": "Days",
     "pebbles": "Pebbles",
+    "achievements": "Achievements",
+    "achievementsCount": "{count, plural, one {# badge earned} other {# badges earned}}",
     "madeWith": "Made with Pebbles"
   },
   "settings": {
