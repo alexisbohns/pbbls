@@ -83,6 +83,8 @@
     "bounceLevel": "Niveau ricochet {level}",
     "days": "Jours",
     "pebbles": "Galets",
+    "achievements": "Succès",
+    "achievementsCount": "{count, plural, one {# badge décroché} other {# badges décrochés}}",
     "madeWith": "Créé avec Pebbles"
   },
   "settings": {

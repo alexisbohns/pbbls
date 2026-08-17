@@ -140,6 +140,24 @@ export type Achievement = {
   descriptionFr: string | null
 }
 
+// The subset a badge needs to draw itself: the family that picks its icon, and
+// everything `useAchievementCopy` interpolates. `Achievement` satisfies this,
+// and so does the leaner row `get_public_profile` projects for a visitor — which
+// is why the badge components take this and not the full catalog row.
+export type AchievementDisplay = Pick<
+  Achievement,
+  | "id"
+  | "slug"
+  | "family"
+  | "threshold"
+  | "emotionId"
+  | "domainId"
+  | "titleEn"
+  | "titleFr"
+  | "descriptionEn"
+  | "descriptionFr"
+>
+
 // One row of the caller's `achievement_unlocks` ledger (permanent by design).
 export type AchievementUnlock = {
   achievementId: string
@@ -286,8 +304,32 @@ export type PublicProfile = {
   days_practiced: number
   /** ISO date (YYYY-MM-DD). */
   member_since: string
-  /** Empty until M48 fills it; shape then defined by the achievements design. */
-  achievements: unknown[]
+  /**
+   * The visitor's view of the owner's shelf: unlocked badges only, most
+   * recently earned first, capped at six by the RPC (#688). Snake_case because
+   * these come straight off the jsonb projection, unmapped.
+   */
+  achievements: PublicAchievement[]
+  /** Total unlocked, untruncated — the array above is a slice of it. */
+  achievements_count: number
+}
+
+/** One badge of `get_public_profile`'s shelf slice. */
+export type PublicAchievement = {
+  id: string
+  slug: string
+  family: AchievementFamily
+  threshold: number | null
+  emotion_id: string | null
+  domain_id: string | null
+  title_en: string | null
+  title_fr: string | null
+  description_en: string | null
+  description_fr: string | null
+  /** Admin-assigned badge visual; null on every seeded row today. */
+  glyph: { strokes: MarkStroke[]; view_box: string } | null
+  /** UTC date (YYYY-MM-DD) — coarsened, like `member_since`. */
+  unlocked_at: string
 }
 
 export type RegisterInput = {

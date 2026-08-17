@@ -10,6 +10,7 @@ import { RippleBadge } from "@/components/profile/ripples/RippleBadge"
 import { AssiduityGrid } from "@/components/profile/AssiduityGrid"
 import { DataTile } from "@/components/profile/DataTile"
 import { SectionCard } from "@/components/profile/SectionCard"
+import { PublicAchievementsShelf } from "@/components/public-profile/PublicAchievementsShelf"
 
 type PublicProfileViewProps = {
   profile: PublicProfile
@@ -17,10 +18,11 @@ type PublicProfileViewProps = {
 
 /**
  * The /u/[handle] public page body (M50). Anonymous-friendly: renders only the
- * `get_public_profile` projection — banner, evolutive rings, 28-day grid and
- * counters — plus a "made with Pebbles" CTA back to the landing page. Reuses
- * the owner-profile primitives (RippleBadge, AssiduityGrid, DataTile) so the
- * public page and the owner's profile stay visually in step.
+ * `get_public_profile` projection — banner, evolutive rings, 28-day grid,
+ * counters and the earned-badge shelf (#688) — plus a "made with Pebbles" CTA
+ * back to the landing page. Reuses the owner-profile primitives (RippleBadge,
+ * AssiduityGrid, DataTile, AchievementShelfBadge) so the public page and the
+ * owner's profile stay visually in step.
  */
 export function PublicProfileView({ profile }: PublicProfileViewProps) {
   const t = useTranslations("publicProfile")
@@ -99,6 +101,11 @@ export function PublicProfileView({ profile }: PublicProfileViewProps) {
             />
           </div>
         </SectionCard>
+
+        <PublicAchievementsShelf
+          achievements={profile.achievements}
+          total={profile.achievements_count}
+        />
       </section>
 
       <footer className="mt-auto flex justify-center py-10">

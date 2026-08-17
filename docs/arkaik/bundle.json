@@ -9,7 +9,7 @@
       "view_card_variant": "large"
     },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-08-03T12:19:24Z"
+    "updated_at": "2026-08-17T09:05:00Z"
   },
   "nodes": [
     {
@@ -3036,6 +3036,29 @@
       }
     },
     {
+      "id": "AC-public-profile-badges",
+      "project_id": "pebbles",
+      "species": "acceptance",
+      "title": "Your badges show on your public page",
+      "status": "live",
+      "platforms": [
+        "web"
+      ],
+      "metadata": {
+        "gherkin": "Given I have unlocked at least one badge and my profile is public, When somebody opens my page, Then they see my six most recently earned badges and my total badge count.",
+        "platformNotes": {
+          "web": "#688 — get_public_profile projects the shelf (unlocked only, newest first, capped at six) and /u/[handle] renders it with the owner profile's badge component"
+        },
+        "platformStatuses": {
+          "web": "live"
+        },
+        "values": [
+          "badge-value",
+          "rewards-me"
+        ]
+      }
+    },
+    {
       "id": "AC-public-profile-page",
       "project_id": "pebbles",
       "species": "acceptance",
@@ -3045,7 +3068,7 @@
         "web"
       ],
       "metadata": {
-        "gherkin": "Given a pebbler has made their profile public, When anyone opens their link with or without a Pebbles account, Then they see that pebbler's glyph, name, ripple rings, 28-day grid and counters, and nothing more.",
+        "gherkin": "Given a pebbler has made their profile public, When anyone opens their link with or without a Pebbles account, Then they see that pebbler's glyph, name, ripple rings, 28-day grid, counters and earned badges, and nothing more.",
         "platformNotes": {
           "web": "#677 — /u/[handle], the app's first server-rendered data route, over the anon-granted get_public_profile projection; iOS and Android claim the handle and share the URL but never render the page"
         },
@@ -3120,7 +3143,7 @@
         "web"
       ],
       "metadata": {
-        "gherkin": "Given I turned my profile public, When somebody opens my page, Then they see only my name, my handle, my glyph, my rings and my streaks, and nothing that identifies my account or the pebbles behind them.",
+        "gherkin": "Given I turned my profile public, When somebody opens my page, Then they see only my name, my handle, my glyph, my rings, my streaks and the badges I earned, and nothing that identifies my account or the pebbles behind them.",
         "platformStatuses": {
           "web": "live"
         },
@@ -9659,6 +9682,13 @@
       "edge_type": "covers"
     },
     {
+      "id": "e-AC-public-profile-badges-V-public-profile",
+      "project_id": "pebbles",
+      "source_id": "AC-public-profile-badges",
+      "target_id": "V-public-profile",
+      "edge_type": "covers"
+    },
+    {
       "id": "e-AC-public-profile-page-V-public-profile",
       "project_id": "pebbles",
       "source_id": "AC-public-profile-page",
@@ -10944,6 +10974,27 @@
       "project_id": "pebbles",
       "source_id": "API-get-profile-engagement",
       "target_id": "DM-v-ripple",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-get-public-profile-DM-achievement",
+      "project_id": "pebbles",
+      "source_id": "API-get-public-profile",
+      "target_id": "DM-achievement",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-get-public-profile-DM-achievement-unlocks",
+      "project_id": "pebbles",
+      "source_id": "API-get-public-profile",
+      "target_id": "DM-achievement-unlocks",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-get-public-profile-DM-achievements",
+      "project_id": "pebbles",
+      "source_id": "API-get-public-profile",
+      "target_id": "DM-achievements",
       "edge_type": "queries"
     },
     {
@@ -14656,6 +14707,13 @@
       "source_id": "V-public-profile",
       "target_id": "API-get-public-profile",
       "edge_type": "calls"
+    },
+    {
+      "id": "e-V-public-profile-DM-achievement",
+      "project_id": "pebbles",
+      "source_id": "V-public-profile",
+      "target_id": "DM-achievement",
+      "edge_type": "displays"
     },
     {
       "id": "e-V-public-profile-DM-profile",

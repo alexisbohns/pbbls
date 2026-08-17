@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl"
 import { useLocale } from "./useLocale"
 import { EMOTIONS } from "@/lib/config/emotions"
 import { DOMAINS } from "@/lib/config/domains"
-import type { Achievement } from "@/lib/types"
+import type { AchievementDisplay } from "@/lib/types"
 
 export type AchievementCopy = { title: string; description: string }
 
@@ -18,7 +18,7 @@ export type AchievementCopy = { title: string; description: string }
  * wins; overrides are written in pairs by the admin RPC, so the cross-language
  * fallback is belt-and-braces only.
  */
-export function useAchievementCopy(): (achievement: Achievement) => AchievementCopy {
+export function useAchievementCopy(): (achievement: AchievementDisplay) => AchievementCopy {
   const { locale } = useLocale()
   // Untyped access because family and reference slugs are runtime DB values,
   // not part of the typed message tree (mirrors useReferenceCatalog).
@@ -28,7 +28,7 @@ export function useAchievementCopy(): (achievement: Achievement) => AchievementC
   }
 
   return useCallback(
-    (achievement: Achievement): AchievementCopy => {
+    (achievement: AchievementDisplay): AchievementCopy => {
       const override =
         locale === "fr"
           ? {
@@ -64,7 +64,7 @@ export function useAchievementCopy(): (achievement: Achievement) => AchievementC
  * qualifier so the badge still renders something meaningful.
  */
 function referenceName(
-  achievement: Achievement,
+  achievement: AchievementDisplay,
   t: { (key: string): string; has(key: string): boolean },
 ): string {
   if (achievement.family === "emotion_first") {
