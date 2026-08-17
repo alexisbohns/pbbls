@@ -891,3 +891,6 @@
 {"type": "edge.added", "edge_id": "e-AC-connection-shared-pebbles-V-connection-detail", "source_id": "AC-connection-shared-pebbles", "target_id": "V-connection-detail", "edge_type": "covers", "ts": "2026-08-17T09:40:00Z", "actor": "claude-code", "id": "01M07F00000000000000000006"}
 {"type": "edge.added", "edge_id": "e-AC-pebble-grade-choice-V-pebble-detail", "source_id": "AC-pebble-grade-choice", "target_id": "V-pebble-detail", "edge_type": "covers", "ts": "2026-08-17T09:40:00Z", "actor": "claude-code", "id": "01M07F00000000000000000007"}
 {"type": "node.status_changed", "node_id": "AC-connection-shared-pebbles", "from": "backlog", "to": "live", "platform": "web", "ts": "2026-08-17T09:40:00Z", "actor": "claude-code", "id": "01M07F00000000000000000008"}
+{"type": "node.status_changed", "node_id": "AC-pebble-grade-choice", "from": "backlog", "to": "live", "platform": "ios", "ts": "2026-08-17T10:30:00Z", "actor": "claude-code", "id": "01M07G0000000000000000000A"}
+{"type": "node.updated", "node_id": "AC-shared-pebble-link", "fields": ["platforms"], "ts": "2026-08-17T10:30:00Z", "actor": "claude-code", "id": "01M07G0000000000000000000B"}
+{"type": "node.status_changed", "node_id": "AC-shared-pebble-link", "from": "backlog", "to": "live", "platform": "ios", "ts": "2026-08-17T10:30:00Z", "actor": "claude-code", "id": "01M07G0000000000000000000C"}

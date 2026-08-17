@@ -67,7 +67,9 @@ struct CreatePebbleSheet: View {
                     }
                     // Quick capture: ungated, unlike Save (design D5). "Just a
                     // name" is a valid draft.
-                    ToolbarItem(placement: .bottomBar) {
+                    ToolbarItemGroup(placement: .bottomBar) {
+                        VisibilityChip(visibility: $draft.visibility)
+                        Spacer()
                         PebbleToolbarButton("Save as draft") {
                             Task { await saveAsDraft() }
                         }

@@ -12,8 +12,17 @@ enum Visibility: String, CaseIterable, Identifiable, Hashable, Decodable {
     var label: LocalizedStringResource {
         switch self {
         case .secret:  return "Secret"
-        case .private: return "Private"
+        case .private: return "Connections"
         case .public:  return "Public"
+        }
+    }
+
+    /// SF Symbol per grade — mirrored by the Android badge/menu drawables.
+    var systemImageName: String {
+        switch self {
+        case .secret:  return "lock.fill"
+        case .private: return "person.2.fill"
+        case .public:  return "globe"
         }
     }
 }

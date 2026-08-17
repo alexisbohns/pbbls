@@ -4953,22 +4953,6 @@
         }
       }
     },
-    "Private" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Private"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Privé"
-          }
-        }
-      }
-    },
     "Profile" : {
       "extractionState" : "manual",
       "localizations" : {
