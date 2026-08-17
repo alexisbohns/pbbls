@@ -67,6 +67,10 @@ struct EditPebbleSheet: View {
                             .disabled(!draft.isValid || isLoading)
                         }
                     }
+                    ToolbarItemGroup(placement: .bottomBar) {
+                        VisibilityChip(visibility: $draft.visibility)
+                        Spacer()
+                    }
                 }
                 .pebblesScreen()
         }

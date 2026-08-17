@@ -35,10 +35,21 @@ struct PebbleDetailSheet: View {
                         }
                     }
                     ToolbarItem(placement: .topBarTrailing) {
-                        PebbleToolbarButton("Edit") {
-                            isPresentingEdit = true
+                        HStack(spacing: 8) {
+                            if let detail, detail.visibility == .public {
+                                ShareLink(item: SharedPebbleLink.url(for: pebbleId)) {
+                                    Image(systemName: "square.and.arrow.up")
+                                }
+                                .accessibilityLabel(Text(
+                                    "Share",
+                                    comment: "Accessibility label for the public pebble share button"
+                                ))
+                            }
+                            PebbleToolbarButton("Edit") {
+                                isPresentingEdit = true
+                            }
+                            .disabled(detail == nil)
                         }
-                        .disabled(detail == nil)
                     }
                 }
                 .pebblesScreen()
