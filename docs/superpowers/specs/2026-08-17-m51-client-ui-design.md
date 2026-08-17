@@ -33,10 +33,11 @@ with **direct client reads** — no `get_connection_pebbles` RPC:
 1. Read the `connections` row by id. RLS (`auth.uid() in (user_a, user_b)`)
    already exposes the row — including both user ids — to its two members, so
    peer id = whichever of `user_a`/`user_b` is not `auth.uid()`.
-2. Query `v_pebbles_full` where `user_id = <peer>`, ordered `happened_at desc`.
-   The widened `pebbles_select` trims the result to `private` + `public` rows;
-   enrichment arrays (cards/souls/snaps/collections) come back empty for
-   non-owners by design — the page must not render those sections.
+2. Query the `pebbles` table where `user_id = <peer>` with the `emotions` FK
+   embed (reference data, RLS `using (true)`), ordered `happened_at desc` —
+   not `v_pebbles_full`, which lacks `render_svg`. The widened `pebbles_select`
+   trims the result to `private` + `public` rows; enrichments stay owner-only
+   and the page must not render them.
 
 Why not an RPC: the roadmap explicitly calls this read "legal under the widened
 RLS"; both reads are single-table single-statement (the RPC-first rule targets
