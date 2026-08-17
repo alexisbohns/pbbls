@@ -8348,7 +8348,8 @@
           "reduces-risk"
         ],
         "platformStatuses": {
-          "web": "live"
+          "web": "live",
+          "ios": "live"
         }
       }
     },

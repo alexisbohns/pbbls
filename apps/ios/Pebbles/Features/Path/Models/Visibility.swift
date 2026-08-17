@@ -1,6 +1,9 @@
 import Foundation
 
 enum Visibility: String, CaseIterable, Identifiable, Hashable, Decodable {
+    // M51 privacy grades: secret = owner-only (the default since the backfill),
+    // private = owner + mutual connections, public = anyone with the /p link.
+    case secret = "secret"
     case `private` = "private"
     case `public` = "public"
 
@@ -8,6 +11,7 @@ enum Visibility: String, CaseIterable, Identifiable, Hashable, Decodable {
 
     var label: LocalizedStringResource {
         switch self {
+        case .secret:  return "Secret"
         case .private: return "Private"
         case .public:  return "Public"
         }

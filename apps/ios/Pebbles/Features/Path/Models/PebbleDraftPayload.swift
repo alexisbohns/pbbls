@@ -205,7 +205,7 @@ extension PebbleDraft {
             self.valence = Valence.from(positiveness: positiveness, intensity: intensity)
         }
         if let visibility = payload.visibility {
-            self.visibility = Visibility(rawValue: visibility) ?? .private
+            self.visibility = Visibility(rawValue: visibility) ?? .secret
         }
         self.emotionId = payload.emotionId
         self.domainId = payload.domainIds?.first
