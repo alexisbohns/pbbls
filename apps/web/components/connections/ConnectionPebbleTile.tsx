@@ -35,16 +35,14 @@ export function ConnectionPebbleTile({ pebble }: { pebble: SharedConnectionPebbl
     <li className="flex flex-col items-center gap-2 rounded-xl border border-muted p-3 text-center dark:border-accent">
       {pebble.render_svg ? (
         <div
-          role="img"
-          aria-label={pebble.name}
+          aria-hidden
           className="pbbls-visual size-20"
           style={wrapperStyle}
           dangerouslySetInnerHTML={{ __html: pebble.render_svg }}
         />
       ) : (
         <div
-          role="img"
-          aria-label={pebble.name}
+          aria-hidden
           className="size-20 rounded-full border-4"
           style={{ borderColor: pebble.emotion.color }}
         />

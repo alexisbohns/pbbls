@@ -27,6 +27,8 @@ export function useConnectionPebbles(connectionId: string) {
       if (cancelled) return
       setLoading(true)
       setError(null)
+      setNotFound(false)
+      setPebbles([])
       try {
         const rows = await provider.listConnectionSharedPebbles(connectionId)
         if (cancelled) return

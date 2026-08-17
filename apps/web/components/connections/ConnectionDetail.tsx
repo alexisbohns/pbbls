@@ -21,10 +21,8 @@ type ConnectionDetailProps = {
  * shared list; `notFound` from the latter and "missing from the former list"
  * are indistinguishable by design (foreign vs. removed connection id).
  *
- * Deviation: the task's instructions pointed at a `components/ui/BackPath`
- * pattern for the happy-path back affordance, but no such component exists in
- * this codebase. Detail pages here (`souls/[id]`, `lab/announcements/[id]`)
- * use a plain `nav > Link` with a chevron instead — mirrored here.
+ * No shared back-nav primitive exists in components/ui, so the back
+ * affordance is a plain `nav > Link` with a chevron.
  */
 export function ConnectionDetail({ connectionId }: ConnectionDetailProps) {
   const t = useTranslations("connections")
@@ -44,7 +42,7 @@ export function ConnectionDetail({ connectionId }: ConnectionDetailProps) {
   const loading = connectionsLoading || pebblesLoading
   const error = connectionsError ?? pebblesError
   const connection = connections.find((c) => c.id === connectionId)
-  const notFound = pebblesNotFound || (!connectionsLoading && !connection)
+  const notFound = pebblesNotFound || (!connectionsLoading && !connectionsError && !connection)
 
   if (loading) {
     return (
