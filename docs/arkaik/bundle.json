@@ -9,7 +9,7 @@
       "view_card_variant": "large"
     },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-08-17T09:05:00Z"
+    "updated_at": "2026-08-17T07:55:00Z"
   },
   "nodes": [
     {
@@ -6014,7 +6014,7 @@
       "project_id": "pebbles",
       "species": "data-model",
       "title": "Pebble",
-      "description": "A single recorded memory with intensity, 3-level positiveness, visibility, and timestamp.",
+      "description": "A single recorded memory with intensity, 3-level positiveness, a privacy grade (secret to just you, private to your connections, public to anyone), and timestamp.",
       "status": "development",
       "platforms": [
         "web",
@@ -8285,6 +8285,92 @@
         "ios",
         "android"
       ]
+    },
+    {
+      "id": "V-shared-pebble",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Shared Pebble",
+      "description": "The /p/{id} page anyone can open, signed in or not — the server-composed pebble artwork tinted by its emotion palette, name, emotion and date, an optional description, plus a \"made with Pebbles\" call to action. Server-rendered from the anon-granted get_shared_pebble projection. The uuid is the capability: a secret or private pebble and an unknown id are deliberately indistinguishable — both render the 404 — so flipping the grade back revokes the link.",
+      "status": "live",
+      "platforms": [
+        "web"
+      ]
+    },
+    {
+      "id": "API-get-shared-pebble",
+      "project_id": "pebbles",
+      "species": "api-endpoint",
+      "title": "RPC get_shared_pebble",
+      "description": "Definer projection granted to anon (pattern: get_public_profile): returns name, description, whole-second UTC happened_at, intensity, positiveness, render_svg and the emotion with its category palette for a public-grade pebble; null for secret, private and unknown ids alike. Never returns user_id.",
+      "status": "live",
+      "platforms": [
+        "web"
+      ]
+    },
+    {
+      "id": "AC-pebble-grade-choice",
+      "project_id": "pebbles",
+      "species": "acceptance",
+      "title": "You choose who sees each pebble",
+      "status": "backlog",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ],
+      "metadata": {
+        "gherkin": "When I record or edit a pebble, Then I can grade it secret (just me), private (my connections) or public (anyone).",
+        "values": [
+          "reduces-anxiety",
+          "connects"
+        ],
+        "platformStatuses": {
+          "web": "live"
+        }
+      }
+    },
+    {
+      "id": "AC-pebbles-secret-by-default",
+      "project_id": "pebbles",
+      "species": "acceptance",
+      "title": "Every pebble starts secret",
+      "status": "backlog",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ],
+      "metadata": {
+        "gherkin": "Given I record a new pebble without touching the privacy control, When I save it, Then only I can see it.",
+        "values": [
+          "reduces-anxiety",
+          "reduces-risk"
+        ],
+        "platformStatuses": {
+          "web": "live"
+        }
+      }
+    },
+    {
+      "id": "AC-shared-pebble-link",
+      "project_id": "pebbles",
+      "species": "acceptance",
+      "title": "A public pebble opens for anyone",
+      "status": "backlog",
+      "platforms": [
+        "web"
+      ],
+      "metadata": {
+        "gherkin": "Given a pebble graded public, When anyone opens its /p link, Then they see the pebble without an account.",
+        "values": [
+          "connects",
+          "provides-access"
+        ],
+        "platformStatuses": {
+          "web": "live"
+        }
+      }
     }
   ],
   "edges": [
@@ -15127,6 +15213,69 @@
       "source_id": "V-welcome",
       "target_id": "V-register",
       "edge_type": "composes"
+    },
+    {
+      "id": "e-V-shared-pebble-API-get-shared-pebble",
+      "project_id": "pebbles",
+      "source_id": "V-shared-pebble",
+      "target_id": "API-get-shared-pebble",
+      "edge_type": "calls"
+    },
+    {
+      "id": "e-V-shared-pebble-DM-pebble",
+      "project_id": "pebbles",
+      "source_id": "V-shared-pebble",
+      "target_id": "DM-pebble",
+      "edge_type": "displays"
+    },
+    {
+      "id": "e-API-get-shared-pebble-DM-pebbles",
+      "project_id": "pebbles",
+      "source_id": "API-get-shared-pebble",
+      "target_id": "DM-pebbles",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-get-shared-pebble-DM-emotions",
+      "project_id": "pebbles",
+      "source_id": "API-get-shared-pebble",
+      "target_id": "DM-emotions",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-API-get-shared-pebble-DM-emotion-categories",
+      "project_id": "pebbles",
+      "source_id": "API-get-shared-pebble",
+      "target_id": "DM-emotion-categories",
+      "edge_type": "queries"
+    },
+    {
+      "id": "e-AC-pebble-grade-choice-V-pebble-record",
+      "project_id": "pebbles",
+      "source_id": "AC-pebble-grade-choice",
+      "target_id": "V-pebble-record",
+      "edge_type": "covers"
+    },
+    {
+      "id": "e-AC-pebbles-secret-by-default-V-pebble-record",
+      "project_id": "pebbles",
+      "source_id": "AC-pebbles-secret-by-default",
+      "target_id": "V-pebble-record",
+      "edge_type": "covers"
+    },
+    {
+      "id": "e-AC-shared-pebble-link-V-shared-pebble",
+      "project_id": "pebbles",
+      "source_id": "AC-shared-pebble-link",
+      "target_id": "V-shared-pebble",
+      "edge_type": "covers"
+    },
+    {
+      "id": "e-DEC-cross-user-reads-are-definer-projections-API-get-shared-pebble",
+      "project_id": "pebbles",
+      "source_id": "DEC-cross-user-reads-are-definer-projections",
+      "target_id": "API-get-shared-pebble",
+      "edge_type": "impacts"
     }
   ]
 }
