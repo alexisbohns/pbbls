@@ -29,7 +29,7 @@ struct PebbleDraftPayloadTests {
 
         // Present because the composer always holds a real value for them.
         #expect(json["happened_at"] != nil)
-        #expect(json["visibility"] as? String == "private")
+        #expect(json["visibility"] as? String == "secret")
 
         // Absent, not null: nothing has been set.
         for key in ["name", "description", "emotion_id", "domain_ids",
@@ -180,7 +180,7 @@ struct PebbleDraftPayloadTests {
         )
         #expect(hydrated.name.isEmpty)
         #expect(hydrated.valence == nil)
-        #expect(hydrated.visibility == .private)
+        #expect(hydrated.visibility == .secret)
         #expect(!hydrated.isValid)
     }
 
