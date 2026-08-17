@@ -14,7 +14,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import app.pbbls.android.R
 import app.pbbls.android.features.path.models.Visibility
 import app.pbbls.android.features.path.models.iconRes
 import app.pbbls.android.features.path.models.labelRes
@@ -30,6 +33,8 @@ import app.pbbls.android.theme.PebblesTypography
  * `DomainRow` picker rows rather than adding a separate semantics label.
  * Tinted `system.secondary` end to end, mirroring iOS's `.tint(Color.system
  * .secondary)` on the chip and the existing `PebblePrivacyBadge` chip tint.
+ * The chip's merged semantics carry the same "Privacy: <grade>" a11y string
+ * as the iOS chip's `accessibilityLabel` (M51).
  */
 @Composable
 fun VisibilityChip(
@@ -39,9 +44,11 @@ fun VisibilityChip(
 ) {
     val system = PebblesTheme.colors.system
     var expanded by remember { mutableStateOf(false) }
+    val a11y = stringResource(R.string.visibility_badge_a11y, stringResource(value.labelRes))
     Box(modifier) {
         AssistChip(
             onClick = { expanded = true },
+            modifier = Modifier.semantics { contentDescription = a11y },
             leadingIcon = {
                 Icon(
                     painter = painterResource(value.iconRes),
