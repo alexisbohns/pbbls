@@ -40,6 +40,10 @@ struct PebbleDetailSheet: View {
                                 ShareLink(item: SharedPebbleLink.url(for: pebbleId)) {
                                     Image(systemName: "square.and.arrow.up")
                                 }
+                                .accessibilityLabel(Text(
+                                    "Share",
+                                    comment: "Accessibility label for the public pebble share button"
+                                ))
                             }
                             PebbleToolbarButton("Edit") {
                                 isPresentingEdit = true
