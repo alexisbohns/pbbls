@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useCallback, useRef } from "react"
-import { Lock, SquarePen, X } from "lucide-react"
+import { Globe, Lock, SquarePen, Users, X } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { Pebble, PebbleSnap, Soul, Collection, Mark } from "@/lib/types"
 import type { UpdatePebbleInput } from "@/lib/data/data-provider"
@@ -122,17 +122,16 @@ export function PebbleDetail({
       {/* Top bar: static privacy indicator + edit/close buttons */}
       <header className="flex items-center justify-between">
         <span
-          aria-label={
-            pebble.visibility === "private"
-              ? tVisibility("ariaPrivate")
-              : tVisibility("ariaPublic")
-          }
-          className={cn(
-            "grid size-10 place-items-center rounded-full bg-surface text-muted-foreground",
-            pebble.visibility !== "private" && "opacity-0",
-          )}
+          aria-label={tVisibility("aria", { grade: tVisibility(pebble.visibility) })}
+          className="grid size-10 place-items-center rounded-full bg-surface text-muted-foreground"
         >
-          <Lock className="size-4" aria-hidden />
+          {pebble.visibility === "secret" ? (
+            <Lock className="size-4" aria-hidden />
+          ) : pebble.visibility === "private" ? (
+            <Users className="size-4" aria-hidden />
+          ) : (
+            <Globe className="size-4" aria-hidden />
+          )}
         </span>
         <div className="flex items-center gap-2">
           {onEdit && (

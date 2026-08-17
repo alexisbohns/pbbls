@@ -87,6 +87,11 @@
     "achievementsCount": "{count, plural, one {# badge décroché} other {# badges décrochés}}",
     "madeWith": "Créé avec Pebbles"
   },
+  "sharedPebble": {
+    "overline": "Un galet partagé",
+    "visualAria": "Galet {name}, émotion {emotion}",
+    "madeWith": "Créé avec Pebbles"
+  },
   "settings": {
     "title": "Réglages",
     "save": "Enregistrer",
@@ -788,10 +793,10 @@
       "alt": "Photo téléversée"
     },
     "visibility": {
-      "private": "Privé",
+      "secret": "Secret",
+      "private": "Connexions",
       "public": "Public",
-      "ariaPrivate": "Visibilité : privé",
-      "ariaPublic": "Visibilité : public"
+      "aria": "Visibilité : {grade}"
     },
     "intensity": {
       "ariaTitle": "Intensité et valence",

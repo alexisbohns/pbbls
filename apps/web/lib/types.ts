@@ -22,6 +22,12 @@ export type PebbleSnap = {
   sort_order: number
 }
 
+/**
+ * Privacy grade (M51): `secret` = owner-only, `private` = owner + mutual
+ * connections, `public` = any signed-in user, plus share-by-link via /p/[id].
+ */
+export type Visibility = "secret" | "private" | "public"
+
 export type Pebble = {
   id: string
   name: string
@@ -29,7 +35,7 @@ export type Pebble = {
   happened_at: string
   intensity: 1 | 2 | 3
   positiveness: -1 | 0 | 1
-  visibility: "private" | "public"
+  visibility: Visibility
   emotion_id: string
   soul_ids: string[]
   domain_ids: string[]
@@ -330,6 +336,33 @@ export type PublicAchievement = {
   glyph: { strokes: MarkStroke[]; view_box: string } | null
   /** UTC date (YYYY-MM-DD) — coarsened, like `member_since`. */
   unlocked_at: string
+}
+
+/**
+ * The `get_shared_pebble` projection (M51) — what an anonymous `/p/[id]`
+ * visitor sees of a `public`-grade pebble. Snake_case because it comes
+ * straight off the jsonb projection, unmapped. Deliberately owner-less:
+ * the RPC never returns `user_id`.
+ */
+export type SharedPebble = {
+  id: string
+  name: string
+  description: string | null
+  /** Whole-second UTC ISO timestamp (e.g. "2026-08-01T12:00:00Z"). */
+  happened_at: string
+  intensity: number
+  positiveness: number
+  /** Server-composed SVG; null only for legacy rows that pre-date the remote engine. */
+  render_svg: string | null
+  emotion: {
+    id: string
+    slug: string
+    name: string
+    color: string
+    /** Category palette tints; null when the emotion has no category linked. */
+    primary_color: string | null
+    secondary_color: string | null
+  }
 }
 
 export type RegisterInput = {

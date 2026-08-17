@@ -87,6 +87,11 @@
     "achievementsCount": "{count, plural, one {# badge earned} other {# badges earned}}",
     "madeWith": "Made with Pebbles"
   },
+  "sharedPebble": {
+    "overline": "A shared pebble",
+    "visualAria": "Pebble {name}, emotion {emotion}",
+    "madeWith": "Made with Pebbles"
+  },
   "settings": {
     "title": "Settings",
     "save": "Save",
@@ -788,10 +793,10 @@
       "alt": "Uploaded photo"
     },
     "visibility": {
-      "private": "Private",
+      "secret": "Secret",
+      "private": "Connections",
       "public": "Public",
-      "ariaPrivate": "Visibility: private",
-      "ariaPublic": "Visibility: public"
+      "aria": "Visibility: {grade}"
     },
     "intensity": {
       "ariaTitle": "Intensity and valence",
