@@ -676,6 +676,7 @@ export class SupabaseProvider implements DataProvider {
         typeof emotion.name !== "string" ||
         typeof emotion.color !== "string"
       ) {
+        console.warn("[supabase-provider] dropped shared pebble with broken emotion embed", row.id)
         return []
       }
       return [
