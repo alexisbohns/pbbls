@@ -228,6 +228,7 @@
     <string name="pebble_detail_no_domain">Aucun domaine</string>
     <string name="pebble_detail_load_error">Impossible de charger ce pebble.</string>
     <string name="pebble_detail_retry">Réessayer</string>
+    <string name="pebble_share_a11y">Partager ce galet</string>
     <!-- Per-grade privacy labels + icon a11y (M51) -->
     <string name="visibility_secret">Secret</string>
     <string name="visibility_private">Connexions</string>

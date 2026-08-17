@@ -240,6 +240,7 @@
     <string name="pebble_detail_no_domain">No domain</string>
     <string name="pebble_detail_load_error">Couldn\'t load this pebble.</string>
     <string name="pebble_detail_retry">Retry</string>
+    <string name="pebble_share_a11y">Share this pebble</string>
     <!-- Per-grade privacy labels + icon a11y (M51) -->
     <string name="visibility_secret">Secret</string>
     <string name="visibility_private">Connections</string>
