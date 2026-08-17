@@ -1,11 +1,10 @@
 import SwiftUI
 
+/// Souls / Glyphs / Circle. Collections are reached from their own section
+/// card below, so they get no shortcut tile here.
 struct ProfileShortcutsRow: View {
     var body: some View {
         HStack(spacing: Spacing.sm) {
-            ProfileShortcutTile(title: "Collections", systemImage: "square.stack.3d.up") {
-                CollectionsListView()
-            }
             ProfileShortcutTile(title: "Souls", systemImage: "person.2") {
                 SoulsListView()
             }

@@ -195,7 +195,6 @@ fun ProfileScreen(
                         glyphStrokes = glyphStrokes,
                     )
                     ProfileShortcutsRow(
-                        onOpenCollections = onOpenCollections,
                         onOpenSouls = onOpenSouls,
                         onOpenGlyphs = onOpenGlyphs,
                         onOpenConnections = onOpenConnections,
