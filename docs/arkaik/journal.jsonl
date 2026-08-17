@@ -881,3 +881,4 @@
 {"type": "node.status_changed", "node_id": "AC-pebbles-secret-by-default", "from": "backlog", "to": "live", "platform": "web", "ts": "2026-08-17T07:55:00Z", "actor": "claude-code", "id": "01M07C00000000000000000016"}
 {"type": "node.status_changed", "node_id": "AC-shared-pebble-link", "from": "backlog", "to": "live", "platform": "web", "ts": "2026-08-17T07:55:00Z", "actor": "claude-code", "id": "01M07C00000000000000000017"}
 {"type": "node.updated", "node_id": "DM-pebble", "fields": ["description"], "ts": "2026-08-17T07:55:00Z", "actor": "claude-code", "id": "01M07C00000000000000000018"}
+{"type": "node.status_changed", "node_id": "AC-pebbles-secret-by-default", "from": "backlog", "to": "live", "platform": "ios", "ts": "2026-08-17T08:15:00Z", "actor": "claude-code", "id": "01M07D00000000000000000001"}
