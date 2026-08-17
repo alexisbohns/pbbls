@@ -59,6 +59,27 @@ class PebbleDetailDecodingTest {
             """.trimIndent(),
         )
 
+    // The M51 backfill set every existing row to "secret"; a two-case enum made
+    // this decode throw and blanked the detail screen for every pebble.
+    @Test
+    fun `decodes the backfilled secret grade`() {
+        val detail =
+            decode(
+                """
+                {
+                  "id": "11111111-1111-1111-1111-111111111111",
+                  "name": "Backfilled",
+                  "description": null,
+                  "happened_at": "2026-04-14T15:42:00Z",
+                  "intensity": 2, "positiveness": 1, "visibility": "secret",
+                  "emotion": { "id": "e1", "slug": "joy", "name": "Joy", "color": "#FFD166" },
+                  "pebble_domains": [], "pebble_souls": [], "collection_pebbles": [], "snaps": []
+                }
+                """.trimIndent(),
+            )
+        assertEquals(Visibility.SECRET, detail.visibility)
+    }
+
     @Test
     fun `decodes and flattens the junction wrappers`() {
         val detail = fullRow()

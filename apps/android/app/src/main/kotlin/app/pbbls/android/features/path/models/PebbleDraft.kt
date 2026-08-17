@@ -20,7 +20,8 @@ data class PebbleDraft(
     val soulIds: List<String> = emptyList(),
     val collectionId: String? = null,
     val glyphId: String? = null,
-    val visibility: Visibility = Visibility.PRIVATE,
+    // Owner-only unless chosen (M51): 'private' now means connections-visible.
+    val visibility: Visibility = Visibility.SECRET,
 ) {
     val isValid: Boolean
         get() = name.trim().isNotEmpty() && emotionId != null && domainId != null && valence != null
