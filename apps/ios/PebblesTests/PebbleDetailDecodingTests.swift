@@ -78,6 +78,19 @@ struct PebbleDetailDecodingTests {
         #expect(detail.collections.map(\.name) == ["Wins"])
     }
 
+    // The M51 backfill set every existing row to "secret"; a two-case enum made
+    // this decode throw and blanked the detail sheet for every pebble.
+    @Test("decodes the backfilled secret grade")
+    func decodesSecretVisibility() throws {
+        let text = try #require(String(bytes: fullJSON, encoding: .utf8))
+        let json = Data(
+            text.replacingOccurrences(of: "\"visibility\": \"private\"",
+                                      with: "\"visibility\": \"secret\"").utf8
+        )
+        let detail = try makeDecoder().decode(PebbleDetail.self, from: json)
+        #expect(detail.visibility == .secret)
+    }
+
     @Test("valence is derived from intensity + positiveness")
     func derivesValence() throws {
         let detail = try makeDecoder().decode(PebbleDetail.self, from: fullJSON)
