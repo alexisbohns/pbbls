@@ -2334,6 +2334,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_shared_pebble: { Args: { p_pebble_id: string }; Returns: Json }
       get_user_averages_series: {
         Args: { p_weeks?: number }
         Returns: {
