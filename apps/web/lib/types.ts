@@ -365,6 +365,21 @@ export type SharedPebble = {
   }
 }
 
+/**
+ * One pebble a connection shares with the viewer (M51) — the RLS-visible
+ * subset of their pebbles ('private' + 'public'), core row only: enrichments
+ * stay owner-only and must not be rendered.
+ */
+export type SharedConnectionPebble = {
+  id: string
+  name: string
+  /** ISO timestamptz as returned by PostgREST. */
+  happened_at: string
+  visibility: Visibility
+  emotion: { id: string; slug: string; name: string; color: string }
+  render_svg: string | null
+}
+
 export type RegisterInput = {
   email: string
   password: string
