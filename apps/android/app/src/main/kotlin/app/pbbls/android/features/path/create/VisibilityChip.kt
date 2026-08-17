@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
@@ -31,10 +32,12 @@ import app.pbbls.android.theme.PebblesTypography
  * label already names the grade, so the leading icons stay decorative
  * (`contentDescription = null`), matching the neighboring `FormRow`/
  * `DomainRow` picker rows rather than adding a separate semantics label.
- * Tinted `system.secondary` end to end, mirroring iOS's `.tint(Color.system
- * .secondary)` on the chip and the existing `PebblePrivacyBadge` chip tint.
- * The chip's merged semantics carry the same "Privacy: <grade>" a11y string
- * as the iOS chip's `accessibilityLabel` (M51).
+ * Tinted `system.secondary` end to end, mirroring iOS's `.tint(Color.system.secondary)`
+ * on the chip and the existing `PebblePrivacyBadge` chip tint. The chip's merged
+ * semantics carry the same "Privacy: <grade>" a11y string as the iOS chip's
+ * `accessibilityLabel` (M51). The dropdown marks the current grade with a
+ * checkmark, mirroring the system checkmark iOS's Menu-hosted `Picker` renders
+ * on the selected option.
  */
 @Composable
 fun VisibilityChip(
@@ -68,6 +71,7 @@ fun VisibilityChip(
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             Visibility.entries.forEach { grade ->
                 DropdownMenuItem(
+                    modifier = Modifier.semantics { selected = grade == value },
                     leadingIcon = {
                         Icon(
                             painter = painterResource(grade.iconRes),
@@ -83,6 +87,23 @@ fun VisibilityChip(
                             color = system.foreground,
                         )
                     },
+                    // Marks the current grade — mirrors the system checkmark iOS's
+                    // Menu-hosted Picker renders on the selected option. Passed as
+                    // null (not an empty-content lambda) on unselected rows so
+                    // DropdownMenuItem doesn't reserve trailing space it never fills.
+                    trailingIcon =
+                        if (grade == value) {
+                            {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_check),
+                                    contentDescription = null,
+                                    tint = system.foreground,
+                                    modifier = Modifier.size(16.dp),
+                                )
+                            }
+                        } else {
+                            null
+                        },
                     onClick = {
                         onChange(grade)
                         expanded = false
