@@ -8373,6 +8373,37 @@
           "web": "live"
         }
       }
+    },
+    {
+      "id": "V-connection-detail",
+      "project_id": "pebbles",
+      "species": "view",
+      "title": "Connection Detail",
+      "description": "The /connections/{id} page: the peer's glyph, name and connected date, then the pebbles that connection shares with you (grades private and public, trimmed by RLS) as palette-tinted tiles of the server-composed artwork. An unknown or removed connection id renders a friendly not-found state; enrichments (cards, souls, snaps) are never rendered cross-user.",
+      "status": "live",
+      "platforms": [
+        "web"
+      ]
+    },
+    {
+      "id": "AC-connection-shared-pebbles",
+      "project_id": "pebbles",
+      "species": "acceptance",
+      "title": "See what a connection shares with you",
+      "status": "backlog",
+      "platforms": [
+        "web"
+      ],
+      "metadata": {
+        "gherkin": "Given a mutual connection who graded pebbles private or public, When I open their connection page, Then I see those pebbles (and only those) shared with me.",
+        "values": [
+          "connects",
+          "affiliation-belonging"
+        ],
+        "platformStatuses": {
+          "web": "live"
+        }
+      }
     }
   ],
   "edges": [
@@ -15278,6 +15309,41 @@
       "source_id": "DEC-cross-user-reads-are-definer-projections",
       "target_id": "API-get-shared-pebble",
       "edge_type": "impacts"
+    },
+    {
+      "id": "e-V-connections-list-V-connection-detail",
+      "project_id": "pebbles",
+      "source_id": "V-connections-list",
+      "target_id": "V-connection-detail",
+      "edge_type": "composes"
+    },
+    {
+      "id": "e-V-connection-detail-DM-pebbles",
+      "project_id": "pebbles",
+      "source_id": "V-connection-detail",
+      "target_id": "DM-pebbles",
+      "edge_type": "displays"
+    },
+    {
+      "id": "e-V-connection-detail-DM-connections",
+      "project_id": "pebbles",
+      "source_id": "V-connection-detail",
+      "target_id": "DM-connections",
+      "edge_type": "displays"
+    },
+    {
+      "id": "e-AC-connection-shared-pebbles-V-connection-detail",
+      "project_id": "pebbles",
+      "source_id": "AC-connection-shared-pebbles",
+      "target_id": "V-connection-detail",
+      "edge_type": "covers"
+    },
+    {
+      "id": "e-AC-pebble-grade-choice-V-pebble-detail",
+      "project_id": "pebbles",
+      "source_id": "AC-pebble-grade-choice",
+      "target_id": "V-pebble-detail",
+      "edge_type": "covers"
     }
   ]
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { Ban, UserRoundMinus } from "lucide-react"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
@@ -62,27 +63,33 @@ export function ConnectionRow({ connection, onRemove }: ConnectionRowProps) {
 
   return (
     <li className="flex items-center gap-3 rounded-xl border border-muted px-3 py-2.5 dark:border-accent">
-      {connection.peer.glyph ? (
-        <span
-          aria-hidden
-          className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent p-1.5"
-        >
-          <PeerGlyphIcon glyph={connection.peer.glyph} className="size-full text-foreground" />
+      <Link
+        href={`/connections/${connection.id}`}
+        aria-label={t("openDetailAria", { name })}
+        className="flex min-w-0 flex-1 items-center gap-3"
+      >
+        {connection.peer.glyph ? (
+          <span
+            aria-hidden
+            className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent p-1.5"
+          >
+            <PeerGlyphIcon glyph={connection.peer.glyph} className="size-full text-foreground" />
+          </span>
+        ) : (
+          <span
+            aria-hidden
+            className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent font-medium text-muted-foreground"
+          >
+            {name.charAt(0).toUpperCase() || "?"}
+          </span>
+        )}
+        <span className="min-w-0 flex-1">
+          <span className="block truncate font-medium text-foreground">{name}</span>
+          <span className="block truncate text-xs text-muted-foreground">
+            {t("connectedAgo", { ago: connectedAgo })}
+          </span>
         </span>
-      ) : (
-        <span
-          aria-hidden
-          className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent font-medium text-muted-foreground"
-        >
-          {name.charAt(0).toUpperCase() || "?"}
-        </span>
-      )}
-      <span className="min-w-0 flex-1">
-        <span className="block truncate font-medium text-foreground">{name}</span>
-        <span className="block truncate text-xs text-muted-foreground">
-          {t("connectedAgo", { ago: connectedAgo })}
-        </span>
-      </span>
+      </Link>
 
       <ConfirmDialog
         trigger={
