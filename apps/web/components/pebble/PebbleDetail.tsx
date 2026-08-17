@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useCallback, useRef } from "react"
-import { Globe, Lock, SquarePen, Users, X } from "lucide-react"
+import { Share2, SquarePen, X } from "lucide-react"
+import { toast } from "sonner"
 import { useTranslations } from "next-intl"
 import type { Pebble, PebbleSnap, Soul, Collection, Mark } from "@/lib/types"
 import type { UpdatePebbleInput } from "@/lib/data/data-provider"
@@ -18,6 +19,15 @@ import { SheetTrigger } from "@/components/ui/sheet"
 import { PickerSheet } from "@/components/ui/PickerSheet"
 import { ValenceGrid } from "@/components/record/ValenceIntensityGrid"
 import { SoulsSheet } from "@/components/record/SoulsSheet"
+import {
+  VISIBILITY_GRADES,
+  VisibilityMenu,
+} from "@/components/record/VisibilityMenu"
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 
 type PebbleDetailProps = {
@@ -117,22 +127,64 @@ export function PebbleDetail({
     [onUploadSnap, onUpdatePebble],
   )
 
+  const handleVisibilityChange = useCallback(
+    (visibility: Pebble["visibility"]) => {
+      void onUpdatePebble({ visibility })
+    },
+    [onUpdatePebble],
+  )
+
+  const handleShare = useCallback(async () => {
+    const url = `${window.location.origin}/p/${pebble.id}`
+    // navigator.share needs a secure context and user gesture; clipboard is
+    // the universal fallback (pattern: InviteSection).
+    try {
+      await navigator.share({ url })
+    } catch {
+      try {
+        await navigator.clipboard.writeText(url)
+        toast.success(t("shareCopied"))
+      } catch (err) {
+        console.error("[pebble-detail] share failed", err)
+      }
+    }
+  }, [pebble.id, t])
+
+  const VisibilityIconComponent = (
+    VISIBILITY_GRADES.find((g) => g.value === pebble.visibility) ??
+    VISIBILITY_GRADES[0]
+  ).icon
+
   return (
     <article>
-      {/* Top bar: static privacy indicator + edit/close buttons */}
+      {/* Top bar: privacy grade picker + share (public only) + edit/close buttons */}
       <header className="flex items-center justify-between">
-        <span
-          aria-label={tVisibility("aria", { grade: tVisibility(pebble.visibility) })}
-          className="grid size-10 place-items-center rounded-full bg-surface text-muted-foreground"
-        >
-          {pebble.visibility === "secret" ? (
-            <Lock className="size-4" aria-hidden />
-          ) : pebble.visibility === "private" ? (
-            <Users className="size-4" aria-hidden />
-          ) : (
-            <Globe className="size-4" aria-hidden />
+        <div className="flex items-center gap-2">
+          <Popover>
+            <PopoverTrigger
+              aria-label={tVisibility("aria", { grade: tVisibility(pebble.visibility) })}
+              className="grid size-10 place-items-center rounded-full bg-surface text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <VisibilityIconComponent className="size-4" aria-hidden />
+            </PopoverTrigger>
+            <PopoverContent align="start" className="min-w-[140px]">
+              <VisibilityMenu
+                value={pebble.visibility}
+                onChange={handleVisibilityChange}
+              />
+            </PopoverContent>
+          </Popover>
+          {pebble.visibility === "public" && (
+            <button
+              type="button"
+              aria-label={t("shareAria")}
+              onClick={() => void handleShare()}
+              className="grid size-10 place-items-center rounded-full bg-surface text-muted-foreground transition-colors hover:text-foreground"
+            >
+              <Share2 className="size-4" aria-hidden />
+            </button>
           )}
-        </span>
+        </div>
         <div className="flex items-center gap-2">
           {onEdit && (
             <button

@@ -664,6 +664,8 @@
     },
     "editIntensityAria": "Modifier l'intensité et la valence",
     "editAria": "Modifier le galet",
+    "shareAria": "Partager ce galet",
+    "shareCopied": "Lien copié",
     "edit": {
       "toolbarTitle": "ÉDITION",
       "cancel": "Annuler",

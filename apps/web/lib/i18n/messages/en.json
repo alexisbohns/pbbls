@@ -664,6 +664,8 @@
     },
     "editIntensityAria": "Edit intensity and valence",
     "editAria": "Edit pebble",
+    "shareAria": "Share this pebble",
+    "shareCopied": "Link copied",
     "edit": {
       "toolbarTitle": "EDITION",
       "cancel": "Cancel",
