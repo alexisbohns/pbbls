@@ -1,5 +1,6 @@
 package app.pbbls.android.features.path
 
+import android.content.Intent
 import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -27,11 +28,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.features.path.models.PebbleDetail
+import app.pbbls.android.features.path.models.SharedPebbleLink
 import app.pbbls.android.features.path.models.Visibility
 import app.pbbls.android.features.path.read.PebblePrivacyBadge
 import app.pbbls.android.features.path.read.PebbleReadView
@@ -65,6 +68,7 @@ fun PebbleDetailScreen(
     val palettes = LocalEmotionPaletteService.current
     val system = PebblesTheme.colors.system
     val accent = PebblesTheme.colors.accent
+    val context = LocalContext.current
 
     var detail by remember(pebbleId) { mutableStateOf<PebbleDetail?>(null) }
     var isLoading by remember(pebbleId) { mutableStateOf(true) }
@@ -98,6 +102,23 @@ fun PebbleDetailScreen(
             pebblePageColors(it, isSystemInDarkTheme()).background
         } ?: system.background
 
+    // Share is only offered for public pebbles (M51) — anyone with the /p
+    // link can open a public pebble, so sharing a secret/connections one
+    // would leak it past its intended audience.
+    val onShare: (() -> Unit)? =
+        if (detail?.visibility == Visibility.PUBLIC) {
+            {
+                val send =
+                    Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_TEXT, SharedPebbleLink.url(pebbleId))
+                    }
+                context.startActivity(Intent.createChooser(send, null))
+            }
+        } else {
+            null
+        }
+
     Column(
         modifier
             .fillMaxSize()
@@ -118,6 +139,7 @@ fun PebbleDetailScreen(
             editEnabled = detail != null,
             onBack = onDismiss,
             onEdit = onEditRequested,
+            onShare = onShare,
         )
         val loaded = detail
         when {
@@ -139,9 +161,10 @@ fun PebbleDetailScreen(
 
 /**
  * Detail top bar: leading system-back arrow, an optional privacy badge once the
- * pebble is loaded, and a trailing Edit button (enabled only after load; inert
- * in B). iOS relies on swipe-to-dismiss; Android adds the explicit back arrow +
- * [BackHandler] for discoverability (D5, documented divergence).
+ * pebble is loaded, an optional share button (public pebbles only, M51), and a
+ * trailing Edit button (enabled only after load; inert in B). iOS relies on
+ * swipe-to-dismiss; Android adds the explicit back arrow + [BackHandler] for
+ * discoverability (D5, documented divergence).
  */
 @Composable
 private fun DetailTopBar(
@@ -149,6 +172,7 @@ private fun DetailTopBar(
     editEnabled: Boolean,
     onBack: () -> Unit,
     onEdit: () -> Unit,
+    onShare: (() -> Unit)?,
 ) {
     val system = PebblesTheme.colors.system
     val accent = PebblesTheme.colors.accent
@@ -167,6 +191,15 @@ private fun DetailTopBar(
             PebblePrivacyBadge(visibility = visibility)
         }
         Spacer(Modifier.weight(1f))
+        if (onShare != null) {
+            IconButton(onClick = onShare) {
+                Icon(
+                    painter = painterResource(R.drawable.ic_share),
+                    contentDescription = stringResource(R.string.pebble_share_a11y),
+                    tint = system.secondary,
+                )
+            }
+        }
         TextButton(onClick = onEdit, enabled = editEnabled) {
             PebblesText(
                 stringResource(R.string.pebble_detail_edit),
