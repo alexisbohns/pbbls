@@ -195,7 +195,7 @@ export class SupabaseProvider implements DataProvider {
         happened_at: row.happened_at as string,
         intensity: row.intensity as 1 | 2 | 3,
         positiveness: row.positiveness as -1 | 0 | 1,
-        visibility: (row.visibility as string) as "private" | "public",
+        visibility: (row.visibility as string) as Pebble["visibility"],
         emotion_id: row.emotion_id as string,
         soul_ids: ((row.souls as Array<{ id: string }>) ?? []).map((s) => s.id),
         domain_ids: ((row.domains as Array<{ id: string }>) ?? []).map((d) => d.id),

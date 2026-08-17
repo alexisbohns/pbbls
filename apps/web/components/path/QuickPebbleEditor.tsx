@@ -9,7 +9,7 @@ import {
   Users,
 } from "lucide-react"
 import { useTranslations } from "next-intl"
-import type { Pebble, PebbleSnap } from "@/lib/types"
+import type { Pebble, PebbleSnap, Visibility } from "@/lib/types"
 import { useFormatDate } from "@/lib/i18n"
 import { usePebbles } from "@/lib/data/usePebbles"
 import { useSouls } from "@/lib/data/useSouls"
@@ -116,7 +116,7 @@ export function QuickPebbleEditor({
   const [pendingSnap, setPendingSnap] = useState<PebbleSnap | undefined>(undefined)
   const [snapPreview, setSnapPreview] = useState<string | undefined>(undefined)
   const [snapUploading, setSnapUploading] = useState(false)
-  const [visibility, setVisibility] = useState<"private" | "public">("private")
+  const [visibility, setVisibility] = useState<Visibility>("secret")
   const [saving, setSaving] = useState(false)
   // Publish failures were silent before M47 (no catch at all), which made
   // "delete the draft once it published" unimplementable. Surfaced inline, per
