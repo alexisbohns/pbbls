@@ -585,7 +585,12 @@
     "deadBody": "Demande un nouveau lien à ton ami.",
     "signInPrompt": "Connecte-toi ou crée un compte pour accepter.",
     "logIn": "Se connecter",
-    "signUp": "Créer un compte"
+    "signUp": "Créer un compte",
+    "sharedTitle": "Les galets partagés avec toi",
+    "sharedEmpty": "Pas encore de galet partagé. Les galets en visibilité Connexions ou Public apparaîtront ici.",
+    "detailNotFound": "Cette connexion n'existe plus.",
+    "backToConnections": "Retour aux connexions",
+    "openDetailAria": "Voir les galets partagés de {name}"
   },
   "path": {
     "loading": "Chargement…",
@@ -664,6 +669,8 @@
     },
     "editIntensityAria": "Modifier l'intensité et la valence",
     "editAria": "Modifier le galet",
+    "shareAria": "Partager ce galet",
+    "shareCopied": "Lien copié",
     "edit": {
       "toolbarTitle": "ÉDITION",
       "cancel": "Annuler",

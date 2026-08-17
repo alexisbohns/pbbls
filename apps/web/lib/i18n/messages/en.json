@@ -585,7 +585,12 @@
     "deadBody": "Ask your friend for a fresh link.",
     "signInPrompt": "Sign in or create an account to accept.",
     "logIn": "Log in",
-    "signUp": "Create account"
+    "signUp": "Create account",
+    "sharedTitle": "Pebbles they share with you",
+    "sharedEmpty": "No shared pebbles yet. Pebbles they grade Connections or Public will show up here.",
+    "detailNotFound": "This connection doesn't exist anymore.",
+    "backToConnections": "Back to connections",
+    "openDetailAria": "Open {name}'s shared pebbles"
   },
   "path": {
     "loading": "Loading…",
@@ -664,6 +669,8 @@
     },
     "editIntensityAria": "Edit intensity and valence",
     "editAria": "Edit pebble",
+    "shareAria": "Share this pebble",
+    "shareCopied": "Link copied",
     "edit": {
       "toolbarTitle": "EDITION",
       "cancel": "Cancel",

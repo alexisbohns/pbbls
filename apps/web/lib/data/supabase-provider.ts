@@ -33,8 +33,10 @@ import type {
   ProfileEngagement,
   Achievement,
   AchievementUnlock,
+  SharedConnectionPebble,
 } from "@/lib/types"
 import { toConnectionPeer } from "@/lib/data/invite-api"
+import { peerIdOf } from "@/lib/data/connection-peer"
 import { DEFAULT_GLYPH_ID } from "@/lib/config/glyphs"
 import { processPebbleImage } from "@/lib/utils/process-pebble-image"
 
@@ -637,6 +639,62 @@ export class SupabaseProvider implements DataProvider {
       connectedAt: row.connected_at as string,
       peer: toConnectionPeer(row.peer),
     }))
+  }
+
+  async listConnectionSharedPebbles(
+    connectionId: string,
+  ): Promise<SharedConnectionPebble[] | null> {
+    const { data: row, error: rowError } = await this.supabase
+      .from("connections")
+      .select("id, user_a, user_b")
+      .eq("id", connectionId)
+      .maybeSingle()
+    if (rowError) throw new Error(`connection lookup failed: ${rowError.message}`)
+    if (!row) return null
+
+    const peerId = peerIdOf(row as { user_a: string; user_b: string }, this.userId)
+    if (!peerId) return null
+
+    // The widened pebbles_select (M51) trims this to 'private' + 'public'
+    // rows; emotions is reference data (RLS `using (true)`), so the embed
+    // cannot blank rows.
+    const { data, error } = await this.supabase
+      .from("pebbles")
+      .select("id, name, happened_at, visibility, render_svg, emotions(id, slug, name, color)")
+      .eq("user_id", peerId)
+      .order("happened_at", { ascending: false })
+    if (error) throw new Error(`shared pebbles fetch failed: ${error.message}`)
+
+    return (data ?? []).flatMap((row: Record<string, unknown>) => {
+      // PostgREST returns a to-one FK embed as an object; drop rows with a
+      // broken embed rather than rendering an empty emotion.
+      const emotion = row.emotions as Record<string, unknown> | null
+      if (
+        !emotion ||
+        typeof emotion.id !== "string" ||
+        typeof emotion.slug !== "string" ||
+        typeof emotion.name !== "string" ||
+        typeof emotion.color !== "string"
+      ) {
+        console.warn("[supabase-provider] dropped shared pebble with broken emotion embed", row.id)
+        return []
+      }
+      return [
+        {
+          id: row.id as string,
+          name: row.name as string,
+          happened_at: row.happened_at as string,
+          visibility: (row.visibility as string) as SharedConnectionPebble["visibility"],
+          emotion: {
+            id: emotion.id,
+            slug: emotion.slug,
+            name: emotion.name,
+            color: emotion.color,
+          },
+          render_svg: (row.render_svg as string | null) ?? null,
+        },
+      ]
+    })
   }
 
   async createConnectionInvite(rotate = false): Promise<ConnectionInvite> {

@@ -14,6 +14,7 @@ import type {
   ProfileEngagement,
   Achievement,
   AchievementUnlock,
+  SharedConnectionPebble,
 } from "@/lib/types"
 
 // ---------------------------------------------------------------------------
@@ -223,6 +224,12 @@ export interface DataProvider {
   // arrive as substrings of the thrown message — match with `.includes` on the
   // lowercased message. None of these touch karma (D9).
   listConnections(): Promise<Connection[]>
+  /**
+   * The pebbles a connection shares with the viewer, newest first. Null when
+   * the connection id does not exist or is not the viewer's (indistinguishable
+   * by design). Direct reads under the widened M51 RLS — no RPC (spec D2).
+   */
+  listConnectionSharedPebbles(connectionId: string): Promise<SharedConnectionPebble[] | null>
   /** Returns the live invite; `rotate` revokes it and mints a fresh one. */
   createConnectionInvite(rotate?: boolean): Promise<ConnectionInvite>
   acceptConnectionInvite(token: string): Promise<AcceptConnectionInviteResult>
