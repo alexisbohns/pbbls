@@ -68,7 +68,7 @@ type Props = {
   pebble: Pebble
   mark?: Mark
   stoneSize: StoneSize
-  size?: "md" | "lg"
+  size?: "sm" | "md" | "lg"
   timeLabel: string
   onSelect?: (id: string) => void
 }
@@ -99,7 +99,7 @@ export function SandboxPolaroid({
           HOVER,
           "motion-reduce:transition-none motion-reduce:group-hover:rotate-0 motion-reduce:group-hover:scale-100",
           "relative",
-          size === "lg" ? "px-4 pb-4" : "px-3 pb-3",
+          size === "lg" ? "px-4 pb-4" : size === "sm" ? "px-2.5 pb-2.5" : "px-3 pb-3",
           head.pad,
         )}
       >
@@ -120,10 +120,10 @@ export function SandboxPolaroid({
         <h3
           className={cn(
             "text-center font-hand font-bold text-balance text-foreground",
-            picture ? "pt-2.5" : "pt-0",
+            picture ? (size === "sm" ? "pt-2" : "pt-2.5") : "pt-0",
             // Leading after the size — Tailwind's text-* utilities also set
             // line-height, so tailwind-merge drops an earlier `leading-*`.
-            "text-[1.125rem] leading-[1.05]",
+            size === "sm" ? "text-[1rem] leading-[1.05]" : "text-[1.125rem] leading-[1.05]",
           )}
         >
           {pebble.name}

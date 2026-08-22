@@ -24,94 +24,76 @@ function pebble(id: string, intensity: 1 | 2 | 3): Pebble {
   }
 }
 
-/** Compact shorthand so the expectations below read as layouts, not as objects. */
-function shape(pebbles: Pebble[]): string[] {
-  return groupPebbles(pebbles).map((block) => {
-    if (block.kind === "small") return `S${block.pebbles.length}`
-    if (block.kind === "large") return "L"
-    return `M[${block.rows.map((r) => r.length).join(",")}]`
-  })
+/** Compact shorthand so the expectations read as layouts, not as objects. */
+function shape(pebbles: Pebble[], columns?: number): string[] {
+  return groupPebbles(pebbles, columns).map((block) =>
+    block.kind === "large" ? "L" : `G[${block.columns.map((c) => c.map((p) => p.id).join("")).join("|")}]`,
+  )
 }
 
-const mediums = (n: number) =>
-  Array.from({ length: n }, (_, i) => pebble(`m${i}`, 2))
+const run = (n: number, intensity: 1 | 2 | 3 = 2) =>
+  Array.from({ length: n }, (_, i) => pebble(String(i), intensity))
 
 describe("groupPebbles", () => {
   it("returns no blocks for an empty week", () => {
     expect(groupPebbles([])).toEqual([])
   })
 
-  it("puts a lone small in its own block", () => {
-    expect(shape([pebble("a", 1)])).toEqual(["S1"])
+  it("deals a run round-robin across two columns", () => {
+    expect(shape(run(5))).toEqual(["G[024|13]"])
   })
 
-  it("merges consecutive smalls into one block", () => {
-    expect(shape([pebble("a", 1), pebble("b", 1), pebble("c", 1)])).toEqual(["S3"])
+  it("mixes smalls and mediums into the same wall", () => {
+    const week = [pebble("a", 1), pebble("b", 2), pebble("c", 1), pebble("d", 2)]
+    expect(shape(week)).toEqual(["G[ac|bd]"])
   })
 
-  it.each([
-    [1, "M[1]"],
-    [2, "M[2]"],
-    [3, "M[2,1]"],
-    [4, "M[2,2]"],
-    [5, "M[2,2,1]"],
-  ])("chunks a run of %i mediums into %s", (n, expected) => {
-    expect(shape(mediums(n))).toEqual([expected])
+  it("honours a different column count", () => {
+    expect(shape(run(7), 3)).toEqual(["G[036|14|25]"])
   })
 
-  it("gives every large its own block", () => {
+  it("gives every large its own full-width block", () => {
     expect(shape([pebble("a", 3), pebble("b", 3)])).toEqual(["L", "L"])
   })
 
-  it("does not merge medium runs across an intervening large", () => {
-    expect(shape([pebble("a", 2), pebble("b", 3), pebble("c", 2)])).toEqual([
-      "M[1]",
-      "L",
-      "M[1]",
-    ])
+  it("splits the wall around an intervening large", () => {
+    const week = [pebble("a", 2), pebble("b", 2), pebble("L", 3), pebble("c", 2)]
+    expect(shape(week)).toEqual(["G[a|b]", "L", "G[c|]"])
   })
 
-  it("does not merge medium runs across an intervening small", () => {
-    expect(shape([...mediums(2), pebble("s", 1), pebble("m9", 2)])).toEqual([
-      "M[2]",
-      "S1",
-      "M[1]",
-    ])
+  it("emits no empty grid when a large leads or trails", () => {
+    expect(shape([pebble("L", 3), pebble("a", 2)])).toEqual(["L", "G[a|]"])
+    expect(shape([pebble("a", 2), pebble("L", 3)])).toEqual(["G[a|]", "L"])
   })
 
-  it("walks the full progressive ladder in order", () => {
-    const week = [
-      pebble("s1", 1),
-      pebble("s2", 1),
-      pebble("m1", 2),
-      pebble("m2", 2),
-      pebble("s3", 1),
-      pebble("l1", 3),
-      pebble("m3", 2),
-      pebble("m4", 2),
-      pebble("m5", 2),
-    ]
-    expect(shape(week)).toEqual(["S2", "M[2]", "S1", "L", "M[2,1]"])
+  it("reads left-to-right in chronological order", () => {
+    // Round-robin is what guarantees this: reading row by row across the columns
+    // must give back the original order.
+    const week = run(6)
+    const [block] = groupPebbles(week)
+    if (block.kind !== "grid") throw new Error("expected a grid")
+    const readingOrder: string[] = []
+    for (let row = 0; row < block.columns[0].length; row++) {
+      for (const column of block.columns) {
+        const p = column[row]
+        if (p) readingOrder.push(p.id)
+      }
+    }
+    expect(readingOrder).toEqual(week.map((p) => p.id))
   })
 
-  it("preserves chronological order within and across blocks", () => {
-    const week = [
-      pebble("a", 1),
-      pebble("b", 2),
-      pebble("c", 2),
-      pebble("d", 2),
-      pebble("e", 3),
-    ]
-    const flattened = groupPebbles(week).flatMap((block) => {
-      if (block.kind === "small") return block.pebbles
-      if (block.kind === "large") return [block.pebble]
-      return block.rows.flat()
-    })
-    expect(flattened.map((p) => p.id)).toEqual(["a", "b", "c", "d", "e"])
+  it("preserves order within every column", () => {
+    const week = run(9)
+    const [block] = groupPebbles(week)
+    if (block.kind !== "grid") throw new Error("expected a grid")
+    for (const column of block.columns) {
+      const indices = column.map((p) => Number(p.id))
+      expect([...indices].sort((a, b) => a - b)).toEqual(indices)
+    }
   })
 
   it("does not mutate the input array", () => {
-    const week = [pebble("a", 2), pebble("b", 2)]
+    const week = run(4)
     const copy = [...week]
     groupPebbles(week)
     expect(week).toEqual(copy)

@@ -25,25 +25,32 @@ const BOX: Record<StoneSize, string> = {
   lg: "size-18",
 }
 
+/** A small pebble's card gets a stone one step down, so intensity still reads on a
+ *  wall where every card is the same column width. */
+export const STEP_DOWN: Record<StoneSize, StoneSize> = { sm: "sm", md: "sm", lg: "md" }
+
 /**
- * Every polaroid stone is painted with the opaque-primary fill and light-colour
- * strokes that `pebbleFrameColors` otherwise reserves for intensity 3.
+ * How a stone is painted, by intensity.
  *
- * On a polaroid the intensity is already said by the card's own size (half width,
- * full width), so spending the frame's colour on it too is redundant — and the
- * low-alpha `surface` fill that intensity 1/2 would otherwise get disappears
- * against white paper, which is the actual reason this override exists.
+ * Small and medium fill with the pale `light` colour and draw in `primary`;
+ * large keeps the production rule and inverts it — opaque `primary` fill, `light`
+ * strokes. So the wall reads as pale stones throughout with the occasional dark
+ * one, and the inversion is what marks a large pebble out rather than size alone.
+ *
+ * Both replace `pebbleFrameColors`, whose intensity-1/2 branch fills with the
+ * low-alpha `surface` colour. That is a faint wash designed for the app's tinted
+ * background; on white paper it disappears.
  */
-function solidColors(palette: {
-  primary_color: string
-  light_color: string
-}): PebbleFrameColors {
+function stoneColors(
+  palette: { primary_color: string; light_color: string },
+  intensity: 1 | 2 | 3,
+): PebbleFrameColors {
   const rgb = (hex: string) => (hex.length === 9 ? hex.slice(0, 7) : hex)
-  return {
-    fillColor: rgb(palette.primary_color),
-    fillOpacity: 1,
-    strokeColor: rgb(palette.light_color),
-  }
+  const primary = rgb(palette.primary_color)
+  const light = rgb(palette.light_color)
+  return intensity === 3
+    ? { fillColor: primary, fillOpacity: 1, strokeColor: light }
+    : { fillColor: light, fillOpacity: 1, strokeColor: primary }
 }
 
 /**
@@ -76,8 +83,8 @@ export function PolaroidStone({
         pebble={pebble}
         mark={mark}
         tier="thumbnail"
-        colors={palette ? solidColors(palette) : undefined}
-        className="size-full drop-shadow-[0_2px_4px_rgba(0,0,0,0.28)]"
+        colors={palette ? stoneColors(palette, pebble.intensity) : undefined}
+        className="size-full drop-shadow-[0_1px_2px_rgba(0,0,0,0.09)]"
       />
     </div>
   )
