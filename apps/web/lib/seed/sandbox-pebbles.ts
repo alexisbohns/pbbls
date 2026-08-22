@@ -11,13 +11,20 @@ import { emotionId } from "./sandbox-palettes"
 // page — and pictures are local files under `public/sandbox/`.
 // ---------------------------------------------------------------------------
 
+// Real photographs rather than generated gradients: a smooth gradient never tests
+// how the stone and the hand-written name read over a busy, high-contrast picture,
+// which is most of what there is to judge here.
+//
+// Sourced from Pexels (free to use, no attribution required) and committed as
+// fixtures so the sandbox stays network-free. Kept in a mix of aspect ratios —
+// 16:9, 2:3, 3:2 and 1:1 — because the picture well takes its height from its own
+// width and every ratio lands differently in the card.
 const SNAPS = {
-  warmPortrait: "/sandbox/warm-portrait.svg",
-  coolLandscape: "/sandbox/cool-landscape.svg",
-  greenSquare: "/sandbox/green-square.svg",
-  amberLandscape: "/sandbox/amber-landscape.svg",
-  violetPortrait: "/sandbox/violet-portrait.svg",
-  roseSquare: "/sandbox/rose-square.svg",
+  rooftop: "/sandbox/rooftop-group.jpg", // 16:9 — group selfie, blown-out sky
+  seawall: "/sandbox/seawall-portrait.jpg", // 2:3 — portrait, busy background
+  fountain: "/sandbox/fountain.jpg", // 3:2 — bright sky, high contrast
+  forest: "/sandbox/forest-crew.jpg", // 3:2 — dark, low contrast
+  march: "/sandbox/flag-march.jpg", // 1:1 — mid-tone, strong colour
 } as const
 
 // Four hand-drawn marks so soul avatars are visually distinguishable. Stroke
@@ -133,12 +140,12 @@ export const SANDBOX_SCENARIOS: SandboxScenario[] = [
       [
         { name: "Coffee before anyone woke up", intensity: 1, emotion: "calm", positiveness: 1 },
         { name: "Inbox already ugly", intensity: 1, emotion: "annoyed", positiveness: -1 },
-        { name: "Lunch on the wall by the canal", intensity: 2, emotion: "content", positiveness: 1, snap: SNAPS.coolLandscape, souls: ["soul-mia"] },
+        { name: "Lunch on the wall by the canal", intensity: 2, emotion: "content", positiveness: 1, snap: SNAPS.rooftop, souls: ["soul-mia"] },
         { name: "Lucas landed the job", intensity: 2, emotion: "proud", positiveness: 1, souls: ["soul-lucas"] },
         { name: "Forgot to call back", intensity: 1, emotion: "guilty", positiveness: -1 },
-        { name: "The whole family on the terrace, finally", intensity: 3, emotion: "grateful", positiveness: 1, snap: SNAPS.amberLandscape, souls: ["soul-mia", "soul-papa", "soul-luna"] },
-        { name: "Rain on the way home", intensity: 2, emotion: "peaceful", positiveness: 1, snap: SNAPS.greenSquare },
-        { name: "Luna asleep on the keyboard", intensity: 2, emotion: "content", positiveness: 1, snap: SNAPS.roseSquare, souls: ["soul-luna"] },
+        { name: "The whole family on the terrace, finally", intensity: 3, emotion: "grateful", positiveness: 1, snap: SNAPS.fountain, souls: ["soul-mia", "soul-papa", "soul-luna"] },
+        { name: "Rain on the way home", intensity: 2, emotion: "peaceful", positiveness: 1, snap: SNAPS.forest },
+        { name: "Luna asleep on the keyboard", intensity: 2, emotion: "content", positiveness: 1, snap: SNAPS.march, souls: ["soul-luna"] },
         { name: "Long call with Papa", intensity: 2, emotion: "grateful", positiveness: 1, souls: ["soul-papa"] },
       ],
       "mixed",
@@ -150,17 +157,17 @@ export const SANDBOX_SCENARIOS: SandboxScenario[] = [
     note: "runs of 1, 3 and 5 mediums, split by smalls — the centering rule for an odd trailing card.",
     pebbles: build(
       [
-        { name: "One on its own", intensity: 2, emotion: "hopeful", positiveness: 1, snap: SNAPS.violetPortrait },
+        { name: "One on its own", intensity: 2, emotion: "hopeful", positiveness: 1, snap: SNAPS.forest },
         { name: "Quick note", intensity: 1, emotion: "calm" },
-        { name: "Three, first", intensity: 2, emotion: "joyful", positiveness: 1, snap: SNAPS.amberLandscape },
+        { name: "Three, first", intensity: 2, emotion: "joyful", positiveness: 1, snap: SNAPS.fountain },
         { name: "Three, second", intensity: 2, emotion: "satisfied", positiveness: 1 },
-        { name: "Three, third", intensity: 2, emotion: "relieved", positiveness: 1, snap: SNAPS.greenSquare },
+        { name: "Three, third", intensity: 2, emotion: "relieved", positiveness: 1, snap: SNAPS.seawall },
         { name: "Another quick note", intensity: 1, emotion: "worried", positiveness: -1 },
-        { name: "Five, first", intensity: 2, emotion: "content", positiveness: 1, snap: SNAPS.coolLandscape },
+        { name: "Five, first", intensity: 2, emotion: "content", positiveness: 1, snap: SNAPS.rooftop },
         { name: "Five, second", intensity: 2, emotion: "grateful", positiveness: 1 },
-        { name: "Five, third", intensity: 2, emotion: "peaceful", positiveness: 1, snap: SNAPS.roseSquare },
+        { name: "Five, third", intensity: 2, emotion: "peaceful", positiveness: 1, snap: SNAPS.rooftop },
         { name: "Five, fourth", intensity: 2, emotion: "hopeful", positiveness: 1 },
-        { name: "Five, fifth", intensity: 2, emotion: "proud", positiveness: 1, snap: SNAPS.warmPortrait },
+        { name: "Five, fifth", intensity: 2, emotion: "proud", positiveness: 1, snap: SNAPS.seawall },
       ],
       "odd",
     ),
@@ -171,14 +178,14 @@ export const SANDBOX_SCENARIOS: SandboxScenario[] = [
     note: "eight mediums, nothing else — the 2-col grid with no interruptions.",
     pebbles: build(
       [
-        { name: "Market at eight", intensity: 2, emotion: "content", positiveness: 1, snap: SNAPS.amberLandscape },
-        { name: "Bread still warm", intensity: 2, emotion: "grateful", positiveness: 1, snap: SNAPS.warmPortrait, souls: ["soul-mia"] },
-        { name: "Long swim", intensity: 2, emotion: "peaceful", positiveness: 1, snap: SNAPS.greenSquare },
+        { name: "Market at eight", intensity: 2, emotion: "content", positiveness: 1, snap: SNAPS.fountain },
+        { name: "Bread still warm", intensity: 2, emotion: "grateful", positiveness: 1, snap: SNAPS.seawall, souls: ["soul-mia"] },
+        { name: "Long swim", intensity: 2, emotion: "peaceful", positiveness: 1, snap: SNAPS.forest },
         { name: "That email again", intensity: 2, emotion: "frustrated", positiveness: -1 },
         { name: "Noor called out of nowhere", intensity: 2, emotion: "surprised", souls: ["soul-noor"] },
-        { name: "Sunset from the roof", intensity: 2, emotion: "joyful", positiveness: 1, snap: SNAPS.roseSquare },
-        { name: "Couldn't sleep", intensity: 2, emotion: "anxious", positiveness: -1, snap: SNAPS.violetPortrait },
-        { name: "Finished the book", intensity: 2, emotion: "satisfied", positiveness: 1, snap: SNAPS.coolLandscape },
+        { name: "Sunset from the roof", intensity: 2, emotion: "joyful", positiveness: 1, snap: SNAPS.fountain },
+        { name: "Couldn't sleep", intensity: 2, emotion: "anxious", positiveness: -1, snap: SNAPS.forest },
+        { name: "Finished the book", intensity: 2, emotion: "satisfied", positiveness: 1, snap: SNAPS.rooftop },
       ],
       "grid",
     ),
@@ -202,15 +209,15 @@ export const SANDBOX_SCENARIOS: SandboxScenario[] = [
   {
     key: "photosOnly",
     label: "All pictures",
-    note: "every card carries a picture, in mixed aspect ratios — portrait, landscape and square.",
+    note: "every card carries a picture, in mixed aspect ratios — 16:9, 2:3, 3:2 and square.",
     pebbles: build(
       [
-        { name: "First light", intensity: 2, emotion: "peaceful", positiveness: 1, snap: SNAPS.violetPortrait },
-        { name: "The canal", intensity: 2, emotion: "content", positiveness: 1, snap: SNAPS.coolLandscape },
-        { name: "Her hands in the dough", intensity: 2, emotion: "grateful", positiveness: 1, snap: SNAPS.warmPortrait, souls: ["soul-mia"] },
-        { name: "Green everywhere", intensity: 2, emotion: "joyful", positiveness: 1, snap: SNAPS.greenSquare },
-        { name: "Everyone, at the table", intensity: 3, emotion: "joyful", positiveness: 1, snap: SNAPS.amberLandscape, souls: ["soul-mia", "soul-papa"] },
-        { name: "Last light", intensity: 2, emotion: "satisfied", positiveness: 1, snap: SNAPS.roseSquare },
+        { name: "First light", intensity: 2, emotion: "peaceful", positiveness: 1, snap: SNAPS.forest },
+        { name: "The canal", intensity: 2, emotion: "content", positiveness: 1, snap: SNAPS.rooftop },
+        { name: "Her hands in the dough", intensity: 2, emotion: "grateful", positiveness: 1, snap: SNAPS.seawall, souls: ["soul-mia"] },
+        { name: "Green everywhere", intensity: 2, emotion: "joyful", positiveness: 1, snap: SNAPS.forest },
+        { name: "Everyone, at the table", intensity: 3, emotion: "joyful", positiveness: 1, snap: SNAPS.fountain, souls: ["soul-mia", "soul-papa"] },
+        { name: "Last light", intensity: 2, emotion: "satisfied", positiveness: 1, snap: SNAPS.march },
       ],
       "photos",
     ),
@@ -218,15 +225,15 @@ export const SANDBOX_SCENARIOS: SandboxScenario[] = [
   {
     key: "manySouls",
     label: "Soul overflow",
-    note: "0, 1, 2 and 5 souls on otherwise identical cards — the avatar stack and its +N.",
+    note: "0, 1, 2 and 5 souls on otherwise identical cards — same picture throughout, so the avatar stack is the only variable.",
     pebbles: build(
       [
-        { name: "Alone", intensity: 2, emotion: "calm", positiveness: 1, snap: SNAPS.greenSquare, souls: [] },
-        { name: "Just Mia", intensity: 2, emotion: "content", positiveness: 1, snap: SNAPS.greenSquare, souls: ["soul-mia"] },
-        { name: "Mia and Lucas", intensity: 2, emotion: "joyful", positiveness: 1, snap: SNAPS.greenSquare, souls: ["soul-mia", "soul-lucas"] },
-        { name: "Everyone at once", intensity: 2, emotion: "grateful", positiveness: 1, snap: SNAPS.greenSquare, souls: ["soul-mia", "soul-lucas", "soul-papa", "soul-luna", "soul-noor"] },
+        { name: "Alone", intensity: 2, emotion: "calm", positiveness: 1, snap: SNAPS.march, souls: [] },
+        { name: "Just Mia", intensity: 2, emotion: "content", positiveness: 1, snap: SNAPS.march, souls: ["soul-mia"] },
+        { name: "Mia and Lucas", intensity: 2, emotion: "joyful", positiveness: 1, snap: SNAPS.march, souls: ["soul-mia", "soul-lucas"] },
+        { name: "Everyone at once", intensity: 2, emotion: "grateful", positiveness: 1, snap: SNAPS.march, souls: ["soul-mia", "soul-lucas", "soul-papa", "soul-luna", "soul-noor"] },
         { name: "All five, no picture", intensity: 2, emotion: "proud", positiveness: 1, souls: ["soul-mia", "soul-lucas", "soul-papa", "soul-luna", "soul-noor"] },
-        { name: "All five, full width", intensity: 3, emotion: "joyful", positiveness: 1, snap: SNAPS.amberLandscape, souls: ["soul-mia", "soul-lucas", "soul-papa", "soul-luna", "soul-noor"] },
+        { name: "All five, full width", intensity: 3, emotion: "joyful", positiveness: 1, snap: SNAPS.fountain, souls: ["soul-mia", "soul-lucas", "soul-papa", "soul-luna", "soul-noor"] },
       ],
       "souls",
     ),
@@ -237,11 +244,11 @@ export const SANDBOX_SCENARIOS: SandboxScenario[] = [
     note: "title wrapping in Caveat, at half width, full width and in a compact row.",
     pebbles: build(
       [
-        { name: "A short one", intensity: 2, emotion: "calm", positiveness: 1, snap: SNAPS.greenSquare },
+        { name: "A short one", intensity: 2, emotion: "calm", positiveness: 1, snap: SNAPS.rooftop },
         { name: "The afternoon where absolutely nothing happened and that turned out to be the entire point of it", intensity: 2, emotion: "peaceful", positiveness: 1 },
-        { name: "Supercalifragilisticexpialidocious", intensity: 2, emotion: "surprised", snap: SNAPS.roseSquare },
-        { name: "Another perfectly ordinary Tuesday that I would like very much to remember in ten years", intensity: 2, emotion: "content", positiveness: 1, snap: SNAPS.coolLandscape },
-        { name: "A full-width card carrying a title long enough to need two lines even at this width, which is the point", intensity: 3, emotion: "grateful", positiveness: 1, snap: SNAPS.amberLandscape, souls: ["soul-papa"] },
+        { name: "Supercalifragilisticexpialidocious", intensity: 2, emotion: "surprised", snap: SNAPS.seawall },
+        { name: "Another perfectly ordinary Tuesday that I would like very much to remember in ten years", intensity: 2, emotion: "content", positiveness: 1, snap: SNAPS.rooftop },
+        { name: "A full-width card carrying a title long enough to need two lines even at this width, which is the point", intensity: 3, emotion: "grateful", positiveness: 1, snap: SNAPS.fountain, souls: ["soul-papa"] },
         { name: "And a compact row with a name long enough that it has to truncate somewhere around here", intensity: 1, emotion: "annoyed", positiveness: -1 },
       ],
       "titles",
