@@ -20,6 +20,22 @@ const CATEGORY_PALETTES: Record<string, EmotionPalette> = {
 }
 
 /**
+ * The `dark_color` column, which `EmotionPalette` does not carry — the app's
+ * dark-mode swap happens in CSS, so no consumer has ever needed the value in JS.
+ * The sandbox does: its stones pick their fill in JS from the toolbar's theme
+ * state, so both ends of the swap have to be reachable from here.
+ */
+const CATEGORY_DARK: Record<string, string> = {
+  fear: "#19131FFF",
+  sadness: "#12141CFF",
+  pride: "#220E1CFF",
+  joy: "#201202FF",
+  peace: "#0E1912FF",
+  anger: "#1C0D0DFF",
+  shame: "#1B1B1BFF",
+}
+
+/**
  * `EMOTIONS[].color` predates emotion categories and carries exactly one value per
  * category — seven colours, seven categories, a clean 1:1. Joining on it is what
  * lets the fixture reach the real palette without a `category_id` the static config
@@ -42,6 +58,15 @@ export const SANDBOX_PALETTES: Map<string, EmotionPalette> = new Map(
     const category = CATEGORY_BY_LEGACY_COLOR[emotion.color]
     const palette = category ? CATEGORY_PALETTES[category] : undefined
     return palette ? [[emotion.id, palette] as const] : []
+  }),
+)
+
+/** Every emotion id → its category's `dark_color`. */
+export const SANDBOX_DARK_COLORS: Map<string, string> = new Map(
+  EMOTIONS.flatMap((emotion) => {
+    const category = CATEGORY_BY_LEGACY_COLOR[emotion.color]
+    const dark = category ? CATEGORY_DARK[category] : undefined
+    return dark ? [[emotion.id, dark] as const] : []
   }),
 )
 

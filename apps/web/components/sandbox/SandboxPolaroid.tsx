@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils"
  *  a drop shadow cannot read against a near-black background, so the card swaps to
  *  a faint inset top highlight instead. */
 const STOCK =
-  "bg-card rounded-sm " +
+  "bg-white dark:bg-card rounded-sm " +
   "shadow-[0_1px_0_rgba(0,0,0,0.02),0_4px_8px_-4px_rgba(0,0,0,0.06),0_14px_28px_-16px_rgba(0,0,0,0.09)] " +
   "dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_4px_8px_-4px_rgba(0,0,0,0.45),0_14px_28px_-16px_rgba(0,0,0,0.6)]"
 
@@ -70,6 +70,7 @@ type Props = {
   stoneSize: StoneSize
   size?: "sm" | "md" | "lg"
   timeLabel: string
+  dark: boolean
   onSelect?: (id: string) => void
 }
 
@@ -84,6 +85,7 @@ export function SandboxPolaroid({
   stoneSize,
   size = "md",
   timeLabel,
+  dark,
   onSelect,
 }: Props) {
   const picture = pebble.instants[0]
@@ -100,10 +102,12 @@ export function SandboxPolaroid({
           "motion-reduce:transition-none motion-reduce:group-hover:rotate-0 motion-reduce:group-hover:scale-100",
           "relative",
           size === "lg" ? "px-4 pb-4" : size === "sm" ? "px-2.5 pb-2.5" : "px-3 pb-3",
-          head.pad,
+          picture
+            ? size === "lg" ? "pt-4" : size === "sm" ? "pt-2.5" : "pt-3"
+            : head.pad,
         )}
       >
-        <PolaroidStone pebble={pebble} mark={mark} size={stoneSize} className={head.lift} />
+        <PolaroidStone pebble={pebble} mark={mark} size={stoneSize} dark={dark} className={head.lift} />
 
         {picture && (
           /* eslint-disable-next-line @next/next/no-img-element -- local fixture asset, next/image not applicable */

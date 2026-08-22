@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { cn } from "@/lib/utils"
 
 const FIELD =
-  "h-8 min-w-0 flex-1 rounded-md border border-border bg-background px-2 text-xs text-foreground " +
+  "h-8 min-w-0 flex-1 rounded-md border border-border bg-card px-2 text-xs text-foreground " +
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
 
 function Field<T extends string>({
@@ -59,7 +59,7 @@ export function SandboxToolbar({
   const activeStone = STONE_SIZES.find((v) => v.key === stoneSize)
 
   return (
-    <div className="sticky top-0 z-50 flex items-center gap-2 border-b border-border bg-background/90 px-3 py-2 backdrop-blur">
+    <div className="sticky top-0 z-50 flex items-center gap-2 border-b border-border bg-surface/90 px-3 py-2 backdrop-blur dark:bg-background/90">
       <Field
         label="Scenario"
         options={SANDBOX_SCENARIOS.map((s) => ({ key: s.key, label: s.label }))}

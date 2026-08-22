@@ -20,9 +20,11 @@ function markFor(pebble: Pebble): Mark | undefined {
 export function SandboxPathScreen({
   pebbles,
   stoneSize,
+  dark,
 }: {
   pebbles: Pebble[]
   stoneSize: StoneSize
+  dark: boolean
 }) {
   const blocks = groupPebbles(pebbles)
 
@@ -41,6 +43,7 @@ export function SandboxPathScreen({
                 stoneSize={stoneSize}
                 size="lg"
                 timeLabel={timeLabel(block.pebble.happened_at)}
+                dark={dark}
               />
             </li>
           )
@@ -65,6 +68,7 @@ export function SandboxPathScreen({
                         stoneSize={isSmall ? STEP_DOWN[stoneSize] : stoneSize}
                         size={isSmall ? "sm" : "md"}
                         timeLabel={timeLabel(pebble.happened_at)}
+                        dark={dark}
                       />
                     )
                   })}

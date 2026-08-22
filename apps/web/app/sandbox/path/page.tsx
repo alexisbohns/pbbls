@@ -38,16 +38,26 @@ export default function SandboxPathPage() {
   const active = SANDBOX_SCENARIOS.find((s) => s.key === scenario) ?? SANDBOX_SCENARIOS[0]
 
   return (
-    <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col">
-      <SandboxToolbar
-        scenario={scenario}
-        onScenario={setScenario}
-        stoneSize={stoneSize}
-        onStoneSize={setStoneSize}
-        dark={dark}
-        onDark={setDark}
-      />
-      <SandboxPathScreen pebbles={active.pebbles} stoneSize={stoneSize} />
+    // bg-surface in light mode: the app's page ground is #FFFFFF there, the same
+    // white as the card, so a white print on it had no edge at all. Dark mode
+    // already separates them (card 0.19 over background 0.15), so it keeps its own
+    // pair — this only fixes the light half.
+    //
+    // The colour goes on a full-width wrapper, not on the max-w-md column: on a
+    // wide viewport the column is narrower than the page, and tinting only the
+    // column would leave white gutters either side of it.
+    <div className="min-h-dvh w-full bg-surface dark:bg-background">
+      <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col">
+        <SandboxToolbar
+          scenario={scenario}
+          onScenario={setScenario}
+          stoneSize={stoneSize}
+          onStoneSize={setStoneSize}
+          dark={dark}
+          onDark={setDark}
+        />
+        <SandboxPathScreen pebbles={active.pebbles} stoneSize={stoneSize} dark={dark} />
+      </div>
     </div>
   )
 }
