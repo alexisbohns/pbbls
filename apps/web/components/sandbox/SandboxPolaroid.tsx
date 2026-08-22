@@ -13,8 +13,8 @@ import { cn } from "@/lib/utils"
  *  a faint inset top highlight instead. */
 const STOCK =
   "bg-card rounded-sm " +
-  "shadow-[0_1px_0_rgba(0,0,0,0.03),0_6px_12px_-4px_rgba(0,0,0,0.10),0_20px_40px_-16px_rgba(0,0,0,0.14)] " +
-  "dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_6px_12px_-4px_rgba(0,0,0,0.6),0_20px_40px_-16px_rgba(0,0,0,0.8)]"
+  "shadow-[0_1px_0_rgba(0,0,0,0.02),0_4px_8px_-4px_rgba(0,0,0,0.06),0_14px_28px_-16px_rgba(0,0,0,0.09)] " +
+  "dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_4px_8px_-4px_rgba(0,0,0,0.45),0_14px_28px_-16px_rgba(0,0,0,0.6)]"
 
 /** How a card answers the pointer. Written as `group-*` so it fires from the
  *  wrapper — the wrapper carries the static chaos rotation, the card carries the
@@ -24,8 +24,8 @@ const HOVER =
   "transition-[transform,box-shadow] duration-300 ease-out " +
   "group-hover:-rotate-3 group-hover:scale-105 " +
   "group-has-[:focus-visible]:-rotate-3 group-has-[:focus-visible]:scale-105 " +
-  "group-hover:shadow-[0_2px_0_rgba(0,0,0,0.04),0_10px_20px_-6px_rgba(0,0,0,0.16),0_32px_56px_-16px_rgba(0,0,0,0.24)] " +
-  "dark:group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_10px_20px_-6px_rgba(0,0,0,0.7),0_32px_56px_-16px_rgba(0,0,0,0.9)] " +
+  "group-hover:shadow-[0_2px_0_rgba(0,0,0,0.03),0_8px_16px_-6px_rgba(0,0,0,0.10),0_24px_40px_-16px_rgba(0,0,0,0.16)] " +
+  "dark:group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_8px_16px_-6px_rgba(0,0,0,0.55),0_24px_40px_-16px_rgba(0,0,0,0.75)] " +
   "group-active:rotate-2 group-active:scale-95"
 
 /** Top padding on the paper, and how far the stone is pulled above the edge. The
@@ -73,7 +73,6 @@ type Props = {
   size?: "md" | "lg"
   /** Full-width cards do not tilt — a full-bleed card that rotates reads as broken. */
   tilt?: boolean
-  timeLabel: string
   onSelect?: (id: string) => void
 }
 
@@ -88,7 +87,6 @@ export function SandboxPolaroid({
   stoneSize,
   size = "md",
   tilt = true,
-  timeLabel,
   onSelect,
 }: Props) {
   const picture = pebble.instants[0]
@@ -125,16 +123,10 @@ export function SandboxPolaroid({
       >
         <PolaroidStone pebble={pebble} mark={mark} size={stoneSize} className={head.lift} />
 
-        {/* Who and when. The stone lands in the gap this row opens, so it stays a
-            space-between even when there are no souls to put on the left. */}
-        <div className="flex min-h-5 items-center justify-between gap-2">
+        {/* Who. Keeps its height with no souls on the card, so the stone always has
+            the same amount of paper to sit against. */}
+        <div className="flex min-h-5 items-center gap-2">
           <SoulAvatars soulIds={pebble.soul_ids} />
-          <time
-            dateTime={pebble.happened_at}
-            className="ml-auto text-[10px] uppercase tracking-[0.12em] text-muted-foreground"
-          >
-            {timeLabel}
-          </time>
         </div>
 
         <h3
@@ -143,7 +135,7 @@ export function SandboxPolaroid({
             // The leading must come AFTER the text-* size: Tailwind's font-size
             // utilities also set line-height, so tailwind-merge treats them as
             // conflicting and silently drops an earlier `leading-*`.
-            size === "lg" ? "text-4xl leading-[0.85]" : "text-3xl leading-[0.85]",
+            "text-[1.125rem] leading-[1.05]",
           )}
         >
           {pebble.name}
