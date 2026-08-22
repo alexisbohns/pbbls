@@ -1,8 +1,6 @@
 "use client"
 
-import type { CSSProperties } from "react"
 import type { Mark, Pebble, Soul } from "@/lib/types"
-import { polaroidChaos } from "@/lib/utils/polaroid-chaos"
 import { SANDBOX_MARK_MAP, SANDBOX_SOUL_MAP } from "@/lib/seed/sandbox-pebbles"
 import { SoulGlyphThumbnail } from "@/components/souls/SoulGlyphThumbnail"
 import { PolaroidStone, type StoneSize } from "./PolaroidStone"
@@ -16,10 +14,10 @@ const STOCK =
   "shadow-[0_1px_0_rgba(0,0,0,0.02),0_4px_8px_-4px_rgba(0,0,0,0.06),0_14px_28px_-16px_rgba(0,0,0,0.09)] " +
   "dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05),0_4px_8px_-4px_rgba(0,0,0,0.45),0_14px_28px_-16px_rgba(0,0,0,0.6)]"
 
-/** How a card answers the pointer. Written as `group-*` so it fires from the
- *  wrapper — the wrapper carries the static chaos rotation, the card carries the
- *  interaction transform, and the two compose. On one element the hover transform
- *  would replace the rotation instead of adding to it. */
+/** How a card answers the pointer. Still written as `group-*` so it fires from the
+ *  wrapper: the overlay button covers the figure, and a pointer over that button is
+ *  not a pointer over the figure. The tilt is now interaction-only — the deck lies
+ *  flat at rest. */
 const HOVER =
   "transition-[transform,box-shadow] duration-300 ease-out " +
   "group-hover:-rotate-3 group-hover:scale-105 " +
@@ -71,8 +69,7 @@ type Props = {
   mark?: Mark
   stoneSize: StoneSize
   size?: "md" | "lg"
-  /** Full-width cards do not tilt — a full-bleed card that rotates reads as broken. */
-  tilt?: boolean
+  timeLabel: string
   onSelect?: (id: string) => void
 }
 
@@ -86,31 +83,16 @@ export function SandboxPolaroid({
   mark,
   stoneSize,
   size = "md",
-  tilt = true,
+  timeLabel,
   onSelect,
 }: Props) {
   const picture = pebble.instants[0]
-  const chaos = polaroidChaos(pebble.id)
   const head = HEAD[stoneSize]
 
-  // motion-reduce:* strips the chaos too, not just the animation: a static tilt is
-  // decoration, and the same preference that asks for no movement is asking for
-  // less visual noise.
-  const wrapperStyle: CSSProperties = tilt
-    ? { rotate: `${chaos.rotate}deg`, translate: `${chaos.shiftX}px`, zIndex: chaos.z }
-    : {}
-
   return (
-    <div
-      className={cn(
-        "group relative",
-        tilt && "motion-reduce:!rotate-0 motion-reduce:!translate-x-0",
-        // The stone breaks the top edge, so a hovered card has to rise above its
-        // neighbours or the one above clips it.
-        "hover:z-30",
-      )}
-      style={wrapperStyle}
-    >
+    // The stone breaks the top edge, so a hovered card has to rise above its
+    // neighbours or the one above clips it.
+    <div className="group relative hover:z-30">
       <figure
         className={cn(
           STOCK,
@@ -123,24 +105,6 @@ export function SandboxPolaroid({
       >
         <PolaroidStone pebble={pebble} mark={mark} size={stoneSize} className={head.lift} />
 
-        {/* Who. Keeps its height with no souls on the card, so the stone always has
-            the same amount of paper to sit against. */}
-        <div className="flex min-h-5 items-center gap-2">
-          <SoulAvatars soulIds={pebble.soul_ids} />
-        </div>
-
-        <h3
-          className={cn(
-            "pt-1.5 text-center font-hand font-bold text-balance text-foreground",
-            // The leading must come AFTER the text-* size: Tailwind's font-size
-            // utilities also set line-height, so tailwind-merge treats them as
-            // conflicting and silently drops an earlier `leading-*`.
-            "text-[1.125rem] leading-[1.05]",
-          )}
-        >
-          {pebble.name}
-        </h3>
-
         {picture && (
           /* eslint-disable-next-line @next/next/no-img-element -- local fixture asset, next/image not applicable */
           <img
@@ -149,9 +113,33 @@ export function SandboxPolaroid({
             loading="lazy"
             // h-auto is load-bearing: the picture has to take its height from its
             // own width, so portrait and landscape fixtures both sit edge to edge.
-            className="mt-2.5 h-auto w-full rounded-xs"
+            className="h-auto w-full rounded-xs"
           />
         )}
+
+        <h3
+          className={cn(
+            "text-center font-hand font-bold text-balance text-foreground",
+            picture ? "pt-2.5" : "pt-0",
+            // Leading after the size — Tailwind's text-* utilities also set
+            // line-height, so tailwind-merge drops an earlier `leading-*`.
+            "text-[1.125rem] leading-[1.05]",
+          )}
+        >
+          {pebble.name}
+        </h3>
+
+        {/* Who and when, under the hand. Keeps its height with no souls on the card
+            so every print's caption block is the same depth. */}
+        <div className="flex min-h-5 items-center justify-between gap-2 pt-1.5">
+          <SoulAvatars soulIds={pebble.soul_ids} />
+          <time
+            dateTime={pebble.happened_at}
+            className="ml-auto text-[10px] uppercase tracking-[0.12em] text-muted-foreground"
+          >
+            {timeLabel}
+          </time>
+        </div>
       </figure>
 
       {/* An invisible button over the card rather than a clickable wrapper: <button>

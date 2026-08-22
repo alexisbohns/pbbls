@@ -7,6 +7,13 @@ import { SandboxPebbleRow } from "./SandboxPebbleRow"
 import { SandboxPolaroid } from "./SandboxPolaroid"
 import type { StoneSize } from "./PolaroidStone"
 
+/** UTC so the fixture renders identically on every machine — the times are made up,
+ *  and a locale-shifted fixture would make two screenshots disagree for no reason. */
+function timeLabel(iso: string): string {
+  const d = new Date(iso)
+  return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`
+}
+
 function markFor(pebble: Pebble): Mark | undefined {
   return pebble.mark_id ? SANDBOX_MARK_MAP.get(pebble.mark_id) : undefined
 }
@@ -49,7 +56,7 @@ export function SandboxPathScreen({
                 mark={markFor(block.pebble)}
                 stoneSize={stoneSize}
                 size="lg"
-                tilt={false}
+                timeLabel={timeLabel(block.pebble.happened_at)}
               />
             </li>
           )
@@ -71,6 +78,7 @@ export function SandboxPathScreen({
                       pebble={pebble}
                       mark={markFor(pebble)}
                       stoneSize={stoneSize}
+                      timeLabel={timeLabel(pebble.happened_at)}
                     />
                   </div>
                 ))}
