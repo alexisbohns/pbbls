@@ -68,7 +68,11 @@ export function SandboxPathScreen({
             {block.rows.map((row, rowIndex) => (
               // A row of one is half width and centred; a row of two fills the grid.
               // `justify-center` does both — with two children it is a no-op.
-              <div key={rowIndex} className="flex justify-center gap-4">
+              //
+              // items-center rather than the default stretch: a card with no picture
+              // is much shorter than one with, and top-aligning the pair leaves the
+              // short one hanging over a tall column of empty paper.
+              <div key={rowIndex} className="flex items-center justify-center gap-4">
                 {row.map((pebble) => (
                   <div key={pebble.id} className="w-[calc(50%-0.5rem)]">
                     <SandboxPolaroid
