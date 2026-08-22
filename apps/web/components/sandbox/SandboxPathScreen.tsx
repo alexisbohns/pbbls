@@ -5,7 +5,7 @@ import { groupPebbles } from "@/lib/utils/path-layout"
 import { SANDBOX_MARK_MAP } from "@/lib/seed/sandbox-pebbles"
 import { PathPebbleRow } from "@/components/path/PathPebbleRow"
 import { SandboxPolaroid } from "./SandboxPolaroid"
-import type { GlyphVariant } from "./PolaroidGlyph"
+import type { StoneSize } from "./PolaroidStone"
 
 /** UTC so the fixture renders identically on every machine — the times are made up,
  *  and a locale-shifted fixture would make two screenshots disagree for no reason. */
@@ -20,10 +20,10 @@ function markFor(pebble: Pebble): Mark | undefined {
 
 export function SandboxPathScreen({
   pebbles,
-  glyphVariant,
+  stoneSize,
 }: {
   pebbles: Pebble[]
-  glyphVariant: GlyphVariant
+  stoneSize: StoneSize
 }) {
   const blocks = groupPebbles(pebbles)
 
@@ -54,7 +54,7 @@ export function SandboxPathScreen({
               <SandboxPolaroid
                 pebble={block.pebble}
                 mark={markFor(block.pebble)}
-                glyphVariant={glyphVariant}
+                stoneSize={stoneSize}
                 size="lg"
                 tilt={false}
                 timeLabel={timeLabel(block.pebble.happened_at)}
@@ -74,7 +74,7 @@ export function SandboxPathScreen({
                     <SandboxPolaroid
                       pebble={pebble}
                       mark={markFor(pebble)}
-                      glyphVariant={glyphVariant}
+                      stoneSize={stoneSize}
                       timeLabel={timeLabel(pebble.happened_at)}
                     />
                   </div>

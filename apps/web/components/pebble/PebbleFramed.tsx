@@ -12,7 +12,7 @@ import {
   pebbleScale,
   outlineAspectRatio,
 } from "@/lib/config/pebble-geometry"
-import { pebbleFrameColors } from "@/lib/utils/pebble-frame-colors"
+import { pebbleFrameColors, type PebbleFrameColors } from "@/lib/utils/pebble-frame-colors"
 import { PebbleOutlineBackdrop } from "./PebbleOutlineBackdrop"
 import { PebbleVisual } from "./PebbleVisual"
 import { cn } from "@/lib/utils"
@@ -25,6 +25,11 @@ type PebbleFramedProps = {
   // When true, the backdrop springs in and the pebble fades on top (used by the
   // detail view). Respects prefers-reduced-motion. Defaults off (static rows).
   animateIn?: boolean
+  // Bypass the intensity → role rule and paint the frame with these colors.
+  // Exists for /sandbox/path, which wants every polaroid stone painted with the
+  // opaque-primary / light-stroke treatment that `pebbleFrameColors` otherwise
+  // reserves for intensity 3. Nothing in the product passes it.
+  colors?: PebbleFrameColors
 }
 
 /**
@@ -43,6 +48,7 @@ export function PebbleFramed({
   tier = "thumbnail",
   className,
   animateIn = false,
+  colors,
 }: PebbleFramedProps) {
   const prefersReducedMotion = useReducedMotion()
   const { paletteByEmotionId } = useEmotionPalettes()
@@ -56,7 +62,8 @@ export function PebbleFramed({
 
   const size = SIZE_BY_INTENSITY[pebble.intensity]
   const polarity = POLARITY_BY_VALENCE[pebble.positiveness]
-  const { fillColor, fillOpacity, strokeColor } = pebbleFrameColors(palette, pebble.intensity)
+  const { fillColor, fillOpacity, strokeColor } =
+    colors ?? pebbleFrameColors(palette, pebble.intensity)
   const shouldAnimate = animateIn && !prefersReducedMotion
 
   const scaleStyle: CSSProperties = {

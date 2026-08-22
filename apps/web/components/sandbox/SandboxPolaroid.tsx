@@ -5,7 +5,7 @@ import type { Mark, Pebble, Soul } from "@/lib/types"
 import { polaroidChaos } from "@/lib/utils/polaroid-chaos"
 import { SANDBOX_MARK_MAP, SANDBOX_SOUL_MAP } from "@/lib/seed/sandbox-pebbles"
 import { SoulGlyphThumbnail } from "@/components/souls/SoulGlyphThumbnail"
-import { PolaroidGlyph, type GlyphVariant } from "./PolaroidGlyph"
+import { PolaroidStone, type StoneSize } from "./PolaroidStone"
 import { cn } from "@/lib/utils"
 
 /** The stock itself — paper, corners, and what lifts it off the page. In dark mode
@@ -28,7 +28,16 @@ const HOVER =
   "dark:group-hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.08),0_10px_20px_-6px_rgba(0,0,0,0.7),0_32px_56px_-16px_rgba(0,0,0,0.9)] " +
   "group-active:rotate-2 group-active:scale-95"
 
-function SoulAvatars({ soulIds, max = 4 }: { soulIds: string[]; max?: number }) {
+/** Top padding on the paper, and how far the stone is pulled above the edge. The
+ *  two are paired: the stone hangs by roughly half its height, and the paper opens
+ *  up enough that the meta row still clears it. */
+const HEAD: Record<StoneSize, { pad: string; lift: string }> = {
+  sm: { pad: "pt-7", lift: "-top-5" },
+  md: { pad: "pt-9", lift: "-top-7" },
+  lg: { pad: "pt-12", lift: "-top-9" },
+}
+
+function SoulAvatars({ soulIds, max = 3 }: { soulIds: string[]; max?: number }) {
   if (soulIds.length === 0) return null
   const shown = soulIds.slice(0, max)
   const overflow = soulIds.length - shown.length
@@ -42,14 +51,14 @@ function SoulAvatars({ soulIds, max = 4 }: { soulIds: string[]; max?: number }) 
           <span
             key={id}
             title={soul?.name}
-            className="grid size-6 place-items-center rounded-full bg-background p-1 ring-2 ring-card"
+            className="grid size-5 place-items-center rounded-full bg-background p-0.5 ring-2 ring-card"
           >
             <SoulGlyphThumbnail mark={mark} className="size-full" strokeClassName="text-foreground/70" />
           </span>
         )
       })}
       {overflow > 0 && (
-        <span className="grid size-6 place-items-center rounded-full bg-background text-[10px] font-semibold text-muted-foreground ring-2 ring-card">
+        <span className="grid size-5 place-items-center rounded-full bg-background text-[9px] font-semibold text-muted-foreground ring-2 ring-card">
           +{overflow}
         </span>
       )}
@@ -60,7 +69,7 @@ function SoulAvatars({ soulIds, max = 4 }: { soulIds: string[]; max?: number }) 
 type Props = {
   pebble: Pebble
   mark?: Mark
-  glyphVariant: GlyphVariant
+  stoneSize: StoneSize
   size?: "md" | "lg"
   /** Full-width cards do not tilt — a full-bleed card that rotates reads as broken. */
   tilt?: boolean
@@ -68,18 +77,23 @@ type Props = {
   onSelect?: (id: string) => void
 }
 
+/**
+ * One polaroid, read top to bottom: who and when, then what it was called, then
+ * the picture. The stone sits over the top edge and splits the meta row — the
+ * space-between gap it falls into is what the row exists to open up.
+ */
 export function SandboxPolaroid({
   pebble,
   mark,
-  glyphVariant,
+  stoneSize,
   size = "md",
   tilt = true,
   timeLabel,
   onSelect,
 }: Props) {
   const picture = pebble.instants[0]
-  const hasPicture = Boolean(picture)
   const chaos = polaroidChaos(pebble.id)
+  const head = HEAD[stoneSize]
 
   // motion-reduce:* strips the chaos too, not just the animation: a static tilt is
   // decoration, and the same preference that asks for no movement is asking for
@@ -90,7 +104,13 @@ export function SandboxPolaroid({
 
   return (
     <div
-      className={cn("group relative", tilt && "motion-reduce:!rotate-0 motion-reduce:!translate-x-0 hover:z-30")}
+      className={cn(
+        "group relative",
+        tilt && "motion-reduce:!rotate-0 motion-reduce:!translate-x-0",
+        // The stone breaks the top edge, so a hovered card has to rise above its
+        // neighbours or the one above clips it.
+        "hover:z-30",
+      )}
       style={wrapperStyle}
     >
       <figure
@@ -98,71 +118,48 @@ export function SandboxPolaroid({
           STOCK,
           HOVER,
           "motion-reduce:transition-none motion-reduce:group-hover:rotate-0 motion-reduce:group-hover:scale-100",
-          size === "lg" ? "p-4" : "p-3",
+          "relative",
+          size === "lg" ? "px-4 pb-4" : "px-3 pb-3",
+          head.pad,
         )}
       >
-        <div className="relative">
-          {hasPicture ? (
-            /* eslint-disable-next-line @next/next/no-img-element -- local fixture asset, next/image not applicable */
-            <img
-              src={picture}
-              alt=""
-              loading="lazy"
-              // h-auto is load-bearing: the picture has to take its height from its
-              // own width, so portrait and landscape fixtures both sit edge to edge.
-              className="h-auto w-full rounded-xs"
-            />
-          ) : null}
-          {glyphVariant !== "margin" && (
-            <PolaroidGlyph
-              pebble={pebble}
-              mark={mark}
-              variant={glyphVariant}
-              hasPicture={hasPicture}
-              size={size}
-            />
-          )}
+        <PolaroidStone pebble={pebble} mark={mark} size={stoneSize} className={head.lift} />
+
+        {/* Who and when. The stone lands in the gap this row opens, so it stays a
+            space-between even when there are no souls to put on the left. */}
+        <div className="flex min-h-5 items-center justify-between gap-2">
+          <SoulAvatars soulIds={pebble.soul_ids} />
+          <time
+            dateTime={pebble.happened_at}
+            className="ml-auto text-[10px] uppercase tracking-[0.12em] text-muted-foreground"
+          >
+            {timeLabel}
+          </time>
         </div>
 
-        <figcaption
+        <h3
           className={cn(
-            "flex select-none flex-col gap-1.5 text-center",
-            hasPicture || glyphVariant === "adaptive" ? "pt-2" : "pt-0",
-            // `adaptive` hangs its mark below the picture's edge; the caption has to
-            // clear it or the title runs straight into the pebble.
-            hasPicture && glyphVariant === "adaptive" && "pt-6",
+            "pt-1.5 text-center font-hand font-bold text-balance text-foreground",
+            // The leading must come AFTER the text-* size: Tailwind's font-size
+            // utilities also set line-height, so tailwind-merge treats them as
+            // conflicting and silently drops an earlier `leading-*`.
+            size === "lg" ? "text-4xl leading-[0.85]" : "text-3xl leading-[0.85]",
           )}
         >
-          <div className={cn("flex items-center gap-2", glyphVariant === "margin" ? "justify-start text-left" : "justify-center")}>
-            {glyphVariant === "margin" && (
-              <PolaroidGlyph
-                pebble={pebble}
-                mark={mark}
-                variant="margin"
-                hasPicture={hasPicture}
-                size={size}
-              />
-            )}
-            <h3
-              className={cn(
-                "min-w-0 font-hand leading-tight font-bold text-balance text-foreground",
-                size === "lg" ? "text-3xl" : "text-2xl",
-              )}
-            >
-              {pebble.name}
-            </h3>
-          </div>
+          {pebble.name}
+        </h3>
 
-          <div className="flex items-center justify-between gap-2 pt-0.5">
-            <SoulAvatars soulIds={pebble.soul_ids} />
-            <time
-              dateTime={pebble.happened_at}
-              className="ml-auto text-[10px] uppercase tracking-[0.12em] text-muted-foreground"
-            >
-              {timeLabel}
-            </time>
-          </div>
-        </figcaption>
+        {picture && (
+          /* eslint-disable-next-line @next/next/no-img-element -- local fixture asset, next/image not applicable */
+          <img
+            src={picture}
+            alt=""
+            loading="lazy"
+            // h-auto is load-bearing: the picture has to take its height from its
+            // own width, so portrait and landscape fixtures both sit edge to edge.
+            className="mt-2.5 h-auto w-full rounded-xs"
+          />
+        )}
       </figure>
 
       {/* An invisible button over the card rather than a clickable wrapper: <button>

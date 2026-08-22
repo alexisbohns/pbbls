@@ -6,7 +6,7 @@ import { SANDBOX_PALETTES } from "@/lib/seed/sandbox-palettes"
 import { SANDBOX_SCENARIOS } from "@/lib/seed/sandbox-pebbles"
 import { SandboxPathScreen } from "@/components/sandbox/SandboxPathScreen"
 import { SandboxToolbar } from "@/components/sandbox/SandboxToolbar"
-import type { GlyphVariant } from "@/components/sandbox/PolaroidGlyph"
+import type { StoneSize } from "@/components/sandbox/PolaroidStone"
 
 // Seed the palette cache at module scope, before any consumer mounts: the page
 // has no Supabase session, and PebbleFramed degrades to a bare untinted pebble
@@ -21,7 +21,7 @@ primeEmotionPalettes(SANDBOX_PALETTES)
  */
 export default function SandboxPathPage() {
   const [scenario, setScenario] = useState(SANDBOX_SCENARIOS[0].key)
-  const [glyphVariant, setGlyphVariant] = useState<GlyphVariant>("adaptive")
+  const [stoneSize, setStoneSize] = useState<StoneSize>("md")
   const [dark, setDark] = useState(false)
 
   // The page drives `.dark` on <html> directly rather than through next-themes,
@@ -42,12 +42,12 @@ export default function SandboxPathPage() {
       <SandboxToolbar
         scenario={scenario}
         onScenario={setScenario}
-        glyphVariant={glyphVariant}
-        onGlyphVariant={setGlyphVariant}
+        stoneSize={stoneSize}
+        onStoneSize={setStoneSize}
         dark={dark}
         onDark={setDark}
       />
-      <SandboxPathScreen pebbles={active.pebbles} glyphVariant={glyphVariant} />
+      <SandboxPathScreen pebbles={active.pebbles} stoneSize={stoneSize} />
     </div>
   )
 }
