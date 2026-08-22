@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "@fontsource-variable/ysabeau";
 import "@fontsource/reenie-beanie";
+import "@fontsource-variable/caveat";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { ColorWorldProvider } from "@/components/layout/ColorWorldProvider";
 import { ThemeColorSync } from "@/components/layout/ThemeColorSync";
