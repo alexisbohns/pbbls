@@ -30,6 +30,18 @@
 rm -rf ~/Library/Developer/Xcode/DerivedData/Pebbles-*/Build
 ```
 
+**`-only-testing:` takes the type name, not the `@Suite` display name.** A
+suite declared `@Suite("TapHaptics") struct TapHapticsTests` is addressed as
+`PebblesTests/TapHapticsTests`. Getting this wrong does not error — xcodebuild
+runs zero tests and still prints `** TEST SUCCEEDED **`. Always confirm the
+run reported the tests you expected:
+
+```bash
+… -only-testing:PebblesTests/<TypeName> 2>&1 | grep -E 'Test "|Suite "|✘|error:'
+```
+
+An empty grep means nothing ran, not that everything passed.
+
 **Running one suite:**
 
 ```bash
@@ -125,7 +137,7 @@ struct TapHapticsTests {
 rm -rf ~/Library/Developer/Xcode/DerivedData/Pebbles-*/Build
 cd apps/ios && xcodegen generate && xcodebuild test -scheme Pebbles \
   -destination 'platform=iOS Simulator,name=iPhone 17' \
-  -only-testing:PebblesTests/TapHaptics 2>&1 | tail -20
+  -only-testing:PebblesTests/TapHapticsTests 2>&1 | tail -20
 ```
 
 Expected: compile failure — `cannot find 'TapHaptics' in scope`.
@@ -217,7 +229,7 @@ enum TapHaptics {
 ```bash
 cd apps/ios && xcodebuild test -scheme Pebbles \
   -destination 'platform=iOS Simulator,name=iPhone 17' \
-  -only-testing:PebblesTests/TapHaptics 2>&1 | tail -20
+  -only-testing:PebblesTests/TapHapticsTests 2>&1 | tail -20
 ```
 
 Expected: `Test Suite 'TapHaptics' passed` — 2 tests.
@@ -289,7 +301,7 @@ struct RecordStepTests {
 ```bash
 cd apps/ios && xcodegen generate && xcodebuild test -scheme Pebbles \
   -destination 'platform=iOS Simulator,name=iPhone 17' \
-  -only-testing:PebblesTests/RecordStep 2>&1 | tail -20
+  -only-testing:PebblesTests/RecordStepTests 2>&1 | tail -20
 ```
 
 Expected: compile failure — `cannot find 'RecordStep' in scope`.
@@ -361,7 +373,7 @@ enum RecordStep: Int, CaseIterable, Identifiable, Hashable {
 ```bash
 cd apps/ios && xcodebuild test -scheme Pebbles \
   -destination 'platform=iOS Simulator,name=iPhone 17' \
-  -only-testing:PebblesTests/RecordStep 2>&1 | tail -20
+  -only-testing:PebblesTests/RecordStepTests 2>&1 | tail -20
 ```
 
 Expected: `Test Suite 'RecordStep' passed` — 4 tests.
@@ -1023,7 +1035,7 @@ struct ExifCaptureDateTests {
 ```bash
 cd apps/ios && xcodegen generate && xcodebuild test -scheme Pebbles \
   -destination 'platform=iOS Simulator,name=iPhone 17' \
-  -only-testing:PebblesTests/ExifCaptureDate 2>&1 | grep -i "error:" | head -5
+  -only-testing:PebblesTests/ExifCaptureDateTests 2>&1 | grep -i "error:" | head -5
 ```
 
 Expected: `cannot find 'ExifCaptureDate' in scope`.
@@ -1090,7 +1102,7 @@ enum ExifCaptureDate {
 ```bash
 cd apps/ios && xcodebuild test -scheme Pebbles \
   -destination 'platform=iOS Simulator,name=iPhone 17' \
-  -only-testing:PebblesTests/ExifCaptureDate 2>&1 | tail -20
+  -only-testing:PebblesTests/ExifCaptureDateTests 2>&1 | tail -20
 ```
 
 Expected: `Test Suite 'ExifCaptureDate' passed` — 5 tests.
@@ -1133,7 +1145,7 @@ Expected: every `processedForRetry = nil` is followed by `pickedCaptureDate = ni
 cd apps/ios && xcodebuild test -scheme Pebbles \
   -destination 'platform=iOS Simulator,name=iPhone 17' \
   -only-testing:PebblesTests/SnapUploadCoordinatorTests \
-  -only-testing:PebblesTests/ExifCaptureDate 2>&1 | tail -20
+  -only-testing:PebblesTests/ExifCaptureDateTests 2>&1 | tail -20
 ```
 
 Expected: both suites pass.
