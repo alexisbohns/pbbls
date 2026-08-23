@@ -16,41 +16,41 @@ struct RecordFlowView: View {
     /// unanswered step, and the row is deleted once the pebble publishes (D9).
     var resuming: PebbleDraftRecord?
 
-    @Environment(SupabaseService.self) private var supabase
-    @Environment(ReferenceDataService.self) private var refs
+    @Environment(SupabaseService.self) var supabase
+    @Environment(ReferenceDataService.self) var refs
     @Environment(KarmaNotificationService.self) private var karma
     @Environment(AchievementsService.self) private var achievements
     @Environment(PebbleDraftsService.self) private var draftsService
     @Environment(ComposerSnapshotStore.self) private var snapshots
     @Environment(\.scenePhase) private var scenePhase
-    @Environment(\.dismiss) private var dismiss
+    @Environment(\.dismiss) var dismiss
 
-    @State private var model = RecordFlowModel()
-    @State private var selectedGlyph: Glyph?
+    @State var model = RecordFlowModel()
+    @State var selectedGlyph: Glyph?
 
     /// Lazily constructed in `.task` so they have `supabase.client`.
-    @State private var snaps: SnapUploadCoordinator?
-    @State private var drafts: ComposerDraftCoordinator?
+    @State var snaps: SnapUploadCoordinator?
+    @State var drafts: ComposerDraftCoordinator?
 
     @State private var isPhotoPickerPresented = false
-    @State private var isCloseConfirmPresented = false
+    @State var isCloseConfirmPresented = false
     /// Drives the step transition direction so back slides back.
     @State private var isMovingBack = false
 
-    private let logger = Logger(subsystem: "app.pbbls.ios", category: "record-flow")
+    let logger = Logger(subsystem: "app.pbbls.ios", category: "record-flow")
 
-    private var currentUserId: UUID? { supabase.session?.user.id }
+    var currentUserId: UUID? { supabase.session?.user.id }
     private var hasSnapNow: Bool { snaps?.formSnap != nil }
 
-    private var draftPayload: PebbleDraftPayload {
+    var draftPayload: PebbleDraftPayload {
         PebbleDraftPayload(from: model.draft, formSnap: snaps?.formSnap, userId: currentUserId)
     }
 
-    private var isSavableAsDraft: Bool {
+    var isSavableAsDraft: Bool {
         model.draft.isSavableAsDraft(formSnap: snaps?.formSnap, userId: currentUserId)
     }
 
-    private var knownIds: PebbleDraft.KnownIds {
+    var knownIds: PebbleDraft.KnownIds {
         PebbleDraft.KnownIds(
             soulIds: Set(refs.souls.map(\.id)),
             collectionIds: Set(refs.collections.map(\.id))
@@ -152,11 +152,29 @@ struct RecordFlowView: View {
                 )
             } else {
                 RecordStepScaffold(
-                    title: title(for: model.step),
-                    subtitle: subtitle(for: model.step),
+                    title: model.step.title,
+                    subtitle: model.step.subtitle,
                     action: action(for: model.step)
                 ) {
-                    content(for: model.step)
+                    RecordStepContent(
+                        step: model.step,
+                        model: model,
+                        snap: snaps?.formSnap,
+                        seededFromPhoto: snaps?.pickedCaptureDate != nil,
+                        snapBlockedMessage: snapBlockedMessage,
+                        selectedGlyph: $selectedGlyph,
+                        onPickPhoto: { isPhotoPickerPresented = true },
+                        onRetryPhoto: {
+                            if let userId = currentUserId, let snaps {
+                                Task { await snaps.retryCurrent(userId: userId) }
+                            }
+                        },
+                        onRemovePhoto: {
+                            if let userId = currentUserId, let snaps {
+                                Task { await snaps.removePending(userId: userId) }
+                            }
+                        }
+                    )
                 }
             }
         }
@@ -165,74 +183,6 @@ struct RecordFlowView: View {
             insertion: .move(edge: isMovingBack ? .leading : .trailing).combined(with: .opacity),
             removal: .move(edge: isMovingBack ? .trailing : .leading).combined(with: .opacity)
         ))
-    }
-
-    @ViewBuilder
-    private func content(for step: RecordStep) -> some View {
-        switch step {
-        case .photo:
-            RecordPhotoStep(
-                snap: snaps?.formSnap,
-                onPick: { isPhotoPickerPresented = true },
-                onRetry: {
-                    if let userId = currentUserId, let snaps {
-                        Task { await snaps.retryCurrent(userId: userId) }
-                    }
-                },
-                onRemove: {
-                    if let userId = currentUserId, let snaps {
-                        Task { await snaps.removePending(userId: userId) }
-                    }
-                }
-            )
-        case .when:
-            RecordWhenStep(
-                happenedAt: Binding(
-                    get: { model.draft.happenedAt },
-                    set: { model.draft.happenedAt = $0 }
-                ),
-                seededFromPhoto: snaps?.pickedCaptureDate != nil
-            )
-        case .name:
-            RecordNameStep(
-                name: model.draft.name,
-                limit: RecordFlowModel.nameLimit,
-                onChange: { model.setName($0) }
-            )
-        case .valence:    RecordValenceStep(model: model)
-        case .emotion:    RecordEmotionStep(model: model)
-        case .domain:     RecordDomainStep(model: model)
-        case .souls:      RecordSoulsStep(model: model)
-        case .collection: RecordCollectionStep(model: model)
-        case .glyph:      RecordGlyphStep(model: model, selectedGlyph: $selectedGlyph)
-        case .privacy:    RecordPrivacyStep(model: model, snapBlockedMessage: snapBlockedMessage)
-        case .success:    EmptyView()  // handled above; the success step owns its own layout
-        }
-    }
-
-    private func title(for step: RecordStep) -> LocalizedStringResource {
-        switch step {
-        case .photo:      return "Start with a picture"
-        case .when:       return "When did it happen?"
-        case .name:       return "What do you call it?"
-        case .valence:    return "How did it land?"
-        case .emotion:    return "What did you feel?"
-        case .domain:     return "What part of life?"
-        case .souls:      return "Anyone in this one?"
-        case .collection: return "Add it to a collection?"
-        case .glyph:      return "Give it a glyph"
-        case .privacy:    return "Who can see it?"
-        case .success:    return "Your pebble"
-        }
-    }
-
-    private func subtitle(for step: RecordStep) -> LocalizedStringResource? {
-        switch step {
-        case .photo:   return "Or skip it and write from memory."
-        case .valence: return "How much of your life did this take up?"
-        case .glyph:   return "A little mark, just for this one."
-        default:       return nil
-        }
     }
 
     /// The one action a step offers, if any. Tile steps offer none — the pick
@@ -260,78 +210,6 @@ struct RecordFlowView: View {
         case .photo, .souls, .collection, .glyph:
             return .text(model.optionalButtonIsSkip ? "Skip" : "Done") { model.advance() }
         }
-    }
-
-    // MARK: - Drafts
-
-    private func hydrateOrOfferRestore() {
-        guard let drafts,
-              let decision = drafts.hydrate(resuming: resuming, refsLoaded: refs.hasLoaded)
-        else { return }
-
-        switch decision {
-        case .resume(let payload):
-            model.resume(from: payload, known: knownIds)
-            if let existing = payload.existingSnap {
-                snaps?.seedExisting(.existing(id: existing.id, storagePath: existing.storagePath))
-                model.hasSnap = true
-            }
-            Task { await verifyGlyph() }
-        case .offerRestore, .fresh:
-            break
-        }
-    }
-
-    private func restoreSnapshot() {
-        guard let snapshot = drafts?.takeRestorableSnapshot() else { return }
-        model.resume(from: snapshot, known: knownIds)
-        Task { await verifyGlyph() }
-    }
-
-    private func verifyGlyph() async {
-        guard let glyphId = model.draft.glyphId, let userId = currentUserId, let drafts else { return }
-        switch await drafts.verifyGlyph(glyphId: glyphId, userId: userId) {
-        case .usable(let glyph):
-            selectedGlyph = glyph
-        case .unusable:
-            model.draft.glyphId = nil
-            selectedGlyph = nil
-        case .unknown:
-            break
-        }
-    }
-
-    // MARK: - Leaving
-
-    /// `✕` only asks when there is something to keep (D9).
-    private func handleClose() {
-        if isSavableAsDraft {
-            isCloseConfirmPresented = true
-        } else {
-            Task { await cancelAndCleanup() }
-        }
-    }
-
-    private func saveAsDraftAndClose() async {
-        guard let drafts, let userId = currentUserId else {
-            logger.error("save draft: no coordinator or no current user id")
-            dismiss()
-            return
-        }
-        // Deliberately no snap cleanup: the draft references that snap.
-        if let message = await drafts.saveAsDraft(payload: draftPayload, userId: userId) {
-            model.fail(message)
-        } else {
-            dismiss()
-        }
-    }
-
-    private func cancelAndCleanup() async {
-        if let userId = currentUserId, let snaps {
-            await snaps.cancelAndCleanup(userId: userId)
-        }
-        drafts?.discardSnapshot()
-        dismiss()
     }
 
     // MARK: - Publish

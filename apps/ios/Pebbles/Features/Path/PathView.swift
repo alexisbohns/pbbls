@@ -20,6 +20,9 @@ struct PathView: View {
     @State private var entries: [WeekRollEntry] = []
     @State private var focusedWeekStart: Date = Date()
     @State private var navPath = NavigationPath()
+    /// The record flow (M58) — what `+` opens.
+    @State private var isPresentingFlow = false
+    /// The classic composer, reachable by long-pressing `+` (D1).
     @State private var isPresentingCreate = false
     @State private var isPresentingDrafts = false
     @State private var selectedPebbleId: UUID?
@@ -64,6 +67,18 @@ struct PathView: View {
         }
         .task { await stats.load() }
         .task { await draftsService.refreshCount() }
+        .fullScreenCover(isPresented: $isPresentingFlow) {
+            RecordFlowView(onPublished: { newPebbleId in
+                // No detail sheet: the user just spent ten screens on this
+                // pebble and the success step already showed it (D10).
+                Task {
+                    async let timeline: Void = load()
+                    async let statsReload: Void = stats.refresh()
+                    _ = await (timeline, statsReload)
+                    focusWeek(containing: newPebbleId)
+                }
+            })
+        }
         .sheet(isPresented: $isPresentingCreate) {
             CreatePebbleSheet(onCreated: { newPebbleId in
                 selectedPebbleId = newPebbleId
@@ -158,7 +173,7 @@ struct PathView: View {
                             entry: entry,
                             onTap: { pebble in selectedPebbleId = pebble.id },
                             onDelete: { pebble in pendingDeletion = pebble },
-                            onCreate: { isPresentingCreate = true }
+                            onCreate: { isPresentingFlow = true }
                         )
                         .tag(entry.weekStart)
                     }
@@ -182,7 +197,10 @@ struct PathView: View {
                             .foregroundStyle(.secondary)
                         }
                     }
-                    NewPebbleButton(onTap: { isPresentingCreate = true })
+                    NewPebbleButton(
+                        onTap: { isPresentingFlow = true },
+                        onLongPress: { isPresentingCreate = true }
+                    )
                     PathBottomBar(
                         karma: stats.karma,
                         ripple: rippleWithLocalActiveToday,
@@ -193,6 +211,20 @@ struct PathView: View {
                 .padding(.bottom, 8)
             }
         }
+    }
+
+    /// Focus the week the new pebble landed in, so exiting the flow puts the
+    /// user where their pebble is rather than wherever they happened to be.
+    ///
+    /// Asks which entry actually holds the pebble rather than recomputing its
+    /// week: `WeekRollBuilder` owns the bucketing, and a second implementation
+    /// here could disagree with it. Silent no-op if the reload has not yet
+    /// surfaced the pebble.
+    private func focusWeek(containing pebbleId: UUID) {
+        guard let entry = entries.first(where: { entry in
+            entry.pebbles.contains { $0.id == pebbleId }
+        }) else { return }
+        focusedWeekStart = entry.weekStart
     }
 
     private func load() async {
