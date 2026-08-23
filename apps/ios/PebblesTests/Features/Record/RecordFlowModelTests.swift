@@ -79,6 +79,9 @@ struct RecordFlowModelNavigationTests {
         let (model, _) = makeModel()
         model.go(to: .valence)
         model.select(valence: .highlightMedium)
+        // Valence commits in place; Continue is what advances.
+        #expect(model.step == .valence)
+        model.advance()
         #expect(model.step == .emotion)
 
         model.back()

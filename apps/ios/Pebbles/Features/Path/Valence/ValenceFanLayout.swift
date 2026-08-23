@@ -16,19 +16,25 @@ import CoreGraphics
 /// widen as the fan rises, so the eye reads "bigger event" going up.
 enum ValenceFanLayout {
 
-    /// The canvas every constant below is expressed in. Chosen to fit the
-    /// narrowest supported content width (375pt device − 2 × `Spacing.lg`
-    /// = 341pt) with room to spare.
-    static let reference = CGSize(width: 288, height: 274)
+    /// The canvas every constant below is expressed in — and the size the fan
+    /// actually renders at. It is exactly the content width of the narrowest
+    /// supported device (375pt − 2 × `Spacing.lg`), so the fan fits everywhere
+    /// and simply gains side margin on wider phones.
+    ///
+    /// Deliberately not scaled to the proposed width: doing that needs a
+    /// `GeometryReader`, whose ideal height is unspecified, and inside the
+    /// record step's `ScrollView` (which proposes no height) the whole fan
+    /// collapses to nothing.
+    static let reference = CGSize(width: 341, height: 324)
 
     /// Stone height in reference units. Width follows from
     /// `PebbleOutlineGeometry.aspectRatio(for:)`, so each stone keeps its real
     /// silhouette proportions.
     static func stoneHeight(for size: ValenceSizeGroup) -> CGFloat {
         switch size {
-        case .small:  return 34
-        case .medium: return 60
-        case .large:  return 88
+        case .small:  return 40
+        case .medium: return 71
+        case .large:  return 104
         }
     }
 
@@ -42,9 +48,9 @@ enum ValenceFanLayout {
     /// Distance from the canvas's horizontal centre to a side stone's centre.
     private static func halfSpread(for size: ValenceSizeGroup) -> CGFloat {
         switch size {
-        case .small:  return 52
-        case .medium: return 76
-        case .large:  return 94
+        case .small:  return 62
+        case .medium: return 90
+        case .large:  return 111
         }
     }
 
@@ -54,18 +60,18 @@ enum ValenceFanLayout {
     /// disturbs the lowlight → highlight ordering.
     private static func ringDrift(for size: ValenceSizeGroup) -> CGFloat {
         switch size {
-        case .small:  return 8
-        case .medium: return -6
-        case .large:  return 4
+        case .small:  return 9
+        case .medium: return -7
+        case .large:  return 5
         }
     }
 
     /// Height of a side stone's centre above the canvas's bottom edge.
     private static func sideRise(for size: ValenceSizeGroup) -> CGFloat {
         switch size {
-        case .small:  return 26
-        case .medium: return 92
-        case .large:  return 190
+        case .small:  return 31
+        case .medium: return 109
+        case .large:  return 225
         }
     }
 
@@ -73,9 +79,9 @@ enum ValenceFanLayout {
     /// bows each row into an arc instead of a straight line.
     private static func centreLift(for size: ValenceSizeGroup) -> CGFloat {
         switch size {
-        case .small:  return 10
-        case .medium: return 20
-        case .large:  return 30
+        case .small:  return 12
+        case .medium: return 24
+        case .large:  return 36
         }
     }
 

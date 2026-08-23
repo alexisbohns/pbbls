@@ -18,8 +18,8 @@ struct ValencePickerContent: View {
 
     /// Opacity of the eight stones that are not the chosen one. With nothing
     /// chosen, all nine stay at full strength.
-    private static let dimmedOpacity: Double = 0.35
-    private static let selectedScale: CGFloat = 1.08
+    private static let dimmedOpacity: Double = 0.45
+    private static let selectedScale: CGFloat = 1.14
     /// Apple's minimum comfortable target; the small stones are under it on
     /// both axes.
     private static let minimumHitTarget: CGFloat = 44
@@ -32,32 +32,22 @@ struct ValencePickerContent: View {
     }
 
     private var fan: some View {
-        GeometryReader { proxy in
-            // The layout is authored in a fixed reference canvas and scaled to
-            // whatever width we are given, so the fan reads identically on
-            // every device.
-            let scale = proxy.size.width / ValenceFanLayout.reference.width
-            ZStack {
-                ForEach(Valence.allCases) { valence in
-                    stone(valence, scale: scale)
-                }
+        ZStack {
+            ForEach(Valence.allCases) { valence in
+                stone(valence)
             }
         }
-        .aspectRatio(
-            ValenceFanLayout.reference.width / ValenceFanLayout.reference.height,
-            contentMode: .fit
-        )
-        .frame(maxWidth: ValenceFanLayout.reference.width * 1.2)
+        .frame(width: ValenceFanLayout.reference.width, height: ValenceFanLayout.reference.height)
         .animation(.snappy(duration: 0.22), value: selected)
     }
 
     @ViewBuilder
-    private func stone(_ valence: Valence, scale: CGFloat) -> some View {
+    private func stone(_ valence: Valence) -> some View {
         let isActive = (valence == selected)
         let hasSelection = (selected != nil)
         let centre = ValenceFanLayout.centre(for: valence)
-        let height = ValenceFanLayout.stoneHeight(for: valence.sizeGroup) * scale
-        let width = ValenceFanLayout.stoneWidth(for: valence.sizeGroup) * scale
+        let height = ValenceFanLayout.stoneHeight(for: valence.sizeGroup)
+        let width = ValenceFanLayout.stoneWidth(for: valence.sizeGroup)
 
         Button {
             onSelect(valence)
@@ -72,7 +62,16 @@ struct ValencePickerContent: View {
         .buttonStyle(.plain)
         .scaleEffect(isActive && !reduceMotion ? Self.selectedScale : 1)
         .opacity(hasSelection && !isActive ? Self.dimmedOpacity : 1)
-        .position(x: centre.x * scale, y: centre.y * scale)
+        // Lifts the chosen stone off the page. Tied to selection rather than to
+        // motion, so it still reads under Reduce Motion, where the scale-up
+        // is the part that gets dropped.
+        .shadow(
+            color: Color.system.foreground.opacity(isActive ? 0.22 : 0),
+            radius: isActive ? 10 : 0,
+            y: isActive ? 4 : 0
+        )
+        .zIndex(isActive ? 1 : 0)
+        .position(centre)
         .accessibilityLabel(Text(
             "\(String(localized: valence.sizeGroup.name)), \(String(localized: valence.shortLabel))"
         ))

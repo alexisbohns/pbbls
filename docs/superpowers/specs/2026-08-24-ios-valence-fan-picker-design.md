@@ -220,3 +220,46 @@ first if a build has already run this session.
 - Turning the mesh into a design-system token.
 - Any change to `Valence`'s `positiveness` / `intensity` mapping, the draft
   payload, or the publish path.
+
+## Revisions (2026-08-24, after first review)
+
+Three corrections from reviewing the built screen. They supersede the
+corresponding paragraphs above.
+
+**1. The stone is a backdrop plus artwork, not a stroked silhouette.** The
+first cut filled *and* stroked the outline silhouette, so the wash and the line
+landed on the same edge — which is not how the Path or the read sheet draws a
+pebble. A real stone is a soft-filled silhouette *behind* the artwork, with the
+artwork scaled down by `PebbleOutlineGeometry.pebbleScale` so the backdrop
+frames it. `ValenceStoneView` now does the same: the wobbled silhouette is
+filled and never stroked, and the vector `Valence/valence-*` asset — the
+pebble's own outline plus its creature and fossil, the artwork the *previous*
+picker showed — is tinted and drawn inside it. `ValenceStoneStyle`'s two roles
+are renamed `backdrop` / `ink` to match, mirroring
+`EmotionPalette.pebbleFrameColors`.
+
+The mesh keeps both roles: soft wash behind, full strength on the ink.
+
+**2. Valence commits in place; `Continue` advances.** The step no longer
+auto-advances on tap. `RecordFlowModel.select(valence:)` writes the draft and
+fires the selection haptic without moving, and `.valence` gains a
+`.primary("Continue", enabled: model.isAnswered)` action in `RecordFlowView`'s
+table. This is a deliberate exception to D3 ("tile steps commit on tap and
+advance") for one step: the fan is a comparison, and a tap that leaves the
+screen denies the user the look at what they chose next to the eight they did
+not. The other tile steps are unchanged, as is `ValencePickerSheet`, which
+still writes back and dismisses. Selection also reads harder now — dim 0.45,
+scale 1.14, and a shadow that survives Reduce Motion.
+
+**3. The canvas is fixed, not scaled to the proposed width.** Deriving a scale
+needs a `GeometryReader`, whose ideal height is unspecified; inside the record
+step's `ScrollView`, which proposes no height, the fan is at the mercy of that.
+The reference canvas is instead authored at 341 × 324 — exactly the content
+width of the narrowest supported device (375pt − 2 × `Spacing.lg`) — and
+rendered at that size, gaining side margin on wider phones. All the constants
+in the geometry table scale up by the same factor; the invariants and their
+tests are unchanged.
+
+Note for whoever verifies this visually: `ImageRenderer` captures a `ScrollView`'s
+content as empty, so `RecordStepScaffold` cannot be rendered directly. Mimic it
+without the ScrollView.

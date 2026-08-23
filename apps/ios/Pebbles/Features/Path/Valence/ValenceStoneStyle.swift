@@ -1,32 +1,37 @@
 import SwiftUI
 
-/// Fill and stroke for one polarity of valence stone.
+/// Backdrop wash and ink for one polarity of valence stone.
 ///
-/// Highlight is the interesting one: fill and stroke are the *same* gradient at
-/// two intensities, so the outline reads as the vivid edge of a soft wash
-/// rather than as a separate colour. The other two polarities are flat.
+/// Mirrors the roles `EmotionPalette.pebbleFrameColors` hands a real pebble:
+/// the backdrop is a soft silhouette *behind* the artwork, and the ink is what
+/// the artwork's lines are drawn in. Highlight is the interesting one: backdrop
+/// and ink are the *same* gradient at two intensities, so the lines read as the
+/// vivid edge of a soft wash rather than as a separate colour.
 struct ValenceStoneStyle {
-    let fill: AnyShapeStyle
-    let stroke: AnyShapeStyle
+    /// Fills the silhouette behind the artwork. Never stroked — the outline a
+    /// stone reads as belongs to the ink, not to the backdrop.
+    let backdrop: AnyShapeStyle
+    /// Tints the pebble artwork drawn inside the backdrop.
+    let ink: AnyShapeStyle
 
     static func style(for polarity: ValencePolarity, scheme: ColorScheme) -> ValenceStoneStyle {
         switch polarity {
         case .lowlight:
             return ValenceStoneStyle(
-                fill: AnyShapeStyle(Color.system.muted),
-                stroke: AnyShapeStyle(Color.system.secondary)
+                backdrop: AnyShapeStyle(Color.system.muted),
+                ink: AnyShapeStyle(Color.system.secondary)
             )
         case .neutral:
             // `AccentSurface` already carries a low alpha, so it lands as a
-            // wash next to the opaque `AccentPrimary` stroke.
+            // wash behind the opaque `AccentPrimary` artwork.
             return ValenceStoneStyle(
-                fill: AnyShapeStyle(Color.accent.surface),
-                stroke: AnyShapeStyle(Color.accent.primary)
+                backdrop: AnyShapeStyle(Color.accent.surface),
+                ink: AnyShapeStyle(Color.accent.primary)
             )
         case .highlight:
             return ValenceStoneStyle(
-                fill: AnyShapeStyle(highlightGradient.opacity(highlightFillOpacity(scheme))),
-                stroke: AnyShapeStyle(highlightGradient)
+                backdrop: AnyShapeStyle(highlightGradient.opacity(highlightFillOpacity(scheme))),
+                ink: AnyShapeStyle(highlightGradient)
             )
         }
     }
