@@ -246,3 +246,104 @@ page.
 - `npm run test --workspace=apps/web`
 - `npm run lint --workspace=apps/web`
 - `/path` visually unchanged before and after.
+
+---
+
+# As built (2026-08-23)
+
+The design above is the *starting* point. Iterating on the live page moved most of
+it, and this section is what actually shipped. Where the two disagree, this wins.
+
+## The glyph question was answered, then dissolved
+
+The page was built to choose between three glyph placements (stamp / adaptive /
+margin). None of them won: the answer was a fourth option not on the list — the
+pebble sits **top-centre, overhanging the card's top edge**, like a real stone laid
+on a print. Placement stopped being a variable, and the toolbar's third control was
+repurposed to stone *scale*, which is what remained open.
+
+## What the card became
+
+Read top to bottom: stone over the edge → picture (if any) → name in Caveat →
+souls and the day. Ordered that way after trying the reverse (meta row first, so
+the stone fell into the `justify-between` gap); the original order read better once
+the stone was overhanging.
+
+- **No chaotic rotation.** The deck lies flat at rest; the tilt is interaction only
+  (`-3°` hover, `+2°` press). `lib/utils/polaroid-chaos.ts` survives, unused, in
+  case the scatter comes back.
+- **Name** at `1.125rem` (`1rem` on a small card), leading `1.05`. The leading must
+  be written *after* the `text-*` size — Tailwind's font-size utilities also set
+  line-height, so `tailwind-merge` silently drops an earlier `leading-*`.
+- **Day, not time**: "Monday, 17", plain case, composed from two single-field
+  `formatDate` calls because Intl joins `{ weekday, day }` with no separator. The
+  accessible name keeps the time, which is the only thing separating two pebbles on
+  the same day.
+- **Caption row** is `justify-between` with souls, `justify-center` without.
+- **Square margin** when there is a picture (`pt` matches `px`); only a picture-less
+  card opens extra head room for the stone.
+
+## Layout: a wall, not rows of pairs
+
+`groupPebbles` no longer chunks mediums into pairs. Small and medium pebbles are
+all polaroids now, dealt **round-robin** into flex columns; a large pebble breaks
+the wall and takes the full width.
+
+Round-robin rather than height-balanced is a correctness choice, not a convenience
+one: height-balancing lets a short card jump the queue to fill a gap, so two cards
+side by side stop being neighbours in time. A test asserts that reading the columns
+row by row gives back the input order.
+
+Flex columns rather than CSS `columns-*`: multicol fragments boxes at column
+boundaries, slicing each card's drop shadow — and here it would bisect the
+overhanging stone too.
+
+## Colour
+
+Light mode fills the stone with the palette's `light` and draws in `primary`; dark
+mode fills with `dark` and draws in `secondary`.
+
+Both ends are emitted as CSS custom properties and picked by the `.dark` cascade —
+never from a JS-read theme, which desyncs between server and client render (the
+same reason `PathPebbleRow` documents). Glyph strokes reuse the existing
+`.pbbls-visual` rule; one new `.path-stone-fill` pair in `globals.css` swaps the
+silhouette, which fills with `currentColor` so CSS can reach it.
+
+**`dark_color` is not reachable in production.** It is not on `EmotionPalette` and
+not selected by `v_emotions_with_palette`, so the shipped stone falls back to
+`secondary_color` for its dark fill. The sandbox has the real value hard-coded, so
+the two differ in dark mode until the column is projected. Open follow-up.
+
+## Two defects found by building this
+
+1. **`strokeOverride` is silently dropped on client-engine renders.** A pebble with
+   no server render takes the engine fallback, which bakes a flat hex in via
+   `recolor()`; `PebbleVisual` ignores `strokeOverride` there. Any caller handing
+   `PebbleFramed` a stroke colour for a legacy or anonymous pebble is not getting
+   it. Worked around locally by substituting `currentColor` back into the composed
+   SVG. Not fixed in the shipped component — it would change how anonymous pebbles
+   render on the landing page.
+
+2. **A sandbox that only exercises the fallback path cannot catch a regression on
+   the other one.** The fixtures all carry `render_svg: null`. The first cut of
+   `PathStone` read the fallback unconditionally and skipped the wobble pass, so
+   real pebbles rendered as bare, unwobbled outlines while the sandbox looked
+   perfect. Verifying the sandbox proved nothing about the branch that was broken.
+
+## Scope actually shipped
+
+The wall is the **default** Path display. `WeekPath` gained
+`display?: "wall" | "list"`, defaulting to `"wall"`; the compact row stack is
+untouched and still reachable, pending a user-facing setting.
+
+`/sandbox/path` stays, now rendering the *production* `PathPolaroid` over fixture
+data rather than a copy of it — two implementations of one card would drift, and
+trying changes to the shipped card is the point of the page.
+
+## Still open
+
+- **iOS and Android still render the compact row Path.** No schema or RPC changed,
+  so nothing is broken, but the three clients no longer look alike.
+- `dark_color` in the palette projection (above).
+- `next-intl` has no configured `timeZone`; a pebble recorded near midnight is
+  where that would surface as a hydration mismatch. Pre-existing.
