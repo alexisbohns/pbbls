@@ -27,6 +27,9 @@ enum PebblesFont {
     case bodyLeadHand
     /// Handwritten (Reenie Beanie) large title, 41pt. Profile display name.
     case largeTitleHand
+    /// Handwritten (Caveat) input face, 36pt. The pebble name field in the
+    /// record flow — the one place the user writes on a bare page.
+    case nameInputHand
 }
 
 // MARK: - View modifier
@@ -74,6 +77,7 @@ private extension PebblesFont {
         case .buttonLabel:           return .ysabeauSemibold(17)
         case .bodyLeadHand:          return .reenieBeanie(22)
         case .largeTitleHand:        return .reenieBeanie(41)
+        case .nameInputHand:         return .caveat(36)
         }
     }
 
@@ -92,6 +96,8 @@ private extension PebblesFont {
         // connected handwriting (issue #515 speced -2%, dialed in on review).
         case .bodyLeadHand:                                       return -1.0   // 22pt
         case .largeTitleHand:                                     return -2.0   // 41pt
+        // Caveat is already tightly connected; no extra tracking.
+        case .nameInputHand:                                      return 0
         }
     }
 
@@ -132,6 +138,18 @@ extension Font {
     /// if the face is missing from the build.
     fileprivate static func reenieBeanie(_ size: CGFloat) -> Font {
         if let custom = UIFont(name: "ReenieBeanie", size: size) {
+            return Font(custom)
+        }
+        return Font(UIFont.systemFont(ofSize: size))
+    }
+
+    /// Caveat — handwritten face used for the pebble name input in the record
+    /// flow. Bundled variable TTF (`Resources/Caveat-VariableFont_wght.ttf`,
+    /// registered in Info.plist `UIAppFonts`); `UIFont(name:)` resolves the
+    /// default instance (weight 400). Falls back to the system font if the
+    /// face is missing from the build.
+    fileprivate static func caveat(_ size: CGFloat) -> Font {
+        if let custom = UIFont(name: "Caveat-Regular", size: size) {
             return Font(custom)
         }
         return Font(UIFont.systemFont(ofSize: size))
