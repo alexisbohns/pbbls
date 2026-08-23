@@ -43,13 +43,19 @@ final class RecordFlowModel {
 
     /// Whether a given step has been answered. Drives both the forward gate and
     /// the optional steps' `Skip` / `Done` button label.
+    ///
+    /// Exhaustive with no `default`, deliberately: this is the single place
+    /// that says what "answered" means, and a `default` would silently treat a
+    /// newly added step as already answered.
     func hasAnswer(for step: RecordStep) -> Bool {
         switch step {
+        // Nothing for the user to supply: `when` arrives seeded from the
+        // photo's EXIF or from now, `privacy` from `.secret`, and `success` is
+        // terminal.
+        case .when, .privacy, .success:
+            return true
         case .photo:
             return hasSnap
-        case .when:
-            // Always seeded — from the photo's EXIF, or now.
-            return true
         case .name:
             return !draft.name.trimmingCharacters(in: .whitespaces).isEmpty
         case .valence:
@@ -64,11 +70,6 @@ final class RecordFlowModel {
             return draft.collectionId != nil
         case .glyph:
             return draft.glyphId != nil
-        case .privacy:
-            // Always seeded — `.secret` until the user says otherwise.
-            return true
-        case .success:
-            return true
         }
     }
 

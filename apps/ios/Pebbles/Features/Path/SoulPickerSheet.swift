@@ -27,8 +27,6 @@ struct SoulPickerSheet: View {
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "pebble-form.souls")
 
-    private let columns = [GridItem(.adaptive(minimum: 96), spacing: Spacing.lg)]
-
     var body: some View {
         NavigationStack {
             content
@@ -70,43 +68,15 @@ struct SoulPickerSheet: View {
             )
         } else {
             ScrollView {
-                VStack(alignment: .leading, spacing: Spacing.lg) {
-                    Text("All my souls")
-                        .pebblesFont(.cardHeading)
-                        .foregroundStyle(Color.system.secondary)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-
-                    LazyVGrid(columns: columns, spacing: Spacing.lg) {
-                        SoulItem(case: .create, soul: nil, count: nil) {
-                            isPresentingCreate = true
-                        }
-                        ForEach(souls) { soul in
-                            SoulItem(
-                                case: itemCase(for: soul.id),
-                                soul: soul,
-                                count: soul.pebblesCount
-                            ) {
-                                toggle(soul.id)
-                            }
-                        }
-                    }
-
-                    if souls.isEmpty {
-                        Text("Add the first soul to tag this pebble with")
-                            .pebblesFont(.callout)
-                            .foregroundStyle(Color.system.secondary)
-                            .multilineTextAlignment(.center)
-                            .frame(maxWidth: .infinity)
-                    }
-                }
+                SoulPickerContent(
+                    souls: souls,
+                    selection: selection,
+                    onToggle: { toggle($0) },
+                    onCreate: { isPresentingCreate = true }
+                )
                 .padding(Spacing.lg)
             }
         }
-    }
-
-    private func itemCase(for id: UUID) -> SoulItem.Case {
-        if selection.isEmpty { return .default }
-        return selection.contains(id) ? .selected : .unselected
     }
 
     private func toggle(_ id: UUID) {
