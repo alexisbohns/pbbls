@@ -1,7 +1,7 @@
 "use client"
 
 import { Info } from "lucide-react"
-import { STONE_SIZES, type StoneSize } from "./PolaroidStone"
+import { STONE_SIZES, type StoneSize } from "./stone-sizes"
 import { SANDBOX_SCENARIOS } from "@/lib/seed/sandbox-pebbles"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"

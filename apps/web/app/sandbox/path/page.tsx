@@ -6,7 +6,7 @@ import { SANDBOX_PALETTES } from "@/lib/seed/sandbox-palettes"
 import { SANDBOX_SCENARIOS } from "@/lib/seed/sandbox-pebbles"
 import { SandboxPathScreen } from "@/components/sandbox/SandboxPathScreen"
 import { SandboxToolbar } from "@/components/sandbox/SandboxToolbar"
-import type { StoneSize } from "@/components/sandbox/PolaroidStone"
+import type { StoneSize } from "@/components/sandbox/stone-sizes"
 
 // Seed the palette cache at module scope, before any consumer mounts: the page
 // has no Supabase session, and PebbleFramed degrades to a bare untinted pebble
@@ -56,7 +56,7 @@ export default function SandboxPathPage() {
           dark={dark}
           onDark={setDark}
         />
-        <SandboxPathScreen pebbles={active.pebbles} stoneSize={stoneSize} dark={dark} />
+        <SandboxPathScreen pebbles={active.pebbles} stoneSize={stoneSize} />
       </div>
     </div>
   )

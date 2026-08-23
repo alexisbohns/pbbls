@@ -544,6 +544,17 @@
 .dark .path-row .path-row-name {
   color: var(--path-row-name-dark);
 }
+/* Pebble silhouette on a Path polaroid. The backdrop is filled with
+ * `currentColor`, so this pair is what swaps it between themes — same shape as
+ * the `.pbbls-visual` rule above, which colours the strokes inside it. */
+.path-stone-fill {
+  color: var(--path-stone-fill-light);
+}
+
+.dark .path-stone-fill {
+  color: var(--path-stone-fill-dark);
+}
+
 
 .prose {
   @apply flex flex-col gap-4;

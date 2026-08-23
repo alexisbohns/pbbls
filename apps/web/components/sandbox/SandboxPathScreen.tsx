@@ -2,48 +2,44 @@
 
 import type { Mark, Pebble } from "@/lib/types"
 import { groupPebbles } from "@/lib/utils/path-layout"
-import { SANDBOX_MARK_MAP } from "@/lib/seed/sandbox-pebbles"
-import { SandboxPolaroid } from "./SandboxPolaroid"
-import { STEP_DOWN, type StoneSize } from "./PolaroidStone"
+import { SANDBOX_MARK_MAP, SANDBOX_SOUL_MAP } from "@/lib/seed/sandbox-pebbles"
+import { PathPolaroid } from "@/components/path/PathPolaroid"
+import { STEP_DOWN, type StoneSize } from "./stone-sizes"
 
-/** UTC so the fixture renders identically on every machine — the times are made up,
- *  and a locale-shifted fixture would make two screenshots disagree for no reason. */
-function timeLabel(iso: string): string {
-  const d = new Date(iso)
-  return `${String(d.getUTCHours()).padStart(2, "0")}:${String(d.getUTCMinutes()).padStart(2, "0")}`
-}
-
-function markFor(pebble: Pebble): Mark | undefined {
-  return pebble.mark_id ? SANDBOX_MARK_MAP.get(pebble.mark_id) : undefined
-}
-
+/**
+ * The sandbox wall. Renders the same `PathPolaroid` the real Path renders, over
+ * fixture pebbles — the point of the page is to try changes to the shipped card,
+ * so a second copy of it here would defeat that.
+ *
+ * What it does not share is `PathWall`: the wall hard-codes one stone scale, and
+ * the sandbox exists to compare them.
+ */
 export function SandboxPathScreen({
   pebbles,
   stoneSize,
-  dark,
 }: {
   pebbles: Pebble[]
   stoneSize: StoneSize
-  dark: boolean
 }) {
   const blocks = groupPebbles(pebbles)
 
+  const markFor = (pebble: Pebble): Mark | undefined =>
+    pebble.mark_id ? SANDBOX_MARK_MAP.get(pebble.mark_id) : undefined
+
+  const shared = { soulMap: SANDBOX_SOUL_MAP, markMap: SANDBOX_MARK_MAP }
+
   return (
-    // overflow-x-clip, not hidden: a hovered card scales past the container's
-    // padding and showed up as a few px of horizontal scroll. `hidden` would make
-    // this a scroll container and coerce the y axis with it.
     <ol className="flex flex-col gap-12 overflow-x-clip px-4 pt-10 pb-24">
       {blocks.map((block, blockIndex) => {
         if (block.kind === "large") {
           return (
             <li key={blockIndex}>
-              <SandboxPolaroid
+              <PathPolaroid
                 pebble={block.pebble}
                 mark={markFor(block.pebble)}
+                {...shared}
                 stoneSize={stoneSize}
                 size="lg"
-                timeLabel={timeLabel(block.pebble.happened_at)}
-                dark={dark}
               />
             </li>
           )
@@ -51,24 +47,19 @@ export function SandboxPathScreen({
 
         return (
           <li key={blockIndex}>
-            {/* Flex columns, not CSS `columns-*`: a multicol container fragments
-                boxes at column boundaries, which slices each card's drop shadow and
-                repaints the leftover slice at the top of the next column. Our stone
-                overhangs the card's top edge, so it would be cut in half too. */}
             <div className="flex items-start gap-5">
               {block.columns.map((column, columnIndex) => (
                 <div key={columnIndex} className="flex min-w-0 flex-1 flex-col gap-12">
                   {column.map((pebble) => {
                     const isSmall = pebble.intensity === 1
                     return (
-                      <SandboxPolaroid
+                      <PathPolaroid
                         key={pebble.id}
                         pebble={pebble}
                         mark={markFor(pebble)}
+                        {...shared}
                         stoneSize={isSmall ? STEP_DOWN[stoneSize] : stoneSize}
                         size={isSmall ? "sm" : "md"}
-                        timeLabel={timeLabel(pebble.happened_at)}
-                        dark={dark}
                       />
                     )
                   })}
