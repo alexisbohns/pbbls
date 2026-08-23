@@ -82,6 +82,19 @@ struct ValenceHelpersTests {
         }
     }
 
+    @Test("caption copy matches the spec")
+    func captionCopy() {
+        #expect(String(localized: Valence.lowlightSmall.caption)   == "A small lowlight.")
+        #expect(String(localized: Valence.lowlightMedium.caption)  == "A medium lowlight.")
+        #expect(String(localized: Valence.lowlightLarge.caption)   == "A large lowlight.")
+        #expect(String(localized: Valence.neutralSmall.caption)    == "A small neutral moment.")
+        #expect(String(localized: Valence.neutralMedium.caption)   == "A medium neutral moment.")
+        #expect(String(localized: Valence.neutralLarge.caption)    == "A large neutral moment.")
+        #expect(String(localized: Valence.highlightSmall.caption)  == "A small highlight.")
+        #expect(String(localized: Valence.highlightMedium.caption) == "A medium highlight.")
+        #expect(String(localized: Valence.highlightLarge.caption)  == "A large highlight.")
+    }
+
     @Test("shortLabel reflects polarity")
     func shortLabel() {
         #expect(String(localized: Valence.lowlightSmall.shortLabel)  == "Lowlight")

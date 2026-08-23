@@ -119,6 +119,23 @@ extension Valence {
     /// Asset name in `Assets.xcassets/Valence/`. Always non-empty.
     var assetName: String { "valence-\(rawValue)" }
 
+    /// Caption under the valence fan, naming the stone the user just picked.
+    /// Warmer and more sentence-like than `label`, which is the terse
+    /// "Lowlight — small" form the collapsed form row wants.
+    var caption: LocalizedStringResource {
+        switch self {
+        case .lowlightSmall:   return "A small lowlight."
+        case .lowlightMedium:  return "A medium lowlight."
+        case .lowlightLarge:   return "A large lowlight."
+        case .neutralSmall:    return "A small neutral moment."
+        case .neutralMedium:   return "A medium neutral moment."
+        case .neutralLarge:    return "A large neutral moment."
+        case .highlightSmall:  return "A small highlight."
+        case .highlightMedium: return "A medium highlight."
+        case .highlightLarge:  return "A large highlight."
+        }
+    }
+
     /// Polarity-only label used inside an option button ("Lowlight" / "Neutral" / "Highlight").
     /// Use `label` when the size axis also matters (e.g. the collapsed form row).
     var shortLabel: LocalizedStringResource {
