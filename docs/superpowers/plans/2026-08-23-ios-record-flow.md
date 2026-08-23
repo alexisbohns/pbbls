@@ -49,6 +49,10 @@ comes out blank, verified with a solid-color probe. So render **content views
 directly**, never a scaffolded step, and leave scaffold composition (title →
 content → button) to the simulator walkthrough in Task 17.
 
+The same applies to UIKit-backed controls: a `TextField` renders as a yellow
+"unavailable" placeholder, so `RecordNameStep`'s field cannot be checked this
+way either (its character counter can).
+
 **Running one suite:**
 
 ```bash
