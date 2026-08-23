@@ -9,4 +9,13 @@ extension Domain {
         // See Emotion+Localized.swift for the NSLocalizedString vs String(localized:) rationale.
         return NSLocalizedString(key, value: name, comment: "")
     }
+
+    /// Localized description, keyed by slug, falling back to the DB `label`
+    /// column (English) when the catalog has no entry. Same Pattern C shape as
+    /// `localizedName` — see `Emotion+Localized.swift` for the
+    /// `NSLocalizedString` vs `String(localized:)` rationale.
+    var localizedLabel: String {
+        let key = "domain.\(slug).label"
+        return NSLocalizedString(key, value: label, comment: "")
+    }
 }

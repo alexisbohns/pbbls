@@ -41,9 +41,12 @@ final class ReferenceDataService {
     func load() async {
         defer { didFinishLoading = true }
         do {
+            // v_domains_with_glyph (security_invoker) flattens the default
+            // glyph onto each row so the record flow's domain picker can draw
+            // it without a second round-trip (D6).
             async let domainsQuery: [Domain] = client
-                .from("domains")
-                .select()
+                .from("v_domains_with_glyph")
+                .select("id, slug, name, label, strokes, view_box")
                 .order("name")
                 .execute()
                 .value
