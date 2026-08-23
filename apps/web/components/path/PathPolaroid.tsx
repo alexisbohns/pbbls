@@ -171,7 +171,7 @@ export function PathPolaroid({
             )}
             <time
               dateTime={pebble.happened_at}
-              className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground"
+              className="text-[10px] text-muted-foreground"
             >
               {dayLabel}
             </time>
