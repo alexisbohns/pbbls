@@ -3019,7 +3019,7 @@ struct RecordPhotoStep: View {
             case .failed:
                 VStack(spacing: Spacing.sm) {
                     Text("That photo didn't upload.")
-                        .pebblesFont(.meta)
+                        .pebblesFont(.subhead)
                         .foregroundStyle(.red)
                     HStack(spacing: Spacing.lg) {
                         Button("Retry", action: onRetry)
@@ -3082,7 +3082,7 @@ struct RecordWhenStep: View {
 
             if seededFromPhoto {
                 Label("Taken from your photo", systemImage: "sparkles")
-                    .pebblesFont(.meta)
+                    .pebblesFont(.subhead)
                     .foregroundStyle(Color.system.secondary)
             }
         }
@@ -3464,7 +3464,7 @@ struct RecordPrivacyStep: View {
 
             if let snapBlockedMessage {
                 Text(verbatim: snapBlockedMessage)
-                    .pebblesFont(.meta)
+                    .pebblesFont(.subhead)
                     .foregroundStyle(Color.system.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.top, Spacing.sm)
@@ -3498,7 +3498,7 @@ struct RecordPrivacyStep: View {
                         .pebblesFont(.bodyEmphasized)
                         .foregroundStyle(isSelected ? Color.accent.primary : Color.system.foreground)
                     Text(explanation(for: grade))
-                        .pebblesFont(.meta)
+                        .pebblesFont(.subhead)
                         .foregroundStyle(Color.system.secondary)
                         .multilineTextAlignment(.leading)
                 }
