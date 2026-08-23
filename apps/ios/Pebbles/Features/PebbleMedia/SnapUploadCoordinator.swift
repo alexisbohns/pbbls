@@ -22,6 +22,11 @@ final class SnapUploadCoordinator {
     /// cleared.
     private(set) var processedForRetry: ProcessedImage?
 
+    /// Capture date read from the picked photo's EXIF, before `ImagePipeline`
+    /// strips it (D7). The record flow seeds its `when` step from this; nil
+    /// means the step falls back to now. Cleared alongside `processedForRetry`.
+    private(set) var pickedCaptureDate: Date?
+
     // MARK: - Derived state
 
     /// True while the pending snap is still uploading.
@@ -91,6 +96,8 @@ final class SnapUploadCoordinator {
         do {
             data = try await Self.loadData(from: picked.itemProvider, uti: picked.uti)
             Self.logger.notice("handlePicked: loaded \(data.count, privacy: .public) bytes")
+            // Read the capture date before the pipeline strips metadata (D7).
+            pickedCaptureDate = ExifCaptureDate.from(data)
         } catch {
             Self.logger.error("picker data load failed: \(error.localizedDescription, privacy: .private)")
             return
@@ -132,6 +139,7 @@ final class SnapUploadCoordinator {
         let snapId = snap.id
         formSnap = nil
         processedForRetry = nil
+        pickedCaptureDate = nil
         await repo.deleteFiles(snapId: snapId, userId: userId)
     }
 
@@ -158,11 +166,13 @@ final class SnapUploadCoordinator {
         guard case .pending(let snap) = formSnap else {
             formSnap = nil
             processedForRetry = nil
+            pickedCaptureDate = nil
             return
         }
         let snapId = snap.id
         formSnap = nil
         processedForRetry = nil
+        pickedCaptureDate = nil
         await repo.deleteFiles(snapId: snapId, userId: userId)
     }
 
