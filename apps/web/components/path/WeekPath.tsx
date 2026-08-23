@@ -5,14 +5,23 @@ import { useLookupMaps } from "@/lib/data/useLookupMaps"
 import { useMarks } from "@/lib/data/useMarks"
 import type { Soul } from "@/lib/types"
 import { PathPebbleRow } from "@/components/path/PathPebbleRow"
+import { PathWall } from "@/components/path/PathWall"
 import { PathEmptyState } from "@/components/path/PathEmptyState"
 import type { WeekRollEntry } from "@/lib/utils/week-roll-entries"
+
+/**
+ * How a week is laid out. `wall` is the default — pebbles as polaroid prints
+ * dealt into a masonry wall. `list` is the compact row stack that preceded it,
+ * kept as the alternative until the choice is exposed as a user setting.
+ */
+export type PathDisplay = "wall" | "list"
 
 type WeekPathProps = {
   entry: WeekRollEntry
   souls: Soul[]
   isFocused: boolean
   onSelectPebble: (id: string) => void
+  display?: PathDisplay
 }
 
 export function WeekPath({
@@ -20,10 +29,11 @@ export function WeekPath({
   souls,
   isFocused,
   onSelectPebble,
+  display = "wall",
 }: WeekPathProps) {
   const prefersReducedMotion = useReducedMotion()
   const { marks } = useMarks()
-  const { markMap } = useLookupMaps(souls, marks)
+  const { soulMap, markMap } = useLookupMaps(souls, marks)
 
   // Cascade key is derived from props: it changes when `isFocused` flips
   // to true (false→true transition forces a remount and plays the
@@ -36,6 +46,19 @@ export function WeekPath({
 
   if (entry.pebbles.length === 0) {
     return <PathEmptyState />
+  }
+
+  if (display === "wall") {
+    return (
+      <PathWall
+        key={cascadeKey}
+        pebbles={entry.pebbles}
+        soulMap={soulMap}
+        markMap={markMap}
+        isFocused={isFocused}
+        onSelectPebble={onSelectPebble}
+      />
+    )
   }
 
   return (
