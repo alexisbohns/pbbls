@@ -2182,6 +2182,23 @@
         }
       }
     },
+    "domain.community.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "People who share your values, culture, or beliefs"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Celles et ceux qui partagent tes valeurs, ta culture ou tes croyances"
+          }
+        }
+      }
+    },
     "domain.community.name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2195,6 +2212,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Communauté"
+          }
+        }
+      }
+    },
+    "domain.currentevents.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What's happening in the world around you"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce qui se passe dans le monde autour de toi"
           }
         }
       }
@@ -2216,6 +2250,23 @@
         }
       }
     },
+    "domain.dating.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Romantic relationships and connections"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relations amoureuses et nouvelles rencontres"
+          }
+        }
+      }
+    },
     "domain.dating.name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2229,6 +2280,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rencontres"
+          }
+        }
+      }
+    },
+    "domain.education.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Learning, growth, and intellectual pursuits"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apprentissage, croissance et quête intellectuelle"
           }
         }
       }
@@ -2250,6 +2318,23 @@
         }
       }
     },
+    "domain.family.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Those connected to you by blood or soul"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Celles et ceux qui te sont liés par le sang ou par le cœur"
+          }
+        }
+      }
+    },
     "domain.family.name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2263,6 +2348,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Famille"
+          }
+        }
+      }
+    },
+    "domain.fitness.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Physical activity, games, and competition"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activité physique, jeux et compétition"
           }
         }
       }
@@ -2284,6 +2386,23 @@
         }
       }
     },
+    "domain.friends.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "People you choose to walk alongside"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les personnes que tu choisis d'avoir à tes côtés"
+          }
+        }
+      }
+    },
     "domain.friends.name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2297,6 +2416,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Amis"
+          }
+        }
+      }
+    },
+    "domain.health.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your body, energy, and physical well-being"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton corps, ton énergie et ton bien-être physique"
           }
         }
       }
@@ -2318,6 +2454,23 @@
         }
       }
     },
+    "domain.hobbies.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creative pursuits and things you love doing"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activités créatives et choses que tu aimes faire"
+          }
+        }
+      }
+    },
     "domain.hobbies.name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2331,6 +2484,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Passions"
+          }
+        }
+      }
+    },
+    "domain.identity.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Who you are and who you're becoming"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qui tu es et qui tu deviens"
           }
         }
       }
@@ -2352,6 +2522,23 @@
         }
       }
     },
+    "domain.money.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Money, stability, and material security"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Argent, stabilité et sécurité matérielle"
+          }
+        }
+      }
+    },
     "domain.money.name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2365,6 +2552,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Finances"
+          }
+        }
+      }
+    },
+    "domain.partner.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your significant other or love relationship"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ta moitié ou ta relation amoureuse"
           }
         }
       }
@@ -2386,6 +2590,23 @@
         }
       }
     },
+    "domain.selfcare.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rituals and habits that restore you"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rituels et habitudes qui te ressourcent"
+          }
+        }
+      }
+    },
     "domain.selfcare.name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2399,6 +2620,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bien-être"
+          }
+        }
+      }
+    },
+    "domain.spirituality.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faith, meaning, and your inner life"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foi, sens et vie intérieure"
           }
         }
       }
@@ -2420,6 +2658,23 @@
         }
       }
     },
+    "domain.tasks.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Things you need to get done"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les choses que tu dois accomplir"
+          }
+        }
+      }
+    },
     "domain.tasks.name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2433,6 +2688,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tâches"
+          }
+        }
+      }
+    },
+    "domain.travel.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exploring new places and horizons"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explorer de nouveaux lieux et horizons"
           }
         }
       }
@@ -2454,6 +2726,23 @@
         }
       }
     },
+    "domain.weather.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sun or rain, seasons and skies"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soleil ou pluie, saisons et ciels"
+          }
+        }
+      }
+    },
     "domain.weather.name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2467,6 +2756,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Météo"
+          }
+        }
+      }
+    },
+    "domain.work.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your job, career, and professional life"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton travail, ta carrière et ta vie professionnelle"
           }
         }
       }

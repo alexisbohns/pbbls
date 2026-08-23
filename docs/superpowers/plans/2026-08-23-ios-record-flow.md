@@ -1430,7 +1430,7 @@ python3 -c "import json; d=json.load(open('apps/ios/Pebbles/Resources/Localizabl
 git diff --numstat apps/ios/Pebbles/Resources/Localizable.xcstrings
 ```
 
-Expected: `18 label keys`, and a numstat showing **288 insertions, 0 deletions** — a nonzero deletion count means the formatting was disturbed, so revert and retry.
+Expected: `18 label keys`, and a numstat showing **306 insertions, 0 deletions** — a nonzero deletion count means the formatting was disturbed, so revert and retry.
 
 - [ ] **Step 7: Add the coverage assertion**
 
