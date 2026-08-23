@@ -12,6 +12,7 @@ import {
   outlineAspectRatio,
 } from "@/lib/config/pebble-geometry"
 import { PebbleOutlineBackdrop } from "@/components/pebble/PebbleOutlineBackdrop"
+import { WOBBLE_ENABLED, wobblePebbleSvg } from "@/lib/wobble"
 import { cn } from "@/lib/utils"
 
 /** How big the stone sits on a card. Steps down for a small pebble, so intensity
@@ -53,7 +54,9 @@ export function PathStone({
 }) {
   const { paletteByEmotionId } = useEmotionPalettes()
   const palette = paletteByEmotionId.get(pebble.emotion_id)
-  const { svg } = usePebbleVisual(pebble, mark ?? null, "thumbnail")
+  // Fallback only — the hook has to be called unconditionally, but a pebble with
+  // a server render never uses its output.
+  const fallback = usePebbleVisual(pebble, mark ?? null, "thumbnail")
 
   if (!palette) return null
 
@@ -61,10 +64,24 @@ export function PathStone({
   const pebbleSize = SIZE_BY_INTENSITY[pebble.intensity]
   const polarity = POLARITY_BY_VALENCE[pebble.positiveness]
 
-  // The colour the engine baked in, so we know what to swap for `currentColor`.
-  // Mirrors `resolveEmotionColor` in lib/engine/params.ts, fallback included.
+  // Same precedence as PebbleVisual: prefer the server-composed render written by
+  // the compose-pebble edge function, and fall back to the client engine only for
+  // legacy rows and anonymous previews. Reading the fallback unconditionally threw
+  // away the composed artwork — which is where the carved glyph lives — so real
+  // pebbles rendered as bare outlines.
+  const isServerRender = pebble.render_svg !== null
+  const raw = pebble.render_svg ?? fallback.svg
+
+  // Petroglyph wobble (#555), dev-only and content-cached, exactly as PebbleVisual
+  // applies it. Without this the wall drew clean strokes while the detail sheet
+  // drew leaky ink for the same pebble.
+  const wobbled = WOBBLE_ENABLED ? wobblePebbleSvg(raw) : raw
+
+  // Server renders already stroke with `currentColor`. Only the client-engine
+  // fallback bakes a flat hex in, via the engine's own `recolor()`; swapping it
+  // back is what lets the `.pbbls-visual` rule below theme it.
   const baked = EMOTIONS.find((e) => e.id === pebble.emotion_id)?.color ?? "#9CA3AF"
-  const inked = svg.replaceAll(baked, "currentColor")
+  const inked = isServerRender ? wobbled : wobbled.replaceAll(baked, "currentColor")
 
   const ar = outlineAspectRatio(pebbleSize)
   // Fit a box at the outline's aspect ratio inside the caller's square box — the
