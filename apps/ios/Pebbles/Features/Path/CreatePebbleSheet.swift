@@ -178,35 +178,16 @@ struct CreatePebbleSheet: View {
         isSaving = true
         saveError = nil
 
-        let payload = PebbleCreatePayload(from: draft, formSnap: snaps?.formSnap, userId: userId)
-        let requestBody = ComposePebbleRequest(payload: payload)
-
         do {
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            let response: ComposePebbleResponse = try await supabase.client.functions
-                .invoke(
-                    "compose-pebble",
-                    options: FunctionInvokeOptions(body: requestBody),
-                    decoder: decoder
-                )
+            let response = try await PebblePublisher(client: supabase.client)
+                .publish(draft: draft, formSnap: snaps?.formSnap, userId: userId)
+            // Soft success returns a nil delta; `notifyEarned` no-ops on zero,
+            // which is exactly what the old inline branch did.
             karma.notifyEarned(amount: response.karmaDelta ?? 0, reason: .pebbleCreated)
             achievements.fireCheck()
             await consumeDraftAfterPublish()
             onCreated(response.pebbleId)
             dismiss()
-        } catch let functionsError as FunctionsError {
-            if let pebbleId = softSuccessPebbleId(from: functionsError) {
-                logger.warning("compose-pebble returned 5xx but pebble_id found — advancing to detail sheet")
-                // Soft success still inserted the pebble, so counts changed.
-                achievements.fireCheck()
-                await consumeDraftAfterPublish()
-                onCreated(pebbleId)
-                dismiss()
-            } else {
-                logger.error("compose-pebble failed: \(functionsError.localizedDescription, privacy: .private)")
-                await handleSaveFailure(functionsError)
-            }
         } catch {
             logger.error("create pebble failed: \(error.localizedDescription, privacy: .private)")
             await handleSaveFailure(error)
@@ -222,25 +203,6 @@ struct CreatePebbleSheet: View {
         saveError = userMessageForPebbleSaveError(error)
         isSaving = false
     }
-
-    /// Tries to extract a `pebble_id` UUID from the raw error body of a
-    /// `FunctionsError.httpError`. Returns `nil` if the body is absent,
-    /// unparseable, or missing the `pebble_id` key.
-    private func softSuccessPebbleId(from error: FunctionsError) -> UUID? {
-        guard case let .httpError(_, data) = error, !data.isEmpty else { return nil }
-        return try? JSONDecoder().decode(PebbleIdPartial.self, from: data).pebbleId
-    }
-}
-
-private struct ComposePebbleRequest: Encodable {
-    let payload: PebbleCreatePayload
-}
-
-private struct PebbleIdPartial: Decodable {
-    let pebbleId: UUID
-    enum CodingKeys: String, CodingKey {
-        case pebbleId = "pebble_id"
-    }
 }
 
 #Preview {
@@ -251,25 +213,4 @@ private struct PebbleIdPartial: Decodable {
         .environment(KarmaNotificationService())
         .environment(PebbleDraftsService(client: supabase.client))
         .environment(ComposerSnapshotStore())
-}
-
-/// Maps a thrown error to a user-facing localized string. Module-private so
-/// `CreatePebbleSheet` and `EditPebbleSheet` share one mapping.
-func userMessageForPebbleSaveError(_ error: Error) -> String {
-    if let fnError = error as? FunctionsError, case let .httpError(_, data) = fnError,
-       let body = try? JSONDecoder().decode([String: String].self, from: data) {
-        let message = body["error"] ?? body["message"] ?? ""
-        if message.contains("media_quota_exceeded") || message.contains("P0001") {
-            return "Photo limit reached on this pebble."
-        }
-    }
-    if let pipelineError = error as? ImagePipelineError {
-        switch pipelineError {
-        case .unsupportedFormat:    return "That image format isn't supported."
-        case .decodeFailed:         return "Couldn't read the image."
-        case .encodeFailed:         return "Couldn't process the image."
-        case .tooLargeAfterResize:  return "That image is too large to attach."
-        }
-    }
-    return "Couldn't save your pebble. Please try again."
 }
