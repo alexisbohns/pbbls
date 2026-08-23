@@ -34,7 +34,11 @@ final class KarmaNotificationService {
         self.haptics = haptics
     }
 
-    func notifyEarned(amount: Int, reason: KarmaReason) {
+    /// - Parameter presentsCapsule: pass `false` when the surface already shows
+    ///   the amount — the record flow's success step does, and a pastille over
+    ///   it is redundant. The sound and the haptic still fire either way: they
+    ///   are the celebration, not the notification (D10).
+    func notifyEarned(amount: Int, reason: KarmaReason, presentsCapsule: Bool = true) {
         // Only positive credits celebrate; deletions/clawbacks stay silent.
         guard amount > 0 else { return }
 
@@ -44,6 +48,7 @@ final class KarmaNotificationService {
         haptics.playKarmaEarned()
         audio.playKarmaEarnedSound()
 
+        guard presentsCapsule else { return }
         presentCapsule(KarmaEarnedContent(amount: amount, reason: reason))
     }
 
