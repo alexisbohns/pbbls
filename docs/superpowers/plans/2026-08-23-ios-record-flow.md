@@ -1920,7 +1920,10 @@ final class ComposerDraftCoordinator {
     /// Returns nil while `refsLoaded` is false: hydrating before reference data
     /// arrives sanitizes the draft against empty sets and silently drops every
     /// soul and collection (#647), the exact failure M47's D7 exists to prevent.
-    static func hydration(
+    /// `nonisolated` because it touches no instance state — being callable
+    /// without hopping to the main actor is the point of extracting it, and
+    /// without it the (non-`@MainActor`) test suite cannot call it at all.
+    nonisolated static func hydration(
         resuming: PebbleDraftRecord?,
         refsLoaded: Bool,
         snapshot: PebbleDraftPayload?

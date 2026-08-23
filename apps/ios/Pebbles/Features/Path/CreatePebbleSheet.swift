@@ -26,14 +26,9 @@ struct CreatePebbleSheet: View {
 
     @State private var isPhotoPickerPresented = false
 
-    @State var isSavingDraft = false
-    /// The server draft this composer is bound to — the resumed one, or the one
-    /// created by the first "Save as draft".
-    @State var serverDraftId: UUID?
-    @State var autosave: ComposerAutosave?
-    @State var restorableSnapshot: PebbleDraftPayload?
-    @State var isRestorePromptPresented = false
-    @State var hasCheckedSnapshot = false
+    /// Owns the server draft and the local snapshot. Lazily constructed in
+    /// `.task` alongside `snaps`, so it has `supabase.client`.
+    @State var drafts: ComposerDraftCoordinator?
 
     /// Lazily constructed in `.task` so we have access to `supabase.client`.
     /// Nil only for the very first body render before `.task` fires.
@@ -56,7 +51,7 @@ struct CreatePebbleSheet: View {
                         }
                     }
                     ToolbarItem(placement: .confirmationAction) {
-                        if isSaving || isSavingDraft {
+                        if isSaving || drafts?.isSavingDraft == true {
                             ProgressView()
                         } else {
                             PebbleToolbarButton("Save") {
@@ -73,7 +68,7 @@ struct CreatePebbleSheet: View {
                         PebbleToolbarButton("Save as draft") {
                             Task { await saveAsDraft() }
                         }
-                        .disabled(!isSavableAsDraft || isSaving || isSavingDraft)
+                        .disabled(!isSavableAsDraft || isSaving || drafts?.isSavingDraft == true)
                     }
                 }
                 .pebblesScreen()
@@ -82,8 +77,10 @@ struct CreatePebbleSheet: View {
             if snaps == nil {
                 snaps = SnapUploadCoordinator(repo: PebbleSnapRepository(client: supabase.client))
             }
-            if autosave == nil {
-                autosave = ComposerAutosave(store: snapshots)
+            if drafts == nil {
+                drafts = ComposerDraftCoordinator(
+                    client: supabase.client, drafts: draftsService, snapshots: snapshots
+                )
             }
             hydrateOrOfferRestore()
         }
@@ -94,14 +91,17 @@ struct CreatePebbleSheet: View {
         .onChange(of: draftPayload) { _, newValue in
             // Debounced inside ComposerAutosave. Held off while the restore
             // prompt is up so the pending answer is not overwritten first.
-            guard !isRestorePromptPresented else { return }
-            autosave?.schedule(newValue)
+            guard drafts?.isRestorePromptPresented != true else { return }
+            drafts?.schedule(newValue)
         }
         .onChange(of: scenePhase) { _, phase in
             // Last reliable moment before a process kill.
-            if phase != .active { autosave?.flush() }
+            if phase != .active { drafts?.flush() }
         }
-        .alert("Pick up where you left off?", isPresented: $isRestorePromptPresented) {
+        .alert("Pick up where you left off?", isPresented: Binding(
+            get: { drafts?.isRestorePromptPresented ?? false },
+            set: { drafts?.isRestorePromptPresented = $0 }
+        )) {
             Button("Restore it") { restoreSnapshot() }
             Button("Start fresh", role: .destructive) { discardSnapshot() }
         } message: {
