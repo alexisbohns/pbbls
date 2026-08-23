@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl"
 import type { Mark, Pebble, Soul } from "@/lib/types"
-import { useFormatTime } from "@/lib/i18n"
+import { useFormatDate, useFormatTime } from "@/lib/i18n"
 import { SoulGlyphThumbnail } from "@/components/souls/SoulGlyphThumbnail"
 import { PathStone, type StoneSize } from "./PathStone"
 import { cn } from "@/lib/utils"
@@ -105,11 +105,24 @@ export function PathPolaroid({
   onSelect?: (id: string) => void
 }) {
   const t = useTranslations("pebble")
+  const formatDate = useFormatDate()
   const formatTime = useFormatTime()
   const picture = pebble.instants[0]
   const head = HEAD[stoneSize]
   const pad = PAD[size]
-  const time = formatTime(new Date(pebble.happened_at))
+  const hasSouls = pebble.soul_ids.length > 0
+  const happenedAt = new Date(pebble.happened_at)
+
+  // "Tuesday, 20". Composed from two single-field formats rather than one
+  // `{ weekday, day }` call: Intl joins those two without a separator in most
+  // locales ("Tuesday 20"), and the field order it picks is not ours to set.
+  // Each part still goes through the locale formatter, so the weekday is
+  // translated and the day numeral is locale-correct.
+  const dayLabel = `${formatDate(happenedAt, { weekday: "long" })}, ${formatDate(happenedAt, { day: "numeric" })}`
+
+  // The pebble's accessible name keeps the time — it is the only thing that
+  // separates two pebbles recorded on the same day.
+  const time = formatTime(happenedAt)
 
   return (
     // The stone breaks the top edge, so a hovered card has to rise above its
@@ -144,14 +157,23 @@ export function PathPolaroid({
           </h3>
 
           {/* Keeps its height with no souls on the card, so every print's caption
-              block is the same depth. */}
-          <div className="flex min-h-5 items-center justify-between gap-2 pt-1.5">
-            <SoulAvatars soulIds={pebble.soul_ids} soulMap={soulMap} markMap={markMap} />
+              block is the same depth. With souls the date sits opposite them; with
+              none it centres under the name, where a lone right-aligned date just
+              looked stranded. */}
+          <div
+            className={cn(
+              "flex min-h-5 items-center gap-2 pt-1.5",
+              hasSouls ? "justify-between" : "justify-center",
+            )}
+          >
+            {hasSouls && (
+              <SoulAvatars soulIds={pebble.soul_ids} soulMap={soulMap} markMap={markMap} />
+            )}
             <time
               dateTime={pebble.happened_at}
-              className="ml-auto text-[10px] uppercase tracking-[0.12em] text-muted-foreground"
+              className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground"
             >
-              {time}
+              {dayLabel}
             </time>
           </div>
         </figcaption>
