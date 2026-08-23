@@ -4504,3 +4504,11 @@ Expected: conventional-commit title, labels `feat`/`ui`/`ios`, milestone `M58 ·
 ## Post-ship
 
 Append a **Lessons learned** section to this plan once the flow has been used for a while. The questions worth answering: did the two-composer coexistence stay temporary, or has the sheet acquired its own users? Did resume-to-first-gap match what people expected, or did they want to see their earlier answers? Is a haptic on *every* tap right, or does the flow buzz too much?
+
+---
+
+## Lessons learned
+
+**A clamp in a `Binding` setter does not clamp the field.** The name step passed `TextField` a computed `Binding` whose setter did `String(raw.prefix(limit))`. Every model-level test passed, the counter sat at `0`, and the field kept happily accepting characters — UIKit holds its own buffer while editing, and nothing pushed the truncated value back. The overflow was trimmed at publish, so the user saw the name they typed get silently shortened after the fact. The fix is to clamp the state the field actually renders: `@State private var text` plus an `onChange` that reassigns `text` when it differs (the re-entrant write converges on the guard). The model keeps its own clamp as a backstop.
+
+The general shape: **a validation that lives downstream of the control it validates is not a validation, it is a trim.** The same trap is waiting on the other surfaces — a React controlled input recovers only if state genuinely changes (an early-return "value unchanged" guard reintroduces it), and Compose's `TextField` with a truncating `onValueChange` fails exactly as SwiftUI did. Recorded as a trap on #725. Neither the model tests nor the render harness could have caught it; typing past the limit on a device is what caught it.

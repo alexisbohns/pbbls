@@ -144,19 +144,19 @@
         }
       }
     },
-    "%lld of %lld characters" : {
+    "%lld characters left" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld of %lld characters"
+            "value" : "%lld characters left"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%lld caractères sur %lld"
+            "value" : "%lld caractères restants"
           }
         }
       }
