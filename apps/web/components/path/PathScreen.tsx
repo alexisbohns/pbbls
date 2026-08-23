@@ -5,7 +5,6 @@ import { Loader2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { Pebble, Soul } from "@/lib/types"
 import { WeekRoll } from "@/components/path/WeekRoll"
-import { WeekHeader } from "@/components/path/WeekHeader"
 import { WeekPager } from "@/components/path/WeekPager"
 import { PathBottomDock } from "@/components/path/PathBottomDock"
 import { PebblePeek } from "@/components/path/PebblePeek"
@@ -14,7 +13,6 @@ import {
   buildWeekRollEntries,
   isoWeekKey,
   isoWeekStart,
-  weekIndex,
   type WeekRollEntry,
 } from "@/lib/utils/week-roll-entries"
 
@@ -84,18 +82,6 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
 
   const handleClosePeek = useCallback(() => setSelectedPebbleId(null), [])
 
-  const handlePrev = useCallback(() => {
-    const idx = weekIndex(entries, focusedWeekStart)
-    const target = entries[idx - 1]
-    if (target) setFocusedKey(target.weekStartIso)
-  }, [entries, focusedWeekStart])
-
-  const handleNext = useCallback(() => {
-    const idx = weekIndex(entries, focusedWeekStart)
-    const target = entries[idx + 1]
-    if (target) setFocusedKey(target.weekStartIso)
-  }, [entries, focusedWeekStart])
-
   if (loading && pebbles.length === 0) {
     return (
       <div className="flex min-h-[60dvh] items-center justify-center">
@@ -106,22 +92,11 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
 
   return (
     <div className="mx-auto flex h-full w-full max-w-md flex-col overflow-x-hidden pt-[var(--safe-area-top)]">
-      <div className="px-4 pt-4">
-        <WeekRoll
-          entries={entries}
-          focused={focusedWeekStart}
-          onFocus={setFocusedFromDate}
-        />
-      </div>
-      <div className="px-4 pt-3">
-        <WeekHeader
-          entries={entries}
-          focused={focusedWeekStart}
-          today={today}
-          onPrev={handlePrev}
-          onNext={handleNext}
-        />
-      </div>
+      <WeekRoll
+        entries={entries}
+        focused={focusedWeekStart}
+        onFocus={setFocusedFromDate}
+      />
       <div className="flex justify-center px-4 pt-2 empty:hidden">
         <DraftsEntry />
       </div>
