@@ -42,6 +42,13 @@ run reported the tests you expected:
 
 An empty grep means nothing ran, not that everything passed.
 
+**`ImageRenderer` does not lay out `ScrollView` content.** Rendering SwiftUI to
+a PNG on the host filesystem (via a temporary `ImageRenderer` test) is the way
+to inspect layout without Xcode's canvas — but anything inside a `ScrollView`
+comes out blank, verified with a solid-color probe. So render **content views
+directly**, never a scaffolded step, and leave scaffold composition (title →
+content → button) to the simulator walkthrough in Task 17.
+
 **Running one suite:**
 
 ```bash
