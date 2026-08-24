@@ -11,6 +11,7 @@ import { useCollections } from "@/lib/data/useCollections"
 import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
 import { useComposerDrafts } from "@/lib/hooks/useComposerDrafts"
 import { useRecordFlowHistory } from "@/lib/hooks/useRecordFlowHistory"
+import { prewarmValenceArt } from "@/lib/valence/stone-art"
 import { applyDraftPayload } from "@/components/record/draft-payload"
 import {
   initialFlowState,
@@ -104,6 +105,12 @@ export function RecordFlow({ draftId, initialPayload, onExit, onDraftSaved }: Re
     [published, onExit],
   )
   const { goBack } = useRecordFlowHistory(flow.step, goTo)
+
+  // The valence fan wobbles nine artworks on first sight, which is a visible
+  // hitch if it lands the moment step 3 appears. Three steps of runway is
+  // plenty, and the prewarm spreads itself across ticks so it never costs a
+  // frame here either.
+  useEffect(() => prewarmValenceArt(), [])
 
   // ---------------------------------------------------------------------------
   // Drafts (M47) — the same coordinator the single-screen composer uses.

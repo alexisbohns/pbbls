@@ -899,6 +899,18 @@
         "description": "This moment impacted my whole month and will be wrapped in my yearly Cairn."
       }
     },
+    "valenceFan": {
+      "word": {
+        "lowlight": "Lowlight",
+        "neutral": "Moment",
+        "highlight": "Highlight"
+      },
+      "span": {
+        "small": "OF MY DAY",
+        "medium": "OF MY WEEK",
+        "large": "OF MY MONTH"
+      }
+    },
     "date": {
       "title": "When",
       "close": "Close",

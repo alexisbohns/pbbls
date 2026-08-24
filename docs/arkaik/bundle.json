@@ -9,7 +9,7 @@
       "view_card_variant": "large"
     },
     "created_at": "2026-04-01T00:00:00.000Z",
-    "updated_at": "2026-08-23T14:30:00Z"
+    "updated_at": "2026-08-24T23:05:00Z"
   },
   "nodes": [
     {
@@ -8429,7 +8429,7 @@
       "project_id": "pebbles",
       "species": "flow",
       "title": "Record Pebble Flow",
-      "description": "Step-by-step composer (M58) and the default way to record a pebble on all three clients: iOS (#723), web (#732) and Android (#725). Eleven screens with one action each — photo, when, name, valence, emotion, domain, souls, collection, glyph, privacy/publish, success. The sequence does work a single form cannot: the photo's EXIF pre-fills the moment, and the valence chosen on step 3 orders the emotion categories on step 4. `F-record-pebble`'s single-screen composer stays reachable by long-pressing the + on the Path (iOS), long-pressing the New pebble entry (Android), or at `/record?composer=form` (web). Three per-surface deviations, all deliberate: web keeps the collection step multi-select because the web composer has always allowed several collections; web has no haptic on tap (the Vibration API is unsupported in Safari/iOS and inconsistent elsewhere), so the web flow is the quiet one, and browser Back walks the steps with one history entry per step reached; Android buzzes on every tap as iOS does but keeps its nine-tile valence grid rather than the iOS stone fan, so its valence step commits and advances on tap and carries no Continue button.",
+      "description": "Step-by-step composer (M58) and the default way to record a pebble on all three clients: iOS (#723), web (#732) and Android (#725). Eleven screens with one action each — photo, when, name, valence, emotion, domain, souls, collection, glyph, privacy/publish, success. The sequence does work a single form cannot: the photo's EXIF pre-fills the moment, and the valence chosen on step 3 orders the emotion categories on step 4. `F-record-pebble`'s single-screen composer stays reachable by long-pressing the + on the Path (iOS), long-pressing the New pebble entry (Android), or at `/record?composer=form` (web). Two per-surface deviations, both deliberate: web keeps the collection step multi-select because the web composer has always allowed several collections; and web has no haptic on tap (the Vibration API is unsupported in Safari/iOS and inconsistent elsewhere), so the web flow is the quiet one, where iOS and Android buzz on every tap, and browser Back walks the steps with one history entry per step reached. The valence step is the same on all three now: a fan of nine real stones over a two-axis roll, committing in place and advancing on Continue (iOS #728, web and Android #729). Each surface draws the highlight gradient its own way from one shared set of sixteen sampled hexes. The nine-tile grid survives only on web, in the edit sheets behind the pebble detail, the edit screen and the quick composer, because a sheet that commits and closes on pick cannot host a roll that changes the value at every detent; iOS and Android answered that by staging their sheets behind a Done button.",
       "status": "live",
       "platforms": [
         "web",
@@ -8504,6 +8504,30 @@
         "values": [
           "reduces-anxiety",
           "design-aesthetics"
+        ]
+      }
+    },
+    {
+      "id": "AC-valence-fan-roll",
+      "project_id": "pebbles",
+      "species": "acceptance",
+      "title": "Pick how it landed from real stones",
+      "status": "live",
+      "platforms": [
+        "web",
+        "ios",
+        "android"
+      ],
+      "metadata": {
+        "gherkin": "When I reach the valence step, Then I see nine real pebble stones fanned out small to large, and I can tap one or swipe the word underneath — sideways for how it landed, up and down for how big it was.",
+        "platformStatuses": {
+          "android": "live",
+          "ios": "live",
+          "web": "live"
+        },
+        "values": [
+          "design-aesthetics",
+          "sensory-appeal"
         ]
       }
     }
@@ -15507,6 +15531,13 @@
       "id": "e-AC-record-pebble-flow-F-record-pebble-flow",
       "project_id": "pebbles",
       "source_id": "AC-record-pebble-flow",
+      "target_id": "F-record-pebble-flow",
+      "edge_type": "covers"
+    },
+    {
+      "id": "e-AC-valence-fan-roll-F-record-pebble-flow",
+      "project_id": "pebbles",
+      "source_id": "AC-valence-fan-roll",
       "target_id": "F-record-pebble-flow",
       "edge_type": "covers"
     },
