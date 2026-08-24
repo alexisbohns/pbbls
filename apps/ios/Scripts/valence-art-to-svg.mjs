@@ -19,6 +19,14 @@
 //
 // Run from apps/ios:  node Scripts/valence-art-to-svg.mjs
 // Rerun only when the source PDFs change; the generated SVGs are committed.
+//
+// Verifying the output: compare each generated SVG against its source PDF by
+// *ink distribution*, not by eye. Render both at the same width
+// (`rsvg-convert` for the SVG, `sips -s format png` for the PDF), reduce each
+// to a coarse grid of ink density, and check that the straight comparison
+// scores better than the vertically flipped one. An orientation bug slipped
+// through an eyeball check once already: the large highlight is close enough
+// to symmetric that flipping it looks fine.
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs'
 import { inflateSync } from 'node:zlib'
@@ -93,15 +101,23 @@ const round = (value) => (Math.round(value * 1000) / 1000).toString()
 
 /**
  * Walks the content stream and returns `{ d, width, filled, evenOdd }` per
- * painted subpath set, in device space (the stream's own top-level flip is just
- * another `cm`, so the result is already y-down like SVG). `width` is the PDF
- * line width carried through the CTM's scale.
+ * painted subpath set, in SVG space. `width` is the PDF line width carried
+ * through the CTM's scale.
+ *
+ * The CTM starts at the PDF-to-SVG flip rather than at identity. PDF device
+ * space is y-up from the bottom-left; SVG is y-down from the top-left. These
+ * artworks are authored y-down and the stream's own first `cm` flips them into
+ * PDF space, so applying the CTM alone lands in PDF space — and writing *that*
+ * into a y-down viewBox renders the whole artwork upside down.
  */
-function extractPaths(stream) {
+function extractPaths(stream, pageHeight) {
   const tokens = tokenize(stream)
   const out = []
 
-  let ctm = [1, 0, 0, 1, 0, 0]
+  // PDF device space → SVG space. Every `cm` premultiplies onto this, so it
+  // stays the last transform applied to every point.
+  const toSvg = [1, 0, 0, -1, 0, pageHeight]
+  let ctm = toSvg.slice()
   let lineWidth = 1
   const stack = []
   let operands = []
@@ -139,7 +155,7 @@ function extractPaths(stream) {
       case 'q': stack.push({ ctm: ctm.slice(), lineWidth }); break
       case 'Q': {
         const restored = stack.pop()
-        ctm = restored?.ctm ?? [1, 0, 0, 1, 0, 0]
+        ctm = restored?.ctm ?? toSvg.slice()
         lineWidth = restored?.lineWidth ?? 1
         break
       }
@@ -216,7 +232,9 @@ for (const valence of VALENCES) {
 
   // Only streams that actually paint something; the rest are object streams
   // carrying the page dictionary.
-  const paths = streams.filter((s) => / [SfF]\*? /.test(s)).flatMap(extractPaths)
+  const paths = streams
+    .filter((s) => / [SfF]\*? /.test(s))
+    .flatMap((s) => extractPaths(s, y1 - y0))
   if (!paths.length) throw new Error(`no paths extracted from ${pdfPath}`)
 
   const svg = toSvg(paths, x1 - x0, y1 - y0)
