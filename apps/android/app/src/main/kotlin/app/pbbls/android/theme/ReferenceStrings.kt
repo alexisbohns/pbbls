@@ -96,7 +96,6 @@ object ReferenceStrings {
             "shame" to R.string.emotionCategory_shame_name,
         )
 
-
     /**
      * Slug → localized *description* (the `domains.label` column). Separate from
      * [domainNames] because only the record flow's domain step renders it: the

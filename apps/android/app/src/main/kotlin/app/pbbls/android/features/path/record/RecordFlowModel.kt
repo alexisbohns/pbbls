@@ -211,8 +211,7 @@ class RecordFlowModel(
      * and re-asking would silently undo the user's decision. Falls through to
      * [RecordStep.PRIVACY] — a fully answered draft resumes against publish.
      */
-    fun firstGap(): RecordStep =
-        RecordStep.counted.firstOrNull { !it.isOptional && !hasAnswer(it) } ?: RecordStep.PRIVACY
+    fun firstGap(): RecordStep = RecordStep.counted.firstOrNull { !it.isOptional && !hasAnswer(it) } ?: RecordStep.PRIVACY
 
     fun resume(
         payload: PebbleDraftPayload,
