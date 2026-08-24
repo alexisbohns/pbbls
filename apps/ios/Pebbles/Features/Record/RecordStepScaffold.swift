@@ -7,10 +7,8 @@ import SwiftUI
 /// `RecordStepScaffold<AnyView>.Action` would be a placeholder standing in for
 /// nothing.
 enum RecordStepAction {
-    /// Quiet text button — `Skip` / `Done` on the optional steps (D3).
-    case text(LocalizedStringResource, () -> Void)
     /// Full-width prominent button — `Continue` on `when` / `name`,
-    /// `Publish` on `privacy`.
+    /// `Skip` / `Done` on the optional steps (D3), `Publish` on `privacy`.
     case primary(LocalizedStringResource, enabled: Bool, loading: Bool, () -> Void)
 }
 
@@ -64,14 +62,6 @@ struct RecordStepScaffold<Content: View>: View {
     @ViewBuilder
     private func actionView(_ action: RecordStepAction) -> some View {
         switch action {
-        case let .text(label, perform):
-            Button(action: perform) {
-                Text(label)
-                    .pebblesFont(.callout)
-                    .foregroundStyle(Color.system.secondary)
-            }
-            .buttonStyle(.plain)
-
         case let .primary(label, enabled, loading, perform):
             Button(action: perform) {
                 Text(label)
