@@ -1,3 +1,4 @@
+import PhotosUI
 import SwiftUI
 import os
 
@@ -32,7 +33,10 @@ struct RecordFlowView: View {
     @State var snaps: SnapUploadCoordinator?
     @State var drafts: ComposerDraftCoordinator?
 
-    @State private var isPhotoPickerPresented = false
+    /// The photo step's inline picker selection. Lives here rather than in the
+    /// step so it survives stepping away and back, and so the byte load stays
+    /// with the orchestration.
+    @State private var pickedPhoto: PhotosPickerItem?
     @State var isCloseConfirmPresented = false
     /// Drives the step transition direction so back slides back.
     @State private var isMovingBack = false
@@ -109,15 +113,12 @@ struct RecordFlowView: View {
             // Last reliable moment before a process kill.
             if phase != .active { drafts?.flush() }
         }
-        .sheet(isPresented: $isPhotoPickerPresented) {
-            PhotoPickerView { picked in
-                isPhotoPickerPresented = false
-                guard let picked, let userId = currentUserId, let snaps else { return }
-                Task {
-                    await snaps.handlePicked(picked, userId: userId)
-                    // Seed the date step from the photo before the user gets there (D7).
-                    model.applyCaptureDate(snaps.pickedCaptureDate)
-                }
+        .onChange(of: pickedPhoto) { _, picked in
+            guard let picked, let userId = currentUserId, let snaps else { return }
+            Task {
+                await snaps.handlePicked(picked, userId: userId)
+                // Seed the date step from the photo before the user gets there (D7).
+                model.applyCaptureDate(snaps.pickedCaptureDate)
             }
         }
         .alert("Pick up where you left off?", isPresented: Binding(
@@ -157,7 +158,9 @@ struct RecordFlowView: View {
                 RecordStepScaffold(
                     title: model.step.title,
                     subtitle: model.step.subtitle,
-                    action: action(for: model.step)
+                    action: action(for: model.step),
+                    // The library grid runs to the bottom, `Skip`/`Done` over it.
+                    contentFillsHeight: model.step == .photo
                 ) {
                     RecordStepContent(
                         step: model.step,
@@ -166,13 +169,17 @@ struct RecordFlowView: View {
                         seededFromPhoto: snaps?.pickedCaptureDate != nil,
                         snapBlockedMessage: snapBlockedMessage,
                         selectedGlyph: $selectedGlyph,
-                        onPickPhoto: { isPhotoPickerPresented = true },
+                        pickedPhoto: $pickedPhoto,
                         onRetryPhoto: {
                             if let userId = currentUserId, let snaps {
                                 Task { await snaps.retryCurrent(userId: userId) }
                             }
                         },
                         onRemovePhoto: {
+                            // Clearing the picker's selection too, or re-tapping
+                            // the same photo would not move the binding and the
+                            // pick would be swallowed.
+                            pickedPhoto = nil
                             if let userId = currentUserId, let snaps {
                                 Task { await snaps.removePending(userId: userId) }
                             }

@@ -1,3 +1,4 @@
+import PhotosUI
 import SwiftUI
 
 // See RecordStep+Copy.swift: an exhaustive per-step switch is a dispatch
@@ -17,8 +18,9 @@ struct RecordStepContent: View {
     /// Non-nil while the attached photo blocks publishing.
     let snapBlockedMessage: String?
     @Binding var selectedGlyph: Glyph?
+    /// The photo step's inline picker selection (owned by `RecordFlowView`).
+    @Binding var pickedPhoto: PhotosPickerItem?
 
-    let onPickPhoto: () -> Void
     let onRetryPhoto: () -> Void
     let onRemovePhoto: () -> Void
 
@@ -27,7 +29,7 @@ struct RecordStepContent: View {
         case .photo:
             RecordPhotoStep(
                 snap: snap,
-                onPick: onPickPhoto,
+                selection: $pickedPhoto,
                 onRetry: onRetryPhoto,
                 onRemove: onRemovePhoto
             )
