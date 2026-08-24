@@ -78,6 +78,7 @@ fun RecordStepContent(
             RecordValenceStep(
                 selected = model.draft.valence,
                 onSelect = { model.selectValence(it) },
+                onSeed = { model.seedValenceIfNeeded() },
                 modifier = modifier,
             )
 

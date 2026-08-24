@@ -102,6 +102,7 @@ class RecordFlowModelTest {
         val model = model()
         model.goTo(RecordStep.VALENCE)
         model.selectValence(Valence.HIGHLIGHT_LARGE)
+        model.advance()
         assertEquals(RecordStep.EMOTION, model.step)
         model.back()
         assertEquals(RecordStep.VALENCE, model.step)
@@ -137,6 +138,41 @@ class RecordFlowModelTest {
         assertEquals(RecordStep.SOULS, model.step)
         // One tap, one buzz: two for one gesture reads as a stutter.
         assertEquals(listOf(TapHaptic.SELECTION), recorded)
+    }
+
+    /**
+     * The one exception to D3, and the same one iOS carved out in #728: the fan
+     * is a comparison, and a tap that leaves the screen denies the user the look
+     * at what they just chose next to the eight they did not.
+     */
+    @Test
+    fun valenceCommitsInPlaceWithOneHaptic() {
+        val model = model()
+        model.goTo(RecordStep.VALENCE)
+        model.selectValence(Valence.HIGHLIGHT_LARGE)
+        assertEquals(Valence.HIGHLIGHT_LARGE, model.draft.valence)
+        assertEquals("valence must not advance on pick", RecordStep.VALENCE, model.step)
+        assertEquals(listOf(TapHaptic.SELECTION), recorded)
+    }
+
+    /** The roll needs something under the finger, and an empty roll reads as nothing. */
+    @Test
+    fun valenceSeedsToNeutralMediumWithoutABuzz() {
+        val model = model()
+        model.goTo(RecordStep.VALENCE)
+        model.seedValenceIfNeeded()
+        assertEquals(Valence.NEUTRAL_MEDIUM, model.draft.valence)
+        assertTrue("the step arrives answered", model.isAnswered)
+        assertEquals("nothing happened that the user did", emptyList<TapHaptic>(), recorded)
+    }
+
+    /** Which is what makes it safe on the resume path. */
+    @Test
+    fun seedingNeverOverwritesAnAnswer() {
+        val model = model()
+        model.selectValence(Valence.LOWLIGHT_SMALL)
+        model.seedValenceIfNeeded()
+        assertEquals(Valence.LOWLIGHT_SMALL, model.draft.valence)
     }
 
     @Test

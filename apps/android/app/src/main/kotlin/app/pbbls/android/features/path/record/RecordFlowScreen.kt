@@ -45,6 +45,7 @@ import app.pbbls.android.features.path.models.PebbleSnapPayload
 import app.pbbls.android.features.path.models.Valence
 import app.pbbls.android.features.path.models.isSavableAsDraft
 import app.pbbls.android.features.path.record.steps.RecordSuccessStep
+import app.pbbls.android.features.path.valence.prewarmValenceStones
 import app.pbbls.android.features.pebblemedia.ExifCaptureDate
 import app.pbbls.android.features.pebblemedia.ImagePipeline
 import app.pbbls.android.features.pebblemedia.SnapUploadCoordinator
@@ -163,6 +164,13 @@ fun RecordFlowScreen(
             ComposerDraftCoordinator.GlyphVerdict.Unknown,
             -> Unit
         }
+    }
+
+    // The valence fan wobbles eighteen assets the first time it draws, which is
+    // a visible hitch on the main thread. Two steps of runway is plenty, and the
+    // caches are process-wide, so a second flow pays nothing.
+    LaunchedEffect(Unit) {
+        withContext(Dispatchers.Default) { prewarmValenceStones(context) }
     }
 
     // Hydrate-or-offer-restore, gated on refs.hasLoaded (#647): hydrating before
@@ -516,9 +524,11 @@ private fun actionFor(
     onPublish: () -> Unit,
 ): RecordStepAction? =
     when (step) {
-        RecordStep.VALENCE, RecordStep.EMOTION, RecordStep.DOMAIN, RecordStep.SUCCESS -> null
+        RecordStep.EMOTION, RecordStep.DOMAIN, RecordStep.SUCCESS -> null
 
-        RecordStep.WHEN, RecordStep.NAME ->
+        // Unlike the other tile steps, valence commits without advancing (the
+        // fan is worth looking at once a stone is lit), so it needs a button.
+        RecordStep.VALENCE, RecordStep.WHEN, RecordStep.NAME ->
             RecordStepAction.Primary(
                 label = stringResource(R.string.record_action_continue),
                 enabled = model.isAnswered,

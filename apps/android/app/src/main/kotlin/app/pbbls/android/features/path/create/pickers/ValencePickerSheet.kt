@@ -1,41 +1,42 @@
 package app.pbbls.android.features.path.create.pickers
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.features.path.create.valencePolarityLabelRes
 import app.pbbls.android.features.path.models.Valence
-import app.pbbls.android.features.path.models.ValencePolarity
-import app.pbbls.android.features.path.models.ValenceSizeGroup
-import app.pbbls.android.features.path.render.ValenceGlyph
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTypography
+import app.pbbls.android.features.path.valence.ValenceFan
+import app.pbbls.android.services.TapHaptic
+import app.pbbls.android.services.rememberTapHaptics
+import app.pbbls.android.theme.Spacing
 
 /**
  * The valence picker (D5) — ports iOS `ValencePickerSheet`. A single
- * `ModalBottomSheet` with three size sections (day/week/month), each offering
- * the three polarities (lowlight/neutral/highlight) as tappable [ValenceGlyph]
- * shapes. Tapping commits the [Valence] and dismisses. Pure [ValencePickerBody]
- * is split out for screenshot previews.
+ * `ModalBottomSheet` over the fan of nine stones and its two-axis roll.
+ *
+ * It **stages** rather than committing on pick, which it used to do: the roll
+ * changes the value at every detent, so a sheet that dismissed on change would
+ * close on the first swipe. Done is what closes it now, matching the souls and
+ * emotion sheets' toolbar.
+ *
+ * Buzzes on its own, unlike the record flow's valence step: that step's picks
+ * go through `RecordFlowModel`, which buzzes for every interaction, and this
+ * sheet has no model behind it. Either way exactly one selection tick per
+ * detent — see `ValenceRoll`.
+ *
+ * The record flow's valence step renders the same fan inline instead (D5).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,85 +45,33 @@ fun ValencePickerSheet(
     onDismiss: () -> Unit,
     onSelected: (Valence) -> Unit,
 ) {
+    val haptic = rememberTapHaptics()
+    // The roll always needs a value under the finger, so an untouched sheet
+    // shows `current` or parks on neutral-medium the way the record step does.
+    var staged by remember { mutableStateOf(current ?: Valence.NEUTRAL_MEDIUM) }
+
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     ) {
-        ValencePickerBody(current = current, onSelected = onSelected)
-    }
-}
-
-@Composable
-fun ValencePickerBody(
-    current: Valence?,
-    onSelected: (Valence) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
-    Column(
-        modifier = modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(24.dp),
-    ) {
-        ValenceSizeGroup.entries.forEach { size ->
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                PebblesText(
-                    text = stringResource(valenceGroupNameRes(size)),
-                    style = PebblesTypography.headline,
-                    color = system.secondary,
-                )
-                PebblesText(
-                    text = stringResource(valenceGroupDescRes(size)),
-                    style = PebblesTypography.subhead,
-                    color = system.secondary,
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                ) {
-                    ValencePolarity.entries.forEach { polarity ->
-                        val option = Valence.entries.first { it.sizeGroup == size && it.polarity == polarity }
-                        val active = option == current
-                        Column(
-                            modifier =
-                                Modifier
-                                    .weight(1f)
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(if (active) accent.primary else system.muted)
-                                    .clickable { onSelected(option) }
-                                    .padding(vertical = 12.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            ValenceGlyph(
-                                size = size,
-                                polarity = polarity,
-                                tintColor = if (active) system.background else system.secondary,
-                                modifier = Modifier.size(56.dp),
-                            )
-                            PebblesText(
-                                text = stringResource(valencePolarityLabelRes(polarity)),
-                                style = PebblesTypography.captionEmphasized,
-                                color = if (active) system.background else system.secondary,
-                            )
-                        }
-                    }
-                }
-            }
+        Column(Modifier.fillMaxWidth()) {
+            SheetToolbar(
+                title = stringResource(R.string.create_valence_title),
+                onCancel = onDismiss,
+                onDone = { onSelected(staged) },
+            )
+            ValenceFan(
+                selected = staged,
+                onSelect = {
+                    if (it != staged) haptic(TapHaptic.SELECTION)
+                    staged = it
+                },
+                modifier =
+                    Modifier
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = Spacing.lg)
+                        .padding(bottom = Spacing.lg),
+            )
         }
     }
 }
-
-private fun valenceGroupNameRes(size: ValenceSizeGroup): Int =
-    when (size) {
-        ValenceSizeGroup.SMALL -> R.string.valence_group_small_name
-        ValenceSizeGroup.MEDIUM -> R.string.valence_group_medium_name
-        ValenceSizeGroup.LARGE -> R.string.valence_group_large_name
-    }
-
-private fun valenceGroupDescRes(size: ValenceSizeGroup): Int =
-    when (size) {
-        ValenceSizeGroup.SMALL -> R.string.valence_group_small_desc
-        ValenceSizeGroup.MEDIUM -> R.string.valence_group_medium_desc
-        ValenceSizeGroup.LARGE -> R.string.valence_group_large_desc
-    }

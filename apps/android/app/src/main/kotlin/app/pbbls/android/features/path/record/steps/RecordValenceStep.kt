@@ -1,26 +1,28 @@
 package app.pbbls.android.features.path.record.steps
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import app.pbbls.android.features.path.create.pickers.ValencePickerBody
 import app.pbbls.android.features.path.models.Valence
+import app.pbbls.android.features.path.valence.ValenceFan
 
 /**
  * Step 3 — how big and how bright — the Android analog of iOS
  * `RecordValenceStep`.
  *
- * Renders the same nine-tile grid `ValencePickerSheet` shows, and commits on
- * tap (M58 D3). iOS moved this step to a fan of stones plus a continuous roll
- * in #728, which is why its step carries a `Continue` button; the grid here is
- * discrete, so a tap is unambiguously the answer and the step advances on it.
- * Porting the fan is a separate piece of work — it is a 800-LOC art + layout
- * subsystem with no Android assets yet.
+ * Renders the fan of nine stones and its two-axis roll, the same content
+ * `ValencePickerSheet` shows. Unlike the other tile steps this one does **not**
+ * advance on pick: the fan is a comparison and the roll is continuous, so
+ * `Continue` does the advancing. It arrives parked on neutral-medium
+ * ([onSeed]) so the roll has something to roll.
  */
 @Composable
 fun RecordValenceStep(
     selected: Valence?,
     onSelect: (Valence) -> Unit,
+    onSeed: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    ValencePickerBody(current = selected, onSelected = onSelect, modifier = modifier)
+    LaunchedEffect(Unit) { onSeed() }
+    ValenceFan(selected = selected, onSelect = onSelect, modifier = modifier)
 }
