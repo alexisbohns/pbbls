@@ -23,6 +23,12 @@ struct RecordStepScaffold<Content: View>: View {
     let title: LocalizedStringResource
     var subtitle: LocalizedStringResource?
     var action: RecordStepAction?
+    /// When true the content fills the space beneath the title instead of
+    /// scrolling, and the action floats over its bottom edge. The photo step
+    /// uses it so the library grid runs to the bottom of the screen — only
+    /// steps whose action is always enabled should, since a disabled pill is
+    /// an outline and would not read over a photo.
+    var contentFillsHeight: Bool = false
     @ViewBuilder let content: () -> Content
 
     var body: some View {
@@ -43,20 +49,40 @@ struct RecordStepScaffold<Content: View>: View {
             .frame(maxWidth: .infinity)
             .padding(.horizontal, Spacing.lg)
 
-            ScrollView {
+            if contentFillsHeight {
                 content()
                     .padding(.horizontal, Spacing.lg)
-                    .padding(.bottom, Spacing.lg)
-            }
-            .scrollBounceBehavior(.basedOnSize)
-
-            if let action {
-                actionView(action)
-                    .padding(.horizontal, Spacing.lg)
                     .padding(.bottom, Spacing.sm)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .overlay(alignment: .bottom) { floatingAction }
+            } else {
+                ScrollView {
+                    content()
+                        .padding(.horizontal, Spacing.lg)
+                        .padding(.bottom, Spacing.lg)
+                }
+                .scrollBounceBehavior(.basedOnSize)
+
+                if let action {
+                    actionView(action)
+                        .padding(.horizontal, Spacing.lg)
+                        .padding(.bottom, Spacing.sm)
+                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    /// The same pill, laid over the content's bottom edge rather than pushing
+    /// it up. The shadow is what separates it from whatever it covers.
+    @ViewBuilder
+    private var floatingAction: some View {
+        if let action {
+            actionView(action)
+                .shadow(color: .black.opacity(0.22), radius: 14, y: 4)
+                .padding(.horizontal, Spacing.xl)
+                .padding(.bottom, Spacing.lg)
+        }
     }
 
     @ViewBuilder

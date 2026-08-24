@@ -1489,23 +1489,6 @@
         }
       }
     },
-    "Choose another" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choose another"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "En choisir une autre"
-          }
-        }
-      }
-    },
     "Choose or carve a glyph to mark the moment. Then reveal a unique pebble illustration to remember your moment." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -6915,23 +6898,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ce pseudo n'est pas valide. Utilisez 3 à 30 minuscules, chiffres ou tirets bas, en commençant et terminant par une lettre ou un chiffre."
-          }
-        }
-      }
-    },
-    "That photo didn't upload." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "That photo didn't upload."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cette photo n'a pas été envoyée."
           }
         }
       }
