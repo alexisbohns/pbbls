@@ -33,18 +33,20 @@ enum class RecordStep(
      * must **not** wrap it in one of its own.
      *
      * This is a correctness flag, not a style one: the picker bodies the flow
-     * reuses (`ValencePickerBody`, `EmotionPickerBody`, `SoulPickerBody`,
-     * `GlyphPickerGrid`) each carry a `verticalScroll`, and a vertically
-     * scrollable child measured inside another vertical scroll gets an infinite
-     * height constraint and throws. The sheets never hit this because a
-     * `ModalBottomSheet` does not scroll its own content.
+     * reuses (`EmotionPickerBody`, `SoulPickerBody`, `GlyphPickerGrid`) each
+     * carry a `verticalScroll`, and a vertically scrollable child measured
+     * inside another vertical scroll gets an infinite height constraint and
+     * throws. The sheets never hit this because a `ModalBottomSheet` does not
+     * scroll its own content. The valence fan is fixed-height content, so it
+     * takes the scaffold's scroll — its roll wins the vertical drag by
+     * consuming it.
      */
     val bringsOwnScroll: Boolean = false,
 ) {
     PHOTO(R.string.record_photo_title, R.string.record_photo_subtitle, isOptional = true),
     WHEN(R.string.record_when_title),
     NAME(R.string.record_name_title),
-    VALENCE(R.string.record_valence_title, R.string.record_valence_subtitle, bringsOwnScroll = true),
+    VALENCE(R.string.record_valence_title, R.string.record_valence_subtitle),
     EMOTION(R.string.record_emotion_title, bringsOwnScroll = true),
     DOMAIN(R.string.record_domain_title),
     SOULS(R.string.record_souls_title, isOptional = true, bringsOwnScroll = true),

@@ -143,7 +143,31 @@ class RecordFlowModel(
         step.next?.let { step = it }
     }
 
-    fun selectValence(valence: Valence) = commitAndAdvance { it.copy(valence = valence) }
+    /**
+     * The valence step arrives already parked on a value: the roll needs
+     * something under the finger, and an empty roll has no affordances to read.
+     * Seeds without a haptic — nothing happened yet that the user did — and
+     * never overwrites an existing answer, which is what makes it safe on the
+     * resume path.
+     */
+    fun seedValenceIfNeeded() {
+        if (draft.valence != null) return
+        draft = draft.copy(valence = Valence.NEUTRAL_MEDIUM)
+    }
+
+    /**
+     * Valence commits in place instead of advancing: the fan is a comparison,
+     * and a tap that leaves the screen denies the user the look at what they
+     * just chose next to the eight they did not. The step's `Continue` button
+     * does the advancing.
+     *
+     * The one exception to D3 ("tile steps commit on tap and advance"), and the
+     * same exception iOS carved out in #728.
+     */
+    fun selectValence(valence: Valence) {
+        haptic(TapHaptic.SELECTION)
+        draft = draft.copy(valence = valence)
+    }
 
     fun selectEmotion(emotionId: String) = commitAndAdvance { it.copy(emotionId = emotionId) }
 

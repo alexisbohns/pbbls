@@ -318,6 +318,14 @@
     <string name="valence_group_small_desc">This moment impacted my day and will be wrapped in my weekly Cairn</string>
     <string name="valence_group_medium_desc">This moment impacted my whole week and will be wrapped in my monthly Cairn</string>
     <string name="valence_group_large_desc">This moment impacted my whole month and will be wrapped in my yearly Cairn</string>
+    <!-- The lockup under the valence fan: the polarity word in the hand font over the span it covers.
+         Two separate strings rather than one sentence because each line is typeset differently, and
+         because a translator needs to move them independently. Lowlight and highlight reuse the
+         polarity labels above; neutral does not (nobody calls their afternoon a neutral). -->
+    <string name="valence_headline_neutral">Moment</string>
+    <string name="valence_span_day">OF MY DAY</string>
+    <string name="valence_span_week">OF MY WEEK</string>
+    <string name="valence_span_month">OF MY MONTH</string>
     <!-- Karma-earned flash (D9). -->
     <string name="karma_flash_amount">+%1$d karma</string>
     <string name="karma_flash_a11y">Earned %1$d karma, %2$s</string>
