@@ -474,3 +474,20 @@ So highlight carries three gradients and one flat colour:
 | resting ink | ink twin (HSL 0.90 / 0.52) | same |
 | selected fill | selected wash (HSL 0.92 / 0.58) | same |
 | selected ink | white | same |
+
+## Revision 7 (2026-08-24) — selection crossfades fixed layers
+
+Selecting a highlight stone wiped the new fill across it on a hard diagonal
+edge. The cause is that `AnyShapeStyle` is not animatable, and the resting and
+selected fills are not even the same kind of thing — in dark mode a flat colour
+gives way to a `MeshGradient` — so SwiftUI has nothing to interpolate and falls
+back to something that looks like a rectangular reveal.
+
+`ValenceStoneView` now draws both states as fixed layers and crossfades their
+opacity: each layer keeps one style for its whole life and only its opacity
+moves. Four shape draws instead of two, which costs nothing — the paths are
+memoized and the fills are the same ones as before.
+
+The rule this leaves behind: **never animate a changing `ShapeStyle`; animate
+the opacity of two views that each hold a fixed one.** Any future state that
+swaps a gradient for a colour on these stones has the same trap waiting.

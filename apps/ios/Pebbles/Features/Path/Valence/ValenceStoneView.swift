@@ -14,6 +14,13 @@ import SwiftUI
 /// both are memoized, so nine stones cost nine parses once per process — never
 /// per frame.
 ///
+/// Selection crossfades two fixed layers rather than animating one changing
+/// fill. `AnyShapeStyle` is not animatable, and the resting and selected fills
+/// are not even the same kind of thing — in dark mode a flat colour gives way
+/// to a `MeshGradient` — so animating the style directly makes SwiftUI wipe the
+/// new fill across the stone on a hard diagonal edge. Each layer here keeps one
+/// style for its whole life and only its opacity moves.
+///
 /// Knows nothing about selection or placement: the picker owns both.
 struct ValenceStoneView: View {
     let valence: Valence
@@ -30,14 +37,24 @@ struct ValenceStoneView: View {
         height * PebbleOutlineGeometry.aspectRatio(for: size)
     }
 
-    var body: some View {
-        let style = ValenceStoneStyle.style(
-            for: valence.polarity, scheme: colorScheme, isSelected: isSelected
-        )
+    private var resting: ValenceStoneStyle {
+        ValenceStoneStyle.style(for: valence.polarity, scheme: colorScheme, isSelected: false)
+    }
 
+    private var selected: ValenceStoneStyle {
+        ValenceStoneStyle.style(for: valence.polarity, scheme: colorScheme, isSelected: true)
+    }
+
+    var body: some View {
         ZStack {
-            backdrop(style)
-            artwork(style)
+            backdrop(resting).opacity(isSelected ? 0 : 1)
+            backdrop(selected).opacity(isSelected ? 1 : 0)
+
+            artwork(resting)
+                .opacity(isSelected ? 0 : 1)
+                .scaleEffect(PebbleOutlineGeometry.pebbleScale(for: size))
+            artwork(selected)
+                .opacity(isSelected ? 1 : 0)
                 .scaleEffect(PebbleOutlineGeometry.pebbleScale(for: size))
         }
         .frame(width: width, height: height)
