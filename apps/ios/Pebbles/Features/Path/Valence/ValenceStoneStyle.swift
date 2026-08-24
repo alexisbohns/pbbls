@@ -40,8 +40,8 @@ struct ValenceStoneStyle {
             )
         case .highlight:
             return ValenceStoneStyle(
-                backdrop: AnyShapeStyle(highlightGradient.opacity(highlightFillOpacity(scheme))),
-                ink: AnyShapeStyle(highlightGradient)
+                backdrop: AnyShapeStyle(highlightWash.opacity(highlightFillOpacity(scheme))),
+                ink: highlightInk
             )
         }
     }
@@ -59,10 +59,10 @@ struct ValenceStoneStyle {
                 ink: AnyShapeStyle(Color.accent.light)
             )
         case .highlight:
-            return ValenceStoneStyle(
-                backdrop: AnyShapeStyle(highlightGradient),
-                ink: AnyShapeStyle(Color.accent.light)
-            )
+            // The one polarity that does not swap its roles: a pastel fill
+            // cannot carry pale ink. It reads as chosen by going fully opaque
+            // while its neighbours sit at 0.45.
+            return ValenceStoneStyle(backdrop: highlightWash, ink: highlightInk)
         }
     }
 
@@ -74,7 +74,7 @@ struct ValenceStoneStyle {
         switch polarity {
         case .lowlight:  return AnyShapeStyle(Color.system.foreground)
         case .neutral:   return AnyShapeStyle(Color.accent.primary)
-        case .highlight: return AnyShapeStyle(highlightGradient)
+        case .highlight: return highlightInk
         }
     }
 
@@ -83,58 +83,66 @@ struct ValenceStoneStyle {
     /// pastel over the light background reads as mud over the dark one — dark
     /// gets more of the gradient, not less.
     private static func highlightFillOpacity(_ scheme: ColorScheme) -> Double {
-        scheme == .dark ? 0.5 : 0.25
+        scheme == .dark ? 0.7 : 0.35
     }
 
-    /// The three hues the highlight mesh is built from: the `secondary_color`
-    /// of the Joy, Pride and Peaceful emotion categories.
-    ///
-    /// Copied rather than read from `EmotionPaletteService`, which needs the
-    /// network and is not loaded when this view first draws — and the gradient
-    /// is decoration, not a reading of anyone's palette. The cost is that a
-    /// re-design of those categories will not reach here: whoever changes them
-    /// should re-check this mesh.
-    private static let joy = Color(hex: "#CF8C39") ?? .orange
-    private static let pride = Color(hex: "#EA91CE") ?? .pink
-    private static let peace = Color(hex: "#80BF96") ?? .green
+    // MARK: - The highlight gradient
 
-    /// The mesh only exists here. There is no gradient token in the design
-    /// system, and this change deliberately does not create one — promote it
-    /// when a second surface needs the same colours.
-    private static var highlightGradient: AnyShapeStyle {
+    /// The highlight material, sampled from the reference pastel gradient at
+    /// each of the mesh's own control points (patch-averaged, so no single
+    /// noisy pixel decides a corner). Cyan and gold across the top, lavender
+    /// and rose through the middle, mint along the bottom.
+    private static let washHexes = [
+        "#CCF3F9", "#EEF597", "#FEE9B4", "#FFE1E0",
+        "#E3E5FE", "#F1DEFF", "#FFE5C2", "#FFDFEE",
+        "#E3E4FF", "#DFE9FF", "#FFDFE0", "#F9E0F5",
+        "#D9EAFE", "#D2EFFF", "#C4FFDC", "#CAFFD4"
+    ]
+
+    /// The same gradient as ink: each sample keeps its hue, loses most of its
+    /// saturation and drops to a readable luminance. The pastels are far too
+    /// light to draw the artwork with — a stone inked in them disappears
+    /// against the page — so the wash fills and this twin draws.
+    ///
+    /// Muted hard on purpose. Carrying the wash's saturation down into the ink
+    /// turns the artwork and the headline word into a rainbow, which is the
+    /// look this gradient replaced.
+    private static let inkHexes = [
+        "#5B888F", "#8C905A", "#958355", "#965754",
+        "#575B94", "#7A5496", "#967A54", "#965473",
+        "#545796", "#546996", "#965457", "#8B5F84",
+        "#567394", "#547F96", "#54966F", "#549661"
+    ]
+
+    private static let meshPoints: [SIMD2<Float>] = [
+        [0.0, 0.0], [0.3, 0.0], [0.7, 0.0], [1.0, 0.0],
+        [0.0, 0.3], [0.2, 0.4], [0.7, 0.2], [1.0, 0.3],
+        [0.0, 0.7], [0.3, 0.8], [0.7, 0.6], [1.0, 0.7],
+        [0.0, 1.0], [0.3, 1.0], [0.7, 1.0], [1.0, 1.0]
+    ]
+
+    private static let highlightWash = gradient(from: washHexes)
+    private static let highlightInk = gradient(from: inkHexes)
+
+    /// A mesh on iOS 18, and below that a linear run through the same four
+    /// diagonal samples — the same colours in the same corner order, so a 17
+    /// device gets a coherent stone rather than a different-looking one.
+    ///
+    /// There is no gradient token in the design system, and this deliberately
+    /// does not create one: promote it when a second surface needs it.
+    private static func gradient(from hexes: [String]) -> AnyShapeStyle {
+        let colors = hexes.map { Color(hex: $0) ?? .clear }
         if #available(iOS 18, *) {
             return AnyShapeStyle(
-                MeshGradient(
-                    width: 4,
-                    height: 4,
-                    points: [
-                        [0.0, 0.0], [0.3, 0.0], [0.7, 0.0], [1.0, 0.0],
-                        [0.0, 0.3], [0.2, 0.4], [0.7, 0.2], [1.0, 0.3],
-                        [0.0, 0.7], [0.3, 0.8], [0.7, 0.6], [1.0, 0.7],
-                        [0.0, 1.0], [0.3, 1.0], [0.7, 1.0], [1.0, 1.0]
-                    ],
-                    // Peace at the top left, Joy down the right, Pride
-                    // rising from the bottom — a stone catching light rather
-                    // than a filter over it.
-                    colors: [
-                        peace, peace, joy, joy,
-                        peace, peace, joy, joy,
-                        pride, pride, joy, joy,
-                        pride, pride, pride, joy
-                    ]
-                )
-            )
-        } else {
-            // iOS 17 has no MeshGradient. The same three hues in the same
-            // corner order, so a 17 device gets a coherent stone rather than a
-            // different-looking one.
-            return AnyShapeStyle(
-                LinearGradient(
-                    colors: [peace, joy, pride],
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
+                MeshGradient(width: 4, height: 4, points: meshPoints, colors: colors)
             )
         }
+        return AnyShapeStyle(
+            LinearGradient(
+                colors: [colors[0], colors[5], colors[10], colors[15]],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            )
+        )
     }
 }

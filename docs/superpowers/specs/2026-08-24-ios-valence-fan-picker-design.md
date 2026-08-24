@@ -423,21 +423,21 @@ highlight the full mesh with `AccentLight`. It is the same treatment
 on the Path, so the picker is borrowing a language the app speaks rather than
 inventing one. Dimming (0.45) and the scale-up (1.14) stay.
 
-**The mesh is now built from the emotion palette.** The purple / pink / orange
-/ yellow set read as a photo filter. It is replaced by the `secondary_color` of
-three emotion categories — Joy `#CF8C39`, Pride `#EA91CE`, Peaceful `#80BF96` —
-arranged with Peace at the top left, Joy down the right and Pride rising from
-the bottom: a stone catching light rather than a filter over it. The iOS 17
-`LinearGradient` fallback runs the same three in the same corner order.
+**The mesh is sampled from a reference image.** Two earlier attempts failed on
+looking at them: the original purple / pink / orange / yellow read as a photo
+filter, and a mesh built from three emotion-category secondaries (Joy, Pride,
+Peaceful) was no better. The gradient now comes from a supplied pastel
+reference, sampled programmatically at each of the mesh's own control points
+with a patch average, so no single noisy pixel decides a corner — cyan and gold
+across the top, lavender and rose through the middle, mint along the bottom.
 
-Worth knowing: the accent ramp was the other candidate and was rejected on
-looking at it. It is monochrome dusty rose, so a highlight built from it lands
-in the same hue family as neutral's flat `AccentPrimary`, and "Highlight" and
-"Moment" become nearly the same colour in the lockup — the polarity distinction
-dies in the one place whose job is to name the polarity.
+**Highlight needs two gradients, not one.** The pastels are far too light to
+draw with: a stone inked in them disappears against the page. So the sampled
+wash fills, and a twin draws — each sample keeping its hue, losing most of its
+saturation, and dropping to a readable luminance. The muting is the load-bearing
+part: carrying the wash's saturation down into the ink turns the artwork and the
+headline word into a rainbow, which is exactly the look this gradient replaced.
 
-**One drift risk, stated rather than solved.** The three hexes are copied, not
-read from `EmotionPaletteService`, which needs the network and is not loaded
-when the picker first draws — and the gradient is decoration, not a reading of
-anyone's palette. A re-design of those categories will not reach here. Whoever
-changes them should re-check this mesh; the constants name their source.
+Highlight is therefore the one polarity whose selected state does not invert —
+a pastel fill cannot carry pale ink. It reads as chosen by going fully opaque
+while its neighbours sit at 0.45.
