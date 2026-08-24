@@ -30,11 +30,11 @@ struct DomainPickerContent: View {
         Button {
             onSelect(domain.id)
         } label: {
-            HStack(spacing: Spacing.md) {
+            HStack(spacing: Spacing.lg) {
                 GlyphView(
                     case: isSelected ? .selected : .default,
                     strokes: domain.strokes,
-                    side: 36
+                    side: 56
                 )
                 .accessibilityHidden(true)
 
@@ -58,8 +58,7 @@ struct DomainPickerContent: View {
             .padding(.horizontal, Spacing.md)
             .padding(.vertical, Spacing.sm)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(isSelected ? Color.accent.primary.opacity(0.12) : Color.system.muted)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         // Both strings are already resolved against the catalog, so they are
