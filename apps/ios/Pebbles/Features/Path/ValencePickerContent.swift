@@ -54,7 +54,7 @@ struct ValencePickerContent: View {
         Button {
             onSelect(valence)
         } label: {
-            ValenceStoneView(valence: valence, height: height)
+            ValenceStoneView(valence: valence, height: height, isSelected: isActive)
                 .frame(
                     width: max(width, Self.minimumHitTarget),
                     height: max(height, Self.minimumHitTarget)
@@ -64,14 +64,6 @@ struct ValencePickerContent: View {
         .buttonStyle(.plain)
         .scaleEffect(isActive && !reduceMotion ? Self.selectedScale : 1)
         .opacity(hasSelection && !isActive ? Self.dimmedOpacity : 1)
-        // Lifts the chosen stone off the page. Tied to selection rather than to
-        // motion, so it still reads under Reduce Motion, where the scale-up
-        // is the part that gets dropped.
-        .shadow(
-            color: Color.system.foreground.opacity(isActive ? 0.22 : 0),
-            radius: isActive ? 10 : 0,
-            y: isActive ? 4 : 0
-        )
         .zIndex(isActive ? 1 : 0)
         .position(centre)
         .accessibilityLabel(Text(

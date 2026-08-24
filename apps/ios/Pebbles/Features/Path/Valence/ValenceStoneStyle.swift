@@ -14,7 +14,17 @@ struct ValenceStoneStyle {
     /// Tints the pebble artwork drawn inside the backdrop.
     let ink: AnyShapeStyle
 
-    static func style(for polarity: ValencePolarity, scheme: ColorScheme) -> ValenceStoneStyle {
+    /// Selection inverts the two roles: the wash becomes the solid and the ink
+    /// goes pale, so the chosen stone reads as filled in rather than merely
+    /// less faded than its neighbours. It is the same treatment
+    /// `EmotionPalette.pebbleFrameColors(forIntensity: 3)` gives a hero pebble
+    /// on the Path — a `light` stroke over an opaque `primary` fill.
+    static func style(
+        for polarity: ValencePolarity,
+        scheme: ColorScheme,
+        isSelected: Bool = false
+    ) -> ValenceStoneStyle {
+        if isSelected { return selected(for: polarity) }
         switch polarity {
         case .lowlight:
             return ValenceStoneStyle(
@@ -32,6 +42,26 @@ struct ValenceStoneStyle {
             return ValenceStoneStyle(
                 backdrop: AnyShapeStyle(highlightGradient.opacity(highlightFillOpacity(scheme))),
                 ink: AnyShapeStyle(highlightGradient)
+            )
+        }
+    }
+
+    private static func selected(for polarity: ValencePolarity) -> ValenceStoneStyle {
+        switch polarity {
+        case .lowlight:
+            return ValenceStoneStyle(
+                backdrop: AnyShapeStyle(Color.system.secondary),
+                ink: AnyShapeStyle(Color.system.background)
+            )
+        case .neutral:
+            return ValenceStoneStyle(
+                backdrop: AnyShapeStyle(Color.accent.primary),
+                ink: AnyShapeStyle(Color.accent.light)
+            )
+        case .highlight:
+            return ValenceStoneStyle(
+                backdrop: AnyShapeStyle(highlightGradient),
+                ink: AnyShapeStyle(Color.accent.light)
             )
         }
     }
@@ -56,7 +86,19 @@ struct ValenceStoneStyle {
         scheme == .dark ? 0.5 : 0.25
     }
 
-    /// The mesh only exists here. There is no rainbow token in the design
+    /// The three hues the highlight mesh is built from: the `secondary_color`
+    /// of the Joy, Pride and Peaceful emotion categories.
+    ///
+    /// Copied rather than read from `EmotionPaletteService`, which needs the
+    /// network and is not loaded when this view first draws — and the gradient
+    /// is decoration, not a reading of anyone's palette. The cost is that a
+    /// re-design of those categories will not reach here: whoever changes them
+    /// should re-check this mesh.
+    private static let joy = Color(hex: "#CF8C39") ?? .orange
+    private static let pride = Color(hex: "#EA91CE") ?? .pink
+    private static let peace = Color(hex: "#80BF96") ?? .green
+
+    /// The mesh only exists here. There is no gradient token in the design
     /// system, and this change deliberately does not create one — promote it
     /// when a second surface needs the same colours.
     private static var highlightGradient: AnyShapeStyle {
@@ -71,22 +113,24 @@ struct ValenceStoneStyle {
                         [0.0, 0.7], [0.3, 0.8], [0.7, 0.6], [1.0, 0.7],
                         [0.0, 1.0], [0.3, 1.0], [0.7, 1.0], [1.0, 1.0]
                     ],
+                    // Peace at the top left, Joy down the right, Pride
+                    // rising from the bottom — a stone catching light rather
+                    // than a filter over it.
                     colors: [
-                        .purple, .indigo, .purple, .yellow,
-                        .pink, .purple, .pink, .yellow,
-                        .orange, .pink, .yellow, .orange,
-                        .yellow, .orange, .pink, .purple
+                        peace, peace, joy, joy,
+                        peace, peace, joy, joy,
+                        pride, pride, joy, joy,
+                        pride, pride, pride, joy
                     ]
                 )
             )
         } else {
-            // iOS 17 has no MeshGradient. The same hues in the same corner
-            // order, so a 17 device gets a coherent stone rather than a
-            // different-looking one. Used for fill *and* stroke, never mixed
-            // with the mesh.
+            // iOS 17 has no MeshGradient. The same three hues in the same
+            // corner order, so a 17 device gets a coherent stone rather than a
+            // different-looking one.
             return AnyShapeStyle(
                 LinearGradient(
-                    colors: [.purple, .pink, .orange, .yellow],
+                    colors: [peace, joy, pride],
                     startPoint: .topLeading,
                     endPoint: .bottomTrailing
                 )

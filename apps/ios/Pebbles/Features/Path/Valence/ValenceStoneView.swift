@@ -19,6 +19,8 @@ struct ValenceStoneView: View {
     let valence: Valence
     /// On-screen height of the whole stone, backdrop included.
     let height: CGFloat
+    /// Inverts the wash and the ink — see `ValenceStoneStyle`.
+    var isSelected: Bool = false
 
     @Environment(\.colorScheme) private var colorScheme
 
@@ -29,7 +31,9 @@ struct ValenceStoneView: View {
     }
 
     var body: some View {
-        let style = ValenceStoneStyle.style(for: valence.polarity, scheme: colorScheme)
+        let style = ValenceStoneStyle.style(
+            for: valence.polarity, scheme: colorScheme, isSelected: isSelected
+        )
 
         ZStack {
             backdrop(style)

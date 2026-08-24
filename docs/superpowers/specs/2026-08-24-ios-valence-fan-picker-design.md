@@ -410,3 +410,34 @@ measurement rather than by eye.
 
 The lesson for the next hand-font token: **measure the ink, don't eyeball the
 render, and don't trust a frame to hold glyphs that escape their advance.**
+
+## Revision 5 (2026-08-24) — selection inverts, and the mesh joins the palette
+
+**The shadow behind the selected stone is gone.** What replaces it is stronger:
+selection now **inverts the stone's two roles**. The wash becomes the solid and
+the ink goes pale, so the chosen stone reads as filled in rather than as merely
+less faded than its neighbours — lowlight turns a solid `SystemSecondary` with
+`SystemBackground` artwork, neutral a solid `AccentPrimary` with `AccentLight`,
+highlight the full mesh with `AccentLight`. It is the same treatment
+`EmotionPalette.pebbleFrameColors(forIntensity: 3)` already gives a hero pebble
+on the Path, so the picker is borrowing a language the app speaks rather than
+inventing one. Dimming (0.45) and the scale-up (1.14) stay.
+
+**The mesh is now built from the emotion palette.** The purple / pink / orange
+/ yellow set read as a photo filter. It is replaced by the `secondary_color` of
+three emotion categories — Joy `#CF8C39`, Pride `#EA91CE`, Peaceful `#80BF96` —
+arranged with Peace at the top left, Joy down the right and Pride rising from
+the bottom: a stone catching light rather than a filter over it. The iOS 17
+`LinearGradient` fallback runs the same three in the same corner order.
+
+Worth knowing: the accent ramp was the other candidate and was rejected on
+looking at it. It is monochrome dusty rose, so a highlight built from it lands
+in the same hue family as neutral's flat `AccentPrimary`, and "Highlight" and
+"Moment" become nearly the same colour in the lockup — the polarity distinction
+dies in the one place whose job is to name the polarity.
+
+**One drift risk, stated rather than solved.** The three hexes are copied, not
+read from `EmotionPaletteService`, which needs the network and is not loaded
+when the picker first draws — and the gradient is decoration, not a reading of
+anyone's palette. A re-design of those categories will not reach here. Whoever
+changes them should re-check this mesh; the constants name their source.
