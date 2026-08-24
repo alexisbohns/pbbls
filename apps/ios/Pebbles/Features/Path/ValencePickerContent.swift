@@ -80,18 +80,15 @@ struct ValencePickerContent: View {
         .accessibilityAddTraits(isActive ? [.isSelected] : [])
     }
 
-    /// Reserves the tallest lockup's height so picking a stone does not shove
-    /// the fan up the screen.
+    /// Reserves the tallest lockup's height so rolling between sizes does not
+    /// shove the fan up and down the screen.
     @ViewBuilder
     private var caption: some View {
         Group {
-            if let selected {
-                ValenceHeadlineView(valence: selected)
-            } else {
-                Text("Pick the one that fits.")
-                    .pebblesFont(.subhead)
-                    .foregroundStyle(Color.system.secondary)
-            }
+            // The step arrives already parked on a valence, so the roll always
+            // has something under the finger. `nil` only happens in previews
+            // and in the edit sheet before it stages a value.
+            ValenceRollView(valence: selected ?? .neutralMedium, onChange: onSelect)
         }
         .frame(maxWidth: .infinity, minHeight: Self.captionHeight, alignment: .top)
         .animation(nil, value: selected)

@@ -306,3 +306,60 @@ Two mechanical notes for whoever touches this next:
   caller so `pebblesFont` stays a pure type modifier. The same hazard applies
   to any future Caveat token: `.nameInputHand` (the pebble name field) has the
   same exposure and is left alone here.
+
+## Revision 3 (2026-08-24) — the lockup becomes a two-axis roll
+
+The lockup is now the picker's second input: swipe left and right to change
+polarity, up and down to change size. The fan stays tappable; the two inputs
+drive the same value and animate the same way.
+
+**Feel.** The roll is 1:1 with the finger (the content travels exactly as far
+as the hand) and detents at the half step, so the answer changes under the
+thumb rather than on release. Each detent springs the new value to centre and
+plays `TapHaptics.selection` — that pairing is what reads as magnetic rather
+than as a slider. The ends clamp with rubber-band resistance instead of
+wrapping, so a hard swipe cannot loop the user past the end and back to where
+they started.
+
+**Direction.** Content follows the finger, so the index moves *against* the
+travel: dragging left brings the value on the right to centre. On the size
+axis the ladder runs large at the top to small at the bottom
+(`ValenceSizeGroup.ladder`, deliberately not `allCases`), so dragging up rolls
+toward smaller events — scrolling down a list whose big end is at the top.
+
+**Affordances are the state.** Faded neighbour words sit one step out on each
+side and bleed off the screen edges. Ladder marks above and below count the
+sizes still available in that direction, widest for the biggest event: nothing
+above when you are on large, nothing below when you are on small.
+
+**The step arrives answered.** `RecordFlowModel.seedValenceIfNeeded()` parks
+the draft on neutral-medium when the step appears, so the roll has something
+under the finger and its affordances are readable on arrival. It seeds without
+a haptic — nothing happened that the user did — and never overwrites an
+existing answer, which is what makes it safe on the resume path. Continue is
+therefore enabled on arrival.
+
+**The edit sheet had to change with it.** `ValencePickerSheet` used to commit
+and dismiss on pick; the roll changes the value at every detent, so that sheet
+would have closed on the first swipe. It now stages locally and commits on a
+new **Done** button.
+
+**Constants** (all eye-tuned, all in `ValenceRollView`): 220pt of travel per
+polarity step — also the distance the neighbour words sit out at, because the
+two have to agree for the roll to feel 1:1 — 90pt per size step, half-step
+detents, 34pt of overscroll.
+
+Two mechanics worth keeping:
+
+- **The axis is locked on the first movement of each drag.** Without the lock a
+  diagonal swipe alternates axes frame to frame and the roll shakes.
+- **The drag is a `highPriorityGesture`.** The step's `ScrollView` otherwise
+  claims every vertical drag, and the size axis is dead on any screen tall
+  enough to scroll.
+
+Roll behaviour is index arithmetic on `Valence` (`polarityIndex`, `sizeIndex`,
+`at(polarityIndex:sizeIndex:)`, `sizesAbove` / `sizesBelow`), so
+`ValenceRollTests` asserts stepping, clamping and the ladder marks without a
+gesture. What tests cannot cover — and what needs a device — is the feel: the
+detent spacing, the spring, and whether the vertical axis really wins against
+the ScrollView.

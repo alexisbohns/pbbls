@@ -8,10 +8,14 @@ import SwiftUI
 /// events get a prefix; small ones drop to lowercase.
 struct ValenceHeadlineView: View {
     let valence: Valence
+    /// The roll's faded neighbour words are the word alone: their prefix and
+    /// span belong to whichever valence is actually centred.
+    var showsPrefix: Bool = true
+    var showsSpan: Bool = true
 
     var body: some View {
         VStack(spacing: Spacing.xs) {
-            if let prefix = valence.headline.prefix {
+            if showsPrefix, let prefix = valence.headline.prefix {
                 Text(prefix)
                     .pebblesFont(.cardHeadingEmphasized)
                     .foregroundStyle(Color.system.foreground)
@@ -24,9 +28,11 @@ struct ValenceHeadlineView: View {
                 // text's advance width — see PebblesFont.inkOverhang.
                 .padding(.horizontal, wordToken.inkOverhang)
 
-            Text(valence.headline.span)
-                .pebblesFont(.cardHeading)
-                .foregroundStyle(Color.system.secondary)
+            if showsSpan {
+                Text(valence.headline.span)
+                    .pebblesFont(.cardHeading)
+                    .foregroundStyle(Color.system.secondary)
+            }
         }
         .multilineTextAlignment(.center)
         .accessibilityElement(children: .combine)
