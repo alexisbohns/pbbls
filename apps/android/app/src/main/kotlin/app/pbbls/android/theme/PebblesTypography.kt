@@ -47,11 +47,33 @@ private val YsabeauSemiBoldFamily =
 private val ReenieBeanieFamily =
     FontFamily(Font(R.font.reenie_beanie, weight = FontWeight.Normal))
 
+// Caveat is a variable font (wght axis), the same file iOS bundles — declared
+// at Regular via FontVariation the way Nunito is, rather than shipping a second
+// static cut.
+@OptIn(ExperimentalTextApi::class)
+private val CaveatFamily =
+    FontFamily(
+        Font(
+            R.font.caveat,
+            weight = FontWeight.Normal,
+            variationSettings = FontVariation.Settings(FontVariation.weight(400)),
+        ),
+    )
+
 private fun nunito(
     size: TextUnit,
     weight: FontWeight,
     tracking: TextUnit,
 ) = TextStyle(fontFamily = NunitoFamily, fontSize = size, fontWeight = weight, letterSpacing = tracking)
+
+private fun caveat(size: TextUnit) =
+    TextStyle(
+        fontFamily = CaveatFamily,
+        fontSize = size,
+        fontWeight = FontWeight.Normal,
+        // Caveat is already tightly connected; no extra tracking (iOS parity).
+        letterSpacing = 0f.em,
+    )
 
 private fun reenieBeanie(
     size: TextUnit,
@@ -111,6 +133,12 @@ object PebblesTypography {
     // values). Any user/soul/creator name renders in the hand font.
     val bodyLeadHand = reenieBeanie(size = 22.sp, tracking = (-0.045f).em)
     val largeTitleHand = reenieBeanie(size = 41.sp, tracking = (-0.049f).em)
+
+    /**
+     * Handwritten (Caveat) input face, 36sp. The pebble name field in the
+     * record flow — the one place the user writes on a bare page.
+     */
+    val nameInputHand = caveat(size = 36.sp)
 
     /** Tokens whose case is uppercase per the type spec — see [PebblesText]. */
     val uppercaseTokens: Set<TextStyle> = setOf(meta, metaEmphasized, cardHeading, cardHeadingEmphasized)

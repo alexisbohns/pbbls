@@ -909,3 +909,6 @@
 {"type": "edge.added", "edge_id": "e-F-record-pebble-flow-V-pebble-drafts", "source_id": "F-record-pebble-flow", "target_id": "V-pebble-drafts", "edge_type": "composes", "ts": "2026-08-23T14:30:00Z", "actor": "claude-code", "id": "01M08N0000000000000000000K"}
 {"type": "edge.added", "edge_id": "e-AC-record-pebble-flow-F-record-pebble-flow", "source_id": "AC-record-pebble-flow", "target_id": "F-record-pebble-flow", "edge_type": "covers", "ts": "2026-08-23T14:30:00Z", "actor": "claude-code", "id": "01M08N0000000000000000000L"}
 {"type": "edge.added", "edge_id": "e-V-home-F-record-pebble-flow", "source_id": "V-home", "target_id": "F-record-pebble-flow", "edge_type": "composes", "ts": "2026-08-23T14:30:00Z", "actor": "claude-code", "id": "01M08N0000000000000000000M"}
+{"type": "node.updated", "node_id": "F-record-pebble-flow", "fields": ["platforms", "description"], "ts": "2026-08-24T10:00:00Z", "actor": "claude-code", "id": "01M08P0000000000000000000"}
+{"type": "node.updated", "node_id": "V-record-success", "fields": ["platforms", "description"], "ts": "2026-08-24T10:00:00Z", "actor": "claude-code", "id": "01M08P000000000000000000A"}
+{"type": "node.updated", "node_id": "AC-record-pebble-flow", "fields": ["platforms", "metadata.platformStatuses"], "ts": "2026-08-24T10:00:00Z", "actor": "claude-code", "id": "01M08P000000000000000000B"}

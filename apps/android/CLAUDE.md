@@ -234,6 +234,19 @@ bundled. Android resource filenames must be lowercase
   sign-out button stays until Profile exists. Still missing: stats bar, photo
   attach, glyph carving/store — see the parity audit
   (`docs/superpowers/specs/2026-07-16-android-parity-audit.md`).
+- **Two composers coexist on purpose (M58, #725).**
+  `features/path/record/RecordFlowScreen.kt` is the eleven-step flow and the
+  default: tapping "New pebble" opens it, **long-pressing the same entry opens
+  `CreatePebbleScreen`**, and resuming a draft enters the flow at its first
+  unanswered mandatory step. Neither is dead code — deleting the form also
+  removes the fallback for what is still an experiment, and `EditPebbleScreen`
+  needs `PebbleForm` regardless. `RecordFlowModel` owns every interaction
+  precisely so the haptic-on-every-tap rule is structural rather than a
+  discipline; a step that mutates state without going through it is a bug. Its
+  step order carries three dependencies (photo→when for EXIF, valence→emotion
+  for category ordering, privacy last against publish) — reordering keeps the
+  cost and drops the reason. Known divergences and their follow-ups are in
+  `docs/decisions/log.md` (2026-08-24).
 - `RootScreen` warms the palette cache concurrently with the splash hold and
   flushes the signed-URL cache when the session drops to null.
 - Leaf path composables take `palette` / data as **parameters**, not service

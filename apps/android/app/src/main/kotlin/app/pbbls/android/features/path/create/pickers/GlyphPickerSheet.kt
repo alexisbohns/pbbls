@@ -52,6 +52,51 @@ import app.pbbls.android.theme.PebblesTypography
 private const val TAG = "glyph-picker"
 
 /**
+ * The glyph picker's content-swap state, hoisted out of the picker so both
+ * callers can unwind it.
+ *
+ * The sheet unwinds on a dismiss gesture (back returns to the grid before it
+ * closes the sheet); the record flow's glyph step unwinds on the system back
+ * before stepping backwards. Without the hoist, the flow would have no way to
+ * ask "is a swap panel open?" — and a nested panel that outlives its step is
+ * exactly the trap the iOS port hit, where `GlyphDetailDrawer` survived onto the
+ * next step because only the sheet's dismissal had ever taken it down.
+ */
+class GlyphPickerState {
+    var isCarving: Boolean by mutableStateOf(false)
+        internal set
+
+    var buying: GlyphGridItem? by mutableStateOf(null)
+        internal set
+
+    /**
+     * Close the topmost content swap. Returns true when one was open (so the
+     * caller keeps its own surface), false when the grid is already showing.
+     */
+    fun unwind(): Boolean =
+        when {
+            isCarving -> {
+                isCarving = false
+                true
+            }
+            buying != null -> {
+                buying = null
+                true
+            }
+            else -> false
+        }
+
+    /** Back to the grid — after a select, or after a purchase completes. */
+    internal fun reset() {
+        isCarving = false
+        buying = null
+    }
+}
+
+@Composable
+fun rememberGlyphPickerState(): GlyphPickerState = remember { GlyphPickerState() }
+
+/**
  * The tabbed glyph picker — the #549 harmonization (M43 D10): the same
  * Mine / Owned / Commu tabs as the store inside the caller's single
  * `ModalBottomSheet` level, with inline buy and a carve row. The API is the
@@ -63,6 +108,9 @@ private const val TAG = "glyph-picker"
  * (or a dismiss gesture) returns to the grid first. Mine keeps system
  * glyphs (D7); Commu client-filters `!owned` on top of the server `.neq`
  * (owned community glyphs live under Owned — both filters load-bearing).
+ *
+ * The body itself lives in [GlyphPickerContent] (M58 D5) so the record flow's
+ * glyph step renders the same grid inline, under the flow's own chrome.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,6 +118,36 @@ fun GlyphPickerSheet(
     currentGlyphId: String?,
     onDismiss: () -> Unit,
     onSelected: (Glyph) -> Unit,
+) {
+    val state = rememberGlyphPickerState()
+    ModalBottomSheet(
+        // Content swaps unwind before the sheet itself dismisses (D5).
+        onDismissRequest = { if (!state.unwind()) onDismiss() },
+        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    ) {
+        GlyphPickerContent(
+            currentGlyphId = currentGlyphId,
+            onSelected = onSelected,
+            state = state,
+        )
+    }
+}
+
+/**
+ * The picker body: tabs, grid, inline buy, and the carve entry point.
+ * Presentation plus its own loading — no sheet, no dismissal (M58 D5).
+ *
+ * Callers differ in commit semantics and own that difference: the sheet
+ * dismisses on select, the flow's step advances. [state] is hoisted so either
+ * can unwind a content swap; whichever swap is open closes itself before
+ * [onSelected] fires, so a panel can never outlive the surface that opened it.
+ */
+@Composable
+fun GlyphPickerContent(
+    currentGlyphId: String?,
+    onSelected: (Glyph) -> Unit,
+    modifier: Modifier = Modifier,
+    state: GlyphPickerState = rememberGlyphPickerState(),
 ) {
     val market = LocalGlyphMarketService.current
     val stats = LocalPathStatsService.current
@@ -80,8 +158,6 @@ fun GlyphPickerSheet(
     var isLoading by remember { mutableStateOf(false) }
     var loadFailed by remember { mutableStateOf(false) }
     var reloadToken by remember { mutableIntStateOf(0) }
-    var buying by remember { mutableStateOf<GlyphGridItem?>(null) }
-    var isCarving by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) { stats.load() }
     LaunchedEffect(tab, reloadToken) {
@@ -102,83 +178,79 @@ fun GlyphPickerSheet(
         }
     }
 
-    ModalBottomSheet(
-        onDismissRequest = {
-            // Content swaps unwind before the sheet itself dismisses (D5).
-            when {
-                isCarving -> isCarving = false
-                buying != null -> buying = null
-                else -> onDismiss()
-            }
-        },
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-    ) {
-        val buyingItem = buying
-        when {
-            isCarving ->
-                GlyphCarveScreen(
-                    onSaved = { glyph ->
-                        isCarving = false
-                        val fresh =
-                            GlyphGridItem(glyph = glyph, price = 0, owned = false, createdAt = null, acquiredAt = null)
-                        itemsByTab[GlyphTab.MINE] = listOf(fresh) + itemsByTab[GlyphTab.MINE].orEmpty()
-                        onSelected(glyph)
+    /** Every select leaves the picker showing its grid — see [GlyphPickerState]. */
+    fun select(glyph: Glyph) {
+        state.reset()
+        onSelected(glyph)
+    }
+
+    val buyingItem = state.buying
+    when {
+        state.isCarving ->
+            GlyphCarveScreen(
+                onSaved = { glyph ->
+                    val fresh =
+                        GlyphGridItem(glyph = glyph, price = 0, owned = false, createdAt = null, acquiredAt = null)
+                    itemsByTab[GlyphTab.MINE] = listOf(fresh) + itemsByTab[GlyphTab.MINE].orEmpty()
+                    select(glyph)
+                },
+                onCancel = { state.isCarving = false },
+                modifier = modifier.fillMaxWidth().heightIn(min = 200.dp),
+            )
+
+        buyingItem != null ->
+            Column(modifier.fillMaxWidth()) {
+                TextButton(onClick = { state.buying = null }) {
+                    PebblesText(
+                        text = stringResource(R.string.action_cancel),
+                        style = PebblesTypography.buttonLabel,
+                        color = accent.primary,
+                    )
+                }
+                GlyphSwapPanel(
+                    item = buyingItem,
+                    balance = stats.karma ?: 0,
+                    onSwapped = { result ->
+                        stats.applyKarmaBalance(result.balance)
+                        // First successful swap selects and hands control back to
+                        // the call site (iOS parity). `select` closes the panel
+                        // first: the panel flips to its owned state rather than
+                        // dismissing itself, so a caller that does not dismiss
+                        // would otherwise be left holding it.
+                        select(buyingItem.glyph)
                     },
-                    onCancel = { isCarving = false },
-                    modifier = Modifier.fillMaxWidth().heightIn(min = 200.dp),
                 )
+            }
 
-            buyingItem != null ->
-                Column(Modifier.fillMaxWidth()) {
-                    TextButton(onClick = { buying = null }) {
-                        PebblesText(
-                            text = stringResource(R.string.action_cancel),
-                            style = PebblesTypography.buttonLabel,
-                            color = accent.primary,
+        else ->
+            Column(modifier.fillMaxWidth().heightIn(min = 200.dp)) {
+                when {
+                    isLoading && itemsByTab[tab].isNullOrEmpty() ->
+                        Box(
+                            modifier = Modifier.fillMaxWidth().padding(48.dp),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            CircularProgressIndicator(color = accent.primary)
+                        }
+                    loadFailed -> GlyphLoadError(onRetry = { reloadToken++ })
+                    else ->
+                        GlyphPickerGrid(
+                            items = itemsByTab[tab].orEmpty(),
+                            currentGlyphId = currentGlyphId,
+                            showCarveRow = tab == GlyphTab.MINE,
+                            onCarve = { state.isCarving = true },
+                            onSelect = { item ->
+                                if (tab == GlyphTab.COMMU) state.buying = item else select(item.glyph)
+                            },
+                            modifier = Modifier.weight(1f, fill = false),
                         )
-                    }
-                    GlyphSwapPanel(
-                        item = buyingItem,
-                        balance = stats.karma ?: 0,
-                        onSwapped = { result ->
-                            stats.applyKarmaBalance(result.balance)
-                            // First successful swap selects and hands control
-                            // back to the call site (iOS parity).
-                            onSelected(buyingItem.glyph)
-                        },
-                    )
                 }
-
-            else ->
-                Column(Modifier.fillMaxWidth().heightIn(min = 200.dp)) {
-                    when {
-                        isLoading && itemsByTab[tab].isNullOrEmpty() ->
-                            Box(
-                                modifier = Modifier.fillMaxWidth().padding(48.dp),
-                                contentAlignment = Alignment.Center,
-                            ) {
-                                CircularProgressIndicator(color = accent.primary)
-                            }
-                        loadFailed -> GlyphLoadError(onRetry = { reloadToken++ })
-                        else ->
-                            GlyphPickerGrid(
-                                items = itemsByTab[tab].orEmpty(),
-                                currentGlyphId = currentGlyphId,
-                                showCarveRow = tab == GlyphTab.MINE,
-                                onCarve = { isCarving = true },
-                                onSelect = { item ->
-                                    if (tab == GlyphTab.COMMU) buying = item else onSelected(item.glyph)
-                                },
-                                modifier = Modifier.weight(1f, fill = false),
-                            )
-                    }
-                    GlyphTabBar(
-                        selection = tab,
-                        onSelect = { tab = it },
-                        modifier = Modifier.align(Alignment.CenterHorizontally),
-                    )
-                }
-        }
+                GlyphTabBar(
+                    selection = tab,
+                    onSelect = { tab = it },
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                )
+            }
     }
 }
 
