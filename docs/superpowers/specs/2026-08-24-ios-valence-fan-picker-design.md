@@ -445,6 +445,9 @@ fills, and a twin draws — each sample keeping its hue and taking a fixed
 saturation and lightness (HSL 0.90 / 0.52), which runs gold through orange to
 coral.
 
-Highlight is therefore the one polarity whose selected state does not invert —
-a pastel fill cannot carry pale ink. It reads as chosen by going fully opaque
-while its neighbours sit at 0.45.
+Highlight inverts like the others, but with its own materials: the selected
+stone takes a **third** gradient — the same hues at HSL 0.92 / 0.58 — and draws
+its artwork in **white**. The resting wash could not carry a white outline
+(white on its gold corner has almost no contrast), and selection is exactly
+where the stone should shout, so the wash goes to full strength rather than
+merely to full opacity.

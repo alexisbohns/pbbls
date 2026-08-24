@@ -59,10 +59,13 @@ struct ValenceStoneStyle {
                 ink: AnyShapeStyle(Color.accent.light)
             )
         case .highlight:
-            // The one polarity that does not swap its roles: a pastel fill
-            // cannot carry pale ink. It reads as chosen by going fully opaque
-            // while its neighbours sit at 0.45.
-            return ValenceStoneStyle(backdrop: highlightWash, ink: highlightInk)
+            // White rather than `AccentLight`, and against a wash taken to
+            // full strength: on the resting peach the artwork had almost
+            // nothing to push against.
+            return ValenceStoneStyle(
+                backdrop: highlightSelectedWash,
+                ink: AnyShapeStyle(Color.white)
+            )
         }
     }
 
@@ -127,7 +130,19 @@ struct ValenceStoneStyle {
         [0.0, 1.0], [0.3, 1.0], [0.7, 1.0], [1.0, 1.0]
     ]
 
+    /// The wash, taken up to full strength for the selected stone: the same
+    /// hues at HSL 0.92 / 0.58. The resting wash is too pale to carry a white
+    /// outline — white on it has almost no contrast at the gold corner — and
+    /// selection is exactly where the stone needs to shout.
+    private static let selectedWashHexes = [
+        "#F64031", "#F65D31", "#F66231", "#F64F31",
+        "#F66331", "#F67731", "#F66631", "#F64931",
+        "#F69131", "#F6A331", "#F67031", "#F64531",
+        "#F6A731", "#F6B731", "#F67231", "#F63C31"
+    ]
+
     private static let highlightWash = gradient(from: washHexes)
+    private static let highlightSelectedWash = gradient(from: selectedWashHexes)
     private static let highlightInk = gradient(from: inkHexes)
 
     /// A mesh on iOS 18, and below that a linear run through the same four
