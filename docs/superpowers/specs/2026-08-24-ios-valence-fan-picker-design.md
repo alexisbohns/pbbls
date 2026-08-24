@@ -433,10 +433,15 @@ across the top, lavender and rose through the middle, mint along the bottom.
 
 **Highlight needs two gradients, not one.** The pastels are far too light to
 draw with: a stone inked in them disappears against the page. So the sampled
-wash fills, and a twin draws — each sample keeping its hue, losing most of its
-saturation, and dropping to a readable luminance. The muting is the load-bearing
-part: carrying the wash's saturation down into the ink turns the artwork and the
-headline word into a rainbow, which is exactly the look this gradient replaced.
+wash fills, and a twin draws — each sample keeping its hue and taking a fixed
+saturation and lightness (HSL 0.80 / 0.60).
+
+Both knobs matter, and both were set wrong once. Darkening the samples made the
+ink muddy, and a highlight should read as vitamin, not as dust. Saturating them
+turned the artwork and the headline word into a marker-pen rainbow, which is the
+look this gradient replaced. A full-hue-wheel gradient cannot be made vivid
+without becoming a rainbow, so **lightness is what carries the freshness** and
+saturation stays just under where it starts to shout.
 
 Highlight is therefore the one polarity whose selected state does not invert —
 a pastel fill cannot carry pale ink. It reads as chosen by going fully opaque

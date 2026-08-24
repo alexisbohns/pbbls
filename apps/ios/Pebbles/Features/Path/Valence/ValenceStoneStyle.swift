@@ -99,19 +99,21 @@ struct ValenceStoneStyle {
         "#D9EAFE", "#D2EFFF", "#C4FFDC", "#CAFFD4"
     ]
 
-    /// The same gradient as ink: each sample keeps its hue, loses most of its
-    /// saturation and drops to a readable luminance. The pastels are far too
+    /// The same gradient as ink: each sample keeps its hue and takes a fixed
+    /// saturation and lightness (HSL 0.80 / 0.60). The pastels are far too
     /// light to draw the artwork with — a stone inked in them disappears
     /// against the page — so the wash fills and this twin draws.
     ///
-    /// Muted hard on purpose. Carrying the wash's saturation down into the ink
-    /// turns the artwork and the headline word into a rainbow, which is the
-    /// look this gradient replaced.
+    /// Bright on purpose. The first attempt darkened the samples instead, which
+    /// made the ink muddy: a highlight should read as vitamin, not as dust.
+    /// Lightness is what keeps it fresh — pushing saturation any further turns
+    /// a full-hue-wheel gradient into a marker-pen rainbow, which is the look
+    /// this gradient replaced.
     private static let inkHexes = [
-        "#5B888F", "#8C905A", "#958355", "#965754",
-        "#575B94", "#7A5496", "#967A54", "#965473",
-        "#545796", "#546996", "#965457", "#8B5F84",
-        "#567394", "#547F96", "#54966F", "#549661"
+        "#47D5EB", "#DEEB47", "#EBBC47", "#EB4D47",
+        "#4753EB", "#A547EB", "#EBA547", "#EB4794",
+        "#474DEB", "#477AEB", "#EB474C", "#EB47D0",
+        "#4792EB", "#47B1EB", "#47EB8A", "#47EB66"
     ]
 
     private static let meshPoints: [SIMD2<Float>] = [
