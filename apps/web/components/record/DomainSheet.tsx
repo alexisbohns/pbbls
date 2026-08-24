@@ -3,44 +3,15 @@
 import { useMemo, useState } from "react"
 import { Compass } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { useDomainLocalized } from "@/lib/i18n"
-import { SelectableItem } from "@/components/ui/SelectableItem"
 import { PickerSheet } from "@/components/ui/PickerSheet"
 import { SheetTrigger } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { useDomains, type DomainRow } from "@/lib/data/useDomains"
-import { DomainGlyph } from "@/components/record/DomainGlyph"
+import { DomainPickerContent } from "@/components/record/DomainPickerContent"
 
 type DomainSheetProps = {
   value: string[]
   onChange: (ids: string[]) => void
-}
-
-function DomainOption({ domain, selected, muted, onSelect }: {
-  domain: DomainRow
-  selected: boolean
-  muted: boolean
-  onSelect: () => void
-}) {
-  const { name, label } = useDomainLocalized(domain)
-  return (
-    <SelectableItem selected={selected} onSelect={onSelect} showCheck={false} muted={muted} className="py-2">
-      <span className="flex items-center gap-3">
-        {domain.glyph ? (
-          <DomainGlyph
-            strokes={domain.glyph.strokes}
-            viewBox={domain.glyph.viewBox}
-            className="size-7 shrink-0"
-            strokeClassName={selected ? "text-primary" : "text-foreground"}
-          />
-        ) : null}
-        <span className="flex flex-col items-start">
-          <span>{name}</span>
-          <span className="text-xs text-muted-foreground">{label}</span>
-        </span>
-      </span>
-    </SelectableItem>
-  )
 }
 
 /**
@@ -49,6 +20,8 @@ function DomainOption({ domain, selected, muted, onSelect }: {
  * the selected row clears it. The interface stays array-based (`value`/
  * `onChange` over `string[]`) so the create payload's `domain_ids` is unchanged,
  * but at most one id is ever held.
+ *
+ * The list itself is `DomainPickerContent`, shared with the flow's domain step.
  */
 export function DomainSheet({ value, onChange }: DomainSheetProps) {
   const t = useTranslations("record.domain")
@@ -87,17 +60,7 @@ export function DomainSheet({ value, onChange }: DomainSheetProps) {
         </SheetTrigger>
       }
     >
-      <div className="flex flex-col gap-0.5">
-        {rows.map((domain) => (
-          <DomainOption
-            key={domain.id}
-            domain={domain}
-            selected={value.includes(domain.id)}
-            muted={value.length > 0 && !value.includes(domain.id)}
-            onSelect={() => toggle(domain.id)}
-          />
-        ))}
-      </div>
+      <DomainPickerContent domains={rows} selected={value[0]} onSelect={toggle} />
     </PickerSheet>
   )
 }

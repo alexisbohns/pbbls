@@ -2,21 +2,30 @@
 
 import { Suspense, useEffect, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import Link from "next/link"
-import { ArrowLeft, Loader2 } from "lucide-react"
-import { useTranslations } from "next-intl"
+import { Loader2 } from "lucide-react"
 import { QuickPebbleEditor } from "@/components/path/QuickPebbleEditor"
+import { RecordFlow } from "@/components/record/flow/RecordFlow"
 import { useDataProvider } from "@/lib/data/provider-context"
 import type { PebbleDraftPayload } from "@/lib/data/data-provider"
 
 /**
  * `?draft=<id>` resumes a server draft (M47). Reading search params requires a
  * Suspense boundary in the App Router, hence the split.
+ *
+ * `?composer=form` opens the single-screen composer instead of the flow. Two
+ * composers is a cost accepted deliberately and temporarily: the flow is an
+ * experiment in interaction model, and the honest way to evaluate it is to be
+ * able to fall back without a redeploy. A query parameter was chosen over a
+ * setting for the same reason iOS chose a long-press — it adds no chrome, no
+ * persisted state and no localized string, and it deletes in one line when the
+ * experiment resolves.
  */
 function RecordEditor() {
   const router = useRouter()
   const { provider } = useDataProvider()
-  const draftId = useSearchParams().get("draft") ?? undefined
+  const searchParams = useSearchParams()
+  const draftId = searchParams.get("draft") ?? undefined
+  const wantsForm = searchParams.get("composer") === "form"
 
   const [payload, setPayload] = useState<PebbleDraftPayload | undefined>(undefined)
 
@@ -57,34 +66,31 @@ function RecordEditor() {
     )
   }
 
+  if (wantsForm) {
+    return (
+      <QuickPebbleEditor
+        draftId={draftId}
+        initialPayload={payload}
+        onPebbleCreated={() => router.push("/path")}
+        onDraftSaved={() => router.push("/drafts")}
+      />
+    )
+  }
+
   return (
-    <QuickPebbleEditor
+    <RecordFlow
       draftId={draftId}
       initialPayload={payload}
-      onPebbleCreated={() => router.push("/path")}
+      onExit={() => router.push("/path")}
       onDraftSaved={() => router.push("/drafts")}
     />
   )
 }
 
 export default function RecordPage() {
-  const t = useTranslations("record")
-
   return (
-    <section className="mx-auto w-full max-w-lg">
-      <header className="mb-4 flex items-center gap-2">
-        <Link
-          href="/path"
-          aria-label={t("back")}
-          className="-ml-2 inline-flex size-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <ArrowLeft className="size-5" aria-hidden />
-        </Link>
-        <h1 className="font-heading text-lg font-semibold">{t("srTitle")}</h1>
-      </header>
-      <Suspense fallback={null}>
-        <RecordEditor />
-      </Suspense>
-    </section>
+    <Suspense fallback={null}>
+      <RecordEditor />
+    </Suspense>
   )
 }

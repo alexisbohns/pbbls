@@ -718,6 +718,65 @@
     "deleteCancel": "Le garder"
   },
   "record": {
+    "flow": {
+      "aria": "Capturer un caillou, une question à la fois",
+      "back": "Retour",
+      "close": "Fermer",
+      "stepOf": "Étape {current} sur {total}",
+      "stepDone": "Terminé",
+      "loading": "Chargement…",
+      "continue": "Continuer",
+      "publish": "Publier",
+      "skip": "Passer",
+      "done": "Terminé",
+      "keepTitle": "Tu gardes ce caillou ?",
+      "keepDescription": "Garde-le en brouillon et termine-le quand tu veux.",
+      "keepGoing": "Je continue",
+      "discard": "Abandonner",
+      "step": {
+        "photoTitle": "Commence par une photo",
+        "photoSubtitle": "Ou passe et écris de mémoire.",
+        "whenTitle": "C'était quand ?",
+        "nameTitle": "Tu l'appelles comment ?",
+        "valenceTitle": "Ça t'a fait quoi ?",
+        "valenceSubtitle": "Quelle place ça a pris dans ta vie ?",
+        "emotionTitle": "Tu as ressenti quoi ?",
+        "domainTitle": "Quel pan de ta vie ?",
+        "soulsTitle": "Quelqu'un dans ce moment ?",
+        "collectionTitle": "Dans une collection ?",
+        "glyphTitle": "Donne-lui un glyphe",
+        "glyphSubtitle": "Une petite marque, rien que pour lui.",
+        "privacyTitle": "Qui peut le voir ?",
+        "successTitle": "Ton caillou"
+      },
+      "photo": {
+        "add": "Ajouter une photo",
+        "alt": "La photo que tu as choisie",
+        "uploading": "Envoi…",
+        "chooseAnother": "En choisir une autre",
+        "failed": "Cette photo n'est pas passée.",
+        "retry": "Réessayer",
+        "remove": "Retirer",
+        "blockedUploading": "La photo est encore en cours d'envoi.",
+        "blockedFailed": "L'envoi de la photo a échoué. Réessaie ou retire-la."
+      },
+      "when": {
+        "fromPhoto": "Récupéré de ta photo"
+      },
+      "name": {
+        "label": "Nom du caillou",
+        "placeholder": "Donne-lui un nom"
+      },
+      "privacy": {
+        "secret": "Toi seul peux le voir.",
+        "private": "Tes connexions mutuelles peuvent le voir.",
+        "public": "Tous ceux qui ont le lien peuvent le voir."
+      },
+      "success": {
+        "karma": "+{count} karma",
+        "exit": "Retour à mon chemin"
+      }
+    },
     "draft": {
       "save": "Garder pour plus tard",
       "saveFailed": "Impossible de garder ce brouillon. Réessaie.",

@@ -718,6 +718,65 @@
     "deleteCancel": "Keep it"
   },
   "record": {
+    "flow": {
+      "aria": "Record a pebble, one question at a time",
+      "back": "Back",
+      "close": "Close",
+      "stepOf": "Step {current} of {total}",
+      "stepDone": "Done",
+      "loading": "Loading…",
+      "continue": "Continue",
+      "publish": "Publish",
+      "skip": "Skip",
+      "done": "Done",
+      "keepTitle": "Keep this pebble?",
+      "keepDescription": "Save it as a draft and finish it whenever you like.",
+      "keepGoing": "Keep going",
+      "discard": "Discard",
+      "step": {
+        "photoTitle": "Start with a picture",
+        "photoSubtitle": "Or skip it and write from memory.",
+        "whenTitle": "When did it happen?",
+        "nameTitle": "What do you call it?",
+        "valenceTitle": "How did it land?",
+        "valenceSubtitle": "How much of your life did this take up?",
+        "emotionTitle": "What did you feel?",
+        "domainTitle": "What part of life?",
+        "soulsTitle": "Anyone in this one?",
+        "collectionTitle": "Add it to a collection?",
+        "glyphTitle": "Give it a glyph",
+        "glyphSubtitle": "A little mark, just for this one.",
+        "privacyTitle": "Who can see it?",
+        "successTitle": "Your pebble"
+      },
+      "photo": {
+        "add": "Add a photo",
+        "alt": "The photo you picked",
+        "uploading": "Uploading…",
+        "chooseAnother": "Choose another",
+        "failed": "That photo didn't upload.",
+        "retry": "Retry",
+        "remove": "Remove",
+        "blockedUploading": "Photo is still uploading.",
+        "blockedFailed": "Photo upload failed. Retry or remove it."
+      },
+      "when": {
+        "fromPhoto": "Taken from your photo"
+      },
+      "name": {
+        "label": "Pebble name",
+        "placeholder": "Name it"
+      },
+      "privacy": {
+        "secret": "Only you can see this one.",
+        "private": "Your mutual connections can see it.",
+        "public": "Anyone with the link can see it."
+      },
+      "success": {
+        "karma": "+{count} karma",
+        "exit": "Back to my path"
+      }
+    },
     "draft": {
       "save": "Save as draft",
       "saveFailed": "Couldn't save that draft. Please try again.",

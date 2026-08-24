@@ -8416,10 +8416,11 @@
       "project_id": "pebbles",
       "species": "view",
       "title": "Record Success",
-      "description": "Closing screen of the iOS step-by-step record flow: the composed pebble traced on with the read view's draw-on animation, the pebble's name, and the karma earned. The karma pastille is deliberately suppressed here because the amount is already on screen, though the sound and haptic still fire. Revives the celebration beat `V-record-celebration` carried on web before #161 retired it.",
+      "description": "Closing screen of the step-by-step record flow: the composed pebble traced on with the read view's draw-on animation, the pebble's name, and the karma earned. The karma pastille is deliberately suppressed here because the amount is already on screen, though on iOS the sound and haptic still fire. Web renders the same beat through `PebbleFramed`'s animate-in and suppresses the karma pill the same way. Revives the celebration beat `V-record-celebration` carried on web before #161 retired it.",
       "status": "live",
       "platforms": [
-        "ios"
+        "ios",
+        "web"
       ]
     },
     {
@@ -8427,10 +8428,11 @@
       "project_id": "pebbles",
       "species": "flow",
       "title": "Record Pebble Flow",
-      "description": "iOS-only step-by-step composer (M58, #723) and the default way to record a pebble on iOS: eleven screens with one action each — photo, when, name, valence, emotion, domain, souls, collection, glyph, privacy/publish, success — and a haptic on every tap. The sequence does work a single form cannot: the photo's EXIF pre-fills the moment, and the valence chosen on step 3 orders the emotion categories on step 4. `F-record-pebble`'s single-screen composer stays reachable by long-pressing the + on the Path, and remains the flow on web and Android.",
+      "description": "Step-by-step composer (M58, #723) and the default way to record a pebble on iOS and web: eleven screens with one action each — photo, when, name, valence, emotion, domain, souls, collection, glyph, privacy/publish, success. The sequence does work a single form cannot: the photo's EXIF pre-fills the moment, and the valence chosen on step 3 orders the emotion categories on step 4. `F-record-pebble`'s single-screen composer stays reachable by long-pressing the + on the Path (iOS) or at `/record?composer=form` (web), and remains the flow on Android. Web deviates on two points, both deliberate: the collection step stays multi-select because the web composer has always allowed several collections, and there is no haptic on tap — the Vibration API is unsupported in Safari/iOS and inconsistent elsewhere, so the web flow is the quiet one. Browser Back walks the steps, one history entry per step reached.",
       "status": "live",
       "platforms": [
-        "ios"
+        "ios",
+        "web"
       ],
       "metadata": {
         "playlist": {
@@ -8486,12 +8488,14 @@
       "title": "Record a pebble one question at a time",
       "status": "live",
       "platforms": [
-        "ios"
+        "ios",
+        "web"
       ],
       "metadata": {
         "gherkin": "Given I start a pebble from a photo, When I answer one question per screen through to publishing, Then the pebble is saved and its artwork is drawn on in front of me.",
         "platformStatuses": {
-          "ios": "live"
+          "ios": "live",
+          "web": "live"
         },
         "values": [
           "reduces-anxiety",
