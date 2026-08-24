@@ -423,25 +423,27 @@ highlight the full mesh with `AccentLight`. It is the same treatment
 on the Path, so the picker is borrowing a language the app speaks rather than
 inventing one. Dimming (0.45) and the scale-up (1.14) stay.
 
-**The mesh is sampled from a reference image.** Two earlier attempts failed on
+**The mesh is sampled from a reference image.** Several attempts failed on
 looking at them: the original purple / pink / orange / yellow read as a photo
-filter, and a mesh built from three emotion-category secondaries (Joy, Pride,
-Peaceful) was no better. The gradient now comes from a supplied pastel
-reference, sampled programmatically at each of the mesh's own control points
-with a patch average, so no single noisy pixel decides a corner — cyan and gold
-across the top, lavender and rose through the middle, mint along the bottom.
+filter; a mesh built from three emotion-category secondaries (Joy, Pride,
+Peaceful) was no better; a full-hue-wheel pastel reference was clownish however
+its ink was tuned. The gradient now comes from a **warm** reference — rose at
+the top left, blush across the top right, gold rising from the bottom left —
+sampled programmatically at each of the mesh's own control points with a patch
+average, so no single noisy pixel decides a corner.
 
-**Highlight needs two gradients, not one.** The pastels are far too light to
-draw with: a stone inked in them disappears against the page. So the sampled
-wash fills, and a twin draws — each sample keeping its hue and taking a fixed
-saturation and lightness (HSL 0.80 / 0.60).
+**Hue range is the setting that mattered, not saturation or lightness.** Every
+sample in the warm reference lands between 3° and 41°. That is what makes a
+saturated ink affordable: a gradient this narrow reads as ember when you push
+it, where a full-wheel one reads as a clown's palette at the same saturation
+and as mud if you darken it instead. Two rounds were spent tuning the wrong
+knob before the reference itself changed.
 
-Both knobs matter, and both were set wrong once. Darkening the samples made the
-ink muddy, and a highlight should read as vitamin, not as dust. Saturating them
-turned the artwork and the headline word into a marker-pen rainbow, which is the
-look this gradient replaced. A full-hue-wheel gradient cannot be made vivid
-without becoming a rainbow, so **lightness is what carries the freshness** and
-saturation stays just under where it starts to shout.
+**Highlight needs two gradients, not one.** The wash is far too light to draw
+with: a stone inked in it disappears against the page. So the sampled wash
+fills, and a twin draws — each sample keeping its hue and taking a fixed
+saturation and lightness (HSL 0.90 / 0.52), which runs gold through orange to
+coral.
 
 Highlight is therefore the one polarity whose selected state does not invert —
 a pastel fill cannot carry pale ink. It reads as chosen by going fully opaque

@@ -88,32 +88,36 @@ struct ValenceStoneStyle {
 
     // MARK: - The highlight gradient
 
-    /// The highlight material, sampled from the reference pastel gradient at
-    /// each of the mesh's own control points (patch-averaged, so no single
-    /// noisy pixel decides a corner). Cyan and gold across the top, lavender
-    /// and rose through the middle, mint along the bottom.
+    /// The highlight material, sampled from the reference gradient at each of
+    /// the mesh's own control points (patch-averaged, so no single noisy pixel
+    /// decides a corner). Rose at the top left, blush across the top right,
+    /// gold rising from the bottom left.
+    ///
+    /// Every sample lands between hue 3° and 41° — the whole thing is warm.
+    /// That is what makes the ink below possible: a gradient this narrow can be
+    /// saturated without becoming a rainbow, which a full-hue-wheel one cannot.
     private static let washHexes = [
-        "#CCF3F9", "#EEF597", "#FEE9B4", "#FFE1E0",
-        "#E3E5FE", "#F1DEFF", "#FFE5C2", "#FFDFEE",
-        "#E3E4FF", "#DFE9FF", "#FFDFE0", "#F9E0F5",
-        "#D9EAFE", "#D2EFFF", "#C4FFDC", "#CAFFD4"
+        "#E7928B", "#FBA78F", "#FED6C9", "#FDC0B5",
+        "#EAA68F", "#F5B592", "#FDC9B6", "#FCAA9F",
+        "#EFC094", "#F8CF97", "#FBB493", "#F3968C",
+        "#F1CC95", "#FADB9A", "#F1B192", "#E6908B"
     ]
 
     /// The same gradient as ink: each sample keeps its hue and takes a fixed
-    /// saturation and lightness (HSL 0.80 / 0.60). The pastels are far too
-    /// light to draw the artwork with — a stone inked in them disappears
-    /// against the page — so the wash fills and this twin draws.
+    /// saturation and lightness (HSL 0.90 / 0.52), which runs gold through
+    /// orange to coral. The wash is far too light to draw the artwork with — a
+    /// stone inked in it disappears against the page — so the wash fills and
+    /// this twin draws.
     ///
-    /// Bright on purpose. The first attempt darkened the samples instead, which
-    /// made the ink muddy: a highlight should read as vitamin, not as dust.
-    /// Lightness is what keeps it fresh — pushing saturation any further turns
-    /// a full-hue-wheel gradient into a marker-pen rainbow, which is the look
-    /// this gradient replaced.
+    /// Saturated on purpose, and only affordable because the hue range is
+    /// narrow. Earlier versions of this gradient spanned the wheel, where the
+    /// same saturation read as a clown's palette and the alternative (darkening
+    /// instead) read as mud.
     private static let inkHexes = [
-        "#47D5EB", "#DEEB47", "#EBBC47", "#EB4D47",
-        "#4753EB", "#A547EB", "#EBA547", "#EB4794",
-        "#474DEB", "#477AEB", "#EB474C", "#EB47D0",
-        "#4792EB", "#47B1EB", "#47EB8A", "#47EB66"
+        "#F32716", "#F34716", "#F34C16", "#F33816",
+        "#F34E16", "#F36416", "#F35116", "#F33016",
+        "#F38116", "#F39616", "#F35C16", "#F32C16",
+        "#F39A16", "#F3AC16", "#F35E16", "#F32316"
     ]
 
     private static let meshPoints: [SIMD2<Float>] = [
