@@ -10,6 +10,17 @@ enum class ValenceSizeGroup(
     SMALL("small"),
     MEDIUM("medium"),
     LARGE("large"),
+    ;
+
+    companion object {
+        /**
+         * Top to bottom, the order the valence roll stacks sizes in — a big
+         * event sits above a small one, so reaching the smaller ones means
+         * scrolling down the ladder. Deliberately *not* [entries], which runs
+         * small → large.
+         */
+        val ladder: List<ValenceSizeGroup> = listOf(LARGE, MEDIUM, SMALL)
+    }
 }
 
 /** Polarity axis of a valence. [key] as in [ValenceSizeGroup.key]. */
@@ -88,3 +99,54 @@ enum class Valence(
         }
     }
 }
+
+/*
+ * The roll — step geometry for the two-axis valence picker, porting the same
+ * extension on iOS `Valence.swift`. Polarity runs left → right, size runs top
+ * → bottom (`ValenceSizeGroup.ladder`).
+ *
+ * Pure index arithmetic, kept off the view so the roll's behaviour is asserted
+ * without a gesture (`ValenceRollTest`).
+ */
+
+/**
+ * The one case at a given cell. Total by construction: the 3×3 grid is
+ * covered, which `ValenceRollTest` pins down.
+ */
+fun valenceAt(
+    polarity: ValencePolarity,
+    size: ValenceSizeGroup,
+): Valence = Valence.entries.first { it.polarity == polarity && it.sizeGroup == size }
+
+/**
+ * The valence at the given indices, clamped to the grid — the roll stops at
+ * the edges rather than wrapping, so a hard swipe cannot loop the user past
+ * the end and back to where they started.
+ */
+fun valenceAt(
+    polarityIndex: Int,
+    sizeIndex: Int,
+): Valence =
+    valenceAt(
+        polarity = ValencePolarity.entries[polarityIndex.coerceIn(0, ValencePolarity.entries.lastIndex)],
+        size = ValenceSizeGroup.ladder[sizeIndex.coerceIn(0, ValenceSizeGroup.ladder.lastIndex)],
+    )
+
+/** Position on the polarity axis, in [ValencePolarity.entries] order. */
+val Valence.polarityIndex: Int
+    get() = ValencePolarity.entries.indexOf(polarity)
+
+/** Position on the size axis, in the roll's top-to-bottom [ValenceSizeGroup.ladder] order. */
+val Valence.sizeIndex: Int
+    get() = ValenceSizeGroup.ladder.indexOf(sizeGroup)
+
+/**
+ * The polarity one step to the left, null at the end. Drives the faded
+ * neighbour word the roll shows on that side.
+ */
+val Valence.polarityBefore: ValencePolarity?
+    get() = ValencePolarity.entries.getOrNull(polarityIndex - 1)
+
+/** The polarity one step to the right, null at the end. */
+val Valence.polarityAfter: ValencePolarity?
+    get() = ValencePolarity.entries.getOrNull(polarityIndex + 1)

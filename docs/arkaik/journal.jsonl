@@ -921,3 +921,6 @@
 {"type": "edge.added", "edge_id": "e-AC-valence-fan-roll-F-record-pebble-flow", "source_id": "AC-valence-fan-roll", "target_id": "F-record-pebble-flow", "edge_type": "covers", "ts": "2026-08-24T22:10:00Z", "actor": "claude-code", "id": "01M0BF0000000000000000000C"}
 {"type": "node.status_changed", "node_id": "AC-valence-fan-roll", "platform": "ios", "from": "", "to": "live", "ts": "2026-08-24T22:10:00Z", "actor": "claude-code", "id": "01M0BF0000000000000000000D"}
 {"type": "node.status_changed", "node_id": "AC-valence-fan-roll", "platform": "web", "from": "", "to": "live", "ts": "2026-08-24T22:10:00Z", "actor": "claude-code", "id": "01M0BF0000000000000000000E"}
+{"type": "node.updated", "node_id": "F-record-pebble-flow", "fields": ["description"], "ts": "2026-08-24T23:05:00Z", "actor": "claude-code", "id": "01M0BH0000000000000000000A"}
+{"type": "node.status_changed", "node_id": "AC-valence-fan-roll", "platform": "android", "from": "backlog", "to": "live", "ts": "2026-08-24T23:05:00Z", "actor": "claude-code", "id": "01M0BH0000000000000000000B"}
+{"type": "node.status_changed", "node_id": "AC-valence-fan-roll", "from": "backlog", "to": "live", "ts": "2026-08-24T23:05:00Z", "actor": "claude-code", "id": "01M0BH0000000000000000000C"}

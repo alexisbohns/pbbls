@@ -21,13 +21,13 @@ import app.pbbls.android.features.path.create.pickers.CreateSoulDialog
 import app.pbbls.android.features.path.create.pickers.EmotionPickerBody
 import app.pbbls.android.features.path.create.pickers.GlyphPickerGrid
 import app.pbbls.android.features.path.create.pickers.SoulPickerBody
-import app.pbbls.android.features.path.create.pickers.ValencePickerBody
 import app.pbbls.android.features.path.models.Domain
 import app.pbbls.android.features.path.models.EmotionPalette
 import app.pbbls.android.features.path.models.EmotionWithPalette
 import app.pbbls.android.features.path.models.PebbleCollection
 import app.pbbls.android.features.path.models.PebbleDraft
 import app.pbbls.android.features.path.models.Valence
+import app.pbbls.android.features.path.valence.ValenceFan
 import app.pbbls.android.features.profile.models.SoulWithGlyph
 import app.pbbls.android.theme.PebblesTheme
 import com.android.tools.screenshot.PreviewTest
@@ -35,7 +35,7 @@ import java.time.OffsetDateTime
 
 /**
  * Previews for the create funnel (#541): the pure [PebbleForm] (empty, filled,
- * and error states), the four picker bodies ([ValencePickerBody],
+ * and error states), the four picker bodies ([ValenceFan],
  * [EmotionPickerBody], [SoulPickerBody], [GlyphPickerGrid]), the inline
  * [CreateSoulDialog], and the [KarmaEarnedCapsule] flash — light and dark,
  * driven with fixtures so no services are needed. The service-backed sheets and
@@ -228,9 +228,9 @@ private fun FormPreview(
 @Composable
 private fun ValenceBodyPreview(current: Valence?) {
     val system = PebblesTheme.colors.system
-    ValencePickerBody(
-        current = current,
-        onSelected = {},
+    ValenceFan(
+        selected = current,
+        onSelect = {},
         modifier = Modifier.fillMaxSize().background(system.background),
     )
 }

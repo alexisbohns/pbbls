@@ -170,7 +170,23 @@ bundled. Android resource filenames must be lowercase
 - **The valence-picker imagery shipped with the create flow (M39)** as
   res/raw SVGs normalized from the web line art and tinted via `currentColor`
   injection (`ValenceGlyph`/`ValenceAssets`) — not the iOS PDF assets. The iOS
-  Path row still never uses them; the row is outline + `render_svg`.
+  Path row still never uses them; the row is outline + `render_svg`. They are
+  now the *collapsed form row's* imagery only: the valence fan draws the
+  artworks below instead.
+- **The valence fan's artworks** (`features/path/valence/`) are byte-identical
+  copies of the iOS files, generated from the source PDFs by
+  `apps/ios/Scripts/valence-art-to-svg.mjs` and renamed on copy like the
+  outlines and the Rive files:
+
+| iOS source (`apps/ios/Pebbles/Resources/ValenceArt/`) | Android (`res/raw/`) |
+| --- | --- |
+| `valence-{polarity}{Size}.svg` (9 files) | `valence_art_{size}_{polarity}.svg` |
+
+  Each carries stroked paths at the widths the PDF drew them with (inked
+  through `WobbleRenderer.glyphInk`) plus exactly one filled path — the
+  fossil's spiral, which goes through `backdropArt` instead. Tracing a filled
+  spiral as a centreline fills it in solid, so the split is load-bearing and
+  `ValenceArtTest` asserts it. Do not re-derive these from the web line art.
 - **The week-roll cairn is a static drawable** (`res/drawable/cairn_static.xml`)
   in v1; the iOS Rive state machine (`pbbls-cairn-states.riv`, with an
   `isSelected` input + `strokeColor` data binding) is a known fast-follow.

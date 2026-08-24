@@ -306,6 +306,10 @@
     <string name="valence_group_small_desc">Ce moment a marqué ma journée et sera réuni dans mon Cairn hebdomadaire</string>
     <string name="valence_group_medium_desc">Ce moment a marqué toute ma semaine et sera réuni dans mon Cairn mensuel</string>
     <string name="valence_group_large_desc">Ce moment a marqué tout mon mois et sera réuni dans mon Cairn annuel</string>
+    <string name="valence_headline_neutral">Moment</string>
+    <string name="valence_span_day">DE MA JOURNÉE</string>
+    <string name="valence_span_week">DE MA SEMAINE</string>
+    <string name="valence_span_month">DE MON MOIS</string>
     <!-- Karma-earned flash (D9). -->
     <string name="karma_flash_amount">+%1$d karma</string>
     <string name="karma_flash_a11y">%1$d karma gagné, %2$s</string>

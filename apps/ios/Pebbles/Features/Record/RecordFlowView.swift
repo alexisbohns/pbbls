@@ -216,7 +216,13 @@ struct RecordFlowView: View {
             }
 
         case .photo, .souls, .collection, .glyph:
-            return .text(model.optionalButtonIsSkip ? "Skip" : "Done") { model.advance() }
+            return .primary(
+                model.optionalButtonIsSkip ? "Skip" : "Done",
+                enabled: true,
+                loading: false
+            ) {
+                model.advance()
+            }
         }
     }
 
