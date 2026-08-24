@@ -123,7 +123,23 @@ final class RecordFlowModel {
         if let next = step.next { step = next }
     }
 
-    func select(valence: Valence) { commitAndAdvance { $0.valence = valence } }
+    /// The valence step arrives already parked on a value: the roll needs
+    /// something under the finger, and an empty roll has no affordances to
+    /// read. Seeds without a haptic — nothing happened yet that the user did.
+    func seedValenceIfNeeded() {
+        guard draft.valence == nil else { return }
+        draft.valence = .neutralMedium
+    }
+
+    /// Valence commits in place instead of advancing: the fan is a
+    /// comparison, and a tap that leaves the screen denies the user the look
+    /// at what they just chose next to the eight they did not. The step's
+    /// `Continue` button does the advancing.
+    func select(valence: Valence) {
+        haptic(.selection)
+        draft.valence = valence
+    }
+
     func select(emotionId: UUID) { commitAndAdvance { $0.emotionId = emotionId } }
     func select(domainId: UUID) { commitAndAdvance { $0.domainId = domainId } }
     func select(collectionId: UUID) { commitAndAdvance { $0.collectionId = collectionId } }

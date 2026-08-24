@@ -4832,6 +4832,23 @@
         }
       }
     },
+    "Moment" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moment"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moment"
+          }
+        }
+      }
+    },
     "Month event" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5368,6 +5385,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rien d'acquis pour l'instant"
+          }
+        }
+      }
+    },
+    "OF MY DAY" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OF MY DAY"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DE MA JOURNÉE"
+          }
+        }
+      }
+    },
+    "OF MY MONTH" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OF MY MONTH"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DE MON MOIS"
+          }
+        }
+      }
+    },
+    "OF MY WEEK" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OF MY WEEK"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DE MA SEMAINE"
           }
         }
       }

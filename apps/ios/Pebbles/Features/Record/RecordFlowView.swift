@@ -83,6 +83,9 @@ struct RecordFlowView: View {
         }
         .task {
             TapHaptics.prepare()
+            // The valence fan wobbles nine artworks on first sight, which is a
+            // visible hitch on the main thread. Two steps of runway is plenty.
+            Task.detached(priority: .utility) { ValenceArt.prewarm() }
             if snaps == nil {
                 snaps = SnapUploadCoordinator(repo: PebbleSnapRepository(client: supabase.client))
             }
@@ -189,8 +192,13 @@ struct RecordFlowView: View {
     /// is the advance (D3).
     private func action(for step: RecordStep) -> RecordStepAction? {
         switch step {
-        case .valence, .emotion, .domain, .success:
+        case .emotion, .domain, .success:
             return nil
+
+        // Unlike the other tile steps, valence commits without advancing (the
+        // fan is worth looking at once a stone is lit), so it needs a button.
+        case .valence:
+            return .primary("Continue", enabled: model.isAnswered, loading: false) { model.advance() }
 
         case .when:
             return .primary("Continue", enabled: true, loading: false) { model.advance() }
