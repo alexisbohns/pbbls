@@ -4,7 +4,6 @@ import app.pbbls.android.features.path.models.Valence
 import app.pbbls.android.features.path.models.ValencePolarity
 import app.pbbls.android.features.path.models.ValenceSizeGroup
 import app.pbbls.android.features.path.models.valenceAt
-import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
