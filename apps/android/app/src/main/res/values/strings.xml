@@ -172,6 +172,27 @@
     <string name="domain_weather_name">Weather</string>
     <string name="domain_work_name">Work</string>
 
+    <!-- Domain descriptions (the `label` column), rendered by the record
+         flow's domain step. Mirrors iOS `domain.<slug>.label`. -->
+    <string name="domain_community_label">People who share your values, culture, or beliefs</string>
+    <string name="domain_currentevents_label">What\'s happening in the world around you</string>
+    <string name="domain_dating_label">Romantic relationships and connections</string>
+    <string name="domain_education_label">Learning, growth, and intellectual pursuits</string>
+    <string name="domain_family_label">Those connected to you by blood or soul</string>
+    <string name="domain_fitness_label">Physical activity, games, and competition</string>
+    <string name="domain_friends_label">People you choose to walk alongside</string>
+    <string name="domain_health_label">Your body, energy, and physical well-being</string>
+    <string name="domain_hobbies_label">Creative pursuits and things you love doing</string>
+    <string name="domain_identity_label">Who you are and who you\'re becoming</string>
+    <string name="domain_money_label">Money, stability, and material security</string>
+    <string name="domain_partner_label">Your significant other or love relationship</string>
+    <string name="domain_selfcare_label">Rituals and habits that restore you</string>
+    <string name="domain_spirituality_label">Faith, meaning, and your inner life</string>
+    <string name="domain_tasks_label">Things you need to get done</string>
+    <string name="domain_travel_label">Exploring new places and horizons</string>
+    <string name="domain_weather_label">Sun or rain, seasons and skies</string>
+    <string name="domain_work_label">Your job, career, and professional life</string>
+
     <!-- Emotions (38) -->
     <string name="emotion_amazed_name">Awe</string>
     <string name="emotion_amused_name">Amused</string>
@@ -479,4 +500,45 @@
     </plurals>
     <string name="achievement_capsule_a11y_single">Achievement unlocked: %1$s</string>
     <string name="achievement_capsule_a11y_karma">You earned %1$d karma</string>
+
+    <!-- Step-by-step record flow (M58) — the eleven-screen composer.
+         Ports the iOS `Features/Record` copy; FR keeps the informal "tu". -->
+    <string name="record_photo_title">Start with a picture</string>
+    <string name="record_photo_subtitle">Or skip it and write from memory.</string>
+    <string name="record_when_title">When did it happen?</string>
+    <string name="record_name_title">What do you call it?</string>
+    <string name="record_valence_title">How did it land?</string>
+    <string name="record_valence_subtitle">How much of your life did this take up?</string>
+    <string name="record_emotion_title">What did you feel?</string>
+    <string name="record_domain_title">What part of life?</string>
+    <string name="record_souls_title">Anyone in this one?</string>
+    <string name="record_collection_title">Add it to a collection?</string>
+    <string name="record_glyph_title">Give it a glyph</string>
+    <string name="record_glyph_subtitle">A little mark, just for this one.</string>
+    <string name="record_privacy_title">Who can see it?</string>
+    <string name="record_success_title">Your pebble</string>
+    <string name="record_action_skip">Skip</string>
+    <string name="record_action_continue">Continue</string>
+    <string name="record_action_publish">Publish</string>
+    <string name="record_success_exit">Back to my path</string>
+    <string name="record_step_a11y">Step %1$d of %2$d</string>
+    <string name="record_back_a11y">Back</string>
+    <string name="record_when_from_photo">Taken from your photo</string>
+    <string name="record_name_placeholder">Name</string>
+    <string name="record_name_remaining_a11y">%1$d characters left</string>
+    <string name="record_photo_choose_another">Choose another</string>
+    <string name="record_photo_upload_failed">That photo didn\'t upload.</string>
+    <string name="record_photo_retry">Retry</string>
+    <string name="record_photo_remove">Remove</string>
+    <string name="record_photo_attached">A photo is already attached.</string>
+    <string name="record_collection_empty">You don\'t have any collections yet.</string>
+    <string name="record_privacy_secret_explanation">Only you can see this one.</string>
+    <string name="record_privacy_private_explanation">Your mutual connections can see it.</string>
+    <string name="record_privacy_public_explanation">Anyone with the link can see it.</string>
+    <string name="record_close_title">Keep this pebble?</string>
+    <string name="record_close_keep_going">Keep going</string>
+    <string name="record_close_discard">Discard</string>
+    <string name="record_karma">+%1$d karma</string>
+    <string name="record_karma_a11y">Earned %1$d karma</string>
+    <string name="record_signed_out_error">You must be signed in to save.</string>
 </resources>

@@ -160,6 +160,27 @@
     <string name="domain_weather_name">Météo</string>
     <string name="domain_work_name">Travail</string>
 
+    <!-- Domain descriptions (the `label` column), rendered by the record
+         flow's domain step. Mirrors iOS `domain.<slug>.label`. -->
+    <string name="domain_community_label">Celles et ceux qui partagent tes valeurs, ta culture ou tes croyances</string>
+    <string name="domain_currentevents_label">Ce qui se passe dans le monde autour de toi</string>
+    <string name="domain_dating_label">Relations amoureuses et nouvelles rencontres</string>
+    <string name="domain_education_label">Apprentissage, croissance et quête intellectuelle</string>
+    <string name="domain_family_label">Celles et ceux qui te sont liés par le sang ou par le cœur</string>
+    <string name="domain_fitness_label">Activité physique, jeux et compétition</string>
+    <string name="domain_friends_label">Les personnes que tu choisis d\'avoir à tes côtés</string>
+    <string name="domain_health_label">Ton corps, ton énergie et ton bien-être physique</string>
+    <string name="domain_hobbies_label">Activités créatives et choses que tu aimes faire</string>
+    <string name="domain_identity_label">Qui tu es et qui tu deviens</string>
+    <string name="domain_money_label">Argent, stabilité et sécurité matérielle</string>
+    <string name="domain_partner_label">Ta moitié ou ta relation amoureuse</string>
+    <string name="domain_selfcare_label">Rituels et habitudes qui te ressourcent</string>
+    <string name="domain_spirituality_label">Foi, sens et vie intérieure</string>
+    <string name="domain_tasks_label">Les choses que tu dois accomplir</string>
+    <string name="domain_travel_label">Explorer de nouveaux lieux et horizons</string>
+    <string name="domain_weather_label">Soleil ou pluie, saisons et ciels</string>
+    <string name="domain_work_label">Ton travail, ta carrière et ta vie professionnelle</string>
+
     <!-- Emotions (38) -->
     <string name="emotion_amazed_name">Émerveillement</string>
     <string name="emotion_amused_name">Amusement</string>
@@ -466,4 +487,45 @@
     </plurals>
     <string name="achievement_capsule_a11y_single">Succès débloqué : %1$s</string>
     <string name="achievement_capsule_a11y_karma">Tu as gagné %1$d karma</string>
+
+    <!-- Step-by-step record flow (M58) — the eleven-screen composer.
+         Ports the iOS `Features/Record` copy; FR keeps the informal "tu". -->
+    <string name="record_photo_title">Commence par une photo</string>
+    <string name="record_photo_subtitle">Ou passe et écris de mémoire.</string>
+    <string name="record_when_title">C\'était quand ?</string>
+    <string name="record_name_title">Tu l\'appelles comment ?</string>
+    <string name="record_valence_title">Ça t\'a fait quoi ?</string>
+    <string name="record_valence_subtitle">Ça a pris quelle place dans ta vie ?</string>
+    <string name="record_emotion_title">Tu as ressenti quoi ?</string>
+    <string name="record_domain_title">Quel domaine de ta vie ?</string>
+    <string name="record_souls_title">Il y avait quelqu\'un ?</string>
+    <string name="record_collection_title">Dans une collection ?</string>
+    <string name="record_glyph_title">Donne-lui un glyphe</string>
+    <string name="record_glyph_subtitle">Une petite marque, rien que pour lui.</string>
+    <string name="record_privacy_title">Qui peut le voir ?</string>
+    <string name="record_success_title">Ton galet</string>
+    <string name="record_action_skip">Ignorer</string>
+    <string name="record_action_continue">Continuer</string>
+    <string name="record_action_publish">Publier</string>
+    <string name="record_success_exit">Retour à mon chemin</string>
+    <string name="record_step_a11y">Étape %1$d sur %2$d</string>
+    <string name="record_back_a11y">Retour</string>
+    <string name="record_when_from_photo">Récupéré depuis ta photo</string>
+    <string name="record_name_placeholder">Nom</string>
+    <string name="record_name_remaining_a11y">Il reste %1$d caractères</string>
+    <string name="record_photo_choose_another">En choisir une autre</string>
+    <string name="record_photo_upload_failed">Cette photo n\'a pas été envoyée.</string>
+    <string name="record_photo_retry">Réessayer</string>
+    <string name="record_photo_remove">Retirer</string>
+    <string name="record_photo_attached">Une photo est déjà jointe.</string>
+    <string name="record_collection_empty">Tu n\'as pas encore de collection.</string>
+    <string name="record_privacy_secret_explanation">Toi seul peux voir celui-ci.</string>
+    <string name="record_privacy_private_explanation">Tes connexions mutuelles peuvent le voir.</string>
+    <string name="record_privacy_public_explanation">Toute personne avec le lien peut le voir.</string>
+    <string name="record_close_title">Tu gardes ce galet ?</string>
+    <string name="record_close_keep_going">Continuer l\'édition</string>
+    <string name="record_close_discard">Abandonner</string>
+    <string name="record_karma">+%1$d karma</string>
+    <string name="record_karma_a11y">%1$d karma gagné</string>
+    <string name="record_signed_out_error">Tu dois être connecté pour enregistrer.</string>
 </resources>

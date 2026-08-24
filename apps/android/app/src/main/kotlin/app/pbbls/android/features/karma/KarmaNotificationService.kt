@@ -33,12 +33,21 @@ class KarmaNotificationService(
 
     private var dismissJob: Job? = null
 
-    /** Only positive credits celebrate; clawbacks/deletes stay silent (D10). */
+    /**
+     * Only positive credits celebrate; clawbacks/deletes stay silent (D10).
+     *
+     * [presentsCapsule] exists for the record flow's success screen (M58 D10),
+     * which already shows the amount — a capsule over it would be redundant.
+     * The sound and haptic are not suppressed: they are the celebration, and
+     * they ride on the capsule's composable, so a caller passing `false` gets a
+     * silent credit by design.
+     */
     fun notifyEarned(
         amount: Int,
         reason: KarmaReason,
+        presentsCapsule: Boolean = true,
     ) {
-        if (amount <= 0) return
+        if (amount <= 0 || !presentsCapsule) return
         activeCapsule = KarmaEarnedContent(amount, reason)
         dismissJob?.cancel()
         dismissJob =

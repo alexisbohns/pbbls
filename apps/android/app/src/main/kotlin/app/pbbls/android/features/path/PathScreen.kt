@@ -38,6 +38,7 @@ import app.pbbls.android.features.path.create.CreatePebbleScreen
 import app.pbbls.android.features.path.models.EmotionPalette
 import app.pbbls.android.features.path.models.Pebble
 import app.pbbls.android.features.path.models.WeekRollEntry
+import app.pbbls.android.features.path.record.RecordFlowScreen
 import app.pbbls.android.features.shared.ripples.RippleSummary
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalPathService
@@ -88,6 +89,9 @@ fun PathScreen(
     var detailReloadKey by remember { mutableIntStateOf(0) }
     var pendingDeletion by remember { mutableStateOf<Pebble?>(null) }
     var deleteError by remember { mutableStateOf(false) }
+    // Which composer is up. The flow is the default; the form survives behind a
+    // long-press on the same entry (M58 D1).
+    var isPresentingFlow by remember { mutableStateOf(false) }
     var isPresentingCreate by remember { mutableStateOf(false) }
     var isPresentingDrafts by remember { mutableStateOf(false) }
     var resumingDraft by remember { mutableStateOf<PebbleDraftRecord?>(null) }
@@ -139,6 +143,28 @@ fun PathScreen(
                 focusedWeekStart = refocusedWeekStart(built, focusedWeekStart, today)
             } catch (e: Exception) {
                 Log.e(TAG, "path reload failed", e)
+            }
+        }
+        scope.launch { stats.refresh() }
+    }
+
+    /**
+     * Reload, then land the user on the week the new pebble belongs to — the
+     * record flow's reading of "the new pebble is where you land" (M58 D10).
+     * Sequenced in one coroutine because the focus has to be applied to the
+     * rebuilt entries, not the stale ones.
+     */
+    val reloadFocusing: (String) -> Unit = { newPebbleId ->
+        scope.launch {
+            try {
+                val pebbles = pathService.loadPathPebbles()
+                val built = WeekRollBuilder.build(pebbles, ZoneId.systemDefault(), today)
+                entries = built
+                focusedWeekStart =
+                    built.firstOrNull { entry -> entry.pebbles.any { it.id == newPebbleId } }?.weekStart
+                        ?: refocusedWeekStart(built, focusedWeekStart, today)
+            } catch (e: Exception) {
+                Log.e(TAG, "path reload after publish failed", e)
             }
         }
         scope.launch { stats.refresh() }
@@ -199,7 +225,8 @@ fun PathScreen(
                         paletteFor = { pebble -> pebble.emotion?.let { palettes.palette(it.id) } },
                         onPebbleTap = { pebble -> selectedPebbleId = pebble.id },
                         onPebbleDelete = { pebble -> pendingDeletion = pebble },
-                        onCreatePebble = { isPresentingCreate = true },
+                        onCreatePebble = { isPresentingFlow = true },
+                        onCreatePebbleLongPress = { isPresentingCreate = true },
                         onOpenDrafts = { isPresentingDrafts = true },
                         draftCount = draftCount,
                         karma = stats.karma,
@@ -241,10 +268,41 @@ fun PathScreen(
             )
         }
 
-        // Full-screen create cover — sibling of the detail cover, also in the
-        // OUTER (unpadded) Box since it self-applies safeDrawingPadding/imePadding
-        // (C, the fullScreenCover analog D5). On success it reveals the new pebble
-        // through the detail cover and reloads the timeline.
+        // Full-screen record-flow cover (M58) — the default composer. Sibling of
+        // the detail cover, in the OUTER (unpadded) Box since it self-applies
+        // safeDrawingPadding/imePadding. On publish it reloads the timeline and
+        // focuses the new pebble's week behind the still-visible success step; it
+        // deliberately does NOT open the detail the way the form does, because the
+        // user has just spent ten screens on this pebble and the success step
+        // already showed it (D10).
+        if (isPresentingFlow) {
+            RecordFlowScreen(
+                onPublished = { newId ->
+                    draftsReloadKey++
+                    reloadFocusing(newId)
+                },
+                onDismiss = {
+                    isPresentingFlow = false
+                    resumingDraft = null
+                    isPresentingDrafts = false
+                    draftsReloadKey++
+                },
+                modifier = Modifier.fillMaxSize(),
+                resuming = resumingDraft,
+                onDraftSaved = {
+                    isPresentingFlow = false
+                    resumingDraft = null
+                    draftsReloadKey++
+                },
+            )
+        }
+
+        // Full-screen create cover — the all-at-once form, now reached by
+        // long-pressing "New pebble" (M58 D1). Sibling of the detail cover, also
+        // in the OUTER (unpadded) Box since it self-applies
+        // safeDrawingPadding/imePadding (C, the fullScreenCover analog D5). On
+        // success it reveals the new pebble through the detail cover and reloads
+        // the timeline — the flow deliberately does not.
         if (isPresentingCreate) {
             CreatePebbleScreen(
                 onCreated = { newId ->
@@ -273,11 +331,11 @@ fun PathScreen(
         // Full-screen drafts cover (M47) — self-applies safeDrawingPadding, so it
         // belongs in the OUTER Box like its siblings. Composed BEFORE the create
         // cover in z-order so resuming a draft stacks the composer on top of it.
-        if (isPresentingDrafts && !isPresentingCreate) {
+        if (isPresentingDrafts && !isPresentingCreate && !isPresentingFlow) {
             DraftsScreen(
                 onResume = { record ->
                     resumingDraft = record
-                    isPresentingCreate = true
+                    isPresentingFlow = true
                 },
                 onDismiss = { isPresentingDrafts = false },
                 modifier = Modifier.fillMaxSize(),
@@ -330,6 +388,7 @@ fun PathContent(
     onPebbleTap: (Pebble) -> Unit = {},
     onPebbleDelete: (Pebble) -> Unit = {},
     onCreatePebble: () -> Unit = {},
+    onCreatePebbleLongPress: (() -> Unit)? = null,
     onOpenDrafts: () -> Unit = {},
     draftCount: Int = 0,
     karma: Int? = null,
@@ -410,6 +469,7 @@ fun PathContent(
         // Pinned "New pebble" entry — the PathView.safeAreaInset(.bottom) analog.
         NewPebbleButton(
             onTap = onCreatePebble,
+            onLongPress = onCreatePebbleLongPress,
             modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
         )
         // Bottom stats bar (sub-project B) — karma + ripple; all taps push
