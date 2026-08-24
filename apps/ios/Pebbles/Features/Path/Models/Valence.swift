@@ -116,7 +116,9 @@ extension Valence {
         }
     }
 
-    /// Asset name in `Assets.xcassets/Valence/`. Always non-empty.
+    /// Base name of this valence's artwork. Names both the source vector in
+    /// `Assets.xcassets/Valence/` and the `ValenceArt/<name>.svg` the picker
+    /// wobbles, which `Scripts/valence-art-to-svg.mjs` generates from it.
     var assetName: String { "valence-\(rawValue)" }
 
     /// Caption under the valence fan, naming the stone the user just picked.

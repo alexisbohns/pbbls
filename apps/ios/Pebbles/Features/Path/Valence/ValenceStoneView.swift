@@ -4,14 +4,15 @@ import SwiftUI
 /// real pebble: a soft-filled silhouette behind, the artwork inked inside it.
 ///
 /// The backdrop is the wobbled `Outlines/<size>-<polarity>.svg` shape, filled
-/// and never stroked. The artwork on top is the vector `Valence/valence-*`
-/// asset (the pebble's own outline plus its creature and fossil), tinted and
+/// and never stroked. The artwork on top is the wobbled `ValenceArt/valence-*`
+/// ink (the pebble's own outline plus its creature and fossil), tinted and
 /// scaled down by `PebbleOutlineGeometry.pebbleScale` so the backdrop frames it
 /// with the same ~12% margin a real stone gets — instead of the backdrop's edge
 /// and the artwork's edge landing on top of each other.
 ///
-/// Backdrop art comes straight from `WobbleRenderer`, which memoizes it, so
-/// nine stones cost nine parses once per process — never per frame.
+/// Both halves are wobbled by the same renderer a real pebble goes through, and
+/// both are memoized, so nine stones cost nine parses once per process — never
+/// per frame.
 ///
 /// Knows nothing about selection or placement: the picker owns both.
 struct ValenceStoneView: View {
@@ -51,12 +52,28 @@ struct ValenceStoneView: View {
         }
     }
 
+    /// The leaky wobbled ink, aspect-fitted into the artwork's own viewBox the
+    /// same way `PebbleAnimatedRenderView` fits a real pebble's static body.
+    @ViewBuilder
     private func artwork(_ style: ValenceStoneStyle) -> some View {
-        Image(valence.assetName)
-            .renderingMode(.template)
-            .resizable()
-            .scaledToFit()
-            .foregroundStyle(style.ink)
+        if let art = ValenceArt.art(for: valence) {
+            ZStack {
+                WobbledPathShape(path: art.ink, layerTransform: .identity, viewBox: art.viewBox)
+                    .fill(style.ink)
+                ForEach(Array(art.regions.enumerated()), id: \.offset) { _, region in
+                    WobbledPathShape(
+                        path: region.path, layerTransform: .identity, viewBox: art.viewBox
+                    )
+                    .fill(style.ink, style: FillStyle(eoFill: region.usesEvenOddFill))
+                }
+            }
+            .aspectRatio(art.viewBox.width / art.viewBox.height, contentMode: .fit)
+        } else {
+            // Missing or unparseable artwork — logged by ValenceArt. The
+            // backdrop wash alone still reads as a stone of the right size and
+            // colour, so the picker stays usable.
+            Color.clear
+        }
     }
 }
 
