@@ -30,6 +30,12 @@ enum PebblesFont {
     /// Handwritten (Caveat) input face, 36pt. The pebble name field in the
     /// record flow — the one place the user writes on a bare page.
     case nameInputHand
+    /// Handwritten (Caveat Bold) headline word naming the picked valence.
+    /// Three sizes, one per `ValenceSizeGroup`, so the word grows with the
+    /// event the way the stones do.
+    case valenceWordSmall
+    case valenceWordMedium
+    case valenceWordLarge
 }
 
 // MARK: - View modifier
@@ -78,6 +84,9 @@ private extension PebblesFont {
         case .bodyLeadHand:          return .reenieBeanie(22)
         case .largeTitleHand:        return .reenieBeanie(41)
         case .nameInputHand:         return .caveat(36)
+        case .valenceWordSmall:      return .caveatBold(34)
+        case .valenceWordMedium:     return .caveatBold(44)
+        case .valenceWordLarge:      return .caveatBold(56)
         }
     }
 
@@ -98,6 +107,7 @@ private extension PebblesFont {
         case .largeTitleHand:                                     return -2.0   // 41pt
         // Caveat is already tightly connected; no extra tracking.
         case .nameInputHand:                                      return 0
+        case .valenceWordSmall, .valenceWordMedium, .valenceWordLarge: return 0
         }
     }
 
@@ -153,6 +163,25 @@ extension Font {
             return Font(custom)
         }
         return Font(UIFont.systemFont(ofSize: size))
+    }
+
+    /// Caveat at weight 700. `UIFont(name:)` only ever resolves a variable
+    /// font's default instance, so the weight axis has to be set explicitly —
+    /// `Caveat-Bold` is not a resolvable name for this file. Falls back to the
+    /// regular instance, then to the system font.
+    fileprivate static func caveatBold(_ size: CGFloat) -> Font {
+        // 'wght' as a four-char code, the identifier CoreText wants for the
+        // variation axis (see kCTFontVariationAxisIdentifierKey).
+        let weightAxis = 0x77_67_68_74
+        guard let base = UIFont(name: "Caveat-Regular", size: size) else {
+            return Font(UIFont.systemFont(ofSize: size, weight: .bold))
+        }
+        let descriptor = base.fontDescriptor.addingAttributes([
+            UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String): [
+                weightAxis: 700
+            ]
+        ])
+        return Font(UIFont(descriptor: descriptor, size: size))
     }
 
     /// SF Pro Rounded — system rounded design.

@@ -23,6 +23,8 @@ struct ValencePickerContent: View {
     /// Apple's minimum comfortable target; the small stones are under it on
     /// both axes.
     private static let minimumHitTarget: CGFloat = 44
+    /// The large lockup is three lines of hand and uppercase type.
+    private static let captionHeight: CGFloat = 116
 
     var body: some View {
         VStack(spacing: Spacing.md) {
@@ -78,13 +80,21 @@ struct ValencePickerContent: View {
         .accessibilityAddTraits(isActive ? [.isSelected] : [])
     }
 
+    /// Reserves the tallest lockup's height so picking a stone does not shove
+    /// the fan up the screen.
+    @ViewBuilder
     private var caption: some View {
-        Text(selected?.caption ?? LocalizedStringResource("Pick the one that fits."))
-            .pebblesFont(.subhead)
-            .foregroundStyle(Color.system.secondary)
-            .multilineTextAlignment(.center)
-            .frame(maxWidth: .infinity)
-            .animation(nil, value: selected)
+        Group {
+            if let selected {
+                ValenceHeadlineView(valence: selected)
+            } else {
+                Text("Pick the one that fits.")
+                    .pebblesFont(.subhead)
+                    .foregroundStyle(Color.system.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, minHeight: Self.captionHeight, alignment: .top)
+        .animation(nil, value: selected)
     }
 }
 

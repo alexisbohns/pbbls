@@ -82,17 +82,28 @@ struct ValenceHelpersTests {
         }
     }
 
-    @Test("caption copy matches the spec")
-    func captionCopy() {
-        #expect(String(localized: Valence.lowlightSmall.caption)   == "A small lowlight.")
-        #expect(String(localized: Valence.lowlightMedium.caption)  == "A medium lowlight.")
-        #expect(String(localized: Valence.lowlightLarge.caption)   == "A large lowlight.")
-        #expect(String(localized: Valence.neutralSmall.caption)    == "A small neutral moment.")
-        #expect(String(localized: Valence.neutralMedium.caption)   == "A medium neutral moment.")
-        #expect(String(localized: Valence.neutralLarge.caption)    == "A large neutral moment.")
-        #expect(String(localized: Valence.highlightSmall.caption)  == "A small highlight.")
-        #expect(String(localized: Valence.highlightMedium.caption) == "A medium highlight.")
-        #expect(String(localized: Valence.highlightLarge.caption)  == "A large highlight.")
+    @Test("headline prefixes only large events")
+    func headlinePrefixOnlyOnLarge() {
+        for valence in Valence.allCases {
+            let hasPrefix = valence.headline.prefix != nil
+            #expect(hasPrefix == (valence.sizeGroup == .large), "\(valence)")
+        }
+    }
+
+    @Test("headline copy matches the spec")
+    func headlineCopy() {
+        #expect(String(localized: Valence.highlightLarge.headline.prefix ?? "") == "A BIG")
+        #expect(String(localized: Valence.lowlightLarge.headline.prefix ?? "") == "A BIG")
+        // The neutral word does not take the article.
+        #expect(String(localized: Valence.neutralLarge.headline.prefix ?? "") == "BIG")
+
+        #expect(String(localized: Valence.lowlightSmall.headline.word) == "Lowlight")
+        #expect(String(localized: Valence.neutralMedium.headline.word) == "Moment")
+        #expect(String(localized: Valence.highlightLarge.headline.word) == "Highlight")
+
+        #expect(String(localized: Valence.neutralSmall.headline.span) == "OF MY DAY")
+        #expect(String(localized: Valence.neutralMedium.headline.span) == "OF MY WEEK")
+        #expect(String(localized: Valence.neutralLarge.headline.span) == "OF MY MONTH")
     }
 
     @Test("shortLabel reflects polarity")

@@ -121,20 +121,46 @@ extension Valence {
     /// wobbles, which `Scripts/valence-art-to-svg.mjs` generates from it.
     var assetName: String { "valence-\(rawValue)" }
 
-    /// Caption under the valence fan, naming the stone the user just picked.
-    /// Warmer and more sentence-like than `label`, which is the terse
-    /// "Lowlight — small" form the collapsed form row wants.
-    var caption: LocalizedStringResource {
-        switch self {
-        case .lowlightSmall:   return "A small lowlight."
-        case .lowlightMedium:  return "A medium lowlight."
-        case .lowlightLarge:   return "A large lowlight."
-        case .neutralSmall:    return "A small neutral moment."
-        case .neutralMedium:   return "A medium neutral moment."
-        case .neutralLarge:    return "A large neutral moment."
-        case .highlightSmall:  return "A small highlight."
-        case .highlightMedium: return "A medium highlight."
-        case .highlightLarge:  return "A large highlight."
+    /// The three-line lockup under the fan naming the stone the user picked:
+    /// an optional size prefix, the polarity word in the hand font, and the
+    /// span it covers. Three separate strings rather than one sentence because
+    /// each line is typeset differently — and because a translator needs to
+    /// move them independently.
+    struct Headline {
+        /// Only large events get one; medium and small carry their size in the
+        /// word's own size.
+        let prefix: LocalizedStringResource?
+        /// Rendered lowercase for small events, as authored otherwise.
+        let word: LocalizedStringResource
+        let span: LocalizedStringResource
+    }
+
+    var headline: Headline {
+        Headline(prefix: headlinePrefix, word: headlineWord, span: headlineSpan)
+    }
+
+    private var headlinePrefix: LocalizedStringResource? {
+        guard sizeGroup == .large else { return nil }
+        // "BIG Moment" rather than "A BIG Moment": the neutral word does not
+        // take the article in the designs.
+        return polarity == .neutral ? "BIG" : "A BIG"
+    }
+
+    /// "Moment" rather than `shortLabel`'s "Neutral" — the lockup reads as a
+    /// phrase, and nobody calls their afternoon a neutral.
+    private var headlineWord: LocalizedStringResource {
+        switch polarity {
+        case .lowlight:  return "Lowlight"
+        case .neutral:   return "Moment"
+        case .highlight: return "Highlight"
+        }
+    }
+
+    private var headlineSpan: LocalizedStringResource {
+        switch sizeGroup {
+        case .small:  return "OF MY DAY"
+        case .medium: return "OF MY WEEK"
+        case .large:  return "OF MY MONTH"
         }
     }
 

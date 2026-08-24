@@ -263,3 +263,38 @@ tests are unchanged.
 Note for whoever verifies this visually: `ImageRenderer` captures a `ScrollView`'s
 content as empty, so `RecordStepScaffold` cannot be rendered directly. Mimic it
 without the ScrollView.
+
+## Revision 2 (2026-08-24) — the caption becomes a lockup
+
+The one-line caption ("A small highlight.") is replaced by a three-line
+typographic lockup, from designs supplied after the first build. It supersedes
+the **Caption** paragraph above.
+
+```
+        A BIG          ← large events only; uppercase, foreground
+      Highlight        ← hand font, sized by size group, coloured by polarity
+   OF MY MONTH         ← uppercase, secondary
+```
+
+- **Prefix** — `A BIG` for lowlight and highlight, `BIG` for neutral (the
+  neutral word does not take the article in the designs). Nothing on medium or
+  small: their size is carried by the word's own size.
+- **Word** — Caveat at weight 700, 34 / 44 / 56pt for small / medium / large,
+  lowercased on small. Highlight wears the same `MeshGradient` its stone does,
+  neutral takes `AccentPrimary`, lowlight takes `SystemForeground` (darker than
+  its stone's ink: at headline size a grey word reads as disabled).
+- **Span** — `OF MY DAY` / `OF MY WEEK` / `OF MY MONTH`, reusing the existing
+  `cardHeading` token.
+
+`Valence.caption` and its nine strings are removed; `Valence.Headline` carries
+the three parts separately, so each line is typeset independently and a
+translator can move them independently. The picker reserves the tallest
+lockup's height (116pt) so picking a stone does not shove the fan up the page.
+
+Two mechanical notes for whoever touches this next:
+
+- **Caveat is a variable font.** `UIFont(name: "Caveat-Bold")` does not resolve;
+  the weight axis has to be set explicitly through `kCTFontVariationAttribute`.
+- **`pebblesFont` owns `textCase`.** The token sets that environment value
+  itself, so a `.textCase(.lowercase)` layered on at the call site is overridden
+  by the token's `nil`. Lowercase the string instead.

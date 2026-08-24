@@ -36,6 +36,18 @@ struct ValenceStoneStyle {
         }
     }
 
+    /// Fill for the headline word naming the picked valence. Highlight carries
+    /// the same mesh its stone does, so the word and the stone read as one
+    /// thing. Lowlight goes darker than its stone ink: at headline size a grey
+    /// word looks disabled rather than quiet.
+    static func headlineInk(for polarity: ValencePolarity) -> AnyShapeStyle {
+        switch polarity {
+        case .lowlight:  return AnyShapeStyle(Color.system.foreground)
+        case .neutral:   return AnyShapeStyle(Color.accent.primary)
+        case .highlight: return AnyShapeStyle(highlightGradient)
+        }
+    }
+
     /// Soft enough that the page background reads through the stone. The wash
     /// composites against the background, so the same alpha that reads as a
     /// pastel over the light background reads as mud over the dark one — dark
