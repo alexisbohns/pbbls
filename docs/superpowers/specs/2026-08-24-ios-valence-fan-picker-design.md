@@ -451,3 +451,26 @@ its artwork in **white**. The resting wash could not carry a white outline
 (white on its gold corner has almost no contrast), and selection is exactly
 where the stone should shout, so the wash goes to full strength rather than
 merely to full opacity.
+
+## Revision 6 (2026-08-24) — the dark-mode wash joins the surface convention
+
+The highlight stone's resting wash was the sampled gradient at raised opacity in
+dark mode. Over black that went muddy and opaque, and the stone ended up looking
+nothing like its neighbours, which wear flat 10%-alpha surface colours
+(`AccentSurface` is `AccentPrimary` at 0.10; `SystemMuted` plays the same role
+for lowlight).
+
+Dark mode now joins that convention instead of fighting it, using the Joy
+emotion category's own `surface_color` — `#A15C08` at 0.10, the same 10% rule,
+in a warm gold that keeps highlight distinct from neutral's rose. Light mode is
+unchanged: over a light page the sampled gradient at 0.35 still reads as the
+pastel it was sampled from, which is the whole point of it.
+
+So highlight carries three gradients and one flat colour:
+
+| state | light | dark |
+|---|---|---|
+| resting fill | sampled wash at 0.35 | Joy `surface_color` |
+| resting ink | ink twin (HSL 0.90 / 0.52) | same |
+| selected fill | selected wash (HSL 0.92 / 0.58) | same |
+| selected ink | white | same |

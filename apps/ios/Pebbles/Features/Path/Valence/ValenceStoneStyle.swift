@@ -39,10 +39,7 @@ struct ValenceStoneStyle {
                 ink: AnyShapeStyle(Color.accent.primary)
             )
         case .highlight:
-            return ValenceStoneStyle(
-                backdrop: AnyShapeStyle(highlightWash.opacity(highlightFillOpacity(scheme))),
-                ink: highlightInk
-            )
+            return ValenceStoneStyle(backdrop: restingWash(scheme), ink: highlightInk)
         }
     }
 
@@ -81,13 +78,28 @@ struct ValenceStoneStyle {
         }
     }
 
-    /// Soft enough that the page background reads through the stone. The wash
-    /// composites against the background, so the same alpha that reads as a
-    /// pastel over the light background reads as mud over the dark one — dark
-    /// gets more of the gradient, not less.
-    private static func highlightFillOpacity(_ scheme: ColorScheme) -> Double {
-        scheme == .dark ? 0.7 : 0.35
+    /// The unselected stone's wash.
+    ///
+    /// Light mode keeps the sampled gradient at low opacity: over a light page
+    /// it stays a pastel. Dark mode cannot — the same gradient over black goes
+    /// muddy and opaque, and the highlight stone ends up looking nothing like
+    /// its neighbours, which wear flat 10%-alpha surface colours
+    /// (`AccentSurface` is `AccentPrimary` at 0.10).
+    ///
+    /// So dark mode joins that convention rather than fighting it, using the
+    /// Joy emotion category's own `surface_color` — `#A15C08` at 0.10, the same
+    /// 10% rule, in a warm gold that keeps highlight distinct from neutral's
+    /// rose.
+    private static func restingWash(_ scheme: ColorScheme) -> AnyShapeStyle {
+        scheme == .dark
+            ? AnyShapeStyle(joySurface)
+            : AnyShapeStyle(highlightWash.opacity(0.35))
     }
+
+    /// Joy's `surface_color`, copied for the same reason as the gradient
+    /// samples: `EmotionPaletteService` needs the network and is not loaded
+    /// when this view first draws.
+    private static let joySurface = Color(hex: "#A15C081A") ?? .clear
 
     // MARK: - The highlight gradient
 
