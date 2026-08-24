@@ -2,30 +2,21 @@ import SwiftUI
 
 /// The lockup under the fan naming the stone the user picked.
 ///
-/// Three lines, typeset to carry the two axes without spelling them out: the
-/// word grows with the size group and takes the polarity's colour, so
-/// "Highlight" wears its stone's mesh while "Lowlight" reads as ink. Large
-/// events get a prefix; small ones drop to lowercase.
+/// Two lines, typeset to carry both axes without spelling them out: the word
+/// grows with the size group and takes the polarity's colour, so "Highlight"
+/// wears its stone's mesh while "Lowlight" reads as ink, and small events drop
+/// to lowercase.
 struct ValenceHeadlineView: View {
     let valence: Valence
-    /// The roll's faded neighbour words are the word alone: their prefix and
-    /// span belong to whichever valence is actually centred.
-    var showsPrefix: Bool = true
+    /// The roll's faded neighbour words are the word alone: the span belongs to
+    /// whichever valence is actually centred.
     var showsSpan: Bool = true
 
     var body: some View {
         VStack(spacing: Spacing.xs) {
-            if showsPrefix, let prefix = valence.headline.prefix {
-                Text(prefix)
-                    .pebblesFont(.cardHeadingEmphasized)
-                    .foregroundStyle(Color.system.foreground)
-            }
-
             Text(word)
                 .pebblesFont(wordToken)
                 .foregroundStyle(ValenceStoneStyle.headlineInk(for: valence.polarity))
-                // Without this the hand font's last letter is clipped at the
-                // text's advance width — see PebblesFont.inkOverhang.
                 .padding(.horizontal, wordToken.inkOverhang)
 
             if showsSpan {
@@ -41,9 +32,15 @@ struct ValenceHeadlineView: View {
     /// Lowercased here rather than with `.textCase`: `pebblesFont` sets that
     /// environment value itself, and the token's `nil` wins over anything the
     /// call site layers on top of it.
+    ///
+    /// Padded with a space on each side so the hand font's terminal flick has
+    /// advance width to live in — see `PebblesFont.needsInkPadding`. A space is
+    /// what survives: it is part of the line the glyphs are clipped to, where a
+    /// frame's padding is not.
     private var word: String {
-        let word = String(localized: valence.headline.word)
-        return valence.sizeGroup == .small ? word.lowercased() : word
+        let raw = String(localized: valence.headline.word)
+        let cased = valence.sizeGroup == .small ? raw.lowercased() : raw
+        return wordToken.needsInkPadding ? " \(cased) " : cased
     }
 
     private var wordToken: PebblesFont {

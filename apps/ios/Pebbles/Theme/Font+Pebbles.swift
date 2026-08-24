@@ -44,21 +44,35 @@ extension PebblesFont {
     /// Horizontal breathing room a token needs so its glyphs are not clipped
     /// at the text's layout width.
     ///
-    /// Caveat Bold's terminal `t` flicks up and to the right past the glyph's
-    /// advance, and SwiftUI clips `Text` to the advance — so "Moment" and
-    /// "Lowlight" lose the end of their last letter to a hard vertical cut.
-    /// Roughly a quarter of the font size covers the flick at every size.
+    /// Caveat Bold's terminal `t` flicks to the right past the glyph's advance,
+    /// and `Text` is clipped to the advance — so "Moment" and "Lowlight" lose
+    /// the end of their last letter to a hard vertical cut.
+    ///
+    /// Measured with CoreText (`CTLineGetImageBounds` against
+    /// `CTLineGetTypographicBounds`): the ink runs 3–8pt past the advance on
+    /// the right at 34–56pt, and never past the ascent, so the cut is only ever
+    /// horizontal. These values round that up.
+    ///
+    /// **Padding alone does not fix it.** A frame is not what the glyphs are
+    /// clipped to, so callers pad the *string* as well — see
+    /// `PebblesFont.needsInkPadding`. This value is the belt to that's braces.
     ///
     /// Applied by the caller rather than by `pebblesFont`, which stays a pure
     /// type modifier (font + tracking + case) and never touches layout.
     var inkOverhang: CGFloat {
         switch self {
-        case .valenceWordSmall:  return 9
-        case .valenceWordMedium: return 11
-        case .valenceWordLarge:  return 14
+        case .valenceWordSmall:  return 6
+        case .valenceWordMedium: return 8
+        case .valenceWordLarge:  return 10
         default:                 return 0
         }
     }
+
+    /// True for the faces whose ink escapes their advance. Callers put a space
+    /// on each side of the string: a space carries real advance width, so the
+    /// room travels with the text no matter what measures its bounds, and
+    /// padding both sides keeps the word centred.
+    var needsInkPadding: Bool { inkOverhang > 0 }
 }
 
 // MARK: - View modifier

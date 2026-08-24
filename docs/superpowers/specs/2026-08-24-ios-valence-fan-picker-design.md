@@ -376,3 +376,37 @@ Roll behaviour is index arithmetic on `Valence` (`polarityIndex`, `sizeIndex`,
 gesture. What tests cannot cover — and what needs a device — is the feel: the
 detent spacing, the spring, and whether the vertical axis really wins against
 the ScrollView.
+
+## Revision 4 (2026-08-24) — no overtitle, and the clipping fix that actually holds
+
+**The `A BIG` / `BIG` overtitle is gone**, along with its strings and
+`Valence.Headline.prefix`. The lockup is two lines: the word and the span. Size
+is carried by the word's own size and by the pyramid, which is what the two
+axes were always meant to say without a third line saying it again.
+
+**The terminal-letter clipping needed a second fix.** Revision 2 added
+horizontal frame padding (`PebblesFont.inkOverhang`). That was measured against
+`ImageRenderer`, where it works — and it does not hold on device, because a
+frame is not what glyphs are clipped to.
+
+The real numbers, from CoreText (`CTLineGetImageBounds` against
+`CTLineGetTypographicBounds`) across all three sizes and both cases:
+
+| size | right overhang | top overhang |
+|---|---|---|
+| 34pt | 3.0 – 4.7pt | none (ink stays 8–13pt below the ascent) |
+| 44pt | 3.9 – 6.0pt | none |
+| 56pt | 5.0 – 7.7pt | none |
+
+So the cut is only ever on the right, and never more than 8pt — which the
+padding already covered, proving the padding was not what was failing.
+
+The fix that holds is to pad the **string**, with a space on each side
+(`PebblesFont.needsInkPadding`). A space carries real advance width, so the
+room is part of the line the glyphs are clipped to and travels with the text no
+matter what measures its bounds; padding both sides keeps the word centred.
+`inkOverhang` stays as the frame-level belt to that's braces, now set from the
+measurement rather than by eye.
+
+The lesson for the next hand-font token: **measure the ink, don't eyeball the
+render, and don't trust a frame to hold glyphs that escape their advance.**

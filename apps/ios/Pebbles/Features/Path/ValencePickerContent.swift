@@ -23,9 +23,8 @@ struct ValencePickerContent: View {
     /// Apple's minimum comfortable target; the small stones are under it on
     /// both axes.
     private static let minimumHitTarget: CGFloat = 44
-    /// The tallest state: overtitle, the large hand word, the span, and the
-    /// pyramid.
-    private static let captionHeight: CGFloat = 168
+    /// The tallest state: the large hand word, the span, and the pyramid.
+    private static let captionHeight: CGFloat = 144
 
     var body: some View {
         VStack(spacing: Spacing.md) {

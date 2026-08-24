@@ -13,9 +13,8 @@ import SwiftUI
 ///
 /// Nothing moves that is not changing. The block is anchored to its bottom
 /// edge and the size pyramid is always three marks tall, so rolling between
-/// sizes never shifts the layout: the word swaps size in place, the pyramid
-/// lights a different mark, and the `BIG` overtitle grows upward into space
-/// that was already reserved. On the polarity axis only the word row travels —
+/// sizes never shifts the layout: the word swaps size in place and the pyramid
+/// lights a different mark. On the polarity axis only the word row travels —
 /// the span reads the same for all three polarities, so sliding it would be
 /// motion that says nothing.
 struct ValenceRollView: View {
@@ -45,12 +44,6 @@ struct ValenceRollView: View {
 
     var body: some View {
         VStack(spacing: Spacing.xs) {
-            if let prefix = valence.headline.prefix {
-                Text(prefix)
-                    .pebblesFont(.cardHeadingEmphasized)
-                    .foregroundStyle(Color.system.foreground)
-            }
-
             wordRow
 
             Text(valence.headline.span)
@@ -81,7 +74,7 @@ struct ValenceRollView: View {
             if let after = valence.polarityAfter {
                 neighbour(after, at: Self.polarityStep)
             }
-            ValenceHeadlineView(valence: valence, showsPrefix: false, showsSpan: false)
+            ValenceHeadlineView(valence: valence, showsSpan: false)
         }
         .offset(x: offset)
     }
@@ -92,7 +85,6 @@ struct ValenceRollView: View {
     private func neighbour(_ polarity: ValencePolarity, at distance: CGFloat) -> some View {
         ValenceHeadlineView(
             valence: .at(polarity: polarity, size: valence.sizeGroup),
-            showsPrefix: false,
             showsSpan: false
         )
         .opacity(Self.neighbourOpacity)

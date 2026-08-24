@@ -281,23 +281,6 @@
         }
       }
     },
-    "A BIG" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A BIG"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "UN GRAND"
-          }
-        }
-      }
-    },
     "A coffee with a friend. A concert that gave you chills. A tough conversation. Record it in seconds — no blank page, no pressure, no audience." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1320,23 +1303,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tes badges le long du chemin"
-          }
-        }
-      }
-    },
-    "BIG" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "BIG"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GRAND"
           }
         }
       }
