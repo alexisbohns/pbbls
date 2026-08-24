@@ -899,6 +899,18 @@
         "description": "Ce moment a marqué tout mon mois et sera réuni dans mon Cairn annuel."
       }
     },
+    "valenceFan": {
+      "word": {
+        "lowlight": "Creux",
+        "neutral": "Moment",
+        "highlight": "Temps fort"
+      },
+      "span": {
+        "small": "DE MA JOURNÉE",
+        "medium": "DE MA SEMAINE",
+        "large": "DE MON MOIS"
+      }
+    },
     "date": {
       "title": "Quand",
       "close": "Fermer",
