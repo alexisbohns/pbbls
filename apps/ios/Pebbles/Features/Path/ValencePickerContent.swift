@@ -23,8 +23,9 @@ struct ValencePickerContent: View {
     /// Apple's minimum comfortable target; the small stones are under it on
     /// both axes.
     private static let minimumHitTarget: CGFloat = 44
-    /// The large lockup is three lines of hand and uppercase type.
-    private static let captionHeight: CGFloat = 116
+    /// The tallest state: overtitle, the large hand word, the span, and the
+    /// pyramid.
+    private static let captionHeight: CGFloat = 168
 
     var body: some View {
         VStack(spacing: Spacing.md) {
@@ -90,7 +91,9 @@ struct ValencePickerContent: View {
             // and in the edit sheet before it stages a value.
             ValenceRollView(valence: selected ?? .neutralMedium, onChange: onSelect)
         }
-        .frame(maxWidth: .infinity, minHeight: Self.captionHeight, alignment: .top)
+        // Bottom-anchored: the pyramid and the span sit at a fixed height, and
+        // the word and its overtitle grow upward into space already reserved.
+        .frame(maxWidth: .infinity, minHeight: Self.captionHeight, alignment: .bottom)
         .animation(nil, value: selected)
     }
 }

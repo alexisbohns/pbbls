@@ -11,9 +11,13 @@ import SwiftUI
 /// resistance past the last step, so a hard swipe cannot loop the user back
 /// where they started.
 ///
-/// The affordances are the state: faded neighbour words sit one step out on
-/// each side, and ladder marks above and below count the sizes still available
-/// in that direction, widest for the biggest event.
+/// Nothing moves that is not changing. The block is anchored to its bottom
+/// edge and the size pyramid is always three marks tall, so rolling between
+/// sizes never shifts the layout: the word swaps size in place, the pyramid
+/// lights a different mark, and the `BIG` overtitle grows upward into space
+/// that was already reserved. On the polarity axis only the word row travels —
+/// the span reads the same for all three polarities, so sliding it would be
+/// motion that says nothing.
 struct ValenceRollView: View {
     let valence: Valence
     let onChange: (Valence) -> Void
@@ -34,13 +38,27 @@ struct ValenceRollView: View {
     /// was when the finger landed, never against the value it has drifted to.
     @State private var origin: Valence?
     @State private var axis: Axis?
-    @State private var offset: CGSize = .zero
+    /// Horizontal only. The size axis deliberately does not translate: a block
+    /// that slid vertically would drag the whole lockup past its neighbours,
+    /// and the detent plus the pyramid already say what changed.
+    @State private var offset: CGFloat = 0
 
     var body: some View {
-        VStack(spacing: Spacing.md) {
-            ladder(valence.sizesAbove)
-            wordBlock
-            ladder(valence.sizesBelow.reversed())
+        VStack(spacing: Spacing.xs) {
+            if let prefix = valence.headline.prefix {
+                Text(prefix)
+                    .pebblesFont(.cardHeadingEmphasized)
+                    .foregroundStyle(Color.system.foreground)
+            }
+
+            wordRow
+
+            Text(valence.headline.span)
+                .pebblesFont(.cardHeading)
+                .foregroundStyle(Color.system.secondary)
+
+            pyramid
+                .padding(.top, Spacing.sm)
         }
         .frame(maxWidth: .infinity)
         .contentShape(Rectangle())
@@ -54,7 +72,8 @@ struct ValenceRollView: View {
 
     // MARK: - Content
 
-    private var wordBlock: some View {
+    /// The only part that travels on the polarity axis.
+    private var wordRow: some View {
         ZStack {
             if let before = valence.polarityBefore {
                 neighbour(before, at: -Self.polarityStep)
@@ -62,9 +81,9 @@ struct ValenceRollView: View {
             if let after = valence.polarityAfter {
                 neighbour(after, at: Self.polarityStep)
             }
-            ValenceHeadlineView(valence: valence)
+            ValenceHeadlineView(valence: valence, showsPrefix: false, showsSpan: false)
         }
-        .offset(offset)
+        .offset(x: offset)
     }
 
     /// A neighbouring polarity, one step out. Rendered at the current size so
@@ -81,15 +100,15 @@ struct ValenceRollView: View {
         .allowsHitTesting(false)
     }
 
-    /// Marks for the sizes still available in one direction, widest for the
-    /// biggest event. Nothing renders at the ends of the ladder, which is how
-    /// the roll says "this is as big as it gets".
-    private func ladder(_ sizes: [ValenceSizeGroup]) -> some View {
-        VStack(spacing: 8) {
-            ForEach(sizes, id: \.self) { size in
+    /// Three marks, widest at the top, with the current size lit. Always all
+    /// three: a pyramid that changed height would move everything above it,
+    /// which is the shift this layout exists to avoid.
+    private var pyramid: some View {
+        VStack(spacing: 6) {
+            ForEach(ValenceSizeGroup.ladder, id: \.self) { size in
                 Capsule()
-                    .fill(Color.accent.primary.opacity(0.3))
-                    .frame(width: markWidth(size), height: 5)
+                    .fill(Color.accent.primary.opacity(size == valence.sizeGroup ? 1 : 0.25))
+                    .frame(width: markWidth(size), height: 6)
             }
         }
         .animation(.snappy(duration: 0.2), value: valence.sizeGroup)
@@ -97,9 +116,9 @@ struct ValenceRollView: View {
 
     private func markWidth(_ size: ValenceSizeGroup) -> CGFloat {
         switch size {
-        case .small:  return 22
-        case .medium: return 34
-        case .large:  return 46
+        case .small:  return 8
+        case .medium: return 26
+        case .large:  return 44
         }
     }
 
@@ -141,13 +160,11 @@ struct ValenceRollView: View {
                     ? next.polarityIndex - origin.polarityIndex
                     : next.sizeIndex - origin.sizeIndex
                 let remainder = travel + CGFloat(taken) * step
-                let held = rubberBanded(remainder, limit: step / 2)
-                offset = axis == .polarity ? CGSize(width: held, height: 0)
-                                           : CGSize(width: 0, height: held)
+                offset = axis == .polarity ? rubberBanded(remainder, limit: step / 2) : 0
             }
             .onEnded { _ in
                 withAnimation(.spring(response: 0.34, dampingFraction: 0.7)) {
-                    offset = .zero
+                    offset = 0
                 }
                 origin = nil
                 axis = nil

@@ -328,9 +328,22 @@ axis the ladder runs large at the top to small at the bottom
 toward smaller events — scrolling down a list whose big end is at the top.
 
 **Affordances are the state.** Faded neighbour words sit one step out on each
-side and bleed off the screen edges. Ladder marks above and below count the
-sizes still available in that direction, widest for the biggest event: nothing
-above when you are on large, nothing below when you are on small.
+side and bleed off the screen edges. Below the span, a pyramid of three marks —
+widest at the top, a dot at the bottom — lights the current size.
+
+**Nothing moves that is not changing.** The block is anchored to its bottom
+edge and the pyramid is always three marks tall, so rolling between sizes never
+shifts the layout: the span and the pyramid hold their exact position, the word
+swaps size in place, and the `BIG` overtitle grows upward into space the
+reservation already accounts for. On the polarity axis only the word row
+travels — the span reads the same for all three polarities, so sliding it would
+be motion that says nothing. The size axis does not translate at all; the
+detent, the spring resize and the pyramid are the feedback.
+
+(The first cut counted *remaining* sizes with marks above and below the lockup,
+which changed the block's height on every size step and shoved the whole thing
+up and down the page. `Valence.sizesAbove` / `sizesBelow` existed for that and
+are gone with it.)
 
 **The step arrives answered.** `RecordFlowModel.seedValenceIfNeeded()` parks
 the draft on neutral-medium when the step appears, so the roll has something

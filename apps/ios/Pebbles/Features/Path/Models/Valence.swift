@@ -232,13 +232,6 @@ extension Valence {
         return .at(polarity: polarity, size: size)
     }
 
-    /// Sizes stacked above this one in the roll, furthest first — the ladder
-    /// marks drawn above the lockup.
-    var sizesAbove: [ValenceSizeGroup] { Array(ValenceSizeGroup.ladder.prefix(sizeIndex)) }
-
-    /// Sizes stacked below this one, nearest first.
-    var sizesBelow: [ValenceSizeGroup] { Array(ValenceSizeGroup.ladder.dropFirst(sizeIndex + 1)) }
-
     /// The polarity one step to each side, nil at the ends. Drives the faded
     /// neighbour words the roll shows left and right.
     var polarityBefore: ValencePolarity? {

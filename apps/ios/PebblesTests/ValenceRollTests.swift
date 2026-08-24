@@ -46,24 +46,16 @@ struct ValenceRollTests {
         #expect(Valence.at(polarityIndex: 1, sizeIndex: 9) == .neutralSmall)
     }
 
-    @Test("ladder marks count the sizes left in each direction")
-    func ladderMarks() {
-        #expect(Valence.neutralLarge.sizesAbove.isEmpty)
-        #expect(Valence.neutralLarge.sizesBelow == [.medium, .small])
+    /// The pyramid draws all three marks and lights the current one, so the
+    /// only thing to assert is that the ladder covers every size exactly once.
+    @Test("the pyramid has a mark for every size")
+    func pyramidCoversEverySize() {
+        #expect(Set(ValenceSizeGroup.ladder) == Set(ValenceSizeGroup.allCases))
+        #expect(ValenceSizeGroup.ladder.count == ValenceSizeGroup.allCases.count)
 
-        #expect(Valence.neutralMedium.sizesAbove == [.large])
-        #expect(Valence.neutralMedium.sizesBelow == [.small])
-
-        #expect(Valence.neutralSmall.sizesAbove == [.large, .medium])
-        #expect(Valence.neutralSmall.sizesBelow.isEmpty)
-    }
-
-    @Test("every valence's marks account for the other two sizes")
-    func marksAreTotal() {
         for valence in Valence.allCases {
-            #expect(valence.sizesAbove.count + valence.sizesBelow.count == 2, "\(valence)")
-            #expect(!valence.sizesAbove.contains(valence.sizeGroup))
-            #expect(!valence.sizesBelow.contains(valence.sizeGroup))
+            let lit = ValenceSizeGroup.ladder.filter { $0 == valence.sizeGroup }
+            #expect(lit.count == 1, "\(valence) lights \(lit.count) marks")
         }
     }
 
