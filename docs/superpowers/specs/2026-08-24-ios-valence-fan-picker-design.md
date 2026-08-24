@@ -298,3 +298,11 @@ Two mechanical notes for whoever touches this next:
 - **`pebblesFont` owns `textCase`.** The token sets that environment value
   itself, so a `.textCase(.lowercase)` layered on at the call site is overridden
   by the token's `nil`. Lowercase the string instead.
+- **Caveat Bold overhangs its advance width.** The terminal `t` flicks up and
+  to the right past where the glyph officially ends, and SwiftUI clips `Text`
+  to the advance — so "Moment" and "Lowlight" lose the end of their last letter
+  to a hard vertical cut. `PebblesFont.inkOverhang` carries the horizontal
+  padding that fixes it (roughly a quarter of the font size), applied by the
+  caller so `pebblesFont` stays a pure type modifier. The same hazard applies
+  to any future Caveat token: `.nameInputHand` (the pebble name field) has the
+  same exposure and is left alone here.

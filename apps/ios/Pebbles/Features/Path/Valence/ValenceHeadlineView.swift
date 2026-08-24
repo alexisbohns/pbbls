@@ -20,6 +20,9 @@ struct ValenceHeadlineView: View {
             Text(word)
                 .pebblesFont(wordToken)
                 .foregroundStyle(ValenceStoneStyle.headlineInk(for: valence.polarity))
+                // Without this the hand font's last letter is clipped at the
+                // text's advance width — see PebblesFont.inkOverhang.
+                .padding(.horizontal, wordToken.inkOverhang)
 
             Text(valence.headline.span)
                 .pebblesFont(.cardHeading)

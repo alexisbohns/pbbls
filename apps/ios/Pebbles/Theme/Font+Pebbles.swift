@@ -38,6 +38,29 @@ enum PebblesFont {
     case valenceWordLarge
 }
 
+// MARK: - Ink overhang
+
+extension PebblesFont {
+    /// Horizontal breathing room a token needs so its glyphs are not clipped
+    /// at the text's layout width.
+    ///
+    /// Caveat Bold's terminal `t` flicks up and to the right past the glyph's
+    /// advance, and SwiftUI clips `Text` to the advance — so "Moment" and
+    /// "Lowlight" lose the end of their last letter to a hard vertical cut.
+    /// Roughly a quarter of the font size covers the flick at every size.
+    ///
+    /// Applied by the caller rather than by `pebblesFont`, which stays a pure
+    /// type modifier (font + tracking + case) and never touches layout.
+    var inkOverhang: CGFloat {
+        switch self {
+        case .valenceWordSmall:  return 9
+        case .valenceWordMedium: return 11
+        case .valenceWordLarge:  return 14
+        default:                 return 0
+        }
+    }
+}
+
 // MARK: - View modifier
 
 extension View {
