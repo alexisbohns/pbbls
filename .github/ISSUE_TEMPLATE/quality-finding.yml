@@ -1,0 +1,78 @@
+name: Quality finding
+description: File a finding from a Kritik quality audit (docs/quality/framework.md)
+title: "[Quality] <criterion-id> <surface>: <short defect statement>"
+labels: ["quality"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        File one issue per finding. Title convention: `[Quality] SEC-03 web: session tokens logged on auth failure`.
+        Add the surface label (`web`, `ios`, `android`, `admin`, `supabase`) and any scope label (`core`, `ui`, `db`, `api`, `auth`, `facility`, `legal`) that applies, plus the milestone.
+        Per-criterion prefilled skeletons live in `docs/quality/templates/`.
+  - type: input
+    id: criterion
+    attributes:
+      label: Criterion
+      description: "Criterion id from docs/quality/library/framework.json"
+      placeholder: "SEC-03"
+    validations:
+      required: true
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Surface
+      options: [web, ios, android, admin, supabase, cross-surface]
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity (impact × likelihood, see framework.md §4.2)
+      options: ["Critical (20–25)", "High (12–19)", "Medium (6–11)", "Low (2–5)", "Info (1)"]
+    validations:
+      required: true
+  - type: dropdown
+    id: cost
+    attributes:
+      label: Remediation cost
+      options: ["S (≤ half day)", "M (≤ 2 days)", "L (≤ 1 week / 2 surfaces)", "XL (> 1 week / cross-surface)"]
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: "file:line citations pinned to a commit, config keys, or a reproduced behavior. A finding without evidence is an opinion."
+      placeholder: |
+        Commit: <sha>
+        - apps/web/src/…:120 — …
+    validations:
+      required: true
+  - type: textarea
+    id: risk
+    attributes:
+      label: Risk
+      description: What concretely goes wrong, for whom, under what conditions (impact and likelihood reasoning).
+    validations:
+      required: true
+  - type: textarea
+    id: remediation
+    attributes:
+      label: Remediation checklist
+      placeholder: |
+        - [ ] …
+        - [ ] Re-run the criterion checklist and record the new level in the next audit
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: Observable end state, including the maturity level this should restore (e.g. "SEC-03 scores ≥ 3 on web").
+    validations:
+      required: true
+  - type: input
+    id: audit
+    attributes:
+      label: Audit reference
+      placeholder: "docs/quality/audits/2026-08/ · finding F-2026-08-SEC-web-01"
