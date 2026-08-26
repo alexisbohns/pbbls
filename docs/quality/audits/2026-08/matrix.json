@@ -486,7 +486,18 @@
      "low": 1
     }
    },
-   "supabase": null
+   "supabase": {
+    "score": 40,
+    "grade": "D",
+    "capped": false,
+    "criteria": 2,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 2,
+     "low": 0
+    }
+   }
   },
   "PRF": {
    "web": {
@@ -680,12 +691,12 @@
   "ios": 48,
   "android": 50,
   "admin": 42,
-  "supabase": 54
+  "supabase": 53
  },
  "finding_counts": {
   "critical": 1,
   "high": 40,
-  "medium": 172,
+  "medium": 174,
   "low": 31,
   "info": 0
  }

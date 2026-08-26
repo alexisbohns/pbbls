@@ -2485,6 +2485,38 @@
    "source_cell": "android:PLT+A11Y"
   },
   {
+   "id": "F-2026-08-A11Y-supabase-01",
+   "criterion_id": "A11Y-07",
+   "surface": "supabase",
+   "title": "Reference catalog is not version-controlled, so per-locale label completeness is unverifiable and slug drift is undetected",
+   "detail": "The production emotion/domain vocabulary that clients localize by slug lives only in the linked Supabase project, not in migrations: emotion_categories rows and the 38-emotion set are hand-entered in Supabase Studio, and migrations either UPDATE-by-slug against rows they never INSERT (20260509000002 updates 38 slugs like 'amazed'/'joyful' that reference_tables never seeds -- it seeds a different 16: joy/sadness/...) or rely on rows 'added out-of-band' (20260415000001:55-61). Because the source of truth for the catalog is not in the repo, no harness or CI step can assert that every DB slug has a name/label key in every client's every locale, and the web fallback path (useReferenceCatalog.ts:11-14) silently renders the English DB `name` whenever a slug is missing from the locale catalog -- a mixed-language screen for FR users, invisible to any single-surface test.",
+   "evidence": "packages/supabase/supabase/migrations/20260506000000_emotion_categories.sql:9-11 (category data 'populated manually in Supabase Studio'); 20260717000000_emotion_categories_shaded_dark.sql:10-14; 20260415000001_remote_pebble_engine.sql:55-61; 20260509000002_emotions_picker_data.sql:26-65 vs 20260411000000_reference_tables.sql:63-79; apps/web/lib/i18n/useReferenceCatalog.ts:11-14,26-30",
+   "impact": 2,
+   "likelihood": 3,
+   "severity": "medium",
+   "cost": "M",
+   "priority": "P2",
+   "remediation": "Move the authoritative emotion_categories + full emotion + domain seed into an idempotent migration (insert ... on conflict (slug) do update) so the catalog is version-controlled, then add a completeness harness/CI check that diffs the DB catalog slug set against each client's per-locale key set (emotion.<slug>.name/label, domain.<slug>.*, emotionCategory.<slug>.name) and fails on any slug missing a key in any supported locale.",
+   "status": "open",
+   "source_cell": "supabase:A11Y (gap-fill)"
+  },
+  {
+   "id": "F-2026-08-A11Y-supabase-02",
+   "criterion_id": "A11Y-08",
+   "surface": "supabase",
+   "title": "No inclusive-language guideline and no recorded review of the server-side emotion/domain vocabulary framing",
+   "detail": "The emotion, domain, and category labels stored server-side are neutral and non-clinical today, but nothing in the repo documents an inclusive-language / tone standard for them or records that the vocabulary was reviewed for non-judgmental, non-pathologizing, non-gendered framing. Additions and edits (admin_update_domain name/label, admin_update_emotion_emoji, or a raw insert in Supabase Studio) pass through no framing-review gate, so a future addition could introduce clinical or judgmental language with no check. Per the A11Y-08 checklist the guideline's absence caps the criterion at level 1 regardless of how clean the current vocabulary is.",
+   "evidence": "Repo-wide grep for inclusiv|non-judgment|non-clinical|tone of voice|gendered|epicene|copy guideline matches only docs/quality/** (the framework itself), never a product guideline; no vocabulary-framing entry in docs/decisions/log.md; packages/supabase/supabase/migrations/20260703000000_admin_domain_management.sql:61-83 and 20260717120000_admin_emotion_management.sql:128-151 are the only vocabulary-editing paths and are gated only by is_admin, not by any review step.",
+   "impact": 2,
+   "likelihood": 3,
+   "severity": "medium",
+   "cost": "S",
+   "priority": "P1",
+   "remediation": "Write a short per-locale inclusive-copy guideline covering the emotion/relationship/domain vocabulary (neutral, non-clinical, non-judgmental, non-gendered), record a one-time review of the current catalog against it in the decision log or a spec, and add a recorded review step (or a deny-list check) before any migration/admin RPC that adds or renames a vocabulary entry lands.",
+   "status": "open",
+   "source_cell": "supabase:A11Y (gap-fill)"
+  },
+  {
    "id": "F-2026-08-A11Y-web-03",
    "criterion_id": "A11Y-07",
    "surface": "web",
