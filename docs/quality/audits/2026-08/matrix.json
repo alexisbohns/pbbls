@@ -1,0 +1,692 @@
+{
+ "audit_id": "2026-08",
+ "commit": "10181916ba9f56789e62c6351bb380682e5d90da",
+ "framework_version": "0.1.0",
+ "matrix": {
+  "SEC": {
+   "web": {
+    "score": 44,
+    "grade": "D",
+    "capped": false,
+    "criteria": 6,
+    "findings": {
+     "critical": 0,
+     "high": 1,
+     "medium": 3,
+     "low": 0
+    }
+   },
+   "ios": {
+    "score": 50,
+    "grade": "D",
+    "capped": false,
+    "criteria": 5,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 1,
+     "low": 0
+    }
+   },
+   "android": {
+    "score": 48,
+    "grade": "D",
+    "capped": false,
+    "criteria": 5,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 3,
+     "low": 0
+    }
+   },
+   "admin": {
+    "score": 48,
+    "grade": "D",
+    "capped": false,
+    "criteria": 7,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 5,
+     "low": 3
+    }
+   },
+   "supabase": {
+    "score": 62,
+    "grade": "D",
+    "capped": true,
+    "criteria": 8,
+    "findings": {
+     "critical": 1,
+     "high": 0,
+     "medium": 3,
+     "low": 1
+    }
+   }
+  },
+  "PRV": {
+   "web": {
+    "score": 56,
+    "grade": "C",
+    "capped": false,
+    "criteria": 9,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 2,
+     "low": 3
+    }
+   },
+   "ios": {
+    "score": 44,
+    "grade": "D",
+    "capped": false,
+    "criteria": 9,
+    "findings": {
+     "critical": 0,
+     "high": 1,
+     "medium": 3,
+     "low": 1
+    }
+   },
+   "android": {
+    "score": 46,
+    "grade": "D",
+    "capped": false,
+    "criteria": 9,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 5,
+     "low": 0
+    }
+   },
+   "admin": {
+    "score": 41,
+    "grade": "D",
+    "capped": false,
+    "criteria": 5,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 1,
+     "low": 2
+    }
+   },
+   "supabase": {
+    "score": 63,
+    "grade": "C",
+    "capped": false,
+    "criteria": 7,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 1,
+     "low": 0
+    }
+   }
+  },
+  "GDP": {
+   "web": {
+    "score": 43,
+    "grade": "D",
+    "capped": false,
+    "criteria": 7,
+    "findings": {
+     "critical": 0,
+     "high": 3,
+     "medium": 6,
+     "low": 0
+    }
+   },
+   "ios": {
+    "score": 43,
+    "grade": "D",
+    "capped": false,
+    "criteria": 7,
+    "findings": {
+     "critical": 0,
+     "high": 2,
+     "medium": 4,
+     "low": 0
+    }
+   },
+   "android": {
+    "score": 38,
+    "grade": "E",
+    "capped": false,
+    "criteria": 7,
+    "findings": {
+     "critical": 0,
+     "high": 2,
+     "medium": 5,
+     "low": 0
+    }
+   },
+   "admin": {
+    "score": 47,
+    "grade": "D",
+    "capped": false,
+    "criteria": 6,
+    "findings": {
+     "critical": 0,
+     "high": 1,
+     "medium": 5,
+     "low": 0
+    }
+   },
+   "supabase": {
+    "score": 42,
+    "grade": "D",
+    "capped": false,
+    "criteria": 7,
+    "findings": {
+     "critical": 0,
+     "high": 1,
+     "medium": 5,
+     "low": 0
+    }
+   }
+  },
+  "SAF": {
+   "web": {
+    "score": 32,
+    "grade": "E",
+    "capped": false,
+    "criteria": 7,
+    "findings": {
+     "critical": 0,
+     "high": 3,
+     "medium": 4,
+     "low": 0
+    }
+   },
+   "ios": {
+    "score": 32,
+    "grade": "E",
+    "capped": false,
+    "criteria": 7,
+    "findings": {
+     "critical": 0,
+     "high": 3,
+     "medium": 2,
+     "low": 0
+    }
+   },
+   "android": {
+    "score": 32,
+    "grade": "E",
+    "capped": false,
+    "criteria": 7,
+    "findings": {
+     "critical": 0,
+     "high": 3,
+     "medium": 2,
+     "low": 0
+    }
+   },
+   "admin": {
+    "score": 38,
+    "grade": "E",
+    "capped": false,
+    "criteria": 4,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 4,
+     "low": 1
+    }
+   },
+   "supabase": {
+    "score": 50,
+    "grade": "D",
+    "capped": false,
+    "criteria": 7,
+    "findings": {
+     "critical": 0,
+     "high": 2,
+     "medium": 3,
+     "low": 0
+    }
+   }
+  },
+  "ARC": {
+   "web": {
+    "score": 60,
+    "grade": "C",
+    "capped": false,
+    "criteria": 7,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 3,
+     "low": 1
+    }
+   },
+   "ios": {
+    "score": 67,
+    "grade": "C",
+    "capped": false,
+    "criteria": 7,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 2,
+     "low": 3
+    }
+   },
+   "android": {
+    "score": 77,
+    "grade": "B",
+    "capped": false,
+    "criteria": 7,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 1,
+     "low": 1
+    }
+   },
+   "admin": {
+    "score": 60,
+    "grade": "C",
+    "capped": false,
+    "criteria": 7,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 3,
+     "low": 1
+    }
+   },
+   "supabase": {
+    "score": 75,
+    "grade": "B",
+    "capped": false,
+    "criteria": 6,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 2,
+     "low": 0
+    }
+   }
+  },
+  "TST": {
+   "web": {
+    "score": 52,
+    "grade": "D",
+    "capped": false,
+    "criteria": 6,
+    "findings": {
+     "critical": 0,
+     "high": 1,
+     "medium": 2,
+     "low": 0
+    }
+   },
+   "ios": {
+    "score": 50,
+    "grade": "D",
+    "capped": false,
+    "criteria": 6,
+    "findings": {
+     "critical": 0,
+     "high": 1,
+     "medium": 2,
+     "low": 1
+    }
+   },
+   "android": {
+    "score": 59,
+    "grade": "C",
+    "capped": false,
+    "criteria": 6,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 3,
+     "low": 0
+    }
+   },
+   "admin": {
+    "score": 9,
+    "grade": "E",
+    "capped": false,
+    "criteria": 7,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 4,
+     "low": 0
+    }
+   },
+   "supabase": {
+    "score": 49,
+    "grade": "D",
+    "capped": false,
+    "criteria": 8,
+    "findings": {
+     "critical": 0,
+     "high": 2,
+     "medium": 4,
+     "low": 0
+    }
+   }
+  },
+  "PLT": {
+   "web": {
+    "score": 35,
+    "grade": "E",
+    "capped": false,
+    "criteria": 5,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 4,
+     "low": 0
+    }
+   },
+   "ios": {
+    "score": 42,
+    "grade": "D",
+    "capped": false,
+    "criteria": 5,
+    "findings": {
+     "critical": 0,
+     "high": 2,
+     "medium": 3,
+     "low": 0
+    }
+   },
+   "android": {
+    "score": 33,
+    "grade": "E",
+    "capped": false,
+    "criteria": 5,
+    "findings": {
+     "critical": 0,
+     "high": 1,
+     "medium": 3,
+     "low": 0
+    }
+   },
+   "admin": {
+    "score": 30,
+    "grade": "E",
+    "capped": false,
+    "criteria": 2,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 3,
+     "low": 0
+    }
+   },
+   "supabase": {
+    "score": 34,
+    "grade": "E",
+    "capped": false,
+    "criteria": 3,
+    "findings": {
+     "critical": 0,
+     "high": 2,
+     "medium": 2,
+     "low": 1
+    }
+   }
+  },
+  "A11Y": {
+   "web": {
+    "score": 46,
+    "grade": "D",
+    "capped": false,
+    "criteria": 6,
+    "findings": {
+     "critical": 0,
+     "high": 1,
+     "medium": 3,
+     "low": 2
+    }
+   },
+   "ios": {
+    "score": 48,
+    "grade": "D",
+    "capped": false,
+    "criteria": 6,
+    "findings": {
+     "critical": 0,
+     "high": 1,
+     "medium": 4,
+     "low": 0
+    }
+   },
+   "android": {
+    "score": 52,
+    "grade": "D",
+    "capped": false,
+    "criteria": 6,
+    "findings": {
+     "critical": 0,
+     "high": 1,
+     "medium": 7,
+     "low": 0
+    }
+   },
+   "admin": {
+    "score": 34,
+    "grade": "E",
+    "capped": false,
+    "criteria": 4,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 4,
+     "low": 1
+    }
+   },
+   "supabase": null
+  },
+  "PRF": {
+   "web": {
+    "score": 37,
+    "grade": "E",
+    "capped": false,
+    "criteria": 6,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 5,
+     "low": 0
+    }
+   },
+   "ios": {
+    "score": 54,
+    "grade": "D",
+    "capped": false,
+    "criteria": 5,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 3,
+     "low": 0
+    }
+   },
+   "android": {
+    "score": 54,
+    "grade": "D",
+    "capped": false,
+    "criteria": 5,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 2,
+     "low": 0
+    }
+   },
+   "admin": {
+    "score": 35,
+    "grade": "E",
+    "capped": false,
+    "criteria": 4,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 2,
+     "low": 1
+    }
+   },
+   "supabase": {
+    "score": 50,
+    "grade": "D",
+    "capped": false,
+    "criteria": 2,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 2,
+     "low": 0
+    }
+   }
+  },
+  "REL": {
+   "web": {
+    "score": 45,
+    "grade": "D",
+    "capped": false,
+    "criteria": 6,
+    "findings": {
+     "critical": 0,
+     "high": 2,
+     "medium": 4,
+     "low": 0
+    }
+   },
+   "ios": {
+    "score": 47,
+    "grade": "D",
+    "capped": false,
+    "criteria": 6,
+    "findings": {
+     "critical": 0,
+     "high": 1,
+     "medium": 3,
+     "low": 0
+    }
+   },
+   "android": {
+    "score": 47,
+    "grade": "D",
+    "capped": false,
+    "criteria": 6,
+    "findings": {
+     "critical": 0,
+     "high": 1,
+     "medium": 5,
+     "low": 1
+    }
+   },
+   "admin": {
+    "score": 37,
+    "grade": "E",
+    "capped": false,
+    "criteria": 5,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 4,
+     "low": 3
+    }
+   },
+   "supabase": {
+    "score": 33,
+    "grade": "E",
+    "capped": false,
+    "criteria": 6,
+    "findings": {
+     "critical": 0,
+     "high": 2,
+     "medium": 3,
+     "low": 1
+    }
+   }
+  },
+  "AGT": {
+   "web": {
+    "score": 78,
+    "grade": "B",
+    "capped": false,
+    "criteria": 8,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 2,
+     "low": 3
+    }
+   },
+   "ios": {
+    "score": 63,
+    "grade": "C",
+    "capped": false,
+    "criteria": 8,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 2,
+     "low": 0
+    }
+   },
+   "android": {
+    "score": 78,
+    "grade": "B",
+    "capped": false,
+    "criteria": 8,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 0,
+     "low": 0
+    }
+   },
+   "admin": {
+    "score": 74,
+    "grade": "B",
+    "capped": false,
+    "criteria": 8,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 1,
+     "low": 0
+    }
+   },
+   "supabase": {
+    "score": 70,
+    "grade": "B",
+    "capped": false,
+    "criteria": 8,
+    "findings": {
+     "critical": 0,
+     "high": 0,
+     "medium": 4,
+     "low": 0
+    }
+   }
+  }
+ },
+ "overall": {
+  "web": 48,
+  "ios": 48,
+  "android": 50,
+  "admin": 42,
+  "supabase": 54
+ },
+ "finding_counts": {
+  "critical": 1,
+  "high": 40,
+  "medium": 172,
+  "low": 31,
+  "info": 0
+ }
+}
