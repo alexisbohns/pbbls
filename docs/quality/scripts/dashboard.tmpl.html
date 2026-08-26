@@ -1,0 +1,382 @@
+<title>Kritik Audit Console</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --ground:#F4F1EC; --surface:#FBFAF7; --surface-2:#ECE7DE; --sunken:#EAE4D9;
+  --ink:#1E1B16; --ink-2:#57503F; --ink-3:#8B8272; --line:#DCD5C8; --line-2:#C8C0B0;
+  --accent:#33507E; --accent-2:#26406A; --accent-soft:#E4E9F1;
+  --crit:#B23A3A; --high:#BE6E17; --med:#A98A1E; --low:#5E8154; --info:#8B8272;
+  --gA:#3E7D53; --gB:#6E9A4E; --gC:#A98A1E; --gD:#BE6E17; --gE:#B23A3A;
+  --shadow:0 1px 2px rgba(40,34,22,.05),0 8px 24px -12px rgba(40,34,22,.14);
+  --radius:11px;
+}
+:root:not([data-theme="light"]){
+  @media (prefers-color-scheme: dark){
+    --ground:#14130F; --surface:#1D1B15; --surface-2:#26231B; --sunken:#100F0B;
+    --ink:#EEE9DE; --ink-2:#B2AB9B; --ink-3:#7D7668; --line:#332F26; --line-2:#413B30;
+    --accent:#8AA5D6; --accent-2:#A6BBE0; --accent-soft:#232838;
+    --crit:#E27070; --high:#E0A050; --med:#D6BB55; --low:#93B382; --info:#8D8676;
+    --gA:#5FA574; --gB:#8FBB63; --gC:#D6BB55; --gD:#E0A050; --gE:#E27070;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#14130F; --surface:#1D1B15; --surface-2:#26231B; --sunken:#100F0B;
+  --ink:#EEE9DE; --ink-2:#B2AB9B; --ink-3:#7D7668; --line:#332F26; --line-2:#413B30;
+  --accent:#8AA5D6; --accent-2:#A6BBE0; --accent-soft:#232838;
+  --crit:#E27070; --high:#E0A050; --med:#D6BB55; --low:#93B382; --info:#8D8676;
+  --gA:#5FA574; --gB:#8FBB63; --gC:#D6BB55; --gD:#E0A050; --gE:#E27070;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+  font-size:15px; line-height:1.55; -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px; margin:0 auto; padding:0 22px}
+h1,h2,h3{font-family:"Archivo",system-ui,sans-serif; margin:0; text-wrap:balance}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace}
+.tnum{font-variant-numeric:tabular-nums}
+a{color:var(--accent); text-decoration:none}
+a:hover{text-decoration:underline}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px}
+
+/* masthead */
+header{border-bottom:1px solid var(--line); background:linear-gradient(var(--surface),var(--ground)); position:relative}
+.mast{display:flex; flex-wrap:wrap; gap:26px 40px; align-items:flex-end; padding:30px 0 26px}
+.brand{display:flex; flex-direction:column; gap:7px; min-width:230px; flex:1}
+.wordmark{display:flex; align-items:baseline; gap:11px}
+.wordmark .k{font-family:"Archivo"; font-weight:900; font-size:34px; letter-spacing:-.02em; line-height:1}
+.wordmark .chip{font-family:"IBM Plex Mono"; font-size:10.5px; font-weight:500; letter-spacing:.14em; text-transform:uppercase; color:var(--accent); border:1px solid var(--line-2); border-radius:100px; padding:3px 9px}
+.tagline{color:var(--ink-2); font-size:13.5px; max-width:44ch}
+.meta{display:flex; gap:8px 20px; flex-wrap:wrap; font-family:"IBM Plex Mono"; font-size:11.5px; color:var(--ink-3)}
+.meta b{color:var(--ink-2); font-weight:500}
+.counts{display:flex; gap:9px}
+.count{border:1px solid var(--line); background:var(--surface); border-radius:10px; padding:9px 13px; min-width:66px; box-shadow:var(--shadow)}
+.count .n{font-family:"Archivo"; font-weight:800; font-size:23px; line-height:1; display:block}
+.count .lbl{font-size:10px; text-transform:uppercase; letter-spacing:.09em; color:var(--ink-3); margin-top:5px}
+.count.crit .n{color:var(--crit)} .count.high .n{color:var(--high)} .count.med .n{color:var(--med)} .count.low .n{color:var(--low)}
+
+.theme-toggle{position:absolute; top:18px; right:22px; background:var(--surface); border:1px solid var(--line); color:var(--ink-2); border-radius:100px; padding:6px 13px; font-size:12px; cursor:pointer; font-family:"IBM Plex Mono"}
+.theme-toggle:hover{border-color:var(--line-2); color:var(--ink)}
+
+section{padding:34px 0}
+.eyebrow{font-family:"IBM Plex Mono"; font-size:11px; letter-spacing:.16em; text-transform:uppercase; color:var(--accent); margin-bottom:6px}
+.sec-h{display:flex; align-items:baseline; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:16px}
+.sec-h h2{font-size:21px; font-weight:700; letter-spacing:-.01em}
+.sec-h p{margin:2px 0 0; color:var(--ink-2); font-size:13px; max-width:60ch}
+
+/* matrix */
+.matrix-scroll{overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius); background:var(--surface); box-shadow:var(--shadow)}
+table.matrix{border-collapse:collapse; width:100%; min-width:720px}
+table.matrix th,table.matrix td{text-align:center; padding:0; border:1px solid var(--line)}
+table.matrix thead th{background:var(--surface-2); font-family:"IBM Plex Mono"; font-size:11px; font-weight:600; letter-spacing:.03em; color:var(--ink-2); padding:11px 8px; position:sticky; top:0}
+table.matrix thead th.corner{text-align:left; padding-left:15px}
+table.matrix tbody th{text-align:left; padding:10px 12px; background:var(--surface); position:sticky; left:0; z-index:1; min-width:186px; border-right:1px solid var(--line-2)}
+.dom-code{font-family:"Archivo"; font-weight:800; font-size:13px; letter-spacing:.02em}
+.dom-name{display:block; font-size:11px; color:var(--ink-3); font-weight:400; margin-top:1px; line-height:1.25}
+.cell{width:100%; height:100%; border:0; background:transparent; cursor:pointer; padding:9px 6px; display:flex; flex-direction:column; align-items:center; gap:5px; font-family:inherit; color:inherit; min-height:62px; justify-content:center; transition:filter .12s}
+.cell:hover{filter:brightness(1.04) saturate(1.15)}
+.cell[data-band]{background:color-mix(in srgb, var(--band) 15%, var(--surface))}
+.cell .sc{font-family:"Archivo"; font-weight:800; font-size:20px; line-height:1; font-variant-numeric:tabular-nums}
+.cell .gr{font-family:"IBM Plex Mono"; font-size:10.5px; font-weight:600; color:var(--band); letter-spacing:.02em}
+.cell .gr .cap{color:var(--crit)}
+.cell.na{cursor:default; color:var(--ink-3); font-family:"IBM Plex Mono"; font-size:12px}
+.cell.na:hover{filter:none}
+.dots{display:flex; gap:2px; height:6px; align-items:center}
+.dots i{width:5px; height:5px; border-radius:50%; display:inline-block}
+.dots i.c{background:var(--crit)} .dots i.h{background:var(--high)} .dots i.m{background:var(--med)} .dots i.l{background:var(--low)}
+tr.overall th{background:var(--sunken)}
+tr.overall td .cell{min-height:52px}
+tr.overall td .cell .sc{font-size:18px}
+.cell.active{box-shadow:inset 0 0 0 2.5px var(--accent)}
+
+.legend{display:flex; flex-wrap:wrap; gap:16px 22px; margin-top:14px; font-size:11.5px; color:var(--ink-2); align-items:center}
+.legend .grp{display:flex; gap:9px; align-items:center; flex-wrap:wrap}
+.legend .sw{display:inline-flex; align-items:center; gap:6px}
+.legend .sw b{width:13px; height:13px; border-radius:3px; display:inline-block}
+.legend .mono{color:var(--ink-3)}
+
+/* findings */
+.controls{display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:16px}
+.search{flex:1; min-width:210px; display:flex; align-items:center; gap:8px; background:var(--surface); border:1px solid var(--line); border-radius:9px; padding:8px 12px}
+.search input{border:0; background:transparent; color:var(--ink); font-family:inherit; font-size:14px; width:100%; outline:none}
+.search svg{flex:none; color:var(--ink-3)}
+.chips{display:flex; flex-wrap:wrap; gap:6px}
+.chip{border:1px solid var(--line); background:var(--surface); color:var(--ink-2); border-radius:100px; padding:5px 12px; font-size:12px; cursor:pointer; font-family:"IBM Plex Mono"; letter-spacing:.02em; transition:all .12s; white-space:nowrap}
+.chip:hover{border-color:var(--line-2); color:var(--ink)}
+.chip[aria-pressed="true"]{background:var(--accent); border-color:var(--accent); color:#fff}
+:root[data-theme="dark"] .chip[aria-pressed="true"], :root:not([data-theme="light"]) .chip[aria-pressed="true"]{color:var(--ground)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .chip[aria-pressed="true"]{color:var(--ground)}}
+.chip.sevchip[aria-pressed="true"]{background:var(--sc); border-color:var(--sc); color:#fff}
+.chip .n{opacity:.65; margin-left:5px}
+.filterbar{display:flex; flex-wrap:wrap; gap:14px 18px; margin-bottom:14px; padding:13px 15px; background:var(--surface-2); border:1px solid var(--line); border-radius:10px}
+.filtergrp{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+.filtergrp>span{font-family:"IBM Plex Mono"; font-size:10.5px; text-transform:uppercase; letter-spacing:.1em; color:var(--ink-3); margin-right:2px}
+.resultline{display:flex; justify-content:space-between; align-items:baseline; gap:12px; margin-bottom:12px; flex-wrap:wrap}
+.resultline .rc{font-family:"IBM Plex Mono"; font-size:12px; color:var(--ink-2)}
+.resultline .clr{font-size:12px; cursor:pointer; color:var(--accent); background:none; border:0; font-family:"IBM Plex Mono",monospace}
+.sortsel{font-family:"IBM Plex Mono"; font-size:12px; background:var(--surface); border:1px solid var(--line); border-radius:7px; padding:5px 9px; color:var(--ink-2)}
+
+.findings{display:flex; flex-direction:column; gap:10px}
+.f{border:1px solid var(--line); border-left:4px solid var(--sev); background:var(--surface); border-radius:10px; box-shadow:var(--shadow); overflow:hidden}
+.f-head{display:grid; grid-template-columns:auto 1fr auto; gap:12px; align-items:center; padding:13px 16px; cursor:pointer}
+.f-sev{display:flex; flex-direction:column; align-items:center; gap:3px; min-width:58px}
+.f-sev .badge{font-family:"IBM Plex Mono"; font-size:9.5px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#fff; background:var(--sev); border-radius:5px; padding:3px 7px}
+.f-sev .rl{font-family:"IBM Plex Mono"; font-size:10px; color:var(--ink-3); font-variant-numeric:tabular-nums}
+.f-mid{min-width:0}
+.f-title{font-weight:600; font-size:14.5px; line-height:1.35; color:var(--ink)}
+.f-tags{display:flex; flex-wrap:wrap; gap:7px; margin-top:6px; align-items:center}
+.tag{font-family:"IBM Plex Mono"; font-size:10.5px; padding:2px 7px; border-radius:5px; border:1px solid var(--line-2); color:var(--ink-2); background:var(--surface-2)}
+.tag.cr{color:var(--accent); border-color:var(--accent-soft); background:var(--accent-soft)}
+.tag.surf{text-transform:capitalize}
+.f-right{display:flex; flex-direction:column; align-items:flex-end; gap:5px; text-align:right}
+.pri{font-family:"Archivo"; font-weight:800; font-size:13px; padding:2px 9px; border-radius:6px; letter-spacing:.02em}
+.pri.P0{background:var(--crit); color:#fff} .pri.P1{background:color-mix(in srgb,var(--high) 20%,var(--surface)); color:var(--high); border:1px solid color-mix(in srgb,var(--high) 40%,var(--surface))}
+.pri.P2{color:var(--ink-2); border:1px solid var(--line-2)} .pri.P3{color:var(--ink-3); border:1px solid var(--line)}
+.f-right .cost{font-family:"IBM Plex Mono"; font-size:10.5px; color:var(--ink-3)}
+.f-body{display:none; padding:0 16px 16px 16px; border-top:1px solid var(--line); margin-top:-1px}
+.f.open .f-body{display:block; animation:fade .18s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.f-body h4{font-family:"IBM Plex Mono"; font-size:10px; letter-spacing:.13em; text-transform:uppercase; color:var(--ink-3); margin:15px 0 5px}
+.f-body p{margin:0; font-size:13.5px; line-height:1.6; color:var(--ink-2)}
+.f-body .ev{font-family:"IBM Plex Mono"; font-size:12px; line-height:1.65; color:var(--ink-2); background:var(--sunken); border:1px solid var(--line); border-radius:8px; padding:11px 13px; white-space:pre-wrap; word-break:break-word; overflow-x:auto}
+.f-body .crit-q{font-size:13.5px; color:var(--ink); font-style:italic; border-left:2px solid var(--accent); padding-left:11px; margin-top:4px}
+.verif{display:inline-flex; align-items:center; gap:6px; font-family:"IBM Plex Mono"; font-size:11px; color:var(--low); margin-top:10px; border:1px solid color-mix(in srgb,var(--low) 35%,var(--surface)); background:color-mix(in srgb,var(--low) 12%,var(--surface)); border-radius:100px; padding:4px 11px}
+.verif.DOWNGRADED{color:var(--high); border-color:color-mix(in srgb,var(--high) 35%,var(--surface)); background:color-mix(in srgb,var(--high) 12%,var(--surface))}
+.empty{text-align:center; padding:50px 20px; color:var(--ink-3); font-family:"IBM Plex Mono"; font-size:13px}
+
+footer{border-top:1px solid var(--line); padding:26px 0 44px; color:var(--ink-3); font-size:12.5px; line-height:1.7}
+footer .mono{color:var(--ink-2)}
+footer b{color:var(--ink-2); font-weight:600}
+
+@media (max-width:640px){
+  .wordmark .k{font-size:28px}
+  .f-head{grid-template-columns:auto 1fr; }
+  .f-right{grid-column:2; flex-direction:row; align-items:center; justify-content:flex-start; margin-top:2px}
+  .counts{width:100%}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+</style>
+
+<header>
+  <button class="theme-toggle" id="tt" aria-label="Toggle theme">◐ theme</button>
+  <div class="wrap">
+    <div class="mast">
+      <div class="brand">
+        <div class="wordmark"><span class="k">Kritik</span><span class="chip">Audit Console</span></div>
+        <div class="tagline">A quality audit of Pebbles across five surfaces and eleven domains, on one comparable maturity scale. Every Critical and High finding was adversarially verified before it was kept.</div>
+        <div class="meta"><span>audit <b id="m-audit"></b></span><span>commit <b class="mono" id="m-commit"></b></span><span>framework <b id="m-fwv"></b></span><span><b id="m-nc"></b> criteria · <b id="m-na"></b> assessments</span></div>
+      </div>
+      <div class="counts" id="counts"></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="matrix-sec">
+    <div class="eyebrow">The comparative matrix</div>
+    <div class="sec-h">
+      <div><h2>How each surface scores, domain by domain</h2>
+      <p>Score 0 to 100 from the maturity levels, weighted per criterion. A grade shown with an asterisk is capped by an open finding (an open Critical caps the cell at D, an open High at B), so the letter can be worse than the number. Dots below a score count that cell's open findings by severity. Select a cell to filter the findings below.</p></div>
+    </div>
+    <div class="matrix-scroll"><table class="matrix"><thead id="mhead"></thead><tbody id="mbody"></tbody></table></div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <section id="findings-sec">
+    <div class="eyebrow">Findings explorer</div>
+    <div class="sec-h">
+      <div><h2>Every finding, with its evidence</h2>
+      <p>246 findings, each pinned to file and line at the snapshot commit. Filter by severity, surface, domain, or priority; search titles, criteria, and evidence. Select a row to read the detail, the evidence, the fix, and the verification verdict.</p></div>
+    </div>
+    <div class="controls">
+      <label class="search"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><input id="q" type="search" placeholder="Search title, criterion, evidence, file path..." autocomplete="off"></label>
+      <select class="sortsel" id="sort">
+        <option value="sev">Sort: severity</option>
+        <option value="pri">Sort: priority</option>
+        <option value="surf">Sort: surface</option>
+        <option value="dom">Sort: domain</option>
+      </select>
+    </div>
+    <div class="filterbar">
+      <div class="filtergrp"><span>Severity</span><div class="chips" id="f-sev"></div></div>
+      <div class="filtergrp"><span>Surface</span><div class="chips" id="f-surf"></div></div>
+      <div class="filtergrp"><span>Priority</span><div class="chips" id="f-pri"></div></div>
+      <div class="filtergrp"><span>Domain</span><div class="chips" id="f-dom"></div></div>
+    </div>
+    <div class="resultline"><span class="rc" id="rc"></span><button class="clr mono" id="clr" hidden>clear filters</button></div>
+    <div class="findings" id="flist"></div>
+  </section>
+</main>
+
+<footer><div class="wrap">
+  <div><b>Method.</b> 27 auditor cells (surface × domain cluster) plus a cross-surface contract auditor and a repo-wide agentic-readiness pass, each scoring every applicable criterion 0 to 4 against observable anchors with file:line evidence, then emitting findings. Every Critical and High finding went through an independent adversarial refutation attempt before retention. Risk = impact × likelihood; priority = severity × remediation cost.</div>
+  <div style="margin-top:9px" class="mono">Kritik v<span id="f-fwv"></span> · snapshot <span id="f-commit"></span> · a projection of scores.json + findings.json + library/framework.json · reproduce with <b>node docs/quality/scripts/compute-matrix.mjs 2026-08</b></div>
+</div></footer>
+
+<script>
+const DATA = /*__DATA__*/;
+const BAND = {A:'--gA',B:'--gB',C:'--gC',D:'--gD',E:'--gE'};
+const SEV = {critical:'--crit',high:'--high',medium:'--med',low:'--low',info:'--info'};
+const SEVSHORT = {critical:'crit',high:'high',medium:'med',low:'low',info:'info'};
+const $ = s => document.querySelector(s);
+const el = (t,c,h)=>{const e=document.createElement(t); if(c)e.className=c; if(h!=null)e.innerHTML=h; return e;};
+function esc(s){return (s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
+
+// masthead
+$('#m-audit').textContent=DATA.audit; $('#m-commit').textContent=DATA.commit.slice(0,10);
+$('#m-fwv').textContent=DATA.fwv; $('#m-nc').textContent=DATA.n_criteria; $('#m-na').textContent=DATA.n_assess;
+$('#f-fwv').textContent=DATA.fwv; $('#f-commit').textContent=DATA.commit.slice(0,10);
+const cdefs=[['critical','crit','Critical'],['high','high','High'],['medium','med','Medium'],['low','low','Low']];
+$('#counts').innerHTML = cdefs.map(([k,c,l])=>`<div class="count ${c}"><span class="n tnum">${DATA.counts[k]}</span><span class="lbl">${l}</span></div>`).join('');
+
+// matrix
+const surfaces=DATA.surfaces, stitles=DATA.surface_titles;
+let mh='<tr><th class="corner">Domain</th>'+surfaces.map(s=>`<th>${esc(stitles[s]||s)}</th>`).join('')+'</tr>';
+$('#mhead').innerHTML=mh;
+function cellHTML(cell,dom,surf){
+  if(!cell) return `<td><div class="cell na">N/A</div></td>`;
+  const band=cell.grade; const f=cell.findings||{};
+  let dots=''; ['critical','high','medium','low'].forEach(k=>{const n=f[k]||0; for(let i=0;i<Math.min(n,4);i++) dots+=`<i class="${k[0]}"></i>`;});
+  const cap = cell.capped?'<span class="cap">*</span>':'';
+  return `<td><button class="cell" data-band data-dom="${dom}" data-surf="${surf}" style="--band:var(${BAND[band]})">
+    <span class="sc tnum">${cell.score}</span><span class="gr">${band}${cap}</span><span class="dots">${dots}</span></button></td>`;
+}
+let mb='';
+for(const d of DATA.domains){
+  mb+=`<tr><th><span class="dom-code">${d.code}</span><span class="dom-name">${esc(d.name)}</span></th>`;
+  for(const s of surfaces){ mb+=cellHTML(DATA.matrix[d.code][s],d.code,s); }
+  mb+='</tr>';
+}
+// overall row
+mb+='<tr class="overall"><th><span class="dom-code">OVERALL</span><span class="dom-name">weighted by profile</span></th>';
+for(const s of surfaces){const sc=DATA.overall[s]; const g= sc>=85?'A':sc>=70?'B':sc>=55?'C':sc>=40?'D':'E';
+  mb+=`<td><div class="cell" style="--band:var(${BAND[g]}); background:color-mix(in srgb, var(--band) 15%, var(--surface))"><span class="sc tnum">${sc}</span><span class="gr">${g}</span></div></td>`;}
+mb+='</tr>';
+$('#mbody').innerHTML=mb;
+
+// legend
+$('#legend').innerHTML =
+ `<div class="grp"><span class="mono">grades</span>`+
+ ['A','B','C','D','E'].map(g=>`<span class="sw"><b style="background:var(${BAND[g]})"></b>${g}</span>`).join('')+`</div>`+
+ `<div class="grp"><span class="mono">findings</span>`+
+ cdefs.map(([k,c,l])=>`<span class="sw"><b style="background:var(${SEV[k]})"></b>${l}</span>`).join('')+`</div>`+
+ `<div class="grp"><span class="mono">* grade capped by an open finding</span></div>`;
+
+// ---- findings ----
+const F=DATA.findings;
+const state={q:'',sev:new Set(),surf:new Set(),pri:new Set(),dom:new Set(),sort:'sev'};
+const SEVORD={critical:0,high:1,medium:2,low:3,info:4};
+const PRIORD={P0:0,P1:1,P2:2,P3:3};
+
+function countBy(key){const m={}; F.forEach(f=>{m[f[key]]=(m[f[key]]||0)+1}); return m;}
+function chipRow(id,vals,setKey,labels,sevColor){
+  const host=$(id); const counts=countBy(setKey==='sev'?'sev':setKey==='surf'?'s':setKey==='pri'?'pri':'dom');
+  host.innerHTML=vals.map(v=>{
+    const lab=labels?labels[v]||v:v; const n=counts[v]||0;
+    const sc = sevColor?` sevchip" style="--sc:var(${SEV[v]})`:'';
+    return `<button class="chip${sevColor?' sevchip':''}" ${sevColor?`style="--sc:var(${SEV[v]})"`:''} data-set="${setKey}" data-val="${v}" aria-pressed="false">${esc(lab)}<span class="n tnum">${n}</span></button>`;
+  }).join('');
+}
+chipRow('#f-sev',['critical','high','medium','low'],'sev',{critical:'Critical',high:'High',medium:'Medium',low:'Low'},true);
+chipRow('#f-surf',surfaces.concat(['cross-surface']).filter(s=>countBy('s')[s]),'surf',stitles);
+chipRow('#f-pri',['P0','P1','P2','P3'],'pri');
+chipRow('#f-dom',DATA.domains.map(d=>d.code).filter(c=>countBy('dom')[c]),'dom');
+
+function matches(f){
+  if(state.sev.size&&!state.sev.has(f.sev))return false;
+  if(state.surf.size&&!state.surf.has(f.s))return false;
+  if(state.pri.size&&!state.pri.has(f.pri))return false;
+  if(state.dom.size&&!state.dom.has(f.dom))return false;
+  if(state.q){const q=state.q.toLowerCase();
+    if(!((f.t+' '+f.cr+' '+f.crn+' '+f.ev+' '+f.detail+' '+f.s).toLowerCase().includes(q)))return false;}
+  return true;
+}
+function sortFn(a,b){
+  if(state.sort==='sev')return SEVORD[a.sev]-SEVORD[b.sev]|| (b.i*b.l)-(a.i*a.l);
+  if(state.sort==='pri')return PRIORD[a.pri]-PRIORD[b.pri]|| SEVORD[a.sev]-SEVORD[b.sev];
+  if(state.sort==='surf')return a.s.localeCompare(b.s)||SEVORD[a.sev]-SEVORD[b.sev];
+  if(state.sort==='dom')return a.dom.localeCompare(b.dom)||a.cr.localeCompare(b.cr);
+}
+function fCard(f){
+  const sev=f.sev; const wrap=el('div','f'); wrap.style.setProperty('--sev',`var(${SEV[sev]})`);
+  const crit = f.cr;
+  wrap.innerHTML=`
+    <div class="f-head">
+      <div class="f-sev"><span class="badge">${SEVSHORT[sev]}</span><span class="rl tnum">${f.i}×${f.l}=${f.i*f.l}</span></div>
+      <div class="f-mid">
+        <div class="f-title">${esc(f.t)}</div>
+        <div class="f-tags"><span class="tag cr">${esc(f.cr)}</span><span class="tag">${esc(f.crn)}</span><span class="tag surf">${esc(stitles[f.s]||f.s)}</span>${f.vv?`<span class="tag">✓ ${f.vv.toLowerCase()}</span>`:''}</div>
+      </div>
+      <div class="f-right"><span class="pri ${f.pri}">${f.pri}</span><span class="cost">cost ${f.cost}</span></div>
+    </div>
+    <div class="f-body">
+      <h4>Why it matters</h4><p>${esc(f.detail)}</p>
+      <h4>Evidence</h4><div class="ev">${esc(f.ev)}</div>
+      <h4>Remediation</h4><p>${esc(f.rem)}</p>
+      ${f.vv?`<div class="verif ${f.vv}">Adversarial verification: ${esc(f.vv)}</div>`:''}
+      <div style="margin-top:10px" class="mono" ><span class="tag">${esc(f.id)}</span></div>
+    </div>`;
+  wrap.querySelector('.f-head').addEventListener('click',()=>wrap.classList.toggle('open'));
+  return wrap;
+}
+function render(){
+  const list=F.filter(matches).sort(sortFn);
+  const host=$('#flist'); host.innerHTML='';
+  if(!list.length){host.innerHTML='<div class="empty">No findings match these filters.</div>';}
+  else{const frag=document.createDocumentFragment(); list.forEach(f=>frag.appendChild(fCard(f))); host.appendChild(frag);}
+  $('#rc').textContent=`${list.length} of ${F.length} findings`;
+  const any=state.sev.size||state.surf.size||state.pri.size||state.dom.size||state.q;
+  $('#clr').hidden=!any;
+}
+// chip clicks
+document.addEventListener('click',e=>{
+  const c=e.target.closest('.chip'); if(!c)return;
+  const set=c.dataset.set,val=c.dataset.val; const S=state[set];
+  if(S.has(val)){S.delete(val);c.setAttribute('aria-pressed','false');}
+  else{S.add(val);c.setAttribute('aria-pressed','true');}
+  render();
+});
+$('#q').addEventListener('input',e=>{state.q=e.target.value;render();});
+$('#sort').addEventListener('change',e=>{state.sort=e.target.value;render();});
+$('#clr').addEventListener('click',()=>{
+  state.sev.clear();state.surf.clear();state.pri.clear();state.dom.clear();state.q='';$('#q').value='';
+  document.querySelectorAll('.chip[aria-pressed="true"]').forEach(c=>c.setAttribute('aria-pressed','false'));
+  document.querySelectorAll('.cell.active').forEach(c=>c.classList.remove('active'));
+  render();
+});
+// matrix cell -> filter by dom+surf
+$('#mbody').addEventListener('click',e=>{
+  const cell=e.target.closest('.cell[data-dom]'); if(!cell)return;
+  const dom=cell.dataset.dom, surf=cell.dataset.surf;
+  const wasActive=cell.classList.contains('active');
+  document.querySelectorAll('.cell.active').forEach(c=>c.classList.remove('active'));
+  state.dom.clear();state.surf.clear();
+  document.querySelectorAll('#f-dom .chip,#f-surf .chip').forEach(c=>c.setAttribute('aria-pressed','false'));
+  if(!wasActive){
+    cell.classList.add('active');
+    state.dom.add(dom);state.surf.add(surf);
+    document.querySelector(`#f-dom .chip[data-val="${dom}"]`)?.setAttribute('aria-pressed','true');
+    document.querySelector(`#f-surf .chip[data-val="${surf}"]`)?.setAttribute('aria-pressed','true');
+    $('#findings-sec').scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  render();
+});
+// theme toggle
+const tt=$('#tt');
+function curTheme(){return document.documentElement.getAttribute('data-theme')|| (matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light');}
+tt.addEventListener('click',()=>{
+  const next=curTheme()==='dark'?'light':'dark';
+  document.documentElement.setAttribute('data-theme',next);
+  try{localStorage.setItem('kritik-theme',next);}catch(e){}
+});
+try{const t=localStorage.getItem('kritik-theme'); if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}
+
+render();
+</script>
