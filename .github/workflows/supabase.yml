@@ -46,6 +46,10 @@ concurrency:
 
 permissions:
   contents: read
+  # The scheduled run opens (or comments on) one tracking issue when it goes
+  # red; the PR trigger never touches issues, because a red check already
+  # blocks the merge.
+  issues: write
 
 jobs:
   verify:
@@ -77,20 +81,79 @@ jobs:
             exit 1
           fi
 
+      # Two ledgers the harness steps append to: one row per harness for the
+      # summary table, one label per FAILING harness for the tracking issue.
+      # Set here rather than in the job's `env:`, where the `runner` context is
+      # not available and fails the whole workflow at parse time.
+      - name: Prepare the run log
+        run: |
+          echo "HARNESS_ROWS=$RUNNER_TEMP/harness-rows.txt"         >> "$GITHUB_ENV"
+          echo "HARNESS_FAILURES=$RUNNER_TEMP/harness-failures.txt" >> "$GITHUB_ENV"
+
       # One step per harness so a red check names the contract that broke, and
       # `!cancelled()` so one failure still reports the other three — each cleans
       # up after itself in a `finally`, so a failed run leaves nothing behind.
+      # The wrapper adds the summary row and preserves the harness's exit code.
       - name: Pebble drafts (M47 draft lifecycle)
-        run: npm run db:verify:drafts --workspace=packages/supabase
+        run: .github/scripts/verify-harness.sh "drafts" db:verify:drafts
 
       - name: Pebble visibility (grade RLS)
         if: '!cancelled()'
-        run: npm run db:verify:visibility --workspace=packages/supabase
+        run: .github/scripts/verify-harness.sh "visibility" db:verify:visibility
 
       - name: Public profile projection
         if: '!cancelled()'
-        run: npm run db:verify:public-profile --workspace=packages/supabase
+        run: .github/scripts/verify-harness.sh "public-profile" db:verify:public-profile
 
       - name: Privileged profile columns (#739 guard)
         if: '!cancelled()'
-        run: npm run db:verify:guard --workspace=packages/supabase
+        run: .github/scripts/verify-harness.sh "guard" db:verify:guard
+
+      # One writer for the whole table. `always()` so it still reports when a
+      # harness failed — that is precisely the run whose table is worth reading.
+      - name: Write the run log
+        if: always()
+        run: |
+          {
+            echo "### Contract harnesses — $(date -u '+%Y-%m-%d %H:%M UTC')"
+            echo
+            echo "| Harness | Result | Asserts |"
+            echo "|---|---|---|"
+            cat "${HARNESS_ROWS:-/dev/null}" 2>/dev/null || true
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # Nightly only. A PR failure needs no issue — the red check is already in
+      # front of the person who caused it — but a scheduled failure otherwise
+      # ends in an inbox. One issue, reused: repeat failures comment on it
+      # rather than opening a new one, so a contract that stays broken for a
+      # week is one thread, not seven. Closed by hand once it is actually fixed,
+      # so an intermittent failure cannot quietly close its own report.
+      - name: Open or update the nightly tracking issue
+        if: failure() && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          title='[Bug] Nightly contract harnesses are failing'
+          # Defaulted: if the job died before the log step ran, the variable
+          # was never exported, and `-u` would abort the report itself.
+          failures="${HARNESS_FAILURES:-/dev/null}"
+          if [ -s "$failures" ]; then
+            broke=$(paste -sd', ' "$failures")
+          else
+            broke='the job failed before any harness reported'
+          fi
+          body=$(printf '%s\n\n%s\n\n%s\n' \
+            "The nightly run of the database contract harnesses went red: **$broke**." \
+            "Run: $RUN_URL" \
+            "Reproduce locally with \`set -a; . ./.env; set +a; npm run db:verify --workspace=packages/supabase\`. See \`packages/supabase/CLAUDE.md\` for what each harness proves. Close this issue by hand once the contract is fixed.")
+          existing=$(gh issue list --state open --label bug --json number,title \
+            --jq "map(select(.title == \"$title\")) | .[0].number // empty")
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+            echo "commented on #$existing"
+          else
+            gh issue create --title "$title" --body "$body" \
+              --label bug --label supabase --label test
+          fi
