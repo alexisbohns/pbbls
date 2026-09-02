@@ -29,7 +29,7 @@ Turborepo + npm workspaces at the root. Web and admin deploy to Vercel (root dir
 | `npm run build --workspace=@pbbls/android` | Gradle via `scripts/gradle-if-sdk.sh` (no-ops without an SDK); `lint` = ktlint, `test` = unit tests |
 | `npm run db:* --workspace=packages/supabase` | Supabase CLI: `db:start`, `db:reset`, `db:types`, `db:push`, `db:migration:new`, … |
 
-Tests: Vitest on web, Swift Testing on iOS (never XCTest), JUnit + screenshot previews on Android. Database contract harnesses live in `packages/supabase/scripts/` (`verify-account-purge.ts`, `verify-pebble-drafts.ts`) and run against the linked project — they are the proof for anything crossing a surface boundary.
+Tests: Vitest on web, Swift Testing on iOS (never XCTest), JUnit + screenshot previews on Android. Database contract harnesses live in `packages/supabase/scripts/` (`npm run db:verify --workspace=packages/supabase`) and run against the linked project — they are the proof for anything crossing a surface boundary. The four anon-only ones are a CI gate; `verify-account-purge.ts` needs the service role and stays a manual run.
 
 ## Before you start
 
@@ -68,7 +68,7 @@ Keep CLAUDE.md short. Read these when relevant — don't pre-load:
 - **Postgres / Supabase technique** → `.agents/skills/supabase-postgres-best-practices/` (RLS, indexing, locking, pooling).
 - **PR Lab Notes** → `lab-note` skill (`.claude/skills/lab-note/`); see the Lab Note section below.
 
-CI gates worth knowing about: `arkaik.yml` validates the bundle + journal on any `docs/arkaik/**` change, `android.yml` builds on `apps/android/**`, `lab-note-reminder.yml` advises at PR-open and `lab-note.yml` posts the note at merge.
+CI gates worth knowing about: `arkaik.yml` validates the bundle + journal on any `docs/arkaik/**` change, `android.yml` builds on `apps/android/**`, `supabase.yml` runs the contract harnesses on `packages/supabase/**` and nightly, `lab-note-reminder.yml` advises at PR-open and `lab-note.yml` posts the note at merge.
 
 ## Standing cross-surface rules
 
@@ -79,7 +79,7 @@ The database is the contract between four clients. These are hardened rules prom
 - **Timestamps crossing a surface boundary are parsed tolerantly and emitted at the narrowest precision every reader accepts** (whole seconds). Never leave a timestamp to whatever date strategy the ambient decoder happens to carry.
 - **Cross-user reads go through `security definer` RPC projections** that build an explicit jsonb allowlist (`get_public_profile` is the template). Never widen `profiles` RLS, never return `user_id`, never add a view instead.
 - **Two migrations that re-emit the same whole function body silently drop each other's appends.** `create or replace` has no merge semantics and git reports no conflict. Before applying a batch containing more than one re-emission of the same function (`purge_account`, `remove_connection` — both use in-body append markers), diff the bodies pairwise and union them manually in a new migration.
-- **A table added to `purge_account` gains its seed and its zero-row assertion in `verify-account-purge.ts` in the same change.** Run that harness against the linked project after any batch touching `purge_account`.
+- **A table added to `purge_account` gains its seed and its zero-row assertion in `verify-account-purge.ts` in the same change.** Run that harness (`npm run db:verify:purge --workspace=packages/supabase`) against the linked project after any batch touching `purge_account` — it is the one harness CI does not run for you.
 - **Any migration or admin RPC that inserts an emotion or a domain re-runs `sync_achievement_catalog()` in the same transaction**, or the achievement catalog drifts from the reference tables.
 
 ## Editing CLAUDE.md / AGENTS.md

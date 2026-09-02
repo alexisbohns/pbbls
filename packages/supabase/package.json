@@ -18,6 +18,12 @@
     "db:migration:list": "supabase migration list",
     "db:link": "supabase link",
     "db:types": "supabase gen types typescript --local 2>/dev/null > types/database.ts",
-    "db:types:remote": "supabase gen types typescript --linked 2>/dev/null > types/database.ts"
+    "db:types:remote": "supabase gen types typescript --linked 2>/dev/null > types/database.ts",
+    "db:verify": "npm run db:verify:drafts && npm run db:verify:visibility && npm run db:verify:public-profile && npm run db:verify:guard",
+    "db:verify:drafts": "deno run --allow-env --allow-net scripts/verify-pebble-drafts.ts",
+    "db:verify:visibility": "deno run --allow-env --allow-net scripts/verify-pebble-visibility.ts",
+    "db:verify:public-profile": "deno run --allow-env --allow-net scripts/verify-public-profile.ts",
+    "db:verify:guard": "deno run --allow-env --allow-net scripts/verify-profiles-privileged-guard.ts",
+    "db:verify:purge": "deno run --allow-env --allow-net scripts/verify-account-purge.ts"
   }
 }
