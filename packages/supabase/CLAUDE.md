@@ -62,7 +62,9 @@ The database is the contract between four clients, and these Deno scripts are th
 
 Credentials come from the environment (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` for the purge harness); the repo root `.env` carries all three: `set -a; . ./.env; set +a`.
 
-**The four anon harnesses run in CI** — `.github/workflows/supabase.yml`, on same-repo PRs touching `packages/supabase/**`, nightly against `main`, and on manual dispatch. Fork PRs skip the job rather than failing it (no secrets).
+**The four anon harnesses run in CI** — `.github/workflows/supabase.yml`, on same-repo PRs touching `packages/supabase/**`, nightly against `main`, and on manual dispatch. Fork PRs skip the job rather than failing it (no secrets). Every run writes a per-harness result table to the job summary, and a **failing nightly opens or comments on one issue** titled `[Bug] Nightly contract harnesses are failing` — reused across consecutive failures, and closed by hand once the contract is actually fixed. A failing PR run opens nothing: the red check is already in front of whoever caused it.
+
+A new harness added to `scripts/` gains a `db:verify:*` script and a workflow step calling `.github/scripts/verify-harness.sh` in the same change, or it is not a gate. Never call the npm script directly from the workflow: the summary needs the harness's stdout, and GitHub's default shell has no `pipefail`, so piping a harness through `tee` reports success for a failing one.
 
 **`db:verify:purge` is deliberately NOT in CI and must be run by hand** after any batch touching `purge_account`. It is the one harness needing `SUPABASE_SERVICE_ROLE_KEY`, this repo is public, and a leaked service-role key is total database access. Do not "fix" its absence by adding that secret without deciding it as such.
 

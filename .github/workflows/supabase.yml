@@ -46,6 +46,10 @@ concurrency:
 
 permissions:
   contents: read
+  # The scheduled run opens (or comments on) one tracking issue when it goes
+  # red; the PR trigger never touches issues, because a red check already
+  # blocks the merge.
+  issues: write
 
 jobs:
   verify:
@@ -59,6 +63,9 @@ jobs:
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
       SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+      # Each failing harness appends its label here; the tracking issue reads it
+      # so it can name what broke instead of just linking the run.
+      HARNESS_FAILURES: ${{ runner.temp }}/harness-failures.txt
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -77,20 +84,63 @@ jobs:
             exit 1
           fi
 
+      - name: Start the run log
+        run: |
+          {
+            echo "### Contract harnesses — $(date -u '+%Y-%m-%d %H:%M UTC')"
+            echo
+            echo "| Harness | Result | Asserts |"
+            echo "|---|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       # One step per harness so a red check names the contract that broke, and
       # `!cancelled()` so one failure still reports the other three — each cleans
       # up after itself in a `finally`, so a failed run leaves nothing behind.
+      # The wrapper adds the summary row and preserves the harness's exit code.
       - name: Pebble drafts (M47 draft lifecycle)
-        run: npm run db:verify:drafts --workspace=packages/supabase
+        run: .github/scripts/verify-harness.sh "drafts" db:verify:drafts
 
       - name: Pebble visibility (grade RLS)
         if: '!cancelled()'
-        run: npm run db:verify:visibility --workspace=packages/supabase
+        run: .github/scripts/verify-harness.sh "visibility" db:verify:visibility
 
       - name: Public profile projection
         if: '!cancelled()'
-        run: npm run db:verify:public-profile --workspace=packages/supabase
+        run: .github/scripts/verify-harness.sh "public-profile" db:verify:public-profile
 
       - name: Privileged profile columns (#739 guard)
         if: '!cancelled()'
-        run: npm run db:verify:guard --workspace=packages/supabase
+        run: .github/scripts/verify-harness.sh "guard" db:verify:guard
+
+      # Nightly only. A PR failure needs no issue — the red check is already in
+      # front of the person who caused it — but a scheduled failure otherwise
+      # ends in an inbox. One issue, reused: repeat failures comment on it
+      # rather than opening a new one, so a contract that stays broken for a
+      # week is one thread, not seven. Closed by hand once it is actually fixed,
+      # so an intermittent failure cannot quietly close its own report.
+      - name: Open or update the nightly tracking issue
+        if: failure() && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          title='[Bug] Nightly contract harnesses are failing'
+          if [ -s "$HARNESS_FAILURES" ]; then
+            broke=$(paste -sd', ' "$HARNESS_FAILURES")
+          else
+            broke='the job failed before any harness reported'
+          fi
+          body=$(printf '%s\n\n%s\n\n%s\n' \
+            "The nightly run of the database contract harnesses went red: **$broke**." \
+            "Run: $RUN_URL" \
+            "Reproduce locally with \`set -a; . ./.env; set +a; npm run db:verify --workspace=packages/supabase\`. See \`packages/supabase/CLAUDE.md\` for what each harness proves. Close this issue by hand once the contract is fixed.")
+          existing=$(gh issue list --state open --label bug --json number,title \
+            --jq "map(select(.title == \"$title\")) | .[0].number // empty")
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+            echo "commented on #$existing"
+          else
+            gh issue create --title "$title" --body "$body" \
+              --label bug --label supabase --label test
+          fi
