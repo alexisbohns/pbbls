@@ -37,8 +37,11 @@ else
   echo "$label" >> "${HARNESS_FAILURES:-/dev/null}"
 fi
 
-if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then
-  echo "| $label | $result | $asserts |" >> "$GITHUB_STEP_SUMMARY"
-fi
+# Rows accumulate in a ledger that ONE later step turns into the summary table.
+# Writing straight to $GITHUB_STEP_SUMMARY here would not work: that file is
+# unique per step, and a table whose header and rows land in five different
+# step summaries only renders as a table if GitHub happens to concatenate them
+# without a blank line. One writer, one table, no bet.
+echo "| $label | $result | $asserts |" >> "${HARNESS_ROWS:-/dev/null}"
 
 exit "$status"

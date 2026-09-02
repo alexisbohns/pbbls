@@ -81,19 +81,14 @@ jobs:
             exit 1
           fi
 
-      - name: Start the run log
+      # Two ledgers the harness steps append to: one row per harness for the
+      # summary table, one label per FAILING harness for the tracking issue.
+      # Set here rather than in the job's `env:`, where the `runner` context is
+      # not available and fails the whole workflow at parse time.
+      - name: Prepare the run log
         run: |
-          # Each failing harness appends its label here; the tracking issue reads
-          # it so it can name what broke instead of just linking the run. Set
-          # here rather than in the job's `env:`, where the `runner` context is
-          # not available and fails the whole workflow at parse time.
+          echo "HARNESS_ROWS=$RUNNER_TEMP/harness-rows.txt"         >> "$GITHUB_ENV"
           echo "HARNESS_FAILURES=$RUNNER_TEMP/harness-failures.txt" >> "$GITHUB_ENV"
-          {
-            echo "### Contract harnesses — $(date -u '+%Y-%m-%d %H:%M UTC')"
-            echo
-            echo "| Harness | Result | Asserts |"
-            echo "|---|---|---|"
-          } >> "$GITHUB_STEP_SUMMARY"
 
       # One step per harness so a red check names the contract that broke, and
       # `!cancelled()` so one failure still reports the other three — each cleans
@@ -113,6 +108,19 @@ jobs:
       - name: Privileged profile columns (#739 guard)
         if: '!cancelled()'
         run: .github/scripts/verify-harness.sh "guard" db:verify:guard
+
+      # One writer for the whole table. `always()` so it still reports when a
+      # harness failed — that is precisely the run whose table is worth reading.
+      - name: Write the run log
+        if: always()
+        run: |
+          {
+            echo "### Contract harnesses — $(date -u '+%Y-%m-%d %H:%M UTC')"
+            echo
+            echo "| Harness | Result | Asserts |"
+            echo "|---|---|---|"
+            cat "${HARNESS_ROWS:-/dev/null}" 2>/dev/null || true
+          } >> "$GITHUB_STEP_SUMMARY"
 
       # Nightly only. A PR failure needs no issue — the red check is already in
       # front of the person who caused it — but a scheduled failure otherwise
