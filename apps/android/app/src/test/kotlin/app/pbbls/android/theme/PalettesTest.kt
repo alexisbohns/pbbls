@@ -12,6 +12,7 @@ class PalettesTest {
         assertEquals(Color(0xFF7A5E64), SystemPaletteLight.secondary)
         assertEquals(Color(0xFFE9E2E4), SystemPaletteLight.muted)
         assertEquals(Color(0xFFFFFFFF), SystemPaletteLight.background)
+        assertEquals(Color(0xFF4A3639), SystemPaletteLight.onLight)
     }
 
     @Test
@@ -20,6 +21,7 @@ class PalettesTest {
         assertEquals(Color(0xFFAF979D), SystemPaletteDark.secondary)
         assertEquals(Color(0xFF2E2024), SystemPaletteDark.muted)
         assertEquals(Color(0xFF171012), SystemPaletteDark.background)
+        assertEquals(Color(0xFF4A3639), SystemPaletteDark.onLight)
     }
 
     @Test
