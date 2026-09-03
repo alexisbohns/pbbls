@@ -139,6 +139,12 @@
     "deleteAccountError": "Impossible de supprimer votre compte. Rien n'a été supprimé. Veuillez réessayer."
   },
   "errors": {
+    "store": {
+      "title": "Impossible de retrouver tes pebbles",
+      "description": "Ton parcours est intact, c'est la connexion qui a lâché en route. Réessaie dans un instant.",
+      "retry": "Réessayer",
+      "retrying": "Chargement…"
+    },
     "title": "Une erreur est survenue",
     "description": "Une erreur inattendue s'est produite. Veuillez réessayer.",
     "retry": "Réessayer",
@@ -264,6 +270,7 @@
     "debtHint": "Gagnez du karma pour remettre votre solde à zéro avant de pouvoir acheter à nouveau.",
     "history": "Historique",
     "empty": "Aucun mouvement de karma pour l’instant.",
+    "historyError": "Impossible de charger ton historique de karma.",
     "loadMore": "Voir plus",
     "reason": {
       "pebble_created": "Caillou créé",
