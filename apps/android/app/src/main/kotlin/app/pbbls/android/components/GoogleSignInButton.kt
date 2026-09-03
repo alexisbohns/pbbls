@@ -34,7 +34,7 @@ internal val GoogleButtonSurface = Color.White
  * Ink for [GoogleButtonSurface]. Never `system.foreground`, which flips to a pale
  * grey in dark theme and lands at 1.28:1 on white. See [SystemPalette.onLight].
  */
-internal fun googleButtonLabelColor(system: SystemPalette): Color = system.onLight
+internal fun googleButtonLabelColor(system: SystemPalette): Color = system.foreground
 
 /**
  * White capsule button with the multi-color Google G mark and "Continue with
