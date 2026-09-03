@@ -7,6 +7,12 @@ struct SystemPalette {
     let secondary: Color
     let muted: Color
     let background: Color
+
+    /// Ink for content painted on a *pinned light* surface (the Google capsule),
+    /// where `foreground` would flip to #E9E2E4 and vanish at 1.28:1. Backed by a
+    /// single-appearance colorset on purpose: it does not follow the appearance,
+    /// because its ground does not either.
+    let onLight: Color
 }
 
 /// Six-tier brand-accent palette. Designed on the same model as
@@ -31,7 +37,8 @@ extension Color {
         foreground: Color("SystemForeground"),
         secondary:  Color("SystemSecondary"),
         muted:      Color("SystemMuted"),
-        background: Color("SystemBackground")
+        background: Color("SystemBackground"),
+        onLight:    Color("SystemOnLight")
     )
 
     static let accent = AccentPalette(
