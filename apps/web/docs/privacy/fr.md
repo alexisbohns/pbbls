@@ -2,9 +2,9 @@
 title: Politique de confidentialité
 locale: fr
 slug: privacy
-version: 1.0.0
-effective_date: 2026-04-09
-last_updated: 2026-04-09
+version: 1.1.0
+effective_date: 2026-09-04
+last_updated: 2026-09-04
 ---
 
 # Politique de Confidentialité de Pebbles
@@ -149,28 +149,37 @@ Conformément à l'article 28 du RGPD, nous travaillons avec les sous-traitants 
 - **Traitement :** Stockage chiffré de toutes vos données, authentification sécurisée, journaux d'audit.
 - **Contrat :** Supabase est lié par un contrat de traitement des données conforme au RGPD.
 
-### 6.2 Google (Gemma LLM)
+### 6.2 Vercel Inc.
 
-- **Fonction :** Traitement de langage anonymisé pour enrichir vos événements (si vous activez les fonctionnalités IA).
-- **Localisation :** Google Cloud (États-Unis avec Privacy Shield / Data Privacy Framework).
+- **Fonction :** Hébergement et distribution de l'application web et du back-office.
+- **Localisation :** Les fonctions serveur sont fixées sur la région de Paris, France (`cdg1`). Les requêtes sont acheminées et déchiffrées (terminaison TLS) par le réseau edge mondial de Vercel, exploité depuis les États-Unis.
+- **Traitement :** Rendu des pages et traitement des requêtes côté serveur. Transitent à ce titre votre adresse IP, l'adresse de la page demandée, votre cookie de session et les données affichées sur la page.
+- **Encadrement du transfert :** Vercel Inc. est certifiée au titre du Data Privacy Framework UE-États-Unis.
+
+### 6.3 Google (Gemma LLM) — non activé à ce jour
+
+- **Fonction :** Traitement de langage anonymisé pour enrichir vos événements (si vous activez les fonctionnalités IA). **Cette intégration n'est pas active aujourd'hui ; l'entrée est conservée car la fonctionnalité est prévue.**
+- **Localisation :** Google Cloud (États-Unis, au titre du Data Privacy Framework UE-États-Unis).
 - **Données transmises :** Seules les données d'événements anonymisées (sans identifiants personnels comme votre nom, email ou noms de souls).
 - **Engagement :** Google ne conserve pas vos données à long terme.
 
 ## 7. Transferts Internationaux de Données
 
-### 7.1 Transferts Intracommunautaires
+### 7.1 Stockage et traitement dans l'Union Européenne
 
-Supabase opère avec des serveurs en Paris (France, UE). Aucun transfert hors UE n'est impliqué pour le stockage principal.
+Vos données sont stockées par Supabase sur des serveurs situés à Paris (France, UE), et le code serveur qui les lit s'exécute dans la région parisienne de Vercel (`cdg1`). Le stockage et le traitement principaux restent donc dans l'Union Européenne.
 
 ### 7.2 Transferts vers les États-Unis
 
-Si vous activez les fonctionnalités IA avec Google Gemma, vos données anonymisées peuvent être transférées vers les serveurs de Google aux États-Unis. Nous nous appuyons sur :
-- Le Data Privacy Framework UE-États-Unis pour justifier ce transfert.
-- L'anonymisation des données pour réduire les risques.
+Deux traitements peuvent impliquer les États-Unis.
 
-### 7.3 Polices de Caractères
+**Distribution de l'application.** Chaque requête vers Pebbles est acheminée par le réseau edge mondial de Vercel, qui en assure la terminaison TLS, avant d'atteindre la région parisienne. Votre adresse IP, l'adresse de la page demandée et votre cookie de session transitent donc par une infrastructure exploitée depuis les États-Unis. Nous nous appuyons sur la certification de Vercel Inc. au titre du Data Privacy Framework UE-États-Unis.
 
-Nos polices de caractères sont auto-hébergées en UE. Aucun transfert vers des CDN externes.
+**Fonctionnalités IA, si vous les activez.** Vos données anonymisées peuvent être transférées vers les serveurs de Google aux États-Unis. Nous nous appuyons sur le Data Privacy Framework UE-États-Unis et sur l'anonymisation des données pour réduire les risques. Cette fonctionnalité n'est pas active à ce jour.
+
+### 7.3 Polices de Caractères et Ressources Statiques
+
+Nos polices de caractères sont auto-hébergées : aucune requête n'est adressée à Google Fonts ou à un service de polices tiers équivalent. Elles sont servies, comme le reste de l'application, via le réseau edge de Vercel décrit au 7.2.
 
 ## 8. Durée de Conservation des Données
 

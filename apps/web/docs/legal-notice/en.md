@@ -2,9 +2,9 @@
 title: Legal Notice
 locale: en
 slug: legal-notice
-version: 1.0.0
-effective_date: 2026-04-09
-last_updated: 2026-04-09
+version: 1.1.0
+effective_date: 2026-09-04
+last_updated: 2026-09-04
 ---
 
 # Legal Notices
@@ -24,7 +24,17 @@ last_updated: 2026-04-09
 * Alexis Bohn
 * Email: hello@bohns.design
 
-## Hosting Provider
+## Hosting Providers
+
+**Web application and back office**
+
+Vercel Inc.
+440 N Barranca Avenue #4133
+Covina, CA 91723, United States
+
+Server-side functions run in: Paris, France (`cdg1` region). Delivery is handled by Vercel's global edge network.
+
+**Database and authentication**
 
 Supabase Inc.
 970 Toa Payoh North #07-04
