@@ -1,0 +1,51 @@
+name: iOS
+
+# Static checks for the iOS app that need no Xcode, so they run on ubuntu in
+# seconds rather than on a macOS runner. Paying for macOS to assert that a file
+# exists is the reason such a check gets disabled later.
+#
+# The Swift test suite is NOT run here — that needs a macOS runner and is still
+# a local `npm run test --workspace=@pbbls/ios`.
+on:
+  pull_request:
+    paths:
+      - 'apps/ios/**'
+      - '.github/workflows/ios.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/ios/**'
+      - '.github/workflows/ios.yml'
+
+concurrency:
+  group: ios-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: privacy manifests · colour contrast
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      # Both bundles carry a manifest, and the required-reason declarations
+      # still match what the Swift sources actually call. Undeclared usage is
+      # an ITMS-91053 rejection on upload; a stale declaration describes code
+      # that no longer exists.
+      - name: Verify privacy manifests
+        run: npm run verify:privacy --workspace=@pbbls/ios
+
+      # SystemOnLight stays a single-appearance colorset clearing WCAG AA on
+      # the pinned white Google capsule. The Swift mirror of this assertion
+      # needs a simulator; this half does not.
+      - name: Verify colour contrast
+        run: npm run verify:contrast --workspace=@pbbls/ios
