@@ -4,6 +4,7 @@ import { useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { AuthGate } from "@/components/auth/AuthGate"
+import { StoreGate } from "@/components/layout/StoreGate"
 import { OnboardingGate } from "@/components/onboarding/OnboardingGate"
 import { PendingInviteRedirect } from "@/components/connections/PendingInviteRedirect"
 
@@ -51,7 +52,9 @@ export function MainContent({ children }: MainContentProps) {
     >
       {!isLanding && !isAuth && !isDocs && !isPublicProfile && <OnboardingGate />}
       {!isLanding && !isAuth && !isDocs && !isPublicProfile && <PendingInviteRedirect />}
-      <AuthGate>{children}</AuthGate>
+      <AuthGate>
+        <StoreGate>{children}</StoreGate>
+      </AuthGate>
     </main>
   )
 }
