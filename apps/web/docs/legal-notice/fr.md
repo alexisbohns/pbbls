@@ -2,9 +2,9 @@
 title: Mentions légales
 locale: fr
 slug: legal-notice
-version: 1.0.0
-effective_date: 2026-04-09
-last_updated: 2026-04-09
+version: 1.1.0
+effective_date: 2026-09-04
+last_updated: 2026-09-04
 ---
 
 # Mentions Légales
@@ -22,7 +22,17 @@ last_updated: 2026-04-09
 * Alexis Bohn
 * Email : hello@bohns.design
 
-## Hébergeur
+## Hébergeurs
+
+**Application web et back-office**
+
+Vercel Inc.
+440 N Barranca Avenue #4133
+Covina, CA 91723, États-Unis
+
+Fonctions serveur exécutées en : Paris, France (région `cdg1`). Distribution assurée par le réseau edge mondial de Vercel.
+
+**Base de données et authentification**
 
 Supabase Inc.
 970 Toa Payoh North #07-04
