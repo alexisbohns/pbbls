@@ -33,6 +33,7 @@ private struct TokensGrid: View {
                         Swatch(name: "system.secondary",  color: .system.secondary)
                         Swatch(name: "system.muted",      color: .system.muted)
                         Swatch(name: "system.background", color: .system.background)
+                        Swatch(name: "system.onLight",    color: .system.onLight)
                     }
                 }
 

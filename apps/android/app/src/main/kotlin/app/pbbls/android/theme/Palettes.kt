@@ -12,6 +12,13 @@ data class SystemPalette(
     val secondary: Color,
     val muted: Color,
     val background: Color,
+    /**
+     * Ink for content painted on a *pinned light* surface (the Google capsule),
+     * where [foreground] would flip to #E9E2E4 and vanish at 1.28:1. Identical in
+     * both palettes on purpose: it does not follow the theme, because its ground
+     * does not either.
+     */
+    val onLight: Color,
 )
 
 /**
@@ -34,6 +41,7 @@ internal val SystemPaletteLight =
         secondary = Color(0xFF7A5E64),
         muted = Color(0xFFE9E2E4),
         background = Color(0xFFFFFFFF),
+        onLight = Color(0xFF4A3639),
     )
 
 internal val SystemPaletteDark =
@@ -42,6 +50,7 @@ internal val SystemPaletteDark =
         secondary = Color(0xFFAF979D),
         muted = Color(0xFF2E2024),
         background = Color(0xFF171012),
+        onLight = Color(0xFF4A3639),
     )
 
 // No dark variant — identical in both themes (mirrors iOS `AccentPalette`).
