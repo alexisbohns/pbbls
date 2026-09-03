@@ -68,7 +68,7 @@ Keep CLAUDE.md short. Read these when relevant — don't pre-load:
 - **Postgres / Supabase technique** → `.agents/skills/supabase-postgres-best-practices/` (RLS, indexing, locking, pooling).
 - **PR Lab Notes** → `lab-note` skill (`.claude/skills/lab-note/`); see the Lab Note section below.
 
-CI gates worth knowing about: `arkaik.yml` validates the bundle + journal on any `docs/arkaik/**` change, `android.yml` builds on `apps/android/**`, `supabase.yml` runs the contract harnesses on `packages/supabase/**` and nightly, `lab-note-reminder.yml` advises at PR-open and `lab-note.yml` posts the note at merge.
+CI gates worth knowing about: `arkaik.yml` validates the bundle + journal on any `docs/arkaik/**` change, `android.yml` builds on `apps/android/**`, `web.yml` runs ESLint + the Vitest suite on **every** PR (no path filter, so it can be a required check), `supabase.yml` runs the contract harnesses on `packages/supabase/**` and nightly, `lab-note-reminder.yml` advises at PR-open and `lab-note.yml` posts the note at merge.
 
 ## Standing cross-surface rules
 
@@ -134,7 +134,7 @@ Cadence: promote during the periodic monorepo-audit grooming pass at **milestone
    - If the PR resolves an issue, propose inheriting its labels and milestone (except `bug` → PR gets `fix`). Confirm with the user.
    - If no issue, ask for species + scope label(s) and milestone.
    - Never open a PR without labels and milestone (unless the user confirms there's no milestone).
-5. Run lint/build at the **scope of your change** (per task-size triage above), confirm green, then open the PR.
+5. Run lint, **the workspace test suite**, and build at the **scope of your change** (per task-size triage above), confirm green, then open the PR.
 6. If this PR established or reversed a **significant** decision, append one entry to `docs/decisions/log.md` (usually a no-op). Significance bar: would a future agent or human waste real time rediscovering or wrongly reversing it? Supersede-don't-edit — status changes are new appended entries, never edits to prior ones.
 7. **Lab Note (EN/FR)** — required for user-facing PRs; see the section below.
 
