@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- The karma Live Activity renders KarmaActivityAttributes.ContentState
+         handed to it by ActivityKit. It has no network, no storage, no
+         UserDefaults, and reads no required-reason API. Present-and-empty is
+         the declaration that says so; an absent file says nothing at all. -->
+    <key>NSPrivacyTracking</key>
+    <false/>
+    <key>NSPrivacyTrackingDomains</key>
+    <array/>
+    <key>NSPrivacyAccessedAPITypes</key>
+    <array/>
+    <key>NSPrivacyCollectedDataTypes</key>
+    <array/>
+</dict>
+</plist>
