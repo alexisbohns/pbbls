@@ -186,6 +186,7 @@ en:
 fr:
   title: "Titre court, orienté bénéfice"
   summary: "Une ou deux phrases, adaptées, pas traduites littéralement."
+nodes: [V-pebble-record, F-record-pebble-flow]   # optional; read only by Arkaik
 suggested:                # optional; read only by the Ariko vault
   molecule: pbbls         # THIS repo's molecule slug
   type: feature           # feature | improvement | fix | announcement
@@ -193,6 +194,17 @@ suggested:                # optional; read only by the Ariko vault
   # atom: <slug>          # ONLY when you know the slug exists — never guess
 ```
 
+**`nodes:` is what makes the Arkaik changelog entry readable.** The entry
+renders a **Touched** list of graph nodes, and Arkaik can only work out the
+*acceptances* on its own (from an `AC-…` id in the PR title or body) — views,
+flows, endpoints and data models have to be named. List the ids your change
+actually touched, most important first, reading them out of the map rather than
+reconstructing them; if you updated `docs/arkaik/bundle.json` in this PR, those
+are exactly the ids. An id that matches nothing is left off the entry and
+reported in the App's delivery response. Omit the key when nothing was touched.
+Note `platform:` is **not** what fills the entry's platform chip — Arkaik works
+that out from the folders the PR touched.
+
 **Tone.** Lead with the benefit, not the mechanism. Short, warm, a little playful, never corporate. No engineering jargon, ticket numbers, or internal names.
 
-**One block, two destinations.** On merge, the Arkaik GitHub App webhook appends the note to this project's arkaik journal as a `deliverable.shipped` event (idempotent per PR; the Ariko federation reads it from the pollen feed) — a malformed note is reported in the delivery response, and the advisory `lab-note-reminder` surfaces the same problems at PR-open time, so fix it by editing the PR body. At release time a human pastes the same YAML into the Pebbles Lab admin ("New log" prefills from the clipboard). Never write to Supabase / `logs` from the dev loop.
+**One block, three destinations.** On merge, the Arkaik GitHub App webhook appends the note to this project's arkaik journal as a `deliverable.shipped` event (idempotent per PR; the Ariko federation reads it from the pollen feed) — a malformed note is reported in the delivery response, and the advisory `lab-note-reminder` surfaces the same problems at PR-open time, so fix it by editing the PR body. At release time a human pastes the same YAML into the Pebbles Lab admin ("New log" prefills from the clipboard). Never write to Supabase / `logs` from the dev loop.

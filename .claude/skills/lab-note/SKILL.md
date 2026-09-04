@@ -24,9 +24,9 @@ Your job here: produce **one YAML snippet** in the PR's `## Lab Note (EN/FR)`
 section, following the schema and tone below. It is a **proposal only** (never
 write to Supabase / the `logs` table from the dev loop).
 
-## One block, two destinations
+## One block, three destinations
 
-The single snippet you write serves **both** delivery legs:
+The single snippet you write serves **all three** delivery legs:
 
 1. **Ariko inbox (automatic, on merge):** the repo's `.github/workflows/lab-note.yml`
    watches for merged PRs, reads this section, and posts the note to the Ariko
@@ -35,11 +35,17 @@ The single snippet you write serves **both** delivery legs:
    fenced `yaml` block — which our `## Lab Note (EN/FR)` heading already matches.
    Ariko requires `en.title` + `en.summary`; it reads the optional `suggested:`
    block and **ignores every other top-level key** (`species`, `platform`, etc.).
-2. **Pebbles Lab admin (manual, at release):** the maintainer copies the same
+2. **The Arkaik journal (automatic, on merge):** the Arkaik GitHub App turns the
+   same note into a `deliverable.shipped` entry on the hosted Pebbles map, which
+   is what the Arkaik changelog renders. It reads `en` + `fr`, and the optional
+   `nodes:` list — see below. It works out the platform from the folders the PR
+   touched, so `platform:` here is **not** what fills the chip.
+3. **Pebbles Lab admin (manual, at release):** the maintainer copies the same
    YAML and publishes it via the Lab admin, unchanged (see "Where it goes").
 
 So you write one block with the full Pebbles key set **plus** the `suggested:`
-block; each destination reads the keys it cares about and ignores the rest.
+block **plus** `nodes:` where it applies; each destination reads the keys it
+cares about and ignores the rest.
 
 ## Both languages are mandatory
 
@@ -71,8 +77,8 @@ failure mode off the table, apostrophes included.
 - Wrong: `summary: Heads up: the widget moved.`
 - Right: `summary: "Heads up: the widget moved."`
 
-Slug-ish values (`species`, `platform`, `status`, `molecule`, `type`, `tags`)
-need no quotes.
+Slug-ish values (`species`, `platform`, `status`, `nodes`, `molecule`, `type`,
+`tags`) need no quotes.
 
 ## When to use
 
@@ -101,6 +107,7 @@ en:
 fr:
   title: "Échange des glyphes avec la communauté"
   summary: "Ta page Glyphes propose désormais les onglets Miens, Acquis et Commu. Trouve un glyphe qui te plaît pour l'échanger contre du karma."
+nodes: [V-glyphs-list, V-glyph-swap-drawer, F-swap-glyph]   # optional; Arkaik only
 suggested:                  # optional; for the Ariko vault only
   molecule: pbbls
   atom: glyphs              # only when confidently known
@@ -119,6 +126,7 @@ suggested:                  # optional; for the Ariko vault only
 | `en.summary` | yes | 1–2 sentences | Required. |
 | `fr.title` | yes | short string | The DB falls back to EN if absent, but the note is incomplete without it. Always write it. |
 | `fr.summary` | yes | 1–2 sentences | The DB tolerates its absence, but the note is incomplete without it. Always write it. |
+| `nodes` | no | list of Arkaik node ids | The graph nodes this change touched, most important first. Read **only** by the Arkaik journal; ignored by the Lab admin and the Ariko vault. See below. |
 | `suggested.molecule` | no | `pbbls` | Always `pbbls` for this repo. Routing hint for the Ariko vault; ignored by the Lab admin. |
 | `suggested.atom` | no | short string | The feature area (`glyphs`, `path`, `read-view`, …). Include **only when confidently known** — omit rather than guess. |
 | `suggested.type` | no | short string | The kind of change, e.g. `feature`, `announcement`. |
@@ -131,6 +139,30 @@ them safe.
 **The `suggested:` block** is optional and read **only by the Ariko vault** (the
 Lab admin ignores it). Always set `molecule: pbbls`. Add `atom`, `type`, and
 `tags` when you can fill them meaningfully; leave `atom` out rather than guess.
+
+### `nodes:` — what the change touched on the map
+
+The Arkaik changelog renders each entry with a **Touched** list of product-graph
+nodes and a count. Arkaik works out the *acceptances* on its own, by reading an
+`AC-…` id in the PR title or body — but **views, flows, API endpoints, data
+models and decisions it cannot guess**. An entry with nothing under it is the
+default, and this key is how you avoid it.
+
+```yaml
+nodes: [V-pebble-record, V-record-success, F-record-pebble-flow, AC-record-pebble-flow]
+```
+
+- **List the ids your change actually touched**, most important first. They lead
+  the entry in your order; any acceptance the PR body mentions follows.
+- **Only ids you know exist.** Read them out of the map (`docs/arkaik/bundle.json`,
+  or the hosted project via the `arkaik` skill) — never reconstruct one from a
+  screen name. An id that matches nothing is left off the entry and named back at
+  you in the delivery response.
+- If you updated the map in this PR, the ids you touched there are exactly the
+  ids that belong here.
+- **Omit the key** when the change touched no node. A malformed `nodes:` never
+  costs you the note — unusable entries are dropped one at a time and the note
+  still posts everywhere.
 
 ## Tone of voice
 
@@ -188,7 +220,13 @@ fr:
    `owner/repo#N`, so merging (or re-running the job) never duplicates the
    capture. A chore PR with no `## Lab Note` section makes the job log
    "skipped" — nothing is posted. No human action beyond merging.
-3. **At release time (a human):** copy the YAML, open the Lab admin, and click
+3. **On merge (automatic):** the Arkaik GitHub App appends the same note to the
+   hosted Pebbles map's journal as a `deliverable.shipped` entry, carrying the
+   `nodes:` you listed and the platform it worked out from the folders the PR
+   touched. Idempotent per PR. Problems — a malformed note, an id nothing
+   answers to — are reported in the App's delivery response, not in this repo's
+   Actions log.
+4. **At release time (a human):** copy the YAML, open the Lab admin, and click
    **"New log"** on the Features or Announcements list. If the snippet is on the
    clipboard, the New-log form opens **prefilled** from it — review, set
    `status: shipped` / the release date / `published`, and Save.
