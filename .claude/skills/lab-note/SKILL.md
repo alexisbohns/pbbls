@@ -4,14 +4,13 @@ description: >
   Author the bilingual (EN/FR) Lab Note for a user-facing Pebbles PR as a strict
   YAML snippet the maintainer can copy straight into the admin. Use this skill
   whenever you are wrapping up a PR that ships something users will notice — the
-  PR has the `feat` label, or it touches a user-visible Arkaik view node
-  (`docs/arkaik/bundle.json`) — and you need to fill the `## Lab Note (EN/FR)`
-  section of the PR body. It defines the exact schema (the fields the `logs`
+  PR has the `feat` label, or it touches a user-visible Arkaik view node — and
+  you need to fill the `## Lab Note (EN/FR)` section of the PR body. It defines the exact schema (the fields the `logs`
   table accepts plus the optional `suggested:` block for the Ariko vault), the
   allowed values, and the friendly, casual tone of voice (French uses "Tu").
-  One block serves two destinations: on merge it auto-posts to the Ariko
-  changelog vault, and a human pastes the same YAML into the Pebbles Lab admin
-  at release time. The skill itself publishes nothing — it only authors the note.
+  One block serves three destinations: on merge it auto-posts to the Ariko
+  changelog vault and to the Arkaik journal, and a human pastes the same YAML
+  into the Pebbles Lab admin at release time. The skill itself publishes nothing — it only authors the note.
 ---
 
 # Lab Note Authoring
@@ -85,7 +84,7 @@ Slug-ish values (`species`, `platform`, `status`, `nodes`, `molecule`, `type`,
 Only for **user-facing** PRs. Gate (same as the PR checklist):
 
 - the PR has the `feat` label, **OR**
-- it touches a user-visible Arkaik **view** node (`docs/arkaik/bundle.json`).
+- it touches a user-visible Arkaik **view** node.
 
 If the PR is not user-facing (chore, refactor, infra, docs-only), there is no Lab
 Note — delete the section from the PR body.
@@ -154,12 +153,13 @@ nodes: [V-pebble-record, V-record-success, F-record-pebble-flow, AC-record-pebbl
 
 - **List the ids your change actually touched**, most important first. They lead
   the entry in your order; any acceptance the PR body mentions follows.
-- **Only ids you know exist.** Read them out of the map (`docs/arkaik/bundle.json`,
-  or the hosted project via the `arkaik` skill) — never reconstruct one from a
-  screen name. An id that matches nothing is left off the entry and named back at
-  you in the delivery response.
-- If you updated the map in this PR, the ids you touched there are exactly the
-  ids that belong here.
+- **Only ids you know exist.** Read them off the **hosted** map with the
+  `arkaik-mcp` tools (`list_nodes` / `get_node`) — never reconstruct one from a
+  screen name, and never from `docs/arkaik/bundle.json`, which is a frozen
+  pre-hosted snapshot (see CLAUDE.md § "The map is hosted"). An id that matches
+  nothing is left off the entry and named back at you in the delivery response.
+- If you moved nodes on the map in this PR, those are exactly the ids that
+  belong here.
 - **Omit the key** when the change touched no node. A malformed `nodes:` never
   costs you the note — unusable entries are dropped one at a time and the note
   still posts everywhere.
