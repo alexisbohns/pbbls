@@ -3,10 +3,10 @@
 import { Layers } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { Collection } from "@/lib/types"
-import { SelectableItem } from "@/components/ui/SelectableItem"
 import { PickerSheet } from "@/components/ui/PickerSheet"
 import { SheetTrigger } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
+import { CollectionPickerContent } from "@/components/record/CollectionPickerContent"
 
 type CollectionSheetProps = {
   value: string[]
@@ -18,6 +18,9 @@ type CollectionSheetProps = {
 /**
  * Multi-select collection picker presented in the shared drawer. Toggling a
  * row keeps the sheet open; the header `X` (or a backdrop tap) dismisses it.
+ *
+ * The list itself is `CollectionPickerContent`, shared with the flow's
+ * collection step.
  */
 export function CollectionSheet({ value, onChange, collections, variant = "tile" }: CollectionSheetProps) {
   const t = useTranslations("record.collection")
@@ -67,24 +70,11 @@ export function CollectionSheet({ value, onChange, collections, variant = "tile"
 
   return (
     <PickerSheet title={t("title")} closeLabel={t("close")} trigger={trigger}>
-      {collections.length === 0 ? (
-        <p className="px-2 py-4 text-center text-sm text-muted-foreground">
-          {t("empty")}
-        </p>
-      ) : (
-        <div className="flex flex-col gap-0.5">
-          {collections.map((coll) => (
-            <SelectableItem
-              key={coll.id}
-              selected={value.includes(coll.id)}
-              onSelect={() => toggle(coll.id)}
-              className="py-2"
-            >
-              {coll.name}
-            </SelectableItem>
-          ))}
-        </div>
-      )}
+      <CollectionPickerContent
+        collections={collections}
+        selectedIds={value}
+        onToggle={toggle}
+      />
     </PickerSheet>
   )
 }

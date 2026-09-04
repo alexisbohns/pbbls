@@ -27,6 +27,52 @@ enum PebblesFont {
     case bodyLeadHand
     /// Handwritten (Reenie Beanie) large title, 41pt. Profile display name.
     case largeTitleHand
+    /// Handwritten (Caveat) input face, 36pt. The pebble name field in the
+    /// record flow — the one place the user writes on a bare page.
+    case nameInputHand
+    /// Handwritten (Caveat Bold) headline word naming the picked valence.
+    /// Three sizes, one per `ValenceSizeGroup`, so the word grows with the
+    /// event the way the stones do.
+    case valenceWordSmall
+    case valenceWordMedium
+    case valenceWordLarge
+}
+
+// MARK: - Ink overhang
+
+extension PebblesFont {
+    /// Horizontal breathing room a token needs so its glyphs are not clipped
+    /// at the text's layout width.
+    ///
+    /// Caveat Bold's terminal `t` flicks to the right past the glyph's advance,
+    /// and `Text` is clipped to the advance — so "Moment" and "Lowlight" lose
+    /// the end of their last letter to a hard vertical cut.
+    ///
+    /// Measured with CoreText (`CTLineGetImageBounds` against
+    /// `CTLineGetTypographicBounds`): the ink runs 3–8pt past the advance on
+    /// the right at 34–56pt, and never past the ascent, so the cut is only ever
+    /// horizontal. These values round that up.
+    ///
+    /// **Padding alone does not fix it.** A frame is not what the glyphs are
+    /// clipped to, so callers pad the *string* as well — see
+    /// `PebblesFont.needsInkPadding`. This value is the belt to that's braces.
+    ///
+    /// Applied by the caller rather than by `pebblesFont`, which stays a pure
+    /// type modifier (font + tracking + case) and never touches layout.
+    var inkOverhang: CGFloat {
+        switch self {
+        case .valenceWordSmall:  return 6
+        case .valenceWordMedium: return 8
+        case .valenceWordLarge:  return 10
+        default:                 return 0
+        }
+    }
+
+    /// True for the faces whose ink escapes their advance. Callers put a space
+    /// on each side of the string: a space carries real advance width, so the
+    /// room travels with the text no matter what measures its bounds, and
+    /// padding both sides keeps the word centred.
+    var needsInkPadding: Bool { inkOverhang > 0 }
 }
 
 // MARK: - View modifier
@@ -74,6 +120,10 @@ private extension PebblesFont {
         case .buttonLabel:           return .ysabeauSemibold(17)
         case .bodyLeadHand:          return .reenieBeanie(22)
         case .largeTitleHand:        return .reenieBeanie(41)
+        case .nameInputHand:         return .caveat(36)
+        case .valenceWordSmall:      return .caveatBold(34)
+        case .valenceWordMedium:     return .caveatBold(44)
+        case .valenceWordLarge:      return .caveatBold(56)
         }
     }
 
@@ -92,6 +142,9 @@ private extension PebblesFont {
         // connected handwriting (issue #515 speced -2%, dialed in on review).
         case .bodyLeadHand:                                       return -1.0   // 22pt
         case .largeTitleHand:                                     return -2.0   // 41pt
+        // Caveat is already tightly connected; no extra tracking.
+        case .nameInputHand:                                      return 0
+        case .valenceWordSmall, .valenceWordMedium, .valenceWordLarge: return 0
         }
     }
 
@@ -135,6 +188,37 @@ extension Font {
             return Font(custom)
         }
         return Font(UIFont.systemFont(ofSize: size))
+    }
+
+    /// Caveat — handwritten face used for the pebble name input in the record
+    /// flow. Bundled variable TTF (`Resources/Caveat-VariableFont_wght.ttf`,
+    /// registered in Info.plist `UIAppFonts`); `UIFont(name:)` resolves the
+    /// default instance (weight 400). Falls back to the system font if the
+    /// face is missing from the build.
+    fileprivate static func caveat(_ size: CGFloat) -> Font {
+        if let custom = UIFont(name: "Caveat-Regular", size: size) {
+            return Font(custom)
+        }
+        return Font(UIFont.systemFont(ofSize: size))
+    }
+
+    /// Caveat at weight 700. `UIFont(name:)` only ever resolves a variable
+    /// font's default instance, so the weight axis has to be set explicitly —
+    /// `Caveat-Bold` is not a resolvable name for this file. Falls back to the
+    /// regular instance, then to the system font.
+    fileprivate static func caveatBold(_ size: CGFloat) -> Font {
+        // 'wght' as a four-char code, the identifier CoreText wants for the
+        // variation axis (see kCTFontVariationAxisIdentifierKey).
+        let weightAxis = 0x77_67_68_74
+        guard let base = UIFont(name: "Caveat-Regular", size: size) else {
+            return Font(UIFont.systemFont(ofSize: size, weight: .bold))
+        }
+        let descriptor = base.fontDescriptor.addingAttributes([
+            UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String): [
+                weightAxis: 700
+            ]
+        ])
+        return Font(UIFont(descriptor: descriptor, size: size))
     }
 
     /// SF Pro Rounded — system rounded design.

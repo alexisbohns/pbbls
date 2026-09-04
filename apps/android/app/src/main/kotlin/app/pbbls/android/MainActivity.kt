@@ -8,10 +8,13 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.CompositionLocalProvider
 import app.pbbls.android.features.glyph.services.LocalGlyphMarketService
 import app.pbbls.android.features.glyph.services.LocalGlyphService
+import app.pbbls.android.features.karma.LocalAchievementNotificationService
 import app.pbbls.android.features.karma.LocalKarmaNotificationService
 import app.pbbls.android.features.lab.services.LocalLogsService
+import app.pbbls.android.services.LocalAchievementsService
 import app.pbbls.android.services.LocalCollectionsService
 import app.pbbls.android.services.LocalComposerSnapshotStore
+import app.pbbls.android.services.LocalConnectionsService
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalPathService
 import app.pbbls.android.services.LocalPathStatsService
@@ -23,6 +26,7 @@ import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSnapURLCache
 import app.pbbls.android.services.LocalSoulsService
 import app.pbbls.android.services.LocalSupabaseService
+import app.pbbls.android.services.parseInviteToken
 import app.pbbls.android.theme.PebblesTheme
 import io.github.jan.supabase.auth.handleDeeplinks
 
@@ -42,6 +46,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         supabase.client.handleDeeplinks(intent)
+        captureInviteToken(intent)
         setContent {
             PebblesTheme {
                 CompositionLocalProvider(
@@ -57,11 +62,14 @@ class MainActivity : ComponentActivity() {
                     LocalSoulsService provides app.soulsService,
                     LocalCollectionsService provides app.collectionsService,
                     LocalPebbleDraftsService provides app.draftsService,
+                    LocalConnectionsService provides app.connectionsService,
                     LocalComposerSnapshotStore provides app.composerSnapshots,
                     LocalGlyphService provides app.glyphService,
                     LocalGlyphMarketService provides app.glyphMarket,
                     LocalLogsService provides app.logsService,
                     LocalKarmaNotificationService provides app.karma,
+                    LocalAchievementNotificationService provides app.achievementNotify,
+                    LocalAchievementsService provides app.achievements,
                 ) {
                     RootScreen()
                 }
@@ -73,5 +81,17 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         supabase.client.handleDeeplinks(intent)
+        captureInviteToken(intent)
+    }
+
+    /**
+     * Parks an invite App Link token on the service (M49). `handleDeeplinks`
+     * only reacts to `pebbles://auth-callback`, so both run safely on every
+     * intent. `RootScreen` presents the accept surface once a session exists,
+     * which is why this only stores rather than navigating.
+     */
+    private fun captureInviteToken(intent: Intent) {
+        val token = parseInviteToken(intent.data?.toString()) ?: return
+        app.connectionsService.pendingInviteToken = token
     }
 }

@@ -22,6 +22,12 @@ export type PebbleSnap = {
   sort_order: number
 }
 
+/**
+ * Privacy grade (M51): `secret` = owner-only, `private` = owner + mutual
+ * connections, `public` = any signed-in user, plus share-by-link via /p/[id].
+ */
+export type Visibility = "secret" | "private" | "public"
+
 export type Pebble = {
   id: string
   name: string
@@ -29,7 +35,7 @@ export type Pebble = {
   happened_at: string
   intensity: 1 | 2 | 3
   positiveness: -1 | 0 | 1
-  visibility: "private" | "public"
+  visibility: Visibility
   emotion_id: string
   soul_ids: string[]
   domain_ids: string[]
@@ -104,6 +110,66 @@ export type ProfileEngagement = {
   assiduity: boolean[]
 }
 
+// ---------------------------------------------------------------------------
+// Achievements (M48) — public catalog + owner-scoped unlock ledger
+// ---------------------------------------------------------------------------
+
+export type AchievementFamily =
+  | "pebble_count"
+  | "emotion_first"
+  | "domain_first"
+  | "first_collection"
+  | "first_glyph"
+  | "first_soul"
+  | "glyph_count"
+  | "glyph_sales"
+
+// One row of the public `achievements` catalog. Copy is composed client-side
+// from family-keyed i18n; the nullable EN/FR pairs are admin overrides that
+// win when present (D7). `isActive: false` retires a badge: it stops
+// evaluating and the grid hides it while locked, but earned unlocks keep
+// rendering.
+export type Achievement = {
+  id: string
+  slug: string
+  family: AchievementFamily
+  threshold: number | null
+  emotionId: string | null // emotion_first only
+  domainId: string | null // domain_first only
+  sortOrder: number
+  glyphId: string | null // system-owned visual; null → family fallback icon
+  karmaReward: number
+  isActive: boolean
+  titleEn: string | null
+  titleFr: string | null
+  descriptionEn: string | null
+  descriptionFr: string | null
+}
+
+// The subset a badge needs to draw itself: the family that picks its icon, and
+// everything `useAchievementCopy` interpolates. `Achievement` satisfies this,
+// and so does the leaner row `get_public_profile` projects for a visitor — which
+// is why the badge components take this and not the full catalog row.
+export type AchievementDisplay = Pick<
+  Achievement,
+  | "id"
+  | "slug"
+  | "family"
+  | "threshold"
+  | "emotionId"
+  | "domainId"
+  | "titleEn"
+  | "titleFr"
+  | "descriptionEn"
+  | "descriptionFr"
+>
+
+// One row of the caller's `achievement_unlocks` ledger (permanent by design).
+export type AchievementUnlock = {
+  achievementId: string
+  unlockedAt: string
+}
+
 export type MarkStroke = {
   d: string
   width: number
@@ -135,6 +201,32 @@ export type GlyphSubmission = {
   price: number
   created_at: string
   review_note?: string | null // admin's reason when status === "rejected"
+}
+
+// ---------------------------------------------------------------------------
+// Connections (M49) — mutual connections between users.
+// ---------------------------------------------------------------------------
+
+// The cross-user glyph projection returned by the connections RPCs: render
+// geometry only (strokes + view_box), never a full Mark — the RPC deliberately
+// omits id/created_at/ownership (design D5/D7). Same narrow shape as
+// `DomainGlyph` in `useDomains.ts`.
+export type PeerGlyph = {
+  strokes: MarkStroke[]
+  viewBox: string
+}
+
+// A peer's display projection — display name + avatar glyph geometry, never a
+// profiles row (roadmap §5 item 8).
+export type ConnectionPeer = {
+  displayName: string
+  glyph: PeerGlyph | null
+}
+
+export type Connection = {
+  id: string
+  connectedAt: string
+  peer: ConnectionPeer
 }
 
 // ---------------------------------------------------------------------------
@@ -187,12 +279,105 @@ export type Profile = {
   display_name: string
   /** FK to the user's chosen profile glyph (glyphs.id). Null when unset. */
   glyph_id: string | null
+  /** Public URL identity (/u/<handle>). Null until claimed via set_handle. */
+  handle: string | null
+  /** Opt-in flag for the public profile page. Requires a handle (DB CHECK). */
+  public_profile: boolean
   onboarding_completed: boolean
   color_world: ColorWorld
   terms_accepted_at: string | null
   privacy_accepted_at: string | null
   created_at: string
   updated_at: string
+}
+
+/**
+ * The `get_public_profile` RPC projection, verbatim wire shape (M50). Null
+ * from the RPC means "unknown or not public" — indistinguishable by design.
+ */
+export type PublicProfile = {
+  display_name: string
+  handle: string
+  /** Avatar glyph geometry, or null when the owner has none set. */
+  glyph: { strokes: MarkStroke[]; view_box: string } | null
+  pebbles_count: number
+  /** 0–6, same buckets as v_ripple. */
+  ripple_level: number
+  /** 0–7, same buckets as v_bounce. */
+  bounce_level: number
+  /** 28 booleans, index 0 = 27 days ago … index 27 = today (UTC). */
+  assiduity: boolean[]
+  days_practiced: number
+  /** ISO date (YYYY-MM-DD). */
+  member_since: string
+  /**
+   * The visitor's view of the owner's shelf: unlocked badges only, most
+   * recently earned first, capped at six by the RPC (#688). Snake_case because
+   * these come straight off the jsonb projection, unmapped.
+   */
+  achievements: PublicAchievement[]
+  /** Total unlocked, untruncated — the array above is a slice of it. */
+  achievements_count: number
+}
+
+/** One badge of `get_public_profile`'s shelf slice. */
+export type PublicAchievement = {
+  id: string
+  slug: string
+  family: AchievementFamily
+  threshold: number | null
+  emotion_id: string | null
+  domain_id: string | null
+  title_en: string | null
+  title_fr: string | null
+  description_en: string | null
+  description_fr: string | null
+  /** Admin-assigned badge visual; null on every seeded row today. */
+  glyph: { strokes: MarkStroke[]; view_box: string } | null
+  /** UTC date (YYYY-MM-DD) — coarsened, like `member_since`. */
+  unlocked_at: string
+}
+
+/**
+ * The `get_shared_pebble` projection (M51) — what an anonymous `/p/[id]`
+ * visitor sees of a `public`-grade pebble. Snake_case because it comes
+ * straight off the jsonb projection, unmapped. Deliberately owner-less:
+ * the RPC never returns `user_id`.
+ */
+export type SharedPebble = {
+  id: string
+  name: string
+  description: string | null
+  /** Whole-second UTC ISO timestamp (e.g. "2026-08-01T12:00:00Z"). */
+  happened_at: string
+  intensity: number
+  positiveness: number
+  /** Server-composed SVG; null only for legacy rows that pre-date the remote engine. */
+  render_svg: string | null
+  emotion: {
+    id: string
+    slug: string
+    name: string
+    color: string
+    /** Category palette tints; null when the emotion has no category linked. */
+    primary_color: string | null
+    secondary_color: string | null
+  }
+}
+
+/**
+ * One pebble a connection shares with the viewer (M51) — the RLS-visible
+ * subset of their pebbles ('private' + 'public'), core row only: enrichments
+ * stay owner-only and must not be rendered.
+ */
+export type SharedConnectionPebble = {
+  id: string
+  name: string
+  /** ISO timestamptz as returned by PostgREST. */
+  happened_at: string
+  visibility: Visibility
+  emotion: { id: string; slug: string; name: string; color: string }
+  render_svg: string | null
 }
 
 export type RegisterInput = {
@@ -202,6 +387,10 @@ export type RegisterInput = {
   privacy_accepted: boolean
 }
 export type LoginInput = { email: string; password: string }
+// `handle` is deliberately excluded: claiming/releasing a handle goes through
+// the `set_handle` RPC (normalization + stable error codes), never a direct
+// column write. `public_profile` stays here — a single-column toggle is the
+// sanctioned direct-update case, guarded by the DB CHECK.
 export type UpdateProfileInput = Partial<
-  Omit<Profile, "id" | "user_id" | "created_at" | "updated_at">
+  Omit<Profile, "id" | "user_id" | "handle" | "created_at" | "updated_at">
 >

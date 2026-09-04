@@ -82,6 +82,17 @@ struct ValenceHelpersTests {
         }
     }
 
+    @Test("headline copy matches the spec")
+    func headlineCopy() {
+        #expect(String(localized: Valence.lowlightSmall.headline.word) == "Lowlight")
+        #expect(String(localized: Valence.neutralMedium.headline.word) == "Moment")
+        #expect(String(localized: Valence.highlightLarge.headline.word) == "Highlight")
+
+        #expect(String(localized: Valence.neutralSmall.headline.span) == "OF MY DAY")
+        #expect(String(localized: Valence.neutralMedium.headline.span) == "OF MY WEEK")
+        #expect(String(localized: Valence.neutralLarge.headline.span) == "OF MY MONTH")
+    }
+
     @Test("shortLabel reflects polarity")
     func shortLabel() {
         #expect(String(localized: Valence.lowlightSmall.shortLabel)  == "Lowlight")

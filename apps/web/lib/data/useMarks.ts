@@ -1,6 +1,7 @@
 "use client"
 
 import { useDataProvider } from "@/lib/data/provider-context"
+import { fireAchievementCheck } from "@/lib/activity/fire-achievement-check"
 import type { CreateMarkInput, UpdateMarkInput } from "@/lib/data/data-provider"
 import type { Mark } from "@/lib/types"
 
@@ -11,6 +12,7 @@ export function useMarks() {
     if (!provider) throw new Error("Not authenticated")
     const mark = await provider.createMark(input)
     setStore(provider.getStore())
+    fireAchievementCheck(provider)
     return mark
   }
 

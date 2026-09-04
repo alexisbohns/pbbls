@@ -32,10 +32,24 @@ export type AuthContextValue = {
   isProfileLoading: boolean
   login(input: LoginInput): Promise<void>
   register(input: RegisterInput): Promise<void>
-  signInWithApple(): Promise<void>
-  signInWithGoogle(): Promise<void>
+  /**
+   * OAuth sign-in. `next` is an optional, strictly relative post-auth
+   * destination threaded through the callback's `?next=` param (M49, D12);
+   * anything not strictly relative is dropped.
+   */
+  signInWithApple(next?: string): Promise<void>
+  signInWithGoogle(next?: string): Promise<void>
   logout(): Promise<void>
   updateProfile(input: UpdateProfileInput): Promise<Profile>
+  /**
+   * Claim, change, or release (null) the public handle via the `set_handle`
+   * RPC. Rejections carry a stable code in the error message —
+   * `invalid_handle`, `handle_taken`, `handle_reserved`, or `not_found` when
+   * the caller has no profile row. Callers must also expect transport
+   * failures (timeout, network), which carry no code. Releasing the handle
+   * also flips `public_profile` off server-side (DB invariant).
+   */
+  setHandle(handle: string | null): Promise<string | null>
   /** Change the signed-in user's password (email accounts). */
   updatePassword(password: string): Promise<void>
   /**

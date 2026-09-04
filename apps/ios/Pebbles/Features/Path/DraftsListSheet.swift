@@ -5,7 +5,8 @@ import os
 ///
 /// Its own surface rather than a section inside the Path timeline, whose week
 /// grouping, ripple, bounce and stats all assume real pebbles (design D4).
-/// Tapping a row resumes it in `CreatePebbleSheet`.
+/// Tapping a row resumes it in `RecordFlowView`, which lands on the first
+/// unanswered step (D9).
 struct DraftsListSheet: View {
     /// Called after a resumed draft publishes, so the Path can reload and reveal
     /// the new pebble — same contract as `CreatePebbleSheet.onCreated`.
@@ -33,9 +34,9 @@ struct DraftsListSheet: View {
                 .pebblesScreen()
         }
         .task { await load() }
-        .sheet(item: $resuming) { draft in
-            CreatePebbleSheet(
-                onCreated: { pebbleId in
+        .fullScreenCover(item: $resuming) { draft in
+            RecordFlowView(
+                onPublished: { pebbleId in
                     resuming = nil
                     onPebbleCreated(pebbleId)
                     dismiss()

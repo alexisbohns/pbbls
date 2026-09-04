@@ -76,6 +76,19 @@ function loadOnce(): Promise<PaletteMap> {
   return inflight
 }
 
+/**
+ * Seed the module cache before any consumer mounts, so `loadOnce()` short-circuits
+ * and no network call is made.
+ *
+ * Exists for `/sandbox/path`, which renders fixture pebbles with no Supabase
+ * session and no network. Without it every card there falls into PebbleFramed's
+ * no-palette branch and renders as a bare, untinted pebble — which would make the
+ * whole experiment lie about colour. Nothing in the product calls this.
+ */
+export function primeEmotionPalettes(map: PaletteMap): void {
+  cachedMap = map
+}
+
 export function useEmotionPalettes(): {
   paletteByEmotionId: PaletteMap
   loading: boolean

@@ -43,6 +43,11 @@ targets:
     sources:
       - path: Pebbles
       - path: Shared
+      # Privacy manifest — declared explicitly rather than left to XcodeGen's
+      # extension inference. One per shippable bundle; never in Shared/, which
+      # is compiled into both targets.
+      - path: Pebbles/Resources/PrivacyInfo.xcprivacy
+        buildPhase: resources
     configFiles:
       Debug: Config/Secrets.xcconfig
       Release: Config/Secrets.xcconfig
@@ -75,6 +80,8 @@ targets:
     sources:
       - path: PebblesWidget
       - path: Shared
+      - path: PebblesWidget/PrivacyInfo.xcprivacy
+        buildPhase: resources
     configFiles:
       Debug: Config/Secrets.xcconfig
       Release: Config/Secrets.xcconfig

@@ -60,7 +60,7 @@ export function WeekRoll({ entries, focused, onFocus }: WeekRollProps) {
     <div
       ref={scrollRef}
       aria-label={t("weekRoll.label")}
-      className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+      className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] border-b pt-2"
       style={{
         maskImage: "linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)",
         WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)",

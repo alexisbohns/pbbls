@@ -84,11 +84,14 @@ private extension View {
     }
 }
 
-/// SwiftUI root hosted inside the overlay window: renders the active pastille
+/// SwiftUI root hosted inside the overlay window: renders the active pastilles
 /// pinned to the bottom-center, animating in/out. `Color.clear` fills the space
-/// so the window has a hit-testable (but pass-through) root.
+/// so the window has a hit-testable (but pass-through) root. The achievement
+/// capsule stacks above the karma one so a mutation that fires both shows both
+/// (web parity: two toasts with distinct ids), each on its own lifetime.
 struct KarmaOverlayRoot: View {
     @Environment(KarmaNotificationService.self) private var karma
+    @Environment(AchievementNotificationService.self) private var achievements
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -100,14 +103,26 @@ struct KarmaOverlayRoot: View {
                 .padding(.bottom, 44)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
             }
+            // The unlock moment covers the screen, so it sits above the
+            // pastille rather than beside it: a mutation that earns karma AND
+            // unlocks a badge shows the flash behind the card, and the card's
+            // own "+N karma" line is the badge's, never the pebble's.
+            if achievements.currentCard != nil {
+                AchievementMomentView()
+                    .transition(.opacity)
+            }
         }
         .animation(.spring(response: 0.42, dampingFraction: 0.72), value: karma.activeCapsule)
+        .animation(.easeInOut(duration: 0.2), value: achievements.currentCard)
     }
 }
 
 /// A window whose empty areas pass touches through to the app below; only the
-/// pastille itself is interactive. Lets the karma flash float above presented
-/// sheets (create/edit/detail) without blocking interaction with them.
+/// overlay's own content is interactive. Lets the karma flash and the unlock
+/// moment float above presented sheets (create/edit/detail) — the composer
+/// dismisses itself on the very success that fires them, so presenting from the
+/// view tree would race that dismissal. The moment's full-screen scrim is a
+/// real subview, so it correctly captures touches while it is up.
 final class KarmaPassthroughWindow: UIWindow {
     override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? {
         guard let hit = super.hitTest(point, with: event) else { return nil }
@@ -149,13 +164,14 @@ final class KarmaPassthroughWindow: UIWindow {
     .padding(40)
 }
 
-/// Owns the overlay window for the karma pastille. Created once from the active
-/// window scene and bound to the shared `KarmaNotificationService`.
+/// Owns the overlay window for the karma + achievement pastilles. Created once
+/// from the active window scene and bound to both shared notification services.
 @MainActor
 final class KarmaOverlayWindowController {
     private var window: KarmaPassthroughWindow?
 
-    func attachIfNeeded(service: KarmaNotificationService) {
+    func attachIfNeeded(service: KarmaNotificationService,
+                        achievements: AchievementNotificationService) {
         guard window == nil else { return }
         let scenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
         guard let scene = scenes.first(where: { $0.activationState == .foregroundActive })
@@ -164,7 +180,11 @@ final class KarmaOverlayWindowController {
         let window = KarmaPassthroughWindow(windowScene: scene)
         window.windowLevel = .alert + 1  // above presented sheets
         window.backgroundColor = .clear
-        let host = UIHostingController(rootView: KarmaOverlayRoot().environment(service))
+        let host = UIHostingController(
+            rootView: KarmaOverlayRoot()
+                .environment(service)
+                .environment(achievements)
+        )
         host.view.backgroundColor = .clear
         window.rootViewController = host
         window.isHidden = false

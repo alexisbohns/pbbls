@@ -1,0 +1,51 @@
+name: Web
+
+# apps/web had no CI at all: the 125-test Vitest suite and the ESLint config that
+# enforces the data-layer boundary ran only when a human remembered to. Vercel's
+# deploy build does not close the gap — Next 16 removed linting from `next build`
+# (node_modules/next/dist/docs/01-app/02-guides/upgrading/version-16.md:1084), so
+# it catches type errors and nothing else.
+#
+# No `paths:` filter, deliberately: a workflow skipped by a path filter never
+# reports a status, so a required check would stay pending forever on every PR
+# that misses the filter. The job is npm ci + eslint + a 268 ms Vitest run —
+# cheap enough that filtering buys nothing — and the wobble golden fixture the
+# suite asserts against lives in apps/ios/, so an honest filter would have to
+# reach outside apps/web anyway.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: web-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: eslint · vitest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      # Catches violations of the no-restricted-imports data-layer boundary and
+      # no-explicit-any, neither of which any deploy build sees.
+      - name: ESLint
+        run: npm run lint --workspace=apps/web
+
+      # `!cancelled()` so a lint failure still reports the test result: a red PR
+      # should name every problem at once, not one per push (the supabase.yml
+      # pattern).
+      - name: Vitest
+        if: '!cancelled()'
+        run: npm run test --workspace=apps/web

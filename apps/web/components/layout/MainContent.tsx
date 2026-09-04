@@ -4,7 +4,9 @@ import { useEffect } from "react"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { AuthGate } from "@/components/auth/AuthGate"
+import { StoreGate } from "@/components/layout/StoreGate"
 import { OnboardingGate } from "@/components/onboarding/OnboardingGate"
+import { PendingInviteRedirect } from "@/components/connections/PendingInviteRedirect"
 
 interface MainContentProps {
   children: React.ReactNode
@@ -16,6 +18,9 @@ export function MainContent({ children }: MainContentProps) {
   const isOnboarding = pathname.startsWith("/onboarding")
   const isAuth = pathname === "/login" || pathname === "/register"
   const isDocs = pathname.startsWith("/docs")
+  // Public profile pages serve anonymous visitors and signed-in users alike —
+  // never bounce a mid-onboarding viewer away from someone's public page.
+  const isPublicProfile = pathname.startsWith("/u/")
   // /path owns its own sticky bottom dock and scrollable interior — it should
   // fill the dynamic viewport edge-to-edge, with no body-level scrolling.
   const isPath = pathname === "/path" || pathname.startsWith("/path/")
@@ -45,8 +50,11 @@ export function MainContent({ children }: MainContentProps) {
             : "pt-[var(--safe-area-top)] pb-[calc(2rem+var(--safe-area-bottom))]",
       )}
     >
-      {!isLanding && !isAuth && !isDocs && <OnboardingGate />}
-      <AuthGate>{children}</AuthGate>
+      {!isLanding && !isAuth && !isDocs && !isPublicProfile && <OnboardingGate />}
+      {!isLanding && !isAuth && !isDocs && !isPublicProfile && <PendingInviteRedirect />}
+      <AuthGate>
+        <StoreGate>{children}</StoreGate>
+      </AuthGate>
     </main>
   )
 }

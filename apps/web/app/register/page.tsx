@@ -5,6 +5,8 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/data/auth-context"
+import { isSafeRelativePath } from "@/lib/utils/safe-relative-path"
+import { hasDisallowedEmailChar, normalizeEmailInput } from "@/lib/utils/email-input"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
@@ -23,7 +25,17 @@ export default function RegisterPage() {
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [emailError, setEmailError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  // Optional validated post-auth destination for the OAuth round-trip (M49,
+  // D12). The client-side redirect below deliberately stays /onboarding — the
+  // pending-invite mechanism handles the return after onboarding.
+  const [next] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null
+    const params = new URLSearchParams(window.location.search)
+    const value = params.get("next")
+    return isSafeRelativePath(value) ? value : null
+  })
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -33,11 +45,27 @@ export default function RegisterPage() {
 
   if (isLoading || isAuthenticated) return null
 
+  // Strip '+' as it is typed, and explain why — the strip is the only
+  // normalization a user would otherwise experience as a keystroke silently
+  // going missing. Lowercasing stays silent on purpose. Mirrors iOS
+  // `AuthView.onChange(of: email)` and Android `AuthLogic.normalizeEmailInput`.
+  const handleEmailChange = (raw: string) => {
+    setEmailError(hasDisallowedEmailChar(raw) ? tErrors("emailPlusNotAllowed") : null)
+    setEmail(normalizeEmailInput(raw))
+  }
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError(null)
 
-    if (!email.trim() || !password || !confirmPassword) {
+    // Normalize again at the boundary rather than trusting the field: a
+    // password manager or autofill can set the value without firing React's
+    // change handler, which is exactly the path the input-time strip misses.
+    // On sign-up this is the one that matters — it decides what address the
+    // account is actually created with.
+    const submittedEmail = normalizeEmailInput(email.trim())
+
+    if (!submittedEmail || !password || !confirmPassword) {
       setError(tErrors("fillFields"))
       return
     }
@@ -55,7 +83,7 @@ export default function RegisterPage() {
     setSubmitting(true)
     try {
       await register({
-        email: email.trim(),
+        email: submittedEmail,
         password,
         terms_accepted: termsAccepted,
         privacy_accepted: privacyAccepted,
@@ -71,7 +99,7 @@ export default function RegisterPage() {
   const handleGoogleSignIn = async () => {
     setError(null)
     try {
-      await signInWithGoogle()
+      await signInWithGoogle(next ?? undefined)
     } catch (err) {
       const message =
         err instanceof Error ? err.message : tErrors("generic")
@@ -82,7 +110,7 @@ export default function RegisterPage() {
   const handleAppleSignIn = async () => {
     setError(null)
     try {
-      await signInWithApple()
+      await signInWithApple(next ?? undefined)
     } catch (err) {
       const message =
         err instanceof Error ? err.message : tErrors("generic")
@@ -112,10 +140,16 @@ export default function RegisterPage() {
             autoComplete="email"
             autoCapitalize="none"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            aria-invalid={error ? true : undefined}
+            onChange={(e) => handleEmailChange(e.target.value)}
+            aria-invalid={error || emailError ? true : undefined}
+            aria-describedby={emailError ? "register-email-error" : undefined}
             disabled={submitting}
           />
+          {emailError && (
+            <p id="register-email-error" role="alert" className="text-sm text-destructive">
+              {emailError}
+            </p>
+          )}
         </div>
 
         <div className="flex flex-col gap-1.5 text-left">

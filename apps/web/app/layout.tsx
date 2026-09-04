@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "@fontsource-variable/ysabeau";
 import "@fontsource/reenie-beanie";
+import "@fontsource-variable/caveat";
 import { ThemeProvider } from "@/components/layout/ThemeProvider";
 import { ColorWorldProvider } from "@/components/layout/ColorWorldProvider";
 import { ThemeColorSync } from "@/components/layout/ThemeColorSync";
@@ -9,6 +10,7 @@ import { AuthProvider } from "@/components/layout/AuthProvider";
 import { SerwistRegistration } from "@/components/layout/SerwistRegistration";
 import { MainContent } from "@/components/layout/MainContent";
 import { Toaster } from "@/components/ui/sonner";
+import { AchievementMomentHost } from "@/components/activity/AchievementMomentHost";
 import { LocaleProvider } from "@/lib/i18n/LocaleProvider";
 import "./globals.css";
 
@@ -21,6 +23,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  // Absolute-URL base for OG/twitter cards (first consumer: /u/[handle]).
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.pbbls.app"),
   title: "pbbls",
   description: "Collect meaningful moments, one pebble at a time",
   manifest: "/manifest.webmanifest",
@@ -92,6 +96,7 @@ export default function RootLayout({
                   <ThemeProvider>
                     <ThemeColorSync />
                     <Toaster />
+                    <AchievementMomentHost />
                     <div className="flex h-full pl-[var(--safe-area-left)] pr-[var(--safe-area-right)]">
                       <MainContent>{children}</MainContent>
                     </div>

@@ -93,4 +93,27 @@ struct WobbleRendererTests {
         // Unparseable input falls back to nil (caller strokes plainly).
         #expect(WobbleRenderer.glyphInk(d: "not a path", width: 6) == nil)
     }
+
+    @Test("concurrent glyph ink requests return one canonical object")
+    func glyphInkConcurrency() async {
+        // Regression for #650: the glyph entry point is called from `Canvas`
+        // renderer closures, which run off the main actor and concurrently.
+        // A racing look-up → build → store used to hand different callers
+        // different art for one key (and took the test runner down with it).
+        // swiftlint:disable:next identifier_name
+        let d = "M10,10 Q40,90 90,90 L180,20"
+        let identities = await withTaskGroup(of: ObjectIdentifier?.self) { group in
+            for _ in 0..<32 {
+                group.addTask {
+                    WobbleRenderer.glyphInk(d: d, width: 7).map { ObjectIdentifier($0) }
+                }
+            }
+            var seen: Set<ObjectIdentifier> = []
+            for await identity in group {
+                if let identity { seen.insert(identity) }
+            }
+            return seen
+        }
+        #expect(identities.count == 1)
+    }
 }

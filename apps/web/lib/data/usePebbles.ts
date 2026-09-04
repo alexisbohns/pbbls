@@ -1,6 +1,7 @@
 "use client"
 
 import { notifyKarma } from "@/lib/activity/karma-activity"
+import { fireAchievementCheck } from "@/lib/activity/fire-achievement-check"
 import { useDataProvider } from "@/lib/data/provider-context"
 import type { CreatePebbleInput, UpdatePebbleInput } from "@/lib/data/data-provider"
 import type { Pebble, PebbleSnap } from "@/lib/types"
@@ -8,14 +9,26 @@ import type { Pebble, PebbleSnap } from "@/lib/types"
 export function usePebbles() {
   const { provider, store, setStore, loading } = useDataProvider()
 
-  const addPebble = async (input: CreatePebbleInput): Promise<Pebble> => {
+  /**
+   * `onKarmaEarned` takes over from the karma pill for callers that show the
+   * amount themselves — the record flow's success screen puts it on screen, so
+   * a capsule over it would be redundant. Omit it and the pill fires as usual.
+   */
+  const addPebble = async (
+    input: CreatePebbleInput,
+    options?: { onKarmaEarned?: (delta: number) => void },
+  ): Promise<Pebble> => {
     if (!provider) throw new Error("Not authenticated")
     const before = provider.getStore().karma
     const pebble = await provider.createPebble(input)
     const after = provider.getStore()
     setStore(after)
     const delta = after.karma - before
-    if (delta > 0) notifyKarma(delta, "pebble_created")
+    if (delta > 0) {
+      if (options?.onKarmaEarned) options.onKarmaEarned(delta)
+      else notifyKarma(delta, "pebble_created")
+    }
+    fireAchievementCheck(provider)
     return pebble
   }
 
@@ -30,6 +43,7 @@ export function usePebbles() {
     setStore(after)
     const delta = after.karma - before
     if (delta > 0) notifyKarma(delta, "pebble_enriched")
+    fireAchievementCheck(provider)
     return pebble
   }
 

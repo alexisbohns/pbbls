@@ -1,4 +1,6 @@
 import Foundation
+import PhotosUI
+import SwiftUI
 import os
 
 /// Single source of truth for the snap (photo) attached to an in-progress
@@ -21,6 +23,11 @@ final class SnapUploadCoordinator {
     /// re-load + re-encode the original. Cleared whenever `formSnap` is
     /// cleared.
     private(set) var processedForRetry: ProcessedImage?
+
+    /// Capture date read from the picked photo's EXIF, before `ImagePipeline`
+    /// strips it (D7). The record flow seeds its `when` step from this; nil
+    /// means the step falls back to now. Cleared alongside `processedForRetry`.
+    private(set) var pickedCaptureDate: Date?
 
     // MARK: - Derived state
 
@@ -84,6 +91,8 @@ final class SnapUploadCoordinator {
 
     // MARK: - User-driven transitions
 
+    /// A pick from the sheet-presented `PHPicker` (`CreatePebbleSheet`,
+    /// `EditPebbleSheet`), which names the representation it hands over.
     func handlePicked(_ picked: PhotoPickerView.PickedItem, userId: UUID) async {
         Self.logger.notice("handlePicked: started uti=\(picked.uti, privacy: .public)")
 
@@ -96,8 +105,47 @@ final class SnapUploadCoordinator {
             return
         }
 
+        await ingest(data, uti: picked.uti, userId: userId)
+    }
+
+    /// A pick from the record flow's inline `PhotosPicker`. A
+    /// `PhotosPickerItem` carries no chosen representation, so the bytes come
+    /// first and the format is read back off them.
+    func handlePicked(_ item: PhotosPickerItem, userId: UUID) async {
+        let advertised = item.supportedContentTypes.map(\.identifier)
+        Self.logger.notice("handlePicked(item): started types=\(advertised, privacy: .public)")
+
+        let data: Data
+        do {
+            guard let loaded = try await item.loadTransferable(type: Data.self) else {
+                Self.logger.warning("picker item carried no data representation")
+                return
+            }
+            data = loaded
+            Self.logger.notice("handlePicked(item): loaded \(data.count, privacy: .public) bytes")
+        } catch {
+            Self.logger.error("picker item load failed: \(error.localizedDescription, privacy: .private)")
+            return
+        }
+
+        // Sniffed first; the advertised list is only a fallback for bytes
+        // ImageIO cannot identify, and it still has to pass the same gate.
+        let candidate = ImageFormatValidator.uti(of: data) ?? advertised.first ?? ""
+        guard ImageFormatValidator.isSupported(candidate) else {
+            Self.logger.warning("unsupported picked format: \(candidate, privacy: .public)")
+            return
+        }
+
+        await ingest(data, uti: candidate, userId: userId)
+    }
+
+    /// Shared pick path: capture date → re-encode → replace → upload.
+    /// `uti` has already passed `ImageFormatValidator`.
+    private func ingest(_ data: Data, uti: String, userId: UUID) async {
+        // Read the capture date before the pipeline strips metadata (D7).
+        pickedCaptureDate = ExifCaptureDate.from(data)
+
         let processed: ProcessedImage
-        let uti = picked.uti
         do {
             processed = try await Task.detached(priority: .userInitiated) {
                 try ImagePipeline.process(data, uti: uti)
@@ -105,6 +153,16 @@ final class SnapUploadCoordinator {
         } catch {
             Self.logger.error("image pipeline failed: \(String(describing: error), privacy: .public)")
             return
+        }
+
+        // The inline picker makes "actually, that one" a single tap, so the
+        // snap being replaced has to take its Storage bytes with it. An upload
+        // still in flight for that id is left to finish — a narrow window, and
+        // the id guard in `applyStateIfSnapMatches` keeps its result off the
+        // new snap.
+        if case .pending(let replaced) = formSnap {
+            Self.logger.notice("replacing pending snap \(replaced.id.uuidString, privacy: .public)")
+            Task { await self.repo.deleteFiles(snapId: replaced.id, userId: userId) }
         }
 
         let snapId = UUID()
@@ -132,6 +190,7 @@ final class SnapUploadCoordinator {
         let snapId = snap.id
         formSnap = nil
         processedForRetry = nil
+        pickedCaptureDate = nil
         await repo.deleteFiles(snapId: snapId, userId: userId)
     }
 
@@ -158,11 +217,13 @@ final class SnapUploadCoordinator {
         guard case .pending(let snap) = formSnap else {
             formSnap = nil
             processedForRetry = nil
+            pickedCaptureDate = nil
             return
         }
         let snapId = snap.id
         formSnap = nil
         processedForRetry = nil
+        pickedCaptureDate = nil
         await repo.deleteFiles(snapId: snapId, userId: userId)
     }
 

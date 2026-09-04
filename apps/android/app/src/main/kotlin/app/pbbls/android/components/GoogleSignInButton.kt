@@ -25,6 +25,16 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography
+import app.pbbls.android.theme.SystemPalette
+
+/** The capsule is a pinned light surface: the multi-colour G mark requires one. */
+internal val GoogleButtonSurface = Color.White
+
+/**
+ * Ink for [GoogleButtonSurface]. Never `system.foreground`, which flips to a pale
+ * grey in dark theme and lands at 1.28:1 on white. See [SystemPalette.onLight].
+ */
+internal fun googleButtonLabelColor(system: SystemPalette): Color = system.onLight
 
 /**
  * White capsule button with the multi-color Google G mark and "Continue with
@@ -46,7 +56,7 @@ fun GoogleSignInButton(
                 .fillMaxWidth()
                 .heightIn(min = 52.dp)
                 .clip(shape)
-                .background(Color.White)
+                .background(GoogleButtonSurface)
                 .border(1.dp, system.muted, shape)
                 .clickable(enabled = enabled, role = Role.Button) { onClick() },
         horizontalArrangement = Arrangement.Center,
@@ -61,7 +71,7 @@ fun GoogleSignInButton(
         Text(
             text = stringResource(R.string.welcome_continue_google),
             style = PebblesTypography.calloutEmphasized,
-            color = system.foreground,
+            color = googleButtonLabelColor(system),
         )
     }
 }

@@ -47,6 +47,29 @@ If the local Supabase instance is not available, run `npm run db:types:remote` t
 
 **Important — stderr suppression.** Both `db:types` scripts route the CLI's stderr to `/dev/null` because `supabase gen types` emits non-TypeScript status lines (`Initialising login role...`, version-update notices, etc.) on stderr. Without the redirect, those lines leak into the redirected stdout and corrupt `database.ts`, causing TS1434 errors that break every TypeScript consumer (`@pbbls/supabase` build, web/admin Vercel deploys). If you ever invoke the command manually, always include `2>/dev/null` before the `>`.
 
+## Contract harnesses (`scripts/verify-*.ts`)
+
+The database is the contract between four clients, and these Deno scripts are the proof for anything crossing a surface boundary. They are acceptance tests, not simulations: each signs up throwaway users **against the linked production project**, exercises the real RLS policies, triggers, RPCs and the real `delete-account` edge function, then deletes what it made in a `finally` (even on failure). Every run namespaces its users by a random `runId`, so concurrent runs cannot see each other's rows.
+
+| Command | Harness | Proves | Needs |
+|---|---|---|---|
+| `npm run db:verify:drafts` | `verify-pebble-drafts.ts` | M47 draft lifecycle | anon |
+| `npm run db:verify:visibility` | `verify-pebble-visibility.ts` | grade RLS on pebbles | anon |
+| `npm run db:verify:public-profile` | `verify-public-profile.ts` | `get_public_profile` jsonb allowlist | anon |
+| `npm run db:verify:guard` | `verify-profiles-privileged-guard.ts` | `profiles_privileged_guard` (#739) | anon |
+| `npm run db:verify` | the four above, in order | — | anon |
+| `npm run db:verify:purge` | `verify-account-purge.ts` | `purge_account` contract | anon + **service role** |
+
+Credentials come from the environment (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` for the purge harness); the repo root `.env` carries all three: `set -a; . ./.env; set +a`.
+
+**The four anon harnesses run in CI** — `.github/workflows/supabase.yml`, on same-repo PRs touching `packages/supabase/**`, nightly against `main`, and on manual dispatch. Fork PRs skip the job rather than failing it (no secrets). Every run writes a per-harness result table to the job summary, and a **failing nightly opens or comments on one issue** titled `[Bug] Nightly contract harnesses are failing` — reused across consecutive failures, and closed by hand once the contract is actually fixed. A failing PR run opens nothing: the red check is already in front of whoever caused it.
+
+A new harness added to `scripts/` gains a `db:verify:*` script and a workflow step calling `.github/scripts/verify-harness.sh` in the same change, or it is not a gate. Never call the npm script directly from the workflow: the summary needs the harness's stdout, and GitHub's default shell has no `pipefail`, so piping a harness through `tee` reports success for a failing one.
+
+**`db:verify:purge` is deliberately NOT in CI and must be run by hand** after any batch touching `purge_account`. It is the one harness needing `SUPABASE_SERVICE_ROLE_KEY`, this repo is public, and a leaked service-role key is total database access. Do not "fix" its absence by adding that secret without deciding it as such.
+
+**Orphans.** A run killed between signup and cleanup leaves a throwaway account behind. They are greppable in `auth.users` by their prefixes — `drafts-verify-`, `grades-verify-`, `public-verify-`, `guard-verify-`, all `@example.test`. There is no automated sweep (deleting them needs the service role).
+
 ## Linking to Remote
 
 After creating a Supabase project on the dashboard:

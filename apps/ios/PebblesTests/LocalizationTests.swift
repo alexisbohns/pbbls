@@ -133,6 +133,36 @@ struct LocalizationPatternCCoverageTests {
         }
     }
 
+    @Test("every domain slug has an EN catalog label distinct from DB fallback")
+    func everyDomainHasEnglishLabel() {
+        for slug in ReferenceSlugs.domains {
+            let resolved = resolveKey(
+                "domain.\(slug).label",
+                locale: Locale(identifier: "en"),
+                fallback: "__FALLBACK__"
+            )
+            #expect(
+                resolved != "__FALLBACK__",
+                "domain.\(slug).label missing from catalog in 'en'"
+            )
+        }
+    }
+
+    @Test("every domain slug has a FR catalog label distinct from DB fallback")
+    func everyDomainHasFrenchLabel() {
+        for slug in ReferenceSlugs.domains {
+            let resolved = resolveKey(
+                "domain.\(slug).label",
+                locale: Locale(identifier: "fr"),
+                fallback: "__FALLBACK__"
+            )
+            #expect(
+                resolved != "__FALLBACK__",
+                "domain.\(slug).label missing from catalog in 'fr'"
+            )
+        }
+    }
+
     @Test("every emotion category slug has an EN catalog entry distinct from DB fallback")
     func everyEmotionCategoryHasEnglishEntry() {
         for slug in ReferenceSlugs.emotionCategories {

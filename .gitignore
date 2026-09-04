@@ -69,3 +69,5 @@ deno.lock
 
 # supabase local state
 .branches/
+.arkaik/
+docs/arkaik/.backups/

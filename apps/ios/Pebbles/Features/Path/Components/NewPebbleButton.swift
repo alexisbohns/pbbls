@@ -8,6 +8,12 @@ import SwiftUI
 struct NewPebbleButton: View {
     let onTap: () -> Void
 
+    /// Opens the classic all-at-once composer (D1). Deliberately
+    /// undiscoverable: this is an escape hatch for the duration of the flow
+    /// experiment, not a feature, and it deletes in one line when the
+    /// experiment resolves.
+    var onLongPress: () -> Void = {}
+
     @Environment(\.colorScheme) private var colorScheme
 
     private static let cornerRadius: CGFloat = 17
@@ -26,6 +32,9 @@ struct NewPebbleButton: View {
                 .background(RoundedRectangle(cornerRadius: Self.cornerRadius).fill(Color.system.muted))
         }
         .buttonStyle(.plain)
+        .simultaneousGesture(
+            LongPressGesture(minimumDuration: 0.6).onEnded { _ in onLongPress() }
+        )
         .accessibilityLabel("New pebble")
     }
 }

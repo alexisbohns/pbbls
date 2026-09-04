@@ -21,6 +21,7 @@ struct RootView: View {
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(ReferenceDataService.self) private var refs
     @Environment(SnapURLCache.self) private var snapURLs
+    @Environment(ConnectionsService.self) private var connections
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
     @State private var isPresentingOnboarding = false
     @State private var authPath = NavigationPath()
@@ -29,6 +30,9 @@ struct RootView: View {
     /// For authed launches: the loader stays over `PathView` until its first
     /// timeline load settles, so the home feed's own spinner never shows.
     @State private var pathFeedLoaded = false
+    /// Invite token lifted out of a universal link, presented as a sheet once
+    /// there is a session to accept with (M49, design D12).
+    @State private var acceptingInvite: InviteToken?
 
     /// Safety ceiling: if reference data never settles (e.g. a wedged
     /// network beyond the client's own timeout), open the app anyway rather
@@ -37,6 +41,22 @@ struct RootView: View {
 
     private enum AuthRoute: Hashable {
         case auth(AuthView.Mode)
+    }
+
+    /// `sheet(item:)` needs an `Identifiable` payload; the token is the id.
+    struct InviteToken: Identifiable, Hashable {
+        let value: String
+        var id: String { value }
+    }
+
+    /// Accepts only `https://www.pbbls.app/invite/<token>` — the one canonical
+    /// invite URL (design D11). Returns nil for anything else.
+    static func inviteToken(from url: URL) -> String? {
+        guard url.scheme == "https", url.host() == "www.pbbls.app" else { return nil }
+        let parts = url.pathComponents.filter { $0 != "/" }
+        guard parts.count == 2, parts[0] == "invite" else { return nil }
+        let token = parts[1]
+        return token.isEmpty ? nil : token
     }
 
     /// Auth resolved AND both reference-data load attempts settled (success or
@@ -83,6 +103,9 @@ struct RootView: View {
                     }
                 }
                 .animation(.easeInOut(duration: 0.35), value: pathFeedLoaded)
+                .sheet(item: $acceptingInvite) { invite in
+                    InviteAcceptSheet(token: invite.value)
+                }
             } else {
                 NavigationStack(path: $authPath) {
                     WelcomeView(
@@ -114,9 +137,25 @@ struct RootView: View {
         // session?.user.id is nil when this observer is registered, so the
         // first authStateChanges event delivers a real nil→id transition
         // even for users already signed in from a prior launch.
+        .onOpenURL { url in
+            // The app's only URL entry point. OAuth returns are absorbed by
+            // ASWebAuthenticationSession, so nothing else lands here.
+            guard let token = Self.inviteToken(from: url) else { return }
+            if supabase.session == nil {
+                // Park it: an invite can arrive before sign-in completes.
+                connections.pendingInviteToken = token
+            } else {
+                acceptingInvite = InviteToken(value: token)
+            }
+        }
         .onChange(of: supabase.session?.user.id) { _, newUserId in
             if newUserId != nil && !hasSeenOnboarding {
                 isPresentingOnboarding = true
+            }
+            // A session just appeared — flush any invite parked before sign-in.
+            if newUserId != nil, let parked = connections.pendingInviteToken {
+                connections.pendingInviteToken = nil
+                acceptingInvite = InviteToken(value: parked)
             }
         }
         .onChange(of: supabase.session == nil) { wasSignedOut, isSignedOut in
@@ -137,4 +176,5 @@ struct RootView: View {
         .environment(ReferenceDataService(client: supabase.client))
         .environment(SnapURLCache(client: supabase.client))
         .environment(KarmaNotificationService())
+        .environment(ConnectionsService(supabase: supabase))
 }

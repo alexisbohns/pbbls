@@ -2,10 +2,10 @@ import SwiftUI
 
 /// Badge showing the pebble's privacy status. Two styles:
 ///
-/// - `.capsule` (default): outlined capsule with lock + label, suitable for
-///   inline placement.
+/// - `.capsule` (default): outlined capsule with grade icon + label, suitable
+///   for inline placement.
 /// - `.chip`: 36pt circular chip with translucent surface and a centered
-///   lock icon, intended for the floating navigation-bar treatment in
+///   grade icon, intended for the floating navigation-bar treatment in
 ///   `PebbleDetailSheet`.
 struct PebblePrivacyBadge: View {
     enum Style {
@@ -30,7 +30,7 @@ struct PebblePrivacyBadge: View {
 
     private var capsuleBody: some View {
         HStack(spacing: 6) {
-            Image(systemName: "lock.fill")
+            Image(systemName: visibility.systemImageName)
                 .font(.caption)
                 .accessibilityHidden(true)
             Text(visibility.label)
@@ -49,7 +49,7 @@ struct PebblePrivacyBadge: View {
     }
 
     private var chipBody: some View {
-        Image(systemName: "lock.fill")
+        Image(systemName: visibility.systemImageName)
             .font(.system(size: 14, weight: .medium))
             .foregroundStyle(Color.system.secondary)
             .frame(width: 36, height: 36)
@@ -59,8 +59,10 @@ struct PebblePrivacyBadge: View {
 
 #Preview {
     VStack(spacing: 16) {
+        PebblePrivacyBadge(visibility: .secret)
         PebblePrivacyBadge(visibility: .private)
         PebblePrivacyBadge(visibility: .public)
+        PebblePrivacyBadge(visibility: .secret, style: .chip)
         PebblePrivacyBadge(visibility: .private, style: .chip)
         PebblePrivacyBadge(visibility: .public, style: .chip)
     }

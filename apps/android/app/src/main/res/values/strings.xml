@@ -93,6 +93,16 @@
     <string name="settings_password_header">Password</string>
     <string name="settings_password_placeholder">New password</string>
     <string name="settings_password_footer">Leave blank to keep your current password.</string>
+    <string name="settings_public_profile_header">Public profile</string>
+    <string name="settings_handle_label">Handle</string>
+    <string name="settings_handle_placeholder">your_handle</string>
+    <string name="settings_handle_footer">3 to 30 characters: lowercase letters, numbers, underscores. Leave empty to release your handle.</string>
+    <string name="settings_public_profile_toggle">Make my profile public</string>
+    <string name="settings_public_profile_needs_handle">Claim a handle first to go public.</string>
+    <string name="settings_public_profile_share">Share my profile</string>
+    <string name="settings_handle_error_invalid">That handle isn\'t valid. Use 3 to 30 lowercase letters, numbers or underscores, starting and ending with a letter or number.</string>
+    <string name="settings_handle_error_taken">That handle is already taken.</string>
+    <string name="settings_handle_error_reserved">That handle is reserved.</string>
     <string name="settings_providers_header">Providers</string>
     <string name="settings_legal_header">Legal</string>
     <string name="settings_save_error">Couldn\'t save your changes. Please try again.</string>
@@ -162,6 +172,27 @@
     <string name="domain_weather_name">Weather</string>
     <string name="domain_work_name">Work</string>
 
+    <!-- Domain descriptions (the `label` column), rendered by the record
+         flow's domain step. Mirrors iOS `domain.<slug>.label`. -->
+    <string name="domain_community_label">People who share your values, culture, or beliefs</string>
+    <string name="domain_currentevents_label">What\'s happening in the world around you</string>
+    <string name="domain_dating_label">Romantic relationships and connections</string>
+    <string name="domain_education_label">Learning, growth, and intellectual pursuits</string>
+    <string name="domain_family_label">Those connected to you by blood or soul</string>
+    <string name="domain_fitness_label">Physical activity, games, and competition</string>
+    <string name="domain_friends_label">People you choose to walk alongside</string>
+    <string name="domain_health_label">Your body, energy, and physical well-being</string>
+    <string name="domain_hobbies_label">Creative pursuits and things you love doing</string>
+    <string name="domain_identity_label">Who you are and who you\'re becoming</string>
+    <string name="domain_money_label">Money, stability, and material security</string>
+    <string name="domain_partner_label">Your significant other or love relationship</string>
+    <string name="domain_selfcare_label">Rituals and habits that restore you</string>
+    <string name="domain_spirituality_label">Faith, meaning, and your inner life</string>
+    <string name="domain_tasks_label">Things you need to get done</string>
+    <string name="domain_travel_label">Exploring new places and horizons</string>
+    <string name="domain_weather_label">Sun or rain, seasons and skies</string>
+    <string name="domain_work_label">Your job, career, and professional life</string>
+
     <!-- Emotions (38) -->
     <string name="emotion_amazed_name">Awe</string>
     <string name="emotion_amused_name">Amused</string>
@@ -227,10 +258,15 @@
     <string name="action_cancel">Cancel</string>
     <string name="pebble_detail_edit">Edit</string>
     <string name="pebble_detail_back_a11y">Back</string>
-    <string name="pebble_detail_privacy_a11y">Private pebble</string>
     <string name="pebble_detail_no_domain">No domain</string>
     <string name="pebble_detail_load_error">Couldn\'t load this pebble.</string>
     <string name="pebble_detail_retry">Retry</string>
+    <string name="pebble_share_a11y">Share this pebble</string>
+    <!-- Per-grade privacy labels + icon a11y (M51) -->
+    <string name="visibility_secret">Secret</string>
+    <string name="visibility_private">Connections</string>
+    <string name="visibility_public">Public</string>
+    <string name="visibility_badge_a11y">Privacy: %1$s</string>
 
     <!-- ==== Create pebble (M39 sub-project C) ==== -->
     <!-- Shell + shared actions. -->
@@ -282,6 +318,14 @@
     <string name="valence_group_small_desc">This moment impacted my day and will be wrapped in my weekly Cairn</string>
     <string name="valence_group_medium_desc">This moment impacted my whole week and will be wrapped in my monthly Cairn</string>
     <string name="valence_group_large_desc">This moment impacted my whole month and will be wrapped in my yearly Cairn</string>
+    <!-- The lockup under the valence fan: the polarity word in the hand font over the span it covers.
+         Two separate strings rather than one sentence because each line is typeset differently, and
+         because a translator needs to move them independently. Lowlight and highlight reuse the
+         polarity labels above; neutral does not (nobody calls their afternoon a neutral). -->
+    <string name="valence_headline_neutral">Moment</string>
+    <string name="valence_span_day">OF MY DAY</string>
+    <string name="valence_span_week">OF MY WEEK</string>
+    <string name="valence_span_month">OF MY MONTH</string>
     <!-- Karma-earned flash (D9). -->
     <string name="karma_flash_amount">+%1$d karma</string>
     <string name="karma_flash_a11y">Earned %1$d karma, %2$s</string>
@@ -379,4 +423,130 @@
     <string name="drafts_saved_ago">Saved %1$s ago</string>
     <string name="drafts_empty">No drafts yet. Anything you start keeping shows up here.</string>
     <string name="drafts_load_error">Couldn\'t load your drafts. Please try again.</string>
+    <!-- ==== Connections (M49) ==== -->
+    <string name="action_close">Close</string>
+    <string name="connections_title">Connections</string>
+    <string name="connections_empty">Share your invite link and whoever accepts shows up here.</string>
+    <string name="connections_load_error">Couldn\'t load your connections. Please try again.</string>
+    <string name="connections_unnamed_peer">Someone</string>
+    <string name="connections_remove_action">Remove</string>
+    <string name="connections_remove_title">Remove %1$s?</string>
+    <string name="connections_remove_message">You\'ll both lose the connection. Blocking also stops them joining again through your invite link.</string>
+    <string name="connections_remove_confirm">Remove</string>
+    <string name="connections_remove_block_confirm">Remove and block</string>
+    <string name="connections_invite_action">Invite</string>
+    <string name="connections_invite_title">Invite</string>
+    <string name="connections_invite_explainer">Anyone who opens this link can connect with you. It works for several people, so one code is enough for a whole table.</string>
+    <string name="connections_invite_qr_alt">QR code for your invite link</string>
+    <string name="connections_invite_copy">Copy link</string>
+    <string name="connections_invite_share">Share</string>
+    <string name="connections_invite_rotate">Get a new link</string>
+    <string name="connections_invite_rotate_note">A new link retires this one. Anyone still holding it won\'t be able to connect.</string>
+    <string name="connections_accept_title">Invitation</string>
+    <string name="connections_accept_prompt">%1$s invites you to connect.</string>
+    <string name="connections_accept_explainer">You\'ll both see each other in your connections. You can remove the connection at any time.</string>
+    <string name="connections_accept_action">Connect</string>
+    <string name="connections_accept_done">You\'re connected with %1$s.</string>
+    <string name="connections_accept_already">You\'re already connected with %1$s.</string>
+    <string name="connections_accept_unusable">This invite link isn\'t valid anymore.</string>
+    <string name="connections_accept_unusable_hint">Ask for a fresh one and try again.</string>
+    <string name="connections_error_generic">Something went wrong. Please try again.</string>
+    <string name="connections_error_invite_unusable">This invite link isn\'t valid anymore. Ask for a fresh one.</string>
+    <string name="connections_error_own_invite">That\'s your own invite link.</string>
+    <string name="connections_error_session">Please sign in again.</string>
+
+    <!-- Achievements (M48) -->
+    <string name="achievements_title">Achievements</string>
+    <string name="achievements_card_subtitle">Badges along your path</string>
+    <string name="achievements_shelf_count">%1$d earned</string>
+    <string name="achievement_moment_eyebrow">Achievement unlocked</string>
+    <string name="achievement_moment_next">Next</string>
+    <string name="achievement_moment_done">Nice</string>
+    <string name="achievement_moment_progress">%1$d of %2$d</string>
+    <string name="achievements_load_error">Couldn\'t load your achievements. Please try again.</string>
+    <string name="achievement_locked">Locked</string>
+    <string name="achievement_unlocked_on">Unlocked %1$s</string>
+    <string name="achievement_group_pebble_count">Pebbles</string>
+    <string name="achievement_group_emotion_first">Emotions</string>
+    <string name="achievement_group_domain_first">Domains</string>
+    <string name="achievement_group_first_collection">Collections</string>
+    <string name="achievement_group_first_glyph">Glyphs</string>
+    <string name="achievement_group_first_soul">Souls</string>
+    <string name="achievement_group_glyph_count">Carving</string>
+    <string name="achievement_group_glyph_sales">Market</string>
+    <plurals name="achievement_family_pebble_count_title">
+        <item quantity="one">First pebble</item>
+        <item quantity="other">%1$d pebbles</item>
+    </plurals>
+    <plurals name="achievement_family_pebble_count_description">
+        <item quantity="one">Drop your first pebble on the path.</item>
+        <item quantity="other">Collect %1$d pebbles along your path.</item>
+    </plurals>
+    <string name="achievement_family_emotion_first_title">First %1$s</string>
+    <string name="achievement_family_emotion_first_description">Record your first pebble carrying %1$s.</string>
+    <string name="achievement_family_domain_first_title">First steps in %1$s</string>
+    <string name="achievement_family_domain_first_description">Record your first pebble in %1$s.</string>
+    <string name="achievement_family_first_collection_title">First collection</string>
+    <string name="achievement_family_first_collection_description">Create your first collection.</string>
+    <string name="achievement_family_first_glyph_title">First glyph</string>
+    <string name="achievement_family_first_glyph_description">Carve your first glyph.</string>
+    <string name="achievement_family_first_soul_title">First soul</string>
+    <string name="achievement_family_first_soul_description">Add your first soul.</string>
+    <string name="achievement_family_glyph_count_title">%1$d glyphs</string>
+    <string name="achievement_family_glyph_count_description">Carve %1$d glyphs of your own.</string>
+    <plurals name="achievement_family_glyph_sales_title">
+        <item quantity="one">First sale</item>
+        <item quantity="other">%1$d sales</item>
+    </plurals>
+    <plurals name="achievement_family_glyph_sales_description">
+        <item quantity="one">Sell your first glyph in the market.</item>
+        <item quantity="other">Make %1$d glyph sales in the market.</item>
+    </plurals>
+    <plurals name="achievement_capsule_count">
+        <item quantity="one">%1$d achievement unlocked</item>
+        <item quantity="other">%1$d achievements unlocked</item>
+    </plurals>
+    <string name="achievement_capsule_a11y_single">Achievement unlocked: %1$s</string>
+    <string name="achievement_capsule_a11y_karma">You earned %1$d karma</string>
+
+    <!-- Step-by-step record flow (M58) — the eleven-screen composer.
+         Ports the iOS `Features/Record` copy; FR keeps the informal "tu". -->
+    <string name="record_photo_title">Start with a picture</string>
+    <string name="record_photo_subtitle">Or skip it and write from memory.</string>
+    <string name="record_when_title">When did it happen?</string>
+    <string name="record_name_title">What do you call it?</string>
+    <string name="record_valence_title">How did it land?</string>
+    <string name="record_valence_subtitle">How much of your life did this take up?</string>
+    <string name="record_emotion_title">What did you feel?</string>
+    <string name="record_domain_title">What part of life?</string>
+    <string name="record_souls_title">Anyone in this one?</string>
+    <string name="record_collection_title">Add it to a collection?</string>
+    <string name="record_glyph_title">Give it a glyph</string>
+    <string name="record_glyph_subtitle">A little mark, just for this one.</string>
+    <string name="record_privacy_title">Who can see it?</string>
+    <string name="record_success_title">Your pebble</string>
+    <string name="record_action_skip">Skip</string>
+    <string name="record_action_continue">Continue</string>
+    <string name="record_action_publish">Publish</string>
+    <string name="record_success_exit">Back to my path</string>
+    <string name="record_step_a11y">Step %1$d of %2$d</string>
+    <string name="record_back_a11y">Back</string>
+    <string name="record_when_from_photo">Taken from your photo</string>
+    <string name="record_name_placeholder">Name</string>
+    <string name="record_name_remaining_a11y">%1$d characters left</string>
+    <string name="record_photo_choose_another">Choose another</string>
+    <string name="record_photo_upload_failed">That photo didn\'t upload.</string>
+    <string name="record_photo_retry">Retry</string>
+    <string name="record_photo_remove">Remove</string>
+    <string name="record_photo_attached">A photo is already attached.</string>
+    <string name="record_collection_empty">You don\'t have any collections yet.</string>
+    <string name="record_privacy_secret_explanation">Only you can see this one.</string>
+    <string name="record_privacy_private_explanation">Your mutual connections can see it.</string>
+    <string name="record_privacy_public_explanation">Anyone with the link can see it.</string>
+    <string name="record_close_title">Keep this pebble?</string>
+    <string name="record_close_keep_going">Keep going</string>
+    <string name="record_close_discard">Discard</string>
+    <string name="record_karma">+%1$d karma</string>
+    <string name="record_karma_a11y">Earned %1$d karma</string>
+    <string name="record_signed_out_error">You must be signed in to save.</string>
 </resources>

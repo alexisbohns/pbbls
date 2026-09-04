@@ -74,6 +74,32 @@ class LocalizationParityTest {
         )
     }
 
+    /**
+     * The record flow's domain step renders each domain's description (M58 D6),
+     * so every domain slug needs a `domain_<slug>_label` in both locales — the
+     * same coverage the `_name` entries have, in the other dimension.
+     */
+    @Test
+    fun everyDomainSlugHasALabelEntryInBothLocales() {
+        ReferenceSlugs.domains.forEach { slug ->
+            val key = "domain_${slug}_label"
+            assertTrue("values/strings.xml missing key: $key", enKeys.contains(key))
+            assertTrue("values-fr/strings.xml missing key: $key", frKeys.contains(key))
+        }
+    }
+
+    @Test
+    fun everyDomainSlugMapsToALabelResourceId() {
+        ReferenceSlugs.domains.forEach { slug ->
+            assertTrue("domain.$slug label unmapped", ReferenceStrings.domainLabelResourceId(slug) != null)
+        }
+    }
+
+    @Test
+    fun labelResourceIdIsNullForAnUnmappedSlug() {
+        assertNull(ReferenceStrings.domainLabelResourceId("not-a-real-slug-xyz"))
+    }
+
     @Test
     fun resourceIdIsNullForAnUnmappedSlug() {
         assertNull(ReferenceStrings.resourceId(ReferenceType.EMOTION, "not-a-real-slug-xyz"))

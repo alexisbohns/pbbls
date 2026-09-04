@@ -1,6 +1,7 @@
 "use client"
 
 import { useDataProvider } from "@/lib/data/provider-context"
+import { fireAchievementCheck } from "@/lib/activity/fire-achievement-check"
 import type { CreateCollectionInput, UpdateCollectionInput } from "@/lib/data/data-provider"
 import type { Collection } from "@/lib/types"
 
@@ -13,6 +14,7 @@ export function useCollections() {
     if (!provider) throw new Error("Not authenticated")
     const collection = await provider.createCollection(input)
     setStore(provider.getStore())
+    fireAchievementCheck(provider)
     return collection
   }
 

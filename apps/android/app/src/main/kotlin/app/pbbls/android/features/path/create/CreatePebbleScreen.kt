@@ -6,9 +6,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -43,6 +44,7 @@ import app.pbbls.android.features.pebblemedia.ImagePipeline
 import app.pbbls.android.features.pebblemedia.SnapUploadCoordinator
 import app.pbbls.android.services.ComposeResult
 import app.pbbls.android.services.ComposerAutosave
+import app.pbbls.android.services.LocalAchievementsService
 import app.pbbls.android.services.LocalComposerSnapshotStore
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalPebbleDraftsService
@@ -93,6 +95,7 @@ fun CreatePebbleScreen(
     val writeService = LocalPebbleWriteService.current
     val refs = LocalReferenceDataService.current
     val karma = LocalKarmaNotificationService.current
+    val achievements = LocalAchievementsService.current
     val palettes = LocalEmotionPaletteService.current
     val supabase = LocalSupabaseService.current
     val draftsService = LocalPebbleDraftsService.current
@@ -277,10 +280,13 @@ fun CreatePebbleScreen(
             when (val result = writeService.create(draft, snapPayload)) {
                 is ComposeResult.Success -> {
                     karma.notifyEarned(result.response.karmaDelta ?: 0, KarmaReason.PEBBLE_CREATED)
+                    achievements.fireCheck()
                     consumeDraftAfterPublish()
                     onCreated(result.response.pebbleId)
                 }
                 is ComposeResult.SoftSuccess -> {
+                    // Soft success still inserted the pebble, so counts changed.
+                    achievements.fireCheck()
                     consumeDraftAfterPublish()
                     onCreated(result.pebbleId)
                 }
@@ -346,8 +352,10 @@ fun CreatePebbleScreen(
                 Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
+            VisibilityChip(value = draft.visibility, onChange = { draft = draft.copy(visibility = it) })
+            Spacer(Modifier.weight(1f))
             TextButton(onClick = { saveAsDraft() }, enabled = draftEnabled) {
                 PebblesText(
                     text = stringResource(R.string.draft_save),

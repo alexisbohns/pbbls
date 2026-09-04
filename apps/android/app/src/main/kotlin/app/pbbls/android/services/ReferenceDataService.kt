@@ -111,10 +111,18 @@ class ReferenceDataService(
         }
     }
 
+    /**
+     * Reads `v_domains_with_glyph`, not the `domains` table: the record flow's
+     * domain step renders each domain's default glyph alongside its name and
+     * description, and the view is where `strokes` / `view_box` are already
+     * flattened onto the row (`security_invoker = true`, granted to
+     * `authenticated`). Columns are listed explicitly so the view's
+     * `default_glyph_id` — which no client needs — never rides along.
+     */
     private suspend fun fetchDomains(): List<Domain> =
         supabase.client
-            .from("domains")
-            .select {
+            .from("v_domains_with_glyph")
+            .select(Columns.list("id", "slug", "name", "label", "strokes", "view_box")) {
                 order("name", Order.ASCENDING)
             }.decodeList<Domain>()
 

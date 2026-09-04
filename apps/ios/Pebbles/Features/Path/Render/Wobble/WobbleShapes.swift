@@ -4,7 +4,10 @@ import SwiftUI
 /// un-wobbled layer: layer transform → viewBox-fit scale → centering offset.
 /// The fit math intentionally mirrors `LayerShape.path(in:)` instead of
 /// reusing it, so deleting the wobble module touches nothing else.
-struct WobbledPathShape: Shape {
+/// `@unchecked Sendable`: `path` is an immutable `CGPath` copy handed over by
+/// `WobbleRenderer` and never mutated. `Shape` requires `Sendable`, and CGPath
+/// predates it (issue #650).
+struct WobbledPathShape: Shape, @unchecked Sendable {
     let path: CGPath
     let layerTransform: CGAffineTransform
     let viewBox: CGRect
@@ -27,7 +30,9 @@ struct WobbledPathShape: Shape {
 }
 
 /// Aspect-fits a wobbled backdrop silhouette into the proposed rect.
-struct WobbledBackdropShape: Shape {
+/// `@unchecked Sendable` for the same reason as `WobbledPathShape`:
+/// `WobbleBackdropArt` is an immutable, already-`Sendable` box around a CGPath.
+struct WobbledBackdropShape: Shape, @unchecked Sendable {
     let art: WobbleBackdropArt
 
     func path(in rect: CGRect) -> Path {

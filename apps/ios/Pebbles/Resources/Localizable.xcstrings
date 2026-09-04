@@ -4,159 +4,6 @@
     "" : {
 
     },
-    "Drafts" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Drafts"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Brouillons"
-          }
-        }
-      }
-    },
-    "No drafts yet. Anything you start keeping shows up here." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No drafts yet. Anything you start keeping shows up here."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucun brouillon. Tout ce que tu commences \u00e0 garder appara\u00eet ici."
-          }
-        }
-      }
-    },
-    "No name yet" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "No name yet"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Encore sans nom"
-          }
-        }
-      }
-    },
-    "Pick up where you left off?" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pick up where you left off?"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "On reprend o\u00f9 tu t'\u00e9tais arr\u00eat\u00e9 ?"
-          }
-        }
-      }
-    },
-    "Restore it" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Restore it"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reprendre"
-          }
-        }
-      }
-    },
-    "Save as draft" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Save as draft"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Garder pour plus tard"
-          }
-        }
-      }
-    },
-    "Start fresh" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Start fresh"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repartir de z\u00e9ro"
-          }
-        }
-      }
-    },
-    "Try again" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Try again"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "R\u00e9essayer"
-          }
-        }
-      }
-    },
-    "We kept what you were writing here. Add your photo again when you're ready." : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "We kept what you were writing here. Add your photo again when you're ready."
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "On a gard\u00e9 ce que tu \u00e9crivais ici. Remets ta photo quand tu veux."
-          }
-        }
-      }
-    },
     "—" : {
       "localizations" : {
         "fr" : {
@@ -197,6 +44,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "@community"
+          }
+        }
+      }
+    },
+    "%@ invites you to connect." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ invites you to connect."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ t'invite à te connecter."
           }
         }
       }
@@ -259,6 +123,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%lld pebbles avant le niveau %lld"
+          }
+        }
+      }
+    },
+    "%lld of %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld of %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sur %lld"
+          }
+        }
+      }
+    },
+    "%lld characters left" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld characters left"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld caractères restants"
           }
         }
       }
@@ -366,6 +264,23 @@
         }
       }
     },
+    "3 to 30 characters: lowercase letters, numbers, underscores. Leave empty to release your handle." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 to 30 characters: lowercase letters, numbers, underscores. Leave empty to release your handle."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "3 à 30 caractères : minuscules, chiffres, tirets bas. Laissez vide pour libérer votre pseudo."
+          }
+        }
+      }
+    },
     "A coffee with a friend. A concert that gave you chills. A tough conversation. Record it in seconds — no blank page, no pressure, no audience." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -383,6 +298,57 @@
         }
       }
     },
+    "A little mark, just for this one." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A little mark, just for this one."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une petite marque, rien que pour lui."
+          }
+        }
+      }
+    },
+    "A new link retires this one. Anyone still holding it won't be able to connect." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A new link retires this one. Anyone still holding it won't be able to connect."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un nouveau lien remplace celui-ci. Les personnes qui l'ont encore ne pourront plus se connecter."
+          }
+        }
+      }
+    },
+    "A photo is already attached." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A photo is already attached."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une photo est déjà jointe."
+          }
+        }
+      }
+    },
     "Account" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -396,6 +362,601 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Compte"
+          }
+        }
+      }
+    },
+    "Achievement unlocked" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Achievement unlocked"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Succès débloqué"
+          }
+        }
+      }
+    },
+    "achievement.capsule.a11y.karma" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Earned %lld karma"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu as gagné %lld karma"
+          }
+        }
+      }
+    },
+    "achievement.capsule.a11y.single" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Achievement unlocked: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Succès débloqué : %@"
+          }
+        }
+      }
+    },
+    "achievement.capsule.countPhrase" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld achievements unlocked"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld succès débloqués"
+          }
+        }
+      }
+    },
+    "achievement.family.domain_first.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record your first pebble in %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capture ton premier galet dans le domaine %@."
+          }
+        }
+      }
+    },
+    "achievement.family.domain_first.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First steps in %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premiers pas : %@"
+          }
+        }
+      }
+    },
+    "achievement.family.emotion_first.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record your first pebble carrying %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Capture ton premier galet teinté par l'émotion %@."
+          }
+        }
+      }
+    },
+    "achievement.family.emotion_first.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Première fois : %@"
+          }
+        }
+      }
+    },
+    "achievement.family.first_collection.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Create your first collection."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Crée ta toute première collection."
+          }
+        }
+      }
+    },
+    "achievement.family.first_collection.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First collection"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Première collection"
+          }
+        }
+      }
+    },
+    "achievement.family.first_glyph.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carve your first glyph."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grave ton tout premier glyphe."
+          }
+        }
+      }
+    },
+    "achievement.family.first_glyph.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First glyph"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premier glyphe"
+          }
+        }
+      }
+    },
+    "achievement.family.first_soul.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add your first soul."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajoute ta toute première âme."
+          }
+        }
+      }
+    },
+    "achievement.family.first_soul.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First soul"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Première âme"
+          }
+        }
+      }
+    },
+    "achievement.family.glyph_count.description" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carve %lld glyphs of your own."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Grave %lld glyphes de ta main."
+          }
+        }
+      }
+    },
+    "achievement.family.glyph_count.title" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld glyphs"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld glyphes"
+          }
+        }
+      }
+    },
+    "achievement.family.glyph_sales.description.one" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sell your first glyph in the market."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un pebbler adopte l'un de tes glyphes."
+          }
+        }
+      }
+    },
+    "achievement.family.glyph_sales.description.other" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make %lld glyph sales in the market."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tes glyphes trouvent preneur %lld fois."
+          }
+        }
+      }
+    },
+    "achievement.family.glyph_sales.title.one" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First sale"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Première vente"
+          }
+        }
+      }
+    },
+    "achievement.family.glyph_sales.title.other" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld sales"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld ventes"
+          }
+        }
+      }
+    },
+    "achievement.family.pebble_count.description.one" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drop your first pebble on the path."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dépose ton tout premier galet sur ton chemin."
+          }
+        }
+      }
+    },
+    "achievement.family.pebble_count.description.other" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collect %lld pebbles along your path."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rassemble %lld galets sur ton chemin."
+          }
+        }
+      }
+    },
+    "achievement.family.pebble_count.title.one" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "First pebble"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premier galet"
+          }
+        }
+      }
+    },
+    "achievement.family.pebble_count.title.other" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld pebbles"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld galets"
+          }
+        }
+      }
+    },
+    "achievement.group.domain_first" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Domains"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Domaines"
+          }
+        }
+      }
+    },
+    "achievement.group.emotion_first" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Emotions"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Émotions"
+          }
+        }
+      }
+    },
+    "achievement.group.first_collection" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collections"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collections"
+          }
+        }
+      }
+    },
+    "achievement.group.first_glyph" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glyphs"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Glyphes"
+          }
+        }
+      }
+    },
+    "achievement.group.first_soul" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Souls"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Âmes"
+          }
+        }
+      }
+    },
+    "achievement.group.glyph_count" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Carving"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gravure"
+          }
+        }
+      }
+    },
+    "achievement.group.glyph_sales" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Market"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marché"
+          }
+        }
+      }
+    },
+    "achievement.group.pebble_count" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pebbles"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Galets"
+          }
+        }
+      }
+    },
+    "achievement.moment.a11y.karma" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Earned %lld karma"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu as gagné %lld karma"
+          }
+        }
+      }
+    },
+    "achievement.shelf.unlockedCount" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld earned"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld décrochés"
+          }
+        }
+      }
+    },
+    "Achievements" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Achievements"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Succès"
           }
         }
       }
@@ -500,6 +1061,23 @@
         }
       }
     },
+    "Add it to a collection?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Add it to a collection?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans une collection ?"
+          }
+        }
+      }
+    },
     "Add soul" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -564,6 +1142,74 @@
         }
       }
     },
+    "Anyone in this one?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anyone in this one?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Il y avait quelqu'un ?"
+          }
+        }
+      }
+    },
+    "Anyone who opens this link can connect with you. It works for several people, so one code is enough for a whole table." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anyone who opens this link can connect with you. It works for several people, so one code is enough for a whole table."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toute personne qui ouvre ce lien peut se connecter avec toi. Il fonctionne pour plusieurs personnes : un seul code suffit pour toute une tablée."
+          }
+        }
+      }
+    },
+    "Anyone with the link can see it." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Anyone with the link can see it."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toute personne avec le lien peut le voir."
+          }
+        }
+      }
+    },
+    "Ask for a fresh one and try again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ask for a fresh one and try again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demandes-en un nouveau et réessaie."
+          }
+        }
+      }
+    },
     "Assiduity grid, last 28 days" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -598,6 +1244,40 @@
         }
       }
     },
+    "Back" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retour"
+          }
+        }
+      }
+    },
+    "Back to my path" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Back to my path"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retour à mon chemin"
+          }
+        }
+      }
+    },
     "Backlog" : {
       "comment" : "A section header for the backlog of lab logs.",
       "isCommentAutoGenerated" : true,
@@ -606,6 +1286,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réserve d’améliorations"
+          }
+        }
+      }
+    },
+    "Badges along your path" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Badges along your path"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tes badges le long du chemin"
+          }
+        }
+      }
+    },
+    "Blocking also stops them joining again through your invite link." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Blocking also stops them joining again through your invite link."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bloquer l'empêche aussi de revenir par ton lien d'invitation."
           }
         }
       }
@@ -809,6 +1523,40 @@
         }
       }
     },
+    "Circle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Circle"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cercle"
+          }
+        }
+      }
+    },
+    "Claim a handle first to go public." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Claim a handle first to go public."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisissez d'abord un pseudo pour passer en public."
+          }
+        }
+      }
+    },
     "Clear" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -975,6 +1723,23 @@
         }
       }
     },
+    "Connections" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connections"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connexions"
+          }
+        }
+      }
+    },
     "Continue" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1026,6 +1791,40 @@
         }
       }
     },
+    "Copied" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copied"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copié"
+          }
+        }
+      }
+    },
+    "Copy link" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copy link"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Copier le lien"
+          }
+        }
+      }
+    },
     "Couldn't complete the swap. Please try again." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1060,6 +1859,23 @@
         }
       }
     },
+    "Couldn't load achievements" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't load achievements"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de charger tes succès"
+          }
+        }
+      }
+    },
     "Couldn't load collections" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1073,6 +1889,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Impossible de charger les collections"
+          }
+        }
+      }
+    },
+    "Couldn't load connections" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't load connections"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de charger tes connexions"
           }
         }
       }
@@ -1141,6 +1974,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Impossible de charger ce pebble."
+          }
+        }
+      }
+    },
+    "Couldn't remove" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Couldn't remove"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Impossible de retirer"
           }
         }
       }
@@ -1434,6 +2284,23 @@
         }
       }
     },
+    "domain.community.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "People who share your values, culture, or beliefs"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Celles et ceux qui partagent tes valeurs, ta culture ou tes croyances"
+          }
+        }
+      }
+    },
     "domain.community.name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1447,6 +2314,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Communauté"
+          }
+        }
+      }
+    },
+    "domain.currentevents.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What's happening in the world around you"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce qui se passe dans le monde autour de toi"
           }
         }
       }
@@ -1468,6 +2352,23 @@
         }
       }
     },
+    "domain.dating.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Romantic relationships and connections"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Relations amoureuses et nouvelles rencontres"
+          }
+        }
+      }
+    },
     "domain.dating.name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1481,6 +2382,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rencontres"
+          }
+        }
+      }
+    },
+    "domain.education.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Learning, growth, and intellectual pursuits"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apprentissage, croissance et quête intellectuelle"
           }
         }
       }
@@ -1502,6 +2420,23 @@
         }
       }
     },
+    "domain.family.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Those connected to you by blood or soul"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Celles et ceux qui te sont liés par le sang ou par le cœur"
+          }
+        }
+      }
+    },
     "domain.family.name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1515,6 +2450,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Famille"
+          }
+        }
+      }
+    },
+    "domain.fitness.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Physical activity, games, and competition"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activité physique, jeux et compétition"
           }
         }
       }
@@ -1536,6 +2488,23 @@
         }
       }
     },
+    "domain.friends.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "People you choose to walk alongside"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les personnes que tu choisis d'avoir à tes côtés"
+          }
+        }
+      }
+    },
     "domain.friends.name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1549,6 +2518,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Amis"
+          }
+        }
+      }
+    },
+    "domain.health.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your body, energy, and physical well-being"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton corps, ton énergie et ton bien-être physique"
           }
         }
       }
@@ -1570,6 +2556,23 @@
         }
       }
     },
+    "domain.hobbies.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Creative pursuits and things you love doing"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activités créatives et choses que tu aimes faire"
+          }
+        }
+      }
+    },
     "domain.hobbies.name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1583,6 +2586,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Passions"
+          }
+        }
+      }
+    },
+    "domain.identity.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Who you are and who you're becoming"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qui tu es et qui tu deviens"
           }
         }
       }
@@ -1604,6 +2624,23 @@
         }
       }
     },
+    "domain.money.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Money, stability, and material security"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Argent, stabilité et sécurité matérielle"
+          }
+        }
+      }
+    },
     "domain.money.name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1617,6 +2654,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Finances"
+          }
+        }
+      }
+    },
+    "domain.partner.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your significant other or love relationship"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ta moitié ou ta relation amoureuse"
           }
         }
       }
@@ -1638,6 +2692,23 @@
         }
       }
     },
+    "domain.selfcare.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rituals and habits that restore you"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rituels et habitudes qui te ressourcent"
+          }
+        }
+      }
+    },
     "domain.selfcare.name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1651,6 +2722,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Bien-être"
+          }
+        }
+      }
+    },
+    "domain.spirituality.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Faith, meaning, and your inner life"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Foi, sens et vie intérieure"
           }
         }
       }
@@ -1672,6 +2760,23 @@
         }
       }
     },
+    "domain.tasks.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Things you need to get done"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les choses que tu dois accomplir"
+          }
+        }
+      }
+    },
     "domain.tasks.name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1685,6 +2790,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tâches"
+          }
+        }
+      }
+    },
+    "domain.travel.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Exploring new places and horizons"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Explorer de nouveaux lieux et horizons"
           }
         }
       }
@@ -1706,6 +2828,23 @@
         }
       }
     },
+    "domain.weather.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sun or rain, seasons and skies"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soleil ou pluie, saisons et ciels"
+          }
+        }
+      }
+    },
     "domain.weather.name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1719,6 +2858,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Météo"
+          }
+        }
+      }
+    },
+    "domain.work.label" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your job, career, and professional life"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton travail, ta carrière et ta vie professionnelle"
           }
         }
       }
@@ -1791,6 +2947,23 @@
         }
       }
     },
+    "Drafts" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Drafts"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Brouillons"
+          }
+        }
+      }
+    },
     "Drawing canvas" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1821,6 +2994,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Grave un galet, capture l’instant."
+          }
+        }
+      }
+    },
+    "Earned %lld karma" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Earned %lld karma"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld karma gagnés"
           }
         }
       }
@@ -2759,6 +3949,23 @@
         }
       }
     },
+    "Expires %@." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expires %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Expire %@."
+          }
+        }
+      }
+    },
     "Fresh week" : {
       "comment" : "A title displayed when a week has no pebbles.",
       "isCommentAutoGenerated" : true,
@@ -2767,6 +3974,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nouvelle semaine"
+          }
+        }
+      }
+    },
+    "Get a new link" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Get a new link"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Obtenir un nouveau lien"
           }
         }
       }
@@ -2784,6 +4008,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Révèle ton galet"
+          }
+        }
+      }
+    },
+    "Give it a glyph" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Give it a glyph"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Donne-lui un glyphe"
           }
         }
       }
@@ -2856,6 +4097,23 @@
         }
       }
     },
+    "Handle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Handle"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pseudo"
+          }
+        }
+      }
+    },
     "Highlight" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -2924,6 +4182,40 @@
         }
       }
     },
+    "How did it land?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How did it land?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ça t'a fait quoi ?"
+          }
+        }
+      }
+    },
+    "How much of your life did this take up?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "How much of your life did this take up?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ça a pris quelle place dans ta vie ?"
+          }
+        }
+      }
+    },
     "I accept the " : {
       "comment" : "Text that precedes a link to the Terms of Service",
       "isCommentAutoGenerated" : true,
@@ -2967,6 +4259,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Informations"
+          }
+        }
+      }
+    },
+    "Invitation" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation"
+          }
+        }
+      }
+    },
+    "Invite" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invite"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invitation"
+          }
+        }
+      }
+    },
+    "Invite someone" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Invite someone"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Inviter quelqu'un"
           }
         }
       }
@@ -3048,6 +4391,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Continuer à modifier"
+          }
+        }
+      }
+    },
+    "Keep going" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep going"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer l'édition"
+          }
+        }
+      }
+    },
+    "Keep this pebble?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep this pebble?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu gardes ce galet ?"
           }
         }
       }
@@ -3162,6 +4539,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chargement…"
+          }
+        }
+      }
+    },
+    "Locked" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Locked"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À débloquer"
           }
         }
       }
@@ -3302,6 +4696,23 @@
         }
       }
     },
+    "Make my profile public" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make my profile public"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rendre mon profil public"
+          }
+        }
+      }
+    },
     "Max level reached" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3400,6 +4811,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mode : %@"
+          }
+        }
+      }
+    },
+    "Moment" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moment"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moment"
           }
         }
       }
@@ -3642,6 +5070,23 @@
         }
       }
     },
+    "Next" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Next"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suivant"
+          }
+        }
+      }
+    },
     "Next week" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3655,6 +5100,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Semaine suivante"
+          }
+        }
+      }
+    },
+    "Nice" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nice"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Super"
           }
         }
       }
@@ -3693,6 +5155,23 @@
         }
       }
     },
+    "No connections yet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No connections yet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Personne pour l'instant"
+          }
+        }
+      }
+    },
     "No domain" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3710,6 +5189,23 @@
         }
       }
     },
+    "No drafts yet. Anything you start keeping shows up here." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No drafts yet. Anything you start keeping shows up here."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun brouillon. Tout ce que tu commences à garder apparaît ici."
+          }
+        }
+      }
+    },
     "No glyphs yet" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3723,6 +5219,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucun glyphe pour l'instant"
+          }
+        }
+      }
+    },
+    "No name yet" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No name yet"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Encore sans nom"
           }
         }
       }
@@ -3859,6 +5372,57 @@
         }
       }
     },
+    "OF MY DAY" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OF MY DAY"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DE MA JOURNÉE"
+          }
+        }
+      }
+    },
+    "OF MY MONTH" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OF MY MONTH"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DE MON MOIS"
+          }
+        }
+      }
+    },
+    "OF MY WEEK" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "OF MY WEEK"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "DE MA SEMAINE"
+          }
+        }
+      }
+    },
     "OK" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3872,6 +5436,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        }
+      }
+    },
+    "Only you can see this one." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Only you can see this one."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toi seul peux voir celui-ci."
           }
         }
       }
@@ -3917,6 +5498,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Facultatif"
+          }
+        }
+      }
+    },
+    "Or skip it and write from memory." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Or skip it and write from memory."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ou passe et écris de mémoire."
           }
         }
       }
@@ -4124,6 +5722,48 @@
         }
       }
     },
+    "Photo is still uploading." : {
+      "comment" : "Error message when a photo is still uploading.",
+      "isCommentAutoGenerated" : true
+    },
+    "Photo upload failed. Retry or remove it." : {
+      "comment" : "Error message when a photo upload fails.",
+      "isCommentAutoGenerated" : true
+    },
+    "Pick up where you left off?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pick up where you left off?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On reprend où tu t'étais arrêté ?"
+          }
+        }
+      }
+    },
+    "Please sign in again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Please sign in again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reconnecte-toi."
+          }
+        }
+      }
+    },
     "Please try again." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4205,22 +5845,6 @@
         }
       }
     },
-    "Private" : {
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Private"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Privé"
-          }
-        }
-      }
-    },
     "Profile" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4267,6 +5891,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Public"
+          }
+        }
+      }
+    },
+    "Public profile" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Public profile"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Profil public"
+          }
+        }
+      }
+    },
+    "Publish" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Publish"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Publier"
+          }
+        }
+      }
+    },
+    "QR code for your invite link" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "QR code for your invite link"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "QR code de ton lien d'invitation"
           }
         }
       }
@@ -4373,6 +6048,57 @@
         }
       }
     },
+    "Remove" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer"
+          }
+        }
+      }
+    },
+    "Remove %@?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove %@?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer %@ ?"
+          }
+        }
+      }
+    },
+    "Remove and block" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Remove and block"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer et bloquer"
+          }
+        }
+      }
+    },
     "Remove glyph" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4455,6 +6181,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Revoir l'introduction"
+          }
+        }
+      }
+    },
+    "Restore it" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Restore it"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprendre"
           }
         }
       }
@@ -4546,6 +6289,23 @@
         }
       }
     },
+    "Save as draft" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save as draft"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garder pour plus tard"
+          }
+        }
+      }
+    },
     "Saved" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4559,6 +6319,22 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Enregistrée"
+          }
+        }
+      }
+    },
+    "Secret" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Secret"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Secret"
           }
         }
       }
@@ -4617,6 +6393,57 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aide-nous à façonner Pebbles sur WhatsApp."
+          }
+        }
+      }
+    },
+    "Share" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partager"
+          }
+        }
+      }
+    },
+    "Share my profile" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share my profile"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partager mon profil"
+          }
+        }
+      }
+    },
+    "Share your invite link and whoever accepts shows up here." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Share your invite link and whoever accepts shows up here."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partage ton lien d'invitation : les personnes qui l'acceptent apparaissent ici."
           }
         }
       }
@@ -4706,6 +6533,40 @@
         }
       }
     },
+    "Someone" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Someone"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quelqu'un"
+          }
+        }
+      }
+    },
+    "Something went wrong. Please try again." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Something went wrong. Please try again."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quelque chose n'a pas fonctionné. Réessaie."
+          }
+        }
+      }
+    },
     "Soon" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4774,6 +6635,40 @@
         }
       }
     },
+    "Start fresh" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start fresh"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repartir de zéro"
+          }
+        }
+      }
+    },
+    "Start with a picture" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Start with a picture"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commence par une photo"
+          }
+        }
+      }
+    },
     "Start your path" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4825,6 +6720,23 @@
         }
       }
     },
+    "Step %lld of %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Step %lld of %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Étape %lld sur %lld"
+          }
+        }
+      }
+    },
     "Swap" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4855,6 +6767,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Échangez un glyphe communautaire pour le voir ici."
+          }
+        }
+      }
+    },
+    "Taken from your photo" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Taken from your photo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Récupéré depuis ta photo"
           }
         }
       }
@@ -4922,6 +6851,74 @@
         }
       }
     },
+    "That handle is already taken." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That handle is already taken."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce pseudo est déjà pris."
+          }
+        }
+      }
+    },
+    "That handle is reserved." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That handle is reserved."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce pseudo est réservé."
+          }
+        }
+      }
+    },
+    "That handle isn't valid. Use 3 to 30 lowercase letters, numbers or underscores, starting and ending with a letter or number." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That handle isn't valid. Use 3 to 30 lowercase letters, numbers or underscores, starting and ending with a letter or number."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce pseudo n'est pas valide. Utilisez 3 à 30 minuscules, chiffres ou tirets bas, en commençant et terminant par une lettre ou un chiffre."
+          }
+        }
+      }
+    },
+    "That's your own invite link." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "That's your own invite link."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "C'est ton propre lien d'invitation."
+          }
+        }
+      }
+    },
     "The '+' character is not allowed in email addresses." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4935,6 +6932,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le caractère « + » n’est pas autorisé dans les adresses e-mail."
+          }
+        }
+      }
+    },
+    "them" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "them"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cette personne"
           }
         }
       }
@@ -4969,6 +6983,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ce glyphe n'est plus disponible"
+          }
+        }
+      }
+    },
+    "This invite link isn't valid anymore." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This invite link isn't valid anymore."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce lien d'invitation n'est plus valide."
+          }
+        }
+      }
+    },
+    "This invite link isn't valid anymore. Ask for a fresh one." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This invite link isn't valid anymore. Ask for a fresh one."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce lien d'invitation n'est plus valide. Demandes-en un nouveau."
           }
         }
       }
@@ -5058,6 +7106,23 @@
         }
       }
     },
+    "this person" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "this person"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "cette personne"
+          }
+        }
+      }
+    },
     "Track" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5071,6 +7136,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Suivre"
+          }
+        }
+      }
+    },
+    "Try again" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Try again"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessayer"
           }
         }
       }
@@ -5105,6 +7187,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Annuler"
+          }
+        }
+      }
+    },
+    "Unlocked" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Unlocked"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Débloqué le"
           }
         }
       }
@@ -5212,6 +7311,23 @@
         }
       }
     },
+    "We kept what you were writing here. Add your photo again when you're ready." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "We kept what you were writing here. Add your photo again when you're ready."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "On a gardé ce que tu écrivais ici. Remets ta photo quand tu veux."
+          }
+        }
+      }
+    },
     "Week %lld" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5264,6 +7380,57 @@
         }
       }
     },
+    "What did you feel?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What did you feel?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu as ressenti quoi ?"
+          }
+        }
+      }
+    },
+    "What do you call it?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What do you call it?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu l'appelles comment ?"
+          }
+        }
+      }
+    },
+    "What part of life?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What part of life?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quel domaine de ta vie ?"
+          }
+        }
+      }
+    },
     "When" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5281,6 +7448,40 @@
         }
       }
     },
+    "When did it happen?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "When did it happen?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "C'était quand ?"
+          }
+        }
+      }
+    },
+    "Who can see it?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Who can see it?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qui peut le voir ?"
+          }
+        }
+      }
+    },
     "You already own this glyph" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5294,6 +7495,77 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vous possédez déjà ce glyphe"
+          }
+        }
+      }
+    },
+    "You don't have any collections yet." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You don't have any collections yet."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu n'as pas encore de collection."
+          }
+        }
+      }
+    },
+    "You must be signed in to save." : {
+
+    },
+    "You'll both see each other in your connections. You can remove the connection at any time." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You'll both see each other in your connections. You can remove the connection at any time."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous vous verrez tous les deux dans vos connexions. Tu peux retirer la connexion quand tu veux."
+          }
+        }
+      }
+    },
+    "You're already connected with %@." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You're already connected with %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu es déjà connecté avec %@."
+          }
+        }
+      }
+    },
+    "You're connected with %@." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "You're connected with %@."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Te voilà connecté avec %@."
           }
         }
       }
@@ -5349,6 +7621,23 @@
         }
       }
     },
+    "Your mutual connections can see it." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your mutual connections can see it."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tes connexions mutuelles peuvent le voir."
+          }
+        }
+      }
+    },
     "Your name" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5362,6 +7651,40 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Votre nom"
+          }
+        }
+      }
+    },
+    "Your pebble" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Your pebble"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ton galet"
+          }
+        }
+      }
+    },
+    "your_handle" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "your_handle"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "votre_pseudo"
           }
         }
       }

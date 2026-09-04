@@ -3,10 +3,13 @@ package app.pbbls.android
 import android.app.Application
 import app.pbbls.android.features.glyph.services.GlyphMarketService
 import app.pbbls.android.features.glyph.services.GlyphService
+import app.pbbls.android.features.karma.AchievementNotificationService
 import app.pbbls.android.features.karma.KarmaNotificationService
 import app.pbbls.android.features.lab.services.LogsService
+import app.pbbls.android.services.AchievementsService
 import app.pbbls.android.services.CollectionsService
 import app.pbbls.android.services.ComposerSnapshotStore
+import app.pbbls.android.services.ConnectionsService
 import app.pbbls.android.services.EmotionPaletteService
 import app.pbbls.android.services.PathService
 import app.pbbls.android.services.PathStatsService
@@ -73,6 +76,8 @@ class PebblesApp :
 
     lateinit var draftsService: PebbleDraftsService
 
+    lateinit var connectionsService: ConnectionsService
+
     lateinit var composerSnapshots: ComposerSnapshotStore
         private set
 
@@ -86,6 +91,12 @@ class PebblesApp :
         private set
 
     lateinit var karma: KarmaNotificationService
+        private set
+
+    lateinit var achievementNotify: AchievementNotificationService
+        private set
+
+    lateinit var achievements: AchievementsService
         private set
 
     override fun onCreate() {
@@ -103,11 +114,14 @@ class PebblesApp :
         soulsService = SoulsService(supabase)
         collectionsService = CollectionsService(supabase)
         draftsService = PebbleDraftsService(supabase)
+        connectionsService = ConnectionsService(supabase)
         composerSnapshots = ComposerSnapshotStore(this)
         glyphService = GlyphService(supabase)
         glyphMarket = GlyphMarketService(supabase)
         logsService = LogsService(supabase)
         karma = KarmaNotificationService()
+        achievementNotify = AchievementNotificationService()
+        achievements = AchievementsService(supabase, achievementNotify)
     }
 
     /**

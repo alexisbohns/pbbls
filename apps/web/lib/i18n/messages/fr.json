@@ -25,6 +25,7 @@
     "collections": "Collections",
     "souls": "Âmes",
     "glyphs": "Glyphes",
+    "connections": "Connexions",
     "lab": "Lab"
   },
   "profile": {
@@ -47,6 +48,12 @@
     },
     "collectionsTitle": "Collections",
     "newCollection": "Nouvelle collection",
+    "achievements": {
+      "title": "Succès",
+      "subtitle": "Tes badges et jalons",
+      "loading": "On compte tes badges…",
+      "unlockedCount": "{count, plural, one {# badge décroché} other {# badges décrochés}}"
+    },
     "lab": {
       "title": "Lab",
       "subtitle": "Actus & communauté"
@@ -70,6 +77,21 @@
     "logout": "Me déconnecter",
     "loggingOut": "Déconnexion…"
   },
+  "publicProfile": {
+    "memberSince": "Membre depuis {date}",
+    "rippleLevel": "Niveau Ripples {level}",
+    "bounceLevel": "Niveau ricochet {level}",
+    "days": "Jours",
+    "pebbles": "Galets",
+    "achievements": "Succès",
+    "achievementsCount": "{count, plural, one {# badge décroché} other {# badges décrochés}}",
+    "madeWith": "Créé avec Pebbles"
+  },
+  "sharedPebble": {
+    "overline": "Un galet partagé",
+    "visualAria": "Galet {name}, émotion {emotion}",
+    "madeWith": "Créé avec Pebbles"
+  },
   "settings": {
     "title": "Réglages",
     "save": "Enregistrer",
@@ -82,6 +104,21 @@
     "name": "Nom",
     "namePlaceholder": "Votre nom",
     "email": "E-mail",
+    "publicProfile": "Profil public",
+    "handle": "Pseudo",
+    "handlePlaceholder": "votre_pseudo",
+    "handleHint": "3 à 30 caractères : minuscules, chiffres, tirets bas. Laissez vide pour libérer votre pseudo.",
+    "handleError": {
+      "invalid_handle": "Ce pseudo n'est pas valide. Utilisez 3 à 30 minuscules, chiffres ou tirets bas, en commençant et terminant par une lettre ou un chiffre.",
+      "handle_taken": "Ce pseudo est déjà pris.",
+      "handle_reserved": "Ce pseudo est réservé."
+    },
+    "publicToggle": "Rendre mon profil public",
+    "publicToggleNeedsHandle": "Choisissez d'abord un pseudo pour passer en public.",
+    "publicProfileCopy": "Copier le lien de votre profil public",
+    "publicProfileShare": "Partager votre profil public",
+    "publicProfileLinkCopied": "Lien copié",
+    "publicProfileLinkCopyError": "Impossible de copier le lien. Veuillez réessayer.",
     "providers": "Fournisseurs",
     "providerApple": "Identifiant Apple",
     "providerGoogle": "Compte Google",
@@ -102,6 +139,12 @@
     "deleteAccountError": "Impossible de supprimer votre compte. Rien n'a été supprimé. Veuillez réessayer."
   },
   "errors": {
+    "store": {
+      "title": "Impossible de retrouver tes pebbles",
+      "description": "Ton parcours est intact, c'est la connexion qui a lâché en route. Réessaie dans un instant.",
+      "retry": "Réessayer",
+      "retrying": "Chargement…"
+    },
     "title": "Une erreur est survenue",
     "description": "Une erreur inattendue s'est produite. Veuillez réessayer.",
     "retry": "Réessayer",
@@ -157,7 +200,67 @@
     "glyphUnlocked": "Glyphe débloqué",
     "spent": "−{amount} karma",
     "srUnlocked": "{name} débloqué — {amount} karma dépensés.",
-    "viewGlyph": "Voir le glyphe"
+    "viewGlyph": "Voir le glyphe",
+    "achievementsUnlocked": "{count, plural, one {Succès débloqué} other {# succès débloqués}}",
+    "srAchievementUnlocked": "Succès débloqué : {title}.",
+    "srAchievementsUnlocked": "{count, plural, one {# succès débloqué} other {# succès débloqués}}.",
+    "srAchievementKarma": "Tu as gagné {amount} karma.",
+    "viewAchievements": "Voir tes succès",
+    "achievementUnlockedEyebrow": "Succès débloqué",
+    "achievementMomentNext": "Suivant",
+    "achievementMomentDone": "Super",
+    "achievementMomentProgress": "{current} sur {total}"
+  },
+  "achievements": {
+    "title": "Succès",
+    "loading": "Chargement…",
+    "error": "Impossible de charger tes succès. Réessaie un peu plus tard.",
+    "locked": "À débloquer",
+    "unlockedOn": "Débloqué le {date}",
+    "group": {
+      "pebble_count": "Galets",
+      "emotion_first": "Émotions",
+      "domain_first": "Domaines",
+      "first_collection": "Collections",
+      "first_glyph": "Glyphes",
+      "first_soul": "Âmes",
+      "glyph_count": "Gravure",
+      "glyph_sales": "Marché"
+    },
+    "family": {
+      "pebble_count": {
+        "title": "{threshold, plural, one {Premier galet} other {# galets}}",
+        "description": "{threshold, plural, one {Dépose ton tout premier galet sur ton chemin.} other {Rassemble # galets sur ton chemin.}}"
+      },
+      "emotion_first": {
+        "title": "Première fois : {name}",
+        "description": "Capture ton premier galet teinté par l'émotion {name}."
+      },
+      "domain_first": {
+        "title": "Premiers pas : {name}",
+        "description": "Capture ton premier galet dans le domaine {name}."
+      },
+      "first_collection": {
+        "title": "Première collection",
+        "description": "Crée ta toute première collection."
+      },
+      "first_glyph": {
+        "title": "Premier glyphe",
+        "description": "Grave ton tout premier glyphe."
+      },
+      "first_soul": {
+        "title": "Première âme",
+        "description": "Ajoute ta toute première âme."
+      },
+      "glyph_count": {
+        "title": "{threshold} glyphes",
+        "description": "Grave {threshold} glyphes de ta main."
+      },
+      "glyph_sales": {
+        "title": "{threshold, plural, one {Première vente} other {# ventes}}",
+        "description": "{threshold, plural, one {Un pebbler adopte l'un de tes glyphes.} other {Tes glyphes trouvent preneur # fois.}}"
+      }
+    }
   },
   "wallet": {
     "title": "Porte-karma",
@@ -167,6 +270,7 @@
     "debtHint": "Gagnez du karma pour remettre votre solde à zéro avant de pouvoir acheter à nouveau.",
     "history": "Historique",
     "empty": "Aucun mouvement de karma pour l’instant.",
+    "historyError": "Impossible de charger ton historique de karma.",
     "loadMore": "Voir plus",
     "reason": {
       "pebble_created": "Caillou créé",
@@ -317,7 +421,8 @@
       "passwordsMismatch": "Les mots de passe ne correspondent pas.",
       "mustAcceptLegal": "Vous devez accepter les Conditions Générales d'Utilisation et la Politique de Confidentialité.",
       "generic": "Une erreur est survenue.",
-      "callbackFailed": "La connexion a échoué. Veuillez réessayer."
+      "callbackFailed": "La connexion a échoué. Veuillez réessayer.",
+      "emailPlusNotAllowed": "Le caractère « + » n’est pas autorisé dans les adresses e-mail."
     },
     "login": {
       "title": "Me connecter",
@@ -437,6 +542,63 @@
       "notFoundDescription": "Cette collection n'existe pas ou a été supprimée."
     }
   },
+  "connections": {
+    "title": "Connexions",
+    "back": "Retour au profil",
+    "loading": "Chargement des connexions",
+    "loadError": "Impossible de charger tes connexions. Réessaie.",
+    "empty": "Personne pour l'instant. Partage ton lien pour te connecter à un ami.",
+    "connectedAgo": "Connectés {ago}",
+    "removeAria": "Retirer {name}",
+    "removeTitle": "Retirer {name} ?",
+    "removeDescription": "Vous disparaîtrez de vos listes respectives. Une nouvelle invitation pourra toujours vous reconnecter.",
+    "removeConfirm": "Retirer",
+    "removeCancel": "Garder",
+    "removeError": "Impossible de retirer cette connexion. Réessaie.",
+    "blockAria": "Retirer et bloquer {name}",
+    "blockTitle": "Retirer et bloquer {name} ?",
+    "blockDescription": "{name} ne pourra plus se connecter à toi.",
+    "blockConfirm": "Retirer et bloquer",
+    "blockCancel": "Annuler",
+    "blockBusy": "Retrait…",
+    "blockError": "Impossible de bloquer cette connexion. Réessaie.",
+    "inviteTitle": "Inviter un ami",
+    "inviteLoading": "Préparation de ton lien d'invitation",
+    "inviteError": "Impossible de préparer ton lien d'invitation. Réessaie.",
+    "inviteUrlAria": "Ton lien d'invitation",
+    "inviteExpires": "Ce lien fonctionne jusqu'au {date}.",
+    "copy": "Copier le lien",
+    "copied": "Lien copié.",
+    "copyError": "Impossible de copier le lien.",
+    "share": "Partager",
+    "shareError": "Impossible de partager le lien.",
+    "qrAlt": "QR code de ton lien d'invitation",
+    "newLink": "Nouveau lien",
+    "newLinkTitle": "Créer un nouveau lien ?",
+    "newLinkDescription": "Ton lien actuel (et son QR code) cessera de fonctionner immédiatement.",
+    "newLinkConfirm": "Nouveau lien",
+    "newLinkCancel": "Garder ce lien",
+    "rotateError": "Impossible de créer un nouveau lien. Réessaie.",
+    "acceptTitle": "{name} t'invite à vous connecter",
+    "acceptSubtitle": "Les connexions voient leurs noms et leurs glyphes. Rien de plus.",
+    "acceptButton": "Accepter",
+    "accepting": "Acceptation…",
+    "acceptedToast": "Te voilà connecté avec {name}.",
+    "alreadyConnectedToast": "Vous êtes déjà connectés, {name} et toi.",
+    "acceptError": "Impossible d'accepter l'invitation. Réessaie.",
+    "ownInviteTitle": "C'est ton propre lien d'invitation",
+    "ownInviteBody": "Passe-le plutôt à un ami. Il apparaîtra dans tes connexions dès qu'il aura accepté.",
+    "deadTitle": "Ce lien d'invitation n'est plus actif",
+    "deadBody": "Demande un nouveau lien à ton ami.",
+    "signInPrompt": "Connecte-toi ou crée un compte pour accepter.",
+    "logIn": "Se connecter",
+    "signUp": "Créer un compte",
+    "sharedTitle": "Les galets partagés avec toi",
+    "sharedEmpty": "Pas encore de galet partagé. Les galets en visibilité Connexions ou Public apparaîtront ici.",
+    "detailNotFound": "Cette connexion n'existe plus.",
+    "backToConnections": "Retour aux connexions",
+    "openDetailAria": "Voir les galets partagés de {name}"
+  },
   "path": {
     "loading": "Chargement…",
     "empty": {
@@ -514,6 +676,8 @@
     },
     "editIntensityAria": "Modifier l'intensité et la valence",
     "editAria": "Modifier le galet",
+    "shareAria": "Partager ce galet",
+    "shareCopied": "Lien copié",
     "edit": {
       "toolbarTitle": "ÉDITION",
       "cancel": "Annuler",
@@ -561,6 +725,65 @@
     "deleteCancel": "Le garder"
   },
   "record": {
+    "flow": {
+      "aria": "Capturer un caillou, une question à la fois",
+      "back": "Retour",
+      "close": "Fermer",
+      "stepOf": "Étape {current} sur {total}",
+      "stepDone": "Terminé",
+      "loading": "Chargement…",
+      "continue": "Continuer",
+      "publish": "Publier",
+      "skip": "Passer",
+      "done": "Terminé",
+      "keepTitle": "Tu gardes ce caillou ?",
+      "keepDescription": "Garde-le en brouillon et termine-le quand tu veux.",
+      "keepGoing": "Je continue",
+      "discard": "Abandonner",
+      "step": {
+        "photoTitle": "Commence par une photo",
+        "photoSubtitle": "Ou passe et écris de mémoire.",
+        "whenTitle": "C'était quand ?",
+        "nameTitle": "Tu l'appelles comment ?",
+        "valenceTitle": "Ça t'a fait quoi ?",
+        "valenceSubtitle": "Quelle place ça a pris dans ta vie ?",
+        "emotionTitle": "Tu as ressenti quoi ?",
+        "domainTitle": "Quel pan de ta vie ?",
+        "soulsTitle": "Quelqu'un dans ce moment ?",
+        "collectionTitle": "Dans une collection ?",
+        "glyphTitle": "Donne-lui un glyphe",
+        "glyphSubtitle": "Une petite marque, rien que pour lui.",
+        "privacyTitle": "Qui peut le voir ?",
+        "successTitle": "Ton caillou"
+      },
+      "photo": {
+        "add": "Ajouter une photo",
+        "alt": "La photo que tu as choisie",
+        "uploading": "Envoi…",
+        "chooseAnother": "En choisir une autre",
+        "failed": "Cette photo n'est pas passée.",
+        "retry": "Réessayer",
+        "remove": "Retirer",
+        "blockedUploading": "La photo est encore en cours d'envoi.",
+        "blockedFailed": "L'envoi de la photo a échoué. Réessaie ou retire-la."
+      },
+      "when": {
+        "fromPhoto": "Récupéré de ta photo"
+      },
+      "name": {
+        "label": "Nom du caillou",
+        "placeholder": "Donne-lui un nom"
+      },
+      "privacy": {
+        "secret": "Toi seul peux le voir.",
+        "private": "Tes connexions mutuelles peuvent le voir.",
+        "public": "Tous ceux qui ont le lien peuvent le voir."
+      },
+      "success": {
+        "karma": "+{count} karma",
+        "exit": "Retour à mon chemin"
+      }
+    },
     "draft": {
       "save": "Garder pour plus tard",
       "saveFailed": "Impossible de garder ce brouillon. Réessaie.",
@@ -643,10 +866,10 @@
       "alt": "Photo téléversée"
     },
     "visibility": {
-      "private": "Privé",
+      "secret": "Secret",
+      "private": "Connexions",
       "public": "Public",
-      "ariaPrivate": "Visibilité : privé",
-      "ariaPublic": "Visibilité : public"
+      "aria": "Visibilité : {grade}"
     },
     "intensity": {
       "ariaTitle": "Intensité et valence",
@@ -681,6 +904,18 @@
       "large": {
         "name": "Évènement du mois",
         "description": "Ce moment a marqué tout mon mois et sera réuni dans mon Cairn annuel."
+      }
+    },
+    "valenceFan": {
+      "word": {
+        "lowlight": "Creux",
+        "neutral": "Moment",
+        "highlight": "Temps fort"
+      },
+      "span": {
+        "small": "DE MA JOURNÉE",
+        "medium": "DE MA SEMAINE",
+        "large": "DE MON MOIS"
       }
     },
     "date": {

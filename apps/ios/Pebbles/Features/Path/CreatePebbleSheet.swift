@@ -12,6 +12,7 @@ struct CreatePebbleSheet: View {
     @Environment(SupabaseService.self) var supabase
     @Environment(ReferenceDataService.self) var refs
     @Environment(KarmaNotificationService.self) private var karma
+    @Environment(AchievementsService.self) private var achievements
     @Environment(PebbleDraftsService.self) var draftsService
     @Environment(ComposerSnapshotStore.self) var snapshots
     @Environment(\.scenePhase) private var scenePhase
@@ -25,14 +26,9 @@ struct CreatePebbleSheet: View {
 
     @State private var isPhotoPickerPresented = false
 
-    @State var isSavingDraft = false
-    /// The server draft this composer is bound to — the resumed one, or the one
-    /// created by the first "Save as draft".
-    @State var serverDraftId: UUID?
-    @State var autosave: ComposerAutosave?
-    @State var restorableSnapshot: PebbleDraftPayload?
-    @State var isRestorePromptPresented = false
-    @State var hasCheckedSnapshot = false
+    /// Owns the server draft and the local snapshot. Lazily constructed in
+    /// `.task` alongside `snaps`, so it has `supabase.client`.
+    @State var drafts: ComposerDraftCoordinator?
 
     /// Lazily constructed in `.task` so we have access to `supabase.client`.
     /// Nil only for the very first body render before `.task` fires.
@@ -55,7 +51,7 @@ struct CreatePebbleSheet: View {
                         }
                     }
                     ToolbarItem(placement: .confirmationAction) {
-                        if isSaving || isSavingDraft {
+                        if isSaving || drafts?.isSavingDraft == true {
                             ProgressView()
                         } else {
                             PebbleToolbarButton("Save") {
@@ -66,11 +62,13 @@ struct CreatePebbleSheet: View {
                     }
                     // Quick capture: ungated, unlike Save (design D5). "Just a
                     // name" is a valid draft.
-                    ToolbarItem(placement: .bottomBar) {
+                    ToolbarItemGroup(placement: .bottomBar) {
+                        VisibilityChip(visibility: $draft.visibility)
+                        Spacer()
                         PebbleToolbarButton("Save as draft") {
                             Task { await saveAsDraft() }
                         }
-                        .disabled(!isSavableAsDraft || isSaving || isSavingDraft)
+                        .disabled(!isSavableAsDraft || isSaving || drafts?.isSavingDraft == true)
                     }
                 }
                 .pebblesScreen()
@@ -79,8 +77,10 @@ struct CreatePebbleSheet: View {
             if snaps == nil {
                 snaps = SnapUploadCoordinator(repo: PebbleSnapRepository(client: supabase.client))
             }
-            if autosave == nil {
-                autosave = ComposerAutosave(store: snapshots)
+            if drafts == nil {
+                drafts = ComposerDraftCoordinator(
+                    client: supabase.client, drafts: draftsService, snapshots: snapshots
+                )
             }
             hydrateOrOfferRestore()
         }
@@ -91,14 +91,17 @@ struct CreatePebbleSheet: View {
         .onChange(of: draftPayload) { _, newValue in
             // Debounced inside ComposerAutosave. Held off while the restore
             // prompt is up so the pending answer is not overwritten first.
-            guard !isRestorePromptPresented else { return }
-            autosave?.schedule(newValue)
+            guard drafts?.isRestorePromptPresented != true else { return }
+            drafts?.schedule(newValue)
         }
         .onChange(of: scenePhase) { _, phase in
             // Last reliable moment before a process kill.
-            if phase != .active { autosave?.flush() }
+            if phase != .active { drafts?.flush() }
         }
-        .alert("Pick up where you left off?", isPresented: $isRestorePromptPresented) {
+        .alert("Pick up where you left off?", isPresented: Binding(
+            get: { drafts?.isRestorePromptPresented ?? false },
+            set: { drafts?.isRestorePromptPresented = $0 }
+        )) {
             Button("Restore it") { restoreSnapshot() }
             Button("Start fresh", role: .destructive) { discardSnapshot() }
         } message: {
@@ -175,32 +178,16 @@ struct CreatePebbleSheet: View {
         isSaving = true
         saveError = nil
 
-        let payload = PebbleCreatePayload(from: draft, formSnap: snaps?.formSnap, userId: userId)
-        let requestBody = ComposePebbleRequest(payload: payload)
-
         do {
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            let response: ComposePebbleResponse = try await supabase.client.functions
-                .invoke(
-                    "compose-pebble",
-                    options: FunctionInvokeOptions(body: requestBody),
-                    decoder: decoder
-                )
+            let response = try await PebblePublisher(client: supabase.client)
+                .publish(draft: draft, formSnap: snaps?.formSnap, userId: userId)
+            // Soft success returns a nil delta; `notifyEarned` no-ops on zero,
+            // which is exactly what the old inline branch did.
             karma.notifyEarned(amount: response.karmaDelta ?? 0, reason: .pebbleCreated)
+            achievements.fireCheck()
             await consumeDraftAfterPublish()
             onCreated(response.pebbleId)
             dismiss()
-        } catch let functionsError as FunctionsError {
-            if let pebbleId = softSuccessPebbleId(from: functionsError) {
-                logger.warning("compose-pebble returned 5xx but pebble_id found — advancing to detail sheet")
-                await consumeDraftAfterPublish()
-                onCreated(pebbleId)
-                dismiss()
-            } else {
-                logger.error("compose-pebble failed: \(functionsError.localizedDescription, privacy: .private)")
-                await handleSaveFailure(functionsError)
-            }
         } catch {
             logger.error("create pebble failed: \(error.localizedDescription, privacy: .private)")
             await handleSaveFailure(error)
@@ -216,25 +203,6 @@ struct CreatePebbleSheet: View {
         saveError = userMessageForPebbleSaveError(error)
         isSaving = false
     }
-
-    /// Tries to extract a `pebble_id` UUID from the raw error body of a
-    /// `FunctionsError.httpError`. Returns `nil` if the body is absent,
-    /// unparseable, or missing the `pebble_id` key.
-    private func softSuccessPebbleId(from error: FunctionsError) -> UUID? {
-        guard case let .httpError(_, data) = error, !data.isEmpty else { return nil }
-        return try? JSONDecoder().decode(PebbleIdPartial.self, from: data).pebbleId
-    }
-}
-
-private struct ComposePebbleRequest: Encodable {
-    let payload: PebbleCreatePayload
-}
-
-private struct PebbleIdPartial: Decodable {
-    let pebbleId: UUID
-    enum CodingKeys: String, CodingKey {
-        case pebbleId = "pebble_id"
-    }
 }
 
 #Preview {
@@ -245,25 +213,4 @@ private struct PebbleIdPartial: Decodable {
         .environment(KarmaNotificationService())
         .environment(PebbleDraftsService(client: supabase.client))
         .environment(ComposerSnapshotStore())
-}
-
-/// Maps a thrown error to a user-facing localized string. Module-private so
-/// `CreatePebbleSheet` and `EditPebbleSheet` share one mapping.
-func userMessageForPebbleSaveError(_ error: Error) -> String {
-    if let fnError = error as? FunctionsError, case let .httpError(_, data) = fnError,
-       let body = try? JSONDecoder().decode([String: String].self, from: data) {
-        let message = body["error"] ?? body["message"] ?? ""
-        if message.contains("media_quota_exceeded") || message.contains("P0001") {
-            return "Photo limit reached on this pebble."
-        }
-    }
-    if let pipelineError = error as? ImagePipelineError {
-        switch pipelineError {
-        case .unsupportedFormat:    return "That image format isn't supported."
-        case .decodeFailed:         return "Couldn't read the image."
-        case .encodeFailed:         return "Couldn't process the image."
-        case .tooLargeAfterResize:  return "That image is too large to attach."
-        }
-    }
-    return "Couldn't save your pebble. Please try again."
 }

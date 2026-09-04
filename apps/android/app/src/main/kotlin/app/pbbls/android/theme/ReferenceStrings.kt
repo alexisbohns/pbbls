@@ -96,6 +96,33 @@ object ReferenceStrings {
             "shame" to R.string.emotionCategory_shame_name,
         )
 
+    /**
+     * Slug → localized *description* (the `domains.label` column). Separate from
+     * [domainNames] because only the record flow's domain step renders it: the
+     * form's menu picker and every read path want the bare name.
+     */
+    private val domainLabels: Map<String, Int> =
+        mapOf(
+            "community" to R.string.domain_community_label,
+            "currentevents" to R.string.domain_currentevents_label,
+            "dating" to R.string.domain_dating_label,
+            "education" to R.string.domain_education_label,
+            "family" to R.string.domain_family_label,
+            "fitness" to R.string.domain_fitness_label,
+            "friends" to R.string.domain_friends_label,
+            "health" to R.string.domain_health_label,
+            "hobbies" to R.string.domain_hobbies_label,
+            "identity" to R.string.domain_identity_label,
+            "money" to R.string.domain_money_label,
+            "partner" to R.string.domain_partner_label,
+            "selfcare" to R.string.domain_selfcare_label,
+            "spirituality" to R.string.domain_spirituality_label,
+            "tasks" to R.string.domain_tasks_label,
+            "travel" to R.string.domain_travel_label,
+            "weather" to R.string.domain_weather_label,
+            "work" to R.string.domain_work_label,
+        )
+
     /** Returns the mapped string-resource id for [type]/[slug], or `null` if unmapped. */
     @StringRes
     internal fun resourceId(
@@ -120,6 +147,25 @@ object ReferenceStrings {
         fallbackDbName: String,
     ): String {
         val resId = resourceId(type, slug) ?: return fallbackDbName
+        return stringResource(resId)
+    }
+
+    /** Returns the mapped `domain_<slug>_label` resource id, or `null` if unmapped. */
+    @StringRes
+    internal fun domainLabelResourceId(slug: String): Int? = domainLabels[slug]
+
+    /**
+     * Localized description for a domain slug, falling back to [fallbackDbLabel]
+     * (the DB `label` column, English only) when no catalog entry exists — same
+     * Pattern C fallback [referenceName] uses, so a domain added server-side
+     * renders its English description rather than nothing.
+     */
+    @Composable
+    fun domainLabel(
+        slug: String,
+        fallbackDbLabel: String,
+    ): String {
+        val resId = domainLabelResourceId(slug) ?: return fallbackDbLabel
         return stringResource(resId)
     }
 }

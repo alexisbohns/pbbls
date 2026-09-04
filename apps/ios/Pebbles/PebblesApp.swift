@@ -9,20 +9,31 @@ struct PebblesApp: App {
     @State private var stats: PathStatsService
     @State private var snapURLs: SnapURLCache
     @State private var karma: KarmaNotificationService
+    @State private var achievementNotify: AchievementNotificationService
+    @State private var achievements: AchievementsService
     @State private var drafts: PebbleDraftsService
     @State private var snapshots: ComposerSnapshotStore
+    @State private var connections: ConnectionsService
     @State private var karmaOverlay = KarmaOverlayWindowController()
 
     init() {
         let supabase = SupabaseService()
+        let palettes = EmotionPaletteService(client: supabase.client)
+        let refs = ReferenceDataService(client: supabase.client)
+        let achievementNotify = AchievementNotificationService()
+        let achievements = AchievementsService(client: supabase.client)
+        achievements.bind(palettes: palettes, refs: refs, notify: achievementNotify)
         self._supabase = State(initialValue: supabase)
-        self._palettes = State(initialValue: EmotionPaletteService(client: supabase.client))
-        self._refs     = State(initialValue: ReferenceDataService(client: supabase.client))
+        self._palettes = State(initialValue: palettes)
+        self._refs     = State(initialValue: refs)
         self._stats    = State(initialValue: PathStatsService(supabase: supabase))
         self._snapURLs = State(initialValue: SnapURLCache(client: supabase.client))
         self._karma    = State(initialValue: KarmaNotificationService())
+        self._achievementNotify = State(initialValue: achievementNotify)
+        self._achievements = State(initialValue: achievements)
         self._drafts   = State(initialValue: PebbleDraftsService(client: supabase.client))
         self._snapshots = State(initialValue: ComposerSnapshotStore())
+        self._connections = State(initialValue: ConnectionsService(supabase: supabase))
         Self.configureSegmentedControlAppearance()
         Self.configureNavigationBarAppearance()
     }
@@ -36,9 +47,12 @@ struct PebblesApp: App {
                 .environment(stats)
                 .environment(snapURLs)
                 .environment(karma)
+                .environment(achievementNotify)
+                .environment(achievements)
                 .environment(drafts)
                 .environment(snapshots)
-                .onAppear { karmaOverlay.attachIfNeeded(service: karma) }
+                .environment(connections)
+                .onAppear { karmaOverlay.attachIfNeeded(service: karma, achievements: achievementNotify) }
         }
     }
 

@@ -1,0 +1,159 @@
+name: Supabase
+
+# The database is the contract between four clients, and until #741 nothing
+# guarded it: a PR touching only migrations got two Vercel builds proving the
+# web and admin apps still compile, which they would with or without any schema
+# change. The `verify-*` harnesses in packages/supabase/scripts/ are the actual
+# proof for anything crossing a surface boundary — they are acceptance tests,
+# not simulations: each signs up throwaway users against the LINKED PRODUCTION
+# project, exercises the real RLS policies, triggers, RPCs and the real
+# delete-account edge function, then deletes what it made in a `finally`.
+#
+# Because that means writing to production, the triggers are deliberately
+# narrow (D-2026-09-02):
+#
+#   pull_request  — only when packages/supabase/** changed, and only from a
+#                   branch in this repo. Blocks the merge.
+#   schedule      — nightly against main, so a guard dropped by a migration
+#                   that nobody path-matched surfaces within a day. Red run is
+#                   the notification; it opens no issue.
+#   dispatch      — manual re-run after a production fix.
+#
+# verify-account-purge.ts is NOT here. It is the one harness needing
+# SUPABASE_SERVICE_ROLE_KEY, and this repo is public — a leaked service-role key
+# is total database access. It stays a manual run (`npm run db:verify:purge`),
+# per the standing rule in packages/supabase/CLAUDE.md.
+on:
+  pull_request:
+    paths:
+      - 'packages/supabase/**'
+      - '.github/workflows/supabase.yml'
+  schedule:
+    # 04:17 UTC — off the hour, so it does not queue behind the top-of-hour rush.
+    - cron: '17 4 * * *'
+  workflow_dispatch:
+
+# Grouped by ref, never cancelling in flight: a run killed between signup and
+# the `finally` leaves an orphan account behind. Superseding a run that has not
+# started yet is free (it signed nothing up), so a rapid second push to the same
+# PR queues rather than racing. Runs from DIFFERENT refs are allowed to overlap:
+# every harness namespaces its users by a per-run uuid and asserts only on rows
+# its own user owns (RLS-scoped reads, own-user counts), so two runs cannot see
+# each other's data.
+concurrency:
+  group: supabase-verify-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  # The scheduled run opens (or comments on) one tracking issue when it goes
+  # red; the PR trigger never touches issues, because a red check already
+  # blocks the merge.
+  issues: write
+
+jobs:
+  verify:
+    name: contract harnesses
+    # Fork PRs get no secrets, so the harnesses would fail with "SUPABASE_URL and
+    # SUPABASE_ANON_KEY must be set" on every outside contribution. Skip the job
+    # instead (skipped counts as success for branch protection). `pull_request_target`
+    # is the wrong fix here: it would hand repository secrets to fork-authored code.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      # Fail with a readable message rather than five identical exit-2s if the
+      # secrets are ever unset on a same-repo run.
+      - name: Check credentials are present
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::error::SUPABASE_URL / SUPABASE_ANON_KEY are not set for this run."
+            exit 1
+          fi
+
+      # Two ledgers the harness steps append to: one row per harness for the
+      # summary table, one label per FAILING harness for the tracking issue.
+      # Set here rather than in the job's `env:`, where the `runner` context is
+      # not available and fails the whole workflow at parse time.
+      - name: Prepare the run log
+        run: |
+          echo "HARNESS_ROWS=$RUNNER_TEMP/harness-rows.txt"         >> "$GITHUB_ENV"
+          echo "HARNESS_FAILURES=$RUNNER_TEMP/harness-failures.txt" >> "$GITHUB_ENV"
+
+      # One step per harness so a red check names the contract that broke, and
+      # `!cancelled()` so one failure still reports the other three — each cleans
+      # up after itself in a `finally`, so a failed run leaves nothing behind.
+      # The wrapper adds the summary row and preserves the harness's exit code.
+      - name: Pebble drafts (M47 draft lifecycle)
+        run: .github/scripts/verify-harness.sh "drafts" db:verify:drafts
+
+      - name: Pebble visibility (grade RLS)
+        if: '!cancelled()'
+        run: .github/scripts/verify-harness.sh "visibility" db:verify:visibility
+
+      - name: Public profile projection
+        if: '!cancelled()'
+        run: .github/scripts/verify-harness.sh "public-profile" db:verify:public-profile
+
+      - name: Privileged profile columns (#739 guard)
+        if: '!cancelled()'
+        run: .github/scripts/verify-harness.sh "guard" db:verify:guard
+
+      # One writer for the whole table. `always()` so it still reports when a
+      # harness failed — that is precisely the run whose table is worth reading.
+      - name: Write the run log
+        if: always()
+        run: |
+          {
+            echo "### Contract harnesses — $(date -u '+%Y-%m-%d %H:%M UTC')"
+            echo
+            echo "| Harness | Result | Asserts |"
+            echo "|---|---|---|"
+            cat "${HARNESS_ROWS:-/dev/null}" 2>/dev/null || true
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # Nightly only. A PR failure needs no issue — the red check is already in
+      # front of the person who caused it — but a scheduled failure otherwise
+      # ends in an inbox. One issue, reused: repeat failures comment on it
+      # rather than opening a new one, so a contract that stays broken for a
+      # week is one thread, not seven. Closed by hand once it is actually fixed,
+      # so an intermittent failure cannot quietly close its own report.
+      - name: Open or update the nightly tracking issue
+        if: failure() && github.event_name == 'schedule'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          set -euo pipefail
+          title='[Bug] Nightly contract harnesses are failing'
+          # Defaulted: if the job died before the log step ran, the variable
+          # was never exported, and `-u` would abort the report itself.
+          failures="${HARNESS_FAILURES:-/dev/null}"
+          if [ -s "$failures" ]; then
+            broke=$(paste -sd', ' "$failures")
+          else
+            broke='the job failed before any harness reported'
+          fi
+          body=$(printf '%s\n\n%s\n\n%s\n' \
+            "The nightly run of the database contract harnesses went red: **$broke**." \
+            "Run: $RUN_URL" \
+            "Reproduce locally with \`set -a; . ./.env; set +a; npm run db:verify --workspace=packages/supabase\`. See \`packages/supabase/CLAUDE.md\` for what each harness proves. Close this issue by hand once the contract is fixed.")
+          existing=$(gh issue list --state open --label bug --json number,title \
+            --jq "map(select(.title == \"$title\")) | .[0].number // empty")
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "$body"
+            echo "commented on #$existing"
+          else
+            gh issue create --title "$title" --body "$body" \
+              --label bug --label supabase --label test
+          fi

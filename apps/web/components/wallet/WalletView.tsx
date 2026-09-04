@@ -11,7 +11,7 @@ import { WalletHistoryItem } from "./WalletHistoryItem"
 
 export function WalletView() {
   const t = useTranslations("wallet")
-  const { balance, totalEarned, totalSpent, history, hasMore, loadMore, loading } = useWallet()
+  const { balance, totalEarned, totalSpent, history, hasMore, loadMore, loading, error } = useWallet()
 
   return (
     <PageLayout>
@@ -35,7 +35,9 @@ export function WalletView() {
       <section>
         <h2 className="mb-2 text-sm font-semibold text-muted-foreground">{t("history")}</h2>
         {history.length === 0 && !loading ? (
-          <p className="text-sm text-muted-foreground">{t("empty")}</p>
+          <p className="text-sm text-muted-foreground">
+            {error ? t("historyError") : t("empty")}
+          </p>
         ) : (
           <ul className="divide-y">
             {history.map((e) => <WalletHistoryItem key={e.id} event={e} />)}

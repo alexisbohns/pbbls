@@ -4,7 +4,8 @@
  *
  * Seeds a throwaway SELLER with every entity type (profile, soul, collection,
  * pebble + cards/domains/soul-link/collection-link/snap, storage files, a SOLD
- * glyph bought by a throwaway BUYER, an unsold glyph, favourites, karma), then
+ * glyph bought by a throwaway BUYER, an unsold glyph, favourites, karma,
+ * achievement unlocks), then
  * deletes the seller through the real delete-account edge function and asserts
  * the roadmap §6 bar: every seller row gone, the buyer's glyph still renders
  * (user_id = null + entitlement + delisted-but-approved submission), the
@@ -223,6 +224,49 @@ try {
   });
   if (draftErr) throw new Error(`insert draft: ${draftErr.message}`);
 
+  // Connections rows (M49): a seller↔buyer connection, the seller's live
+  // invite, and blocks in BOTH directions. Seeded via the service-role client:
+  // the three tables have no client write policies (definer-RPC-only writes).
+  const [connUserA, connUserB] =
+    sellerId < buyerId ? [sellerId, buyerId] : [buyerId, sellerId];
+  const { error: connErr } = await admin
+    .from("connections").insert({ user_a: connUserA, user_b: connUserB });
+  if (connErr) throw new Error(`insert connection: ${connErr.message}`);
+
+  const { error: invErr } = await admin
+    .from("connection_invites")
+    .insert({ inviter_id: sellerId, token: `purge-test-token-${runId}` });
+  if (invErr) throw new Error(`insert invite: ${invErr.message}`);
+
+  for (const [blocker, blocked] of [[sellerId, buyerId], [buyerId, sellerId]]) {
+    const { error: blockErr } = await admin
+      .from("connection_blocks").insert({ blocker_id: blocker, blocked_id: blocked });
+    if (blockErr) throw new Error(`insert block ${blocker}->${blocked}: ${blockErr.message}`);
+  }
+
+  // A public profile (M50). Claimed through the real RPC + direct toggle so
+  // the purge run also proves the handle frees up (profiles-row delete).
+  const handle = `purgetest${runId}`;
+  const { error: handleErr } = await seller.rpc("set_handle", { p_handle: handle });
+  if (handleErr) throw new Error(`set_handle: ${handleErr.message}`);
+  const { error: publicErr } = await seller
+    .from("profiles").update({ public_profile: true }).eq("user_id", sellerId);
+  if (publicErr) throw new Error(`public_profile toggle: ${publicErr.message}`);
+  const { data: livePublic, error: livePublicErr } = await seller
+    .rpc("get_public_profile", { p_handle: handle });
+  if (livePublicErr || !livePublic) {
+    throw new Error(`get_public_profile pre-purge: ${livePublicErr?.message ?? "null"}`);
+  }
+
+  // Achievement unlocks (M48). Earned through the real RPC as the signed-in
+  // seller (achievement_unlocks has no client insert policy): the pebble,
+  // soul, collection and glyphs above qualify several badges in one call.
+  const { data: unlockRows, error: unlockErr } = await seller.rpc("check_achievements");
+  if (unlockErr) throw new Error(`check_achievements: ${unlockErr.message}`);
+  if (!Array.isArray(unlockRows) || unlockRows.length === 0) {
+    throw new Error("check_achievements unlocked nothing — seed should qualify several badges");
+  }
+
   // -------------------------------------------------------------------------
   // 3. The sale: fund the buyer, buy through the real RPC, favourite.
   // -------------------------------------------------------------------------
@@ -255,6 +299,23 @@ try {
     `status=${res.status} body=${JSON.stringify(body)}`);
   if (body?.purged) console.log(`  purge counts: ${JSON.stringify(body.purged)}`);
 
+  // Assert the purge's OWN accounting for the section-(4) tables: they all
+  // cascade from auth.users, so by the time the zero-row checks below run
+  // (after deleteUser) the cascade would empty them even if a purge delete
+  // line were dropped. Only the RPC's counts can catch that, so pin the
+  // M47/M49 rows to what §2 seeded.
+  const purgedCounts = (body?.purged?.counts ?? {}) as Record<string, number>;
+  const expectedPurged: Array<[string, number]> = [
+    ["pebble_drafts", 1], // the M47 draft
+    ["connections", 1], // the seller↔buyer row
+    ["connection_invites", 1], // the seller's live invite
+    ["connection_blocks", 2], // both directions
+  ];
+  for (const [key, expected] of expectedPurged) {
+    check(`purge itself counted ${key} = ${expected}`, purgedCounts[key] === expected,
+      `got ${purgedCounts[key] ?? "missing"}`);
+  }
+
   // -------------------------------------------------------------------------
   // 5. Assertions.
   // -------------------------------------------------------------------------
@@ -274,11 +335,30 @@ try {
     ["bounces", "user_id"],
     ["log_reactions", "user_id"],
     ["pebble_drafts", "user_id"],
+    ["connection_invites", "inviter_id"],
+    ["achievement_unlocks", "user_id"],
   ];
   for (const [table, column] of sellerScoped) {
     const n = await countRows(table, column, sellerId);
     check(`no seller rows in ${table}.${column}`, n === 0, `found ${n}`);
   }
+
+  // connections and connection_blocks are TWO-SIDED (user_a/user_b,
+  // blocker_id/blocked_id — not user_id-shaped), so the single-column loop
+  // above cannot cover them: count each side explicitly.
+  for (const [table, column] of [
+    ["connections", "user_a"],
+    ["connections", "user_b"],
+    ["connection_blocks", "blocker_id"],
+    ["connection_blocks", "blocked_id"],
+  ]) {
+    const n = await countRows(table, column, sellerId);
+    check(`no seller rows in ${table}.${column}`, n === 0, `found ${n}`);
+  }
+  // Deleting A removes blocks in BOTH directions, so the buyer's own
+  // buyer→seller block row is gone too (blocked side purged).
+  const buyerBlocks = await countRows("connection_blocks", "blocker_id", buyerId);
+  check("buyer's block row purged with the seller", buyerBlocks === 0, `found ${buyerBlocks}`);
   for (const table of ["pebble_cards", "pebble_souls", "pebble_domains", "collection_pebbles"]) {
     const n = await countRows(table, "pebble_id", pebbleId as string);
     check(`pebble cascade emptied ${table}`, n === 0, `found ${n}`);
@@ -308,6 +388,14 @@ try {
 
   const leftover = await listStorageFiles(sellerId);
   check("storage prefix empty", leftover.length === 0, `found ${leftover.join(", ")}`);
+
+  // M50: the profiles-row delete freed the handle — the public projection
+  // resolves null (indistinguishable from never-existed).
+  const { data: freedHandle, error: freedHandleErr } = await admin
+    .rpc("get_public_profile", { p_handle: handle });
+  check("purged handle resolves null via get_public_profile",
+    !freedHandleErr && freedHandle === null,
+    freedHandleErr ? freedHandleErr.message : JSON.stringify(freedHandle));
 
   const { data: goneUser } = await admin.auth.admin.getUserById(sellerId);
   check("auth user gone", !goneUser?.user);

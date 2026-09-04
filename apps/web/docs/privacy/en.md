@@ -2,9 +2,9 @@
 title: Privacy Policy
 locale: en
 slug: privacy
-version: 1.0.0
-effective_date: 2026-04-09
-last_updated: 2026-04-09
+version: 1.1.0
+effective_date: 2026-09-04
+last_updated: 2026-09-04
 ---
 
 # Privacy Policy for Pebbles
@@ -167,10 +167,17 @@ In accordance with Article 28 of the GDPR, we work with the following sub-proces
 - **Processing :** Encrypted storage of all your data, secure authentication, audit logs.
 - **Agreement :** Supabase is bound by a data processing agreement compliant with the GDPR.
 
-### 6.2 Google (Gemma LLM)
+### 6.2 Vercel Inc.
 
-- **Role :** Anonymized language processing to enhance your events (if you enable AI features).
-- **Location :** Google Cloud (United States with Privacy Shield / Data Privacy Framework).
+- **Role :** Hosting and delivery of the web application and the back office.
+- **Location :** Server-side functions are pinned to the Paris, France region (`cdg1`). Requests are routed and TLS-terminated by Vercel's global edge network, which is operated from the United States.
+- **Processing :** Page rendering and server-side request handling. Your IP address, the address of the page requested, your session cookie and the data shown on the page pass through it.
+- **Transfer mechanism :** Vercel Inc. is certified under the EU-U.S. Data Privacy Framework.
+
+### 6.3 Google (Gemma LLM) — not active today
+
+- **Role :** Anonymized language processing to enhance your events (if you enable AI features). **This integration is not enabled today; the entry is kept because the feature is planned.**
+- **Location :** Google Cloud (United States, under the EU-U.S. Data Privacy Framework).
 - **Data Transmitted :** Only anonymized event data (without personal identifiers such as your name, email, or soul names).
 - **Commitment :** Google does not retain your data long-term.
 
@@ -178,19 +185,21 @@ In accordance with Article 28 of the GDPR, we work with the following sub-proces
 
 ## 7. International Data Transfers
 
-### 7.1 Intra-EU Transfers
+### 7.1 Storage and Processing in the European Union
 
-Supabase operates with servers in Paris (France, EU). No transfer outside the EU is involved in primary storage.
+Your data is stored by Supabase on servers in Paris (France, EU), and the server-side code that reads it runs in Vercel's Paris region (`cdg1`). Primary storage and processing therefore remain within the European Union.
 
 ### 7.2 Transfers to the United States
 
-If you enable AI features with Google Gemma, your anonymized data may be transferred to Google's servers in the United States. We rely on:
-- The EU-U.S. Data Privacy Framework to justify this transfer.
-- Data anonymization to mitigate risks.
+Two forms of processing may involve the United States.
 
-### 7.3 Fonts
+**Delivery of the application.** Every request to Pebbles is routed by Vercel's global edge network, which terminates TLS, before reaching the Paris region. Your IP address, the address of the page requested and your session cookie therefore transit infrastructure operated from the United States. We rely on Vercel Inc.'s certification under the EU-U.S. Data Privacy Framework.
 
-Our fonts are self-hosted in the EU. No transfer to external CDNs.
+**AI features, if you enable them.** Your anonymized data may be transferred to Google's servers in the United States. We rely on the EU-U.S. Data Privacy Framework and on data anonymization to mitigate risks. This feature is not active today.
+
+### 7.3 Fonts and Static Assets
+
+Our fonts are self-hosted: no request is made to Google Fonts or an equivalent third-party font service. They are served, like the rest of the application, through the Vercel edge network described in 7.2.
 
 ---
 

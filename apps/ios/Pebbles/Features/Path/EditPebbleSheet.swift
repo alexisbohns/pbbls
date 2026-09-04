@@ -19,6 +19,7 @@ struct EditPebbleSheet: View {
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(ReferenceDataService.self) private var refs
     @Environment(KarmaNotificationService.self) private var karma
+    @Environment(AchievementsService.self) private var achievements
     @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
 
@@ -65,6 +66,10 @@ struct EditPebbleSheet: View {
                             }
                             .disabled(!draft.isValid || isLoading)
                         }
+                    }
+                    ToolbarItemGroup(placement: .bottomBar) {
+                        VisibilityChip(visibility: $draft.visibility)
+                        Spacer()
                     }
                 }
                 .pebblesScreen()
@@ -228,6 +233,9 @@ struct EditPebbleSheet: View {
                 )
             self.renderSvg = response.renderSvg ?? self.renderSvg
             karma.notifyEarned(amount: response.karmaDelta ?? 0, reason: .pebbleEnriched)
+            // An edit can change the pebble's emotion, newly qualifying an
+            // emotion_first badge.
+            achievements.fireCheck()
             onSaved()
             dismiss()
         } catch let functionsError as FunctionsError {
@@ -237,6 +245,7 @@ struct EditPebbleSheet: View {
             if case .httpError(let status, let data) = functionsError, status >= 500 {
                 let bodyString = String(data: data, encoding: .utf8) ?? "<non-utf8 body>"
                 logger.warning("compose-pebble-update returned \(status, privacy: .public) — advancing on soft-success. body=\(bodyString, privacy: .private)")
+                achievements.fireCheck()
                 onSaved()
                 dismiss()
             } else {

@@ -14,12 +14,16 @@ import {
   type WalletHistoryPage,
   type PebbleDraftPayload,
   type PebbleDraftRecord,
+  type ConnectionInvite,
+  type AcceptConnectionInviteResult,
+  type AchievementUnlockResult,
 } from "@/lib/data/data-provider"
 import type {
   Pebble,
   PebbleSnap,
   Soul,
   Collection,
+  Connection,
   Mark,
   MarketGlyph,
   GlyphSubmission,
@@ -27,7 +31,12 @@ import type {
   WalletSnapshot,
   RippleSummary,
   ProfileEngagement,
+  Achievement,
+  AchievementUnlock,
+  SharedConnectionPebble,
 } from "@/lib/types"
+import { toConnectionPeer } from "@/lib/data/invite-api"
+import { peerIdOf } from "@/lib/data/connection-peer"
 import { DEFAULT_GLYPH_ID } from "@/lib/config/glyphs"
 import { processPebbleImage } from "@/lib/utils/process-pebble-image"
 
@@ -188,7 +197,7 @@ export class SupabaseProvider implements DataProvider {
         happened_at: row.happened_at as string,
         intensity: row.intensity as 1 | 2 | 3,
         positiveness: row.positiveness as -1 | 0 | 1,
-        visibility: (row.visibility as string) as "private" | "public",
+        visibility: (row.visibility as string) as Pebble["visibility"],
         emotion_id: row.emotion_id as string,
         soul_ids: ((row.souls as Array<{ id: string }>) ?? []).map((s) => s.id),
         domain_ids: ((row.domains as Array<{ id: string }>) ?? []).map((d) => d.id),
@@ -309,6 +318,65 @@ export class SupabaseProvider implements DataProvider {
       daysPracticed: (row?.days_practiced as number) ?? 0,
       assiduity: (row?.assiduity as boolean[]) ?? [],
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Achievements (M48) — public catalog, owner-scoped unlock ledger, and the
+  // idempotent check_achievements() evaluation RPC.
+  // ---------------------------------------------------------------------------
+
+  async getAchievements(): Promise<Achievement[]> {
+    const { data, error } = await this.supabase
+      .from("achievements")
+      .select("*")
+      .order("sort_order", { ascending: true })
+    if (error) throw new Error(`getAchievements failed: ${error.message}`)
+    return (data ?? []).map((row) => {
+      const r = row as Record<string, unknown>
+      return {
+        id: r.id as string,
+        slug: r.slug as string,
+        // The `family` CHECK constraint on the catalog makes this cast sound.
+        family: r.family as Achievement["family"],
+        threshold: (r.threshold as number | null) ?? null,
+        emotionId: (r.emotion_id as string | null) ?? null,
+        domainId: (r.domain_id as string | null) ?? null,
+        sortOrder: r.sort_order as number,
+        glyphId: (r.glyph_id as string | null) ?? null,
+        karmaReward: (r.karma_reward as number) ?? 0,
+        isActive: Boolean(r.is_active),
+        titleEn: (r.title_en as string | null) ?? null,
+        titleFr: (r.title_fr as string | null) ?? null,
+        descriptionEn: (r.description_en as string | null) ?? null,
+        descriptionFr: (r.description_fr as string | null) ?? null,
+      }
+    })
+  }
+
+  async getAchievementUnlocks(): Promise<AchievementUnlock[]> {
+    const { data, error } = await this.supabase
+      .from("achievement_unlocks")
+      .select("achievement_id, unlocked_at")
+      .eq("user_id", this.userId)
+    if (error) throw new Error(`getAchievementUnlocks failed: ${error.message}`)
+    return (data ?? []).map((row) => {
+      const r = row as Record<string, unknown>
+      return {
+        achievementId: r.achievement_id as string,
+        unlockedAt: r.unlocked_at as string,
+      }
+    })
+  }
+
+  async checkAchievements(): Promise<AchievementUnlockResult[]> {
+    // The RPC `returns table(...)`, so PostgREST yields an array of rows —
+    // empty when nothing newly unlocked.
+    const { data, error } = await this.supabase.rpc("check_achievements")
+    if (error) throw new Error(`check_achievements failed: ${error.message}`)
+    return ((data ?? []) as Record<string, unknown>[]).map((row) => ({
+      slug: row.slug as string,
+      karmaGranted: (row.karma_granted as number) ?? 0,
+    }))
   }
 
   // ---------------------------------------------------------------------------
@@ -549,6 +617,117 @@ export class SupabaseProvider implements DataProvider {
       return undefined
     }
     return data?.signedUrl
+  }
+
+  // ---------------------------------------------------------------------------
+  // Connections (M49) — definer-RPC-only, no direct table access: every write
+  // is multi-table validated logic (accept touches invites, blocks and
+  // connections), and cross-user reads are display projections, never a
+  // profiles row. Deliberately outside the eager store (their own surface,
+  // refreshed on screen open — no realtime). Error slugs (invite_not_found,
+  // invite_expired, cannot_accept_own_invite, not_found) survive as substrings
+  // of the thrown message for callers to `.includes`-match. Zero karma (D9).
+  // ---------------------------------------------------------------------------
+
+  async listConnections(): Promise<Connection[]> {
+    // The RPC returns a jsonb array ordered connected_at desc (newest first).
+    const { data, error } = await this.supabase.rpc("get_connections")
+    if (error) throw new Error(`get_connections failed: ${error.message}`)
+    const rows = Array.isArray(data) ? (data as Record<string, unknown>[]) : []
+    return rows.map((row) => ({
+      id: row.connection_id as string,
+      connectedAt: row.connected_at as string,
+      peer: toConnectionPeer(row.peer),
+    }))
+  }
+
+  async listConnectionSharedPebbles(
+    connectionId: string,
+  ): Promise<SharedConnectionPebble[] | null> {
+    const { data: row, error: rowError } = await this.supabase
+      .from("connections")
+      .select("id, user_a, user_b")
+      .eq("id", connectionId)
+      .maybeSingle()
+    if (rowError) throw new Error(`connection lookup failed: ${rowError.message}`)
+    if (!row) return null
+
+    const peerId = peerIdOf(row as { user_a: string; user_b: string }, this.userId)
+    if (!peerId) return null
+
+    // The widened pebbles_select (M51) trims this to 'private' + 'public'
+    // rows; emotions is reference data (RLS `using (true)`), so the embed
+    // cannot blank rows.
+    const { data, error } = await this.supabase
+      .from("pebbles")
+      .select("id, name, happened_at, visibility, render_svg, emotions(id, slug, name, color)")
+      .eq("user_id", peerId)
+      .order("happened_at", { ascending: false })
+    if (error) throw new Error(`shared pebbles fetch failed: ${error.message}`)
+
+    return (data ?? []).flatMap((row: Record<string, unknown>) => {
+      // PostgREST returns a to-one FK embed as an object; drop rows with a
+      // broken embed rather than rendering an empty emotion.
+      const emotion = row.emotions as Record<string, unknown> | null
+      if (
+        !emotion ||
+        typeof emotion.id !== "string" ||
+        typeof emotion.slug !== "string" ||
+        typeof emotion.name !== "string" ||
+        typeof emotion.color !== "string"
+      ) {
+        console.warn("[supabase-provider] dropped shared pebble with broken emotion embed", row.id)
+        return []
+      }
+      return [
+        {
+          id: row.id as string,
+          name: row.name as string,
+          happened_at: row.happened_at as string,
+          visibility: (row.visibility as string) as SharedConnectionPebble["visibility"],
+          emotion: {
+            id: emotion.id,
+            slug: emotion.slug,
+            name: emotion.name,
+            color: emotion.color,
+          },
+          render_svg: (row.render_svg as string | null) ?? null,
+        },
+      ]
+    })
+  }
+
+  async createConnectionInvite(rotate = false): Promise<ConnectionInvite> {
+    // Returns the live invite if one exists; `p_rotate` revokes it and mints
+    // fresh (the entire revocation surface — there is no separate revoke RPC).
+    const { data, error } = await this.supabase.rpc("create_connection_invite", {
+      p_rotate: rotate,
+    })
+    if (error) throw new Error(`create_connection_invite failed: ${error.message}`)
+    const r = data as { token: string; expires_at: string; created_at: string }
+    return { token: r.token, expiresAt: r.expires_at, createdAt: r.created_at }
+  }
+
+  async acceptConnectionInvite(token: string): Promise<AcceptConnectionInviteResult> {
+    const { data, error } = await this.supabase.rpc("accept_connection_invite", {
+      p_token: token,
+    })
+    if (error) throw new Error(`accept_connection_invite failed: ${error.message}`)
+    const r = data as Record<string, unknown>
+    return {
+      connectionId: r.connection_id as string,
+      alreadyConnected: Boolean(r.already_connected),
+      connectedAt: r.connected_at as string,
+      peer: toConnectionPeer(r.peer),
+    }
+  }
+
+  async removeConnection(id: string, block = false): Promise<void> {
+    const { error } = await this.supabase.rpc("remove_connection", {
+      p_connection_id: id,
+      p_block: block,
+    })
+    if (error) throw new Error(`remove_connection failed: ${error.message}`)
   }
 
   /**

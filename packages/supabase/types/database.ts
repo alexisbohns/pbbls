@@ -39,6 +39,161 @@ export type Database = {
   }
   public: {
     Tables: {
+      achievement_unlocks: {
+        Row: {
+          achievement_id: string
+          unlocked_at: string
+          user_id: string
+        }
+        Insert: {
+          achievement_id: string
+          unlocked_at?: string
+          user_id: string
+        }
+        Update: {
+          achievement_id?: string
+          unlocked_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "achievement_unlocks_achievement_id_fkey"
+            columns: ["achievement_id"]
+            isOneToOne: false
+            referencedRelation: "achievements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "achievement_unlocks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "achievement_unlocks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "achievement_unlocks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      achievements: {
+        Row: {
+          description_en: string | null
+          description_fr: string | null
+          domain_id: string | null
+          emotion_id: string | null
+          family: string
+          glyph_id: string | null
+          id: string
+          is_active: boolean
+          karma_reward: number
+          slug: string
+          sort_order: number
+          threshold: number | null
+          title_en: string | null
+          title_fr: string | null
+        }
+        Insert: {
+          description_en?: string | null
+          description_fr?: string | null
+          domain_id?: string | null
+          emotion_id?: string | null
+          family: string
+          glyph_id?: string | null
+          id?: string
+          is_active?: boolean
+          karma_reward?: number
+          slug: string
+          sort_order: number
+          threshold?: number | null
+          title_en?: string | null
+          title_fr?: string | null
+        }
+        Update: {
+          description_en?: string | null
+          description_fr?: string | null
+          domain_id?: string | null
+          emotion_id?: string | null
+          family?: string
+          glyph_id?: string | null
+          id?: string
+          is_active?: boolean
+          karma_reward?: number
+          slug?: string
+          sort_order?: number
+          threshold?: number | null
+          title_en?: string | null
+          title_fr?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "achievements_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "domains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "achievements_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "v_analytics_domain_share_weekly"
+            referencedColumns: ["domain_id"]
+          },
+          {
+            foreignKeyName: "achievements_domain_id_fkey"
+            columns: ["domain_id"]
+            isOneToOne: false
+            referencedRelation: "v_domains_with_glyph"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "achievements_emotion_id_fkey"
+            columns: ["emotion_id"]
+            isOneToOne: false
+            referencedRelation: "emotions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "achievements_emotion_id_fkey"
+            columns: ["emotion_id"]
+            isOneToOne: false
+            referencedRelation: "v_analytics_emotion_share_weekly"
+            referencedColumns: ["emotion_id"]
+          },
+          {
+            foreignKeyName: "achievements_emotion_id_fkey"
+            columns: ["emotion_id"]
+            isOneToOne: false
+            referencedRelation: "v_emotions_with_palette"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "achievements_glyph_id_fkey"
+            columns: ["glyph_id"]
+            isOneToOne: false
+            referencedRelation: "glyphs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "achievements_glyph_id_fkey"
+            columns: ["glyph_id"]
+            isOneToOne: false
+            referencedRelation: "v_glyph_market"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       bounces: {
         Row: {
           score: number
@@ -180,6 +335,180 @@ export type Database = {
           {
             foreignKeyName: "collections_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      connection_blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connection_blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connection_blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connection_blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connection_blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connection_blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connection_blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      connection_invites: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          inviter_id: string
+          revoked_at: string | null
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          inviter_id: string
+          revoked_at?: string | null
+          token: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          inviter_id?: string
+          revoked_at?: string | null
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connection_invites_inviter_id_fkey"
+            columns: ["inviter_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connection_invites_inviter_id_fkey"
+            columns: ["inviter_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connection_invites_inviter_id_fkey"
+            columns: ["inviter_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      connections: {
+        Row: {
+          created_at: string
+          id: string
+          user_a: string
+          user_b: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          user_a: string
+          user_b: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          user_a?: string
+          user_b?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "connections_user_a_fkey"
+            columns: ["user_a"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connections_user_a_fkey"
+            columns: ["user_a"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connections_user_a_fkey"
+            columns: ["user_a"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connections_user_b_fkey"
+            columns: ["user_b"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connections_user_b_fkey"
+            columns: ["user_b"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "connections_user_b_fkey"
+            columns: ["user_b"]
             isOneToOne: false
             referencedRelation: "v_ripple"
             referencedColumns: ["user_id"]
@@ -1038,11 +1367,13 @@ export type Database = {
           created_at: string
           display_name: string
           glyph_id: string | null
+          handle: string | null
           id: string
           is_admin: boolean
           max_media_per_pebble: number
           onboarding_completed: boolean
           privacy_accepted_at: string | null
+          public_profile: boolean
           terms_accepted_at: string | null
           updated_at: string
           user_id: string
@@ -1052,11 +1383,13 @@ export type Database = {
           created_at?: string
           display_name: string
           glyph_id?: string | null
+          handle?: string | null
           id?: string
           is_admin?: boolean
           max_media_per_pebble?: number
           onboarding_completed?: boolean
           privacy_accepted_at?: string | null
+          public_profile?: boolean
           terms_accepted_at?: string | null
           updated_at?: string
           user_id: string
@@ -1066,11 +1399,13 @@ export type Database = {
           created_at?: string
           display_name?: string
           glyph_id?: string | null
+          handle?: string | null
           id?: string
           is_admin?: boolean
           max_media_per_pebble?: number
           onboarding_completed?: boolean
           privacy_accepted_at?: string | null
+          public_profile?: boolean
           terms_accepted_at?: string | null
           updated_at?: string
           user_id?: string
@@ -1112,6 +1447,18 @@ export type Database = {
             referencedColumns: ["user_id"]
           },
         ]
+      }
+      reserved_handles: {
+        Row: {
+          handle: string
+        }
+        Insert: {
+          handle: string
+        }
+        Update: {
+          handle?: string
+        }
+        Relationships: []
       }
       snaps: {
         Row: {
@@ -1665,12 +2012,57 @@ export type Database = {
       }
     }
     Functions: {
+      accept_connection_invite: { Args: { p_token: string }; Returns: Json }
       admin_attribute_glyph: {
         Args: { p_glyph_id: string; p_user_id: string }
         Returns: Json
       }
+      admin_create_achievement: {
+        Args: {
+          p_description_en?: string
+          p_description_fr?: string
+          p_domain_id?: string
+          p_emotion_id?: string
+          p_family: string
+          p_karma_reward: number
+          p_slug: string
+          p_sort_order: number
+          p_threshold?: number
+          p_title_en: string
+          p_title_fr: string
+        }
+        Returns: string
+      }
+      admin_delete_achievement: {
+        Args: { p_achievement_id: string }
+        Returns: undefined
+      }
       admin_delete_glyph: { Args: { p_glyph_id: string }; Returns: undefined }
       admin_find_user: { Args: { p_email: string }; Returns: Json }
+      admin_list_achievements: {
+        Args: never
+        Returns: {
+          description_en: string
+          description_fr: string
+          domain_id: string
+          domain_slug: string
+          emotion_id: string
+          emotion_slug: string
+          family: string
+          glyph_id: string
+          id: string
+          is_active: boolean
+          karma_reward: number
+          slug: string
+          sort_order: number
+          strokes: Json
+          threshold: number
+          title_en: string
+          title_fr: string
+          unlock_count: number
+          view_box: string
+        }[]
+      }
       admin_list_domains: {
         Args: never
         Returns: {
@@ -1714,9 +2106,26 @@ export type Database = {
         Args: { p_status?: string }
         Returns: Json
       }
+      admin_set_achievement_glyph: {
+        Args: { p_achievement_id: string; p_strokes: Json; p_view_box: string }
+        Returns: string
+      }
       admin_set_domain_glyph: {
         Args: { p_domain_id: string; p_strokes: Json; p_view_box: string }
         Returns: string
+      }
+      admin_update_achievement: {
+        Args: {
+          p_achievement_id: string
+          p_description_en?: string
+          p_description_fr?: string
+          p_is_active?: boolean
+          p_karma_reward: number
+          p_sort_order?: number
+          p_title_en: string
+          p_title_fr: string
+        }
+        Returns: undefined
       }
       admin_update_domain: {
         Args: { p_domain_id: string; p_label: string; p_name: string }
@@ -1746,6 +2155,13 @@ export type Database = {
         Args: { p_glyph_id: string; p_user: string }
         Returns: boolean
       }
+      check_achievements: {
+        Args: never
+        Returns: {
+          karma_granted: number
+          slug: string
+        }[]
+      }
       compute_karma_delta: {
         Args: {
           p_cards_count: number
@@ -1757,6 +2173,7 @@ export type Database = {
         }
         Returns: number
       }
+      create_connection_invite: { Args: { p_rotate?: boolean }; Returns: Json }
       create_pebble: { Args: { payload: Json }; Returns: string }
       delete_pebble: { Args: { p_pebble_id: string }; Returns: undefined }
       delete_pebble_media: { Args: { p_snap_id: string }; Returns: string }
@@ -1793,6 +2210,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_connections: { Args: never; Returns: Json }
       get_domain_share: {
         Args: { p_end: string; p_start: string }
         Returns: {
@@ -1880,6 +2298,7 @@ export type Database = {
           days_practiced: number
         }[]
       }
+      get_public_profile: { Args: { p_handle: string }; Returns: Json }
       get_quality_signals_today: {
         Args: never
         Returns: {
@@ -1915,6 +2334,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_shared_pebble: { Args: { p_pebble_id: string }; Returns: Json }
       get_user_averages_series: {
         Args: { p_weeks?: number }
         Returns: {
@@ -1946,6 +2366,7 @@ export type Database = {
           render_svg: string
         }[]
       }
+      preview_connection_invite: { Args: { p_token: string }; Returns: Json }
       publish_admin_glyph: {
         Args: {
           p_name: string
@@ -1964,6 +2385,10 @@ export type Database = {
         Args: { p_note: string; p_submission_id: string }
         Returns: Json
       }
+      remove_connection: {
+        Args: { p_block?: boolean; p_connection_id: string }
+        Returns: undefined
+      }
       set_glyph_listed: {
         Args: { p_listed: boolean; p_submission_id: string }
         Returns: Json
@@ -1972,6 +2397,7 @@ export type Database = {
         Args: { p_price: number; p_submission_id: string }
         Returns: Json
       }
+      set_handle: { Args: { p_handle?: string }; Returns: string }
       spend_karma: {
         Args: { p_amount: number; p_reason: string; p_ref_id?: string }
         Returns: string
@@ -1984,6 +2410,7 @@ export type Database = {
           deleted_count: number
         }[]
       }
+      sync_achievement_catalog: { Args: never; Returns: undefined }
       update_pebble: {
         Args: { p_pebble_id: string; payload: Json }
         Returns: undefined
@@ -1995,11 +2422,13 @@ export type Database = {
           created_at: string
           display_name: string
           glyph_id: string | null
+          handle: string | null
           id: string
           is_admin: boolean
           max_media_per_pebble: number
           onboarding_completed: boolean
           privacy_accepted_at: string | null
+          public_profile: boolean
           terms_accepted_at: string | null
           updated_at: string
           user_id: string

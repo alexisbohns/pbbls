@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
@@ -36,6 +37,7 @@ import app.pbbls.android.features.glyph.models.Glyph
 import app.pbbls.android.features.karma.KarmaReason
 import app.pbbls.android.features.karma.LocalKarmaNotificationService
 import app.pbbls.android.features.path.create.PebbleForm
+import app.pbbls.android.features.path.create.VisibilityChip
 import app.pbbls.android.features.path.models.PebbleDraft
 import app.pbbls.android.features.path.models.PebbleSnapPayload
 import app.pbbls.android.features.path.models.renderHeightDp
@@ -43,6 +45,7 @@ import app.pbbls.android.features.pebblemedia.ImagePipeline
 import app.pbbls.android.features.pebblemedia.SnapUploadCoordinator
 import app.pbbls.android.features.pebblemedia.models.FormSnap
 import app.pbbls.android.services.ComposeResult
+import app.pbbls.android.services.LocalAchievementsService
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalPebbleDetailService
 import app.pbbls.android.services.LocalPebbleWriteService
@@ -79,6 +82,7 @@ fun EditPebbleScreen(
     val referenceData = LocalReferenceDataService.current
     val palettes = LocalEmotionPaletteService.current
     val karma = LocalKarmaNotificationService.current
+    val achievements = LocalAchievementsService.current
     val supabase = LocalSupabaseService.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -194,9 +198,15 @@ fun EditPebbleScreen(
                 is ComposeResult.Success -> {
                     renderSvg = result.response.renderSvg ?: renderSvg
                     karma.notifyEarned(result.response.karmaDelta ?: 0, KarmaReason.PEBBLE_ENRICHED)
+                    // An edit can change the pebble's emotion, newly
+                    // qualifying an emotion_first badge.
+                    achievements.fireCheck()
                     onSaved()
                 }
-                is ComposeResult.SoftSuccess -> onSaved()
+                is ComposeResult.SoftSuccess -> {
+                    achievements.fireCheck()
+                    onSaved()
+                }
                 is ComposeResult.Failure -> {
                     saveErrorRes = result.messageRes
                     isSaving = false
@@ -226,53 +236,67 @@ fun EditPebbleScreen(
             loadError ->
                 EditLoadError(onRetry = { reloadToken++ })
             else ->
-                PebbleForm(
-                    draft = draft,
-                    onDraftChange = { draft = it },
-                    domains = referenceData.domains,
-                    souls = referenceData.souls,
-                    collections = referenceData.collections,
-                    selectedEmotion = selectedEmotion,
-                    selectedGlyph = selectedGlyph,
-                    onGlyphPicked = { selectedGlyph = it },
-                    saveError = saveError,
-                    renderSvg = renderSvg,
-                    strokeColor = strokeColor,
-                    renderHeight = renderHeight,
-                    modifier = Modifier.fillMaxSize(),
-                    formSnap = snaps.formSnap,
-                    onAddPhoto = {
-                        photoPicker.launch(
-                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
-                        )
-                    },
-                    onRetryPending = {
-                        supabase.session
-                            ?.user
-                            ?.id
-                            ?.let { id -> scope.launch { snaps.retryCurrent(id) } }
-                    },
-                    onRemovePending = {
-                        supabase.session
-                            ?.user
-                            ?.id
-                            ?.let { id -> scope.launch { snaps.removePending(id) } }
-                    },
-                    isRemovingExistingSnap = isRemovingExistingSnap,
-                    onRemoveExistingSnap = {
-                        scope.launch {
-                            isRemovingExistingSnap = true
-                            try {
-                                snaps.removeExisting()
-                            } catch (e: Exception) {
-                                Log.e(TAG, "delete_pebble_media failed", e)
-                                saveErrorRes = R.string.photo_remove_error
-                            } finally {
-                                isRemovingExistingSnap = false
+                Column(Modifier.fillMaxSize()) {
+                    PebbleForm(
+                        draft = draft,
+                        onDraftChange = { draft = it },
+                        domains = referenceData.domains,
+                        souls = referenceData.souls,
+                        collections = referenceData.collections,
+                        selectedEmotion = selectedEmotion,
+                        selectedGlyph = selectedGlyph,
+                        onGlyphPicked = { selectedGlyph = it },
+                        saveError = saveError,
+                        renderSvg = renderSvg,
+                        strokeColor = strokeColor,
+                        renderHeight = renderHeight,
+                        modifier = Modifier.weight(1f),
+                        formSnap = snaps.formSnap,
+                        onAddPhoto = {
+                            photoPicker.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                            )
+                        },
+                        onRetryPending = {
+                            supabase.session
+                                ?.user
+                                ?.id
+                                ?.let { id -> scope.launch { snaps.retryCurrent(id) } }
+                        },
+                        onRemovePending = {
+                            supabase.session
+                                ?.user
+                                ?.id
+                                ?.let { id -> scope.launch { snaps.removePending(id) } }
+                        },
+                        isRemovingExistingSnap = isRemovingExistingSnap,
+                        onRemoveExistingSnap = {
+                            scope.launch {
+                                isRemovingExistingSnap = true
+                                try {
+                                    snaps.removeExisting()
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "delete_pebble_media failed", e)
+                                    saveErrorRes = R.string.photo_remove_error
+                                } finally {
+                                    isRemovingExistingSnap = false
+                                }
                             }
-                        }
-                    },
-                )
+                        },
+                    )
+                    // Grade chip (M51) — mirrors iOS EditPebbleSheet's bottomBar
+                    // ToolbarItemGroup, matching CreatePebbleScreen's row treatment.
+                    Row(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        VisibilityChip(value = draft.visibility, onChange = { draft = draft.copy(visibility = it) })
+                        Spacer(Modifier.weight(1f))
+                    }
+                }
         }
     }
 }

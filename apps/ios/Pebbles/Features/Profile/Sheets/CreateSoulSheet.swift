@@ -9,6 +9,7 @@ struct CreateSoulSheet: View {
     let onCreated: (SoulWithGlyph) -> Void
 
     @Environment(SupabaseService.self) private var supabase
+    @Environment(AchievementsService.self) private var achievements
     @Environment(\.dismiss) private var dismiss
 
     @State private var draft = SoulDraft()
@@ -126,6 +127,7 @@ struct CreateSoulSheet: View {
                 .single()
                 .execute()
                 .value
+            achievements.fireCheck()
             onCreated(inserted)
             dismiss()
         } catch {

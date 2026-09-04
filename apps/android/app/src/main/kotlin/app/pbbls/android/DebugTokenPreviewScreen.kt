@@ -65,6 +65,7 @@ fun DebugTokenPreviewScreen() {
                         TokenSwatch("system.secondary", system.secondary),
                         TokenSwatch("system.muted", system.muted),
                         TokenSwatch("system.background", system.background),
+                        TokenSwatch("system.onLight", system.onLight),
                     ),
             )
             TokenSection(

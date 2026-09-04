@@ -27,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.features.glyph.models.GlyphStroke
+import app.pbbls.android.features.profile.components.ProfileAchievementsCard
 import app.pbbls.android.features.profile.components.ProfileBanner
 import app.pbbls.android.features.profile.components.ProfileCollectionsCard
 import app.pbbls.android.features.profile.components.ProfileLabCard
@@ -69,7 +70,9 @@ fun ProfileScreen(
     onOpenCollections: () -> Unit,
     onOpenCollection: (Collection) -> Unit,
     onOpenGlyphs: () -> Unit,
+    onOpenConnections: () -> Unit,
     onOpenLab: () -> Unit,
+    onOpenAchievements: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val profileService = LocalProfileService.current
@@ -192,9 +195,9 @@ fun ProfileScreen(
                         glyphStrokes = glyphStrokes,
                     )
                     ProfileShortcutsRow(
-                        onOpenCollections = onOpenCollections,
                         onOpenSouls = onOpenSouls,
                         onOpenGlyphs = onOpenGlyphs,
+                        onOpenConnections = onOpenConnections,
                     )
                     ProfileStatsCard(
                         ripple = stats.ripple,
@@ -203,6 +206,7 @@ fun ProfileScreen(
                         pebbles = stats.pebbles,
                         karma = stats.karma,
                     )
+                    ProfileAchievementsCard(onOpen = onOpenAchievements)
                     ProfileCollectionsCard(
                         collections = collections,
                         hasLoaded = collectionsLoaded,
@@ -243,12 +247,20 @@ fun ProfileScreen(
                         ?.map { it.provider },
                 ),
             onDismiss = { isPresentingSettings = false },
-            onSaved = { newName, newGlyph ->
-                profile = profile?.copy(displayName = newName, glyphId = newGlyph?.id ?: profile?.glyphId)
+            onSaved = { newName, newGlyph, newHandle, isPublic ->
+                profile =
+                    profile?.copy(
+                        displayName = newName,
+                        glyphId = newGlyph?.id ?: profile?.glyphId,
+                        handle = newHandle,
+                        publicProfile = isPublic,
+                    )
                 newGlyph?.strokes?.let { glyphStrokes = it }
                 isPresentingSettings = false
             },
             modifier = Modifier.fillMaxSize(),
+            initialHandle = profile?.handle,
+            initialPublicProfile = profile?.publicProfile ?: false,
         )
     }
 }

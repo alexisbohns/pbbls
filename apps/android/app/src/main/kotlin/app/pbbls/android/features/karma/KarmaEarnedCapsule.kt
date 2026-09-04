@@ -50,9 +50,9 @@ import app.pbbls.android.theme.PebblesTypography
 
 /**
  * Bottom-center overlay hosting the "+N karma" pastille — the iOS
- * `KarmaOverlayRoot` analog (D9). Drawn last in `RootScreen`'s authed branch so
- * it floats above the create/detail surfaces. Observes
- * [KarmaNotificationService.activeCapsule]; the service owns the auto-dismiss.
+ * `KarmaOverlayRoot` analog (D9). Drawn in `RootScreen`'s authed branch so it
+ * floats above the create/detail surfaces. The achievement unlock moment (M48)
+ * is a separate full-screen overlay drawn above this one.
  */
 @Composable
 fun KarmaOverlayHost(

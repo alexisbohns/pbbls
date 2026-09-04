@@ -1,5 +1,5 @@
 import type { PebbleDraftPayload } from "@/lib/data/data-provider"
-import type { PebbleSnap } from "@/lib/types"
+import type { PebbleSnap, Visibility } from "@/lib/types"
 
 /**
  * Projection between the composer's flat state and the draft payload (M47).
@@ -24,7 +24,7 @@ export type ComposerState = {
   soulIds: string[]
   markId: string | undefined
   collectionIds: string[]
-  visibility: "private" | "public"
+  visibility: Visibility
   pendingSnap: PebbleSnap | undefined
 }
 
@@ -41,7 +41,9 @@ export function composerDefaults(): ComposerState {
     soulIds: [],
     markId: undefined,
     collectionIds: [],
-    visibility: "private",
+    // 'secret' (owner-only) since M51 — matching the DB default. 'private'
+    // now means connections-visible and must be an explicit choice.
+    visibility: "secret",
     pendingSnap: undefined,
   }
 }

@@ -16,28 +16,22 @@ import app.pbbls.android.theme.SurfaceTile
 
 /**
  * The Profile shortcut tiles — ports iOS `ProfileShortcutsRow.swift`
- * (Collections · Souls · Glyphs, in that order). Handlers are optional and a
- * tile renders only when its handler is wired (D11 — no dead chrome); all
- * three are live as of M43 (the Glyphs tile reversed the last omission).
+ * (Souls · Glyphs · Connections, in that order). Collections are reached from
+ * their own section card below, so they get no shortcut tile. Handlers are
+ * optional and a tile renders only when its handler is wired (D11 — no dead
+ * chrome).
  */
 @Composable
 fun ProfileShortcutsRow(
     modifier: Modifier = Modifier,
-    onOpenCollections: (() -> Unit)? = null,
     onOpenSouls: (() -> Unit)? = null,
     onOpenGlyphs: (() -> Unit)? = null,
+    onOpenConnections: (() -> Unit)? = null,
 ) {
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.sm),
     ) {
-        if (onOpenCollections != null) {
-            ShortcutTile(
-                iconRes = R.drawable.ic_stack,
-                label = stringResource(R.string.profile_collections_header),
-                onClick = onOpenCollections,
-            )
-        }
         if (onOpenSouls != null) {
             ShortcutTile(
                 iconRes = R.drawable.ic_person_pair,
@@ -50,6 +44,13 @@ fun ProfileShortcutsRow(
                 iconRes = R.drawable.ic_scribble,
                 label = stringResource(R.string.glyphs_title),
                 onClick = onOpenGlyphs,
+            )
+        }
+        if (onOpenConnections != null) {
+            ShortcutTile(
+                iconRes = R.drawable.ic_person_pair,
+                label = stringResource(R.string.connections_title),
+                onClick = onOpenConnections,
             )
         }
     }

@@ -1,22 +1,19 @@
-// Dev-only gate for the petroglyph wobble experiment (issue #555), the web
-// analogue of iOS's `#if DEBUG` (`WobbleFlags`).
+// Whether the petroglyph wobble (issue #555) draws.
 //
-// The catch: the spike has to be reviewable on a Vercel *preview*/branch
-// deploy, but there `NODE_ENV` is "production" exactly like the live site — so
-// gating on `NODE_ENV` alone compiles the wobble out of every deploy (which is
-// why it looked perfectly straight on the branch URL). Instead:
+// This was a dev-only gate — on for local dev and preview deploys, off on the
+// production domain — which is how the spike was reviewed without shipping it.
+// It now ships. The valence fan (#729) draws real stones, and making the picker
+// the one always-wobbly surface in an otherwise smooth app was the worse of the
+// two inconsistencies. iOS promoted its own flag for the same reason in #727,
+// and Android has baked the wobble into internal-testing releases since
+// 2026-07-14, so all three surfaces now draw the same stone.
 //
-//   - explicit override wins: NEXT_PUBLIC_WOBBLE="1" forces on, "0" forces off;
-//   - otherwise on for local dev and any non-production deploy env
-//     (NEXT_PUBLIC_VERCEL_ENV — "preview"/"development"), off on the production
-//     domain.
+// Kept as a constant rather than deleted, so the look is still switchable in
+// one place — the same posture iOS's `WobbleFlags` takes. Turning it off is
+// this line; deleting the experiment is removing `lib/wobble/` and reverting
+// the flag-gated call sites (`PebbleVisual`, `PathStone`, `StrokeRenderer`,
+// `PebbleOutlineBackdrop`, `lib/valence/stone-art`).
 //
-// Every input is a build-time-inlined `NODE_ENV` / `NEXT_PUBLIC_*` literal, so
-// the value is identical on server and client (no hydration mismatch) and the
-// production domain never ships the spike by accident. Delete the experiment by
-// removing `lib/wobble/` and reverting the flag-gated call sites (PebbleVisual,
-// StrokeRenderer, PebbleOutlineBackdrop).
-const override = process.env.NEXT_PUBLIC_WOBBLE
-const deployEnv = process.env.NEXT_PUBLIC_VERCEL_ENV ?? process.env.NODE_ENV
-
-export const WOBBLE_ENABLED = override === "1" || (override !== "0" && deployEnv !== "production")
+// A build-time constant, so the value is identical on the server and the client
+// (no hydration mismatch) and dead branches fold away.
+export const WOBBLE_ENABLED = true

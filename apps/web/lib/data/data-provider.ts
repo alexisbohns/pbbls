@@ -3,6 +3,8 @@ import type {
   PebbleSnap,
   Soul,
   Collection,
+  Connection,
+  ConnectionPeer,
   KarmaEvent,
   Mark,
   MarketGlyph,
@@ -10,6 +12,9 @@ import type {
   WalletSnapshot,
   RippleSummary,
   ProfileEngagement,
+  Achievement,
+  AchievementUnlock,
+  SharedConnectionPebble,
 } from "@/lib/types"
 
 // ---------------------------------------------------------------------------
@@ -82,6 +87,14 @@ export type WalletHistoryPage = {
   nextCursor: string | null
 }
 
+// One newly granted badge from `check_achievements()`. `karmaGranted` is what
+// the ledger actually received at unlock time (0 for reward-less badges),
+// never the catalog's current value.
+export type AchievementUnlockResult = {
+  slug: string
+  karmaGranted: number
+}
+
 // ---------------------------------------------------------------------------
 // Drafts (M47) — a draft is a PARTIAL compose-pebble wire payload, stored as
 // jsonb in `pebble_drafts.payload`. Deliberately keyed like the wire and not
@@ -121,6 +134,28 @@ export type PebbleDraftRecord = {
 }
 
 // ---------------------------------------------------------------------------
+// Connections (M49) — operation results for the definer-RPC wire contract.
+// See docs/superpowers/specs/2026-07-29-mutual-connections-design.md.
+// ---------------------------------------------------------------------------
+
+// The caller's live multi-use invite. The client composes the share URL
+// (`${origin}/invite/<token>`) — the server returns only the token (D11).
+export type ConnectionInvite = {
+  token: string
+  expiresAt: string
+  createdAt: string
+}
+
+// Accept is idempotent: a repeat accept SUCCEEDS with `alreadyConnected: true`
+// (re-scans and retries are the normal case for a multi-use QR, D5).
+export type AcceptConnectionInviteResult = {
+  connectionId: string
+  alreadyConnected: boolean
+  connectedAt: string
+  peer: ConnectionPeer
+}
+
+// ---------------------------------------------------------------------------
 // DataProvider interface — implemented by SupabaseProvider.
 // All mutation methods return Promises to match async Supabase calls.
 // ---------------------------------------------------------------------------
@@ -143,6 +178,15 @@ export interface DataProvider {
   // assiduity from the get_profile_engagement RPC.
   getRipple(): Promise<RippleSummary>
   getProfileEngagement(tz: string): Promise<ProfileEngagement>
+
+  // Achievements (on-demand, not part of the eager store): the full public
+  // catalog including inactive rows (clients decide what to render), the
+  // caller's unlock ledger, and the idempotent evaluation RPC — it inserts
+  // whatever the caller now qualifies for and returns only what it NEWLY
+  // granted (empty array = nothing new).
+  getAchievements(): Promise<Achievement[]>
+  getAchievementUnlocks(): Promise<AchievementUnlock[]>
+  checkAchievements(): Promise<AchievementUnlockResult[]>
 
   listPebbles(): Promise<Pebble[]>
   getPebble(id: string): Promise<Pebble | undefined>
@@ -171,6 +215,26 @@ export interface DataProvider {
   deletePebbleDraft(id: string): Promise<void>
   /** Signed read URL for a draft snap's thumb (drafts have no `instants`). */
   getDraftSnapUrl(storagePath: string): Promise<string | undefined>
+
+  // Connections (M49): definer-RPC-only — every write is multi-table validated
+  // logic (accept touches invites, blocks and connections), so there are no
+  // direct table writes on any surface. Reads return display projections
+  // (name + glyph geometry), never a profiles row. Error slugs
+  // (invite_not_found, invite_expired, cannot_accept_own_invite, not_found)
+  // arrive as substrings of the thrown message — match with `.includes` on the
+  // lowercased message. None of these touch karma (D9).
+  listConnections(): Promise<Connection[]>
+  /**
+   * The pebbles a connection shares with the viewer, newest first. Null when
+   * the connection id does not exist or is not the viewer's (indistinguishable
+   * by design). Direct reads under the widened M51 RLS — no RPC (spec D2).
+   */
+  listConnectionSharedPebbles(connectionId: string): Promise<SharedConnectionPebble[] | null>
+  /** Returns the live invite; `rotate` revokes it and mints a fresh one. */
+  createConnectionInvite(rotate?: boolean): Promise<ConnectionInvite>
+  acceptConnectionInvite(token: string): Promise<AcceptConnectionInviteResult>
+  /** Severs for both sides; `block` additionally blocks the removed peer. */
+  removeConnection(id: string, block?: boolean): Promise<void>
 
   listSouls(): Promise<Soul[]>
   getSoul(id: string): Promise<Soul | undefined>
