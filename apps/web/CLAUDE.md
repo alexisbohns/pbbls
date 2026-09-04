@@ -2,6 +2,10 @@
 
 The main Pebbles web application — a local-first PWA built with Next.js (App Router).
 
+> The Arkaik product map for this surface is **hosted**, not a file in this
+> repo. Change it with the `arkaik-mcp` tools; never edit
+> `docs/arkaik/bundle.json`. See the root `CLAUDE.md` § "The map is hosted".
+
 ## Next.js version warning
 
 This project uses **Next.js 16.2.0** which has breaking changes from earlier versions. APIs, conventions, and file structure may differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
