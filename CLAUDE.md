@@ -54,7 +54,7 @@ Match ceremony to task size. Heavy workflows on small tasks are the main reason 
 **Large (cross-app, schema migration, new feature surface):**
 - Use the brainstorming/planning/TDD/review skills. The ceremony pays for itself here.
 - Full `npm run build` and `npm run lint` from the repo root.
-- Update Arkaik (`docs/arkaik/bundle.json`) as part of the same change — see the `arkaik` skill.
+- Update the Arkaik map as part of the same change — see the `arkaik` skill and **The map is hosted** below.
 
 ## Where knowledge lives (load on demand)
 
@@ -62,13 +62,57 @@ Keep CLAUDE.md short. Read these when relevant — don't pre-load:
 
 - **UI / styling / a11y** → `docs/agents/ui-and-styling.md` (atomic design, shadcn-first, base-nova quirks, theming, WCAG)
 - **Data layer / Supabase / async** → `docs/agents/data-and-async.md` (DataProvider, auth deadlock, withTimeout, error logging)
-- **Product architecture map** → `arkaik` skill (`.claude/skills/arkaik/`), bundle at `docs/arkaik/bundle.json`
+- **Product architecture map** → `arkaik` skill (`.claude/skills/arkaik/`). The map is **hosted**, not a file in this repo — see below
 - **Why something is the way it is** → `docs/decisions/log.md`. Read it before making an architectural call — it is append-only and supersede-don't-edit, so the *last* entry on a topic wins.
 - **How a feature was designed / built** → `docs/superpowers/specs/<date>-<slug>-design.md` and `docs/superpowers/plans/<date>-<slug>.md`. Post-ship "Lessons learned" live in the plan.
 - **Postgres / Supabase technique** → `.agents/skills/supabase-postgres-best-practices/` (RLS, indexing, locking, pooling).
 - **PR Lab Notes** → `lab-note` skill (`.claude/skills/lab-note/`); see the Lab Note section below.
 
-CI gates worth knowing about: `arkaik.yml` validates the bundle + journal on any `docs/arkaik/**` change, `android.yml` builds on `apps/android/**`, `web.yml` runs ESLint + the Vitest suite on **every** PR (no path filter, so it can be a required check), `supabase.yml` runs the contract harnesses on `packages/supabase/**` and nightly, `lab-note-reminder.yml` advises at PR-open and `lab-note.yml` posts the note at merge.
+CI gates worth knowing about: `arkaik.yml` validates the legacy bundle + journal on any `docs/arkaik/**` change (it should now rarely run — see below), `android.yml` builds on `apps/android/**`, `web.yml` runs ESLint + the Vitest suite on **every** PR (no path filter, so it can be a required check), `supabase.yml` runs the contract harnesses on `packages/supabase/**` and nightly, `lab-note-reminder.yml` advises at PR-open and `lab-note.yml` posts the note at merge.
+
+## The map is hosted — never edit `docs/arkaik/bundle.json`
+
+`docs/arkaik/arkaik.json` is present, so this project's Arkaik map lives in an
+**account**, not in this repo. The `arkaik` skill's hosted rule is binding:
+
+> **Do not create or edit `docs/arkaik/bundle.json` for a hosted map.** Nothing
+> reads it, the account never sees the change, and the next person to look finds
+> two maps disagreeing.
+
+| | Where | How you change it |
+|---|---|---|
+| The map | the hosted project, over HTTP | the `arkaik-mcp` tools (`create_node`, `update_node`, `create_edge`, …) |
+| History | derived server-side | nothing to write — every mutation emits its own journal events |
+
+`docs/arkaik/bundle.json` and `journal.jsonl` are a **frozen snapshot of the
+pre-hosted era**. They are kept for the record and for `arkaik.yml`; they are not
+the map, they are not current, and reading them as truth is how you ship a change
+against a stale graph. Editing them is worse: the only way they ever reach the
+account is `arkaik restore`, which replaces the hosted project wholesale — that
+command has already silently deleted this project's federation feed and its
+PR-promotion policy ([arkaik#423](https://github.com/alexisbohns/arkaik/issues/423)).
+
+**If the `arkaik-mcp` tools are not available, say so and stop.** Do not fall
+back to the file. A silent fallback is the failure nobody notices, and it is the
+one this note exists to prevent. In a cloud container the usual cause is a
+missing `ARKAIK_TOKEN`: `.mcp.json` sources this machine's `.env`, which is
+gitignored and therefore absent — the token has to be in the environment
+instead.
+
+### Status is part of the change
+
+The map records where each promise stands, per platform. Two halves:
+
+- **You** move an acceptance or a view to `development` when you start work on
+  it (`update_node` over MCP). Do it when you pick the work up, not at the end.
+- **The Arkaik GitHub App** does the rest from the pull request: opening one
+  marks `development`, merging marks `releasing`, on the platform of the app
+  folder the PR touched. Nothing to write, nothing to remember.
+
+`live` is **not** a merge. It means shipped to people: the web deploy is out, or
+a store accepted the build. Nothing moves a status there automatically yet
+([arkaik#424](https://github.com/alexisbohns/arkaik/issues/424)), so leave
+acceptances at `releasing` rather than claiming a release that has not happened.
 
 ## Standing cross-surface rules
 
@@ -171,7 +215,7 @@ PR's diff shows only its own layer. The extension is a one-time install:
 
 **When you open a PR that ships something a user would notice, you MUST include a Lab Note in the PR body.** This section is self-sufficient: you can author a valid note from it alone. The repo-local `lab-note` skill (`.claude/skills/lab-note/`) is the source of truth for full tone guidance and examples, and **takes precedence over the `lab-note@ariko` plugin skill** if both are present.
 
-**The gate.** The PR has the `feat` label, **or** it touches a user-visible Arkaik view node (`docs/arkaik/bundle.json`) → write a note. Chore, refactor, infra, or docs-only → **no note**: delete the section from the PR body (if the advisory `lab-note-reminder` still comments, add the **`no-lab-note`** label to silence it).
+**The gate.** The PR has the `feat` label, **or** it touches a user-visible Arkaik view node → write a note. Chore, refactor, infra, or docs-only → **no note**: delete the section from the PR body (if the advisory `lab-note-reminder` still comments, add the **`no-lab-note`** label to silence it).
 
 **The contract.** One `## Lab Note (EN/FR)` section holding exactly one ` ```yaml ` fence. Both languages are mandatory (`en.title`, `en.summary`, `fr.title`, `fr.summary`) — French is a real adaptation using the informal "Tu", never a literal translation. **No em dashes** in either language; use parentheses or a new sentence. **Always double-quote every title and summary**, as the skeleton below does: a colon is the natural way to write a sentence ("Heads up: it moved", "ton compte : ceux que...") and it is exactly what an unquoted YAML value cannot hold, so the parser reads `key: value` and the whole note fails. Quoting removes the failure mode outright, apostrophes included; slug-ish values need no quotes. PR-time defaults: `status: in_progress`, `published: false`, omit `release-date` (the maintainer's release-time switches).
 
@@ -198,9 +242,9 @@ suggested:                # optional; read only by the Ariko vault
 renders a **Touched** list of graph nodes, and Arkaik can only work out the
 *acceptances* on its own (from an `AC-…` id in the PR title or body) — views,
 flows, endpoints and data models have to be named. List the ids your change
-actually touched, most important first, reading them out of the map rather than
-reconstructing them; if you updated `docs/arkaik/bundle.json` in this PR, those
-are exactly the ids. An id that matches nothing is left off the entry and
+actually touched, most important first, reading them off the hosted map
+(`list_nodes` / `get_node`) rather than reconstructing them; if you moved nodes
+on the map in this PR, those are exactly the ids. An id that matches nothing is left off the entry and
 reported in the App's delivery response. Omit the key when nothing was touched.
 Note `platform:` is **not** what fills the entry's platform chip — Arkaik works
 that out from the folders the PR touched.
