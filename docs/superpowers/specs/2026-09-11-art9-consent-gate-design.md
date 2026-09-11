@@ -371,6 +371,7 @@ post-auth gate is not revisited.
 | The DPIA is drafted by a non-lawyer | Ships unsigned and undated; maintainer validates (D6) |
 | Published policy text is not revertible the way config is | Every wording block marked DRAFT; Part 5 merges last and separately |
 | Withdrawal-as-deletion read as coercive by a regulator | Documented reasoning in the DPIA; the granular alternative (D3) is recorded as the escalation path |
+| **Accepted residual (2026-09-11):** `record_consent`'s `on conflict … do nothing` makes a concurrent replay a silent no-op, which is right for the identical-version case it exists for. Two concurrent calls at *different* versions would discard the loser's act silently rather than erroring. | Requires a policy-version bump landing between two concurrent calls from one user, which is implausible today. **M55 must revisit this if the re-consent surface makes version bumps routine** — the fix would be a `consent_conflict` code or a retry, neither of which is warranted now. Documented in `20260911090060_user_consents_hardening.sql`. |
 
 ## 10. Decision-log entry
 

@@ -258,6 +258,28 @@ try {
     throw new Error(`get_public_profile pre-purge: ${livePublicErr?.message ?? "null"}`);
   }
 
+  // Art. 9 consent ledger rows (#775). Written through the real RPC as the
+  // signed-in seller — user_consents has no client insert policy at all, so a
+  // direct admin insert would prove nothing about the path the app uses.
+  const { error: consentErr } = await seller.rpc("record_consent", {
+    p_kind: "health_data",
+    p_document_version: "1.1.0",
+    p_source: "web_register",
+  });
+  if (consentErr) throw new Error(`record_consent health_data: ${consentErr.message}`);
+
+  const { error: publicConsentErr } = await seller.rpc("record_consent", {
+    p_kind: "public_profile",
+    p_document_version: "1.1.0",
+    p_source: "web_settings",
+  });
+  if (publicConsentErr) throw new Error(`record_consent public_profile: ${publicConsentErr.message}`);
+
+  const consentCount = await countRows("user_consents", "user_id", sellerId);
+  if (consentCount !== 2) {
+    throw new Error(`expected 2 seeded consent rows, got ${consentCount}`);
+  }
+
   // Achievement unlocks (M48). Earned through the real RPC as the signed-in
   // seller (achievement_unlocks has no client insert policy): the pebble,
   // soul, collection and glyphs above qualify several badges in one call.
@@ -310,6 +332,7 @@ try {
     ["connections", 1], // the seller↔buyer row
     ["connection_invites", 1], // the seller's live invite
     ["connection_blocks", 2], // both directions
+    ["user_consents", 2], // health_data + public_profile
   ];
   for (const [key, expected] of expectedPurged) {
     check(`purge itself counted ${key} = ${expected}`, purgedCounts[key] === expected,
@@ -337,6 +360,7 @@ try {
     ["pebble_drafts", "user_id"],
     ["connection_invites", "inviter_id"],
     ["achievement_unlocks", "user_id"],
+    ["user_consents", "user_id"],
   ];
   for (const [table, column] of sellerScoped) {
     const n = await countRows(table, column, sellerId);

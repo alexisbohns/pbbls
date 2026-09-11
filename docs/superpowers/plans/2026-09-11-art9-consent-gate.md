@@ -1544,10 +1544,18 @@ stepper renders rather than the consent gate. An established account seeing the
 gate is the M55 cohort being re-consented early, which is exactly the scope that
 was ruled out — stop and report it rather than working around it.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 6: Close the map's login-page gap**
+
+`docs/compliance/lawful-basis-map.md`'s first "Known gaps" bullet was written in
+Part 2 and says login-page OAuth accounts have no Art. 9 consent record and get
+none until M55. This task is what makes that false. Reword it so the only
+remaining uncovered population is **accounts that existed before this stack**,
+and leave the M55 pointer for those.
+
+- [ ] **Step 7: Commit**
 
 ```bash
-git add apps/web/components/onboarding/ConsentGate.tsx apps/web/app/onboarding/page.tsx
+git add apps/web/components/onboarding/ConsentGate.tsx apps/web/app/onboarding/page.tsx docs/compliance/lawful-basis-map.md
 git commit -m "feat(auth): gate onboarding on Art. 9 consent for OAuth-created accounts"
 ```
 
@@ -1835,6 +1843,36 @@ with:
 ```
 
 Note `withdrawConsent` already sets `profiles.public_profile = false` server-side, so the `updates` field is deliberately not set on that branch.
+
+**Handle `no_active_consent` deliberately — there are three ways to reach it.**
+`withdraw_consent` raises when it finds nothing to withdraw, and the asymmetry
+with the idempotent `record_consent` is intentional: a withdrawal that matches
+no row means someone's model of consent state is wrong, and for an
+accountability record that should be loud rather than swallowed. But it must
+never reach the user as a raw error toast, because one of its causes is a
+completely ordinary user.
+
+1. **A user who was already public before this stack shipped.** They have
+   `profiles.public_profile = true` and no consent row at all. Routing "turn off
+   my public profile" through `withdraw_consent` raises, and **leaves them
+   published** — the worst outcome of the three, and the one the happy path
+   walks straight into. Handle it: on `no_active_consent` for
+   `public_profile`, fall back to writing `public_profile = false` directly
+   through `updateProfile`, so the user's intent is honoured even though there
+   was no consent row to withdraw.
+2. **A double-submit**, or a genuine bug where the UI's state disagrees with the
+   database.
+3. **A rare race** — a `record_consent` at a bumped policy version committing
+   between this statement's snapshot and its row lock makes the old row
+   superseded and the new one invisible for one statement. Self-correcting on
+   retry.
+
+For causes 2 and 3: log with `console.error`, call the hook's `refresh()` so the
+UI reconciles to the true state, and show the ordinary save-error toast. Match
+the error on its message (`message.includes("no_active_consent")`), the way
+`useSupabaseAuth` consumes `set_handle`'s codes — the RPC raises it bare, not
+with a distinguishing SQLSTATE. Do not soften the RPC to a no-op to avoid any of
+this.
 
 - [ ] **Step 3: Name the toggle as consent**
 
