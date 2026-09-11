@@ -11,7 +11,9 @@ validated_on:
 > **Draft. Not yet validated.** Written by an engineering agent, not counsel.
 > `reviewed_by` and `validated_on` are deliberately blank: an impact assessment
 > is the controller's act. Every factual claim below cites a file in this
-> repository; every uncertainty is marked as an open question.
+> repository. Ten judgement calls that the repository could not settle were put
+> to the controller; eight are now decided and two remain open, all recorded
+> in §6. Deciding them is not signing this assessment.
 
 **Drafted:** 2026-09-11, against `main` at the head of the Art. 9 consent-gate
 stack (issue #774).
@@ -47,7 +49,9 @@ From `apps/web/docs/legal-notice/en.md` and `apps/web/docs/privacy/en.md` §1:
 | Publication director | Alexis Bohn |
 
 The two unfilled placeholders are a live Art. 13(1)(a) defect, not an editorial
-oversight to be quietly carried forward. See §6, open question **Q1**.
+oversight to be quietly carried forward. The controller has deferred the decision
+(Q1, one of the two items still open), so this section stays incomplete by
+choice, with the reason on the record. Tracked as issue #779.
 
 Pebbles is an open-source project (https://github.com/alexisbohns/pbbls). The
 source being public changes nothing about controllership: the deployed instance
@@ -146,18 +150,21 @@ single transaction, immediate, with no grace period (§2.2).
 | Storage bucket `lab-assets` | Lab cover images; **public** bucket (`20260421000003`) | No | Operator content |
 | Backups | Supabase-managed | Follows the source | Policy §8.5 states 90 days. **Not evidenced in this repo** — see **Q4** |
 
-**Three processing operations are declared to users but do not exist in the
-code:** therapist access, HealthKit and Google Gemma. None has an implementation
-anywhere in `apps/` or `packages/`, yet all three are declared across the privacy
-policy, the Terms and the Credits page, mostly in the present tense. A fourth
-entry, "Cairns", is described in policy §2.2 and §8.4 as an indefinitely retained
-aggregate; it is computed client-side in `WeekRoll` / `WeekRollCairn` and stored
-nowhere.
+**Three processing operations are declared to users, do not exist in the code,
+and have now been abandoned:** therapist access, HealthKit and Google Gemma. None
+has an implementation anywhere in `apps/` or `packages/`, yet all three are
+declared across the privacy policy, the Terms and the Credits page, mostly in the
+present tense. A fourth entry, "Cairns", is described in policy §8.4 as an
+indefinitely retained aggregate; the feature exists, but it is computed
+client-side in `WeekRoll` / `WeekRollCairn` and stored nowhere, so the retention
+claim is wrong.
 
-None of the four is processing, so none is inventoried above. They are recorded
-here because declaring processing that does not happen inflates the apparent
-scope of this assessment. **The full enumeration, the disclaimer that covers only
-part of it, and the decisions the controller has to take are in Q2 (§6).**
+The controller decided on 2026-09-11 that all four declarations are removed from
+the published documents (Q2). **None is or will be processing, so none is
+inventoried above.** The removal is tracked separately against
+`F-2026-08-GDP-web-03` and is not performed by this stack, so the published
+documents still carry the declarations today. The full enumeration and the
+decision are in Q2 (§6).
 
 ### 1.4 Recipients and processors
 
@@ -172,10 +179,9 @@ other users. No data is sold, shared with advertisers, or used to train models.
 | **Apple / Google** | App distribution (App Store, Play internal testing per `docs/android-play-deploy.md`) | Provider-operated | Distribution, not journal content |
 | **Other users** | Recipients *by the user's own act* — a mutual connection sees `private` pebbles, anyone with the link sees `public` ones, and anyone on the open web sees an enabled public profile | n/a | The user's choice, per the visibility grade |
 
-Google (Gemma) appears in the policy's processor inventory at §6.3, which is one
-of only two places marking it "not active today". It is not a recipient today,
-but three other published sections declare it in the present tense (§1.3,
-**Q2**).
+Google (Gemma) appears in the policy's processor inventory at §6.3. It is not a
+recipient today and, following the controller's Q2 decision, will not become one:
+the integration is abandoned and every declaration of it is to be removed (§1.3).
 
 No analytics, tag-management, crash-reporting, attribution or advertising
 processor exists on any surface. This was checked, not assumed: no such
@@ -208,11 +214,13 @@ deviation from the design spec, recorded in the plan's pre-Task-1 conventions.
 The two timestamps may not warrant the same retention period, which is part of
 what Q5 puts to the controller.
 
-**Retention is, in practice, binary today: data lives while the account lives and
-is gone the moment the account is deleted.** There is no partial ageing-out, no
-archival tier and no scheduled pruning of old pebbles. For a journal whose value
-is re-reading old entries that is defensible, but it should be a decision on the
-record rather than an artefact of there being no deletion job. See **Q3**.
+**Retention is binary: data lives while the account lives and is gone the moment
+the account or the pebble is deleted.** There is no partial ageing-out, no
+archival tier and no scheduled pruning of old pebbles. The controller decided on
+2026-09-11 (Q3) that this is the intended policy for a product whose value is
+re-reading old entries, and that the policy text will state it in the user's own
+terms: *kept until you delete your account or the pebble*. It is a decision on
+the record, not an artefact of there being no deletion job.
 
 ## 2. Necessity and proportionality
 
@@ -279,9 +287,10 @@ every surface, which is the strongest accuracy control available for subjective
 data; `update_pebble` and the owner-scoped RLS update policies are the mechanism.
 There is no inference to be wrong about.
 
-**Retention.** As §1.5 records, retention is life-of-account with no ageing-out.
-The erasure path, by contrast, is unusually strong and is the single most
-substantiated claim in this document:
+**Retention.** Life-of-account with no ageing-out, and — since the controller's
+Q3 decision of 2026-09-11 — a deliberate policy rather than an observed absence:
+data is kept until the user deletes the pebble or the account. The erasure path
+is unusually strong and is the single most substantiated claim in this document:
 
 `delete-account` (`packages/supabase/supabase/functions/delete-account/index.ts`)
 takes the caller's identity from the forwarded JWT — never from the body, so
@@ -304,11 +313,17 @@ that a re-run converges to zero counts. It needs the service role, so CI does no
 run it; the standing rule in `CLAUDE.md` requires it to be run manually against
 the linked project after any change to `purge_account`.
 
-Two honest caveats on erasure. First, **deletion is immediate, while the policy
-promises a 30-day window** ("30 days after account deletion, before permanent
-erasure", §8.1; "complete erasure within 30 days", §9.3). Acting faster than
-promised is not a rights failure, but the text and the system disagree and the
-text is the thing a regulator reads (**Q6**). Second, **externally-referenced
+Two caveats on erasure. First, **deletion is immediate, while the policy promises
+a 30-day window** ("30 days after account deletion, before permanent erasure",
+§8.1; "complete erasure within 30 days", §9.3). Acting faster than promised is
+not a rights failure, but the text and the system disagree and the text is what a
+regulator reads. The controller decided on 2026-09-11 (Q6) to **correct the text
+and build no grace period**: erasure stays immediate and irreversible, chosen as
+the better privacy posture. That decision interacts with the missing export:
+**immediate erasure plus no Art. 20 export means a user who deletes their account
+has no recovery path of any kind** (§2.3, §3.3). Neither decision is wrong alone;
+together they make export more pressing than its P2 priority suggests. Second,
+**externally-referenced
 glyphs are anonymized rather than deleted** (`user_id = null`) so that another
 user's purchase keeps rendering. That is a deliberate, logged decision and the
 residual artefact is a drawing with no link to a person, but it is a documented
@@ -318,7 +333,7 @@ exception to "everything is erased" and belongs in the policy too.
 
 | Right | Status | Where |
 |---|---|---|
-| Art. 13/14 information | **Partial** | `apps/web/docs/privacy/{en,fr}.md` is thorough, but the controller's postal address and telephone are unfilled placeholders (**Q1**), and it describes three operations that do not exist (**Q2**) |
+| Art. 13/14 information | **Partial** | `apps/web/docs/privacy/{en,fr}.md` is thorough, but the controller's postal address and telephone are unfilled placeholders (**Q1**, still open), and it describes three abandoned operations that do not exist (**Q2** — decided; removal tracked separately, not yet performed) |
 | Art. 15 access | **Manual only** | Policy §9.8: by email to hello@bohns.design. No in-product access-request path, and no export to satisfy it with (see Art. 20) |
 | Art. 16 rectification | **Met, self-service** | Every field is editable by its owner on every surface (§2.2) |
 | Art. 17 erasure | **Met, self-service and verified** | `delete-account` edge function + `purge_account`, proven by `verify-account-purge.ts`. Reachable from web settings (`DeleteAccountSection`) |
@@ -341,6 +356,11 @@ that design rather than an unrelated improvement.
 Severity and likelihood use the CNIL's four-level scale (negligible, limited,
 significant, maximum). Severity is judged on the impact on the data subject, not
 on the controller.
+
+Two residual risks below are assessed as *significant* (§3.3, §3.5) and none as
+*maximum*. On that basis the controller considered Art. 36 prior consultation on
+2026-09-11 and concluded it is **not required**, since no residual risk remains
+*high* after mitigation (**Q10**).
 
 ### 3.1 Illegitimate access to data
 
@@ -563,8 +583,19 @@ engineering. The available measures are limits on scope and on sharing.
 This assessment recommends that (a) souls and any pebble free text remain excluded
 from every cross-user projection as an invariant, not a default, (b) any future
 feature that would surface a soul to a third party re-opens this assessment
-(§5), and (c) the controller decide how a third party who *does* learn of a soul
-record would exercise Art. 15 or 17 over it — no procedure exists (**Q8**).
+(§5), and (c) the standing position on a soul's own rights request be applied as
+decided. On that third point the gap is now closed: the controller decided on
+2026-09-11 (**Q8**) that an Art. 15 or Art. 17 request from a person named as a
+soul is **declined absent a legal order**, on the Art. 11(2) reasoning that
+answering would require searching other users' private journals for a name — a
+disclosure risk to those users and processing they never agreed to. It is a
+stated policy established before any request arrives, not an unanswered gap.
+
+The household-exemption characterisation above was **accepted as drafted**
+(**Q9**), explicitly as the conservative reading: it assumes the controller's own
+obligations are undiminished and that the exemption weakens as sharing widens, so
+if it is wrong it errs toward over-protecting the data subject. `souls` keeps
+6(1)(f) in the lawful-basis map.
 
 ### 3.6 Operator analytics without a minimum cohort
 
@@ -645,8 +676,8 @@ file named. They are stated as facts about the code, not as aspirations.
 | iOS consent capture | Kritik `F-2026-08-GDP-ios-04` |
 | Android consent capture | Kritik `F-2026-08-GDP-android-02` |
 | Sensitive-column inventory plus a CI guard against sensitive fields reaching a log or analytics sink | Kritik `F-2026-08-GDP-supabase-02` |
-| Documented Art. 33/34 breach-notification procedure | Not yet tracked — **Q7** |
-| A decision on how a third party named as a soul would exercise their rights | Not yet tracked — **Q8** |
+| Written Art. 33/34 breach-notification procedure | Threshold **decided** (**Q7**, 2026-09-11): any exposure of pebble data is notifiable. The procedure has to be written to that threshold. Not yet tracked as an issue |
+| Soul rights-request position — **decided, no build required** (**Q8**, 2026-09-11): declined absent a legal order (§3.5). Carried here only so the decision is visible alongside the outstanding work | Standing policy; nothing to schedule |
 
 **Why new-account capture takes two mechanisms.**
 `apps/web/app/login/page.tsx:87,98` wires `signInWithGoogle` / `signInWithApple`
@@ -683,10 +714,17 @@ Two further triggers follow from the reasoning in this document specifically:
 > `CLAUDE.md`, learnings are promoted at the audit grooming pass at milestone
 > boundaries, never per-PR — so it lives here until then.
 
-## 6. Open questions for the controller
+## 6. Controller decisions
 
-Each of these is a judgement call that could not be resolved from the repository.
-None is guessed at in the body above.
+Ten judgement calls that could not be resolved from the repository were put to
+the controller. **Eight are decided; two remain open — Q1 (controller contact
+details) and Q4 (the two stated retention periods).** Each item below keeps the
+reasoning that was weighed, so the record shows the basis for the answer and not
+only the answer. Decisions are dated 2026-09-11.
+
+Deciding eight questions is not validating the assessment. §7 remains unsigned.
+
+### Still open
 
 **Q1 — The controller's postal address and telephone are unpublished, in eight
 places: three documents, each in two languages, and two of them carry the pair
@@ -714,6 +752,28 @@ state the controller's full identity (§1.1).
 **Tracked as issue #779, outside this stack.** It is recorded here because an
 impact assessment that could not name its controller would be incomplete without
 saying why.
+
+**Decision (2026-09-11): deferred.** Address and telephone stay unpublished
+for now; the controller may publish a domiciliation address rather than a home
+one, and will decide separately. Tracked as issue #779, outside this stack. §1.1
+therefore remains incomplete, with the reason stated rather than the gap hidden.
+**This is one of the two outstanding items.**
+
+**Q4 — The two retention periods the policy states are not evidenced anywhere in
+this repo.** Auth logs for 12 months (§8.3) and backups for 90 days (§8.5) are
+both Supabase platform behaviours that depend on plan and dashboard
+configuration. The controller should confirm the actual configured values and
+whether they are contractually guaranteed, since the policy states them as
+commitments.
+
+**Decision (2026-09-11): pending verification.** The controller will confirm
+the configured values in the Supabase dashboard. Sharpened in the meantime: the
+policy states both figures to users as **commitments, not estimates**, so each is
+currently a promise the controller cannot evidence. Until verified, neither
+figure should be relied on in any response to a data subject.
+**This is the second outstanding item.**
+
+### Decided
 
 **Q2 — Three processing operations are declared to users across the published
 document set and do not exist in the code.** Therapist access, HealthKit and
@@ -750,6 +810,22 @@ The same question covers "Cairns" as an indefinitely-retained aggregate (policy
 §8.4), which are computed client-side in `WeekRoll` / `WeekRollCairn` and stored
 nowhere.
 
+**Decision (2026-09-11): all four abandoned and scheduled for removal.**
+Therapist access, HealthKit and Google Gemma will not be built, and every
+declaration of them comes out of the privacy policy, the Terms and the Credits
+page. "Cairns" as a stored, indefinitely retained aggregate also comes out: the
+feature exists, but the policy §8.4 claim that it is retained data is simply
+wrong, since cairns are computed client-side and stored nowhere.
+
+The removal decision **moots the second fork** put in this question. Terms §7 was
+flagged as possibly needing correction ahead of the roadmap decision; with the
+roadmap decision being "abandoned", §7 goes with the rest and there is no longer
+a sequencing question to answer.
+
+The document surgery is tracked as a separate issue against
+`F-2026-08-GDP-web-03`. **This stack does not perform it**, so the published
+documents still carry the declarations until that issue lands.
+
 **Q3 — Is life-of-account the intended retention for journal content?** There is
 no ageing-out, no archival tier and no pruning job, so the current behaviour is
 as much an absence as a decision. For a re-reading product indefinite retention
@@ -757,12 +833,10 @@ is defensible, but Art. 5(1)(e) wants it stated and justified rather than
 inherited. A stated policy — "kept until you delete your account or the pebble"
 — would close it.
 
-**Q4 — The two retention periods the policy states are not evidenced anywhere in
-this repo.** Auth logs for 12 months (§8.3) and backups for 90 days (§8.5) are
-both Supabase platform behaviours that depend on plan and dashboard
-configuration. The controller should confirm the actual configured values and
-whether they are contractually guaranteed, since the policy states them as
-commitments.
+**Decision (2026-09-11): life-of-account, stated explicitly.** Retention is
+deliberate, not an artefact of there being no pruning job, and the policy will
+say so in the user's own terms: *kept until you delete your account or the
+pebble*. §2.2 records it as a decision.
 
 **Q5 — How long should a consent record outlive the account?** Art. 7(1)
 accountability argues for keeping proof of consent after processing ends; Art.
@@ -778,12 +852,31 @@ older document version was consented to. Whether those warrant the same lifetime
 is precisely the judgement being put to the controller here, and this assessment
 does not presume it.
 
+**Decision (2026-09-11): delete everything, as planned.** `user_consents`
+is erased by `purge_account` along with every other row. The reasoning accepted:
+once the data subject is gone there is no one to demonstrate anything to, and
+retaining a consent record after erasing the data it authorised would be the
+harder position to defend. The two-kinds distinction drawn above stands as
+analysis, but the answer is the same for `withdrawn_at` and `superseded_at` rows
+alike.
+
 **Q6 — Deletion is immediate; the policy promises a 30-day window.** The system
 erases in one transaction with no grace period, while §8.1 and §9.3 describe up
 to 30 days. Should the text be corrected to match the system (immediate, and
 better), or should a grace period actually be built — which would give users a
 recovery path from accidental deletion, at the cost of holding Art. 9 data after
 a request to erase it? These are opposite answers and both are defensible.
+
+**Decision (2026-09-11): correct the text; build no grace period.**
+Deletion stays immediate and irreversible; the policy's 30-day promise is the
+thing that is wrong, and §8.1 and §9.3 will be corrected. This is the better
+privacy posture, and it is deliberately chosen as such.
+
+It carries one consequence that belongs in the open rather than buried: **immediate
+erasure combined with the absent data export (Art. 20, §2.3) means a user who
+deletes their account has no recovery path of any kind.** Neither decision is
+wrong on its own; together they make export more pressing than its P2 priority
+suggests.
 
 **Q7 — What is the notification threshold for a breach here?** No procedure
 exists (§4.2 carries the action). The decision that has to precede writing one is
@@ -797,6 +890,13 @@ no emotional content, and notifying on it would dilute the signal of a real one.
 The first is simpler to execute alone and harder to get wrong under time
 pressure; the second is proportionate but requires a judgement call inside 72
 hours. The answer determines what the procedure has to contain.
+
+**Decision (2026-09-11): any pebble-data exposure is notifiable.** The
+first option is adopted. Every pebble record is Art. 9 data and the controller
+cannot know what a given person wrote, so the threshold is not attempted case by
+case. Chosen for being executable by one person under a 72-hour clock: a bright
+line needs no judgement call at the worst possible moment. The breach procedure
+(§4.2) has to be written to this threshold.
 
 **Q8 — What is the default answer to an Art. 15 or Art. 17 request from a person
 named as a soul?** §3.5 concludes no technical control can reach them, so the
@@ -812,12 +912,26 @@ data is identifiable by name and the effort is only disproportionate because no
 tooling was built for it. The position should be recorded before a request
 arrives, not after.
 
+**Decision (2026-09-11): decline absent a legal order.** This is the
+standing position, established before any request arrives. The Art. 11(2)
+reasoning is adopted: answering would mean searching other users' private
+journals for a name, which is both a disclosure risk to those users and
+processing they never agreed to. §3.5 records it as stated policy rather than an
+unanswered gap.
+
 **Q9 — Is the §3.5 household-exemption reasoning accepted as drafted?** This
 assessment argues the exemption covers the user but never the controller, and
 weakens as sharing widens. That is a legal characterisation offered by an
 engineering agent, and it is the single most consequential judgement in this
 document: if a reviewer disagrees, the lawful basis for `souls` (map operation
 #4, currently 6(1)(f)) and the whole of §3.5 need rework.
+
+**Decision (2026-09-11): accepted as drafted.** The household-exemption
+reasoning stands, and `souls` keeps 6(1)(f) in the lawful-basis map. Accepted
+explicitly as the **conservative reading** — it assumes the controller's
+obligations are undiminished and that the exemption weakens as sharing widens, so
+if the characterisation is wrong it is wrong in the direction that over-protects
+the data subject.
 
 **Q10 — Was a prior consultation under Art. 36 considered?** Prior consultation is
 required only where residual risk remains high after mitigation. This assessment
@@ -826,7 +940,19 @@ does not conclude that it does, but it does leave two "significant" residual ris
 way, since "we did not consider it" and "we considered it and concluded it was
 not required" are different positions on the record.
 
+**Decision (2026-09-11): considered; not required.** Art. 36 prior
+consultation was considered and concluded not to be required, because this
+assessment does not find residual risk remaining high after mitigation. The two
+"significant" residuals (§3.3, §3.5) are not assessed as *high* in the Art. 36
+sense. Recorded deliberately: "considered and concluded not required" is a
+materially different position on the record from silence.
+
 ## 7. Validation (unsigned)
+
+**This assessment has not been validated.** The controller answered eight of the
+ten questions in §6 on 2026-09-11 and left two open; that is a record of
+decisions, not a signature. The fields below stay empty until the controller
+validates the assessment as a whole.
 
 | | |
 |---|---|
