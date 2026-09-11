@@ -2,9 +2,9 @@
 title: Privacy Policy
 locale: en
 slug: privacy
-version: 1.1.0
+version: 1.2.0
 effective_date: 2026-09-04
-last_updated: 2026-09-04
+last_updated: 2026-09-12
 ---
 
 # Privacy Policy for Pebbles
@@ -90,13 +90,13 @@ Processing of the following data is necessary to perform the Pebbles service agr
 
 ### 3.2 Explicit Consent (Art. 9(2)(a))
 
-The following data constitutes special category personal data within the meaning of Article 9 of the GDPR and is processed only with your explicit consent, which you provide during onboarding:
+The following data constitutes special category personal data within the meaning of Article 9 of the GDPR and is processed only with your explicit consent, which you give when you create your account:
 - Moods and emotion labels (qualified as health data)
 - CBT reflections and personal analysis
 - Social sharing (if enabled)
 - Therapist access (if applicable)
 
-You may withdraw your consent at any time without affecting the lawfulness of prior processing.
+You may withdraw your consent at any time. Section 4.3 explains how, and what withdrawal means in practice.
 
 ### 3.3 Legitimate Interest (Art. 6(1)(f))
 
@@ -119,13 +119,17 @@ The moods, emotions, and CBT reflections you record in Pebbles may be qualified 
 ### 4.2 Processing and Consent
 
 This data is processed only:
-- On the basis of your explicit consent, obtained during onboarding;
+- On the basis of your explicit consent, given when you create your account;
 - With your full control over who accesses it (you alone, unless you grant access to a therapist);
 - Solely for purposes of personal improvement, memory collection, and, if applicable, therapeutic support.
 
 ### 4.3 Right to Withdraw Consent
 
-You may withdraw your consent at any time via your profile. Withdrawal of consent does not render prior processing unlawful.
+You may withdraw your consent at any time from Settings.
+
+Pebbles cannot operate without permission to record how you feel: that processing is the service itself. Withdrawing your consent therefore closes your account and permanently erases everything in it, including your pebbles, photos, souls, collections, glyphs and karma. Glyphs other pebblers bought stay available to them, without your name attached. Withdrawal does not render prior processing unlawful.
+
+Permission to publish your public profile is separate. You can turn it off at any time from Settings without closing your account, and your profile becomes private again immediately.
 
 ### 4.4 HealthKit (if applicable)
 

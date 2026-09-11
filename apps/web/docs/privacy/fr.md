@@ -2,9 +2,9 @@
 title: Politique de confidentialité
 locale: fr
 slug: privacy
-version: 1.1.0
+version: 1.2.0
 effective_date: 2026-09-04
-last_updated: 2026-09-04
+last_updated: 2026-09-12
 ---
 
 # Politique de Confidentialité de Pebbles
@@ -78,13 +78,13 @@ Le traitement des données suivantes est nécessaire à l'exécution du contrat 
 
 ### 3.2 Consentement Explicite (Art. 9(2)(a))
 
-Les données suivantes constituent des données à caractère personnel sensible au sens de l'article 9 du RGPD et sont traitées uniquement avec votre consentement explicite, que vous accordez lors de l'onboarding :
+Les données suivantes constituent des données à caractère personnel sensible au sens de l'article 9 du RGPD et sont traitées uniquement avec votre consentement explicite, que vous accordez lors de la création de votre compte :
 - Humeurs et étiquettes d'émotions (qualifiées de données de santé)
 - Réflexions TCC et analyse personnelle
 - Partage social (si activé)
 - Accès thérapeute (si applicable)
 
-Vous pouvez retirer votre consentement à tout moment sans affecter la licéité des traitements antérieurs.
+Vous pouvez retirer votre consentement à tout moment. La section 4.3 explique comment, et ce que le retrait implique concrètement.
 
 ### 3.3 Intérêt Légitime (Art. 6(1)(f))
 
@@ -105,13 +105,17 @@ Les humeurs, émotions et réflexions TCC que vous enregistrez dans Pebbles peuv
 ### 4.2 Traitement et Consentement
 
 Ces données ne sont traitées que :
-- Sur la base de votre consentement explicite, obtenu lors de l'onboarding ;
+- Sur la base de votre consentement explicite, obtenu lors de la création de votre compte ;
 - Avec votre contrôle total sur qui y accède (vous seul, sauf si vous accordez l'accès à un thérapeute) ;
 - Uniquement à des fins d'amélioration personnelle, de collecte de souvenirs et, si applicable, de soutien thérapeutique.
 
 ### 4.3 Droit de Retrait
 
-Vous pouvez retirer votre consentement à tout moment via votre profil. Le retrait du consentement ne rend pas le traitement antérieur illicite.
+Vous pouvez retirer votre consentement à tout moment depuis les Réglages.
+
+Pebbles ne peut pas fonctionner sans l'autorisation d'enregistrer ce que vous ressentez : ce traitement constitue le service lui-même. Le retrait de votre consentement ferme donc votre compte et efface définitivement tout ce qu'il contient, y compris vos galets, vos photos, vos âmes, vos collections, vos glyphes et votre karma. Les glyphes achetés par d'autres personnes restent disponibles pour elles, sans votre nom. Le retrait ne rend pas le traitement antérieur illicite.
+
+L'autorisation de publier votre profil public est distincte. Vous pouvez la désactiver à tout moment depuis les Réglages sans fermer votre compte, et votre profil redevient immédiatement privé.
 
 ### 4.4 HealthKit (si applicable)
 
