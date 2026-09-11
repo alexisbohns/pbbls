@@ -1401,9 +1401,19 @@ consent record. Kritik `F-2026-08-GDP-web-02` names this path explicitly.
 **The gate must not fire for the existing cohort.** Re-consenting accounts
 created before this stack is M55 work, accepted as out of scope. The signal that
 separates the two is `profiles.onboarding_completed`: a brand-new account is
-`false` and lands on `/onboarding`; an established account is `true` and never
-routes there. So gating inside onboarding, on the absence of an active consent,
-catches exactly the new consent-less accounts and nobody else.
+`false`, an established account is `true`.
+
+**Routing is not enough — read this before you write the condition.** No route
+sends an established account to `/onboarding`, but nothing stops one *arriving*
+there: `components/onboarding/OnboardingGate.tsx:14` early-returns for
+`pathname.startsWith("/onboarding")`, so it deliberately does not police that
+route in the other direction, and `app/onboarding/page.tsx` renders the stepper
+unconditionally. A bookmark, a typed URL or a back-navigation therefore lands an
+established account on `/onboarding` — and every pre-existing account has no
+active `health_data` consent, so a gate keyed on the consent alone would fire for
+exactly the population that is out of scope. **The condition must test
+`onboarding_completed` as well**, which is what makes "cannot fire for the
+existing cohort" true rather than merely usually true.
 
 - [ ] **Step 1: Read how onboarding renders today**
 
@@ -1493,32 +1503,46 @@ import { useConsents } from "@/lib/data/useConsents"
 and inside the component, before the existing render:
 
 ```tsx
+  const { profile, isProfileLoading } = useAuth()
   const { healthData: healthConsent, isLoading: consentsLoading, record } = useConsents()
 
-  // An account can only reach onboarding without a consent record through the
-  // login page's OAuth buttons (F-2026-08-GDP-web-02). Established accounts
-  // never route here at all — onboarding_completed is true for them — so this
-  // cannot fire for the pre-existing cohort, which is M55 re-consent work.
-  if (consentsLoading) return null
-  if (!healthConsent) {
+  // An account can only reach onboarding WITHOUT a consent record by signing in
+  // through the login page's OAuth buttons (F-2026-08-GDP-web-02): /register
+  // gates all three of its paths on the checkbox.
+  //
+  // Both conditions are load-bearing. Every pre-existing account also lacks an
+  // active consent, and nothing prevents one landing here by bookmark or typed
+  // URL — OnboardingGate deliberately does not police this route. Testing
+  // onboarding_completed too is what keeps the gate off the M55 cohort.
+  if (consentsLoading || isProfileLoading) return null
+  if (!healthConsent && !profile?.onboarding_completed) {
     return <ConsentGate onAccept={() => record("health_data", "web_oauth")} />
   }
 ```
 
-Place it after any existing auth/loading guards, so an unauthenticated visitor is still redirected first.
+Add `import { useAuth } from "@/lib/data/auth-context"` alongside the others.
+Place the block after any existing auth/loading guards, so an unauthenticated
+visitor is still redirected first.
 
 - [ ] **Step 4: Typecheck**
 
 Run: `npm run build --workspace=apps/web`
 Expected: succeeds.
 
-- [ ] **Step 5: Verify the gate does not catch established accounts**
+- [ ] **Step 5: Verify the gate cannot catch established accounts**
 
-Read `apps/web/app/auth/callback/route.ts` and confirm the destination line still
-sends `onboarding_completed === true` users to `next ?? "/path"` and never to
-`/onboarding`. If that is not true, stop — the gate would fire for every
-existing user on every OAuth login, which is precisely the scope that was ruled
-out. Report it rather than working around it.
+Two checks, because routing alone does not establish this.
+
+**Routing.** Read `apps/web/app/auth/callback/route.ts` and confirm the
+destination line still sends `onboarding_completed === true` users to
+`next ?? "/path"` and never to `/onboarding`.
+
+**Direct arrival.** Confirm your condition tests `profile?.onboarding_completed`
+and not the consent alone. Then prove it: sign in as an account that has
+completed onboarding, navigate to `/onboarding` directly, and confirm the
+stepper renders rather than the consent gate. An established account seeing the
+gate is the M55 cohort being re-consented early, which is exactly the scope that
+was ruled out — stop and report it rather than working around it.
 
 - [ ] **Step 6: Commit**
 
