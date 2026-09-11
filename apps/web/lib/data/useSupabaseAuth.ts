@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { createClient } from "@/lib/supabase/client"
 import { withTimeout } from "@/lib/utils/with-timeout"
 import { isSafeRelativePath } from "@/lib/utils/safe-relative-path"
+import { CONSENT_DOCUMENT_VERSION } from "@/lib/config/consent"
 
 import type {
   Account,
@@ -24,12 +25,21 @@ function getSupabase() {
 
 /**
  * OAuth callback URL, optionally carrying a validated post-auth destination
- * (M49, design D12). A `next` that is not strictly relative is dropped — the
- * callback route re-validates on its side regardless.
+ * (M49, design D12) and the Art. 9 consent act. A `next` that is not strictly
+ * relative is dropped — the callback route re-validates on its side regardless.
+ *
+ * The consent rides the URL because no signup metadata survives an OAuth round
+ * trip, and the callback route is server-side so the record survives whatever
+ * the tab does next. It is not an attack surface: the parameter can only record
+ * consent for whoever completes the code exchange, which is that person.
  */
-function buildCallbackUrl(next?: string): string {
+function buildCallbackUrl(next?: string, consentVersion?: string): string {
   const base = `${window.location.origin}/auth/callback`
-  return isSafeRelativePath(next) ? `${base}?next=${encodeURIComponent(next)}` : base
+  const params = new URLSearchParams()
+  if (isSafeRelativePath(next)) params.set("next", next)
+  if (consentVersion) params.set("consent", consentVersion)
+  const query = params.toString()
+  return query ? `${base}?${query}` : base
 }
 
 export function useSupabaseAuth(): AuthContextValue {
@@ -150,28 +160,33 @@ export function useSupabaseAuth(): AuthContextValue {
         data: {
           terms_accepted_at: input.terms_accepted ? new Date().toISOString() : null,
           privacy_accepted_at: input.privacy_accepted ? new Date().toISOString() : null,
+          // handle_new_user turns these two into the user_consents row. Sent as
+          // metadata rather than a post-signup RPC because there is no session
+          // yet when email confirmations are on, so a client call would be lost.
+          health_data_consent_at: input.health_data_consent ? new Date().toISOString() : null,
+          health_data_consent_version: input.health_data_consent ? CONSENT_DOCUMENT_VERSION : null,
         },
       },
     })
     if (error) throw new Error(error.message)
   }, [])
 
-  const signInWithApple = useCallback(async (next?: string) => {
+  const signInWithApple = useCallback(async (next?: string, consentVersion?: string) => {
     const supabase = getSupabase()
     if (!supabase) throw new Error("Supabase client not available")
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "apple",
-      options: { redirectTo: buildCallbackUrl(next) },
+      options: { redirectTo: buildCallbackUrl(next, consentVersion) },
     })
     if (error) throw new Error(error.message)
   }, [])
 
-  const signInWithGoogle = useCallback(async (next?: string) => {
+  const signInWithGoogle = useCallback(async (next?: string, consentVersion?: string) => {
     const supabase = getSupabase()
     if (!supabase) throw new Error("Supabase client not available")
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: buildCallbackUrl(next) },
+      options: { redirectTo: buildCallbackUrl(next, consentVersion) },
     })
     if (error) throw new Error(error.message)
   }, [])

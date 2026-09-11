@@ -35,10 +35,13 @@ export type AuthContextValue = {
   /**
    * OAuth sign-in. `next` is an optional, strictly relative post-auth
    * destination threaded through the callback's `?next=` param (M49, D12);
-   * anything not strictly relative is dropped.
+   * anything not strictly relative is dropped. `consentVersion` is the Art. 9
+   * consent act, carried on the callback's `?consent=` param so the server-side
+   * callback route can record it — OAuth signup has no signup metadata to hold
+   * it. Omit it on paths that are not collecting consent.
    */
-  signInWithApple(next?: string): Promise<void>
-  signInWithGoogle(next?: string): Promise<void>
+  signInWithApple(next?: string, consentVersion?: string): Promise<void>
+  signInWithGoogle(next?: string, consentVersion?: string): Promise<void>
   logout(): Promise<void>
   updateProfile(input: UpdateProfileInput): Promise<Profile>
   /**

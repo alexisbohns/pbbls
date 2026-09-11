@@ -385,6 +385,8 @@ export type RegisterInput = {
   password: string
   terms_accepted: boolean
   privacy_accepted: boolean
+  /** Art. 9 explicit consent for emotional/health-adjacent data. */
+  health_data_consent: boolean
 }
 export type LoginInput = { email: string; password: string }
 // `handle` is deliberately excluded: claiming/releasing a handle goes through
