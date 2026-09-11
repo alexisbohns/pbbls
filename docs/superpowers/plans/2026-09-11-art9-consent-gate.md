@@ -1844,16 +1844,35 @@ with:
 
 Note `withdrawConsent` already sets `profiles.public_profile = false` server-side, so the `updates` field is deliberately not set on that branch.
 
-**Handle `no_active_consent` (`P0002`) deliberately.** `withdraw_consent` raises
-when it finds nothing to withdraw — the asymmetry with the idempotent
-`record_consent` is intentional, because a withdrawal that matches no row means
-the client's model of consent state disagrees with the database, and for an
-accountability record that disagreement should be loud rather than swallowed.
-But it must not reach the user as a raw error toast: the toggle was rendered
-from a `select` on the same table, so this is a double-submit or a genuine bug,
-not a normal flow. Catch it specifically, log it with `console.error`, call the
-hook's `refresh()` so the UI reconciles to the true state, and show the ordinary
-save-error toast. Do not soften the RPC to a no-op to avoid handling this.
+**Handle `no_active_consent` deliberately — there are three ways to reach it.**
+`withdraw_consent` raises when it finds nothing to withdraw, and the asymmetry
+with the idempotent `record_consent` is intentional: a withdrawal that matches
+no row means someone's model of consent state is wrong, and for an
+accountability record that should be loud rather than swallowed. But it must
+never reach the user as a raw error toast, because one of its causes is a
+completely ordinary user.
+
+1. **A user who was already public before this stack shipped.** They have
+   `profiles.public_profile = true` and no consent row at all. Routing "turn off
+   my public profile" through `withdraw_consent` raises, and **leaves them
+   published** — the worst outcome of the three, and the one the happy path
+   walks straight into. Handle it: on `no_active_consent` for
+   `public_profile`, fall back to writing `public_profile = false` directly
+   through `updateProfile`, so the user's intent is honoured even though there
+   was no consent row to withdraw.
+2. **A double-submit**, or a genuine bug where the UI's state disagrees with the
+   database.
+3. **A rare race** — a `record_consent` at a bumped policy version committing
+   between this statement's snapshot and its row lock makes the old row
+   superseded and the new one invisible for one statement. Self-correcting on
+   retry.
+
+For causes 2 and 3: log with `console.error`, call the hook's `refresh()` so the
+UI reconciles to the true state, and show the ordinary save-error toast. Match
+the error on its message (`message.includes("no_active_consent")`), the way
+`useSupabaseAuth` consumes `set_handle`'s codes — the RPC raises it bare, not
+with a distinguishing SQLSTATE. Do not soften the RPC to a no-op to avoid any of
+this.
 
 - [ ] **Step 3: Name the toggle as consent**
 
