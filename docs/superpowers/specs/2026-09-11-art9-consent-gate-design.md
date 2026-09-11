@@ -90,6 +90,7 @@ the audit did not record.
 | # | Decision | Rejected alternative |
 |---|---|---|
 | D1 | Consent is captured by a **third checkbox on `/register`**, gating the email submit **and both OAuth buttons**. | A blocking post-auth gate before onboarding. It would have covered existing accounts and made the policy's "during onboarding" wording true, at the cost of a new interstitial on every path. Deferred to M55's re-consent surface. |
+| D1a | **Amended 2026-09-11.** The login page's OAuth buttons also create first-time accounts (`app/login/page.tsx:87,98`), which a `/register` checkbox structurally cannot reach. A consent gate inside onboarding, keyed on `profiles.onboarding_completed`, catches exactly those accounts. | Copying the checkboxes onto `/login` (asks returning users to re-consent on every login) or removing OAuth from `/login` (degrades a working path for existing users). |
 | D2 | Core consent is **required**; withdrawing it routes to account deletion, stated plainly. | A read-only "frozen" account. Retaining Art. 9 data after withdrawal is arguably worse than erasing it, and it needs a server-side write gate on every path. |
 | D3 | The **public-profile toggle is reframed** as a separately withdrawable enlargement consent, in place. | Layered granular consents for sharing, connections and photos. More defensible, but adds gates on several write paths and needs a full policy rewrite. |
 | D4 | Consent is a **ledger of acts** bound to a document version, in `user_consents`. | Two more nullable timestamps on `profiles`. No history, no version binding, and withdrawal and re-consent would overwrite each other. |
@@ -329,11 +330,22 @@ Each becomes a follow-on issue, and the resolution note on
 | Android consent capture | Separate codebase, separate finding | `F-2026-08-GDP-android-02` |
 | Sensitive-column inventory / CI sink guard | Schema annotation work, separate finding | `F-2026-08-GDP-supabase-02` |
 | Analytics minimum-cohort threshold | Admin surface, separate finding | `F-2026-08-GDP-admin-06` |
-| Art. 20 data export | Not raised by this finding; named as a gap in the DPIA | new issue |
+| Art. 20 data export | Not raised by this finding; named as a gap in the DPIA | **already tracked** as `F-2026-08-GDP-web-04` (P2) — no new issue needed |
+| Login-time re-consent when the policy version moves | Needs a surface this stack does not build | the remaining half of `F-2026-08-GDP-web-06` |
 
 **So: this stack resolves `F-2026-08-GDP-web-01` for new web accounts, and
 resolves the DPIA half of all five findings.** The web finding's own resolution
 therefore depends on accepting the existing-cohort gap as M55 work.
+
+**Three findings, not one.** A review pass over the open web findings (2026-09-11,
+after the spec was approved) found two more that this stack closes, and one that
+it does not but that already has a finding of its own:
+
+| Finding | Title | This stack |
+|---|---|---|
+| `F-2026-08-GDP-web-02` (P1) | OAuth signup paths create accounts with no consent record | **resolved**, including the login-page path (D1a) |
+| `F-2026-08-GDP-web-06` (P2) | Consent records carry no document version; no withdrawal short of deletion | **substantially resolved** — `document_version` and the settings withdrawal; the login-time re-consent trigger stays M55 |
+| `F-2026-08-GDP-web-04` (P2) | No data export (Art. 20) | not addressed; already tracked, so §11 needs no new issue for it |
 
 **Maintainer decision (2026-09-11): accepted as a resolution.** Pebbles is in
 beta, so the existing cohort is small and largely the maintainer's own test
@@ -377,3 +389,9 @@ re-litigate both.
 | 3 | `[Feat] Capture explicit Art. 9 consent at web signup, OAuth included` | `feat` | `auth`, `web` | M55 |
 | 4 | `[Feat] Consent withdrawal surface in web settings` | `feat` | `auth`, `web` | M55 |
 | 5 | `[Fix] Correct the privacy policy's Art. 9 consent and withdrawal claims` | `fix` | `legal`, `web` | M55 |
+
+Created as #774-#778. A sixth issue, **#779**, came out of the DPIA work and is
+deliberately outside this stack: both published legal documents ship with
+unfilled `[adresse]` / `[téléphone]` / `[address]` placeholders (Art. 13(1)(a)),
+and the fix needs the maintainer's real contact details rather than an
+engineering change. No Kritik finding covers it.
