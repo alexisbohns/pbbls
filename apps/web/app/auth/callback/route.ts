@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { isSafeRelativePath } from "@/lib/utils/safe-relative-path"
+import { CONSENT_DOCUMENT_VERSION } from "@/lib/config/consent"
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -31,6 +32,41 @@ export async function GET(request: Request) {
   if (!user) {
     console.error("[auth/callback] getUser() returned null after successful code exchange")
     return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`)
+  }
+
+  // Art. 9 consent from the OAuth path. The register page put the policy
+  // version on the callback URL because no signup metadata survives an OAuth
+  // round trip; recording it here rather than client-side means it survives
+  // whatever the tab does after the redirect.
+  //
+  // record_consent is idempotent, so a replayed callback is a no-op. A failure
+  // must never block the sign-in — it is logged loudly instead, because a
+  // silently missing consent record is the exact defect this change fixes.
+  //
+  // The only legitimate caller is our own buildCallbackUrl, which always sends
+  // the current CONSENT_DOCUMENT_VERSION — there is no flow where an older or
+  // different version is a valid value here (unlike a ledger row itself, which
+  // may legitimately cite an older version recorded at the time). Anything
+  // else is either a stale client bundle or a crafted parameter, and the
+  // ledger is an accountability record: a garbage document_version is worse
+  // than a missing row, since a missing row is at least visibly absent. So we
+  // validate against the known-good value rather than trusting it verbatim.
+  const consentVersion = searchParams.get("consent")
+  if (consentVersion) {
+    if (consentVersion !== CONSENT_DOCUMENT_VERSION) {
+      console.error(
+        `[auth/callback] ignoring consent param with unexpected version: ${consentVersion}`,
+      )
+    } else {
+      const { error: consentError } = await supabase.rpc("record_consent", {
+        p_kind: "health_data",
+        p_document_version: consentVersion,
+        p_source: "web_oauth",
+      })
+      if (consentError) {
+        console.error("[auth/callback] record_consent failed:", consentError.message)
+      }
+    }
   }
 
   const { data: profile } = await supabase
