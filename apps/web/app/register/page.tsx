@@ -5,6 +5,8 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/data/auth-context"
+import { canSubmitRegistration } from "@/lib/auth/registration-gate"
+import { CONSENT_DOCUMENT_VERSION } from "@/lib/config/consent"
 import { isSafeRelativePath } from "@/lib/utils/safe-relative-path"
 import { hasDisallowedEmailChar, normalizeEmailInput } from "@/lib/utils/email-input"
 import { Button } from "@/components/ui/button"
@@ -24,6 +26,7 @@ export default function RegisterPage() {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
+  const [healthConsent, setHealthConsent] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [emailError, setEmailError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -35,6 +38,12 @@ export default function RegisterPage() {
     const params = new URLSearchParams(window.location.search)
     const value = params.get("next")
     return isSafeRelativePath(value) ? value : null
+  })
+
+  const consentsAccepted = canSubmitRegistration({
+    terms: termsAccepted,
+    privacy: privacyAccepted,
+    healthData: healthConsent,
   })
 
   useEffect(() => {
@@ -75,7 +84,7 @@ export default function RegisterPage() {
       return
     }
 
-    if (!termsAccepted || !privacyAccepted) {
+    if (!consentsAccepted) {
       setError(tErrors("mustAcceptLegal"))
       return
     }
@@ -87,6 +96,7 @@ export default function RegisterPage() {
         password,
         terms_accepted: termsAccepted,
         privacy_accepted: privacyAccepted,
+        health_data_consent: healthConsent,
       })
     } catch (err) {
       const message =
@@ -99,7 +109,7 @@ export default function RegisterPage() {
   const handleGoogleSignIn = async () => {
     setError(null)
     try {
-      await signInWithGoogle(next ?? undefined)
+      await signInWithGoogle(next ?? undefined, CONSENT_DOCUMENT_VERSION)
     } catch (err) {
       const message =
         err instanceof Error ? err.message : tErrors("generic")
@@ -110,7 +120,7 @@ export default function RegisterPage() {
   const handleAppleSignIn = async () => {
     setError(null)
     try {
-      await signInWithApple(next ?? undefined)
+      await signInWithApple(next ?? undefined, CONSENT_DOCUMENT_VERSION)
     } catch (err) {
       const message =
         err instanceof Error ? err.message : tErrors("generic")
@@ -230,17 +240,32 @@ export default function RegisterPage() {
           </label>
         </div>
 
+        {/* Deliberately not a document link: Art. 9 explicit consent is its own
+            act, and "I accept the Privacy Policy" is exactly what does not
+            qualify as one. */}
+        <div className="flex items-start gap-2 text-left">
+          <Checkbox
+            id="register-health-consent"
+            checked={healthConsent}
+            onCheckedChange={(checked) => setHealthConsent(checked === true)}
+            disabled={submitting}
+            required
+          />
+          <label
+            htmlFor="register-health-consent"
+            className="text-sm text-muted-foreground"
+          >
+            {t("healthConsent")}
+          </label>
+        </div>
+
         {error && (
           <p role="alert" className="text-sm text-destructive">
             {error}
           </p>
         )}
 
-        <Button
-          type="submit"
-          size="lg"
-          disabled={submitting || !termsAccepted || !privacyAccepted}
-        >
+        <Button type="submit" size="lg" disabled={submitting || !consentsAccepted}>
           {submitting ? t("submitting") : t("submit")}
         </Button>
       </form>
@@ -253,11 +278,18 @@ export default function RegisterPage() {
           </span>
         </div>
 
+        {/* A disabled control with no stated reason is a WCAG failure; this
+            hint is what makes the consent gate perceivable. */}
+        <p id="register-oauth-hint" className="text-center text-xs text-muted-foreground">
+          {t("consentRequiredHint")}
+        </p>
+
         <Button
           variant="outline"
           size="lg"
           onClick={handleAppleSignIn}
-          disabled={submitting}
+          disabled={submitting || !consentsAccepted}
+          aria-describedby="register-oauth-hint"
           aria-label={t("appleAria")}
         >
           <svg
@@ -278,7 +310,8 @@ export default function RegisterPage() {
           variant="outline"
           size="lg"
           onClick={handleGoogleSignIn}
-          disabled={submitting}
+          disabled={submitting || !consentsAccepted}
+          aria-describedby="register-oauth-hint"
           aria-label={t("googleAria")}
         >
           <svg
