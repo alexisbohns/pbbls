@@ -217,7 +217,7 @@ dependency appears in `apps/web/package.json`, `apps/admin/package.json`,
 |---|---|---|
 | Deliver the journal: record, re-read, organise and revisit pebbles | Pebbles and every enrichment (cards, domains, souls, snaps, drafts, collections) | Life of the account. Erasure on request is immediate and total (§2.2) |
 | Authenticate and identify | `auth.users`, `profiles.display_name` | Life of the account |
-| Demonstrate consent (accountability, Art. 5(2) / 7(1)) | `profiles.terms_accepted_at`, `privacy_accepted_at` today; the `user_consents` ledger once Part 2 of this stack lands | Life of the account, plus whatever period is needed to evidence past processing. **Not yet decided — see Q5** |
+| Demonstrate consent (accountability, Art. 5(2) / 7(1)) | `profiles.terms_accepted_at`, `privacy_accepted_at` today; the `user_consents` ledger once Part 2 of this stack lands. A row is a consent *act*, not a flag, and it carries **two distinct nullable timestamps**: `withdrawn_at` (the data subject exercised Art. 7(3)) and `superseded_at` (a newer policy version replaced the grant; the person revoked nothing). They are separate columns on purpose — conflating them would make the accountability record assert an act the person never performed, which defeats the point of keeping a ledger. A partial unique index on `(user_id, kind) where withdrawn_at is null and superseded_at is null` makes "at most one active consent per kind" a database invariant. Deliberate deviation from the design spec, recorded in the plan's pre-Task-1 conventions | Life of the account, plus whatever period is needed to evidence past processing. The two timestamps may not warrant the same lifetime. **Not yet decided — see Q5** |
 | Engagement mechanics (karma, bounce, achievements, glyph marketplace) | `karma_events`, `wallet_balances`, `bounces`, `achievement_unlocks`, glyph tables | Life of the account |
 | Social features the user opts into | `connections`, `connection_invites`, `connection_blocks`, `pebbles.visibility`, `profiles.handle` / `public_profile` | Life of the account; invites expire after 7 days by default and are revocable |
 | Operator analytics: understand product use | Aggregate views over `pebbles`, gated behind `is_admin` security-definer RPCs | Derived on read from live rows; nothing separate is stored, so it disappears with the source data. **No minimum-cohort threshold — §3.6** |
@@ -763,7 +763,13 @@ accountability argues for keeping proof of consent after processing ends; Art.
 with everything else. The design as planned deletes `user_consents` in
 `purge_account` along with all other rows. That is the cleaner promise and
 probably the right call, but it is a controller's decision about litigation risk,
-not an engineering one.
+not an engineering one. **And it is really two questions, because the ledger
+distinguishes two kinds of ended consent (§1.5):** a `withdrawn_at` row is the
+evidence that the person exercised Art. 7(3), which is the record a controller
+would most need to produce later; a `superseded_at` row is evidence of what an
+older document version was consented to. Whether those warrant the same lifetime
+is precisely the judgement being put to the controller here, and this assessment
+does not presume it.
 
 **Q6 — Deletion is immediate; the policy promises a 30-day window.** The system
 erases in one transaction with no grace period, while §8.1 and §9.3 describe up
