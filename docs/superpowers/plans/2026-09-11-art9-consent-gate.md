@@ -1544,10 +1544,18 @@ stepper renders rather than the consent gate. An established account seeing the
 gate is the M55 cohort being re-consented early, which is exactly the scope that
 was ruled out — stop and report it rather than working around it.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 6: Close the map's login-page gap**
+
+`docs/compliance/lawful-basis-map.md`'s first "Known gaps" bullet was written in
+Part 2 and says login-page OAuth accounts have no Art. 9 consent record and get
+none until M55. This task is what makes that false. Reword it so the only
+remaining uncovered population is **accounts that existed before this stack**,
+and leave the M55 pointer for those.
+
+- [ ] **Step 7: Commit**
 
 ```bash
-git add apps/web/components/onboarding/ConsentGate.tsx apps/web/app/onboarding/page.tsx
+git add apps/web/components/onboarding/ConsentGate.tsx apps/web/app/onboarding/page.tsx docs/compliance/lawful-basis-map.md
 git commit -m "feat(auth): gate onboarding on Art. 9 consent for OAuth-created accounts"
 ```
 
@@ -1835,6 +1843,17 @@ with:
 ```
 
 Note `withdrawConsent` already sets `profiles.public_profile = false` server-side, so the `updates` field is deliberately not set on that branch.
+
+**Handle `no_active_consent` (`P0002`) deliberately.** `withdraw_consent` raises
+when it finds nothing to withdraw — the asymmetry with the idempotent
+`record_consent` is intentional, because a withdrawal that matches no row means
+the client's model of consent state disagrees with the database, and for an
+accountability record that disagreement should be loud rather than swallowed.
+But it must not reach the user as a raw error toast: the toggle was rendered
+from a `select` on the same table, so this is a double-submit or a genuine bug,
+not a normal flow. Catch it specifically, log it with `console.error`, call the
+hook's `refresh()` so the UI reconciles to the true state, and show the ordinary
+save-error toast. Do not soften the RPC to a no-op to avoid handling this.
 
 - [ ] **Step 3: Name the toggle as consent**
 
