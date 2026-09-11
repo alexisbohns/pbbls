@@ -80,7 +80,9 @@ Branch: `docs/774-dpia`. Docs only. No code, no tests.
 
 - [ ] **Step 1: Create the directory and write the map**
 
-The table must be grounded in the real schema. Read `packages/supabase/supabase/migrations/20260411000001_core_tables.sql` first for the actual column names. Write:
+The table must be grounded in the real schema. Read `packages/supabase/supabase/migrations/20260411000001_core_tables.sql` first for the actual column names.
+
+**The Consent record column describes the state at THIS merge, not the end of the stack.** `user_consents` does not exist until Part 2, so the map must not cite it yet — a map naming a table that does not exist is a map describing a future as a present. Part 2 (Task 3, step 6) updates this column when the table lands. Write:
 
 ```markdown
 # Lawful basis map
@@ -94,12 +96,12 @@ re-dating the assessment.
 | # | Processing operation | Data | Art. 6 basis | Art. 9 condition | Consent record |
 |---|---|---|---|---|---|
 | 1 | Account creation and authentication | email, password hash, `profiles.display_name` | 6(1)(b) contract | n/a | — |
-| 2 | Recording a pebble | `pebbles.intensity`, `positiveness`, `emotion_id`, `description` | 6(1)(a) consent | **9(2)(a) explicit consent** | `user_consents.kind = 'health_data'` |
+| 2 | Recording a pebble | `pebbles.intensity`, `positiveness`, `emotion_id`, `description` | 6(1)(a) consent | **9(2)(a) explicit consent** | none — no dedicated consent capture exists; see gap below |
 | 3 | Photo attachments on a pebble | `snaps`, storage objects | 6(1)(a) consent | 9(2)(a), via #2 | as #2 |
 | 4 | Naming souls in a pebble | `souls`, `pebble_souls` | 6(1)(f) legitimate interest | n/a (third-party data — see DPIA §3) | — |
 | 5 | Reflective cards | `pebble_cards` | 6(1)(a) consent | 9(2)(a), via #2 | as #2 |
 | 6 | Mutual connections and connection-visible pebbles | `connections`, `pebbles.visibility` | 6(1)(a) consent | 9(2)(a), via #2 | as #2 |
-| 7 | Public profile | `profiles.handle`, `public_profile` | 6(1)(a) consent | 9(2)(a) — enlarges #2 to the open web | `user_consents.kind = 'public_profile'` |
+| 7 | Public profile | `profiles.handle`, `public_profile` | 6(1)(a) consent | 9(2)(a) — enlarges #2 to the open web | `profiles.public_profile` (opt-in flag; no separate consent-proof record) |
 | 8 | Public share-by-link of a pebble | `pebbles.visibility = 'public'` | 6(1)(a) consent | 9(2)(a), via #2 | as #2 |
 | 9 | Karma, bounces, achievements | `karma_events`, `bounces`, `achievement_unlocks` | 6(1)(b) contract | n/a | — |
 | 10 | Glyph marketplace | `glyphs`, `glyph_submissions`, `glyph_entitlements` | 6(1)(b) contract | n/a | — |
@@ -108,6 +110,13 @@ re-dating the assessment.
 
 ## Known gaps
 
+- **No dedicated consent record exists for any of the Art. 9(2)(a) conditions
+  claimed above (#2, #3, #5, #6, #8), nor for the public-profile opt-in (#7).**
+  `profiles.terms_accepted_at` / `profiles.privacy_accepted_at` record
+  acceptance of the Terms and Privacy Policy as a whole, at signup — not a
+  distinct, revocable consent to processing mood, emotion and reflection data
+  as special-category health data. This is the Kritik finding this map exists
+  to start closing: `F-2026-08-GDP-web-01`.
 - **#11 aggregates emotion data with no minimum-cohort threshold.** For a week
   with one or two active users the weekly emotion mix is effectively one
   identifiable person's record. Tracked as Kritik `F-2026-08-GDP-admin-06`.
@@ -118,7 +127,9 @@ re-dating the assessment.
 
 - [ ] **Step 2: Verify every table name in the map exists**
 
-Run: `for t in pebbles snaps souls pebble_souls pebble_cards connections profiles karma_events bounces achievement_unlocks glyphs glyph_submissions glyph_entitlements; do grep -qrn "create table public.$t" packages/supabase/supabase/migrations/ && echo "OK $t" || echo "MISSING $t"; done`
+Run: `for t in pebbles snaps souls pebble_souls pebble_cards connections profiles karma_events bounces achievement_unlocks glyphs glyph_submissions glyph_entitlements; do grep -qrnE "create table (if not exists )?public\.$t\b" packages/supabase/supabase/migrations/ && echo "OK $t" || echo "MISSING $t"; done`
+
+Some tables use `create table if not exists` (`bounces` does), hence the optional clause in the pattern — a bare `create table public.x` grep reports a false MISSING for those.
 
 Expected: `OK` for every line. Any `MISSING` means the map cites a table that does not exist — fix the map, do not invent the table.
 
@@ -513,10 +524,27 @@ Expected: the only differences are **additions** — the `declare` block and the
 Run: `npm run db:push --workspace=packages/supabase`
 Expected: the migration applies cleanly against the linked project.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 5: Update the lawful-basis map, now that the table exists**
+
+`docs/compliance/lawful-basis-map.md` was written in Part 1 against a repo with
+no consent table, so its "Consent record" column says none exists. That is now
+out of date. Change:
+
+- row #2's cell to `user_consents.kind = 'health_data'`
+- row #7's cell to `user_consents.kind = 'public_profile'`
+- the first "Known gaps" bullet: keep it, but reword it to the past — the gap
+  described the state before this migration, and the map records that it is
+  closed by `user_consents` for new web accounts, with existing and OAuth
+  accounts still uncovered until the M55 re-consent surface.
+- `**Last reviewed:**` to today's date.
+
+The map is a living reference; leaving it describing a world without the table
+is how the next reader concludes there is no consent record.
+
+- [ ] **Step 6: Commit**
 
 ```bash
-git add packages/supabase/supabase/migrations/20260911090000_user_consents.sql
+git add packages/supabase/supabase/migrations/20260911090000_user_consents.sql docs/compliance/lawful-basis-map.md
 git commit -m "feat(db): record Art. 9 consent as a version-bound ledger"
 ```
 
