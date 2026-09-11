@@ -454,6 +454,14 @@
     }
   },
   "onboarding": {
+    "consent": {
+      "title": "One thing before we start",
+      "body": "Pebbles records how you feel: your moods, the emotions you pick, and what you write. That is sensitive data about your mental well-being, so we need your explicit permission before we keep any of it.",
+      "checkbox": "Yes, Pebbles may record how I feel.",
+      "continue": "Continue",
+      "saving": "Saving…",
+      "error": "Could not save your permission. Please try again."
+    },
     "controlsAria": "Onboarding controls",
     "progressAria": "Onboarding progress",
     "stepAria": "Step {current} of {total}",
