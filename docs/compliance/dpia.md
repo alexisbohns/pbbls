@@ -42,8 +42,8 @@ From `apps/web/docs/legal-notice/en.md` and `apps/web/docs/privacy/en.md` §1:
 | Capacity | Data controller within the meaning of Art. 4(7) |
 | Location | France |
 | Email | hello@bohns.design |
-| Postal address | **Not published.** The legal notice and the policy both carry the placeholder `[adresse]` / `[address]` |
-| Telephone | **Not published.** Same placeholder |
+| Postal address | **Not published** — an unfilled placeholder in every published document (Q1) |
+| Telephone | **Not published** — same (Q1) |
 | Publication director | Alexis Bohn |
 
 The two unfilled placeholders are a live Art. 13(1)(a) defect, not an editorial
@@ -106,7 +106,7 @@ single transaction, immediate, with no grace period (§2.2).
 
 | Table | What it holds | Special category? | Retention |
 |---|---|---|---|
-| `profiles` | display name, colour world, onboarding flag, `terms_accepted_at`, `privacy_accepted_at`, optional public `handle`, `public_profile` flag, profile glyph, `is_admin`, media quota | No, but `handle` + `public_profile` govern exposure of data that is | Life of account; row deleted by purge |
+| `profiles` | display name, colour world, onboarding flag, `terms_accepted_at`, `privacy_accepted_at`, optional public `handle`, `public_profile` flag, profile glyph, `is_admin`, media quota | No. `handle` and `public_profile` are not special category themselves, but they govern whether the profile's activity and badge data becomes public (§3.4) | Life of account; row deleted by purge |
 | `pebbles` | `name`, free-text `description`, `happened_at`, `intensity` (1–3), `positiveness` (−1…1), `emotion_id`, `visibility`, server-composed `render_svg` | **Yes** — the core Art. 9 record | Life of account; deleted by purge |
 | `pebble_cards` | reflective-card answers (free text), CBT-shaped | **Yes** | Cascade from `pebbles` |
 | `pebble_domains` | which life domains a pebble touches | **Yes by association** — ties an emotional state to a life area | Cascade from `pebbles` |
@@ -147,46 +147,17 @@ single transaction, immediate, with no grace period (§2.2).
 | Backups | Supabase-managed | Follows the source | Policy §8.5 states 90 days. **Not evidenced in this repo** — see **Q4** |
 
 **Three processing operations are declared to users but do not exist in the
-code, and they are declared across the whole published document set, not only in
-the privacy policy.** Therapist access, HealthKit and Google Gemma have no
-implementation anywhere in `apps/` or `packages/`. (The only non-markdown mention
-of any of them is a comment at `apps/ios/Pebbles/Resources/PrivacyInfo.xcprivacy:70`
-that exists to *deny* the dependency — it labels moods as Apple's Health data type
-"independently of HealthKit".) What *is* published:
+code:** therapist access, HealthKit and Google Gemma. None has an implementation
+anywhere in `apps/` or `packages/`, yet all three are declared across the privacy
+policy, the Terms and the Credits page, mostly in the present tense. A fourth
+entry, "Cairns", is described in policy §2.2 and §8.4 as an indefinitely retained
+aggregate; it is computed client-side in `WeekRoll` / `WeekRollCairn` and stored
+nowhere.
 
-- **`apps/web/docs/privacy/en.md`** devotes §5 to therapist access with named
-  permissions (`can_view_general`, `can_view_events`), §4.4 to HealthKit, and the
-  whole of §12 to Gemma — §12.1 in the present tense ("Pebbles processes your
-  events with Google Gemma") and §12.4 offering to disable a feature that does
-  not exist.
-- **`apps/web/docs/terms/en.md`** carries thirteen matches for the three terms,
-  including §4.4 "Therapist Access", an entire §7 "Therapist-Specific Terms"
-  (role activation, "Pebbles' approval and verification of professional
-  qualifications", and an allocation of independent-controller status to the
-  therapist), §9 on what therapists lose when an account closes, and §13.3 on
-  HealthKit and biometric data. `fr.md` mirrors it.
-- **`apps/web/docs/credits/{en,fr}.md`** describes Gemma in the present tense as
-  "the language model powering Pebbles' analysis features, with data anonymized
-  before transmission", and HealthKit as `HKStateOfMind` compatibility.
-
-Only `can_view_general` / `can_view_events` genuinely appear nowhere outside the
-privacy policy.
-
-**The one disclaimer that exists is narrower than it looks.** Privacy §6.3 ("not
-active today") and §7.2 ("This feature is not active today") mark the Gemma
-integration as inactive. §12 carries no such marker and reads as live,
-disableable processing; the Terms and Credits carry none either; and nothing
-anywhere marks therapist access or HealthKit as future.
-
-**The Terms are the more serious defect.** A stale privacy paragraph
-over-declares processing. Contractual terms governing the activation, vetting and
-data-protection status of a professional role that the product does not implement
-create obligations around something that cannot be performed, and they invite a
-user to believe a clinician can be given access. Declaring processing that does
-not happen is a transparency defect in its own right, and it inflates the
-apparent scope of this assessment. Recorded as **Q2**; the same inventory notes
-that §2.2's "Cairns" are computed client-side in `WeekRoll` / `WeekRollCairn` and
-are not stored anywhere, contrary to policy §8.4's "retained indefinitely".
+None of the four is processing, so none is inventoried above. They are recorded
+here because declaring processing that does not happen inflates the apparent
+scope of this assessment. **The full enumeration, the disclaimer that covers only
+part of it, and the decisions the controller has to take are in Q2 (§6).**
 
 ### 1.4 Recipients and processors
 
@@ -219,11 +190,23 @@ dependency appears in `apps/web/package.json`, `apps/admin/package.json`,
 |---|---|---|
 | Deliver the journal: record, re-read, organise and revisit pebbles | Pebbles and every enrichment (cards, domains, souls, snaps, drafts, collections) | Life of the account. Erasure on request is immediate and total (§2.2) |
 | Authenticate and identify | `auth.users`, `profiles.display_name` | Life of the account |
-| Demonstrate consent (accountability, Art. 5(2) / 7(1)) | `profiles.terms_accepted_at`, `privacy_accepted_at` today; the `user_consents` ledger once Part 2 of this stack lands. A row will be a consent *act*, not a flag, and will carry **two distinct nullable timestamps**: `withdrawn_at` (the data subject exercised Art. 7(3)) and `superseded_at` (a newer policy version replaced the grant; the person revoked nothing). They are to be separate columns on purpose — conflating them would make the accountability record assert an act the person never performed, which defeats the point of keeping a ledger. A partial unique index on `(user_id, kind) where withdrawn_at is null and superseded_at is null` will make "at most one active consent per kind" a database invariant. Deliberate deviation from the design spec, recorded in the plan's pre-Task-1 conventions | Life of the account, plus whatever period is needed to evidence past processing. The two timestamps may not warrant the same lifetime. **Not yet decided — see Q5** |
+| Demonstrate consent (accountability, Art. 5(2) / 7(1)) | `profiles.terms_accepted_at`, `privacy_accepted_at` today; the `user_consents` ledger once Part 2 lands (see below) | Life of the account, plus whatever period is needed to evidence past processing. **Not yet decided — see Q5** |
 | Engagement mechanics (karma, bounce, achievements, glyph marketplace) | `karma_events`, `wallet_balances`, `bounces`, `achievement_unlocks`, glyph tables | Life of the account |
 | Social features the user opts into | `connections`, `connection_invites`, `connection_blocks`, `pebbles.visibility`, `profiles.handle` / `public_profile` | Life of the account; invites expire after 7 days by default and are revocable |
 | Operator analytics: understand product use | Aggregate views over `pebbles`, gated behind `is_admin` security-definer RPCs | Derived on read from live rows; nothing separate is stored, so it disappears with the source data. **No minimum-cohort threshold — §3.6** |
 | Security and abuse prevention | Supabase auth logs, `connection_blocks`, reserved handles | Policy states 12 months for auth logs (**Q4**) |
+
+**On the consent ledger.** A `user_consents` row will be a consent *act*, not a
+flag, and will carry two distinct nullable timestamps: `withdrawn_at`, meaning
+the data subject exercised Art. 7(3), and `superseded_at`, meaning a newer policy
+version replaced the grant and the person revoked nothing. They are separate
+columns on purpose: conflating them would make the accountability record assert
+an act the person never performed. A partial unique index on
+`(user_id, kind) where withdrawn_at is null and superseded_at is null` will make
+"at most one active consent per kind" a database invariant. This is a deliberate
+deviation from the design spec, recorded in the plan's pre-Task-1 conventions.
+The two timestamps may not warrant the same retention period, which is part of
+what Q5 puts to the controller.
 
 **Retention is, in practice, binary today: data lives while the account lives and
 is gone the moment the account is deleted.** There is no partial ageing-out, no
@@ -345,14 +328,13 @@ exception to "everything is erased" and belongs in the policy too.
 | Art. 7(3) withdrawal of consent | **Not implemented as such** | There is no consent to withdraw, because none is recorded (§2) — the absence of both a withdrawal surface and a document-version binding is Kritik `F-2026-08-GDP-web-06`. After Part 4 of this stack, withdrawal of the core consent routes to account deletion; the public-profile toggle is the one consent that is genuinely withdrawable today, in place |
 | Art. 22 automated decision-making | **Not applicable** | No automated decision produces legal or similarly significant effects. No profiling, scoring or ranking of people exists |
 
-**Art. 20 is the gap this assessment refuses to soften.** A journalling product
-whose whole premise is that "your data remains yours" (policy preamble) and which
-offers total erasure but no way to take a copy out first is in the least
-defensible position of the three options: a user exercising erasure loses
-everything irrecoverably, and a user exercising portability cannot. Erasure
-without export also makes withdrawal-as-deletion (§4.2, design decision D2)
-harsher than it needs to be. Export should be treated as a prerequisite for
-that design, not as an unrelated nice-to-have.
+**Art. 20 is the most consequential gap in this table.** The product offers total
+erasure and no way to take a copy out first, against a stated premise that "your
+data remains yours" (policy preamble). A user exercising erasure loses everything
+irrecoverably; a user exercising portability cannot exercise it at all. The
+absence also bears on withdrawal-as-deletion (§4.2, design decision D2), which is
+harsher without an export than with one. Export is therefore a prerequisite for
+that design rather than an unrelated improvement.
 
 ## 3. Risks to rights and freedoms
 
@@ -373,11 +355,12 @@ personal safety.
 
 **Likelihood: limited.** Every one of the 30 tables in `public` has
 `enable row level security` (verified table by table), and the owner predicate is
-`user_id = auth.uid()`. Cross-user reads do not widen a policy: they go through
-`security definer` projections that build an explicit jsonb allowlist —
-`get_public_profile` (current body `20260817090000`, superseding `20260730120000`)
-and `get_shared_pebble` (`20260817130000`), both of which deliberately omit
-`user_id` and every enrichment table. `anon` is revoked from `public.pebbles` outright. Newer tables
+`user_id = auth.uid()`.
+
+**Existing controls.** Cross-user reads do not widen a policy: they go through
+the two `security definer` allowlist projections catalogued in §4.1, both of
+which omit `user_id` and every enrichment table. `anon` is revoked from
+`public.pebbles` outright. Newer tables
 use the stricter `for all … using … with check` policy shape precisely because
 the older four-policy style omitted `with check` on UPDATE and would have let a
 row be moved to another user's `user_id` (see the comment in
@@ -406,7 +389,8 @@ of the same order as disclosure.
 
 **Likelihood: limited.** Writes are owner-scoped by the same RLS policies as
 reads, and cross-user reads are read-only projections with no write path.
-Multi-table writes go through `security definer` RPCs in a single transaction
+
+**Existing controls.** Multi-table writes go through `security definer` RPCs in a single transaction
 rather than client-stitched calls — a standing rule in `AGENTS.md` — so a partial
 failure cannot leave a half-written pebble. Invariants that matter are enforced
 as CHECK constraints so that no write path can bypass them (`intensity` 1–3,
@@ -435,7 +419,10 @@ intended.
 years of personal writing that is a serious harm, and the missing export
 converts what would be a limited risk into a significant one.
 
-**Likelihood: limited.** Supabase provides managed backups (policy §8.5 cites a
+**Likelihood: limited.** No uncontrolled deletion path exists, and the processor
+maintains backups.
+
+**Existing controls.** Supabase provides managed backups (policy §8.5 cites a
 90-day window; not evidenced in this repo, **Q4**). Cascades are explicit and
 FK-ordered. The deletion flow is scoped to the caller's own id, taken from the
 JWT, and `verify-account-purge.ts` asserts the scoping directly by keeping a
@@ -456,61 +443,55 @@ publish.
 arrived at by inference instead of intrusion — and it is harder to undo, because
 the person believed they were choosing what to expose.
 
-**Likelihood: limited, by design, but non-zero.** Publication requires two
+**Likelihood: limited by design, but non-zero.** Publication requires two
 separate opt-ins that both default off: claim a handle, then flip
-`public_profile` (`20260730120000_public_profiles.sql`). `get_public_profile`
-returns a fixed allowlist. Its **current body is
-`20260817090000_public_profile_achievements.sql:67-205`**, a whole-body
-re-emission that supersedes the day-one version in `20260730120000`; read against
-the older file the allowlist looks smaller than it is. In full, it returns:
-`display_name`, `handle`, the profile glyph as raw `strokes` + `view_box`,
-`pebbles_count`, `ripple_level`, `bounce_level`, a 28-day `assiduity` grid,
-`days_practiced`, `member_since` (UTC date), `achievements_count`, and
-`achievements` — up to six *unlocked* badges, each carrying `id`, `slug`,
-`family`, `threshold`, `emotion_id`, `domain_id`, EN/FR title and description
-overrides, glyph geometry, and `unlocked_at` coarsened to a UTC date. The
-migration's own exclusion note (`:57-60`) lists what it keeps out: `user_id`,
-`is_admin`, consent timestamps, quotas, karma, `color_world`, the raw counts
-behind the levels, and `active_today`. Email and all pebble content are excluded
-too — not by that note, which does not mention them, but because the projection
-simply never selects them. `get_shared_pebble` likewise projects a single pebble
-by uuid (122 unguessable bits), returns null for anything not graded `public` so
-that unknown and ungraded are indistinguishable, and excludes snaps, cards,
-souls and domains entirely. Handles that invite impersonation are blocked by
-`reserved_handles` and a trigger that binds direct writes, not just the RPC.
+`public_profile`.
 
-**Residual risk: limited, but for narrower reasons than the opt-in design alone.**
-What remains is inherent to publishing at all, and it is more than a presence
-signal. A public profile discloses a self-chosen display name alongside two
-things:
+**Existing controls.** Both cross-user reads are `security definer` allowlist
+projections, described once in §4.1. `get_public_profile` exposes
+`display_name`, `handle`, the profile glyph, `pebbles_count`, `ripple_level`,
+`bounce_level`, a 28-day `assiduity` grid, `days_practiced`, `member_since`,
+`achievements_count`, and up to six unlocked badges with `unlocked_at` coarsened
+to a UTC date. `get_shared_pebble` projects a single pebble by uuid (122
+unguessable bits), returns null for anything not graded `public` so that unknown
+and ungraded are indistinguishable, and excludes snaps, cards, souls and domains.
+Handles that invite impersonation are blocked by `reserved_handles` and a trigger
+binding direct writes, not only the RPC.
 
-- a **28-day daily activity grid** — a pattern of *when* someone was recording
-  feelings, which is behavioural data about mental state even without a single
-  pebble being readable; and
-- a **shelf of up to six unlocked badges**, several of which are keyed to an
-  `emotion_id` or a `domain_id` and each of which carries an unlock date. Those
-  are earned by recording a given emotion, or recording in a given life domain,
-  often enough to cross a threshold. So the shelf discloses not only *when* the
-  person journals but *which emotional and life-domain themes recur* in their
-  journalling, and roughly when each pattern became established. That is closer
-  to the Art. 9 core than the grid is, and it is the disclosure §3.4 has to
-  reason about, not the grid alone.
+**Residual risk: limited.** Two things are disclosed about a person who has opted
+in twice, under a display name they chose: a **28-day daily activity grid**, a
+pattern of *when* they were recording feelings; and a **shelf of up to six
+unlocked badges**, some keyed to an `emotion_id` or a `domain_id`, each with an
+unlock date. Combined with a handle reused elsewhere online, that is a real
+linkage vector.
 
-Combined with a handle reused elsewhere online, that is a real linkage vector.
+The badge shelf is the sharper of the two, and its resolution is what settles the
+level. The emotion- and domain-keyed families are `emotion_first` and
+`domain_first`, whose `threshold` is null: they are **one-shot firsts**, unlocked
+the first time a person records a given emotion or a given domain
+(`20260730090000_achievements.sql:26-30`, `:108-125`). The shelf therefore
+discloses that a person has *at some point* recorded a given emotion, and the
+date they first did — not how often, not in what proportion, and not any pattern
+over time. It is a set of single events, not an affective profile, and it is
+lower-resolution than the activity grid sitting beside it.
 
-The reason the assessment still lands on *limited* is that the badge disclosure
-is deliberate and already narrowed at the point of projection, by the author of
-`20260817090000`: only **unlocked** badges are returned, so a visitor learns
-nothing about what the owner has not earned; the array is capped at six; and
-`unlocked_at` is **coarsened to a UTC date specifically so it is no finer a
-presence signal than the assiduity grid already is** — the same reasoning that
-excludes `active_today`. Those are exactly the mitigations this section would
-otherwise have to ask for.
+Three narrowings at the point of projection hold it there: only **unlocked**
+badges are returned, so a visitor learns nothing about what the owner has not
+earned; the array is capped at six; and `unlocked_at` is coarsened to a date
+specifically so it is no finer a presence signal than the grid already is. With a
+one-shot, capped, date-coarsened, positive-space-only disclosure sitting behind
+two default-off opt-ins that the person can reverse at any time, the residual
+does not reach the threshold for *significant* — which this assessment reserves
+for consequences a data subject would overcome only with real and serious
+difficulty.
 
-Two mitigations worth the controller's consideration remain absent, and the first
-matters more now than it would have before the badges shipped: no warning at the
-moment of enabling a public profile explains what becomes public — the activity
-grid *and* an emotion- and domain-keyed badge shelf — and nothing rate-limits or
+One property of the shelf does deserve the controller's attention, and it is the
+reason the first of the two absent mitigations matters: the six badges are the
+**most recently unlocked**, and common emotions unlock early. An established
+user's shelf therefore skews toward the rarer emotions they have recorded, which
+are likelier to be the more sensitive ones. So: no warning at the moment of
+enabling a public profile explains what becomes public — the activity grid *and*
+a badge shelf that names emotions and life domains — and nothing rate-limits or
 robots-excludes public profile pages. Neither is a defect against a stated
 promise, so both are recorded here rather than as findings.
 
@@ -576,10 +557,10 @@ as a mitigation for transmission to a model §6.3 says is not enabled — a user
 reading about a feature they cannot use. Nothing in the product carries it. §2.1
 restates it as this assessment's own recommendation instead.
 
-**Residual risk: significant, and structurally unresolvable by technical means.**
-No control can give a named person rights they cannot know to exercise. What is
-available is honesty about scope and restraint about sharing. Concretely, this
-assessment recommends that (a) souls and any pebble free text remain excluded
+**Residual risk: significant.** No technical control can give a named person
+rights they cannot know to exercise, so the residual is not reducible by
+engineering. The available measures are limits on scope and on sharing.
+This assessment recommends that (a) souls and any pebble free text remain excluded
 from every cross-user projection as an invariant, not a default, (b) any future
 feature that would surface a soul to a third party re-opens this assessment
 (§5), and (c) the controller decide how a third party who *does* learn of a soul
@@ -638,7 +619,7 @@ file named. They are stated as facts about the code, not as aspirations.
 |---|---|
 | **Row-level security on every table in `public`** | All 30 tables carry `alter table public.<t> enable row level security`, checked table by table across `packages/supabase/supabase/migrations/`. User tables scope on `user_id = auth.uid()`; dependent tables scope through their parent (`pebble_cards`, `pebble_souls`, `pebble_domains`, `collection_pebbles`) |
 | **Writes that must not come from a client have no write policy at all** | `bounces`, `wallet_balances`, `achievement_unlocks`, `connections`, `connection_invites`, `connection_blocks` expose SELECT only; they are written exclusively by triggers or `security definer` RPCs |
-| **Cross-user reads are `security definer` projections with an explicit jsonb allowlist, never widened RLS and never a view** | `get_public_profile` is the template — introduced in `20260730120000_public_profiles.sql`, **current body `20260817090000_public_profile_achievements.sql:67-205`** (cite the later file: the earlier one is superseded and its allowlist is shorter). `get_shared_pebble` (`20260817130000_pebble_visibility_grades.sql`) follows the same pattern. Neither returns `user_id`. `anon` is revoked from `public.pebbles`. What each projection exposes is assessed in §3.4 |
+| **Cross-user reads are `security definer` projections with an explicit jsonb allowlist, never widened RLS and never a view** | Two exist; this row is the canonical description of both. **`get_public_profile`** — introduced in `20260730120000_public_profiles.sql`, current body `20260817090000_public_profile_achievements.sql:67-205`; always cite the later file, as the earlier one is superseded and its allowlist is shorter. **`get_shared_pebble`** — `20260817130000_pebble_visibility_grades.sql`. Neither returns `user_id`; `anon` is revoked from `public.pebbles`. What each exposes, and why it is acceptable, is assessed in §3.4 |
 | **Private-by-default sharing** | `pebbles.visibility` defaults to `secret`; the M51 migration backfilled every pre-existing pebble to `secret` rather than letting the new grade widen them. Public profiles need two independent opt-ins, both default off |
 | **Multi-table writes are atomic** | Standing rule in `AGENTS.md`: anything touching more than one table goes through an RPC in one transaction, not client-stitched calls |
 | **No telemetry, analytics, crash-reporting or advertising SDK exists on any surface, so none can reach a sensitive field** | No such dependency in `apps/web/package.json`, `apps/admin/package.json`, the Android Gradle build or the iOS project. `apps/ios/Pebbles/Resources/PrivacyInfo.xcprivacy` declares `NSPrivacyTracking: false` with empty tracking domains and labels moods as `NSPrivacyCollectedDataTypeHealth`, linked and not used for tracking. Policy §13.3 says the same and is, unusually, exactly true |
@@ -655,7 +636,7 @@ file named. They are stated as facts about the code, not as aspirations.
 | Measure | Where |
 |---|---|
 | Art. 9 explicit consent recorded in a version-bound `user_consents` ledger, owner-select-only RLS, written only through two `security definer` RPCs | Kritik **`F-2026-08-GDP-web-01`** — this stack, issue #774, Parts 2–4 (`docs/superpowers/plans/2026-09-11-art9-consent-gate.md`) |
-| **Consent captured for every new web account, by two mechanisms rather than one** — (a) a third checkbox on `/register`, gating the email submit and that page's two OAuth buttons; (b) a consent gate rendered inside onboarding when no active `health_data` consent exists, which catches accounts created through the **login page's** OAuth buttons | Kritik **`F-2026-08-GDP-web-02`** (GDP-01, high / P1) — **resolved by this stack.** `apps/web/app/login/page.tsx:87,98` wires `signInWithGoogle` / `signInWithApple` gated on `submitting` alone, and an OAuth sign-in creates an account when none exists, so a `/register` checkbox structurally cannot reach every new account. The gate's condition tests **both** the absence of an active consent **and** `profile.onboarding_completed === false`, which is what makes it unable to fire for an account past onboarding. Routing alone would not be enough: nothing prevents an established account reaching `/onboarding` by bookmark or typed URL (`components/onboarding/OnboardingGate.tsx:14` deliberately does not police that route inward), and every pre-existing account also lacks an active consent — so a gate keyed on the consent alone would have fired for exactly the M55 cohort it must not touch (design spec D1a, plan Task 14) |
+| **Consent captured for every new web account, by two mechanisms** — (a) a third checkbox on `/register`, gating the email submit and that page's OAuth buttons; (b) a consent gate inside onboarding, catching accounts created through the login page's OAuth buttons (see below) | Kritik **`F-2026-08-GDP-web-02`** (GDP-01, high / P1) — resolved by this stack |
 | Consent bound to a document version, and withdrawable from settings without deleting the account first where the consent is severable | Kritik **`F-2026-08-GDP-web-06`** (GDP-01, P2) — **substantially resolved by this stack**: `document_version` on the ledger (Part 2) and the settings withdrawal surface (Part 4). The login-time re-consent trigger the finding also asks for — re-asking when the policy version moves — stays M55 work |
 | Privacy-policy wording corrected so "during onboarding" matches where consent is actually taken, and withdrawal described as it actually behaves | This stack, Part 5 |
 | **Re-consent surface for accounts that already exist**, which neither mechanism above can reach: every account created before this stack, including every OAuth account created to date, carries no Art. 9 consent record and is already past onboarding | M55. Accepted as out of scope for this stack by the maintainer on 2026-09-11 (design spec §7) on the basis that the beta cohort is small and largely the maintainer's own test accounts. **This is the one population the stack leaves uncovered**, and the reasoning is cohort-size-dependent (§5) |
@@ -666,6 +647,19 @@ file named. They are stated as facts about the code, not as aspirations.
 | Sensitive-column inventory plus a CI guard against sensitive fields reaching a log or analytics sink | Kritik `F-2026-08-GDP-supabase-02` |
 | Documented Art. 33/34 breach-notification procedure | Not yet tracked — **Q7** |
 | A decision on how a third party named as a soul would exercise their rights | Not yet tracked — **Q8** |
+
+**Why new-account capture takes two mechanisms.**
+`apps/web/app/login/page.tsx:87,98` wires `signInWithGoogle` / `signInWithApple`
+gated on `submitting` alone, and an OAuth sign-in creates an account when none
+exists. A checkbox on `/register` therefore cannot reach every new account. The
+onboarding gate closes that path, and its condition tests **both** the absence of
+an active consent **and** `profile.onboarding_completed === false` — which is
+what makes it unable to fire for an account past onboarding. Routing alone would
+not be sufficient: nothing prevents an established account reaching `/onboarding`
+by bookmark or typed URL (`components/onboarding/OnboardingGate.tsx:14`
+deliberately does not police that route inward), and every pre-existing account
+also lacks an active consent, so a gate keyed on the consent alone would fire for
+exactly the M55 cohort it must not touch. Design spec D1a, plan Task 14.
 
 ## 5. When to revisit
 
@@ -723,7 +717,11 @@ saying why.
 
 **Q2 — Three processing operations are declared to users across the published
 document set and do not exist in the code.** Therapist access, HealthKit and
-Google Gemma have no implementation anywhere in `apps/` or `packages/`, yet they
+Google Gemma have no implementation anywhere in `apps/` or `packages/` — the only
+non-markdown mention of any of them is a comment at
+`apps/ios/Pebbles/Resources/PrivacyInfo.xcprivacy:70` that exists to *deny* the
+dependency, labelling moods as Apple's Health data type "independently of
+HealthKit". Yet all three
 appear in the privacy policy (§5, §4.4, §12), the **Terms** (§4.4, the whole of
 §7, §9, §13.3 — thirteen matches in `en.md`, mirrored in `fr.md`) and the
 **Credits** page (Gemma described in the present tense as powering "Pebbles'
@@ -739,12 +737,14 @@ Two decisions are needed, and neither is an engineering call:
    removal is larger than it sounds: therapist access spans four files (privacy
    and terms, each EN and FR), Gemma and HealthKit six apiece (those plus
    credits EN and FR).
-2. **The Terms are the sharper end of this and should be handled first.** §7
+2. **Should the Terms be corrected ahead of the roadmap question?** Terms §7
    creates contractual machinery around a professional role — activation,
    Pebbles' approval, verification of professional qualifications, an allocation
    of independent-controller status — for a role the product does not implement.
-   That is an obligation that cannot be performed and an invitation to believe a
-   clinician can be granted access. It should not wait on the roadmap question.
+   Unlike an over-declaring privacy paragraph, that is a contractual obligation
+   that cannot be performed, and a user may read it as meaning a clinician can be
+   granted access. It can be corrected without deciding whether the feature is
+   ever built.
 
 The same question covers "Cairns" as an indefinitely-retained aggregate (policy
 §8.4), which are computed client-side in `WeekRoll` / `WeekRollCairn` and stored
@@ -785,18 +785,32 @@ better), or should a grace period actually be built — which would give users a
 recovery path from accidental deletion, at the cost of holding Art. 9 data after
 a request to erase it? These are opposite answers and both are defensible.
 
-**Q7 — No breach-notification procedure exists.** Nothing in this repository
-documents how an Art. 33 notification to the CNIL within 72 hours, or an Art. 34
-communication to affected users, would be assessed, drafted or sent. For a
-single-operator product the procedure can be short, but it has to exist before
-it is needed.
+**Q7 — What is the notification threshold for a breach here?** No procedure
+exists (§4.2 carries the action). The decision that has to precede writing one is
+where the Art. 33 "likely to result in a risk" line sits for this product, and
+there are two defensible answers. **Treat any exposure of pebble data as
+notifiable**: every such record is Art. 9 data, the controller cannot know what a
+given user wrote, and erring toward notification is the posture a supervisory
+authority rewards. **Or assess case by case** against volume and the projection
+actually breached: a leak confined to, say, `bounces` or `karma_events` exposes
+no emotional content, and notifying on it would dilute the signal of a real one.
+The first is simpler to execute alone and harder to get wrong under time
+pressure; the second is proportionate but requires a judgement call inside 72
+hours. The answer determines what the procedure has to contain.
 
-**Q8 — How would a person named as a soul exercise their rights?** §3.5 concludes
-that no technical control can reach them. If such a person did learn of the
-record and asked for access or erasure, the controller would have to search other
-users' private journals to answer — which is itself a disclosure risk to those
-users. A stated position is needed, even if the position is "we would decline
-absent a legal order".
+**Q8 — What is the default answer to an Art. 15 or Art. 17 request from a person
+named as a soul?** §3.5 concludes no technical control can reach them, so the
+answer is a stated policy rather than a feature. Two positions are available.
+**Decline absent a legal order**: answering means searching other users' private
+journals for a name, which is a disclosure risk to those users and processing
+they never agreed to, and the requester cannot in any case identify which
+accounts to search. **Or honour it** on the reasoning that a soul row is personal
+data of the requester and the controller cannot rely on inaccessibility as an
+excuse. Art. 11(2) supports the first where the controller cannot identify the
+data subject without disproportionate effort; the counter-argument is that the
+data is identifiable by name and the effort is only disproportionate because no
+tooling was built for it. The position should be recorded before a request
+arrives, not after.
 
 **Q9 — Is the §3.5 household-exemption reasoning accepted as drafted?** This
 assessment argues the exemption covers the user but never the controller, and
@@ -812,7 +826,7 @@ does not conclude that it does, but it does leave two "significant" residual ris
 way, since "we did not consider it" and "we considered it and concluded it was
 not required" are different positions on the record.
 
-## 7. Validation
+## 7. Validation (unsigned)
 
 | | |
 |---|---|
