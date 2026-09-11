@@ -9,12 +9,12 @@ re-dating the assessment.
 | # | Processing operation | Data | Art. 6 basis | Art. 9 condition | Consent record |
 |---|---|---|---|---|---|
 | 1 | Account creation and authentication | email, password hash, `profiles.display_name` | 6(1)(b) contract | n/a | — |
-| 2 | Recording a pebble | `pebbles.intensity`, `positiveness`, `emotion_id`, `description` | 6(1)(a) consent | **9(2)(a) explicit consent** | none — no dedicated consent capture exists; see gap below |
+| 2 | Recording a pebble | `pebbles.intensity`, `positiveness`, `emotion_id`, `description` | 6(1)(a) consent | **9(2)(a) explicit consent** | `user_consents.kind = 'health_data'` |
 | 3 | Photo attachments on a pebble | `snaps`, storage objects | 6(1)(a) consent | 9(2)(a), via #2 | as #2 |
 | 4 | Naming souls in a pebble | `souls`, `pebble_souls` | 6(1)(f) legitimate interest | n/a (third-party data — see DPIA §3) | — |
 | 5 | Reflective cards | `pebble_cards` | 6(1)(a) consent | 9(2)(a), via #2 | as #2 |
 | 6 | Mutual connections and connection-visible pebbles | `connections`, `pebbles.visibility` | 6(1)(a) consent | 9(2)(a), via #2 | as #2 |
-| 7 | Public profile | `profiles.handle`, `public_profile` | 6(1)(a) consent | 9(2)(a) — enlarges #2 to the open web | `profiles.public_profile` (opt-in flag; no separate consent-proof record) |
+| 7 | Public profile | `profiles.handle`, `public_profile` | 6(1)(a) consent | 9(2)(a) — enlarges #2 to the open web | `user_consents.kind = 'public_profile'` |
 | 8 | Public share-by-link of a pebble | `pebbles.visibility = 'public'` | 6(1)(a) consent | 9(2)(a), via #2 | as #2 |
 | 9 | Karma, bounces, achievements | `karma_events`, `bounces`, `achievement_unlocks` | 6(1)(b) contract | n/a | — |
 | 10 | Glyph marketplace | `glyphs`, `glyph_submissions`, `glyph_entitlements` | 6(1)(b) contract | n/a | — |
@@ -23,14 +23,21 @@ re-dating the assessment.
 
 ## Known gaps
 
-- **No dedicated consent record exists for any of the Art. 9(2)(a) conditions
-  claimed above (#2, #3, #5, #6, #8), nor for the public-profile opt-in (#7).**
-  `profiles.terms_accepted_at` / `profiles.privacy_accepted_at` (persisted by
-  `handle_new_user()`, migration `20260729120000_handle_new_user_consent.sql`)
-  record acceptance of the Terms and Privacy Policy as a whole, at signup —
-  not a distinct, revocable consent to processing mood, emotion and
-  reflection data as special-category health data. This is the Kritik finding
-  this map exists to start closing: `F-2026-08-GDP-web-01`.
+- **Until `user_consents` landed, no dedicated consent record existed for any
+  of the Art. 9(2)(a) conditions claimed above (#2, #3, #5, #6, #8), nor for
+  the public-profile opt-in (#7).** `profiles.terms_accepted_at` /
+  `profiles.privacy_accepted_at` (persisted by `handle_new_user()`, migration
+  `20260729120000_handle_new_user_consent.sql`) record acceptance of the Terms
+  and Privacy Policy as a whole, at signup — not a distinct, revocable consent
+  to processing mood, emotion and reflection data as special-category health
+  data. That is the Kritik finding this map exists to close:
+  `F-2026-08-GDP-web-01`. Migration `20260911090000_user_consents.sql` closes
+  it **for new web accounts**: the `user_consents` ledger records each consent
+  act against the policy version it was given under, and `withdraw_consent`
+  makes it revocable. Still uncovered, and therefore still open: accounts that
+  existed before this migration, and accounts created through the login page's
+  OAuth buttons — neither has an Art. 9 consent record, and neither gets one
+  until the M55 re-consent surface asks them.
 - **#11 aggregates emotion data with no minimum-cohort threshold.** For a week
   with one or two active users the weekly emotion mix is effectively one
   identifiable person's record. Tracked as Kritik `F-2026-08-GDP-admin-06`.
