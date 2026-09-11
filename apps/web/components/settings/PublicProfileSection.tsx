@@ -30,8 +30,9 @@ type PublicProfileSectionProps = {
 /**
  * Settings "Public profile" section (M50): handle claim/edit, the public
  * toggle, and the share row. Staged like every other settings edit — nothing
- * writes until the page-level Save runs (set_handle RPC for the handle, a
- * direct public_profile update for the toggle).
+ * writes until the page-level Save runs (set_handle RPC for the handle, the
+ * record_consent / withdraw_consent RPCs for the toggle, since that flag IS
+ * the consent to publish).
  */
 export function PublicProfileSection({
   handle,
@@ -125,12 +126,15 @@ export function PublicProfileSection({
               checked={isPublic}
               disabled={!savedHandle}
               onCheckedChange={(checked) => onPublicChange(checked === true)}
-              aria-label={t("publicToggle")}
+              aria-label={t("publicProfileConsent")}
             />
           }
         >
           <span className={savedHandle ? undefined : "text-muted-foreground"}>
-            {t("publicToggle")}
+            {t("publicProfileConsent")}
+          </span>
+          <span className="block text-xs font-normal text-muted-foreground">
+            {t("publicProfileConsentHint")}
           </span>
           {!savedHandle && (
             <span className="block text-xs font-normal text-muted-foreground">
