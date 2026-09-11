@@ -6,6 +6,7 @@ import { toast } from "sonner"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/data/auth-context"
 import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
+import { useConsents } from "@/lib/data/useConsents"
 import type { UpdateProfileInput } from "@/lib/types"
 import { PageLayout } from "@/components/layout/PageLayout"
 import { PageHeader } from "@/components/layout/PageHeader"
@@ -19,6 +20,7 @@ import {
 import { ProvidersSection } from "@/components/settings/ProvidersSection"
 import { PasswordSection } from "@/components/settings/PasswordSection"
 import { LegalSection } from "@/components/settings/LegalSection"
+import { ConsentSection } from "@/components/settings/ConsentSection"
 import { AppearanceSection } from "@/components/settings/AppearanceSection"
 import { DeleteAccountSection } from "@/components/settings/DeleteAccountSection"
 
@@ -26,6 +28,15 @@ export default function SettingsPage() {
   const { user, profile, isAuthenticated, isLoading, updateProfile, setHandle, updatePassword } = useAuth()
   const router = useRouter()
   const { glyphs } = useUsableGlyphs()
+  // Deliberately outside the staged-save model every other control on this
+  // page follows: a consent act is not a draft edit. Granting or withdrawing
+  // writes immediately, and `record_consent` is idempotent, so there is
+  // nothing for the page-level Save to batch or replay.
+  const {
+    healthData: healthConsent,
+    record: recordConsent,
+    withdraw: withdrawConsent,
+  } = useConsents()
   const t = useTranslations("settings")
   const tProfile = useTranslations("profile")
 
@@ -173,6 +184,11 @@ export default function SettingsPage() {
           <ProvidersSection providers={providers} />
           {showPassword && <PasswordSection value={password} onChange={setPassword} />}
           <LegalSection />
+          <ConsentSection
+            consent={healthConsent}
+            onGrant={() => recordConsent("health_data", "web_settings")}
+            onWithdrawn={() => router.push("/")}
+          />
           <AppearanceSection />
           <DeleteAccountSection onDeleted={() => router.push("/")} />
         </div>
