@@ -335,6 +335,11 @@ Each becomes a follow-on issue, and the resolution note on
 resolves the DPIA half of all five findings.** The web finding's own resolution
 therefore depends on accepting the existing-cohort gap as M55 work.
 
+**Maintainer decision (2026-09-11): accepted as a resolution.** Pebbles is in
+beta, so the existing cohort is small and largely the maintainer's own test
+accounts; re-consenting it is M55 work, not a blocker. D1 stands — the
+post-auth gate is not revisited.
+
 ## 8. Testing
 
 | Layer | Test |
