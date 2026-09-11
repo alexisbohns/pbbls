@@ -3,7 +3,7 @@ title: Politique de confidentialité
 locale: fr
 slug: privacy
 version: 1.2.0
-effective_date: 2026-09-04
+effective_date: 2026-09-12
 last_updated: 2026-09-12
 ---
 
@@ -78,13 +78,15 @@ Le traitement des données suivantes est nécessaire à l'exécution du contrat 
 
 ### 3.2 Consentement Explicite (Art. 9(2)(a))
 
-Les données suivantes constituent des données à caractère personnel sensible au sens de l'article 9 du RGPD et sont traitées uniquement avec votre consentement explicite, que vous accordez lors de la création de votre compte :
+Les données suivantes constituent des données à caractère personnel sensible au sens de l'article 9 du RGPD et sont traitées uniquement avec votre consentement explicite :
 - Humeurs et étiquettes d'émotions (qualifiées de données de santé)
 - Réflexions TCC et analyse personnelle
 - Partage social (si activé)
 - Accès thérapeute (si applicable)
 
-Vous pouvez retirer votre consentement à tout moment. La section 4.3 explique comment, et ce que le retrait implique concrètement.
+Vous accordez le consentement portant sur vos humeurs, vos émotions et vos réflexions lors de la création de votre compte. Si votre compte a été créé avant la mise en place de cette étape, vous pouvez l'accorder à tout moment depuis les Réglages. La publication de votre profil public est une autorisation distincte, que vous accordez dans les Réglages au moment de l'activer.
+
+Vous pouvez retirer l'une comme l'autre à tout moment. La section 4.3 explique comment, et ce que le retrait implique concrètement.
 
 ### 3.3 Intérêt Légitime (Art. 6(1)(f))
 
@@ -242,7 +244,7 @@ Vous pouvez vous opposer au traitement de vos données sur la base de l'intérê
 
 ### 9.7 Droit de Retrait du Consentement (Art. 7(3))
 
-Vous pouvez retirer votre consentement à tout moment, notamment pour les données sensibles et les fonctionnalités IA.
+Vous pouvez retirer votre consentement à tout moment. Le traitement de vos humeurs, de vos émotions et de vos réflexions constituant le service lui-même, le retrait de ce consentement ferme votre compte et efface vos données. La section 4.3 détaille précisément ce qui se passe, et traite de l'autorisation distincte relative à votre profil public, que vous pouvez retirer séparément.
 
 ### 9.8 Comment Exercer Vos Droits
 
