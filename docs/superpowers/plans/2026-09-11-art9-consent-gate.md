@@ -4,12 +4,17 @@
 
 **Goal:** Give the web app a real Art. 9 explicit-consent gate — captured at signup on every path including OAuth, recorded as a version-bound ledger the backend honours, withdrawable from Settings — and put the DPIA the regulation requires on record.
 
-**Architecture:** A new `user_consents` table records consent *acts* (grant, withdrawal, version supersession) bound to a privacy-policy version, written only through two `security definer` RPCs. The email signup path carries consent in the existing `signUp` metadata and `handle_new_user` inserts the row; the OAuth path carries it as a callback query parameter and `app/auth/callback/route.ts` records it server-side. Settings gains a withdrawal surface, and the existing public-profile toggle is rerouted through the same RPCs.
+**Architecture:** A new `user_consents` table records consent *acts* (grant, withdrawal, version supersession) bound to a privacy-policy version, written only through two `security definer` RPCs. The email signup path carries consent in the existing `signUp` metadata and `handle_new_user` inserts the row; the OAuth path from `/register` carries it as a callback query parameter and `app/auth/callback/route.ts` records it server-side; the login page's OAuth buttons, which also create accounts, are caught by a consent gate inside onboarding. Settings gains a withdrawal surface, and the existing public-profile toggle is rerouted through the same RPCs.
 
 **Tech Stack:** Postgres/Supabase migrations, Next.js 16 App Router, React 19, TypeScript strict, next-intl, Vitest, shadcn/ui.
 
 **Spec:** `docs/superpowers/specs/2026-09-11-art9-consent-gate-design.md`
-**Finding:** Kritik `F-2026-08-GDP-web-01` (GDP-02, web, high/P1)
+**Findings:**
+- `F-2026-08-GDP-web-01` (GDP-02, high/P1) — the Art. 9 gate that does not exist, and the missing DPIA. **Resolved for new web accounts.**
+- `F-2026-08-GDP-web-02` (GDP-01, high/P1) — OAuth signup paths create accounts with no consent record. **Resolved**, including the login-page path (Task 14).
+- `F-2026-08-GDP-web-06` (GDP-01, medium/P2) — consent records carry no document version, and no withdrawal surface short of deletion. **Substantially resolved**: `document_version` (Task 3) and the settings withdrawal (Tasks 16-17). The login-time re-consent trigger it also asks for stays M55 work.
+- `F-2026-08-GDP-web-04` (GDP-04, medium/P2) — no data export. **Not addressed**; named as a gap in the DPIA. It already has a finding, so it needs no new issue.
+- `-android-02`, `-ios-04`, `-supabase-02`, `-admin-06` (GDP-02) — the DPIA half of each is addressed by Part 1. Their consent-capture halves stay open.
 
 ---
 
@@ -43,7 +48,7 @@
 - Modify: `scripts/verify-account-purge.ts` — seed + zero-row assertion.
 - Modify: `types/database.ts` — regenerated, never hand-edited.
 
-**Part 3 — capture at signup (`apps/web`)**
+**Part 3 — capture at signup and first sign-in (`apps/web`)**
 - Create: `lib/config/consent.ts` — `CONSENT_DOCUMENT_VERSION`, the consent kinds.
 - Create: `lib/config/consent.test.ts` — pins the constant to the privacy doc frontmatter.
 - Create: `lib/auth/registration-gate.ts` — pure `canSubmitRegistration`.
@@ -52,12 +57,14 @@
 - Modify: `lib/data/useSupabaseAuth.ts` — signup metadata, `buildCallbackUrl` consent param.
 - Modify: `app/register/page.tsx` — third checkbox, OAuth gating, a11y hint.
 - Modify: `app/auth/callback/route.ts` — server-side `record_consent`.
-- Modify: `lib/i18n/messages/{en,fr}.json`.
-
-**Part 4 — withdrawal (`apps/web`)**
 - Create: `lib/data/consent.ts` — pure `activeConsent` selector + `ConsentRow` type.
 - Create: `lib/data/consent.test.ts`.
 - Create: `lib/data/useConsents.ts` — read hook + the two RPC callers.
+- Create: `components/onboarding/ConsentGate.tsx` — the backstop for login-page OAuth signups.
+- Modify: `app/onboarding/page.tsx` — render the gate when no consent exists.
+- Modify: `lib/i18n/messages/{en,fr}.json`.
+
+**Part 4 — withdrawal (`apps/web`)**
 - Create: `components/settings/ConsentSection.tsx`.
 - Modify: `app/settings/page.tsx` — mount `ConsentSection`, route the public toggle through the RPCs.
 - Modify: `components/settings/PublicProfileSection.tsx` — consent-naming copy.
@@ -82,7 +89,7 @@ Branch: `docs/774-dpia`. Docs only. No code, no tests.
 
 The table must be grounded in the real schema. Read `packages/supabase/supabase/migrations/20260411000001_core_tables.sql` first for the actual column names.
 
-**The Consent record column describes the state at THIS merge, not the end of the stack.** `user_consents` does not exist until Part 2, so the map must not cite it yet — a map naming a table that does not exist is a map describing a future as a present. Part 2 (Task 3, step 6) updates this column when the table lands. Write:
+**The Consent record column describes the state at THIS merge, not the end of the stack.** `user_consents` does not exist until Part 2, so the map must not cite it yet — a map naming a table that does not exist is a map describing a future as a present. Part 2 (Task 3, step 5) updates this column when the table lands. Write:
 
 ```markdown
 # Lawful basis map
@@ -702,9 +709,13 @@ git commit -m "chore(db): regenerate types for the consent ledger"
 
 ---
 
-# PART 3 — Capture at signup
+# PART 3 — Capture at signup and first sign-in
 
 Branch: `feat/776-consent-capture-web`, stacked on Part 2. **`apps/web` only.**
+
+This part carries the consent *selector and hook* (Tasks 12-13) as well as
+capture, because Task 14's onboarding gate depends on them. Part 4 consumes the
+same hook for the settings surface; it does not create it.
 
 ### Task 7: The document-version constant
 
@@ -1090,7 +1101,7 @@ A disabled control with no stated reason is a WCAG failure; the hint is what mak
 - [ ] **Step 7: Typecheck**
 
 Run: `npm run build --workspace=apps/web`
-Expected: succeeds (the i18n keys resolve at runtime, not build time — Task 12 adds them).
+Expected: succeeds (the i18n keys resolve at runtime, not build time — Task 15 adds them).
 
 - [ ] **Step 8: Commit**
 
@@ -1158,66 +1169,7 @@ git add apps/web/app/auth/callback/route.ts
 git commit -m "feat(auth): record Art. 9 consent on the OAuth callback"
 ```
 
-### Task 12: The copy, EN and FR
-
-**Files:**
-- Modify: `apps/web/lib/i18n/messages/en.json`
-- Modify: `apps/web/lib/i18n/messages/fr.json`
-
-**Formatting warning:** these files are formatting-sensitive catalogs. Insert the new keys as text at the right anchor. Do not read-modify-write the whole file with a JSON dumper — it reorders keys and rewrites escaping across the entire file.
-
-- [ ] **Step 1: Add the English keys**
-
-In `en.json`, inside `auth.register`, after `"privacyLink": "Privacy Policy"`:
-
-```json
-    "healthConsent": "Pebbles records how you feel: your moods, the emotions you pick, and what you write. That is sensitive data about your mental well-being, and we only process it with your explicit permission.",
-    "consentRequiredHint": "Tick all three boxes above to continue."
-```
-
-- [ ] **Step 2: Add the French keys**
-
-In `fr.json`, inside `auth.register`, after `"privacyLink": "Politique de Confidentialité"`. Formal *vous*, matching the surrounding `auth.register` strings and the policy itself — the informal *tu* of Lab Notes does not apply here. **No em dashes.**
-
-```json
-    "healthConsent": "Pebbles enregistre ce que vous ressentez : vos humeurs, les émotions que vous choisissez et ce que vous écrivez. Ce sont des données sensibles sur votre bien-être mental, et nous ne les traitons qu'avec votre autorisation explicite.",
-    "consentRequiredHint": "Cochez les trois cases ci-dessus pour continuer."
-```
-
-- [ ] **Step 3: Verify both files still parse and the keys match**
-
-Run:
-```bash
-cd apps/web && for f in en fr; do node -e "
-const d=require('./lib/i18n/messages/$f.json');
-const r=d.auth.register;
-if(!r.healthConsent||!r.consentRequiredHint) throw new Error('$f: missing key');
-console.log('$f ok');
-"; done
-```
-Expected: `en ok` then `fr ok`.
-
-- [ ] **Step 4: Lint**
-
-Run: `npm run lint --workspace=apps/web`
-Expected: passes.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add apps/web/lib/i18n/messages/en.json apps/web/lib/i18n/messages/fr.json
-git commit -m "feat(auth): add the Art. 9 consent copy in EN and FR"
-```
-
-**Part 3 is done.** Run `npm run test --workspace=apps/web` and `npm run lint --workspace=apps/web`, confirm green, and open the PR **with a Lab Note** — this is user-visible.
-
----
-
-# PART 4 — Withdrawal in Settings
-
-Branch: `feat/777-consent-withdrawal-web`, stacked on Part 3. **`apps/web` only.**
-
-### Task 13: The active-consent selector
+### Task 12: The active-consent selector
 
 **Files:**
 - Create: `apps/web/lib/data/consent.ts`
@@ -1323,10 +1275,10 @@ Expected: PASS, 6 tests.
 
 ```bash
 git add apps/web/lib/data/consent.ts apps/web/lib/data/consent.test.ts
-git commit -m "feat(settings): add the active-consent selector"
+git commit -m "feat(auth): add the active-consent selector"
 ```
 
-### Task 14: The consent hook
+### Task 13: The consent hook
 
 **Files:**
 - Create: `apps/web/lib/data/useConsents.ts`
@@ -1431,10 +1383,242 @@ Expected: succeeds. If `supabase.rpc("record_consent", ...)` errors as an unknow
 
 ```bash
 git add apps/web/lib/data/useConsents.ts
-git commit -m "feat(settings): add the consent ledger hook"
+git commit -m "feat(auth): add the consent ledger hook"
 ```
 
-### Task 15: The settings consent section
+### Task 14: The onboarding consent gate
+
+**Files:**
+- Create: `apps/web/components/onboarding/ConsentGate.tsx`
+- Modify: `apps/web/app/onboarding/page.tsx`
+
+This closes the hole the register-page checkbox structurally cannot reach.
+`apps/web/app/login/page.tsx:87,98` wires `signInWithGoogle` / `signInWithApple`
+gated on `submitting` alone, and an OAuth sign-in **creates an account when none
+exists** — so someone can create an account entirely through `/login` with no
+consent record. Kritik `F-2026-08-GDP-web-02` names this path explicitly.
+
+**The gate must not fire for the existing cohort.** Re-consenting accounts
+created before this stack is M55 work, accepted as out of scope. The signal that
+separates the two is `profiles.onboarding_completed`: a brand-new account is
+`false` and lands on `/onboarding`; an established account is `true` and never
+routes there. So gating inside onboarding, on the absence of an active consent,
+catches exactly the new consent-less accounts and nobody else.
+
+- [ ] **Step 1: Read how onboarding renders today**
+
+Run: `cat apps/web/app/onboarding/page.tsx && cat apps/web/components/onboarding/OnboardingScreen.tsx`
+
+You need its existing loading/redirect conventions. Match them; do not invent new ones.
+
+- [ ] **Step 2: Write the gate component**
+
+`apps/web/components/onboarding/ConsentGate.tsx`:
+
+```tsx
+"use client"
+
+import { useState } from "react"
+import { toast } from "sonner"
+import { useTranslations } from "next-intl"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
+
+type ConsentGateProps = {
+  /** Records the Art. 9 consent. Resolves once the ledger row exists. */
+  onAccept: () => Promise<void>
+}
+
+/**
+ * Art. 9 consent for accounts that reached onboarding without one.
+ *
+ * Only the login page's OAuth buttons can produce such an account: /register
+ * gates all three of its paths on the consent checkbox. This is a backstop for
+ * that one route, not a gate every signup passes through — which is why it
+ * lives inside onboarding rather than ahead of it.
+ */
+export function ConsentGate({ onAccept }: ConsentGateProps) {
+  const t = useTranslations("onboarding.consent")
+  const [accepted, setAccepted] = useState(false)
+  const [saving, setSaving] = useState(false)
+
+  const handleAccept = async () => {
+    setSaving(true)
+    try {
+      await onAccept()
+    } catch (err) {
+      console.error("[onboarding] consent record failed:", err)
+      toast.error(t("error"))
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="flex min-h-dvh flex-col justify-center gap-6 px-6">
+      <div className="flex flex-col gap-2 text-left">
+        <h1 className="text-2xl font-semibold">{t("title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("body")}</p>
+      </div>
+
+      <div className="flex items-start gap-2 text-left">
+        <Checkbox
+          id="onboarding-health-consent"
+          checked={accepted}
+          onCheckedChange={(checked) => setAccepted(checked === true)}
+          disabled={saving}
+          required
+        />
+        <label htmlFor="onboarding-health-consent" className="text-sm text-muted-foreground">
+          {t("checkbox")}
+        </label>
+      </div>
+
+      <Button size="lg" onClick={handleAccept} disabled={saving || !accepted}>
+        {saving ? t("saving") : t("continue")}
+      </Button>
+    </div>
+  )
+}
+```
+
+- [ ] **Step 3: Gate onboarding on it**
+
+In `apps/web/app/onboarding/page.tsx`, add:
+
+```ts
+import { ConsentGate } from "@/components/onboarding/ConsentGate"
+import { useConsents } from "@/lib/data/useConsents"
+```
+
+and inside the component, before the existing render:
+
+```tsx
+  const { healthData: healthConsent, isLoading: consentsLoading, record } = useConsents()
+
+  // An account can only reach onboarding without a consent record through the
+  // login page's OAuth buttons (F-2026-08-GDP-web-02). Established accounts
+  // never route here at all — onboarding_completed is true for them — so this
+  // cannot fire for the pre-existing cohort, which is M55 re-consent work.
+  if (consentsLoading) return null
+  if (!healthConsent) {
+    return <ConsentGate onAccept={() => record("health_data", "web_oauth")} />
+  }
+```
+
+Place it after any existing auth/loading guards, so an unauthenticated visitor is still redirected first.
+
+- [ ] **Step 4: Typecheck**
+
+Run: `npm run build --workspace=apps/web`
+Expected: succeeds.
+
+- [ ] **Step 5: Verify the gate does not catch established accounts**
+
+Read `apps/web/app/auth/callback/route.ts` and confirm the destination line still
+sends `onboarding_completed === true` users to `next ?? "/path"` and never to
+`/onboarding`. If that is not true, stop — the gate would fire for every
+existing user on every OAuth login, which is precisely the scope that was ruled
+out. Report it rather than working around it.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add apps/web/components/onboarding/ConsentGate.tsx apps/web/app/onboarding/page.tsx
+git commit -m "feat(auth): gate onboarding on Art. 9 consent for OAuth-created accounts"
+```
+
+### Task 15: The copy, EN and FR
+
+**Files:**
+- Modify: `apps/web/lib/i18n/messages/en.json`
+- Modify: `apps/web/lib/i18n/messages/fr.json`
+
+**Formatting warning:** these files are formatting-sensitive catalogs. Insert the new keys as text at the right anchor. Do not read-modify-write the whole file with a JSON dumper — it reorders keys and rewrites escaping across the entire file.
+
+- [ ] **Step 1: Add the English keys**
+
+In `en.json`, inside `auth.register`, after `"privacyLink": "Privacy Policy"`:
+
+```json
+    "healthConsent": "Pebbles records how you feel: your moods, the emotions you pick, and what you write. That is sensitive data about your mental well-being, and we only process it with your explicit permission.",
+    "consentRequiredHint": "Tick all three boxes above to continue."
+```
+
+And a new `onboarding.consent` object, for the Task 14 gate. Anchor it inside the
+existing `onboarding` object:
+
+```json
+    "consent": {
+      "title": "One thing before we start",
+      "body": "Pebbles records how you feel: your moods, the emotions you pick, and what you write. That is sensitive data about your mental well-being, so we need your explicit permission before we keep any of it.",
+      "checkbox": "Yes, Pebbles may record how I feel.",
+      "continue": "Continue",
+      "saving": "Saving…",
+      "error": "Could not save your permission. Please try again."
+    }
+```
+
+- [ ] **Step 2: Add the French keys**
+
+In `fr.json`, inside `auth.register`, after `"privacyLink": "Politique de Confidentialité"`. Formal *vous*, matching the surrounding `auth.register` strings and the policy itself — the informal *tu* of Lab Notes does not apply here. **No em dashes.**
+
+```json
+    "healthConsent": "Pebbles enregistre ce que vous ressentez : vos humeurs, les émotions que vous choisissez et ce que vous écrivez. Ce sont des données sensibles sur votre bien-être mental, et nous ne les traitons qu'avec votre autorisation explicite.",
+    "consentRequiredHint": "Cochez les trois cases ci-dessus pour continuer."
+```
+
+And the `onboarding.consent` object, anchored inside the existing `onboarding`
+object. Formal *vous*, **no em dashes**:
+
+```json
+    "consent": {
+      "title": "Une chose avant de commencer",
+      "body": "Pebbles enregistre ce que vous ressentez : vos humeurs, les émotions que vous choisissez et ce que vous écrivez. Ce sont des données sensibles sur votre bien-être mental, nous avons donc besoin de votre autorisation explicite avant d'en conserver quoi que ce soit.",
+      "checkbox": "Oui, Pebbles peut enregistrer ce que je ressens.",
+      "continue": "Continuer",
+      "saving": "Enregistrement…",
+      "error": "Impossible d'enregistrer votre autorisation. Veuillez réessayer."
+    }
+```
+
+- [ ] **Step 3: Verify both files still parse and the keys match**
+
+Run:
+```bash
+cd apps/web && for f in en fr; do node -e "
+const d=require('./lib/i18n/messages/$f.json');
+const r=d.auth.register;
+if(!r.healthConsent||!r.consentRequiredHint) throw new Error('$f: missing register key');
+if(!d.onboarding.consent||!d.onboarding.consent.checkbox) throw new Error('$f: missing onboarding consent key');
+console.log('$f ok');
+"; done
+```
+Expected: `en ok` then `fr ok`.
+
+- [ ] **Step 4: Lint**
+
+Run: `npm run lint --workspace=apps/web`
+Expected: passes.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add apps/web/lib/i18n/messages/en.json apps/web/lib/i18n/messages/fr.json
+git commit -m "feat(auth): add the Art. 9 consent copy in EN and FR"
+```
+
+**Part 3 is done.** Run `npm run test --workspace=apps/web` and `npm run lint --workspace=apps/web`, confirm green, and open the PR **with a Lab Note** — this is user-visible.
+
+---
+
+# PART 4 — Withdrawal in Settings
+
+Branch: `feat/777-consent-withdrawal-web`, stacked on Part 3. **`apps/web` only.**
+
+`lib/data/consent.ts` and `lib/data/useConsents.ts` already exist — Part 3 created
+them for the onboarding gate. Do not recreate them; import them.
+
+### Task 16: The settings consent section
 
 **Files:**
 - Create: `apps/web/components/settings/ConsentSection.tsx`
@@ -1571,7 +1755,7 @@ git add apps/web/components/settings/ConsentSection.tsx
 git commit -m "feat(settings): add the Art. 9 consent withdrawal surface"
 ```
 
-### Task 16: Wire it up and reroute the public toggle
+### Task 17: Wire it up and reroute the public toggle
 
 **Files:**
 - Modify: `apps/web/app/settings/page.tsx`
@@ -1723,7 +1907,7 @@ Branch: `fix/778-privacy-art9-wording`, stacked on Part 4.
 > before merge.** Published legal text on a user-facing route is not revertible
 > the way config is.
 
-### Task 17: Correct the consent and withdrawal claims
+### Task 18: Correct the consent and withdrawal claims
 
 **Files:**
 - Modify: `apps/web/docs/privacy/en.md`
