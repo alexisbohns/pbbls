@@ -13,6 +13,16 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 
+// `aria-disabled` keeps the gated OAuth buttons in the tab order so a keyboard
+// or screen-reader user actually lands on them and hears
+// `register-oauth-hint` explaining why they cannot proceed — a `disabled`
+// button is skipped entirely and the hint is never announced at the control.
+// Tailwind's `disabled:` variants do not match `aria-disabled`, so the button's
+// own disabled look has to be restated here; `pointer-events-none` suppresses
+// hover/active/click without affecting keyboard focus.
+const OAUTH_DISABLED_CLASSES =
+  "aria-disabled:pointer-events-none aria-disabled:bg-transparent aria-disabled:text-accent"
+
 export default function RegisterPage() {
   const { register, signInWithApple, signInWithGoogle, isAuthenticated, isLoading } = useAuth()
   const router = useRouter()
@@ -45,6 +55,8 @@ export default function RegisterPage() {
     privacy: privacyAccepted,
     healthData: healthConsent,
   })
+
+  const oauthBlocked = submitting || !consentsAccepted
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -287,8 +299,9 @@ export default function RegisterPage() {
         <Button
           variant="outline"
           size="lg"
-          onClick={handleAppleSignIn}
-          disabled={submitting || !consentsAccepted}
+          className={OAUTH_DISABLED_CLASSES}
+          onClick={oauthBlocked ? undefined : handleAppleSignIn}
+          aria-disabled={oauthBlocked}
           aria-describedby="register-oauth-hint"
           aria-label={t("appleAria")}
         >
@@ -309,8 +322,9 @@ export default function RegisterPage() {
         <Button
           variant="outline"
           size="lg"
-          onClick={handleGoogleSignIn}
-          disabled={submitting || !consentsAccepted}
+          className={OAUTH_DISABLED_CLASSES}
+          onClick={oauthBlocked ? undefined : handleGoogleSignIn}
+          aria-disabled={oauthBlocked}
           aria-describedby="register-oauth-hint"
           aria-label={t("googleAria")}
         >
