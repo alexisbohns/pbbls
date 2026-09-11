@@ -114,6 +114,8 @@
       "handle_reserved": "Ce pseudo est réservé."
     },
     "publicToggle": "Rendre mon profil public",
+    "publicProfileConsent": "Autoriser tout le monde à voir mon profil public",
+    "publicProfileConsentHint": "C'est une autorisation distincte. Désactivez-la quand vous voulez et votre profil redevient privé.",
     "publicToggleNeedsHandle": "Choisissez d'abord un pseudo pour passer en public.",
     "publicProfileCopy": "Copier le lien de votre profil public",
     "publicProfileShare": "Partager votre profil public",

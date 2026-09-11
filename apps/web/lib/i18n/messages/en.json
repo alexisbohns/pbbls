@@ -114,6 +114,8 @@
       "handle_reserved": "That handle is reserved."
     },
     "publicToggle": "Make my profile public",
+    "publicProfileConsent": "Let anyone see my public profile",
+    "publicProfileConsentHint": "This is a separate permission. Turn it off any time and your profile goes private again.",
     "publicToggleNeedsHandle": "Claim a handle first to go public.",
     "publicProfileCopy": "Copy your public profile link",
     "publicProfileShare": "Share your public profile",

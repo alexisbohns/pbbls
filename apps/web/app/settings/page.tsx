@@ -34,8 +34,10 @@ export default function SettingsPage() {
   // nothing for the page-level Save to batch or replay.
   const {
     healthData: healthConsent,
+    publicProfile: publicConsent,
     record: recordConsent,
     withdraw: withdrawConsent,
+    refresh: refreshConsents,
   } = useConsents()
   const t = useTranslations("settings")
   const tProfile = useTranslations("profile")
@@ -123,9 +125,46 @@ export default function SettingsPage() {
       const updates: UpdateProfileInput = {}
       if (nameChanged) updates.display_name = name.trim()
       if (glyphChanged && stagedGlyphId) updates.glyph_id = stagedGlyphId
-      // Releasing the handle already dropped the flag server-side; only write
+      // Releasing the handle already dropped the flag server-side; only touch
       // the toggle when a handle exists to satisfy the CHECK.
-      if (publicChanged && effectiveHandle) updates.public_profile = isPublic
+      //
+      // `public_profile` IS the consent to publish, so it is written by the
+      // consent RPCs rather than as a plain column update: record_consent on
+      // the way in, withdraw_consent on the way out — the latter flips the
+      // column off itself, in the same transaction as the ledger row.
+      if (publicChanged && effectiveHandle) {
+        if (isPublic) {
+          // Ledger first: a consent row without the flag exposes nothing,
+          // whereas a published profile without a consent row is the defect
+          // this change exists to close.
+          await recordConsent("public_profile", "web_settings")
+          updates.public_profile = true
+        } else {
+          try {
+            await withdrawConsent("public_profile")
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err)
+            if (!message.includes("no_active_consent")) throw err
+            if (publicConsent) {
+              // The ledger we rendered says there is a live consent and the
+              // database disagrees: a double submit, a stale view, or the rare
+              // race where a record_consent at a bumped version commits
+              // between this withdraw's snapshot and its row lock. For an
+              // accountability record that mismatch is loud, not absorbed.
+              console.error(
+                "[settings] withdraw_consent(public_profile) found no active consent",
+              )
+              await refreshConsents()
+              toast.error(t("saveError"))
+              return
+            }
+            // Accounts that went public before the ledger existed have the
+            // flag set and no row to withdraw. Their intent still wins —
+            // unpublish through the ordinary profile update.
+            updates.public_profile = false
+          }
+        }
+      }
       if (Object.keys(updates).length > 0) await updateProfile(updates)
       if (passwordChanged) await updatePassword(password)
       setNameInput(null)
