@@ -1504,32 +1504,77 @@ and inside the component, before the existing render:
 
 ```tsx
   const { profile, isProfileLoading } = useAuth()
-  const { healthData: healthConsent, isLoading: consentsLoading, record } = useConsents()
+  const { healthData: healthConsent, loading: consentsLoading, record } = useConsents()
 
   // An account can only reach onboarding WITHOUT a consent record by signing in
   // through the login page's OAuth buttons (F-2026-08-GDP-web-02): /register
   // gates all three of its paths on the checkbox.
   //
-  // Both conditions are load-bearing. Every pre-existing account also lacks an
-  // active consent, and nothing prevents one landing here by bookmark or typed
-  // URL — OnboardingGate deliberately does not police this route. Testing
-  // onboarding_completed too is what keeps the gate off the M55 cohort.
+  // `profile &&` is load-bearing twice over. The consent hook cannot tell a
+  // signed-out visitor from a signed-in user who never consented — an owner
+  // select returns zero rows either way — so without it a logged-out visitor
+  // typing /onboarding would be shown a consent gate. And every pre-existing
+  // account also lacks an active consent, while nothing stops one landing here
+  // by bookmark (OnboardingGate deliberately does not police this route), so
+  // testing onboarding_completed is what keeps the gate off the M55 cohort.
   if (consentsLoading || isProfileLoading) return null
-  if (!healthConsent && !profile?.onboarding_completed) {
+  if (!healthConsent && profile && !profile.onboarding_completed) {
     return <ConsentGate onAccept={() => record("health_data", "web_oauth")} />
   }
 ```
+
+**Do not write `!profile?.onboarding_completed`.** Optional chaining yields
+`undefined` for a null profile, and `!undefined` is `true` — so the gate would
+fire for exactly the two populations it must never fire for.
 
 Add `import { useAuth } from "@/lib/data/auth-context"` alongside the others.
 Place the block after any existing auth/loading guards, so an unauthenticated
 visitor is still redirected first.
 
-- [ ] **Step 4: Typecheck**
+- [ ] **Step 4: Add the `onboarding.consent` copy, EN and FR**
+
+**next-intl keys are typechecked in this repo** — `apps/web/lib/i18n/messages.d.ts`
+augments `AppConfig` with `Messages: typeof import("./messages/en.json")`, so
+`t("...")` on a key that does not exist is a build error, not a runtime warning.
+The copy therefore lands in the same commit as the component that uses it; a
+commit that does not build is not a reviewable unit.
+
+These are formatting-sensitive catalogs. **Insert as text at the anchor** —
+never read-modify-write the whole file with a JSON dumper, which reorders keys
+and rewrites escaping across the entire file.
+
+In `lib/i18n/messages/en.json`, inside the existing `onboarding` object:
+
+```json
+    "consent": {
+      "title": "One thing before we start",
+      "body": "Pebbles records how you feel: your moods, the emotions you pick, and what you write. That is sensitive data about your mental well-being, so we need your explicit permission before we keep any of it.",
+      "checkbox": "Yes, Pebbles may record how I feel.",
+      "continue": "Continue",
+      "saving": "Saving…",
+      "error": "Could not save your permission. Please try again."
+    }
+```
+
+In `fr.json`, same anchor. Formal *vous*, **no em dashes**:
+
+```json
+    "consent": {
+      "title": "Une chose avant de commencer",
+      "body": "Pebbles enregistre ce que vous ressentez : vos humeurs, les émotions que vous choisissez et ce que vous écrivez. Ce sont des données sensibles sur votre bien-être mental, nous avons donc besoin de votre autorisation explicite avant d'en conserver quoi que ce soit.",
+      "checkbox": "Oui, Pebbles peut enregistrer ce que je ressens.",
+      "continue": "Continuer",
+      "saving": "Enregistrement…",
+      "error": "Impossible d'enregistrer votre autorisation. Veuillez réessayer."
+    }
+```
+
+- [ ] **Step 5: Typecheck**
 
 Run: `npm run build --workspace=apps/web`
-Expected: succeeds.
+Expected: succeeds. If it fails on a missing message key, step 4 was skipped.
 
-- [ ] **Step 5: Verify the gate cannot catch established accounts**
+- [ ] **Step 6: Verify the gate cannot catch established accounts**
 
 Two checks, because routing alone does not establish this.
 
@@ -1544,7 +1589,7 @@ stepper renders rather than the consent gate. An established account seeing the
 gate is the M55 cohort being re-consented early, which is exactly the scope that
 was ruled out — stop and report it rather than working around it.
 
-- [ ] **Step 6: Close the map's login-page gap**
+- [ ] **Step 7: Close the map's login-page gap**
 
 `docs/compliance/lawful-basis-map.md`'s first "Known gaps" bullet was written in
 Part 2 and says login-page OAuth accounts have no Art. 9 consent record and get
@@ -1552,68 +1597,53 @@ none until M55. This task is what makes that false. Reword it so the only
 remaining uncovered population is **accounts that existed before this stack**,
 and leave the M55 pointer for those.
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
-git add apps/web/components/onboarding/ConsentGate.tsx apps/web/app/onboarding/page.tsx docs/compliance/lawful-basis-map.md
+git add apps/web/components/onboarding/ConsentGate.tsx apps/web/app/onboarding/page.tsx apps/web/lib/i18n/messages/en.json apps/web/lib/i18n/messages/fr.json docs/compliance/lawful-basis-map.md
 git commit -m "feat(auth): gate onboarding on Art. 9 consent for OAuth-created accounts"
 ```
 
-### Task 15: The copy, EN and FR
+### Task 15: Close Part 3 — accessibility and verification
+
+The register-page copy landed with Task 10 and the onboarding copy with Task 14,
+because next-intl keys are typechecked and a commit that does not build is not a
+reviewable unit. What remains is one real accessibility gap and the part's
+closing verification.
 
 **Files:**
-- Modify: `apps/web/lib/i18n/messages/en.json`
-- Modify: `apps/web/lib/i18n/messages/fr.json`
+- Modify: `apps/web/app/register/page.tsx`
 
-**Formatting warning:** these files are formatting-sensitive catalogs. Insert the new keys as text at the right anchor. Do not read-modify-write the whole file with a JSON dumper — it reorders keys and rewrites escaping across the entire file.
+- [ ] **Step 1: Make the disabled OAuth buttons perceivable to keyboard users**
 
-- [ ] **Step 1: Add the English keys**
+Task 10 gated the Apple and Google buttons with `disabled` plus an
+`aria-describedby` hint. There is a gap in that: a `disabled` button is removed
+from the tab order entirely, so a keyboard or screen-reader user never lands on
+it and never hears the hint explaining why it cannot be used. The hint is still
+in the DOM and reachable in browse mode, but it is not announced at the control.
 
-In `en.json`, inside `auth.register`, after `"privacyLink": "Privacy Policy"`:
+This matters more here than it would elsewhere — the whole point of the hint is
+to tell someone why they cannot proceed, on the screen where consent is
+collected. Swap both buttons to the `aria-disabled` pattern:
 
-```json
-    "healthConsent": "Pebbles records how you feel: your moods, the emotions you pick, and what you write. That is sensitive data about your mental well-being, and we only process it with your explicit permission.",
-    "consentRequiredHint": "Tick all three boxes above to continue."
+```tsx
+          aria-disabled={submitting || !consentsAccepted}
+          aria-describedby="register-oauth-hint"
+          onClick={consentsAccepted ? handleGoogleSignIn : undefined}
 ```
 
-And a new `onboarding.consent` object, for the Task 14 gate. Anchor it inside the
-existing `onboarding` object:
+Remove the `disabled` prop from both. The button stays focusable, announces its
+disabled state and its description, and does nothing when activated. Keep
+`submitting` in the `aria-disabled` expression so a click mid-submit is still a
+no-op.
 
-```json
-    "consent": {
-      "title": "One thing before we start",
-      "body": "Pebbles records how you feel: your moods, the emotions you pick, and what you write. That is sensitive data about your mental well-being, so we need your explicit permission before we keep any of it.",
-      "checkbox": "Yes, Pebbles may record how I feel.",
-      "continue": "Continue",
-      "saving": "Saving…",
-      "error": "Could not save your permission. Please try again."
-    }
-```
+Check how `Button` forwards props before writing this — if it does not pass
+`aria-disabled` through, say so rather than working around it, and check whether
+the variant styling still reads as disabled without the `disabled` attribute.
+Styling that no longer looks disabled is a worse outcome than the gap you are
+closing; if that is the case, stop and report.
 
-- [ ] **Step 2: Add the French keys**
-
-In `fr.json`, inside `auth.register`, after `"privacyLink": "Politique de Confidentialité"`. Formal *vous*, matching the surrounding `auth.register` strings and the policy itself — the informal *tu* of Lab Notes does not apply here. **No em dashes.**
-
-```json
-    "healthConsent": "Pebbles enregistre ce que vous ressentez : vos humeurs, les émotions que vous choisissez et ce que vous écrivez. Ce sont des données sensibles sur votre bien-être mental, et nous ne les traitons qu'avec votre autorisation explicite.",
-    "consentRequiredHint": "Cochez les trois cases ci-dessus pour continuer."
-```
-
-And the `onboarding.consent` object, anchored inside the existing `onboarding`
-object. Formal *vous*, **no em dashes**:
-
-```json
-    "consent": {
-      "title": "Une chose avant de commencer",
-      "body": "Pebbles enregistre ce que vous ressentez : vos humeurs, les émotions que vous choisissez et ce que vous écrivez. Ce sont des données sensibles sur votre bien-être mental, nous avons donc besoin de votre autorisation explicite avant d'en conserver quoi que ce soit.",
-      "checkbox": "Oui, Pebbles peut enregistrer ce que je ressens.",
-      "continue": "Continuer",
-      "saving": "Enregistrement…",
-      "error": "Impossible d'enregistrer votre autorisation. Veuillez réessayer."
-    }
-```
-
-- [ ] **Step 3: Verify both files still parse and the keys match**
+- [ ] **Step 2: Verify catalog parity for everything Part 3 added**
 
 Run:
 ```bash
@@ -1621,25 +1651,33 @@ cd apps/web && for f in en fr; do node -e "
 const d=require('./lib/i18n/messages/$f.json');
 const r=d.auth.register;
 if(!r.healthConsent||!r.consentRequiredHint) throw new Error('$f: missing register key');
-if(!d.onboarding.consent||!d.onboarding.consent.checkbox) throw new Error('$f: missing onboarding consent key');
+const c=d.onboarding.consent;
+if(!c||!c.title||!c.body||!c.checkbox||!c.continue||!c.saving||!c.error) throw new Error('$f: missing onboarding consent key');
 console.log('$f ok');
 "; done
 ```
-Expected: `en ok` then `fr ok`.
 
-- [ ] **Step 4: Lint**
+Expected: `en ok` then `fr ok`. Key drift between the two catalogs is
+mechanically undetectable in this repo today (Kritik `F-2026-08-A11Y-web-03`),
+so this check is the only thing standing between a missing French key and a
+user seeing a raw key name.
 
-Run: `npm run lint --workspace=apps/web`
-Expected: passes.
-
-- [ ] **Step 5: Commit**
+- [ ] **Step 3: Full verification of Part 3**
 
 ```bash
-git add apps/web/lib/i18n/messages/en.json apps/web/lib/i18n/messages/fr.json
-git commit -m "feat(auth): add the Art. 9 consent copy in EN and FR"
+npm run lint --workspace=apps/web
+npm run test --workspace=apps/web
+npm run build --workspace=apps/web
 ```
 
-**Part 3 is done.** Run `npm run test --workspace=apps/web` and `npm run lint --workspace=apps/web`, confirm green, and open the PR **with a Lab Note** — this is user-visible.
+All three must pass. Report the summary lines.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add apps/web/app/register/page.tsx
+git commit -m "fix(a11y): keep the gated OAuth buttons focusable so the hint is announced"
+```
 
 ---
 
