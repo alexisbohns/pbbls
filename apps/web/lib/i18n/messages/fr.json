@@ -448,7 +448,9 @@
       "termsPrefix": "J'accepte les ",
       "termsLink": "Conditions Générales d'Utilisation",
       "privacyPrefix": "J'accepte la ",
-      "privacyLink": "Politique de Confidentialité"
+      "privacyLink": "Politique de Confidentialité",
+      "healthConsent": "Pebbles enregistre ce que vous ressentez : vos humeurs, les émotions que vous choisissez et ce que vous écrivez. Ce sont des données sensibles sur votre bien-être mental, et nous ne les traitons qu'avec votre autorisation explicite.",
+      "consentRequiredHint": "Cochez les trois cases ci-dessus pour continuer."
     }
   },
   "onboarding": {

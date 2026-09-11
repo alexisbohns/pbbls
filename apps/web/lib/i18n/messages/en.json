@@ -448,7 +448,9 @@
       "termsPrefix": "I accept the ",
       "termsLink": "Terms of Service",
       "privacyPrefix": "I accept the ",
-      "privacyLink": "Privacy Policy"
+      "privacyLink": "Privacy Policy",
+      "healthConsent": "Pebbles records how you feel: your moods, the emotions you pick, and what you write. That is sensitive data about your mental well-being, and we only process it with your explicit permission.",
+      "consentRequiredHint": "Tick all three boxes above to continue."
     }
   },
   "onboarding": {
