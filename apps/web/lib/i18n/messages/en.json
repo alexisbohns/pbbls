@@ -142,11 +142,14 @@
       "healthData": "Recording how you feel",
       "grantedOn": "Given on {date} (policy version {version})",
       "notRecorded": "No record on file",
+      "grant": "Give consent",
+      "granting": "Saving…",
+      "grantError": "Could not save your consent. Please try again.",
       "withdraw": "Withdraw",
       "withdrawing": "Withdrawing…",
       "withdrawError": "Could not withdraw your consent. Please try again.",
       "confirmTitle": "Withdraw your consent?",
-      "confirmBody": "Pebbles cannot work without permission to record how you feel, so withdrawing closes your account and permanently erases your pebbles, photos and connections. Everything processed until now stays lawful. This cannot be undone.",
+      "confirmBody": "Pebbles cannot work without permission to record how you feel, so withdrawing closes your account. That permanently deletes everything in it: pebbles, snaps, souls, collections, glyphs and karma. Glyphs other pebblers bought stay available to them, without your name attached. Everything processed until now stays lawful. This cannot be undone.",
       "confirmAction": "Withdraw and delete"
     }
   },

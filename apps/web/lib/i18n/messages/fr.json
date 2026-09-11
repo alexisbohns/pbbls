@@ -142,11 +142,14 @@
       "healthData": "Enregistrer ce que vous ressentez",
       "grantedOn": "Donné le {date} (version {version} de la politique)",
       "notRecorded": "Aucun enregistrement",
+      "grant": "Donner mon consentement",
+      "granting": "Enregistrement…",
+      "grantError": "Impossible d'enregistrer votre consentement. Veuillez réessayer.",
       "withdraw": "Retirer",
       "withdrawing": "Retrait en cours…",
       "withdrawError": "Impossible de retirer votre consentement. Veuillez réessayer.",
       "confirmTitle": "Retirer votre consentement ?",
-      "confirmBody": "Pebbles ne peut pas fonctionner sans l'autorisation d'enregistrer ce que vous ressentez. Le retrait ferme donc votre compte et efface définitivement vos pebbles, vos photos et vos connexions. Tout ce qui a été traité jusqu'ici reste licite. Cette action est irréversible.",
+      "confirmBody": "Pebbles ne peut pas fonctionner sans l'autorisation d'enregistrer ce que vous ressentez. Le retrait ferme donc votre compte. Tout ce qu'il contient sera supprimé définitivement : galets, photos, âmes, collections, glyphes et karma. Les glyphes achetés par d'autres personnes restent disponibles pour elles, sans votre nom. Tout ce qui a été traité jusqu'ici reste licite. Cette action est irréversible.",
       "confirmAction": "Retirer et supprimer"
     }
   },

@@ -24,6 +24,10 @@ import type { ConsentRow } from "@/lib/data/consent"
 type ConsentSectionProps = {
   /** The live health-data consent, or null if it was never recorded. */
   consent: ConsentRow | null
+  /** Records the Art. 9 consent for an account that never had one (the
+   *  pre-stack cohort). Not a gate: nobody is forced, and M55's re-consent
+   *  flow is still what will reach people who never open settings. */
+  onGrant: () => Promise<void>
   /** Called after the account is deleted and the local session is cleared. */
   onWithdrawn: () => void
 }
@@ -46,13 +50,26 @@ type ConsentSectionProps = {
  * while the delete-account edge function runs, and ConfirmDialog's
  * AlertDialogAction closes on click.
  */
-export function ConsentSection({ consent, onWithdrawn }: ConsentSectionProps) {
+export function ConsentSection({ consent, onGrant, onWithdrawn }: ConsentSectionProps) {
   const { deleteAccount } = useAuth()
   const t = useTranslations("settings.consent")
   const tCommon = useTranslations("common")
   const formatDate = useFormatDate()
   const [open, setOpen] = useState(false)
   const [withdrawing, setWithdrawing] = useState(false)
+  const [granting, setGranting] = useState(false)
+
+  const handleGrant = async () => {
+    setGranting(true)
+    try {
+      await onGrant()
+    } catch (err) {
+      console.error("[settings] consent grant failed:", err)
+      toast.error(t("grantError"))
+    } finally {
+      setGranting(false)
+    }
+  }
 
   const handleConfirm = async () => {
     setWithdrawing(true)
@@ -78,7 +95,14 @@ export function ConsentSection({ consent, onWithdrawn }: ConsentSectionProps) {
               <Button variant="ghost" size="sm" onClick={() => setOpen(true)}>
                 {t("withdraw")}
               </Button>
-            ) : null
+            ) : (
+              // Accounts created before this stack have no ledger row at all.
+              // Without a control here the section reads as a bug rather than
+              // a state, so the cohort gets a way to close the gap itself.
+              <Button variant="ghost" size="sm" disabled={granting} onClick={handleGrant}>
+                {granting ? t("granting") : t("grant")}
+              </Button>
+            )
           }
         >
           <span className="flex flex-col text-left">
