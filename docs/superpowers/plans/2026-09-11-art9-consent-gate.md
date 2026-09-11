@@ -27,7 +27,7 @@
 
 **Deviation from the spec, decided during planning:** the spec's §4.1 table has a single `withdrawn_at`. This plan adds a second nullable timestamp, `superseded_at`, so that "the user withdrew" and "a newer policy version replaced this" stay distinguishable in the ledger. Conflating them would make the accountability record lie about what the user did. The active-row index keys on both.
 
-**Branch names use `NNN` = the GitHub issue number.** The five issues are proposed in spec §11. Create them first, or substitute the real numbers before branching.
+**Issues:** #774 (Part 1), #775 (Part 2), #776 (Part 3), #777 (Part 4), #778 (Part 5), all on M55 · Compliance Batch A.
 
 ---
 
@@ -71,7 +71,7 @@
 
 # PART 1 — The DPIA
 
-Branch: `docs/NNN-dpia`. Docs only. No code, no tests.
+Branch: `docs/774-dpia`. Docs only. No code, no tests.
 
 ### Task 1: The lawful-basis map
 
@@ -290,7 +290,7 @@ git commit -m "docs(legal): add the DPIA draft for the current feature set"
 
 # PART 2 — The consent contract
 
-Branch: `feat/NNN-consent-contract`, stacked on Part 1 or on `main`. **This part owns every database change in the stack.**
+Branch: `feat/775-consent-contract`, stacked on Part 1 or on `main`. **This part owns every database change in the stack.**
 
 ### Task 3: The `user_consents` table, RLS and RPCs
 
@@ -676,7 +676,7 @@ git commit -m "chore(db): regenerate types for the consent ledger"
 
 # PART 3 — Capture at signup
 
-Branch: `feat/NNN-consent-capture-web`, stacked on Part 2. **`apps/web` only.**
+Branch: `feat/776-consent-capture-web`, stacked on Part 2. **`apps/web` only.**
 
 ### Task 7: The document-version constant
 
@@ -1187,7 +1187,7 @@ git commit -m "feat(auth): add the Art. 9 consent copy in EN and FR"
 
 # PART 4 — Withdrawal in Settings
 
-Branch: `feat/NNN-consent-withdrawal-web`, stacked on Part 3. **`apps/web` only.**
+Branch: `feat/777-consent-withdrawal-web`, stacked on Part 3. **`apps/web` only.**
 
 ### Task 13: The active-consent selector
 
@@ -1689,7 +1689,7 @@ git commit -m "feat(settings): honour consent withdrawal in the backend"
 
 # PART 5 — The policy text
 
-Branch: `fix/NNN-privacy-art9-wording`, stacked on Part 4.
+Branch: `fix/778-privacy-art9-wording`, stacked on Part 4.
 
 > **Every wording block in this part is DRAFT and requires maintainer sign-off
 > before merge.** Published legal text on a user-facing route is not revertible
