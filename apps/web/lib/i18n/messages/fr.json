@@ -448,10 +448,20 @@
       "termsPrefix": "J'accepte les ",
       "termsLink": "Conditions Générales d'Utilisation",
       "privacyPrefix": "J'accepte la ",
-      "privacyLink": "Politique de Confidentialité"
+      "privacyLink": "Politique de Confidentialité",
+      "healthConsent": "Pebbles enregistre ce que vous ressentez : vos humeurs, les émotions que vous choisissez et ce que vous écrivez. Ce sont des données sensibles sur votre bien-être mental, et nous ne les traitons qu'avec votre autorisation explicite.",
+      "consentRequiredHint": "Cochez les trois cases ci-dessus pour continuer."
     }
   },
   "onboarding": {
+    "consent": {
+      "title": "Une chose avant de commencer",
+      "body": "Pebbles enregistre ce que vous ressentez : vos humeurs, les émotions que vous choisissez et ce que vous écrivez. Ce sont des données sensibles sur votre bien-être mental, nous avons donc besoin de votre autorisation explicite avant d'en conserver quoi que ce soit.",
+      "checkbox": "Oui, Pebbles peut enregistrer ce que je ressens.",
+      "continue": "Continuer",
+      "saving": "Enregistrement…",
+      "error": "Impossible d'enregistrer votre autorisation. Veuillez réessayer."
+    },
     "controlsAria": "Commandes de l'introduction",
     "progressAria": "Progression de l'introduction",
     "stepAria": "Étape {current} sur {total}",

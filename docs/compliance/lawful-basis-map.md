@@ -46,10 +46,12 @@ re-dating the assessment.
   is still the only opt-in evidence on disk for #7, and there is none for #2.
 
   Uncovered even after the web tasks land, and therefore still open: accounts
-  that existed before this migration, accounts created through the login page's
-  OAuth buttons, and the iOS and Android surfaces (Kritik `F-2026-08-GDP-ios-04`,
-  `F-2026-08-GDP-android-02`) — none gets an Art. 9 consent record until the M55
-  re-consent surface asks for one.
+  that existed before this migration, and the iOS and Android surfaces (Kritik
+  `F-2026-08-GDP-ios-04`, `F-2026-08-GDP-android-02`) — none gets an Art. 9
+  consent record until the M55 re-consent surface asks for one. Accounts created
+  through the login page's OAuth buttons (`F-2026-08-GDP-web-02`) are no longer
+  among them: an OAuth sign-in that creates an account lands on `/onboarding`,
+  which now refuses to render its first step until the consent is recorded.
 - **#11 aggregates emotion data with no minimum-cohort threshold.** For a week
   with one or two active users the weekly emotion mix is effectively one
   identifiable person's record. Tracked as Kritik `F-2026-08-GDP-admin-06`.
