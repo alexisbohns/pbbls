@@ -149,8 +149,10 @@ single transaction, immediate, with no grace period (§2.2).
 **Three processing operations are declared to users but do not exist in the
 code, and they are declared across the whole published document set, not only in
 the privacy policy.** Therapist access, HealthKit and Google Gemma have no
-implementation: nothing in `apps/` or `packages/` outside the published markdown
-carries them. What *is* published:
+implementation anywhere in `apps/` or `packages/`. (The only non-markdown mention
+of any of them is a comment at `apps/ios/Pebbles/Resources/PrivacyInfo.xcprivacy:70`
+that exists to *deny* the dependency — it labels moods as Apple's Health data type
+"independently of HealthKit".) What *is* published:
 
 - **`apps/web/docs/privacy/en.md`** devotes §5 to therapist access with named
   permissions (`can_view_general`, `can_view_events`), §4.4 to HealthKit, and the
@@ -217,7 +219,7 @@ dependency appears in `apps/web/package.json`, `apps/admin/package.json`,
 |---|---|---|
 | Deliver the journal: record, re-read, organise and revisit pebbles | Pebbles and every enrichment (cards, domains, souls, snaps, drafts, collections) | Life of the account. Erasure on request is immediate and total (§2.2) |
 | Authenticate and identify | `auth.users`, `profiles.display_name` | Life of the account |
-| Demonstrate consent (accountability, Art. 5(2) / 7(1)) | `profiles.terms_accepted_at`, `privacy_accepted_at` today; the `user_consents` ledger once Part 2 of this stack lands. A row is a consent *act*, not a flag, and it carries **two distinct nullable timestamps**: `withdrawn_at` (the data subject exercised Art. 7(3)) and `superseded_at` (a newer policy version replaced the grant; the person revoked nothing). They are separate columns on purpose — conflating them would make the accountability record assert an act the person never performed, which defeats the point of keeping a ledger. A partial unique index on `(user_id, kind) where withdrawn_at is null and superseded_at is null` makes "at most one active consent per kind" a database invariant. Deliberate deviation from the design spec, recorded in the plan's pre-Task-1 conventions | Life of the account, plus whatever period is needed to evidence past processing. The two timestamps may not warrant the same lifetime. **Not yet decided — see Q5** |
+| Demonstrate consent (accountability, Art. 5(2) / 7(1)) | `profiles.terms_accepted_at`, `privacy_accepted_at` today; the `user_consents` ledger once Part 2 of this stack lands. A row will be a consent *act*, not a flag, and will carry **two distinct nullable timestamps**: `withdrawn_at` (the data subject exercised Art. 7(3)) and `superseded_at` (a newer policy version replaced the grant; the person revoked nothing). They are to be separate columns on purpose — conflating them would make the accountability record assert an act the person never performed, which defeats the point of keeping a ledger. A partial unique index on `(user_id, kind) where withdrawn_at is null and superseded_at is null` will make "at most one active consent per kind" a database invariant. Deliberate deviation from the design spec, recorded in the plan's pre-Task-1 conventions | Life of the account, plus whatever period is needed to evidence past processing. The two timestamps may not warrant the same lifetime. **Not yet decided — see Q5** |
 | Engagement mechanics (karma, bounce, achievements, glyph marketplace) | `karma_events`, `wallet_balances`, `bounces`, `achievement_unlocks`, glyph tables | Life of the account |
 | Social features the user opts into | `connections`, `connection_invites`, `connection_blocks`, `pebbles.visibility`, `profiles.handle` / `public_profile` | Life of the account; invites expire after 7 days by default and are revocable |
 | Operator analytics: understand product use | Aggregate views over `pebbles`, gated behind `is_admin` security-definer RPCs | Derived on read from live rows; nothing separate is stored, so it disappears with the source data. **No minimum-cohort threshold — §3.6** |
@@ -466,10 +468,12 @@ the older file the allowlist looks smaller than it is. In full, it returns:
 `days_practiced`, `member_since` (UTC date), `achievements_count`, and
 `achievements` — up to six *unlocked* badges, each carrying `id`, `slug`,
 `family`, `threshold`, `emotion_id`, `domain_id`, EN/FR title and description
-overrides, glyph geometry, and `unlocked_at` coarsened to a UTC date. Excluded,
-per that migration's own contract note: `user_id`, email, all pebble content,
+overrides, glyph geometry, and `unlocked_at` coarsened to a UTC date. The
+migration's own exclusion note (`:57-60`) lists what it keeps out: `user_id`,
 `is_admin`, consent timestamps, quotas, karma, `color_world`, the raw counts
-behind the levels, and `active_today`. `get_shared_pebble` likewise projects a single pebble
+behind the levels, and `active_today`. Email and all pebble content are excluded
+too — not by that note, which does not mention them, but because the projection
+simply never selects them. `get_shared_pebble` likewise projects a single pebble
 by uuid (122 unguessable bits), returns null for anything not graded `public` so
 that unknown and ungraded are indistinguishable, and excludes snaps, cards,
 souls and domains entirely. Handles that invite impersonation are blocked by
@@ -651,11 +655,11 @@ file named. They are stated as facts about the code, not as aspirations.
 | Measure | Where |
 |---|---|
 | Art. 9 explicit consent recorded in a version-bound `user_consents` ledger, owner-select-only RLS, written only through two `security definer` RPCs | Kritik **`F-2026-08-GDP-web-01`** — this stack, issue #774, Parts 2–4 (`docs/superpowers/plans/2026-09-11-art9-consent-gate.md`) |
-| **Consent captured for every new web account, by two mechanisms rather than one** — (a) a third checkbox on `/register`, gating the email submit and that page's two OAuth buttons; (b) a consent gate rendered inside onboarding when no active `health_data` consent exists, which catches accounts created through the **login page's** OAuth buttons | Kritik **`F-2026-08-GDP-web-02`** (GDP-01, high / P1) — **resolved by this stack.** `apps/web/app/login/page.tsx:87,98` wires `signInWithGoogle` / `signInWithApple` gated on `submitting` alone, and an OAuth sign-in creates an account when none exists, so a `/register` checkbox structurally cannot reach every new account. The gate keys on `profiles.onboarding_completed`: a brand-new account is `false` and routes to `/onboarding`, an established one is `true` and never does — so it catches exactly the new consent-less accounts and cannot fire for the pre-existing cohort (design spec D1a, plan Task 14) |
+| **Consent captured for every new web account, by two mechanisms rather than one** — (a) a third checkbox on `/register`, gating the email submit and that page's two OAuth buttons; (b) a consent gate rendered inside onboarding when no active `health_data` consent exists, which catches accounts created through the **login page's** OAuth buttons | Kritik **`F-2026-08-GDP-web-02`** (GDP-01, high / P1) — **resolved by this stack.** `apps/web/app/login/page.tsx:87,98` wires `signInWithGoogle` / `signInWithApple` gated on `submitting` alone, and an OAuth sign-in creates an account when none exists, so a `/register` checkbox structurally cannot reach every new account. The gate's condition tests **both** the absence of an active consent **and** `profile.onboarding_completed === false`, which is what makes it unable to fire for an account past onboarding. Routing alone would not be enough: nothing prevents an established account reaching `/onboarding` by bookmark or typed URL (`components/onboarding/OnboardingGate.tsx:14` deliberately does not police that route inward), and every pre-existing account also lacks an active consent — so a gate keyed on the consent alone would have fired for exactly the M55 cohort it must not touch (design spec D1a, plan Task 14) |
 | Consent bound to a document version, and withdrawable from settings without deleting the account first where the consent is severable | Kritik **`F-2026-08-GDP-web-06`** (GDP-01, P2) — **substantially resolved by this stack**: `document_version` on the ledger (Part 2) and the settings withdrawal surface (Part 4). The login-time re-consent trigger the finding also asks for — re-asking when the policy version moves — stays M55 work |
 | Privacy-policy wording corrected so "during onboarding" matches where consent is actually taken, and withdrawal described as it actually behaves | This stack, Part 5 |
 | **Re-consent surface for accounts that already exist**, which neither mechanism above can reach: every account created before this stack, including every OAuth account created to date, carries no Art. 9 consent record and is already past onboarding | M55. Accepted as out of scope for this stack by the maintainer on 2026-09-11 (design spec §7) on the basis that the beta cohort is small and largely the maintainer's own test accounts. **This is the one population the stack leaves uncovered**, and the reasoning is cohort-size-dependent (§5) |
-| **Data export, to meet Art. 20 and to make erasure survivable** | Kritik **`F-2026-08-GDP-web-04`** (P2). Tracked, but **unscheduled**: no milestone and no surface, and this stack does not address it. The single largest open commitment in this assessment (§2.3, §3.3), and P2 arguably understates it given that erasure without export is irreversible for the user |
+| **Data export, to meet Art. 20 and to make erasure survivable** | Kritik **`F-2026-08-GDP-web-04`** (P2). Tracked against the web surface, but **unscheduled**: no milestone, and this stack does not address it. The single largest open commitment in this assessment (§2.3, §3.3), and P2 arguably understates it given that erasure without export is irreversible for the user |
 | Minimum-cohort suppression inside the analytics RPCs | Kritik `F-2026-08-GDP-admin-06` (§3.6) |
 | iOS consent capture | Kritik `F-2026-08-GDP-ios-04` |
 | Android consent capture | Kritik `F-2026-08-GDP-android-02` |
@@ -690,8 +694,9 @@ Two further triggers follow from the reasoning in this document specifically:
 Each of these is a judgement call that could not be resolved from the repository.
 None is guessed at in the body above.
 
-**Q1 — The controller's postal address and telephone are unpublished, in six
-places across four documents.** Precisely, and per file:
+**Q1 — The controller's postal address and telephone are unpublished, in eight
+places: three documents, each in two languages, and two of them carry the pair
+twice.** Precisely, and per file:
 
 | File | Where | Placeholder |
 |---|---|---|
@@ -730,8 +735,10 @@ covers Gemma alone; privacy §12 itself reads as live, disableable processing.
 Two decisions are needed, and neither is an engineering call:
 
 1. **Is each operation planned or abandoned?** If planned, each needs marking as
-   future processing wherever it appears, not only in §6.3. If abandoned, each
-   needs removing from four documents.
+   future processing wherever it appears, not only in §6.3. If abandoned, the
+   removal is larger than it sounds: therapist access spans four files (privacy
+   and terms, each EN and FR), Gemma and HealthKit six apiece (those plus
+   credits EN and FR).
 2. **The Terms are the sharper end of this and should be handled first.** §7
    creates contractual machinery around a professional role — activation,
    Pebbles' approval, verification of professional qualifications, an allocation
