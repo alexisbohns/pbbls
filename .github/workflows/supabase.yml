@@ -3,11 +3,19 @@ name: Supabase
 # The database is the contract between four clients, and until #741 nothing
 # guarded it: a PR touching only migrations got two Vercel builds proving the
 # web and admin apps still compile, which they would with or without any schema
-# change. The `verify-*` harnesses in packages/supabase/scripts/ are the actual
-# proof for anything crossing a surface boundary — they are acceptance tests,
-# not simulations: each signs up throwaway users against the LINKED PRODUCTION
-# project, exercises the real RLS policies, triggers, RPCs and the real
-# delete-account edge function, then deletes what it made in a `finally`.
+# change. Three jobs now stand between a migration and `main`, and they answer
+# three different questions:
+#
+#   checks   does the code compile?            secretless, no containers
+#   schema   does the schema build from zero?  secretless, local stack
+#   verify   does the contract still hold?     production writes, same-repo only
+#
+# `verify` is the oldest and the sharpest. The `verify-*` harnesses in
+# packages/supabase/scripts/ are the actual proof for anything crossing a
+# surface boundary — they are acceptance tests, not simulations: each signs up
+# throwaway users against the LINKED PRODUCTION project, exercises the real RLS
+# policies, triggers, RPCs and the real delete-account edge function, then
+# deletes what it made in a `finally`.
 #
 # Because that means writing to production, the triggers are deliberately
 # narrow (D-2026-09-02):
@@ -34,7 +42,11 @@ on:
   workflow_dispatch:
 
 # Grouped by ref, never cancelling in flight: a run killed between signup and
-# the `finally` leaves an orphan account behind. Superseding a run that has not
+# the `finally` leaves an orphan account behind. Concurrency is workflow-level,
+# so `checks` and `schema` inherit a policy written for `verify` — they would be
+# safe to cancel, and queueing them costs a minute on a rapid re-push. That is
+# the cheaper half of the trade against splitting them into a second workflow
+# and losing the shared header, the shared path filter, and one place to look. Superseding a run that has not
 # started yet is free (it signed nothing up), so a rapid second push to the same
 # PR queues rather than racing. Runs from DIFFERENT refs are allowed to overlap:
 # every harness namespaces its users by a per-run uuid and asserts only on rows
@@ -165,3 +177,159 @@ jobs:
             gh issue create --title "$title" --body "$body" \
               --label bug --label supabase --label test
           fi
+
+  # ---------------------------------------------------------------------------
+  # The two jobs below are what #741 deliberately did not build. `verify` proves
+  # RUNTIME behaviour against the linked production project; nothing proved the
+  # code compiles or that the schema builds. `packages/supabase` had a `lint`
+  # that was `echo 'placeholder'` and a `build` (`tsc --noEmit`) no workflow
+  # invoked, and no deploy covered either: `apps/web` does not declare
+  # @pbbls/supabase at all, so only the apps/admin Vercel build touches the
+  # package, and only through the generated `types/database.ts`. The four edge
+  # functions — `delete-account` among them, the GDPR deletion path and the
+  # teardown every harness depends on — were typechecked by nobody and are
+  # deployed by hand.
+  #
+  # Neither job needs a secret, so neither carries `verify`'s fork gate: an
+  # outside contributor's PR gets typechecked and gets its migrations applied.
+  #
+  # Both skip the nightly. The nightly exists because production state can drift
+  # under a PR that never touched this path; a typecheck and a migration replay
+  # are functions of the committed tree alone, so running them at 04:17 can only
+  # repeat what the last PR run already said. (They would also report into
+  # nothing — the tracking-issue step keys off the harness ledger.)
+
+  checks:
+    name: typecheck
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # Before the checks, not between them: a later step guarded by
+      # `!cancelled()` cannot run if the toolchain it needs was skipped.
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Install
+        run: npm ci
+
+      # Two branches that both add a migration at the same second produce two
+      # files the CLI orders arbitrarily, and `db reset` is happy to apply them
+      # in either order. Cheap to check, and this repo has already paid once for
+      # a parallel-migration collision (#687).
+      - name: Migration versions are unique
+        run: |
+          dups=$(ls packages/supabase/supabase/migrations | cut -d_ -f1 | sort | uniq -d)
+          if [ -n "$dups" ]; then
+            echo "::error::Duplicate migration version prefixes: $dups"
+            exit 1
+          fi
+
+      # `!cancelled()` throughout so a red PR names every problem at once rather
+      # than one per push — the house pattern from the harness steps above.
+      - name: tsc --noEmit
+        if: '!cancelled()'
+        run: npm run build --workspace=packages/supabase
+
+      # Covers the four function entrypoints and the seven scripts; `_shared/`
+      # and `_shared/engine/` come along transitively through their imports.
+      # `deno check`, not `deno lint`: the only thing `deno lint` has to say
+      # about this tree is 13 × no-import-prefix, and inline `https://esm.sh/…`
+      # specifiers are how Supabase edge functions are written.
+      - name: deno check
+        if: '!cancelled()'
+        run: npm run lint --workspace=packages/supabase
+
+  schema:
+    name: migration chain · types drift
+    if: github.event_name != 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Pinned, not `latest`. `gen types` output is this job's assertion, and an
+      # unpinned CLI would turn a generator change into a red check on a PR that
+      # touched nothing.
+      #
+      # NOT the 2.84.2 the maintainer happens to run locally: the committed
+      # types/database.ts carries `__InternalSupabase` / `PostgrestVersion` and
+      # parenthesized conditional generics, and 2.84.2 emits neither — that file
+      # came from a newer generator (the dashboard, or the `generate_typescript_types`
+      # MCP tool named as a fallback in packages/supabase/CLAUDE.md). Pinning the
+      # older CLI here would make the job demand a downgrade of the committed file.
+      - name: Set up the Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: 2.117.0
+
+      # Excludes only what this job cannot use: no request is served, no mail is
+      # sent, no function is invoked. `storage` and `auth` stay — migrations
+      # insert into `storage.buckets` and 66 of them reference `auth.users`.
+      - name: Boot the local stack
+        working-directory: packages/supabase
+        run: supabase start -x studio,imgproxy,edge-runtime,logflare,vector,supavisor,mailpit,realtime
+
+      # `supabase start` already applied the chain, but it applied it as a side
+      # effect. This is the assertion, stated as one: 68 migrations, empty
+      # database, seed included. It is what would have caught a migration
+      # referencing a column an earlier one dropped at the DDL level.
+      - name: Apply every migration to an empty database
+        working-directory: packages/supabase
+        run: supabase db reset
+
+      # AGENTS.md makes regenerating and committing types/database.ts mandatory
+      # after any migration change, and nothing enforced it: a forgotten
+      # regeneration stays invisible until a client reads a column the generated
+      # types do not have.
+      #
+      # Generated to a temp file, never over the committed one. `db:types`
+      # redirects the CLI's stdout into the file, so a failed generation
+      # TRUNCATES database.ts — the TS1434 failure mode documented in
+      # packages/supabase/CLAUDE.md. Here that would silently turn a broken
+      # generator into a 4000-line "drift".
+      - name: Types match the migrations
+        working-directory: packages/supabase
+        run: |
+          set -uo pipefail
+          generated="$RUNNER_TEMP/database.ts"
+          supabase gen types typescript --local 2>/dev/null > "$generated"
+          if [ ! -s "$generated" ]; then
+            echo "::error::supabase gen types produced nothing — the generator failed, not the types."
+            exit 1
+          fi
+          # Not a byte-for-byte diff, for one structural reason: the
+          # __InternalSupabase / PostgrestVersion block is emitted only when
+          # generating against a LINKED project (the version is read from that
+          # project's API), so a `--local` generation can never reproduce it. It
+          # describes the server, not the schema. The normaliser removes it from
+          # BOTH sides — never one — and settles the trailing newline `gen types`
+          # is inconsistent about across versions. Everything else is compared
+          # exactly; a renamed column or a dropped function survives untouched.
+          # Absolute: this step runs with working-directory packages/supabase.
+          "$GITHUB_WORKSPACE/.github/scripts/normalize-db-types.py" \
+            types/database.ts "$RUNNER_TEMP/committed.ts" \
+            "$generated"      "$RUNNER_TEMP/generated.ts"
+          if ! diff -u "$RUNNER_TEMP/committed.ts" "$RUNNER_TEMP/generated.ts"; then
+            echo "::error::types/database.ts is out of date. Run 'npm run db:types --workspace=packages/supabase' and commit the result."
+            exit 1
+          fi
+          echo "types/database.ts matches the migrations."
+
+      # Containers are the runner's problem once the job ends, but a failed
+      # `db reset` can leave the stack up long enough to hold the port on a
+      # retry of the same runner.
+      - name: Stop the local stack
+        if: always()
+        working-directory: packages/supabase
+        run: supabase stop --no-backup || true

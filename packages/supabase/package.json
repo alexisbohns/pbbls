@@ -6,7 +6,7 @@
   "types": "./src/index.ts",
   "scripts": {
     "build": "tsc --noEmit",
-    "lint": "echo 'placeholder \u2014 no lint step yet'",
+    "lint": "deno check supabase/functions/*/index.ts scripts/*.ts",
     "db:start": "supabase start",
     "db:stop": "supabase stop",
     "db:status": "supabase status",
