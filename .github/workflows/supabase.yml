@@ -260,11 +260,18 @@ jobs:
 
       # Pinned, not `latest`. `gen types` output is this job's assertion, and an
       # unpinned CLI would turn a generator change into a red check on a PR that
-      # touched nothing. Matches the version the maintainer runs locally.
+      # touched nothing.
+      #
+      # NOT the 2.84.2 the maintainer happens to run locally: the committed
+      # types/database.ts carries `__InternalSupabase` / `PostgrestVersion` and
+      # parenthesized conditional generics, and 2.84.2 emits neither — that file
+      # came from a newer generator (the dashboard, or the `generate_typescript_types`
+      # MCP tool named as a fallback in packages/supabase/CLAUDE.md). Pinning the
+      # older CLI here would make the job demand a downgrade of the committed file.
       - name: Set up the Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: 2.84.2
+          version: 2.117.0
 
       # Excludes only what this job cannot use: no request is served, no mail is
       # sent, no function is invoked. `storage` and `auth` stay — migrations
