@@ -15,6 +15,14 @@ export default defineConfig({
     },
   },
   test: {
+    // Worker threads, not Vitest 4's default `forks`. A forked worker is a
+    // separate OS process, so a parent killed ungracefully (a Ctrl-C that does
+    // not propagate, a closed terminal, an IDE stop) leaves children reparented
+    // to launchd, burning CPU until someone notices. Threads cannot outlive
+    // their process. Safe here because nothing under test touches the DOM,
+    // `process.chdir` or a native addon — revisit if this suite ever gains
+    // jsdom or a native dependency, which is when `forks` earns its default.
+    pool: "threads",
     environment: "node",
     include: ["lib/**/*.test.ts"],
   },
