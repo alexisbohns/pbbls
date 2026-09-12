@@ -109,6 +109,14 @@ jobs:
         if: '!cancelled()'
         run: .github/scripts/verify-harness.sh "guard" db:verify:guard
 
+      # Read-only, and the only harness that signs nobody up: it compares the
+      # linked project against packages/supabase/reference/*.json. Studio stays
+      # the editing surface for palettes, so this reports the day the committed
+      # snapshot falls behind — see #796.
+      - name: Emotion reference data (#796 drift)
+        if: '!cancelled()'
+        run: .github/scripts/verify-harness.sh "reference" db:verify:reference
+
       # One writer for the whole table. `always()` so it still reports when a
       # harness failed — that is precisely the run whose table is worth reading.
       - name: Write the run log

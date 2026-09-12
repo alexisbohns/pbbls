@@ -1,0 +1,79 @@
+[
+  {
+    "id": "f094a725-61aa-4488-8bc0-1c814159b536",
+    "slug": "anger",
+    "name": "Anger",
+    "primary_color": "#8E4242FF",
+    "secondary_color": "#C17575FF",
+    "light_color": "#F4ECECFF",
+    "surface_color": "#8E42421A",
+    "shaded_color": "#632E2EFF",
+    "dark_color": "#1C0D0DFF"
+  },
+  {
+    "id": "1dada583-3ac8-4964-a976-76974eeac8fd",
+    "slug": "fear",
+    "name": "Fear",
+    "primary_color": "#7B5E99FF",
+    "secondary_color": "#AE91CCFF",
+    "light_color": "#F2EFF5FF",
+    "surface_color": "#7B5E991A",
+    "shaded_color": "#56426BFF",
+    "dark_color": "#19131FFF"
+  },
+  {
+    "id": "b9ff1de0-6846-4254-956e-7c7570f9b28b",
+    "slug": "joy",
+    "name": "Joy",
+    "primary_color": "#A15C08FF",
+    "secondary_color": "#CF8C39FF",
+    "light_color": "#FAF6EAFF",
+    "surface_color": "#A15C081A",
+    "shaded_color": "#714006FF",
+    "dark_color": "#201202FF"
+  },
+  {
+    "id": "eed68af7-491c-4736-a02d-ea2cd314e201",
+    "slug": "peace",
+    "name": "Peaceful",
+    "primary_color": "#487C5AFF",
+    "secondary_color": "#80BF96FF",
+    "light_color": "#EDF2EEFF",
+    "surface_color": "#487C5A1A",
+    "shaded_color": "#32573FFF",
+    "dark_color": "#0E1912FF"
+  },
+  {
+    "id": "57b334d9-f1e7-4865-ab20-1ca6ce794a51",
+    "slug": "pride",
+    "name": "Pride",
+    "primary_color": "#A9478AFF",
+    "secondary_color": "#EA91CEFF",
+    "light_color": "#F6EDF3FF",
+    "surface_color": "#A9478A1A",
+    "shaded_color": "#763261FF",
+    "dark_color": "#220E1CFF"
+  },
+  {
+    "id": "528f2356-d960-444b-a437-ec4340f78e45",
+    "slug": "sadness",
+    "name": "Sadness",
+    "primary_color": "#59658AFF",
+    "secondary_color": "#8C98BDFF",
+    "light_color": "#EEF0F3FF",
+    "surface_color": "#59658A1A",
+    "shaded_color": "#3E4761FF",
+    "dark_color": "#12141CFF"
+  },
+  {
+    "id": "f5316645-9221-4597-9772-677245060877",
+    "slug": "shame",
+    "name": "Shame",
+    "primary_color": "#868686FF",
+    "secondary_color": "#B9B9B9FF",
+    "light_color": "#F3F3F3FF",
+    "surface_color": "#8686861A",
+    "shaded_color": "#5E5E5EFF",
+    "dark_color": "#1B1B1BFF"
+  }
+]

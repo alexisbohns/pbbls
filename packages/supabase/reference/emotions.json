@@ -1,0 +1,306 @@
+[
+  {
+    "id": "50a68890-f6bb-e67a-6655-e84ff0b71f49",
+    "slug": "amazed",
+    "name": "Awe",
+    "color": "#A15C08",
+    "emoji": "🤩",
+    "category_slug": "joy"
+  },
+  {
+    "id": "f14ca000-32c7-4cf3-9aa5-ad5dc84c5285",
+    "slug": "amused",
+    "name": "Amused",
+    "color": "#A15C08",
+    "emoji": "😂",
+    "category_slug": "joy"
+  },
+  {
+    "id": "8a851a45-d1c5-92fd-fd50-098c4e86eaef",
+    "slug": "angry",
+    "name": "Anger",
+    "color": "#8E4242",
+    "emoji": "😡",
+    "category_slug": "anger"
+  },
+  {
+    "id": "25d98464-bc3d-417f-ae12-a3a996e5dee1",
+    "slug": "annoyed",
+    "name": "Annoyed",
+    "color": "#8E4242",
+    "emoji": "😒",
+    "category_slug": "anger"
+  },
+  {
+    "id": "b4216f65-f0a6-2a26-ca1a-9dfa839fbbeb",
+    "slug": "anxious",
+    "name": "Anxiety",
+    "color": "#7B5E99",
+    "emoji": "😰",
+    "category_slug": "fear"
+  },
+  {
+    "id": "0c98e05e-cf64-3b6f-929f-8bb6d0449b5f",
+    "slug": "ashamed",
+    "name": "Shame",
+    "color": "#868686",
+    "emoji": "🫣",
+    "category_slug": "shame"
+  },
+  {
+    "id": "70e70f6a-237b-4e2d-8f4c-8043df889b36",
+    "slug": "brave",
+    "name": "Brave",
+    "color": "#A9478A",
+    "emoji": "🫡",
+    "category_slug": "pride"
+  },
+  {
+    "id": "5ff5cd1c-6739-6143-537f-85a2dbbd8841",
+    "slug": "calm",
+    "name": "Calm",
+    "color": "#487C5A",
+    "emoji": "🙂",
+    "category_slug": "peace"
+  },
+  {
+    "id": "3e14e406-90e8-41fd-a967-30fa545c47dc",
+    "slug": "confident",
+    "name": "Confident",
+    "color": "#A9478A",
+    "emoji": "😌",
+    "category_slug": "pride"
+  },
+  {
+    "id": "b0230f83-c4e4-4cdc-bf9f-2d650509658c",
+    "slug": "content",
+    "name": "Content",
+    "color": "#487C5A",
+    "emoji": "😀",
+    "category_slug": "peace"
+  },
+  {
+    "id": "f76b1274-04ab-4a9c-858d-4da26f8d124d",
+    "slug": "disappointed",
+    "name": "Disappointed",
+    "color": "#59658A",
+    "emoji": "😕",
+    "category_slug": "sadness"
+  },
+  {
+    "id": "8a79a265-5dcd-4d42-b8de-8c1ff5d7e505",
+    "slug": "discouraged",
+    "name": "Discouraged",
+    "color": "#59658A",
+    "emoji": "😫",
+    "category_slug": "sadness"
+  },
+  {
+    "id": "332cabe9-c76d-d737-bba6-f2d7024de808",
+    "slug": "disgusted",
+    "name": "Disgust",
+    "color": "#8E4242",
+    "emoji": "🤢",
+    "category_slug": "anger"
+  },
+  {
+    "id": "ce828ce7-78ad-4a39-bfe6-0c843cfb2838",
+    "slug": "drained",
+    "name": "Drained",
+    "color": "#59658A",
+    "emoji": "😪",
+    "category_slug": "sadness"
+  },
+  {
+    "id": "52301a19-4b27-4432-9d0b-281f6341bb95",
+    "slug": "embarrassed",
+    "name": "Embarrassed",
+    "color": "#868686",
+    "emoji": "😬",
+    "category_slug": "shame"
+  },
+  {
+    "id": "98bdc543-6b26-e1c8-da1d-50ae8b9973ff",
+    "slug": "excited",
+    "name": "Excitement",
+    "color": "#A15C08",
+    "emoji": "😇",
+    "category_slug": "joy"
+  },
+  {
+    "id": "fab5fa1f-ad54-4705-a205-f8a0b2b31806",
+    "slug": "frustrated",
+    "name": "Frustrated",
+    "color": "#8E4242",
+    "emoji": "😤",
+    "category_slug": "anger"
+  },
+  {
+    "id": "b5c925f9-ed7d-5b87-2dc2-d3857e736235",
+    "slug": "grateful",
+    "name": "Gratitude",
+    "color": "#487C5A",
+    "emoji": "🥰",
+    "category_slug": "peace"
+  },
+  {
+    "id": "648b1092-820c-b19a-8a27-07072b068724",
+    "slug": "guilty",
+    "name": "Guilt",
+    "color": "#868686",
+    "emoji": "😓",
+    "category_slug": "shame"
+  },
+  {
+    "id": "f1b09d24-3c2e-414b-a751-fc91da51fcdb",
+    "slug": "happy",
+    "name": "Happy",
+    "color": "#A15C08",
+    "emoji": "🤗",
+    "category_slug": "joy"
+  },
+  {
+    "id": "b4102799-3d5f-45f2-bfa9-28d72fb89bec",
+    "slug": "hopeful",
+    "name": "Hopeful",
+    "color": "#487C5A",
+    "emoji": "🥹",
+    "category_slug": "peace"
+  },
+  {
+    "id": "5d5e346a-c5c5-4fcb-99e9-2951213c3ff3",
+    "slug": "hopeless",
+    "name": "Hopeless",
+    "color": "#59658A",
+    "emoji": "😞",
+    "category_slug": "sadness"
+  },
+  {
+    "id": "59f68361-3443-4352-a119-b0daaf864bca",
+    "slug": "indifferent",
+    "name": "Indifferent",
+    "color": "#868686",
+    "emoji": "😑",
+    "category_slug": "shame"
+  },
+  {
+    "id": "df630582-0846-4ebf-be75-166595513840",
+    "slug": "irritated",
+    "name": "Irritated",
+    "color": "#8E4242",
+    "emoji": "🙄",
+    "category_slug": "anger"
+  },
+  {
+    "id": "c32faae1-46ac-411b-987f-e32e572259bb",
+    "slug": "jealous",
+    "name": "Jealous",
+    "color": "#8E4242",
+    "emoji": "😠",
+    "category_slug": "anger"
+  },
+  {
+    "id": "3ffd6ca6-e033-6926-fa1f-ddf8f90bfd8c",
+    "slug": "joyful",
+    "name": "Joy",
+    "color": "#A15C08",
+    "emoji": "🥳",
+    "category_slug": "joy"
+  },
+  {
+    "id": "f99d4e11-5a81-101b-07a3-6fc89a7aa1d9",
+    "slug": "lonely",
+    "name": "Loneliness",
+    "color": "#59658A",
+    "emoji": "🥺",
+    "category_slug": "sadness"
+  },
+  {
+    "id": "afd28421-b994-475c-ad49-75ecae570ee5",
+    "slug": "overwhelmed",
+    "name": "Overwhelmed",
+    "color": "#7B5E99",
+    "emoji": "😣",
+    "category_slug": "fear"
+  },
+  {
+    "id": "6b22ff42-67d4-ea3d-f35b-f71e49ae94cb",
+    "slug": "passionate",
+    "name": "Passion",
+    "color": "#A15C08",
+    "emoji": "😍",
+    "category_slug": "joy"
+  },
+  {
+    "id": "21d79e4c-9482-40d3-bf73-53adfb452e5a",
+    "slug": "peaceful",
+    "name": "Peaceful",
+    "color": "#487C5A",
+    "emoji": "☺️",
+    "category_slug": "peace"
+  },
+  {
+    "id": "ed9fbe9f-6a93-22bb-d5d5-35f42164c120",
+    "slug": "proud",
+    "name": "Pride",
+    "color": "#A9478A",
+    "emoji": "😎",
+    "category_slug": "pride"
+  },
+  {
+    "id": "0312c804-7656-4f33-950c-a70a5b08b842",
+    "slug": "relieved",
+    "name": "Relieved",
+    "color": "#487C5A",
+    "emoji": "😮‍💨",
+    "category_slug": "peace"
+  },
+  {
+    "id": "075ec40d-f27c-033d-a498-850947e4e887",
+    "slug": "sad",
+    "name": "Sadness",
+    "color": "#59658A",
+    "emoji": "😢",
+    "category_slug": "sadness"
+  },
+  {
+    "id": "776d210e-29f3-4f14-acb3-9787518aa53d",
+    "slug": "satisfied",
+    "name": "Satisfied",
+    "color": "#487C5A",
+    "emoji": "😊",
+    "category_slug": "peace"
+  },
+  {
+    "id": "8b2993f3-4043-7bdf-388d-c0e3d5c96f02",
+    "slug": "scared",
+    "name": "Fear",
+    "color": "#7B5E99",
+    "emoji": "😱",
+    "category_slug": "fear"
+  },
+  {
+    "id": "93694d2b-41a7-4dfc-8582-7cce835ca9fe",
+    "slug": "stressed",
+    "name": "Stressed",
+    "color": "#7B5E99",
+    "emoji": "😖",
+    "category_slug": "fear"
+  },
+  {
+    "id": "a9b0625b-8a77-06cf-ba9c-a348ab58b12c",
+    "slug": "surprised",
+    "name": "Surprise",
+    "color": "#487C5A",
+    "emoji": "😯",
+    "category_slug": "peace"
+  },
+  {
+    "id": "2d45e136-cee7-4bf1-b5fa-a3a79f26feab",
+    "slug": "worried",
+    "name": "Worried",
+    "color": "#7B5E99",
+    "emoji": "😟",
+    "category_slug": "fear"
+  }
+]
