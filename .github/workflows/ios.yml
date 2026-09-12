@@ -1,20 +1,35 @@
 name: iOS
 
-# Static checks for the iOS app that need no Xcode, so they run on ubuntu in
-# seconds rather than on a macOS runner. Paying for macOS to assert that a file
-# exists is the reason such a check gets disabled later.
+# Two jobs, split by what they actually need:
 #
-# The Swift test suite is NOT run here — that needs a macOS runner and is still
-# a local `npm run test --workspace=@pbbls/ios`.
+#   verify — static checks needing no Xcode, on ubuntu in seconds. Paying for
+#            macOS to assert that a file exists is how such a check ends up
+#            disabled.
+#   test   — SwiftLint and the Swift Testing suite, which need a Mac and a
+#            simulator. Until #789 nothing ran either on a pull request: the
+#            suite and the lint config both existed and neither was a gate, so
+#            an iOS regression merged green-by-absence and shipped at the next
+#            TestFlight build. Xcode Cloud does not close this — ci_scripts/
+#            covers build setup only, and SwiftLint is not even installed there.
+#
+# `packages/supabase/**` is in the path filter on purpose. The database is the
+# contract between four clients, so a migration that changes a shape iOS decodes
+# is exactly the change that should run the iOS decoding tests — and that PR
+# touches no apps/ios file, which is how the hole stayed open. The cost is that
+# a supabase-only PR also runs the two ubuntu checks; they pass in seconds.
+#
+# macOS minutes are free on public repositories, so the gate is not billed.
 on:
   pull_request:
     paths:
       - 'apps/ios/**'
+      - 'packages/supabase/**'
       - '.github/workflows/ios.yml'
   push:
     branches: [main]
     paths:
       - 'apps/ios/**'
+      - 'packages/supabase/**'
       - '.github/workflows/ios.yml'
 
 concurrency:
@@ -49,3 +64,112 @@ jobs:
       # needs a simulator; this half does not.
       - name: Verify colour contrast
         run: npm run verify:contrast --workspace=@pbbls/ios
+
+  test:
+    name: swiftlint · unit tests
+    # macos-26 is the arm64 image. Xcode 26 is a floor, not a preference: the
+    # karma pastille compiles `.glassEffect` behind an `if #available(iOS 26, *)`
+    # guard, which needs the iOS 26 SDK to build at all.
+    runs-on: macos-26
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Pinned for the same reason project.yml pins its packages: a gate that
+      # compiles something other than what ships is not evidence about what
+      # ships. 26.3 (17C529) is the build the maintainer's machine runs. The
+      # image default, 26.6, fails BannerAspectTests.cgRatioValues() on an exact
+      # CGFloat comparison that passes on 26.3 — unexplained, tracked in #793.
+      # Raising this pin is that issue's job, not a drive-by.
+      - name: Select Xcode 26.3
+        run: |
+          if [ ! -d /Applications/Xcode_26.3.app ]; then
+            echo "Xcode 26.3 is gone from the runner image. Installed:"
+            ls -d /Applications/Xcode*.app
+            echo "Pick the closest version and update #793 rather than silently taking the default."
+            exit 1
+          fi
+          sudo xcode-select -s /Applications/Xcode_26.3.app
+          xcodebuild -version
+
+      # Neither tool ships on the runner image. XcodeGen is the same install
+      # Xcode Cloud's ci_post_clone.sh does.
+      - name: Install XcodeGen and SwiftLint
+        run: brew install xcodegen swiftlint
+
+      # Config/Secrets.xcconfig is git-ignored, and project.yml names it as the
+      # base config file for both shippable targets, so it has to exist before
+      # the project is generated. The values are placeholders rather than repo
+      # secrets: the suite is offline, and the only thing that reads them is
+      # AppEnvironment, which fatalErrors on an EMPTY value (SupabaseService()
+      # is constructed in a test) and never dials the URL. Placeholders also
+      # mean the job works on a fork PR, where secrets are unavailable. If a
+      # test ever needs to reach a real project, that is the moment to swap in
+      # secrets.SUPABASE_URL / secrets.SUPABASE_ANON_KEY — not before.
+      #
+      # The $() escape is required: xcconfig parses // as a comment.
+      - name: Write placeholder Secrets.xcconfig
+        working-directory: apps/ios
+        run: |
+          cat > Config/Secrets.xcconfig <<'EOF'
+          SUPABASE_URL = https:/$()/placeholder.supabase.co
+          SUPABASE_ANON_KEY = placeholder-anon-key
+          EOF
+
+      - name: Generate Xcode project
+        working-directory: apps/ios
+        run: xcodegen generate
+
+      # Runs the committed .swiftlint.yml, which is tuned so that error severity
+      # means "defect" and warnings stay advisory — see the note at the top of
+      # that file. Non-blocking warnings still print here.
+      - name: SwiftLint
+        working-directory: apps/ios
+        run: swiftlint
+
+      # The destination is resolved rather than hard-coded. A named device
+      # ('iPhone 17') is a string that the next runner image is free to retire,
+      # and the failure it produces reads like a project error rather than a
+      # missing simulator. Any available iPhone will do — nothing in the suite
+      # is device-specific.
+      - name: Resolve a simulator
+        id: sim
+        run: |
+          udid=$(xcrun simctl list devices available --json | python3 -c '
+          import json, sys
+          devices = json.load(sys.stdin)["devices"]
+          for runtime in sorted(devices):
+              if "iOS" not in runtime:
+                  continue
+              for device in devices[runtime]:
+                  if device["name"].startswith("iPhone"):
+                      print(device["udid"])
+                      raise SystemExit
+          raise SystemExit("no available iPhone simulator on this runner")
+          ')
+          echo "udid=$udid" >> "$GITHUB_OUTPUT"
+          xcrun simctl list devices available | grep -F "$udid"
+
+      # CODE_SIGNING_ALLOWED=NO because project.yml carries a DEVELOPMENT_TEAM
+      # and the runner holds no identity; a simulator build needs neither.
+      - name: Run tests
+        working-directory: apps/ios
+        run: |
+          xcodebuild test \
+            -scheme Pebbles \
+            -destination "id=${{ steps.sim.outputs.udid }}" \
+            -derivedDataPath build \
+            -skipMacroValidation \
+            -quiet \
+            CODE_SIGNING_ALLOWED=NO
+
+      # The .xcresult is the readable account of which @Test failed, and -quiet
+      # keeps the log short enough to be worth reading. Kept only on a red run;
+      # -derivedDataPath above is what makes the location predictable.
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcresult
+          path: apps/ios/build/Logs/Test/*.xcresult
+          if-no-files-found: ignore

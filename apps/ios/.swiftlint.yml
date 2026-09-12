@@ -1,1 +1,39 @@
-# Use SwiftLint defaults for v1. Tune rules when friction appears.
+# SwiftLint defaults, with the *metric* rules' error level switched off.
+#
+# `.github/workflows/ios.yml` runs `swiftlint` on every pull request and an
+# error-severity violation fails the job, so that level is now a merge gate.
+# That makes it worth reserving for things that are actually defects. A struct
+# that grew past 350 lines, or a 201-character localized string, is a nudge and
+# not a reason to block a branch — and a gate that blocks on those is a gate
+# somebody deletes within the month. All of them still report as warnings; the
+# error thresholds below are put out of reach rather than removed, because
+# SwiftLint keeps its own default whenever the key is absent or null.
+#
+# The semantic defaults (force_cast, force_try, …) stay fatal. The two justified
+# `try!` sites — both #Preview fixtures — carry inline `swiftlint:disable:next`
+# comments, which is narrower than demoting the rule everywhere.
+
+# Single-letter names are the idiom in the geometry and noise code
+# (Features/Path/Render/Wobble deliberately mirrors the SVG 1.1 §15.19 spec's
+# own x / y / t / a / b naming — docs/decisions/log.md, 2026-07-13) and in short
+# closures across the UI layer. Length here never flagged a real problem.
+identifier_name:
+  min_length:
+    warning: 1
+    error: 1
+  # Snake_case is the deliberate spelling wherever an identifier mirrors a
+  # Postgres column or an RPC parameter verbatim (`p_handle`, `display_name`),
+  # so the Swift side reads the same as the migration it has to agree with.
+  allowed_symbols: ["_"]
+
+line_length:
+  warning: 120
+  error: 1000
+
+type_body_length:
+  warning: 250
+  error: 1000
+
+large_tuple:
+  warning: 2
+  error: 10

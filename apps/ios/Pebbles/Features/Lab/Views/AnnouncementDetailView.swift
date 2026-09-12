@@ -131,6 +131,9 @@ struct AnnouncementDetailView: View {
     """
     let decoder = JSONDecoder()
     decoder.dateDecodingStrategy = .iso8601
+    // Preview fixture: a literal that stops decoding should break the preview
+    // loudly rather than render a silently empty announcement.
+    // swiftlint:disable:next force_try
     let log = try! decoder.decode(Log.self, from: Data(json.utf8))
     return NavigationStack {
         AnnouncementDetailView(log: log, coverImageURL: nil)

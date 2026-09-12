@@ -24,16 +24,28 @@ settings:
     Release:
       SWIFT_OPTIMIZATION_LEVEL: "-O"
 
+# Pinned exactly, not `from:`. Package.resolved lives inside the generated
+# .xcodeproj, which is git-ignored, so `from:` meant every clean checkout
+# resolved whatever was newest that day while this machine kept building
+# against a resolved file from months ago. That is not a hypothetical: the
+# first CI run of the test job (#790) failed to compile because supabase-swift
+# had moved 2.43.1 → 2.55.x and `createSignedURLs` now returns
+# [SignedURLResult] rather than [URL]. Xcode Cloud clones clean too, so the
+# release build was resolving the same drifting graph.
+#
+# These three versions are what the shipped app is actually built against.
+# Bumping one is a deliberate PR that fixes the API changes it brings, not
+# something a Tuesday afternoon does on its own.
 packages:
   Supabase:
     url: https://github.com/supabase/supabase-swift
-    from: "2.0.0"
+    exactVersion: "2.43.1"
   SVGView:
     url: https://github.com/exyte/SVGView
-    from: "1.0.4"
+    exactVersion: "1.0.6"
   RiveRuntime:
     url: https://github.com/rive-app/rive-ios
-    from: "6.0.0"
+    exactVersion: "6.19.2"
 
 targets:
   Pebbles:
