@@ -316,7 +316,8 @@ jobs:
           # BOTH sides — never one — and settles the trailing newline `gen types`
           # is inconsistent about across versions. Everything else is compared
           # exactly; a renamed column or a dropped function survives untouched.
-          .github/scripts/normalize-db-types.py \
+          # Absolute: this step runs with working-directory packages/supabase.
+          "$GITHUB_WORKSPACE/.github/scripts/normalize-db-types.py" \
             types/database.ts "$RUNNER_TEMP/committed.ts" \
             "$generated"      "$RUNNER_TEMP/generated.ts"
           if ! diff -u "$RUNNER_TEMP/committed.ts" "$RUNNER_TEMP/generated.ts"; then
