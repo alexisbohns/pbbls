@@ -71,6 +71,20 @@ A new harness added to `scripts/` gains a `db:verify:*` script and a workflow st
 
 **Orphans.** A run killed between signup and cleanup leaves a throwaway account behind. They are greppable in `auth.users` by their prefixes — `drafts-verify-`, `grades-verify-`, `public-verify-`, `guard-verify-`, all `@example.test`. There is no automated sweep (deleting them needs the service role).
 
+## What CI runs on `packages/supabase/**`
+
+`.github/workflows/supabase.yml` holds three jobs, each answering a different question. Only the last one needs secrets, so the first two also run on fork PRs, and they skip the nightly (a typecheck and a migration replay are functions of the committed tree, so running them at 04:17 repeats the last PR run).
+
+| Job | Question | Reproduce locally |
+|---|---|---|
+| `checks` | Does the code compile? | `npm run build --workspace=packages/supabase` (tsc), `npm run lint --workspace=packages/supabase` (`deno check`) |
+| `schema` | Does the schema build from zero, and do the types match it? | `npm run db:reset` then `npm run db:types`, needs Docker |
+| `verify` | Does the contract still hold? | `set -a; . ./.env; set +a; npm run db:verify --workspace=packages/supabase` |
+
+**`lint` is `deno check` over the four edge-function entrypoints and the nine scripts** — `_shared/` and `_shared/engine/` come along transitively. It is not `deno lint`: the only thing that rule set has to say about this tree is 13 × `no-import-prefix`, and inline `https://esm.sh/…` specifiers are how Supabase edge functions are written. A new file under `scripts/` or a new edge function is covered automatically by the globs; a new *directory* of shared code is covered only if something imports it.
+
+**The `schema` job is the only thing that reads `types/database.ts` as an assertion.** It generates types from the local stack into a temp file and diffs — never over the committed file, because `db:types` redirects stdout into it and a failed generation would truncate it (the TS1434 failure mode above). If that job goes red, the fix is `npm run db:types` and a commit, not an edit to the workflow.
+
 ## Reference data lives in `reference/*.json`
 
 `emotion_categories` and the 38-row `emotions` roster were built by hand in Supabase Studio and never written back as migrations. The chain seeded 16 entirely different emotion slugs, so `supabase db reset` against an empty database died at `20260506000001` — `set not null` on a `category_id` nothing had ever backfilled. #796 repaired it:

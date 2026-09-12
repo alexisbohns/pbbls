@@ -68,7 +68,7 @@ Keep CLAUDE.md short. Read these when relevant — don't pre-load:
 - **Postgres / Supabase technique** → `.agents/skills/supabase-postgres-best-practices/` (RLS, indexing, locking, pooling).
 - **PR Lab Notes** → `lab-note` skill (`.claude/skills/lab-note/`); see the Lab Note section below.
 
-CI gates worth knowing about: `arkaik.yml` validates the legacy bundle + journal on any `docs/arkaik/**` change (it should now rarely run — see below), `android.yml` builds on `apps/android/**`, `web.yml` runs ESLint + the Vitest suite on **every** PR (no path filter, so it can be a required check), `supabase.yml` runs the contract harnesses on `packages/supabase/**` and nightly, `lab-note-reminder.yml` advises at PR-open and `lab-note.yml` posts the note at merge.
+CI gates worth knowing about: `arkaik.yml` validates the legacy bundle + journal on any `docs/arkaik/**` change (it should now rarely run — see below), `android.yml` builds on `apps/android/**`, `web.yml` runs ESLint + the Vitest suite on **every** PR (no path filter, so it can be a required check), `supabase.yml` typechecks, replays the migration chain on a local stack and runs the contract harnesses on `packages/supabase/**` (harnesses also nightly), `lab-note-reminder.yml` advises at PR-open and `lab-note.yml` posts the note at merge.
 
 ## The map is hosted — never edit `docs/arkaik/bundle.json`
 
