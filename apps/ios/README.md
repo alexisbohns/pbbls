@@ -70,3 +70,12 @@ apps/ios/
 ## Status
 
 Full production app: auth (email, Apple, Google), Path timeline with pebble create/edit/detail, Profile (collections, souls, glyphs), glyph carving + marketplace, karma, Lab feed — localized en/fr. Builds on Xcode Cloud (`ci_scripts/ci_post_clone.sh`).
+
+## CI
+
+`.github/workflows/ios.yml` runs on every pull request touching `apps/ios/**` or `packages/supabase/**` (the database is the contract this app decodes, so a migration runs these tests too):
+
+- **ubuntu** — the privacy-manifest and colour-contrast scripts, which need no Xcode.
+- **macOS** — `swiftlint` and the full Swift Testing suite on a simulator resolved at run time.
+
+Xcode Cloud is the *build*; it runs no tests and has no SwiftLint. The Secrets.xcconfig CI writes holds placeholders, not repo secrets — the suite is offline, and `AppEnvironment` only insists the values are non-empty.

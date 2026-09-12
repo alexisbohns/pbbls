@@ -113,6 +113,8 @@ private extension Collection {
           "mode": "pack",
           "pebble_count": [{ "count": 7 }] }
         """.data(using: .utf8)!
+        // Preview fixture: see AnnouncementDetailView — fail the preview, not quietly.
+        // swiftlint:disable:next force_try
         return try! JSONDecoder().decode(Collection.self, from: data)
     }
 }
