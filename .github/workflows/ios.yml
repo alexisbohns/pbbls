@@ -75,6 +75,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Pinned for the same reason project.yml pins its packages: a gate that
+      # compiles something other than what ships is not evidence about what
+      # ships. 26.3 (17C529) is the build the maintainer's machine runs. The
+      # image default, 26.6, fails BannerAspectTests.cgRatioValues() on an exact
+      # CGFloat comparison that passes on 26.3 — unexplained, tracked in #793.
+      # Raising this pin is that issue's job, not a drive-by.
+      - name: Select Xcode 26.3
+        run: |
+          if [ ! -d /Applications/Xcode_26.3.app ]; then
+            echo "Xcode 26.3 is gone from the runner image. Installed:"
+            ls -d /Applications/Xcode*.app
+            echo "Pick the closest version and update #793 rather than silently taking the default."
+            exit 1
+          fi
+          sudo xcode-select -s /Applications/Xcode_26.3.app
+          xcodebuild -version
+
       # Neither tool ships on the runner image. XcodeGen is the same install
       # Xcode Cloud's ci_post_clone.sh does.
       - name: Install XcodeGen and SwiftLint
@@ -138,7 +155,6 @@ jobs:
       - name: Run tests
         working-directory: apps/ios
         run: |
-          xcodebuild -version
           xcodebuild test \
             -scheme Pebbles \
             -destination "id=${{ steps.sim.outputs.udid }}" \
