@@ -1,0 +1,29 @@
+-- Migration: restore the postgres EXECUTE grant on sweep_orphan_snap_files (#322)
+--
+-- 20260912130000 recovered this function from the linked project, where it had
+-- been created in Studio and never written back. `pg_get_functiondef` does not
+-- report ACLs and they were not captured, so that migration applied this repo's
+-- standard lockdown for a privileged function rather than guess at the live one.
+--
+-- The abandoned branch behind closed PR #386 has since turned up the original
+-- intent, and it granted one role this repo's default pattern does not:
+--
+--   revoke execute on function public.sweep_orphan_snap_files() from public;
+--   grant  execute on function public.sweep_orphan_snap_files() to postgres;
+--   grant  execute on function public.sweep_orphan_snap_files() to service_role;
+--
+-- `postgres` is there for a reason. A pg_cron job runs as the role recorded in
+-- cron.job.username, and the linked project has one — `sweep_orphan_snap_files`,
+-- `0 3 * * *`, active — scheduled as postgres. That job is NOT described by any
+-- migration in this repo; #322 carries the finding.
+--
+-- In practice the omission was almost certainly harmless: a function's owner
+-- always retains EXECUTE, `revoke ... from public` cannot take it away, and the
+-- Studio SQL editor creates functions as postgres. This restores the grant
+-- explicitly rather than leaving a nightly job depending on that inference. The
+-- statement is idempotent and a no-op wherever the grant already holds.
+--
+-- The tighter revoke from 20260912130000 stands: `anon` and `authenticated` have
+-- no business invoking a security-definer function that deletes storage objects.
+
+grant execute on function public.sweep_orphan_snap_files() to postgres;
