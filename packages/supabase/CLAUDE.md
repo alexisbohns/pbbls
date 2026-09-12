@@ -57,18 +57,39 @@ The database is the contract between four clients, and these Deno scripts are th
 | `npm run db:verify:visibility` | `verify-pebble-visibility.ts` | grade RLS on pebbles | anon |
 | `npm run db:verify:public-profile` | `verify-public-profile.ts` | `get_public_profile` jsonb allowlist | anon |
 | `npm run db:verify:guard` | `verify-profiles-privileged-guard.ts` | `profiles_privileged_guard` (#739) | anon |
-| `npm run db:verify` | the four above, in order | — | anon |
+| `npm run db:verify:reference` | `verify-reference-data.ts` | the committed emotion reference data still matches the project (#796) | anon, **read-only** |
+| `npm run db:verify` | the five above, in order | — | anon |
 | `npm run db:verify:purge` | `verify-account-purge.ts` | `purge_account` contract | anon + **service role** |
 
 Credentials come from the environment (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` for the purge harness); the repo root `.env` carries all three: `set -a; . ./.env; set +a`.
 
-**The four anon harnesses run in CI** — `.github/workflows/supabase.yml`, on same-repo PRs touching `packages/supabase/**`, nightly against `main`, and on manual dispatch. Fork PRs skip the job rather than failing it (no secrets). Every run writes a per-harness result table to the job summary, and a **failing nightly opens or comments on one issue** titled `[Bug] Nightly contract harnesses are failing` — reused across consecutive failures, and closed by hand once the contract is actually fixed. A failing PR run opens nothing: the red check is already in front of whoever caused it.
+**The five anon harnesses run in CI** — `.github/workflows/supabase.yml`, on same-repo PRs touching `packages/supabase/**`, nightly against `main`, and on manual dispatch. Fork PRs skip the job rather than failing it (no secrets). Every run writes a per-harness result table to the job summary, and a **failing nightly opens or comments on one issue** titled `[Bug] Nightly contract harnesses are failing` — reused across consecutive failures, and closed by hand once the contract is actually fixed. A failing PR run opens nothing: the red check is already in front of whoever caused it.
 
 A new harness added to `scripts/` gains a `db:verify:*` script and a workflow step calling `.github/scripts/verify-harness.sh` in the same change, or it is not a gate. Never call the npm script directly from the workflow: the summary needs the harness's stdout, and GitHub's default shell has no `pipefail`, so piping a harness through `tee` reports success for a failing one.
 
 **`db:verify:purge` is deliberately NOT in CI and must be run by hand** after any batch touching `purge_account`. It is the one harness needing `SUPABASE_SERVICE_ROLE_KEY`, this repo is public, and a leaked service-role key is total database access. Do not "fix" its absence by adding that secret without deciding it as such.
 
 **Orphans.** A run killed between signup and cleanup leaves a throwaway account behind. They are greppable in `auth.users` by their prefixes — `drafts-verify-`, `grades-verify-`, `public-verify-`, `guard-verify-`, all `@example.test`. There is no automated sweep (deleting them needs the service role).
+
+## Reference data lives in `reference/*.json`
+
+`emotion_categories` and the 38-row `emotions` roster were built by hand in Supabase Studio and never written back as migrations. The chain seeded 16 entirely different emotion slugs, so `supabase db reset` against an empty database died at `20260506000001` — `set not null` on a `category_id` nothing had ever backfilled. #796 repaired it:
+
+- **`reference/emotions.json` and `reference/emotion-categories.json`** are the committed copy, pulled from the project. They are also the only backup of data that otherwise exists nowhere but the live database.
+- **`20260505000000_retire_obsolete_emotions.sql`** deletes the 16 obsolete slugs *by name* — never `delete from public.emotions`, which on the project would take 38 live rows and cascade into user pebbles.
+- **`20260912120000_seed_emotion_reference_data.sql`** seeds the categories and the roster, dated last because `emoji` and `shaded_color`/`dark_color` arrive in migrations in between. Both files are no-ops against the project and only do work on a fresh database.
+
+**Studio stays the editing surface.** Changing a palette there is expected and fine; it makes the committed JSON stale, which is what `db:verify:reference` reports. When it goes red:
+
+```bash
+set -a; . ./.env; set +a
+npm run db:reference:pull --workspace=packages/supabase   # refresh the snapshot
+git diff packages/supabase/reference/                      # read what moved
+```
+
+Then commit the JSON. **If the change should also reach fresh databases, add an update migration** — `20260912120000` is already applied and will never re-run. Do not edit it, and do not edit the JSON by hand to make the harness pass: that hides the drift instead of recording it.
+
+**A new emotion or category added in Studio needs the same two steps**, plus `sync_achievement_catalog()` if it is an emotion — the standing rule in the root `CLAUDE.md`.
 
 ## Linking to Remote
 
