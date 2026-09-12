@@ -308,7 +308,18 @@ jobs:
             echo "::error::supabase gen types produced nothing — the generator failed, not the types."
             exit 1
           fi
-          if ! diff -u types/database.ts "$generated"; then
+          # Not a byte-for-byte diff, for one structural reason: the
+          # __InternalSupabase / PostgrestVersion block is emitted only when
+          # generating against a LINKED project (the version is read from that
+          # project's API), so a `--local` generation can never reproduce it. It
+          # describes the server, not the schema. The normaliser removes it from
+          # BOTH sides — never one — and settles the trailing newline `gen types`
+          # is inconsistent about across versions. Everything else is compared
+          # exactly; a renamed column or a dropped function survives untouched.
+          .github/scripts/normalize-db-types.py \
+            types/database.ts "$RUNNER_TEMP/committed.ts" \
+            "$generated"      "$RUNNER_TEMP/generated.ts"
+          if ! diff -u "$RUNNER_TEMP/committed.ts" "$RUNNER_TEMP/generated.ts"; then
             echo "::error::types/database.ts is out of date. Run 'npm run db:types --workspace=packages/supabase' and commit the result."
             exit 1
           fi
