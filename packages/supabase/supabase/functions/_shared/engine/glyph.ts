@@ -16,6 +16,7 @@
  */
 
 import type { Stroke, BoundingBox, GlyphArtwork, Point } from "./types.ts";
+import { sanitizePathData } from "./path-data.ts";
 
 // ── Config ──────────────────────────────────────────────────
 
@@ -154,6 +155,42 @@ function extractPointsFromPath(d: string): Point[] {
   return points;
 }
 
+// ── Input Sanitization ──────────────────────────────────────
+
+/**
+ * Re-emit a stroke list from trusted parts.
+ *
+ * Strokes arrive from `glyphs.strokes`, a jsonb column its owner writes
+ * directly through PostgREST, so neither `d` nor `width` can be assumed to be
+ * what the carve editor would have produced. Both are interpolated into SVG
+ * attributes downstream, so both are rebuilt here rather than escaped (#829):
+ * `d` from the path grammar, `width` from a finite-number check.
+ *
+ * A stroke whose `d` does not parse is dropped. Dropping one stroke degrades a
+ * glyph; keeping it would put unparsed text inside an attribute, which is the
+ * whole bug.
+ */
+function sanitizeStrokes(strokes: Stroke[], defaultWidth: number): Stroke[] {
+  if (!Array.isArray(strokes)) return [];
+
+  const clean: Stroke[] = [];
+  for (const stroke of strokes) {
+    if (!stroke || typeof stroke !== "object") continue;
+
+    const d = sanitizePathData((stroke as Stroke).d);
+    if (d === "") continue;
+
+    const rawWidth = (stroke as Stroke).width;
+    const width =
+      typeof rawWidth === "number" && Number.isFinite(rawWidth) && rawWidth > 0 && rawWidth <= 1000
+        ? rawWidth
+        : defaultWidth;
+
+    clean.push({ d, width });
+  }
+  return clean;
+}
+
 // ── Bounding Box ────────────────────────────────────────────
 
 /**
@@ -225,8 +262,14 @@ export function createGlyphArtwork(
   const fill = options?.fillRatio ?? FILL_RATIO;
   const defaultSW = options?.defaultWidth ?? DEFAULT_STROKE_WIDTH;
 
-  // Empty glyph → empty square
-  if (strokes.length === 0) {
+  // Everything below interpolates these values into SVG attributes, so nothing
+  // below may see the raw jsonb. Sanitize once, here, and the bounding box and
+  // the emitted paths are guaranteed to agree on the same geometry.
+  const safeStrokes = sanitizeStrokes(strokes, defaultSW);
+
+  // Empty glyph → empty square. A glyph whose every stroke failed the grammar
+  // lands here too, which is the right outcome: a blank square, never markup.
+  if (safeStrokes.length === 0) {
     return {
       svg: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${size} ${size}" width="${size}" height="${size}"></svg>`,
       viewBox: `0 0 ${size} ${size}`,
@@ -234,7 +277,7 @@ export function createGlyphArtwork(
     };
   }
 
-  const bbox = computeStrokesBoundingBox(strokes, defaultSW);
+  const bbox = computeStrokesBoundingBox(safeStrokes, defaultSW);
 
   // Compute scale: fit the longest edge into (size × fillRatio)
   const targetSize = size * fill;
@@ -249,7 +292,7 @@ export function createGlyphArtwork(
   const translateY = (size - scaledHeight) / 2 - bbox.minY * scale;
 
   // Build path elements
-  const paths = strokes
+  const paths = safeStrokes
     .map((stroke, i) => {
       const sw = stroke.width ?? defaultSW;
       return `  <path id="glyph:stroke-${i}" d="${stroke.d}" fill="none" stroke="currentColor" stroke-width="${sw * scale}" stroke-linecap="round" stroke-linejoin="round"/>`;

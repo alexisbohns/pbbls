@@ -5,6 +5,7 @@ import type { CSSProperties } from "react"
 import { useTranslations } from "next-intl"
 import type { SharedPebble } from "@/lib/types"
 import { useFormatDate, useEmotionLocalized } from "@/lib/i18n"
+import { safeRenderSvg } from "@/lib/render-svg"
 
 type SharedPebbleViewProps = {
   pebble: SharedPebble
@@ -39,6 +40,12 @@ export function SharedPebbleView({ pebble }: SharedPebbleViewProps) {
     ["--pebble-stroke-dark"]: pebble.emotion.secondary_color ?? pebble.emotion.color,
   } as CSSProperties
 
+  // The anonymous share page is the widest-reach sink for a column composed
+  // from user-written jsonb, so the markup is re-validated against the engine
+  // grammar before it is injected (#829). A row that fails takes the same
+  // branch as a legacy row with no render at all.
+  const renderSvg = safeRenderSvg(pebble.render_svg)
+
   return (
     <div className="mx-auto flex min-h-full w-full max-w-md flex-col px-4 pt-10 md:px-6 md:pt-14">
       <section className="flex flex-col items-center gap-8 text-center">
@@ -46,14 +53,14 @@ export function SharedPebbleView({ pebble }: SharedPebbleViewProps) {
           {t("overline")}
         </span>
 
-        {pebble.render_svg ? (
+        {renderSvg ? (
           <div
             data-slot="pebble-visual"
             role="img"
             aria-label={t("visualAria", { name: pebble.name, emotion: emotionName })}
             className="pbbls-visual size-40"
             style={wrapperStyle}
-            dangerouslySetInnerHTML={{ __html: pebble.render_svg }}
+            dangerouslySetInnerHTML={{ __html: renderSvg }}
           />
         ) : (
           // Legacy rows that pre-date the remote engine have no composed SVG;

@@ -10,6 +10,7 @@ import { useEmotionLocalized } from "@/lib/i18n"
 import { useEmotionPalettes } from "@/lib/data/useEmotionPalettes"
 import { usePebbleVisual } from "@/lib/hooks/usePebbleVisual"
 import { WOBBLE_ENABLED, wobblePebbleSvg } from "@/lib/wobble"
+import { safeRenderSvg } from "@/lib/render-svg"
 import { cn } from "@/lib/utils"
 
 type PebbleVisualProps = {
@@ -35,8 +36,13 @@ export function PebbleVisual({
   // the remote engine and for unauthenticated previews (e.g. landing page
   // seed pebbles) where no render exists yet.
   const fallback = usePebbleVisual(pebble, mark, tier)
-  const isServerRender = pebble.render_svg !== null
-  const rawSvg = pebble.render_svg ?? fallback.svg
+  // `render_svg` is composed from a jsonb column its owner writes directly and
+  // is injected below with `dangerouslySetInnerHTML`, so it is re-validated
+  // against the engine grammar first (#829). A row that fails takes the same
+  // path as a row that has none: the client engine draws it instead.
+  const serverSvg = safeRenderSvg(pebble.render_svg)
+  const isServerRender = serverSvg !== null
+  const rawSvg = serverSvg ?? fallback.svg
   // Petroglyph wobble (#555): dev-only, content-cached. Rewrites the composed
   // SVG's stroked paths into leaky filled ink; compiled out in production.
   const svg = WOBBLE_ENABLED ? wobblePebbleSvg(rawSvg) : rawSvg

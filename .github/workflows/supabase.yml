@@ -250,6 +250,15 @@ jobs:
         if: '!cancelled()'
         run: npm run lint --workspace=packages/supabase
 
+      # The engine's unit tests. They are here rather than in `verify` because
+      # they need no database: the compositor is a pure function, and what they
+      # assert is that untrusted stroke data cannot leave it as markup (#829).
+      # That property is worth a gate of its own — it is the one the stored-XSS
+      # finding turned on, and it regresses silently.
+      - name: deno test
+        if: '!cancelled()'
+        run: npm run test --workspace=packages/supabase
+
   schema:
     name: migration chain · types drift
     if: github.event_name != 'schedule'
