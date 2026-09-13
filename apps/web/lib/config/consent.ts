@@ -6,7 +6,7 @@
  * document the person actually read, so an older row citing an older version is
  * correct, not stale.
  */
-export const CONSENT_DOCUMENT_VERSION = "1.2.0"
+export const CONSENT_DOCUMENT_VERSION = "1.3.0"
 
 /** The consent kinds `user_consents.kind` accepts. */
 export const CONSENT_KINDS = ["health_data", "public_profile"] as const

@@ -2,9 +2,9 @@
 title: Politique de confidentialité
 locale: fr
 slug: privacy
-version: 1.2.0
+version: 1.3.0
 effective_date: 2026-09-12
-last_updated: 2026-09-12
+last_updated: 2026-09-13
 ---
 
 # Politique de Confidentialité de Pebbles
@@ -266,24 +266,15 @@ Si vous estimez que nous violons vos droits, vous pouvez déposer une plainte au
 
 ### 10.1 Âge Minimum
 
-Pebbles est destinée aux utilisateurs âgés de 13 ans ou plus. En France, l'âge du consentement numérique est fixé à 15 ans par la CNIL, mais nous acceptons les utilisateurs à partir de 13 ans.
+Pebbles s'adresse aux personnes âgées de 16 ans ou plus. Nous ne collectons pas sciemment de données concernant une personne de moins de 16 ans. Seize ans est l'âge du consentement pour les services de la société de l'information au sens de l'article 8 du RGPD, et nous l'appliquons uniformément plutôt que de le faire varier selon les pays.
 
-### 10.2 Consentement Parental (13-14 ans)
+### 10.2 Comment Nous l'Appliquons
 
-Si vous avez entre 13 et 14 ans, l'utilisation de Pebbles nécessite le consentement préalable de vos parents ou représentants légaux. Nous vous demandons de confirmer ce consentement lors de l'inscription.
+Nous ne demandons pas votre date de naissance et nous n'en conservons aucune. Lorsque nous vous demandons de confirmer votre âge, nous conservons une trace de cette confirmation et rien de plus.
 
-### 10.3 Droits des Parents
+### 10.3 Si Nous Apprenons le Contraire
 
-Les parents ou représentants légaux d'un utilisateur mineur peuvent :
-- Demander l'accès aux données de l'utilisateur mineur.
-- Demander la rectification ou la suppression des données.
-- Retirer le consentement et faire supprimer le compte.
-
-Les demandes doivent être envoyées à hello@bohns.design avec preuve de l'autorité parentale.
-
-### 10.4 Usagers de 15 ans ou Plus
-
-À partir de 15 ans, vous pouvez consentir seul à l'utilisation de Pebbles.
+Si nous apprenons qu'un compte appartient à une personne de moins de 16 ans, nous le fermons et effaçons les données. Un parent ou représentant légal qui pense que son enfant détient un compte peut nous l'indiquer à hello@bohns.design et nous ferons de même.
 
 ## 11. Sécurité des Données
 
