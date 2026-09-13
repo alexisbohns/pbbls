@@ -13,7 +13,7 @@ junit = "4.13.2"
 coroutines = "1.11.0"
 # Google's official Compose Preview Screenshot Testing (renders @Preview to PNG
 # on the JVM, no device/emulator, no Robolectric). Still alpha — see CLAUDE.md.
-screenshot = "0.0.1-alpha15"
+screenshot = "0.0.1-alpha16"
 # Rive (D14) — bundled logo animation on the Welcome screen. Requires
 # androidx-startup for Rive.init(); see PebblesApp.onCreate().
 rive = "11.7.2"
