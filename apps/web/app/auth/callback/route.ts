@@ -66,6 +66,19 @@ export async function GET(request: Request) {
       if (consentError) {
         console.error("[auth/callback] record_consent failed:", consentError.message)
       }
+
+      // The 16+ attestation from the same round trip. Both acts ride the same
+      // validated `consent` param because the same checkbox set gated the OAuth
+      // button before the redirect: ticking age is what let this callback
+      // happen at all, so the version that carried one carries the other.
+      const { error: ageError } = await supabase.rpc("record_consent", {
+        p_kind: "age_assurance",
+        p_document_version: consentVersion,
+        p_source: "web_oauth",
+      })
+      if (ageError) {
+        console.error("[auth/callback] record_consent (age_assurance) failed:", ageError.message)
+      }
     }
   }
 

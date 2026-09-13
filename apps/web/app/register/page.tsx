@@ -37,6 +37,7 @@ export default function RegisterPage() {
   const [termsAccepted, setTermsAccepted] = useState(false)
   const [privacyAccepted, setPrivacyAccepted] = useState(false)
   const [healthConsent, setHealthConsent] = useState(false)
+  const [ageAttested, setAgeAttested] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [emailError, setEmailError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -54,6 +55,7 @@ export default function RegisterPage() {
     terms: termsAccepted,
     privacy: privacyAccepted,
     healthData: healthConsent,
+    age: ageAttested,
   })
 
   const oauthBlocked = submitting || !consentsAccepted
@@ -109,6 +111,7 @@ export default function RegisterPage() {
         terms_accepted: termsAccepted,
         privacy_accepted: privacyAccepted,
         health_data_consent: healthConsent,
+        age_attested: ageAttested,
       })
     } catch (err) {
       const message =
@@ -268,6 +271,26 @@ export default function RegisterPage() {
             className="text-sm text-muted-foreground"
           >
             {t("healthConsent")}
+          </label>
+        </div>
+
+        {/* Deliberately not a document link either: an age attestation is its
+            own act, and "I accept the Terms" is exactly what does not qualify
+            as one. It is an attestation, not a verification — no date of birth
+            is asked for, and none is stored. */}
+        <div className="flex items-start gap-2 text-left">
+          <Checkbox
+            id="register-age"
+            checked={ageAttested}
+            onCheckedChange={(checked) => setAgeAttested(checked === true)}
+            disabled={submitting}
+            required
+          />
+          <label
+            htmlFor="register-age"
+            className="text-sm text-muted-foreground"
+          >
+            {t("ageAttestation")}
           </label>
         </div>
 

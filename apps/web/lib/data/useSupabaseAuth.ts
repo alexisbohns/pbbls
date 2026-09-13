@@ -165,6 +165,13 @@ export function useSupabaseAuth(): AuthContextValue {
           // yet when email confirmations are on, so a client call would be lost.
           health_data_consent_at: input.health_data_consent ? new Date().toISOString() : null,
           health_data_consent_version: input.health_data_consent ? CONSENT_DOCUMENT_VERSION : null,
+          age_attested_at: input.age_attested ? new Date().toISOString() : null,
+          age_attestation_version: input.age_attested ? CONSENT_DOCUMENT_VERSION : null,
+          // Provenance for the trigger's `source` mapping. Sent explicitly so
+          // 'web_register' is a stated fact rather than the fallback branch:
+          // handle_new_user maps this through a closed `case` whose default is
+          // web, so a client that omits it is silently stamped as web.
+          signup_surface: "web",
         },
       },
     })
