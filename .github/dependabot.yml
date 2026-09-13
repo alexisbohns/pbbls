@@ -1,0 +1,64 @@
+version: 2
+
+# Nothing watched this repo's dependencies: no bot, no scheduled audit, so a
+# known-vulnerable transitive package would have sat in the lockfile until
+# someone happened to notice (Kritik F-2026-08-SEC-admin-03). Lockfile pinning
+# stops drift, which also means it freezes a vulnerable version in place
+# forever unless something asks for the bump.
+#
+# Updates are grouped and weekly on purpose: four surfaces share one lockfile,
+# and an ungrouped bot on a monorepo this size produces more PRs per week than
+# the milestone cadence can triage, which is how bot PRs start getting ignored.
+# Security updates are deliberately left ungrouped so they arrive as their own
+# PR and are not buried in a batch.
+#
+# apps/ios is absent: its packages are declared in project.yml and resolved
+# into the generated Xcode project, and Dependabot's swift support only reads
+# a Package.swift-based SPM package. Those three (supabase-swift, SVGView,
+# rive-ios) stay a manual bump at milestone boundaries.
+updates:
+  # One root lockfile covers every npm workspace (apps/*, packages/*).
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    labels: [chore, infra]
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    groups:
+      npm-production:
+        dependency-type: production
+        update-types: [minor, patch]
+      npm-development:
+        dependency-type: development
+        update-types: [minor, patch]
+
+  - package-ecosystem: gradle
+    directory: /apps/android
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 3
+    labels: [chore, android]
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      gradle:
+        patterns: ["*"]
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 3
+    labels: [chore, infra]
+    commit-message:
+      prefix: "chore(ci)"
+    groups:
+      actions:
+        patterns: ["*"]

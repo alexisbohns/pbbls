@@ -6,6 +6,9 @@
     "apps/*",
     "packages/*"
   ],
+  "overrides": {
+    "browserslist": "^4.28.9"
+  },
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
