@@ -1,0 +1,53 @@
+name: Audit
+
+# Dependabot proposes bumps; this says out loud whether what is in the lockfile
+# right now is known-vulnerable. The two are not the same check: a bot PR that
+# nobody merges leaves the repo green, and org-level alerting is invisible from
+# here (Kritik F-2026-08-SEC-admin-03).
+#
+# It runs on PRs that touch a manifest or the lockfile rather than on every PR,
+# deliberately: a newly disclosed advisory with no fix available would otherwise
+# block every unrelated PR in the repo until upstream ships. Path-filtered means
+# it must never be a required check (a filtered-out workflow reports no status
+# and would hang a required check forever) — the weekly run is what keeps the
+# unfiltered state honest, and a failed scheduled run notifies the repo owner.
+on:
+  pull_request:
+    paths:
+      - "**/package.json"
+      - package-lock.json
+      - .github/workflows/audit.yml
+  schedule:
+    # Monday 06:00 UTC, ahead of the weekly Dependabot batch.
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: audit-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  npm:
+    name: npm audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # No `npm ci`: audit reads the lockfile, and installing first would only
+      # add a few minutes and a second way for the job to go red.
+      - name: npm audit (high and critical)
+        run: npm audit --audit-level=high
+
+      # The high gate is what fails the build; the full report is for whoever
+      # opens the run, so moderate advisories are visible without blocking.
+      - name: Full advisory report
+        if: always()
+        run: npm audit || true
