@@ -2,9 +2,9 @@
 title: Privacy Policy
 locale: en
 slug: privacy
-version: 1.2.0
+version: 1.3.0
 effective_date: 2026-09-12
-last_updated: 2026-09-12
+last_updated: 2026-09-13
 ---
 
 # Privacy Policy for Pebbles
@@ -292,24 +292,15 @@ If you believe we are violating your rights, you may file a complaint with the C
 
 ### 10.1 Minimum Age
 
-Pebbles is intended for users aged 13 and above. In France, the digital age of consent is set at 15 years by CNIL, but we accept users from age 13.
+Pebbles is for people aged 16 and over. We do not knowingly collect data from anyone under 16. Sixteen is the age of consent for information society services under Article 8 of the GDPR, and we apply it uniformly rather than varying it by country.
 
-### 10.2 Parental Consent (Ages 13-14)
+### 10.2 How We Apply It
 
-If you are between 13 and 14 years old, using Pebbles requires prior consent from your parents or legal guardians. We ask you to confirm this consent during sign-up.
+We do not ask for your date of birth, and we do not store one. Where we ask you to confirm your age, we keep a record of that confirmation and nothing more.
 
-### 10.3 Parental Rights
+### 10.3 If We Learn Otherwise
 
-Parents or legal guardians of a minor user may:
-- Request access to the minor's data.
-- Request rectification or deletion of data.
-- Withdraw consent and request account deletion.
-
-Requests must be sent to hello@bohns.design with proof of parental authority.
-
-### 10.4 Users 15 and Above
-
-From age 15 onward, you may consent independently to use Pebbles.
+If we learn that an account belongs to someone under 16, we close it and erase the data. A parent or legal guardian who believes their child holds an account can tell us at hello@bohns.design and we will do the same.
 
 ---
 
