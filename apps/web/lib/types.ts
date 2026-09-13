@@ -387,6 +387,8 @@ export type RegisterInput = {
   privacy_accepted: boolean
   /** Art. 9 explicit consent for emotional/health-adjacent data. */
   health_data_consent: boolean
+  /** The 16+ age attestation. An attestation, never a birthdate. */
+  age_attested: boolean
 }
 export type LoginInput = { email: string; password: string }
 // `handle` is deliberately excluded: claiming/releasing a handle goes through
