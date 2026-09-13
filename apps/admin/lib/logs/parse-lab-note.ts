@@ -40,6 +40,26 @@ function stripQuotes(value: string): string {
   return value
 }
 
+// Drop a trailing YAML comment. Like YAML, a `#` only opens a comment when it
+// follows whitespace (so "Issue #827" keeps its hash) and never inside quotes
+// (so a title may contain one). The skeleton in CLAUDE.md annotates `species`,
+// `platform` and `status` with their allowed values this way, so a note copied
+// verbatim from it depends on this.
+function stripComment(value: string): string {
+  let quote: '"' | "'" | null = null
+  for (let i = 0; i < value.length; i++) {
+    const ch = value[i]
+    if (quote) {
+      if (ch === quote) quote = null
+    } else if (ch === '"' || ch === "'") {
+      quote = ch
+    } else if (ch === "#" && (i === 0 || /\s/.test(value[i - 1]))) {
+      return value.slice(0, i)
+    }
+  }
+  return value
+}
+
 // Split on the FIRST colon only, so datetimes ("2026-07-17T20:00:00") and
 // colons inside a title/summary survive in the value.
 function splitKeyValue(content: string): [string, string] | null {
@@ -47,7 +67,7 @@ function splitKeyValue(content: string): [string, string] | null {
   if (idx === -1) return null
   const key = content.slice(0, idx).trim().toLowerCase()
   if (!key) return null
-  const value = stripQuotes(content.slice(idx + 1).trim())
+  const value = stripQuotes(stripComment(content.slice(idx + 1).trim()).trim())
   return [key, value]
 }
 
