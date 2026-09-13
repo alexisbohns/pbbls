@@ -261,23 +261,68 @@ try {
   // Art. 9 consent ledger rows (#775). Written through the real RPC as the
   // signed-in seller — user_consents has no client insert policy at all, so a
   // direct admin insert would prove nothing about the path the app uses.
+  const CONSENT_DOC_VERSION = "1.1.0";
   const { error: consentErr } = await seller.rpc("record_consent", {
     p_kind: "health_data",
-    p_document_version: "1.1.0",
+    p_document_version: CONSENT_DOC_VERSION,
     p_source: "web_register",
   });
   if (consentErr) throw new Error(`record_consent health_data: ${consentErr.message}`);
 
   const { error: publicConsentErr } = await seller.rpc("record_consent", {
     p_kind: "public_profile",
-    p_document_version: "1.1.0",
+    p_document_version: CONSENT_DOC_VERSION,
     p_source: "web_settings",
   });
   if (publicConsentErr) throw new Error(`record_consent public_profile: ${publicConsentErr.message}`);
 
+  const { error: ageConsentErr } = await seller.rpc("record_consent", {
+    p_kind: "age_assurance",
+    p_document_version: CONSENT_DOC_VERSION,
+    p_source: "web_register",
+  });
+  if (ageConsentErr) throw new Error(`record_consent age_assurance: ${ageConsentErr.message}`);
+
+  // The age attestation must not be withdrawable: you cannot un-attest your
+  // age, and a withdrawn row would be indistinguishable from an account that
+  // never attested. Two things enforce that, and this block pins both:
+  // withdraw_consent's p_kind allowlist (20260911090060_user_consents_hardening
+  // .sql §4) deliberately omits age_assurance, and the
+  // user_consents_age_not_withdrawable CHECK backs it structurally. If either
+  // is widened "for symmetry", this fails.
+  //
+  // Match the message, not merely "an error happened": a renamed/re-arity'd RPC
+  // (PGRST202), a dropped grant (42501), an expired session or a silently
+  // no-op'd seed (no_active_consent) all error too, and those are exactly the
+  // states a careless refactor produces. Only `invalid_kind` proves the
+  // allowlist did the refusing.
+  const { error: withdrawAgeErr } = await seller.rpc("withdraw_consent", {
+    p_kind: "age_assurance",
+  });
+  check("withdraw_consent refuses age_assurance with invalid_kind",
+    withdrawAgeErr?.message?.includes("invalid_kind") === true,
+    `expected invalid_kind, got: ${withdrawAgeErr?.message ?? "no error at all"}` +
+      ` (code=${withdrawAgeErr?.code ?? "none"})`);
+
+  // …and the refused call left the attestation ACTIVE. The consentCount check
+  // below counts rows whatever their state, so a withdrawal that succeeded
+  // would still total 3; only the withdrawn_at/superseded_at predicates tell
+  // the two apart. Read through `admin` like every other assertion here, so
+  // the result is ground truth rather than a function of RLS.
+  const { count: activeAge, error: activeAgeErr } = await admin
+    .from("user_consents")
+    .select("*", { count: "exact", head: true })
+    .eq("user_id", sellerId)
+    .eq("kind", "age_assurance")
+    .is("withdrawn_at", null)
+    .is("superseded_at", null);
+  if (activeAgeErr) throw new Error(`count active age_assurance: ${activeAgeErr.message}`);
+  check("age attestation still active after the refused withdrawal", activeAge === 1,
+    `found ${activeAge ?? 0} active age_assurance rows, expected 1`);
+
   const consentCount = await countRows("user_consents", "user_id", sellerId);
-  if (consentCount !== 2) {
-    throw new Error(`expected 2 seeded consent rows, got ${consentCount}`);
+  if (consentCount !== 3) {
+    throw new Error(`expected 3 seeded consent rows, got ${consentCount}`);
   }
 
   // Achievement unlocks (M48). Earned through the real RPC as the signed-in
@@ -332,7 +377,7 @@ try {
     ["connections", 1], // the seller↔buyer row
     ["connection_invites", 1], // the seller's live invite
     ["connection_blocks", 2], // both directions
-    ["user_consents", 2], // health_data + public_profile
+    ["user_consents", 3], // health_data + public_profile + age_assurance
   ];
   for (const [key, expected] of expectedPurged) {
     check(`purge itself counted ${key} = ${expected}`, purgedCounts[key] === expected,
