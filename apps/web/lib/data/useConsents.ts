@@ -8,6 +8,7 @@ import {
   CONSENT_DOCUMENT_VERSION,
   type ConsentKind,
   type ConsentSource,
+  type WithdrawableConsentKind,
 } from "@/lib/config/consent"
 
 const CONSENT_COLUMNS =
@@ -94,7 +95,7 @@ export function useConsents() {
   )
 
   const withdraw = useCallback(
-    async (kind: ConsentKind) => {
+    async (kind: WithdrawableConsentKind) => {
       const supabase = createClient()
       const { error: rpcError } = await withTimeout(
         supabase.rpc("withdraw_consent", { p_kind: kind }),

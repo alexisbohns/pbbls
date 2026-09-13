@@ -9,8 +9,16 @@
 export const CONSENT_DOCUMENT_VERSION = "1.3.0"
 
 /** The consent kinds `user_consents.kind` accepts. */
-export const CONSENT_KINDS = ["health_data", "public_profile"] as const
+export const CONSENT_KINDS = ["health_data", "public_profile", "age_assurance"] as const
 export type ConsentKind = (typeof CONSENT_KINDS)[number]
+
+/**
+ * The kinds `withdraw_consent` accepts. `age_assurance` is absent on purpose:
+ * you cannot un-attest your age, so the RPC's own allowlist refuses it with
+ * `invalid_kind` and a `user_consents_age_not_withdrawable` CHECK refuses it
+ * structurally. This type refuses it at compile time too.
+ */
+export type WithdrawableConsentKind = Exclude<ConsentKind, "age_assurance">
 
 /**
  * Where a consent act was collected. Mirrors the `user_consents.source` CHECK,
