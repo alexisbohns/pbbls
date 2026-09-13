@@ -135,10 +135,9 @@ the machinery and split the evidence across two places.
 
 ## 4. The migration
 
-One migration, four moves. `handle_new_user` and `withdraw_consent` are each
-re-emitted exactly once in this batch, so the standing CLAUDE.md rule about two
-migrations silently dropping each other's appends is satisfied without a
-pairwise merge.
+One migration, three moves. `handle_new_user` is the only function re-emitted
+in this batch, so the standing CLAUDE.md rule about two migrations silently
+dropping each other's appends is satisfied without a pairwise merge.
 
 ### 4.1 Widen the `kind` CHECK
 
@@ -155,10 +154,20 @@ rather than leaving the narrow CHECK in force alongside a new wide one.
 **Widening the table CHECK alone is not enough** — the RPC would still reject
 `age_assurance`. Both change together.
 
-### 4.3 Guard `withdraw_consent`
+### 4.3 Leave `withdraw_consent` alone — deliberately
 
-Re-emit `withdraw_consent` to refuse `age_assurance` with a stable
-`not_withdrawable`, in the same house form as `invalid_kind`. Rationale in §3.1.
+**Corrected during planning.** `withdraw_consent` validates `p_kind` against its
+*own* hand-rolled allowlist (`090060:222`), independent of `record_consent`'s.
+That list stays `('health_data', 'public_profile')`, so
+`withdraw_consent('age_assurance')` already raises `invalid_kind` today. The
+guard §3.1 requires is achieved by **not** widening it — no re-emission, no new
+error name, no diff.
+
+The hazard is that this is a guard by omission, and the two allowlists now
+differ by design where they previously matched. A future maintainer widening
+`withdraw_consent`'s list "for symmetry" with `record_consent` would silently
+open the hole. Two things prevent that: a loud comment at the widening site in
+`record_consent`, and a harness case asserting the refusal (§11).
 
 ### 4.4 Append to `handle_new_user`
 
@@ -222,6 +231,32 @@ accounts, but existing accounts were formed under a published 13+ minimum.
 Whether that needs a transitional statement is a question for counsel, not for
 this spec.
 
+### 6.3 Version bumps, and which version the attestation cites
+
+**Found during planning.** `CONSENT_DOCUMENT_VERSION` (`lib/config/consent.ts`)
+is bound to the **privacy policy's** `version:` frontmatter by
+`consent.test.ts`, which asserts against both `en.md` and `fr.md`. So:
+
+| File | Now | After |
+|---|---|---|
+| `docs/privacy/{en,fr}.md` frontmatter | `1.2.0` | `1.3.0` |
+| `docs/terms/{en,fr}.md` frontmatter | `1.0.0` | `1.1.0` |
+| `CONSENT_DOCUMENT_VERSION` | `1.2.0` | `1.3.0` |
+
+The constant **must** move in the same commit as the privacy frontmatter or
+`consent.test.ts` fails — which is exactly what that test is for.
+
+**The attestation cites `CONSENT_DOCUMENT_VERSION`** (the privacy version),
+not a new terms-version constant. The minimum age is stated in privacy §10.1 as
+well as terms §3.1, so the privacy version is a truthful citation for the act,
+and it keeps one version constant and one OAuth query param rather than two.
+
+Bumping the privacy version does **not** retroactively invalidate existing
+`health_data` rows — they stay active at `1.2.0` until someone calls
+`record_consent` at the new version. It does mean #788's re-consent surface has
+a version mismatch to act on for every existing account, which is the intended
+behaviour and reinforces §8's decision to fold the age attestation into it.
+
 ## 7. The web gate
 
 ### 7.1 `canSubmitRegistration`
@@ -242,10 +277,11 @@ health-consent checkbox's shape. Like that one it is **deliberately not a
 document link**: an age attestation is its own act, and "I accept the Terms" is
 exactly what does not qualify as one.
 
-The existing `register-oauth-hint` already explains why the OAuth buttons are
-disabled (a disabled control with no stated reason is a WCAG failure). It needs
-no change — it names the consent gate generically — but its copy must be re-read
-once the fourth checkbox exists to confirm it still reads truthfully.
+`register-oauth-hint` explains why the OAuth buttons are disabled (a disabled
+control with no stated reason is a WCAG failure). **Corrected during planning:
+it does need changing.** Its copy counts the boxes literally — "Tick all three
+boxes above to continue" / "Cochez les trois cases ci-dessus pour continuer" —
+so a fourth checkbox makes the accessible explanation wrong in both languages.
 
 ### 7.3 The email path
 
@@ -327,7 +363,7 @@ misrepresentation stays published longer than it needs to.
 | Claim | How it is proven |
 |---|---|
 | `age_assurance` is an accepted kind | Migration replay on a local stack (`supabase.yml`). |
-| `withdraw_consent('age_assurance')` is refused | Assertion in the migration, or a contract harness case. |
+| `withdraw_consent('age_assurance')` is refused | Case in `verify-account-purge.ts`, asserting the RPC errors (§4.3). |
 | The attestation is purged with the account | `npm run db:verify:purge` — manual, service role. |
 | An ungated signup is impossible on web | `registration-gate.test.ts` case for the new flag. |
 | The OAuth path records the attestation | Callback route change, exercised as the `health_data` call is. |
