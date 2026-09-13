@@ -1044,3 +1044,72 @@ If that residual feels too large to call the finding resolved, `kritik_accept_fi
 | Registration cannot proceed unattested | `registration-gate.test.ts` | 6 |
 | The email path records the row | Live signup + SQL | 9 |
 | The OAuth path records the row | Live Google signup + SQL | 9 |
+
+---
+
+# Lessons learned
+
+Written after the three stacks shipped. Recorded here rather than promoted into
+CLAUDE.md: per the editing rule, learnings harden at a milestone-boundary audit,
+not per-PR.
+
+## About the change itself
+
+**Replacing an unkept promise with a different unkept promise is the same
+defect.** The first draft of privacy §10.2 swapped "we confirm parental consent
+during sign-up" for "you are asked to confirm you are 16". Both describe a
+mechanism. The finding is *about* describing mechanisms the product does not
+have, so the fix has to state the rule and the remedy and let the mechanism
+sentence wait for the mechanism (#825). When a claim is true on some surfaces
+and not others, a conditional ("Where we ask...") is honest where an affirmative
+is not.
+
+**The native surfaces serve the web legal documents.** `LegalDocumentSheet.swift:14-15`
+and `LegalDocs.kt:14-15` open `https://www.pbbls.app/docs/...`. So a change to
+`apps/web/docs/` is a four-surface release the moment it deploys, and the
+standing cross-surface rule applies to published text exactly as it does to a
+schema contract. This is not obvious from the file path.
+
+**A guard by omission needs a structural backstop.** Leaving `age_assurance` out
+of `withdraw_consent`'s allowlist is correct and sufficient — but the warning
+lived in a different migration than the function a maintainer would open, since
+widening means copying forward the *newest* emission. The `user_consents_age_not_withdrawable`
+CHECK is what actually survives a future rewrite. Comments do not enforce
+invariants; constraints do.
+
+**Validate the untrusted path, not the convenient one.** The design praised the
+OAuth callback for validating `document_version` and never noticed the trigger
+path validated nothing — while the trigger path is the one where the value is
+unambiguously attacker-supplied. When two paths write the same column, check
+which one is actually exposed before deciding which deserves the guard.
+
+## About running this kind of work
+
+**Subagents share one working tree.** Switching branches while an agent is
+running silently redirects its commits: two legal-text commits landed on the
+docs branch because the controller checked out a different branch mid-flight.
+The agent had no way to detect it. Either keep the controller off git entirely
+while agents run, or give each agent its own worktree.
+
+**Two agents amending concurrently can revert each other with no conflict.** One
+agent's rebase cherry-picked a sibling's pre-amend SHA and silently dropped its
+newer work. Git reports nothing — it is a clean replay of a stale commit. It was
+caught only by blob-diffing against a pre-reset snapshot. Never instruct an
+agent to amend a commit that is not `HEAD`, and never while a sibling is
+committing.
+
+**"Carry the body forward verbatim" must mean a pure addition.** The prescribed
+`record_consent` body dropped a four-line comment from its source. The
+implementer wrote it as specified and flagged it. A re-emission that deletes
+anything is the exact drift the verbatim rule exists to prevent, so the check is
+`diff` with zero `<`-side lines — not "looks right".
+
+**An assertion that cannot fail is worse than no assertion.** `withdrawAgeErr !== null`
+was satisfied by a renamed function, a dropped grant, an expired session and
+`no_active_consent` alike — i.e. loudest precisely when it should be silent.
+Assert the specific error, and assert the state that should have survived.
+
+**Tell reviewers the stack shape.** A spec-compliance reviewer flagged three
+"false claims" in comments that were simply forward references to later parts of
+the same stack. The findings were noise because the prompt omitted context the
+reviewer needed, which is the prompt's defect, not the reviewer's.
