@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Gate every `dark:` utility on a `.dark` ancestor. Without this, Tailwind 4
+   falls back to prefers-color-scheme and dark-tuned utilities fire over the
+   light token block, which nothing ever switches (no provider, no toggle). */
+@custom-variant dark (&:is(.dark *));
+
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.141 0.005 285.823);

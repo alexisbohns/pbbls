@@ -5,7 +5,9 @@ import { Toaster as Sonner, type ToasterProps } from "sonner"
 import { CircleCheckIcon, InfoIcon, TriangleAlertIcon, OctagonXIcon, Loader2Icon } from "lucide-react"
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
+  // No theme provider is mounted; the admin is light-only, so follow the app,
+  // not the OS (a "system" default renders dark toasts on the light surface).
+  const { theme = "light" } = useTheme()
 
   return (
     <Sonner
