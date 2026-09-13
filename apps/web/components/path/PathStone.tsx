@@ -13,6 +13,7 @@ import {
 } from "@/lib/config/pebble-geometry"
 import { PebbleOutlineBackdrop } from "@/components/pebble/PebbleOutlineBackdrop"
 import { WOBBLE_ENABLED, wobblePebbleSvg } from "@/lib/wobble"
+import { safeRenderSvg } from "@/lib/render-svg"
 import { cn } from "@/lib/utils"
 
 /** How big the stone sits on a card. Steps down for a small pebble, so intensity
@@ -69,8 +70,12 @@ export function PathStone({
   // legacy rows and anonymous previews. Reading the fallback unconditionally threw
   // away the composed artwork — which is where the carved glyph lives — so real
   // pebbles rendered as bare outlines.
-  const isServerRender = pebble.render_svg !== null
-  const raw = pebble.render_svg ?? fallback.svg
+  // Validated before it is injected, exactly as in PebbleVisual — a render_svg
+  // that is not recognisable engine output falls through to the client engine
+  // rather than reaching `dangerouslySetInnerHTML` (#829).
+  const serverSvg = safeRenderSvg(pebble.render_svg)
+  const isServerRender = serverSvg !== null
+  const raw = serverSvg ?? fallback.svg
 
   // Petroglyph wobble (#555), dev-only and content-cached, exactly as PebbleVisual
   // applies it. Without this the wall drew clean strokes while the detail sheet

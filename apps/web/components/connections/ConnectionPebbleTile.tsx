@@ -4,6 +4,7 @@ import type { CSSProperties } from "react"
 import type { SharedConnectionPebble } from "@/lib/types"
 import { useFormatDate, useEmotionLocalized } from "@/lib/i18n"
 import { useEmotionPalettes } from "@/lib/data/useEmotionPalettes"
+import { safeRenderSvg } from "@/lib/render-svg"
 
 /**
  * One shared pebble on the connection detail page (M51): the server-composed
@@ -31,14 +32,19 @@ export function ConnectionPebbleTile({ pebble }: { pebble: SharedConnectionPebbl
         ["--pebble-stroke-dark"]: pebble.emotion.color,
       } as CSSProperties)
 
+  // Another person's composed markup, rendered inside the viewer's own
+  // authenticated session, so it is re-validated against the engine grammar
+  // before it is injected (#829).
+  const renderSvg = safeRenderSvg(pebble.render_svg)
+
   return (
     <li className="flex flex-col items-center gap-2 rounded-xl border border-muted p-3 text-center dark:border-accent">
-      {pebble.render_svg ? (
+      {renderSvg ? (
         <div
           aria-hidden
           className="pbbls-visual size-20"
           style={wrapperStyle}
-          dangerouslySetInnerHTML={{ __html: pebble.render_svg }}
+          dangerouslySetInnerHTML={{ __html: renderSvg }}
         />
       ) : (
         <div
