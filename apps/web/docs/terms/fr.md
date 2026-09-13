@@ -2,9 +2,9 @@
 title: Conditions générales d'utilisation
 locale: fr
 slug: terms
-version: 1.0.0
+version: 1.1.0
 effective_date: 2026-04-09
-last_updated: 2026-04-09
+last_updated: 2026-09-13
 ---
 
 # Conditions Générales d'Utilisation - Pebbles
@@ -80,7 +80,7 @@ Les CGU sont complétées par la [Politique de Confidentialité](./politique-de-
 
 ### 3.1 Admissibilité
 
-Pour utiliser Pebbles, vous devez avoir au moins **13 ans**. En France, les utilisateurs âgés de 13 à 15 ans doivent obtenir le consentement parental ou la responsabilité parentale, conformément à l'article 8 du Règlement Général sur la Protection des Données (RGPD) et à sa mise en œuvre en droit français. Les parents ou responsables légaux sont responsables du respect de ces conditions par les mineurs sous leur autorité.
+Pour utiliser Pebbles, vous devez avoir au moins **16 ans**. Nous ne créons ni ne maintenons sciemment de compte pour une personne de moins de 16 ans. Seize ans est l'âge du consentement pour les services de la société de l'information au sens de l'article 8 du Règlement Général sur la Protection des Données (RGPD), et nous l'appliquons uniformément plutôt que de le faire varier selon les pays. Si nous apprenons qu'un compte appartient à une personne de moins de 16 ans, nous le fermons et effaçons les données.
 
 ### 3.2 Sécurité du compte
 

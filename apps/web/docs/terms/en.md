@@ -2,9 +2,9 @@
 title: Terms of Service
 locale: en
 slug: terms
-version: 1.0.0
+version: 1.1.0
 effective_date: 2026-04-09
-last_updated: 2026-04-09
+last_updated: 2026-09-13
 ---
 
 # Terms of Service - Pebbles
@@ -84,7 +84,7 @@ These Terms are complemented by the [Privacy Policy](./privacy-policy.md), a sep
 
 ### 3.1 Eligibility
 
-To use Pebbles, you must be at least **13 years old**. In France, users aged 13 to 15 must obtain parental consent or parental authority, in accordance with Article 8 of the General Data Protection Regulation (GDPR) and its implementation in French law. Parents or legal guardians are responsible for ensuring minors under their care comply with these Terms.
+To use Pebbles, you must be at least **16 years old**. We do not knowingly create or maintain accounts for anyone under 16. Sixteen is the age of consent for information society services under Article 8 of the General Data Protection Regulation (GDPR), and we apply it uniformly rather than varying it by country. If we learn that an account belongs to someone under 16, we close it and erase the data.
 
 ### 3.2 Account Security
 
