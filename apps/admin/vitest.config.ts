@@ -13,6 +13,11 @@ import { defineConfig } from "vitest/config"
 // Environment is `node`. `svg-to-strokes` is the one module that needs a DOM
 // (`DOMParser`), and it opts in per-file with `@vitest-environment jsdom` rather
 // than paying jsdom's startup cost across the whole suite.
+//
+// jsdom is held at ^26 deliberately: 27+ requires Node >= 22, and CI runs Node
+// 20 (the version every workflow in .github/workflows pins). The failure is not
+// a version warning — the worker dies with `webidl.util.markAsUncloneable is
+// not a function` from jsdom's bundled undici, which reads as a Vitest bug.
 export default defineConfig({
   resolve: {
     alias: {
