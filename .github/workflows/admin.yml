@@ -1,0 +1,49 @@
+name: Admin
+
+# apps/admin had no CI at all: its ESLint config and its TypeScript build ran
+# only when a human remembered to, so a PR that broke the back-office merged
+# green-by-absence and was first noticed as a failed Vercel deploy or a broken
+# moderation queue. Admin types come from packages/supabase, so a schema change
+# can break this app without touching a single file under apps/admin.
+#
+# No `paths:` filter, deliberately, for the web.yml reason: a workflow skipped
+# by a path filter never reports a status, so a required check would stay
+# pending forever on every PR that misses the filter. An honest filter would
+# have to cover apps/admin/**, packages/supabase/** and the root lockfile
+# anyway, which is most of the repo.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: admin-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: eslint · build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: ESLint
+        run: npm run lint --workspace=apps/admin
+
+      # The Supabase URL and key are read inside request-time helpers, never at
+      # module scope, so the build needs no secrets. `!cancelled()` so a lint
+      # failure still reports the build result: a red PR should name every
+      # problem at once, not one per push.
+      - name: Build
+        if: '!cancelled()'
+        run: npm run build --workspace=apps/admin
