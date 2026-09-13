@@ -25,7 +25,7 @@ permissions:
 
 jobs:
   check:
-    name: eslint · build
+    name: eslint · vitest · build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -40,10 +40,14 @@ jobs:
       - name: ESLint
         run: npm run lint --workspace=apps/admin
 
+      # `!cancelled()` so a lint failure still reports the test result: a red PR
+      # should name every problem at once, not one per push.
+      - name: Vitest
+        if: '!cancelled()'
+        run: npm run test --workspace=apps/admin
+
       # The Supabase URL and key are read inside request-time helpers, never at
-      # module scope, so the build needs no secrets. `!cancelled()` so a lint
-      # failure still reports the build result: a red PR should name every
-      # problem at once, not one per push.
+      # module scope, so the build needs no secrets.
       - name: Build
         if: '!cancelled()'
         run: npm run build --workspace=apps/admin
