@@ -190,6 +190,43 @@ the `user_consents_granted_at_range` CHECK added at `090060` §2. No new guard.
 `packages/supabase/types/database.ts` in the same change. (The plain `db:types`
 target points at a local Docker stack and truncates the file on failure.)
 
+### 4.6 Added in code review
+
+Four things the design did not anticipate, found reviewing the migration and
+folded into it. They are recorded here because each closes a gap this spec
+argued for but did not actually enforce.
+
+**`user_consents_age_not_withdrawable`.** §4.3's guard-by-omission is correct
+but invisible at the point of edit: a maintainer widening `withdraw_consent`
+copies forward its newest emission (`20260911090060` §4), a file carrying no
+warning, while the warning sits in the `record_consent` file they never open.
+A CHECK forbidding `withdrawn_at` on an `age_assurance` row is structural and
+survives any future rewrite of any function.
+
+**`user_consents_document_version_shape`.** §7.4 praised the OAuth path for
+validating `document_version` rather than trusting it, and the design never
+noticed that the *trigger* path validated nothing at all. That asymmetry was
+backwards — the trigger path is where the value is unambiguously
+attacker-supplied — so a semver-shape CHECK now covers every path.
+
+**A probe.** The sibling migration proves every claim it makes; this one
+asserted a drop-and-recreate and proved nothing. Ordering matters: the probe
+runs after the `document_version` CHECK, so it cites `'0.0.0'`, not `'probe'`
+as its sibling does.
+
+**`source` provenance.** `handle_new_user` hardcoded `source = 'web_register'`.
+That is true today — iOS and Android send only `terms_accepted_at` and
+`privacy_accepted_at`, so the consent inserts have never fired for a native
+signup — but it stops being true the moment the follow-on client work lands,
+and a mis-stamped accountability row cannot be told from a genuine one
+afterwards. The source is now mapped from a `signup_surface` metadata key
+through a closed `case`, applied to the `health_data` insert as well.
+
+The `case` fallback is `web_register`, which means **a native client that sends
+`age_attested_at` without `signup_surface` is silently stamped as web.** The
+protection is only real once the client change lands, so §9's follow-on issues
+name the key explicitly rather than leaving it to review.
+
 ## 5. The purge harness
 
 `verify-account-purge.ts:335` asserts `["user_consents", 2]` — the health_data
@@ -335,8 +372,9 @@ the web gate (§7).
 
 | Work | Why separate |
 |---|---|
-| iOS attestation at signup | Independent auth flow; mirrors Android 1:1. The RPC and `ios_register`/`ios_oauth` source values already exist. |
-| Android attestation at signup | As above, `android_*` source values already exist. |
+| iOS attestation at signup | Independent auth flow; mirrors Android 1:1. The RPC and `ios_register`/`ios_oauth` source values already exist. Must also send `signup_surface: "ios"` — see §4.6. |
+| Android attestation at signup | As above, plus `signup_surface: "android"`. |
+| Malformed signup metadata aborts the account | `age_attested_at: "banana"` raises in `handle_new_user`'s `declare` block and returns an opaque 500. Pre-existing across four metadata keys, so not fixed as a drive-by. |
 | Store age/target-audience declarations, diffed in CI | The finding's remediation asks for this. It belongs with M57 · Store readiness, not here. |
 | Age attestation on the #788 re-consent surface | §8. An addition to an existing issue, not a new one. |
 

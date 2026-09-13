@@ -44,6 +44,35 @@
 
 Branch: `feat/816-age-assurance-schema` off updated `main`.
 
+> **Shipped as [#818](https://github.com/alexisbohns/pbbls/pull/818).** Code review
+> added four things this plan did not anticipate, all folded into the same
+> migration. Recorded here so the plan matches what exists:
+>
+> - **§2 `user_consents_age_not_withdrawable`** — a CHECK forbidding
+>   `withdrawn_at` on an `age_assurance` row. The spec's §4.3 guard was a
+>   comment in a file a maintainer would never open: widening
+>   `withdraw_consent` means copying forward its newest emission, which lives
+>   in `20260911090060` §4 and carries no warning. The CHECK is structural and
+>   survives any future function rewrite.
+> - **§3 `user_consents_document_version_shape`** — a semver CHECK.
+>   `document_version` was written from client-controlled signup metadata with
+>   no validation at all, while the OAuth path validated it. That asymmetry was
+>   backwards: the trigger path is the one where the value is attacker-supplied.
+> - **§4 a probe** proving the widened `kind` CHECK admits `age_assurance`.
+>   The sibling migration proves every claim it makes; this one asserted a
+>   drop-and-recreate and proved nothing. Note the ordering: the probe runs
+>   after §3, so it uses `'0.0.0'`, not `'probe'`.
+> - **`source` provenance** — `handle_new_user` hardcoded `'web_register'`.
+>   It now maps a `signup_surface` metadata key through a closed `case`,
+>   applied to the `health_data` insert too (maintainer-approved). Inert today,
+>   since no client sends the key.
+>
+> The harness assertion in Task 3 was also **wrong as planned**: `withdrawAgeErr
+> !== null` passed for a renamed function, a dropped grant, an expired session
+> or `no_active_consent` alike, and never proved the row survived. It now
+> asserts the specific `invalid_kind` message and counts the row as still
+> active.
+
 ### Task 1: The migration
 
 **Files:**
@@ -696,6 +725,11 @@ export type RegisterInput = {
 ```typescript
           age_attested_at: input.age_attested ? new Date().toISOString() : null,
           age_attestation_version: input.age_attested ? CONSENT_DOCUMENT_VERSION : null,
+          // Provenance for the trigger's `source` mapping (migration §6). Sent
+          // explicitly so `web_register` is a stated fact rather than the
+          // fallback branch — iOS and Android send their own value, and a
+          // native client that forgets it is stamped as web with no error.
+          signup_surface: "web",
 ```
 
 The attestation cites the privacy version because privacy §10.1 states the minimum age (design §6.3). No second constant.
@@ -956,11 +990,20 @@ When part 1 is picked up, `update_node` the affected acceptance/view nodes to `d
 
 Title: `[Feat] Ask for the 16+ age attestation on iOS signup`
 Body: references `F-2026-08-SAF-supabase-01` and the design §9. Note that `record_consent` and the `ios_register` / `ios_oauth` source values already exist, so this is client work only.
+
+**It must send `signup_surface: "ios"` alongside `age_attested_at`.** `handle_new_user` maps that key through a closed `case` whose fallback is `web_register`, so a native signup that omits it is stamped with false provenance — silently, with no error, in the one table whose purpose is to be true under audit, and uncorrectable after the fact. State this in the issue body, not just in review.
+
 Labels: `feat`, `auth`, `ios`. Milestone: `M55 · Compliance Batch A`.
 
 - [ ] **Step 2: File the Android issue**
 
-Same body, `android_register` / `android_oauth`. Labels: `feat`, `auth`, `android`. Mirrors iOS 1:1.
+Same body with `android_register` / `android_oauth` and `signup_surface: "android"`, including the same warning. Labels: `feat`, `auth`, `android`. Mirrors iOS 1:1.
+
+- [ ] **Step 2b: File the malformed-metadata issue**
+
+Title: `[Fix] Malformed signup metadata aborts account creation with an opaque 500`
+Body: `age_attested_at: "banana"` (or a bad `health_data_consent_at`, `terms_accepted_at`, `privacy_accepted_at`) raises during `handle_new_user`'s `declare` block, aborting the transaction; GoTrue returns `500 Database error saving new user` with nothing distinguishing the cause. Pre-existing across four metadata keys; found during the age-assurance review and deliberately not fixed as a drive-by. Suggested fix: a guarded conversion per key, so unreadable metadata records nothing rather than failing the account.
+Labels: `fix`, `db`, `supabase`. Milestone: `M55 · Compliance Batch A`.
 
 - [ ] **Step 3: File the store-declarations issue**
 
