@@ -959,11 +959,13 @@ Insert after the `countRows` helper:
  * this: the service role sets it out of band. The admin RPCs read auth.uid(),
  * so they need the USER's session, not the service-role client.
  */
-async function mintModerator(
-  anonClient: ReturnType<typeof createClient>,
-  email: string,
-  password: string,
-) {
+async function mintModerator(email: string, password: string) {
+  // The client is built HERE rather than passed in: a parameter typed
+  // `ReturnType<typeof createClient>` loses the generic overloads, and every
+  // `.rpc(name, args)` call through it then fails `deno check` with "args not
+  // assignable to undefined". deno run type-checks by default, so that is a
+  // hard failure, not a warning.
+  const anonClient = createClient(SUPABASE_URL, ANON_KEY, { auth: { persistSession: false } });
   const { data, error } = await anonClient.auth.signUp({ email, password });
   if (error || !data.user || !data.session) {
     throw new Error(`signUp moderator: ${error?.message ?? "no session"}`);
@@ -1022,9 +1024,14 @@ Locate the section that seeds the seller's content and the sold glyph (the buyer
     JSON.stringify(storedReport?.target_snapshot));
 
   // Editing after the fact must NOT rewrite the evidence.
-  await seller.rpc("update_pebble", {
-    payload: { id: pubPebbleId, description: "innocent now" },
+  // update_pebble takes the pebble id as its OWN argument (p_pebble_id),
+  // separate from the payload — passing it inside payload silently edits
+  // nothing and makes the two assertions below pass vacuously.
+  const { error: updateErr } = await seller.rpc("update_pebble", {
+    p_pebble_id: pubPebbleId,
+    payload: { description: "innocent now" },
   });
+  if (updateErr) throw new Error(`update_pebble: ${updateErr.message}`);
   const { data: afterEdit } = await admin
     .from("content_reports").select("target_snapshot")
     .eq("id", (pebbleReport as { id: string }).id).maybeSingle();
@@ -1063,11 +1070,8 @@ Locate the section that seeds the seller's content and the sold glyph (the buyer
   // The POSITIVE admin path — queue read and takedown dispatch. Needs a real
   // admin session, which only the service role can mint.
   // ---------------------------------------------------------------------------
-  const moderator = await mintModerator(
-    createClient(SUPABASE_URL, ANON_KEY, { auth: { persistSession: false } }),
-    `purge-test-mod-${runId}@example.test`,
-    password,
-  );
+  const moderator = await mintModerator(`purge-test-mod-${runId}@example.test`, password);
+  moderatorId = moderator.id;
 
   const { data: queue, error: queueErr } = await moderator.client
     .rpc("admin_list_content_reports", { p_status: "open" });
