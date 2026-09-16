@@ -202,14 +202,17 @@ The seller seeds a report **filed against the buyer** and the buyer seeds a repo
 - reports against the seller are zero
 - the purge re-run still converges to all-zero counts
 
-It also carries the two assertions the anon-only harness structurally cannot (see below): a report filed against the seeded **listed glyph**, and a service-role-minted admin driving `admin_list_content_reports` and `resolve_content_report` through one takedown per `target_kind`.
+It also carries the three assertions the anon-only harness structurally cannot (see below), all of which need the service role:
+
+- `target_user_id` is resolved server-side to the content's real owner, and `target_snapshot` captured the text as filed — **and editing the pebble afterwards does not rewrite it**, which is the property the whole snapshot decision (D4) exists for
+- a report filed against the seeded **listed glyph**
+- a service-role-minted admin driving `admin_list_content_reports` and `resolve_content_report` through one takedown per `target_kind`, plus the refusal to resolve an already-resolved report
 
 ### `verify-content-reports.ts` (new, anon-only)
 
 Anon-only so it can join the CI gate — it signs up throwaway users and deletes them through the real `delete-account` edge function, like `verify-public-profile.ts`. Proves:
 
-- a report on a public pebble and on a public profile lands with the right `target_user_id` and a populated snapshot
-- editing the pebble afterwards does not change the snapshot
+- a report on a public pebble and on a public profile is accepted, returning an `open` report and a whole-second UTC `created_at`
 - another user's *unlisted* glyph submission raises `not_found` (the negative half of the glyph gate)
 - a second file returns the same row (idempotency), and no duplicate lands
 - a secret pebble and a random uuid both raise `not_found` — the same message (enumeration resistance)
@@ -219,8 +222,9 @@ Anon-only so it can join the CI gate — it signs up throwaway users and deletes
 
 **What it cannot prove, and where the gap is covered instead.** Two things need an admin, and an anon-only harness cannot mint one past `profiles_privileged_guard` (`20260902090000`):
 
-1. *Reporting a listed glyph.* A submission is `pending` until an admin approves it, so this harness can never produce a listed target. It asserts the negative instead (an unlisted glyph is not reportable). The positive case moves to `verify-account-purge.ts`, which holds the service role and **already seeds an approved, listed, sold glyph** — a report against it costs one more seed statement there.
-2. *The positive admin path* (`admin_list_content_reports` returning a queue, `resolve_content_report` taking down content). This is the limit glyph moderation already lives with — `admin_list_glyph_submissions` has no harness either. The negative case (non-admin refused) is the security assertion and it is covered here; the takedown dispatch is exercised in `verify-account-purge.ts` under the service role, where an admin can be minted directly.
+1. *That `target_user_id` and `target_snapshot` are resolved correctly.* Both are unreadable from here **by construction** — §5's whole point is that the reporter cannot read the table back. Asserting them needs the service role.
+2. *Reporting a listed glyph.* A submission is `pending` until an admin approves it, so this harness can never produce a listed target. It asserts the negative instead (an unlisted glyph is not reportable). The positive case moves to `verify-account-purge.ts`, which holds the service role and **already seeds an approved, listed, sold glyph** — a report against it costs one more seed statement there.
+3. *The positive admin path* (`admin_list_content_reports` returning a queue, `resolve_content_report` taking down content). This is the limit glyph moderation already lives with — `admin_list_glyph_submissions` has no harness either. The negative case (non-admin refused) is the security assertion and it is covered here; the takedown dispatch is exercised in `verify-account-purge.ts` under the service role, where an admin can be minted directly.
 
 Wired into `db:verify` and `supabase.yml` as a sixth step, alongside the other anon-only four.
 
