@@ -130,9 +130,12 @@ try {
     .insert({ user_id: owner.id, name: `g ${runId}`, strokes: [], view_box: "0 0 100 100" })
     .select("id").single();
   if (glyphErr || !glyph) throw new Error(`insert glyph: ${glyphErr?.message}`);
-  const { error: subErr } = await o.from("glyph_submissions")
-    .insert({ glyph_id: glyph.id, submitter_id: owner.id, status: "pending", price: 10 });
-  if (subErr) throw new Error(`insert submission: ${subErr.message}`);
+  // Via the RPC, not a direct insert: glyph_submissions carries a SELECT
+  // policy only (20260630003348 §3), so every client write goes through
+  // submit_glyph. It inserts with status defaulting to 'pending' — which is
+  // exactly the unlisted state this fixture needs.
+  const { error: subErr } = await o.rpc("submit_glyph", { p_glyph_id: glyph.id });
+  if (subErr) throw new Error(`submit_glyph: ${subErr.message}`);
 
   // ---------------------------------------------------------------------------
   // 1. The happy path: a stranger reports a public pebble and a public profile.
