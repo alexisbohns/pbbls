@@ -7,6 +7,7 @@ import {
   Megaphone,
   Palette,
   Shapes,
+  ShieldAlert,
   Smile,
   Sparkles,
   Store,
@@ -35,6 +36,10 @@ const LOG_ITEMS = [
 
 const PEBBLESTORE_ITEMS = [
   { href: "/pebblestore/glyphs", label: "Glyph moderation", icon: Store },
+] as const
+
+const MODERATION_ITEMS = [
+  { href: "/moderation/reports", label: "Content reports", icon: ShieldAlert },
 ] as const
 
 const REFERENCE_ITEMS = [
@@ -76,6 +81,24 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {PEBBLESTORE_ITEMS.map(({ href, label, icon: Icon }) => {
+                const active = pathname === href || pathname.startsWith(`${href}/`)
+                return (
+                  <SidebarMenuItem key={href}>
+                    <SidebarMenuButton render={<Link href={href} />} isActive={active}>
+                      <Icon aria-hidden />
+                      <span>{label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Moderation</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {MODERATION_ITEMS.map(({ href, label, icon: Icon }) => {
                 const active = pathname === href || pathname.startsWith(`${href}/`)
                 return (
                   <SidebarMenuItem key={href}>
