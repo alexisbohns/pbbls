@@ -129,6 +129,14 @@ jobs:
         if: '!cancelled()'
         run: .github/scripts/verify-harness.sh "reference" db:verify:reference
 
+      # The UGC report path (#831). Anon-only by design: it proves the visibility
+      # gate, the enumeration-resistance property and that the table is opaque.
+      # The positive admin path and the takedown dispatch need an admin, so they
+      # live in verify-account-purge.ts, which CI does not run.
+      - name: Content reports (#831 UGC report path)
+        if: '!cancelled()'
+        run: .github/scripts/verify-harness.sh "reports" db:verify:reports
+
       # One writer for the whole table. `always()` so it still reports when a
       # harness failed — that is precisely the run whose table is worth reading.
       - name: Write the run log
