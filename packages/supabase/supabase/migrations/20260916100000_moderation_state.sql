@@ -319,6 +319,8 @@ begin
     raise exception 'invalid_outcome';
   end if;
 
+  -- for update: two admins resolving the same row race otherwise, and the
+  -- second takedown would run against already-removed content.
   select * into v_row from public.content_reports where id = p_report_id for update;
   if not found then raise exception 'not_found'; end if;
   if v_row.status <> 'open' then raise exception 'invalid_state'; end if;
