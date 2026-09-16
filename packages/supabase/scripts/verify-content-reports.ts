@@ -254,15 +254,15 @@ try {
   check("an owner cannot SET hidden_at on their own pebble",
     !!selfHideErr, "the pebbles moderation guard did not fire");
 
-  const { error: selfUnhideErr } = await o.from("pebbles")
-    .update({ hidden_at: null }).eq("id", publicPebbleId);
-  check("an owner cannot CLEAR hidden_at on their own pebble",
-    !!selfUnhideErr, "the pebbles moderation guard did not fire");
-
-  const { error: selfProfileHideErr } = await o.from("profiles")
-    .update({ hidden_at: null }).eq("user_id", owner.id);
-  check("an owner cannot clear hidden_at on their own profile",
-    !!selfProfileHideErr, "the profiles privileged guard did not cover hidden_at");
+  // The CLEAR case — the dangerous one — is NOT asserted here, and cannot be.
+  // Both guards fire on `new.hidden_at is distinct from old.hidden_at`, and
+  // null-to-null is not distinct, so clearing a flag that was never set is an
+  // idempotent no-op write that both guards deliberately allow (the profiles
+  // guard documents that behaviour at 20260902090000). Proving a hidden user
+  // cannot un-hide themselves needs content that is actually hidden, which
+  // needs an admin — so it lives in verify-moderation-state.ts, which holds the
+  // service role. Asserting it here would only ever prove null is not distinct
+  // from null.
 
   // An ordinary column on the same table still writes — proving the guard is
   // column-scoped and has not broken normal profile edits.

@@ -606,6 +606,16 @@ Model it on `verify-pebble-visibility.ts` for the signup/teardown helpers and on
 Seed: an owner, a connection, a stranger, a moderator. The owner has a `public` pebble, a `private` pebble, and a published profile. Then assert:
 
 ```
+the guard, against a genuinely hidden row (moved here from the anon harness —
+see its comment: null-to-null is not `is distinct from`, so the CLEAR case is
+unprovable until something is actually hidden):
+  the owner CANNOT clear hidden_at on their own hidden pebble
+        -> error mentions pebbles_moderation_column
+  the owner CANNOT clear hidden_at on their own hidden profile
+        -> error mentions profiles_privileged_column
+  this is THE assertion the feature rests on: without it moderation is
+        revocable by its own subject
+
 hidden pebble:
   owner still sees it via v_pebbles_full            <- D2, the anti-data-loss property
   stranger does not see it                           <- pebbles_select public arm
