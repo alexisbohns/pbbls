@@ -41,6 +41,8 @@ This is the test, and it is written first. Every assertion in it is behavioural 
 **Files:**
 - Create: `packages/supabase/scripts/verify-content-reports.ts`
 
+> **Correction applied 2026-09-16.** The first draft of this task seeded the unlisted glyph with a direct `.from("glyph_submissions").insert(...)`. That fails: `glyph_submissions` has a SELECT policy and nothing else (`20260630003348_glyph_marketplace.sql:56`), so every client write goes through the `submit_glyph` definer RPC — the root `AGENTS.md` rule about preferring RPCs, enforced by RLS. The seed below uses the RPC. A harness that aborts in its own setup is not a red test; it fails identically before and after the migration lands.
+
 - [ ] **Step 1: Write the harness**
 
 ```typescript
@@ -176,9 +178,12 @@ try {
     .insert({ user_id: owner.id, name: `g ${runId}`, strokes: [], view_box: "0 0 100 100" })
     .select("id").single();
   if (glyphErr || !glyph) throw new Error(`insert glyph: ${glyphErr?.message}`);
-  const { error: subErr } = await o.from("glyph_submissions")
-    .insert({ glyph_id: glyph.id, submitter_id: owner.id, status: "pending", price: 10 });
-  if (subErr) throw new Error(`insert submission: ${subErr.message}`);
+  // Via the RPC, not a direct insert: glyph_submissions carries a SELECT
+  // policy only (20260630003348 §3), so every client write goes through
+  // submit_glyph. It inserts with status defaulting to 'pending' — which is
+  // exactly the unlisted state this fixture needs.
+  const { error: subErr } = await o.rpc("submit_glyph", { p_glyph_id: glyph.id });
+  if (subErr) throw new Error(`submit_glyph: ${subErr.message}`);
 
   // ---------------------------------------------------------------------------
   // 1. The happy path: a stranger reports a public pebble and a public profile.
@@ -321,7 +326,9 @@ cd /Users/alexis/code/pbbls && set -a && . ./.env && set +a && \
   deno run --allow-env --allow-net packages/supabase/scripts/verify-content-reports.ts
 ```
 
-Expected: FAIL. Every `report_content` / `admin_list_content_reports` call errors with `Could not find the function public.report_content(...) in the schema cache`, and the `content_reports` select errors with `relation "public.content_reports" does not exist`. Summary line shows `failed` greater than zero.
+Expected: FAIL, **and fail for the right reason**. The setup must complete (users signed up, pebbles and profile seeded, glyph submitted), then every `report_content` / `admin_list_content_reports` / `resolve_content_report` call must error with `Could not find the function public.report_content(...) in the schema cache`, and the `content_reports` select with `relation "public.content_reports" does not exist`.
+
+**Verify the harness reached the assertions.** If the output is a single `✗ aborted: ...` line, the harness died in its own setup and proves nothing about the missing schema — it would fail identically after Task 2 lands. That is a harness bug to fix here, not a red test. A valid red run prints many `✗` assertion lines, not one abort.
 
 - [ ] **Step 3: Commit the red test**
 
