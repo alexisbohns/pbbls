@@ -238,6 +238,40 @@ try {
   check("an over-long detail is refused", !!longErr, "expected a constraint violation");
 
   // ---------------------------------------------------------------------------
+  // 5b. Moderation columns are pinned against their own subject (#833 D7).
+  //
+  // pebbles_update and profiles_update are owner-scoped with NO column
+  // restriction, and Postgres grants UPDATE on the whole table to
+  // authenticated. Without the guard triggers, a hidden user clears hidden_at
+  // and un-hides themselves — the moderation state would be revocable by
+  // exactly the person it is applied to.
+  //
+  // SETTING is guarded too, not just clearing: a user who can set hidden_at
+  // could hide a pebble and later claim it was moderated.
+  // ---------------------------------------------------------------------------
+  const { error: selfHideErr } = await o.from("pebbles")
+    .update({ hidden_at: new Date().toISOString() }).eq("id", publicPebbleId);
+  check("an owner cannot SET hidden_at on their own pebble",
+    !!selfHideErr, "the pebbles moderation guard did not fire");
+
+  // The CLEAR case — the dangerous one — is NOT asserted here, and cannot be.
+  // Both guards fire on `new.hidden_at is distinct from old.hidden_at`, and
+  // null-to-null is not distinct, so clearing a flag that was never set is an
+  // idempotent no-op write that both guards deliberately allow (the profiles
+  // guard documents that behaviour at 20260902090000). Proving a hidden user
+  // cannot un-hide themselves needs content that is actually hidden, which
+  // needs an admin — so it lives in verify-moderation-state.ts, which holds the
+  // service role. Asserting it here would only ever prove null is not distinct
+  // from null.
+
+  // An ordinary column on the same table still writes — proving the guard is
+  // column-scoped and has not broken normal profile edits.
+  const { error: ordinaryErr } = await o.from("profiles")
+    .update({ display_name: `owner ${runId}` }).eq("user_id", owner.id);
+  check("an ordinary profile column still updates",
+    !ordinaryErr, ordinaryErr?.message);
+
+  // ---------------------------------------------------------------------------
   // 6. The admin surface is closed to non-admins. This is the security
   //    assertion; the POSITIVE admin path lives in verify-account-purge.ts.
   // ---------------------------------------------------------------------------

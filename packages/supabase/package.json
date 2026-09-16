@@ -28,6 +28,7 @@
     "db:verify:reference": "deno run --allow-env --allow-net --allow-read scripts/verify-reference-data.ts",
     "db:verify:reports": "deno run --allow-env --allow-net scripts/verify-content-reports.ts",
     "db:verify:purge": "deno run --allow-env --allow-net scripts/verify-account-purge.ts",
+    "db:verify:moderation": "deno run --allow-env --allow-net scripts/verify-moderation-state.ts",
     "db:reference:pull": "deno run --allow-env --allow-net --allow-write scripts/pull-reference-data.ts"
   }
 }
