@@ -128,7 +128,7 @@ report_content(
 
 Reporting your own content raises `cannot_report_own`.
 
-**Ownerless glyphs resolve cleanly.** `purge_account` anonymises a sold glyph to `user_id = null` but delists it in the same pass, so an ownerless glyph fails the `listed` gate and raises `not_found` before `target_user_id` (which is `not null`) is ever needed. A glyph re-attributed to a new owner by `admin_attribute_glyph` stays listed and resolves to that owner.
+**Ownerless glyphs resolve cleanly** — and the gate tests the resolved owner, not row existence, precisely because of them. `purge_account` anonymises a sold glyph to `user_id = null`, but its delisting pass only covers submissions the departing user *submitted*; a glyph `admin_attribute_glyph` re-attributed can therefore survive as listed with a null owner. Such a glyph selects a null owner and raises `not_found`, rather than reaching the insert and violating `target_user_id`'s not-null. A glyph re-attributed to a live owner resolves to that owner as normal.
 
 **Idempotency.** `insert ... on conflict do nothing` against `content_reports_open_unique`, then return the existing row. A second file is a success, not an error — from the user's point of view they reported it, and forcing the client to handle an `already_reported` slug for that is ceremony. Once a report is resolved the partial index no longer covers it, so a reoffending target can be reported again.
 

@@ -532,9 +532,14 @@ begin
   end if;
 
   -- One slug for three cases: no such row, a row the reporter cannot see, and
-  -- an anonymised glyph (purge_account nulls user_id but delists in the same
-  -- pass, so it fails the listed gate above before the not-null column is
-  -- needed). Distinguishing them would make this an existence oracle — feed it
+  -- an OWNERLESS glyph. The third is why this tests v_owner rather than FOUND:
+  -- purge_account anonymises a sold glyph to user_id = null, and its delisting
+  -- pass only covers submissions the departing user submitted — so a glyph
+  -- re-attributed by admin_attribute_glyph can survive as listed with a null
+  -- owner. Selecting it yields v_owner = null, which lands here instead of
+  -- violating target_user_id's not-null on insert.
+  --
+  -- Distinguishing the three would make this an existence oracle — feed it
   -- uuids, learn which secret pebbles exist. Same choice get_shared_pebble
   -- makes by returning null for both (20260817130000 §4).
   if v_owner is null then
