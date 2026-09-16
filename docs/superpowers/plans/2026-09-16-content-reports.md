@@ -765,7 +765,7 @@ cd /Users/alexis/code/pbbls && set -a && . ./.env && set +a && \
   deno run --allow-env --allow-net packages/supabase/scripts/verify-content-reports.ts
 ```
 
-Expected: PASS — `Summary: passed=17 failed=0`.
+Expected: PASS — `Summary: passed=15 failed=0` (the harness defines exactly 15 `check()` calls).
 
 - [ ] **Step 4: Commit**
 
