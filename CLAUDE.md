@@ -208,8 +208,9 @@ PR's diff shows only its own layer. The extension is a one-time install:
    - If no issue, ask for species + scope label(s) and milestone.
    - Never open a PR without labels and milestone (unless the user confirms there's no milestone).
 5. Run lint, **the workspace test suite**, and build at the **scope of your change** (per task-size triage above), confirm green, then open the PR.
-6. If this PR established or reversed a **significant** decision, append one entry to `docs/decisions/log.md` (usually a no-op). Significance bar: would a future agent or human waste real time rediscovering or wrongly reversing it? Supersede-don't-edit — status changes are new appended entries, never edits to prior ones.
-7. **Lab Note (EN/FR)** — required for user-facing PRs; see the section below.
+6. **Never write a Kritik finding id (`F-…`) in a PR body unless that PR closes it.** The Arkaik App resolves *every* id it finds in the body — it does not distinguish "closes" from "mentions", so listing follow-up work by finding id marks that work done. Reference follow-ups by GitHub issue number instead. Five launch-gating PLT-04 findings were silently closed this way by #832 ([arkaik#440](https://github.com/alexisbohns/arkaik/issues/440)); the matrix then reports a store-compliance pillar as satisfied when no client has shipped it, and a hosted session cannot re-open a finding to repair it.
+7. If this PR established or reversed a **significant** decision, append one entry to `docs/decisions/log.md` (usually a no-op). Significance bar: would a future agent or human waste real time rediscovering or wrongly reversing it? Supersede-don't-edit — status changes are new appended entries, never edits to prior ones.
+8. **Lab Note (EN/FR)** — required for user-facing PRs; see the section below.
 
 ### Lab Note requirement — read before opening a PR
 
