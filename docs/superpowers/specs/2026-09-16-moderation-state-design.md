@@ -69,6 +69,29 @@ Two migrations re-emitting one function body is the failure mode the standing ru
 
 A new `admin_release_handle(p_user_id, p_note)` does it deliberately. This is the right tool for impersonation (`Pebbles Support`), which is the case that actually needs the name freed; every other profile report is served by hiding.
 
+### D7 — The moderated user must not be able to un-hide themselves
+
+**This is the one that would have sunk the feature.**
+
+`pebbles_update` and `profiles_update` are owner-scoped with **no column restriction** (`20260411000001:169`, `20260902090000`). Postgres grants UPDATE on the whole table to `authenticated`, and a table-level grant covers every column. So without a guard, a user whose pebble is hidden runs:
+
+```sql
+update pebbles set hidden_at = null where id = '…';
+```
+
+…and un-hides themselves. The same for a suspended profile. The entire moderation state would be self-revocable by exactly the person it is applied to.
+
+`profiles_privileged_guard` (`20260902090000`) already solved this class for `is_admin` and the consent timestamps, and its header says so in as many words:
+
+> Adding a privileged column later means adding it here. A column that gates access and is not in this list is writable by every authenticated user.
+
+So:
+
+- **`profiles`** — extend `enforce_profile_privileged_columns` to pin `hidden_at` and `hidden_by`, and add both to the trigger's `before update of` list. Note the trigger fires on the *named columns*, so adding the columns to the function body without adding them to the trigger's column list would be a silent no-op.
+- **`pebbles`** — no such guard exists. Add the equivalent trigger, same shape, same `current_user not in ('authenticated','anon')` exemption so migrations, the service role and definer functions still pass.
+
+`delete` is deliberately **not** guarded: deleting your own pebble remains your right, and a deleted pebble is not a hidden one that got away.
+
 ## 3. RPC changes
 
 ### `admin_set_content_hidden(p_target_kind, p_target_id, p_hidden, p_note)`
@@ -103,6 +126,7 @@ This is worth stating rather than assuming: if any real report had been actioned
 `verify-content-reports.ts` (anon-only, CI-gated) gains the hidden-content matrix:
 
 - a hidden public pebble is dark to a stranger, dark to a connection, dark to anon via `get_shared_pebble`, and **still visible to its owner** (D2)
+- **the owner cannot clear `hidden_at` on their own pebble or profile by direct table update** (D7) — the assertion that proves moderation is not self-revocable
 - a hidden pebble is absent from `v_pebbles_full` for a stranger — proving the `security_invoker` inheritance rather than assuming it
 - a hidden profile resolves null from `get_public_profile`
 - a hidden profile's `handle` is **still claimed** (hiding is not releasing — D6)
