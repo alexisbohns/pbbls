@@ -1372,6 +1372,8 @@ export type Database = {
           emotion_id: string
           glyph_id: string | null
           happened_at: string
+          hidden_at: string | null
+          hidden_by: string | null
           id: string
           intensity: number
           name: string
@@ -1388,6 +1390,8 @@ export type Database = {
           emotion_id: string
           glyph_id?: string | null
           happened_at: string
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           intensity: number
           name: string
@@ -1404,6 +1408,8 @@ export type Database = {
           emotion_id?: string
           glyph_id?: string | null
           happened_at?: string
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           intensity?: number
           name?: string
@@ -1451,6 +1457,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "pebbles_hidden_by_fkey"
+            columns: ["hidden_by"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pebbles_hidden_by_fkey"
+            columns: ["hidden_by"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "pebbles_hidden_by_fkey"
+            columns: ["hidden_by"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+          {
             foreignKeyName: "pebbles_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -1480,6 +1507,8 @@ export type Database = {
           display_name: string
           glyph_id: string | null
           handle: string | null
+          hidden_at: string | null
+          hidden_by: string | null
           id: string
           is_admin: boolean
           max_media_per_pebble: number
@@ -1496,6 +1525,8 @@ export type Database = {
           display_name: string
           glyph_id?: string | null
           handle?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           is_admin?: boolean
           max_media_per_pebble?: number
@@ -1512,6 +1543,8 @@ export type Database = {
           display_name?: string
           glyph_id?: string | null
           handle?: string | null
+          hidden_at?: string | null
+          hidden_by?: string | null
           id?: string
           is_admin?: boolean
           max_media_per_pebble?: number
@@ -1536,6 +1569,27 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_glyph_market"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_hidden_by_fkey"
+            columns: ["hidden_by"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "profiles_hidden_by_fkey"
+            columns: ["hidden_by"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "profiles_hidden_by_fkey"
+            columns: ["hidden_by"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "profiles_user_id_fkey"
@@ -2277,9 +2331,22 @@ export type Database = {
         Args: { p_status?: string }
         Returns: Json
       }
+      admin_release_handle: {
+        Args: { p_note?: string; p_user_id: string }
+        Returns: Json
+      }
       admin_set_achievement_glyph: {
         Args: { p_achievement_id: string; p_strokes: Json; p_view_box: string }
         Returns: string
+      }
+      admin_set_content_hidden: {
+        Args: {
+          p_hidden: boolean
+          p_note?: string
+          p_target_id: string
+          p_target_kind: string
+        }
+        Returns: Json
       }
       admin_set_domain_glyph: {
         Args: { p_domain_id: string; p_strokes: Json; p_view_box: string }
@@ -2611,6 +2678,8 @@ export type Database = {
           display_name: string
           glyph_id: string | null
           handle: string | null
+          hidden_at: string | null
+          hidden_by: string | null
           id: string
           is_admin: boolean
           max_media_per_pebble: number
