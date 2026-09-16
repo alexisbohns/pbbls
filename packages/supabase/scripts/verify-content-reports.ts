@@ -238,6 +238,40 @@ try {
   check("an over-long detail is refused", !!longErr, "expected a constraint violation");
 
   // ---------------------------------------------------------------------------
+  // 5b. Moderation columns are pinned against their own subject (#833 D7).
+  //
+  // pebbles_update and profiles_update are owner-scoped with NO column
+  // restriction, and Postgres grants UPDATE on the whole table to
+  // authenticated. Without the guard triggers, a hidden user clears hidden_at
+  // and un-hides themselves — the moderation state would be revocable by
+  // exactly the person it is applied to.
+  //
+  // SETTING is guarded too, not just clearing: a user who can set hidden_at
+  // could hide a pebble and later claim it was moderated.
+  // ---------------------------------------------------------------------------
+  const { error: selfHideErr } = await o.from("pebbles")
+    .update({ hidden_at: new Date().toISOString() }).eq("id", publicPebbleId);
+  check("an owner cannot SET hidden_at on their own pebble",
+    !!selfHideErr, "the pebbles moderation guard did not fire");
+
+  const { error: selfUnhideErr } = await o.from("pebbles")
+    .update({ hidden_at: null }).eq("id", publicPebbleId);
+  check("an owner cannot CLEAR hidden_at on their own pebble",
+    !!selfUnhideErr, "the pebbles moderation guard did not fire");
+
+  const { error: selfProfileHideErr } = await o.from("profiles")
+    .update({ hidden_at: null }).eq("user_id", owner.id);
+  check("an owner cannot clear hidden_at on their own profile",
+    !!selfProfileHideErr, "the profiles privileged guard did not cover hidden_at");
+
+  // An ordinary column on the same table still writes — proving the guard is
+  // column-scoped and has not broken normal profile edits.
+  const { error: ordinaryErr } = await o.from("profiles")
+    .update({ display_name: `owner ${runId}` }).eq("user_id", owner.id);
+  check("an ordinary profile column still updates",
+    !ordinaryErr, ordinaryErr?.message);
+
+  // ---------------------------------------------------------------------------
   // 6. The admin surface is closed to non-admins. This is the security
   //    assertion; the POSITIVE admin path lives in verify-account-purge.ts.
   // ---------------------------------------------------------------------------
