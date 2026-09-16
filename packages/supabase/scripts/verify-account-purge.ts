@@ -513,10 +513,17 @@ try {
     p_note: "harness takedown",
   });
   const { data: takenPebble } = await admin
-    .from("pebbles").select("visibility").eq("id", pubPebbleId).maybeSingle();
-  check("actioning a pebble report drops it to secret",
-    !takePebbleErr && takenPebble?.visibility === "secret",
-    takePebbleErr ? takePebbleErr.message : takenPebble?.visibility);
+    .from("pebbles").select("visibility, hidden_at").eq("id", pubPebbleId).maybeSingle();
+  // #833 replaced the destructive takedown: actioning now sets hidden_at and
+  // leaves the user's own visibility setting alone. Both halves are asserted —
+  // "it is hidden" without "and visibility was not overwritten" would pass just
+  // as well against the old destructive behaviour this change exists to remove.
+  check("actioning a pebble report hides it",
+    !takePebbleErr && takenPebble?.hidden_at !== null,
+    takePebbleErr ? takePebbleErr.message : `hidden_at=${takenPebble?.hidden_at}`);
+  check("actioning leaves the owner's visibility setting untouched",
+    takenPebble?.visibility === "public",
+    `visibility=${takenPebble?.visibility}`);
 
   const { error: takeGlyphErr } = await moderator.client.rpc("resolve_content_report", {
     p_report_id: (glyphReport as { id: string }).id,
