@@ -24,6 +24,13 @@
  *
  * STANDING RULE (roadmap §M46): when a later milestone adds a user-owned
  * table to purge_account, extend the seed + zero-row assertions here too.
+ *
+ * It also carries the content_reports assertions that verify-content-reports.ts
+ * structurally cannot (#831): that harness is anon-only, so it can neither read
+ * the table back nor mint an admin past profiles_privileged_guard. Here, the
+ * service role does both — so this is where "target_user_id is resolved
+ * correctly", "a LISTED glyph is reportable" and the takedown dispatch of
+ * resolve_content_report are actually proven.
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -75,6 +82,35 @@ async function listStorageFiles(prefix: string): Promise<string[]> {
   return files;
 }
 
+// A named, non-generic factory (rather than inlining `createClient(...)` at
+// each call site) so its return type can be used as a concrete parameter/
+// return type elsewhere in this file. `ReturnType<typeof createClient>` looks
+// equivalent but is NOT: createClient is itself generic, so that alias loses
+// the Database-shaped overload resolution and every `.rpc(name, args)` call
+// through it type-checks `args` against `undefined` instead of the real Args
+// type — deno check (and `deno run`, which type-checks by default) fails.
+function createAnonClient() {
+  return createClient(SUPABASE_URL!, ANON_KEY!, { auth: { persistSession: false } });
+}
+
+/**
+ * A real authenticated admin session. is_admin is pinned against client writes
+ * by profiles_privileged_guard (20260902090000), and the exemption is exactly
+ * this: the service role sets it out of band. The admin RPCs read auth.uid(),
+ * so they need the USER's session, not the service-role client.
+ */
+async function mintModerator(email: string, password: string) {
+  const anonClient = createAnonClient();
+  const { data, error } = await anonClient.auth.signUp({ email, password });
+  if (error || !data.user || !data.session) {
+    throw new Error(`signUp moderator: ${error?.message ?? "no session"}`);
+  }
+  const { error: promoteErr } = await admin
+    .from("profiles").update({ is_admin: true }).eq("user_id", data.user.id);
+  if (promoteErr) throw new Error(`promote moderator: ${promoteErr.message}`);
+  return { id: data.user.id, client: anonClient, token: data.session.access_token };
+}
+
 async function invokeDeleteAccount(accessToken: string): Promise<Response> {
   return await fetch(`${SUPABASE_URL}/functions/v1/delete-account`, {
     method: "POST",
@@ -93,6 +129,7 @@ const buyerEmail = `purge-test-buyer-${runId}@example.test`;
 
 let sellerId: string | null = null;
 let buyerId: string | null = null;
+let moderatorId: string | null = null;
 
 /** Last-resort cleanup so a failed run never leaves residue. */
 async function forceCleanup(userId: string | null, label: string) {
@@ -247,6 +284,7 @@ try {
   // A public profile (M50). Claimed through the real RPC + direct toggle so
   // the purge run also proves the handle frees up (profiles-row delete).
   const handle = `purgetest${runId}`;
+  const buyerHandle = `purgetestbuyer${runId}`;
   const { error: handleErr } = await seller.rpc("set_handle", { p_handle: handle });
   if (handleErr) throw new Error(`set_handle: ${handleErr.message}`);
   const { error: publicErr } = await seller
@@ -357,6 +395,146 @@ try {
 
   console.log(`Seeded: pebble ${pebbleId}, sold glyph ${soldGlyph.id}, unsold glyph ${unsoldGlyph.id}\n`);
 
+  // ---------------------------------------------------------------------------
+  // content_reports (#831). Four seeds, covering both purge directions and the
+  // two things the anon-only harness cannot reach.
+  // ---------------------------------------------------------------------------
+
+  // (a) The buyer reports the seller's PUBLIC pebble. This is the row that
+  //     must be DELETED when the seller goes.
+  const { data: pubPebbleId, error: pubPebbleErr } = await seller.rpc("create_pebble", {
+    payload: {
+      happened_at: "2026-09-01T12:00:00Z",
+      intensity: 2,
+      positiveness: 1,
+      emotion_id: emotion.id,
+      name: "reportable public",
+      description: "original text",
+      visibility: "public",
+    },
+  });
+  if (pubPebbleErr || !pubPebbleId) throw new Error(`public pebble: ${pubPebbleErr?.message}`);
+
+  const { data: pebbleReport, error: pebbleReportErr } = await buyer.rpc("report_content", {
+    p_target_kind: "pebble",
+    p_target_id: pubPebbleId,
+    p_reason: "harassment",
+    p_detail: "purge harness",
+  });
+  check("buyer can report the seller's public pebble",
+    !pebbleReportErr && !!(pebbleReport as { id?: string } | null)?.id, pebbleReportErr?.message);
+
+  // The correctness assertion the anon harness cannot make: the owner was
+  // resolved server-side, and the snapshot captured the text at file time.
+  const { data: storedReport } = await admin
+    .from("content_reports").select("target_user_id, target_snapshot, status")
+    .eq("id", (pebbleReport as { id: string }).id).maybeSingle();
+  check("report resolved target_user_id server-side",
+    storedReport?.target_user_id === sellerId,
+    `got ${storedReport?.target_user_id}, want ${sellerId}`);
+  check("report snapshotted the reported text",
+    (storedReport?.target_snapshot as { description?: string } | null)?.description === "original text",
+    JSON.stringify(storedReport?.target_snapshot));
+
+  // Editing after the fact must NOT rewrite the evidence.
+  // update_pebble takes the pebble id as its own arg (p_pebble_id), separate
+  // from the payload jsonb (packages/supabase/types/database.ts) — the plan's
+  // draft nested `id` inside `payload`, which the RPC never reads, so the edit
+  // would silently no-op and both snapshot checks below would pass vacuously.
+  const { error: updateErr } = await seller.rpc("update_pebble", {
+    p_pebble_id: pubPebbleId,
+    payload: { description: "innocent now" },
+  });
+  if (updateErr) throw new Error(`update_pebble: ${updateErr.message}`);
+  const { data: afterEdit } = await admin
+    .from("content_reports").select("target_snapshot")
+    .eq("id", (pebbleReport as { id: string }).id).maybeSingle();
+  check("editing the pebble does not rewrite the snapshot",
+    (afterEdit?.target_snapshot as { description?: string } | null)?.description === "original text",
+    JSON.stringify(afterEdit?.target_snapshot));
+
+  // (b) A LISTED glyph is reportable — the case the anon harness cannot reach,
+  //     because approving a submission needs an admin.
+  const { data: glyphReport, error: glyphReportErr } = await buyer.rpc("report_content", {
+    p_target_kind: "glyph",
+    p_target_id: soldGlyph.id,
+    p_reason: "sexual",
+  });
+  check("a listed marketplace glyph is reportable",
+    !glyphReportErr && !!(glyphReport as { id?: string } | null)?.id, glyphReportErr?.message);
+
+  // (c) The seller reports the BUYER. This is the row that must SURVIVE the
+  //     seller's purge with reporter_id detached.
+  const { error: buyerHandleErr } = await buyer.rpc("set_handle", { p_handle: buyerHandle });
+  if (buyerHandleErr) throw new Error(`buyer set_handle: ${buyerHandleErr.message}`);
+  const { error: buyerPubErr } = await admin
+    .from("profiles").update({ public_profile: true }).eq("user_id", buyerId);
+  if (buyerPubErr) throw new Error(`buyer publish: ${buyerPubErr.message}`);
+
+  const { data: sellerFiled, error: sellerFiledErr } = await seller.rpc("report_content", {
+    p_target_kind: "profile",
+    p_target_id: buyerId,
+    p_reason: "impersonation",
+  });
+  check("seller can report the buyer's public profile",
+    !sellerFiledErr && !!(sellerFiled as { id?: string } | null)?.id, sellerFiledErr?.message);
+  const sellerFiledId = (sellerFiled as { id: string }).id;
+
+  // ---------------------------------------------------------------------------
+  // The POSITIVE admin path — queue read and takedown dispatch. Needs a real
+  // admin session, which only the service role can mint.
+  // ---------------------------------------------------------------------------
+  const moderator = await mintModerator(
+    `purge-test-mod-${runId}@example.test`,
+    password,
+  );
+  moderatorId = moderator.id;
+
+  const { data: queue, error: queueErr } = await moderator.client
+    .rpc("admin_list_content_reports", { p_status: "open" });
+  const queueRows = (queue ?? []) as Array<Record<string, unknown>>;
+  check("admin queue returns the open reports", !queueErr && queueRows.length >= 3,
+    queueErr ? queueErr.message : `rows=${queueRows.length}`);
+  const queuedPebble = queueRows.find((r) => r.id === (pebbleReport as { id: string }).id);
+  check("queue shows live content beside the snapshot",
+    (queuedPebble?.target_live as { description?: string } | null)?.description === "innocent now",
+    JSON.stringify(queuedPebble?.target_live));
+  check("queue counts open reports per target",
+    Number(queuedPebble?.open_reports_against_target) === 1,
+    String(queuedPebble?.open_reports_against_target));
+  check("queue does not leak reporter emails",
+    !Object.keys(queuedPebble ?? {}).some((k) => k.includes("email")),
+    Object.keys(queuedPebble ?? {}).join(","));
+
+  // Takedown, one per target_kind.
+  const { error: takePebbleErr } = await moderator.client.rpc("resolve_content_report", {
+    p_report_id: (pebbleReport as { id: string }).id,
+    p_outcome: "actioned",
+    p_note: "harness takedown",
+  });
+  const { data: takenPebble } = await admin
+    .from("pebbles").select("visibility").eq("id", pubPebbleId).maybeSingle();
+  check("actioning a pebble report drops it to secret",
+    !takePebbleErr && takenPebble?.visibility === "secret",
+    takePebbleErr ? takePebbleErr.message : takenPebble?.visibility);
+
+  const { error: takeGlyphErr } = await moderator.client.rpc("resolve_content_report", {
+    p_report_id: (glyphReport as { id: string }).id,
+    p_outcome: "actioned",
+  });
+  const { data: takenSub } = await admin
+    .from("glyph_submissions").select("listed").eq("glyph_id", soldGlyph.id).maybeSingle();
+  check("actioning a glyph report delists it",
+    !takeGlyphErr && takenSub?.listed === false,
+    takeGlyphErr ? takeGlyphErr.message : String(takenSub?.listed));
+
+  // Resolving twice is refused — the verdict is not re-writable.
+  const { error: reResolveErr } = await moderator.client.rpc("resolve_content_report", {
+    p_report_id: (pebbleReport as { id: string }).id, p_outcome: "dismissed",
+  });
+  check("a resolved report cannot be resolved again",
+    !!reResolveErr && reResolveErr.message.includes("invalid_state"), reResolveErr?.message);
+
   // -------------------------------------------------------------------------
   // 4. Delete the seller through the real edge function.
   // -------------------------------------------------------------------------
@@ -406,6 +584,8 @@ try {
     ["connection_invites", "inviter_id"],
     ["achievement_unlocks", "user_id"],
     ["user_consents", "user_id"],
+    ["content_reports", "target_user_id"],
+    ["content_reports", "reporter_id"],
   ];
   for (const [table, column] of sellerScoped) {
     const n = await countRows(table, column, sellerId);
@@ -466,6 +646,18 @@ try {
     !freedHandleErr && freedHandle === null,
     freedHandleErr ? freedHandleErr.message : JSON.stringify(freedHandle));
 
+  // ...but the report the seller FILED survives, detached. The moderation
+  // trail must outlive the reporter.
+  const { data: survivor } = await admin
+    .from("content_reports").select("id, reporter_id, target_user_id")
+    .eq("id", sellerFiledId).maybeSingle();
+  check("the report the seller filed survives the purge", !!survivor,
+    "the moderation trail was destroyed with the reporter");
+  check("the surviving report is detached from the seller",
+    survivor?.reporter_id === null, String(survivor?.reporter_id));
+  check("the surviving report still names its target",
+    survivor?.target_user_id === buyerId, String(survivor?.target_user_id));
+
   const { data: goneUser } = await admin.auth.admin.getUserById(sellerId);
   check("auth user gone", !goneUser?.user);
 
@@ -494,6 +686,7 @@ try {
   try {
     await forceCleanup(sellerId, "seller");
     await forceCleanup(buyerId, "buyer");
+    if (moderatorId) await forceCleanup(moderatorId, "moderator");
   } catch (err) {
     console.error(`cleanup failed — remove purge-test-* users manually: ${err}`);
   }
