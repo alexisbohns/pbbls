@@ -10,7 +10,7 @@
 |---|---|---|
 | `apps/web` | `@pbbls/web` — Next.js 16 App Router PWA, the main app | `apps/web/CLAUDE.md` |
 | `apps/ios` | `@pbbls/ios` — SwiftUI, iOS 17+, iPhone-only | `apps/ios/CLAUDE.md` |
-| `apps/android` | `@pbbls/android` — Kotlin + Compose, minSdk 33; mirrors iOS 1:1 | `apps/android/CLAUDE.md` |
+| `apps/android` | `@pbbls/android` — Kotlin + Compose, minSdk 33; mirrors iOS 1:1 | `apps/android/CLAUDE.md` (also routes the two Android skill sets) |
 | `apps/admin` | `@pbbls/admin` — Next.js back-office (analytics, Lab logs, moderation), port 3001 | `apps/admin/CLAUDE.md` |
 | `packages/supabase` | Migrations, generated `database.ts`, edge functions, DB verify harnesses | `packages/supabase/CLAUDE.md` |
 | `packages/shared` | Stub — no code yet | `packages/shared/CLAUDE.md` |

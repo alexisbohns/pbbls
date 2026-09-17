@@ -11,6 +11,67 @@ and port its structure, not just its behavior.
 > **A** is the scaffold; B adds the design system, C the entry funnel, D the
 > read-only Path. All four have shipped (PRs #533–#536).
 
+## Skill routing
+
+Two Android skill sets are installed user-side and their descriptions
+overlap: Google's official set (`adaptive`, `navigation-3`, `edge-to-edge`,
+`r8-analyzer`, …, installed through the `android` CLI) and the `android-skills`
+plugin by rcosteira79 (`android-skills:compose`, `android-skills:android-dev`,
+…, always invoked with the `android-skills:` prefix). They may not be present
+for every contributor; ignore any row whose skill is missing. Where two rows
+could apply, the more specific topic wins. This table overrides both sets'
+own descriptions.
+
+`android-skills:android-dev` advertises itself as the baseline for *all*
+Android work and routes only within its own set; it never overrides the second
+table. When it defaults to a pattern the M61 issues have not landed yet
+(Hilt, ViewModel per screen, Navigation 3), write new code to the target and
+leave existing code to the issue that owns it.
+
+The `android` CLI (`android docs search "…"`, `android docs fetch kb://…`) is
+the authoritative reference for any API question neither set answers; prefer
+it to web search. There is no local SDK on the maintainer's machine, so the
+CLI's device and emulator commands are for contributors who have one.
+
+### This app's stack
+
+| Topic | Use | Not |
+| --- | --- | --- |
+| Compose UI, state hoisting, recomposition, `LazyColumn`, side effects | `android-skills:compose` | |
+| M3 compliance review, touch targets, a11y audit of a screen | `android-skills:android-ux` | |
+| Screen architecture: `ViewModel`, `UiState`, effects channel, Hilt (#848, #849) | `android-skills:android-dev` | `android-skills:koin`; the DI target is Hilt |
+| Repository error boundary, sealed `DataError` (#850) | `android-skills:android-data-layer` | |
+| Coroutines and `Flow`, dispatcher injection, `Channel` vs `SharedFlow` | `android-skills:kotlin-coroutines`, `android-skills:kotlin-flows` | |
+| Navigation: `NavDisplay`, `NavKey`, back stacks, Scenes (#852) | `navigation-3` | `android-skills:compose`; the target is Navigation 3, not `navigation-compose` |
+| Snap thumbnails, signed-URL images | `android-skills:coil-compose` | |
+| Package boundaries, visibility, `core/` vs `features/` (#851) | `android-skills:modularization` | |
+| Writing or fixing JVM, Robolectric and screenshot tests (#847, #857) | `android-skills:android-testing` | `testing-setup`, which stands up new infra |
+| Logcat, ADB, ANR traces, Compose recomposition bugs | `android-skills:android-debugging` | |
+| `libs.versions.toml`, convention plugins, build speed | `android-skills:android-gradle-logic`, `android-skills:gradle-build-performance` | |
+| AndroidX source lookups | `android-skills:android-source-search` | |
+
+Not applicable here and never routed: `android-skills:android-retrofit`,
+`android-skills:kmp-ktor`, `android-skills:kmp-boundaries` (supabase-kt owns
+the network client), `android-skills:paging` (the Path loads whole),
+`android-skills:datastore` (SharedPreferences is a deliberate D5 choice until
+real settings exist), `android-skills:rxjava-migration`,
+`android-skills:pdf-annotations`.
+
+### Owned outright by the Google set
+
+| Topic | Skill |
+| --- | --- |
+| Window size classes, foldables, tablets, content width cap (#855) | `adaptive` |
+| System bar and IME insets, `enableEdgeToEdge`, sheet insets | `edge-to-edge` |
+| R8 keep rules, `isMinifyEnabled`, mapping upload (#845) | `r8-analyzer` |
+| Predictive back, `NavigationBackHandler`, `androidx.navigationevent` (#852) | `navigation-event` |
+| Exported components, deep-link and App Link intent handling | `android-intent-security` |
+| Play policy, Data Safety declarations, permission hygiene | `play-policy-insights` |
+| Restore Credentials after device restore | `restore-credentials` |
+| `android` CLI: docs search, SDK, AVDs, screenshots, UI inspection | `android-cli` |
+| Adopting the Compose Styles API | `styles` |
+| Standing up a new test harness or CI test job | `testing-setup` |
+
 ## Source of truth
 
 - **Gradle Kotlin DSL is the build source of truth.** `gradle/libs.versions.toml`
