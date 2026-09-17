@@ -9,6 +9,9 @@ name: Android Release
 #   • a PR labelled `deploy-beta`     → publish THAT branch to the phone (opt-in)
 #   • manual "Run workflow"           → workflow_dispatch, pick any branch
 #
+# The AAB is minified and shrunk by R8 (#845); its mapping file is uploaded to
+# Play so Console crashes deobfuscate, and kept as a workflow artifact too.
+#
 # The AAB is ALWAYS uploaded as a workflow artifact too. The Play Publishing API
 # refuses to create an app's first-ever release, so the very first upload must be
 # done by hand in the Console — download this artifact once and upload it there to
@@ -99,6 +102,17 @@ jobs:
           path: apps/android/app/build/outputs/bundle/release/app-release.aab
           if-no-files-found: error
 
+      # The AAB is minified and obfuscated (#845), so the mapping file is the only
+      # way to read a stack trace from it. Keep a copy per run even when the
+      # publish step below is skipped — a build whose mapping is lost is a build
+      # whose crashes can never be decoded.
+      - name: Upload R8 mapping artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: app-release-mapping
+          path: apps/android/app/build/outputs/mapping/release/mapping.txt
+          if-no-files-found: error
+
       # Skips until the Play service-account secret exists, so the pre-setup runs
       # still hand you the AAB artifact to seed the first release manually without
       # failing the job. Once the secret is set, every run publishes to internal.
@@ -109,5 +123,8 @@ jobs:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: app.pbbls.android
           releaseFiles: apps/android/app/build/outputs/bundle/release/app-release.aab
+          # Ships the R8 mapping alongside the bundle so Play Console deobfuscates
+          # crashes and ANRs for this versionCode instead of showing bare frames.
+          mappingFile: apps/android/app/build/outputs/mapping/release/mapping.txt
           track: internal
           status: completed

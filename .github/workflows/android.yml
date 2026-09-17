@@ -3,7 +3,13 @@ name: Android
 # The repository's first CI workflow (D12). Path-filtered to the Android app so
 # it stays dormant for web/admin/ios changes. No secrets needed: the build
 # defaults BuildConfig values to empty strings when secrets.properties is absent
-# (D8), and this milestone ships only a debug APK.
+# (D8).
+#
+# This workflow is the PRE-MERGE gate; android-release.yml only runs after merge.
+# So everything that can break the shipped artifact has to be exercised here:
+# Android Lint (baselined, warnings-as-errors) and an UNSIGNED `bundleRelease`,
+# which is what runs R8 and lint-vital. A broken keep rule or a lint-vital error
+# fails the PR instead of failing the deploy (#845).
 on:
   pull_request:
     paths:
@@ -21,10 +27,12 @@ concurrency:
 
 permissions:
   contents: read
+  # Android Lint publishes its SARIF report to GitHub code scanning.
+  security-events: write
 
 jobs:
   build:
-    name: ktlint · unit tests · assemble
+    name: ktlint · lint · unit tests · assemble · bundle
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -78,3 +86,35 @@ jobs:
           name: ui-screenshots
           path: apps/android/app/src/screenshotTestDebug/reference/**
           if-no-files-found: error
+
+      # Android Lint with `warningsAsErrors` + a committed baseline
+      # (apps/android/app/lint-baseline.xml). Anything already in the baseline is
+      # filtered out; anything new fails the PR. Regenerate the baseline with
+      # `./gradlew updateLintBaseline` only when an issue is deliberately accepted.
+      - name: Android Lint
+        working-directory: apps/android
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: ./gradlew lint
+
+      # Fork PRs get a read-only GITHUB_TOKEN, so the code-scanning upload would
+      # fail there; the lint step above has already failed the job on any real
+      # finding, so skipping the upload loses no signal.
+      - name: Upload lint SARIF to code scanning
+        if: ${{ always() && github.event.pull_request.head.repo.fork != true }}
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: apps/android/app/build/reports/lint-results-debug.sarif
+          category: android-lint
+
+      # The real reason this step exists: `bundleRelease` is the only task that
+      # runs R8 and lintVitalRelease. Without a keystore the AAB comes out
+      # unsigned (the D8 fail-soft contract) and nothing is published — this is a
+      # build gate, not a release. android-release.yml still owns publishing.
+      - name: Assemble release bundle (R8 + lint-vital gate)
+        working-directory: apps/android
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: ./gradlew bundleRelease
