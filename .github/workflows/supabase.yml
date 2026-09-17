@@ -70,7 +70,22 @@ jobs:
     # SUPABASE_ANON_KEY must be set" on every outside contribution. Skip the job
     # instead (skipped counts as success for branch protection). `pull_request_target`
     # is the wrong fix here: it would hand repository secrets to fork-authored code.
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    #
+    # Dependabot is the second case, and it does not look like the first: its
+    # branches live in THIS repo, so the head-repo test passes and the job ran,
+    # then died on the credentials check. A `pull_request` opened by Dependabot
+    # is handed the `dependabot` secret store, never the repository one, so
+    # SUPABASE_URL arrives empty no matter what is configured here (#808 failed
+    # this way three times while every other job on it passed, and the nightly
+    # run against main stayed green throughout — the harnesses were never the
+    # problem). Mirroring the secrets into the Dependabot store would mean
+    # letting a bot-authored branch write to production, which is the trade
+    # D-2026-09-02 already declined for forks. Skip, and let the nightly run
+    # and the first human PR touching packages/supabase/** be the proof.
+    if: >-
+      github.event_name != 'pull_request'
+      || (github.event.pull_request.head.repo.full_name == github.repository
+      && github.event.pull_request.user.login != 'dependabot[bot]')
     runs-on: ubuntu-latest
     env:
       SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
