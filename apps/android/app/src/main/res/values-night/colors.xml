@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Dark-mode overrides for the pre-Compose colours (#846). The launcher icon has
+  no dark variant (its accent ground is theme-independent, like
+  `AccentPaletteShared`), so only the splash background flips.
+-->
+<resources>
+    <!-- SystemPaletteDark.background. -->
+    <color name="splash_background">#171012</color>
+</resources>

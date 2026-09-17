@@ -10,4 +10,23 @@
         <item name="android:windowActionBar">false</item>
         <item name="android:windowNoTitle">true</item>
     </style>
+
+    <!--
+      Cold-start theme (#846) — what MainActivity is declared with, and what
+      `installSplashScreen()` swaps away for `postSplashScreenTheme` once the
+      splash is dismissed. This is a *separate* theme rather than Theme.Pebbles
+      re-parented: `postSplashScreenTheme` has to name the theme the activity
+      settles into, and a theme cannot point at itself.
+
+      `.IconBackground` is the variant that draws the icon-background circle, so
+      the splash reads as the launcher icon: the cream mark on its accent ground,
+      over the app's own background colour. Without the circle the mark would be
+      cream-on-white and invisible in light mode.
+    -->
+    <style name="Theme.Pebbles.Starting" parent="Theme.SplashScreen.IconBackground">
+        <item name="windowSplashScreenBackground">@color/splash_background</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="windowSplashScreenIconBackgroundColor">@color/ic_launcher_background</item>
+        <item name="postSplashScreenTheme">@style/Theme.Pebbles</item>
+    </style>
 </resources>

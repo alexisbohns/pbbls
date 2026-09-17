@@ -204,6 +204,35 @@ A 1:1 map of `apps/ios/Pebbles/{Features,Services,Components,Theme}`.
   `emotionCategory.<slug>`) resolve through `ReferenceStrings.referenceName`,
   never the DB `name` column directly — see Localization below.
 
+### Launcher icon & splash (#846)
+
+- **The launcher icon is a vector adaptive icon, generated — never hand-edited.**
+  `res/mipmap-anydpi/ic_launcher.xml` composes three layers:
+  `@color/ic_launcher_background` (the accent primary), plus
+  `drawable/ic_launcher_foreground.xml` and `drawable/ic_launcher_monochrome.xml`
+  (the themed-icon layer minSdk 33 exists for). Both drawables are produced by
+  `node scripts/logo-svg-to-launcher-icon.mjs` from the *iOS* brand mark
+  (`apps/ios/Pebbles/Resources/pbbls-logo-loader.svg`) — re-run it when the mark
+  changes rather than editing the XML, or the two surfaces drift. There are no
+  `mipmap-*dpi` PNG buckets: the layers are vectors and every supported device
+  is ≥ API 26, so one file serves all densities.
+- **`values/colors.xml` is only for what the platform reads before Compose runs**
+  — the icon ground and the splash background (with its `values-night` override).
+  It duplicates two values from `theme/Palettes.kt` because XML cannot read
+  Kotlin; keep them in sync and do **not** grow it into a second palette.
+- **The cold-start splash is the system splash** (`androidx.core:core-splashscreen`).
+  `Theme.Pebbles.Starting` (parent `Theme.SplashScreen.IconBackground`) is the
+  activity's declared theme and names `Theme.Pebbles` as its
+  `postSplashScreenTheme`; it is a separate style rather than a re-parented
+  `Theme.Pebbles` because a theme cannot be its own `postSplashScreenTheme`.
+- **Nothing gates the launch on a duration.** `MainActivity.onCreate` calls
+  `installSplashScreen()` before `super.onCreate` and holds the splash on
+  `supabase.isInitializing`, with an 8 s ceiling mirroring iOS's
+  `loaderCeilingSeconds` (decision log 2026-07-17) so a wedged auth cannot
+  strand it. A warm signed-in launch therefore reaches Path immediately. Do not
+  reintroduce a `delay(…)` in `RootScreen`: the 2.5 s hold this replaced was the
+  bug.
+
 ### Rive rename map (D14)
 
 Only the logo ships in B; the cairn (`pbbls-cairn.riv`) is D-optional and not
@@ -355,15 +384,16 @@ bundled. Android resource filenames must be lowercase
   for category ordering, privacy last against publish) — reordering keeps the
   cost and drops the reason. Known divergences and their follow-ups are in
   `docs/decisions/log.md` (2026-08-24).
-- `RootScreen` warms the palette cache concurrently with the splash hold and
-  flushes the signed-URL cache when the session drops to null.
+- `RootScreen` warms the palette cache at launch and flushes the signed-URL
+  cache when the session drops to null. It holds **no** fixed splash duration
+  (#846) — see **Launcher icon & splash**.
 - Leaf path composables take `palette` / data as **parameters**, not service
   reads — same previewability rule as the funnel screens.
-- No app icon slot — the launcher shows the default system icon. Expected.
-- `MainActivity` hosts `RootScreen` (the auth gate / single NavHost) and
-  forwards `pebbles://auth-callback` deep links to supabase-kt's
-  `handleDeeplinks` (`onCreate` + `onNewIntent`, `launchMode="singleTask"`).
-  `DebugTokenPreviewScreen` is retained only as a screenshot-test preview.
+- `MainActivity` hosts `RootScreen` (the auth gate / single NavHost), owns the
+  system splash, and forwards `pebbles://auth-callback` deep links to
+  supabase-kt's `handleDeeplinks` (`onCreate` + `onNewIntent`,
+  `launchMode="singleTask"`). `DebugTokenPreviewScreen` is retained only as a
+  screenshot-test preview.
 - Onboarding illustrations render a placeholder surface — the iOS asset-catalog
   artwork is not yet exported to Android drawable densities (milestone risk 6,
   needs the maintainer's design sources).
