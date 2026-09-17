@@ -28,6 +28,16 @@ updates:
     commit-message:
       prefix: "chore(deps)"
       prefix-development: "chore(deps-dev)"
+    # ESLint 10 is unusable here until Next's shared config catches up (#860).
+    # apps/web and apps/admin both extend eslint-config-next, which depends on
+    # eslint-plugin-react; its latest stable (7.37.5) peers at `^9.7` and still
+    # calls the `context.getFilename()` that ESLint 10 removed, so rule loading
+    # throws before a single file is linted. Scoped to majors on purpose, so 9.x
+    # patches keep arriving. Delete this entry — not the whole `ignore:` key —
+    # once eslint-config-next ships on an ESLint 10-compatible plugin set.
+    ignore:
+      - dependency-name: eslint
+        update-types: ["version-update:semver-major"]
     groups:
       npm-production:
         dependency-type: production
