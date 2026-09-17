@@ -43,6 +43,11 @@ coil = "3.6.2"
 # encoder stays unit-testable off-device.
 zxing = "3.5.4"
 
+# System splash screen (#846). The androidx compat layer over the API 31+
+# platform splash: it owns the pre-draw hold (setKeepOnScreenCondition) that
+# replaced RootScreen's fixed 2.5s timer.
+splashscreen = "1.2.0"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
@@ -85,6 +90,9 @@ supabase-storage = { group = "io.github.jan-tennert.supabase", name = "storage-k
 # compose-pebble / compose-pebble-update edge-function surface; PebbleWriteService
 # posts via raw Ktor to read the 5xx soft-success body (D2).
 supabase-functions = { group = "io.github.jan-tennert.supabase", name = "functions-kt" }
+
+# Branded cold-start splash (#846).
+androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

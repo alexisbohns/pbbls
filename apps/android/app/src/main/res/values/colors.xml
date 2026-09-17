@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The only colours the platform reads before Compose is running: the launcher
+  icon and the cold-start splash (#846). Everything else lives in
+  theme/Palettes.kt — do NOT grow this file into a second palette.
+
+  Values are copied from that palette by hand because XML cannot read Kotlin;
+  keep them in sync with `AccentPaletteShared` / `SystemPaletteLight`.
+-->
+<resources>
+    <!-- AccentPaletteShared.primary — the iOS app icon's own ground. -->
+    <color name="ic_launcher_background">#C07A7A</color>
+    <!-- SystemPaletteLight.background — matches the first Compose frame, so the
+         splash hands off without a colour flash. values-night overrides it. -->
+    <color name="splash_background">#FFFFFF</color>
+</resources>

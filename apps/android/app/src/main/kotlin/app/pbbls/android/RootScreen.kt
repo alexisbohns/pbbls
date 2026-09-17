@@ -45,10 +45,8 @@ import app.pbbls.android.services.LocalSnapURLCache
 import app.pbbls.android.services.LocalSupabaseService
 import app.pbbls.android.services.OnboardingPreferences
 import app.pbbls.android.theme.PebblesTheme
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-private const val MIN_SPLASH_MILLIS = 2_500L
 private const val ROUTE_WELCOME = "welcome"
 private const val ROUTE_AUTH = "auth"
 private const val ROUTE_PATH = "path"
@@ -65,14 +63,16 @@ private const val ROUTE_CONNECTIONS = "connections"
 /**
  * Top-level auth gate — the `RootView` analog (D5). The gate is conditional
  * composition, not navigation:
- *   - `canShowAuthedTabs` (session AND resolved AND splash held ~2.5s) →
- *     [PathScreen], with [OnboardingScreen] as a full-screen overlay the first
- *     time a user id appears while `hasSeenOnboarding` is false.
+ *   - `canShowAuthedTabs` (session AND auth resolved) → [PathScreen], with
+ *     [OnboardingScreen] as a full-screen overlay the first time a user id
+ *     appears while `hasSeenOnboarding` is false.
  *   - otherwise → a NavHost (Welcome → Auth), with Welcome revealing its content
- *     only once auth has settled to "no session" and the splash hold elapsed.
+ *     once auth has settled to "no session".
  *
- * The Rive logo plays for at least the splash hold either way, satisfying the
- * "splash before Path" intent.
+ * There is no fixed splash duration here (#846): the system splash owns the
+ * launch hold and [MainActivity] releases it on the same `isInitializing`
+ * signal this gate reads, so a warm signed-in launch lands on Path immediately.
+ * The Rive logo is Welcome's hero, not a gate.
  */
 @Composable
 fun RootScreen() {
@@ -88,18 +88,13 @@ fun RootScreen() {
 
     var hasSeenOnboarding by rememberSaveable { mutableStateOf(OnboardingPreferences.hasSeenOnboarding(context)) }
     var isPresentingOnboarding by rememberSaveable { mutableStateOf(false) }
-    var minSplashDone by rememberSaveable { mutableStateOf(false) }
 
     // supabase.start() collects the auth-status stream for the app's lifetime.
     LaunchedEffect(Unit) { supabase.start() }
-    // Warm the emotion-palette cache concurrently with the splash hold — the
+    // Warm the emotion-palette cache concurrently with the launch — the
     // RootView `.task { await palettes.load() }` analog. Path renders with a
     // warm cache; misses fall back to accent.
     LaunchedEffect(Unit) { palettes.load() }
-    LaunchedEffect(Unit) {
-        delay(MIN_SPLASH_MILLIS)
-        minSplashDone = true
-    }
 
     val session = supabase.session
     val isInitializing = supabase.isInitializing
@@ -107,8 +102,8 @@ fun RootScreen() {
     // status delivers a real null→id transition even for already-signed-in users.
     val userId = session?.user?.id
 
-    val canShowAuthedTabs = session != null && !isInitializing && minSplashDone
-    val welcomeContentRevealed = session == null && !isInitializing && minSplashDone
+    val canShowAuthedTabs = session != null && !isInitializing
+    val welcomeContentRevealed = session == null && !isInitializing
 
     LaunchedEffect(userId) {
         if (OnboardingGate.shouldPresent(userId, hasSeenOnboarding)) {
