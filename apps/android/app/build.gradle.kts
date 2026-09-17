@@ -83,7 +83,13 @@ android {
             buildConfigField("boolean", "WOBBLE_ENABLED", "true")
         }
         release {
-            isMinifyEnabled = false
+            // R8 shrink + obfuscate + optimize, and the resource shrinker on top
+            // (#845). Everything this app ships that needs reflection is named in
+            // proguard-rules.pro; everything else relies on the libraries' own
+            // consumer rules. `proguard-android-optimize.txt` is the default file
+            // that leaves the optimization passes on.
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -110,6 +116,27 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+
+    // Android Lint runs in android.yml on every PR (#845), so it has to be a
+    // gate, not a report: warnings are errors and the build aborts. The baseline
+    // freezes what existed when lint was first turned on — new findings fail,
+    // old ones are tracked in the issues that own them. `checkDependencies`
+    // widens the scan past :app (there is only one module today, but the flag
+    // also pulls in the AARs' manifest/resource findings). The SARIF report is
+    // what the workflow uploads to GitHub code scanning.
+    lint {
+        abortOnError = true
+        warningsAsErrors = true
+        baseline = file("lint-baseline.xml")
+        checkDependencies = true
+        sarifReport = true
+        // NewerVersionAvailable resolves the latest published version over the
+        // network, so it goes red on its own schedule — every dependency release
+        // is a new finding the committed baseline cannot have. Dependabot already
+        // owns version bumps here (D2 keeps them isolated commits), so this check
+        // would only ever turn someone else's release into a red PR.
+        disable += "NewerVersionAvailable"
     }
 
     // Compose Preview Screenshot Testing (experimental/alpha). Also flagged in

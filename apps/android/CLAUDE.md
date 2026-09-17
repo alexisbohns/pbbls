@@ -259,6 +259,15 @@ bundled. Android resource filenames must be lowercase
 
 - **ktlint, stock ruleset (D11).** `./gradlew ktlintCheck`; `./gradlew
   ktlintFormat` auto-fixes. No detekt yet.
+- **Android Lint is a gate, not a report (#845).** `abortOnError`,
+  `warningsAsErrors`, `checkDependencies`, and a committed baseline
+  (`app/lint-baseline.xml`, 60 accepted findings) — `./gradlew lint` is green on
+  main and `android.yml` runs it on every PR. A *new* finding fails the PR.
+  Regenerate the baseline with `./gradlew updateLintBaseline` only when a finding
+  is deliberately accepted; never to silence one you introduced. The one check
+  disabled outright is `NewerVersionAvailable` (network-resolved, so every
+  upstream release would be a finding no baseline can hold — Dependabot owns
+  bumps).
 - **JUnit4 + `kotlinx-coroutines-test`, JVM unit tests only.** No Robolectric, no
   instrumented tests. Test pure logic (auth `canSubmit`, week grouping, valence
   mapping, palette parsing, slug resolution) and localization parity.
@@ -278,8 +287,24 @@ bundled. Android resource filenames must be lowercase
   `.github/workflows/android-release.yml` builds a **signed release AAB**
   (`bundleRelease`) and publishes it on every push to `main`, on a PR labelled
   `deploy-beta`, or via manual dispatch. It is separate from `android.yml`, which
-  stays the debug / lint / test / screenshot CI. Full setup + troubleshooting:
+  is the pre-merge gate. Full setup + troubleshooting:
   the [`docs/android-play-deploy.md`](../../docs/android-play-deploy.md) runbook.
+- **The release build is minified (#845).** `isMinifyEnabled` +
+  `isShrinkResources` on `proguard-android-optimize.txt`. `app/proguard-rules.pro`
+  is deliberately two rules long — **check a library's own artifact for a bundled
+  `proguard.txt` / `META-INF/proguard/*.pro` before adding a keep rule here**;
+  Rive, Ktor, kotlinx-serialization, coroutines, Coil and OkHttp all ship their
+  own, and supabase-kt, AndroidSVG and zxing use no reflection at all. A
+  redundant `-keep` is not free: it widens the keep radius and undoes the
+  shrinking. `android.yml` runs an **unsigned `bundleRelease`** on every PR
+  precisely because R8 and `lintVitalRelease` run nowhere else — but it cannot
+  catch reflection R8 strips *silently*, so **adding a library that reflects means
+  smoke-testing a minified build by hand** before merge.
+- **Obfuscated stack traces need the mapping file.** `-keepattributes
+  SourceFile,LineNumberTable` keeps line numbers;
+  `app/build/outputs/mapping/release/mapping.txt` goes to Play with the bundle and
+  is kept as a workflow artifact. A release whose mapping is lost can never have
+  its crashes decoded.
 - **`versionCode` derives from `GITHUB_RUN_NUMBER`** (`build.gradle.kts`) — Play
   requires every upload to strictly increase, so never pin it to a constant.
   Re-running a release run reuses its number, which only matters once a publish
