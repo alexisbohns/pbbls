@@ -30,8 +30,14 @@ leave existing code to the issue that owns it.
 
 The `android` CLI (`android docs search "…"`, `android docs fetch kb://…`) is
 the authoritative reference for any API question neither set answers; prefer
-it to web search. There is no local SDK on the maintainer's machine, so the
-CLI's device and emulator commands are for contributors who have one.
+it to web search. Its device and emulator commands are usable: the maintainer's
+machine **does** have a JDK, an Android SDK and AVDs (this file previously said
+it did not — corrected 2026-09-17 after building, installing and running a
+release APK on the `oxymore-eclipse` Pixel 7 AVD). `ANDROID_HOME` is not exported
+by default, so set it (`export ANDROID_HOME=$HOME/Library/Android/sdk`) or
+`scripts/gradle-if-sdk.sh` silently no-ops and `npm run build --workspace=@pbbls/android`
+looks green having done nothing. CI remains the authority; local is now the fast
+first check, and the only way to smoke-test a minified build by hand.
 
 ### This app's stack
 
