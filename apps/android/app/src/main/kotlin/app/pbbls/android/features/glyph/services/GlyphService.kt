@@ -27,7 +27,7 @@ class GlyphService(
     private val supabase: SupabaseService,
 ) {
     /**
-     * Every glyph the user may attach: own + system (`user_id is null`) +
+     * Every glyph the user may attach: own + system (`is_system`, #872) +
      * marketplace-entitled (#562) — the same set the server-side
      * `can_use_glyph` guard accepts. The `glyphs` RLS SELECT also exposes
      * approved community submissions (browsable, but not owned), so the bare
@@ -42,10 +42,10 @@ class GlyphService(
                 async {
                     supabase.client
                         .from("glyphs")
-                        .select(Columns.raw("id, name, strokes, view_box, user_id")) {
+                        .select(Columns.raw("id, name, strokes, view_box, user_id, is_system")) {
                             order("created_at", Order.DESCENDING)
                         }.decodeList<Glyph>()
-                        .filter { it.userId == null || it.userId == me }
+                        .let { attachable(it, me) }
                 }
             // glyph_entitlements is RLS-scoped to the caller, so no client
             // filter is needed; entitlement created_at = newest acquisition
@@ -54,7 +54,7 @@ class GlyphService(
                 async {
                     supabase.client
                         .from("glyph_entitlements")
-                        .select(Columns.raw("glyphs(id, name, strokes, view_box, user_id)")) {
+                        .select(Columns.raw("glyphs(id, name, strokes, view_box, user_id, is_system)")) {
                             order("created_at", Order.DESCENDING)
                         }.decodeList<EntitlementRow>()
                         .map { it.glyph }
@@ -85,7 +85,7 @@ class GlyphService(
                     put("name", normalizedName(name))
                 },
             ) {
-                select(Columns.raw("id, name, strokes, view_box, user_id"))
+                select(Columns.raw("id, name, strokes, view_box, user_id, is_system"))
             }.decodeSingle<Glyph>()
     }
 
@@ -100,7 +100,7 @@ class GlyphService(
                 buildJsonObject { put("name", normalizedName(name)) },
             ) {
                 filter { eq("id", glyphId) }
-                select(Columns.raw("id, name, strokes, view_box, user_id"))
+                select(Columns.raw("id, name, strokes, view_box, user_id, is_system"))
             }.decodeSingle<Glyph>()
 
     companion object {
@@ -118,6 +118,21 @@ class GlyphService(
             val seen = base.mapTo(mutableSetOf()) { it.id }
             return base + entitled.filter { seen.add(it.id) }
         }
+
+        /**
+         * Own ∪ system — the client half of `can_use_glyph`'s accepted set
+         * (entitled glyphs arrive separately, through [withEntitled]).
+         *
+         * Keyed on [Glyph.isSystem], never on `userId == null` (#872): an
+         * ownerless glyph is a glyph whose creator deleted their account, and
+         * if it was ever sold the buyers' entitlements are the only claim on
+         * it. Offering it here would let the server reject the attach with
+         * SQLSTATE 42501 at best, and hand out paid artwork at worst.
+         */
+        fun attachable(
+            rows: List<Glyph>,
+            me: String?,
+        ): List<Glyph> = rows.filter { it.isSystem || (me != null && it.userId == me) }
 
         /** iOS name normalization: trim; empty → null (JVM-tested). */
         fun normalizedName(name: String?): String? = name?.trim()?.takeIf { it.isNotEmpty() }

@@ -969,6 +969,7 @@ export type Database = {
           created_at: string
           id: string
           is_custom: boolean | null
+          is_system: boolean
           name: string | null
           strokes: Json
           updated_at: string
@@ -979,6 +980,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_custom?: boolean | null
+          is_system?: boolean
           name?: string | null
           strokes?: Json
           updated_at?: string
@@ -989,6 +991,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_custom?: boolean | null
+          is_system?: boolean
           name?: string | null
           strokes?: Json
           updated_at?: string

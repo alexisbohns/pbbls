@@ -8,17 +8,19 @@
  * achievement unlocks), then
  * deletes the seller through the real delete-account edge function and asserts
  * the roadmap §6 bar: every seller row gone, the buyer's glyph still renders
- * (user_id = null + entitlement + delisted-but-approved submission), the
- * storage prefix is empty, the auth user is gone, and a purge_account re-run
- * converges to zero counts. The buyer is then deleted through the same edge
- * path (dogfoods the buyer-side purge: own entitlement before the purchase
- * karma_event it references).
+ * AND stays paid (user_id = null, is_system false, entitlement intact,
+ * delisted-but-approved submission), the storage prefix is empty, the auth
+ * user is gone, and a purge_account re-run converges to zero counts. The
+ * buyer is then deleted through the same edge path (dogfoods the buyer-side
+ * purge: own entitlement before the purchase karma_event it references).
  *
  * Run:
  *   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... SUPABASE_ANON_KEY=... \
  *     deno run --allow-env --allow-net packages/supabase/scripts/verify-account-purge.ts
  *
- * Safety: every statement is scoped to the two user ids minted by THIS run.
+ * Safety: every statement is scoped to the four user ids minted by THIS run
+ * (seller, buyer, moderator, stranger) — nothing reads or writes a row
+ * belonging to any other account.
  * Cleanup runs even on failure (service-role purge + deleteUser fallback).
  * Exits non-zero if any assertion fails.
  *
@@ -27,10 +29,12 @@
  *
  * STANDING RULE (#870): a fixture row that DELIBERATELY survives the purge is
  * this script's to remove — nothing else will. The sold glyph is the one such
- * row today: purge_account anonymizes it to user_id = null, which is the
- * definition of a system glyph, so every run used to hand the shared project
- * one more glyph offered to every user. Seed shapes the clients actually
- * decode, and clean up what outlives the purge.
+ * row today: purge_account anonymizes it to user_id = null. That used to be the
+ * definition of a system glyph, so every run handed the shared project one more
+ * glyph offered to every user for free (#872 — ownerless and system are now
+ * separate, see glyphs.is_system). The fixture still outlives the purge by
+ * design, so this script still has to remove it. Seed shapes the clients
+ * actually decode, and clean up what outlives the purge.
  *
  * It also carries the content_reports assertions that verify-content-reports.ts
  * structurally cannot (#831): that harness is anon-only, so it can neither read
@@ -137,9 +141,14 @@ const buyerEmail = `purge-test-buyer-${runId}@example.test`;
 let sellerId: string | null = null;
 let buyerId: string | null = null;
 let moderatorId: string | null = null;
+/** An ordinary third user: holds no entitlement on the sold glyph and never
+ *  did. The proof that the purge did not turn paid artwork into a free seed
+ *  (#872) has to come from someone with no claim on it at all. */
+let strangerId: string | null = null;
 /** The sold glyph deliberately outlives its purged creator, so nothing else in
- *  this script will ever remove it — this run has to. Left behind it becomes an
- *  ownerless (= system) glyph on the shared project (#870). */
+ *  this script will ever remove it — this run has to. Left behind it is a stray
+ *  ownerless glyph on the shared project (#870); since #872 ownerless no longer
+ *  means system, so it is inert rather than offered to everyone. */
 let soldGlyphId: string | null = null;
 
 /** Last-resort cleanup so a failed run never leaves residue. */
@@ -181,8 +190,13 @@ try {
   // -------------------------------------------------------------------------
   // 2. Seed the seller with every entity type.
   // -------------------------------------------------------------------------
+  // The predicate is is_system, NOT a null owner (#872). They stopped being the
+  // same thing: a stray ownerless row — exactly what a crashed earlier run of
+  // this harness leaves behind, which is why the soldGlyphId cleanup exists —
+  // is no longer a usable glyph, so the souls insert below would trip
+  // enforce_soul_glyph_usable and abort the run before it asserted anything.
   const { data: systemGlyph } = await admin
-    .from("glyphs").select("id").is("user_id", null).limit(1).single();
+    .from("glyphs").select("id").eq("is_system", true).limit(1).single();
   const { data: emotion } = await admin.from("emotions").select("id").limit(1).single();
   const { data: cardType } = await admin.from("card_types").select("id").limit(1).single();
   const { data: domain } = await admin.from("domains").select("id").limit(1).single();
@@ -506,6 +520,19 @@ try {
   );
   moderatorId = moderator.id;
 
+  // An ordinary third user for the #872 assertions below. Signed up BEFORE the
+  // purge so the sold glyph's fate is the only variable.
+  const stranger = createAnonClient();
+  const { data: strangerAuth, error: strangerErr } = await stranger.auth.signUp({
+    email: `purge-test-stranger-${runId}@example.test`,
+    password,
+  });
+  if (strangerErr || !strangerAuth.user) throw new Error(`signUp stranger: ${strangerErr?.message}`);
+  strangerId = strangerAuth.user.id;
+  // `strangerId` is `string | null` for the cleanup block; the RPC args below
+  // need a plain string, and a non-null local beats a type assertion.
+  const strangerUserId = strangerAuth.user.id;
+
   const { data: queue, error: queueErr } = await moderator.client
     .rpc("admin_list_content_reports", { p_status: "open" });
   const queueRows = (queue ?? []) as Array<Record<string, unknown>>;
@@ -637,7 +664,7 @@ try {
   }
 
   const { data: keptGlyph } = await admin
-    .from("glyphs").select("user_id, strokes, name").eq("id", soldGlyph.id).maybeSingle();
+    .from("glyphs").select("user_id, strokes, name, is_system").eq("id", soldGlyph.id).maybeSingle();
   check("sold glyph still exists", !!keptGlyph);
   check("sold glyph is anonymized (user_id null)", keptGlyph?.user_id === null);
   check("sold glyph strokes intact (buyer's glyph still renders)",
@@ -650,6 +677,46 @@ try {
       keptGlyph.strokes.every((s) =>
         typeof s?.d === "string" && typeof s?.width === "number"),
     JSON.stringify(keptGlyph?.strokes));
+
+  // #872: keeping the row is right — the buyer paid for it. Turning it into a
+  // SYSTEM glyph is not. Before the is_system marker, `user_id is null` was
+  // both "first-party seed" and "creator deleted their account", so
+  // can_use_glyph handed a stranger free use of artwork someone bought.
+  //
+  // Anonymized is not system. Counting rows cannot see this: the glyph exists,
+  // renders, and the entitlement row is intact in every version of this bug.
+  check("anonymized sold glyph is NOT marked is_system",
+    keptGlyph?.is_system === false, JSON.stringify(keptGlyph?.is_system));
+
+  const { data: strangerMay, error: strangerMayErr } = await stranger
+    .rpc("can_use_glyph", { p_glyph_id: soldGlyph.id, p_user: strangerUserId });
+  check("a stranger may NOT use the purged seller's sold glyph",
+    !strangerMayErr && strangerMay === false,
+    strangerMayErr ? strangerMayErr.message : String(strangerMay));
+
+  // The RPC is the helper; this is the path a real client takes.
+  const { error: strangerPebbleErr } = await stranger.rpc("create_pebble", {
+    payload: {
+      name: `purge-test stranger steal ${runId}`,
+      happened_at: new Date().toISOString(),
+      intensity: 2,
+      positiveness: 1,
+      visibility: "private",
+      emotion_id: emotion.id,
+      glyph_id: soldGlyph.id,
+    },
+  });
+  check("create_pebble rejects the stranger attaching it",
+    strangerPebbleErr !== null &&
+      strangerPebbleErr.message.includes("Glyph not usable by user"),
+    strangerPebbleErr?.message ?? "the pebble was created");
+
+  // …and the entitlement still MEANS something: the buyer keeps their access.
+  const { data: buyerMay, error: buyerMayErr } = await buyer
+    .rpc("can_use_glyph", { p_glyph_id: soldGlyph.id, p_user: buyerId });
+  check("the buyer who paid may still use it",
+    !buyerMayErr && buyerMay === true,
+    buyerMayErr ? buyerMayErr.message : String(buyerMay));
 
   const { data: keptSub } = await admin
     .from("glyph_submissions").select("status, listed, submitter_id")
@@ -718,11 +785,13 @@ try {
     await forceCleanup(sellerId, "seller");
     await forceCleanup(buyerId, "buyer");
     if (moderatorId) await forceCleanup(moderatorId, "moderator");
+    if (strangerId) await forceCleanup(strangerId, "stranger");
     // purge_account keeps the sold glyph on purpose (buyers hold entitlements)
-    // and anonymizes it to user_id = null — which makes it a system glyph,
-    // offered to every user on every surface that lists them. The fixture has
-    // served its purpose by here, so remove it; its glyph_submissions row
-    // cascades. #870.
+    // and anonymizes it to user_id = null. Ownerless no longer means system
+    // (#872), so what is left behind is an inert stray rather than a free
+    // glyph — but the fixture still deliberately outlives the purge, and
+    // nothing else will ever remove it. The fixture has served its purpose by
+    // here, so remove it; its glyph_submissions row cascades. #870.
     if (soldGlyphId) {
       const { error } = await admin.from("glyphs").delete().eq("id", soldGlyphId);
       if (error) console.error(`sold-glyph cleanup failed (${soldGlyphId}): ${error.message}`);
