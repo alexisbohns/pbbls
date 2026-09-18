@@ -591,7 +591,12 @@ end;
 $$;
 ```
 
-**Before writing this file**, confirm the `admin_set_achievement_glyph` signature and body against `packages/supabase/supabase/migrations/20260730150000_admin_achievement_management.sql` (read from the `create or replace function public.admin_set_achievement_glyph` line to its closing `$$;`). The body above is transcribed from it; if the live one differs in any line other than the insert, carry that difference forward rather than the version here.
+Both re-emitted bodies were diffed against their sources while writing this plan and are identical apart from the `is_system` addition:
+
+- `admin_set_domain_glyph` ← `20260731090100_fix_admin_set_domain_glyph.sql` (the latest re-emission — **not** `20260703000000`, which still carries the dropped `shape_id`)
+- `admin_set_achievement_glyph` ← `20260730150000_admin_achievement_management.sql`
+
+Re-run that diff anyway before pushing (`awk '/create or replace function public.admin_set_achievement_glyph/,/^\$\$;$/' <file>`) — a re-emission that silently drops a line is exactly the failure mode `CLAUDE.md` warns about, and it produces no git conflict.
 
 - [ ] **Step 2: Push the migration**
 
