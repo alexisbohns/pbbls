@@ -41,6 +41,8 @@ data class MineGlyphRow(
     val viewBox: String,
     @SerialName("user_id")
     val userId: String? = null,
+    @SerialName("is_system")
+    val isSystem: Boolean = false,
     @SerialName("created_at")
     @Serializable(with = OffsetDateTimeSerializer::class)
     val createdAt: OffsetDateTime? = null,
@@ -58,7 +60,7 @@ data class MineGlyphRow(
     val listedPrice: Int
         get() = submissions.firstOrNull { it.status == "approved" && it.listed }?.price ?: 0
 
-    fun toGlyph(): Glyph = Glyph(id = id, name = name, strokes = strokes, viewBox = viewBox, userId = userId)
+    fun toGlyph(): Glyph = Glyph(id = id, name = name, strokes = strokes, viewBox = viewBox, userId = userId, isSystem = isSystem)
 }
 
 /** Wire row for the Owned query — `glyph_entitlements` with the joined glyph. */

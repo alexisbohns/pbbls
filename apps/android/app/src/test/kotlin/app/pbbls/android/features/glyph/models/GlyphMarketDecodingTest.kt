@@ -53,6 +53,27 @@ class GlyphMarketDecodingTest {
     }
 
     @Test
+    fun `mine row decodes is_system and defaults it to false when absent`() {
+        val flagged =
+            json.decodeFromString<MineGlyphRow>(
+                """
+                { "id": "g1", "strokes": [], "view_box": "0 0 200 200",
+                  "user_id": null, "is_system": true }
+                """.trimIndent(),
+            )
+        assertTrue(flagged.isSystem)
+        assertTrue(flagged.toGlyph().isSystem)
+
+        // Column-restricted embeds (the pebble-detail
+        // `glyphs(id, name, strokes, view_box)` select) omit the key entirely.
+        val absent =
+            json.decodeFromString<MineGlyphRow>(
+                """{ "id": "g2", "strokes": [], "view_box": "0 0 200 200" }""",
+            )
+        assertEquals(false, absent.isSystem)
+    }
+
+    @Test
     fun `owned row nests the glyph under glyphs with both created_at levels`() {
         val row =
             json.decodeFromString<OwnedGlyphRow>(

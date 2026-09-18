@@ -29,7 +29,8 @@ class GlyphMarketService(
      * The Mine tab: the caller's creations (newest first, price from the
      * embedded approved+listed submission) THEN system glyphs — Android keeps
      * system glyphs pickable (design D7, a named deviation from iOS's
-     * `eq(user_id, me)` which silently drops them).
+     * `eq(user_id, me)` which silently drops them) — membership is
+     * `is_system`, not a null owner (#872).
      */
     suspend fun listMine(): List<GlyphGridItem> {
         val me = requireUserId()
@@ -38,14 +39,13 @@ class GlyphMarketService(
                 .from("glyphs")
                 .select(
                     Columns.raw(
-                        "id, name, strokes, view_box, user_id, created_at, glyph_submissions(price, status, listed)",
+                        "id, name, strokes, view_box, user_id, is_system, created_at, " +
+                            "glyph_submissions(price, status, listed)",
                     ),
                 ) {
                     order("created_at", Order.DESCENDING)
                 }.decodeList<MineGlyphRow>()
-        val (own, rest) = rows.partition { it.userId == me }
-        val system = rest.filter { it.userId == null }
-        return (own + system).map { row ->
+        return mineTab(rows, me).map { row ->
             GlyphGridItem(
                 glyph = row.toGlyph(),
                 price = row.listedPrice,
@@ -61,7 +61,9 @@ class GlyphMarketService(
         supabase.client
             .from("glyph_entitlements")
             .select(
-                Columns.raw("price_paid, created_at, glyphs(id, name, strokes, view_box, user_id, created_at)"),
+                Columns.raw(
+                    "price_paid, created_at, glyphs(id, name, strokes, view_box, user_id, is_system, created_at)",
+                ),
             ) {
                 order("created_at", Order.DESCENDING)
             }.decodeList<OwnedGlyphRow>()
@@ -116,6 +118,26 @@ class GlyphMarketService(
     private fun requireUserId(): String =
         supabase.session?.user?.id
             ?: throw IllegalStateException("glyph market without session")
+
+    companion object {
+        /**
+         * The Mine tab's membership and order: the caller's own creations
+         * (server order, newest first) then system glyphs — design D7, the
+         * named deviation from iOS's `eq(user_id, me)`.
+         *
+         * Keyed on [MineGlyphRow.isSystem], never on `userId == null` (#872):
+         * `purge_account` anonymizes a SOLD glyph when its creator deletes
+         * their account, and that row must not appear in a stranger's Mine tab
+         * as a free first-party seed.
+         */
+        fun mineTab(
+            rows: List<MineGlyphRow>,
+            me: String,
+        ): List<MineGlyphRow> {
+            val (own, rest) = rows.partition { it.userId == me }
+            return own + rest.filter { it.isSystem }
+        }
+    }
 }
 
 /**
