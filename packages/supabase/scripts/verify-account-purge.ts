@@ -25,6 +25,13 @@
  * STANDING RULE (roadmap §M46): when a later milestone adds a user-owned
  * table to purge_account, extend the seed + zero-row assertions here too.
  *
+ * STANDING RULE (#870): a fixture row that DELIBERATELY survives the purge is
+ * this script's to remove — nothing else will. The sold glyph is the one such
+ * row today: purge_account anonymizes it to user_id = null, which is the
+ * definition of a system glyph, so every run used to hand the shared project
+ * one more glyph offered to every user. Seed shapes the clients actually
+ * decode, and clean up what outlives the purge.
+ *
  * It also carries the content_reports assertions that verify-content-reports.ts
  * structurally cannot (#831): that harness is anon-only, so it can neither read
  * the table back nor mint an admin past profiles_privileged_guard. Here, the
@@ -130,6 +137,10 @@ const buyerEmail = `purge-test-buyer-${runId}@example.test`;
 let sellerId: string | null = null;
 let buyerId: string | null = null;
 let moderatorId: string | null = null;
+/** The sold glyph deliberately outlives its purged creator, so nothing else in
+ *  this script will ever remove it — this run has to. Left behind it becomes an
+ *  ownerless (= system) glyph on the shared project (#870). */
+let soldGlyphId: string | null = null;
 
 /** Last-resort cleanup so a failed run never leaves residue. */
 async function forceCleanup(userId: string | null, label: string) {
@@ -179,12 +190,17 @@ try {
     throw new Error("reference data missing (system glyph / emotion / card type / domain)");
   }
 
-  const strokes = [{ points: [[20, 20], [180, 180]] }];
+  // The stroke shape every client requires — `d` (SVG path) plus `width`, the
+  // pair android GlyphStroke.kt, ios GlyphStroke.swift and web MarkStroke all
+  // declare non-optional. A fixture no client can decode is not testing the
+  // contract it claims to, and `glyphs_strokes_shape` now rejects it (#870).
+  const strokes = [{ d: "M20,20 L180,180", width: 6 }];
   const { data: soldGlyph, error: sgErr } = await admin
     .from("glyphs")
     .insert({ user_id: sellerId, name: `purge-test sold ${runId}`, strokes, view_box: "0 0 200 200" })
     .select("id").single();
   if (sgErr || !soldGlyph) throw new Error(`insert sold glyph: ${sgErr?.message}`);
+  soldGlyphId = soldGlyph.id;
 
   const { data: unsoldGlyph, error: ugErr } = await admin
     .from("glyphs")
@@ -626,6 +642,14 @@ try {
   check("sold glyph is anonymized (user_id null)", keptGlyph?.user_id === null);
   check("sold glyph strokes intact (buyer's glyph still renders)",
     Array.isArray(keptGlyph?.strokes) && keptGlyph.strokes.length === strokes.length);
+  // Counting rows cannot see a payload no client can decode, which is exactly
+  // how six undecodable glyphs reached every Android user while this harness
+  // stayed green (#870). "Still renders" has to mean "still decodes".
+  check("sold glyph strokes still decode on every client ({d, width})",
+    Array.isArray(keptGlyph?.strokes) &&
+      keptGlyph.strokes.every((s) =>
+        typeof s?.d === "string" && typeof s?.width === "number"),
+    JSON.stringify(keptGlyph?.strokes));
 
   const { data: keptSub } = await admin
     .from("glyph_submissions").select("status, listed, submitter_id")
@@ -694,6 +718,15 @@ try {
     await forceCleanup(sellerId, "seller");
     await forceCleanup(buyerId, "buyer");
     if (moderatorId) await forceCleanup(moderatorId, "moderator");
+    // purge_account keeps the sold glyph on purpose (buyers hold entitlements)
+    // and anonymizes it to user_id = null — which makes it a system glyph,
+    // offered to every user on every surface that lists them. The fixture has
+    // served its purpose by here, so remove it; its glyph_submissions row
+    // cascades. #870.
+    if (soldGlyphId) {
+      const { error } = await admin.from("glyphs").delete().eq("id", soldGlyphId);
+      if (error) console.error(`sold-glyph cleanup failed (${soldGlyphId}): ${error.message}`);
+    }
   } catch (err) {
     console.error(`cleanup failed — remove purge-test-* users manually: ${err}`);
   }
