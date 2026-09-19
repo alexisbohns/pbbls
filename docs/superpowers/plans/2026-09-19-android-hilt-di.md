@@ -2116,8 +2116,11 @@ grep -rn "Dispatchers\." app/src/main/kotlin
 # expect: BUILD SUCCESSFUL
 
 # 4. Decision-log entry superseding D4
-grep -n "supersedes M38 D4" ../../docs/decisions/log.md
-# expect: the 2026-09-19 heading
+grep -n "Hilt is the Android DI container" ../../docs/decisions/log.md
+# expect: the 2026-09-19 heading. NOTE: the log's house template is
+# Status/Scope/Context/Decision/Why/Consequences/Supersedes/Refs with
+# `Status: taken` — the entry was written to that, not to the prose format
+# this plan originally drafted.
 ```
 
 - [ ] **Step 2: Open the Part 3 PR**
