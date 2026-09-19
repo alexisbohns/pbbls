@@ -1,6 +1,5 @@
 package app.pbbls.android.features.path.record
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -26,52 +25,24 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
-import app.pbbls.android.features.karma.KarmaReason
-import app.pbbls.android.features.karma.LocalKarmaNotificationService
 import app.pbbls.android.features.path.create.pickers.rememberGlyphPickerState
-import app.pbbls.android.features.path.models.ComposePebbleResponse
-import app.pbbls.android.features.path.models.KnownDraftIds
-import app.pbbls.android.features.path.models.PebbleDraftPayload
-import app.pbbls.android.features.path.models.PebbleSnapPayload
 import app.pbbls.android.features.path.models.Valence
-import app.pbbls.android.features.path.models.isSavableAsDraft
 import app.pbbls.android.features.path.record.steps.RecordSuccessStep
-import app.pbbls.android.features.path.valence.LocalValencePrewarmer
-import app.pbbls.android.features.pebblemedia.LocalSnapProcessor
-import app.pbbls.android.features.pebblemedia.LocalSnapWriteRepository
-import app.pbbls.android.features.pebblemedia.SnapUploadCoordinator
-import app.pbbls.android.services.ComposeResult
-import app.pbbls.android.services.ComposerDraftCoordinator
-import app.pbbls.android.services.LocalAchievementsService
-import app.pbbls.android.services.LocalComposerSnapshotStore
 import app.pbbls.android.services.LocalEmotionPaletteService
-import app.pbbls.android.services.LocalPebbleDraftsService
-import app.pbbls.android.services.LocalPebbleWriteService
 import app.pbbls.android.services.LocalReferenceDataService
-import app.pbbls.android.services.LocalSupabaseService
 import app.pbbls.android.services.PebbleDraftRecord
 import app.pbbls.android.services.rememberTapHaptics
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import java.time.OffsetDateTime
-
-private const val TAG = "record-flow"
-
-/** Long enough that typing does not thrash SharedPreferences (iOS parity). */
-private const val AUTOSAVE_DEBOUNCE_MS = 800L
+import app.pbbls.android.ui.ObserveUiEffects
 
 /** Enough for the slide to read as one motion without holding the user up. */
 private const val STEP_TRANSITION_MS = 280
@@ -81,9 +52,10 @@ private const val STEP_TRANSITION_MS = 280
  * default way to record a pebble on Android. `CreatePebbleScreen` stays in the
  * tree and is reachable by long-pressing the same "New pebble" entry (D1).
  *
- * Owns the coordinators the flow needs and the orchestration between them;
- * everything about *the flow itself* — gating, back, skip labels, resume,
- * haptics — lives on [RecordFlowModel].
+ * Since #849 this layer is the *view*: the coordinators, the writes and the
+ * draft lifecycle live in [RecordFlowViewModel], and what is left here is the
+ * three things that genuinely need a composition — the photo picker (an
+ * Activity result contract), the haptics (they need a `View`), and the layout.
  *
  * Self-applies `safeDrawingPadding()` + `imePadding()`, so the caller composes
  * it in an edge-to-edge (unpadded) slot, sibling to the detail cover in
@@ -100,226 +72,53 @@ fun RecordFlowScreen(
     modifier: Modifier = Modifier,
     resuming: PebbleDraftRecord? = null,
     onDraftSaved: () -> Unit = onDismiss,
+    viewModel: RecordFlowViewModel = hiltViewModel(),
 ) {
-    val writeService = LocalPebbleWriteService.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val model = viewModel.machine()
     val refs = LocalReferenceDataService.current
-    val karma = LocalKarmaNotificationService.current
-    val achievements = LocalAchievementsService.current
     val palettes = LocalEmotionPaletteService.current
-    val supabase = LocalSupabaseService.current
-    val draftsService = LocalPebbleDraftsService.current
-    val snapshots = LocalComposerSnapshotStore.current
-    val snapProcessor = LocalSnapProcessor.current
-    val valencePrewarmer = LocalValencePrewarmer.current
-    val context = LocalContext.current
     val system = PebblesTheme.colors.system
     val accent = PebblesTheme.colors.accent
-    val scope = rememberCoroutineScope()
 
     val haptic = rememberTapHaptics()
-    val model = remember(haptic) { RecordFlowModel(haptic = haptic) }
     val glyphPickerState = rememberGlyphPickerState()
-    val drafts = remember(draftsService, snapshots) { ComposerDraftCoordinator(draftsService, snapshots) }
 
-    val snapRepo = LocalSnapWriteRepository.current
-    // Form-scoped (M42 D6): an in-flight upload dies with this cover. The
-    // repository behind it is a stateless singleton; the coordinator holding
-    // the in-flight state is what must not outlive the form.
-    val snaps = remember { SnapUploadCoordinator(repo = snapRepo) }
-    var captureDate by remember { mutableStateOf<OffsetDateTime?>(null) }
-    var isCloseConfirmPresented by remember { mutableStateOf(false) }
+    // The ViewModel is activity-scoped (the cover is a conditionally-composed
+    // child, not a destination — #852), so opening is explicit. `startFlow`
+    // guards itself, which is what keeps a rotation from re-hydrating over what
+    // the user has typed since.
+    LaunchedEffect(resuming?.id, refs.hasLoaded) { viewModel.startFlow(resuming) }
 
-    val userId = supabase.session?.user?.id
+    // Haptics come back out as effects because a ViewModel has no View to buzz;
+    // every interaction still routes through RecordFlowModel (M58 D4).
+    ObserveUiEffects(viewModel.effects) { effect ->
+        when (effect) {
+            is RecordFlowEffect.Haptic -> haptic(effect.flavor)
+            is RecordFlowEffect.Published -> onPublished(effect.pebbleId)
+            RecordFlowEffect.Dismiss -> onDismiss()
+            RecordFlowEffect.DraftSaved -> onDraftSaved()
+        }
+    }
 
     val photoPicker =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-            if (uri != null && userId != null) {
-                scope.launch {
-                    try {
-                        // EXIF first: `ImagePipeline` re-encodes with
-                        // `Bitmap.compress`, which writes no metadata at all, so
-                        // the capture date is gone by the time bytes exist (D7).
-                        val picked = snapProcessor.captureDate(context, uri)
-                        captureDate = picked
-                        model.applyCaptureDate(picked)
-                        val processed = snapProcessor.process(context, uri)
-                        snaps.attach(processed, userId)
-                    } catch (e: Exception) {
-                        // iOS parity: a failed pick/decode logs and drops silently.
-                        Log.e(TAG, "photo pick processing failed", e)
-                    }
-                }
-            }
+            uri?.let(viewModel::onPhotoPicked)
         }
 
-    val knownIds =
-        KnownDraftIds(
-            soulIds = refs.souls.map { it.id }.toSet(),
-            collectionIds = refs.collections.map { it.id }.toSet(),
-        )
+    val flow = uiState.flow
+    val snapBlockedMessage = uiState.snapBlockedMessageRes?.let { stringResource(it) }
+    val publishError = flow.publishErrorRes?.let { stringResource(it) }
 
-    suspend fun verifyGlyph(glyphId: String) {
-        val id = supabase.session?.user?.id ?: return
-        when (drafts.verifyGlyph(glyphId, id)) {
-            ComposerDraftCoordinator.GlyphVerdict.Unusable -> model.clearGlyph()
-            ComposerDraftCoordinator.GlyphVerdict.Usable,
-            ComposerDraftCoordinator.GlyphVerdict.Unknown,
-            -> Unit
-        }
-    }
-
-    // The valence fan wobbles eighteen assets the first time it draws, which is
-    // a visible hitch on the main thread. Two steps of runway is plenty, and the
-    // caches are process-wide, so a second flow pays nothing.
-    LaunchedEffect(Unit) {
-        valencePrewarmer.prewarm(context)
-    }
-
-    // Hydrate-or-offer-restore, gated on refs.hasLoaded (#647): hydrating before
-    // the souls / collections caches arrive would sanitize against empty sets and
-    // silently drop every soul and collection. Re-keyed on hasLoaded because the
-    // first composition may run before the reference fetch settles; the
-    // coordinator only ever decides once.
-    LaunchedEffect(resuming?.id, refs.hasLoaded) {
-        val decision = drafts.hydrate(resuming, refs.hasLoaded)
-        if (decision is ComposerDraftCoordinator.Decision.Resume) {
-            model.resume(decision.payload, knownIds)
-            decision.payload.existingSnap?.let {
-                snaps.seedExisting(it)
-                model.hasSnap = true
-            }
-            model.draft.glyphId?.let { verifyGlyph(it) }
-        }
-    }
-
-    // The photo step's Skip / Done label reads off the model, so the upload
-    // coordinator's state is mirrored onto it rather than the model owning media.
-    LaunchedEffect(snaps.formSnap) { model.hasSnap = snaps.formSnap != null }
-
-    val currentPayload = PebbleDraftPayload.from(model.draft, snaps.formSnap, userId)
-    LaunchedEffect(currentPayload, drafts.isRestorePromptPresented) {
-        // Held off while the restore prompt is up so the pending answer is not
-        // overwritten before it is given.
-        if (drafts.isRestorePromptPresented || currentPayload.isEmpty) return@LaunchedEffect
-        drafts.stage(currentPayload)
-        delay(AUTOSAVE_DEBOUNCE_MS)
-        drafts.flush()
-    }
-
-    /** Non-null while the attached photo blocks publishing — the two rules the sheet enforces. */
-    val snapBlockedMessage =
-        when {
-            snaps.isUploading -> stringResource(R.string.pebble_save_error_photo_uploading)
-            snaps.hasFailed -> stringResource(R.string.pebble_save_error_photo_failed)
-            else -> null
-        }
-    val publishError = model.publishErrorRes?.let { stringResource(it) }
-
-    fun cancelAndCleanup() {
-        scope.launch {
-            userId?.let { snaps.cancelAndCleanup(it) }
-            drafts.discardSnapshot()
-            onDismiss()
-        }
-    }
-
-    /** ✕ only asks when there is something to keep (D9). */
-    fun handleClose() {
-        if (model.isPublishing) return
-        if (model.draft.isSavableAsDraft(snaps.formSnap, userId)) {
-            isCloseConfirmPresented = true
-        } else {
-            cancelAndCleanup()
-        }
-    }
-
-    fun saveAsDraftAndClose() {
-        val id = userId
-        if (id == null) {
-            Log.e(TAG, "save draft: no current user id")
-            model.fail(R.string.record_signed_out_error)
-            return
-        }
-        scope.launch {
-            // Deliberately no snap cleanup: the draft references that snap.
-            val error = drafts.saveAsDraft(PebbleDraftPayload.from(model.draft, snaps.formSnap, id), id)
-            if (error != null) model.fail(error) else onDraftSaved()
-        }
-    }
-
-    fun publish() {
-        val id = userId
-        if (id == null) {
-            Log.e(TAG, "publish: no current user id")
-            model.fail(R.string.record_signed_out_error)
-            return
-        }
-        // Snap gates (M42): distinct copy per state, checked before the request.
-        if (snaps.isUploading) {
-            model.fail(R.string.pebble_save_error_photo_uploading)
-            return
-        }
-        if (snaps.hasFailed) {
-            model.fail(R.string.pebble_save_error_photo_failed)
-            return
-        }
-        scope.launch {
-            model.beginPublish()
-            val snapPayload =
-                snaps.pendingSnapForPayload()?.let { snap ->
-                    listOf(PebbleSnapPayload(snap.id, snap.storagePrefix(id), 0))
-                }
-            when (val result = writeService.create(model.draft, snapPayload)) {
-                is ComposeResult.Success -> {
-                    // The success step shows the amount, so the capsule would be
-                    // redundant (D10).
-                    karma.notifyEarned(
-                        result.response.karmaDelta ?: 0,
-                        KarmaReason.PEBBLE_CREATED,
-                        presentsCapsule = false,
-                    )
-                    achievements.fireCheck()
-                    drafts.consumeAfterPublish()
-                    model.succeed(result.response)
-                    // Reload the Path behind the cover so it is fresh on exit.
-                    onPublished(result.response.pebbleId)
-                }
-                is ComposeResult.SoftSuccess -> {
-                    // The pebble exists but the compose step failed, so there is
-                    // no render and no karma amount to show — the success step
-                    // degrades to the name alone rather than blocking (D10).
-                    achievements.fireCheck()
-                    drafts.consumeAfterPublish()
-                    model.succeed(ComposePebbleResponse(pebbleId = result.pebbleId))
-                    onPublished(result.pebbleId)
-                }
-                is ComposeResult.Failure -> {
-                    // A hard failure never reaches the success step: the flow
-                    // stays on privacy so ✕ → Save as draft is still a way out.
-                    model.fail(result.messageRes)
-                    snaps.handleSaveFailure(id)
-                }
-            }
-        }
-    }
-
-    // System back mirrors the chrome: unwind an open glyph swap first, then step
-    // backwards, and only ask to leave from the first step.
+    // System back mirrors the chrome: unwind an open glyph swap first (that
+    // state belongs to the picker, not the flow), then let the flow decide.
     //
     // Always enabled, never conditional: a disabled handler lets back fall
     // through to whatever hosts the cover, so "back does nothing here" has to be
     // an explicit branch rather than an absent handler. That is also why the
     // terminal step handles it — it has no back chevron, but the system button
     // exists regardless and has to mean "leave", not "exit the app".
-    BackHandler {
-        when {
-            model.isPublishing -> Unit
-            model.step == RecordStep.SUCCESS -> onDismiss()
-            glyphPickerState.unwind() -> Unit
-            model.step.previous != null -> model.back()
-            else -> handleClose()
-        }
-    }
+    BackHandler { viewModel.onSystemBack(unwindGlyphPicker = glyphPickerState::unwind) }
 
     Column(
         modifier =
@@ -329,12 +128,16 @@ fun RecordFlowScreen(
                 .safeDrawingPadding()
                 .imePadding(),
     ) {
-        if (model.step != RecordStep.SUCCESS) {
-            RecordFlowChrome(step = model.step, onBack = { model.back() }, onClose = { handleClose() })
+        if (flow.step != RecordStep.SUCCESS) {
+            RecordFlowChrome(
+                step = flow.step,
+                onBack = { model.back() },
+                onClose = viewModel::onCloseRequested,
+            )
         }
 
         AnimatedContent(
-            targetState = model.step,
+            targetState = flow.step,
             transitionSpec = {
                 // Direction comes from the transition itself rather than a
                 // remembered "previous step", which would be a second source of
@@ -351,30 +154,31 @@ fun RecordFlowScreen(
             // weighted child is the unambiguous way to say "everything left".
             modifier = Modifier.fillMaxWidth().weight(1f),
         ) { step ->
-            val response = model.published
+            val response = flow.published
             if (step == RecordStep.SUCCESS && response != null) {
                 RecordSuccessStep(
-                    name = model.draft.name,
+                    name = flow.draft.name,
                     renderSvg = response.renderSvg,
                     karmaDelta = response.karmaDelta,
-                    valence = model.draft.valence ?: Valence.NEUTRAL_MEDIUM,
-                    palette = model.draft.emotionId?.let { palettes.palette(it) },
-                    onExit = onDismiss,
+                    valence = flow.draft.valence ?: Valence.NEUTRAL_MEDIUM,
+                    palette = flow.draft.emotionId?.let { palettes.palette(it) },
+                    onExit = viewModel::onExit,
                 )
             } else {
                 RecordStepScaffold(
                     title = stringResource(step.titleRes),
                     subtitle = step.subtitleRes?.let { stringResource(it) },
-                    action = actionFor(step, model, snapBlockedMessage, onPublish = { publish() }),
+                    action = actionFor(step, flow, model, snapBlockedMessage, onPublish = viewModel::publish),
                     contentScrolls = !step.bringsOwnScroll,
                 ) {
                     RecordStepContent(
                         step = step,
+                        draft = flow.draft,
                         model = model,
                         domains = refs.domains,
                         collections = refs.collections,
-                        snap = snaps.formSnap,
-                        seededFromPhoto = captureDate != null,
+                        snap = uiState.snap,
+                        seededFromPhoto = uiState.seededFromPhoto,
                         snapBlockedMessage = snapBlockedMessage,
                         publishError = publishError,
                         glyphPickerState = glyphPickerState,
@@ -383,8 +187,8 @@ fun RecordFlowScreen(
                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
                             )
                         },
-                        onRetryPhoto = { userId?.let { id -> scope.launch { snaps.retryCurrent(id) } } },
-                        onRemovePhoto = { userId?.let { id -> scope.launch { snaps.removePending(id) } } },
+                        onRetryPhoto = viewModel::onRetryPhoto,
+                        onRemovePhoto = viewModel::onRemovePhoto,
                         onGlyphPicked = { model.selectGlyph(it.id) },
                     )
                 }
@@ -394,9 +198,9 @@ fun RecordFlowScreen(
 
     // Crash-insurance restore, unchanged from the sheet (M47): local autosave is
     // invisible, and the prompt fires on entry.
-    if (drafts.isRestorePromptPresented) {
+    if (uiState.isRestorePromptPresented) {
         AlertDialog(
-            onDismissRequest = { drafts.discardSnapshot() },
+            onDismissRequest = viewModel::discardRestore,
             containerColor = system.background,
             title = {
                 PebblesText(
@@ -413,12 +217,7 @@ fun RecordFlowScreen(
                 )
             },
             confirmButton = {
-                TextButton(onClick = {
-                    drafts.takeRestorableSnapshot()?.let { snapshot ->
-                        model.resume(snapshot, knownIds)
-                        model.draft.glyphId?.let { id -> scope.launch { verifyGlyph(id) } }
-                    }
-                }) {
+                TextButton(onClick = viewModel::acceptRestore) {
                     PebblesText(
                         text = stringResource(R.string.draft_restore_confirm),
                         style = PebblesTypography.body,
@@ -427,7 +226,7 @@ fun RecordFlowScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { drafts.discardSnapshot() }) {
+                TextButton(onClick = viewModel::discardRestore) {
                     PebblesText(
                         text = stringResource(R.string.draft_restore_discard),
                         style = PebblesTypography.body,
@@ -438,17 +237,11 @@ fun RecordFlowScreen(
         )
     }
 
-    if (isCloseConfirmPresented) {
+    if (uiState.isCloseConfirmPresented) {
         CloseConfirmDialog(
-            onSaveAsDraft = {
-                isCloseConfirmPresented = false
-                saveAsDraftAndClose()
-            },
-            onDiscard = {
-                isCloseConfirmPresented = false
-                cancelAndCleanup()
-            },
-            onKeepGoing = { isCloseConfirmPresented = false },
+            onSaveAsDraft = viewModel::onSaveAsDraft,
+            onDiscard = viewModel::onDiscard,
+            onKeepGoing = viewModel::onKeepGoing,
         )
     }
 }
@@ -521,6 +314,7 @@ internal fun CloseConfirmDialog(
 @Composable
 private fun actionFor(
     step: RecordStep,
+    flow: RecordFlowState,
     model: RecordFlowModel,
     snapBlockedMessage: String?,
     onPublish: () -> Unit,
@@ -533,7 +327,7 @@ private fun actionFor(
         RecordStep.VALENCE, RecordStep.WHEN, RecordStep.NAME ->
             RecordStepAction.Primary(
                 label = stringResource(R.string.record_action_continue),
-                enabled = model.isAnswered,
+                enabled = flow.isAnswered,
                 isLoading = false,
                 onClick = { model.advance() },
             )
@@ -541,8 +335,8 @@ private fun actionFor(
         RecordStep.PRIVACY ->
             RecordStepAction.Primary(
                 label = stringResource(R.string.record_action_publish),
-                enabled = snapBlockedMessage == null && model.draft.isValid,
-                isLoading = model.isPublishing,
+                enabled = snapBlockedMessage == null && flow.draft.isValid,
+                isLoading = flow.isPublishing,
                 onClick = onPublish,
             )
 
@@ -550,7 +344,7 @@ private fun actionFor(
             RecordStepAction.Text(
                 label =
                     stringResource(
-                        if (model.optionalButtonIsSkip) R.string.record_action_skip else R.string.action_done,
+                        if (flow.optionalButtonIsSkip) R.string.record_action_skip else R.string.action_done,
                     ),
                 onClick = { model.advance() },
             )

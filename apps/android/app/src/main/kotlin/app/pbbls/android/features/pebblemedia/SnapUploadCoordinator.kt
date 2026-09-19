@@ -73,6 +73,20 @@ class SnapUploadCoordinator(
         formSnap = snap
     }
 
+    /**
+     * Back to an empty form, with no Storage cleanup (#849).
+     *
+     * For reusing the coordinator across presentations now that it is owned by
+     * an activity-scoped ViewModel rather than by the composition. It is NOT the
+     * way to abandon an upload — that is [cancelAndCleanup], which also fires the
+     * compensating delete. Calling this with a pending snap would leak the
+     * uploaded bytes, so the caller must have finished or cancelled first.
+     */
+    fun reset() {
+        formSnap = null
+        processedForRetry = null
+    }
+
     /** A processed pick enters the machine: pending-uploading, then [performUpload]. */
     suspend fun attach(
         processed: ProcessedImage,
