@@ -132,6 +132,9 @@ One `@HiltViewModel` per stateful screen. The shape, of which
 
 - **`StateFlow<XUiState>`, collected with `collectAsStateWithLifecycle()`** —
   not `collectAsState()`, which keeps collecting while the app is backgrounded.
+- **`hiltViewModel()` comes from `androidx.hilt.lifecycle.viewmodel.compose`.**
+  The `androidx.hilt.navigation.compose` one is the same function at its old
+  address and is deprecated; the IDE still offers it first.
 - **`XUiState` is a sealed interface: `Loading`, `Error(@StringRes …)`,
   `Content(…)`.** Never a bag of booleans beside the data — five flags admit 32
   combinations of which four are real, and the render code pays for the other 28.
