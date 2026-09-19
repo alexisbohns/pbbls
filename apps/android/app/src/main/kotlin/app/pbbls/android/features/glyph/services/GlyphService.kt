@@ -15,6 +15,8 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Glyph CRUD — the iOS `GlyphService` analog: the attachable-glyph list
@@ -23,121 +25,124 @@ import kotlinx.serialization.json.put
  * owns view state (keeps the seam JVM-testable). Mirrors
  * ReferenceDataService.fetchSouls's supabase-kt call shape.
  */
-class GlyphService(
-    private val supabase: SupabaseService,
-) {
-    /**
-     * Every glyph the user may attach: own + system (`is_system`, #872) +
-     * marketplace-entitled (#562) — the same set the server-side
-     * `can_use_glyph` guard accepts. The `glyphs` RLS SELECT also exposes
-     * approved community submissions (browsable, but not owned), so the bare
-     * select is still filtered to own+system before the entitled union — a
-     * bare list would offer community glyphs whose attachment the server
-     * rejects (SQLSTATE 42501).
-     */
-    suspend fun list(): List<Glyph> =
-        coroutineScope {
-            val me = supabase.session?.user?.id
-            val ownAndSystem =
-                async {
-                    supabase.client
-                        .from("glyphs")
-                        .select(Columns.raw("id, name, strokes, view_box, user_id, is_system")) {
-                            order("created_at", Order.DESCENDING)
-                        }.decodeList<Glyph>()
-                        .let { attachable(it, me) }
-                }
-            // glyph_entitlements is RLS-scoped to the caller, so no client
-            // filter is needed; entitlement created_at = newest acquisition
-            // first (mirrors iOS GlyphMarketService.listOwned).
-            val entitled =
-                async {
-                    supabase.client
-                        .from("glyph_entitlements")
-                        .select(Columns.raw("glyphs(id, name, strokes, view_box, user_id, is_system)")) {
-                            order("created_at", Order.DESCENDING)
-                        }.decodeList<EntitlementRow>()
-                        .map { it.glyph }
-                }
-            withEntitled(ownAndSystem.await(), entitled.await())
-        }
-
-    /**
-     * Carve insert — ports `GlyphService.create`: exactly four keys
-     * (`user_id`, `strokes`, literal `view_box`, `name` as string or explicit
-     * JSON null — never a shape key, #503), select-back so the fresh glyph
-     * lands in pickers without a refetch.
-     */
-    suspend fun create(
-        strokes: List<GlyphStroke>,
-        name: String?,
-    ): Glyph {
-        val userId =
-            supabase.session?.user?.id
-                ?: throw IllegalStateException("glyph save without session")
-        return supabase.client
-            .from("glyphs")
-            .insert(
-                buildJsonObject {
-                    put("user_id", userId)
-                    put("strokes", Json.encodeToJsonElement(ListSerializer(GlyphStroke.serializer()), strokes))
-                    put("view_box", "0 0 200 200")
-                    put("name", normalizedName(name))
-                },
-            ) {
-                select(Columns.raw("id, name, strokes, view_box, user_id, is_system"))
-            }.decodeSingle<Glyph>()
-    }
-
-    /** Rename — empty/whitespace input CLEARS the name (explicit null; M43 D8). */
-    suspend fun updateName(
-        glyphId: String,
-        name: String?,
-    ): Glyph =
-        supabase.client
-            .from("glyphs")
-            .update(
-                buildJsonObject { put("name", normalizedName(name)) },
-            ) {
-                filter { eq("id", glyphId) }
-                select(Columns.raw("id, name, strokes, view_box, user_id, is_system"))
-            }.decodeSingle<Glyph>()
-
-    companion object {
-        private const val TAG = "glyph-service"
+@Singleton
+class GlyphService
+    @Inject
+    constructor(
+        private val supabase: SupabaseService,
+    ) {
+        /**
+         * Every glyph the user may attach: own + system (`is_system`, #872) +
+         * marketplace-entitled (#562) — the same set the server-side
+         * `can_use_glyph` guard accepts. The `glyphs` RLS SELECT also exposes
+         * approved community submissions (browsable, but not owned), so the bare
+         * select is still filtered to own+system before the entitled union — a
+         * bare list would offer community glyphs whose attachment the server
+         * rejects (SQLSTATE 42501).
+         */
+        suspend fun list(): List<Glyph> =
+            coroutineScope {
+                val me = supabase.session?.user?.id
+                val ownAndSystem =
+                    async {
+                        supabase.client
+                            .from("glyphs")
+                            .select(Columns.raw("id, name, strokes, view_box, user_id, is_system")) {
+                                order("created_at", Order.DESCENDING)
+                            }.decodeList<Glyph>()
+                            .let { attachable(it, me) }
+                    }
+                // glyph_entitlements is RLS-scoped to the caller, so no client
+                // filter is needed; entitlement created_at = newest acquisition
+                // first (mirrors iOS GlyphMarketService.listOwned).
+                val entitled =
+                    async {
+                        supabase.client
+                            .from("glyph_entitlements")
+                            .select(Columns.raw("glyphs(id, name, strokes, view_box, user_id, is_system)")) {
+                                order("created_at", Order.DESCENDING)
+                            }.decodeList<EntitlementRow>()
+                            .map { it.glyph }
+                    }
+                withEntitled(ownAndSystem.await(), entitled.await())
+            }
 
         /**
-         * Own+system glyphs first (server order), then entitled glyphs not
-         * already present. `cannot_buy_own` makes overlap impossible in
-         * practice; the de-dupe is defensive.
+         * Carve insert — ports `GlyphService.create`: exactly four keys
+         * (`user_id`, `strokes`, literal `view_box`, `name` as string or explicit
+         * JSON null — never a shape key, #503), select-back so the fresh glyph
+         * lands in pickers without a refetch.
          */
-        fun withEntitled(
-            base: List<Glyph>,
-            entitled: List<Glyph>,
-        ): List<Glyph> {
-            val seen = base.mapTo(mutableSetOf()) { it.id }
-            return base + entitled.filter { seen.add(it.id) }
+        suspend fun create(
+            strokes: List<GlyphStroke>,
+            name: String?,
+        ): Glyph {
+            val userId =
+                supabase.session?.user?.id
+                    ?: throw IllegalStateException("glyph save without session")
+            return supabase.client
+                .from("glyphs")
+                .insert(
+                    buildJsonObject {
+                        put("user_id", userId)
+                        put("strokes", Json.encodeToJsonElement(ListSerializer(GlyphStroke.serializer()), strokes))
+                        put("view_box", "0 0 200 200")
+                        put("name", normalizedName(name))
+                    },
+                ) {
+                    select(Columns.raw("id, name, strokes, view_box, user_id, is_system"))
+                }.decodeSingle<Glyph>()
         }
 
-        /**
-         * Own ∪ system — the client half of `can_use_glyph`'s accepted set
-         * (entitled glyphs arrive separately, through [withEntitled]).
-         *
-         * Keyed on [Glyph.isSystem], never on `userId == null` (#872): an
-         * ownerless glyph is a glyph whose creator deleted their account, and
-         * if it was ever sold the buyers' entitlements are the only claim on
-         * it. Offering it here would let the server reject the attach with
-         * SQLSTATE 42501 at best, and hand out paid artwork at worst.
-         */
-        fun attachable(
-            rows: List<Glyph>,
-            me: String?,
-        ): List<Glyph> = rows.filter { it.isSystem || (me != null && it.userId == me) }
+        /** Rename — empty/whitespace input CLEARS the name (explicit null; M43 D8). */
+        suspend fun updateName(
+            glyphId: String,
+            name: String?,
+        ): Glyph =
+            supabase.client
+                .from("glyphs")
+                .update(
+                    buildJsonObject { put("name", normalizedName(name)) },
+                ) {
+                    filter { eq("id", glyphId) }
+                    select(Columns.raw("id, name, strokes, view_box, user_id, is_system"))
+                }.decodeSingle<Glyph>()
 
-        /** iOS name normalization: trim; empty → null (JVM-tested). */
-        fun normalizedName(name: String?): String? = name?.trim()?.takeIf { it.isNotEmpty() }
+        companion object {
+            private const val TAG = "glyph-service"
+
+            /**
+             * Own+system glyphs first (server order), then entitled glyphs not
+             * already present. `cannot_buy_own` makes overlap impossible in
+             * practice; the de-dupe is defensive.
+             */
+            fun withEntitled(
+                base: List<Glyph>,
+                entitled: List<Glyph>,
+            ): List<Glyph> {
+                val seen = base.mapTo(mutableSetOf()) { it.id }
+                return base + entitled.filter { seen.add(it.id) }
+            }
+
+            /**
+             * Own ∪ system — the client half of `can_use_glyph`'s accepted set
+             * (entitled glyphs arrive separately, through [withEntitled]).
+             *
+             * Keyed on [Glyph.isSystem], never on `userId == null` (#872): an
+             * ownerless glyph is a glyph whose creator deleted their account, and
+             * if it was ever sold the buyers' entitlements are the only claim on
+             * it. Offering it here would let the server reject the attach with
+             * SQLSTATE 42501 at best, and hand out paid artwork at worst.
+             */
+            fun attachable(
+                rows: List<Glyph>,
+                me: String?,
+            ): List<Glyph> = rows.filter { it.isSystem || (me != null && it.userId == me) }
+
+            /** iOS name normalization: trim; empty → null (JVM-tested). */
+            fun normalizedName(name: String?): String? = name?.trim()?.takeIf { it.isNotEmpty() }
+        }
     }
-}
 
 /** Wire row for `glyph_entitlements` selects — PostgREST nests the joined glyph under `glyphs`. */
 @Serializable

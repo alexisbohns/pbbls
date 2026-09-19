@@ -10,6 +10,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.snapshotFlow
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
+import app.pbbls.android.di.ServiceGraph
 import app.pbbls.android.features.glyph.services.LocalGlyphMarketService
 import app.pbbls.android.features.glyph.services.LocalGlyphService
 import app.pbbls.android.features.karma.LocalAchievementNotificationService
@@ -32,10 +33,12 @@ import app.pbbls.android.services.LocalSoulsService
 import app.pbbls.android.services.LocalSupabaseService
 import app.pbbls.android.services.parseInviteToken
 import app.pbbls.android.theme.PebblesTheme
+import dagger.hilt.android.AndroidEntryPoint
 import io.github.jan.supabase.auth.handleDeeplinks
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import javax.inject.Inject
 
 /**
  * Safety ceiling for the splash hold, mirroring iOS's `loaderCeilingSeconds`
@@ -47,15 +50,24 @@ private const val SPLASH_CEILING_MILLIS = 8_000L
 
 /**
  * The single activity hosting the Compose tree and the auth gate (D5). Provides
- * the [SupabaseService][app.pbbls.android.services.SupabaseService] constructed
- * in [PebblesApp] to the tree via CompositionLocal, and forwards OAuth
- * deep-link returns (`pebbles://auth-callback`) to supabase-kt so the session
- * lands (D15). `launchMode="singleTask"` (manifest) means the redirect reuses
- * this activity and arrives at [onNewIntent].
+ * the [SupabaseService][app.pbbls.android.services.SupabaseService] and its
+ * siblings — injected from the Hilt graph (#848), not read off [PebblesApp] —
+ * to the tree via CompositionLocal, and forwards OAuth deep-link returns
+ * (`pebbles://auth-callback`) to supabase-kt so the session lands (D15).
+ * `launchMode="singleTask"` (manifest) means the redirect reuses this activity
+ * and arrives at [onNewIntent].
  */
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val app get() = application as PebblesApp
-    private val supabase get() = app.supabase
+    /**
+     * Injected in `super.onCreate`, which runs before the first read below.
+     * [ServiceGraph] is the temporary bridge to the CompositionLocals — #849
+     * deletes it and this field with it.
+     */
+    @Inject
+    internal lateinit var graph: ServiceGraph
+
+    private val supabase get() = graph.supabase
 
     /**
      * Read on every pre-draw pass by the splash screen. Not Compose state: the
@@ -90,25 +102,25 @@ class MainActivity : ComponentActivity() {
             PebblesTheme {
                 CompositionLocalProvider(
                     LocalSupabaseService provides supabase,
-                    LocalEmotionPaletteService provides app.palettes,
-                    LocalPathService provides app.pathService,
-                    LocalPathStatsService provides app.pathStats,
-                    LocalProfileService provides app.profileService,
-                    LocalSnapURLCache provides app.snapUrls,
-                    LocalReferenceDataService provides app.referenceData,
-                    LocalPebbleWriteService provides app.pebbleWrite,
-                    LocalPebbleDetailService provides app.pebbleDetailService,
-                    LocalSoulsService provides app.soulsService,
-                    LocalCollectionsService provides app.collectionsService,
-                    LocalPebbleDraftsService provides app.draftsService,
-                    LocalConnectionsService provides app.connectionsService,
-                    LocalComposerSnapshotStore provides app.composerSnapshots,
-                    LocalGlyphService provides app.glyphService,
-                    LocalGlyphMarketService provides app.glyphMarket,
-                    LocalLogsService provides app.logsService,
-                    LocalKarmaNotificationService provides app.karma,
-                    LocalAchievementNotificationService provides app.achievementNotify,
-                    LocalAchievementsService provides app.achievements,
+                    LocalEmotionPaletteService provides graph.palettes,
+                    LocalPathService provides graph.pathService,
+                    LocalPathStatsService provides graph.pathStats,
+                    LocalProfileService provides graph.profileService,
+                    LocalSnapURLCache provides graph.snapUrls,
+                    LocalReferenceDataService provides graph.referenceData,
+                    LocalPebbleWriteService provides graph.pebbleWrite,
+                    LocalPebbleDetailService provides graph.pebbleDetailService,
+                    LocalSoulsService provides graph.soulsService,
+                    LocalCollectionsService provides graph.collectionsService,
+                    LocalPebbleDraftsService provides graph.draftsService,
+                    LocalConnectionsService provides graph.connectionsService,
+                    LocalComposerSnapshotStore provides graph.composerSnapshots,
+                    LocalGlyphService provides graph.glyphService,
+                    LocalGlyphMarketService provides graph.glyphMarket,
+                    LocalLogsService provides graph.logsService,
+                    LocalKarmaNotificationService provides graph.karma,
+                    LocalAchievementNotificationService provides graph.achievementNotify,
+                    LocalAchievementsService provides graph.achievements,
                 ) {
                     RootScreen()
                 }
@@ -131,6 +143,6 @@ class MainActivity : ComponentActivity() {
      */
     private fun captureInviteToken(intent: Intent) {
         val token = parseInviteToken(intent.data?.toString()) ?: return
-        app.connectionsService.pendingInviteToken = token
+        graph.connectionsService.pendingInviteToken = token
     }
 }
