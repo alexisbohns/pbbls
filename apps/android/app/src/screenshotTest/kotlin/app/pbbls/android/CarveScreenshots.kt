@@ -46,6 +46,7 @@ private fun CarveGallery() {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
 @Composable
 fun CarveGalleryLight() {
     PebblesTheme { CarveGallery() }

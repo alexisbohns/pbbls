@@ -42,6 +42,7 @@ private val sampleDrafts =
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
 @Composable
 fun DraftsListLight() {
     PebblesTheme {

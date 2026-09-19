@@ -195,6 +195,7 @@ private fun SuccessStepPreview(renderSvg: String?) {
 
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
+@PreviewLargeFontTall
 @Composable
 fun RecordChromeStepsLight() {
     PebblesTheme {
@@ -209,6 +210,7 @@ fun RecordChromeStepsLight() {
 
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
+@PreviewLargeFontTall
 @Composable
 fun RecordPhotoStepLight() {
     PebblesTheme { PhotoStepPreview() }
@@ -223,6 +225,7 @@ fun RecordPhotoStepDark() {
 
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
+@PreviewLargeFontTall
 @Composable
 fun RecordNameStepEmptyLight() {
     PebblesTheme { NameStepPreview("") }
@@ -231,6 +234,7 @@ fun RecordNameStepEmptyLight() {
 /** Past the countdown threshold, so the remaining-characters number is visible. */
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
+@PreviewLargeFontTall
 @Composable
 fun RecordNameStepNearLimitLight() {
     PebblesTheme { NameStepPreview("Shipped the Android record flow at") }
@@ -245,6 +249,7 @@ fun RecordNameStepNearLimitDark() {
 
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
+@PreviewLargeFontTall
 @Composable
 fun RecordDomainStepLight() {
     PebblesTheme { DomainStepPreview() }
@@ -259,6 +264,7 @@ fun RecordDomainStepDark() {
 
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
+@PreviewLargeFontTall
 @Composable
 fun RecordCollectionStepLight() {
     PebblesTheme { CollectionStepPreview(previewCollections) }
@@ -266,6 +272,7 @@ fun RecordCollectionStepLight() {
 
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
+@PreviewLargeFontTall
 @Composable
 fun RecordCollectionStepEmptyLight() {
     PebblesTheme { CollectionStepPreview(emptyList()) }
@@ -273,6 +280,7 @@ fun RecordCollectionStepEmptyLight() {
 
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
+@PreviewLargeFontTall
 @Composable
 fun RecordPrivacyStepLight() {
     PebblesTheme { PrivacyStepPreview(null) }
@@ -288,6 +296,7 @@ fun RecordPrivacyStepDark() {
 /** A hard failure keeps the user here, with the mapped message in the step. */
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
+@PreviewLargeFontTall
 @Composable
 fun RecordPrivacyStepErrorLight() {
     PebblesTheme { PrivacyStepPreview("Couldn't save your pebble. Please try again.") }
@@ -295,6 +304,7 @@ fun RecordPrivacyStepErrorLight() {
 
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
+@PreviewLargeFontTall
 @Composable
 fun RecordSuccessStepLight() {
     PebblesTheme { SuccessStepPreview(PREVIEW_RENDER_SVG) }
@@ -310,6 +320,7 @@ fun RecordSuccessStepDark() {
 /** Soft success: the pebble exists but there is no render to draw. */
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
+@PreviewLargeFontTall
 @Composable
 fun RecordSuccessStepSoftLight() {
     PebblesTheme { SuccessStepPreview(null) }
@@ -317,6 +328,7 @@ fun RecordSuccessStepSoftLight() {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
 @Composable
 fun RecordCloseConfirmLight() {
     PebblesTheme { CloseConfirmDialog(onSaveAsDraft = {}, onDiscard = {}, onKeepGoing = {}) }

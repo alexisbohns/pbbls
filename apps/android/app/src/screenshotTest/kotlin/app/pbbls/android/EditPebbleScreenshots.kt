@@ -151,6 +151,7 @@ private fun EditFormPreview(
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
 @Composable
 fun EditFormSmallLight() {
     PebblesTheme {
@@ -187,6 +188,7 @@ fun EditFormMediumDark() {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
 @Composable
 fun EditFormLargeLight() {
     PebblesTheme {
@@ -205,6 +207,7 @@ fun EditFormLargeDark() {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
 @Composable
 fun EditFormErrorLight() {
     PebblesTheme {

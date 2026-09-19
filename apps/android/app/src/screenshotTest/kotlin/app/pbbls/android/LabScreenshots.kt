@@ -157,6 +157,7 @@ private fun DetailGallery() {
 
 @PreviewTest
 @Preview(showBackground = true, heightDp = 1200)
+@Preview(name = "fs2", showBackground = true, heightDp = 1200, fontScale = 2f)
 @Composable
 fun LabContentLight() {
     PebblesTheme { LabGallery() }

@@ -96,6 +96,7 @@ private fun RowGallery() {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewFrench
 @Composable
 fun PathRowsLight() {
     PebblesTheme { RowGallery() }

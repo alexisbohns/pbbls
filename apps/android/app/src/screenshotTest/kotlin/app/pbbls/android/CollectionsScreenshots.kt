@@ -48,6 +48,7 @@ private fun CollectionsGallery() {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
 @Composable
 fun CollectionsGalleryLight() {
     PebblesTheme { CollectionsGallery() }

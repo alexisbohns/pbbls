@@ -94,6 +94,8 @@ private fun ScreenPreview(entries: List<WeekRollEntry>) {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
+@PreviewFrench
 @Composable
 fun PathScreenPopulatedLight() {
     PebblesTheme { ScreenPreview(populatedEntries) }
@@ -108,6 +110,7 @@ fun PathScreenPopulatedDark() {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewFrench
 @Composable
 fun PathScreenFreshWeekLight() {
     PebblesTheme { ScreenPreview(emptyWeekEntries) }

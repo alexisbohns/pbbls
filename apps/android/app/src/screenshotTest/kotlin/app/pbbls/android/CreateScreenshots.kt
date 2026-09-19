@@ -288,6 +288,7 @@ private fun KarmaCapsulePreview(content: KarmaEarnedContent) {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
 @Composable
 fun CreateFormEmptyLight() {
     PebblesTheme { FormPreview(emptyDraft, null, null, null) }
@@ -302,6 +303,7 @@ fun CreateFormEmptyDark() {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
 @Composable
 fun CreateFormFilledLight() {
     PebblesTheme { FormPreview(filledDraft, joyEmotion, sampleGlyph, null) }
@@ -316,6 +318,7 @@ fun CreateFormFilledDark() {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
 @Composable
 fun CreateFormErrorLight() {
     PebblesTheme {
@@ -334,6 +337,7 @@ fun CreateFormErrorDark() {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
 @Composable
 fun ValencePickerEmptyLight() {
     PebblesTheme { ValenceBodyPreview(null) }
@@ -348,6 +352,7 @@ fun ValencePickerEmptyDark() {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
 @Composable
 fun ValencePickerSelectedLight() {
     PebblesTheme { ValenceBodyPreview(Valence.HIGHLIGHT_MEDIUM) }
@@ -362,6 +367,7 @@ fun ValencePickerSelectedDark() {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
 @Composable
 fun EmotionPickerLight() {
     PebblesTheme { EmotionBodyPreview() }
@@ -376,6 +382,7 @@ fun EmotionPickerDark() {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
 @Composable
 fun SoulPickerLight() {
     PebblesTheme { SoulBodyPreview() }
@@ -390,6 +397,7 @@ fun SoulPickerDark() {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
 @Composable
 fun GlyphPickerLight() {
     PebblesTheme { GlyphBodyPreview() }
@@ -404,6 +412,7 @@ fun GlyphPickerDark() {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
 @Composable
 fun CreateSoulDialogLight() {
     PebblesTheme { CreateSoulDialog(onDismiss = {}, onCreate = {}) }
