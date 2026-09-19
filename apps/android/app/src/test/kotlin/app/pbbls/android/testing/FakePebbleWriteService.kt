@@ -7,15 +7,11 @@ import app.pbbls.android.services.ComposeResult
 import app.pbbls.android.services.PebbleWriteServicing
 
 /**
- * In-memory [PebbleWriteServicing] for tests.
+ * In-memory [PebbleWriteServicing] (#848) — the composer's save path, drivable
+ * without a live project. See [PebblesTestHarness] for where these live and why.
  *
- * It holds no `SupabaseClient` and reads no `BuildConfig` — that is the whole
- * point: the composer's save path is drivable without a live project (#848).
  * The overrides take every parameter positionally because Kotlin forbids a
  * default on an override; the defaults are inherited from the interface.
- *
- * Lives in `src/test` because that is the only consumer until #857 lands
- * Robolectric; it moves to a real `core/testing` module with #851.
  */
 class FakePebbleWriteService(
     /** What [create] returns. A [ComposeResult.Failure] is the reachable error path. */
@@ -32,20 +28,25 @@ class FakePebbleWriteService(
     /** Every pebble id passed to [delete], oldest first. */
     val deletedPebbleIds = mutableListOf<String>()
 
+    private val armed = ArmedFailure()
+
     /**
-     * Thrown by the next call, then cleared — so one fake can drive a failure
-     * and the retry that follows it without being rebuilt. Only [delete]
-     * throws in production; `create`/`update` report failure through
-     * [ComposeResult.Failure], so prefer [createResult] / [updateResult] there.
+     * Thrown by the next call, then cleared. Only [delete] throws in production;
+     * `create`/`update` report failure through [ComposeResult.Failure], so prefer
+     * [createResult] / [updateResult] there.
      */
-    var failNext: Exception? = null
+    var failNext: Exception?
+        get() = armed.next
+        set(value) {
+            armed.next = value
+        }
 
     override suspend fun create(
         draft: PebbleDraft,
         snaps: List<PebbleSnapPayload>?,
     ): ComposeResult {
         createCalls += draft to snaps
-        throwIfArmed()
+        armed.fire()
         return createResult
     }
 
@@ -55,18 +56,12 @@ class FakePebbleWriteService(
         snaps: List<PebbleSnapPayload>,
     ): ComposeResult {
         updateCalls += Triple(pebbleId, draft, snaps)
-        throwIfArmed()
+        armed.fire()
         return updateResult
     }
 
     override suspend fun delete(pebbleId: String) {
         deletedPebbleIds += pebbleId
-        throwIfArmed()
-    }
-
-    private fun throwIfArmed() {
-        val failure = failNext ?: return
-        failNext = null
-        throw failure
+        armed.fire()
     }
 }

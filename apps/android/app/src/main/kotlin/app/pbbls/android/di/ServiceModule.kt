@@ -19,7 +19,7 @@ import javax.inject.Singleton
  * constructor(…)`; if you are adding a service, prefer that and do not grow
  * this file.
  *
- * Neither of these is here because Dagger *cannot* infer it — both *could* be
+ * None of these is here because Dagger *cannot* infer it — all three *could* be
  * wired through the graph and deliberately are not. That distinction matters, because
  * "needs a qualifier" is NOT a reason to add a provider: a qualifier annotation
  * on a constructor parameter is inferred like any other binding, which is how

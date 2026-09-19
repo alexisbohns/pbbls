@@ -117,8 +117,10 @@ fun CreatePebbleScreen(
     var hasCheckedSnapshot by remember { mutableStateOf(false) }
     val autosave = remember { ComposerAutosave(snapshots.asSink()) }
 
-    // Form-scoped (M42 D6): an in-flight upload dies with this cover.
     val snapRepo = LocalSnapWriteRepository.current
+    // Form-scoped (M42 D6): an in-flight upload dies with this cover. The
+    // repository behind it is a stateless singleton; the coordinator holding
+    // the in-flight state is what must not outlive the form.
     val snaps = remember { SnapUploadCoordinator(repo = snapRepo) }
     val photoPicker =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->

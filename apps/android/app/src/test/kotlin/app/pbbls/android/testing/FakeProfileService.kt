@@ -7,14 +7,9 @@ import app.pbbls.android.services.ProfileServicing
 import java.time.OffsetDateTime
 
 /**
- * In-memory [ProfileServicing] for tests.
- *
- * It holds no `SupabaseClient` and reads no `BuildConfig` — that is the whole
- * point: Settings' load, save and delete paths are drivable without a live
- * project (#848).
- *
- * Lives in `src/test` because that is the only consumer until #857 lands
- * Robolectric; it moves to a real `core/testing` module with #851.
+ * In-memory [ProfileServicing] (#848) — Settings' load, save and delete paths,
+ * drivable without a live project. See [PebblesTestHarness] for where these live
+ * and why.
  */
 class FakeProfileService(
     var profile: ProfileRow =
@@ -34,31 +29,42 @@ class FakeProfileService(
     /** Every flag passed to [setPublicProfile], oldest first. */
     val setPublicProfileCalls = mutableListOf<Boolean>()
 
+    /** Every glyph id passed to [loadGlyphStrokes], oldest first. */
+    val loadGlyphStrokesCalls = mutableListOf<String>()
+
     var loadProfileCount = 0
+        private set
+
+    var loadCollectionsCount = 0
         private set
 
     var deleteAccountCount = 0
         private set
 
-    /**
-     * Thrown by the next call, then cleared — so one fake can drive a failure
-     * and the retry that follows it without being rebuilt.
-     */
-    var failNext: Exception? = null
+    private val armed = ArmedFailure()
+
+    /** Thrown by the next call, then cleared. */
+    var failNext: Exception?
+        get() = armed.next
+        set(value) {
+            armed.next = value
+        }
 
     override suspend fun loadProfile(): ProfileRow {
         loadProfileCount += 1
-        throwIfArmed()
+        armed.fire()
         return profile
     }
 
     override suspend fun loadGlyphStrokes(glyphId: String): List<GlyphStroke> {
-        throwIfArmed()
+        loadGlyphStrokesCalls += glyphId
+        armed.fire()
         return glyphStrokes
     }
 
     override suspend fun loadCollections(): List<Collection> {
-        throwIfArmed()
+        loadCollectionsCount += 1
+        armed.fire()
         return collections
     }
 
@@ -68,27 +74,21 @@ class FakeProfileService(
         password: String?,
     ) {
         saveSettingsCalls += Triple(displayName, glyphId, password)
-        throwIfArmed()
+        armed.fire()
     }
 
     override suspend fun setHandle(handle: String?) {
         setHandleCalls += handle
-        throwIfArmed()
+        armed.fire()
     }
 
     override suspend fun setPublicProfile(isPublic: Boolean) {
         setPublicProfileCalls += isPublic
-        throwIfArmed()
+        armed.fire()
     }
 
     override suspend fun deleteAccount() {
         deleteAccountCount += 1
-        throwIfArmed()
-    }
-
-    private fun throwIfArmed() {
-        val failure = failNext ?: return
-        failNext = null
-        throw failure
+        armed.fire()
     }
 }

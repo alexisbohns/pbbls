@@ -72,14 +72,14 @@ class MainActivity : ComponentActivity() {
     internal lateinit var graph: ServiceGraph
 
     /**
-     * The concrete client owner, for `handleDeeplinks` only. The composition
-     * root is the one place allowed to know a concrete service type; everything
-     * below it gets [app.pbbls.android.services.SupabaseServicing].
+     * The concrete client owner, for `handleDeeplinks` only — it is the one
+     * caller that needs the raw `SupabaseClient`. The composition root is the one
+     * place allowed to know a concrete service type; everything below it, the
+     * splash gate included, goes through
+     * [app.pbbls.android.services.SupabaseServicing] off [graph].
      */
     @Inject
     internal lateinit var supabaseClientOwner: SupabaseService
-
-    private val supabase get() = supabaseClientOwner
 
     /**
      * Read on every pre-draw pass by the splash screen. Not Compose state: the
@@ -99,7 +99,7 @@ class MainActivity : ComponentActivity() {
         splashScreen.setKeepOnScreenCondition { keepSplashOnScreen }
         lifecycleScope.launch {
             withTimeoutOrNull(SPLASH_CEILING_MILLIS) {
-                snapshotFlow { supabase.isInitializing }.first { !it }
+                snapshotFlow { graph.supabase.isInitializing }.first { !it }
             }
             keepSplashOnScreen = false
             // The predicate is only re-read on a draw pass, and a stalled launch
@@ -108,12 +108,12 @@ class MainActivity : ComponentActivity() {
             findViewById<View>(android.R.id.content).invalidate()
         }
         enableEdgeToEdge()
-        supabase.client.handleDeeplinks(intent)
+        supabaseClientOwner.client.handleDeeplinks(intent)
         captureInviteToken(intent)
         setContent {
             PebblesTheme {
                 CompositionLocalProvider(
-                    LocalSupabaseService provides supabase,
+                    LocalSupabaseService provides graph.supabase,
                     LocalEmotionPaletteService provides graph.palettes,
                     LocalPathService provides graph.pathService,
                     LocalPathStatsService provides graph.pathStats,
@@ -146,7 +146,7 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        supabase.client.handleDeeplinks(intent)
+        supabaseClientOwner.client.handleDeeplinks(intent)
         captureInviteToken(intent)
     }
 

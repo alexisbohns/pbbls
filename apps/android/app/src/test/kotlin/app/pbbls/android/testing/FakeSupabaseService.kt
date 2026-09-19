@@ -4,15 +4,12 @@ import app.pbbls.android.services.SupabaseServicing
 import io.github.jan.supabase.auth.user.UserSession
 
 /**
- * In-memory [SupabaseServicing] for tests.
+ * In-memory [SupabaseServicing] (#848). See [PebblesTestHarness] for where these
+ * live and why.
  *
- * It holds no `SupabaseClient` and reads no `BuildConfig` — that is the whole
- * point. Before #848 the auth surface was only reachable through the concrete
+ * Before #848 the auth surface was only reachable through the concrete
  * `SupabaseService`, whose client came from `AppEnvironment` and threw on a
  * blank `SUPABASE_URL`, so a test could not construct one at all.
- *
- * Lives in `src/test` because that is the only consumer until #857 lands
- * Robolectric; it moves to a real `core/testing` module with #851.
  */
 class FakeSupabaseService(
     override var session: UserSession? = null,
@@ -33,15 +30,23 @@ class FakeSupabaseService(
     var signOutCount = 0
         private set
 
-    /**
-     * Thrown by the next call, then cleared — so one fake can drive a failure
-     * and the retry that follows it without being rebuilt.
-     */
-    var failNext: Exception? = null
+    private val armed = ArmedFailure()
 
+    /** Thrown by the next call, then cleared. */
+    var failNext: Exception?
+        get() = armed.next
+        set(value) {
+            armed.next = value
+        }
+
+    /**
+     * Returns immediately. The real [app.pbbls.android.services.SupabaseService.start]
+     * collects `sessionStatus` and suspends forever — a fake that did the same
+     * would hang every test that called it.
+     */
     override suspend fun start() {
         startCount += 1
-        throwIfArmed()
+        armed.fire()
         isInitializing = false
     }
 
@@ -50,7 +55,7 @@ class FakeSupabaseService(
         password: String,
     ) {
         signInCalls += email to password
-        throwIfArmed()
+        armed.fire()
     }
 
     override suspend fun signUp(
@@ -58,23 +63,21 @@ class FakeSupabaseService(
         password: String,
     ) {
         signUpCalls += email to password
-        throwIfArmed()
+        armed.fire()
     }
 
     override suspend fun signInWithGoogle() {
         googleSignInCount += 1
-        throwIfArmed()
+        armed.fire()
     }
 
+    /**
+     * Never throws, matching the real service: `signOut` catches and logs, because
+     * the local token is wiped regardless. A signed-out user is the only
+     * observable outcome, so there is no error path for a test to drive.
+     */
     override suspend fun signOut() {
         signOutCount += 1
-        throwIfArmed()
         session = null
-    }
-
-    private fun throwIfArmed() {
-        val failure = failNext ?: return
-        failNext = null
-        throw failure
     }
 }

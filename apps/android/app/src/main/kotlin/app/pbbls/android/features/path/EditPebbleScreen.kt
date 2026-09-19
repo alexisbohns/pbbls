@@ -102,8 +102,10 @@ fun EditPebbleScreen(
     var reloadToken by remember(pebbleId) { mutableIntStateOf(0) }
     var isRemovingExistingSnap by remember(pebbleId) { mutableStateOf(false) }
 
-    // Form-scoped (M42 D6); seeded with the existing snap once the detail loads.
     val snapRepo = LocalSnapWriteRepository.current
+    // Form-scoped (M42 D6); seeded with the existing snap once the detail loads.
+    // The repository behind it is a stateless singleton; the coordinator holding
+    // the in-flight state is what must not outlive the form.
     val snaps = remember(pebbleId) { SnapUploadCoordinator(repo = snapRepo) }
     val photoPicker =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->

@@ -7,14 +7,22 @@ import app.pbbls.android.features.profile.models.SoulWithGlyph
 import app.pbbls.android.services.ReferenceDataServicing
 
 /**
- * In-memory [ReferenceDataServicing] for tests.
+ * In-memory [ReferenceDataServicing] (#848). See [PebblesTestHarness] for where
+ * these live and why.
  *
- * It holds no `SupabaseClient` and reads no `BuildConfig` — that is the whole
- * point: the form's pickers are drivable without a live project (#848). The
- * four state properties are plain `var`s; a fake needs no Compose state.
+ * The four state properties are plain `var`s; a fake needs no Compose state.
  *
- * Lives in `src/test` because that is the only consumer until #857 lands
- * Robolectric; it moves to a real `core/testing` module with #851.
+ * **It cannot be made to throw, deliberately.** Every method on the real
+ * [app.pbbls.android.services.ReferenceDataService] swallows its own failure:
+ * `load`, `refreshSouls` and `refreshCollections` wrap their whole body in
+ * `try`/`catch` + `Log.e` and return normally, and `createSoul` returns null.
+ * Reference-data failure is observable ONLY as "the lists stayed empty" or
+ * "`hasLoaded` stayed false" — never as an exception. A fake that could throw
+ * here would let a test assert an error path the screen can never actually
+ * reach.
+ *
+ * So the error path is [createSoulResult] = null, and "the load failed" is
+ * modelled by leaving the lists empty.
  */
 class FakeReferenceDataService(
     override var domains: List<Domain> = emptyList(),
@@ -25,8 +33,7 @@ class FakeReferenceDataService(
     /**
      * What [createSoul] returns, built from the requested name. **null is the
      * error path** — the real service swallows the failure and returns null
-     * rather than throwing, so a test drives that case here, not with
-     * [failNext].
+     * rather than throwing.
      */
     var createSoulResult: (String) -> SoulWithGlyph? = { name ->
         SoulWithGlyph(
@@ -49,40 +56,28 @@ class FakeReferenceDataService(
     var refreshCollectionsCount = 0
         private set
 
-    /**
-     * Thrown by the next call, then cleared — so one fake can drive a failure
-     * and the retry that follows it without being rebuilt. [createSoul] is
-     * exempt: its failure is a null result, matching the real service.
-     */
-    var failNext: Exception? = null
-
     override suspend fun load() {
         loadCount += 1
-        throwIfArmed()
         hasLoaded = true
     }
 
     override suspend fun refreshSouls() {
         refreshSoulsCount += 1
-        throwIfArmed()
     }
 
     override suspend fun refreshCollections() {
         refreshCollectionsCount += 1
-        throwIfArmed()
     }
 
-    /** Appends to [souls] on success, so a test can assert the cache updated. */
+    /**
+     * Appends to [souls] on success, so a test can assert the cache updated —
+     * re-sorting by name the way the real service does, because the picker's
+     * ordering is what the cache update exists to keep correct.
+     */
     override suspend fun createSoul(name: String): SoulWithGlyph? {
         createSoulCalls += name
         val created = createSoulResult(name) ?: return null
-        souls = souls + created
+        souls = (souls + created).sortedBy { it.name }
         return created
-    }
-
-    private fun throwIfArmed() {
-        val failure = failNext ?: return
-        failNext = null
-        throw failure
     }
 }

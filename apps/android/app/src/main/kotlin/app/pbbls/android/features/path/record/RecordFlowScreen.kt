@@ -121,8 +121,10 @@ fun RecordFlowScreen(
     val glyphPickerState = rememberGlyphPickerState()
     val drafts = remember(draftsService, snapshots) { ComposerDraftCoordinator(draftsService, snapshots) }
 
-    // Form-scoped (M42 D6): an in-flight upload dies with this cover.
     val snapRepo = LocalSnapWriteRepository.current
+    // Form-scoped (M42 D6): an in-flight upload dies with this cover. The
+    // repository behind it is a stateless singleton; the coordinator holding
+    // the in-flight state is what must not outlive the form.
     val snaps = remember { SnapUploadCoordinator(repo = snapRepo) }
     var captureDate by remember { mutableStateOf<OffsetDateTime?>(null) }
     var isCloseConfirmPresented by remember { mutableStateOf(false) }
