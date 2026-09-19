@@ -1,6 +1,5 @@
 package app.pbbls.android.features.profile
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,20 +12,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
-import app.pbbls.android.features.glyph.models.GlyphStroke
 import app.pbbls.android.features.profile.components.ProfileAchievementsCard
 import app.pbbls.android.features.profile.components.ProfileBanner
 import app.pbbls.android.features.profile.components.ProfileCollectionsCard
@@ -35,19 +29,12 @@ import app.pbbls.android.features.profile.components.ProfileLogoutButton
 import app.pbbls.android.features.profile.components.ProfileShortcutsRow
 import app.pbbls.android.features.profile.components.ProfileStatsCard
 import app.pbbls.android.features.profile.models.Collection
-import app.pbbls.android.services.LocalPathStatsService
-import app.pbbls.android.services.LocalProfileService
-import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSupabaseService
-import app.pbbls.android.services.ProfileRow
 import app.pbbls.android.theme.PebblesScreen
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar
 import app.pbbls.android.theme.PebblesTypography
-import kotlinx.coroutines.launch
-
-private const val TAG = "profile"
 
 /**
  * The Profile screen — ports iOS `ProfileView.swift` (sub-project C): banner,
@@ -74,52 +61,12 @@ fun ProfileScreen(
     onOpenLab: () -> Unit,
     onOpenAchievements: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: ProfileViewModel = hiltViewModel(),
 ) {
-    val profileService = LocalProfileService.current
-    val stats = LocalPathStatsService.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val covers by viewModel.covers.collectAsStateWithLifecycle()
     val supabase = LocalSupabaseService.current
-    val refs = LocalReferenceDataService.current
-    val scope = rememberCoroutineScope()
     val system = PebblesTheme.colors.system
-
-    var profile by remember { mutableStateOf<ProfileRow?>(null) }
-    var glyphStrokes by remember { mutableStateOf<List<GlyphStroke>?>(null) }
-    var collections by remember { mutableStateOf<List<Collection>>(emptyList()) }
-    var collectionsLoaded by remember { mutableStateOf(false) }
-    var loadFailed by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(true) }
-    var isPresentingSettings by remember { mutableStateOf(false) }
-    var isPresentingCreateCollection by remember { mutableStateOf(false) }
-    var loadKey by remember { mutableIntStateOf(0) }
-
-    LaunchedEffect(loadKey) {
-        isLoading = true
-        loadFailed = false
-        try {
-            val row = profileService.loadProfile()
-            profile = row
-            row.glyphId?.let { id ->
-                try {
-                    glyphStrokes = profileService.loadGlyphStrokes(id)
-                } catch (e: Exception) {
-                    Log.e(TAG, "glyph fetch failed", e)
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "profile fetch failed", e)
-            loadFailed = true
-        } finally {
-            isLoading = false
-        }
-        try {
-            collections = profileService.loadCollections()
-        } catch (e: Exception) {
-            Log.e(TAG, "collections fetch failed", e)
-        } finally {
-            collectionsLoaded = true
-        }
-    }
-    LaunchedEffect(Unit) { stats.load() }
 
     PebblesScreen(
         modifier = modifier,
@@ -137,7 +84,7 @@ fun ProfileScreen(
                     }
                 },
                 trailing = {
-                    IconButton(onClick = { isPresentingSettings = true }) {
+                    IconButton(onClick = viewModel::openSettings) {
                         Icon(
                             painter = painterResource(R.drawable.ic_gear),
                             contentDescription = stringResource(R.string.settings_title),
@@ -149,8 +96,9 @@ fun ProfileScreen(
             )
         },
     ) {
-        when {
-            isLoading ->
+        // Exhaustive with no `else`: a new ProfileUiState case must be rendered.
+        when (uiState) {
+            ProfileUiState.Loading ->
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
@@ -159,18 +107,18 @@ fun ProfileScreen(
                     CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
                 }
 
-            loadFailed ->
+            is ProfileUiState.Error ->
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     PebblesText(
-                        text = stringResource(R.string.profile_load_error),
+                        text = stringResource((uiState as ProfileUiState.Error).messageRes),
                         style = PebblesTypography.body,
                         color = system.secondary,
                     )
-                    TextButton(onClick = { loadKey++ }) {
+                    TextButton(onClick = viewModel::retry) {
                         PebblesText(
                             text = stringResource(R.string.profile_retry),
                             style = PebblesTypography.buttonLabel,
@@ -179,7 +127,8 @@ fun ProfileScreen(
                     }
                 }
 
-            else ->
+            is ProfileUiState.Content -> {
+                val content = uiState as ProfileUiState.Content
                 Column(
                     modifier =
                         Modifier
@@ -190,9 +139,9 @@ fun ProfileScreen(
                     verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.xl),
                 ) {
                     ProfileBanner(
-                        displayName = profile?.displayName,
-                        memberSince = profile?.createdAt,
-                        glyphStrokes = glyphStrokes,
+                        displayName = content.profile?.displayName,
+                        memberSince = content.profile?.createdAt,
+                        glyphStrokes = content.glyphStrokes,
                     )
                     ProfileShortcutsRow(
                         onOpenSouls = onOpenSouls,
@@ -200,44 +149,42 @@ fun ProfileScreen(
                         onOpenConnections = onOpenConnections,
                     )
                     ProfileStatsCard(
-                        ripple = stats.ripple,
-                        assiduity = stats.assiduity,
-                        daysPracticed = stats.daysPracticed,
-                        pebbles = stats.pebbles,
-                        karma = stats.karma,
+                        ripple = content.ripple,
+                        assiduity = content.assiduity,
+                        daysPracticed = content.daysPracticed,
+                        pebbles = content.pebbles,
+                        karma = content.karma,
                     )
                     ProfileAchievementsCard(onOpen = onOpenAchievements)
                     ProfileCollectionsCard(
-                        collections = collections,
-                        hasLoaded = collectionsLoaded,
+                        collections = content.collections,
+                        hasLoaded = content.collectionsLoaded,
                         onOpenList = onOpenCollections,
                         onOpenCollection = onOpenCollection,
-                        onCreate = { isPresentingCreateCollection = true },
+                        onCreate = viewModel::openCreateCollection,
                     )
                     ProfileLabCard(onOpen = onOpenLab)
                     ProfileLogoutButton(onClick = onSignOut)
                 }
+            }
         }
     }
 
-    if (isPresentingCreateCollection) {
+    if (covers.isPresentingCreateCollection) {
         CollectionFormScreen(
             original = null,
-            onDismiss = { isPresentingCreateCollection = false },
-            onSaved = {
-                isPresentingCreateCollection = false
-                loadKey++
-                scope.launch { refs.refreshCollections() }
-            },
+            onDismiss = viewModel::closeCreateCollection,
+            onSaved = viewModel::onCollectionCreated,
             modifier = Modifier.fillMaxSize(),
         )
     }
 
-    if (isPresentingSettings) {
+    if (covers.isPresentingSettings) {
+        val content = uiState as? ProfileUiState.Content
         SettingsScreen(
-            initialDisplayName = profile?.displayName.orEmpty(),
-            initialGlyphId = profile?.glyphId,
-            initialGlyphStrokes = glyphStrokes,
+            initialDisplayName = content?.profile?.displayName.orEmpty(),
+            initialGlyphId = content?.profile?.glyphId,
+            initialGlyphStrokes = content?.glyphStrokes,
             email = supabase.session?.user?.email,
             providers =
                 linkedProviders(
@@ -246,21 +193,11 @@ fun ProfileScreen(
                         ?.identities
                         ?.map { it.provider },
                 ),
-            onDismiss = { isPresentingSettings = false },
-            onSaved = { newName, newGlyph, newHandle, isPublic ->
-                profile =
-                    profile?.copy(
-                        displayName = newName,
-                        glyphId = newGlyph?.id ?: profile?.glyphId,
-                        handle = newHandle,
-                        publicProfile = isPublic,
-                    )
-                newGlyph?.strokes?.let { glyphStrokes = it }
-                isPresentingSettings = false
-            },
+            onDismiss = viewModel::closeSettings,
+            onSaved = viewModel::onSettingsSaved,
             modifier = Modifier.fillMaxSize(),
-            initialHandle = profile?.handle,
-            initialPublicProfile = profile?.publicProfile ?: false,
+            initialHandle = content?.profile?.handle,
+            initialPublicProfile = content?.profile?.publicProfile ?: false,
         )
     }
 }
