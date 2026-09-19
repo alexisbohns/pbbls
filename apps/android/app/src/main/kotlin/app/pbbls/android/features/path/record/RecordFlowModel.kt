@@ -1,8 +1,5 @@
 package app.pbbls.android.features.path.record
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import app.pbbls.android.features.path.models.ComposePebbleResponse
 import app.pbbls.android.features.path.models.KnownDraftIds
 import app.pbbls.android.features.path.models.PebbleDraft
@@ -11,6 +8,10 @@ import app.pbbls.android.features.path.models.Valence
 import app.pbbls.android.features.path.models.Visibility
 import app.pbbls.android.features.path.models.toDraft
 import app.pbbls.android.services.TapHaptic
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import java.time.OffsetDateTime
 
 /**
@@ -34,71 +35,54 @@ import java.time.OffsetDateTime
  */
 class RecordFlowModel(
     private val haptic: (TapHaptic) -> Unit,
+    initial: RecordFlowState = RecordFlowState(),
 ) {
-    var draft: PebbleDraft by mutableStateOf(PebbleDraft())
-
-    var step: RecordStep by mutableStateOf(RecordStep.PHOTO)
-        private set
+    private val _state = MutableStateFlow(initial)
 
     /**
-     * Mirrored from the `SnapUploadCoordinator` by the screen, so the photo
-     * step's button can read Skip or Done without the model owning media.
+     * The whole machine, as one value. `RecordFlowViewModel` persists it
+     * through `SavedStateHandle` and the screen collects it with
+     * `collectAsStateWithLifecycle` (#849).
      */
-    var hasSnap: Boolean by mutableStateOf(false)
-
-    /** Set once publish returns. Drives the success step. */
-    var published: ComposePebbleResponse? by mutableStateOf(null)
-        private set
-
-    var isPublishing: Boolean by mutableStateOf(false)
-        private set
+    val state: StateFlow<RecordFlowState> = _state.asStateFlow()
 
     /**
-     * Publish failure text, as a string resource id. Cleared when a publish
-     * begins so a retry never renders the previous attempt's message.
+     * The accessors below read and write [state] rather than holding anything.
+     * They exist so the mutators and the tests read as they always did — the
+     * storage changed, the machine did not.
      */
-    var publishErrorRes: Int? by mutableStateOf(null)
-        private set
+    var draft: PebbleDraft
+        get() = _state.value.draft
+        set(value) = _state.update { it.copy(draft = value) }
+
+    val step: RecordStep
+        get() = _state.value.step
+
+    var hasSnap: Boolean
+        get() = _state.value.hasSnap
+        set(value) = _state.update { it.copy(hasSnap = value) }
+
+    val published: ComposePebbleResponse?
+        get() = _state.value.published
+
+    val isPublishing: Boolean
+        get() = _state.value.isPublishing
+
+    val publishErrorRes: Int?
+        get() = _state.value.publishErrorRes
 
     // MARK: - Answers
+    //
+    // Live on RecordFlowState, which is where the data is. Delegated here so
+    // every caller keeps asking the model.
 
-    /**
-     * Whether a given step has been answered. Drives both the forward gate and
-     * the optional steps' Skip / Done button label.
-     *
-     * Exhaustive with no `else`, deliberately: this is the single place that
-     * says what "answered" means, and an `else` would silently treat a newly
-     * added step as already answered.
-     */
-    fun hasAnswer(forStep: RecordStep): Boolean =
-        when (forStep) {
-            // Nothing for the user to supply: WHEN arrives seeded from the
-            // photo's EXIF or from now, PRIVACY from SECRET, and SUCCESS is
-            // terminal.
-            RecordStep.WHEN, RecordStep.PRIVACY, RecordStep.SUCCESS -> true
-            RecordStep.PHOTO -> hasSnap
-            RecordStep.NAME -> draft.name.trim().isNotEmpty()
-            RecordStep.VALENCE -> draft.valence != null
-            RecordStep.EMOTION -> draft.emotionId != null
-            RecordStep.DOMAIN -> draft.domainId != null
-            RecordStep.SOULS -> draft.soulIds.isNotEmpty()
-            RecordStep.COLLECTION -> draft.collectionId != null
-            RecordStep.GLYPH -> draft.glyphId != null
-        }
+    fun hasAnswer(forStep: RecordStep): Boolean = _state.value.hasAnswer(forStep)
 
-    /**
-     * Whether the current step may be left. Optional steps are always
-     * satisfied: passing one is the user saying "not this one", not an error.
-     */
     val isAnswered: Boolean
-        get() = step.isOptional || hasAnswer(step)
+        get() = _state.value.isAnswered
 
-    /**
-     * Skip while the optional step is empty, Done once it holds something.
-     * Only meaningful on optional steps.
-     */
     val optionalButtonIsSkip: Boolean
-        get() = !hasAnswer(step)
+        get() = _state.value.optionalButtonIsSkip
 
     // MARK: - Navigation
 
@@ -110,14 +94,14 @@ class RecordFlowModel(
         }
         val next = step.next ?: return
         haptic(TapHaptic.ADVANCE)
-        step = next
+        _state.update { it.copy(step = next) }
     }
 
     fun back() {
         if (step == RecordStep.SUCCESS) return
         val previous = step.previous ?: return
         haptic(TapHaptic.ADVANCE)
-        step = previous
+        _state.update { it.copy(step = previous) }
     }
 
     /**
@@ -125,7 +109,7 @@ class RecordFlowModel(
      * to a control.
      */
     fun goTo(target: RecordStep) {
-        step = target
+        _state.update { it.copy(step = target) }
     }
 
     // MARK: - Selection
@@ -139,8 +123,11 @@ class RecordFlowModel(
      */
     private fun commitAndAdvance(mutate: (PebbleDraft) -> PebbleDraft) {
         haptic(TapHaptic.SELECTION)
-        draft = mutate(draft)
-        step.next?.let { step = it }
+        // One update, so the commit and the advance are a single emission: two
+        // would briefly publish the new answer against the old step.
+        _state.update { current ->
+            current.copy(draft = mutate(current.draft), step = current.step.next ?: current.step)
+        }
     }
 
     /**
@@ -235,28 +222,29 @@ class RecordFlowModel(
      * and re-asking would silently undo the user's decision. Falls through to
      * [RecordStep.PRIVACY] — a fully answered draft resumes against publish.
      */
-    fun firstGap(): RecordStep = RecordStep.counted.firstOrNull { !it.isOptional && !hasAnswer(it) } ?: RecordStep.PRIVACY
+    fun firstGap(): RecordStep = _state.value.firstGap()
 
     fun resume(
         payload: PebbleDraftPayload,
         known: KnownDraftIds,
     ) {
-        draft = payload.toDraft(known)
-        step = firstGap()
+        _state.update { current ->
+            val hydrated = current.copy(draft = payload.toDraft(known))
+            hydrated.copy(step = hydrated.firstGap())
+        }
     }
 
     // MARK: - Publish
 
     fun beginPublish() {
-        isPublishing = true
-        publishErrorRes = null
+        _state.update { it.copy(isPublishing = true, publishErrorRes = null) }
     }
 
     fun succeed(response: ComposePebbleResponse) {
         haptic(TapHaptic.SUCCESS)
-        isPublishing = false
-        published = response
-        step = RecordStep.SUCCESS
+        _state.update {
+            it.copy(isPublishing = false, published = response, step = RecordStep.SUCCESS)
+        }
     }
 
     /**
@@ -266,8 +254,19 @@ class RecordFlowModel(
      */
     fun fail(messageRes: Int) {
         haptic(TapHaptic.WARNING)
-        isPublishing = false
-        publishErrorRes = messageRes
+        _state.update { it.copy(isPublishing = false, publishErrorRes = messageRes) }
+    }
+
+    /**
+     * Back to a blank flow.
+     *
+     * Needed because `RecordFlowViewModel` is activity-scoped while the cover it
+     * drives is a conditionally-composed child (#849): without an explicit reset,
+     * reopening the composer would show the pebble that was just published.
+     * Silent — a reset is not something the user did.
+     */
+    fun reset() {
+        _state.value = RecordFlowState()
     }
 
     companion object {

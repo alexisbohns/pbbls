@@ -26,7 +26,7 @@ private const val TAG = "composer-drafts"
  */
 class ComposerDraftCoordinator(
     private val drafts: PebbleDraftsServicing,
-    private val snapshots: ComposerSnapshotStore,
+    private val snapshots: ComposerSnapshotStoring,
 ) {
     /** What [hydrate] decided the composer should open with. */
     sealed interface Decision {
@@ -92,6 +92,24 @@ class ComposerDraftCoordinator(
         } else {
             Decision.Fresh
         }
+    }
+
+    /**
+     * Forget that this composer ever opened, so the next presentation hydrates
+     * again (#849).
+     *
+     * Needed because `RecordFlowViewModel` is activity-scoped while the cover it
+     * drives is a conditionally-composed child: the coordinator's
+     * decide-only-once guard is per-presentation, and without this the second
+     * "New pebble" of a session would skip hydration entirely. Deliberately does
+     * NOT touch the stored snapshot — only [discardSnapshot] and a publish may
+     * clear that.
+     */
+    fun reset() {
+        hasHydrated = false
+        restorable = null
+        serverDraftId = null
+        isRestorePromptPresented = false
     }
 
     /** The user accepted the restore prompt. Consumes the snapshot. */
