@@ -111,9 +111,49 @@ real settings exist), `android-skills:rxjava-migration`,
   against the locals.
 - **Log, don't swallow.** Use `android.util.Log` (or a thin logger) with a
   consistent tag on every error path — mirror the web/iOS discipline that silent
-  failures are bugs. No empty `catch` blocks. No `println`.
+  failures are bugs. No empty `catch` blocks. No `println`. JVM unit tests set
+  `unitTests.isReturnDefaultValues`, so a `Log` call in a tested class no longer
+  throws "not mocked" — injecting the logger as a lambda
+  (`SnapUploadCoordinator.onLog`) is a pattern to stop copying, not to spread.
 - **View-scoped async cancels with the view.** Use `LaunchedEffect` /
   `rememberCoroutineScope` / `viewModelScope`, never `GlobalScope`.
+- **Let cancellation travel: `runCatchingCancellable`, never a bare `catch (e:
+  Exception)`.** Both that and `kotlin.runCatching` swallow
+  `CancellationException`, and a coroutine that catches its own cancellation
+  keeps running inside a scope that believes it stopped. `ui/CoroutineErrors.kt`
+  rethrows it first. The inverse case — a write that must finish once the request
+  has left the device — is `withContext(NonCancellable)` around that section, not
+  a catch.
+
+### Screen architecture (#849)
+
+One `@HiltViewModel` per stateful screen. The shape, of which
+`AchievementsViewModel` + `AchievementsScreen` is the worked reference:
+
+- **`StateFlow<XUiState>`, collected with `collectAsStateWithLifecycle()`** —
+  not `collectAsState()`, which keeps collecting while the app is backgrounded.
+- **`XUiState` is a sealed interface: `Loading`, `Error(@StringRes …)`,
+  `Content(…)`.** Never a bag of booleans beside the data — five flags admit 32
+  combinations of which four are real, and the render code pays for the other 28.
+  `when` over it with **no `else`**, so a new case is a compile error.
+- **Derived values are getters (`by lazy`) on the case, not constructor fields.**
+  A field has to be recomputed at every construction site and joins `equals`; a
+  getter replaces a per-recomposition recompute with a per-state-value one.
+- **One-shot effects (navigate, snackbar, haptic) go through `UiEffects<T>`**
+  (`ui/UiEffects.kt`) and are collected with `ObserveUiEffects`, never held in
+  state — a `StateFlow` replays to every new collector, so "navigate back" in
+  state navigates back again after a rotation.
+- **Writes run in `viewModelScope`**, never `rememberCoroutineScope` — leaving
+  the composition must not cancel a request the server has already accepted.
+- **`SavedStateHandle` only for what the server has not seen** (a typed draft, an
+  unsaved form). Server-derived data is re-fetchable, so process death has
+  nothing to restore that a reload would not produce.
+- **A screen keeps a stateless overload taking the `XUiState`.** That is what
+  makes the screen's own chrome, spinner and error branch screenshot-testable —
+  a component gallery never covered them.
+- **The ViewModel gets a JVM test** (`runTest` + `MainDispatcherRule`) driving
+  load, error and save against a fake. That test is the bar for extracting the
+  service's `…Servicing` interface; do not extract one ahead of it.
 
 ### supabase-kt sessionStatus-collector deadlock rule (ported verbatim from iOS)
 

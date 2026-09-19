@@ -2,6 +2,8 @@ package app.pbbls.android.testing
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import app.pbbls.android.services.AchievementsServicing
+import app.pbbls.android.services.LocalAchievementsService
 import app.pbbls.android.services.LocalPathService
 import app.pbbls.android.services.LocalPebbleWriteService
 import app.pbbls.android.services.LocalProfileService
@@ -21,10 +23,9 @@ import app.pbbls.android.services.SupabaseServicing
  * val graph = FakeServiceGraph(pathService = FakePathService(pebbles = fixture))
  * ```
  *
- * Only the five extracted seams are here. The other fifteen services still have
- * no interface, on purpose — #849 pulls each one as its screen gets a ViewModel
- * and a test (`apps/android/CLAUDE.md`: extract a seam when a test needs one,
- * not before).
+ * Only the extracted seams are here — the five from #848 plus one per screen
+ * #849 has migrated. The rest still have no interface, on purpose
+ * (`apps/android/CLAUDE.md`: extract a seam when a test needs one, not before).
  *
  * **Where the fakes live, and why.** Not one of them holds a `SupabaseClient` or
  * reads `BuildConfig` — that is the whole point: each screen's load, error and
@@ -38,6 +39,7 @@ class FakeServiceGraph(
     val profileService: ProfileServicing = FakeProfileService(),
     val pebbleWrite: PebbleWriteServicing = FakePebbleWriteService(),
     val referenceData: ReferenceDataServicing = FakeReferenceDataService(),
+    val achievements: AchievementsServicing = FakeAchievementsService(),
 )
 
 /**
@@ -64,6 +66,7 @@ fun PebblesTestHarness(
         LocalProfileService provides graph.profileService,
         LocalPebbleWriteService provides graph.pebbleWrite,
         LocalReferenceDataService provides graph.referenceData,
+        LocalAchievementsService provides graph.achievements,
         content = content,
     )
 }

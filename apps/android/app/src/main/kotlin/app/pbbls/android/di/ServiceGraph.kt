@@ -7,7 +7,7 @@ import app.pbbls.android.features.karma.KarmaNotificationService
 import app.pbbls.android.features.lab.services.LogsService
 import app.pbbls.android.features.path.valence.ValencePrewarmer
 import app.pbbls.android.features.pebblemedia.SnapProcessor
-import app.pbbls.android.services.AchievementsService
+import app.pbbls.android.services.AchievementsServicing
 import app.pbbls.android.services.CollectionsService
 import app.pbbls.android.services.ComposerSnapshotStore
 import app.pbbls.android.services.ConnectionsService
@@ -65,7 +65,7 @@ class ServiceGraph
         val logsService: LogsService,
         val karma: KarmaNotificationService,
         val achievementNotify: AchievementNotificationService,
-        val achievements: AchievementsService,
+        val achievements: AchievementsServicing,
         val snapProcessor: SnapProcessor,
         val valencePrewarmer: ValencePrewarmer,
     )
