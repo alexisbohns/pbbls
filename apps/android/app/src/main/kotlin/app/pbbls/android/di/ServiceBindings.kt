@@ -1,13 +1,15 @@
 package app.pbbls.android.di
 
-import app.pbbls.android.features.path.record.AndroidRecordFlowMedia
-import app.pbbls.android.features.path.record.RecordFlowMedia
+import app.pbbls.android.features.path.AndroidComposerMedia
+import app.pbbls.android.features.path.ComposerMedia
 import app.pbbls.android.services.AchievementsService
 import app.pbbls.android.services.AchievementsServicing
 import app.pbbls.android.services.PathService
 import app.pbbls.android.services.PathServicing
 import app.pbbls.android.services.PathStatsService
 import app.pbbls.android.services.PathStatsServicing
+import app.pbbls.android.services.PebbleDetailService
+import app.pbbls.android.services.PebbleDetailServicing
 import app.pbbls.android.services.PebbleDraftsService
 import app.pbbls.android.services.PebbleDraftsServicing
 import app.pbbls.android.services.PebbleWriteService
@@ -71,5 +73,9 @@ interface ServiceBindings {
 
     @Binds
     @Singleton
-    fun bindRecordFlowMedia(impl: AndroidRecordFlowMedia): RecordFlowMedia
+    fun bindComposerMedia(impl: AndroidComposerMedia): ComposerMedia
+
+    @Binds
+    @Singleton
+    fun bindPebbleDetailServicing(impl: PebbleDetailService): PebbleDetailServicing
 }

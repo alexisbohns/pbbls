@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
 import app.pbbls.android.features.karma.KarmaNotificationService
 import app.pbbls.android.features.karma.KarmaReason
+import app.pbbls.android.features.path.ComposerMedia
 import app.pbbls.android.features.path.models.ComposePebbleResponse
 import app.pbbls.android.features.path.models.KnownDraftIds
 import app.pbbls.android.features.path.models.PebbleDraftPayload
@@ -132,7 +133,7 @@ class RecordFlowViewModel
         draftsService: PebbleDraftsServicing,
         snapshots: ComposerSnapshotStoring,
         snapRepo: SnapWriteRepositing,
-        private val media: RecordFlowMedia,
+        private val media: ComposerMedia,
     ) : ViewModel() {
         private val effectsOut = UiEffects<RecordFlowEffect>(viewModelScope)
         val effects: Flow<RecordFlowEffect> = effectsOut.flow

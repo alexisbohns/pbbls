@@ -8,6 +8,14 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
+ * The single-pebble read seam (#849). Extracted because the detail and edit
+ * ViewModels have tests, which is the standing bar for an interface here.
+ */
+interface PebbleDetailServicing {
+    suspend fun load(pebbleId: String): PebbleDetail
+}
+
+/**
  * Loads a single pebble with its embedded relations for the detail/edit
  * surfaces — the `PebbleDetailSheet.load()` analog (D7). Direct PostgREST
  * embedded select, NOT an RPC: the join graph is read-only and single-request,
@@ -19,8 +27,8 @@ class PebbleDetailService
     @Inject
     constructor(
         private val supabase: SupabaseService,
-    ) {
-        suspend fun load(pebbleId: String): PebbleDetail =
+    ) : PebbleDetailServicing {
+        override suspend fun load(pebbleId: String): PebbleDetail =
             supabase.client
                 .from("pebbles")
                 .select(Columns.raw(DETAIL_SELECT)) {
@@ -48,6 +56,6 @@ class PebbleDetailService
 
 /** CompositionLocal for [PebbleDetailService] — see [LocalSupabaseService]. */
 val LocalPebbleDetailService =
-    staticCompositionLocalOf<PebbleDetailService> {
+    staticCompositionLocalOf<PebbleDetailServicing> {
         error("LocalPebbleDetailService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

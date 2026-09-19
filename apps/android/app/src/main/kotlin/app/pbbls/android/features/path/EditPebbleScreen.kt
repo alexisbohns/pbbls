@@ -1,6 +1,5 @@
 package app.pbbls.android.features.path
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -22,42 +21,22 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
-import app.pbbls.android.features.glyph.models.Glyph
-import app.pbbls.android.features.karma.KarmaReason
-import app.pbbls.android.features.karma.LocalKarmaNotificationService
 import app.pbbls.android.features.path.create.PebbleForm
 import app.pbbls.android.features.path.create.VisibilityChip
-import app.pbbls.android.features.path.models.PebbleDraft
-import app.pbbls.android.features.path.models.PebbleSnapPayload
 import app.pbbls.android.features.path.models.renderHeightDp
-import app.pbbls.android.features.pebblemedia.LocalSnapProcessor
-import app.pbbls.android.features.pebblemedia.LocalSnapWriteRepository
-import app.pbbls.android.features.pebblemedia.SnapUploadCoordinator
-import app.pbbls.android.features.pebblemedia.models.FormSnap
-import app.pbbls.android.services.ComposeResult
-import app.pbbls.android.services.LocalAchievementsService
 import app.pbbls.android.services.LocalEmotionPaletteService
-import app.pbbls.android.services.LocalPebbleDetailService
-import app.pbbls.android.services.LocalPebbleWriteService
 import app.pbbls.android.services.LocalReferenceDataService
-import app.pbbls.android.services.LocalSupabaseService
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography
-import kotlinx.coroutines.launch
-
-private const val TAG = "edit-pebble"
+import app.pbbls.android.ui.ObserveUiEffects
 
 /**
  * Full-screen surface for editing an existing pebble — ports EditPebbleSheet.swift
@@ -74,149 +53,31 @@ fun EditPebbleScreen(
     onDismiss: () -> Unit,
     onSaved: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: EditPebbleViewModel = hiltViewModel(),
 ) {
-    val detailService = LocalPebbleDetailService.current
-    val writeService = LocalPebbleWriteService.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val referenceData = LocalReferenceDataService.current
     val palettes = LocalEmotionPaletteService.current
-    val karma = LocalKarmaNotificationService.current
-    val achievements = LocalAchievementsService.current
-    val supabase = LocalSupabaseService.current
-    val snapProcessor = LocalSnapProcessor.current
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
     val isDark = isSystemInDarkTheme()
     val system = PebblesTheme.colors.system
     val accent = PebblesTheme.colors.accent
 
-    var draft by remember(pebbleId) { mutableStateOf(PebbleDraft()) }
-    var selectedGlyph by remember(pebbleId) { mutableStateOf<Glyph?>(null) }
-    var renderSvg by remember(pebbleId) { mutableStateOf<String?>(null) }
-    var strokeColor by remember(pebbleId) { mutableStateOf<String?>(null) }
-    var renderHeight by remember(pebbleId) { mutableStateOf(260.dp) }
+    LaunchedEffect(pebbleId) { viewModel.start(pebbleId) }
 
-    var isLoading by remember(pebbleId) { mutableStateOf(true) }
-    var loadError by remember(pebbleId) { mutableStateOf(false) }
-    var isSaving by remember(pebbleId) { mutableStateOf(false) }
-    var saveErrorRes by remember(pebbleId) { mutableStateOf<Int?>(null) }
-    var reloadToken by remember(pebbleId) { mutableIntStateOf(0) }
-    var isRemovingExistingSnap by remember(pebbleId) { mutableStateOf(false) }
+    ObserveUiEffects(viewModel.effects) { effect ->
+        when (effect) {
+            EditPebbleEffect.Saved -> onSaved()
+            EditPebbleEffect.Dismissed -> onDismiss()
+        }
+    }
 
-    val snapRepo = LocalSnapWriteRepository.current
-    // Form-scoped (M42 D6); seeded with the existing snap once the detail loads.
-    // The repository behind it is a stateless singleton; the coordinator holding
-    // the in-flight state is what must not outlive the form.
-    val snaps = remember(pebbleId) { SnapUploadCoordinator(repo = snapRepo) }
     val photoPicker =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-            val userId = supabase.session?.user?.id
-            if (uri != null && userId != null) {
-                scope.launch {
-                    try {
-                        val processed = snapProcessor.process(context, uri)
-                        snaps.attach(processed, userId)
-                    } catch (e: Exception) {
-                        // iOS parity: a failed pick/decode logs and drops silently.
-                        Log.e(TAG, "photo pick processing failed", e)
-                    }
-                }
-            }
+            uri?.let(viewModel::onPhotoPicked)
         }
 
-    fun dismiss() {
-        if (isSaving) return
-        scope.launch {
-            supabase.session
-                ?.user
-                ?.id
-                ?.let { snaps.cancelAndCleanup(it) }
-            onDismiss()
-        }
-    }
-
-    BackHandler(enabled = !isSaving) { dismiss() }
-
-    LaunchedEffect(pebbleId, reloadToken) {
-        isLoading = true
-        loadError = false
-        try {
-            val detail = detailService.load(pebbleId)
-            draft = PebbleDraft.from(detail)
-            selectedGlyph = detail.glyph
-            renderSvg = detail.renderSvg
-            // iOS parity: EditPebbleSheet uses strokeHex(colorScheme), NOT the
-            // intensity-based pebbleFrameColors the read banner uses.
-            strokeColor = palettes.palette(detail.emotion.id)?.strokeHex(isDark) ?: accent.primaryHex
-            // Extracted so neither line exceeds ktlint's 3-dot chain limit.
-            val sizeGroup = detail.valence.sizeGroup
-            renderHeight = sizeGroup.renderHeightDp.dp
-            // iOS seeds only the first saved snap (at most one photo — M42 D1).
-            snaps.seedExisting(
-                detail.sortedSnaps.firstOrNull()?.let { FormSnap.Existing(id = it.id, storagePath = it.storagePath) },
-            )
-            isLoading = false
-        } catch (e: Exception) {
-            Log.e(TAG, "edit pebble load failed", e)
-            loadError = true
-            isLoading = false
-        }
-    }
-
-    // Ports iOS `.onChange(of: draft.glyphId) { if nil { selectedGlyph = nil } }`.
-    LaunchedEffect(draft.glyphId) {
-        if (draft.glyphId == null) selectedGlyph = null
-    }
-
-    val selectedEmotion = draft.emotionId?.let { palettes.byEmotionId[it] }
-    val saveError = saveErrorRes?.let { stringResource(it) }
-
-    fun save() {
-        if (!draft.isValid || isSaving) return
-        // Snap gates (M42): distinct copy per state, checked before isSaving.
-        if (snaps.isUploading) {
-            saveErrorRes = R.string.pebble_save_error_photo_uploading
-            return
-        }
-        if (snaps.hasFailed) {
-            saveErrorRes = R.string.pebble_save_error_photo_failed
-            return
-        }
-        isSaving = true
-        saveErrorRes = null
-        scope.launch {
-            val userId = supabase.session?.user?.id
-            // Always-echo contract (M42 D5): existing echoes verbatim, a fresh
-            // upload sends its pair, no snap sends [] (which deletes server-side).
-            val snapPayload =
-                when (val formSnap = snaps.formSnap) {
-                    is FormSnap.Existing -> listOf(PebbleSnapPayload(formSnap.id, formSnap.storagePath, 0))
-                    is FormSnap.Pending ->
-                        snaps.pendingSnapForPayload()?.let { snap ->
-                            userId?.let { listOf(PebbleSnapPayload(snap.id, snap.storagePrefix(it), 0)) }
-                        } ?: emptyList()
-                    null -> emptyList()
-                }
-            when (val result = writeService.update(pebbleId, draft, snapPayload)) {
-                is ComposeResult.Success -> {
-                    renderSvg = result.response.renderSvg ?: renderSvg
-                    karma.notifyEarned(result.response.karmaDelta ?: 0, KarmaReason.PEBBLE_ENRICHED)
-                    // An edit can change the pebble's emotion, newly
-                    // qualifying an emotion_first badge.
-                    achievements.fireCheck()
-                    onSaved()
-                }
-                is ComposeResult.SoftSuccess -> {
-                    achievements.fireCheck()
-                    onSaved()
-                }
-                is ComposeResult.Failure -> {
-                    saveErrorRes = result.messageRes
-                    isSaving = false
-                    userId?.let { snaps.handleSaveFailure(it) }
-                }
-            }
-        }
-    }
+    val content = uiState as? EditPebbleUiState.Content
+    BackHandler(enabled = content?.isSaving != true) { viewModel.dismiss() }
 
     Column(
         modifier
@@ -225,66 +86,53 @@ fun EditPebbleScreen(
             .safeDrawingPadding(),
     ) {
         EditTopBar(
-            isSaving = isSaving,
-            saveEnabled = draft.isValid && !isLoading,
-            onCancel = { dismiss() },
-            onSave = { save() },
+            isSaving = content?.isSaving == true,
+            saveEnabled = content?.draft?.isValid == true,
+            onCancel = viewModel::dismiss,
+            onSave = viewModel::save,
         )
-        when {
-            isLoading ->
+        // Exhaustive with no `else`: a new EditPebbleUiState case must render.
+        when (val state = uiState) {
+            EditPebbleUiState.Loading ->
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
                     CircularProgressIndicator(color = accent.primary)
                 }
-            loadError ->
-                EditLoadError(onRetry = { reloadToken++ })
-            else ->
+            EditPebbleUiState.Error ->
+                EditLoadError(onRetry = viewModel::retry)
+            is EditPebbleUiState.Content -> {
+                // The stroke colour depends on the active colour scheme, so it
+                // is resolved here rather than in the load (iOS parity:
+                // EditPebbleSheet uses strokeHex(colorScheme), NOT the
+                // intensity-based pebbleFrameColors the read banner uses).
+                val strokeColor =
+                    state.emotionId?.let { palettes.palette(it)?.strokeHex(isDark) } ?: accent.primaryHex
+                val selectedEmotion = state.draft.emotionId?.let { palettes.byEmotionId[it] }
+                val saveError = state.saveErrorRes?.let { stringResource(it) }
                 Column(Modifier.fillMaxSize()) {
                     PebbleForm(
-                        draft = draft,
-                        onDraftChange = { draft = it },
+                        draft = state.draft,
+                        onDraftChange = viewModel::onDraftChange,
                         domains = referenceData.domains,
                         souls = referenceData.souls,
                         collections = referenceData.collections,
                         selectedEmotion = selectedEmotion,
-                        selectedGlyph = selectedGlyph,
-                        onGlyphPicked = { selectedGlyph = it },
+                        selectedGlyph = state.selectedGlyph,
+                        onGlyphPicked = viewModel::onGlyphPicked,
                         saveError = saveError,
-                        renderSvg = renderSvg,
+                        renderSvg = state.renderSvg,
                         strokeColor = strokeColor,
-                        renderHeight = renderHeight,
+                        renderHeight = state.renderHeightDp.dp,
                         modifier = Modifier.weight(1f),
-                        formSnap = snaps.formSnap,
+                        formSnap = state.snap,
                         onAddPhoto = {
                             photoPicker.launch(
                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
                             )
                         },
-                        onRetryPending = {
-                            supabase.session
-                                ?.user
-                                ?.id
-                                ?.let { id -> scope.launch { snaps.retryCurrent(id) } }
-                        },
-                        onRemovePending = {
-                            supabase.session
-                                ?.user
-                                ?.id
-                                ?.let { id -> scope.launch { snaps.removePending(id) } }
-                        },
-                        isRemovingExistingSnap = isRemovingExistingSnap,
-                        onRemoveExistingSnap = {
-                            scope.launch {
-                                isRemovingExistingSnap = true
-                                try {
-                                    snaps.removeExisting()
-                                } catch (e: Exception) {
-                                    Log.e(TAG, "delete_pebble_media failed", e)
-                                    saveErrorRes = R.string.photo_remove_error
-                                } finally {
-                                    isRemovingExistingSnap = false
-                                }
-                            }
-                        },
+                        onRetryPending = viewModel::onRetryPhoto,
+                        onRemovePending = viewModel::onRemovePhoto,
+                        isRemovingExistingSnap = state.isRemovingExistingSnap,
+                        onRemoveExistingSnap = viewModel::onRemoveExistingSnap,
                     )
                     // Grade chip (M51) — mirrors iOS EditPebbleSheet's bottomBar
                     // ToolbarItemGroup, matching CreatePebbleScreen's row treatment.
@@ -295,10 +143,14 @@ fun EditPebbleScreen(
                                 .padding(horizontal = 8.dp, vertical = 4.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        VisibilityChip(value = draft.visibility, onChange = { draft = draft.copy(visibility = it) })
+                        VisibilityChip(
+                            value = state.draft.visibility,
+                            onChange = { viewModel.onDraftChange(state.draft.copy(visibility = it)) },
+                        )
                         Spacer(Modifier.weight(1f))
                     }
                 }
+            }
         }
     }
 }

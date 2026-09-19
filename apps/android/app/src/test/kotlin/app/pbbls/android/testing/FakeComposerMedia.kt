@@ -1,12 +1,12 @@
 package app.pbbls.android.testing
 
 import android.net.Uri
-import app.pbbls.android.features.path.record.RecordFlowMedia
+import app.pbbls.android.features.path.ComposerMedia
 import app.pbbls.android.features.pebblemedia.ProcessedImage
 import java.time.OffsetDateTime
 
 /**
- * [RecordFlowMedia] for a JVM test (#849).
+ * [ComposerMedia] for a JVM test (#849).
  *
  * The two photo methods throw rather than returning a plausible nothing: they
  * take a `Uri`, which cannot be constructed off device, so any test reaching
@@ -14,7 +14,7 @@ import java.time.OffsetDateTime
  * loudly is the point — a fake that quietly returned null here would let such a
  * test pass while asserting nothing.
  */
-class FakeRecordFlowMedia : RecordFlowMedia {
+class FakeComposerMedia : ComposerMedia {
     var prewarmCount = 0
         private set
 
