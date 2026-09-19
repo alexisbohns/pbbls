@@ -8,11 +8,12 @@
  * achievement unlocks), then
  * deletes the seller through the real delete-account edge function and asserts
  * the roadmap §6 bar: every seller row gone, the buyer's glyph still renders
- * AND stays paid (user_id = null, is_system false, entitlement intact,
- * delisted-but-approved submission), the storage prefix is empty, the auth
- * user is gone, and a purge_account re-run converges to zero counts. The
- * buyer is then deleted through the same edge path (dogfoods the buyer-side
- * purge: own entitlement before the purchase karma_event it references).
+ * AND stays paid (user_id = null, is_system false, is_custom true,
+ * entitlement intact, delisted-but-approved submission), the storage prefix
+ * is empty, the auth user is gone, and a purge_account re-run converges to
+ * zero counts. The buyer is then deleted through the same edge path
+ * (dogfoods the buyer-side purge: own entitlement before the purchase
+ * karma_event it references).
  *
  * Run:
  *   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... SUPABASE_ANON_KEY=... \
@@ -664,7 +665,7 @@ try {
   }
 
   const { data: keptGlyph } = await admin
-    .from("glyphs").select("user_id, strokes, name, is_system").eq("id", soldGlyph.id).maybeSingle();
+    .from("glyphs").select("user_id, strokes, name, is_system, is_custom").eq("id", soldGlyph.id).maybeSingle();
   check("sold glyph still exists", !!keptGlyph);
   check("sold glyph is anonymized (user_id null)", keptGlyph?.user_id === null);
   check("sold glyph strokes intact (buyer's glyph still renders)",
@@ -687,6 +688,16 @@ try {
   // renders, and the entitlement row is intact in every version of this bug.
   check("anonymized sold glyph is NOT marked is_system",
     keptGlyph?.is_system === false, JSON.stringify(keptGlyph?.is_system));
+
+  // #874: the same drift, one layer down. `is_custom` was generated from
+  // ownership, so anonymizing the row flipped it true -> false and the admin
+  // "% of pebbles with a custom glyph" metric filed bought artwork under
+  // system-seeded. It is now `not is_system`, which is the honest question:
+  // somebody drew this. The assertion is here rather than on the analytics
+  // RPCs because those are admin-gated and this harness owns the purge
+  // fixture — reaching this state at all needs the service role.
+  check("anonymized sold glyph is STILL is_custom (analytics does not lose it)",
+    keptGlyph?.is_custom === true, JSON.stringify(keptGlyph?.is_custom));
 
   const { data: strangerMay, error: strangerMayErr } = await stranger
     .rpc("can_use_glyph", { p_glyph_id: soldGlyph.id, p_user: strangerUserId });
