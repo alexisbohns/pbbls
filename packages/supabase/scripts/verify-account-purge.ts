@@ -37,6 +37,15 @@
  * design, so this script still has to remove it. Seed shapes the clients
  * actually decode, and clean up what outlives the purge.
  *
+ * It also carries the profiles_glyph_usable assertions that
+ * verify-glyph-usability.ts structurally cannot (#875). That trigger guards the
+ * TRANSITION rather than the state, so proving it needs a profile whose mark
+ * STOPPED being usable while it stood — and the only cheap way to manufacture
+ * that is to revoke an entitlement with the service role, which the anon
+ * harness does not hold. The buyer wears the sold glyph here for two reasons at
+ * once: profiles.glyph_id is an arm of the purge's own `v_kept` predicate, and
+ * it is the row the purge must not disturb on its way past.
+ *
  * It also carries the content_reports assertions that verify-content-reports.ts
  * structurally cannot (#831): that harness is anon-only, so it can neither read
  * the table back nor mint an admin past profiles_privileged_guard. Here, the
@@ -424,6 +433,15 @@ try {
     .from("glyph_favourites").insert({ user_id: buyerId, glyph_id: soldGlyph.id });
   if (favBuyerErr) throw new Error(`buyer favourite: ${favBuyerErr.message}`);
 
+  // The buyer WEARS what they bought (#875). profiles.glyph_id is one of the
+  // arms of the purge's `v_kept` predicate, so this is the row that decides
+  // whether the seller's glyph is anonymized or deleted — and, since #875 put a
+  // can_use_glyph trigger on the column, the row the purge must not disturb on
+  // its way past. Set through the real client path, so the trigger is in play.
+  const { error: buyerMarkErr } = await buyer
+    .from("profiles").update({ glyph_id: soldGlyph.id }).eq("user_id", buyerId);
+  if (buyerMarkErr) throw new Error(`buyer profile mark: ${buyerMarkErr.message}`);
+
   console.log(`Seeded: pebble ${pebbleId}, sold glyph ${soldGlyph.id}, unsold glyph ${unsoldGlyph.id}\n`);
 
   // ---------------------------------------------------------------------------
@@ -736,6 +754,28 @@ try {
   check("kept submission delisted", keptSub?.listed === false);
   check("kept submission detached from seller", keptSub?.submitter_id === null);
 
+  // #875, ordering constraint 1: the buyer's profile MARK survives the seller's
+  // departure. The purge anonymizes the glyph (`update glyphs set user_id =
+  // null`) rather than writing to profiles, so profiles_glyph_usable never
+  // fires and the mark is left alone. A trigger written to check STATE instead
+  // of the transition would not break this assertion — it would break the next
+  // one.
+  const { data: buyerProfile } = await admin
+    .from("profiles").select("glyph_id, display_name").eq("user_id", buyerId).maybeSingle();
+  check("buyer's profile mark survives the seller's purge",
+    buyerProfile?.glyph_id === soldGlyph.id, JSON.stringify(buyerProfile?.glyph_id));
+
+  // …and the profile is still editable. `update_profile` always names glyph_id
+  // in its SET list, so every rename re-fires the guard against a glyph whose
+  // author no longer exists. This does not yet discriminate the change-only
+  // branch — the buyer's entitlement survives the purge (asserted below), so
+  // the mark is still usable and a state-checking guard would pass too. The
+  // discriminating case needs an UNUSABLE standing mark, which is section 6.
+  const { error: buyerRenameErr } = await buyer
+    .rpc("update_profile", { p_display_name: `purge-test buyer renamed ${runId}` });
+  check("buyer can still rename with a mark whose author is purged",
+    buyerRenameErr === null, buyerRenameErr?.message);
+
   const buyerEntitlements = await countRows("glyph_entitlements", "user_id", buyerId);
   check("buyer entitlement survives", buyerEntitlements === 1, `found ${buyerEntitlements}`);
   const buyerFavs = await countRows("glyph_favourites", "user_id", buyerId);
@@ -778,7 +818,66 @@ try {
     rerunErr ? rerunErr.message : JSON.stringify(rerun));
 
   // -------------------------------------------------------------------------
-  // 6. Cleanup: the buyer deletes their own account through the same path
+  // 6. #875: a standing mark that STOPPED being usable.
+  //
+  // profiles_glyph_usable guards the TRANSITION, not the state — it returns
+  // early when an UPDATE names glyph_id without moving it. Every assertion so
+  // far would pass just as well against a state-checking guard, because every
+  // mark in this run is still usable. This is the one that would not.
+  //
+  // Revoking the entitlement with the service role is the cheapest way to
+  // manufacture the state; a real user reaches it through
+  // admin_attribute_glyph (20260701102810), which moves a glyph to a new owner
+  // and detaches nothing from the old one. Either way the mark was legitimate
+  // when it was written, and losing it must not cost the person their name:
+  // `update_profile` names glyph_id on EVERY call, and there is no UX to clear
+  // the mark, so a state-checking guard locks them out of their own profile
+  // permanently.
+  //
+  // Runs last among the assertions: it destroys the buyer's entitlement, which
+  // section 5 asserts survives the purge.
+  // -------------------------------------------------------------------------
+  const { error: revokeErr } = await admin
+    .from("glyph_entitlements").delete().eq("user_id", buyerId).eq("glyph_id", soldGlyph.id);
+  if (revokeErr) throw new Error(`revoke buyer entitlement: ${revokeErr.message}`);
+
+  const { data: nowUnusable } = await buyer
+    .rpc("can_use_glyph", { p_glyph_id: soldGlyph.id, p_user: buyerId });
+  check("revoking the entitlement makes the standing mark unusable",
+    nowUnusable === false, String(nowUnusable));
+
+  const { error: unusableRenameErr } = await buyer
+    .rpc("update_profile", { p_display_name: `purge-test buyer relabelled ${runId}` });
+  check("a rename still succeeds with an unusable standing mark",
+    unusableRenameErr === null, unusableRenameErr?.message);
+
+  const { data: afterRename } = await admin
+    .from("profiles").select("glyph_id").eq("user_id", buyerId).maybeSingle();
+  check("…and the rename left the unusable mark in place (it was not cleared)",
+    afterRename?.glyph_id === soldGlyph.id, JSON.stringify(afterRename?.glyph_id));
+
+  // The other half: an actual transition is still refused. Move the mark away
+  // (a glyph the buyer may use), then try to move it back — that second write
+  // IS a change, and the guard has to bite. Without this pair, "the rename
+  // passed" is indistinguishable from "the trigger stopped firing".
+  const { error: toSystemErr } = await buyer
+    .from("profiles").update({ glyph_id: systemGlyph.id }).eq("user_id", buyerId);
+  check("the buyer may move their mark to a system glyph", toSystemErr === null,
+    toSystemErr?.message);
+
+  const { error: reattachErr } = await buyer
+    .from("profiles").update({ glyph_id: soldGlyph.id }).eq("user_id", buyerId);
+  check("…but may NOT move it back once the entitlement is gone",
+    reattachErr !== null && reattachErr.message.includes("Glyph not usable by user"),
+    reattachErr?.message ?? "the profile was updated");
+
+  const { data: afterReattach } = await admin
+    .from("profiles").select("glyph_id").eq("user_id", buyerId).maybeSingle();
+  check("…and the stored mark is still the system glyph",
+    afterReattach?.glyph_id === systemGlyph.id, JSON.stringify(afterReattach?.glyph_id));
+
+  // -------------------------------------------------------------------------
+  // 7. Cleanup: the buyer deletes their own account through the same path
   //    (exercises own-entitlement-before-karma_events on the buyer side).
   // -------------------------------------------------------------------------
   const buyerRes = await invokeDeleteAccount(buyerSession.session.access_token);
