@@ -5,6 +5,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
+import app.pbbls.android.di.ApplicationScope
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Google
@@ -14,8 +15,6 @@ import io.github.jan.supabase.auth.user.UserSession
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -42,6 +41,9 @@ class SupabaseService
     @Inject
     constructor(
         val client: SupabaseClient,
+        // Scope for work that REACTS to a status change (never inline in the
+        // collector — see start()).
+        @ApplicationScope private val scope: CoroutineScope,
     ) {
         /** The current Supabase session, or null when signed out. */
         var session: UserSession? by mutableStateOf(null)
@@ -57,10 +59,6 @@ class SupabaseService
 
         /** Guards the OAuth display-name patch so it runs at most once per process. */
         private var didAttemptNamePatch = false
-
-        // Scope for work that REACTS to a status change (never inline in the
-        // collector — see start()).
-        private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
         /**
          * Collects supabase-kt's auth-status stream and keeps [session] +

@@ -3,8 +3,6 @@ package app.pbbls.android.services
 import androidx.compose.runtime.staticCompositionLocalOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -43,12 +41,6 @@ class SnapURLCache internal constructor(
     private val scope: CoroutineScope,
     private val nowMillis: () -> Long,
 ) {
-    constructor(supabase: SupabaseService) : this(
-        provider = PebbleSnapRepository(supabase),
-        scope = CoroutineScope(SupervisorJob() + Dispatchers.IO),
-        nowMillis = System::currentTimeMillis,
-    )
-
     private data class Entry(
         val urls: SnapUrls,
         val expiresAtMillis: Long,
