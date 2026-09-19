@@ -50,8 +50,10 @@ import app.pbbls.android.features.glyph.views.GlyphViewCase
 import app.pbbls.android.features.path.create.pickers.GlyphPickerSheet
 import app.pbbls.android.features.profile.components.ConfirmDeleteDialog
 import app.pbbls.android.features.profile.components.DeleteErrorDialog
+import app.pbbls.android.services.DataError
 import app.pbbls.android.services.LocalProfileService
 import app.pbbls.android.services.LocalSupabaseService
+import app.pbbls.android.services.toDataError
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesListSection
 import app.pbbls.android.theme.PebblesScreen
@@ -152,7 +154,7 @@ fun SettingsScreen(
                     savedHandle = claimed
                 } catch (e: Exception) {
                     Log.e(TAG, "set_handle failed", e)
-                    val code = handleErrorStringRes(e)
+                    val code = handleErrorStringRes(e.toDataError())
                     if (code != null) handleErrorRes = code else showSaveError = true
                     isSaving = false
                     return@launch
@@ -644,13 +646,18 @@ internal fun settingsIsDirty(
  * stable codes; anything else (`not_found`, a dropped connection) is not a
  * verdict on the handle, so it returns null and the caller falls back to the
  * generic save error.
+ *
+ * Takes the decoded [DataError] rather than the `Throwable` (#850): it used to
+ * scan `error.message`, which is a blob containing the request URL and headers
+ * as well as the condition. Only a deliberately raised condition is a verdict
+ * on the handle, so anything that is not a [DataError.Conflict] returns null.
  */
-internal fun handleErrorStringRes(error: Throwable): Int? {
-    val description = error.message ?: error.toString()
-    return when {
-        description.contains("handle_taken") -> R.string.settings_handle_error_taken
-        description.contains("handle_reserved") -> R.string.settings_handle_error_reserved
-        description.contains("invalid_handle") -> R.string.settings_handle_error_invalid
+internal fun handleErrorStringRes(error: DataError): Int? {
+    val conflict = error as? DataError.Conflict ?: return null
+    return when (conflict.code) {
+        "handle_taken" -> R.string.settings_handle_error_taken
+        "handle_reserved" -> R.string.settings_handle_error_reserved
+        "invalid_handle" -> R.string.settings_handle_error_invalid
         else -> null
     }
 }

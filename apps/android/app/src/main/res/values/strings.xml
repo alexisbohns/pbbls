@@ -25,6 +25,22 @@
     <string name="auth_email_placeholder">Email</string>
     <string name="auth_password_placeholder">Password</string>
     <string name="auth_email_plus_error">The \'+\' character is not allowed in email addresses.</string>
+
+    <!-- Auth failures (#850). Replaced `authError = e.message`, which rendered
+         whatever supabase-kt / Ktor / GoTrue put in the exception, unlocalized
+         (D9). Keyed off GoTrue's machine `AuthErrorCode`, never its wording. -->
+    <string name="auth_error_generic">Something went wrong. Please try again.</string>
+    <string name="auth_error_invalid_credentials">That email and password don\'t match. Please try again.</string>
+    <string name="auth_error_email_exists">There\'s already an account with this email. Try signing in instead.</string>
+    <string name="auth_error_email_not_confirmed">Please confirm your email first. Check your inbox for the link.</string>
+    <string name="auth_error_weak_password">Please choose a stronger password.</string>
+    <string name="auth_error_rate_limited">Too many attempts. Please wait a moment and try again.</string>
+    <string name="auth_error_user_banned">This account has been suspended.</string>
+    <string name="auth_error_signup_disabled">New accounts aren\'t available right now.</string>
+    <string name="auth_error_invalid_email">Please enter a valid email address.</string>
+
+    <!-- Shared across every feature's error mapping: no answer from the server. -->
+    <string name="error_offline">You appear to be offline. Please check your connection.</string>
     <string name="auth_consent_prefix">I accept the </string>
     <string name="auth_consent_terms_link">Terms of Service</string>
     <string name="auth_consent_privacy_link">Privacy Policy</string>

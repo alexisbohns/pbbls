@@ -63,45 +63,51 @@ class InviteLinkTest {
 }
 
 /**
- * Mirrors the iOS `ConnectionsError.from` mapping. The SQL error slugs are a
- * wire contract, so this pins them.
+ * [connectionsErrorMessage] over the decoded [DataError] (#850).
+ *
+ * The slugs are a wire contract, so this pins them — but against the value
+ * PostgREST actually sends (the bare condition, per
+ * `PostgrestImpl.parseErrorResponse`), not the decorated text the substring
+ * version used to be fed.
  */
 class ConnectionsErrorMessageTest {
+    private fun conflict(code: String) = connectionsErrorMessage(DataError.Conflict(code))
+
     @Test
-    fun `maps own-invite before the expiry slugs`() {
-        assertEquals(
-            R.string.connections_error_own_invite,
-            connectionsErrorMessage("ERROR: cannot_accept_own_invite"),
-        )
+    fun `maps the own-invite rejection`() {
+        assertEquals(R.string.connections_error_own_invite, conflict("cannot_accept_own_invite"))
     }
 
     @Test
     fun `maps expired and not-found to the same unusable copy`() {
         // A block in either direction also arrives as invite_expired — the
         // accept path never confirms a block.
-        assertEquals(
-            R.string.connections_error_invite_unusable,
-            connectionsErrorMessage("invite_expired"),
-        )
-        assertEquals(
-            R.string.connections_error_invite_unusable,
-            connectionsErrorMessage("invite_not_found"),
-        )
+        assertEquals(R.string.connections_error_invite_unusable, conflict("invite_expired"))
+        assertEquals(R.string.connections_error_invite_unusable, conflict("invite_not_found"))
     }
 
     @Test
     fun `maps the auth slug`() {
-        assertEquals(R.string.connections_error_session, connectionsErrorMessage("not_authenticated"))
+        assertEquals(R.string.connections_error_session, conflict("not_authenticated"))
     }
 
     @Test
-    fun `is case insensitive`() {
-        assertEquals(R.string.connections_error_invite_unusable, connectionsErrorMessage("INVITE_EXPIRED"))
+    fun `an unrecognised condition falls back to the generic copy`() {
+        assertEquals(R.string.connections_error_generic, conflict("some_new_condition"))
+    }
+
+    /**
+     * A 401/403 is a dead session whatever the body says, so it earns the
+     * session copy rather than the generic one — which the substring version
+     * could not tell apart.
+     */
+    @Test
+    fun `an unauthorized response reads as a session problem`() {
+        assertEquals(R.string.connections_error_session, connectionsErrorMessage(DataError.Unauthorized))
     }
 
     @Test
-    fun `falls back for null and unknown text`() {
-        assertEquals(R.string.connections_error_generic, connectionsErrorMessage(null))
-        assertEquals(R.string.connections_error_generic, connectionsErrorMessage("some other failure"))
+    fun `offline gets its own copy`() {
+        assertEquals(R.string.error_offline, connectionsErrorMessage(DataError.Network))
     }
 }

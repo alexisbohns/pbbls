@@ -45,6 +45,7 @@ import app.pbbls.android.R
 import app.pbbls.android.services.ConnectionInvite
 import app.pbbls.android.services.LocalConnectionsService
 import app.pbbls.android.services.connectionsErrorMessage
+import app.pbbls.android.services.toDataError
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar
@@ -89,7 +90,7 @@ fun InviteScreen(
             isLoading = false
         } catch (e: Exception) {
             Log.e(TAG, "invite load failed", e)
-            errorRes = connectionsErrorMessage(e.message)
+            errorRes = connectionsErrorMessage(e.toDataError())
             isLoading = false
         }
     }
@@ -120,7 +121,7 @@ fun InviteScreen(
                     invite = service.createInvite(rotate = true)
                 } catch (e: Exception) {
                     Log.e(TAG, "invite rotation failed", e)
-                    errorRes = connectionsErrorMessage(e.message)
+                    errorRes = connectionsErrorMessage(e.toDataError())
                 }
                 isRotating = false
             }

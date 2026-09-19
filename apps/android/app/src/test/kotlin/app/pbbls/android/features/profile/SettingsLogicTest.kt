@@ -1,6 +1,7 @@
 package app.pbbls.android.features.profile
 
 import app.pbbls.android.R
+import app.pbbls.android.services.DataError
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -91,22 +92,29 @@ class SettingsLogicTest {
     }
 
     @Test
-    fun `set_handle codes map to inline errors, everything else falls through`() {
+    fun `set_handle conditions map to inline errors, everything else falls through`() {
         assertEquals(
             R.string.settings_handle_error_taken,
-            handleErrorStringRes(RuntimeException("...handle_taken...")),
+            handleErrorStringRes(DataError.Conflict("handle_taken")),
         )
         assertEquals(
             R.string.settings_handle_error_reserved,
-            handleErrorStringRes(RuntimeException("...handle_reserved...")),
+            handleErrorStringRes(DataError.Conflict("handle_reserved")),
         )
         assertEquals(
             R.string.settings_handle_error_invalid,
-            handleErrorStringRes(RuntimeException("...invalid_handle...")),
+            handleErrorStringRes(DataError.Conflict("invalid_handle")),
         )
-        // not_found, timeouts and transport failures are not handle verdicts.
-        assertNull(handleErrorStringRes(RuntimeException("not_found")))
-        assertNull(handleErrorStringRes(RuntimeException("timeout")))
+        // A condition the RPC does raise, but not about the handle.
+        assertNull(handleErrorStringRes(DataError.Conflict("not_found")))
+        // Transport failures are not handle verdicts. Before #850 these were
+        // distinguished only by not happening to contain one of the slugs —
+        // a `not_found` reply whose URL contained "invalid_handle" would have
+        // been shown as an invalid handle.
+        assertNull(handleErrorStringRes(DataError.Network))
+        assertNull(handleErrorStringRes(DataError.NotFound))
+        assertNull(handleErrorStringRes(DataError.Unauthorized))
+        assertNull(handleErrorStringRes(DataError.Unknown(null)))
     }
 
     @Test

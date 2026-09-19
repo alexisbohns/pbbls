@@ -1,5 +1,6 @@
 package app.pbbls.android.features.auth
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -42,6 +43,9 @@ import app.pbbls.android.components.openLegalDoc
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography
 import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
+
+private const val TAG = "auth"
 
 private val ErrorRed = Color(0xFFDC2626)
 
@@ -70,7 +74,8 @@ fun AuthScreen(
     var termsAccepted by rememberSaveable { mutableStateOf(false) }
     var privacyAccepted by rememberSaveable { mutableStateOf(false) }
     var isSubmitting by remember { mutableStateOf(false) }
-    var authError by remember { mutableStateOf<String?>(null) }
+    // A resource id, never a message: raw SDK text must not reach a user (D9, #850).
+    var authErrorRes by remember { mutableStateOf<Int?>(null) }
     // True while the raw input contained a '+' that was just stripped — drives the
     // inline explanation. Lowercasing is silent on purpose (no error shown).
     var showPlusError by remember { mutableStateOf(false) }
@@ -86,14 +91,14 @@ fun AuthScreen(
         )
 
     fun onEmailChange(raw: String) {
-        if (authError != null) authError = null
+        if (authErrorRes != null) authErrorRes = null
         showPlusError = raw.contains("+")
         email = AuthLogic.normalizeEmailInput(raw)
     }
 
     fun onModeChange(newMode: AuthMode) {
         mode = newMode
-        authError = null
+        authErrorRes = null
         if (newMode == AuthMode.LOGIN) {
             termsAccepted = false
             privacyAccepted = false
@@ -103,11 +108,14 @@ fun AuthScreen(
     fun submit() {
         scope.launch {
             isSubmitting = true
-            authError = null
+            authErrorRes = null
             try {
                 onSubmit(mode, email.trim(), password)
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                authError = e.message
+                Log.e(TAG, "sign-in/up failed", e)
+                authErrorRes = authErrorMessage(e)
             }
             isSubmitting = false
         }
@@ -117,11 +125,14 @@ fun AuthScreen(
         if (isSubmitting) return
         scope.launch {
             isSubmitting = true
-            authError = null
+            authErrorRes = null
             try {
                 onGoogleSignIn()
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
-                authError = e.message
+                Log.e(TAG, "google sign-in failed", e)
+                authErrorRes = authErrorMessage(e)
             }
             isSubmitting = false
         }
@@ -169,7 +180,7 @@ fun AuthScreen(
                 placeholder = stringResource(R.string.auth_password_placeholder),
                 value = password,
                 onValueChange = {
-                    if (authError != null) authError = null
+                    if (authErrorRes != null) authErrorRes = null
                     password = it
                 },
                 isSecure = true,
@@ -202,9 +213,9 @@ fun AuthScreen(
             }
         }
 
-        if (authError != null) {
+        authErrorRes?.let { messageRes ->
             Text(
-                text = authError.orEmpty(),
+                text = stringResource(messageRes),
                 style = PebblesTypography.subhead.copy(fontSize = 12.sp),
                 color = ErrorRed,
                 textAlign = TextAlign.Start,

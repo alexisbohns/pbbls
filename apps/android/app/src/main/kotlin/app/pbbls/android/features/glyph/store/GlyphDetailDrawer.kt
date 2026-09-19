@@ -37,6 +37,7 @@ import app.pbbls.android.features.glyph.services.LocalGlyphMarketService
 import app.pbbls.android.features.glyph.services.glyphMarketErrorMessage
 import app.pbbls.android.features.glyph.views.GlyphBanner
 import app.pbbls.android.features.glyph.views.GlyphBannerSubtitle
+import app.pbbls.android.services.toDataError
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
@@ -111,7 +112,7 @@ internal fun GlyphSwapPanel(
                 true
             } catch (e: Exception) {
                 Log.e(TAG, "glyph swap failed", e)
-                errorRes = glyphMarketErrorMessage(e.message)
+                errorRes = glyphMarketErrorMessage(e.toDataError())
                 false
             } finally {
                 isBuying = false

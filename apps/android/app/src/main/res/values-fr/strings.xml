@@ -20,6 +20,19 @@
     <string name="auth_email_placeholder">E-mail</string>
     <string name="auth_password_placeholder">Mot de passe</string>
     <string name="auth_email_plus_error">Le caractère \'+\' n\'est pas autorisé dans les adresses e-mail.</string>
+
+    <!-- Voir values/strings.xml : erreurs d\'authentification (#850). -->
+    <string name="auth_error_generic">Une erreur est survenue. Réessaie.</string>
+    <string name="auth_error_invalid_credentials">Cet e-mail et ce mot de passe ne correspondent pas. Réessaie.</string>
+    <string name="auth_error_email_exists">Un compte existe déjà avec cet e-mail. Essaie plutôt de te connecter.</string>
+    <string name="auth_error_email_not_confirmed">Confirme d\'abord ton e-mail. Le lien est dans ta boîte de réception.</string>
+    <string name="auth_error_weak_password">Choisis un mot de passe plus solide.</string>
+    <string name="auth_error_rate_limited">Trop de tentatives. Patiente un instant et réessaie.</string>
+    <string name="auth_error_user_banned">Ce compte a été suspendu.</string>
+    <string name="auth_error_signup_disabled">La création de compte est indisponible pour le moment.</string>
+    <string name="auth_error_invalid_email">Saisis une adresse e-mail valide.</string>
+
+    <string name="error_offline">Tu sembles hors ligne. Vérifie ta connexion.</string>
     <string name="auth_consent_prefix">J\'accepte </string>
     <string name="auth_consent_terms_link">les Conditions d\'utilisation</string>
     <string name="auth_consent_privacy_link">la politique de confidentialité</string>
