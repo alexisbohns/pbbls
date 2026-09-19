@@ -21,9 +21,11 @@
  *      The profile is the one that was unguarded until #875, and it is the most
  *      visible glyph a user has — it renders on their public profile.
  *   2. The guard did not over-block: a system glyph and the caller's own carve
- *      both still attach, and — for the profile — naming glyph_id in an UPDATE
- *      without changing it still succeeds, which is what keeps `update_profile`
- *      (it always names the column) usable for a plain rename.
+ *      both still attach, and — for the soul and the profile alike — naming
+ *      glyph_id in an UPDATE without changing it still succeeds, which is what
+ *      keeps a plain rename working for the two clients that always name the
+ *      column (`update_profile` for the profile; the direct souls write on iOS
+ *      and Android, whose payloads carry name and glyphId together).
  *   3. `is_system` is not self-settable. Every negative assertion checks the
  *      error AND re-reads the stored value — a 0-row RLS filter would also leave
  *      the value unchanged while proving nothing (the lesson
@@ -47,11 +49,19 @@
  * `enforce_glyph_system_flag`'s allowance AND to the negative assertions here in
  * the same change. An unguarded write path is a free-glyph vulnerability.
  *
- * STANDING RULE (#875): a new column that holds a glyph_id is guarded by
- * `can_use_glyph` at the moment it is added, and gains its negative assertion
- * here. profiles.glyph_id shipped in 20260516104231 and went unguarded for four
+ * STANDING RULE (#875, #879): a new column that holds a glyph_id is guarded by
+ * `can_use_glyph` at the moment it is added, and gains BOTH assertions here —
+ * the negative (an unusable glyph cannot be attached) and the change-only
+ * positive (naming the column without moving it is not an attachment). A guard
+ * that checks the state rather than the transition freezes every other edit to
+ * the row the moment a legitimate standing glyph stops being usable.
+ *
+ * profiles.glyph_id shipped in 20260516104231 and went unguarded for four
  * months because the guard (20260712000000) enumerated the surfaces that
  * existed when it was written and nothing re-asked the question afterwards.
+ * The souls arm then shipped guarding the state, and froze the rename path on
+ * two of the three clients for two months (#879) — the other half of the same
+ * lesson: enumerating the surfaces is not enough if the rule is the wrong one.
  */
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
@@ -195,9 +205,36 @@ try {
   check("create_pebble accepts the caller's own carve",
     (await attachToPebble(bob, bobGlyph, emotionId, "own")) === null);
 
-  const { error: ownSoulErr } = await bob.client
-    .from("souls").insert({ user_id: bob.id, name: `glyph-verify own soul ${runId}`, glyph_id: bobGlyph });
+  const { data: ownSoul, error: ownSoulErr } = await bob.client
+    .from("souls")
+    .insert({ user_id: bob.id, name: `glyph-verify own soul ${runId}`, glyph_id: bobGlyph })
+    .select("id").single();
   check("souls accepts the caller's own carve", ownSoulErr === null, ownSoulErr?.message);
+
+  // The change-only half of the souls guard (#879), mirroring the profile arm
+  // below. There is no update_soul RPC — iOS and Android write the table
+  // directly with a payload that always carries BOTH keys
+  // (`SoulUpdatePayload` has non-optional name and glyphId;
+  // `SoulsService.update(soulId, name, glyphId)` always puts both), so a plain
+  // rename fires the trigger with an unchanged glyph_id. Send that exact
+  // shape. This passes against a state-checking guard too — the glyph is still
+  // usable here — so it is a regression guard, not the discriminator; the
+  // discriminating case needs an UNUSABLE standing glyph and lives in
+  // verify-account-purge.ts §6, which holds the service role this harness
+  // deliberately lacks.
+  const soulRenamed = `glyph-verify own soul renamed ${runId}`;
+  const { error: soulRenameErr } = await bob.client
+    .from("souls")
+    .update({ name: soulRenamed, glyph_id: bobGlyph })
+    .eq("id", ownSoul?.id ?? "");
+  check("a soul rename still works with glyph_id named but unchanged",
+    soulRenameErr === null, soulRenameErr?.message);
+
+  const { data: renamedSoul } = await bob.client
+    .from("souls").select("name, glyph_id").eq("id", ownSoul?.id ?? "").maybeSingle();
+  check("…and the rename left the soul's glyph in place",
+    renamedSoul?.name === soulRenamed && renamedSoul?.glyph_id === bobGlyph,
+    JSON.stringify(renamedSoul));
 
   // can_use_glyph directly — the helper the three call sites share.
   const { data: usableOwn } = await bob.client
