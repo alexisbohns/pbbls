@@ -321,11 +321,16 @@ fails the PR and uploads the reference/actual/diff triptych as
   fix is to re-baseline, never to weaken the threshold or re-ignore the
   references.
 - **Re-baseline is one step: add the `rebaseline-screenshots` label to the PR.**
-  `android-screenshots.yml` re-renders and commits the new PNGs to the branch.
-  Because that push uses `GITHUB_TOKEN`, it does not re-trigger workflows — **re-run
-  the Android workflow afterwards** or the PR keeps showing the old red check. The
-  same workflow runs from the Actions tab on any ref; dispatched on `main` it
-  opens a branch instead of writing to it.
+  `android-screenshots.yml` re-renders and commits the new PNGs to the branch. The
+  same workflow runs from the Actions tab on any ref; dispatched on `main` it opens
+  a branch instead of writing to it.
+- **After a re-baseline the Android check is still red, and it needs a hand.** The
+  push is attributed to `github-actions[bot]`, so the runs queued against the new
+  commit are held at `action_required`: approve them from the PR's Checks tab (or
+  `gh api --method POST repos/<owner>/<repo>/actions/runs/<id>/approve`), or push
+  any further commit yourself. Do **not** re-run the failed run — a re-run replays
+  the commit it was created for, which is the tree from before the re-baseline.
+  The workflow's own step summary says all of this at the moment you need it.
 - **Never commit references rendered on your own machine.** `./gradlew
   updateDebugScreenshotTest` locally is the right way to *look* at a change (it is
   ~35 s for the whole suite), but CI is the authority. Measured on this suite:
