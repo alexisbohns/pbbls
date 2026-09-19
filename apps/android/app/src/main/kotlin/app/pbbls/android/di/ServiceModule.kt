@@ -14,7 +14,7 @@ import kotlinx.coroutines.CoroutineScope
 import javax.inject.Singleton
 
 /**
- * The two of this app's own service classes that do not carry an `@Inject`
+ * The three of this app's own service classes that do not carry an `@Inject`
  * constructor (#848). Everything else is `@Singleton class X @Inject
  * constructor(…)`; if you are adding a service, prefer that and do not grow
  * this file.
@@ -28,6 +28,12 @@ import javax.inject.Singleton
  *
  * - [ComposerSnapshotStore] keeps the `@ApplicationContext` qualifier out of a
  *   service class that is otherwise framework-free.
+ * - [PebbleSnapRepository] is assembled here because three screens used to
+ *   `new` one from a `SupabaseService` they read off a CompositionLocal. Once
+ *   that local carries `SupabaseServicing` (#848) they cannot, and they should
+ *   not have been building a repository anyway — they take
+ *   [app.pbbls.android.features.pebblemedia.LocalSnapWriteRepository] instead.
+ *   The class is stateless, so one instance serves every form.
  * - [SnapURLCache]'s real injection point is its `internal` primary
  *   constructor, which `SnapURLCacheTest` drives with a fake provider, a test
  *   scope and a fake clock. Annotating it would make the test's seam part of
@@ -38,12 +44,16 @@ import javax.inject.Singleton
 object ServiceModule {
     @Provides
     @Singleton
+    fun providePebbleSnapRepository(supabase: SupabaseService): PebbleSnapRepository = PebbleSnapRepository(supabase)
+
+    @Provides
+    @Singleton
     fun provideSnapURLCache(
-        supabase: SupabaseService,
+        snaps: PebbleSnapRepository,
         @IoApplicationScope scope: CoroutineScope,
     ): SnapURLCache =
         SnapURLCache(
-            provider = PebbleSnapRepository(supabase),
+            provider = snaps,
             scope = scope,
             nowMillis = System::currentTimeMillis,
         )

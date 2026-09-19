@@ -20,6 +20,27 @@ import java.time.OffsetDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** The Profile surface's data seam — see [SupabaseServicing] for why these exist (#848). */
+interface ProfileServicing {
+    suspend fun loadProfile(): ProfileRow
+
+    suspend fun loadGlyphStrokes(glyphId: String): List<GlyphStroke>
+
+    suspend fun loadCollections(): List<Collection>
+
+    suspend fun saveSettings(
+        displayName: String?,
+        glyphId: String?,
+        password: String?,
+    )
+
+    suspend fun setHandle(handle: String?)
+
+    suspend fun setPublicProfile(isPublic: Boolean)
+
+    suspend fun deleteAccount()
+}
+
 /**
  * Data access for the Profile surface — the fetch/save half of iOS
  * `ProfileView` + `SettingsSheet`, extracted into a service so the screens
@@ -32,16 +53,16 @@ class ProfileService
     @Inject
     constructor(
         private val supabase: SupabaseService,
-    ) {
+    ) : ProfileServicing {
         /** The signed-in user's `profiles` row (RLS-scoped single row). */
-        suspend fun loadProfile(): ProfileRow =
+        override suspend fun loadProfile(): ProfileRow =
             supabase.client
                 .from("profiles")
                 .select(Columns.raw("display_name, created_at, glyph_id, handle, public_profile"))
                 .decodeSingle()
 
         /** Stroke data for the profile glyph — mirrors `ProfileView.loadGlyphStrokes`. */
-        suspend fun loadGlyphStrokes(glyphId: String): List<GlyphStroke> =
+        override suspend fun loadGlyphStrokes(glyphId: String): List<GlyphStroke> =
             supabase.client
                 .from("glyphs")
                 .select(Columns.raw("strokes")) {
@@ -53,7 +74,7 @@ class ProfileService
          * Collections with their live pebble counts for the profile carousel —
          * mirrors `ProfileCollectionsCard.load()`, newest first.
          */
-        suspend fun loadCollections(): List<Collection> =
+        override suspend fun loadCollections(): List<Collection> =
             supabase.client
                 .from("collections")
                 .select(Columns.raw("id, name, mode, pebble_count:collection_pebbles(count)")) {
@@ -67,7 +88,7 @@ class ProfileService
          * change"; the RPC cannot clear glyph_id by design), then the GoTrue
          * password update. Throws on failure; the screen maps to its inline error.
          */
-        suspend fun saveSettings(
+        override suspend fun saveSettings(
             displayName: String?,
             glyphId: String?,
             password: String?,
@@ -95,7 +116,7 @@ class ProfileService
          * `handle_reserved`; a null handle releases it and drops `public_profile`
          * in the same statement. Throws on failure; the screen maps the code.
          */
-        suspend fun setHandle(handle: String?) {
+        override suspend fun setHandle(handle: String?) {
             supabase.client.postgrest.rpc(
                 "set_handle",
                 buildJsonObject {
@@ -109,7 +130,7 @@ class ProfileService
          * the sanctioned direct-client case (root `AGENTS.md`) — no RPC. The DB
          * CHECK rejects `true` without a handle, so callers claim first.
          */
-        suspend fun setPublicProfile(isPublic: Boolean) {
+        override suspend fun setPublicProfile(isPublic: Boolean) {
             val userId = supabase.session?.user?.id ?: error("not authenticated")
             supabase.client
                 .from("profiles")
@@ -126,7 +147,7 @@ class ProfileService
          * has to expose the raw client — a client on that interface would make every
          * fake of it pointless.
          */
-        suspend fun deleteAccount() {
+        override suspend fun deleteAccount() {
             supabase.client.functions.invoke("delete-account")
         }
 
@@ -153,6 +174,6 @@ data class ProfileRow(
 
 /** CompositionLocal for [ProfileService] — see [LocalSupabaseService]. */
 val LocalProfileService =
-    staticCompositionLocalOf<ProfileService> {
+    staticCompositionLocalOf<ProfileServicing> {
         error("LocalProfileService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

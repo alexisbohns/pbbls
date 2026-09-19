@@ -26,6 +26,36 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
+ * The auth surface screens actually read (#848).
+ *
+ * `client` is deliberately NOT on this interface. Screens reach the database
+ * through the other services; putting a `SupabaseClient` here would mean a fake
+ * had to produce one, which needs real secrets — i.e. it would defeat the entire
+ * extraction. The composition root (`MainActivity`) and the other services keep
+ * the concrete [SupabaseService].
+ */
+interface SupabaseServicing {
+    val session: UserSession?
+    val isInitializing: Boolean
+
+    suspend fun start()
+
+    suspend fun signIn(
+        email: String,
+        password: String,
+    )
+
+    suspend fun signUp(
+        email: String,
+        password: String,
+    )
+
+    suspend fun signInWithGoogle()
+
+    suspend fun signOut()
+}
+
+/**
  * Wraps the supabase-kt client and exposes auth state to Compose. Screens read
  * this from the [LocalSupabaseService] CompositionLocal (the
  * `@Environment(SupabaseService.self)` analog) and read [session] to decide what
@@ -44,9 +74,9 @@ class SupabaseService
         // Scope for work that REACTS to a status change (never inline in the
         // collector — see start()).
         @ApplicationScope private val scope: CoroutineScope,
-    ) {
+    ) : SupabaseServicing {
         /** The current Supabase session, or null when signed out. */
-        var session: UserSession? by mutableStateOf(null)
+        override var session: UserSession? by mutableStateOf(null)
             private set
 
         /**
@@ -54,7 +84,7 @@ class SupabaseService
          * `RootScreen` keeps showing the splash/Welcome while this is true so the
          * user never sees the auth screen flash before Path.
          */
-        var isInitializing: Boolean by mutableStateOf(true)
+        override var isInitializing: Boolean by mutableStateOf(true)
             private set
 
         /** Guards the OAuth display-name patch so it runs at most once per process. */
@@ -72,7 +102,7 @@ class SupabaseService
          * auth actor. Mutate state synchronously only — any network call reacting to
          * a status change is launched in a SEPARATE coroutine ([scope]), not inline.
          */
-        suspend fun start() {
+        override suspend fun start() {
             client.auth.sessionStatus.collect { status ->
                 when (status) {
                     is SessionStatus.Authenticated -> {
@@ -110,7 +140,7 @@ class SupabaseService
         }
 
         /** Sign in with email + password. Success flows back through [start]'s collector. */
-        suspend fun signIn(
+        override suspend fun signIn(
             email: String,
             password: String,
         ) {
@@ -131,7 +161,7 @@ class SupabaseService
          * Mirrors iOS: the current `handle_new_user` trigger does not copy them into
          * `public.profiles` — a separate `fix(db)` issue.
          */
-        suspend fun signUp(
+        override suspend fun signUp(
             email: String,
             password: String,
         ) {
@@ -155,7 +185,7 @@ class SupabaseService
          * (`SupabaseService.swift`) — hosted web OAuth over the native SDK, no Google
          * Sign-In SDK in v1.
          */
-        suspend fun signInWithGoogle() {
+        override suspend fun signInWithGoogle() {
             try {
                 client.auth.signInWith(Google)
             } catch (e: Exception) {
@@ -168,7 +198,7 @@ class SupabaseService
          * Sign out. Failures are logged but never surfaced — the local token is
          * wiped regardless and the collector emits `NotAuthenticated`.
          */
-        suspend fun signOut() {
+        override suspend fun signOut() {
             try {
                 client.auth.signOut()
             } catch (e: Exception) {
@@ -239,6 +269,6 @@ class SupabaseService
  * deletes the locals. Do not add another.
  */
 val LocalSupabaseService =
-    staticCompositionLocalOf<SupabaseService> {
+    staticCompositionLocalOf<SupabaseServicing> {
         error("LocalSupabaseService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

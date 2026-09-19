@@ -18,6 +18,7 @@ import app.pbbls.android.features.karma.LocalKarmaNotificationService
 import app.pbbls.android.features.lab.services.LocalLogsService
 import app.pbbls.android.features.path.valence.LocalValencePrewarmer
 import app.pbbls.android.features.pebblemedia.LocalSnapProcessor
+import app.pbbls.android.features.pebblemedia.LocalSnapWriteRepository
 import app.pbbls.android.services.LocalAchievementsService
 import app.pbbls.android.services.LocalCollectionsService
 import app.pbbls.android.services.LocalComposerSnapshotStore
@@ -33,6 +34,7 @@ import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSnapURLCache
 import app.pbbls.android.services.LocalSoulsService
 import app.pbbls.android.services.LocalSupabaseService
+import app.pbbls.android.services.SupabaseService
 import app.pbbls.android.services.parseInviteToken
 import app.pbbls.android.theme.PebblesTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -69,7 +71,15 @@ class MainActivity : ComponentActivity() {
     @Inject
     internal lateinit var graph: ServiceGraph
 
-    private val supabase get() = graph.supabase
+    /**
+     * The concrete client owner, for `handleDeeplinks` only. The composition
+     * root is the one place allowed to know a concrete service type; everything
+     * below it gets [app.pbbls.android.services.SupabaseServicing].
+     */
+    @Inject
+    internal lateinit var supabaseClientOwner: SupabaseService
+
+    private val supabase get() = supabaseClientOwner
 
     /**
      * Read on every pre-draw pass by the splash screen. Not Compose state: the
@@ -109,6 +119,7 @@ class MainActivity : ComponentActivity() {
                     LocalPathStatsService provides graph.pathStats,
                     LocalProfileService provides graph.profileService,
                     LocalSnapURLCache provides graph.snapUrls,
+                    LocalSnapWriteRepository provides graph.snapWrites,
                     LocalReferenceDataService provides graph.referenceData,
                     LocalPebbleWriteService provides graph.pebbleWrite,
                     LocalPebbleDetailService provides graph.pebbleDetailService,

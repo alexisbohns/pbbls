@@ -8,6 +8,11 @@ import io.github.jan.supabase.postgrest.postgrest
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** The Path read screens' data seam — see [SupabaseServicing] for why these exist (#848). */
+interface PathServicing {
+    suspend fun loadPathPebbles(): List<Pebble>
+}
+
 /**
  * Thin data access for the read-only Path timeline. iOS calls the RPC inline
  * in `PathView.load()`; Android extracts this seam so the screen stays
@@ -20,13 +25,13 @@ class PathService
     @Inject
     constructor(
         private val supabase: SupabaseService,
-    ) {
+    ) : PathServicing {
         /**
          * `path_pebbles()` — no params, RLS-scoped to the signed-in user, every
          * pebble in one response ordered `happened_at desc` (no pagination; the
          * UI pages by week, mirroring iOS).
          */
-        suspend fun loadPathPebbles(): List<Pebble> {
+        override suspend fun loadPathPebbles(): List<Pebble> {
             val pebbles =
                 supabase.client.postgrest
                     .rpc("path_pebbles")
@@ -52,6 +57,6 @@ class PathService
 
 /** CompositionLocal for [PathService] — see [LocalSupabaseService]. */
 val LocalPathService =
-    staticCompositionLocalOf<PathService> {
+    staticCompositionLocalOf<PathServicing> {
         error("LocalPathService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }
