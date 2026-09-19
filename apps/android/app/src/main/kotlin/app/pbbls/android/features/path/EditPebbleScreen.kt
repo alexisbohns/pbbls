@@ -41,7 +41,7 @@ import app.pbbls.android.features.path.create.VisibilityChip
 import app.pbbls.android.features.path.models.PebbleDraft
 import app.pbbls.android.features.path.models.PebbleSnapPayload
 import app.pbbls.android.features.path.models.renderHeightDp
-import app.pbbls.android.features.pebblemedia.ImagePipeline
+import app.pbbls.android.features.pebblemedia.LocalSnapProcessor
 import app.pbbls.android.features.pebblemedia.SnapUploadCoordinator
 import app.pbbls.android.features.pebblemedia.models.FormSnap
 import app.pbbls.android.services.ComposeResult
@@ -55,9 +55,7 @@ import app.pbbls.android.services.PebbleSnapRepository
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 private const val TAG = "edit-pebble"
 
@@ -84,6 +82,7 @@ fun EditPebbleScreen(
     val karma = LocalKarmaNotificationService.current
     val achievements = LocalAchievementsService.current
     val supabase = LocalSupabaseService.current
+    val snapProcessor = LocalSnapProcessor.current
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val isDark = isSystemInDarkTheme()
@@ -111,7 +110,7 @@ fun EditPebbleScreen(
             if (uri != null && userId != null) {
                 scope.launch {
                     try {
-                        val processed = withContext(Dispatchers.IO) { ImagePipeline.process(context, uri) }
+                        val processed = snapProcessor.process(context, uri)
                         snaps.attach(processed, userId)
                     } catch (e: Exception) {
                         // iOS parity: a failed pick/decode logs and drops silently.

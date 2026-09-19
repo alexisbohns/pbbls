@@ -45,9 +45,8 @@ import app.pbbls.android.features.path.models.PebbleSnapPayload
 import app.pbbls.android.features.path.models.Valence
 import app.pbbls.android.features.path.models.isSavableAsDraft
 import app.pbbls.android.features.path.record.steps.RecordSuccessStep
-import app.pbbls.android.features.path.valence.prewarmValenceStones
-import app.pbbls.android.features.pebblemedia.ExifCaptureDate
-import app.pbbls.android.features.pebblemedia.ImagePipeline
+import app.pbbls.android.features.path.valence.LocalValencePrewarmer
+import app.pbbls.android.features.pebblemedia.LocalSnapProcessor
 import app.pbbls.android.features.pebblemedia.SnapUploadCoordinator
 import app.pbbls.android.services.ComposeResult
 import app.pbbls.android.services.ComposerDraftCoordinator
@@ -65,10 +64,8 @@ import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.time.OffsetDateTime
 
 private const val TAG = "record-flow"
@@ -112,6 +109,8 @@ fun RecordFlowScreen(
     val supabase = LocalSupabaseService.current
     val draftsService = LocalPebbleDraftsService.current
     val snapshots = LocalComposerSnapshotStore.current
+    val snapProcessor = LocalSnapProcessor.current
+    val valencePrewarmer = LocalValencePrewarmer.current
     val context = LocalContext.current
     val system = PebblesTheme.colors.system
     val accent = PebblesTheme.colors.accent
@@ -137,10 +136,10 @@ fun RecordFlowScreen(
                         // EXIF first: `ImagePipeline` re-encodes with
                         // `Bitmap.compress`, which writes no metadata at all, so
                         // the capture date is gone by the time bytes exist (D7).
-                        val picked = withContext(Dispatchers.IO) { ExifCaptureDate.from(context, uri) }
+                        val picked = snapProcessor.captureDate(context, uri)
                         captureDate = picked
                         model.applyCaptureDate(picked)
-                        val processed = withContext(Dispatchers.IO) { ImagePipeline.process(context, uri) }
+                        val processed = snapProcessor.process(context, uri)
                         snaps.attach(processed, userId)
                     } catch (e: Exception) {
                         // iOS parity: a failed pick/decode logs and drops silently.
@@ -170,7 +169,7 @@ fun RecordFlowScreen(
     // a visible hitch on the main thread. Two steps of runway is plenty, and the
     // caches are process-wide, so a second flow pays nothing.
     LaunchedEffect(Unit) {
-        withContext(Dispatchers.Default) { prewarmValenceStones(context) }
+        valencePrewarmer.prewarm(context)
     }
 
     // Hydrate-or-offer-restore, gated on refs.hasLoaded (#647): hydrating before

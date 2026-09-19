@@ -40,7 +40,7 @@ import app.pbbls.android.features.path.models.PebbleDraftPayload
 import app.pbbls.android.features.path.models.PebbleSnapPayload
 import app.pbbls.android.features.path.models.isSavableAsDraft
 import app.pbbls.android.features.path.models.toDraft
-import app.pbbls.android.features.pebblemedia.ImagePipeline
+import app.pbbls.android.features.pebblemedia.LocalSnapProcessor
 import app.pbbls.android.features.pebblemedia.SnapUploadCoordinator
 import app.pbbls.android.services.ComposeResult
 import app.pbbls.android.services.ComposerAutosave
@@ -59,10 +59,8 @@ import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar
 import app.pbbls.android.theme.PebblesTopBarTextButton
 import app.pbbls.android.theme.PebblesTypography
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 private const val TAG = "create-pebble"
 
@@ -100,6 +98,7 @@ fun CreatePebbleScreen(
     val supabase = LocalSupabaseService.current
     val draftsService = LocalPebbleDraftsService.current
     val snapshots = LocalComposerSnapshotStore.current
+    val snapProcessor = LocalSnapProcessor.current
     val context = LocalContext.current
     val system = PebblesTheme.colors.system
     val accent = PebblesTheme.colors.accent
@@ -126,7 +125,7 @@ fun CreatePebbleScreen(
             if (uri != null && userId != null) {
                 scope.launch {
                     try {
-                        val processed = withContext(Dispatchers.IO) { ImagePipeline.process(context, uri) }
+                        val processed = snapProcessor.process(context, uri)
                         snaps.attach(processed, userId)
                     } catch (e: Exception) {
                         // iOS parity: a failed pick/decode logs and drops silently.

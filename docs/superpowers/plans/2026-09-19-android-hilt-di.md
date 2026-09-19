@@ -741,7 +741,11 @@ export ANDROID_HOME=$HOME/Library/Android/sdk
 Expected: `BUILD SUCCESSFUL` for all five.
 
 - `lint` — a NEW finding fails the PR. Fix it; never run `updateLintBaseline` to silence something you introduced.
-- `validateDebugScreenshotTest` — Part 1 changes no UI, so this must stay green. If it does not, read the diff before assuming host-platform noise.
+- `validateDebugScreenshotTest` — **expected to fail 14 of 162 locally on macOS,
+  on every commit including untouched `origin/main`** (measured 2026-09-19; all
+  14 draw vector art). That is the documented host divergence, not your change.
+  Confirm the failure set matches `origin/main`'s and move on — CI is the
+  authority. Never re-baseline from a local run.
 
 - [ ] **Step 2: Smoke-test a minified build by hand**
 
@@ -1242,10 +1246,15 @@ Identical to Step 5, at line 129.
 - [ ] **Step 7: Prove the criterion**
 
 ```bash
-grep -rn "Dispatchers\." app/src/main/kotlin
+grep -rn "Dispatchers\." app/src/main/kotlin | grep -v '^\S*: *\*'
 ```
 
 Expected: **exactly 3 lines, all in `app/src/main/kotlin/app/pbbls/android/di/DispatchersModule.kt`.** Anything else is not done.
+
+The `grep -v` strips comment lines, and it is load-bearing rather than cosmetic:
+two KDocs added in this part legitimately *mention* `Dispatchers.IO` while
+explaining what they replaced. The criterion is "no hard-coded thread policy";
+prose is not policy, but a naive grep counts it and cries wolf forever.
 
 - [ ] **Step 8: Verify and commit**
 
@@ -1253,7 +1262,17 @@ Expected: **exactly 3 lines, all in `app/src/main/kotlin/app/pbbls/android/di/Di
 ./gradlew ktlintFormat lint testDebugUnitTest assembleDebug validateDebugScreenshotTest
 ```
 
-Expected: `BUILD SUCCESSFUL`. Behaviour is unchanged (same dispatchers, same order), so the screenshot suite must stay green.
+Expected: `BUILD SUCCESSFUL` for everything except the screenshot task.
+Behaviour is unchanged here (same dispatchers, same order), so this part
+moves no pixels.
+
+**On `validateDebugScreenshotTest`, read this before you panic.** It fails
+**14 of 162 on macOS on every commit, including untouched `origin/main`** —
+measured 2026-09-19. All 14 draw vector art, which is exactly the host
+divergence `apps/android/CLAUDE.md` documents (macOS and the CI runner disagree
+on 54 of 162 renders). Confirm your failure set is identical to `origin/main`'s
+and move on. **CI is the authority.** Do NOT re-baseline off a local run, and
+never widen the threshold.
 
 ```bash
 git add app/src/main/kotlin/app/pbbls/android
@@ -2108,7 +2127,7 @@ grep -rn "lateinit var\|application as PebblesApp" app/src/main/kotlin/app/pbbls
 # expect: no output
 
 # 2. No Dispatchers literal outside the provider
-grep -rn "Dispatchers\." app/src/main/kotlin
+grep -rn "Dispatchers\." app/src/main/kotlin | grep -v '^\S*: *\*'
 # expect: only di/DispatchersModule.kt
 
 # 3. A JVM test constructs a service with fakes and no secrets
