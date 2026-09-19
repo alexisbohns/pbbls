@@ -21,6 +21,8 @@ import com.android.tools.screenshot.PreviewTest
  */
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
+@PreviewFrench
 @Composable
 fun WelcomeScreenLight() {
     PebblesTheme {
@@ -49,6 +51,8 @@ fun WelcomeScreenDark() {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
+@PreviewFrench
 @Composable
 fun AuthScreenLogin() {
     PebblesTheme {
@@ -75,6 +79,8 @@ fun AuthScreenSignup() {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
+@PreviewFrench
 @Composable
 fun OnboardingScreenLight() {
     PebblesTheme {

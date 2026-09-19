@@ -84,6 +84,7 @@ private fun DrawerGallery(isOwned: Boolean) {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
 @Composable
 fun StoreGalleryLight() {
     PebblesTheme { StoreGallery() }

@@ -189,6 +189,7 @@ private fun DetailPreview(detail: PebbleDetail) {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
 @Composable
 fun PebbleDetailFullLight() {
     PebblesTheme { DetailPreview(fullDetail) }

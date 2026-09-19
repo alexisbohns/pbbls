@@ -87,6 +87,7 @@ private fun ProfileGallery() {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
 @Composable
 fun ProfileComponentsLight() {
     PebblesTheme { ProfileGallery() }

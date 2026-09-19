@@ -71,6 +71,7 @@ private fun SoulsGallery() {
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewLargeFont
 @Composable
 fun SoulsGalleryLight() {
     PebblesTheme { SoulsGallery() }

@@ -1,3 +1,4 @@
+import com.android.compose.screenshot.tasks.PreviewScreenshotValidationTask
 import java.util.Properties
 
 plugins {
@@ -142,6 +143,39 @@ android {
     // Compose Preview Screenshot Testing (experimental/alpha). Also flagged in
     // gradle.properties; set here so the :app module opts in explicitly.
     experimentalProperties["android.experimental.enableScreenshotTest"] = true
+}
+
+// The screenshot suite is a validation gate (#847): `validateDebugScreenshotTest`
+// diffs every rendered @PreviewTest against the committed PNG under
+// app/src/screenshotTestDebug/reference/ and fails the build on a mismatch.
+//
+// The plugin's comparator is PixelPerfect: it counts differing pixels and fails
+// when that fraction of the image exceeds this threshold. 0.0f (its default)
+// makes one stray pixel a failure, which is brittle against a layoutlib patch
+// that nudges antialiasing; 0.0005f lets 0.05% of the pixels move instead.
+//
+// Calibrated, not guessed: re-wording one two-word label ("Delete account" ->
+// "Remove account") on the tallest render in the suite — 1080x3675, so the
+// single changed row is the smallest slice a real regression can occupy — came
+// out at 0.12%, 2.4x over this line. Anything larger, or on any shorter image,
+// clears it by more. Rendering the same source twice on one machine is
+// byte-identical, so the headroom underneath costs no sensitivity.
+//
+// Do NOT widen this to absorb a host-platform difference. Rendering the suite on
+// macOS and on the CI runner gave 108 of 162 byte-identical and 54 differing, up
+// to 1.77% — and the worst offender is visually indistinguishable: the pebble
+// silhouettes come out one colour level apart, so byte-exact comparison counts
+// every pixel of a filled area. A threshold loose enough to swallow that would be
+// ~35x looser than the smallest real regression measured above, i.e. no gate at
+// all. The baseline is rendered on the runner instead (android-screenshots.yml).
+//
+// There is no public DSL for this in alpha16 — the plugin sets the task input's
+// convention itself and leaves a TODO to expose it — so it is set on the task.
+// That is exactly why libs.versions.toml pins the plugin strictly: a version bump
+// that moves this property fails at configuration time instead of silently
+// restoring the 0.0f default.
+tasks.withType<PreviewScreenshotValidationTask>().configureEach {
+    testEngineInput.threshold.set(0.0005f)
 }
 
 // jvmToolchain sets sourceCompatibility/targetCompatibility for Java and the

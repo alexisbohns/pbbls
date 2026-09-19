@@ -46,6 +46,7 @@ private val sampleInvite =
 
 @PreviewTest
 @Preview(name = "Connections · list", showBackground = true)
+@PreviewLargeFont
 @Composable
 private fun ConnectionsListPreview() {
     PebblesTheme {
