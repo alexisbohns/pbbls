@@ -37,14 +37,15 @@
  * design, so this script still has to remove it. Seed shapes the clients
  * actually decode, and clean up what outlives the purge.
  *
- * It also carries the profiles_glyph_usable assertions that
- * verify-glyph-usability.ts structurally cannot (#875). That trigger guards the
- * TRANSITION rather than the state, so proving it needs a profile whose mark
- * STOPPED being usable while it stood — and the only cheap way to manufacture
- * that is to revoke an entitlement with the service role, which the anon
- * harness does not hold. The buyer wears the sold glyph here for two reasons at
- * once: profiles.glyph_id is an arm of the purge's own `v_kept` predicate, and
- * it is the row the purge must not disturb on its way past.
+ * It also carries the profiles_glyph_usable (#875) and souls_glyph_usable
+ * (#879) assertions that verify-glyph-usability.ts structurally cannot. Both
+ * triggers guard the TRANSITION rather than the state, so proving either needs
+ * a glyph that STOPPED being usable while it stood — and the only cheap way to
+ * manufacture that is to revoke an entitlement with the service role, which the
+ * anon harness does not hold. The buyer wears the sold glyph here on their
+ * profile AND on a soul, for two reasons at once: both columns are arms of the
+ * purge's own `v_kept` predicate, and both are rows the purge must not disturb
+ * on its way past.
  *
  * It also carries the content_reports assertions that verify-content-reports.ts
  * structurally cannot (#831): that harness is anon-only, so it can neither read
@@ -442,6 +443,18 @@ try {
     .from("profiles").update({ glyph_id: soldGlyph.id }).eq("user_id", buyerId);
   if (buyerMarkErr) throw new Error(`buyer profile mark: ${buyerMarkErr.message}`);
 
+  // …and puts it on a SOUL too (#879). Same two reasons as the profile mark,
+  // one rung harsher: `souls.glyph_id` is another arm of the purge's `v_kept`
+  // predicate, and it carries the souls_glyph_usable trigger — which, unlike
+  // the profile's, guards a NOT NULL column with a system default, so a
+  // state-checking guard would leave the user no way out at all. Inserted
+  // through the buyer's own client so the trigger is in play.
+  const { data: buyerSoul, error: buyerSoulErr } = await buyer
+    .from("souls")
+    .insert({ user_id: buyerId, name: `purge-test buyer soul ${runId}`, glyph_id: soldGlyph.id })
+    .select("id").single();
+  if (buyerSoulErr || !buyerSoul) throw new Error(`buyer soul: ${buyerSoulErr?.message}`);
+
   console.log(`Seeded: pebble ${pebbleId}, sold glyph ${soldGlyph.id}, unsold glyph ${unsoldGlyph.id}\n`);
 
   // ---------------------------------------------------------------------------
@@ -776,6 +789,21 @@ try {
   check("buyer can still rename with a mark whose author is purged",
     buyerRenameErr === null, buyerRenameErr?.message);
 
+  // The same pair for the soul. `souls.glyph_id` is `on delete restrict`, so
+  // "the soul survives" is also the proof the purge anonymized the glyph
+  // rather than deleting it — a delete would have raised, not cascaded.
+  const { data: buyerSoulAfter } = await admin
+    .from("souls").select("glyph_id").eq("id", buyerSoul.id).maybeSingle();
+  check("buyer's soul glyph survives the seller's purge",
+    buyerSoulAfter?.glyph_id === soldGlyph.id, JSON.stringify(buyerSoulAfter?.glyph_id));
+
+  const { error: buyerSoulRenameErr } = await buyer
+    .from("souls")
+    .update({ name: `purge-test buyer soul renamed ${runId}`, glyph_id: soldGlyph.id })
+    .eq("id", buyerSoul.id);
+  check("buyer can still rename a soul whose glyph's author is purged",
+    buyerSoulRenameErr === null, buyerSoulRenameErr?.message);
+
   const buyerEntitlements = await countRows("glyph_entitlements", "user_id", buyerId);
   check("buyer entitlement survives", buyerEntitlements === 1, `found ${buyerEntitlements}`);
   const buyerFavs = await countRows("glyph_favourites", "user_id", buyerId);
@@ -818,12 +846,13 @@ try {
     rerunErr ? rerunErr.message : JSON.stringify(rerun));
 
   // -------------------------------------------------------------------------
-  // 6. #875: a standing mark that STOPPED being usable.
+  // 6. #875 / #879: a standing glyph that STOPPED being usable.
   //
-  // profiles_glyph_usable guards the TRANSITION, not the state — it returns
-  // early when an UPDATE names glyph_id without moving it. Every assertion so
-  // far would pass just as well against a state-checking guard, because every
-  // mark in this run is still usable. This is the one that would not.
+  // profiles_glyph_usable and souls_glyph_usable both guard the TRANSITION,
+  // not the state — each returns early when an UPDATE names glyph_id without
+  // moving it. Every assertion so far would pass just as well against a
+  // state-checking guard, because every glyph in this run is still usable.
+  // These are the ones that would not.
   //
   // Revoking the entitlement with the service role is the cheapest way to
   // manufacture the state; a real user reaches it through
@@ -835,7 +864,10 @@ try {
   // permanently.
   //
   // Runs last among the assertions: it destroys the buyer's entitlement, which
-  // section 5 asserts survives the purge.
+  // section 5 asserts survives the purge. The profile arm runs first, then the
+  // soul arm, so each ends with its glyph moved to the system one — which also
+  // releases the `on delete restrict` the buyer's soul holds on the sold glyph
+  // before the fixture cleanup in `finally` tries to remove it.
   // -------------------------------------------------------------------------
   const { error: revokeErr } = await admin
     .from("glyph_entitlements").delete().eq("user_id", buyerId).eq("glyph_id", soldGlyph.id);
@@ -875,6 +907,52 @@ try {
     .from("profiles").select("glyph_id").eq("user_id", buyerId).maybeSingle();
   check("…and the stored mark is still the system glyph",
     afterReattach?.glyph_id === systemGlyph.id, JSON.stringify(afterReattach?.glyph_id));
+
+  // -------------------------------------------------------------------------
+  // The same four, for the SOUL (#879). souls_glyph_usable had the same defect
+  // and is the worse of the two: the profile mark is nullable, so a
+  // state-checking guard there at least left "clear it" imaginable as a fix;
+  // `souls.glyph_id` is NOT NULL with a system default (20260426000000), so
+  // there is no empty state to fall back to and no client offers a way to
+  // change it away either — a soul wearing a glyph that stopped being usable
+  // could never be renamed again.
+  //
+  // The update sends BOTH keys, because that is verbatim what the two affected
+  // clients send: `SoulUpdatePayload` (iOS) and `SoulsService.update(soulId,
+  // name, glyphId)` (Android) each carry a non-optional name and glyphId, so
+  // every rename names glyph_id. Web spreads only the keys present in
+  // `UpdateSoulInput` and was never affected — testing the web shape here
+  // would pass against the broken trigger.
+  // -------------------------------------------------------------------------
+  const { error: unusableSoulRenameErr } = await buyer
+    .from("souls")
+    .update({ name: `purge-test buyer soul relabelled ${runId}`, glyph_id: soldGlyph.id })
+    .eq("id", buyerSoul.id);
+  check("a soul rename still succeeds with an unusable standing glyph",
+    unusableSoulRenameErr === null, unusableSoulRenameErr?.message);
+
+  const { data: soulAfterRename } = await admin
+    .from("souls").select("name, glyph_id").eq("id", buyerSoul.id).maybeSingle();
+  check("…and the rename landed with the unusable glyph left in place",
+    soulAfterRename?.name === `purge-test buyer soul relabelled ${runId}` &&
+      soulAfterRename?.glyph_id === soldGlyph.id,
+    JSON.stringify(soulAfterRename));
+
+  const { error: soulToSystemErr } = await buyer
+    .from("souls").update({ glyph_id: systemGlyph.id }).eq("id", buyerSoul.id);
+  check("the buyer may move their soul's glyph to a system glyph",
+    soulToSystemErr === null, soulToSystemErr?.message);
+
+  const { error: soulReattachErr } = await buyer
+    .from("souls").update({ glyph_id: soldGlyph.id }).eq("id", buyerSoul.id);
+  check("…but may NOT move a soul back onto it once the entitlement is gone",
+    soulReattachErr !== null && soulReattachErr.message.includes("Glyph not usable by user"),
+    soulReattachErr?.message ?? "the soul was updated");
+
+  const { data: soulAfterReattach } = await admin
+    .from("souls").select("glyph_id").eq("id", buyerSoul.id).maybeSingle();
+  check("…and the soul's stored glyph is still the system one",
+    soulAfterReattach?.glyph_id === systemGlyph.id, JSON.stringify(soulAfterReattach?.glyph_id));
 
   // -------------------------------------------------------------------------
   // 7. Cleanup: the buyer deletes their own account through the same path
