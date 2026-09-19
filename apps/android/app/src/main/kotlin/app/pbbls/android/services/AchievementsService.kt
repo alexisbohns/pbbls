@@ -6,6 +6,7 @@ import app.pbbls.android.di.ApplicationScope
 import app.pbbls.android.features.karma.AchievementMomentCard
 import app.pbbls.android.features.karma.AchievementNotificationService
 import app.pbbls.android.features.path.models.OffsetDateTimeSerializer
+import app.pbbls.android.ui.runCatchingCancellable
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
@@ -17,6 +18,7 @@ import kotlinx.serialization.Serializable
 import java.time.OffsetDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.cancellation.CancellationException
 
 private const val TAG = "achievements"
 
@@ -80,6 +82,28 @@ data class AchievementCheckResult(
 )
 
 /**
+ * The achievements seam (#849).
+ *
+ * Extracted because `AchievementsViewModel` has a test, which is the standing
+ * bar for an interface here (`apps/android/CLAUDE.md`) — not because the layer
+ * wanted one on principle. [AchievementsService]'s constructor reaches
+ * `SupabaseService`, so without this a JVM test of the screen's load and error
+ * paths would need a live project.
+ *
+ * [check] stays off it deliberately: no caller outside the implementation uses
+ * the raw result, and the two wrappers below are the whole public contract.
+ */
+interface AchievementsServicing {
+    suspend fun loadCatalog(): List<AchievementRecord>
+
+    suspend fun loadUnlocks(): List<AchievementUnlockRecord>
+
+    suspend fun checkIgnoringFailure()
+
+    fun fireCheck()
+}
+
+/**
  * Achievements data access + the fire-and-forget evaluation call (M48).
  *
  * `check_achievements()` is the design's single evaluation path: idempotent,
@@ -97,12 +121,12 @@ class AchievementsService
         private val supabase: SupabaseService,
         private val notify: AchievementNotificationService,
         @ApplicationScope private val scope: CoroutineScope,
-    ) {
+    ) : AchievementsServicing {
         /**
          * Full catalog, inactive rows included — the screen filters (an inactive
          * badge stays visible once unlocked, hidden while locked).
          */
-        suspend fun loadCatalog(): List<AchievementRecord> =
+        override suspend fun loadCatalog(): List<AchievementRecord> =
             supabase.client
                 .from(TABLE)
                 .select(Columns.raw(CATALOG_COLUMNS)) {
@@ -110,7 +134,7 @@ class AchievementsService
                 }.decodeList()
 
         /** The caller's unlocks; RLS scopes to `auth.uid()`. */
-        suspend fun loadUnlocks(): List<AchievementUnlockRecord> =
+        override suspend fun loadUnlocks(): List<AchievementUnlockRecord> =
             supabase.client
                 .from("achievement_unlocks")
                 .select(Columns.raw("achievement_id, unlocked_at"))
@@ -129,12 +153,11 @@ class AchievementsService
          * Screen-open variant: the retroactive grant must never surface as an
          * error — the grid renders whatever `loadUnlocks()` then returns.
          */
-        suspend fun checkIgnoringFailure() {
-            try {
-                check()
-            } catch (e: Exception) {
-                Log.w(TAG, "achievement check on screen open failed (self-heals on next call)", e)
-            }
+        override suspend fun checkIgnoringFailure() {
+            runCatchingCancellable { check() }
+                .onFailure {
+                    Log.w(TAG, "achievement check on screen open failed (self-heals on next call)", it)
+                }
         }
 
         /**
@@ -147,7 +170,7 @@ class AchievementsService
          * copy; the one extra catalog read per actual unlock (rare) keeps i18n out
          * of six call sites.
          */
-        fun fireCheck() {
+        override fun fireCheck() {
             scope.launch {
                 try {
                     val results = check()
@@ -155,6 +178,8 @@ class AchievementsService
                     val bySlug =
                         try {
                             loadCatalog().associateBy { it.slug }
+                        } catch (e: CancellationException) {
+                            throw e
                         } catch (e: Exception) {
                             Log.w(TAG, "catalog fetch for the unlock moment failed", e)
                             emptyMap()
@@ -174,6 +199,8 @@ class AchievementsService
                                 )
                             }
                     notify.present(cards)
+                } catch (e: CancellationException) {
+                    throw e
                 } catch (e: Exception) {
                     Log.w(TAG, "achievement check failed (self-heals on next call)", e)
                 }
@@ -189,6 +216,6 @@ class AchievementsService
     }
 
 val LocalAchievementsService =
-    staticCompositionLocalOf<AchievementsService> {
+    staticCompositionLocalOf<AchievementsServicing> {
         error("LocalAchievementsService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

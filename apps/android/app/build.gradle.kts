@@ -121,6 +121,24 @@ android {
         buildConfig = true
     }
 
+    // `android.util.Log` is a stub in the JVM unit-test android.jar: every method
+    // throws "not mocked" unless this is on. Every ViewModel #849 adds logs on its
+    // error path and every one of them has a test that drives that path, so
+    // without this the choice is a `Log` call that fails the test or no logging at
+    // all — and "log, don't swallow" is a standing rule (`apps/android/CLAUDE.md`).
+    // The existing escape hatch was to inject the logger as a lambda
+    // (`SnapUploadCoordinator.onLog`), which is fine for one class and absurd
+    // across eleven.
+    //
+    // The cost is real and bounded: any OTHER unmocked android.jar call now
+    // returns 0/null/false in a unit test instead of throwing, so a test can
+    // quietly exercise a stub. It is bounded because these are JVM tests of pure
+    // logic and state holders by policy — anything needing real framework
+    // behaviour waits for Robolectric (#857).
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+    }
+
     // Android Lint runs in android.yml on every PR (#845), so it has to be a
     // gate, not a report: warnings are errors and the build aborts. The baseline
     // freezes what existed when lint was first turned on — new findings fail,
@@ -231,6 +249,13 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.androidx.hilt.navigation.compose)
     ksp(libs.hilt.compiler)
+
+    // ViewModel + lifecycle-aware collection (#849). collectAsStateWithLifecycle
+    // lives in runtime-compose, not runtime-ktx — the two are different artifacts
+    // and only the former stops a StateFlow collecting while the app is backgrounded.
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.savedstate)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

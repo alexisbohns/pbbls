@@ -1,6 +1,5 @@
 package app.pbbls.android.features.profile
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,25 +17,21 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.features.shared.achievements.achievementDescription
 import app.pbbls.android.features.shared.achievements.achievementFamilyIcon
 import app.pbbls.android.features.shared.achievements.achievementGroupName
 import app.pbbls.android.features.shared.achievements.achievementTitle
 import app.pbbls.android.services.AchievementRecord
-import app.pbbls.android.services.LocalAchievementsService
 import app.pbbls.android.theme.PebblesIconToken
 import app.pbbls.android.theme.PebblesScreen
 import app.pbbls.android.theme.PebblesText
@@ -48,8 +43,6 @@ import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
-private const val TAG = "achievements-screen"
-
 /**
  * Achievements grid (M48, D8) — ports web `/achievements` and iOS
  * `AchievementsView`: badges grouped by family in catalog `sort_order`, locked
@@ -57,37 +50,44 @@ private const val TAG = "achievements-screen"
  * `check_achievements()` first — that call *is* the retroactive grant — then
  * reads catalog + unlocks, so history appears unlocked on first visit with no
  * celebration chain (the capsule is for the mutation path only).
+ *
+ * The load lives in [AchievementsViewModel] (#849), so rotating the device no
+ * longer throws the grid away and re-runs all three calls. The composable owns
+ * no data state at all now; it reads one [AchievementsUiState] and renders it.
  */
 @Composable
 fun AchievementsScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: AchievementsViewModel = hiltViewModel(),
 ) {
-    val achievements = LocalAchievementsService.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    AchievementsScreen(
+        uiState = uiState,
+        onBack = onBack,
+        onRetry = viewModel::retry,
+        modifier = modifier,
+    )
+}
+
+/**
+ * Stateless host: the chrome plus the [AchievementsUiState] switch.
+ *
+ * Split out from the `hiltViewModel()` overload above so the screen's own top
+ * bar and empty/error/loading branches are renderable from a preview — until
+ * now only the inner grid was, and a regression in this layer had nothing
+ * watching it (`apps/android/CLAUDE.md`, "Screens that read services cannot be
+ * previewed").
+ */
+@Composable
+fun AchievementsScreen(
+    uiState: AchievementsUiState,
+    onBack: () -> Unit,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val system = PebblesTheme.colors.system
-
-    var catalog by remember { mutableStateOf<List<AchievementRecord>>(emptyList()) }
-    var unlockedAt by remember { mutableStateOf<Map<String, OffsetDateTime>>(emptyMap()) }
-    var isLoading by remember { mutableStateOf(true) }
-    var loadFailed by remember { mutableStateOf(false) }
-    var loadKey by remember { mutableIntStateOf(0) }
-
-    LaunchedEffect(loadKey) {
-        isLoading = true
-        loadFailed = false
-        // The retroactive grant precedes the read so a veteran's history is
-        // already unlocked when the grid renders; its errors are non-fatal.
-        achievements.checkIgnoringFailure()
-        try {
-            catalog = achievements.loadCatalog()
-            unlockedAt = achievements.loadUnlocks().associate { it.achievementId to it.unlockedAt }
-        } catch (e: Exception) {
-            Log.e(TAG, "achievements fetch failed", e)
-            loadFailed = true
-        } finally {
-            isLoading = false
-        }
-    }
 
     PebblesScreen(
         modifier = modifier,
@@ -107,8 +107,11 @@ fun AchievementsScreen(
             )
         },
     ) {
-        when {
-            isLoading ->
+        // Exhaustive with no `else`: a case added to AchievementsUiState must be
+        // rendered here or the build fails, which is the whole point of the
+        // sealed interface over the booleans this replaced.
+        when (uiState) {
+            AchievementsUiState.Loading ->
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
@@ -117,18 +120,18 @@ fun AchievementsScreen(
                     CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
                 }
 
-            loadFailed ->
+            is AchievementsUiState.Error ->
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     PebblesText(
-                        text = stringResource(R.string.achievements_load_error),
+                        text = stringResource(uiState.messageRes),
                         style = PebblesTypography.body,
                         color = system.secondary,
                     )
-                    TextButton(onClick = { loadKey++ }) {
+                    TextButton(onClick = onRetry) {
                         PebblesText(
                             text = stringResource(R.string.profile_retry),
                             style = PebblesTypography.buttonLabel,
@@ -137,19 +140,25 @@ fun AchievementsScreen(
                     }
                 }
 
-            else -> AchievementsContent(catalog = catalog, unlockedAt = unlockedAt)
+            is AchievementsUiState.Content -> AchievementsContent(state = uiState)
         }
     }
 }
 
-/** Stateless grid layer, preview/screenshot-friendly. */
+/**
+ * Stateless grid layer, preview/screenshot-friendly.
+ *
+ * Takes the [AchievementsUiState.Content] rather than its two fields so the
+ * family grouping it renders is the one the state already computed — recomputing
+ * it here is what this composable used to do on every recomposition.
+ */
 @Composable
 fun AchievementsContent(
-    catalog: List<AchievementRecord>,
-    unlockedAt: Map<String, OffsetDateTime>,
+    state: AchievementsUiState.Content,
     modifier: Modifier = Modifier,
 ) {
-    val groups = visibleFamilyGroups(catalog, unlockedAt.keys)
+    val groups = state.groups
+    val unlockedAt = state.unlockedAt
     LazyVerticalGrid(
         columns = GridCells.Adaptive(156.dp),
         contentPadding = PaddingValues(PebblesTheme.spacing.lg),
