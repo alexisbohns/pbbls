@@ -161,6 +161,14 @@ android {
 // clears it by more. Rendering the same source twice on one machine is
 // byte-identical, so the headroom underneath costs no sensitivity.
 //
+// Do NOT widen this to absorb a host-platform difference. Rendering the suite on
+// macOS and on the CI runner gave 108 of 162 byte-identical and 54 differing, up
+// to 1.77% — and the worst offender is visually indistinguishable: the pebble
+// silhouettes come out one colour level apart, so byte-exact comparison counts
+// every pixel of a filled area. A threshold loose enough to swallow that would be
+// ~35x looser than the smallest real regression measured above, i.e. no gate at
+// all. The baseline is rendered on the runner instead (android-screenshots.yml).
+//
 // There is no public DSL for this in alpha16 — the plugin sets the task input's
 // convention itself and leaves a TODO to expose it — so it is set on the task.
 // That is exactly why libs.versions.toml pins the plugin strictly: a version bump

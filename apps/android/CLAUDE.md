@@ -328,15 +328,21 @@ fails the PR and uploads the reference/actual/diff triptych as
   opens a branch instead of writing to it.
 - **Never commit references rendered on your own machine.** `./gradlew
   updateDebugScreenshotTest` locally is the right way to *look* at a change (it is
-  ~35 s for the whole suite), but layoutlib's text rasterization is not guaranteed
-  to agree across host platforms and CI is the authority. Render locally, review,
-  then let the label regenerate the committed set. `./gradlew
-  validateDebugScreenshotTest` locally tells you *which* previews moved, which is
-  the useful part even if the absolute pixels are yours and not CI's.
+  ~35 s for the whole suite), but CI is the authority. Measured on this suite:
+  macOS and the CI runner agree byte-for-byte on 108 of 162 renders and disagree
+  on 54, by up to 1.77%. Text is not the problem — every divergent render is one
+  that draws vector art, and the worst is **visually indistinguishable**: the
+  pebble silhouettes come out one colour level apart, which byte-exact comparison
+  counts as every pixel of the filled area. So render locally, review, then let
+  the `rebaseline-screenshots` label regenerate the committed set on the runner.
+  `./gradlew validateDebugScreenshotTest` locally still tells you *which* previews
+  moved, which is the useful part even when the absolute pixels are yours.
 - **The threshold lives in `app/build.gradle.kts`**, set on the validation task
   because alpha16 exposes no DSL for it. It is calibrated (0.05% of pixels)
   against a measured real change, not guessed — the comment there carries the
-  numbers. `libs.versions.toml` pins the plugin with `strictly` for the same
+  numbers. Do not widen it to paper over a host-platform difference: loose enough
+  to swallow that 1.77% is ~35x looser than the smallest real regression measured,
+  i.e. no gate at all. `libs.versions.toml` pins the plugin with `strictly` for the same
   reason: any layoutlib movement re-baselines all 162 references at once, so that
   has to be a deliberate commit that re-runs the re-baseline job, not a Dependabot
   drive-by.
