@@ -4,6 +4,10 @@ import app.pbbls.android.services.AchievementsService
 import app.pbbls.android.services.AchievementsServicing
 import app.pbbls.android.services.PathService
 import app.pbbls.android.services.PathServicing
+import app.pbbls.android.services.PathStatsService
+import app.pbbls.android.services.PathStatsServicing
+import app.pbbls.android.services.PebbleDraftsService
+import app.pbbls.android.services.PebbleDraftsServicing
 import app.pbbls.android.services.PebbleWriteService
 import app.pbbls.android.services.PebbleWriteServicing
 import app.pbbls.android.services.ProfileService
@@ -54,4 +58,12 @@ interface ServiceBindings {
     @Binds
     @Singleton
     fun bindAchievementsServicing(impl: AchievementsService): AchievementsServicing
+
+    @Binds
+    @Singleton
+    fun bindPathStatsServicing(impl: PathStatsService): PathStatsServicing
+
+    @Binds
+    @Singleton
+    fun bindPebbleDraftsServicing(impl: PebbleDraftsService): PebbleDraftsServicing
 }

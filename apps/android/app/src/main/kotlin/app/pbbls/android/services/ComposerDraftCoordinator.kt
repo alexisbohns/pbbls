@@ -25,7 +25,7 @@ private const val TAG = "composer-drafts"
  * touching a shipped composer is a refactor of working code.
  */
 class ComposerDraftCoordinator(
-    private val drafts: PebbleDraftsService,
+    private val drafts: PebbleDraftsServicing,
     private val snapshots: ComposerSnapshotStore,
 ) {
     /** What [hydrate] decided the composer should open with. */

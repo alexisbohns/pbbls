@@ -5,11 +5,15 @@ import androidx.compose.runtime.CompositionLocalProvider
 import app.pbbls.android.services.AchievementsServicing
 import app.pbbls.android.services.LocalAchievementsService
 import app.pbbls.android.services.LocalPathService
+import app.pbbls.android.services.LocalPathStatsService
+import app.pbbls.android.services.LocalPebbleDraftsService
 import app.pbbls.android.services.LocalPebbleWriteService
 import app.pbbls.android.services.LocalProfileService
 import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSupabaseService
 import app.pbbls.android.services.PathServicing
+import app.pbbls.android.services.PathStatsServicing
+import app.pbbls.android.services.PebbleDraftsServicing
 import app.pbbls.android.services.PebbleWriteServicing
 import app.pbbls.android.services.ProfileServicing
 import app.pbbls.android.services.ReferenceDataServicing
@@ -40,6 +44,8 @@ class FakeServiceGraph(
     val pebbleWrite: PebbleWriteServicing = FakePebbleWriteService(),
     val referenceData: ReferenceDataServicing = FakeReferenceDataService(),
     val achievements: AchievementsServicing = FakeAchievementsService(),
+    val pathStats: PathStatsServicing = FakePathStatsService(),
+    val drafts: PebbleDraftsServicing = FakePebbleDraftsService(),
 )
 
 /**
@@ -67,6 +73,8 @@ fun PebblesTestHarness(
         LocalPebbleWriteService provides graph.pebbleWrite,
         LocalReferenceDataService provides graph.referenceData,
         LocalAchievementsService provides graph.achievements,
+        LocalPathStatsService provides graph.pathStats,
+        LocalPebbleDraftsService provides graph.drafts,
         content = content,
     )
 }

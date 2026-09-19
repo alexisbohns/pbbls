@@ -20,6 +20,37 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
+ * The shared-stats seam (#849).
+ *
+ * Read by three screens, so its state is a *singleton's* Compose state rather
+ * than any one screen's — which is exactly why a ViewModel observing it has to
+ * go through `snapshotFlow`, not hold a copy. The interface exists because
+ * `PathViewModel` folds [ripple] into its own state and has a test for it.
+ */
+interface PathStatsServicing {
+    val karma: Int?
+
+    val pebbles: Int?
+
+    val ripple: RippleSummary?
+
+    val daysPracticed: Int?
+
+    val assiduity: List<Boolean>?
+
+    val hasLoaded: Boolean
+
+    /** Idempotent: a no-op once loaded, so every screen may call it on open. */
+    suspend fun load()
+
+    /** Forces a refetch, still serialized against a load already in flight. */
+    suspend fun refresh()
+
+    /** Applies the wallet balance a write RPC returned. Display-only (D2). */
+    fun applyKarmaBalance(balance: Int)
+}
+
+/**
  * Shared wrapper around `v_karma_summary`, `v_ripple`, and
  * `get_profile_engagement(p_tz)` — ports iOS `PathStatsService.swift`.
  * PathScreen (bottom bar) and the Profile screen read the same instance so a
@@ -35,23 +66,23 @@ class PathStatsService
     @Inject
     constructor(
         private val supabase: SupabaseService,
-    ) {
-        var karma: Int? by mutableStateOf(null)
+    ) : PathStatsServicing {
+        override var karma: Int? by mutableStateOf(null)
             private set
 
-        var pebbles: Int? by mutableStateOf(null)
+        override var pebbles: Int? by mutableStateOf(null)
             private set
 
-        var ripple: RippleSummary? by mutableStateOf(null)
+        override var ripple: RippleSummary? by mutableStateOf(null)
             private set
 
-        var daysPracticed: Int? by mutableStateOf(null)
+        override var daysPracticed: Int? by mutableStateOf(null)
             private set
 
-        var assiduity: List<Boolean>? by mutableStateOf(null)
+        override var assiduity: List<Boolean>? by mutableStateOf(null)
             private set
 
-        var hasLoaded: Boolean by mutableStateOf(false)
+        override var hasLoaded: Boolean by mutableStateOf(false)
             private set
 
         private var isLoading = false
@@ -60,7 +91,7 @@ class PathStatsService
          * Idempotent. Returns immediately if already loaded or currently loading,
          * so it is safe to call from every screen's LaunchedEffect.
          */
-        suspend fun load() {
+        override suspend fun load() {
             if (hasLoaded || isLoading) return
             performLoad()
         }
@@ -69,7 +100,7 @@ class PathStatsService
          * Forces a network reload, bypassing the [hasLoaded] cache. Still guards
          * against concurrent calls so spam-tapping cannot fan out parallel queries.
          */
-        suspend fun refresh() {
+        override suspend fun refresh() {
             if (isLoading) return
             performLoad()
         }
@@ -79,7 +110,7 @@ class PathStatsService
          * `stats.karma = result.balance` after `buy_glyph` (M43 D5): server truth
          * riding the response, no refetch. Display-only, never a flash source (D2).
          */
-        fun applyKarmaBalance(balance: Int) {
+        override fun applyKarmaBalance(balance: Int) {
             karma = balance
         }
 
@@ -148,8 +179,8 @@ class PathStatsService
         }
     }
 
-/** CompositionLocal for [PathStatsService] — see [LocalSupabaseService]. */
+/** CompositionLocal for [PathStatsServicing] — see [LocalSupabaseService]. */
 val LocalPathStatsService =
-    staticCompositionLocalOf<PathStatsService> {
+    staticCompositionLocalOf<PathStatsServicing> {
         error("LocalPathStatsService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }
