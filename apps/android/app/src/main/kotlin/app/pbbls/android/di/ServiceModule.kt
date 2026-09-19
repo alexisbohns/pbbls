@@ -10,18 +10,17 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import javax.inject.Singleton
 
 /**
- * The two graph singletons that do not carry an `@Inject` constructor (#848).
- * Everything else is `@Singleton class X @Inject constructor(…)`; if you are
- * adding a service, prefer that and do not grow this file.
+ * The two of this app's own service classes that do not carry an `@Inject`
+ * constructor (#848). Everything else is `@Singleton class X @Inject
+ * constructor(…)`; if you are adding a service, prefer that and do not grow
+ * this file.
  *
- * Neither of these is here because Dagger *cannot* infer it — both *could*
- * carry `@Inject` and deliberately do not. That distinction matters, because
+ * Neither of these is here because Dagger *cannot* infer it — both *could* be
+ * wired through the graph and deliberately are not. That distinction matters, because
  * "needs a qualifier" is NOT a reason to add a provider: a qualifier annotation
  * on a constructor parameter is inferred like any other binding, which is how
  * `SupabaseService`, `KarmaNotificationService` and `AchievementsService` take
@@ -41,11 +40,11 @@ object ServiceModule {
     @Singleton
     fun provideSnapURLCache(
         supabase: SupabaseService,
-        @IoDispatcher io: CoroutineDispatcher,
+        @IoApplicationScope scope: CoroutineScope,
     ): SnapURLCache =
         SnapURLCache(
             provider = PebbleSnapRepository(supabase),
-            scope = CoroutineScope(SupervisorJob() + io),
+            scope = scope,
             nowMillis = System::currentTimeMillis,
         )
 

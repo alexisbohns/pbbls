@@ -23,7 +23,9 @@ class ValencePrewarmer
     constructor(
         @DefaultDispatcher private val default: CoroutineDispatcher,
     ) {
-        suspend fun prewarm(context: Context) = withContext(default) { prewarmValenceStones(context) }
+        suspend fun prewarm(context: Context) {
+            withContext(default) { prewarmValenceStones(context) }
+        }
     }
 
 /**
