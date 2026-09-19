@@ -18,11 +18,10 @@ import app.pbbls.android.testing.FakeReferenceDataService
 import app.pbbls.android.testing.FakeSnapWriteRepository
 import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.MainDispatcherRule
+import app.pbbls.android.testing.recordEffects
 import io.github.jan.supabase.auth.user.UserInfo
 import io.github.jan.supabase.auth.user.UserSession
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -105,8 +104,7 @@ class RecordFlowViewModelTest {
                 ComposeResult.Success(ComposePebbleResponse(pebbleId = "pebble-9", karmaDelta = 12))
             harness.snapshots.snapshot = PebbleDraftPayload(name = "autosaved")
 
-            val effects = mutableListOf<RecordFlowEffect>()
-            backgroundScope.launch { harness.viewModel.effects.toList(effects) }
+            val effects = recordEffects(harness.viewModel.effects)
 
             harness.viewModel.fillMandatory()
             harness.viewModel.publish()
@@ -119,7 +117,8 @@ class RecordFlowViewModelTest {
                 harness.viewModel.uiState.value.flow.published
                     ?.pebbleId,
             )
-            assertTrue(effects.contains(RecordFlowEffect.Published("pebble-9")))
+            assertTrue(effects.values.contains(RecordFlowEffect.Published("pebble-9")))
+            effects.stop()
             // The local crash snapshot is gone: a published pebble is not a draft.
             assertNull(harness.snapshots.snapshot)
             assertEquals(1, harness.achievements.fireCheckCount)
@@ -206,16 +205,16 @@ class RecordFlowViewModelTest {
     fun `every interaction's haptic leaves as an effect`() =
         runTest {
             val harness = signedIn(Harness(backgroundScope))
-            val effects = mutableListOf<RecordFlowEffect>()
-            backgroundScope.launch { harness.viewModel.effects.toList(effects) }
+            val effects = recordEffects(harness.viewModel.effects)
 
             harness.viewModel.machine().selectValence(Valence.NEUTRAL_MEDIUM)
             advanceUntilIdle()
 
             assertEquals(
                 listOf(RecordFlowEffect.Haptic(TapHaptic.SELECTION)),
-                effects,
+                effects.values,
             )
+            effects.stop()
         }
 
     // MARK: - Leaving
@@ -224,14 +223,14 @@ class RecordFlowViewModelTest {
     fun `closing an empty flow leaves without asking`() =
         runTest {
             val harness = signedIn(Harness(backgroundScope))
-            val effects = mutableListOf<RecordFlowEffect>()
-            backgroundScope.launch { harness.viewModel.effects.toList(effects) }
+            val effects = recordEffects(harness.viewModel.effects)
 
             harness.viewModel.onCloseRequested()
             advanceUntilIdle()
 
             assertFalse(harness.viewModel.uiState.value.isCloseConfirmPresented)
-            assertTrue(effects.contains(RecordFlowEffect.Dismiss))
+            assertTrue(effects.values.contains(RecordFlowEffect.Dismiss))
+            effects.stop()
         }
 
     @Test
@@ -250,8 +249,7 @@ class RecordFlowViewModelTest {
     fun `save as draft writes the draft and reports it`() =
         runTest {
             val harness = signedIn(Harness(backgroundScope))
-            val effects = mutableListOf<RecordFlowEffect>()
-            backgroundScope.launch { harness.viewModel.effects.toList(effects) }
+            val effects = recordEffects(harness.viewModel.effects)
 
             harness.viewModel.machine().setName("A walk")
             harness.viewModel.onSaveAsDraft()
@@ -264,7 +262,8 @@ class RecordFlowViewModelTest {
                     .single()
                     .payload.name,
             )
-            assertTrue(effects.contains(RecordFlowEffect.DraftSaved))
+            assertTrue(effects.values.contains(RecordFlowEffect.DraftSaved))
+            effects.stop()
         }
 
     @Test

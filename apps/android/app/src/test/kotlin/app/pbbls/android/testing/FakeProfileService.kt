@@ -4,6 +4,7 @@ import app.pbbls.android.features.glyph.models.GlyphStroke
 import app.pbbls.android.features.profile.models.Collection
 import app.pbbls.android.services.ProfileRow
 import app.pbbls.android.services.ProfileServicing
+import kotlinx.coroutines.CompletableDeferred
 import java.time.OffsetDateTime
 
 /**
@@ -41,6 +42,24 @@ class FakeProfileService(
     var deleteAccountCount = 0
         private set
 
+    /**
+     * Awaited by [setHandle] when set, so a test can hold the save sequence
+     * open at its first server call and act while it is in flight — the shape
+     * of the cancellation #849 is about. Complete it to let the save proceed.
+     */
+    var setHandleGate: CompletableDeferred<Unit>? = null
+
+    /**
+     * Thrown by every [loadGlyphStrokes] call while set. Separate from
+     * [failNext] because Profile's load has three parts that fail
+     * *independently* by design, and a one-shot arming cannot express "the
+     * glyph is unavailable but the row is fine".
+     */
+    var glyphStrokesFailure: Exception? = null
+
+    /** As [glyphStrokesFailure], for the collections card. */
+    var collectionsFailure: Exception? = null
+
     private val armed = ArmedFailure()
 
     /** Thrown by the next call, then cleared. */
@@ -58,12 +77,14 @@ class FakeProfileService(
 
     override suspend fun loadGlyphStrokes(glyphId: String): List<GlyphStroke> {
         loadGlyphStrokesCalls += glyphId
+        glyphStrokesFailure?.let { throw it }
         armed.fire()
         return glyphStrokes
     }
 
     override suspend fun loadCollections(): List<Collection> {
         loadCollectionsCount += 1
+        collectionsFailure?.let { throw it }
         armed.fire()
         return collections
     }
@@ -79,6 +100,7 @@ class FakeProfileService(
 
     override suspend fun setHandle(handle: String?) {
         setHandleCalls += handle
+        setHandleGate?.await()
         armed.fire()
     }
 

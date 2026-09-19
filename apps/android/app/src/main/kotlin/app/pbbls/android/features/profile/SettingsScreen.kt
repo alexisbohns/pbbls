@@ -2,7 +2,6 @@ package app.pbbls.android.features.profile
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,11 +24,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
@@ -40,6 +36,8 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.components.LegalDoc
 import app.pbbls.android.components.openLegalDoc
@@ -51,9 +49,6 @@ import app.pbbls.android.features.path.create.pickers.GlyphPickerSheet
 import app.pbbls.android.features.profile.components.ConfirmDeleteDialog
 import app.pbbls.android.features.profile.components.DeleteErrorDialog
 import app.pbbls.android.services.DataError
-import app.pbbls.android.services.LocalProfileService
-import app.pbbls.android.services.LocalSupabaseService
-import app.pbbls.android.services.toDataError
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesListSection
 import app.pbbls.android.theme.PebblesScreen
@@ -62,7 +57,7 @@ import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar
 import app.pbbls.android.theme.PebblesTopBarTextButton
 import app.pbbls.android.theme.PebblesTypography
-import kotlinx.coroutines.launch
+import app.pbbls.android.ui.ObserveUiEffects
 
 private const val TAG = "settings"
 
@@ -87,124 +82,39 @@ fun SettingsScreen(
     modifier: Modifier = Modifier,
     initialHandle: String? = null,
     initialPublicProfile: Boolean = false,
+    viewModel: SettingsViewModel = hiltViewModel(),
 ) {
-    val profileService = LocalProfileService.current
-    val supabase = LocalSupabaseService.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val system = PebblesTheme.colors.system
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
 
-    var displayName by remember { mutableStateOf(initialDisplayName) }
-    var pickedGlyph by remember { mutableStateOf<Glyph?>(null) }
-    var newPassword by remember { mutableStateOf("") }
-    var handle by remember { mutableStateOf(initialHandle ?: "") }
-    var isPublicProfile by remember { mutableStateOf(initialPublicProfile) }
-    var handleErrorRes by remember { mutableStateOf<Int?>(null) }
-    var isSaving by remember { mutableStateOf(false) }
-    var showSaveError by remember { mutableStateOf(false) }
-    var isPresentingGlyphPicker by remember { mutableStateOf(false) }
-    var showDeleteConfirm by remember { mutableStateOf(false) }
-    var isDeleting by remember { mutableStateOf(false) }
-    var showDeleteError by remember { mutableStateOf(false) }
-
-    // Handles are stored normalized (DB CHECK), so comparisons and writes use
-    // the lowercased, trimmed form.
-    val normalizedHandle = handle.trim().lowercase()
-    val isDirty =
-        settingsIsDirty(
-            initialName = initialDisplayName,
-            name = displayName,
-            initialGlyphId = initialGlyphId,
-            pickedGlyphId = pickedGlyph?.id,
-            newPassword = newPassword,
-            initialHandle = initialHandle,
-            handle = handle,
-            initialPublicProfile = initialPublicProfile,
-            isPublicProfile = isPublicProfile,
+    // Seeded from the profile the caller already loaded rather than refetched.
+    // `start` guards itself, so a rotation cannot re-seed over the user's edits.
+    LaunchedEffect(Unit) {
+        viewModel.start(
+            SettingsInitial(
+                displayName = initialDisplayName,
+                glyphId = initialGlyphId,
+                glyphStrokes = initialGlyphStrokes,
+                handle = initialHandle,
+                publicProfile = initialPublicProfile,
+                email = email,
+                providers = providers,
+            ),
         )
-    val currentStrokes = pickedGlyph?.strokes ?: initialGlyphStrokes
+    }
 
-    // The share row reflects what is live on the server, not staged edits — a
-    // link to an unsaved handle would 404.
-    val shareUrl =
-        initialHandle
-            ?.takeIf { initialPublicProfile && it.isNotEmpty() }
-            ?.let { "https://www.pbbls.app/u/$it" }
+    ObserveUiEffects(viewModel.effects) { effect ->
+        when (effect) {
+            is SettingsEffect.Saved ->
+                onSaved(effect.displayName, effect.glyph, effect.handle, effect.isPublic)
 
-    BackHandler(enabled = !isSaving && !isDeleting) { onDismiss() }
-
-    fun save() {
-        if (!isDirty || isSaving) return
-        scope.launch {
-            isSaving = true
-            showSaveError = false
-            handleErrorRes = null
-            val trimmed = displayName.trim()
-            val nameToSend = trimmed.takeIf { it != initialDisplayName && it.isNotEmpty() }
-            val glyphToSend = pickedGlyph?.takeIf { it.id != initialGlyphId }
-            val passwordToSend = newPassword.takeIf { it.isNotEmpty() }
-
-            // Handle first: claiming and going public in one save needs the
-            // handle stored before the public_profile write passes the CHECK.
-            var savedHandle = initialHandle
-            if (normalizedHandle != (initialHandle ?: "")) {
-                val claimed = normalizedHandle.takeIf { it.isNotEmpty() }
-                try {
-                    profileService.setHandle(claimed)
-                    savedHandle = claimed
-                } catch (e: Exception) {
-                    Log.e(TAG, "set_handle failed", e)
-                    val code = handleErrorStringRes(e.toDataError())
-                    if (code != null) handleErrorRes = code else showSaveError = true
-                    isSaving = false
-                    return@launch
-                }
-            }
-
-            try {
-                profileService.saveSettings(
-                    displayName = nameToSend,
-                    glyphId = glyphToSend?.id,
-                    password = passwordToSend,
-                )
-                // Releasing the handle already cleared the flag server-side, so
-                // only write the toggle while a handle exists.
-                if (isPublicProfile != initialPublicProfile && savedHandle != null) {
-                    profileService.setPublicProfile(isPublicProfile)
-                }
-                onSaved(
-                    nameToSend ?: initialDisplayName,
-                    pickedGlyph,
-                    savedHandle,
-                    if (savedHandle == null) false else isPublicProfile,
-                )
-            } catch (e: Exception) {
-                Log.e(TAG, "settings save failed", e)
-                showSaveError = true
-                isSaving = false
-            }
+            SettingsEffect.Dismiss -> onDismiss()
         }
     }
 
-    /**
-     * Full erasure via the delete-account edge function (purge + storage +
-     * auth user), then a local sign-out: the server session is already gone,
-     * and `sessionStatus` dropping unmounts the authed NavHost to Welcome —
-     * no navigation code needed here.
-     */
-    fun deleteAccount() {
-        if (isDeleting) return
-        scope.launch {
-            isDeleting = true
-            try {
-                profileService.deleteAccount()
-                supabase.signOut()
-            } catch (e: Exception) {
-                Log.e(TAG, "account deletion failed", e)
-                showDeleteError = true
-                isDeleting = false
-            }
-        }
+    BackHandler(enabled = !uiState.isSaving && uiState.deletion != DeletionState.DELETING) {
+        viewModel.onDismissRequested()
     }
 
     PebblesScreen(
@@ -215,11 +125,11 @@ fun SettingsScreen(
                 leading = {
                     PebblesTopBarTextButton(
                         text = stringResource(R.string.action_cancel),
-                        onClick = { if (!isSaving) onDismiss() },
+                        onClick = viewModel::onDismissRequested,
                     )
                 },
                 trailing = {
-                    if (isSaving) {
+                    if (uiState.isSaving) {
                         CircularProgressIndicator(
                             color = PebblesTheme.colors.accent.primary,
                             strokeWidth = 2.dp,
@@ -228,9 +138,9 @@ fun SettingsScreen(
                     } else {
                         PebblesTopBarTextButton(
                             text = stringResource(R.string.action_save),
-                            onClick = { save() },
-                            enabled = isDirty,
-                            color = if (isDirty) system.secondary else system.muted,
+                            onClick = viewModel::save,
+                            enabled = uiState.isDirty,
+                            color = if (uiState.isDirty) system.secondary else system.muted,
                         )
                     }
                 },
@@ -252,12 +162,12 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                val hasStrokes = !currentStrokes.isNullOrEmpty()
+                val hasStrokes = !uiState.currentStrokes.isNullOrEmpty()
                 GlyphView(
                     case = if (hasStrokes) GlyphViewCase.PROFILE else GlyphViewCase.CARVE,
-                    strokes = currentStrokes,
+                    strokes = uiState.currentStrokes,
                     side = 120.dp,
-                    modifier = Modifier.clickable { isPresentingGlyphPicker = true },
+                    modifier = Modifier.clickable(onClick = viewModel::openGlyphPicker),
                 )
             }
 
@@ -274,8 +184,8 @@ fun SettingsScreen(
                                 )
                                 Spacer(Modifier.weight(1f))
                                 BasicTextField(
-                                    value = displayName,
-                                    onValueChange = { displayName = it },
+                                    value = uiState.form.displayName,
+                                    onValueChange = viewModel::onDisplayNameChange,
                                     singleLine = true,
                                     textStyle =
                                         PebblesTypography.body.copy(
@@ -286,7 +196,7 @@ fun SettingsScreen(
                                     keyboardOptions =
                                         KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                                     decorationBox = { inner ->
-                                        if (displayName.isEmpty()) {
+                                        if (uiState.form.displayName.isEmpty()) {
                                             PebblesText(
                                                 text = stringResource(R.string.settings_name_placeholder),
                                                 style = PebblesTypography.body,
@@ -336,16 +246,8 @@ fun SettingsScreen(
                                     color = system.secondary,
                                 )
                                 BasicTextField(
-                                    value = handle,
-                                    onValueChange = {
-                                        handle = it
-                                        handleErrorRes = null
-                                        // Emptying the field means "release my handle",
-                                        // which the server pairs with dropping the public
-                                        // flag. Mirror it so a save can never carry
-                                        // "public, no handle".
-                                        if (it.trim().isEmpty()) isPublicProfile = false
-                                    },
+                                    value = uiState.form.handle,
+                                    onValueChange = viewModel::onHandleChange,
                                     singleLine = true,
                                     textStyle =
                                         PebblesTypography.body.copy(
@@ -359,7 +261,7 @@ fun SettingsScreen(
                                             autoCorrectEnabled = false,
                                         ),
                                     decorationBox = { inner ->
-                                        if (handle.isEmpty()) {
+                                        if (uiState.form.handle.isEmpty()) {
                                             PebblesText(
                                                 text = stringResource(R.string.settings_handle_placeholder),
                                                 style = PebblesTypography.body,
@@ -378,9 +280,10 @@ fun SettingsScreen(
                                 modifier =
                                     Modifier
                                         .fillMaxWidth()
-                                        .clickable(enabled = initialHandle != null) {
-                                            isPublicProfile = !isPublicProfile
-                                        },
+                                        .clickable(
+                                            enabled = uiState.initial.handle != null,
+                                            onClick = viewModel::togglePublicProfile,
+                                        ),
                             ) {
                                 PebblesText(
                                     text = stringResource(R.string.settings_public_profile_toggle),
@@ -389,8 +292,8 @@ fun SettingsScreen(
                                 )
                                 Spacer(Modifier.weight(1f))
                                 Switch(
-                                    checked = isPublicProfile,
-                                    onCheckedChange = { isPublicProfile = it },
+                                    checked = uiState.form.isPublicProfile,
+                                    onCheckedChange = viewModel::onPublicProfileChange,
                                     enabled = initialHandle != null,
                                     colors =
                                         SwitchDefaults.colors(
@@ -399,7 +302,7 @@ fun SettingsScreen(
                                 )
                             }
                         }
-                        if (shareUrl != null) {
+                        uiState.shareUrl?.let { shareUrl ->
                             add {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
@@ -430,14 +333,14 @@ fun SettingsScreen(
                 )
                 PebblesText(
                     text =
-                        handleErrorRes?.let { stringResource(it) }
+                        uiState.handleErrorRes?.let { stringResource(it) }
                             ?: if (initialHandle == null) {
                                 stringResource(R.string.settings_public_profile_needs_handle)
                             } else {
                                 stringResource(R.string.settings_handle_footer)
                             },
                     style = PebblesTypography.subhead,
-                    color = if (handleErrorRes != null) PebblesDestructive else system.secondary,
+                    color = if (uiState.handleErrorRes != null) PebblesDestructive else system.secondary,
                 )
             }
 
@@ -464,14 +367,14 @@ fun SettingsScreen(
                             listOf(
                                 {
                                     BasicTextField(
-                                        value = newPassword,
-                                        onValueChange = { newPassword = it },
+                                        value = uiState.form.newPassword,
+                                        onValueChange = viewModel::onPasswordChange,
                                         singleLine = true,
                                         visualTransformation = PasswordVisualTransformation(),
                                         textStyle = PebblesTypography.body.copy(color = system.foreground),
                                         cursorBrush = SolidColor(PebblesTheme.colors.accent.primary),
                                         decorationBox = { inner ->
-                                            if (newPassword.isEmpty()) {
+                                            if (uiState.form.newPassword.isEmpty()) {
                                                 PebblesText(
                                                     text = stringResource(R.string.settings_password_placeholder),
                                                     style = PebblesTypography.body,
@@ -493,7 +396,7 @@ fun SettingsScreen(
                 }
             }
 
-            if (showSaveError) {
+            if (uiState.didSaveFail) {
                 PebblesText(
                     text = stringResource(R.string.settings_save_error),
                     style = PebblesTypography.subhead,
@@ -564,7 +467,10 @@ fun SettingsScreen(
                                 modifier =
                                     Modifier
                                         .fillMaxWidth()
-                                        .clickable(enabled = !isDeleting) { showDeleteConfirm = true },
+                                        .clickable(
+                                            enabled = uiState.deletion != DeletionState.DELETING,
+                                            onClick = viewModel::requestDelete,
+                                        ),
                             ) {
                                 PebblesText(
                                     text = stringResource(R.string.settings_delete_account),
@@ -572,7 +478,7 @@ fun SettingsScreen(
                                     color = PebblesDestructive,
                                 )
                                 Spacer(Modifier.weight(1f))
-                                if (isDeleting) {
+                                if (uiState.deletion == DeletionState.DELETING) {
                                     CircularProgressIndicator(
                                         color = PebblesDestructive,
                                         strokeWidth = 2.dp,
@@ -586,32 +492,30 @@ fun SettingsScreen(
         }
     }
 
-    if (showDeleteConfirm) {
+    if (uiState.deletion == DeletionState.CONFIRMING) {
         ConfirmDeleteDialog(
             title = stringResource(R.string.settings_delete_account_title),
             message = stringResource(R.string.settings_delete_account_message),
             confirmText = stringResource(R.string.settings_delete_account_confirm),
             onConfirm = {
-                showDeleteConfirm = false
-                deleteAccount()
+                viewModel.confirmDelete()
             },
-            onDismiss = { showDeleteConfirm = false },
+            onDismiss = viewModel::cancelDelete,
         )
     }
-    if (showDeleteError) {
+    if (uiState.deletion == DeletionState.FAILED) {
         DeleteErrorDialog(
             message = stringResource(R.string.settings_delete_account_error),
-            onDismiss = { showDeleteError = false },
+            onDismiss = viewModel::dismissDeleteError,
         )
     }
 
-    if (isPresentingGlyphPicker) {
+    if (uiState.isPresentingGlyphPicker) {
         GlyphPickerSheet(
-            currentGlyphId = pickedGlyph?.id ?: initialGlyphId,
-            onDismiss = { isPresentingGlyphPicker = false },
+            currentGlyphId = uiState.form.pickedGlyph?.id ?: uiState.initial.glyphId,
+            onDismiss = viewModel::closeGlyphPicker,
             onSelected = { glyph ->
-                pickedGlyph = glyph
-                isPresentingGlyphPicker = false
+                viewModel.onGlyphPicked(glyph)
             },
         )
     }

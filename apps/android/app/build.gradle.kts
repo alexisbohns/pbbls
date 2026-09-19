@@ -259,6 +259,7 @@ dependencies {
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.ktor.client.mock)
 
     // Compose Preview Screenshot Testing renders the @PreviewTest composables in
     // src/screenshotTest/ to PNGs. ui-tooling supplies the @Preview runtime.
