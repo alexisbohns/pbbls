@@ -13,7 +13,18 @@ junit = "4.13.2"
 coroutines = "1.11.0"
 # Google's official Compose Preview Screenshot Testing (renders @Preview to PNG
 # on the JVM, no device/emulator, no Robolectric). Still alpha — see CLAUDE.md.
-screenshot = "0.0.1-alpha16"
+#
+# STRICTLY pinned, unlike every other entry here, because the committed reference
+# PNGs under app/src/screenshotTestDebug/reference/ are only meaningful against
+# one renderer: a layoutlib change of any size re-baselines the whole suite, and
+# `strictly` turns "Dependabot moved it" from 162 mystery diffs into a resolution
+# failure that names the version. It also guards app/build.gradle.kts's reach into
+# the validation task's `threshold` input, which alpha16 exposes only as a task
+# property (the plugin's own TODO is to promote it to a DSL).
+#
+# Bumping it is a deliberate, isolated commit that re-runs the re-baseline job —
+# see "Screenshot validation gate" in apps/android/CLAUDE.md.
+screenshot = { strictly = "0.0.1-alpha16" }
 # Rive (D14) — bundled logo animation on the Welcome screen. Requires
 # androidx-startup for Rive.init(); see PebblesApp.onCreate().
 rive = "11.12.0"

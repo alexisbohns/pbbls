@@ -71,21 +71,43 @@ jobs:
           path: apps/android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
 
-      # Renders the @PreviewTest composables to PNGs so the UI is reviewable
-      # without a device (the maintainer has no local Android SDK). This uses
-      # `update` (not `validate`) deliberately: it always re-renders the current
-      # UI and never diffs against a committed baseline — render-to-view, not a
-      # regression gate. Baseline-diff regression testing is a future opt-in.
-      - name: Render UI screenshots
+      # The screenshot suite is a validation gate (#847). Every @PreviewTest is
+      # re-rendered and diffed against the PNG committed under
+      # apps/android/app/src/screenshotTestDebug/reference/; a rendered pixel that
+      # moves past the threshold in app/build.gradle.kts fails the PR here. This
+      # replaced `updateDebugScreenshotTest`, which re-rendered the references in
+      # place and so could never fail — render-to-view, not an oracle.
+      #
+      # A PR that changes UI on purpose is therefore red until its baseline is
+      # regenerated: label it `rebaseline-screenshots` and android-screenshots.yml
+      # commits the new PNGs to the branch. Reviewing the UI no longer needs an
+      # artifact download either — the references are in the repo, and the PR diff
+      # shows before/after for every render that moved.
+      #
+      # The Supabase config is passed here only to keep BuildConfig identical to
+      # the steps around it; flipping those values between steps invalidates the
+      # Kotlin compilation and rebuilds the app twice per run. Nothing rendered
+      # reads AppEnvironment, so the baseline does not depend on the secrets being
+      # present — which matters, because a fork PR has none.
+      - name: Validate UI screenshots
         working-directory: apps/android
-        run: ./gradlew updateDebugScreenshotTest
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: ./gradlew validateDebugScreenshotTest
 
-      - name: Upload UI screenshots
+      # The reference/actual/diff triptych for whatever failed, so the change is
+      # reviewable without an SDK. Only uploaded on failure: on a green run the
+      # renders are byte-identical to the committed references.
+      - name: Upload UI screenshot diffs
+        if: failure()
         uses: actions/upload-artifact@v7
         with:
-          name: ui-screenshots
-          path: apps/android/app/src/screenshotTestDebug/reference/**
-          if-no-files-found: error
+          name: ui-screenshot-diffs
+          path: |
+            apps/android/app/build/reports/screenshotTest/preview/debug/**
+            apps/android/app/build/outputs/screenshotTest-results/preview/debug/**
+          if-no-files-found: warn
 
       # Android Lint with `warningsAsErrors` + a committed baseline
       # (apps/android/app/lint-baseline.xml). Anything already in the baseline is
