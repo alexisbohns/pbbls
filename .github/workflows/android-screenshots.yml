@@ -107,14 +107,29 @@ jobs:
             echo "branch=$TARGET_REF" >> "$GITHUB_OUTPUT"
           fi
 
-      # A push made with GITHUB_TOKEN does not trigger workflows, so android.yml
-      # will NOT re-run by itself and the PR keeps showing the failed check that
-      # sent you here. Say so rather than letting someone conclude the gate is
-      # broken.
+      # The push above is attributed to github-actions[bot], and GitHub holds
+      # workflow runs whose triggering actor is a bot: android.yml IS queued
+      # against the new commit, but it sits at `action_required` until a human
+      # with write access approves it. Until then the PR still shows the failed
+      # check that sent you here, which looks exactly like the re-baseline having
+      # done nothing. Say what to do instead of leaving that to be rediscovered.
+      #
+      # "Re-run the Android workflow" would be wrong advice: a re-run replays the
+      # SHA it was created for, which is the pre-baseline tree, so it fails again.
       - name: Next step
         if: ${{ steps.commit.outputs.changed == 'true' }}
         run: |
-          echo "Baseline committed to ${{ steps.commit.outputs.branch }}." >> "$GITHUB_STEP_SUMMARY"
-          echo "" >> "$GITHUB_STEP_SUMMARY"
-          echo "This push was made with GITHUB_TOKEN, which does not re-trigger workflows." >> "$GITHUB_STEP_SUMMARY"
-          echo "Re-run the **Android** workflow on the PR to turn the screenshot check green." >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "Baseline committed to \`${{ steps.commit.outputs.branch }}\`."
+            echo
+            echo "**The Android check is not green yet.** This push is attributed to"
+            echo "\`github-actions[bot]\`, so the runs queued against the new commit are held"
+            echo "at \`action_required\` pending approval. Do one of:"
+            echo
+            echo "- approve them from the PR's **Checks** tab, or"
+            echo '  `gh api --method POST repos/${{ github.repository }}/actions/runs/<run-id>/approve`'
+            echo "- push any further commit yourself, which runs them without approval"
+            echo
+            echo "Do **not** re-run the failed Android run: a re-run replays the commit it was"
+            echo "created for, which is the tree from before the re-baseline."
+          } >> "$GITHUB_STEP_SUMMARY"
