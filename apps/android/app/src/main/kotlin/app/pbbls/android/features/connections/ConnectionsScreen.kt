@@ -37,6 +37,7 @@ import app.pbbls.android.features.profile.components.DeleteErrorDialog
 import app.pbbls.android.services.Connection
 import app.pbbls.android.services.LocalConnectionsService
 import app.pbbls.android.services.connectionsErrorMessage
+import app.pbbls.android.services.toDataError
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar
@@ -100,7 +101,7 @@ fun ConnectionsScreen(
                 service.remove(connectionId = row.connectionId, block = block)
             } catch (e: Exception) {
                 Log.e(TAG, "connection removal failed", e)
-                removeErrorRes = connectionsErrorMessage(e.message)
+                removeErrorRes = connectionsErrorMessage(e.toDataError())
                 retryKey++
             }
         }

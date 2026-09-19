@@ -210,7 +210,12 @@ class PebbleWriteService
                         val obj = Json.parseToJsonElement(body).jsonObject
                         (obj["error"] ?: obj["message"])?.jsonPrimitive?.contentOrNull
                     }.getOrNull().orEmpty()
-                return if (message.contains("media_quota_exceeded") || message.contains("P0001")) {
+                // Exact match on the decoded field, not a scan of it (#850). The
+                // edge function forwards the Postgres condition verbatim, so
+                // `media_quota_exceeded` arrives alone; the bare SQLSTATE is
+                // accepted too because the function's older branch returned only
+                // that, and it raises P0001 for nothing else.
+                return if (message == "media_quota_exceeded" || message == "P0001") {
                     R.string.pebble_save_error_media_quota
                 } else {
                     R.string.pebble_save_error_generic

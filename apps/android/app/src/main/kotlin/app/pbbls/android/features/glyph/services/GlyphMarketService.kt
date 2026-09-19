@@ -1,5 +1,6 @@
 package app.pbbls.android.features.glyph.services
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.R
 import app.pbbls.android.features.glyph.models.BuyGlyphResult
@@ -7,6 +8,7 @@ import app.pbbls.android.features.glyph.models.GlyphGridItem
 import app.pbbls.android.features.glyph.models.MarketGlyphRow
 import app.pbbls.android.features.glyph.models.MineGlyphRow
 import app.pbbls.android.features.glyph.models.OwnedGlyphRow
+import app.pbbls.android.services.DataError
 import app.pbbls.android.services.SupabaseService
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
@@ -149,16 +151,25 @@ class GlyphMarketService
  * iOS `friendlyMessage` — substring-contains on the lowercased error text, in
  * the iOS order, mapped to the localized catalog (pure; JVM-tested).
  */
-fun glyphMarketErrorMessage(message: String?): Int {
-    val lowered = message?.lowercase() ?: return R.string.glyph_error_generic
-    return when {
-        "insufficient_karma" in lowered -> R.string.glyph_error_insufficient_karma
-        "not_in_market" in lowered -> R.string.glyph_error_not_in_market
-        "already_owned" in lowered -> R.string.glyph_error_already_owned
-        "cannot_buy_own" in lowered -> R.string.glyph_error_cannot_buy_own
-        else -> R.string.glyph_error_generic
+@StringRes
+fun glyphMarketErrorMessage(error: DataError): Int =
+    when (error) {
+        DataError.Network -> R.string.error_offline
+        is DataError.Conflict ->
+            when (error.code) {
+                "insufficient_karma" -> R.string.glyph_error_insufficient_karma
+                "not_in_market" -> R.string.glyph_error_not_in_market
+                "already_owned" -> R.string.glyph_error_already_owned
+                "cannot_buy_own" -> R.string.glyph_error_cannot_buy_own
+                else -> R.string.glyph_error_generic
+            }
+
+        DataError.Unauthorized,
+        DataError.NotFound,
+        DataError.Quota,
+        is DataError.Unknown,
+        -> R.string.glyph_error_generic
     }
-}
 
 /** CompositionLocal for [GlyphMarketService] — see [LocalSupabaseService]. */
 val LocalGlyphMarketService =

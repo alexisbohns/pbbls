@@ -1,5 +1,6 @@
 package app.pbbls.android.services
 
+import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -174,22 +175,33 @@ fun parseInviteToken(url: String?): String? {
 const val INVITE_HOST = "www.pbbls.app"
 
 /**
- * iOS `ConnectionsError.from` — substring-contains on the lowercased error
- * text, in the iOS order, mapped to the localized catalog (pure; JVM-tested).
+ * A connections failure as its inline string resource (pure; JVM-tested).
+ *
+ * Was a substring scan of the exception text in the iOS order; it now matches
+ * the server's own answer exactly — see [DataError] for why the old form was
+ * reading the request URL as well as the error. iOS still has the substring
+ * version (`ConnectionsError.from`), so the two surfaces have diverged here on
+ * purpose until iOS gets the same treatment.
  */
-fun connectionsErrorMessage(message: String?): Int {
-    val lowered = message?.lowercase() ?: return R.string.connections_error_generic
-    return when {
-        "cannot_accept_own_invite" in lowered -> R.string.connections_error_own_invite
-        // `invite_expired` also covers revoked tokens and a block in either
-        // direction — deliberately indistinguishable, so a block is never
-        // confirmed by the accept path.
-        "invite_expired" in lowered -> R.string.connections_error_invite_unusable
-        "invite_not_found" in lowered -> R.string.connections_error_invite_unusable
-        "not_authenticated" in lowered -> R.string.connections_error_session
-        else -> R.string.connections_error_generic
+@StringRes
+fun connectionsErrorMessage(error: DataError): Int =
+    when (error) {
+        DataError.Network -> R.string.error_offline
+        DataError.Unauthorized -> R.string.connections_error_session
+        is DataError.Conflict ->
+            when (error.code) {
+                "cannot_accept_own_invite" -> R.string.connections_error_own_invite
+                // `invite_expired` also covers revoked tokens and a block in either
+                // direction — deliberately indistinguishable, so a block is never
+                // confirmed by the accept path.
+                "invite_expired", "invite_not_found" -> R.string.connections_error_invite_unusable
+                "not_authenticated" -> R.string.connections_error_session
+                else -> R.string.connections_error_generic
+            }
+
+        DataError.NotFound -> R.string.connections_error_invite_unusable
+        DataError.Quota, is DataError.Unknown -> R.string.connections_error_generic
     }
-}
 
 /** CompositionLocal for [ConnectionsService]. */
 val LocalConnectionsService =

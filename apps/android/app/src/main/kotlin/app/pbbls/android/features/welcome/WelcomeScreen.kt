@@ -1,6 +1,8 @@
 package app.pbbls.android.features.welcome
 
 import android.provider.Settings
+import android.util.Log
+import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -42,11 +44,15 @@ import app.pbbls.android.components.LegalDisclaimer
 import app.pbbls.android.components.LegalDoc
 import app.pbbls.android.components.PebblesPrimaryButton
 import app.pbbls.android.components.openLegalDoc
+import app.pbbls.android.features.auth.authErrorMessage
 import app.pbbls.android.rive.RiveLogo
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.coroutines.cancellation.CancellationException
+
+private const val TAG = "welcome"
 
 // One entry per revealed element, in fade-in order. iOS's 7th step (Continue
 // with Apple) is dropped — no Apple sign-in on Android (settled non-goal).
@@ -81,7 +87,8 @@ fun WelcomeScreen(
     val scope = rememberCoroutineScope()
 
     var isSubmitting by remember { mutableStateOf(false) }
-    var authError by remember { mutableStateOf<String?>(null) }
+    // A resource id, never a message (D9, #850) — see authErrorMessage.
+    var authErrorRes by remember { mutableStateOf<Int?>(null) }
     var revealStep by remember { mutableIntStateOf(if (inspection) REVEAL_STEPS else 0) }
 
     LaunchedEffectReveal(contentRevealed, reduceMotion, revealStep) { revealStep = it }
@@ -113,18 +120,21 @@ fun WelcomeScreen(
                     revealStep = revealStep,
                     reduceMotion = reduceMotion,
                     isSubmitting = isSubmitting,
-                    authError = authError,
+                    authErrorRes = authErrorRes,
                     onCreateAccount = onCreateAccount,
                     onLogin = onLogin,
                     onGoogleSignIn = {
                         if (!isSubmitting) {
                             scope.launch {
                                 isSubmitting = true
-                                authError = null
+                                authErrorRes = null
                                 try {
                                     onGoogleSignIn()
+                                } catch (e: CancellationException) {
+                                    throw e
                                 } catch (e: Exception) {
-                                    authError = e.message
+                                    Log.e(TAG, "google sign-in failed", e)
+                                    authErrorRes = authErrorMessage(e)
                                 }
                                 isSubmitting = false
                             }
@@ -143,7 +153,7 @@ private fun WelcomeRevealedContent(
     revealStep: Int,
     reduceMotion: Boolean,
     isSubmitting: Boolean,
-    authError: String?,
+    @StringRes authErrorRes: Int?,
     onCreateAccount: () -> Unit,
     onLogin: () -> Unit,
     onGoogleSignIn: () -> Unit,
@@ -187,9 +197,9 @@ private fun WelcomeRevealedContent(
                 enabled = !isSubmitting,
                 modifier = Modifier.revealAlpha(revealStep >= 5),
             )
-            if (authError != null) {
+            authErrorRes?.let { messageRes ->
                 Text(
-                    text = authError,
+                    text = stringResource(messageRes),
                     style = PebblesTypography.subhead.copy(fontSize = 12.sp),
                     color = ErrorRed,
                     textAlign = TextAlign.Center,

@@ -31,6 +31,7 @@ import app.pbbls.android.services.AcceptInviteResult
 import app.pbbls.android.services.InvitePreview
 import app.pbbls.android.services.LocalConnectionsService
 import app.pbbls.android.services.connectionsErrorMessage
+import app.pbbls.android.services.toDataError
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar
@@ -67,7 +68,7 @@ fun AcceptInviteScreen(
             preview = service.preview(token)
         } catch (e: Exception) {
             Log.e(TAG, "invite preview failed", e)
-            errorRes = connectionsErrorMessage(e.message)
+            errorRes = connectionsErrorMessage(e.toDataError())
         }
         isLoading = false
     }
@@ -88,7 +89,7 @@ fun AcceptInviteScreen(
                     accepted = service.accept(token)
                 } catch (e: Exception) {
                     Log.e(TAG, "invite accept failed", e)
-                    errorRes = connectionsErrorMessage(e.message)
+                    errorRes = connectionsErrorMessage(e.toDataError())
                 }
                 isAccepting = false
             }
