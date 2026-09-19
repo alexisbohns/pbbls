@@ -6,6 +6,7 @@ import app.pbbls.android.features.path.models.OffsetDateTimeSerializer
 import app.pbbls.android.features.profile.models.Collection
 import app.pbbls.android.features.profile.models.CollectionRow
 import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.functions.functions
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
@@ -115,6 +116,18 @@ class ProfileService
                 .update(buildJsonObject { put("public_profile", isPublic) }) {
                     filter { eq("user_id", userId) }
                 }
+        }
+
+        /**
+         * Invokes the `delete-account` edge function, which purges the row graph and
+         * the auth user. Throws on failure; the caller signs out and maps the error.
+         *
+         * Lives here rather than on the screen (#848) so `SupabaseServicing` never
+         * has to expose the raw client — a client on that interface would make every
+         * fake of it pointless.
+         */
+        suspend fun deleteAccount() {
+            supabase.client.functions.invoke("delete-account")
         }
 
         @Serializable
