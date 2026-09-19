@@ -6,6 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.services.AchievementRecord
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * One card of an unlock moment: a badge that just unlocked, with the karma it
@@ -33,42 +35,45 @@ data class AchievementMomentCard(
  * is the retroactive grant and can return a veteran's whole history at once, so
  * it renders in the grid instead of chaining twenty cards.
  */
-class AchievementNotificationService {
-    /** The queue being celebrated (empty = nothing showing). */
-    var cards: List<AchievementMomentCard> by mutableStateOf(emptyList())
-        private set
+@Singleton
+class AchievementNotificationService
+    @Inject
+    constructor() {
+        /** The queue being celebrated (empty = nothing showing). */
+        var cards: List<AchievementMomentCard> by mutableStateOf(emptyList())
+            private set
 
-    /** Index of the card on screen. */
-    var index: Int by mutableIntStateOf(0)
-        private set
+        /** Index of the card on screen. */
+        var index: Int by mutableIntStateOf(0)
+            private set
 
-    /** The card on screen, or null when the moment is idle. */
-    val currentCard: AchievementMomentCard?
-        get() = cards.getOrNull(index)
+        /** The card on screen, or null when the moment is idle. */
+        val currentCard: AchievementMomentCard?
+            get() = cards.getOrNull(index)
 
-    val isShowingLastCard: Boolean
-        get() = index + 1 >= cards.size
+        val isShowingLastCard: Boolean
+            get() = index + 1 >= cards.size
 
-    fun present(cards: List<AchievementMomentCard>) {
-        if (cards.isEmpty()) return
-        this.cards = cards
-        this.index = 0
+        fun present(cards: List<AchievementMomentCard>) {
+            if (cards.isEmpty()) return
+            this.cards = cards
+            this.index = 0
+        }
+
+        /** Advances to the next card, ending the moment after the last one. */
+        fun advance() {
+            if (isShowingLastCard) dismiss() else index += 1
+        }
+
+        /**
+         * Ends the moment immediately — tapping the scrim or pressing back skips
+         * the rest of the queue. Dismissal is never blocking.
+         */
+        fun dismiss() {
+            cards = emptyList()
+            index = 0
+        }
     }
-
-    /** Advances to the next card, ending the moment after the last one. */
-    fun advance() {
-        if (isShowingLastCard) dismiss() else index += 1
-    }
-
-    /**
-     * Ends the moment immediately — tapping the scrim or pressing back skips
-     * the rest of the queue. Dismissal is never blocking.
-     */
-    fun dismiss() {
-        cards = emptyList()
-        index = 0
-    }
-}
 
 val LocalAchievementNotificationService =
     staticCompositionLocalOf<AchievementNotificationService> {

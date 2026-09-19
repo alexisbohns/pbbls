@@ -11,6 +11,8 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Mutual connections (M49) — ports iOS `ConnectionsService`.
@@ -21,74 +23,77 @@ import kotlinx.serialization.json.put
  * accessor). Errors propagate to the caller, which owns loading/error view
  * state; [connectionsErrorMessage] maps the Postgres slugs to copy.
  */
-class ConnectionsService(
-    private val supabase: SupabaseService,
-) {
-    /**
-     * Token lifted from an invite App Link. Compose-observable so `RootScreen`
-     * reacts both to a cold start (token parked before the session resolves)
-     * and to `onNewIntent` on an already-running, already-signed-in app.
-     */
-    var pendingInviteToken: String? by mutableStateOf(null)
-
-    /** `get_connections() returns jsonb` — the caller's connections, newest first. */
-    suspend fun list(): List<Connection> =
-        supabase.client.postgrest
-            .rpc("get_connections")
-            .decodeAs()
-
-    /**
-     * Returns the caller's live invite, minting one only when none exists.
-     * [rotate] revokes the live invite and issues a fresh token — the whole
-     * revocation surface, so a link already shared stays alive until then.
-     */
-    suspend fun createInvite(rotate: Boolean = false): ConnectionInvite =
-        supabase.client.postgrest
-            .rpc(
-                "create_connection_invite",
-                buildJsonObject { put("p_rotate", rotate) },
-            ).decodeAs()
-
-    /**
-     * Anon-callable preview: who is inviting, before accepting. Never raises —
-     * an unusable token comes back as a status, not an error.
-     */
-    suspend fun preview(token: String): InvitePreview =
-        supabase.client.postgrest
-            .rpc(
-                "preview_connection_invite",
-                buildJsonObject { put("p_token", token) },
-            ).decodeAs()
-
-    /**
-     * Accepting is the mutual consent. A repeat accept SUCCEEDS with
-     * `alreadyConnected` — re-scanning a shared QR is the normal case, not an
-     * error. A block in either direction surfaces as `invite_expired`.
-     */
-    suspend fun accept(token: String): AcceptInviteResult =
-        supabase.client.postgrest
-            .rpc(
-                "accept_connection_invite",
-                buildJsonObject { put("p_token", token) },
-            ).decodeAs()
-
-    /**
-     * Severs the connection for both sides. [block] additionally records a
-     * one-way block that stops the peer re-entering through a live invite.
-     */
-    suspend fun remove(
-        connectionId: String,
-        block: Boolean = false,
+@Singleton
+class ConnectionsService
+    @Inject
+    constructor(
+        private val supabase: SupabaseService,
     ) {
-        supabase.client.postgrest.rpc(
-            "remove_connection",
-            buildJsonObject {
-                put("p_connection_id", connectionId)
-                put("p_block", block)
-            },
-        )
+        /**
+         * Token lifted from an invite App Link. Compose-observable so `RootScreen`
+         * reacts both to a cold start (token parked before the session resolves)
+         * and to `onNewIntent` on an already-running, already-signed-in app.
+         */
+        var pendingInviteToken: String? by mutableStateOf(null)
+
+        /** `get_connections() returns jsonb` — the caller's connections, newest first. */
+        suspend fun list(): List<Connection> =
+            supabase.client.postgrest
+                .rpc("get_connections")
+                .decodeAs()
+
+        /**
+         * Returns the caller's live invite, minting one only when none exists.
+         * [rotate] revokes the live invite and issues a fresh token — the whole
+         * revocation surface, so a link already shared stays alive until then.
+         */
+        suspend fun createInvite(rotate: Boolean = false): ConnectionInvite =
+            supabase.client.postgrest
+                .rpc(
+                    "create_connection_invite",
+                    buildJsonObject { put("p_rotate", rotate) },
+                ).decodeAs()
+
+        /**
+         * Anon-callable preview: who is inviting, before accepting. Never raises —
+         * an unusable token comes back as a status, not an error.
+         */
+        suspend fun preview(token: String): InvitePreview =
+            supabase.client.postgrest
+                .rpc(
+                    "preview_connection_invite",
+                    buildJsonObject { put("p_token", token) },
+                ).decodeAs()
+
+        /**
+         * Accepting is the mutual consent. A repeat accept SUCCEEDS with
+         * `alreadyConnected` — re-scanning a shared QR is the normal case, not an
+         * error. A block in either direction surfaces as `invite_expired`.
+         */
+        suspend fun accept(token: String): AcceptInviteResult =
+            supabase.client.postgrest
+                .rpc(
+                    "accept_connection_invite",
+                    buildJsonObject { put("p_token", token) },
+                ).decodeAs()
+
+        /**
+         * Severs the connection for both sides. [block] additionally records a
+         * one-way block that stops the peer re-entering through a live invite.
+         */
+        suspend fun remove(
+            connectionId: String,
+            block: Boolean = false,
+        ) {
+            supabase.client.postgrest.rpc(
+                "remove_connection",
+                buildJsonObject {
+                    put("p_connection_id", connectionId)
+                    put("p_block", block)
+                },
+            )
+        }
     }
-}
 
 // ---------------------------------------------------------------------------
 // Wire models. UUIDs are Strings on Android; timestamps stay Strings because

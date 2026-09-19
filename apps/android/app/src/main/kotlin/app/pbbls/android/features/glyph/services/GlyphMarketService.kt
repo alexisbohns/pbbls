@@ -14,6 +14,8 @@ import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Market reads + the `buy_glyph` purchase — ports iOS `GlyphMarketService`
@@ -22,123 +24,126 @@ import kotlinx.serialization.json.put
  * Methods throw; callers own view state and map errors through
  * [glyphMarketErrorMessage].
  */
-class GlyphMarketService(
-    private val supabase: SupabaseService,
-) {
-    /**
-     * The Mine tab: the caller's creations (newest first, price from the
-     * embedded approved+listed submission) THEN system glyphs — Android keeps
-     * system glyphs pickable (design D7, a named deviation from iOS's
-     * `eq(user_id, me)` which silently drops them) — membership is
-     * `is_system`, not a null owner (#872).
-     */
-    suspend fun listMine(): List<GlyphGridItem> {
-        val me = requireUserId()
-        val rows =
-            supabase.client
-                .from("glyphs")
-                .select(
-                    Columns.raw(
-                        "id, name, strokes, view_box, user_id, is_system, created_at, " +
-                            "glyph_submissions(price, status, listed)",
-                    ),
-                ) {
-                    order("created_at", Order.DESCENDING)
-                }.decodeList<MineGlyphRow>()
-        return mineTab(rows, me).map { row ->
-            GlyphGridItem(
-                glyph = row.toGlyph(),
-                price = row.listedPrice,
-                owned = false,
-                createdAt = row.createdAt,
-                acquiredAt = null,
-            )
-        }
-    }
-
-    /** The Owned tab: entitlements (RLS-scoped — no user filter), newest acquisition first. */
-    suspend fun listOwned(): List<GlyphGridItem> =
-        supabase.client
-            .from("glyph_entitlements")
-            .select(
-                Columns.raw(
-                    "price_paid, created_at, glyphs(id, name, strokes, view_box, user_id, is_system, created_at)",
-                ),
-            ) {
-                order("created_at", Order.DESCENDING)
-            }.decodeList<OwnedGlyphRow>()
-            .map { row ->
-                GlyphGridItem(
-                    glyph = row.glyph.toGlyph(),
-                    price = row.pricePaid,
-                    owned = true,
-                    createdAt = row.glyph.createdAt,
-                    acquiredAt = row.acquiredAt,
-                )
-            }
-
-    /**
-     * The Commu tab: `v_glyph_market` minus the caller's own creations (the
-     * view does NOT exclude them — the `.neq` is load-bearing). The picker
-     * additionally client-filters `!owned` (design D10).
-     */
-    suspend fun listCommunity(): List<GlyphGridItem> {
-        val me = requireUserId()
-        return supabase.client
-            .from("v_glyph_market")
-            .select(Columns.raw("id, user_id, name, strokes, view_box, created_at, price, owned")) {
-                filter { neq("user_id", me) }
-                order("created_at", Order.DESCENDING)
-            }.decodeList<MarketGlyphRow>()
-            .map { row ->
+@Singleton
+class GlyphMarketService
+    @Inject
+    constructor(
+        private val supabase: SupabaseService,
+    ) {
+        /**
+         * The Mine tab: the caller's creations (newest first, price from the
+         * embedded approved+listed submission) THEN system glyphs — Android keeps
+         * system glyphs pickable (design D7, a named deviation from iOS's
+         * `eq(user_id, me)` which silently drops them) — membership is
+         * `is_system`, not a null owner (#872).
+         */
+        suspend fun listMine(): List<GlyphGridItem> {
+            val me = requireUserId()
+            val rows =
+                supabase.client
+                    .from("glyphs")
+                    .select(
+                        Columns.raw(
+                            "id, name, strokes, view_box, user_id, is_system, created_at, " +
+                                "glyph_submissions(price, status, listed)",
+                        ),
+                    ) {
+                        order("created_at", Order.DESCENDING)
+                    }.decodeList<MineGlyphRow>()
+            return mineTab(rows, me).map { row ->
                 GlyphGridItem(
                     glyph = row.toGlyph(),
-                    price = row.price,
-                    owned = row.owned,
+                    price = row.listedPrice,
+                    owned = false,
                     createdAt = row.createdAt,
                     acquiredAt = null,
                 )
             }
-    }
+        }
 
-    /**
-     * `buy_glyph(p_glyph_id) returns jsonb` — success inserts the entitlement,
-     * credits the creator, and returns the buyer's new `{entitlement_id,
-     * balance}`. Errors surface as Postgres exception text
-     * (`insufficient_karma` bubbles from `spend_karma`); the message must
-     * reach the caller intact for [glyphMarketErrorMessage]'s substring match.
-     */
-    suspend fun buy(glyphId: String): BuyGlyphResult =
-        supabase.client.postgrest
-            .rpc(
-                "buy_glyph",
-                buildJsonObject { put("p_glyph_id", glyphId) },
-            ).decodeAs()
+        /** The Owned tab: entitlements (RLS-scoped — no user filter), newest acquisition first. */
+        suspend fun listOwned(): List<GlyphGridItem> =
+            supabase.client
+                .from("glyph_entitlements")
+                .select(
+                    Columns.raw(
+                        "price_paid, created_at, glyphs(id, name, strokes, view_box, user_id, is_system, created_at)",
+                    ),
+                ) {
+                    order("created_at", Order.DESCENDING)
+                }.decodeList<OwnedGlyphRow>()
+                .map { row ->
+                    GlyphGridItem(
+                        glyph = row.glyph.toGlyph(),
+                        price = row.pricePaid,
+                        owned = true,
+                        createdAt = row.glyph.createdAt,
+                        acquiredAt = row.acquiredAt,
+                    )
+                }
 
-    private fun requireUserId(): String =
-        supabase.session?.user?.id
-            ?: throw IllegalStateException("glyph market without session")
-
-    companion object {
         /**
-         * The Mine tab's membership and order: the caller's own creations
-         * (server order, newest first) then system glyphs — design D7, the
-         * named deviation from iOS's `eq(user_id, me)`.
-         *
-         * Keyed on [MineGlyphRow.isSystem], never on `userId == null` (#872):
-         * `purge_account` anonymizes a SOLD glyph when its creator deletes
-         * their account, and that row must not appear in a stranger's Mine tab
-         * as a free first-party seed.
+         * The Commu tab: `v_glyph_market` minus the caller's own creations (the
+         * view does NOT exclude them — the `.neq` is load-bearing). The picker
+         * additionally client-filters `!owned` (design D10).
          */
-        fun mineTab(
-            rows: List<MineGlyphRow>,
-            me: String,
-        ): List<MineGlyphRow> {
-            val (own, rest) = rows.partition { it.userId == me }
-            return own + rest.filter { it.isSystem }
+        suspend fun listCommunity(): List<GlyphGridItem> {
+            val me = requireUserId()
+            return supabase.client
+                .from("v_glyph_market")
+                .select(Columns.raw("id, user_id, name, strokes, view_box, created_at, price, owned")) {
+                    filter { neq("user_id", me) }
+                    order("created_at", Order.DESCENDING)
+                }.decodeList<MarketGlyphRow>()
+                .map { row ->
+                    GlyphGridItem(
+                        glyph = row.toGlyph(),
+                        price = row.price,
+                        owned = row.owned,
+                        createdAt = row.createdAt,
+                        acquiredAt = null,
+                    )
+                }
+        }
+
+        /**
+         * `buy_glyph(p_glyph_id) returns jsonb` — success inserts the entitlement,
+         * credits the creator, and returns the buyer's new `{entitlement_id,
+         * balance}`. Errors surface as Postgres exception text
+         * (`insufficient_karma` bubbles from `spend_karma`); the message must
+         * reach the caller intact for [glyphMarketErrorMessage]'s substring match.
+         */
+        suspend fun buy(glyphId: String): BuyGlyphResult =
+            supabase.client.postgrest
+                .rpc(
+                    "buy_glyph",
+                    buildJsonObject { put("p_glyph_id", glyphId) },
+                ).decodeAs()
+
+        private fun requireUserId(): String =
+            supabase.session?.user?.id
+                ?: throw IllegalStateException("glyph market without session")
+
+        companion object {
+            /**
+             * The Mine tab's membership and order: the caller's own creations
+             * (server order, newest first) then system glyphs — design D7, the
+             * named deviation from iOS's `eq(user_id, me)`.
+             *
+             * Keyed on [MineGlyphRow.isSystem], never on `userId == null` (#872):
+             * `purge_account` anonymizes a SOLD glyph when its creator deletes
+             * their account, and that row must not appear in a stranger's Mine tab
+             * as a free first-party seed.
+             */
+            fun mineTab(
+                rows: List<MineGlyphRow>,
+                me: String,
+            ): List<MineGlyphRow> {
+                val (own, rest) = rows.partition { it.userId == me }
+                return own + rest.filter { it.isSystem }
+            }
         }
     }
-}
 
 /**
  * iOS `friendlyMessage` — substring-contains on the lowercased error text, in
@@ -155,7 +160,7 @@ fun glyphMarketErrorMessage(message: String?): Int {
     }
 }
 
-/** CompositionLocal for [GlyphMarketService] — see [LocalGlyphService] (D4). */
+/** CompositionLocal for [GlyphMarketService] — see [LocalSupabaseService]. */
 val LocalGlyphMarketService =
     staticCompositionLocalOf<GlyphMarketService> {
         error("LocalGlyphMarketService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
