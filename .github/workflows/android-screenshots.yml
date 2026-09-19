@@ -11,7 +11,7 @@ name: Android screenshots (re-baseline)
 #
 # Two ways in, both manual:
 #   - label a PR `rebaseline-screenshots` — the new PNGs are committed to the PR
-#     branch (same-repo PRs only; a fork's token cannot push to its branch)
+#     branch (same-repo PRs only; a fork PR skips, see the job's `if`)
 #   - run it from the Actions tab on any ref
 #
 # The references are rendered on ubuntu-latest here and validated on
@@ -33,8 +33,14 @@ permissions:
 
 jobs:
   rebaseline:
-    # The `labeled` event fires for every label, so gate on the one that means it.
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.label.name == 'rebaseline-screenshots' }}
+    # The `labeled` event fires for every label, so gate on the one that means
+    # it. A fork's head branch does not exist in this repository and its token
+    # cannot push, so skip rather than fail the checkout on a run that could
+    # never have finished.
+    if: >-
+      ${{ github.event_name == 'workflow_dispatch' ||
+          (github.event.label.name == 'rebaseline-screenshots' &&
+           github.event.pull_request.head.repo.full_name == github.repository) }}
     name: Re-render and commit the screenshot baseline
     runs-on: ubuntu-latest
     steps:
