@@ -9,6 +9,21 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 /**
+ * The local crash-snapshot seam (#849).
+ *
+ * `ComposerSnapshotStore` is SharedPreferences, so it needs a `Context` and a
+ * JVM test cannot build one. `RecordFlowViewModel` drives the whole draft
+ * lifecycle through this interface instead, and the fake is a map.
+ */
+interface ComposerSnapshotStoring {
+    fun load(): PebbleDraftPayload?
+
+    fun save(payload: PebbleDraftPayload)
+
+    fun clear()
+}
+
+/**
  * Crash insurance for the open composer (M47) — ports iOS
  * `ComposerSnapshotStore.swift`.
  *
@@ -28,7 +43,7 @@ import kotlinx.serialization.json.Json
  */
 class ComposerSnapshotStore(
     private val context: Context,
-) {
+) : ComposerSnapshotStoring {
     private companion object {
         const val PREFS_NAME = "pebbles_prefs"
         const val KEY_SNAPSHOT = "composerSnapshot"
@@ -43,7 +58,7 @@ class ComposerSnapshotStore(
      * payload written by an older build must never crash the composer, so a
      * decode failure discards the entry rather than propagating.
      */
-    fun load(): PebbleDraftPayload? {
+    override fun load(): PebbleDraftPayload? {
         val raw = prefs().getString(KEY_SNAPSHOT, null) ?: return null
         return try {
             json.decodeFromString<PebbleDraftPayload>(raw).takeUnless { it.isEmpty }
@@ -55,7 +70,7 @@ class ComposerSnapshotStore(
     }
 
     /** Overwrite the snapshot. Callers debounce; see [ComposerAutosave]. */
-    fun save(payload: PebbleDraftPayload) {
+    override fun save(payload: PebbleDraftPayload) {
         if (payload.isEmpty) {
             clear()
             return
@@ -68,7 +83,7 @@ class ComposerSnapshotStore(
         }
     }
 
-    fun clear() {
+    override fun clear() {
         prefs().edit().remove(KEY_SNAPSHOT).apply()
     }
 
@@ -122,8 +137,8 @@ class ComposerAutosave(
     }
 }
 
-/** Adapts the real store to [ComposerAutosave.SnapshotSink]. */
-fun ComposerSnapshotStore.asSink(): ComposerAutosave.SnapshotSink =
+/** Adapts a store to [ComposerAutosave.SnapshotSink]. */
+fun ComposerSnapshotStoring.asSink(): ComposerAutosave.SnapshotSink =
     object : ComposerAutosave.SnapshotSink {
         override fun write(payload: PebbleDraftPayload) = save(payload)
 
@@ -131,6 +146,6 @@ fun ComposerSnapshotStore.asSink(): ComposerAutosave.SnapshotSink =
     }
 
 val LocalComposerSnapshotStore =
-    staticCompositionLocalOf<ComposerSnapshotStore> {
+    staticCompositionLocalOf<ComposerSnapshotStoring> {
         error("LocalComposerSnapshotStore not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

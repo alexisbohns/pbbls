@@ -1,5 +1,7 @@
 package app.pbbls.android.di
 
+import app.pbbls.android.features.path.record.AndroidRecordFlowMedia
+import app.pbbls.android.features.path.record.RecordFlowMedia
 import app.pbbls.android.services.AchievementsService
 import app.pbbls.android.services.AchievementsServicing
 import app.pbbls.android.services.PathService
@@ -66,4 +68,8 @@ interface ServiceBindings {
     @Binds
     @Singleton
     fun bindPebbleDraftsServicing(impl: PebbleDraftsService): PebbleDraftsServicing
+
+    @Binds
+    @Singleton
+    fun bindRecordFlowMedia(impl: AndroidRecordFlowMedia): RecordFlowMedia
 }

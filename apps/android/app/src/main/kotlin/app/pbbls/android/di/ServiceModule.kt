@@ -2,8 +2,10 @@ package app.pbbls.android.di
 
 import android.content.Context
 import app.pbbls.android.services.ComposerSnapshotStore
+import app.pbbls.android.services.ComposerSnapshotStoring
 import app.pbbls.android.services.PebbleSnapRepository
 import app.pbbls.android.services.SnapURLCache
+import app.pbbls.android.services.SnapWriteRepositing
 import app.pbbls.android.services.SupabaseService
 import dagger.Module
 import dagger.Provides
@@ -63,4 +65,17 @@ object ServiceModule {
     fun provideComposerSnapshotStore(
         @ApplicationContext context: Context,
     ): ComposerSnapshotStore = ComposerSnapshotStore(context)
+
+    // The two seams #849 needed for `RecordFlowViewModel`'s test. They are
+    // @Provides rather than @Binds in ServiceBindings because both
+    // implementations are themselves assembled here by @Provides, so there is no
+    // @Inject constructor for @Binds to point at.
+
+    @Provides
+    @Singleton
+    fun provideComposerSnapshotStoring(impl: ComposerSnapshotStore): ComposerSnapshotStoring = impl
+
+    @Provides
+    @Singleton
+    fun provideSnapWriteRepositing(impl: PebbleSnapRepository): SnapWriteRepositing = impl
 }

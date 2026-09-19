@@ -6,6 +6,7 @@ import app.pbbls.android.features.glyph.models.Glyph
 import app.pbbls.android.features.path.create.pickers.GlyphPickerState
 import app.pbbls.android.features.path.models.Domain
 import app.pbbls.android.features.path.models.PebbleCollection
+import app.pbbls.android.features.path.models.PebbleDraft
 import app.pbbls.android.features.path.record.steps.RecordCollectionStep
 import app.pbbls.android.features.path.record.steps.RecordDomainStep
 import app.pbbls.android.features.path.record.steps.RecordEmotionStep
@@ -32,6 +33,15 @@ import app.pbbls.android.features.pebblemedia.models.FormSnap
 @Composable
 fun RecordStepContent(
     step: RecordStep,
+    /**
+     * Reads come from here, writes go through [model] (#849). Two parameters
+     * rather than one because the split is the point: the draft is a value the
+     * screen collected from `RecordFlowViewModel`, while every mutation has to
+     * keep routing through the machine so it buzzes (M58 D4). Reading
+     * `model.draft` here instead would compile and never recompose — the model
+     * is StateFlow-backed now, not Compose state.
+     */
+    draft: PebbleDraft,
     model: RecordFlowModel,
     domains: List<Domain>,
     collections: List<PebbleCollection>,
@@ -60,7 +70,7 @@ fun RecordStepContent(
 
         RecordStep.WHEN ->
             RecordWhenStep(
-                happenedAt = model.draft.happenedAt,
+                happenedAt = draft.happenedAt,
                 onChange = { model.setHappenedAt(it) },
                 seededFromPhoto = seededFromPhoto,
                 modifier = modifier,
@@ -68,7 +78,7 @@ fun RecordStepContent(
 
         RecordStep.NAME ->
             RecordNameStep(
-                name = model.draft.name,
+                name = draft.name,
                 limit = RecordFlowModel.NAME_LIMIT,
                 onChange = { model.setName(it) },
                 modifier = modifier,
@@ -76,7 +86,7 @@ fun RecordStepContent(
 
         RecordStep.VALENCE ->
             RecordValenceStep(
-                selected = model.draft.valence,
+                selected = draft.valence,
                 onSelect = { model.selectValence(it) },
                 onSeed = { model.seedValenceIfNeeded() },
                 modifier = modifier,
@@ -84,8 +94,8 @@ fun RecordStepContent(
 
         RecordStep.EMOTION ->
             RecordEmotionStep(
-                selectedId = model.draft.emotionId,
-                valence = model.draft.valence,
+                selectedId = draft.emotionId,
+                valence = draft.valence,
                 onSelect = { model.selectEmotion(it) },
                 modifier = modifier,
             )
@@ -93,14 +103,14 @@ fun RecordStepContent(
         RecordStep.DOMAIN ->
             RecordDomainStep(
                 domains = domains,
-                selectedId = model.draft.domainId,
+                selectedId = draft.domainId,
                 onSelect = { model.selectDomain(it) },
                 modifier = modifier,
             )
 
         RecordStep.SOULS ->
             RecordSoulsStep(
-                selectedIds = model.draft.soulIds,
+                selectedIds = draft.soulIds,
                 onToggle = { model.toggleSoul(it) },
                 modifier = modifier,
             )
@@ -108,14 +118,14 @@ fun RecordStepContent(
         RecordStep.COLLECTION ->
             RecordCollectionStep(
                 collections = collections,
-                selectedId = model.draft.collectionId,
+                selectedId = draft.collectionId,
                 onSelect = { model.selectCollection(it) },
                 modifier = modifier,
             )
 
         RecordStep.GLYPH ->
             RecordGlyphStep(
-                selectedGlyphId = model.draft.glyphId,
+                selectedGlyphId = draft.glyphId,
                 onSelect = onGlyphPicked,
                 state = glyphPickerState,
                 modifier = modifier,
@@ -123,7 +133,7 @@ fun RecordStepContent(
 
         RecordStep.PRIVACY ->
             RecordPrivacyStep(
-                selected = model.draft.visibility,
+                selected = draft.visibility,
                 onSelect = { model.selectVisibility(it) },
                 snapBlockedMessage = snapBlockedMessage,
                 publishError = publishError,
