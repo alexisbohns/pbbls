@@ -15,10 +15,15 @@
  * What this proves, and why a same-surface unit test cannot:
  *
  *   1. A glyph authored by someone else, never bought, cannot be attached —
- *      through create_pebble AND through the direct souls write (two different
- *      enforcement mechanisms: the RPC guard and the souls_glyph_usable trigger).
+ *      through create_pebble, through the direct souls write, AND onto the
+ *      profile mark (three different enforcement mechanisms: the RPC guard, the
+ *      souls_glyph_usable trigger, and the profiles_glyph_usable trigger #875).
+ *      The profile is the one that was unguarded until #875, and it is the most
+ *      visible glyph a user has — it renders on their public profile.
  *   2. The guard did not over-block: a system glyph and the caller's own carve
- *      both still attach.
+ *      both still attach, and — for the profile — naming glyph_id in an UPDATE
+ *      without changing it still succeeds, which is what keeps `update_profile`
+ *      (it always names the column) usable for a plain rename.
  *   3. `is_system` is not self-settable. Every negative assertion checks the
  *      error AND re-reads the stored value — a 0-row RLS filter would also leave
  *      the value unchanged while proving nothing (the lesson
@@ -41,6 +46,12 @@
  * STANDING RULE (#872): a new way to mark a glyph first-party is added to
  * `enforce_glyph_system_flag`'s allowance AND to the negative assertions here in
  * the same change. An unguarded write path is a free-glyph vulnerability.
+ *
+ * STANDING RULE (#875): a new column that holds a glyph_id is guarded by
+ * `can_use_glyph` at the moment it is added, and gains its negative assertion
+ * here. profiles.glyph_id shipped in 20260516104231 and went unguarded for four
+ * months because the guard (20260712000000) enumerated the surfaces that
+ * existed when it was written and nothing re-asked the question afterwards.
  */
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
@@ -200,7 +211,72 @@ try {
   check("can_use_glyph(system) is true", usableSystem === true, String(usableSystem));
 
   // ---------------------------------------------------------------------------
-  // 4. is_system is not self-settable (#872 D3).
+  // 4. The profile mark — the surface #875 found unguarded.
+  //
+  // Neither write path goes through create_pebble, so neither is covered by the
+  // RPC guard above: the web client PATCHes `profiles` directly, iOS and
+  // Android call `update_profile` (security INVOKER). `profiles_update` only
+  // asks that the row be yours, so before the profiles_glyph_usable trigger a
+  // user could wear ANY glyph `glyphs_select` let them read — which, for an
+  // approved community glyph, is everyone, bought or not.
+  //
+  // Both negatives re-read the stored value as well as checking the error: a
+  // 0-row RLS filter returns no error at all and would leave glyph_id unchanged
+  // while proving nothing.
+  // ---------------------------------------------------------------------------
+  const readMark = async (user: TestUser): Promise<string | null | undefined> => {
+    const { data } = await user.client
+      .from("profiles").select("glyph_id").eq("user_id", user.id).maybeSingle();
+    return data?.glyph_id as string | null | undefined;
+  };
+
+  const { error: markStealErr } = await bob.client
+    .from("profiles").update({ glyph_id: aliceGlyph }).eq("user_id", bob.id);
+  check("profiles_glyph_usable rejects another user's unsold glyph (direct write)",
+    markStealErr !== null && markStealErr.message.includes("Glyph not usable by user"),
+    markStealErr?.message ?? "the profile was updated");
+  check("…and the stored mark is unchanged", (await readMark(bob)) !== aliceGlyph,
+    String(await readMark(bob)));
+
+  const { error: rpcStealErr } = await bob.client
+    .rpc("update_profile", { p_glyph_id: aliceGlyph });
+  check("update_profile rejects another user's unsold glyph",
+    rpcStealErr !== null && rpcStealErr.message.includes("Glyph not usable by user"),
+    rpcStealErr?.message ?? "the RPC succeeded");
+  check("…and the stored mark is still unchanged", (await readMark(bob)) !== aliceGlyph,
+    String(await readMark(bob)));
+
+  // Not over-blocked: a system glyph and the caller's own carve both land.
+  const { error: markSystemErr } = await bob.client
+    .from("profiles").update({ glyph_id: SYSTEM_GLYPH_ID }).eq("user_id", bob.id);
+  check("profiles accepts the system glyph as a mark", markSystemErr === null,
+    markSystemErr?.message);
+
+  const { error: markOwnErr } = await bob.client
+    .rpc("update_profile", { p_glyph_id: bobGlyph });
+  check("update_profile accepts the caller's own carve", markOwnErr === null,
+    markOwnErr?.message);
+  check("…and the mark actually moved", (await readMark(bob)) === bobGlyph,
+    String(await readMark(bob)));
+
+  // The change-only half of the guard. `update_profile` ALWAYS names glyph_id
+  // in its SET list (`case when p_glyph_id is not null ... else glyph_id end`),
+  // so a plain rename fires the trigger with an unchanged value. If the guard
+  // checked state instead of the transition, this would still pass today — and
+  // would permanently lock a user out of renaming themselves the moment their
+  // mark stopped being usable (admin_attribute_glyph moves a glyph's owner and
+  // detaches nothing). Assert the rename succeeds AND that it left the mark
+  // alone, so this cannot go green by the RPC quietly clearing glyph_id.
+  const renamed = `glyph-verify bob renamed ${runId}`;
+  const { error: renameErr } = await bob.client
+    .rpc("update_profile", { p_display_name: renamed });
+  check("a rename still works while a mark is set (glyph_id named, not changed)",
+    renameErr === null, renameErr?.message);
+  check("…and the rename left the mark in place", (await readMark(bob)) === bobGlyph,
+    String(await readMark(bob)));
+
+  // ---------------------------------------------------------------------------
+  // 5. is_system is not self-settable (#872 D3).
   //
   // glyphs_update is owner-scoped and has NO WITH CHECK, so Postgres reuses the
   // USING clause — which a self-promotion satisfies. Without the trigger, any
@@ -241,7 +317,7 @@ try {
     JSON.stringify(bornSystem));
 
   // ---------------------------------------------------------------------------
-  // 5. glyphs_select still hides an unsubmitted glyph from a stranger.
+  // 6. glyphs_select still hides an unsubmitted glyph from a stranger.
   // ---------------------------------------------------------------------------
   const { data: peek } = await bob.client
     .from("glyphs").select("id").eq("id", aliceGlyph).maybeSingle();
