@@ -98,14 +98,17 @@ real settings exist), `android-skills:rxjava-migration`,
   (D11); the only accommodation is `.editorconfig`'s
   `ktlint_function_naming_ignore_when_annotated_with = Composable`. Don't add
   other ktlint config without a motivating incident.
-- **State: plain service classes, manual injection, CompositionLocals — no DI
-  framework (D4).** Each iOS `@Observable` service becomes a plain Kotlin class
-  holding Compose state (`mutableStateOf` for UI-read values; `StateFlow` where a
-  non-Compose consumer needs it). `PebblesApp` (Application) constructs the graph
-  exactly like `PebblesApp.swift` — `SupabaseService` first, dependents take it by
-  constructor — and `MainActivity` provides them via `CompositionLocalProvider`
-  (one `staticCompositionLocalOf` per service, the `@Environment(Type.self)`
-  analog). No Hilt, no Koin.
+- **State: plain service classes, constructor-injected by Hilt (#848, supersedes
+  D4).** Each iOS `@Observable` service becomes a plain Kotlin class holding
+  Compose state (`mutableStateOf` for UI-read values; `StateFlow` where a
+  non-Compose consumer needs it), annotated `@Singleton class X @Inject
+  constructor(…)`. Adding a service is that one annotation — do **not** add a
+  `@Provides` unless Dagger genuinely cannot infer the constructor, and do not
+  add a new `Local…Service`. `di/SupabaseModule` is the only place
+  `AppEnvironment` is read. Screens still read `Local…Service.current` through a
+  temporary `di/ServiceGraph` bridge; #849 replaces those reads with ViewModels
+  and deletes the bridge, so write new screens against `hiltViewModel()`, not
+  against the locals.
 - **Log, don't swallow.** Use `android.util.Log` (or a thin logger) with a
   consistent tag on every error path — mirror the web/iOS discipline that silent
   failures are bugs. No empty `catch` blocks. No `println`.
