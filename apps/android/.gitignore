@@ -13,10 +13,10 @@ secrets.properties
 *.apk
 *.aab
 
-# Compose screenshot-test reference images (rendered in CI and uploaded as the
-# ui-screenshots artifact, not committed — see CLAUDE.md "Seeing the UI").
-# Remove this line to adopt committed baselines for regression testing.
-app/src/screenshotTest*/reference/
+# NOTE: app/src/screenshotTest*/reference/ is deliberately NOT ignored (#847).
+# Those PNGs are the screenshot suite's baseline — `validateDebugScreenshotTest`
+# diffs every rendered @PreviewTest against them and fails CI on a mismatch, so
+# ignoring them again would turn the gate back into a no-op nobody notices.
 
 # Android Studio / IntelliJ
 .idea/
