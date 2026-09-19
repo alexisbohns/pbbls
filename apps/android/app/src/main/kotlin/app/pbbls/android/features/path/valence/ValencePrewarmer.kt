@@ -1,6 +1,7 @@
 package app.pbbls.android.features.path.valence
 
 import android.content.Context
+import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.di.DefaultDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -23,4 +24,13 @@ class ValencePrewarmer
         @DefaultDispatcher private val default: CoroutineDispatcher,
     ) {
         suspend fun prewarm(context: Context) = withContext(default) { prewarmValenceStones(context) }
+    }
+
+/**
+ * CompositionLocal for [ValencePrewarmer]. Temporary, like every `Local…` in
+ * this app — #849 replaces it with a ViewModel dependency.
+ */
+val LocalValencePrewarmer =
+    staticCompositionLocalOf<ValencePrewarmer> {
+        error("LocalValencePrewarmer not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

@@ -5,6 +5,8 @@ import app.pbbls.android.features.glyph.services.GlyphService
 import app.pbbls.android.features.karma.AchievementNotificationService
 import app.pbbls.android.features.karma.KarmaNotificationService
 import app.pbbls.android.features.lab.services.LogsService
+import app.pbbls.android.features.path.valence.ValencePrewarmer
+import app.pbbls.android.features.pebblemedia.SnapProcessor
 import app.pbbls.android.services.AchievementsService
 import app.pbbls.android.services.CollectionsService
 import app.pbbls.android.services.ComposerSnapshotStore
@@ -62,4 +64,6 @@ class ServiceGraph
         val karma: KarmaNotificationService,
         val achievementNotify: AchievementNotificationService,
         val achievements: AchievementsService,
+        val snapProcessor: SnapProcessor,
+        val valencePrewarmer: ValencePrewarmer,
     )
