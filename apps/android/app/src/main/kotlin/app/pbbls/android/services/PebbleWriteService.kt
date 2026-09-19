@@ -53,6 +53,28 @@ sealed interface ComposeResult {
 }
 
 /**
+ * The pebble write seam — see [SupabaseServicing] for why these exist (#848).
+ *
+ * The parameter defaults live here rather than on the implementation: Kotlin
+ * forbids a default on an override, and every caller that passes one argument
+ * has to keep compiling.
+ */
+interface PebbleWriteServicing {
+    suspend fun create(
+        draft: PebbleDraft,
+        snaps: List<PebbleSnapPayload>? = null,
+    ): ComposeResult
+
+    suspend fun update(
+        pebbleId: String,
+        draft: PebbleDraft,
+        snaps: List<PebbleSnapPayload> = emptyList(),
+    ): ComposeResult
+
+    suspend fun delete(pebbleId: String)
+}
+
+/**
  * The one write path for pebbles (D2) — UI never touches the transport. Posts to
  * the edge functions with a dedicated Ktor OkHttp client so we can (1) read the
  * 5xx soft-success body (risk 1) and (2) serialize the payload with OUR Json
@@ -64,7 +86,7 @@ class PebbleWriteService
     @Inject
     constructor(
         private val supabase: SupabaseService,
-    ) {
+    ) : PebbleWriteServicing {
         private val http = HttpClient(OkHttp)
 
         // No defaults on the payload classes + explicitNulls = true => description
@@ -72,9 +94,9 @@ class PebbleWriteService
         private val json = Json { explicitNulls = true }
         private val decodeJson = Json { ignoreUnknownKeys = true }
 
-        suspend fun create(
+        override suspend fun create(
             draft: PebbleDraft,
-            snaps: List<PebbleSnapPayload>? = null,
+            snaps: List<PebbleSnapPayload>?,
         ): ComposeResult {
             val body = json.encodeToString(CreateRequest(PebbleCreatePayload.from(draft, snaps)))
             val (status, text) = post(FUNCTION_CREATE, body) ?: return failGeneric()
@@ -89,10 +111,10 @@ class PebbleWriteService
             }
         }
 
-        suspend fun update(
+        override suspend fun update(
             pebbleId: String,
             draft: PebbleDraft,
-            snaps: List<PebbleSnapPayload> = emptyList(),
+            snaps: List<PebbleSnapPayload>,
         ): ComposeResult {
             val body = json.encodeToString(UpdateRequest(pebbleId, PebbleUpdatePayload.from(draft, snaps)))
             val (status, text) = post(FUNCTION_UPDATE, body) ?: return failGeneric()
@@ -109,7 +131,7 @@ class PebbleWriteService
         }
 
         /** Direct RPC (void return). Server sums karma_events and writes the clawback. No flash. */
-        suspend fun delete(pebbleId: String) {
+        override suspend fun delete(pebbleId: String) {
             try {
                 supabase.client.postgrest.rpc(
                     "delete_pebble",
@@ -198,6 +220,6 @@ class PebbleWriteService
     }
 
 val LocalPebbleWriteService =
-    staticCompositionLocalOf<PebbleWriteService> {
+    staticCompositionLocalOf<PebbleWriteServicing> {
         error("LocalPebbleWriteService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

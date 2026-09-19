@@ -12,16 +12,17 @@ import app.pbbls.android.services.CollectionsService
 import app.pbbls.android.services.ComposerSnapshotStore
 import app.pbbls.android.services.ConnectionsService
 import app.pbbls.android.services.EmotionPaletteService
-import app.pbbls.android.services.PathService
+import app.pbbls.android.services.PathServicing
 import app.pbbls.android.services.PathStatsService
 import app.pbbls.android.services.PebbleDetailService
 import app.pbbls.android.services.PebbleDraftsService
-import app.pbbls.android.services.PebbleWriteService
-import app.pbbls.android.services.ProfileService
-import app.pbbls.android.services.ReferenceDataService
+import app.pbbls.android.services.PebbleSnapRepository
+import app.pbbls.android.services.PebbleWriteServicing
+import app.pbbls.android.services.ProfileServicing
+import app.pbbls.android.services.ReferenceDataServicing
 import app.pbbls.android.services.SnapURLCache
 import app.pbbls.android.services.SoulsService
-import app.pbbls.android.services.SupabaseService
+import app.pbbls.android.services.SupabaseServicing
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -44,15 +45,16 @@ import javax.inject.Singleton
 class ServiceGraph
     @Inject
     constructor(
-        val supabase: SupabaseService,
+        val supabase: SupabaseServicing,
         val palettes: EmotionPaletteService,
-        val pathService: PathService,
+        val pathService: PathServicing,
         val pathStats: PathStatsService,
-        val profileService: ProfileService,
+        val profileService: ProfileServicing,
         val pebbleDetailService: PebbleDetailService,
         val snapUrls: SnapURLCache,
-        val referenceData: ReferenceDataService,
-        val pebbleWrite: PebbleWriteService,
+        val snapWrites: PebbleSnapRepository,
+        val referenceData: ReferenceDataServicing,
+        val pebbleWrite: PebbleWriteServicing,
         val soulsService: SoulsService,
         val collectionsService: CollectionsService,
         val draftsService: PebbleDraftsService,

@@ -60,7 +60,6 @@ import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar
 import app.pbbls.android.theme.PebblesTopBarTextButton
 import app.pbbls.android.theme.PebblesTypography
-import io.github.jan.supabase.functions.functions
 import kotlinx.coroutines.launch
 
 private const val TAG = "settings"
@@ -196,7 +195,7 @@ fun SettingsScreen(
         scope.launch {
             isDeleting = true
             try {
-                supabase.client.functions.invoke("delete-account")
+                profileService.deleteAccount()
                 supabase.signOut()
             } catch (e: Exception) {
                 Log.e(TAG, "account deletion failed", e)

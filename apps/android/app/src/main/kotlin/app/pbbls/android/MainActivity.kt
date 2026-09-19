@@ -18,6 +18,7 @@ import app.pbbls.android.features.karma.LocalKarmaNotificationService
 import app.pbbls.android.features.lab.services.LocalLogsService
 import app.pbbls.android.features.path.valence.LocalValencePrewarmer
 import app.pbbls.android.features.pebblemedia.LocalSnapProcessor
+import app.pbbls.android.features.pebblemedia.LocalSnapWriteRepository
 import app.pbbls.android.services.LocalAchievementsService
 import app.pbbls.android.services.LocalCollectionsService
 import app.pbbls.android.services.LocalComposerSnapshotStore
@@ -33,6 +34,7 @@ import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSnapURLCache
 import app.pbbls.android.services.LocalSoulsService
 import app.pbbls.android.services.LocalSupabaseService
+import app.pbbls.android.services.SupabaseService
 import app.pbbls.android.services.parseInviteToken
 import app.pbbls.android.theme.PebblesTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -69,7 +71,15 @@ class MainActivity : ComponentActivity() {
     @Inject
     internal lateinit var graph: ServiceGraph
 
-    private val supabase get() = graph.supabase
+    /**
+     * The concrete client owner, for `handleDeeplinks` only — it is the one
+     * caller that needs the raw `SupabaseClient`. The composition root is the one
+     * place allowed to know a concrete service type; everything below it, the
+     * splash gate included, goes through
+     * [app.pbbls.android.services.SupabaseServicing] off [graph].
+     */
+    @Inject
+    internal lateinit var supabaseClientOwner: SupabaseService
 
     /**
      * Read on every pre-draw pass by the splash screen. Not Compose state: the
@@ -89,7 +99,7 @@ class MainActivity : ComponentActivity() {
         splashScreen.setKeepOnScreenCondition { keepSplashOnScreen }
         lifecycleScope.launch {
             withTimeoutOrNull(SPLASH_CEILING_MILLIS) {
-                snapshotFlow { supabase.isInitializing }.first { !it }
+                snapshotFlow { graph.supabase.isInitializing }.first { !it }
             }
             keepSplashOnScreen = false
             // The predicate is only re-read on a draw pass, and a stalled launch
@@ -98,17 +108,18 @@ class MainActivity : ComponentActivity() {
             findViewById<View>(android.R.id.content).invalidate()
         }
         enableEdgeToEdge()
-        supabase.client.handleDeeplinks(intent)
+        supabaseClientOwner.client.handleDeeplinks(intent)
         captureInviteToken(intent)
         setContent {
             PebblesTheme {
                 CompositionLocalProvider(
-                    LocalSupabaseService provides supabase,
+                    LocalSupabaseService provides graph.supabase,
                     LocalEmotionPaletteService provides graph.palettes,
                     LocalPathService provides graph.pathService,
                     LocalPathStatsService provides graph.pathStats,
                     LocalProfileService provides graph.profileService,
                     LocalSnapURLCache provides graph.snapUrls,
+                    LocalSnapWriteRepository provides graph.snapWrites,
                     LocalReferenceDataService provides graph.referenceData,
                     LocalPebbleWriteService provides graph.pebbleWrite,
                     LocalPebbleDetailService provides graph.pebbleDetailService,
@@ -135,7 +146,7 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
-        supabase.client.handleDeeplinks(intent)
+        supabaseClientOwner.client.handleDeeplinks(intent)
         captureInviteToken(intent)
     }
 

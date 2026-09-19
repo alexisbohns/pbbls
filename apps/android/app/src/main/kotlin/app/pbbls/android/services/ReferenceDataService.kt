@@ -19,6 +19,22 @@ import kotlinx.serialization.json.put
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** The reference-data seam — see [SupabaseServicing] for why these exist (#848). */
+interface ReferenceDataServicing {
+    val domains: List<Domain>
+    val souls: List<SoulWithGlyph>
+    val collections: List<PebbleCollection>
+    val hasLoaded: Boolean
+
+    suspend fun load()
+
+    suspend fun refreshSouls()
+
+    suspend fun refreshCollections()
+
+    suspend fun createSoul(name: String): SoulWithGlyph?
+}
+
 /**
  * Session cache of the three reference lists the pebble form needs (domains,
  * souls, collections) — ports ReferenceDataService.swift. `load()` is kicked from
@@ -31,20 +47,20 @@ class ReferenceDataService
     @Inject
     constructor(
         private val supabase: SupabaseService,
-    ) {
-        var domains: List<Domain> by mutableStateOf(emptyList())
+    ) : ReferenceDataServicing {
+        override var domains: List<Domain> by mutableStateOf(emptyList())
             private set
 
-        var souls: List<SoulWithGlyph> by mutableStateOf(emptyList())
+        override var souls: List<SoulWithGlyph> by mutableStateOf(emptyList())
             private set
 
-        var collections: List<PebbleCollection> by mutableStateOf(emptyList())
+        override var collections: List<PebbleCollection> by mutableStateOf(emptyList())
             private set
 
-        var hasLoaded: Boolean by mutableStateOf(false)
+        override var hasLoaded: Boolean by mutableStateOf(false)
             private set
 
-        suspend fun load() {
+        override suspend fun load() {
             try {
                 coroutineScope {
                     val domainsDeferred = async { fetchDomains() }
@@ -61,7 +77,7 @@ class ReferenceDataService
             }
         }
 
-        suspend fun refreshSouls() {
+        override suspend fun refreshSouls() {
             try {
                 souls = fetchSouls()
             } catch (e: Exception) {
@@ -69,7 +85,7 @@ class ReferenceDataService
             }
         }
 
-        suspend fun refreshCollections() {
+        override suspend fun refreshCollections() {
             try {
                 collections = fetchCollections()
             } catch (e: Exception) {
@@ -85,7 +101,7 @@ class ReferenceDataService
          * [fetchSouls]'s embedded select. Returns null on failure (logged) so the
          * inline dialog can stay open.
          */
-        suspend fun createSoul(name: String): SoulWithGlyph? {
+        override suspend fun createSoul(name: String): SoulWithGlyph? {
             val userId = supabase.session?.user?.id
             if (userId == null) {
                 Log.e(TAG, "createSoul: no session")
@@ -157,6 +173,6 @@ class ReferenceDataService
     }
 
 val LocalReferenceDataService =
-    staticCompositionLocalOf<ReferenceDataService> {
+    staticCompositionLocalOf<ReferenceDataServicing> {
         error("LocalReferenceDataService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

@@ -47,6 +47,7 @@ import app.pbbls.android.features.path.models.isSavableAsDraft
 import app.pbbls.android.features.path.record.steps.RecordSuccessStep
 import app.pbbls.android.features.path.valence.LocalValencePrewarmer
 import app.pbbls.android.features.pebblemedia.LocalSnapProcessor
+import app.pbbls.android.features.pebblemedia.LocalSnapWriteRepository
 import app.pbbls.android.features.pebblemedia.SnapUploadCoordinator
 import app.pbbls.android.services.ComposeResult
 import app.pbbls.android.services.ComposerDraftCoordinator
@@ -58,7 +59,6 @@ import app.pbbls.android.services.LocalPebbleWriteService
 import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSupabaseService
 import app.pbbls.android.services.PebbleDraftRecord
-import app.pbbls.android.services.PebbleSnapRepository
 import app.pbbls.android.services.rememberTapHaptics
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesText
@@ -121,8 +121,11 @@ fun RecordFlowScreen(
     val glyphPickerState = rememberGlyphPickerState()
     val drafts = remember(draftsService, snapshots) { ComposerDraftCoordinator(draftsService, snapshots) }
 
-    // Form-scoped (M42 D6): an in-flight upload dies with this cover.
-    val snaps = remember { SnapUploadCoordinator(repo = PebbleSnapRepository(supabase)) }
+    val snapRepo = LocalSnapWriteRepository.current
+    // Form-scoped (M42 D6): an in-flight upload dies with this cover. The
+    // repository behind it is a stateless singleton; the coordinator holding
+    // the in-flight state is what must not outlive the form.
+    val snaps = remember { SnapUploadCoordinator(repo = snapRepo) }
     var captureDate by remember { mutableStateOf<OffsetDateTime?>(null) }
     var isCloseConfirmPresented by remember { mutableStateOf(false) }
 

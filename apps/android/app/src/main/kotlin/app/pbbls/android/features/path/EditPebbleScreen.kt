@@ -42,6 +42,7 @@ import app.pbbls.android.features.path.models.PebbleDraft
 import app.pbbls.android.features.path.models.PebbleSnapPayload
 import app.pbbls.android.features.path.models.renderHeightDp
 import app.pbbls.android.features.pebblemedia.LocalSnapProcessor
+import app.pbbls.android.features.pebblemedia.LocalSnapWriteRepository
 import app.pbbls.android.features.pebblemedia.SnapUploadCoordinator
 import app.pbbls.android.features.pebblemedia.models.FormSnap
 import app.pbbls.android.services.ComposeResult
@@ -51,7 +52,6 @@ import app.pbbls.android.services.LocalPebbleDetailService
 import app.pbbls.android.services.LocalPebbleWriteService
 import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSupabaseService
-import app.pbbls.android.services.PebbleSnapRepository
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography
@@ -102,8 +102,11 @@ fun EditPebbleScreen(
     var reloadToken by remember(pebbleId) { mutableIntStateOf(0) }
     var isRemovingExistingSnap by remember(pebbleId) { mutableStateOf(false) }
 
+    val snapRepo = LocalSnapWriteRepository.current
     // Form-scoped (M42 D6); seeded with the existing snap once the detail loads.
-    val snaps = remember(pebbleId) { SnapUploadCoordinator(repo = PebbleSnapRepository(supabase)) }
+    // The repository behind it is a stateless singleton; the coordinator holding
+    // the in-flight state is what must not outlive the form.
+    val snaps = remember(pebbleId) { SnapUploadCoordinator(repo = snapRepo) }
     val photoPicker =
         rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
             val userId = supabase.session?.user?.id
