@@ -7,6 +7,8 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.screenshot)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 
 // Secrets chain (D8): read the git-ignored secrets.properties if present,
@@ -222,6 +224,13 @@ dependencies {
 
     // Invite QR encoding (M49); the BitMatrix is drawn in a Compose Canvas.
     implementation(libs.zxing.core)
+
+    // Hilt (#848). The library's own consumer ProGuard rules cover its
+    // reflection, so proguard-rules.pro stays at two rules — but R8 can strip
+    // silently, so Part 1 smoke-tests a minified build by hand before merge.
+    implementation(libs.hilt.android)
+    implementation(libs.androidx.hilt.navigation.compose)
+    ksp(libs.hilt.compiler)
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

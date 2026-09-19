@@ -59,6 +59,14 @@ zxing = "3.5.4"
 # replaced RootScreen's fixed 2.5s timer.
 splashscreen = "1.2.0"
 
+# DI (#848, supersedes M38 D4). KSP has decoupled from the Kotlin version line —
+# it is versioned independently now, so this does NOT track `kotlin` above.
+# Verified against AGP 9.4.1's built-in Kotlin, where no KGP is applied by the
+# module: `:app:assembleDebug` runs hiltCollectClasses/hiltAggregateDeps/hiltJavaCompile green.
+ksp = "2.3.12"
+hilt = "2.60.1"
+hiltNavigationCompose = "1.4.0"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
@@ -105,6 +113,11 @@ supabase-functions = { group = "io.github.jan-tennert.supabase", name = "functio
 # Branded cold-start splash (#846).
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
 
+# Hilt (#848). hilt-navigation-compose supplies hiltViewModel(), which #849 uses.
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 # AGP 9 has built-in Kotlin but does NOT bundle the Compose compiler — it must
@@ -115,3 +128,5 @@ compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 screenshot = { id = "com.android.compose.screenshot", version.ref = "screenshot" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
