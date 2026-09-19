@@ -306,15 +306,62 @@ bundled. Android resource filenames must be lowercase
 - **JUnit4 + `kotlinx-coroutines-test`, JVM unit tests only.** No Robolectric, no
   instrumented tests. Test pure logic (auth `canSubmit`, week grouping, valence
   mapping, palette parsing, slug resolution) and localization parity.
-- **Compose Preview Screenshot Testing** (`com.android.compose.screenshot`)
-  renders `@PreviewTest` composables in `src/screenshotTest/` to PNGs on the JVM
-  (no device, no Robolectric). CI runs `updateDebugScreenshotTest` and uploads the
-  `ui-screenshots` artifact so the UI is reviewable without a local SDK — this
-  deliberately re-enables screenshot tooling that the milestone design (D17)
-  deferred, so the SDK-less maintainer can review UI. It is **render-to-view**,
-  not a regression gate: references are git-ignored and nothing fails on a visual
-  change. To adopt visual-regression later, commit the references and switch CI to
-  `validateDebugScreenshotTest`. Add a preview per screen/state as real UI lands.
+### Screenshot validation gate (#847)
+
+**Compose Preview Screenshot Testing** (`com.android.compose.screenshot`) renders
+the `@PreviewTest` composables in `src/screenshotTest/` to PNGs on the JVM (no
+device, no Robolectric). Since #847 it is a **regression gate**, not a
+render-to-view: the reference PNGs are committed under
+`app/src/screenshotTestDebug/reference/`, and `android.yml` runs
+`validateDebugScreenshotTest` on every PR. A render that moves past the threshold
+fails the PR and uploads the reference/actual/diff triptych as
+`ui-screenshot-diffs`.
+
+- **Changing UI turns the check red. That is the gate working, not a bug.** The
+  fix is to re-baseline, never to weaken the threshold or re-ignore the
+  references.
+- **Re-baseline is one step: add the `rebaseline-screenshots` label to the PR.**
+  `android-screenshots.yml` re-renders and commits the new PNGs to the branch.
+  Because that push uses `GITHUB_TOKEN`, it does not re-trigger workflows — **re-run
+  the Android workflow afterwards** or the PR keeps showing the old red check. The
+  same workflow runs from the Actions tab on any ref; dispatched on `main` it
+  opens a branch instead of writing to it.
+- **Never commit references rendered on your own machine.** `./gradlew
+  updateDebugScreenshotTest` locally is the right way to *look* at a change (it is
+  ~35 s for the whole suite), but layoutlib's text rasterization is not guaranteed
+  to agree across host platforms and CI is the authority. Render locally, review,
+  then let the label regenerate the committed set. `./gradlew
+  validateDebugScreenshotTest` locally tells you *which* previews moved, which is
+  the useful part even if the absolute pixels are yours and not CI's.
+- **The threshold lives in `app/build.gradle.kts`**, set on the validation task
+  because alpha16 exposes no DSL for it. It is calibrated (0.05% of pixels)
+  against a measured real change, not guessed — the comment there carries the
+  numbers. `libs.versions.toml` pins the plugin with `strictly` for the same
+  reason: any layoutlib movement re-baselines all 162 references at once, so that
+  has to be a deliberate commit that re-runs the re-baseline job, not a Dependabot
+  drive-by.
+- **Variants are multipreview annotations in `PreviewVariants.kt`.** Stack
+  `@PreviewLargeFont` / `@PreviewLargeFontTall` (font scale 2.0, the accessibility
+  ceiling) or `@PreviewFrench` (`values-fr`) on an existing `@PreviewTest` function
+  to add a render without touching its body — the original reference's file name is
+  unaffected, so adding a variant never re-baselines what was already there. The
+  baseline covers font scale 2.0 across the record flow, the create/edit forms and
+  pickers, Settings and the `PebblesScreen` galleries, and `fr` across the funnel
+  and Path.
+- Add a preview per screen/state as real UI lands.
+
+**Screens that read services cannot be previewed.** `SettingsScreen`,
+`ProfileScreen`, `SoulsListScreen` and the rest read their `Local…Service`
+CompositionLocals at the top, and those cannot be provided from a preview:
+`ProfileService` needs a `SupabaseService`, whose constructor goes through
+`AppEnvironment` and throws on a blank `BuildConfig.SUPABASE_URL` — the fork-PR
+case. Those surfaces are covered by pure-component *galleries*
+(`ProfileScreenshots.kt`, `SettingsScreenshots.kt`, …) that compose the real
+components with the real string resources. A gallery catches a control that clips
+its own text; it does not catch a regression in the screen's own scroll column or
+top bar. The real fix is a stateless content layer per screen, the way
+`PathScreen` has `PathContent` — #848/#849 own that architecture, so do not pull
+it forward from a screenshot PR.
 
 ## Release & distribution (Play internal testing)
 
