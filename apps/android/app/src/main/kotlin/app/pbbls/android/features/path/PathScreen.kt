@@ -1,6 +1,5 @@
 package app.pbbls.android.features.path
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,16 +17,13 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.features.path.components.NewPebbleButton
 import app.pbbls.android.features.path.components.PathBottomBar
@@ -41,21 +37,12 @@ import app.pbbls.android.features.path.models.WeekRollEntry
 import app.pbbls.android.features.path.record.RecordFlowScreen
 import app.pbbls.android.features.shared.ripples.RippleSummary
 import app.pbbls.android.services.LocalEmotionPaletteService
-import app.pbbls.android.services.LocalPathService
-import app.pbbls.android.services.LocalPathStatsService
-import app.pbbls.android.services.LocalPebbleDraftsService
-import app.pbbls.android.services.LocalPebbleWriteService
-import app.pbbls.android.services.PebbleDraftRecord
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography
-import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.ZoneId
 import kotlin.math.abs
-
-private const val TAG = "path"
 
 /**
  * The Path timeline — the authenticated landing surface (`PathView.swift`
@@ -63,129 +50,28 @@ private const val TAG = "path"
  * pages the body by week, and hosts the create/detail/edit covers plus the
  * bottom stats bar. Sign-out moved to the Profile screen (sub-project C);
  * [onProfile] navigates there.
+ *
+ * Every piece of state it used to hold in `remember` now lives in
+ * [PathViewModel] (#849), so a rotation no longer re-fetches the timeline,
+ * loses the focused week or closes an open cover. What is left here is
+ * composition: which cover is up, and wiring the stateless [PathContent] to the
+ * state.
+ *
+ * The covers are still conditionally-composed children rather than navigation
+ * destinations, so their own ViewModels are activity-scoped; #852 turns them
+ * into a real back stack.
  */
 @Composable
 fun PathScreen(
     onProfile: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: PathViewModel = hiltViewModel(),
 ) {
-    val pathService = LocalPathService.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val covers by viewModel.covers.collectAsStateWithLifecycle()
     val palettes = LocalEmotionPaletteService.current
-    val stats = LocalPathStatsService.current
     val system = PebblesTheme.colors.system
     val accent = PebblesTheme.colors.accent
-
-    val today = remember { LocalDate.now() }
-    var entries by remember { mutableStateOf<List<WeekRollEntry>>(emptyList()) }
-    var focusedWeekStart by remember { mutableStateOf<LocalDate?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
-    var didLoadFail by remember { mutableStateOf(false) }
-
-    val writeService = LocalPebbleWriteService.current
-    val draftsService = LocalPebbleDraftsService.current
-    val scope = rememberCoroutineScope()
-    var selectedPebbleId by remember { mutableStateOf<String?>(null) }
-    var editingPebbleId by remember { mutableStateOf<String?>(null) }
-    var detailReloadKey by remember { mutableIntStateOf(0) }
-    var pendingDeletion by remember { mutableStateOf<Pebble?>(null) }
-    var deleteError by remember { mutableStateOf(false) }
-    // Which composer is up. The flow is the default; the form survives behind a
-    // long-press on the same entry (M58 D1).
-    var isPresentingFlow by remember { mutableStateOf(false) }
-    var isPresentingCreate by remember { mutableStateOf(false) }
-    var isPresentingDrafts by remember { mutableStateOf(false) }
-    var resumingDraft by remember { mutableStateOf<PebbleDraftRecord?>(null) }
-    var draftsReloadKey by remember { mutableIntStateOf(0) }
-    var draftCount by remember { mutableIntStateOf(0) }
-
-    LaunchedEffect(Unit) {
-        try {
-            val pebbles = pathService.loadPathPebbles()
-            val built = WeekRollBuilder.build(pebbles, ZoneId.systemDefault(), today)
-            entries = built
-            focusedWeekStart = refocusedWeekStart(built, focusedWeekStart, today)
-            didLoadFail = false
-        } catch (e: Exception) {
-            Log.e(TAG, "path_pebbles load failed", e)
-            didLoadFail = true
-        } finally {
-            isLoading = false
-        }
-    }
-    // Stats load rides its own effect so a slow/failed stats fetch never
-    // delays the timeline (the iOS `.task { await stats.load() }` analog).
-    LaunchedEffect(Unit) { stats.load() }
-
-    // Drafts count for the entry point (M47) — its own effect for the same reason
-    // stats has one: a slow or failed fetch must not delay the timeline. Re-keyed
-    // on draftsReloadKey so every draft write refreshes the badge.
-    LaunchedEffect(draftsReloadKey) {
-        draftCount =
-            try {
-                draftsService.count()
-            } catch (e: Exception) {
-                Log.e(TAG, "draft count failed", e)
-                0
-            }
-    }
-
-    // Hoisted so the delete flow and create/edit can refresh the timeline
-    // without re-triggering the first-load spinner: isLoading is left
-    // untouched, mirroring iOS PathView.load() after the initial fetch.
-    // Every write also refreshes the stats bar (iOS parity: stats.refresh()
-    // after each create/edit/delete).
-    val reload: () -> Unit = {
-        scope.launch {
-            try {
-                val pebbles = pathService.loadPathPebbles()
-                val built = WeekRollBuilder.build(pebbles, ZoneId.systemDefault(), today)
-                entries = built
-                focusedWeekStart = refocusedWeekStart(built, focusedWeekStart, today)
-            } catch (e: Exception) {
-                Log.e(TAG, "path reload failed", e)
-            }
-        }
-        scope.launch { stats.refresh() }
-    }
-
-    /**
-     * Reload, then land the user on the week the new pebble belongs to — the
-     * record flow's reading of "the new pebble is where you land" (M58 D10).
-     * Sequenced in one coroutine because the focus has to be applied to the
-     * rebuilt entries, not the stale ones.
-     */
-    val reloadFocusing: (String) -> Unit = { newPebbleId ->
-        scope.launch {
-            try {
-                val pebbles = pathService.loadPathPebbles()
-                val built = WeekRollBuilder.build(pebbles, ZoneId.systemDefault(), today)
-                entries = built
-                focusedWeekStart =
-                    built.firstOrNull { entry -> entry.pebbles.any { it.id == newPebbleId } }?.weekStart
-                        ?: refocusedWeekStart(built, focusedWeekStart, today)
-            } catch (e: Exception) {
-                Log.e(TAG, "path reload after publish failed", e)
-            }
-        }
-        scope.launch { stats.refresh() }
-    }
-
-    // Overrides the server's `active_today` flag (which compares against UTC
-    // `current_date`) with a device-local check so users in non-UTC timezones
-    // don't see "active today" after local midnight — ports iOS
-    // `PathView.rippleWithLocalActiveToday` (see M22 follow-up for the proper
-    // server-side timezone fix).
-    val rippleWithLocalActiveToday =
-        stats.ripple?.let { server ->
-            val localToday = LocalDate.now()
-            val activeToday =
-                entries.any { entry ->
-                    entry.pebbles.any {
-                        it.createdAt.atZoneSameInstant(ZoneId.systemDefault()).toLocalDate() == localToday
-                    }
-                }
-            server.copy(activeToday = activeToday)
-        }
 
     Box(
         modifier =
@@ -199,52 +85,53 @@ fun PathScreen(
                     .fillMaxSize()
                     .safeDrawingPadding(),
         ) {
-            val focused = focusedWeekStart
-            when {
-                isLoading ->
+            // Exhaustive with no `else` — a new PathUiState case must be rendered.
+            when (uiState) {
+                PathUiState.Loading ->
                     CircularProgressIndicator(
                         color = accent.primary,
                         modifier = Modifier.align(Alignment.Center),
                     )
 
-                didLoadFail || focused == null ->
+                is PathUiState.Error ->
                     PebblesText(
-                        text = stringResource(R.string.path_load_error),
+                        text = stringResource((uiState as PathUiState.Error).messageRes),
                         style = PebblesTypography.body,
                         color = system.secondary,
                         modifier = Modifier.align(Alignment.Center),
                     )
 
-                else ->
+                is PathUiState.Content -> {
+                    val content = uiState as PathUiState.Content
                     PathContent(
-                        entries = entries,
-                        initialWeekStart = focused,
-                        focusedWeekStart = focused,
-                        today = today,
-                        onFocusChange = { focusedWeekStart = it },
+                        entries = content.entries,
+                        initialWeekStart = content.focusedWeekStart,
+                        focusedWeekStart = content.focusedWeekStart,
+                        today = content.today,
+                        onFocusChange = viewModel::onFocusWeek,
                         paletteFor = { pebble -> pebble.emotion?.let { palettes.palette(it.id) } },
-                        onPebbleTap = { pebble -> selectedPebbleId = pebble.id },
-                        onPebbleDelete = { pebble -> pendingDeletion = pebble },
-                        onCreatePebble = { isPresentingFlow = true },
-                        onCreatePebbleLongPress = { isPresentingCreate = true },
-                        onOpenDrafts = { isPresentingDrafts = true },
-                        draftCount = draftCount,
-                        karma = stats.karma,
-                        ripple = rippleWithLocalActiveToday,
+                        onPebbleTap = { pebble -> viewModel.openDetail(pebble.id) },
+                        onPebbleDelete = viewModel::requestDelete,
+                        onCreatePebble = viewModel::openFlow,
+                        onCreatePebbleLongPress = viewModel::openForm,
+                        onOpenDrafts = viewModel::openDrafts,
+                        draftCount = content.draftCount,
+                        karma = content.karma,
+                        ripple = content.ripple,
                         onProfile = onProfile,
                     )
+                }
             }
         }
 
         // Full-screen detail cover (self-applies safeDrawingPadding, so it lives in
         // the OUTER Box) — the fullScreenCover analog (D5).
-        val detailId = selectedPebbleId
-        if (detailId != null) {
+        covers.detailPebbleId?.let { detailId ->
             PebbleDetailScreen(
                 pebbleId = detailId,
-                reloadKey = detailReloadKey,
-                onDismiss = { selectedPebbleId = null },
-                onEditRequested = { editingPebbleId = detailId },
+                reloadKey = covers.detailReloadKey,
+                onDismiss = viewModel::closeDetail,
+                onEditRequested = viewModel::openEdit,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -254,16 +141,11 @@ fun PathScreen(
         // in the OUTER Box since EditPebbleScreen self-applies safeDrawingPadding.
         // On save it swaps back to the detail (D5), bumps detailReloadKey to reload
         // the revealed detail in place, and reloads the timeline.
-        val editId = editingPebbleId
-        if (editId != null) {
+        covers.editingPebbleId?.let { editId ->
             EditPebbleScreen(
                 pebbleId = editId,
-                onDismiss = { editingPebbleId = null },
-                onSaved = {
-                    editingPebbleId = null
-                    detailReloadKey++
-                    reload()
-                },
+                onDismiss = viewModel::closeEdit,
+                onSaved = viewModel::onEditSaved,
                 modifier = Modifier.fillMaxSize(),
             )
         }
@@ -275,25 +157,13 @@ fun PathScreen(
         // deliberately does NOT open the detail the way the form does, because the
         // user has just spent ten screens on this pebble and the success step
         // already showed it (D10).
-        if (isPresentingFlow) {
+        if (covers.isPresentingFlow) {
             RecordFlowScreen(
-                onPublished = { newId ->
-                    draftsReloadKey++
-                    reloadFocusing(newId)
-                },
-                onDismiss = {
-                    isPresentingFlow = false
-                    resumingDraft = null
-                    isPresentingDrafts = false
-                    draftsReloadKey++
-                },
+                onPublished = viewModel::onFlowPublished,
+                onDismiss = viewModel::closeFlow,
                 modifier = Modifier.fillMaxSize(),
-                resuming = resumingDraft,
-                onDraftSaved = {
-                    isPresentingFlow = false
-                    resumingDraft = null
-                    draftsReloadKey++
-                },
+                resuming = covers.resumingDraft,
+                onDraftSaved = viewModel::onFlowDraftSaved,
             )
         }
 
@@ -303,67 +173,36 @@ fun PathScreen(
         // safeDrawingPadding/imePadding (C, the fullScreenCover analog D5). On
         // success it reveals the new pebble through the detail cover and reloads
         // the timeline — the flow deliberately does not.
-        if (isPresentingCreate) {
+        if (covers.isPresentingCreate) {
             CreatePebbleScreen(
-                onCreated = { newId ->
-                    isPresentingCreate = false
-                    resumingDraft = null
-                    isPresentingDrafts = false
-                    selectedPebbleId = newId
-                    draftsReloadKey++
-                    reload()
-                },
-                onCancel = {
-                    isPresentingCreate = false
-                    resumingDraft = null
-                    draftsReloadKey++
-                },
+                onCreated = viewModel::onFormCreated,
+                onCancel = viewModel::closeForm,
                 modifier = Modifier.fillMaxSize(),
-                resuming = resumingDraft,
-                onDraftSaved = {
-                    isPresentingCreate = false
-                    resumingDraft = null
-                    draftsReloadKey++
-                },
+                resuming = covers.resumingDraft,
+                onDraftSaved = viewModel::onFormDraftSaved,
             )
         }
 
         // Full-screen drafts cover (M47) — self-applies safeDrawingPadding, so it
         // belongs in the OUTER Box like its siblings. Composed BEFORE the create
         // cover in z-order so resuming a draft stacks the composer on top of it.
-        if (isPresentingDrafts && !isPresentingCreate && !isPresentingFlow) {
+        if (covers.showsDrafts) {
             DraftsScreen(
-                onResume = { record ->
-                    resumingDraft = record
-                    isPresentingFlow = true
-                },
-                onDismiss = { isPresentingDrafts = false },
+                onResume = viewModel::resumeDraft,
+                onDismiss = viewModel::closeDrafts,
                 modifier = Modifier.fillMaxSize(),
-                reloadKey = draftsReloadKey,
+                reloadKey = covers.draftsReloadKey,
             )
         }
 
-        val target = pendingDeletion
-        if (target != null) {
+        covers.pendingDeletion?.let { target ->
             DeleteConfirmDialog(
                 pebbleName = target.name,
-                onConfirm = {
-                    pendingDeletion = null
-                    scope.launch {
-                        try {
-                            writeService.delete(target.id)
-                            if (selectedPebbleId == target.id) selectedPebbleId = null
-                            reload()
-                        } catch (e: Exception) {
-                            Log.e(TAG, "delete pebble failed", e)
-                            deleteError = true
-                        }
-                    }
-                },
-                onDismiss = { pendingDeletion = null },
+                onConfirm = viewModel::confirmDelete,
+                onDismiss = viewModel::cancelDelete,
             )
         }
-        if (deleteError) DeleteErrorDialog(onDismiss = { deleteError = false })
+        if (covers.didDeleteFail) DeleteErrorDialog(onDismiss = viewModel::dismissDeleteError)
     }
 }
 

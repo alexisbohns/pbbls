@@ -27,6 +27,31 @@ data class PebbleDraftRecord(
 )
 
 /**
+ * The drafts seam (#849). `PathViewModel` reads [count] for the entry-point
+ * badge and has a test for it.
+ */
+interface PebbleDraftsServicing {
+    suspend fun list(): List<PebbleDraftRecord>
+
+    suspend fun load(id: String): PebbleDraftRecord?
+
+    suspend fun save(
+        payload: PebbleDraftPayload,
+        id: String?,
+        userId: String,
+    ): String
+
+    suspend fun delete(id: String)
+
+    suspend fun count(): Int
+
+    suspend fun canUseGlyph(
+        glyphId: String,
+        userId: String,
+    ): Boolean
+}
+
+/**
  * Server-side drafts (M47) — ports iOS `PebbleDraftsService.swift`.
  *
  * Direct RLS-scoped single-table calls (design D6, the sanctioned cross-surface
@@ -41,7 +66,7 @@ class PebbleDraftsService
     @Inject
     constructor(
         private val supabase: SupabaseService,
-    ) {
+    ) : PebbleDraftsServicing {
         private companion object {
             const val TABLE = "pebble_drafts"
             const val COLUMNS = "id, payload, updated_at"
@@ -51,14 +76,14 @@ class PebbleDraftsService
          * Most recently saved first. `updated_at` is trigger-maintained server-side,
          * so the ordering does not depend on device clocks.
          */
-        suspend fun list(): List<PebbleDraftRecord> =
+        override suspend fun list(): List<PebbleDraftRecord> =
             supabase.client
                 .from(TABLE)
                 .select(Columns.raw(COLUMNS)) {
                     order("updated_at", Order.DESCENDING)
                 }.decodeList()
 
-        suspend fun load(id: String): PebbleDraftRecord? =
+        override suspend fun load(id: String): PebbleDraftRecord? =
             supabase.client
                 .from(TABLE)
                 .select(Columns.raw(COLUMNS)) {
@@ -75,7 +100,7 @@ class PebbleDraftsService
          * `user_id` is explicit because the RLS `with check` compares it to
          * `auth.uid()`.
          */
-        suspend fun save(
+        override suspend fun save(
             payload: PebbleDraftPayload,
             id: String?,
             userId: String,
@@ -87,7 +112,7 @@ class PebbleDraftsService
             return rowId
         }
 
-        suspend fun delete(id: String) {
+        override suspend fun delete(id: String) {
             supabase.client
                 .from(TABLE)
                 .delete {
@@ -100,7 +125,7 @@ class PebbleDraftsService
          * [list]: this runs on every Path composition, and pulling every draft's full
          * jsonb payload to render one number is waste on the app's home screen.
          */
-        suspend fun count(): Int =
+        override suspend fun count(): Int =
             supabase.client
                 .from(TABLE)
                 .select(Columns.raw("id"))
@@ -114,7 +139,7 @@ class PebbleDraftsService
          * checking it while hydrating means publishing cannot fail on 42501 later
          * (design D7).
          */
-        suspend fun canUseGlyph(
+        override suspend fun canUseGlyph(
             glyphId: String,
             userId: String,
         ): Boolean =
@@ -147,6 +172,6 @@ private data class DraftUpsertPayload(
 )
 
 val LocalPebbleDraftsService =
-    staticCompositionLocalOf<PebbleDraftsService> {
+    staticCompositionLocalOf<PebbleDraftsServicing> {
         error("LocalPebbleDraftsService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

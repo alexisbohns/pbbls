@@ -13,9 +13,9 @@ import app.pbbls.android.services.ComposerSnapshotStore
 import app.pbbls.android.services.ConnectionsService
 import app.pbbls.android.services.EmotionPaletteService
 import app.pbbls.android.services.PathServicing
-import app.pbbls.android.services.PathStatsService
+import app.pbbls.android.services.PathStatsServicing
 import app.pbbls.android.services.PebbleDetailService
-import app.pbbls.android.services.PebbleDraftsService
+import app.pbbls.android.services.PebbleDraftsServicing
 import app.pbbls.android.services.PebbleSnapRepository
 import app.pbbls.android.services.PebbleWriteServicing
 import app.pbbls.android.services.ProfileServicing
@@ -48,7 +48,7 @@ class ServiceGraph
         val supabase: SupabaseServicing,
         val palettes: EmotionPaletteService,
         val pathService: PathServicing,
-        val pathStats: PathStatsService,
+        val pathStats: PathStatsServicing,
         val profileService: ProfileServicing,
         val pebbleDetailService: PebbleDetailService,
         val snapUrls: SnapURLCache,
@@ -57,7 +57,7 @@ class ServiceGraph
         val pebbleWrite: PebbleWriteServicing,
         val soulsService: SoulsService,
         val collectionsService: CollectionsService,
-        val draftsService: PebbleDraftsService,
+        val draftsService: PebbleDraftsServicing,
         val connectionsService: ConnectionsService,
         val composerSnapshots: ComposerSnapshotStore,
         val glyphService: GlyphService,
