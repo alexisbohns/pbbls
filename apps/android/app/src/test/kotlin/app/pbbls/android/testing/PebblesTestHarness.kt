@@ -32,11 +32,13 @@ import kotlinx.coroutines.test.TestScope
  * a test names only the seam it cares about:
  *
  * ```
- * val graph = FakeServiceGraph(pathService = FakePathService(pebbles = fixture))
+ * val graph = FakeServices(pathService = FakePathService(pebbles = fixture))
  * ```
  *
  * Only the extracted seams are here — the five from #848 plus one per screen
- * #849 has migrated. The rest still have no interface, on purpose
+ * #849 has migrated. The name no longer echoes a production type: `di/ServiceGraph`
+ * was deleted in #852, and this was never a fake OF it — it is a bag of fakes a
+ * test can name one field of. The rest still have no interface, on purpose
  * (`apps/android/CLAUDE.md`: extract a seam when a test needs one, not before).
  * These fields back ViewModel constructors directly in most tests; only
  * [referenceData] is also handed to [PebblesTestHarness] below, since it is one
@@ -48,7 +50,7 @@ import kotlinx.coroutines.test.TestScope
  * because that is their only consumer until #857 lands Robolectric; they move to
  * a real `core/testing` module with #851.
  */
-class FakeServiceGraph(
+class FakeServices(
     val supabase: SupabaseServicing = FakeSupabaseService(),
     val pathService: PathServicing = FakePathService(),
     val profileService: ProfileServicing = FakeProfileService(),
@@ -61,7 +63,7 @@ class FakeServiceGraph(
 
 /**
  * A real [EmotionPaletteService] over a syntactically valid but fake project —
- * the same recipe `ServiceGraphFakesTest.servicesConstructWithoutSecrets` uses,
+ * the same recipe `ServiceFakesTest.servicesConstructWithoutSecrets` uses,
  * because [EmotionPaletteService] is concrete with no extracted interface
  * (nothing calls `load()` through this harness, so `createSupabaseClient`'s
  * client never leaves the JVM — see `di/SupabaseModule`'s KDoc). The `@OptIn`
@@ -113,7 +115,7 @@ private fun fakeSnapURLCache(): SnapURLCache =
  */
 @Composable
 fun PebblesTestHarness(
-    graph: FakeServiceGraph = FakeServiceGraph(),
+    graph: FakeServices = FakeServices(),
     palettes: EmotionPaletteService = fakeEmotionPaletteService(),
     snapUrls: SnapURLCache = fakeSnapURLCache(),
     content: @Composable () -> Unit,

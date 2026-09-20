@@ -5,7 +5,7 @@ package app.pbbls.android.testing
  *
  * Set [next] and the following call throws it, then CLEARS — so a test can drive
  * "fails once, then the retry succeeds" without rebuilding the fake. That
- * clear-once semantic is what `ServiceGraphFakesTest` pins; keeping it in one
+ * clear-once semantic is what `ServiceFakesTest` pins; keeping it in one
  * place means the test covers every fake rather than whichever one it happens to
  * name.
  *

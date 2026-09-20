@@ -38,7 +38,7 @@ import java.time.OffsetDateTime
  * test never calls; and the five seams below are interfaces, so a fake stands in
  * without producing a client at all.
  */
-class ServiceGraphFakesTest {
+class ServiceFakesTest {
     private fun pebble(
         id: String,
         name: String,
@@ -120,7 +120,7 @@ class ServiceGraphFakesTest {
     fun `a named seam drives the success path`() =
         runTest {
             val fixture = listOf(pebble("p1", "First light"), pebble("p2", "Second wind"))
-            val graph = FakeServiceGraph(pathService = FakePathService(pebbles = fixture))
+            val graph = FakeServices(pathService = FakePathService(pebbles = fixture))
 
             val loaded = graph.pathService.loadPathPebbles()
 
@@ -133,7 +133,7 @@ class ServiceGraphFakesTest {
     fun `an armed failure throws once, then clears so the retry succeeds`() =
         runTest {
             val pathService = FakePathService(pebbles = listOf(pebble("p1", "First light")))
-            val graph = FakeServiceGraph(pathService = pathService)
+            val graph = FakeServices(pathService = pathService)
             pathService.failNext = IOException("network down")
 
             val thrown =
