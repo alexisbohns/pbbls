@@ -91,7 +91,7 @@ class AuthViewModel
             hasStarted = true
             _uiState.update {
                 it.copy(
-                    mode = savedState.get<String>(KEY_MODE)?.let(AuthMode::fromRoute) ?: initialMode,
+                    mode = savedState.get<String>(KEY_MODE)?.let { AuthMode.valueOf(it) } ?: initialMode,
                     email = savedState[KEY_EMAIL] ?: "",
                     termsAccepted = savedState[KEY_TERMS] ?: false,
                     privacyAccepted = savedState[KEY_PRIVACY] ?: false,
@@ -132,7 +132,7 @@ class AuthViewModel
 
         /** Switching to Login drops the consents: they belong to a sign-up. */
         fun onModeChange(newMode: AuthMode) {
-            savedState[KEY_MODE] = newMode.route
+            savedState[KEY_MODE] = newMode.name
             val clearsConsents = newMode == AuthMode.LOGIN
             if (clearsConsents) {
                 savedState[KEY_TERMS] = false

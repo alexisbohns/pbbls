@@ -35,8 +35,6 @@ androidxStartup = "1.2.0"
 supabase = "3.8.0"
 ktor = "3.5.2"
 kotlinxSerializationJson = "1.11.0"
-# Single-activity NavHost for the unauthenticated Welcome -> Auth flow (D5).
-navigationCompose = "2.10.1"
 # Custom Tabs — the in-app-browser analog of iOS SFSafariViewController, used
 # for the legal document links (D15).
 browser = "1.10.0"
@@ -97,7 +95,6 @@ androidx-startup-runtime = { group = "androidx.startup", name = "startup-runtime
 
 # Compose (BOM-managed; no version here). foundation supplies HorizontalPager.
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
-androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 
 # supabase-kt entry-funnel stack (sub-project C).

@@ -5,20 +5,16 @@ import app.pbbls.android.R
 import kotlinx.serialization.Serializable
 
 /**
- * Login vs Sign-up mode for [AuthScreen] — the `AuthView.Mode` analog. [route] is
- * the NavHost path argument; [labelRes] the switcher label.
+ * Login vs Sign-up mode for [AuthScreen] — the `AuthView.Mode` analog. [labelRes]
+ * is the switcher label. [PebblesKey.Auth] carries this enum directly as a typed
+ * `NavKey` field (#852 Task 30) — `route`/`fromRoute` round-tripped it through a
+ * NavHost path argument and are gone with `navigation-compose`; `AuthViewModel`
+ * persists it across process death with `AuthMode.name`/`valueOf` instead.
  */
 @Serializable
 enum class AuthMode(
-    val route: String,
     @StringRes val labelRes: Int,
 ) {
-    LOGIN("login", R.string.auth_mode_login),
-    SIGNUP("signup", R.string.auth_mode_signup),
-    ;
-
-    companion object {
-        /** Maps a NavHost `{mode}` argument back to a mode, defaulting to [LOGIN]. */
-        fun fromRoute(route: String?): AuthMode = entries.firstOrNull { it.route == route } ?: LOGIN
-    }
+    LOGIN(R.string.auth_mode_login),
+    SIGNUP(R.string.auth_mode_signup),
 }
