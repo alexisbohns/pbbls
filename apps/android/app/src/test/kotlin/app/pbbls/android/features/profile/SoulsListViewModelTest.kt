@@ -224,33 +224,6 @@ class SoulsListViewModelTest {
             assertTrue(service.deleteCalls.isEmpty())
         }
 
-    // MARK: - Create cover
-
-    /**
-     * The cover's own save refreshes the picker cache (inside its uncancellable
-     * block, where it survives this host being destroyed), so this callback has
-     * only the grid to reload. Asserting the cache is *not* touched here is what
-     * keeps the duplicate from creeping back.
-     */
-    @Test
-    fun `saving a soul closes the cover and reloads the grid only`() =
-        runTest {
-            val service = FakeSoulsService()
-            val refs = FakeReferenceDataService()
-            val viewModel = viewModel(souls = service, refs = refs)
-            advanceUntilIdle()
-
-            viewModel.openCreate()
-            assertTrue(viewModel.covers.value.isPresentingCreate)
-
-            viewModel.onSoulSaved()
-            advanceUntilIdle()
-
-            assertFalse(viewModel.covers.value.isPresentingCreate)
-            assertEquals(2, service.listCount)
-            assertEquals(0, refs.refreshSoulsCount)
-        }
-
     // MARK: - Returning from the detail
 
     /**
@@ -301,9 +274,11 @@ class SoulsListViewModelTest {
             val service = FakeSoulsService(souls = listOf(soul("a")))
             val viewModel = viewModel(souls = service)
             advanceUntilIdle()
+            viewModel.onResumed()
+            advanceUntilIdle()
 
             service.failNext = IOException("offline")
-            viewModel.onSoulSaved()
+            viewModel.onResumed()
             advanceUntilIdle()
 
             val state = viewModel.uiState.value as SoulsListUiState.Content

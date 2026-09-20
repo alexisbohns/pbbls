@@ -35,7 +35,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.components.PebblesTextInput
-import app.pbbls.android.features.glyph.carve.GlyphCarveScreen
 import app.pbbls.android.features.glyph.models.GlyphGridItem
 import app.pbbls.android.features.glyph.views.GlyphView
 import app.pbbls.android.features.glyph.views.GlyphViewCase
@@ -62,6 +61,7 @@ private const val TAG = "glyphs-store"
 @Composable
 fun GlyphsListScreen(
     onBack: () -> Unit,
+    onCarve: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: GlyphsListViewModel = hiltViewModel(),
 ) {
@@ -85,7 +85,7 @@ fun GlyphsListScreen(
                     }
                 },
                 trailing = {
-                    IconButton(onClick = viewModel::openCarve) {
+                    IconButton(onClick = onCarve) {
                         Icon(
                             painter = painterResource(R.drawable.ic_plus),
                             contentDescription = stringResource(R.string.glyphs_carve_a11y),
@@ -159,14 +159,6 @@ fun GlyphsListScreen(
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
         }
-    }
-
-    if (covers.isPresentingCarve) {
-        GlyphCarveScreen(
-            onSaved = viewModel::onCarved,
-            onCancel = viewModel::closeCarve,
-            modifier = Modifier.fillMaxSize(),
-        )
     }
 
     covers.renaming?.let { glyph ->

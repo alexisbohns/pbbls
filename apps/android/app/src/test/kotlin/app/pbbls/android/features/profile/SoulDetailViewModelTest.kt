@@ -166,27 +166,6 @@ class SoulDetailViewModelTest {
 
     // MARK: - Covers
 
-    /** The cover's own save owns the picker-cache refresh (see the list twin). */
-    @Test
-    fun `saving the soul closes the cover and reloads only`() =
-        runTest {
-            val service = FakeSoulsService(soul = soul("a"))
-            val refs = FakeReferenceDataService()
-            val viewModel = viewModel(souls = service, refs = refs)
-            viewModel.start("a")
-            advanceUntilIdle()
-
-            viewModel.openEdit()
-            assertTrue(viewModel.covers.value.isPresentingEdit)
-
-            viewModel.onSoulSaved()
-            advanceUntilIdle()
-
-            assertFalse(viewModel.covers.value.isPresentingEdit)
-            assertEquals(2, service.loadSoulCount)
-            assertEquals(0, refs.refreshSoulsCount)
-        }
-
     @Test
     fun `saving an edited pebble closes its cover and reloads`() =
         runTest {

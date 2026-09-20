@@ -203,27 +203,6 @@ class CollectionDetailViewModelTest {
 
     // MARK: - Covers
 
-    /** The cover's own save owns the picker-cache refresh (see the list twin). */
-    @Test
-    fun `saving the collection closes the cover and reloads only`() =
-        runTest {
-            val service = FakeCollectionsService(collection = collection("a"))
-            val refs = FakeReferenceDataService()
-            val viewModel = viewModel(collections = service, refs = refs)
-            viewModel.start("a")
-            advanceUntilIdle()
-
-            viewModel.openEdit()
-            assertTrue(viewModel.covers.value.isPresentingEdit)
-
-            viewModel.onCollectionSaved()
-            advanceUntilIdle()
-
-            assertFalse(viewModel.covers.value.isPresentingEdit)
-            assertEquals(2, service.loadCollectionCount)
-            assertEquals(0, refs.refreshCollectionsCount)
-        }
-
     @Test
     fun `saving an edited pebble closes its cover and reloads`() =
         runTest {

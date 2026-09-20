@@ -2,7 +2,6 @@ package app.pbbls.android.features.profile
 
 import android.content.Context
 import android.content.Intent
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -90,10 +89,6 @@ fun SettingsScreen(
 
             SettingsEffect.Dismiss -> onDismiss()
         }
-    }
-
-    BackHandler(enabled = !uiState.isSaving && uiState.deletion != DeletionState.DELETING) {
-        viewModel.onDismissRequested()
     }
 
     PebblesScreen(

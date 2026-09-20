@@ -55,6 +55,7 @@ import app.pbbls.android.theme.PebblesTypography
 fun SoulDetailScreen(
     soulId: String,
     onBack: () -> Unit,
+    onEditSoul: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SoulDetailViewModel = hiltViewModel(),
 ) {
@@ -85,7 +86,7 @@ fun SoulDetailScreen(
                     if (uiState is SoulDetailUiState.Content) {
                         PebblesTopBarTextButton(
                             text = stringResource(R.string.pebble_detail_edit),
-                            onClick = viewModel::openEdit,
+                            onClick = onEditSoul,
                         )
                     }
                 },
@@ -152,17 +153,6 @@ fun SoulDetailScreen(
                         }
                     }
                 }
-        }
-    }
-
-    if (covers.isPresentingEdit) {
-        (uiState as? SoulDetailUiState.Content)?.let { content ->
-            SoulFormScreen(
-                soulId = content.soul.id,
-                onDismiss = viewModel::closeEdit,
-                onSaved = viewModel::onSoulSaved,
-                modifier = Modifier.fillMaxSize(),
-            )
         }
     }
 

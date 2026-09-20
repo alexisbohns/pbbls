@@ -1,6 +1,5 @@
 package app.pbbls.android.features.lab
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -68,12 +67,13 @@ fun LogListScreen(
         onBack()
     }
 
-    // Its own handler, innermost, so system/gesture back takes the same exit as
-    // the toolbar arrow. The Lab's handler only knows to clear its cover flag,
-    // which would leave this ViewModel's mode guard set and serve the next
-    // presentation a stale list — two behaviours for one gesture.
-    BackHandler { back() }
-
+    // This screen's own back handler (which called `back()` above, releasing
+    // the mode guard before Lab's own handler cleared its cover flag) is gone
+    // as of #852 Task 17, ahead of Task 19 promoting this to a `LabLogList`
+    // entry. Until then, system/gesture back falls through to Lab's, which
+    // does not call `viewModel.finish()` — so `startedMode` stays set and a
+    // same-mode reopen can show a stale list until Task 19 lands. The toolbar
+    // arrow still calls `back()` and is unaffected.
     PebblesScreen(
         modifier = modifier,
         topBar = {

@@ -42,9 +42,8 @@ sealed interface SoulsListUiState {
     ) : SoulsListUiState
 }
 
-/** The create cover and the delete dialogs, which stack over the grid. */
+/** The delete dialogs, which stack over the grid. */
 data class SoulsListCovers(
-    val isPresentingCreate: Boolean = false,
     val pendingDeletion: SoulWithGlyph? = null,
     val didDeleteFail: Boolean = false,
 )
@@ -152,22 +151,6 @@ class SoulsListViewModel
         fun onResumed() {
             resumeCount += 1
             if (resumeCount > 1) reload()
-        }
-
-        // MARK: - Covers
-
-        fun openCreate() = _covers.update { it.copy(isPresentingCreate = true) }
-
-        fun closeCreate() = _covers.update { it.copy(isPresentingCreate = false) }
-
-        /**
-         * A soul was created. Only the grid is this screen's to refresh: the
-         * composer's picker cache is re-warmed by [SoulFormViewModel] inside its
-         * own uncancellable save, so it survives the host being destroyed.
-         */
-        fun onSoulSaved() {
-            _covers.update { it.copy(isPresentingCreate = false) }
-            reload()
         }
 
         // MARK: - Delete

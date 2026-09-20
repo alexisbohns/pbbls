@@ -1,6 +1,5 @@
 package app.pbbls.android.features.profile
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -80,8 +79,6 @@ fun CollectionFormScreen(
             CollectionFormEffect.Dismiss -> onDismiss()
         }
     }
-
-    BackHandler(enabled = !uiState.isSaving) { viewModel.onDismissRequested() }
 
     PebblesScreen(
         modifier = modifier.background(system.background),

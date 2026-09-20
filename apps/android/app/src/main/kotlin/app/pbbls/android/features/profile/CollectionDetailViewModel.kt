@@ -52,9 +52,8 @@ sealed interface CollectionDetailUiState {
     }
 }
 
-/** The edit cover, the pebble-edit cover, and the delete dialogs. */
+/** The pebble-edit cover and the delete dialogs. */
 data class CollectionDetailCovers(
-    val isPresentingEdit: Boolean = false,
     val editingPebbleId: String? = null,
     val pendingDeletion: Pebble? = null,
     val didDeleteFail: Boolean = false,
@@ -112,6 +111,13 @@ class CollectionDetailViewModel
             loadJob = viewModelScope.launch { fetch(id) }
         }
 
+        /**
+         * Still called by [onPebbleSaved] and [confirmDelete]. It used to also
+         * run when the edit-collection cover closed; since #852 Task 17 that
+         * edit is a separate `CollectionForm` entry with no callback back into
+         * this instance, so nothing calls this after an edit yet — Task 18
+         * wires a resume refresh for that gap (see [SoulDetailViewModel.reload]).
+         */
         private fun reload() {
             val id = collectionId ?: return
             loadJob?.cancel()
@@ -156,15 +162,6 @@ class CollectionDetailViewModel
         }
 
         // MARK: - Covers
-
-        fun openEdit() = _covers.update { it.copy(isPresentingEdit = true) }
-
-        fun closeEdit() = _covers.update { it.copy(isPresentingEdit = false) }
-
-        fun onCollectionSaved() {
-            _covers.update { it.copy(isPresentingEdit = false) }
-            reload()
-        }
 
         fun openPebble(pebbleId: String) = _covers.update { it.copy(editingPebbleId = pebbleId) }
 

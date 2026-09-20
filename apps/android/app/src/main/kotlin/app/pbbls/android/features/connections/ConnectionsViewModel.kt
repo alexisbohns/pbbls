@@ -36,11 +36,10 @@ sealed interface ConnectionsUiState {
     ) : ConnectionsUiState
 }
 
-/** The invite cover and the removal dialogs. */
+/** The removal dialogs. */
 data class ConnectionsCovers(
     val pendingRemoval: Connection? = null,
     @StringRes val removeErrorRes: Int? = null,
-    val isPresentingInvite: Boolean = false,
 )
 
 /**
@@ -121,12 +120,6 @@ class ConnectionsViewModel
                     else -> ConnectionsUiState.Content(connections)
                 }
         }
-
-        // MARK: - Invite cover
-
-        fun openInvite() = _covers.update { it.copy(isPresentingInvite = true) }
-
-        fun closeInvite() = _covers.update { it.copy(isPresentingInvite = false) }
 
         // MARK: - Removal
 

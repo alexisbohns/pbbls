@@ -365,27 +365,4 @@ class GlyphsListViewModelTest {
 
             assertTrue(glyphs.updateNameCalls.isEmpty())
         }
-
-    // MARK: - Carve cover
-
-    /** A carved glyph is already in hand, so it is shown without a round trip. */
-    @Test
-    fun `carving prepends to Mine and switches to it`() =
-        runTest {
-            val market = FakeGlyphMarketService(mine = listOf(item("a")), community = listOf(item("c")))
-            val viewModel = viewModel(market)
-            advanceUntilIdle()
-            viewModel.onSelectTab(GlyphTab.COMMU)
-            advanceUntilIdle()
-            val minesBefore = market.mineCount
-
-            viewModel.openCarve()
-            viewModel.onCarved(glyph("new", name = "Fresh"))
-
-            val state = viewModel.uiState.value as GlyphsUiState.Content
-            assertEquals(GlyphTab.MINE, state.tab)
-            assertEquals(listOf("new", "a"), state.items.map { it.id })
-            assertFalse(viewModel.covers.value.isPresentingCarve)
-            assertEquals("no refetch — the glyph came back from the save", minesBefore, market.mineCount)
-        }
 }

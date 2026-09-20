@@ -60,6 +60,7 @@ import java.util.Locale
 fun CollectionDetailScreen(
     collectionId: String,
     onBack: () -> Unit,
+    onEditCollection: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CollectionDetailViewModel = hiltViewModel(),
 ) {
@@ -93,7 +94,7 @@ fun CollectionDetailScreen(
                     if (uiState is CollectionDetailUiState.Content) {
                         PebblesTopBarTextButton(
                             text = stringResource(R.string.pebble_detail_edit),
-                            onClick = viewModel::openEdit,
+                            onClick = onEditCollection,
                         )
                     }
                 },
@@ -180,17 +181,6 @@ fun CollectionDetailScreen(
                         }
                     }
                 }
-        }
-    }
-
-    if (covers.isPresentingEdit) {
-        (uiState as? CollectionDetailUiState.Content)?.let { content ->
-            CollectionFormScreen(
-                collectionId = content.collection.id,
-                onDismiss = viewModel::closeEdit,
-                onSaved = viewModel::onCollectionSaved,
-                modifier = Modifier.fillMaxSize(),
-            )
         }
     }
 

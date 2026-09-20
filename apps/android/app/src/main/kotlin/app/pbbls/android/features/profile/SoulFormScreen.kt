@@ -1,6 +1,5 @@
 package app.pbbls.android.features.profile
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -83,8 +82,6 @@ fun SoulFormScreen(
             SoulFormEffect.Dismiss -> onDismiss()
         }
     }
-
-    BackHandler(enabled = !uiState.isSaving) { viewModel.onDismissRequested() }
 
     PebblesScreen(
         modifier = modifier.background(system.background),

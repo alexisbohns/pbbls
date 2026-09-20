@@ -13,7 +13,6 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -236,20 +235,5 @@ class ConnectionsViewModelTest {
             assertTrue(service.removeCalls.isEmpty())
             val state = viewModel.uiState.value as ConnectionsUiState.Content
             assertEquals(listOf("a"), state.connections.map { it.connectionId })
-        }
-
-    // MARK: - Invite cover
-
-    @Test
-    fun `the invite cover opens and closes`() =
-        runTest {
-            val viewModel = viewModel()
-            advanceUntilIdle()
-
-            viewModel.openInvite()
-            assertTrue(viewModel.covers.value.isPresentingInvite)
-
-            viewModel.closeInvite()
-            assertFalse(viewModel.covers.value.isPresentingInvite)
         }
 }

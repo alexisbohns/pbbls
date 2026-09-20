@@ -3,14 +3,19 @@ package app.pbbls.android.navigation
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import app.pbbls.android.features.connections.ConnectionsScreen
+import app.pbbls.android.features.connections.InviteScreen
+import app.pbbls.android.features.glyph.carve.GlyphCarveScreen
 import app.pbbls.android.features.glyph.store.GlyphsListScreen
 import app.pbbls.android.features.lab.LabScreen
 import app.pbbls.android.features.path.PathScreen
 import app.pbbls.android.features.profile.AchievementsScreen
 import app.pbbls.android.features.profile.CollectionDetailScreen
+import app.pbbls.android.features.profile.CollectionFormScreen
 import app.pbbls.android.features.profile.CollectionsListScreen
 import app.pbbls.android.features.profile.ProfileScreen
+import app.pbbls.android.features.profile.SettingsScreen
 import app.pbbls.android.features.profile.SoulDetailScreen
+import app.pbbls.android.features.profile.SoulFormScreen
 import app.pbbls.android.features.profile.SoulsListScreen
 
 /**
@@ -44,6 +49,8 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             onOpenConnections = { navigator.navigate(PebblesKey.Connections) },
             onOpenLab = { navigator.navigate(PebblesKey.Lab) },
             onOpenAchievements = { navigator.navigate(PebblesKey.Achievements) },
+            onOpenSettings = { navigator.navigate(PebblesKey.Settings) },
+            onCreateCollection = { navigator.navigate(PebblesKey.CollectionForm()) },
         )
     }
 
@@ -51,6 +58,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         SoulsListScreen(
             onBack = navigator::goBack,
             onOpenSoul = { navigator.navigate(PebblesKey.SoulDetail(it.id)) },
+            onCreateSoul = { navigator.navigate(PebblesKey.SoulForm()) },
         )
     }
 
@@ -58,23 +66,38 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         CollectionsListScreen(
             onBack = navigator::goBack,
             onOpenCollection = { navigator.navigate(PebblesKey.CollectionDetail(it.id)) },
+            onCreateCollection = { navigator.navigate(PebblesKey.CollectionForm()) },
         )
     }
 
     entry<PebblesKey.SoulDetail>(metadata = NavTransitions.forKey(PebblesKey.SoulDetail(""))) { key ->
-        SoulDetailScreen(soulId = key.soulId, onBack = navigator::goBack)
+        SoulDetailScreen(
+            soulId = key.soulId,
+            onBack = navigator::goBack,
+            onEditSoul = { navigator.navigate(PebblesKey.SoulForm(key.soulId)) },
+        )
     }
 
     entry<PebblesKey.CollectionDetail>(metadata = NavTransitions.forKey(PebblesKey.CollectionDetail(""))) { key ->
-        CollectionDetailScreen(collectionId = key.collectionId, onBack = navigator::goBack)
+        CollectionDetailScreen(
+            collectionId = key.collectionId,
+            onBack = navigator::goBack,
+            onEditCollection = { navigator.navigate(PebblesKey.CollectionForm(key.collectionId)) },
+        )
     }
 
     entry<PebblesKey.Connections>(metadata = NavTransitions.forKey(PebblesKey.Connections)) {
-        ConnectionsScreen(onDismiss = navigator::goBack)
+        ConnectionsScreen(
+            onDismiss = navigator::goBack,
+            onOpenInvite = { navigator.navigate(PebblesKey.Invite) },
+        )
     }
 
     entry<PebblesKey.Glyphs>(metadata = NavTransitions.forKey(PebblesKey.Glyphs)) {
-        GlyphsListScreen(onBack = navigator::goBack)
+        GlyphsListScreen(
+            onBack = navigator::goBack,
+            onCarve = { navigator.navigate(PebblesKey.GlyphCarve) },
+        )
     }
 
     entry<PebblesKey.Lab>(metadata = NavTransitions.forKey(PebblesKey.Lab)) {
@@ -83,5 +106,37 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
 
     entry<PebblesKey.Achievements>(metadata = NavTransitions.forKey(PebblesKey.Achievements)) {
         AchievementsScreen(onBack = navigator::goBack)
+    }
+
+    // ---- Modal covers promoted to entries (#852 Task 17) ----
+
+    entry<PebblesKey.SoulForm>(metadata = NavTransitions.forKey(PebblesKey.SoulForm())) { key ->
+        SoulFormScreen(soulId = key.soulId, onDismiss = navigator::goBack, onSaved = navigator::goBack)
+    }
+
+    entry<PebblesKey.CollectionForm>(metadata = NavTransitions.forKey(PebblesKey.CollectionForm())) { key ->
+        CollectionFormScreen(
+            collectionId = key.collectionId,
+            onDismiss = navigator::goBack,
+            onSaved = navigator::goBack,
+        )
+    }
+
+    entry<PebblesKey.Settings>(metadata = NavTransitions.forKey(PebblesKey.Settings)) {
+        SettingsScreen(
+            onDismiss = navigator::goBack,
+            // The saved values used to be folded straight into ProfileViewModel's
+            // state; an entry has no such handle back to its parent, so the
+            // parent picks them up on its own resume refresh instead (Task 18).
+            onSaved = { _, _, _, _ -> navigator.goBack() },
+        )
+    }
+
+    entry<PebblesKey.GlyphCarve>(metadata = NavTransitions.forKey(PebblesKey.GlyphCarve)) {
+        GlyphCarveScreen(onSaved = { navigator.goBack() }, onCancel = navigator::goBack)
+    }
+
+    entry<PebblesKey.Invite>(metadata = NavTransitions.forKey(PebblesKey.Invite)) {
+        InviteScreen(onDismiss = navigator::goBack)
     }
 }

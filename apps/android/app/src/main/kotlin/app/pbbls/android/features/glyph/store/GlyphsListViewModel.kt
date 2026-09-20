@@ -54,13 +54,12 @@ sealed interface GlyphsUiState {
     ) : GlyphsUiState
 }
 
-/** The rename dialog, the detail drawer and the carve cover. */
+/** The rename dialog and the detail drawer. */
 data class GlyphsCovers(
     val renaming: Glyph? = null,
     val didRenameFail: Boolean = false,
     /** The drawer's subject. Replaced in place when a purchase lands. */
     val selected: GlyphGridItem? = null,
-    val isPresentingCarve: Boolean = false,
 )
 
 /**
@@ -86,6 +85,13 @@ data class GlyphsCovers(
  * `withContext(NonCancellable)`; [onPurchased] is what this screen does with a
  * purchase that landed. `GlyphPickerSheet` keeps its own duplicated copy of the
  * store's state and is a migration of its own, not folded in here.
+ *
+ * **The carve cover is gone (#852 Task 17).** It used to prepend the fresh
+ * glyph to Mine and switch straight to it on save, an optimistic update with no
+ * round trip. `GlyphCarve` is a separate entry now, with no callback back into
+ * this instance, so that optimism is lost until Task 18 gives this screen a
+ * resume refresh — until then, a carved glyph only appears in Mine on the next
+ * full reload of that tab.
  */
 @HiltViewModel
 class GlyphsListViewModel
@@ -164,26 +170,6 @@ class GlyphsListViewModel
                             isLoadingTab = isLoadingTab,
                         )
                 }
-        }
-
-        // MARK: - Carve cover
-
-        fun openCarve() = _covers.update { it.copy(isPresentingCarve = true) }
-
-        fun closeCarve() = _covers.update { it.copy(isPresentingCarve = false) }
-
-        /**
-         * A carve landed. The fresh glyph is prepended to Mine and the tab
-         * switches to it rather than refetching — the glyph is already in hand,
-         * so a round trip would only delay showing the user what they just drew.
-         */
-        fun onCarved(glyph: Glyph) {
-            _covers.update { it.copy(isPresentingCarve = false) }
-            val fresh =
-                GlyphGridItem(glyph = glyph, price = 0, owned = false, createdAt = null, acquiredAt = null)
-            itemsByTab[GlyphTab.MINE] = listOf(fresh) + itemsByTab[GlyphTab.MINE].orEmpty()
-            tab = GlyphTab.MINE
-            publish()
         }
 
         // MARK: - Rename

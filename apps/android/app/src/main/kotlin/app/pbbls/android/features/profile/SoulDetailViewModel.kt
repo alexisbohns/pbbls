@@ -44,9 +44,8 @@ sealed interface SoulDetailUiState {
     ) : SoulDetailUiState
 }
 
-/** The edit cover, the pebble-edit cover, and the delete dialogs. */
+/** The pebble-edit cover and the delete dialogs. */
 data class SoulDetailCovers(
-    val isPresentingEdit: Boolean = false,
     val editingPebbleId: String? = null,
     val pendingDeletion: Pebble? = null,
     val didDeleteFail: Boolean = false,
@@ -114,7 +113,15 @@ class SoulDetailViewModel
             loadJob = viewModelScope.launch { fetch(id) }
         }
 
-        /** Refresh after a write, keeping the content that is already on screen. */
+        /**
+         * Refresh after a write, keeping the content that is already on screen.
+         *
+         * Still called by [onPebbleSaved] and [confirmDelete]. It used to also
+         * run when the edit-soul cover closed; since #852 Task 17 that edit is a
+         * separate `SoulForm` entry with no callback back into this instance, so
+         * nothing calls this after an edit yet — Task 18 wires a resume refresh
+         * for that gap.
+         */
         private fun reload() {
             val id = soulId ?: return
             loadJob?.cancel()
@@ -152,16 +159,6 @@ class SoulDetailViewModel
         }
 
         // MARK: - Covers
-
-        fun openEdit() = _covers.update { it.copy(isPresentingEdit = true) }
-
-        fun closeEdit() = _covers.update { it.copy(isPresentingEdit = false) }
-
-        /** The soul was edited: close the cover and refresh (see [SoulsListViewModel.onSoulSaved]). */
-        fun onSoulSaved() {
-            _covers.update { it.copy(isPresentingEdit = false) }
-            reload()
-        }
 
         fun openPebble(pebbleId: String) = _covers.update { it.copy(editingPebbleId = pebbleId) }
 
