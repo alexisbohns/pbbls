@@ -1,7 +1,10 @@
 package app.pbbls.android.features.profile
 
 import app.pbbls.android.R
+import app.pbbls.android.services.AchievementRecord
+import app.pbbls.android.services.AchievementUnlockRecord
 import app.pbbls.android.services.ProfileRow
+import app.pbbls.android.testing.FakeAchievementsService
 import app.pbbls.android.testing.FakePathStatsService
 import app.pbbls.android.testing.FakeProfileService
 import app.pbbls.android.testing.FakeSupabaseService
@@ -38,7 +41,8 @@ class ProfileViewModelTest {
         profile: FakeProfileService = FakeProfileService(profile = row),
         stats: FakePathStatsService = FakePathStatsService(),
         supabase: FakeSupabaseService = FakeSupabaseService(),
-    ) = ProfileViewModel(profile, stats, supabase)
+        achievements: FakeAchievementsService = FakeAchievementsService(),
+    ) = ProfileViewModel(profile, stats, supabase, achievements)
 
     // MARK: - Load
 
@@ -129,6 +133,54 @@ class ProfileViewModelTest {
             repeat(5) { viewModel.uiState.value }
 
             assertEquals(1, profile.loadProfileCount)
+        }
+
+    /** The shelf's load (#852) — hoisted here from the card's own `LaunchedEffect`. */
+    @Test
+    fun `achievements shelf loads alongside the profile`() =
+        runTest {
+            val badge =
+                AchievementRecord(
+                    id = "a1",
+                    slug = "first-pebble",
+                    family = "milestone",
+                    sortOrder = 0,
+                    karmaReward = 10,
+                    isActive = true,
+                )
+            val achievements =
+                FakeAchievementsService(
+                    catalog = listOf(badge),
+                    unlocks =
+                        listOf(
+                            AchievementUnlockRecord(
+                                achievementId = "a1",
+                                unlockedAt = OffsetDateTime.parse("2026-01-02T00:00:00Z"),
+                            ),
+                        ),
+                )
+            val viewModel = viewModel(achievements = achievements)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value as ProfileUiState.Content
+            assertTrue(state.achievementsLoaded)
+            assertEquals(1, state.unlockedAchievementCount)
+            assertEquals(listOf(badge), state.recentAchievements)
+        }
+
+    /** A failed shelf fetch must not take the whole profile down (mirrors collections). */
+    @Test
+    fun `a failed achievements fetch still shows the profile`() =
+        runTest {
+            val achievements = FakeAchievementsService()
+            achievements.failNext = IOException("offline")
+            val viewModel = viewModel(achievements = achievements)
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value as ProfileUiState.Content
+            assertEquals("Pebbler", state.profile?.displayName)
+            assertTrue(state.recentAchievements.isEmpty())
+            assertTrue(state.achievementsLoaded)
         }
 
     @Test

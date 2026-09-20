@@ -97,6 +97,7 @@ fun PebbleForm(
     onRemovePending: () -> Unit = {},
     isRemovingExistingSnap: Boolean = false,
     onRemoveExistingSnap: () -> Unit = {},
+    onAchievementCheck: () -> Unit = {},
 ) {
     var activePicker by remember { mutableStateOf<PickerKind?>(null) }
 
@@ -224,6 +225,7 @@ fun PebbleForm(
                     onDraftChange(draft.copy(soulIds = it))
                     activePicker = null
                 },
+                onAchievementCheck = onAchievementCheck,
             )
         PickerKind.GLYPH ->
             GlyphPickerSheet(

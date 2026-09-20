@@ -166,7 +166,12 @@ fun ProfileScreen(
                         pebbles = content.pebbles,
                         karma = content.karma,
                     )
-                    ProfileAchievementsCard(onOpen = onOpenAchievements)
+                    ProfileAchievementsCard(
+                        recent = content.recentAchievements,
+                        unlockedCount = content.unlockedAchievementCount,
+                        hasLoaded = content.achievementsLoaded,
+                        onOpen = onOpenAchievements,
+                    )
                     ProfileCollectionsCard(
                         collections = content.collections,
                         hasLoaded = content.collectionsLoaded,

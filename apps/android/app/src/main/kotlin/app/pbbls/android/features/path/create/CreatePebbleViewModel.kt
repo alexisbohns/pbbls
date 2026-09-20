@@ -181,6 +181,9 @@ class CreatePebbleViewModel
 
         fun onGlyphPicked(glyph: Glyph?) = _uiState.update { it.copy(selectedGlyph = glyph) }
 
+        /** Wired into [PebbleForm]'s soul picker — an inline soul creation fires the check (#852). */
+        fun onAchievementCheck() = achievements.fireCheck()
+
         fun onPhotoPicked(uri: Uri) {
             val id = userId ?: return
             viewModelScope.launch {

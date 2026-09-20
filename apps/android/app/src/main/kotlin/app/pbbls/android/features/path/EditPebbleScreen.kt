@@ -144,6 +144,7 @@ fun EditPebbleScreen(
                         onRemovePending = viewModel::onRemovePhoto,
                         isRemovingExistingSnap = state.isRemovingExistingSnap,
                         onRemoveExistingSnap = viewModel::onRemoveExistingSnap,
+                        onAchievementCheck = viewModel::onAchievementCheck,
                     )
                     // Grade chip (M51) — mirrors iOS EditPebbleSheet's bottomBar
                     // ToolbarItemGroup, matching CreatePebbleScreen's row treatment.

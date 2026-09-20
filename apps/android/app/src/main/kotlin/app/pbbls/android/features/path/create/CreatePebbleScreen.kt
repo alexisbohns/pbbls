@@ -135,6 +135,7 @@ fun CreatePebbleScreen(
             },
             onRetryPending = viewModel::onRetryPhoto,
             onRemovePending = viewModel::onRemovePhoto,
+            onAchievementCheck = viewModel::onAchievementCheck,
         )
         // Quick capture: ungated, unlike Save (design D5). "Just a name" is a
         // valid draft. Mirrors the iOS .bottomBar toolbar item.
