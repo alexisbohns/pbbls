@@ -17,7 +17,7 @@ import org.junit.Test
 import java.io.IOException
 import java.time.OffsetDateTime
 
-/** The see-all list's load, mode parsing and reaction contract (#849, #852 Task 19). */
+/** The see-all list's load, mode parsing and reaction contract (#849, #852). */
 class LogListViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
@@ -188,7 +188,7 @@ class LogListViewModelTest {
     /**
      * A different mode re-reads. Re-opening the SAME mode (`start is idempotent`
      * above) is what covers the guard actually skipping a redundant fetch; the
-     * mode guard's release on close (`finish()`) is gone as of #852 Task 19 — an
+     * mode guard's release on close (`finish()`) is gone as of #852 — an
      * entry's ViewModel is destroyed when the entry is popped, so the next
      * presentation is always a fresh instance with nothing to release.
      */

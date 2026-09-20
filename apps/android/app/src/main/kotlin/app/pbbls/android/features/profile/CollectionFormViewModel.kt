@@ -84,7 +84,7 @@ sealed interface CollectionFormEffect {
  * collection created on the server that neither the list nor the composer's
  * picker learned about), the same `NonCancellable` fix, the same
  * [start]/[finish] pair standing in for the lifecycle a cover does not have,
- * and — as of Task 15 — the same move from receiving the whole [Collection]
+ * and — since #852 — the same move from receiving the whole [Collection]
  * to loading it from an id (see [SoulFormViewModel]'s KDoc for the
  * [SavedStateHandle] rationale, which applies here verbatim).
  *

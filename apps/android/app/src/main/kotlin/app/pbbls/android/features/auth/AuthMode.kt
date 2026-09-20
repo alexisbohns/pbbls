@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 /**
  * Login vs Sign-up mode for [AuthScreen] — the `AuthView.Mode` analog. [labelRes]
  * is the switcher label. [PebblesKey.Auth] carries this enum directly as a typed
- * `NavKey` field (#852 Task 30) — `route`/`fromRoute` round-tripped it through a
+ * `NavKey` field (#852) — `route`/`fromRoute` round-tripped it through a
  * NavHost path argument and are gone with `navigation-compose`; `AuthViewModel`
  * persists it across process death with `AuthMode.name`/`valueOf` instead.
  */

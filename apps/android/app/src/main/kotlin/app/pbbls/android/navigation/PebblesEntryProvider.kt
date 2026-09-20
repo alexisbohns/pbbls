@@ -36,9 +36,8 @@ import app.pbbls.android.features.welcome.WelcomeScreen
  * Key → screen (#852).
  *
  * Part 1 wired exactly what the two NavHosts reached, with the same IA, so
- * that PR was a move and not a redesign (D11). Part 3 (Task 23) promoted the
- * five write-path covers (detail, edit, both composers, drafts). Task 28
- * folds in the funnel (`Welcome`, `Auth`) that used to live in its own
+ * that PR was a move and not a redesign (D11). Part 3 promoted the
+ * five write-path covers (detail, edit, both composers, drafts). * folds in the funnel (`Welcome`, `Auth`) that used to live in its own
  * `NavDisplay`, plus `Onboarding` and `AcceptInvite` — the last two were
  * previously composed outside any back stack as `RootScreen` overlays; now
  * they are ordinary entries `RootViewModel`-driven navigation pushes onto
@@ -170,7 +169,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         InviteScreen(onDismiss = navigator::goBack)
     }
 
-    // ---- Lab's content swaps promoted to entries (#852 Task 19) ----
+    // ---- Lab's content swaps promoted to entries (#852) ----
 
     entry<PebblesKey.LabAnnouncement>(metadata = NavTransitions.forKey(PebblesKey.LabAnnouncement(""))) { key ->
         AnnouncementDetailScreen(logId = key.logId, onBack = navigator::goBack)
@@ -182,7 +181,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         LogListScreen(mode = key.mode, onBack = navigator::goBack)
     }
 
-    // ---- The write path promoted to entries (#852 Task 23) ----
+    // ---- The write path promoted to entries (#852) ----
 
     entry<PebblesKey.PebbleDetail>(metadata = NavTransitions.forKey(PebblesKey.PebbleDetail(""))) { key ->
         PebbleDetailScreen(
@@ -241,7 +240,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         )
     }
 
-    // ---- The unauthenticated funnel promoted to entries (#852 Task 28) ----
+    // ---- The unauthenticated funnel promoted to entries (#852) ----
 
     entry<PebblesKey.Welcome>(metadata = NavTransitions.forKey(PebblesKey.Welcome)) {
         WelcomeScreen(
@@ -255,7 +254,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         AuthScreen(initialMode = key.mode)
     }
 
-    // ---- Onboarding + the pending-invite accept surface (#852 Task 28) ----
+    // ---- Onboarding + the pending-invite accept surface (#852) ----
     // Both used to be `RootScreen` overlays composed outside any back stack;
     // now `RootViewModel`'s destination/pendingInvite state pushes them onto
     // this one stack instead (design §5, D8).

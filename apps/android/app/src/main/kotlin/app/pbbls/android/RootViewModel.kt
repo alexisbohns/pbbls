@@ -36,7 +36,7 @@ sealed interface RootDestination {
 
 /**
  * [pendingInvite] is the App Link token today parked on
- * `ConnectionsService.pendingInviteToken` (deleted in #852 Task 29). It lives
+ * `ConnectionsService.pendingInviteToken` (deleted in #852). It lives
  * here instead so it survives process death via [SavedStateHandle] — a token
  * the server has not seen is exactly what that rule is for
  * (`apps/android/CLAUDE.md`).
@@ -53,7 +53,7 @@ data class RootUiState(
  * from "auth has not resolved yet", and the parked-invite lifecycle (D8, D12).
  *
  * **Not yet consumed.** `RootScreen` still branches on `canShowAuthedTabs`
- * itself — Task 28 rewrites it to drive off [uiState] instead. This class is
+ * itself — `RootScreen` drives off [uiState] instead (#852). This class is
  * built and fully tested standalone first, which is why nothing below
  * constructs one yet.
  *
@@ -134,7 +134,7 @@ class RootViewModel
 
         /**
          * Parks an invite App Link token (D8). Called from `MainActivity`'s
-         * intent handling once Task 29 wires it up; harmless to call more than
+         * intent handling; harmless to call more than
          * once — the latest token wins.
          */
         fun onInviteTokenReceived(token: String) {
@@ -142,7 +142,7 @@ class RootViewModel
             _uiState.update { it.copy(pendingInvite = token) }
         }
 
-        /** Consumed once the accept surface has been navigated to (Task 28). */
+        /** Consumed once the accept surface has been navigated to. */
         fun onInviteConsumed() = clearPendingInvite()
 
         private fun clearPendingInvite() {

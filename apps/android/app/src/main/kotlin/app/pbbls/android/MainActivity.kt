@@ -70,7 +70,7 @@ class MainActivity : ComponentActivity() {
     internal lateinit var supabaseClientOwner: SupabaseService
 
     /**
-     * The same instance `RootScreen` reads via `hiltViewModel()` (#852 Task 29):
+     * The same instance `RootScreen` reads via `hiltViewModel()` (#852):
      * `RootScreen` calls it above `PebblesNavDisplay`, outside any `NavEntry`, so
      * it resolves off the ambient `LocalViewModelStoreOwner` — the activity —
      * same as this delegate. If `RootScreen` ever moved inside an entry
@@ -137,7 +137,7 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * Hands an invite App Link token to [RootViewModel] (#852 Task 29,
+     * Hands an invite App Link token to [RootViewModel] (#852,
      * replacing the M49 `ConnectionsService.pendingInviteToken` field).
      * `handleDeeplinks` only reacts to `pebbles://auth-callback`, so both run
      * safely on every intent. `RootScreen` pushes the accept surface once a

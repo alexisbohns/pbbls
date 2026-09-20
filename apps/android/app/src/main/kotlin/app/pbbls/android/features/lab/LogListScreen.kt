@@ -47,7 +47,7 @@ enum class LogListMode(
  * The see-all list — ports iOS `LogListView`: the unlimited feed and
  * `myReactions` load together and, unlike the Lab screen, ANY failure shows
  * the error state (design D3). Reactions toggle only in backlog mode. A real
- * Nav3 entry now (#852 Task 19): [mode] is `PebblesKey.LabLogList.mode`, the
+ * Nav3 entry now (#852): [mode] is `PebblesKey.LabLogList.mode`, the
  * enum's `.name` — a `NavKey` argument can only carry primitives.
  * [LogListViewModel] maps it back and fails loudly into an `Error` state
  * rather than silently defaulting to the first constant, which is the

@@ -39,7 +39,7 @@ import app.pbbls.android.theme.PebblesTypography
  * and Skip (both finish), and a "Start your path" button on the last page.
  *
  * Pushed as an ordinary [app.pbbls.android.navigation.PebblesKey.Onboarding]
- * entry (#852 Task 28); [onFinish] persists the `hasSeenOnboarding` flag at the
+ * entry (#852); [onFinish] persists the `hasSeenOnboarding` flag at the
  * call site so this view stays previewable and serves both the initial gate
  * and any replay. System back is consumed entirely rather than popping the
  * entry — the flow is dismissible only via skip or close (D5) — via

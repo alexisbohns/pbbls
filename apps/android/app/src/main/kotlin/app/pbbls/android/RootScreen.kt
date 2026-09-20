@@ -40,7 +40,7 @@ import kotlinx.coroutines.launch
 
 /**
  * Top-level auth gate — the `RootView` analog (D5). Auth is now a condition,
- * not a composition branch (#852 Task 28, design §5, D8): one [NavDisplay]
+ * not a composition branch (#852, design §5, D8): one [NavDisplay]
  * hosts every destination, and [RootViewModel] watches session state and
  * drives the stack (`replaceAll`) instead of `RootScreen` conditionally
  * composing a signed-in tree or a signed-out one. Sign-out therefore replaces
@@ -165,7 +165,7 @@ fun RootScreen() {
 
 /**
  * One [NavDisplay] over one saveable back stack, for every destination — signed
- * in or out (#852 Task 28). Renamed from `AuthedNavDisplay`: it is no longer
+ * in or out (#852). Renamed from `AuthedNavDisplay`: it is no longer
  * authed-only, since `RootScreen`'s effects above are what decide which key
  * sits at the bottom of the stack, not which tree gets composed.
  *

@@ -96,7 +96,7 @@ class LabViewModel
 
         /**
          * The Lab's entry leaves RESUMED on any trip to a child destination —
-         * Profile, and, since #852 Task 19, the announcement detail and the
+         * Profile, and, since #852, the announcement detail and the
          * see-all list too, now that both are entries stacked on top rather
          * than a swap composed over this one. Returning re-reads the feeds, so
          * a reaction toggled in the see-all list is reflected back here.

@@ -34,9 +34,9 @@ private const val USER_ID = "user-1"
  * (#849, #852).
  *
  * None of it was reachable before: it lived in a 672-line composable that read
- * two `Local…Service`s and held twelve `remember`s. As of Task 16 the load
+ * two `Local…Service`s and held twelve `remember`s. Since #852 the load
  * itself moved in too — `SettingsScreen` has no id to hand it, unlike the soul
- * and collection forms (Task 15), so this ViewModel fetches the profile and
+ * and collection forms (#852), so this ViewModel fetches the profile and
  * the session identity by itself rather than being seeded by `ProfileScreen`.
  */
 class SettingsViewModelTest {

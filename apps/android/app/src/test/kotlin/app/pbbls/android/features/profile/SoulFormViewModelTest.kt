@@ -31,7 +31,7 @@ import java.io.IOException
  * conditionally-composed cover, so `hiltViewModel()` scopes it to the back
  * stack entry underneath, which outlives the cover many times over.
  *
- * As of Task 15, [SoulFormViewModel.start] takes an id instead of the whole
+ * Since #852, [SoulFormViewModel.start] takes an id instead of the whole
  * row and fetches it itself — [FakeSoulsService.loadSoul] stands in for the
  * server round trip, so a load is asynchronous and needs `advanceUntilIdle()`
  * before the result lands in [SoulFormViewModel.uiState].

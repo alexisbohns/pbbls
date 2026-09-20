@@ -224,7 +224,7 @@ class CollectionDetailViewModelTest {
     // MARK: - Returning from the edit form
 
     /**
-     * The gap Task 17 opened: `CollectionForm` is now a separate entry with no
+     * The gap promotion opened (#852): `CollectionForm` is now a separate entry with no
      * callback back into this instance, so a name edited there has to be
      * picked up by a resume — same mechanism as
      * [CollectionsListViewModel.onResumed].
