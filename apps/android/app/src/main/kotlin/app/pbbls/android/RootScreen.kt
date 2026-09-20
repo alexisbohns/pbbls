@@ -112,12 +112,22 @@ fun RootScreen() {
     LaunchedEffect(root.destination) {
         when (root.destination) {
             RootDestination.Unresolved -> Unit // the splash still owns the screen
-            RootDestination.SignedOut -> navigator.replaceAll(PebblesKey.Welcome)
+            RootDestination.SignedOut -> navigator.rootAt(PebblesKey.Welcome)
             RootDestination.SignedIn -> {
-                navigator.replaceAll(PebblesKey.Path)
+                // rootAt, NOT replaceAll: this effect also runs on a cold
+                // restore, by which point the saveable back stack has already
+                // restored where the user was. Re-rooting unconditionally would
+                // throw that away and land everyone back on Path.
+                val wasAlreadyAuthed = navigator.rootKey == PebblesKey.Path
+                navigator.rootAt(PebblesKey.Path)
                 // First-run gate: push Onboarding on top of the freshly-seeded
-                // Path so a pending invite (below) waits behind it.
-                if (shouldPresentOnboarding) navigator.navigate(PebblesKey.Onboarding)
+                // Path so a pending invite (below) waits behind it. Skipped on a
+                // restore that was already authed — the restored stack is
+                // authoritative there, and re-pushing would stack a second
+                // Onboarding over whatever the user was doing.
+                if (shouldPresentOnboarding && !wasAlreadyAuthed) {
+                    navigator.navigate(PebblesKey.Onboarding)
+                }
             }
         }
     }
