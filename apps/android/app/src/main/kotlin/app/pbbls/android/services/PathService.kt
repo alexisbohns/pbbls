@@ -1,7 +1,6 @@
 package app.pbbls.android.services
 
 import android.util.Log
-import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.features.path.models.Pebble
 import app.pbbls.android.features.path.models.Valence
 import io.github.jan.supabase.postgrest.postgrest
@@ -53,10 +52,4 @@ class PathService
         companion object {
             private const val TAG = "path"
         }
-    }
-
-/** CompositionLocal for [PathService] — see [LocalSupabaseService]. */
-val LocalPathService =
-    staticCompositionLocalOf<PathServicing> {
-        error("LocalPathService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

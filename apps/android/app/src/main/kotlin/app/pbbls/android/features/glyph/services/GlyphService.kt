@@ -1,6 +1,5 @@
 package app.pbbls.android.features.glyph.services
 
-import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.features.glyph.models.Glyph
 import app.pbbls.android.features.glyph.models.GlyphStroke
 import app.pbbls.android.services.SupabaseService
@@ -169,8 +168,3 @@ private data class EntitlementRow(
     @SerialName("glyphs")
     val glyph: Glyph,
 )
-
-val LocalGlyphService =
-    staticCompositionLocalOf<GlyphServicing> {
-        error("LocalGlyphService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
-    }

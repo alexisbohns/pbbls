@@ -2,7 +2,6 @@ package app.pbbls.android.services
 
 import android.util.Log
 import androidx.annotation.StringRes
-import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.AppEnvironment
 import app.pbbls.android.R
 import app.pbbls.android.features.path.models.ComposePebbleResponse
@@ -222,9 +221,4 @@ class PebbleWriteService
                 }
             }
         }
-    }
-
-val LocalPebbleWriteService =
-    staticCompositionLocalOf<PebbleWriteServicing> {
-        error("LocalPebbleWriteService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

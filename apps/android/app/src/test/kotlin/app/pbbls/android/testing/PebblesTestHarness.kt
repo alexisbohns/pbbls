@@ -4,11 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import app.pbbls.android.services.AchievementsServicing
 import app.pbbls.android.services.LocalAchievementsService
-import app.pbbls.android.services.LocalPathService
 import app.pbbls.android.services.LocalPathStatsService
-import app.pbbls.android.services.LocalPebbleDraftsService
-import app.pbbls.android.services.LocalPebbleWriteService
-import app.pbbls.android.services.LocalProfileService
 import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSupabaseService
 import app.pbbls.android.services.PathServicing
@@ -36,6 +32,12 @@ import app.pbbls.android.services.SupabaseServicing
  * save path becomes drivable without a live project. They sit in `src/test`
  * because that is their only consumer until #857 lands Robolectric; they move to
  * a real `core/testing` module with #851.
+ *
+ * **It provides four locals now, not eight.** #849 deleted eleven of them as
+ * their screens moved to ViewModels; what a Robolectric screen test will need
+ * from a `CompositionLocal` is the ambient data the leaves still read, plus the
+ * session. The fakes themselves are unaffected — a ViewModel takes them by
+ * constructor, which is how every test in this suite already drives them.
  */
 class FakeServiceGraph(
     val supabase: SupabaseServicing = FakeSupabaseService(),
@@ -57,9 +59,9 @@ class FakeServiceGraph(
  * against exactly this shape, and because a harness that arrives with the seams
  * is one that gets used.
  *
- * This file COMPILING is itself the gate: if any of the five `Local…` reverts to
- * a concrete type, or a screen re-acquires a dependency a fake cannot supply,
- * this stops compiling and `testDebugUnitTest` goes red.
+ * This file COMPILING is itself the gate: if a surviving `Local…` reverts to a
+ * concrete type, or a screen re-acquires a dependency a fake cannot supply, this
+ * stops compiling and `testDebugUnitTest` goes red.
  */
 @Composable
 fun PebblesTestHarness(
@@ -68,13 +70,9 @@ fun PebblesTestHarness(
 ) {
     CompositionLocalProvider(
         LocalSupabaseService provides graph.supabase,
-        LocalPathService provides graph.pathService,
-        LocalProfileService provides graph.profileService,
-        LocalPebbleWriteService provides graph.pebbleWrite,
         LocalReferenceDataService provides graph.referenceData,
         LocalAchievementsService provides graph.achievements,
         LocalPathStatsService provides graph.pathStats,
-        LocalPebbleDraftsService provides graph.drafts,
         content = content,
     )
 }

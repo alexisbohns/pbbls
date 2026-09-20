@@ -30,7 +30,6 @@ import app.pbbls.android.features.profile.components.ProfileLogoutButton
 import app.pbbls.android.features.profile.components.ProfileShortcutsRow
 import app.pbbls.android.features.profile.components.ProfileStatsCard
 import app.pbbls.android.features.profile.models.Collection
-import app.pbbls.android.services.LocalSupabaseService
 import app.pbbls.android.theme.PebblesScreen
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
@@ -70,7 +69,6 @@ fun ProfileScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val covers by viewModel.covers.collectAsStateWithLifecycle()
-    val supabase = LocalSupabaseService.current
     val system = PebblesTheme.colors.system
 
     // Coming back from a pushed screen must re-read the page: the ViewModel is
@@ -197,14 +195,8 @@ fun ProfileScreen(
             initialDisplayName = content?.profile?.displayName.orEmpty(),
             initialGlyphId = content?.profile?.glyphId,
             initialGlyphStrokes = content?.glyphStrokes,
-            email = supabase.session?.user?.email,
-            providers =
-                linkedProviders(
-                    supabase.session
-                        ?.user
-                        ?.identities
-                        ?.map { it.provider },
-                ),
+            email = content?.email,
+            providers = content?.providers.orEmpty(),
             onDismiss = viewModel::closeSettings,
             onSaved = viewModel::onSettingsSaved,
             modifier = Modifier.fillMaxSize(),

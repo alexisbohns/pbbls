@@ -1,6 +1,5 @@
 package app.pbbls.android.services
 
-import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.features.path.models.PebbleDetail
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
@@ -52,10 +51,4 @@ class PebbleDetailService
                 snaps(id, storage_path, sort_order)
                 """.trimIndent().replace("\n", " ")
         }
-    }
-
-/** CompositionLocal for [PebbleDetailService] — see [LocalSupabaseService]. */
-val LocalPebbleDetailService =
-    staticCompositionLocalOf<PebbleDetailServicing> {
-        error("LocalPebbleDetailService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }
