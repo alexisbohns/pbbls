@@ -1161,6 +1161,34 @@ EOF
 
 ---
 
+### How a key's argument reaches its ViewModel — decided, do not re-litigate
+
+**Navigation 3 does NOT populate `SavedStateHandle` from the key.** Verified
+against the AndroidX `passingarguments` recipe: the documented idiom is
+`@AssistedInject` + `@AssistedFactory` + `hiltViewModel<VM, VM.Factory>(creationCallback = { it.create(key) })`.
+A `NavKey` is an object, not a route with parsed arguments, so nothing writes it
+into the handle.
+
+**This codebase uses the other option, deliberately.** The entry's content lambda
+already has the key, so the entry passes `soulId = key.soulId` to the screen and
+the screen drives `LaunchedEffect(soulId) { viewModel.start(soulId) }`. That is
+the idiom `SoulDetailViewModel` and `CollectionDetailViewModel` have used since
+#849, and Task 15 extended it to the two form ViewModels, which also mirror the
+id into their own `SavedStateHandle` inside `start`.
+
+Why not `@AssistedInject`:
+
+- It is a **new DI pattern with no precedent in this repo**, and the root
+  `CLAUDE.md` says new patterns require discussion first.
+- It would have to be applied to every key carrying an argument — eight of them —
+  for a benefit the existing idiom already delivers.
+- **Process death is covered either way.** The key is restored from the saveable
+  back stack, so the entry recomposes with the right key and `LaunchedEffect`
+  re-fires; the mirrored id in `SavedStateHandle` is the belt to that braces.
+
+So Task 17 and Task 23 pass the id as a screen parameter. Neither introduces
+assisted injection.
+
 ### Task 17: Promote the five profile-side covers
 
 **Files:**
