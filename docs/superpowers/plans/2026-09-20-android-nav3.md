@@ -936,24 +936,35 @@ Walk each of these by hand and confirm the destination is unchanged from `main`:
 
 The covers (create, detail, settings, forms) still behave exactly as before — they have not been touched.
 
-- [ ] **Step 2: Smoke-test a minified build**
+- [x] **Step 2: Smoke-test a minified build** — DONE, and no keep rule was needed
 
-R8 can strip `@Serializable` keys silently, and the failure mode is a crash on restore rather than a build error.
+R8 can strip `@Serializable` keys silently, and the failure mode is a crash on
+restore rather than a build error.
 
-```bash
-./gradlew assembleRelease && ./gradlew installRelease
+**Result (2026-09-20, emulator, `assembleRelease` + debug-signed):** the minified
+build launched clean, pushed `Auth(AuthMode.SIGNUP)`, survived
+`adb shell am kill`, and **restored to the Auth screen with Sign Up still
+selected**. So R8 keeps the generated serializers on its own, including a key
+carrying an enum payload.
+
+**Therefore no rule was added to `app/proguard-rules.pro`.** Per
+`apps/android/CLAUDE.md`, a redundant `-keep` widens the keep radius and undoes
+the shrinking, so the rule below is recorded only as what to reach for *if* a
+future key shape does break:
+
 ```
-
-Open the app, push to a soul detail, background it, and return. If it crashes with a serializer error, add to `app/proguard-rules.pro`:
-
-```
-# Navigation 3 keys are resolved by their generated serializers at restore time.
+# ONLY IF NEEDED — not currently required, verified 2026-09-20.
 -keep,includedescriptorclasses class app.pbbls.android.navigation.** { *; }
 -keepclassmembers class app.pbbls.android.navigation.** {
     *** Companion;
     kotlinx.serialization.KSerializer serializer(...);
 }
 ```
+
+Note this restore is *better* than the pre-migration behaviour, not merely equal:
+the old code parsed the mode out of a route string through
+`AuthMode.fromRoute`'s silent `LOGIN` default, so a restored signup became a
+login.
 
 - [ ] **Step 3: Confirm process-death restoration is still absent for covers**
 
