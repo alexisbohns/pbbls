@@ -53,27 +53,31 @@ import app.pbbls.android.theme.PebblesTypography
  * `KarmaOverlayRoot` analog (D9). Drawn in `RootScreen`'s authed branch so it
  * floats above the create/detail surfaces. The achievement unlock moment (M48)
  * is a separate full-screen overlay drawn above this one.
+ *
+ * Takes state, not the service (#852) — [flash] is
+ * [KarmaNotificationService.activeCapsule], surfaced through `RootViewModel`'s
+ * `RootUiState` the same way every other surface has taken state since #849.
  */
 @Composable
 fun KarmaOverlayHost(
-    service: KarmaNotificationService,
+    flash: KarmaEarnedContent?,
+    onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val content = service.activeCapsule
     // Retain the last content during the exit animation so it doesn't blank out.
     var lastContent by remember { mutableStateOf(KarmaEarnedContent(0, KarmaReason.PEBBLE_CREATED)) }
-    if (content != null) lastContent = content
+    if (flash != null) lastContent = flash
 
     Box(modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
         AnimatedVisibility(
-            visible = content != null,
+            visible = flash != null,
             enter = fadeIn() + slideInVertically { it / 2 },
             exit = fadeOut() + slideOutVertically { it / 2 },
         ) {
-            val shown = content ?: lastContent
+            val shown = flash ?: lastContent
             KarmaEarnedCapsule(
                 content = shown,
-                onTap = { service.dismiss() },
+                onTap = onDismiss,
                 modifier = Modifier.padding(bottom = 44.dp),
             )
         }

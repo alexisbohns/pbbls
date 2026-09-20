@@ -4,6 +4,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.pbbls.android.features.karma.KarmaEarnedContent
+import app.pbbls.android.features.karma.KarmaNotificationService
 import app.pbbls.android.services.SupabaseServicing
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -44,6 +46,8 @@ sealed interface RootDestination {
 data class RootUiState(
     val destination: RootDestination = RootDestination.Unresolved,
     val pendingInvite: String? = null,
+    /** The "+N karma" pastille content, or null when idle. Mirrors [KarmaNotificationService.activeCapsule]. */
+    val karmaFlash: KarmaEarnedContent? = null,
 )
 
 /**
@@ -72,6 +76,7 @@ class RootViewModel
     @Inject
     constructor(
         private val supabase: SupabaseServicing,
+        private val karma: KarmaNotificationService,
         private val savedStateHandle: SavedStateHandle,
     ) : ViewModel() {
         private val _uiState =
@@ -111,6 +116,14 @@ class RootViewModel
                     .distinctUntilChanged()
                     .collect { (userId, isInitializing) -> onAuthState(userId, isInitializing) }
             }
+            // Its own coroutine, deliberately: karma is unrelated to auth, and
+            // folding it into the sessionStatus collector above would risk the
+            // "never call back into supabase-kt from inside its own collector"
+            // deadlock rule (apps/android/CLAUDE.md) the moment either grows.
+            viewModelScope.launch {
+                snapshotFlow { karma.activeCapsule }
+                    .collect { flash -> _uiState.update { it.copy(karmaFlash = flash) } }
+            }
         }
 
         private fun onAuthState(
@@ -144,6 +157,9 @@ class RootViewModel
 
         /** Consumed once the accept surface has been navigated to. */
         fun onInviteConsumed() = clearPendingInvite()
+
+        /** Tap-to-dismiss on the karma pastille (D9). */
+        fun onKarmaDismissed() = karma.dismiss()
 
         private fun clearPendingInvite() {
             savedStateHandle.remove<String>(KEY_PENDING_INVITE)

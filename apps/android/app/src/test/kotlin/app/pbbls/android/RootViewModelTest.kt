@@ -1,10 +1,12 @@
 package app.pbbls.android
 
 import androidx.lifecycle.SavedStateHandle
+import app.pbbls.android.features.karma.KarmaNotificationService
 import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.MainDispatcherRule
 import io.github.jan.supabase.auth.user.UserInfo
 import io.github.jan.supabase.auth.user.UserSession
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -27,6 +29,9 @@ class RootViewModelTest {
     @get:Rule
     val rule = MainDispatcherRule()
 
+    /** A fresh, isolated [KarmaNotificationService] — RootViewModel's karma flash is not under test here. */
+    private fun karma() = KarmaNotificationService(CoroutineScope(rule.dispatcher))
+
     private fun session(userId: String) =
         UserSession(
             accessToken = "token",
@@ -40,7 +45,7 @@ class RootViewModelTest {
     fun `a resolved null session asks for the Welcome stack`() =
         runTest(rule.dispatcher) {
             val supabase = FakeSupabaseService()
-            val vm = RootViewModel(supabase, SavedStateHandle())
+            val vm = RootViewModel(supabase, karma(), SavedStateHandle())
 
             supabase.emitResolved(session = null)
             advanceUntilIdle()
@@ -52,7 +57,7 @@ class RootViewModelTest {
     fun `a resolved session asks for the Path stack`() =
         runTest(rule.dispatcher) {
             val supabase = FakeSupabaseService()
-            val vm = RootViewModel(supabase, SavedStateHandle())
+            val vm = RootViewModel(supabase, karma(), SavedStateHandle())
 
             supabase.emitResolved(session = session(userId = "u1"))
             advanceUntilIdle()
@@ -63,7 +68,7 @@ class RootViewModelTest {
     @Test
     fun `an unresolved session asks for neither`() =
         runTest(rule.dispatcher) {
-            val vm = RootViewModel(FakeSupabaseService(), SavedStateHandle())
+            val vm = RootViewModel(FakeSupabaseService(), karma(), SavedStateHandle())
 
             advanceUntilIdle()
 
@@ -74,19 +79,19 @@ class RootViewModelTest {
     fun `a pending invite survives a SavedStateHandle round trip`() =
         runTest(rule.dispatcher) {
             val handle = SavedStateHandle()
-            val vm = RootViewModel(FakeSupabaseService(), handle)
+            val vm = RootViewModel(FakeSupabaseService(), karma(), handle)
 
             vm.onInviteTokenReceived("tok-1")
             advanceUntilIdle()
 
-            val restored = RootViewModel(FakeSupabaseService(), handle)
+            val restored = RootViewModel(FakeSupabaseService(), karma(), handle)
             assertEquals("tok-1", restored.uiState.value.pendingInvite)
         }
 
     @Test
     fun `consuming the invite clears it so it cannot re-present`() =
         runTest(rule.dispatcher) {
-            val vm = RootViewModel(FakeSupabaseService(), SavedStateHandle())
+            val vm = RootViewModel(FakeSupabaseService(), karma(), SavedStateHandle())
             vm.onInviteTokenReceived("tok-1")
             advanceUntilIdle()
 
@@ -100,7 +105,7 @@ class RootViewModelTest {
     fun `signing out drops a pending invite from the old session`() =
         runTest(rule.dispatcher) {
             val supabase = FakeSupabaseService()
-            val vm = RootViewModel(supabase, SavedStateHandle())
+            val vm = RootViewModel(supabase, karma(), SavedStateHandle())
             supabase.emitResolved(session = session(userId = "u1"))
             vm.onInviteTokenReceived("tok-1")
             advanceUntilIdle()
@@ -117,7 +122,7 @@ class RootViewModelTest {
             // The cold-start App Link case (D12): the token arrives before there
             // has ever been a session, and must NOT be treated as a sign-out.
             val supabase = FakeSupabaseService()
-            val vm = RootViewModel(supabase, SavedStateHandle())
+            val vm = RootViewModel(supabase, karma(), SavedStateHandle())
 
             vm.onInviteTokenReceived("tok-1")
             supabase.emitResolved(session = null)

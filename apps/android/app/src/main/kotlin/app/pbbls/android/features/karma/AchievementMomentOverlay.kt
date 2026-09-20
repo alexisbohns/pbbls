@@ -1,7 +1,6 @@
 package app.pbbls.android.features.karma
 
 import android.view.HapticFeedbackConstants
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -35,6 +34,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
 import app.pbbls.android.components.PebblesPrimaryButton
 import app.pbbls.android.features.shared.achievements.achievementDescription
@@ -94,7 +96,13 @@ fun AchievementMomentOverlay(
         ) {
             val shown = card ?: lastCard
             if (shown != null) {
-                BackHandler(enabled = card != null) { service.dismiss() }
+                // NavigationBackHandler (not the legacy BackHandler, #852): still a
+                // handler rather than a nav entry, since this overlay is drawn above
+                // `NavDisplay`, not on its back stack.
+                val backState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
+                NavigationBackHandler(state = backState, isBackEnabled = card != null) {
+                    service.dismiss()
+                }
                 MomentCard(
                     card = shown,
                     position = service.index + 1,

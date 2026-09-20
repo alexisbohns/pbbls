@@ -25,7 +25,6 @@ import androidx.navigation3.ui.NavDisplay
 import app.pbbls.android.features.karma.AchievementMomentOverlay
 import app.pbbls.android.features.karma.KarmaOverlayHost
 import app.pbbls.android.features.karma.LocalAchievementNotificationService
-import app.pbbls.android.features.karma.LocalKarmaNotificationService
 import app.pbbls.android.features.onboarding.OnboardingGate
 import app.pbbls.android.navigation.Navigator
 import app.pbbls.android.navigation.PebblesKey
@@ -61,7 +60,13 @@ fun RootScreen() {
     val supabase = LocalSupabaseService.current
     val palettes = LocalEmotionPaletteService.current
     val referenceData = LocalReferenceDataService.current
-    val karma = LocalKarmaNotificationService.current
+    // NOT inverted like `karma` above (#852 escalation): AchievementNotificationService
+    // holds a queue (`cards` + `index`), not a single displayable value — its overlay
+    // needs the current card, its position, the total and `isLast`, plus an
+    // `onAdvance` distinct from `onDismiss`. Surfacing that through RootUiState means
+    // inventing a state shape, which is a design call left to a follow-up rather than
+    // guessed here (see the PR's report). `achievementNotify` therefore stays in
+    // ServiceGraph for now.
     val achievementNotify = LocalAchievementNotificationService.current
     val snapUrls = LocalSnapURLCache.current
     val context = LocalContext.current
@@ -164,7 +169,11 @@ fun RootScreen() {
         if (root.destination == RootDestination.SignedIn) {
             // Karma + achievement flashes only ever fire from signed-in
             // actions — floats above the nav host, drawn last for z-order (D9).
-            KarmaOverlayHost(service = karma, modifier = Modifier.fillMaxSize())
+            KarmaOverlayHost(
+                flash = root.karmaFlash,
+                onDismiss = viewModel::onKarmaDismissed,
+                modifier = Modifier.fillMaxSize(),
+            )
             AchievementMomentOverlay(
                 service = achievementNotify,
                 modifier = Modifier.fillMaxSize(),
