@@ -1,6 +1,5 @@
 package app.pbbls.android.features.path.create.pickers
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,8 +22,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -35,23 +32,21 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.features.glyph.carve.GlyphCarveScreen
 import app.pbbls.android.features.glyph.carve.GlyphCarveViewModel
 import app.pbbls.android.features.glyph.models.Glyph
 import app.pbbls.android.features.glyph.models.GlyphGridItem
-import app.pbbls.android.features.glyph.services.LocalGlyphMarketService
 import app.pbbls.android.features.glyph.store.GlyphSwapPanel
 import app.pbbls.android.features.glyph.store.GlyphTab
 import app.pbbls.android.features.glyph.store.GlyphTabBar
 import app.pbbls.android.features.glyph.views.GlyphView
 import app.pbbls.android.features.glyph.views.GlyphViewCase
-import app.pbbls.android.services.LocalPathStatsService
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography
-
-private const val TAG = "glyph-picker"
+import app.pbbls.android.ui.ObserveUiEffects
 
 /**
  * The glyph picker's content-swap state, hoisted out of the picker so both
@@ -150,33 +145,20 @@ fun GlyphPickerContent(
     onSelected: (Glyph) -> Unit,
     modifier: Modifier = Modifier,
     state: GlyphPickerState = rememberGlyphPickerState(),
+    viewModel: GlyphPickerViewModel = hiltViewModel(),
 ) {
-    val market = LocalGlyphMarketService.current
-    val stats = LocalPathStatsService.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val accent = PebblesTheme.colors.accent
 
-    var tab by remember { mutableStateOf(GlyphTab.MINE) }
-    val itemsByTab = remember { mutableStateMapOf<GlyphTab, List<GlyphGridItem>>() }
-    var isLoading by remember { mutableStateOf(false) }
-    var loadFailed by remember { mutableStateOf(false) }
-    var reloadToken by remember { mutableIntStateOf(0) }
-
-    LaunchedEffect(Unit) { stats.load() }
-    LaunchedEffect(tab, reloadToken) {
-        isLoading = true
-        loadFailed = false
-        try {
-            itemsByTab[tab] =
-                when (tab) {
-                    GlyphTab.MINE -> market.listMine()
-                    GlyphTab.OWNED -> market.listOwned()
-                    GlyphTab.COMMU -> market.listCommunity().filter { !it.owned }
-                }
-        } catch (e: Exception) {
-            Log.e(TAG, "glyph picker tab load failed: $tab", e)
-            if (itemsByTab[tab].isNullOrEmpty()) loadFailed = true
-        } finally {
-            isLoading = false
+    // Every select leaves the picker showing its grid: the effect resets the
+    // content swap before handing the glyph to the caller, so a selection
+    // never replays across a rotation the way holding it in state would.
+    ObserveUiEffects(viewModel.effects) { effect ->
+        when (effect) {
+            is GlyphPickerEffect.Selected -> {
+                state.reset()
+                onSelected(effect.glyph)
+            }
         }
     }
 
@@ -187,27 +169,22 @@ fun GlyphPickerContent(
     // instance `GlyphCarveScreen` resolves, so releasing it here is what keeps
     // an abandoned drawing from surfacing under the next carve. Idempotent
     // after a save or a discard.
+    //
+    // Still needed (#852): `GlyphCarve` is a nav entry for the store's "+" but
+    // this sheet still hosts the carve studio as an inline content swap, so
+    // the ViewModel above is not released by leaving a destination the way the
+    // store's is. See `GlyphCarveViewModelTest.reset clears a carve abandoned
+    // by its host`.
     val carveViewModel: GlyphCarveViewModel = hiltViewModel()
     LaunchedEffect(state.isCarving) {
         if (!state.isCarving) carveViewModel.reset()
-    }
-
-    /** Every select leaves the picker showing its grid — see [GlyphPickerState]. */
-    fun select(glyph: Glyph) {
-        state.reset()
-        onSelected(glyph)
     }
 
     val buyingItem = state.buying
     when {
         state.isCarving ->
             GlyphCarveScreen(
-                onSaved = { glyph ->
-                    val fresh =
-                        GlyphGridItem(glyph = glyph, price = 0, owned = false, createdAt = null, acquiredAt = null)
-                    itemsByTab[GlyphTab.MINE] = listOf(fresh) + itemsByTab[GlyphTab.MINE].orEmpty()
-                    select(glyph)
-                },
+                onSaved = { glyph -> viewModel.onCarved(glyph) },
                 onCancel = { state.isCarving = false },
                 modifier = modifier.fillMaxWidth().heightIn(min = 200.dp),
             )
@@ -223,13 +200,13 @@ fun GlyphPickerContent(
                 }
                 GlyphSwapPanel(
                     item = buyingItem,
-                    balance = stats.karma ?: 0,
+                    balance = (uiState as? GlyphPickerUiState.Content)?.karma ?: 0,
                     // The balance is a record of the purchase, so it runs inside
                     // the uncancellable section and survives the sheet closing.
-                    onRecorded = { result -> stats.applyKarmaBalance(result.balance) },
+                    onRecorded = { result -> viewModel.onPurchaseRecorded(result) },
                     onSwapped = {
                         // First successful swap selects and hands control back to
-                        // the call site (iOS parity). `select` closes the panel
+                        // the call site (iOS parity). Selecting closes the panel
                         // first: the panel flips to its owned state rather than
                         // dismissing itself, so a caller that does not dismiss
                         // would otherwise be left holding it.
@@ -238,42 +215,55 @@ fun GlyphPickerContent(
                         // writes into the form that opened the picker, and a
                         // user who dismissed the sheet mid-buy must not find
                         // their profile glyph silently changed.
-                        select(buyingItem.glyph)
+                        viewModel.selectGlyph(buyingItem.glyph)
                     },
                 )
             }
 
         else ->
             Column(modifier.fillMaxWidth().heightIn(min = 200.dp)) {
-                when {
-                    isLoading && itemsByTab[tab].isNullOrEmpty() ->
+                when (val current = uiState) {
+                    GlyphPickerUiState.Loading ->
                         Box(
                             modifier = Modifier.fillMaxWidth().padding(48.dp),
                             contentAlignment = Alignment.Center,
                         ) {
                             CircularProgressIndicator(color = accent.primary)
                         }
-                    loadFailed -> GlyphLoadError(onRetry = { reloadToken++ })
-                    else ->
+                    is GlyphPickerUiState.Error -> GlyphLoadError(onRetry = viewModel::retry)
+                    is GlyphPickerUiState.Content ->
                         GlyphPickerGrid(
-                            items = itemsByTab[tab].orEmpty(),
+                            items = current.items,
                             currentGlyphId = currentGlyphId,
-                            showCarveRow = tab == GlyphTab.MINE,
+                            showCarveRow = current.tab == GlyphTab.MINE,
                             onCarve = { state.isCarving = true },
                             onSelect = { item ->
-                                if (tab == GlyphTab.COMMU) state.buying = item else select(item.glyph)
+                                if (current.tab == GlyphTab.COMMU) {
+                                    state.buying = item
+                                } else {
+                                    viewModel.selectGlyph(item.glyph)
+                                }
                             },
                             modifier = Modifier.weight(1f, fill = false),
                         )
                 }
                 GlyphTabBar(
-                    selection = tab,
-                    onSelect = { tab = it },
+                    selection = uiState.tab,
+                    onSelect = viewModel::onSelectTab,
                     modifier = Modifier.align(Alignment.CenterHorizontally),
                 )
             }
     }
 }
+
+/** Whichever tab the picker is on, loading, failed or not — the bar must not lie. */
+private val GlyphPickerUiState.tab: GlyphTab
+    get() =
+        when (this) {
+            is GlyphPickerUiState.Content -> tab
+            is GlyphPickerUiState.Error -> tab
+            GlyphPickerUiState.Loading -> GlyphTab.MINE
+        }
 
 /**
  * The picker grid — 3-per-row cells (selection carried by glyph color, #459),
