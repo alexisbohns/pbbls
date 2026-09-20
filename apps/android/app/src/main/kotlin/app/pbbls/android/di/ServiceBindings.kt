@@ -4,6 +4,8 @@ import app.pbbls.android.features.path.AndroidComposerMedia
 import app.pbbls.android.features.path.ComposerMedia
 import app.pbbls.android.services.AchievementsService
 import app.pbbls.android.services.AchievementsServicing
+import app.pbbls.android.services.CollectionsService
+import app.pbbls.android.services.CollectionsServicing
 import app.pbbls.android.services.PathService
 import app.pbbls.android.services.PathServicing
 import app.pbbls.android.services.PathStatsService
@@ -18,6 +20,8 @@ import app.pbbls.android.services.ProfileService
 import app.pbbls.android.services.ProfileServicing
 import app.pbbls.android.services.ReferenceDataService
 import app.pbbls.android.services.ReferenceDataServicing
+import app.pbbls.android.services.SoulsService
+import app.pbbls.android.services.SoulsServicing
 import app.pbbls.android.services.SupabaseService
 import app.pbbls.android.services.SupabaseServicing
 import dagger.Binds
@@ -78,4 +82,12 @@ interface ServiceBindings {
     @Binds
     @Singleton
     fun bindPebbleDetailServicing(impl: PebbleDetailService): PebbleDetailServicing
+
+    @Binds
+    @Singleton
+    fun bindSoulsServicing(impl: SoulsService): SoulsServicing
+
+    @Binds
+    @Singleton
+    fun bindCollectionsServicing(impl: CollectionsService): CollectionsServicing
 }

@@ -13,7 +13,6 @@ import app.pbbls.android.features.shared.ripples.RippleSummary
 import app.pbbls.android.services.PathStatsServicing
 import app.pbbls.android.services.ProfileRow
 import app.pbbls.android.services.ProfileServicing
-import app.pbbls.android.services.ReferenceDataServicing
 import app.pbbls.android.ui.runCatchingCancellable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -81,7 +80,6 @@ class ProfileViewModel
     constructor(
         private val profileService: ProfileServicing,
         private val stats: PathStatsServicing,
-        private val refs: ReferenceDataServicing,
     ) : ViewModel() {
         private var profile: ProfileRow? = null
         private var glyphStrokes: List<GlyphStroke>? = null
@@ -193,9 +191,10 @@ class ProfileViewModel
         fun onCollectionCreated() {
             _covers.update { it.copy(isPresentingCreateCollection = false) }
             refresh()
-            // The composer's collection picker reads the shared cache, so a new
-            // collection has to reach it too.
-            viewModelScope.launch { refs.refreshCollections() }
+            // The composer's collection picker also reads the new collection,
+            // but that cache refresh belongs to [CollectionFormViewModel]'s
+            // uncancellable save — where it survives this host being destroyed
+            // mid-write, which it would not here. Do not add it back.
         }
 
         /**

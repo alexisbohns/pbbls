@@ -1,6 +1,5 @@
 package app.pbbls.android.services
 
-import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.features.glyph.models.Glyph
 import app.pbbls.android.features.path.models.Pebble
 import app.pbbls.android.features.profile.models.SoulRow
@@ -12,6 +11,37 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import javax.inject.Inject
 import javax.inject.Singleton
+
+/**
+ * The souls seam (#849) — what [SoulsListViewModel], [SoulDetailViewModel] and
+ * [SoulFormViewModel] are tested against.
+ *
+ * Extracted now because those three tests need it, which is the standing bar
+ * (`apps/android/CLAUDE.md`: extract a `…Servicing` interface for a fake only
+ * when a test needs one).
+ */
+interface SoulsServicing {
+    suspend fun list(): List<SoulWithGlyph>
+
+    suspend fun loadSoul(soulId: String): SoulWithGlyph
+
+    suspend fun loadPebbles(soulId: String): List<Pebble>
+
+    suspend fun create(
+        name: String,
+        glyphId: String,
+    ): SoulWithGlyph
+
+    suspend fun update(
+        soulId: String,
+        name: String,
+        glyphId: String,
+    )
+
+    suspend fun delete(soulId: String)
+
+    suspend fun loadGlyph(glyphId: String): Glyph
+}
 
 /**
  * Data access for the souls management surfaces (sub-project D) — the
@@ -26,9 +56,9 @@ class SoulsService
     @Inject
     constructor(
         private val supabase: SupabaseService,
-    ) {
+    ) : SoulsServicing {
         /** All souls, name-ascending — the `SoulsListView.load()` analog. */
-        suspend fun list(): List<SoulWithGlyph> =
+        override suspend fun list(): List<SoulWithGlyph> =
             supabase.client
                 .from("souls")
                 .select(
@@ -39,7 +69,7 @@ class SoulsService
                 .map { it.toSoulWithGlyph() }
 
         /** One soul with its glyph + live count — the detail header reload. */
-        suspend fun loadSoul(soulId: String): SoulWithGlyph =
+        override suspend fun loadSoul(soulId: String): SoulWithGlyph =
             supabase.client
                 .from("souls")
                 .select(
@@ -53,7 +83,7 @@ class SoulsService
          * Pebbles tagged with the soul, newest first — mirrors
          * `SoulDetailView.load()`'s `pebble_souls!inner` embedded filter.
          */
-        suspend fun loadPebbles(soulId: String): List<Pebble> =
+        override suspend fun loadPebbles(soulId: String): List<Pebble> =
             supabase.client
                 .from("pebbles")
                 .select(
@@ -67,7 +97,7 @@ class SoulsService
                 }.decodeList<Pebble>()
 
         /** Full-form create (name + glyph) — the `SoulInsertPayload` analog with select-back. */
-        suspend fun create(
+        override suspend fun create(
             name: String,
             glyphId: String,
         ): SoulWithGlyph {
@@ -93,7 +123,7 @@ class SoulsService
         }
 
         /** Update name + glyph — the `SoulUpdatePayload` analog. */
-        suspend fun update(
+        override suspend fun update(
             soulId: String,
             name: String,
             glyphId: String,
@@ -114,7 +144,7 @@ class SoulsService
          * Delete — linked pebbles stay; `pebble_souls.soul_id` cascades
          * server-side so only the links are removed.
          */
-        suspend fun delete(soulId: String) {
+        override suspend fun delete(soulId: String) {
             supabase.client
                 .from("souls")
                 .delete {
@@ -123,16 +153,10 @@ class SoulsService
         }
 
         /** Glyph-by-id fetch for the form's thumbnail after a picker selection. */
-        suspend fun loadGlyph(glyphId: String): Glyph =
+        override suspend fun loadGlyph(glyphId: String): Glyph =
             supabase.client
                 .from("glyphs")
                 .select(Columns.raw("id, name, strokes, view_box")) {
                     filter { eq("id", glyphId) }
                 }.decodeSingle()
-    }
-
-/** CompositionLocal for [SoulsService] — see [LocalSupabaseService]. */
-val LocalSoulsService =
-    staticCompositionLocalOf<SoulsService> {
-        error("LocalSoulsService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

@@ -1,6 +1,5 @@
 package app.pbbls.android.features.profile
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,10 +21,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
@@ -33,6 +28,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.components.DashedPlaceholder
 import app.pbbls.android.features.glyph.models.SystemGlyph
@@ -40,8 +37,6 @@ import app.pbbls.android.features.glyph.views.GlyphView
 import app.pbbls.android.features.glyph.views.GlyphViewCase
 import app.pbbls.android.features.path.create.pickers.GlyphPickerSheet
 import app.pbbls.android.features.profile.models.SoulWithGlyph
-import app.pbbls.android.services.LocalAchievementsService
-import app.pbbls.android.services.LocalSoulsService
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesListSection
 import app.pbbls.android.theme.PebblesScreen
@@ -50,20 +45,18 @@ import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar
 import app.pbbls.android.theme.PebblesTopBarTextButton
 import app.pbbls.android.theme.PebblesTypography
-import kotlinx.coroutines.launch
-
-private const val TAG = "soul-form"
+import app.pbbls.android.ui.ObserveUiEffects
 
 /**
  * Create/edit form for a soul — merges iOS `CreateSoulSheet` + `EditSoulSheet`
  * (which differ only in initial state and the write call) into one full-screen
  * surface (D5): name field + glyph row → [GlyphPickerSheet] (the M39 D12
  * parked glyph slot, landing here per D8). [original] `null` means create —
- * the glyph defaults to [SystemGlyph.DEFAULT] and its strokes are fetched for
- * the thumbnail. Writes are direct RLS-scoped single-table calls (D6);
- * `souls_glyph_usable` enforces glyph ownership server-side.
+ * the glyph defaults to [SystemGlyph.DEFAULT] and [SoulFormViewModel] fetches
+ * its strokes for the thumbnail. Writes are direct RLS-scoped single-table
+ * calls (D6); `souls_glyph_usable` enforces glyph ownership server-side.
  *
- * Deviation from iOS: the picker already returns the full [Glyph], so the
+ * Deviation from iOS: the picker already returns the full `Glyph`, so the
  * post-pick thumbnail refetch iOS carries ("tracked separately" in its
  * comments) is dropped rather than ported.
  */
@@ -73,85 +66,36 @@ fun SoulFormScreen(
     onDismiss: () -> Unit,
     onSaved: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: SoulFormViewModel = hiltViewModel(),
 ) {
-    val soulsService = LocalSoulsService.current
-    val achievements = LocalAchievementsService.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val system = PebblesTheme.colors.system
-    val scope = rememberCoroutineScope()
 
-    var name by remember { mutableStateOf(original?.name.orEmpty()) }
-    var glyphId by remember { mutableStateOf(original?.glyphId ?: SystemGlyph.DEFAULT) }
-    var currentGlyph by remember { mutableStateOf(original?.glyph) }
-    var isSaving by remember { mutableStateOf(false) }
-    var showSaveError by remember { mutableStateOf(false) }
-    var isPresentingPicker by remember { mutableStateOf(false) }
+    // `start` is guarded, so a rotation cannot re-seed over the user's edits.
+    LaunchedEffect(original?.id) { viewModel.start(original) }
 
-    val canSave =
-        soulFormCanSave(
-            originalName = original?.name,
-            originalGlyphId = original?.glyphId,
-            name = name,
-            glyphId = glyphId,
-        )
-
-    BackHandler(enabled = !isSaving) { onDismiss() }
-
-    // Create starts on the system default glyph; fetch its strokes so the row
-    // shows a real thumbnail — the `CreateSoulSheet.loadDefaultGlyph` analog.
-    // Re-checked after the fetch: a picker selection made while it was in
-    // flight must not be clobbered by the late default.
-    LaunchedEffect(Unit) {
-        if (currentGlyph == null) {
-            try {
-                val fetched = soulsService.loadGlyph(SystemGlyph.DEFAULT)
-                if (currentGlyph == null && glyphId == SystemGlyph.DEFAULT) {
-                    currentGlyph = fetched
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "default glyph fetch failed", e)
-                // The dashed placeholder still works as a tap target.
-            }
+    ObserveUiEffects(viewModel.effects) { effect ->
+        when (effect) {
+            SoulFormEffect.Saved -> onSaved()
+            SoulFormEffect.Dismiss -> onDismiss()
         }
     }
 
-    fun save() {
-        if (!canSave || isSaving) return
-        scope.launch {
-            isSaving = true
-            showSaveError = false
-            val trimmed = name.trim()
-            try {
-                if (original == null) {
-                    soulsService.create(name = trimmed, glyphId = glyphId)
-                    achievements.fireCheck()
-                } else {
-                    soulsService.update(soulId = original.id, name = trimmed, glyphId = glyphId)
-                }
-                onSaved()
-            } catch (e: Exception) {
-                Log.e(TAG, "soul save failed", e)
-                showSaveError = true
-                isSaving = false
-            }
-        }
-    }
+    BackHandler(enabled = !uiState.isSaving) { viewModel.onDismissRequested() }
 
     PebblesScreen(
         modifier = modifier.background(system.background),
         topBar = {
             PebblesTopBar(
-                title =
-                    stringResource(
-                        if (original == null) R.string.create_soul_title else R.string.soul_edit_title,
-                    ),
+                title = stringResource(uiState.titleRes),
                 leading = {
                     PebblesTopBarTextButton(
                         text = stringResource(R.string.action_cancel),
-                        onClick = { if (!isSaving) onDismiss() },
+                        onClick = viewModel::onDismissRequested,
                     )
                 },
                 trailing = {
-                    if (isSaving) {
+                    if (uiState.isSaving) {
                         CircularProgressIndicator(
                             color = PebblesTheme.colors.accent.primary,
                             strokeWidth = 2.dp,
@@ -160,9 +104,9 @@ fun SoulFormScreen(
                     } else {
                         PebblesTopBarTextButton(
                             text = stringResource(R.string.action_save),
-                            onClick = { save() },
-                            enabled = canSave,
-                            color = if (canSave) system.secondary else system.muted,
+                            onClick = viewModel::save,
+                            enabled = uiState.canSave,
+                            color = if (uiState.canSave) system.secondary else system.muted,
                         )
                     }
                 },
@@ -184,15 +128,15 @@ fun SoulFormScreen(
                     listOf(
                         {
                             BasicTextField(
-                                value = name,
-                                onValueChange = { name = it },
+                                value = uiState.name,
+                                onValueChange = viewModel::onNameChange,
                                 singleLine = true,
                                 textStyle = PebblesTypography.body.copy(color = system.foreground),
                                 cursorBrush = SolidColor(PebblesTheme.colors.accent.primary),
                                 keyboardOptions =
                                     KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                                 decorationBox = { inner ->
-                                    if (name.isEmpty()) {
+                                    if (uiState.name.isEmpty()) {
                                         PebblesText(
                                             text = stringResource(R.string.create_soul_name_placeholder),
                                             style = PebblesTypography.body,
@@ -218,9 +162,9 @@ fun SoulFormScreen(
                                 modifier =
                                     Modifier
                                         .fillMaxWidth()
-                                        .clickable { isPresentingPicker = true },
+                                        .clickable(onClick = viewModel::openPicker),
                             ) {
-                                val glyph = currentGlyph
+                                val glyph = uiState.glyph
                                 if (glyph != null) {
                                     GlyphView(
                                         case = GlyphViewCase.DEFAULT,
@@ -248,12 +192,9 @@ fun SoulFormScreen(
                     ),
             )
 
-            if (showSaveError) {
+            if (uiState.didSaveFail) {
                 PebblesText(
-                    text =
-                        stringResource(
-                            if (original == null) R.string.soul_save_error else R.string.settings_save_error,
-                        ),
+                    text = stringResource(uiState.saveErrorRes),
                     style = PebblesTypography.subhead,
                     color = PebblesDestructive,
                 )
@@ -261,15 +202,11 @@ fun SoulFormScreen(
         }
     }
 
-    if (isPresentingPicker) {
+    if (uiState.isPresentingPicker) {
         GlyphPickerSheet(
-            currentGlyphId = glyphId,
-            onDismiss = { isPresentingPicker = false },
-            onSelected = { glyph ->
-                glyphId = glyph.id
-                currentGlyph = glyph
-                isPresentingPicker = false
-            },
+            currentGlyphId = uiState.glyphId,
+            onDismiss = viewModel::closePicker,
+            onSelected = viewModel::onGlyphPicked,
         )
     }
 }

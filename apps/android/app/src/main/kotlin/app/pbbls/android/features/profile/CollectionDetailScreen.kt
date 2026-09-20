@@ -1,6 +1,5 @@
 package app.pbbls.android.features.profile
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,29 +18,22 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.components.PebbleRow
 import app.pbbls.android.features.path.EditPebbleScreen
-import app.pbbls.android.features.path.models.Pebble
 import app.pbbls.android.features.profile.components.CollectionModeBadge
 import app.pbbls.android.features.profile.components.ConfirmDeleteDialog
 import app.pbbls.android.features.profile.components.DeleteErrorDialog
 import app.pbbls.android.features.profile.components.ProfileEmptyState
-import app.pbbls.android.features.profile.models.Collection
-import app.pbbls.android.services.LocalCollectionsService
 import app.pbbls.android.services.LocalEmotionPaletteService
-import app.pbbls.android.services.LocalPebbleWriteService
-import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.theme.PebblesListSection
 import app.pbbls.android.theme.PebblesScreen
 import app.pbbls.android.theme.PebblesText
@@ -49,12 +41,8 @@ import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar
 import app.pbbls.android.theme.PebblesTopBarTextButton
 import app.pbbls.android.theme.PebblesTypography
-import kotlinx.coroutines.launch
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
-
-private const val TAG = "collection-detail"
 
 /**
  * Pushed detail for one collection — ports iOS `CollectionDetailView.swift`:
@@ -62,55 +50,35 @@ private const val TAG = "collection-detail"
  * grouped by calendar month with locale-formatted headers (D14), tap →
  * [EditPebbleScreen] cover, long-press → `delete_pebble` with confirm, and an
  * Edit top-bar action opening [CollectionFormScreen] as a cover (D9 surface
- * swap). The NavHost passes only the collection id, so the screen fetches the
- * collection itself (same named deviation as the soul detail).
+ * swap). The NavHost passes only the collection id, so
+ * [CollectionDetailViewModel] fetches the collection itself (same named
+ * deviation as the soul detail), and it owns the month grouping — only the
+ * locale-dependent header formatting stays here, because only the view knows
+ * the active locale.
  */
 @Composable
 fun CollectionDetailScreen(
     collectionId: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: CollectionDetailViewModel = hiltViewModel(),
 ) {
-    val collectionsService = LocalCollectionsService.current
-    val writeService = LocalPebbleWriteService.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val covers by viewModel.covers.collectAsStateWithLifecycle()
     val palettes = LocalEmotionPaletteService.current
-    val refs = LocalReferenceDataService.current
-    val scope = rememberCoroutineScope()
     val system = PebblesTheme.colors.system
 
-    var collection by remember(collectionId) { mutableStateOf<Collection?>(null) }
-    var pebbles by remember(collectionId) { mutableStateOf<List<Pebble>>(emptyList()) }
-    var isLoading by remember(collectionId) { mutableStateOf(true) }
-    var loadFailed by remember(collectionId) { mutableStateOf(false) }
-    var loadKey by remember(collectionId) { mutableIntStateOf(0) }
-    var isPresentingEdit by remember(collectionId) { mutableStateOf(false) }
-    var editingPebbleId by remember(collectionId) { mutableStateOf<String?>(null) }
-    var pendingDeletion by remember(collectionId) { mutableStateOf<Pebble?>(null) }
-    var deleteError by remember(collectionId) { mutableStateOf(false) }
-
-    LaunchedEffect(collectionId, loadKey) {
-        isLoading = true
-        loadFailed = false
-        try {
-            collection = collectionsService.loadCollection(collectionId)
-            pebbles = collectionsService.loadPebbles(collectionId)
-        } catch (e: Exception) {
-            Log.e(TAG, "collection detail load failed", e)
-            loadFailed = true
-        } finally {
-            isLoading = false
-        }
-    }
+    // Guarded on the id, so a rotation re-runs this without re-fetching.
+    LaunchedEffect(collectionId) { viewModel.start(collectionId) }
 
     val locale = Locale.getDefault()
     val monthFormatter = remember(locale) { DateTimeFormatter.ofPattern("MMMM yyyy", locale) }
-    val groupedPebbles = remember(pebbles) { groupPebblesByMonth(pebbles, ZoneId.systemDefault()) }
 
     PebblesScreen(
         modifier = modifier,
         topBar = {
             PebblesTopBar(
-                title = collection?.name.orEmpty(),
+                title = (uiState as? CollectionDetailUiState.Content)?.collection?.name.orEmpty(),
                 leading = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -122,34 +90,35 @@ fun CollectionDetailScreen(
                     }
                 },
                 trailing = {
-                    if (collection != null) {
+                    if (uiState is CollectionDetailUiState.Content) {
                         PebblesTopBarTextButton(
                             text = stringResource(R.string.pebble_detail_edit),
-                            onClick = { isPresentingEdit = true },
+                            onClick = viewModel::openEdit,
                         )
                     }
                 },
             )
         },
     ) {
-        when {
-            isLoading ->
+        // Exhaustive with no `else`: a new CollectionDetailUiState case must be rendered.
+        when (val state = uiState) {
+            CollectionDetailUiState.Loading ->
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
                     CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
                 }
 
-            loadFailed ->
+            is CollectionDetailUiState.Error ->
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     PebblesText(
-                        text = stringResource(R.string.soul_detail_load_error),
+                        text = stringResource(state.messageRes),
                         style = PebblesTypography.body,
                         color = system.secondary,
                     )
-                    TextButton(onClick = { loadKey++ }) {
+                    TextButton(onClick = viewModel::retry) {
                         PebblesText(
                             text = stringResource(R.string.profile_retry),
                             style = PebblesTypography.buttonLabel,
@@ -158,108 +127,89 @@ fun CollectionDetailScreen(
                     }
                 }
 
-            pebbles.isEmpty() ->
-                ProfileEmptyState(
-                    title = stringResource(R.string.soul_detail_empty_title),
-                    message = stringResource(R.string.collection_detail_empty_message),
-                )
-
-            else ->
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                            .padding(horizontal = 16.dp)
-                            .padding(bottom = 32.dp),
-                    verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.xl),
-                ) {
-                    PebblesListSection(
-                        rows =
-                            listOf(
-                                {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.fillMaxWidth(),
-                                    ) {
-                                        CollectionModeBadge(mode = collection?.mode)
-                                        Spacer(Modifier.weight(1f))
-                                        PebblesText(
-                                            text = pebbleCountLabel(pebbles.size),
-                                            style = PebblesTypography.captionEmphasized,
-                                            color = system.secondary,
-                                        )
-                                    }
-                                },
-                            ),
+            is CollectionDetailUiState.Content ->
+                if (state.pebbles.isEmpty()) {
+                    ProfileEmptyState(
+                        title = stringResource(R.string.soul_detail_empty_title),
+                        message = stringResource(R.string.collection_detail_empty_message),
                     )
-                    groupedPebbles.forEach { (month, monthPebbles) ->
+                } else {
+                    Column(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                                .padding(horizontal = 16.dp)
+                                .padding(bottom = 32.dp),
+                        verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.xl),
+                    ) {
                         PebblesListSection(
-                            header = month.format(monthFormatter),
                             rows =
-                                monthPebbles.map { pebble ->
+                                listOf(
                                     {
-                                        PebbleRow(
-                                            pebble = pebble,
-                                            palette = pebble.emotion?.let { palettes.palette(it.id) },
-                                            onTap = { editingPebbleId = pebble.id },
-                                            onDelete = { pendingDeletion = pebble },
-                                        )
-                                    }
-                                },
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier.fillMaxWidth(),
+                                        ) {
+                                            CollectionModeBadge(mode = state.collection.mode)
+                                            Spacer(Modifier.weight(1f))
+                                            PebblesText(
+                                                text = pebbleCountLabel(state.pebbles.size),
+                                                style = PebblesTypography.captionEmphasized,
+                                                color = system.secondary,
+                                            )
+                                        }
+                                    },
+                                ),
                         )
+                        state.groups.forEach { (month, monthPebbles) ->
+                            PebblesListSection(
+                                header = month.format(monthFormatter),
+                                rows =
+                                    monthPebbles.map { pebble ->
+                                        {
+                                            PebbleRow(
+                                                pebble = pebble,
+                                                palette = pebble.emotion?.let { palettes.palette(it.id) },
+                                                onTap = { viewModel.openPebble(pebble.id) },
+                                                onDelete = { viewModel.requestDelete(pebble) },
+                                            )
+                                        }
+                                    },
+                            )
+                        }
                     }
                 }
         }
     }
 
-    if (isPresentingEdit) {
-        collection?.let { current ->
+    if (covers.isPresentingEdit) {
+        (uiState as? CollectionDetailUiState.Content)?.let { content ->
             CollectionFormScreen(
-                original = current,
-                onDismiss = { isPresentingEdit = false },
-                onSaved = {
-                    isPresentingEdit = false
-                    loadKey++
-                    scope.launch { refs.refreshCollections() }
-                },
+                original = content.collection,
+                onDismiss = viewModel::closeEdit,
+                onSaved = viewModel::onCollectionSaved,
                 modifier = Modifier.fillMaxSize(),
             )
         }
     }
 
-    editingPebbleId?.let { pebbleId ->
+    covers.editingPebbleId?.let { pebbleId ->
         EditPebbleScreen(
             pebbleId = pebbleId,
-            onDismiss = { editingPebbleId = null },
-            onSaved = {
-                editingPebbleId = null
-                loadKey++
-            },
+            onDismiss = viewModel::closePebble,
+            onSaved = viewModel::onPebbleSaved,
             modifier = Modifier.fillMaxSize(),
         )
     }
 
-    val target = pendingDeletion
-    if (target != null) {
+    covers.pendingDeletion?.let { target ->
         ConfirmDeleteDialog(
             title = stringResource(R.string.pebble_delete_confirm_title, target.name),
             message = stringResource(R.string.pebble_delete_confirm_message),
-            onConfirm = {
-                pendingDeletion = null
-                scope.launch {
-                    try {
-                        writeService.delete(target.id)
-                        loadKey++
-                        refs.refreshCollections()
-                    } catch (e: Exception) {
-                        Log.e(TAG, "delete pebble failed", e)
-                        deleteError = true
-                    }
-                }
-            },
-            onDismiss = { pendingDeletion = null },
+            onConfirm = viewModel::confirmDelete,
+            onDismiss = viewModel::cancelDelete,
         )
     }
-    if (deleteError) DeleteErrorDialog(onDismiss = { deleteError = false })
+    if (covers.didDeleteFail) DeleteErrorDialog(onDismiss = viewModel::dismissDeleteError)
 }
