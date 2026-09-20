@@ -7,37 +7,32 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
 import app.pbbls.android.features.auth.AuthMode
 import app.pbbls.android.features.auth.AuthScreen
 import app.pbbls.android.features.connections.AcceptInviteScreen
-import app.pbbls.android.features.connections.ConnectionsScreen
-import app.pbbls.android.features.glyph.store.GlyphsListScreen
 import app.pbbls.android.features.karma.AchievementMomentOverlay
 import app.pbbls.android.features.karma.KarmaOverlayHost
 import app.pbbls.android.features.karma.LocalAchievementNotificationService
 import app.pbbls.android.features.karma.LocalKarmaNotificationService
-import app.pbbls.android.features.lab.LabScreen
 import app.pbbls.android.features.onboarding.OnboardingGate
 import app.pbbls.android.features.onboarding.OnboardingScreen
 import app.pbbls.android.features.onboarding.OnboardingSteps
-import app.pbbls.android.features.path.PathScreen
-import app.pbbls.android.features.profile.AchievementsScreen
-import app.pbbls.android.features.profile.CollectionDetailScreen
-import app.pbbls.android.features.profile.CollectionsListScreen
-import app.pbbls.android.features.profile.ProfileScreen
-import app.pbbls.android.features.profile.SoulDetailScreen
-import app.pbbls.android.features.profile.SoulsListScreen
 import app.pbbls.android.features.welcome.WelcomeScreen
+import app.pbbls.android.navigation.NavTransitions
+import app.pbbls.android.navigation.Navigator
+import app.pbbls.android.navigation.PebblesKey
+import app.pbbls.android.navigation.pebblesEntries
 import app.pbbls.android.services.LocalConnectionsService
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalReferenceDataService
@@ -47,27 +42,14 @@ import app.pbbls.android.services.OnboardingPreferences
 import app.pbbls.android.theme.PebblesTheme
 import kotlinx.coroutines.launch
 
-private const val ROUTE_WELCOME = "welcome"
-private const val ROUTE_AUTH = "auth"
-private const val ROUTE_PATH = "path"
-private const val ROUTE_PROFILE = "profile"
-private const val ROUTE_SOULS = "souls"
-private const val ROUTE_SOUL_DETAIL = "souls/{soulId}"
-private const val ROUTE_COLLECTIONS = "collections"
-private const val ROUTE_COLLECTION_DETAIL = "collections/{collectionId}"
-private const val ROUTE_GLYPHS = "glyphs"
-private const val ROUTE_LAB = "lab"
-private const val ROUTE_ACHIEVEMENTS = "achievements"
-private const val ROUTE_CONNECTIONS = "connections"
-
 /**
  * Top-level auth gate — the `RootView` analog (D5). The gate is conditional
  * composition, not navigation:
  *   - `canShowAuthedTabs` (session AND auth resolved) → [PathScreen], with
  *     [OnboardingScreen] as a full-screen overlay the first time a user id
  *     appears while `hasSeenOnboarding` is false.
- *   - otherwise → a NavHost (Welcome → Auth), with Welcome revealing its content
- *     once auth has settled to "no session".
+ *   - otherwise → a NavDisplay (Welcome → Auth), with Welcome revealing its
+ *     content once auth has settled to "no session".
  *
  * There is no fixed splash duration here (#846): the system splash owns the
  * launch hold and [MainActivity] releases it on the same `isInitializing`
@@ -147,7 +129,7 @@ fun RootScreen() {
                 .background(PebblesTheme.colors.system.background),
     ) {
         if (canShowAuthedTabs) {
-            AuthedNavHost(onSignOut = { scope.launch { supabase.signOut() } })
+            AuthedNavDisplay(onSignOut = { scope.launch { supabase.signOut() } })
             if (isPresentingOnboarding) {
                 OnboardingScreen(
                     steps = OnboardingSteps.all,
@@ -178,105 +160,60 @@ fun RootScreen() {
         } else {
             // The funnel calls supabase-kt through its own ViewModels now, so
             // this gate only decides WHICH tree is up, not how it signs in.
-            WelcomeAuthNavHost(contentRevealed = welcomeContentRevealed)
+            WelcomeAuthNavDisplay(contentRevealed = welcomeContentRevealed)
         }
     }
 }
 
 /**
- * Authed navigation (D1): pushes — Path → Profile → souls/collections lists →
- * details — are real NavHost routes so predictive back and the back stack
- * behave natively; modal surfaces (pebble create/detail/edit, soul/collection
- * create/edit) stay conditionally-composed covers inside their screens (the
- * M39 D5 pattern). Sign-out lives on the Profile screen now; the session
- * dropping to null flips RootScreen's gate and unmounts this host.
+ * Authed navigation (#852). One [NavDisplay] over one saveable back stack,
+ * replacing the NavHost. The IA is unchanged from the NavHost it replaces —
+ * Part 2 introduces the four-tab bar (D11).
+ *
+ * `rememberViewModelStoreNavEntryDecorator` is what scopes a `hiltViewModel()`
+ * to its entry rather than to the composition that happens to host it, so a
+ * popped entry takes its ViewModel with it.
  */
 @Composable
-private fun AuthedNavHost(onSignOut: () -> Unit) {
-    val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = ROUTE_PATH) {
-        composable(ROUTE_PATH) {
-            PathScreen(onProfile = { navController.navigate(ROUTE_PROFILE) })
-        }
-        composable(ROUTE_PROFILE) {
-            ProfileScreen(
-                onBack = { navController.popBackStack() },
-                onSignOut = onSignOut,
-                onOpenSouls = { navController.navigate(ROUTE_SOULS) },
-                onOpenCollections = { navController.navigate(ROUTE_COLLECTIONS) },
-                onOpenCollection = { collection ->
-                    navController.navigate("$ROUTE_COLLECTIONS/${collection.id}")
-                },
-                onOpenGlyphs = { navController.navigate(ROUTE_GLYPHS) },
-                onOpenConnections = { navController.navigate(ROUTE_CONNECTIONS) },
-                onOpenLab = { navController.navigate(ROUTE_LAB) },
-                onOpenAchievements = { navController.navigate(ROUTE_ACHIEVEMENTS) },
-            )
-        }
-        composable(ROUTE_CONNECTIONS) {
-            ConnectionsScreen(onDismiss = { navController.popBackStack() })
-        }
-        composable(ROUTE_GLYPHS) {
-            GlyphsListScreen(onBack = { navController.popBackStack() })
-        }
-        composable(ROUTE_LAB) {
-            LabScreen(onBack = { navController.popBackStack() })
-        }
-        composable(ROUTE_ACHIEVEMENTS) {
-            AchievementsScreen(onBack = { navController.popBackStack() })
-        }
-        composable(ROUTE_SOULS) {
-            SoulsListScreen(
-                onBack = { navController.popBackStack() },
-                onOpenSoul = { soul -> navController.navigate("$ROUTE_SOULS/${soul.id}") },
-            )
-        }
-        composable(
-            route = ROUTE_SOUL_DETAIL,
-            arguments = listOf(navArgument("soulId") { type = NavType.StringType }),
-        ) { backStackEntry ->
-            SoulDetailScreen(
-                soulId = backStackEntry.arguments?.getString("soulId").orEmpty(),
-                onBack = { navController.popBackStack() },
-            )
-        }
-        composable(ROUTE_COLLECTIONS) {
-            CollectionsListScreen(
-                onBack = { navController.popBackStack() },
-                onOpenCollection = { collection ->
-                    navController.navigate("$ROUTE_COLLECTIONS/${collection.id}")
-                },
-            )
-        }
-        composable(
-            route = ROUTE_COLLECTION_DETAIL,
-            arguments = listOf(navArgument("collectionId") { type = NavType.StringType }),
-        ) { backStackEntry ->
-            CollectionDetailScreen(
-                collectionId = backStackEntry.arguments?.getString("collectionId").orEmpty(),
-                onBack = { navController.popBackStack() },
-            )
-        }
-    }
+private fun AuthedNavDisplay(onSignOut: () -> Unit) {
+    val backStack = rememberNavBackStack(PebblesKey.Path)
+    val navigator = remember(backStack) { Navigator(backStack) }
+    NavDisplay(
+        backStack = backStack,
+        onBack = { navigator.goBack() },
+        entryDecorators =
+            listOf(
+                rememberSaveableStateHolderNavEntryDecorator(),
+                rememberViewModelStoreNavEntryDecorator(),
+            ),
+        entryProvider = entryProvider { pebblesEntries(navigator = navigator, onSignOut = onSignOut) },
+    )
 }
 
 @Composable
-private fun WelcomeAuthNavHost(contentRevealed: Boolean) {
-    val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = ROUTE_WELCOME) {
-        composable(ROUTE_WELCOME) {
-            WelcomeScreen(
-                contentRevealed = contentRevealed,
-                onCreateAccount = { navController.navigate("$ROUTE_AUTH/${AuthMode.SIGNUP.route}") },
-                onLogin = { navController.navigate("$ROUTE_AUTH/${AuthMode.LOGIN.route}") },
-            )
-        }
-        composable(
-            route = "$ROUTE_AUTH/{mode}",
-            arguments = listOf(navArgument("mode") { type = NavType.StringType }),
-        ) { backStackEntry ->
-            val mode = AuthMode.fromRoute(backStackEntry.arguments?.getString("mode"))
-            AuthScreen(initialMode = mode)
-        }
-    }
+private fun WelcomeAuthNavDisplay(contentRevealed: Boolean) {
+    val backStack = rememberNavBackStack(PebblesKey.Welcome)
+    val navigator = remember(backStack) { Navigator(backStack) }
+    NavDisplay(
+        backStack = backStack,
+        onBack = { navigator.goBack() },
+        entryDecorators =
+            listOf(
+                rememberSaveableStateHolderNavEntryDecorator(),
+                rememberViewModelStoreNavEntryDecorator(),
+            ),
+        entryProvider =
+            entryProvider {
+                entry<PebblesKey.Welcome>(metadata = NavTransitions.forKey(PebblesKey.Welcome)) {
+                    WelcomeScreen(
+                        contentRevealed = contentRevealed,
+                        onCreateAccount = { navigator.navigate(PebblesKey.Auth(AuthMode.SIGNUP)) },
+                        onLogin = { navigator.navigate(PebblesKey.Auth(AuthMode.LOGIN)) },
+                    )
+                }
+                entry<PebblesKey.Auth>(metadata = NavTransitions.forKey(PebblesKey.Auth(AuthMode.LOGIN))) { key ->
+                    AuthScreen(initialMode = key.mode)
+                }
+            },
+    )
 }
