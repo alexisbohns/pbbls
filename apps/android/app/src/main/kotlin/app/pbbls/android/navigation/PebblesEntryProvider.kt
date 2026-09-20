@@ -2,6 +2,9 @@ package app.pbbls.android.navigation
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
+import app.pbbls.android.features.auth.AuthMode
+import app.pbbls.android.features.auth.AuthScreen
+import app.pbbls.android.features.connections.AcceptInviteScreen
 import app.pbbls.android.features.connections.ConnectionsScreen
 import app.pbbls.android.features.connections.InviteScreen
 import app.pbbls.android.features.glyph.carve.GlyphCarveScreen
@@ -10,6 +13,8 @@ import app.pbbls.android.features.lab.AnnouncementDetailScreen
 import app.pbbls.android.features.lab.LabScreen
 import app.pbbls.android.features.lab.LogListMode
 import app.pbbls.android.features.lab.LogListScreen
+import app.pbbls.android.features.onboarding.OnboardingScreen
+import app.pbbls.android.features.onboarding.OnboardingSteps
 import app.pbbls.android.features.path.DraftsScreen
 import app.pbbls.android.features.path.EditPebbleScreen
 import app.pbbls.android.features.path.PathScreen
@@ -25,15 +30,19 @@ import app.pbbls.android.features.profile.SettingsScreen
 import app.pbbls.android.features.profile.SoulDetailScreen
 import app.pbbls.android.features.profile.SoulFormScreen
 import app.pbbls.android.features.profile.SoulsListScreen
+import app.pbbls.android.features.welcome.WelcomeScreen
 
 /**
  * Key → screen (#852).
  *
- * Part 1 wires exactly what the two NavHosts reached, with the same IA, so this
- * PR is a move and not a redesign (D11). Part 3 (Task 23) promotes the five
- * write-path covers (detail, edit, both composers, drafts) below. What is left
- * unwired — `AcceptInvite`, `Onboarding` — is handled outside this back stack
- * (`RootScreen`'s own overlays) and belongs to later parts.
+ * Part 1 wired exactly what the two NavHosts reached, with the same IA, so
+ * that PR was a move and not a redesign (D11). Part 3 (Task 23) promoted the
+ * five write-path covers (detail, edit, both composers, drafts). Task 28
+ * folds in the funnel (`Welcome`, `Auth`) that used to live in its own
+ * `NavDisplay`, plus `Onboarding` and `AcceptInvite` — the last two were
+ * previously composed outside any back stack as `RootScreen` overlays; now
+ * they are ordinary entries `RootViewModel`-driven navigation pushes onto
+ * this one stack (design §5, D8).
  *
  * Each `entry` carries its transition metadata via [NavTransitions.forKey], so
  * the animation travels with the key rather than living in a `when` at the
@@ -42,6 +51,8 @@ import app.pbbls.android.features.profile.SoulsListScreen
 fun EntryProviderScope<NavKey>.pebblesEntries(
     navigator: Navigator,
     onSignOut: () -> Unit,
+    welcomeContentRevealed: Boolean,
+    onOnboardingFinished: () -> Unit,
 ) {
     entry<PebblesKey.Path>(metadata = NavTransitions.forKey(PebblesKey.Path)) {
         PathScreen(
@@ -228,5 +239,32 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             },
             onDismiss = navigator::goBack,
         )
+    }
+
+    // ---- The unauthenticated funnel promoted to entries (#852 Task 28) ----
+
+    entry<PebblesKey.Welcome>(metadata = NavTransitions.forKey(PebblesKey.Welcome)) {
+        WelcomeScreen(
+            contentRevealed = welcomeContentRevealed,
+            onCreateAccount = { navigator.navigate(PebblesKey.Auth(AuthMode.SIGNUP)) },
+            onLogin = { navigator.navigate(PebblesKey.Auth(AuthMode.LOGIN)) },
+        )
+    }
+
+    entry<PebblesKey.Auth>(metadata = NavTransitions.forKey(PebblesKey.Auth(AuthMode.LOGIN))) { key ->
+        AuthScreen(initialMode = key.mode)
+    }
+
+    // ---- Onboarding + the pending-invite accept surface (#852 Task 28) ----
+    // Both used to be `RootScreen` overlays composed outside any back stack;
+    // now `RootViewModel`'s destination/pendingInvite state pushes them onto
+    // this one stack instead (design §5, D8).
+
+    entry<PebblesKey.Onboarding>(metadata = NavTransitions.forKey(PebblesKey.Onboarding)) {
+        OnboardingScreen(steps = OnboardingSteps.all, onFinish = onOnboardingFinished)
+    }
+
+    entry<PebblesKey.AcceptInvite>(metadata = NavTransitions.forKey(PebblesKey.AcceptInvite(""))) { key ->
+        AcceptInviteScreen(token = key.token, onDismiss = navigator::goBack)
     }
 }
