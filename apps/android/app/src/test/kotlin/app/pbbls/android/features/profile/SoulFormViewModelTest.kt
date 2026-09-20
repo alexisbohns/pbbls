@@ -25,7 +25,7 @@ import org.junit.Test
 import java.io.IOException
 
 /**
- * The soul form's seed, save and reset contract (#849, #852 Task 15).
+ * The soul form's seed, save and reset contract (#849, #852).
  *
  * The reset half is the load-bearing one: this ViewModel is hosted behind a
  * conditionally-composed cover, so `hiltViewModel()` scopes it to the back
@@ -64,7 +64,7 @@ class SoulFormViewModelTest {
             service.soul = soul("s1", name = "Otis", glyphId = "glyph-s1")
 
             // No `start()` call: `init` reads the id straight off the handle,
-            // exactly as it will once a real nav entry supplies one (#852 Task 17).
+            // exactly as a real nav entry supplies one (#852).
             val viewModel = viewModel(souls = service, savedState = SavedStateHandle(mapOf(SOUL_FORM_ID_KEY to "s1")))
             advanceUntilIdle()
 

@@ -21,7 +21,7 @@ import org.junit.Test
 import java.io.IOException
 
 /**
- * The collection form's seed, save and reset contract (#849, #852 Task 15).
+ * The collection form's seed, save and reset contract (#849, #852).
  *
  * As of Task 15, [CollectionFormViewModel.start] takes an id instead of the
  * whole row and fetches it itself — [FakeCollectionsService.loadCollection]
@@ -56,7 +56,7 @@ class CollectionFormViewModelTest {
             service.collection = collection("c1", name = "Journeys", mode = CollectionMode.TRACK)
 
             // No `start()` call: `init` reads the id straight off the handle,
-            // exactly as it will once a real nav entry supplies one (#852 Task 17).
+            // exactly as a real nav entry supplies one (#852).
             val viewModel =
                 viewModel(collections = service, savedState = SavedStateHandle(mapOf(COLLECTION_FORM_ID_KEY to "c1")))
             advanceUntilIdle()

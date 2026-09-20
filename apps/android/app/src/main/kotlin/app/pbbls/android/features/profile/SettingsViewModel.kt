@@ -116,7 +116,7 @@ sealed interface SettingsEffect {
 }
 
 /**
- * State holder for Settings (#849, #852 Task 16).
+ * State holder for Settings (#849, #852).
  *
  * **This ViewModel loads its own profile.** It used to receive seven initial
  * values from `ProfileScreen`, which had already loaded them — but `SettingsKey`

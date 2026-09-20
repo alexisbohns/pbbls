@@ -49,7 +49,7 @@ import app.pbbls.android.ui.ObserveUiEffects
  * `EditCollectionSheet` (they differ only in initial state and the write call)
  * into one full-screen surface (D5): name field + mode picker (None / Stack /
  * Pack / Track). [collectionId] `null` means create; a non-null id is fetched
- * by the ViewModel itself (#852 Task 15), so this screen never receives the
+ * by the ViewModel itself (#852), so this screen never receives the
  * row from its caller. Selecting "None" on edit really clears the column — the
  * payload encodes mode as explicit JSON null (see `collectionUpdatePayload`).
  * Writes are direct RLS-scoped single-table calls (D6), driven by

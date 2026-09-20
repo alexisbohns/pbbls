@@ -86,7 +86,7 @@ data class GlyphsCovers(
  * purchase that landed. `GlyphPickerSheet` keeps its own duplicated copy of the
  * store's state and is a migration of its own, not folded in here.
  *
- * **The carve cover is gone (#852 Task 17).** It used to prepend the fresh
+ * **The carve cover is gone (#852).** It used to prepend the fresh
  * glyph to Mine and switch straight to it on save, an optimistic update with no
  * round trip. `GlyphCarve` is a separate entry now, with no callback back into
  * this instance; [onResumed] (#852) reloads whichever tab is on screen when
@@ -139,7 +139,7 @@ class GlyphsListViewModel
          * Reloads the tab currently on screen — the same per-tab refetch
          * [loadTab] already does for a tab switch, just re-run on the tab you
          * never left. This is what picks up a glyph carved in `GlyphCarve`
-         * (#852 Task 17 removed the optimistic prepend-and-switch). The first
+         * (#852 removed the optimistic prepend-and-switch). The first
          * resume is skipped because `init` has already loaded Mine.
          */
         fun onResumed() {

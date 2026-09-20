@@ -109,7 +109,7 @@ class SoulDetailViewModel
         /**
          * The destination came back to the foreground.
          *
-         * `SoulForm` is a separate entry now (#852 Task 17), with no callback
+         * `SoulForm` is a separate entry now (#852), with no callback
          * back into this instance, so an edit made there has to be picked up by
          * a resume — same mechanism as [SoulsListViewModel.onResumed]. The first
          * resume is skipped because [start] has already loaded.

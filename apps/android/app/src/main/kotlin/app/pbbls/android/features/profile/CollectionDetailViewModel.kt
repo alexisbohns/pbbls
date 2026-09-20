@@ -107,7 +107,7 @@ class CollectionDetailViewModel
         /**
          * The destination came back to the foreground.
          *
-         * `CollectionForm` is a separate entry now (#852 Task 17), with no
+         * `CollectionForm` is a separate entry now (#852), with no
          * callback back into this instance, so an edit made there has to be
          * picked up by a resume — see [SoulDetailViewModel.onResumed]. The first
          * resume is skipped because [start] has already loaded.

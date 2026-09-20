@@ -114,7 +114,7 @@ class ProfileViewModel
          * its own list left Profile's carousel showing the old name, and the
          * stats card stale after anything that changes counts.
          *
-         * Since #852 Task 17, this is also what refreshes after Settings and the
+         * Since #852, this is also what refreshes after Settings and the
          * create-collection form: both are entries now, with no callback back
          * into this ViewModel, so their old `onXSaved` hooks are gone and this
          * generic resume is what picks up the change instead.

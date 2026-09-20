@@ -27,7 +27,7 @@ import javax.inject.Inject
 
 private const val TAG = "soul-form"
 
-/** The [SavedStateHandle] key a nav key's argument will land under once #852's Task 17 lands. */
+/** The [SavedStateHandle] key the nav key's argument lands under (#852). */
 internal const val SOUL_FORM_ID_KEY = "soulId"
 
 data class SoulFormUiState(
@@ -83,12 +83,12 @@ sealed interface SoulFormEffect {
 }
 
 /**
- * State holder for the soul create/edit cover (#849, #852 Task 15).
+ * State holder for the soul create/edit cover (#849, #852).
  *
  * **This ViewModel loads its own subject.** It used to receive the whole
  * [SoulWithGlyph] from whichever screen already had it loaded — but a
  * navigation key can only carry an id, so before this cover can become a real
- * Nav3 destination (#852 Task 17) it has to fetch the row itself, the way
+ * Nav3 destination (#852) it has to fetch the row itself, the way
  * [SoulDetailViewModel] already fetches its soul from an id. [start] takes the
  * id instead of the object now, and a non-null id drives [loadSoul].
  *
@@ -104,7 +104,7 @@ sealed interface SoulFormEffect {
  * to whichever back stack entry hosts it — the souls list for a create, the
  * soul detail for an edit — and that entry outlives the cover many times over.
  * [start] is therefore guarded and [finish] is explicit: without the reset, the
- * next "+" opens onto the soul just saved. #852 Task 17 turns these covers into
+ * next "+" opens onto the soul just saved. #852 turns these covers into
  * real destinations and takes the pair away.
  *
  * **[SavedStateHandle] now carries the id being edited** — the one thing this

@@ -26,7 +26,7 @@ import javax.inject.Inject
 
 private const val TAG = "collection-form"
 
-/** The [SavedStateHandle] key a nav key's argument will land under once #852's Task 17 lands. */
+/** The [SavedStateHandle] key the nav key's argument lands under (#852). */
 internal const val COLLECTION_FORM_ID_KEY = "collectionId"
 
 data class CollectionFormUiState(
@@ -78,7 +78,7 @@ sealed interface CollectionFormEffect {
 }
 
 /**
- * State holder for the collection create/edit cover (#849, #852 Task 15).
+ * State holder for the collection create/edit cover (#849, #852).
  *
  * [SoulFormViewModel]'s twin: the same `rememberCoroutineScope` write hole (a
  * collection created on the server that neither the list nor the composer's

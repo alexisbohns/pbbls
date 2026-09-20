@@ -31,7 +31,7 @@ private const val USER_ID = "user-1"
 
 /**
  * Settings' own load, its save sequence, deletion flow and form persistence
- * (#849, #852 Task 16).
+ * (#849, #852).
  *
  * None of it was reachable before: it lived in a 672-line composable that read
  * two `Local…Service`s and held twelve `remember`s. As of Task 16 the load
@@ -87,7 +87,7 @@ class SettingsViewModelTest {
         savedState: SavedStateHandle = SavedStateHandle(),
     ) = SettingsViewModel(savedState, profile, supabase)
 
-    // MARK: - Loading its own profile (#852 Task 16)
+    // MARK: - Loading its own profile (#852)
 
     @Test
     fun `settings loads the profile itself`() =

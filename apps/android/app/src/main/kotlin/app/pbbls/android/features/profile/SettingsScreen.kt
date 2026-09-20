@@ -68,7 +68,7 @@ private const val TAG = "settings"
  * GoTrue password update — and stays open with an inline error on failure.
  *
  * The profile, its glyph, and the account's email/providers are fetched by
- * [SettingsViewModel] itself (#852 Task 16) rather than handed down by
+ * [SettingsViewModel] itself (#852) rather than handed down by
  * `ProfileScreen` — `SettingsKey` carries no argument to seed from.
  */
 @Composable

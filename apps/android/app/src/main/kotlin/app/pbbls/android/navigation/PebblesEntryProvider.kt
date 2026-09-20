@@ -108,7 +108,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         AchievementsScreen(onBack = navigator::goBack)
     }
 
-    // ---- Modal covers promoted to entries (#852 Task 17) ----
+    // ---- Modal covers promoted to entries (#852) ----
 
     entry<PebblesKey.SoulForm>(metadata = NavTransitions.forKey(PebblesKey.SoulForm())) { key ->
         SoulFormScreen(soulId = key.soulId, onDismiss = navigator::goBack, onSaved = navigator::goBack)

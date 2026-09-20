@@ -54,7 +54,7 @@ import app.pbbls.android.ui.ObserveUiEffects
  * parked glyph slot, landing here per D8). [soulId] `null` means create — the
  * glyph defaults to [SystemGlyph.DEFAULT] and [SoulFormViewModel] fetches its
  * strokes for the thumbnail; a non-null id is fetched by the ViewModel itself
- * (#852 Task 15), so this screen never receives the row from its caller.
+ * (#852), so this screen never receives the row from its caller.
  * Writes are direct RLS-scoped single-table calls (D6); `souls_glyph_usable`
  * enforces glyph ownership server-side.
  *
