@@ -48,7 +48,7 @@ first check, and the only way to smoke-test a minified build by hand.
 | Screen architecture: `ViewModel`, `UiState`, effects channel, Hilt (#848, #849) | `android-skills:android-dev` | `android-skills:koin`; the DI target is Hilt |
 | Repository error boundary, sealed `DataError` (#850) | `android-skills:android-data-layer` | |
 | Coroutines and `Flow`, dispatcher injection, `Channel` vs `SharedFlow` | `android-skills:kotlin-coroutines`, `android-skills:kotlin-flows` | |
-| Navigation: `NavDisplay`, `NavKey`, back stacks, Scenes (#852) | `navigation-3` | `android-skills:compose`; the target is Navigation 3, not `navigation-compose` |
+| Navigation: `NavDisplay`, `NavKey`, back stacks, Scenes | `navigation-3` | `android-skills:compose`; the target is Navigation 3, not `navigation-compose` |
 | Snap thumbnails, signed-URL images | `android-skills:coil-compose` | |
 | Package boundaries, visibility, `core/` vs `features/` (#851) | `android-skills:modularization` | |
 | Writing or fixing JVM, Robolectric and screenshot tests (#847, #857) | `android-skills:android-testing` | `testing-setup`, which stands up new infra |
@@ -70,7 +70,7 @@ real settings exist), `android-skills:rxjava-migration`,
 | Window size classes, foldables, tablets, content width cap (#855) | `adaptive` |
 | System bar and IME insets, `enableEdgeToEdge`, sheet insets | `edge-to-edge` |
 | R8 keep rules, `isMinifyEnabled`, mapping upload (#845) | `r8-analyzer` |
-| Predictive back, `NavigationBackHandler`, `androidx.navigationevent` (#852) | `navigation-event` |
+| Predictive back, `NavigationBackHandler`, `androidx.navigationevent` | `navigation-event` |
 | Exported components, deep-link and App Link intent handling | `android-intent-security` |
 | Play policy, Data Safety declarations, permission hygiene | `play-policy-insights` |
 | Restore Credentials after device restore | `restore-credentials` |
@@ -106,14 +106,16 @@ real settings exist), `android-skills:rxjava-migration`,
   `@Provides` unless Dagger genuinely cannot infer the constructor, and do not
   add a new `Local…Service` **for anything a screen calls** — see the carve-out
   below. `di/SupabaseModule` is the only place `AppEnvironment` is read.
-- **Three CompositionLocals are permanent, the rest of the bridge is not.**
+- **Three CompositionLocals are permanent; the rest of the bridge is gone.**
   `LocalEmotionPaletteService`, `LocalReferenceDataService` and
   `LocalSnapURLCache` carry ambient reference data read by *leaf* components
   (`PathPebbleRow`, `ValenceGlyph`, `WeekHeader`, the pickers), which is what a
-  `CompositionLocal` is for; they stay (decision log, 2026-09-20). `ServiceGraph`
-  is down to 10 entries and dies in **#852**, which carries the `RootScreen` and
-  `GlyphPickerSheet` migrations as folded-in scope. Write new screens against `hiltViewModel()`, never against a local,
-  and do not add an entry to `ServiceGraph`.
+  `CompositionLocal` is for; they stay (decision log, 2026-09-20). `di/ServiceGraph`
+  — the temporary service locator #848 introduced and #849 halved — was deleted
+  in #852, along with every other `Local…Service`; `MainActivity` now provides
+  only the three above. Write new screens against `hiltViewModel()`, never
+  against a local, and do not add a new `Local…Service` for anything a screen
+  calls.
 - **Log, don't swallow.** Use `android.util.Log` (or a thin logger) with a
   consistent tag on every error path — mirror the web/iOS discipline that silent
   failures are bugs. No empty `catch` blocks. No `println`. JVM unit tests set
