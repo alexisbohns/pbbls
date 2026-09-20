@@ -641,7 +641,7 @@ import app.pbbls.android.features.profile.SoulsListScreen
  * display.
  */
 @Suppress("LongParameterList")
-fun EntryProviderScope<PebblesKey>.pebblesEntries(
+fun EntryProviderScope<NavKey>.pebblesEntries(
     navigator: Navigator,
     onSignOut: () -> Unit,
 ) {
@@ -732,6 +732,7 @@ package app.pbbls.android.navigation
 
 import androidx.compose.runtime.Stable
 import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 
 /**
  * The only writer of navigation state (#852).
@@ -742,7 +743,7 @@ import androidx.navigation3.runtime.NavBackStack
  * than arriving with the tabs.
  */
 @Stable
-class Navigator(private val backStack: NavBackStack<PebblesKey>) {
+class Navigator(private val backStack: NavBackStack<NavKey>) {
     fun navigate(key: PebblesKey) {
         backStack.add(key)
     }
@@ -811,7 +812,7 @@ Then add the two new hosts at the bottom of the file:
  */
 @Composable
 private fun AuthedNavDisplay(onSignOut: () -> Unit) {
-    val backStack = rememberNavBackStack<PebblesKey>(PebblesKey.Path)
+    val backStack = rememberNavBackStack(PebblesKey.Path)
     val navigator = remember(backStack) { Navigator(backStack) }
     NavDisplay(
         backStack = backStack,
@@ -827,7 +828,7 @@ private fun AuthedNavDisplay(onSignOut: () -> Unit) {
 
 @Composable
 private fun WelcomeAuthNavDisplay(contentRevealed: Boolean) {
-    val backStack = rememberNavBackStack<PebblesKey>(PebblesKey.Welcome)
+    val backStack = rememberNavBackStack(PebblesKey.Welcome)
     val navigator = remember(backStack) { Navigator(backStack) }
     NavDisplay(
         backStack = backStack,
@@ -2767,7 +2768,7 @@ EOF
 lives in `RootViewModel` rather than in the entry provider. Its signature becomes:
 
 ```kotlin
-fun EntryProviderScope<PebblesKey>.pebblesEntries(
+fun EntryProviderScope<NavKey>.pebblesEntries(
     navigator: Navigator,
     onSignOut: () -> Unit,
     welcomeContentRevealed: Boolean,
