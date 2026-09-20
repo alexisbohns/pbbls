@@ -1,7 +1,6 @@
 package app.pbbls.android.features.path
 
 import android.content.Intent
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.features.path.models.SharedPebbleLink
@@ -41,22 +41,21 @@ import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography
 
 /**
- * Full-screen pebble detail surface — ports iOS `PebbleDetailSheet` (D5/D7).
- * Composed OVER `PathScreen` (the `fullScreenCover` analog) and self-applies
- * `safeDrawingPadding()`, so it must live in `PathScreen`'s OUTER (unpadded) Box
- * or the inset doubles. Loads a [PebbleDetail] via [LocalPebbleDetailService],
- * owns its loading/error/retry state, hosts the top bar + system-back
- * ([BackHandler]), and delegates the body to the pure [PebbleReadView].
+ * Pebble detail — a pushed entry now (#852, ports iOS `PebbleDetailSheet`,
+ * D5/D7). Self-applies `safeDrawingPadding()`. Loads a [PebbleDetail] via
+ * [LocalPebbleDetailService], owns its loading/error/retry state, hosts the
+ * top bar, and delegates the body to the pure [PebbleReadView]. System back is
+ * `NavDisplay`'s own — this screen has no in-flight write to protect, so it no
+ * longer needs its own `BackHandler`.
  *
- * [onEditRequested] is a stub in B (Edit button is present but inert); D swaps
- * in the edit surface.
+ * [onEditRequested] opens the `EditPebble` entry; returning from it is picked
+ * up by [PebbleDetailViewModel.onResumed] rather than a callback.
  */
 @Composable
 fun PebbleDetailScreen(
     pebbleId: String,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
-    reloadKey: Int = 0,
     onEditRequested: () -> Unit = {},
     viewModel: PebbleDetailViewModel = hiltViewModel(),
 ) {
@@ -66,13 +65,14 @@ fun PebbleDetailScreen(
     val accent = PebblesTheme.colors.accent
     val context = LocalContext.current
 
-    // reloadKey is the host saying "read it again" after an edit saved; the
-    // ViewModel ignores a repeat of the same pair, so a rotation does not
-    // re-fetch. The caller closes this cover when the pebble is deleted, so a
-    // load against a stale id never renders.
-    LaunchedEffect(pebbleId, reloadKey) { viewModel.start(pebbleId, reloadKey) }
+    LaunchedEffect(pebbleId) { viewModel.start(pebbleId) }
 
-    BackHandler { onDismiss() }
+    // Returning from EditPebble must re-read the pebble: the ViewModel is
+    // scoped to the back stack entry, which survives that round trip.
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onResumed()
+        onPauseOrDispose {}
+    }
 
     val detail = (uiState as? PebbleDetailUiState.Content)?.detail
 

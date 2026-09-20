@@ -14,7 +14,7 @@ import org.junit.Test
 import java.io.IOException
 import java.time.OffsetDateTime
 
-/** The read cover's load and reload-key contract (#849). */
+/** The pushed detail entry's load and resume-refresh contract (#849, #852). */
 class PebbleDetailViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
@@ -38,7 +38,7 @@ class PebbleDetailViewModelTest {
             val service = FakePebbleDetailService(detail())
             val viewModel = PebbleDetailViewModel(service)
 
-            viewModel.start("pebble-1", reloadKey = 0)
+            viewModel.start("pebble-1")
             assertEquals(PebbleDetailUiState.Loading, viewModel.uiState.value)
             advanceUntilIdle()
 
@@ -55,7 +55,7 @@ class PebbleDetailViewModelTest {
             service.failNext = IOException("offline")
             val viewModel = PebbleDetailViewModel(service)
 
-            viewModel.start("pebble-1", reloadKey = 0)
+            viewModel.start("pebble-1")
             advanceUntilIdle()
             assertEquals(PebbleDetailUiState.Error, viewModel.uiState.value)
 
@@ -65,35 +65,40 @@ class PebbleDetailViewModelTest {
             assertTrue(viewModel.uiState.value is PebbleDetailUiState.Content)
         }
 
-    /**
-     * Rotation: the screen's effect re-runs with the same (id, key) pair and
-     * must not flash the spinner back over a page being read.
-     */
+    /** Rotation, as far as a JVM test carries it: re-running `start` with the same id does not refetch. */
     @Test
-    fun `the same id and key does not refetch`() =
+    fun `starting with the same id does not refetch`() =
         runTest {
             val service = FakePebbleDetailService(detail())
             val viewModel = PebbleDetailViewModel(service)
 
-            viewModel.start("pebble-1", reloadKey = 0)
+            viewModel.start("pebble-1")
             advanceUntilIdle()
-            viewModel.start("pebble-1", reloadKey = 0)
+            viewModel.start("pebble-1")
             advanceUntilIdle()
 
             assertEquals(1, service.loadCalls.size)
         }
 
-    /** An edit saved: same pebble, different contents. */
+    /**
+     * `EditPebble` is a separate entry with no callback back into this instance
+     * (#852) — an edit saved there has to be picked up on resume.
+     */
     @Test
-    fun `a bumped reload key refetches the same pebble`() =
+    fun `resuming after the first time refetches the same pebble`() =
         runTest {
             val service = FakePebbleDetailService(detail(name = "A walk"))
             val viewModel = PebbleDetailViewModel(service)
-            viewModel.start("pebble-1", reloadKey = 0)
+            viewModel.start("pebble-1")
             advanceUntilIdle()
 
+            // First resume: `start` already loaded, so this is a no-op.
+            viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals(1, service.loadCalls.size)
+
             service.detail = detail(name = "A longer walk")
-            viewModel.start("pebble-1", reloadKey = 1)
+            viewModel.onResumed()
             advanceUntilIdle()
 
             assertEquals(listOf("pebble-1", "pebble-1"), service.loadCalls)
@@ -108,11 +113,11 @@ class PebbleDetailViewModelTest {
         runTest {
             val service = FakePebbleDetailService(detail(id = "pebble-1"))
             val viewModel = PebbleDetailViewModel(service)
-            viewModel.start("pebble-1", reloadKey = 0)
+            viewModel.start("pebble-1")
             advanceUntilIdle()
 
             service.detail = detail(id = "pebble-2", name = "Another")
-            viewModel.start("pebble-2", reloadKey = 0)
+            viewModel.start("pebble-2")
             advanceUntilIdle()
 
             assertEquals(listOf("pebble-1", "pebble-2"), service.loadCalls)

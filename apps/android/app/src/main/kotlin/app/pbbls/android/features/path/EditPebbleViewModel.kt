@@ -116,10 +116,11 @@ class EditPebbleViewModel
         /**
          * Load the pebble, unless it is the one already loaded.
          *
-         * The guard is what makes an activity-scoped ViewModel safe behind a
-         * cover: a rotation re-runs the screen's `LaunchedEffect` and must not
-         * throw away edits in progress, while opening a *different* pebble must
-         * start clean.
+         * The guard is what keeps a rotation safe: it re-runs the screen's
+         * `LaunchedEffect`, which must not throw away edits in progress, while
+         * opening a *different* pebble must start clean. Since #852 this is its
+         * own nav entry, so a different pebble is a different entry — but the
+         * rotation case is unchanged and still needs the guard.
          */
         fun start(pebbleId: String) {
             if (loadedPebbleId == pebbleId) return
@@ -249,9 +250,15 @@ class EditPebbleViewModel
                             } ?: emptyList()
                         null -> emptyList()
                     }
-                val result = writeService.update(pebbleId, state.draft, snapPayload)
-
+                // The write itself is inside NonCancellable, not just the
+                // response handling (#852). Before these screens were nav
+                // entries they lived on Path's entry, so closing the cover never
+                // cancelled this scope. An entry is disposed when it is popped,
+                // which cancels `viewModelScope` and would abort a request the
+                // server may already have accepted — mirroring SoulFormViewModel,
+                // which has always wrapped the whole section.
                 withContext(NonCancellable) {
+                    val result = writeService.update(pebbleId, state.draft, snapPayload)
                     when (result) {
                         is ComposeResult.Success -> {
                             updateContent { it.copy(renderSvg = result.response.renderSvg ?: it.renderSvg) }

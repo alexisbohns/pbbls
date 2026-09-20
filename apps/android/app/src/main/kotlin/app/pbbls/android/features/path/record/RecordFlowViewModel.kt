@@ -22,7 +22,6 @@ import app.pbbls.android.services.AchievementsServicing
 import app.pbbls.android.services.ComposeResult
 import app.pbbls.android.services.ComposerDraftCoordinator
 import app.pbbls.android.services.ComposerSnapshotStoring
-import app.pbbls.android.services.PebbleDraftRecord
 import app.pbbls.android.services.PebbleDraftsServicing
 import app.pbbls.android.services.PebbleWriteServicing
 import app.pbbls.android.services.ReferenceDataServicing
@@ -114,11 +113,13 @@ data class RecordFlowUiState(
  * (M58 D4), and none of that is orchestration. What changed is its storage —
  * a `StateFlow<RecordFlowState>` this class persists and exposes.
  *
- * **Activity-scoped.** The cover is a conditionally-composed child of
- * `PathScreen`, not a navigation destination, so `hiltViewModel()` binds to the
- * activity's store and this outlives the cover. [startFlow] and [resetForNext]
- * are the explicit lifecycle that buys back; #852 replaces both with a back
- * stack entry.
+ * **Entry-scoped (#852).** The flow is its own `PebblesKey.RecordFlow`
+ * destination, and `RootScreen` decorates entries with
+ * `rememberViewModelStoreNavEntryDecorator()`, so this ViewModel is created
+ * with the entry and cleared when it is popped — verified on device by logging
+ * one init/clear pair per visit with fresh identities. [startFlow] and
+ * [resetForNext] survive as defence in depth rather than as the lifecycle: they
+ * were load-bearing when the ViewModel outlived the cover it drove.
  */
 @HiltViewModel
 class RecordFlowViewModel
@@ -233,15 +234,20 @@ class RecordFlowViewModel
          * behaviour #647 put there. A guard here would latch on the first call —
          * the one that happens *before* refs load — and the draft would never
          * hydrate at all.
+         *
+         * Takes the draft's id rather than the record (#852): a navigation key
+         * can only carry an id, so the coordinator does the by-id fetch itself.
          */
-        fun startFlow(resuming: PebbleDraftRecord?) = hydrate(resuming)
+        fun startFlow(resumeDraftId: String?) = hydrate(resumeDraftId)
 
         /**
-         * Clears the machine for the next presentation. Explicit because the
-         * ViewModel is activity-scoped: without it, reopening the composer would
-         * show the pebble the user published five minutes ago, and the
-         * coordinator's decide-once guard would skip hydration for the rest of
-         * the session.
+         * Clears the machine after a terminal step, before the entry pops.
+         *
+         * This was load-bearing when the ViewModel was activity-scoped and
+         * outlived the cover: without it, reopening the composer showed the
+         * pebble published five minutes ago. Since #852 the entry takes the
+         * ViewModel with it, so this is belt to that braces — kept because the
+         * publish and discard paths call it before the pop, not after.
          */
         private fun resetForNext() {
             model.reset()
@@ -257,9 +263,9 @@ class RecordFlowViewModel
          * before the souls / collections caches arrive would sanitize against
          * empty sets and silently drop every soul and collection.
          */
-        private fun hydrate(resuming: PebbleDraftRecord?) {
+        private fun hydrate(resumeDraftId: String?) {
             viewModelScope.launch {
-                val decision = drafts.hydrate(resuming, refs.hasLoaded)
+                val decision = drafts.hydrate(resumeDraftId, refs.hasLoaded)
                 _uiState.update {
                     it.copy(isRestorePromptPresented = drafts.isRestorePromptPresented)
                 }
@@ -271,6 +277,11 @@ class RecordFlowViewModel
                     }
                     model.draft.glyphId?.let { verifyGlyph(it) }
                     restoreStep()
+                } else if (decision is ComposerDraftCoordinator.Decision.Failed) {
+                    // No composer state to seed — surface the failure through the
+                    // same banner a failed publish uses rather than leaving the
+                    // flow silently blank.
+                    model.fail(decision.messageRes)
                 }
             }
         }

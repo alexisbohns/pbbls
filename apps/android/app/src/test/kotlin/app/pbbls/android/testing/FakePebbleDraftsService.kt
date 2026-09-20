@@ -14,6 +14,10 @@ class FakePebbleDraftsService(
     var countCallCount = 0
         private set
 
+    /** How many times [load] (the by-id resume read, #852) was called. */
+    var loadCallCount = 0
+        private set
+
     private val armed = ArmedFailure()
 
     /** Thrown by the next call, then cleared. */
@@ -29,6 +33,7 @@ class FakePebbleDraftsService(
     }
 
     override suspend fun load(id: String): PebbleDraftRecord? {
+        loadCallCount += 1
         armed.fire()
         return records.firstOrNull { it.id == id }
     }

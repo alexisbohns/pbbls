@@ -1,6 +1,5 @@
 package app.pbbls.android.features.path.record
 
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -30,13 +29,15 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
 import app.pbbls.android.features.path.create.pickers.rememberGlyphPickerState
 import app.pbbls.android.features.path.models.Valence
 import app.pbbls.android.features.path.record.steps.RecordSuccessStep
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalReferenceDataService
-import app.pbbls.android.services.PebbleDraftRecord
 import app.pbbls.android.services.rememberTapHaptics
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesText
@@ -64,13 +65,17 @@ private const val STEP_TRANSITION_MS = 280
  * [onPublished] fires as soon as the pebble publishes, while the success step is
  * still up, so the Path is already reloaded by the time the user exits (D10).
  * [onDismiss] is the exit: cancel, and the success step's own button.
+ *
+ * [resumeDraftId] carries an id rather than the whole draft record (#852): a
+ * navigation key can only carry an id, and [RecordFlowViewModel] fetches the row
+ * itself once reference data has loaded.
  */
 @Composable
 fun RecordFlowScreen(
     onPublished: (String) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
-    resuming: PebbleDraftRecord? = null,
+    resumeDraftId: String? = null,
     onDraftSaved: () -> Unit = onDismiss,
     viewModel: RecordFlowViewModel = hiltViewModel(),
 ) {
@@ -84,11 +89,11 @@ fun RecordFlowScreen(
     val haptic = rememberTapHaptics()
     val glyphPickerState = rememberGlyphPickerState()
 
-    // The ViewModel is activity-scoped (the cover is a conditionally-composed
-    // child, not a destination — #852), so opening is explicit. `startFlow`
-    // guards itself, which is what keeps a rotation from re-hydrating over what
-    // the user has typed since.
-    LaunchedEffect(resuming?.id, refs.hasLoaded) { viewModel.startFlow(resuming) }
+    // The entry carries `resumeDraftId` as a key argument, and Nav3 does not
+    // populate SavedStateHandle from a key, so the screen drives the start
+    // (#852). `startFlow` guards itself, which is what keeps a rotation from
+    // re-hydrating over what the user has typed since.
+    LaunchedEffect(resumeDraftId, refs.hasLoaded) { viewModel.startFlow(resumeDraftId) }
 
     // Haptics come back out as effects because a ViewModel has no View to buzz;
     // every interaction still routes through RecordFlowModel (M58 D4).
@@ -118,7 +123,17 @@ fun RecordFlowScreen(
     // an explicit branch rather than an absent handler. That is also why the
     // terminal step handles it — it has no back chevron, but the system button
     // exists regardless and has to mean "leave", not "exit the app".
-    BackHandler { viewModel.onSystemBack(unwindGlyphPicker = glyphPickerState::unwind) }
+    //
+    // NavigationBackHandler (not the legacy BackHandler) so a half-swipe is
+    // cancellable: onSystemBack only runs on onBackCompleted, so a cancelled
+    // gesture never touches the step machine — nothing to undo, because
+    // nothing was mutated during the scrub. The wizard's steps stay internal
+    // state (not nav entries), so this is the one handler in the flow that
+    // still walks its own step machine rather than popping a key.
+    val recordFlowBackState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
+    NavigationBackHandler(state = recordFlowBackState) {
+        viewModel.onSystemBack(unwindGlyphPicker = glyphPickerState::unwind)
+    }
 
     Column(
         modifier =

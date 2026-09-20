@@ -31,11 +31,9 @@ import app.pbbls.android.features.path.components.PathBottomBar
 import app.pbbls.android.features.path.components.WeekHeader
 import app.pbbls.android.features.path.components.WeekPebbleList
 import app.pbbls.android.features.path.components.WeekRoll
-import app.pbbls.android.features.path.create.CreatePebbleScreen
 import app.pbbls.android.features.path.models.EmotionPalette
 import app.pbbls.android.features.path.models.Pebble
 import app.pbbls.android.features.path.models.WeekRollEntry
-import app.pbbls.android.features.path.record.RecordFlowScreen
 import app.pbbls.android.features.shared.ripples.RippleSummary
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.theme.PebblesDestructive
@@ -48,23 +46,25 @@ import kotlin.math.abs
 /**
  * The Path timeline — the authenticated landing surface (`PathView.swift`
  * analog). Loads every pebble once via `path_pebbles()`, groups by ISO week,
- * pages the body by week, and hosts the create/detail/edit covers plus the
- * bottom stats bar. Sign-out moved to the Profile screen (sub-project C);
- * [onProfile] navigates there.
+ * pages the body by week, and hosts the bottom stats bar. Sign-out moved to the
+ * Profile screen (sub-project C); [onProfile] navigates there.
  *
  * Every piece of state it used to hold in `remember` now lives in
- * [PathViewModel] (#849), so a rotation no longer re-fetches the timeline,
- * loses the focused week or closes an open cover. What is left here is
- * composition: which cover is up, and wiring the stateless [PathContent] to the
- * state.
+ * [PathViewModel] (#849), so a rotation no longer re-fetches the timeline or
+ * loses the focused week.
  *
- * The covers are still conditionally-composed children rather than navigation
- * destinations, so their own ViewModels are activity-scoped; #852 turns them
- * into a real back stack.
+ * Detail, edit, both composers and drafts are `PebblesEntryProvider` entries
+ * now (#852) — [onOpenDetail], [onOpenDrafts], [onCreatePebble] and
+ * [onCreatePebbleLongPress] are how this screen reaches them; only the caller
+ * (`PebblesEntryProvider`) ever touches a `Navigator`.
  */
 @Composable
 fun PathScreen(
     onProfile: () -> Unit,
+    onOpenDetail: (String) -> Unit,
+    onOpenDrafts: () -> Unit,
+    onCreatePebble: () -> Unit,
+    onCreatePebbleLongPress: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: PathViewModel = hiltViewModel(),
 ) {
@@ -72,7 +72,9 @@ fun PathScreen(
     val covers by viewModel.covers.collectAsStateWithLifecycle()
 
     // Coming back from a pushed screen must re-read the timeline: the ViewModel is
-    // scoped to the back stack entry, which survives that round trip.
+    // scoped to the back stack entry, which survives that round trip. This is also
+    // how a published pebble, a saved edit or a delete made on the detail/edit/
+    // drafts entries reaches the timeline now — see PathViewModel.onResumed.
     LifecycleResumeEffect(viewModel) {
         viewModel.onResumed()
         onPauseOrDispose {}
@@ -118,11 +120,11 @@ fun PathScreen(
                         today = content.today,
                         onFocusChange = viewModel::onFocusWeek,
                         paletteFor = { pebble -> pebble.emotion?.let { palettes.palette(it.id) } },
-                        onPebbleTap = { pebble -> viewModel.openDetail(pebble.id) },
+                        onPebbleTap = { pebble -> onOpenDetail(pebble.id) },
                         onPebbleDelete = viewModel::requestDelete,
-                        onCreatePebble = viewModel::openFlow,
-                        onCreatePebbleLongPress = viewModel::openForm,
-                        onOpenDrafts = viewModel::openDrafts,
+                        onCreatePebble = onCreatePebble,
+                        onCreatePebbleLongPress = onCreatePebbleLongPress,
+                        onOpenDrafts = onOpenDrafts,
                         draftCount = content.draftCount,
                         karma = content.karma,
                         ripple = content.ripple,
@@ -130,77 +132,6 @@ fun PathScreen(
                     )
                 }
             }
-        }
-
-        // Full-screen detail cover (self-applies safeDrawingPadding, so it lives in
-        // the OUTER Box) — the fullScreenCover analog (D5).
-        covers.detailPebbleId?.let { detailId ->
-            PebbleDetailScreen(
-                pebbleId = detailId,
-                reloadKey = covers.detailReloadKey,
-                onDismiss = viewModel::closeDetail,
-                onEditRequested = viewModel::openEdit,
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
-
-        // Full-screen edit cover — stacked over the detail cover (both opaque, so
-        // the detail stays alive underneath, matching iOS EditPebbleSheet). Also
-        // in the OUTER Box since EditPebbleScreen self-applies safeDrawingPadding.
-        // On save it swaps back to the detail (D5), bumps detailReloadKey to reload
-        // the revealed detail in place, and reloads the timeline.
-        covers.editingPebbleId?.let { editId ->
-            EditPebbleScreen(
-                pebbleId = editId,
-                onDismiss = viewModel::closeEdit,
-                onSaved = viewModel::onEditSaved,
-                modifier = Modifier.fillMaxSize(),
-            )
-        }
-
-        // Full-screen record-flow cover (M58) — the default composer. Sibling of
-        // the detail cover, in the OUTER (unpadded) Box since it self-applies
-        // safeDrawingPadding/imePadding. On publish it reloads the timeline and
-        // focuses the new pebble's week behind the still-visible success step; it
-        // deliberately does NOT open the detail the way the form does, because the
-        // user has just spent ten screens on this pebble and the success step
-        // already showed it (D10).
-        if (covers.isPresentingFlow) {
-            RecordFlowScreen(
-                onPublished = viewModel::onFlowPublished,
-                onDismiss = viewModel::closeFlow,
-                modifier = Modifier.fillMaxSize(),
-                resuming = covers.resumingDraft,
-                onDraftSaved = viewModel::onFlowDraftSaved,
-            )
-        }
-
-        // Full-screen create cover — the all-at-once form, now reached by
-        // long-pressing "New pebble" (M58 D1). Sibling of the detail cover, also
-        // in the OUTER (unpadded) Box since it self-applies
-        // safeDrawingPadding/imePadding (C, the fullScreenCover analog D5). On
-        // success it reveals the new pebble through the detail cover and reloads
-        // the timeline — the flow deliberately does not.
-        if (covers.isPresentingCreate) {
-            CreatePebbleScreen(
-                onCreated = viewModel::onFormCreated,
-                onCancel = viewModel::closeForm,
-                modifier = Modifier.fillMaxSize(),
-                resuming = covers.resumingDraft,
-                onDraftSaved = viewModel::onFormDraftSaved,
-            )
-        }
-
-        // Full-screen drafts cover (M47) — self-applies safeDrawingPadding, so it
-        // belongs in the OUTER Box like its siblings. Composed BEFORE the create
-        // cover in z-order so resuming a draft stacks the composer on top of it.
-        if (covers.showsDrafts) {
-            DraftsScreen(
-                onResume = viewModel::resumeDraft,
-                onDismiss = viewModel::closeDrafts,
-                modifier = Modifier.fillMaxSize(),
-                reloadKey = covers.draftsReloadKey,
-            )
         }
 
         covers.pendingDeletion?.let { target ->

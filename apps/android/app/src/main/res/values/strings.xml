@@ -433,6 +433,8 @@
     <string name="action_delete">Delete</string>
     <string name="draft_save">Save as draft</string>
     <string name="draft_save_error">Couldn\'t save that draft. Please try again.</string>
+    <!-- The composer resumes a draft by id (#852): shown when that by-id fetch fails or the row is gone. -->
+    <string name="draft_resume_load_error">Couldn\'t load that draft. Please try again.</string>
     <string name="draft_restore_title">Pick up where you left off?</string>
     <string name="draft_restore_body">We kept what you were writing here. Add your photo again when you\'re ready.</string>
     <string name="draft_restore_confirm">Restore it</string>

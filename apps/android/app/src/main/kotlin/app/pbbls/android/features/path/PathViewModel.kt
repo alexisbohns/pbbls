@@ -11,7 +11,6 @@ import app.pbbls.android.features.path.models.WeekRollEntry
 import app.pbbls.android.features.shared.ripples.RippleSummary
 import app.pbbls.android.services.PathServicing
 import app.pbbls.android.services.PathStatsServicing
-import app.pbbls.android.services.PebbleDraftRecord
 import app.pbbls.android.services.PebbleDraftsServicing
 import app.pbbls.android.services.PebbleWriteServicing
 import app.pbbls.android.ui.runCatchingCancellable
@@ -77,41 +76,23 @@ sealed interface PathUiState {
 }
 
 /**
- * Which full-screen covers are up.
+ * The delete confirmation and its failure notice — genuine dialogs, not
+ * navigation destinations, so they stay here rather than becoming entries
+ * (design D7).
  *
- * **Moved here verbatim, not redesigned.** These are five independent flags
- * plus two reload tokens, and the render conditions that read them include a
- * hand-written exclusion (`isPresentingDrafts && !isPresentingCreate &&
- * !isPresentingFlow`) — exactly the kind of thing a sealed type should make
- * unrepresentable. It is not one here because the covers genuinely *stack*
- * (edit over detail; the composer over the drafts list, and cancelling the form
- * returns to that list while dismissing the flow closes it), so the honest
- * model is a back stack — which is what #852 turns them into. Collapsing them
- * into an enum now would quietly change which surface you land on when you
- * cancel the form.
- *
- * What moving them *does* buy, today, is the acceptance criterion: an open cover
- * now survives a rotation, because this lives in a `ViewModel` rather than in
- * `remember`.
+ * Detail, edit, the two composers and drafts used to live here too: five
+ * independent flags plus two reload tokens, with a hand-written exclusion
+ * (`isPresentingDrafts && !isPresentingCreate && !isPresentingFlow`) standing
+ * in for what a sealed type should have made unrepresentable. #852 promotes
+ * all five to [PebblesKey] entries on the shared back stack, which makes that
+ * exclusion structurally impossible instead of merely discouraged — only one
+ * entry is ever on top, so "drafts showing under a composer" is no longer a
+ * state this class can even express.
  */
 data class PathCovers(
-    val detailPebbleId: String? = null,
-    val editingPebbleId: String? = null,
-    val isPresentingFlow: Boolean = false,
-    val isPresentingCreate: Boolean = false,
-    val isPresentingDrafts: Boolean = false,
-    val resumingDraft: PebbleDraftRecord? = null,
     val pendingDeletion: Pebble? = null,
     val didDeleteFail: Boolean = false,
-    /** Bumped to make the revealed detail re-read after an edit. */
-    val detailReloadKey: Int = 0,
-    /** Bumped so the drafts badge and list re-read after any draft write. */
-    val draftsReloadKey: Int = 0,
-) {
-    /** The drafts list hides while a composer is stacked on top of it. */
-    val showsDrafts: Boolean
-        get() = isPresentingDrafts && !isPresentingCreate && !isPresentingFlow
-}
+)
 
 /**
  * State holder for the Path timeline (#849).
@@ -184,13 +165,24 @@ class PathViewModel
          * timeline showing what it showed before, until a write of its own
          * happened to reload it.
          *
+         * **This is also what replaced the three write-completion mechanisms
+         * (#852):** `detailReloadKey`, `draftsReloadKey` and the
+         * `onFlowPublished`/`onFormCreated` callbacks all existed to notify this
+         * ViewModel that a child cover had written something. Now that detail,
+         * edit, both composers and drafts are entries on the same back stack,
+         * *returning* to Path is itself the signal — publishing, editing and
+         * deleting all reload the same way, through this one path.
+         *
          * The first resume is skipped (`init` has already loaded); every later
          * one refreshes without the spinner. Deferred from PR #896, where the
          * same gap was fixed for the souls and collections lists.
          */
         fun onResumed() {
             resumeCount += 1
-            if (resumeCount > 1) reload()
+            if (resumeCount > 1) {
+                reload()
+                refreshDraftCount()
+            }
         }
 
         // MARK: - Loading
@@ -202,7 +194,7 @@ class PathViewModel
             loadJob?.cancel()
             _uiState.value = PathUiState.Loading
             isLoaded = false
-            loadJob = viewModelScope.launch { fetch(focusing = null) }
+            loadJob = viewModelScope.launch { fetch() }
         }
 
         /**
@@ -213,31 +205,17 @@ class PathViewModel
          */
         fun reload() {
             loadJob?.cancel()
-            loadJob = viewModelScope.launch { fetch(focusing = null) }
+            loadJob = viewModelScope.launch { fetch() }
             viewModelScope.launch { stats.refresh() }
         }
 
-        /**
-         * Reload and land on the week the new pebble belongs to (M58 D10).
-         * One coroutine, because the focus has to be applied to the rebuilt
-         * entries rather than the stale ones.
-         */
-        fun reloadFocusing(newPebbleId: String) {
-            loadJob?.cancel()
-            loadJob = viewModelScope.launch { fetch(focusing = newPebbleId) }
-            viewModelScope.launch { stats.refresh() }
-        }
-
-        private suspend fun fetch(focusing: String?) {
+        private suspend fun fetch() {
             runCatchingCancellable {
                 WeekRollBuilder.build(pathService.loadPathPebbles(), ZoneId.systemDefault(), today)
             }.fold(
                 onSuccess = { built ->
                     entries = built
-                    focusedWeekStart =
-                        focusing
-                            ?.let { id -> built.firstOrNull { e -> e.pebbles.any { it.id == id } }?.weekStart }
-                            ?: refocusedWeekStart(built, focusedWeekStart, today)
+                    focusedWeekStart = refocusedWeekStart(built, focusedWeekStart, today)
                     hasFailed = false
                     isLoaded = true
                 },
@@ -301,79 +279,6 @@ class PathViewModel
             publish()
         }
 
-        // MARK: - Covers
-
-        fun openDetail(pebbleId: String) = _covers.update { it.copy(detailPebbleId = pebbleId) }
-
-        fun closeDetail() = _covers.update { it.copy(detailPebbleId = null) }
-
-        fun openEdit() = _covers.update { it.copy(editingPebbleId = it.detailPebbleId) }
-
-        fun closeEdit() = _covers.update { it.copy(editingPebbleId = null) }
-
-        /** Edit saved: swap back to the detail and make it re-read (D5). */
-        fun onEditSaved() {
-            _covers.update { it.copy(editingPebbleId = null, detailReloadKey = it.detailReloadKey + 1) }
-            reload()
-        }
-
-        fun openFlow() = _covers.update { it.copy(isPresentingFlow = true) }
-
-        fun openForm() = _covers.update { it.copy(isPresentingCreate = true) }
-
-        fun openDrafts() = _covers.update { it.copy(isPresentingDrafts = true) }
-
-        fun closeDrafts() = _covers.update { it.copy(isPresentingDrafts = false) }
-
-        fun resumeDraft(record: PebbleDraftRecord) = _covers.update { it.copy(resumingDraft = record, isPresentingFlow = true) }
-
-        /** The record flow published: reload behind the still-visible success step. */
-        fun onFlowPublished(newPebbleId: String) {
-            bumpDrafts()
-            reloadFocusing(newPebbleId)
-        }
-
-        /** Dismissing the flow also leaves the drafts list it may have been opened from. */
-        fun closeFlow() =
-            _covers.update {
-                it.copy(isPresentingFlow = false, resumingDraft = null, isPresentingDrafts = false)
-            }
-
-        fun onFlowDraftSaved() {
-            _covers.update { it.copy(isPresentingFlow = false, resumingDraft = null) }
-            bumpDrafts()
-        }
-
-        /** The form reveals the new pebble through the detail cover; the flow does not. */
-        fun onFormCreated(newPebbleId: String) {
-            _covers.update {
-                it.copy(
-                    isPresentingCreate = false,
-                    resumingDraft = null,
-                    isPresentingDrafts = false,
-                    detailPebbleId = newPebbleId,
-                )
-            }
-            bumpDrafts()
-            reload()
-        }
-
-        /** Cancelling the form leaves the drafts list open underneath, unlike the flow. */
-        fun closeForm() {
-            _covers.update { it.copy(isPresentingCreate = false, resumingDraft = null) }
-            bumpDrafts()
-        }
-
-        fun onFormDraftSaved() {
-            _covers.update { it.copy(isPresentingCreate = false, resumingDraft = null) }
-            bumpDrafts()
-        }
-
-        private fun bumpDrafts() {
-            _covers.update { it.copy(draftsReloadKey = it.draftsReloadKey + 1) }
-            refreshDraftCount()
-        }
-
         // MARK: - Delete
 
         fun requestDelete(pebble: Pebble) = _covers.update { it.copy(pendingDeletion = pebble) }
@@ -393,12 +298,7 @@ class PathViewModel
             viewModelScope.launch {
                 runCatchingCancellable { writeService.delete(target.id) }
                     .fold(
-                        onSuccess = {
-                            _covers.update {
-                                if (it.detailPebbleId == target.id) it.copy(detailPebbleId = null) else it
-                            }
-                            reload()
-                        },
+                        onSuccess = { reload() },
                         onFailure = {
                             Log.e(TAG, "delete pebble failed", it)
                             _covers.update { covers -> covers.copy(didDeleteFail = true) }

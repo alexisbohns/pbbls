@@ -26,7 +26,7 @@ class DraftsViewModelTest {
             val drafts = FakePebbleDraftsService(mutableListOf(record("d1"), record("d2")))
             val viewModel = DraftsViewModel(drafts)
 
-            viewModel.start(reloadKey = 0)
+            viewModel.start()
             assertEquals(DraftsUiState.Loading, viewModel.uiState.value)
             advanceUntilIdle()
 
@@ -41,7 +41,7 @@ class DraftsViewModelTest {
             drafts.failNext = IOException("offline")
             val viewModel = DraftsViewModel(drafts)
 
-            viewModel.start(reloadKey = 0)
+            viewModel.start()
             advanceUntilIdle()
             assertEquals(DraftsUiState.Error, viewModel.uiState.value)
 
@@ -52,29 +52,25 @@ class DraftsViewModelTest {
         }
 
     /**
-     * The key is the host saying "a draft was written, read it again". Keying on
-     * it rather than reloading unconditionally is what lets a rotation re-run
-     * the screen's effect without refetching.
+     * `Drafts` is a plain pushed-and-popped entry (#852), not a cover kept
+     * mounted underneath a composer, so `start` only needs to guard against a
+     * rotation re-running the screen's effect on the SAME instance — a fresh
+     * visit is always a fresh `DraftsViewModel` with a fresh load.
      */
     @Test
-    fun `the same reload key does not refetch, a new one does`() =
+    fun `starting twice on the same instance does not refetch`() =
         runTest {
             val drafts = FakePebbleDraftsService(mutableListOf(record("d1")))
             val viewModel = DraftsViewModel(drafts)
 
-            viewModel.start(reloadKey = 0)
+            viewModel.start()
             advanceUntilIdle()
-            viewModel.start(reloadKey = 0)
+            drafts.records.add(record("d2"))
+            viewModel.start()
             advanceUntilIdle()
 
             val state = viewModel.uiState.value as DraftsUiState.Content
             assertEquals(1, state.drafts.size)
-
-            drafts.records.add(record("d2"))
-            viewModel.start(reloadKey = 1)
-            advanceUntilIdle()
-
-            assertEquals(2, (viewModel.uiState.value as DraftsUiState.Content).drafts.size)
         }
 
     @Test
@@ -82,7 +78,7 @@ class DraftsViewModelTest {
         runTest {
             val drafts = FakePebbleDraftsService(mutableListOf(record("d1"), record("d2")))
             val viewModel = DraftsViewModel(drafts)
-            viewModel.start(reloadKey = 0)
+            viewModel.start()
             advanceUntilIdle()
 
             viewModel.delete(record("d1"))
@@ -107,7 +103,7 @@ class DraftsViewModelTest {
         runTest {
             val drafts = FakePebbleDraftsService(mutableListOf(record("d1"), record("d2")))
             val viewModel = DraftsViewModel(drafts)
-            viewModel.start(reloadKey = 0)
+            viewModel.start()
             advanceUntilIdle()
 
             drafts.failNext = IOException("offline")

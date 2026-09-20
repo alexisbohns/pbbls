@@ -75,8 +75,9 @@ class SnapUploadCoordinator(
     /**
      * Back to an empty form, with no Storage cleanup (#849).
      *
-     * For reusing the coordinator across presentations now that it is owned by
-     * an activity-scoped ViewModel rather than by the composition. It is NOT the
+     * For reusing the coordinator within one presentation. It mattered more when
+     * the owning ViewModel was activity-scoped and outlived the composer; since
+     * #852 the entry clears it. It is NOT the
      * way to abandon an upload — that is [cancelAndCleanup], which also fires the
      * compensating delete. Calling this with a pending snap would leak the
      * uploaded bytes, so the caller must have finished or cancelled first.

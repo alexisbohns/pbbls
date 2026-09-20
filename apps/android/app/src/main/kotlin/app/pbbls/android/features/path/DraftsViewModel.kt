@@ -32,11 +32,12 @@ sealed interface DraftsUiState {
  * State holder for the drafts list (#849).
  *
  * The delete is optimistic — the row leaves immediately and a failure reloads
- * the truth back in — and it ran in `rememberCoroutineScope`. Leaving the cover
- * mid-delete cancelled it after the request had gone, so the row was gone from
- * the server and the list never reloaded: the badge on the Path kept counting a
- * draft that no longer existed until the next cold start. The request and the
- * reconcile are one `withContext(NonCancellable)` step now.
+ * the truth back in — and it ran in `rememberCoroutineScope`. Leaving the
+ * screen mid-delete cancelled it after the request had gone, so the row was
+ * gone from the server and the list never reloaded: the badge on the Path kept
+ * counting a draft that no longer existed until the next cold start. The
+ * request and the reconcile are one `withContext(NonCancellable)` step now, so
+ * popping this entry (#852) mid-delete no longer loses that either.
  */
 @HiltViewModel
 class DraftsViewModel
@@ -47,17 +48,19 @@ class DraftsViewModel
         private val _uiState = MutableStateFlow<DraftsUiState>(DraftsUiState.Loading)
         val uiState: StateFlow<DraftsUiState> = _uiState.asStateFlow()
 
-        private var loadedKey: Int? = null
+        private var hasStarted = false
         private var loadJob: Job? = null
 
         /**
-         * Load, unless this [reloadKey] is already shown. The host bumps it on
-         * every draft write, so the list refreshes on open and after a publish
-         * while a rotation re-runs the screen's effect for free.
+         * Load once. `Drafts` is a plain pushed-and-popped entry (#852) rather
+         * than a cover that stays mounted underneath a composer, so a fresh
+         * instance (and a fresh load) is exactly what a rotation-safe re-run of
+         * this guard should do, and exactly what happens every time the entry is
+         * re-entered.
          */
-        fun start(reloadKey: Int) {
-            if (loadedKey == reloadKey) return
-            loadedKey = reloadKey
+        fun start() {
+            if (hasStarted) return
+            hasStarted = true
             load()
         }
 

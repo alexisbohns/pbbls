@@ -23,7 +23,6 @@ import app.pbbls.android.services.AchievementsServicing
 import app.pbbls.android.services.ComposeResult
 import app.pbbls.android.services.ComposerDraftCoordinator
 import app.pbbls.android.services.ComposerSnapshotStoring
-import app.pbbls.android.services.PebbleDraftRecord
 import app.pbbls.android.services.PebbleDraftsServicing
 import app.pbbls.android.services.PebbleWriteServicing
 import app.pbbls.android.services.ReferenceDataServicing
@@ -98,9 +97,11 @@ sealed interface CreatePebbleEffect {
  * Adopting the coordinator is the consolidation, not a new abstraction: every
  * method used here already existed and is covered by its own tests.
  *
- * Activity-scoped, like its siblings — the cover is a conditionally-composed
- * child of `PathScreen`, so [start] and the reset in [finish] are the explicit
- * lifecycle until #852.
+ * Entry-scoped since #852, like its siblings — this is its own
+ * `PebblesKey.CreatePebble` destination, and the entry decorator clears the
+ * ViewModel when it pops. [start] and the reset in [finish] were the explicit
+ * lifecycle while it was an activity-scoped cover; they now run before the pop
+ * rather than instead of one.
  */
 @HiltViewModel
 class CreatePebbleViewModel
@@ -148,16 +149,24 @@ class CreatePebbleViewModel
          * Called on open and again when reference data lands. No guard of its
          * own: the coordinator returns null until `refs.hasLoaded` and then
          * decides exactly once (#647).
+         *
+         * Takes the draft's id rather than the record (#852): a navigation key
+         * can only carry an id, so the coordinator does the by-id fetch itself.
          */
-        fun start(resuming: PebbleDraftRecord?) {
+        fun start(resumeDraftId: String?) {
             viewModelScope.launch {
-                val decision = drafts.hydrate(resuming, refs.hasLoaded)
+                val decision = drafts.hydrate(resumeDraftId, refs.hasLoaded)
                 _uiState.update { it.copy(isRestorePromptPresented = drafts.isRestorePromptPresented) }
                 if (decision is ComposerDraftCoordinator.Decision.Resume) {
                     _uiState.update { it.copy(draft = decision.payload.toDraft(knownIds)) }
                     decision.payload.existingSnap?.let { snaps.seedExisting(it) }
                     _uiState.value.draft.glyphId
                         ?.let { verifyGlyph(it) }
+                } else if (decision is ComposerDraftCoordinator.Decision.Failed) {
+                    // No form state to seed — surface the failure through the same
+                    // banner a failed publish uses (there is no other error slot
+                    // on this state) rather than leaving the form silently blank.
+                    _uiState.update { it.copy(saveErrorRes = decision.messageRes) }
                 }
             }
         }
@@ -303,12 +312,19 @@ class CreatePebbleViewModel
                     snaps.pendingSnapForPayload()?.let { snap ->
                         id?.let { listOf(PebbleSnapPayload(snap.id, snap.storagePrefix(it), 0)) }
                     }
-                val result = writeService.create(_uiState.value.draft, snapPayload)
-
-                // Past this line the server has decided. Reconciling the client
-                // with that decision — consuming the draft above all — cannot be
-                // interrupted, or a published pebble keeps a draft beside it.
+                // The write is inside NonCancellable too, not just the
+                // reconciliation below (#852). Before this screen was a nav entry
+                // it lived on Path's entry, so closing the cover never cancelled
+                // this scope; an entry is disposed when popped, which cancels
+                // `viewModelScope` and would abort a create the server may
+                // already have accepted.
+                //
+                // Past the call the server has decided, and reconciling the
+                // client with that decision — consuming the draft above all —
+                // cannot be interrupted, or a published pebble keeps a draft
+                // beside it.
                 withContext(NonCancellable) {
+                    val result = writeService.create(_uiState.value.draft, snapPayload)
                     when (result) {
                         is ComposeResult.Success -> {
                             karma.notifyEarned(result.response.karmaDelta ?: 0, KarmaReason.PEBBLE_CREATED)
@@ -337,10 +353,11 @@ class CreatePebbleViewModel
         }
 
         /**
-         * Clear for the next presentation. Explicit because the ViewModel is
-         * activity-scoped: without it the next long-press opens onto the pebble
-         * just published, and the coordinator's decide-once guard would skip
-         * hydration for the rest of the session.
+         * Clear after a terminal step, before the entry pops.
+         *
+         * Load-bearing while the ViewModel was activity-scoped: without it the
+         * next long-press opened onto the pebble just published. Since #852 the
+         * entry takes the ViewModel with it, so this is defence in depth.
          */
         private fun finish() {
             drafts.reset()

@@ -260,9 +260,11 @@ class RecordFlowModel(
     /**
      * Back to a blank flow.
      *
-     * Needed because `RecordFlowViewModel` is activity-scoped while the cover it
-     * drives is a conditionally-composed child (#849): without an explicit reset,
-     * reopening the composer would show the pebble that was just published.
+     * Was needed when `RecordFlowViewModel` was activity-scoped and outlived the
+     * cover it drove (#849): without an explicit reset, reopening the composer
+     * showed the pebble just published. Since #852 the flow is its own nav entry
+     * and the ViewModel is cleared with it, so this runs before the pop rather
+     * than instead of one.
      * Silent — a reset is not something the user did.
      */
     fun reset() {

@@ -29,7 +29,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalReferenceDataService
-import app.pbbls.android.services.PebbleDraftRecord
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar
@@ -50,14 +49,29 @@ import app.pbbls.android.ui.ObserveUiEffects
  *
  * M47 adds draft mode: a "Save as draft" action ungated by the publish
  * requirements (design D5), a debounced local snapshot of the open form as crash
- * insurance, and [resuming] to hydrate from a server draft.
+ * insurance, and [resumeDraftId] to hydrate from a server draft.
+ *
+ * [resumeDraftId] carries an id rather than the whole draft record (#852): a
+ * navigation key can only carry an id, and [CreatePebbleViewModel] fetches the
+ * row itself once reference data has loaded.
+ *
+ * A pushed entry now (#852). Keeps a `BackHandler`, unlike its detail/drafts
+ * siblings — deliberately: `viewModel.cancel()` runs snap cleanup
+ * (`cancelAndCleanup`) and releases the composer's start guard, both of which a
+ * bare `Navigator.goBack()` would skip, so system back has to route through it
+ * rather than through `NavDisplay`'s default. The handler is now
+ * unconditionally **enabled** rather than `enabled = !uiState.isBusy` (D9): a
+ * *disabled* `BackHandler` declines the event instead of blocking it, so it
+ * fell through and popped this screen anyway while busy, skipping the cleanup
+ * the disabled state was trying to preserve. `cancel()` already no-ops while
+ * `isBusy`, so always calling it gets both cases right.
  */
 @Composable
 fun CreatePebbleScreen(
     onCreated: (String) -> Unit,
     onCancel: () -> Unit,
     modifier: Modifier = Modifier,
-    resuming: PebbleDraftRecord? = null,
+    resumeDraftId: String? = null,
     onDraftSaved: () -> Unit = onCancel,
     viewModel: CreatePebbleViewModel = hiltViewModel(),
 ) {
@@ -69,7 +83,7 @@ fun CreatePebbleScreen(
 
     // Re-run when reference data lands: the coordinator refuses to hydrate
     // before it, so the first call may legitimately decide nothing (#647).
-    LaunchedEffect(resuming?.id, refs.hasLoaded) { viewModel.start(resuming) }
+    LaunchedEffect(resumeDraftId, refs.hasLoaded) { viewModel.start(resumeDraftId) }
 
     ObserveUiEffects(viewModel.effects) { effect ->
         when (effect) {
@@ -84,7 +98,7 @@ fun CreatePebbleScreen(
             uri?.let(viewModel::onPhotoPicked)
         }
 
-    BackHandler(enabled = !uiState.isBusy) { viewModel.cancel() }
+    BackHandler { viewModel.cancel() }
 
     val draft = uiState.draft
     val selectedEmotion = draft.emotionId?.let { palettes.byEmotionId[it] }

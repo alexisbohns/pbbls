@@ -21,7 +21,6 @@ import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
 import java.time.OffsetDateTime
-import java.time.ZoneId
 
 /**
  * The Path timeline's load, refresh, delete and cover contract (#849).
@@ -84,6 +83,29 @@ class PathViewModelTest {
             viewModel.onResumed()
             advanceUntilIdle()
             assertEquals(loadsAfterInit + 1, path.loadCount)
+        }
+
+    /**
+     * The resume hook is also what replaced `detailReloadKey`, `draftsReloadKey`
+     * and the `onFlowPublished`/`onFormCreated` callbacks (#852): every entry that
+     * writes something — publish, edit, drafts — pops back to Path, and a resume
+     * refreshes both the timeline and the drafts badge in one place.
+     */
+    @Test
+    fun `returning to the timeline also refreshes the draft count`() =
+        runTest {
+            val drafts = FakePebbleDraftsService()
+            val viewModel = viewModel(drafts = drafts)
+            advanceUntilIdle()
+            val countsAfterInit = drafts.countCallCount
+
+            viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals(countsAfterInit, drafts.countCallCount)
+
+            viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals(countsAfterInit + 1, drafts.countCallCount)
         }
 
     /** The refresh is silent — it must not blank the timeline to a spinner. */
@@ -171,23 +193,6 @@ class PathViewModelTest {
             repeat(5) { viewModel.uiState.value }
 
             assertEquals(1, path.loadCount)
-        }
-
-    @Test
-    fun `reloadFocusing lands on the new pebble's week`() =
-        runTest {
-            val lastYear = now.minusWeeks(30)
-            val path = FakePathService(pebbles = listOf(pebble("old", happenedAt = lastYear)))
-            val viewModel = viewModel(path)
-            advanceUntilIdle()
-
-            path.pebbles = listOf(pebble("old", happenedAt = lastYear), pebble("new", happenedAt = lastYear))
-            viewModel.reloadFocusing("new")
-            advanceUntilIdle()
-
-            val state = viewModel.uiState.value as PathUiState.Content
-            val expected = WeekRollBuilder.weekStart(lastYear.atZoneSameInstant(ZoneId.systemDefault()).toLocalDate())
-            assertEquals(expected, state.focusedWeekStart)
         }
 
     // MARK: - Stats and the local active-today override
@@ -322,20 +327,6 @@ class PathViewModelTest {
         }
 
     @Test
-    fun `deleting the pebble whose detail is open closes the detail`() =
-        runTest {
-            val viewModel = viewModel(FakePathService(pebbles = listOf(pebble("a"))))
-            advanceUntilIdle()
-
-            viewModel.openDetail("a")
-            viewModel.requestDelete(pebble("a"))
-            viewModel.confirmDelete()
-            advanceUntilIdle()
-
-            assertNull(viewModel.covers.value.detailPebbleId)
-        }
-
-    @Test
     fun `a failed delete surfaces the error dialog`() =
         runTest {
             val writes = FakePebbleWriteService()
@@ -366,97 +357,5 @@ class PathViewModelTest {
 
             assertTrue(writes.deletedPebbleIds.isEmpty())
             assertNull(viewModel.covers.value.pendingDeletion)
-        }
-
-    // MARK: - Covers
-
-    /**
-     * The hand-written exclusion the old screen carried
-     * (`isPresentingDrafts && !isPresentingCreate && !isPresentingFlow`), now a
-     * property with a test rather than a condition repeated at the call site.
-     */
-    @Test
-    fun `the drafts list hides while a composer is stacked over it`() =
-        runTest {
-            val viewModel = viewModel()
-            advanceUntilIdle()
-
-            viewModel.openDrafts()
-            assertTrue(viewModel.covers.value.showsDrafts)
-
-            viewModel.resumeDraft(draftRecord("d1"))
-            assertFalse(viewModel.covers.value.showsDrafts)
-            assertTrue(viewModel.covers.value.isPresentingFlow)
-        }
-
-    /**
-     * The asymmetry between the two composers, pinned because it is easy to
-     * "tidy away": dismissing the flow leaves the drafts list too, while
-     * cancelling the form returns to it.
-     */
-    @Test
-    fun `dismissing the flow closes drafts, cancelling the form does not`() =
-        runTest {
-            val viewModel = viewModel()
-            advanceUntilIdle()
-
-            viewModel.openDrafts()
-            viewModel.resumeDraft(draftRecord("d1"))
-            viewModel.closeFlow()
-            assertFalse(viewModel.covers.value.isPresentingDrafts)
-
-            viewModel.openDrafts()
-            viewModel.openForm()
-            viewModel.closeForm()
-            assertTrue(viewModel.covers.value.isPresentingDrafts)
-        }
-
-    @Test
-    fun `the form reveals the new pebble through the detail cover`() =
-        runTest {
-            val viewModel = viewModel()
-            advanceUntilIdle()
-
-            viewModel.openForm()
-            viewModel.onFormCreated("new-pebble")
-            advanceUntilIdle()
-
-            assertEquals("new-pebble", viewModel.covers.value.detailPebbleId)
-            assertFalse(viewModel.covers.value.isPresentingCreate)
-        }
-
-    @Test
-    fun `saving an edit swaps back to the detail and makes it re-read`() =
-        runTest {
-            val viewModel = viewModel(FakePathService(pebbles = listOf(pebble("a"))))
-            advanceUntilIdle()
-
-            viewModel.openDetail("a")
-            viewModel.openEdit()
-            assertEquals("a", viewModel.covers.value.editingPebbleId)
-            val before = viewModel.covers.value.detailReloadKey
-
-            viewModel.onEditSaved()
-            advanceUntilIdle()
-
-            assertNull(viewModel.covers.value.editingPebbleId)
-            assertEquals("a", viewModel.covers.value.detailPebbleId)
-            assertEquals(before + 1, viewModel.covers.value.detailReloadKey)
-        }
-
-    @Test
-    fun `every draft write bumps the drafts reload key and rereads the badge`() =
-        runTest {
-            val drafts = FakePebbleDraftsService()
-            val viewModel = viewModel(drafts = drafts)
-            advanceUntilIdle()
-            val countsAfterInit = drafts.countCallCount
-            val keyBefore = viewModel.covers.value.draftsReloadKey
-
-            viewModel.onFlowDraftSaved()
-            advanceUntilIdle()
-
-            assertEquals(keyBefore + 1, viewModel.covers.value.draftsReloadKey)
-            assertEquals(countsAfterInit + 1, drafts.countCallCount)
         }
 }

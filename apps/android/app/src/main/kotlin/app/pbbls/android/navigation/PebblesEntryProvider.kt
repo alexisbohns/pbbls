@@ -10,7 +10,12 @@ import app.pbbls.android.features.lab.AnnouncementDetailScreen
 import app.pbbls.android.features.lab.LabScreen
 import app.pbbls.android.features.lab.LogListMode
 import app.pbbls.android.features.lab.LogListScreen
+import app.pbbls.android.features.path.DraftsScreen
+import app.pbbls.android.features.path.EditPebbleScreen
 import app.pbbls.android.features.path.PathScreen
+import app.pbbls.android.features.path.PebbleDetailScreen
+import app.pbbls.android.features.path.create.CreatePebbleScreen
+import app.pbbls.android.features.path.record.RecordFlowScreen
 import app.pbbls.android.features.profile.AchievementsScreen
 import app.pbbls.android.features.profile.CollectionDetailScreen
 import app.pbbls.android.features.profile.CollectionFormScreen
@@ -25,9 +30,10 @@ import app.pbbls.android.features.profile.SoulsListScreen
  * Key → screen (#852).
  *
  * Part 1 wires exactly what the two NavHosts reached, with the same IA, so this
- * PR is a move and not a redesign (D11). The modal keys in [PebblesKey] are
- * declared but not yet wired: their covers still live inside their parent
- * screens until Parts 3–5 promote them.
+ * PR is a move and not a redesign (D11). Part 3 (Task 23) promotes the five
+ * write-path covers (detail, edit, both composers, drafts) below. What is left
+ * unwired — `AcceptInvite`, `Onboarding` — is handled outside this back stack
+ * (`RootScreen`'s own overlays) and belongs to later parts.
  *
  * Each `entry` carries its transition metadata via [NavTransitions.forKey], so
  * the animation travels with the key rather than living in a `when` at the
@@ -38,7 +44,13 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     onSignOut: () -> Unit,
 ) {
     entry<PebblesKey.Path>(metadata = NavTransitions.forKey(PebblesKey.Path)) {
-        PathScreen(onProfile = { navigator.navigate(PebblesKey.You) })
+        PathScreen(
+            onProfile = { navigator.navigate(PebblesKey.You) },
+            onOpenDetail = { pebbleId -> navigator.navigate(PebblesKey.PebbleDetail(pebbleId)) },
+            onOpenDrafts = { navigator.navigate(PebblesKey.Drafts) },
+            onCreatePebble = { navigator.navigate(PebblesKey.RecordFlow()) },
+            onCreatePebbleLongPress = { navigator.navigate(PebblesKey.CreatePebble()) },
+        )
     }
 
     entry<PebblesKey.You>(metadata = NavTransitions.forKey(PebblesKey.You)) {
@@ -157,5 +169,64 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         metadata = NavTransitions.forKey(PebblesKey.LabLogList(LogListMode.CHANGELOG.name)),
     ) { key ->
         LogListScreen(mode = key.mode, onBack = navigator::goBack)
+    }
+
+    // ---- The write path promoted to entries (#852 Task 23) ----
+
+    entry<PebblesKey.PebbleDetail>(metadata = NavTransitions.forKey(PebblesKey.PebbleDetail(""))) { key ->
+        PebbleDetailScreen(
+            pebbleId = key.pebbleId,
+            onDismiss = navigator::goBack,
+            onEditRequested = { navigator.navigate(PebblesKey.EditPebble(key.pebbleId)) },
+        )
+    }
+
+    entry<PebblesKey.EditPebble>(metadata = NavTransitions.forKey(PebblesKey.EditPebble(""))) { key ->
+        EditPebbleScreen(
+            pebbleId = key.pebbleId,
+            onDismiss = navigator::goBack,
+            // Popping back to the still-open detail entry is the reveal — its
+            // own resume refresh (mirroring PathViewModel.onResumed) is what
+            // re-reads the pebble (M58 D5, #852).
+            onSaved = navigator::goBack,
+        )
+    }
+
+    entry<PebblesKey.RecordFlow>(metadata = NavTransitions.forKey(PebblesKey.RecordFlow())) { key ->
+        RecordFlowScreen(
+            resumeDraftId = key.resumeDraftId,
+            // The flow deliberately does NOT reveal the pebble through the
+            // detail entry: the user has just spent ten screens on it and the
+            // success step already showed it (M58 D10). Just pop; Path's own
+            // resume refresh picks up the new pebble.
+            onPublished = { navigator.goBack() },
+            onDismiss = navigator::goBack,
+        )
+    }
+
+    entry<PebblesKey.CreatePebble>(metadata = NavTransitions.forKey(PebblesKey.CreatePebble())) { key ->
+        CreatePebbleScreen(
+            resumeDraftId = key.resumeDraftId,
+            // The form DOES reveal the new pebble through the detail entry
+            // (M58 D10) — pop the composer, then push detail on what is left.
+            onCreated = { pebbleId ->
+                navigator.goBack()
+                navigator.navigate(PebblesKey.PebbleDetail(pebbleId))
+            },
+            onCancel = navigator::goBack,
+        )
+    }
+
+    entry<PebblesKey.Drafts>(metadata = NavTransitions.forKey(PebblesKey.Drafts)) {
+        DraftsScreen(
+            // Resuming a draft leaves the drafts list rather than stacking the
+            // flow over it (#852 supersedes the cover-stacking of M47/M58): pop
+            // Drafts, then enter the flow already seeded with this draft's id.
+            onResume = { record ->
+                navigator.goBack()
+                navigator.navigate(PebblesKey.RecordFlow(resumeDraftId = record.id))
+            },
+            onDismiss = navigator::goBack,
+        )
     }
 }
