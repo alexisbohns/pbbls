@@ -1240,7 +1240,16 @@ Delete from each ViewModel the corresponding `isPresentingX` field, `openX()`, `
 
 - [ ] **Step 3: Delete seven `BackHandler`s**
 
-Remove the `BackHandler` from: `SoulFormScreen:84`, `CollectionFormScreen:81`, `SettingsScreen:116`, `GlyphCarveScreen:101`, `InviteScreen:78`, `ConnectionsScreen:58`, and `LogListScreen:75` (Task 19 handles Lab's other one).
+Remove the `BackHandler` from the **six** screens this task promotes:
+`SoulFormScreen`, `CollectionFormScreen`, `SettingsScreen`, `GlyphCarveScreen`,
+`InviteScreen`, `ConnectionsScreen`.
+
+**Do NOT touch `LogListScreen`'s or `LabScreen`'s.** Neither is promoted here —
+both are still content swaps inside `LabScreen`, so nothing else owns their back.
+`LogListScreen`'s handler exists for a specific reason its own comment records:
+Lab's handler only clears the cover flag, so without it the ViewModel's mode
+guard stays set and a same-mode reopen serves a stale list. **Task 19** promotes
+both to entries and deletes both handlers then.
 
 Each of these had `enabled = !uiState.isSaving`, which did not block back at all — it declined to handle it, so back fell through to the host (D9). Where the intent was genuinely "refuse back while saving", express it as an **enabled** handler that consumes:
 
