@@ -1,6 +1,5 @@
 package app.pbbls.android.features.path
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -46,24 +45,23 @@ import java.time.OffsetDateTime
  *
  * Its own surface rather than a section inside the Path timeline, whose week
  * grouping, ripple, bounce and stats all assume real pebbles (design D4).
- * Tapping a row resumes it in `CreatePebbleScreen`.
+ * Tapping a row resumes it in the record flow (#852 supersedes `CreatePebbleScreen`
+ * stacking underneath: resuming now pops this entry and pushes `RecordFlow`).
  *
- * Self-applies `safeDrawingPadding()`, so the caller composes it in the OUTER
- * (unpadded) Box alongside the other full-screen covers (D5).
+ * A pushed-and-popped entry now (#852), not a cover — self-applies
+ * `safeDrawingPadding()`. System back is `NavDisplay`'s own; nothing here needs
+ * to refuse it, since [DraftsViewModel]'s delete is already uncancellable.
  */
 @Composable
 fun DraftsScreen(
     onResume: (PebbleDraftRecord) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
-    reloadKey: Int = 0,
     viewModel: DraftsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    LaunchedEffect(reloadKey) { viewModel.start(reloadKey) }
-
-    BackHandler { onDismiss() }
+    LaunchedEffect(Unit) { viewModel.start() }
 
     DraftsContent(
         uiState = uiState,

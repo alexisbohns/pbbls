@@ -46,6 +46,17 @@ import app.pbbls.android.ui.ObserveUiEffects
  * stroke color, and saves through PebbleWriteService.update (D2/D3). Soft-success
  * (any 5xx) advances; the pebbleEnriched flash fires only when karma_delta > 0
  * (D10, guarded inside KarmaNotificationService).
+ *
+ * A pushed entry now (#852). Keeps a `BackHandler`, unlike its detail/drafts
+ * siblings — deliberately: `viewModel.dismiss()` runs snap cleanup
+ * (`cancelAndCleanup`) that a bare `Navigator.goBack()` would skip, so system
+ * back has to route through it rather than through `NavDisplay`'s default. The
+ * handler is now unconditionally **enabled** rather than
+ * `enabled = content?.isSaving != true` (D9): a *disabled* `BackHandler`
+ * declines the event instead of blocking it, so it fell through and popped
+ * this screen anyway while saving, skipping the cleanup the disabled state was
+ * trying to preserve. `dismiss()` already no-ops while `isSaving`, so always
+ * calling it gets both cases right.
  */
 @Composable
 fun EditPebbleScreen(
@@ -77,7 +88,7 @@ fun EditPebbleScreen(
         }
 
     val content = uiState as? EditPebbleUiState.Content
-    BackHandler(enabled = content?.isSaving != true) { viewModel.dismiss() }
+    BackHandler { viewModel.dismiss() }
 
     Column(
         modifier

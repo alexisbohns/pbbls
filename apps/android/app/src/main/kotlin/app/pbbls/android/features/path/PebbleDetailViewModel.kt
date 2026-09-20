@@ -27,12 +27,16 @@ sealed interface PebbleDetailUiState {
 }
 
 /**
- * State holder for the read cover (#849).
+ * State holder for the pushed detail entry (#849, #852).
  *
  * A pure read, so there is no write to make uncancellable here — what it fixes
  * is rotation: the load lived in a `LaunchedEffect` over `remember(pebbleId)`,
  * so turning the phone re-fetched the pebble and flashed the spinner back over
  * a page the user was reading.
+ *
+ * `EditPebble` is a separate entry now (#852), with no callback back into this
+ * instance, so an edit made there has to be picked up by [onResumed] — same
+ * mechanism as `SoulDetailViewModel.onResumed`.
  */
 @HiltViewModel
 class PebbleDetailViewModel
@@ -43,43 +47,72 @@ class PebbleDetailViewModel
         private val _uiState = MutableStateFlow<PebbleDetailUiState>(PebbleDetailUiState.Loading)
         val uiState: StateFlow<PebbleDetailUiState> = _uiState.asStateFlow()
 
-        private var loaded: Pair<String, Int>? = null
+        private var pebbleId: String? = null
+        private var detail: PebbleDetail? = null
+        private var hasFailed = false
+        private var isLoaded = false
         private var loadJob: Job? = null
+        private var resumeCount = 0
 
-        /**
-         * Load [pebbleId], unless this exact (id, [reloadKey]) pair is already
-         * shown.
-         *
-         * The key is the host's way of saying "read it again" after an edit
-         * saved — the pebble is the same, its contents are not. Keying on the
-         * pair rather than on the id alone is what lets a rotation re-run the
-         * screen's effect without re-fetching, while an edit still refreshes.
-         */
-        fun start(
-            pebbleId: String,
-            reloadKey: Int,
-        ) {
-            val requested = pebbleId to reloadKey
-            if (loaded == requested) return
-            loaded = requested
-            load(pebbleId)
+        /** Load [id], unless it is the one already loaded. */
+        fun start(id: String) {
+            if (pebbleId == id) return
+            pebbleId = id
+            load()
         }
 
-        fun retry() = loaded?.let { (pebbleId, _) -> load(pebbleId) }
+        fun retry() = load()
 
-        private fun load(pebbleId: String) {
+        /**
+         * The entry came back to the foreground, e.g. from `EditPebble` popping
+         * back onto this one. The first resume is skipped because [start] has
+         * already loaded.
+         */
+        fun onResumed() {
+            resumeCount += 1
+            if (resumeCount > 1) reload()
+        }
+
+        private fun load() {
+            val id = pebbleId ?: return
             loadJob?.cancel()
             _uiState.value = PebbleDetailUiState.Loading
-            loadJob =
-                viewModelScope.launch {
-                    runCatchingCancellable { detailService.load(pebbleId) }
-                        .fold(
-                            onSuccess = { _uiState.value = PebbleDetailUiState.Content(it) },
-                            onFailure = {
-                                Log.e(TAG, "pebble detail load failed", it)
-                                _uiState.value = PebbleDetailUiState.Error
-                            },
-                        )
+            isLoaded = false
+            loadJob = viewModelScope.launch { fetch(id) }
+        }
+
+        /** Refresh after a resume, keeping the content that is already on screen. */
+        private fun reload() {
+            val id = pebbleId ?: return
+            loadJob?.cancel()
+            loadJob = viewModelScope.launch { fetch(id) }
+        }
+
+        private suspend fun fetch(id: String) {
+            runCatchingCancellable { detailService.load(id) }
+                .fold(
+                    onSuccess = {
+                        detail = it
+                        hasFailed = false
+                        isLoaded = true
+                    },
+                    onFailure = {
+                        Log.e(TAG, "pebble detail load failed", it)
+                        // A failed post-resume refresh keeps the detail that is
+                        // already up, rather than replacing it with the error state.
+                        if (!isLoaded) hasFailed = true
+                    },
+                )
+            publish()
+        }
+
+        private fun publish() {
+            val current = detail
+            _uiState.value =
+                when {
+                    hasFailed -> PebbleDetailUiState.Error
+                    !isLoaded || current == null -> PebbleDetailUiState.Loading
+                    else -> PebbleDetailUiState.Content(current)
                 }
         }
     }

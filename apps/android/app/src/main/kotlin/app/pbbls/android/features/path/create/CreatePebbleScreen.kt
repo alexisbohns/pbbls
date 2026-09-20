@@ -54,6 +54,17 @@ import app.pbbls.android.ui.ObserveUiEffects
  * [resumeDraftId] carries an id rather than the whole draft record (#852): a
  * navigation key can only carry an id, and [CreatePebbleViewModel] fetches the
  * row itself once reference data has loaded.
+ *
+ * A pushed entry now (#852). Keeps a `BackHandler`, unlike its detail/drafts
+ * siblings — deliberately: `viewModel.cancel()` runs snap cleanup
+ * (`cancelAndCleanup`) and releases the composer's start guard, both of which a
+ * bare `Navigator.goBack()` would skip, so system back has to route through it
+ * rather than through `NavDisplay`'s default. The handler is now
+ * unconditionally **enabled** rather than `enabled = !uiState.isBusy` (D9): a
+ * *disabled* `BackHandler` declines the event instead of blocking it, so it
+ * fell through and popped this screen anyway while busy, skipping the cleanup
+ * the disabled state was trying to preserve. `cancel()` already no-ops while
+ * `isBusy`, so always calling it gets both cases right.
  */
 @Composable
 fun CreatePebbleScreen(
@@ -87,7 +98,7 @@ fun CreatePebbleScreen(
             uri?.let(viewModel::onPhotoPicked)
         }
 
-    BackHandler(enabled = !uiState.isBusy) { viewModel.cancel() }
+    BackHandler { viewModel.cancel() }
 
     val draft = uiState.draft
     val selectedEmotion = draft.emotionId?.let { palettes.byEmotionId[it] }
