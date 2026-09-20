@@ -666,7 +666,7 @@ fun EntryProviderScope<PebblesKey>.pebblesEntries(
     entry<PebblesKey.People>(metadata = NavTransitions.forKey(PebblesKey.People)) {
         SoulsListScreen(
             onBack = navigator::goBack,
-            onOpenSoul = { navigator.navigate(PebblesKey.SoulDetail(it.soul.id)) },
+            onOpenSoul = { navigator.navigate(PebblesKey.SoulDetail(it.id)) },
         )
     }
 
@@ -703,13 +703,10 @@ fun EntryProviderScope<PebblesKey>.pebblesEntries(
 }
 ```
 
-**Note on `onOpenSoul`:** `SoulsListScreen` hands back a `SoulWithGlyph`. Confirm the id path is `it.soul.id` and not `it.id` before compiling:
-
-```bash
-grep -n "class SoulWithGlyph" -A6 apps/android/app/src/main/kotlin/app/pbbls/android/services/SoulsService.kt
-```
-
-Use whatever that shows. Do not guess.
+**Note on `onOpenSoul`:** `SoulsListScreen` hands back a `SoulWithGlyph`, which
+is flat — `id`, `name`, `glyphId`, `glyph`, `pebblesCount`
+(`features/profile/models/SoulWithGlyph.kt:8`). So the id is `it.id`, not
+`it.soul.id`. Verified before this plan was finalized.
 
 - [ ] **Step 2: Verify it compiles**
 
@@ -1668,7 +1665,7 @@ and render the back button only when non-null. Do the same for `CollectionsListS
     entry<PebblesKey.People>(metadata = NavTransitions.forKey(PebblesKey.People)) {
         SoulsListScreen(
             onBack = null,
-            onOpenSoul = { navigator.navigate(PebblesKey.SoulDetail(it.soul.id)) },
+            onOpenSoul = { navigator.navigate(PebblesKey.SoulDetail(it.id)) },
         )
     }
 ```
