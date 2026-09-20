@@ -2,11 +2,13 @@ package app.pbbls.android.features.auth
 
 import androidx.annotation.StringRes
 import app.pbbls.android.R
+import kotlinx.serialization.Serializable
 
 /**
  * Login vs Sign-up mode for [AuthScreen] — the `AuthView.Mode` analog. [route] is
  * the NavHost path argument; [labelRes] the switcher label.
  */
+@Serializable
 enum class AuthMode(
     val route: String,
     @StringRes val labelRes: Int,
