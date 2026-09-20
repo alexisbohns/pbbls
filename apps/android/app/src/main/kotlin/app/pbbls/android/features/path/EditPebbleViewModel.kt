@@ -249,9 +249,15 @@ class EditPebbleViewModel
                             } ?: emptyList()
                         null -> emptyList()
                     }
-                val result = writeService.update(pebbleId, state.draft, snapPayload)
-
+                // The write itself is inside NonCancellable, not just the
+                // response handling (#852). Before these screens were nav
+                // entries they lived on Path's entry, so closing the cover never
+                // cancelled this scope. An entry is disposed when it is popped,
+                // which cancels `viewModelScope` and would abort a request the
+                // server may already have accepted — mirroring SoulFormViewModel,
+                // which has always wrapped the whole section.
                 withContext(NonCancellable) {
+                    val result = writeService.update(pebbleId, state.draft, snapPayload)
                     when (result) {
                         is ComposeResult.Success -> {
                             updateContent { it.copy(renderSvg = result.response.renderSvg ?: it.renderSvg) }

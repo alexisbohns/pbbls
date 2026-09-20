@@ -310,12 +310,19 @@ class CreatePebbleViewModel
                     snaps.pendingSnapForPayload()?.let { snap ->
                         id?.let { listOf(PebbleSnapPayload(snap.id, snap.storagePrefix(it), 0)) }
                     }
-                val result = writeService.create(_uiState.value.draft, snapPayload)
-
-                // Past this line the server has decided. Reconciling the client
-                // with that decision — consuming the draft above all — cannot be
-                // interrupted, or a published pebble keeps a draft beside it.
+                // The write is inside NonCancellable too, not just the
+                // reconciliation below (#852). Before this screen was a nav entry
+                // it lived on Path's entry, so closing the cover never cancelled
+                // this scope; an entry is disposed when popped, which cancels
+                // `viewModelScope` and would abort a create the server may
+                // already have accepted.
+                //
+                // Past the call the server has decided, and reconciling the
+                // client with that decision — consuming the draft above all —
+                // cannot be interrupted, or a published pebble keeps a draft
+                // beside it.
                 withContext(NonCancellable) {
+                    val result = writeService.create(_uiState.value.draft, snapPayload)
                     when (result) {
                         is ComposeResult.Success -> {
                             karma.notifyEarned(result.response.karmaDelta ?: 0, KarmaReason.PEBBLE_CREATED)
