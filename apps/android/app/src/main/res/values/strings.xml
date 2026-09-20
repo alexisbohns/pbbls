@@ -122,6 +122,7 @@
     <string name="settings_providers_header">Providers</string>
     <string name="settings_legal_header">Legal</string>
     <string name="settings_save_error">Couldn\'t save your changes. Please try again.</string>
+    <string name="settings_load_error">Couldn\'t load your settings. Please try again.</string>
     <string name="settings_account_header">Account</string>
     <string name="settings_delete_account">Delete account</string>
     <string name="settings_delete_account_title">Delete your account?</string>

@@ -190,18 +190,10 @@ fun ProfileScreen(
     }
 
     if (covers.isPresentingSettings) {
-        val content = uiState as? ProfileUiState.Content
         SettingsScreen(
-            initialDisplayName = content?.profile?.displayName.orEmpty(),
-            initialGlyphId = content?.profile?.glyphId,
-            initialGlyphStrokes = content?.glyphStrokes,
-            email = content?.email,
-            providers = content?.providers.orEmpty(),
             onDismiss = viewModel::closeSettings,
             onSaved = viewModel::onSettingsSaved,
             modifier = Modifier.fillMaxSize(),
-            initialHandle = content?.profile?.handle,
-            initialPublicProfile = content?.profile?.publicProfile ?: false,
         )
     }
 }

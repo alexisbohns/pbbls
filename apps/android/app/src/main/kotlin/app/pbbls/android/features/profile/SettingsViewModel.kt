@@ -5,8 +5,10 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.pbbls.android.R
 import app.pbbls.android.features.glyph.models.Glyph
 import app.pbbls.android.features.glyph.models.GlyphStroke
+import app.pbbls.android.services.ProfileRow
 import app.pbbls.android.services.ProfileServicing
 import app.pbbls.android.services.SupabaseServicing
 import app.pbbls.android.services.toDataError
@@ -62,6 +64,10 @@ data class SettingsUiState(
     val didSaveFail: Boolean = false,
     val isPresentingGlyphPicker: Boolean = false,
     val deletion: DeletionState = DeletionState.IDLE,
+    /** True while the ViewModel fetches its own profile — see the class KDoc. */
+    val isLoading: Boolean = true,
+    /** Set when that fetch fails — the screen shows this instead of an empty form. */
+    @StringRes val loadErrorRes: Int? = null,
 ) {
     /** Handles are stored normalized (DB CHECK), so compare and write that form. */
     val normalizedHandle: String
@@ -69,17 +75,19 @@ data class SettingsUiState(
 
     val isDirty: Boolean
         get() =
-            settingsIsDirty(
-                initialName = initial.displayName,
-                name = form.displayName,
-                initialGlyphId = initial.glyphId,
-                pickedGlyphId = form.pickedGlyph?.id,
-                newPassword = form.newPassword,
-                initialHandle = initial.handle,
-                handle = form.handle,
-                initialPublicProfile = initial.publicProfile,
-                isPublicProfile = form.isPublicProfile,
-            )
+            !isLoading &&
+                loadErrorRes == null &&
+                settingsIsDirty(
+                    initialName = initial.displayName,
+                    name = form.displayName,
+                    initialGlyphId = initial.glyphId,
+                    pickedGlyphId = form.pickedGlyph?.id,
+                    newPassword = form.newPassword,
+                    initialHandle = initial.handle,
+                    handle = form.handle,
+                    initialPublicProfile = initial.publicProfile,
+                    isPublicProfile = form.isPublicProfile,
+                )
 
     val currentStrokes: List<GlyphStroke>?
         get() = form.pickedGlyph?.strokes ?: initial.glyphStrokes
@@ -108,7 +116,19 @@ sealed interface SettingsEffect {
 }
 
 /**
- * State holder for Settings (#849).
+ * State holder for Settings (#849, #852 Task 16).
+ *
+ * **This ViewModel loads its own profile.** It used to receive seven initial
+ * values from `ProfileScreen`, which had already loaded them — but `SettingsKey`
+ * carries no argument (there is nothing to seed from, unlike the soul/collection
+ * forms' id), and as a nav entry Settings has no parent to hand it anything. So
+ * it fetches the profile and the glyph strokes itself (mirrors
+ * [ProfileViewModel.fetch]), plus the email and linked providers off the
+ * session (mirrors [ProfileViewModel.publish]). Unlike [SoulFormViewModel]'s
+ * `start(id)`, there is no id to guard against re-seeding on: [init] runs
+ * exactly once per instance, so a private, ungated [load] is enough — this
+ * cover's ViewModel is scoped to Profile's back stack entry the same way
+ * theirs are.
  *
  * **The bug this exists for.** `save()` ran in `rememberCoroutineScope` and
  * makes up to three sequential server calls — `set_handle`, then
@@ -147,22 +167,61 @@ class SettingsViewModel
         private val _uiState = MutableStateFlow(SettingsUiState())
         val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
-        private var hasStarted = false
+        init {
+            load()
+        }
 
         /**
-         * Seed from the profile the hosting screen already loaded, then overlay
-         * whatever survived process death.
+         * Fetches the profile row, its glyph strokes, and the session identity,
+         * then seeds the form from whatever survived process death.
          *
-         * Guarded so a recomposition or a rotation cannot re-seed over what the
-         * user has typed since — unlike the record flow, whose guard has to live
-         * in its draft coordinator because the seed itself arrives late.
+         * The glyph fetch failing is decoration, not the screen (mirrors
+         * [ProfileViewModel.fetch]): the header just renders without it. The
+         * profile fetch failing IS the screen — [SettingsUiState.loadErrorRes]
+         * — since there is nothing else to show a form for.
          */
-        fun start(initial: SettingsInitial) {
-            if (hasStarted) return
-            hasStarted = true
+        private fun load() {
+            viewModelScope.launch {
+                runCatchingCancellable { profileService.loadProfile() }
+                    .fold(
+                        onSuccess = { onProfileLoaded(it) },
+                        onFailure = {
+                            Log.e(TAG, "settings load failed", it)
+                            _uiState.update { state ->
+                                state.copy(isLoading = false, loadErrorRes = R.string.settings_load_error)
+                            }
+                        },
+                    )
+            }
+        }
+
+        private suspend fun onProfileLoaded(profile: ProfileRow) {
+            val glyphStrokes =
+                profile.glyphId?.let { id ->
+                    runCatchingCancellable { profileService.loadGlyphStrokes(id) }
+                        .onFailure { Log.e(TAG, "glyph fetch failed", it) }
+                        .getOrNull()
+                }
+            val initial =
+                SettingsInitial(
+                    displayName = profile.displayName.orEmpty(),
+                    glyphId = profile.glyphId,
+                    glyphStrokes = glyphStrokes,
+                    handle = profile.handle,
+                    publicProfile = profile.publicProfile,
+                    email = supabase.session?.user?.email,
+                    providers =
+                        linkedProviders(
+                            supabase.session
+                                ?.user
+                                ?.identities
+                                ?.map { it.provider },
+                        ),
+                )
             _uiState.update {
                 it.copy(
                     initial = initial,
+                    isLoading = false,
                     form =
                         SettingsForm(
                             displayName = savedState[KEY_NAME] ?: initial.displayName,

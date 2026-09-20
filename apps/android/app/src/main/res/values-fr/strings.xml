@@ -112,6 +112,7 @@
     <string name="settings_providers_header">Fournisseurs</string>
     <string name="settings_legal_header">Mentions légales</string>
     <string name="settings_save_error">Impossible d\'enregistrer vos modifications. Veuillez réessayer.</string>
+    <string name="settings_load_error">Impossible de charger vos réglages. Veuillez réessayer.</string>
     <string name="settings_account_header">Compte</string>
     <string name="settings_delete_account">Supprimer le compte</string>
     <string name="settings_delete_account_title">Supprimer votre compte ?</string>

@@ -5,14 +5,19 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import app.pbbls.android.R
+import app.pbbls.android.services.ProfileRow
 import app.pbbls.android.testing.FakeProfileService
 import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.MainDispatcherRule
 import app.pbbls.android.testing.postgrestException
 import app.pbbls.android.testing.recordEffects
+import io.github.jan.supabase.auth.user.Identity
+import io.github.jan.supabase.auth.user.UserInfo
+import io.github.jan.supabase.auth.user.UserSession
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.json.JsonObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -20,37 +25,121 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
+import java.time.OffsetDateTime
+
+private const val USER_ID = "user-1"
 
 /**
- * Settings' save sequence, deletion flow and form persistence (#849).
+ * Settings' own load, its save sequence, deletion flow and form persistence
+ * (#849, #852 Task 16).
  *
  * None of it was reachable before: it lived in a 672-line composable that read
- * two `Local…Service`s and held twelve `remember`s.
+ * two `Local…Service`s and held twelve `remember`s. As of Task 16 the load
+ * itself moved in too — `SettingsScreen` has no id to hand it, unlike the soul
+ * and collection forms (Task 15), so this ViewModel fetches the profile and
+ * the session identity by itself rather than being seeded by `ProfileScreen`.
  */
 class SettingsViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private fun initial(
+    private fun profileRow(
         displayName: String = "Pebbler",
+        glyphId: String? = null,
         handle: String? = null,
         publicProfile: Boolean = false,
-    ) = SettingsInitial(displayName = displayName, handle = handle, publicProfile = publicProfile)
+    ) = ProfileRow(
+        displayName = displayName,
+        createdAt = OffsetDateTime.parse("2026-01-01T00:00:00Z"),
+        glyphId = glyphId,
+        handle = handle,
+        publicProfile = publicProfile,
+    )
+
+    private fun session(
+        email: String? = "pebbler@example.com",
+        providers: List<String> = listOf("google"),
+    ) = UserSession(
+        accessToken = "token",
+        refreshToken = "refresh",
+        expiresIn = 3600,
+        tokenType = "bearer",
+        user =
+            UserInfo(
+                id = USER_ID,
+                aud = "authenticated",
+                email = email,
+                identities =
+                    providers.map { provider ->
+                        Identity(
+                            id = "identity-$provider",
+                            identityData = JsonObject(emptyMap()),
+                            provider = provider,
+                            userId = USER_ID,
+                        )
+                    },
+            ),
+    )
 
     private fun viewModel(
-        profile: FakeProfileService = FakeProfileService(),
+        profile: FakeProfileService = FakeProfileService(profile = profileRow()),
         supabase: FakeSupabaseService = FakeSupabaseService(),
         savedState: SavedStateHandle = SavedStateHandle(),
     ) = SettingsViewModel(savedState, profile, supabase)
+
+    // MARK: - Loading its own profile (#852 Task 16)
+
+    @Test
+    fun `settings loads the profile itself`() =
+        runTest {
+            val profile = FakeProfileService(profile = profileRow(displayName = "Sam", handle = "sam"))
+            val viewModel = viewModel(profile)
+
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertFalse(state.isLoading)
+            assertNull(state.loadErrorRes)
+            assertEquals("Sam", state.form.displayName)
+            assertEquals("sam", state.form.handle)
+            assertEquals(1, profile.loadProfileCount)
+        }
+
+    @Test
+    fun `settings loads email and providers from the session source`() =
+        runTest {
+            val supabase = FakeSupabaseService(session = session(email = "sam@pbbls.app", providers = listOf("apple")))
+            val viewModel = viewModel(supabase = supabase)
+
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertEquals("sam@pbbls.app", state.initial.email)
+            assertEquals(listOf("Apple"), state.initial.providers)
+        }
+
+    @Test
+    fun `a failed profile load surfaces the error state, not a blank form`() =
+        runTest {
+            val profile = FakeProfileService(profile = profileRow())
+            profile.failNext = IOException("offline")
+            val viewModel = viewModel(profile)
+
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertFalse(state.isLoading)
+            assertEquals(R.string.settings_load_error, state.loadErrorRes)
+        }
 
     // MARK: - The save sequence
 
     @Test
     fun `claiming a handle and going public writes the handle first`() =
         runTest {
-            val profile = FakeProfileService()
+            val profile = FakeProfileService(profile = profileRow())
             val viewModel = viewModel(profile)
-            viewModel.start(initial())
+            advanceUntilIdle()
 
             viewModel.onHandleChange("pebbler")
             viewModel.onPublicProfileChange(true)
@@ -79,12 +168,14 @@ class SettingsViewModelTest {
     @Test
     fun `clearing the ViewModel mid-save still finishes the sequence`() =
         runTest {
-            val profile = FakeProfileService()
+            val profile = FakeProfileService(profile = profileRow())
+            val viewModel = viewModel(profile)
+            advanceUntilIdle()
+
             val gate = CompletableDeferred<Unit>()
             profile.setHandleGate = gate
 
             val store = ViewModelStore()
-            val viewModel = viewModel(profile)
             ViewModelProvider(
                 store,
                 object : ViewModelProvider.Factory {
@@ -93,7 +184,6 @@ class SettingsViewModelTest {
                 },
             )[SettingsViewModel::class.java]
 
-            viewModel.start(initial())
             viewModel.onHandleChange("pebbler")
             viewModel.onPublicProfileChange(true)
             viewModel.save()
@@ -119,10 +209,10 @@ class SettingsViewModelTest {
     @Test
     fun `a rejected handle stops the sequence before anything else is written`() =
         runTest {
-            val profile = FakeProfileService()
-            profile.failNext = postgrestException("handle_taken")
+            val profile = FakeProfileService(profile = profileRow())
             val viewModel = viewModel(profile)
-            viewModel.start(initial())
+            advanceUntilIdle()
+            profile.failNext = postgrestException("handle_taken")
 
             viewModel.onHandleChange("taken")
             viewModel.onPublicProfileChange(true)
@@ -141,10 +231,10 @@ class SettingsViewModelTest {
     @Test
     fun `a transport failure on the handle shows the generic error, not a handle verdict`() =
         runTest {
-            val profile = FakeProfileService()
-            profile.failNext = IOException("offline")
+            val profile = FakeProfileService(profile = profileRow())
             val viewModel = viewModel(profile)
-            viewModel.start(initial())
+            advanceUntilIdle()
+            profile.failNext = IOException("offline")
 
             viewModel.onHandleChange("pebbler")
             viewModel.save()
@@ -158,9 +248,9 @@ class SettingsViewModelTest {
     @Test
     fun `releasing the handle never writes the public toggle`() =
         runTest {
-            val profile = FakeProfileService()
+            val profile = FakeProfileService(profile = profileRow(handle = "pebbler", publicProfile = true))
             val viewModel = viewModel(profile)
-            viewModel.start(initial(handle = "pebbler", publicProfile = true))
+            advanceUntilIdle()
 
             viewModel.onHandleChange("")
             viewModel.save()
@@ -175,8 +265,8 @@ class SettingsViewModelTest {
     fun `a successful save reports the new values`() =
         runTest {
             val viewModel = viewModel()
+            advanceUntilIdle()
             val effects = recordEffects(viewModel.effects)
-            viewModel.start(initial())
 
             viewModel.onDisplayNameChange("Sam")
             viewModel.save()
@@ -190,9 +280,9 @@ class SettingsViewModelTest {
     @Test
     fun `saving a pristine form does nothing`() =
         runTest {
-            val profile = FakeProfileService()
+            val profile = FakeProfileService(profile = profileRow())
             val viewModel = viewModel(profile)
-            viewModel.start(initial())
+            advanceUntilIdle()
 
             viewModel.save()
             advanceUntilIdle()
@@ -210,8 +300,9 @@ class SettingsViewModelTest {
     @Test
     fun `emptying the handle drops the public flag with it`() =
         runTest {
-            val viewModel = viewModel()
-            viewModel.start(initial(handle = "pebbler", publicProfile = true))
+            val profile = FakeProfileService(profile = profileRow(handle = "pebbler", publicProfile = true))
+            val viewModel = viewModel(profile)
+            advanceUntilIdle()
             assertTrue(viewModel.uiState.value.form.isPublicProfile)
 
             viewModel.onHandleChange("   ")
@@ -222,10 +313,10 @@ class SettingsViewModelTest {
     @Test
     fun `editing the handle clears the previous verdict`() =
         runTest {
-            val profile = FakeProfileService()
-            profile.failNext = postgrestException("handle_taken")
+            val profile = FakeProfileService(profile = profileRow())
             val viewModel = viewModel(profile)
-            viewModel.start(initial())
+            advanceUntilIdle()
+            profile.failNext = postgrestException("handle_taken")
             viewModel.onHandleChange("taken")
             viewModel.save()
             advanceUntilIdle()
@@ -242,16 +333,15 @@ class SettingsViewModelTest {
     fun `typed fields survive process death`() =
         runTest {
             val savedState = SavedStateHandle()
-            viewModel(savedState = savedState).apply {
-                start(initial())
-                onDisplayNameChange("Sam")
-                onHandleChange("sam")
-                onPublicProfileChange(true)
-            }
+            val viewModel = viewModel(savedState = savedState)
+            advanceUntilIdle()
+            viewModel.onDisplayNameChange("Sam")
+            viewModel.onHandleChange("sam")
+            viewModel.onPublicProfileChange(true)
 
             // The process dies; a new ViewModel is built with the same handle.
             val restored = viewModel(savedState = savedState)
-            restored.start(initial())
+            advanceUntilIdle()
 
             val form = restored.uiState.value.form
             assertEquals("Sam", form.displayName)
@@ -268,7 +358,7 @@ class SettingsViewModelTest {
         runTest {
             val savedState = SavedStateHandle()
             val viewModel = viewModel(savedState = savedState)
-            viewModel.start(initial())
+            advanceUntilIdle()
 
             viewModel.onPasswordChange("hunter2")
 
@@ -279,28 +369,15 @@ class SettingsViewModelTest {
             )
         }
 
-    @Test
-    fun `start does not re-seed over what the user has typed`() =
-        runTest {
-            val viewModel = viewModel()
-            viewModel.start(initial(displayName = "Pebbler"))
-            viewModel.onDisplayNameChange("Sam")
-
-            // A rotation re-runs the screen's LaunchedEffect.
-            viewModel.start(initial(displayName = "Pebbler"))
-
-            assertEquals("Sam", viewModel.uiState.value.form.displayName)
-        }
-
     // MARK: - Deletion
 
     @Test
     fun `deletion walks confirm to purge to sign-out`() =
         runTest {
-            val profile = FakeProfileService()
+            val profile = FakeProfileService(profile = profileRow())
             val supabase = FakeSupabaseService()
             val viewModel = viewModel(profile, supabase)
-            viewModel.start(initial())
+            advanceUntilIdle()
 
             viewModel.requestDelete()
             assertEquals(DeletionState.CONFIRMING, viewModel.uiState.value.deletion)
@@ -315,11 +392,11 @@ class SettingsViewModelTest {
     @Test
     fun `a failed deletion surfaces the error and leaves the session alone`() =
         runTest {
-            val profile = FakeProfileService()
-            profile.failNext = IOException("offline")
+            val profile = FakeProfileService(profile = profileRow())
             val supabase = FakeSupabaseService()
             val viewModel = viewModel(profile, supabase)
-            viewModel.start(initial())
+            advanceUntilIdle()
+            profile.failNext = IOException("offline")
 
             viewModel.requestDelete()
             viewModel.confirmDelete()
@@ -335,9 +412,9 @@ class SettingsViewModelTest {
     @Test
     fun `cancelling the confirmation deletes nothing`() =
         runTest {
-            val profile = FakeProfileService()
+            val profile = FakeProfileService(profile = profileRow())
             val viewModel = viewModel(profile)
-            viewModel.start(initial())
+            advanceUntilIdle()
 
             viewModel.requestDelete()
             viewModel.cancelDelete()
