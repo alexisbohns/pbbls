@@ -1,6 +1,5 @@
 package app.pbbls.android.features.profile
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -20,11 +19,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
@@ -32,12 +28,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.features.profile.components.labelRes
 import app.pbbls.android.features.profile.models.Collection
 import app.pbbls.android.features.profile.models.CollectionMode
-import app.pbbls.android.services.LocalAchievementsService
-import app.pbbls.android.services.LocalCollectionsService
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesListSection
 import app.pbbls.android.theme.PebblesScreen
@@ -46,9 +42,7 @@ import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar
 import app.pbbls.android.theme.PebblesTopBarTextButton
 import app.pbbls.android.theme.PebblesTypography
-import kotlinx.coroutines.launch
-
-private const val TAG = "collection-form"
+import app.pbbls.android.ui.ObserveUiEffects
 
 /**
  * Create/edit form for a collection — merges iOS `CreateCollectionSheet` +
@@ -57,7 +51,7 @@ private const val TAG = "collection-form"
  * Pack / Track). [original] `null` means create. Selecting "None" on edit
  * really clears the column — the payload encodes mode as explicit JSON null
  * (see `collectionUpdatePayload`). Writes are direct RLS-scoped single-table
- * calls (D6).
+ * calls (D6), driven by [CollectionFormViewModel].
  *
  * Deviation from iOS: the segmented mode control renders as Pebbles-styled
  * capsule toggles rather than Material's segmented buttons — same reason the
@@ -69,65 +63,36 @@ fun CollectionFormScreen(
     onDismiss: () -> Unit,
     onSaved: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: CollectionFormViewModel = hiltViewModel(),
 ) {
-    val collectionsService = LocalCollectionsService.current
-    val achievements = LocalAchievementsService.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val system = PebblesTheme.colors.system
-    val scope = rememberCoroutineScope()
 
-    var name by remember { mutableStateOf(original?.name.orEmpty()) }
-    var mode by remember { mutableStateOf(original?.mode) }
-    var isSaving by remember { mutableStateOf(false) }
-    var showSaveError by remember { mutableStateOf(false) }
+    // `start` is guarded, so a rotation cannot re-seed over the user's edits.
+    LaunchedEffect(original?.id) { viewModel.start(original) }
 
-    val canSave =
-        collectionFormCanSave(
-            originalName = original?.name,
-            originalMode = original?.mode,
-            name = name,
-            mode = mode,
-        )
-
-    BackHandler(enabled = !isSaving) { onDismiss() }
-
-    fun save() {
-        if (!canSave || isSaving) return
-        scope.launch {
-            isSaving = true
-            showSaveError = false
-            val trimmed = name.trim()
-            try {
-                if (original == null) {
-                    collectionsService.create(name = trimmed, mode = mode)
-                    achievements.fireCheck()
-                } else {
-                    collectionsService.update(collectionId = original.id, name = trimmed, mode = mode)
-                }
-                onSaved()
-            } catch (e: Exception) {
-                Log.e(TAG, "collection save failed", e)
-                showSaveError = true
-                isSaving = false
-            }
+    ObserveUiEffects(viewModel.effects) { effect ->
+        when (effect) {
+            CollectionFormEffect.Saved -> onSaved()
+            CollectionFormEffect.Dismiss -> onDismiss()
         }
     }
+
+    BackHandler(enabled = !uiState.isSaving) { viewModel.onDismissRequested() }
 
     PebblesScreen(
         modifier = modifier.background(system.background),
         topBar = {
             PebblesTopBar(
-                title =
-                    stringResource(
-                        if (original == null) R.string.profile_collection_new else R.string.collection_edit_title,
-                    ),
+                title = stringResource(uiState.titleRes),
                 leading = {
                     PebblesTopBarTextButton(
                         text = stringResource(R.string.action_cancel),
-                        onClick = { if (!isSaving) onDismiss() },
+                        onClick = viewModel::onDismissRequested,
                     )
                 },
                 trailing = {
-                    if (isSaving) {
+                    if (uiState.isSaving) {
                         CircularProgressIndicator(
                             color = PebblesTheme.colors.accent.primary,
                             strokeWidth = 2.dp,
@@ -136,9 +101,9 @@ fun CollectionFormScreen(
                     } else {
                         PebblesTopBarTextButton(
                             text = stringResource(R.string.action_save),
-                            onClick = { save() },
-                            enabled = canSave,
-                            color = if (canSave) system.secondary else system.muted,
+                            onClick = viewModel::save,
+                            enabled = uiState.canSave,
+                            color = if (uiState.canSave) system.secondary else system.muted,
                         )
                     }
                 },
@@ -161,15 +126,15 @@ fun CollectionFormScreen(
                     listOf(
                         {
                             BasicTextField(
-                                value = name,
-                                onValueChange = { name = it },
+                                value = uiState.name,
+                                onValueChange = viewModel::onNameChange,
                                 singleLine = true,
                                 textStyle = PebblesTypography.body.copy(color = system.foreground),
                                 cursorBrush = SolidColor(PebblesTheme.colors.accent.primary),
                                 keyboardOptions =
                                     KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                                 decorationBox = { inner ->
-                                    if (name.isEmpty()) {
+                                    if (uiState.name.isEmpty()) {
                                         PebblesText(
                                             text = stringResource(R.string.create_soul_name_placeholder),
                                             style = PebblesTypography.body,
@@ -190,19 +155,16 @@ fun CollectionFormScreen(
                     listOf(
                         {
                             CollectionModePicker(
-                                selected = mode,
-                                onSelect = { mode = it },
+                                selected = uiState.mode,
+                                onSelect = viewModel::onModeChange,
                             )
                         },
                     ),
             )
 
-            if (showSaveError) {
+            if (uiState.didSaveFail) {
                 PebblesText(
-                    text =
-                        stringResource(
-                            if (original == null) R.string.collection_save_error else R.string.settings_save_error,
-                        ),
+                    text = stringResource(uiState.saveErrorRes),
                     style = PebblesTypography.subhead,
                     color = PebblesDestructive,
                 )

@@ -20,7 +20,6 @@ import app.pbbls.android.features.path.valence.LocalValencePrewarmer
 import app.pbbls.android.features.pebblemedia.LocalSnapProcessor
 import app.pbbls.android.features.pebblemedia.LocalSnapWriteRepository
 import app.pbbls.android.services.LocalAchievementsService
-import app.pbbls.android.services.LocalCollectionsService
 import app.pbbls.android.services.LocalComposerSnapshotStore
 import app.pbbls.android.services.LocalConnectionsService
 import app.pbbls.android.services.LocalEmotionPaletteService
@@ -32,7 +31,6 @@ import app.pbbls.android.services.LocalPebbleWriteService
 import app.pbbls.android.services.LocalProfileService
 import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSnapURLCache
-import app.pbbls.android.services.LocalSoulsService
 import app.pbbls.android.services.LocalSupabaseService
 import app.pbbls.android.services.SupabaseService
 import app.pbbls.android.services.parseInviteToken
@@ -123,8 +121,6 @@ class MainActivity : ComponentActivity() {
                     LocalReferenceDataService provides graph.referenceData,
                     LocalPebbleWriteService provides graph.pebbleWrite,
                     LocalPebbleDetailService provides graph.pebbleDetailService,
-                    LocalSoulsService provides graph.soulsService,
-                    LocalCollectionsService provides graph.collectionsService,
                     LocalPebbleDraftsService provides graph.draftsService,
                     LocalConnectionsService provides graph.connectionsService,
                     LocalComposerSnapshotStore provides graph.composerSnapshots,

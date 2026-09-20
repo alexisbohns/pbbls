@@ -5,7 +5,6 @@ import app.pbbls.android.features.glyph.models.Glyph
 import app.pbbls.android.services.ProfileRow
 import app.pbbls.android.testing.FakePathStatsService
 import app.pbbls.android.testing.FakeProfileService
-import app.pbbls.android.testing.FakeReferenceDataService
 import app.pbbls.android.testing.MainDispatcherRule
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -39,8 +38,7 @@ class ProfileViewModelTest {
     private fun viewModel(
         profile: FakeProfileService = FakeProfileService(profile = row),
         stats: FakePathStatsService = FakePathStatsService(),
-        refs: FakeReferenceDataService = FakeReferenceDataService(),
-    ) = ProfileViewModel(profile, stats, refs)
+    ) = ProfileViewModel(profile, stats)
 
     // MARK: - Load
 
@@ -160,11 +158,10 @@ class ProfileViewModelTest {
         }
 
     @Test
-    fun `creating a collection reloads the page and the shared cache`() =
+    fun `creating a collection reloads the page only`() =
         runTest {
             val profile = FakeProfileService(profile = row)
-            val refs = FakeReferenceDataService()
-            val viewModel = viewModel(profile, refs = refs)
+            val viewModel = viewModel(profile)
             advanceUntilIdle()
             val loadsAfterInit = profile.loadProfileCount
 
@@ -174,8 +171,9 @@ class ProfileViewModelTest {
 
             assertFalse(viewModel.covers.value.isPresentingCreateCollection)
             assertEquals(loadsAfterInit + 1, profile.loadProfileCount)
-            // The composer's collection picker reads the shared cache.
-            assertEquals(1, refs.refreshCollectionsCount)
+            // Only the page. The composer's collection-picker cache is refreshed
+            // by CollectionFormViewModel's own uncancellable save, which is why
+            // this ViewModel no longer takes ReferenceDataServicing at all.
         }
 
     /**

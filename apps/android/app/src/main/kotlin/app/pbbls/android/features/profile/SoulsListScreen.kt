@@ -1,6 +1,5 @@
 package app.pbbls.android.features.profile
 
-import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,18 +16,18 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.features.profile.components.ConfirmDeleteDialog
 import app.pbbls.android.features.profile.components.DeleteErrorDialog
@@ -36,56 +35,38 @@ import app.pbbls.android.features.profile.components.ProfileEmptyState
 import app.pbbls.android.features.profile.models.SoulWithGlyph
 import app.pbbls.android.features.shared.SoulItem
 import app.pbbls.android.features.shared.SoulItemCase
-import app.pbbls.android.services.LocalReferenceDataService
-import app.pbbls.android.services.LocalSoulsService
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesScreen
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar
 import app.pbbls.android.theme.PebblesTypography
-import kotlinx.coroutines.launch
-
-private const val TAG = "souls-list"
 
 /**
  * The souls grid — ports iOS `SoulsListView.swift` as a NavHost push (D1):
  * adaptive-96 grid of shared [SoulItem] cells, "+" top-bar create, tap → the
  * detail route, long-press → delete menu + confirm (D7 unifies on the M39 D8
- * idiom over iOS's context menu). The screen fetches its own rows (like iOS)
- * and refreshes the reference-data souls cache after every mutation so the
- * pebble-form picker stays in sync.
+ * idiom over iOS's context menu). [SoulsListViewModel] owns the fetch, the
+ * delete and the reference-data refresh that keeps the pebble-form picker in
+ * sync; this function is render and callbacks only.
  */
 @Composable
 fun SoulsListScreen(
     onBack: () -> Unit,
     onOpenSoul: (SoulWithGlyph) -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: SoulsListViewModel = hiltViewModel(),
 ) {
-    val soulsService = LocalSoulsService.current
-    val refs = LocalReferenceDataService.current
-    val scope = rememberCoroutineScope()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val covers by viewModel.covers.collectAsStateWithLifecycle()
     val system = PebblesTheme.colors.system
 
-    var items by remember { mutableStateOf<List<SoulWithGlyph>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
-    var loadFailed by remember { mutableStateOf(false) }
-    var loadKey by remember { mutableIntStateOf(0) }
-    var isPresentingCreate by remember { mutableStateOf(false) }
-    var pendingDeletion by remember { mutableStateOf<SoulWithGlyph?>(null) }
-    var deleteError by remember { mutableStateOf(false) }
-
-    LaunchedEffect(loadKey) {
-        isLoading = true
-        loadFailed = false
-        try {
-            items = soulsService.list()
-        } catch (e: Exception) {
-            Log.e(TAG, "souls fetch failed", e)
-            loadFailed = true
-        } finally {
-            isLoading = false
-        }
+    // Returning from the detail must re-read the list: the ViewModel is
+    // scoped to the back stack entry, which survives the round trip that
+    // used to rebuild the screen and re-run its load.
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onResumed()
+        onPauseOrDispose {}
     }
 
     PebblesScreen(
@@ -104,7 +85,7 @@ fun SoulsListScreen(
                     }
                 },
                 trailing = {
-                    IconButton(onClick = { isPresentingCreate = true }) {
+                    IconButton(onClick = viewModel::openCreate) {
                         Icon(
                             painter = painterResource(R.drawable.ic_plus),
                             contentDescription = stringResource(R.string.souls_add_a11y),
@@ -116,24 +97,25 @@ fun SoulsListScreen(
             )
         },
     ) {
-        when {
-            isLoading ->
+        // Exhaustive with no `else`: a new SoulsListUiState case must be rendered.
+        when (val state = uiState) {
+            SoulsListUiState.Loading ->
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
                     CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
                 }
 
-            loadFailed ->
+            is SoulsListUiState.Error ->
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     PebblesText(
-                        text = stringResource(R.string.souls_load_error),
+                        text = stringResource(state.messageRes),
                         style = PebblesTypography.body,
                         color = system.secondary,
                     )
-                    TextButton(onClick = { loadKey++ }) {
+                    TextButton(onClick = viewModel::retry) {
                         PebblesText(
                             text = stringResource(R.string.profile_retry),
                             style = PebblesTypography.buttonLabel,
@@ -142,66 +124,50 @@ fun SoulsListScreen(
                     }
                 }
 
-            items.isEmpty() ->
-                ProfileEmptyState(
-                    title = stringResource(R.string.souls_empty_title),
-                    message = stringResource(R.string.souls_empty_message),
-                )
-
-            else ->
-                LazyVerticalGrid(
-                    columns = GridCells.Adaptive(96.dp),
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(PebblesTheme.spacing.lg),
-                    horizontalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.lg),
-                    verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.lg),
-                ) {
-                    items(items, key = { it.id }) { soul ->
-                        SoulCell(
-                            soul = soul,
-                            onTap = { onOpenSoul(soul) },
-                            onDelete = { pendingDeletion = soul },
-                        )
+            is SoulsListUiState.Content ->
+                if (state.souls.isEmpty()) {
+                    ProfileEmptyState(
+                        title = stringResource(R.string.souls_empty_title),
+                        message = stringResource(R.string.souls_empty_message),
+                    )
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Adaptive(96.dp),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(PebblesTheme.spacing.lg),
+                        horizontalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.lg),
+                        verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.lg),
+                    ) {
+                        items(state.souls, key = { it.id }) { soul ->
+                            SoulCell(
+                                soul = soul,
+                                onTap = { onOpenSoul(soul) },
+                                onDelete = { viewModel.requestDelete(soul) },
+                            )
+                        }
                     }
                 }
         }
     }
 
-    if (isPresentingCreate) {
+    if (covers.isPresentingCreate) {
         SoulFormScreen(
             original = null,
-            onDismiss = { isPresentingCreate = false },
-            onSaved = {
-                isPresentingCreate = false
-                loadKey++
-                scope.launch { refs.refreshSouls() }
-            },
+            onDismiss = viewModel::closeCreate,
+            onSaved = viewModel::onSoulSaved,
             modifier = Modifier.fillMaxSize(),
         )
     }
 
-    val target = pendingDeletion
-    if (target != null) {
+    covers.pendingDeletion?.let { target ->
         ConfirmDeleteDialog(
             title = stringResource(R.string.pebble_delete_confirm_title, target.name),
             message = stringResource(R.string.souls_delete_message),
-            onConfirm = {
-                pendingDeletion = null
-                scope.launch {
-                    try {
-                        soulsService.delete(target.id)
-                        loadKey++
-                        refs.refreshSouls()
-                    } catch (e: Exception) {
-                        Log.e(TAG, "delete soul failed", e)
-                        deleteError = true
-                    }
-                }
-            },
-            onDismiss = { pendingDeletion = null },
+            onConfirm = viewModel::confirmDelete,
+            onDismiss = viewModel::cancelDelete,
         )
     }
-    if (deleteError) DeleteErrorDialog(onDismiss = { deleteError = false })
+    if (covers.didDeleteFail) DeleteErrorDialog(onDismiss = viewModel::dismissDeleteError)
 }
 
 /** Grid cell wrapper anchoring the long-press delete menu — the PebbleRow menu idiom. */

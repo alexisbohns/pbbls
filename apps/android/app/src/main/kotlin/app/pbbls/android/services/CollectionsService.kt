@@ -1,6 +1,5 @@
 package app.pbbls.android.services
 
-import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.features.path.models.Pebble
 import app.pbbls.android.features.profile.models.Collection
 import app.pbbls.android.features.profile.models.CollectionMode
@@ -12,6 +11,33 @@ import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
 import javax.inject.Inject
 import javax.inject.Singleton
+
+/**
+ * The collections seam (#849) — what [CollectionsListViewModel],
+ * [CollectionDetailViewModel] and [CollectionFormViewModel] are tested against.
+ *
+ * Same bar as [SoulsServicing]: extracted because those three tests need it.
+ */
+interface CollectionsServicing {
+    suspend fun list(): List<Collection>
+
+    suspend fun loadCollection(collectionId: String): Collection
+
+    suspend fun loadPebbles(collectionId: String): List<Pebble>
+
+    suspend fun create(
+        name: String,
+        mode: CollectionMode?,
+    )
+
+    suspend fun update(
+        collectionId: String,
+        name: String,
+        mode: CollectionMode?,
+    )
+
+    suspend fun delete(collectionId: String)
+}
 
 /**
  * Data access for the collections management surfaces (sub-project E) — the
@@ -26,9 +52,9 @@ class CollectionsService
     @Inject
     constructor(
         private val supabase: SupabaseService,
-    ) {
+    ) : CollectionsServicing {
         /** All collections, name-ascending — the `CollectionsListView.load()` analog. */
-        suspend fun list(): List<Collection> =
+        override suspend fun list(): List<Collection> =
             supabase.client
                 .from("collections")
                 .select(Columns.raw("id, name, mode, pebble_count:collection_pebbles(count)")) {
@@ -37,7 +63,7 @@ class CollectionsService
                 .map { it.toCollection() }
 
         /** One collection with its live count — the detail header (re)load. */
-        suspend fun loadCollection(collectionId: String): Collection =
+        override suspend fun loadCollection(collectionId: String): Collection =
             supabase.client
                 .from("collections")
                 .select(Columns.raw("id, name, mode, pebble_count:collection_pebbles(count)")) {
@@ -50,7 +76,7 @@ class CollectionsService
          * `CollectionDetailView.load()`'s `collection_pebbles!inner` embedded
          * filter (note the junction's word order, opposite of `pebble_souls`).
          */
-        suspend fun loadPebbles(collectionId: String): List<Pebble> =
+        override suspend fun loadPebbles(collectionId: String): List<Pebble> =
             supabase.client
                 .from("pebbles")
                 .select(
@@ -64,7 +90,7 @@ class CollectionsService
                 }.decodeList<Pebble>()
 
         /** Create with optional mode — no select-back; callers reload (iOS parity). */
-        suspend fun create(
+        override suspend fun create(
             name: String,
             mode: CollectionMode?,
         ) {
@@ -77,7 +103,7 @@ class CollectionsService
         }
 
         /** Update name + mode — explicit JSON-null mode clears the column. */
-        suspend fun update(
+        override suspend fun update(
             collectionId: String,
             name: String,
             mode: CollectionMode?,
@@ -93,17 +119,11 @@ class CollectionsService
          * Delete — linked pebbles stay; `collection_pebbles.collection_id`
          * cascades server-side so only the links are removed.
          */
-        suspend fun delete(collectionId: String) {
+        override suspend fun delete(collectionId: String) {
             supabase.client
                 .from("collections")
                 .delete {
                     filter { eq("id", collectionId) }
                 }
         }
-    }
-
-/** CompositionLocal for [CollectionsService] — see [LocalSupabaseService]. */
-val LocalCollectionsService =
-    staticCompositionLocalOf<CollectionsService> {
-        error("LocalCollectionsService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

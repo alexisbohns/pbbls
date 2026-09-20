@@ -1,6 +1,5 @@
 package app.pbbls.android.features.profile
 
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -23,12 +22,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,14 +33,15 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.features.profile.components.CollectionModeBadge
 import app.pbbls.android.features.profile.components.ConfirmDeleteDialog
 import app.pbbls.android.features.profile.components.DeleteErrorDialog
 import app.pbbls.android.features.profile.components.ProfileEmptyState
 import app.pbbls.android.features.profile.models.Collection
-import app.pbbls.android.services.LocalCollectionsService
-import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesListSection
 import app.pbbls.android.theme.PebblesScreen
@@ -52,17 +49,14 @@ import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar
 import app.pbbls.android.theme.PebblesTypography
-import kotlinx.coroutines.launch
-
-private const val TAG = "collections-list"
 
 /**
  * The collections list — ports iOS `CollectionsListView.swift` as a NavHost
  * push (D1): bordered rows (name + mode badge + count), "+" top-bar create,
  * pull-to-refresh, tap → the detail route, long-press → delete menu + confirm
- * (D7 unifies on the M39 D8 idiom over iOS's swipe action). The screen fetches
- * its own rows (D10) and refreshes the reference-data collections cache after
- * every mutation so the pebble-form picker stays in sync.
+ * (D7 unifies on the M39 D8 idiom over iOS's swipe action).
+ * [CollectionsListViewModel] owns the fetch (D10), the delete and the
+ * reference-data refresh that keeps the pebble-form picker in sync.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -70,35 +64,18 @@ fun CollectionsListScreen(
     onBack: () -> Unit,
     onOpenCollection: (Collection) -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: CollectionsListViewModel = hiltViewModel(),
 ) {
-    val collectionsService = LocalCollectionsService.current
-    val refs = LocalReferenceDataService.current
-    val scope = rememberCoroutineScope()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val covers by viewModel.covers.collectAsStateWithLifecycle()
     val system = PebblesTheme.colors.system
 
-    var items by remember { mutableStateOf<List<Collection>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
-    var isRefreshing by remember { mutableStateOf(false) }
-    var loadFailed by remember { mutableStateOf(false) }
-    var loadKey by remember { mutableIntStateOf(0) }
-    var isPresentingCreate by remember { mutableStateOf(false) }
-    var pendingDeletion by remember { mutableStateOf<Collection?>(null) }
-    var deleteError by remember { mutableStateOf(false) }
-
-    suspend fun loadItems() {
-        loadFailed = false
-        try {
-            items = collectionsService.list()
-        } catch (e: Exception) {
-            Log.e(TAG, "collections fetch failed", e)
-            loadFailed = true
-        }
-    }
-
-    LaunchedEffect(loadKey) {
-        isLoading = true
-        loadItems()
-        isLoading = false
+    // Returning from the detail must re-read the list: the ViewModel is
+    // scoped to the back stack entry, which survives the round trip that
+    // used to rebuild the screen and re-run its load.
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onResumed()
+        onPauseOrDispose {}
     }
 
     PebblesScreen(
@@ -117,7 +94,7 @@ fun CollectionsListScreen(
                     }
                 },
                 trailing = {
-                    IconButton(onClick = { isPresentingCreate = true }) {
+                    IconButton(onClick = viewModel::openCreate) {
                         Icon(
                             painter = painterResource(R.drawable.ic_plus),
                             contentDescription = stringResource(R.string.collections_add_a11y),
@@ -129,24 +106,25 @@ fun CollectionsListScreen(
             )
         },
     ) {
-        when {
-            isLoading ->
+        // Exhaustive with no `else`: a new CollectionsListUiState case must be rendered.
+        when (val state = uiState) {
+            CollectionsListUiState.Loading ->
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
                     CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
                 }
 
-            loadFailed ->
+            is CollectionsListUiState.Error ->
                 Column(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     PebblesText(
-                        text = stringResource(R.string.collections_load_error),
+                        text = stringResource(state.messageRes),
                         style = PebblesTypography.body,
                         color = system.secondary,
                     )
-                    TextButton(onClick = { loadKey++ }) {
+                    TextButton(onClick = viewModel::retry) {
                         PebblesText(
                             text = stringResource(R.string.profile_retry),
                             style = PebblesTypography.buttonLabel,
@@ -155,84 +133,62 @@ fun CollectionsListScreen(
                     }
                 }
 
-            items.isEmpty() ->
-                ProfileEmptyState(
-                    title = stringResource(R.string.collections_empty_title),
-                    message = stringResource(R.string.collections_empty_message),
-                )
-
-            else ->
-                PullToRefreshBox(
-                    isRefreshing = isRefreshing,
-                    onRefresh = {
-                        scope.launch {
-                            isRefreshing = true
-                            loadItems()
-                            isRefreshing = false
-                        }
-                    },
-                    modifier = Modifier.fillMaxSize(),
-                ) {
-                    Column(
-                        modifier =
-                            Modifier
-                                .fillMaxSize()
-                                .verticalScroll(rememberScrollState())
-                                .padding(horizontal = 16.dp)
-                                .padding(bottom = 32.dp),
+            is CollectionsListUiState.Content ->
+                if (state.collections.isEmpty()) {
+                    ProfileEmptyState(
+                        title = stringResource(R.string.collections_empty_title),
+                        message = stringResource(R.string.collections_empty_message),
+                    )
+                } else {
+                    PullToRefreshBox(
+                        isRefreshing = state.isRefreshing,
+                        onRefresh = viewModel::refresh,
+                        modifier = Modifier.fillMaxSize(),
                     ) {
-                        PebblesListSection(
-                            rows =
-                                items.map { collection ->
-                                    {
-                                        CollectionRow(
-                                            collection = collection,
-                                            onTap = { onOpenCollection(collection) },
-                                            onDelete = { pendingDeletion = collection },
-                                        )
-                                    }
-                                },
-                        )
+                        Column(
+                            modifier =
+                                Modifier
+                                    .fillMaxSize()
+                                    .verticalScroll(rememberScrollState())
+                                    .padding(horizontal = 16.dp)
+                                    .padding(bottom = 32.dp),
+                        ) {
+                            PebblesListSection(
+                                rows =
+                                    state.collections.map { collection ->
+                                        {
+                                            CollectionRow(
+                                                collection = collection,
+                                                onTap = { onOpenCollection(collection) },
+                                                onDelete = { viewModel.requestDelete(collection) },
+                                            )
+                                        }
+                                    },
+                            )
+                        }
                     }
                 }
         }
     }
 
-    if (isPresentingCreate) {
+    if (covers.isPresentingCreate) {
         CollectionFormScreen(
             original = null,
-            onDismiss = { isPresentingCreate = false },
-            onSaved = {
-                isPresentingCreate = false
-                loadKey++
-                scope.launch { refs.refreshCollections() }
-            },
+            onDismiss = viewModel::closeCreate,
+            onSaved = viewModel::onCollectionSaved,
             modifier = Modifier.fillMaxSize(),
         )
     }
 
-    val target = pendingDeletion
-    if (target != null) {
+    covers.pendingDeletion?.let { target ->
         ConfirmDeleteDialog(
             title = stringResource(R.string.pebble_delete_confirm_title, target.name),
             message = stringResource(R.string.collections_delete_message),
-            onConfirm = {
-                pendingDeletion = null
-                scope.launch {
-                    try {
-                        collectionsService.delete(target.id)
-                        loadKey++
-                        refs.refreshCollections()
-                    } catch (e: Exception) {
-                        Log.e(TAG, "delete collection failed", e)
-                        deleteError = true
-                    }
-                }
-            },
-            onDismiss = { pendingDeletion = null },
+            onConfirm = viewModel::confirmDelete,
+            onDismiss = viewModel::cancelDelete,
         )
     }
-    if (deleteError) DeleteErrorDialog(onDismiss = { deleteError = false })
+    if (covers.didDeleteFail) DeleteErrorDialog(onDismiss = viewModel::dismissDeleteError)
 }
 
 /**
