@@ -23,6 +23,15 @@ private const val TAG = "logs-service"
 interface LogsServicing {
     suspend fun announcements(limit: Int? = null): List<Log>
 
+    /**
+     * One row by [id], or null if it does not exist. A single-table,
+     * single-statement read, so no RPC (root `AGENTS.md`) — the seam
+     * [AnnouncementDetailViewModel] loads by id, mirroring how
+     * [app.pbbls.android.features.profile.SoulDetailViewModel] fetches its
+     * soul rather than receiving the row from whichever screen had it.
+     */
+    suspend fun log(id: String): Log?
+
     suspend fun changelog(limit: Int? = null): List<Log>
 
     suspend fun initiatives(): List<Log>
@@ -70,6 +79,14 @@ class LogsService
                 order("published_at", Order.DESCENDING)
                 limit?.let { limit(it.toLong()) }
             }
+
+        /** One row by [id], undecorated by any species/status filter — see the interface doc. */
+        override suspend fun log(id: String): Log? =
+            supabase.client
+                .from("v_logs_with_counts")
+                .select {
+                    filter { eq("id", id) }
+                }.decodeSingleOrNull<Log>()
 
         /**
          * Shipped features — `released_at` DESC with nulls LAST (the easy-to-miss

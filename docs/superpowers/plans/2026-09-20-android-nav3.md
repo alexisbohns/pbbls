@@ -33,14 +33,37 @@ Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 
 **Branches and the stack.** One part is one branch is one PR, chained with `gh stack` (see the `gh-stack` skill). Branch names follow `type/852-<description>`:
 
-| Part | Branch |
-|---|---|
-| 1 | `feat/852-navigation3-migration` (already created; holds the spec + this plan) |
-| 2 | `feat/852-navigation-bar-tabs` |
-| 3 | `feat/852-profile-covers-as-entries` |
-| 4 | `feat/852-write-path-as-entries` |
-| 5 | `feat/852-auth-and-deep-links` |
-| 6 | `feat/852-service-graph-dies` |
+| Part | Branch | Tasks |
+|---|---|---|
+| 1 | `feat/852-navigation3-migration` (shipped, PR #902 — holds the spec + this plan) | 1–6 |
+| 2 | `feat/852-profile-covers-as-entries` | 15–21 |
+| 3 | `feat/852-write-path-as-entries` | 22–26 |
+| 4 | `feat/852-auth-and-deep-links` | 27–31 |
+| 5 | `feat/852-service-graph-dies` | 32–37 |
+| 6 | `feat/852-navigation-bar-tabs` | 7–14 |
+
+> **⚠ The order changed on 2026-09-20, after the bar had been built.** The plan
+> originally raised the `NavigationBar` in Part 2, before the covers were
+> entries. That is backwards, and the bug is visible on a device: bar visibility
+> is `topKey is BarKey`, and while a cover is open the top key is still `Path` —
+> a `BarKey` — so **the bar stays up over the record flow and the pebble
+> detail**. Worse, covers render inside the Scaffold's content padding, so a
+> surface that used to be full-screen becomes inset above a bar.
+>
+> **The bar depends on the covers being entries.** The root `CLAUDE.md` says to
+> order parts by dependency and never by convenience, and this is exactly what
+> that rule is for. The bar therefore lands **last**, once nothing is a cover any
+> more, so no PR in the stack ever shows a bar over a cover.
+>
+> **Task numbers are unchanged** — they are referenced from commit messages and
+> from this document, so they keep their original values and are simply executed
+> in a different order. Tasks 7–14 (the bar) run last.
+>
+> The bar work — `NavigationState`, the per-tab `Navigator` and its ten tests,
+> `PebblesNavigationBar`, `NewPebbleFab` — is **already built** and parked on
+> `feat/852-navigation-bar-tabs`; it is rebased onto Part 5 when its turn comes.
+> **Parts 2–5 run against Part 1's flat `Navigator`**, which is all they need:
+> per-tab stacks arrive with the bar.
 
 Each part must pass `./gradlew lint` and `npm run test --workspace=@pbbls/android` **on its own**, without the parts above it. If you discover mid-stack that a lower part needs a change, navigate down (`gh stack down`), fix it there, and `gh stack rebase --upstack` — do not patch around it at the top.
 
@@ -444,7 +467,7 @@ sealed interface BarKey
 enum class AuthMode(
 ```
 
-Leave `route` and `fromRoute` in place for now — Part 5 deletes them, once nothing calls them.
+Leave `route` and `fromRoute` in place for now — Part 4 deletes them, once nothing calls them.
 
 - [ ] **Step 4: Run the test**
 
@@ -605,7 +628,7 @@ EOF
 **Files:**
 - Create: `apps/android/app/src/main/kotlin/app/pbbls/android/navigation/PebblesEntryProvider.kt`
 
-This maps each key to the screen it renders. In Part 1 it covers **only the keys the current `NavHost`s reach** — Path, Profile-as-`You`, and the six pushes. The modal keys exist in the taxonomy but are not yet wired, because their covers are still inside their parent screens (D11). Parts 3–5 wire the rest.
+This maps each key to the screen it renders. In Part 1 it covers **only the keys the current `NavHost`s reach** — Path, Profile-as-`You`, and the six pushes. The modal keys exist in the taxonomy but are not yet wired, because their covers are still inside their parent screens (D11). Parts 2–4 wire the rest.
 
 - [ ] **Step 1: Write it**
 
@@ -634,7 +657,7 @@ import app.pbbls.android.features.profile.SoulsListScreen
  * Part 1 wires exactly what the two NavHosts reached, with the same IA, so this
  * PR is a move and not a redesign (D11). The modal keys in [PebblesKey] are
  * declared but not yet wired: their covers still live inside their parent
- * screens until Parts 3–5 promote them.
+ * screens until Parts 2–4 promote them.
  *
  * Each `entry` carries its transition metadata via [NavTransitions.forKey], so
  * the animation travels with the key rather than living in a `when` at the
@@ -738,7 +761,7 @@ import androidx.navigation3.runtime.NavKey
  * The only writer of navigation state (#852).
  *
  * Part 1 backs this with one flat [NavBackStack], preserving the IA exactly as
- * the two NavHosts had it. Part 2 swaps the internals for four per-tab stacks
+ * the two NavHosts had it. Part 6 swaps the internals for four per-tab stacks
  * without touching a single call site — which is why the seam exists now rather
  * than arriving with the tabs.
  */
@@ -804,7 +827,7 @@ Then add the two new hosts at the bottom of the file:
 /**
  * Authed navigation (#852). One [NavDisplay] over one saveable back stack,
  * replacing the NavHost. The IA is unchanged from the NavHost it replaces —
- * Part 2 introduces the four-tab bar (D11).
+ * Part 6 introduces the four-tab bar (D11).
  *
  * `rememberViewModelStoreNavEntryDecorator` is what scopes a `hiltViewModel()`
  * to its entry rather than to the composition that happens to host it, so a
@@ -993,906 +1016,7 @@ Include a Lab Note? **No** — this part is invisible to users. Delete the `## L
 
 ---
 
-# Part 2 — The four-tab NavigationBar
-
-**Branch:** `feat/852-navigation-bar-tabs` (`gh stack` on top of part 1)
-
-**What ships:** `NavigationState` + the per-tab back stacks, the M3 bar, the Path FAB, and the IA change (D1–D4). This is the part users see.
-
----
-
-### Task 7: `NavigationState`
-
-**Files:**
-- Create: `apps/android/app/src/main/kotlin/app/pbbls/android/navigation/NavigationState.kt`
-
-- [ ] **Step 1: Write it**
-
-```kotlin
-package app.pbbls.android.navigation
-
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.Stable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSerializable
-import androidx.compose.runtime.setValue
-import androidx.navigation3.runtime.NavBackStack
-import androidx.navigation3.runtime.NavEntry
-import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.rememberDecoratedNavEntries
-import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
-import androidx.navigation3.runtime.serialization.NavKeySerializer
-import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import androidx.savedstate.compose.serialization.serializers.MutableStateSerializer
-
-/**
- * Per-tab back stacks (#852, D4), modelled on the AndroidX `multiplestacks`
- * recipe.
- *
- * Each tab owns a [NavBackStack], which is saveable — so process-death
- * restoration is a property of this container rather than something each screen
- * re-implements. Each tab also owns its own `SaveableStateHolder` decorator, so
- * a tab's scroll position survives a trip to another tab.
- *
- * This class never modifies itself. [Navigator] is the only writer.
- */
-@Stable
-class NavigationState(
-    val startRoute: PebblesKey,
-    topLevelRoute: MutableState<PebblesKey>,
-    val backStacks: Map<PebblesKey, NavBackStack<NavKey>>,
-) {
-    var topLevelRoute: PebblesKey by topLevelRoute
-
-    /** The stack the user is currently in. Modals are pushed here (D6). */
-    val currentStack: NavBackStack<NavKey>
-        get() = backStacks[topLevelRoute] ?: error("No stack for $topLevelRoute")
-
-    /**
-     * The key on top of everything — what the bar check reads.
-     *
-     * Typed [NavKey], not [PebblesKey], and deliberately NOT cast: `topKey is
-     * BarKey` and `topKey == PebblesKey.Path` both work on a `NavKey`, because
-     * [BarKey] is a marker unrelated to the stack's element type. A cast here
-     * would buy nothing and could throw.
-     */
-    val topKey: NavKey
-        get() = currentStack.last()
-
-    /**
-     * "Exit through home" (D4): the start route is always first, and at most one
-     * other tab is active. Back therefore unwinds the current tab, falls back to
-     * Path, then exits — and the back path cannot grow without bound however
-     * much the user taps around the bar.
-     *
-     * A tab that is not in use still RETAINS its stack; it is simply not in the
-     * back path.
-     */
-    fun topLevelRoutesInUse(): List<PebblesKey> = if (topLevelRoute == startRoute) listOf(startRoute) else listOf(startRoute, topLevelRoute)
-
-    @Composable
-    fun toDecoratedEntries(entryProvider: (NavKey) -> NavEntry<NavKey>): List<NavEntry<NavKey>> {
-        val decorated =
-            backStacks.mapValues { (_, stack) ->
-                rememberDecoratedNavEntries(
-                    backStack = stack,
-                    entryDecorators =
-                        listOf(
-                            rememberSaveableStateHolderNavEntryDecorator(),
-                            rememberViewModelStoreNavEntryDecorator(),
-                        ),
-                    entryProvider = entryProvider,
-                )
-            }
-        return topLevelRoutesInUse().flatMap { decorated[it].orEmpty() }
-    }
-}
-
-@Composable
-fun rememberNavigationState(
-    startRoute: PebblesKey = PebblesKey.Path,
-    tabs: List<PebblesKey> = PebblesKey.tabs,
-): NavigationState {
-    val topLevelRoute =
-        rememberSerializable(
-            startRoute,
-            tabs,
-            serializer = MutableStateSerializer(NavKeySerializer()),
-        ) { mutableStateOf<PebblesKey>(startRoute) }
-
-    val backStacks = tabs.associateWith { key -> rememberNavBackStack(key) }
-
-    return remember(startRoute, tabs) {
-        NavigationState(startRoute = startRoute, topLevelRoute = topLevelRoute, backStacks = backStacks)
-    }
-}
-```
-
-- [ ] **Step 2: Build**
-
-Run: `npm run build --workspace=@pbbls/android`
-Expected: `BUILD SUCCESSFUL`.
-
-`rememberSerializable` and `MutableStateSerializer` come from `androidx.savedstate`, which arrives transitively with `lifecycle-viewmodel-savedstate`. If they do not resolve, add `androidx-savedstate-compose` to the catalog rather than hand-rolling a `Saver` — a hand-rolled one will silently drop the tab on process death.
-
-**Why the stacks are typed `NavBackStack<NavKey>` and not `NavBackStack<PebblesKey>`.**
-Verified against the 1.1.7 artifact during Part 1: both `rememberNavBackStack`
-overloads are fixed to `NavBackStack<NavKey>` — there is no reified per-call
-generic. The `NavBackStack` *class* is generic (`NavBackStack<T : NavKey>`), but
-the saveable composable that builds one is not, because it restores through a
-reflection-based serializer.
-
-This costs nothing in practice: [Navigator] is the only writer and its `navigate`
-/ `replaceAll` take a `PebblesKey`, so every element on every stack is a
-`PebblesKey` by construction, and callers keep full compile-time safety. Only the
-storage type is widened. Do not "fix" this with a cast.
-
-- [ ] **Step 3: Commit**
-
-```bash
-git add apps/android/app/src/main/kotlin/app/pbbls/android/navigation/NavigationState.kt
-git commit -m "$(cat <<'EOF'
-feat(android): per-tab back stacks with exit-through-home (#852)
-
-Four saveable NavBackStacks, one per tab, each with its own
-SaveableStateHolder so a tab's scroll survives a trip elsewhere. At most
-two are in the back path at a time (start + current), so back unwinds the
-current tab, falls back to Path, then exits — and the back depth stays
-bounded however much the user taps the bar.
-
-Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
-EOF
-)"
-```
-
----
-
-### Task 8: `Navigator` over the tabs — test first
-
-**Files:**
-- Modify: `apps/android/app/src/main/kotlin/app/pbbls/android/navigation/Navigator.kt`
-- Test: `apps/android/app/src/test/kotlin/app/pbbls/android/navigation/NavigatorTest.kt`
-
-This is the part with all the judgement in it, so it is the part that gets tested hardest.
-
-- [ ] **Step 1: Write the failing test**
-
-Create `app/src/test/kotlin/app/pbbls/android/navigation/NavigatorTest.kt`:
-
-```kotlin
-package app.pbbls.android.navigation
-
-import androidx.navigation3.runtime.NavBackStack
-import androidx.navigation3.runtime.NavKey
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
-import org.junit.Before
-import org.junit.Test
-
-/**
- * The navigation rules from the spec (D4), stated as tests.
- *
- * These run on the JVM against a hand-built NavigationState rather than through
- * Compose, because the rules are pure list arithmetic and the Compose layer adds
- * nothing but a harness.
- */
-class NavigatorTest {
-    private lateinit var state: NavigationState
-    private lateinit var navigator: Navigator
-
-    @Before
-    fun setUp() {
-        state =
-            NavigationState(
-                startRoute = PebblesKey.Path,
-                topLevelRoute = androidx.compose.runtime.mutableStateOf(PebblesKey.Path),
-                backStacks = PebblesKey.tabs.associateWith { NavBackStack<NavKey>(it) },
-            )
-        navigator = Navigator(state)
-    }
-
-    @Test
-    fun `navigating to a tab switches rather than pushing`() {
-        navigator.navigate(PebblesKey.People)
-
-        assertEquals(PebblesKey.People, state.topLevelRoute)
-        assertEquals(listOf<PebblesKey>(PebblesKey.People), state.backStacks[PebblesKey.People]!!.toList())
-    }
-
-    @Test
-    fun `navigating to a non-tab pushes onto the current tab`() {
-        navigator.navigate(PebblesKey.People)
-        navigator.navigate(PebblesKey.SoulDetail("s1"))
-
-        assertEquals(
-            listOf(PebblesKey.People, PebblesKey.SoulDetail("s1")),
-            state.backStacks[PebblesKey.People]!!.toList(),
-        )
-        // Path's stack is untouched.
-        assertEquals(listOf<PebblesKey>(PebblesKey.Path), state.backStacks[PebblesKey.Path]!!.toList())
-    }
-
-    @Test
-    fun `back unwinds the current tab before leaving it`() {
-        navigator.navigate(PebblesKey.People)
-        navigator.navigate(PebblesKey.SoulDetail("s1"))
-        navigator.navigate(PebblesKey.SoulForm("s1"))
-
-        navigator.goBack()
-        assertEquals(PebblesKey.SoulDetail("s1"), state.topKey)
-
-        navigator.goBack()
-        assertEquals(PebblesKey.People, state.topKey)
-    }
-
-    @Test
-    fun `back at a tab root falls back to the start route`() {
-        navigator.navigate(PebblesKey.People)
-
-        navigator.goBack()
-
-        assertEquals(PebblesKey.Path, state.topLevelRoute)
-        // People's stack is RETAINED, just no longer in the back path.
-        assertEquals(listOf<PebblesKey>(PebblesKey.People), state.backStacks[PebblesKey.People]!!.toList())
-    }
-
-    @Test
-    fun `back at the start root is a no-op so the system can exit`() {
-        navigator.goBack()
-
-        assertEquals(PebblesKey.Path, state.topLevelRoute)
-        assertEquals(listOf<PebblesKey>(PebblesKey.Path), state.backStacks[PebblesKey.Path]!!.toList())
-    }
-
-    @Test
-    fun `at most start plus current are in the back path`() {
-        navigator.navigate(PebblesKey.You)
-        navigator.navigate(PebblesKey.People)
-
-        // You is skipped: the back path is bounded (D4).
-        assertEquals(listOf(PebblesKey.Path, PebblesKey.People), state.topLevelRoutesInUse())
-    }
-
-    @Test
-    fun `a visited tab retains its stack even when out of the back path`() {
-        navigator.navigate(PebblesKey.You)
-        navigator.navigate(PebblesKey.Glyphs)
-        navigator.navigate(PebblesKey.People)
-
-        assertEquals(
-            listOf(PebblesKey.You, PebblesKey.Glyphs),
-            state.backStacks[PebblesKey.You]!!.toList(),
-        )
-    }
-
-    @Test
-    fun `reselecting the current tab pops it to its root`() {
-        navigator.navigate(PebblesKey.People)
-        navigator.navigate(PebblesKey.SoulDetail("s1"))
-        navigator.navigate(PebblesKey.SoulForm("s1"))
-
-        navigator.onReselect(PebblesKey.People)
-
-        assertEquals(listOf<PebblesKey>(PebblesKey.People), state.backStacks[PebblesKey.People]!!.toList())
-        assertEquals(PebblesKey.People, state.topLevelRoute)
-    }
-
-    @Test
-    fun `replaceAll clears every stack and seeds the target`() {
-        navigator.navigate(PebblesKey.People)
-        navigator.navigate(PebblesKey.SoulDetail("s1"))
-        navigator.navigate(PebblesKey.You)
-        navigator.navigate(PebblesKey.Glyphs)
-
-        navigator.replaceAll(PebblesKey.Welcome)
-
-        assertEquals(PebblesKey.Path, state.topLevelRoute)
-        assertEquals(listOf<PebblesKey>(PebblesKey.Welcome), state.backStacks[PebblesKey.Path]!!.toList())
-        assertEquals(listOf<PebblesKey>(PebblesKey.People), state.backStacks[PebblesKey.People]!!.toList())
-        assertEquals(listOf<PebblesKey>(PebblesKey.You), state.backStacks[PebblesKey.You]!!.toList())
-        assertEquals(listOf<PebblesKey>(PebblesKey.Collections), state.backStacks[PebblesKey.Collections]!!.toList())
-    }
-
-    @Test
-    fun `a modal pushed on a tab keeps the bar invariant intact`() {
-        navigator.navigate(PebblesKey.People)
-        navigator.navigate(PebblesKey.SoulForm(null))
-
-        // D6: the top key is modal, so the bar is hidden, so the user cannot
-        // switch tabs from here — which is what guarantees no OTHER tab's stack
-        // can ever have a modal on top of it.
-        assertTrue(state.topKey !is BarKey)
-        PebblesKey.tabs.filter { it != PebblesKey.People }.forEach {
-            assertTrue(state.backStacks[it]!!.last() is BarKey)
-        }
-    }
-}
-```
-
-- [ ] **Step 2: Run it to confirm it fails**
-
-Run: `npm run test --workspace=@pbbls/android -- --tests '*NavigatorTest*'`
-Expected: compilation failure — `Navigator` takes a `NavBackStack`, not a `NavigationState`.
-
-- [ ] **Step 3: Rewrite the Navigator**
-
-Replace the whole body of `navigation/Navigator.kt`:
-
-```kotlin
-package app.pbbls.android.navigation
-
-import androidx.compose.runtime.Stable
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
-
-/**
- * The only writer of [NavigationState] (#852).
- *
- * Part 1 backed this with one flat stack; the call sites written then are
- * unchanged, which is what the seam was for.
- */
-@Stable
-class Navigator(val state: NavigationState) {
-    private val _reselectEvents = MutableSharedFlow<PebblesKey>(extraBufferCapacity = 1)
-
-    /** Emitted when a tab is reselected, for screens that also reset scroll. */
-    val reselectEvents = _reselectEvents.asSharedFlow()
-
-    /**
-     * A [TopLevelKey] switches tab; anything else pushes onto the current tab's
-     * own stack (D6).
-     */
-    fun navigate(key: PebblesKey) {
-        if (key is TopLevelKey) {
-            state.topLevelRoute = key
-        } else {
-            state.currentStack.add(key)
-        }
-    }
-
-    /**
-     * Unwind the current tab, then fall back to the start route, then let the
-     * system exit (D4). Popping the start route's last entry is deliberately a
-     * no-op: an empty stack has nothing to render.
-     */
-    fun goBack() {
-        val stack = state.currentStack
-        if (stack.size > 1) {
-            stack.removeAt(stack.lastIndex)
-        } else if (state.topLevelRoute != state.startRoute) {
-            state.topLevelRoute = state.startRoute
-        }
-    }
-
-    /** Reselecting a tab pops it to its root and signals anyone resetting scroll. */
-    fun onReselect(key: PebblesKey) {
-        val stack = state.backStacks[key] ?: return
-        while (stack.size > 1) stack.removeAt(stack.lastIndex)
-        state.topLevelRoute = key
-        _reselectEvents.tryEmit(key)
-    }
-
-    /**
-     * Resets every tab to its root, returns to the start tab, and seeds [key]
-     * there. Part 5 drives the auth switch with this: sign-out must not leave a
-     * signed-in user's stack sitting under the Welcome screen.
-     */
-    fun replaceAll(key: PebblesKey) {
-        state.backStacks.forEach { (tab, stack) ->
-            while (stack.size > 1) stack.removeAt(stack.lastIndex)
-            if (stack.isNotEmpty()) stack[0] = tab
-        }
-        state.topLevelRoute = state.startRoute
-        val start = state.backStacks.getValue(state.startRoute)
-        start[0] = key
-    }
-}
-```
-
-- [ ] **Step 4: Run the tests**
-
-Run: `npm run test --workspace=@pbbls/android -- --tests '*NavigatorTest*'`
-Expected: PASS, 10 tests. `NavBackStack<T : NavKey>` has a `vararg T` constructor
-(verified in the 1.1.7 artifact), so `NavBackStack<NavKey>(it)` is valid on the
-JVM. Do **not** replace it with a plain `mutableStateListOf`: the test would then
-stop exercising the type the production code uses.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add apps/android/app/src/main/kotlin/app/pbbls/android/navigation/Navigator.kt \
-        apps/android/app/src/test/kotlin/app/pbbls/android/navigation/NavigatorTest.kt
-git commit -m "$(cat <<'EOF'
-feat(android): Navigator over per-tab stacks, with tests (#852)
-
-Ten tests state the D4 rules: tabs switch rather than push, modals land on
-the current tab, back unwinds before leaving a tab, back at a tab root
-falls back to Path, back at Path is a no-op so the system exits, the back
-path is bounded at start-plus-current, an out-of-path tab keeps its stack,
-reselect pops to root, and replaceAll clears everything.
-
-The last test pins the D6 invariant: a modal is only ever on top of the
-CURRENT tab, because the bar is hidden on modals and the bar is the only
-way to switch.
-
-Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
-EOF
-)"
-```
-
----
-
-### Task 9: The NavigationBar
-
-**Files:**
-- Create: `apps/android/app/src/main/kotlin/app/pbbls/android/navigation/PebblesNavigationBar.kt`
-- Modify: `apps/android/app/src/main/res/values/strings.xml`
-- Modify: `apps/android/app/src/main/res/values-fr/strings.xml`
-
-- [ ] **Step 1: Add the four labels**
-
-Per the repo's formatting-sensitive-catalogs rule, **insert these at the right anchor as text; do not rewrite the file.** Find the navigation or profile block in each and add:
-
-`values/strings.xml`:
-```xml
-    <!-- Bottom navigation bar (#852) -->
-    <string name="tab_path">Path</string>
-    <string name="tab_people">People</string>
-    <string name="tab_collections">Collections</string>
-    <string name="tab_you">You</string>
-```
-
-`values-fr/strings.xml`:
-```xml
-    <!-- Barre de navigation (#852) -->
-    <string name="tab_path">Chemin</string>
-    <string name="tab_people">Proches</string>
-    <string name="tab_collections">Collections</string>
-    <string name="tab_you">Toi</string>
-```
-
-- [ ] **Step 2: Write the bar**
-
-```kotlin
-package app.pbbls.android.navigation
-
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
-import app.pbbls.android.R
-
-/**
- * The four top-level destinations (#852, D2).
- *
- * Tapping a tab you are not on switches to it, retaining that tab's stack;
- * tapping the one you ARE on pops it to its root, which is the standard M3
- * escape hatch and the only reliable way out of a deep stack.
- */
-@Composable
-fun PebblesNavigationBar(
-    current: PebblesKey,
-    onSelect: (PebblesKey) -> Unit,
-    onReselect: (PebblesKey) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    NavigationBar(modifier = modifier) {
-        PebblesKey.tabs.forEach { tab ->
-            val selected = tab == current
-            NavigationBarItem(
-                selected = selected,
-                onClick = { if (selected) onReselect(tab) else onSelect(tab) },
-                icon = { Icon(imageVector = tab.icon(), contentDescription = null) },
-                label = { Text(stringResource(tab.labelRes())) },
-            )
-        }
-    }
-}
-```
-
-Pick the four icons from whatever icon set the app already uses. Check first:
-
-```bash
-grep -rn "Icons\.\|painterResource(R.drawable" apps/android/app/src/main/kotlin/app/pbbls/android/features/profile/components/ | head
-```
-
-If the app uses its own drawables (likely, given the design system), add `tab.icon()` as a `@Composable` returning `painterResource(...)` and adjust `Icon` accordingly. **Do not introduce `material-icons-extended`** for this — it is a large dependency and the app has its own visual language.
-
-Add the two extension functions at the bottom of the file:
-
-```kotlin
-private fun PebblesKey.labelRes(): Int =
-    when (this) {
-        PebblesKey.Path -> R.string.tab_path
-        PebblesKey.People -> R.string.tab_people
-        PebblesKey.Collections -> R.string.tab_collections
-        PebblesKey.You -> R.string.tab_you
-        else -> error("$this is not a tab")
-    }
-```
-
-- [ ] **Step 3: Build and commit**
-
-```bash
-npm run build --workspace=@pbbls/android
-git add apps/android/app/src/main/kotlin/app/pbbls/android/navigation/PebblesNavigationBar.kt \
-        apps/android/app/src/main/res/values/strings.xml \
-        apps/android/app/src/main/res/values-fr/strings.xml
-git commit -m "$(cat <<'EOF'
-feat(android): the four-tab M3 NavigationBar (#852)
-
-Path / People / Collections / You, EN and FR. Tapping the active tab pops
-it to its root.
-
-Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
-EOF
-)"
-```
-
----
-
-### Task 10: Wire the bar into `RootScreen`
-
-**Files:**
-- Modify: `apps/android/app/src/main/kotlin/app/pbbls/android/RootScreen.kt`
-
-- [ ] **Step 1: Replace `AuthedNavDisplay`**
-
-```kotlin
-@Composable
-private fun AuthedNavDisplay(onSignOut: () -> Unit) {
-    val state = rememberNavigationState()
-    val navigator = remember(state) { Navigator(state) }
-    val topKey = state.topKey
-
-    Scaffold(
-        bottomBar = {
-            // D5: bar visibility is read straight off the stack, so it cannot
-            // drift out of sync with what is on screen.
-            if (topKey is BarKey) {
-                PebblesNavigationBar(
-                    current = state.topLevelRoute,
-                    onSelect = navigator::navigate,
-                    onReselect = navigator::onReselect,
-                )
-            }
-        },
-        floatingActionButton = {
-            // D3: the pinned "New pebble" button used to occupy exactly the
-            // space the bar now takes. Path only — no other tab has a create action.
-            if (topKey == PebblesKey.Path) {
-                NewPebbleFab(
-                    onClick = { navigator.navigate(PebblesKey.RecordFlow()) },
-                    onLongClick = { navigator.navigate(PebblesKey.CreatePebble()) },
-                )
-            }
-        },
-        containerColor = PebblesTheme.colors.system.background,
-    ) { padding ->
-        NavDisplay(
-            entries = state.toDecoratedEntries(entryProvider = entryProvider { pebblesEntries(navigator, onSignOut) }),
-            onBack = { navigator.goBack() },
-            modifier = Modifier.padding(padding),
-        )
-    }
-}
-```
-
-**The `NavDisplay(entries = …)` overload** is what takes pre-decorated entries; the `backStack = …` overload used in Part 1 decorates internally and cannot express per-tab decorators. Confirm the parameter name against the 1.1.7 artifact before assuming it is `entries`.
-
-- [ ] **Step 2: Move the FAB out of `PathScreen`**
-
-In `PathScreen.kt`, find the pinned "New pebble" block around line 316 and cut it into a new file `features/path/components/NewPebbleFab.kt`, keeping the tap/long-press pair:
-
-```kotlin
-package app.pbbls.android.features.path.components
-
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.material3.ExtendedFloatingActionButton
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
-import app.pbbls.android.R
-
-/**
- * "New pebble" (#852, D3). Was a pinned bar at the bottom of the timeline —
- * exactly where the NavigationBar now lives — so it became a FAB on the Path
- * tab.
- *
- * Tap opens the record flow, long-press the all-at-once form (M58 D1). That
- * pair is preserved verbatim; only the affordance moved.
- */
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun NewPebbleFab(
-    onClick: () -> Unit,
-    onLongClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    val interaction = remember { MutableInteractionSource() }
-    ExtendedFloatingActionButton(
-        onClick = {},
-        modifier =
-            modifier.combinedClickable(
-                interactionSource = interaction,
-                indication = null,
-                onClick = onClick,
-                onLongClick = onLongClick,
-            ),
-        interactionSource = interaction,
-    ) {
-        Text(stringResource(R.string.path_new_pebble))
-    }
-}
-```
-
-Check the existing string name before using `R.string.path_new_pebble`:
-
-```bash
-grep -rn "new_pebble" apps/android/app/src/main/res/values/strings.xml
-```
-
-Remove `onCreatePebble` / `onCreatePebbleLongPress` from `PathScreen`'s internal timeline call, and remove the bottom inset the pinned button needed.
-
-- [ ] **Step 3: Build, lint, test**
-
-```bash
-npm run build --workspace=@pbbls/android
-npm run lint --workspace=@pbbls/android
-./gradlew lint
-npm run test --workspace=@pbbls/android
-```
-
-- [ ] **Step 4: Commit**
-
-```bash
-git add apps/android/app/src/main/kotlin/app/pbbls/android/RootScreen.kt \
-        apps/android/app/src/main/kotlin/app/pbbls/android/features/path/
-git commit -m "$(cat <<'EOF'
-feat(android): the bar goes up, New pebble becomes a FAB (#852)
-
-Bar visibility is `topKey is BarKey`, read off the stack, so it cannot
-disagree with what is on screen. The pinned New pebble button occupied
-exactly the space the bar now takes, so it moved to a Path-only FAB,
-keeping tap-for-flow and long-press-for-form (M58 D1).
-
-Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
-EOF
-)"
-```
-
----
-
-### Task 11: Redistribute Profile's children
-
-**Files:**
-- Modify: `apps/android/app/src/main/kotlin/app/pbbls/android/navigation/PebblesEntryProvider.kt`
-- Modify: `apps/android/app/src/main/kotlin/app/pbbls/android/features/profile/ProfileScreen.kt`
-- Modify: `apps/android/app/src/main/kotlin/app/pbbls/android/features/profile/components/ProfileSoulsCard.kt`
-- Modify: `apps/android/app/src/main/kotlin/app/pbbls/android/features/profile/components/ProfileCollectionsCard.kt`
-
-- [ ] **Step 1: Retarget the People and Collections entries**
-
-In `PebblesEntryProvider.kt`, the `People` and `Collections` entries already render `SoulsListScreen` and `CollectionsListScreen`. Now that they are tab roots, their `onBack` is meaningless — a tab root has nothing to go back to within its own stack. Change both to hide the back affordance.
-
-`SoulsListScreen` and `CollectionsListScreen` each take a non-optional `onBack: () -> Unit`. Make it nullable so a tab root can say "no back button":
-
-```kotlin
-fun SoulsListScreen(
-    onBack: (() -> Unit)?,
-    ...
-```
-
-and render the back button only when non-null. Do the same for `CollectionsListScreen`. Then:
-
-```kotlin
-    entry<PebblesKey.People>(metadata = NavTransitions.forKey(PebblesKey.People)) {
-        SoulsListScreen(
-            onBack = null,
-            onOpenSoul = { navigator.navigate(PebblesKey.SoulDetail(it.id)) },
-        )
-    }
-```
-
-- [ ] **Step 2: Strip the moved entry points from Profile**
-
-`ProfileScreen` loses three parameters — `onOpenSouls`, `onOpenCollections`, `onOpenConnections` — because those surfaces are now one tap away in the bar and a second route into the same place is a maintenance trap. Its signature becomes:
-
-```kotlin
-fun ProfileScreen(
-    onSignOut: () -> Unit,
-    onOpenCollection: (Collection) -> Unit,
-    onOpenGlyphs: () -> Unit,
-    onOpenLab: () -> Unit,
-    onOpenAchievements: () -> Unit,
-    modifier: Modifier = Modifier,
-    viewModel: ProfileViewModel = hiltViewModel(),
-) {
-```
-
-`onBack` goes too: `You` is a tab root.
-
-In `ProfileSoulsCard`, remove `onOpenSouls` and `onOpenConnections`. In `ProfileCollectionsCard`, remove `onOpenList` but **keep** `onOpenCollection` — tapping a specific collection from the profile hub still makes sense and lands on `CollectionDetail` within the `You` stack.
-
-Update the `You` entry to match.
-
-- [ ] **Step 3: Update the screenshot previews**
-
-Any `@PreviewTest` that constructs `ProfileScreen`, `ProfileSoulsCard` or `ProfileCollectionsCard` now has wrong parameters.
-
-```bash
-grep -rln "ProfileScreen\|ProfileSoulsCard\|ProfileCollectionsCard" apps/android/app/src/screenshotTest/
-```
-
-Fix each. Then re-baseline, because the cards genuinely changed:
-
-```bash
-./gradlew updateDebugScreenshotTest
-./gradlew validateDebugScreenshotTest
-```
-
-Inspect the regenerated PNGs before committing them — a re-baseline that hides an unintended layout break is worse than a failing test.
-
-- [ ] **Step 4: Build, lint, test, commit**
-
-```bash
-npm run build --workspace=@pbbls/android && ./gradlew lint && npm run test --workspace=@pbbls/android
-git add apps/android/app/src/main/kotlin/app/pbbls/android/ apps/android/app/src/screenshotTest/
-git commit -m "$(cat <<'EOF'
-feat(android): Souls and Collections become tabs, not Profile children (#852)
-
-ProfileScreen loses onOpenSouls, onOpenCollections, onOpenConnections and
-onBack: those surfaces are one tap away in the bar now, and a second route
-into the same place is a trap. Tapping a specific collection from the hub
-still works and lands within the You stack.
-
-Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
-EOF
-)"
-```
-
----
-
-### Task 12: Decision-log entries
-
-**Files:**
-- Modify: `docs/decisions/log.md` (append only — never edit a prior entry)
-
-- [ ] **Step 1: Append both entries**
-
-Append to the end of `docs/decisions/log.md`. Match the existing entry format exactly: `## YYYY-MM-DD — Title (#issue)` then the Status / Scope / Context / Decision / Why / Consequences / Supersedes / Refs fields.
-
-Entry 1 — the IA choice and the deliberate mirror break. It must state: the four tabs and what moved; that this breaks the standing 1:1 iOS rule on purpose; that the rule's actual target (schema, RPC payloads, cross-surface semantics) is untouched; the cost (two IAs to reason about for every future surface); and the iOS follow-up issue number from Step 2.
-
-Entry 2 — the supersession of M38 D5. It must state: that "modal surfaces stay conditionally-composed covers" no longer holds; that every full-screen cover is now a nav entry; and that D5's sibling decisions (D1's push IA for the authed tree, D9's z-order) are consumed by this too. Mark it **Supersedes: D5** in
-`docs/superpowers/specs/2026-07-10-android-bootstrap-design.md`.
-
-- [ ] **Step 2: File the iOS follow-up issue**
-
-```bash
-gh issue create \
-  --title "[Feat] Decide whether iOS adopts a TabView to match Android's four-tab IA" \
-  --label feat --label ios --label ui --label core \
-  --body "Android moved to an M3 NavigationBar with four tabs (Path / People / Collections / You) and per-tab back stacks in #852, deliberately breaking the standing 1:1 iOS/Android mirror at the navigation layer. See the decision log entry of 2026-09-20 and docs/superpowers/specs/2026-09-20-android-nav3-design.md D1.
-
-This issue decides iOS's answer: adopt a TabView and converge, or keep the push IA and accept that the two surfaces navigate differently. Not a bug — a deliberate fork that needs a deliberate resolution."
-```
-
-Put the issue number into Entry 1 before committing.
-
-- [ ] **Step 3: Commit**
-
-```bash
-git add docs/decisions/log.md
-git commit -m "$(cat <<'EOF'
-docs: the Android four-tab IA, and D5 superseded (#852)
-
-Two appended entries: the bottom-bar IA as a deliberate break from the 1:1
-iOS mirror rule (with the iOS follow-up filed), and the supersession of
-M38 D5's "modal surfaces stay conditionally-composed covers".
-
-Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
-EOF
-)"
-```
-
----
-
-### Task 13: Update the Arkaik map
-
-The IA changed, which is exactly what the `arkaik` skill exists for.
-
-- [ ] **Step 1: Confirm the MCP tools are available**
-
-The map is **hosted**. `docs/arkaik/bundle.json` is a frozen snapshot and must not be edited — editing it and running `arkaik restore` has already silently deleted this project's federation feed once ([arkaik#423](https://github.com/alexisbohns/arkaik/issues/423)).
-
-If `mcp__arkaik-mcp__*` tools are not available, **say so and stop this task**. Do not fall back to the file. In a container the usual cause is a missing `ARKAIK_TOKEN`.
-
-- [ ] **Step 2: Move the nodes**
-
-Using `mcp__arkaik-mcp__list_nodes` and `mcp__arkaik-mcp__update_node`:
-
-- Add view nodes for the four tabs if they do not exist; set the `android` platform status of the ones this stack is building to `development`.
-- Re-parent the souls / collections / connections view nodes from the Profile view to their new tab roots with `add_edge` / `remove_edge`.
-- Record the new `LabAnnouncement` and `LabLogList` views.
-
-Note the node ids returned — they are what the Part 2 and Part 4 Lab Notes put in `nodes:`.
-
-- [ ] **Step 3: Nothing to commit**
-
-Hosted mutations emit their own journal events. There is no repo change for this task.
-
----
-
-### Task 14: Verify Part 2 and open the PR
-
-- [ ] **Step 1: Walk the tab behavior on a device**
-
-```bash
-./gradlew installDebug
-```
-
-| Check | Expect |
-|---|---|
-| Launch | Path, bar visible, FAB visible |
-| Tap People, then a soul | soul detail, **bar still visible** |
-| Tap People again (reselect) | back at the souls list |
-| From People root, press back | Path |
-| From Path root, press back | app exits |
-| Path → You → People → back | **Path** (You is skipped, D4) |
-| You → Glyphs, switch to People, switch back to You | still on Glyphs — the stack was retained |
-| Scroll Path, go to Collections, come back | scroll position retained |
-| Rotate on any tab | stack and scroll survive |
-| Kill the process on People › SoulDetail and relaunch | **back on that soul's detail** |
-
-That last row is the acceptance criterion this part delivers — per-tab stacks are saveable, so it should already hold for pushes even though the covers are not promoted until parts 3–4.
-
-- [ ] **Step 2: Open the PR with a Lab Note**
-
-This part is highly visible, so the PR body needs a `## Lab Note (EN/FR)` section with exactly one ```yaml fence. Double-quote every title and summary. No em dashes in either language. French uses "Tu" and is an adaptation, not a translation.
-
-```yaml
-species: feature
-platform: android
-status: in_progress
-published: false
-en:
-  title: "A new way around the app"
-  summary: "Your path, your people, your collections and your profile now each have their own tab at the bottom of the screen. Everything keeps its place, so you can jump away and come back to exactly where you were."
-fr:
-  title: "Une nouvelle façon de circuler"
-  summary: "Ton chemin, tes proches, tes collections et ton profil ont maintenant chacun leur onglet en bas de l'écran. Chaque onglet garde sa place, donc tu peux partir et revenir exactement là où tu étais."
-nodes: [V-path, V-souls-list, V-collections-list, V-profile]
-suggested:
-  molecule: pbbls
-  type: feature
-  tags: [changelog]
-```
-
-Replace the `nodes:` ids with the real ones from Task 13. An id that matches nothing is dropped and reported in the App's delivery response.
-
-```bash
-gh pr create --base feat/852-navigation3-migration \
-  --title "feat(android): a four-tab NavigationBar with per-tab back stacks (#852)" \
-  --label feat --label android --label core --label ui \
-  --milestone "M61 · Android Refacto"
-```
-
----
-
-# Part 3 — Profile-side covers become entries
+# Part 2 — Profile-side covers become entries
 
 **Branch:** `feat/852-profile-covers-as-entries`
 
@@ -2037,6 +1161,34 @@ EOF
 
 ---
 
+### How a key's argument reaches its ViewModel — decided, do not re-litigate
+
+**Navigation 3 does NOT populate `SavedStateHandle` from the key.** Verified
+against the AndroidX `passingarguments` recipe: the documented idiom is
+`@AssistedInject` + `@AssistedFactory` + `hiltViewModel<VM, VM.Factory>(creationCallback = { it.create(key) })`.
+A `NavKey` is an object, not a route with parsed arguments, so nothing writes it
+into the handle.
+
+**This codebase uses the other option, deliberately.** The entry's content lambda
+already has the key, so the entry passes `soulId = key.soulId` to the screen and
+the screen drives `LaunchedEffect(soulId) { viewModel.start(soulId) }`. That is
+the idiom `SoulDetailViewModel` and `CollectionDetailViewModel` have used since
+#849, and Task 15 extended it to the two form ViewModels, which also mirror the
+id into their own `SavedStateHandle` inside `start`.
+
+Why not `@AssistedInject`:
+
+- It is a **new DI pattern with no precedent in this repo**, and the root
+  `CLAUDE.md` says new patterns require discussion first.
+- It would have to be applied to every key carrying an argument — eight of them —
+  for a benefit the existing idiom already delivers.
+- **Process death is covered either way.** The key is restored from the saveable
+  back stack, so the entry recomposes with the right key and `LaunchedEffect`
+  re-fires; the mirrored id in `SavedStateHandle` is the belt to that braces.
+
+So Task 17 and Task 23 pass the id as a screen parameter. Neither introduces
+assisted injection.
+
 ### Task 17: Promote the five profile-side covers
 
 **Files:**
@@ -2088,7 +1240,16 @@ Delete from each ViewModel the corresponding `isPresentingX` field, `openX()`, `
 
 - [ ] **Step 3: Delete seven `BackHandler`s**
 
-Remove the `BackHandler` from: `SoulFormScreen:84`, `CollectionFormScreen:81`, `SettingsScreen:116`, `GlyphCarveScreen:101`, `InviteScreen:78`, `ConnectionsScreen:58`, and `LogListScreen:75` (Task 19 handles Lab's other one).
+Remove the `BackHandler` from the **six** screens this task promotes:
+`SoulFormScreen`, `CollectionFormScreen`, `SettingsScreen`, `GlyphCarveScreen`,
+`InviteScreen`, `ConnectionsScreen`.
+
+**Do NOT touch `LogListScreen`'s or `LabScreen`'s.** Neither is promoted here —
+both are still content swaps inside `LabScreen`, so nothing else owns their back.
+`LogListScreen`'s handler exists for a specific reason its own comment records:
+Lab's handler only clears the cover flag, so without it the ViewModel's mode
+guard stays set and a same-mode reopen serves a stale list. **Task 19** promotes
+both to entries and deletes both handlers then.
 
 Each of these had `enabled = !uiState.isSaving`, which did not block back at all — it declined to handle it, so back fell through to the host (D9). Where the intent was genuinely "refuse back while saving", express it as an **enabled** handler that consumes:
 
@@ -2314,13 +1475,13 @@ EOF
 
 - [ ] **Step 2: Open the PR**
 
-Body: `Part 3 of #852`. No `Resolves`. No `F-…` ids. Label `feat`, `android`, `ui`, `core`, milestone `M61 · Android Refacto`.
+Body: `Part 2 of #852`. No `Resolves`. No `F-…` ids. Label `feat`, `android`, `ui`, `core`, milestone `M61 · Android Refacto`.
 
 This part is user-visible (predictive back on five surfaces, state surviving a kill), so it **does** need a Lab Note. Write it with the `lab-note` skill's tone: benefit-first, warm, no jargon, no em dashes, everything double-quoted, French an adaptation using "Tu".
 
 ---
 
-# Part 4 — The write path becomes entries
+# Part 3 — The write path becomes entries
 
 **Branch:** `feat/852-write-path-as-entries`
 
@@ -2609,7 +1770,7 @@ The most user-visible part of the stack. Note ids from the Arkaik map for `V-peb
 
 ---
 
-# Part 5 — Auth as a condition, deep links through the stack
+# Part 4 — Auth as a condition, deep links through the stack
 
 **Branch:** `feat/852-auth-and-deep-links`
 
@@ -2997,7 +2158,7 @@ Body: `Part 5 of #852`. The invite-after-onboarding fix is user-visible, so incl
 
 ---
 
-# Part 6 — `di/ServiceGraph` dies
+# Part 5 — `di/ServiceGraph` dies
 
 **Branch:** `feat/852-service-graph-dies`
 
@@ -3315,6 +2476,977 @@ gh stack submit
 ```
 
 Confirm each PR's base is the part below it and that only part 6 says `Resolves`.
+
+---
+
+# Part 6 — The four-tab NavigationBar
+
+> **Runs LAST** (see the ordering note at the top). Every cover is an entry by
+> now, so `topKey is BarKey` is true exactly when the bar should be up, and the
+> bar never covers a full-screen surface.
+>
+> Tasks 7–13 are **already implemented** on `feat/852-navigation-bar-tabs`:
+> rebase that branch onto Part 5 rather than rebuilding them. Task 14's device
+> verification is the part still outstanding.
+
+**Branch:** `feat/852-navigation-bar-tabs` (`gh stack` on top of part 1)
+
+**What ships:** `NavigationState` + the per-tab back stacks, the M3 bar, the Path FAB, and the IA change (D1–D4). This is the part users see.
+
+---
+
+### Task 7: `NavigationState`
+
+**Files:**
+- Create: `apps/android/app/src/main/kotlin/app/pbbls/android/navigation/NavigationState.kt`
+
+- [ ] **Step 1: Write it**
+
+```kotlin
+package app.pbbls.android.navigation
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSerializable
+import androidx.compose.runtime.setValue
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.rememberDecoratedNavEntries
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.runtime.serialization.NavKeySerializer
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+
+/**
+ * Per-tab back stacks (#852, D4), modelled on the AndroidX `multiplestacks`
+ * recipe.
+ *
+ * Each tab owns a [NavBackStack], which is saveable — so process-death
+ * restoration is a property of this container rather than something each screen
+ * re-implements. Each tab also owns its own `SaveableStateHolder` decorator, so
+ * a tab's scroll position survives a trip to another tab.
+ *
+ * This class never modifies itself. [Navigator] is the only writer.
+ */
+@Stable
+class NavigationState(
+    val startRoute: PebblesKey,
+    topLevelRoute: MutableState<PebblesKey>,
+    val backStacks: Map<PebblesKey, NavBackStack<NavKey>>,
+) {
+    var topLevelRoute: PebblesKey by topLevelRoute
+
+    /** The stack the user is currently in. Modals are pushed here (D6). */
+    val currentStack: NavBackStack<NavKey>
+        get() = backStacks[topLevelRoute] ?: error("No stack for $topLevelRoute")
+
+    /**
+     * The key on top of everything — what the bar check reads.
+     *
+     * Typed [NavKey], not [PebblesKey], and deliberately NOT cast: `topKey is
+     * BarKey` and `topKey == PebblesKey.Path` both work on a `NavKey`, because
+     * [BarKey] is a marker unrelated to the stack's element type. A cast here
+     * would buy nothing and could throw.
+     */
+    val topKey: NavKey
+        get() = currentStack.last()
+
+    /**
+     * "Exit through home" (D4): the start route is always first, and at most one
+     * other tab is active. Back therefore unwinds the current tab, falls back to
+     * Path, then exits — and the back path cannot grow without bound however
+     * much the user taps around the bar.
+     *
+     * A tab that is not in use still RETAINS its stack; it is simply not in the
+     * back path.
+     */
+    fun topLevelRoutesInUse(): List<PebblesKey> = if (topLevelRoute == startRoute) listOf(startRoute) else listOf(startRoute, topLevelRoute)
+
+    @Composable
+    fun toDecoratedEntries(entryProvider: (NavKey) -> NavEntry<NavKey>): List<NavEntry<NavKey>> {
+        val decorated =
+            backStacks.mapValues { (_, stack) ->
+                rememberDecoratedNavEntries(
+                    backStack = stack,
+                    entryDecorators =
+                        listOf(
+                            rememberSaveableStateHolderNavEntryDecorator(),
+                            rememberViewModelStoreNavEntryDecorator(),
+                        ),
+                    entryProvider = entryProvider,
+                )
+            }
+        return topLevelRoutesInUse().flatMap { decorated[it].orEmpty() }
+    }
+}
+
+@Composable
+fun rememberNavigationState(
+    startRoute: PebblesKey = PebblesKey.Path,
+    tabs: List<PebblesKey> = PebblesKey.tabs,
+): NavigationState {
+    // NB: `androidx.savedstate...MutableStateSerializer` exists but is the wrong
+    // shape here — it serializes a `MutableState<T>` and pairs with a
+    // `rememberSerializable(serializer = …)` overload returning `T` directly. The
+    // overload that returns a `MutableState<T>` (what `by` needs) lives in
+    // `androidx.compose.runtime.saveable` and takes the INNER serializer as
+    // `stateSerializer`.
+    val topLevelRoute =
+        rememberSerializable(
+            startRoute,
+            tabs,
+            stateSerializer = NavKeySerializer<PebblesKey>(),
+        ) { mutableStateOf(startRoute) }
+
+    val backStacks = tabs.associateWith { key -> rememberNavBackStack(key) }
+
+    return remember(startRoute, tabs) {
+        NavigationState(startRoute = startRoute, topLevelRoute = topLevelRoute, backStacks = backStacks)
+    }
+}
+```
+
+- [ ] **Step 2: Build**
+
+Run: `npm run build --workspace=@pbbls/android`
+Expected: `BUILD SUCCESSFUL`.
+
+`rememberSerializable` and `MutableStateSerializer` come from `androidx.savedstate`, which arrives transitively with `lifecycle-viewmodel-savedstate`. If they do not resolve, add `androidx-savedstate-compose` to the catalog rather than hand-rolling a `Saver` — a hand-rolled one will silently drop the tab on process death.
+
+**`rememberSerializable` is in `androidx.compose.runtime.saveable`, not
+`androidx.savedstate`** — verified by decompiling the resolved artifacts during
+Part 2. Its `MutableState`-returning overload names the parameter
+`stateSerializer` and takes the INNER value's serializer
+(`NavKeySerializer<PebblesKey>()`), not a `MutableStateSerializer` wrapper. The
+wrapper is real but pairs with a different overload that returns `T` rather than
+`MutableState<T>`, which the `by` delegate cannot use.
+
+**Why the stacks are typed `NavBackStack<NavKey>` and not `NavBackStack<PebblesKey>`.**
+Verified against the 1.1.7 artifact during Part 1: both `rememberNavBackStack`
+overloads are fixed to `NavBackStack<NavKey>` — there is no reified per-call
+generic. The `NavBackStack` *class* is generic (`NavBackStack<T : NavKey>`), but
+the saveable composable that builds one is not, because it restores through a
+reflection-based serializer.
+
+This costs nothing in practice: [Navigator] is the only writer and its `navigate`
+/ `replaceAll` take a `PebblesKey`, so every element on every stack is a
+`PebblesKey` by construction, and callers keep full compile-time safety. Only the
+storage type is widened. Do not "fix" this with a cast.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add apps/android/app/src/main/kotlin/app/pbbls/android/navigation/NavigationState.kt
+git commit -m "$(cat <<'EOF'
+feat(android): per-tab back stacks with exit-through-home (#852)
+
+Four saveable NavBackStacks, one per tab, each with its own
+SaveableStateHolder so a tab's scroll survives a trip elsewhere. At most
+two are in the back path at a time (start + current), so back unwinds the
+current tab, falls back to Path, then exits — and the back depth stays
+bounded however much the user taps the bar.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+### Task 8: `Navigator` over the tabs — test first
+
+**Files:**
+- Modify: `apps/android/app/src/main/kotlin/app/pbbls/android/navigation/Navigator.kt`
+- Test: `apps/android/app/src/test/kotlin/app/pbbls/android/navigation/NavigatorTest.kt`
+
+This is the part with all the judgement in it, so it is the part that gets tested hardest.
+
+- [ ] **Step 1: Write the failing test**
+
+Create `app/src/test/kotlin/app/pbbls/android/navigation/NavigatorTest.kt`:
+
+```kotlin
+package app.pbbls.android.navigation
+
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Before
+import org.junit.Test
+
+/**
+ * The navigation rules from the spec (D4), stated as tests.
+ *
+ * These run on the JVM against a hand-built NavigationState rather than through
+ * Compose, because the rules are pure list arithmetic and the Compose layer adds
+ * nothing but a harness.
+ */
+class NavigatorTest {
+    private lateinit var state: NavigationState
+    private lateinit var navigator: Navigator
+
+    @Before
+    fun setUp() {
+        state =
+            NavigationState(
+                startRoute = PebblesKey.Path,
+                topLevelRoute = androidx.compose.runtime.mutableStateOf(PebblesKey.Path),
+                backStacks = PebblesKey.tabs.associateWith { NavBackStack<NavKey>(it) },
+            )
+        navigator = Navigator(state)
+    }
+
+    @Test
+    fun `navigating to a tab switches rather than pushing`() {
+        navigator.navigate(PebblesKey.People)
+
+        assertEquals(PebblesKey.People, state.topLevelRoute)
+        assertEquals(listOf<PebblesKey>(PebblesKey.People), state.backStacks[PebblesKey.People]!!.toList())
+    }
+
+    @Test
+    fun `navigating to a non-tab pushes onto the current tab`() {
+        navigator.navigate(PebblesKey.People)
+        navigator.navigate(PebblesKey.SoulDetail("s1"))
+
+        assertEquals(
+            listOf(PebblesKey.People, PebblesKey.SoulDetail("s1")),
+            state.backStacks[PebblesKey.People]!!.toList(),
+        )
+        // Path's stack is untouched.
+        assertEquals(listOf<PebblesKey>(PebblesKey.Path), state.backStacks[PebblesKey.Path]!!.toList())
+    }
+
+    @Test
+    fun `back unwinds the current tab before leaving it`() {
+        navigator.navigate(PebblesKey.People)
+        navigator.navigate(PebblesKey.SoulDetail("s1"))
+        navigator.navigate(PebblesKey.SoulForm("s1"))
+
+        navigator.goBack()
+        assertEquals(PebblesKey.SoulDetail("s1"), state.topKey)
+
+        navigator.goBack()
+        assertEquals(PebblesKey.People, state.topKey)
+    }
+
+    @Test
+    fun `back at a tab root falls back to the start route`() {
+        navigator.navigate(PebblesKey.People)
+
+        navigator.goBack()
+
+        assertEquals(PebblesKey.Path, state.topLevelRoute)
+        // People's stack is RETAINED, just no longer in the back path.
+        assertEquals(listOf<PebblesKey>(PebblesKey.People), state.backStacks[PebblesKey.People]!!.toList())
+    }
+
+    @Test
+    fun `back at the start root is a no-op so the system can exit`() {
+        navigator.goBack()
+
+        assertEquals(PebblesKey.Path, state.topLevelRoute)
+        assertEquals(listOf<PebblesKey>(PebblesKey.Path), state.backStacks[PebblesKey.Path]!!.toList())
+    }
+
+    @Test
+    fun `at most start plus current are in the back path`() {
+        navigator.navigate(PebblesKey.You)
+        navigator.navigate(PebblesKey.People)
+
+        // You is skipped: the back path is bounded (D4).
+        assertEquals(listOf(PebblesKey.Path, PebblesKey.People), state.topLevelRoutesInUse())
+    }
+
+    @Test
+    fun `a visited tab retains its stack even when out of the back path`() {
+        navigator.navigate(PebblesKey.You)
+        navigator.navigate(PebblesKey.Glyphs)
+        navigator.navigate(PebblesKey.People)
+
+        assertEquals(
+            listOf(PebblesKey.You, PebblesKey.Glyphs),
+            state.backStacks[PebblesKey.You]!!.toList(),
+        )
+    }
+
+    @Test
+    fun `reselecting the current tab pops it to its root`() {
+        navigator.navigate(PebblesKey.People)
+        navigator.navigate(PebblesKey.SoulDetail("s1"))
+        navigator.navigate(PebblesKey.SoulForm("s1"))
+
+        navigator.onReselect(PebblesKey.People)
+
+        assertEquals(listOf<PebblesKey>(PebblesKey.People), state.backStacks[PebblesKey.People]!!.toList())
+        assertEquals(PebblesKey.People, state.topLevelRoute)
+    }
+
+    @Test
+    fun `replaceAll clears every stack and seeds the target`() {
+        navigator.navigate(PebblesKey.People)
+        navigator.navigate(PebblesKey.SoulDetail("s1"))
+        navigator.navigate(PebblesKey.You)
+        navigator.navigate(PebblesKey.Glyphs)
+
+        navigator.replaceAll(PebblesKey.Welcome)
+
+        assertEquals(PebblesKey.Path, state.topLevelRoute)
+        assertEquals(listOf<PebblesKey>(PebblesKey.Welcome), state.backStacks[PebblesKey.Path]!!.toList())
+        assertEquals(listOf<PebblesKey>(PebblesKey.People), state.backStacks[PebblesKey.People]!!.toList())
+        assertEquals(listOf<PebblesKey>(PebblesKey.You), state.backStacks[PebblesKey.You]!!.toList())
+        assertEquals(listOf<PebblesKey>(PebblesKey.Collections), state.backStacks[PebblesKey.Collections]!!.toList())
+    }
+
+    @Test
+    fun `a modal pushed on a tab keeps the bar invariant intact`() {
+        navigator.navigate(PebblesKey.People)
+        navigator.navigate(PebblesKey.SoulForm(null))
+
+        // D6: the top key is modal, so the bar is hidden, so the user cannot
+        // switch tabs from here — which is what guarantees no OTHER tab's stack
+        // can ever have a modal on top of it.
+        assertTrue(state.topKey !is BarKey)
+        PebblesKey.tabs.filter { it != PebblesKey.People }.forEach {
+            assertTrue(state.backStacks[it]!!.last() is BarKey)
+        }
+    }
+}
+```
+
+- [ ] **Step 2: Run it to confirm it fails**
+
+Run: `npm run test --workspace=@pbbls/android -- --tests '*NavigatorTest*'`
+Expected: compilation failure — `Navigator` takes a `NavBackStack`, not a `NavigationState`.
+
+- [ ] **Step 3: Rewrite the Navigator**
+
+Replace the whole body of `navigation/Navigator.kt`:
+
+```kotlin
+package app.pbbls.android.navigation
+
+import androidx.compose.runtime.Stable
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
+
+/**
+ * The only writer of [NavigationState] (#852).
+ *
+ * Part 1 backed this with one flat stack; the call sites written then are
+ * unchanged, which is what the seam was for.
+ */
+@Stable
+class Navigator(val state: NavigationState) {
+    private val _reselectEvents = MutableSharedFlow<PebblesKey>(extraBufferCapacity = 1)
+
+    /** Emitted when a tab is reselected, for screens that also reset scroll. */
+    val reselectEvents = _reselectEvents.asSharedFlow()
+
+    /**
+     * A [TopLevelKey] switches tab; anything else pushes onto the current tab's
+     * own stack (D6).
+     */
+    fun navigate(key: PebblesKey) {
+        if (key is TopLevelKey) {
+            state.topLevelRoute = key
+        } else {
+            state.currentStack.add(key)
+        }
+    }
+
+    /**
+     * Unwind the current tab, then fall back to the start route, then let the
+     * system exit (D4). Popping the start route's last entry is deliberately a
+     * no-op: an empty stack has nothing to render.
+     */
+    fun goBack() {
+        val stack = state.currentStack
+        if (stack.size > 1) {
+            stack.removeAt(stack.lastIndex)
+        } else if (state.topLevelRoute != state.startRoute) {
+            state.topLevelRoute = state.startRoute
+        }
+    }
+
+    /** Reselecting a tab pops it to its root and signals anyone resetting scroll. */
+    fun onReselect(key: PebblesKey) {
+        val stack = state.backStacks[key] ?: return
+        while (stack.size > 1) stack.removeAt(stack.lastIndex)
+        state.topLevelRoute = key
+        _reselectEvents.tryEmit(key)
+    }
+
+    /**
+     * Resets every tab to its root, returns to the start tab, and seeds [key]
+     * there. Part 5 drives the auth switch with this: sign-out must not leave a
+     * signed-in user's stack sitting under the Welcome screen.
+     */
+    fun replaceAll(key: PebblesKey) {
+        state.backStacks.forEach { (tab, stack) ->
+            while (stack.size > 1) stack.removeAt(stack.lastIndex)
+            if (stack.isNotEmpty()) stack[0] = tab
+        }
+        state.topLevelRoute = state.startRoute
+        val start = state.backStacks.getValue(state.startRoute)
+        start[0] = key
+    }
+}
+```
+
+- [ ] **Step 4: Run the tests**
+
+Run: `npm run test --workspace=@pbbls/android -- --tests '*NavigatorTest*'`
+Expected: PASS, 10 tests. `NavBackStack<T : NavKey>` has a `vararg T` constructor
+(verified in the 1.1.7 artifact), so `NavBackStack<NavKey>(it)` is valid on the
+JVM. Do **not** replace it with a plain `mutableStateListOf`: the test would then
+stop exercising the type the production code uses.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add apps/android/app/src/main/kotlin/app/pbbls/android/navigation/Navigator.kt \
+        apps/android/app/src/test/kotlin/app/pbbls/android/navigation/NavigatorTest.kt
+git commit -m "$(cat <<'EOF'
+feat(android): Navigator over per-tab stacks, with tests (#852)
+
+Ten tests state the D4 rules: tabs switch rather than push, modals land on
+the current tab, back unwinds before leaving a tab, back at a tab root
+falls back to Path, back at Path is a no-op so the system exits, the back
+path is bounded at start-plus-current, an out-of-path tab keeps its stack,
+reselect pops to root, and replaceAll clears everything.
+
+The last test pins the D6 invariant: a modal is only ever on top of the
+CURRENT tab, because the bar is hidden on modals and the bar is the only
+way to switch.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+### Task 9: The NavigationBar
+
+**Files:**
+- Create: `apps/android/app/src/main/kotlin/app/pbbls/android/navigation/PebblesNavigationBar.kt`
+- Modify: `apps/android/app/src/main/res/values/strings.xml`
+- Modify: `apps/android/app/src/main/res/values-fr/strings.xml`
+
+- [ ] **Step 1: Add the four labels**
+
+Per the repo's formatting-sensitive-catalogs rule, **insert these at the right anchor as text; do not rewrite the file.** Find the navigation or profile block in each and add:
+
+`values/strings.xml`:
+```xml
+    <!-- Bottom navigation bar (#852) -->
+    <string name="tab_path">Path</string>
+    <string name="tab_people">People</string>
+    <string name="tab_collections">Collections</string>
+    <string name="tab_you">You</string>
+```
+
+`values-fr/strings.xml`:
+```xml
+    <!-- Barre de navigation (#852) -->
+    <string name="tab_path">Chemin</string>
+    <string name="tab_people">Proches</string>
+    <string name="tab_collections">Collections</string>
+    <string name="tab_you">Toi</string>
+```
+
+- [ ] **Step 2: Write the bar**
+
+**Icons — already resolved, do not go looking.** The app uses **zero** Material
+Icons; it has its own vector set in `res/drawable/ic_*.xml`, read with
+`painterResource`. So the bar takes a `@DrawableRes Int`, not an `ImageVector`,
+and **`material-icons-extended` must not be added** — it is a large dependency
+and the app has its own visual language.
+
+Four icons already exist and fit exactly:
+
+| Tab | Drawable | Why |
+|---|---|---|
+| Path | `ic_stack` | the stacked-pebble cairn, the app's own metaphor for the timeline |
+| People | `ic_people` | (`ic_person_pair` is the alternative; `ic_people` reads better at bar size) |
+| Collections | `ic_pebble_collection` | the existing collection mark |
+| You | `ic_person` | singular, against People's plural |
+
+```kotlin
+package app.pbbls.android.navigation
+
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import app.pbbls.android.R
+import app.pbbls.android.theme.PebblesText
+
+/**
+ * The four top-level destinations (#852, D2).
+ *
+ * Tapping a tab you are not on switches to it, retaining that tab's stack;
+ * tapping the one you ARE on pops it to its root, which is the standard M3
+ * escape hatch and the only reliable way out of a deep stack.
+ */
+@Composable
+fun PebblesNavigationBar(
+    current: PebblesKey,
+    onSelect: (PebblesKey) -> Unit,
+    onReselect: (PebblesKey) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    NavigationBar(modifier = modifier) {
+        PebblesKey.tabs.forEach { tab ->
+            val selected = tab == current
+            NavigationBarItem(
+                selected = selected,
+                onClick = { if (selected) onReselect(tab) else onSelect(tab) },
+                icon = {
+                    Icon(
+                        painter = painterResource(tab.iconRes()),
+                        contentDescription = null,
+                    )
+                },
+                label = { PebblesText(stringResource(tab.labelRes())) },
+            )
+        }
+    }
+}
+
+@DrawableRes
+private fun PebblesKey.iconRes(): Int =
+    when (this) {
+        PebblesKey.Path -> R.drawable.ic_stack
+        PebblesKey.People -> R.drawable.ic_people
+        PebblesKey.Collections -> R.drawable.ic_pebble_collection
+        PebblesKey.You -> R.drawable.ic_person
+        else -> error("$this is not a tab")
+    }
+
+@StringRes
+private fun PebblesKey.labelRes(): Int =
+    when (this) {
+        PebblesKey.Path -> R.string.tab_path
+        PebblesKey.People -> R.string.tab_people
+        PebblesKey.Collections -> R.string.tab_collections
+        PebblesKey.You -> R.string.tab_you
+        else -> error("$this is not a tab")
+    }
+```
+
+**`PebblesText`, not raw `Text`** — the repo rule is that uppercase typography
+tokens only get their case transform through `PebblesText`. Check its signature
+before using it; if it does not take a bare `String` plus a style, match however
+the rest of the app calls it.
+
+**The bar's own colours.** `NavigationBar` defaults to Material 3 colour roles,
+which the app deliberately does not use (M38 D6 — Material 3 is the rendering
+engine only, no Material colour roles in app code). Pass
+`NavigationBarDefaults`/`NavigationBarItemDefaults` colours built from
+`PebblesTheme.colors` so the bar matches the app rather than Material's palette.
+Read `PebblesTheme.colors.system.*` and `.accent.*` and pick the closest
+existing tokens; do not invent new ones.
+
+- [ ] **Step 3: Build and commit**
+
+```bash
+npm run build --workspace=@pbbls/android
+git add apps/android/app/src/main/kotlin/app/pbbls/android/navigation/PebblesNavigationBar.kt \
+        apps/android/app/src/main/res/values/strings.xml \
+        apps/android/app/src/main/res/values-fr/strings.xml
+git commit -m "$(cat <<'EOF'
+feat(android): the four-tab M3 NavigationBar (#852)
+
+Path / People / Collections / You, EN and FR. Tapping the active tab pops
+it to its root.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+### Task 10: Wire the bar into `RootScreen`
+
+**Files:**
+- Modify: `apps/android/app/src/main/kotlin/app/pbbls/android/RootScreen.kt`
+
+- [ ] **Step 1: Replace `AuthedNavDisplay`**
+
+```kotlin
+@Composable
+private fun AuthedNavDisplay(onSignOut: () -> Unit) {
+    val state = rememberNavigationState()
+    val navigator = remember(state) { Navigator(state) }
+    val topKey = state.topKey
+
+    Scaffold(
+        bottomBar = {
+            // D5: bar visibility is read straight off the stack, so it cannot
+            // drift out of sync with what is on screen.
+            if (topKey is BarKey) {
+                PebblesNavigationBar(
+                    current = state.topLevelRoute,
+                    onSelect = navigator::navigate,
+                    onReselect = navigator::onReselect,
+                )
+            }
+        },
+        floatingActionButton = {
+            // D3: the pinned "New pebble" button used to occupy exactly the
+            // space the bar now takes. Path only — no other tab has a create action.
+            if (topKey == PebblesKey.Path) {
+                NewPebbleFab(
+                    onClick = { navigator.navigate(PebblesKey.RecordFlow()) },
+                    onLongClick = { navigator.navigate(PebblesKey.CreatePebble()) },
+                )
+            }
+        },
+        containerColor = PebblesTheme.colors.system.background,
+    ) { padding ->
+        NavDisplay(
+            entries = state.toDecoratedEntries(entryProvider = entryProvider { pebblesEntries(navigator, onSignOut) }),
+            onBack = { navigator.goBack() },
+            modifier = Modifier.padding(padding),
+        )
+    }
+}
+```
+
+**The `NavDisplay(entries = …)` overload** is what takes pre-decorated entries; the `backStack = …` overload used in Part 1 decorates internally and cannot express per-tab decorators. Confirm the parameter name against the 1.1.7 artifact before assuming it is `entries`.
+
+> **⚠ The two FAB targets exist by Part 6.** Under the original ordering this
+> was a trap; with the bar running last, `RecordFlow` and
+> `CreatePebble` are declared keys with **no entry** in `pebblesEntries` until
+> **Part 4** promotes them, and navigating to a key with no entry crashes.
+>
+> `CreatePebble` are promoted in Part 3, which now runs *before* the bar, so the
+> `navigator.navigate(...)` calls are safe by the time this task runs.
+>
+> **The FAB lives inside `PathScreen`, not in `RootScreen`'s `Scaffold`.**
+> `PathViewModel` is scoped to the Path `NavEntry` via `hiltViewModel()`, so a
+> Scaffold-level FAB cannot reach it without threading a lambda down from a
+> composable with no business knowing about it. Inside the entry it still floats
+> clear of the bar, because the entry renders within the Scaffold's content
+> padding.
+
+- [ ] **Step 2: Move the FAB out of `PathScreen`**
+
+In `PathScreen.kt`, find the pinned "New pebble" block around line 316 and cut it into a new file `features/path/components/NewPebbleFab.kt`, keeping the tap/long-press pair:
+
+```kotlin
+package app.pbbls.android.features.path.components
+
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import app.pbbls.android.R
+
+/**
+ * "New pebble" (#852, D3). Was a pinned bar at the bottom of the timeline —
+ * exactly where the NavigationBar now lives — so it became a FAB on the Path
+ * tab.
+ *
+ * Tap opens the record flow, long-press the all-at-once form (M58 D1). That
+ * pair is preserved verbatim; only the affordance moved.
+ */
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun NewPebbleFab(
+    onClick: () -> Unit,
+    onLongClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val interaction = remember { MutableInteractionSource() }
+    ExtendedFloatingActionButton(
+        onClick = {},
+        modifier =
+            modifier.combinedClickable(
+                interactionSource = interaction,
+                indication = null,
+                onClick = onClick,
+                onLongClick = onLongClick,
+            ),
+        interactionSource = interaction,
+    ) {
+        Text(stringResource(R.string.path_new_pebble))
+    }
+}
+```
+
+Check the existing string name before using `R.string.path_new_pebble`:
+
+```bash
+grep -rn "new_pebble" apps/android/app/src/main/res/values/strings.xml
+```
+
+Remove `onCreatePebble` / `onCreatePebbleLongPress` from `PathScreen`'s internal timeline call, and remove the bottom inset the pinned button needed.
+
+- [ ] **Step 3: Build, lint, test**
+
+```bash
+npm run build --workspace=@pbbls/android
+npm run lint --workspace=@pbbls/android
+./gradlew lint
+npm run test --workspace=@pbbls/android
+```
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add apps/android/app/src/main/kotlin/app/pbbls/android/RootScreen.kt \
+        apps/android/app/src/main/kotlin/app/pbbls/android/features/path/
+git commit -m "$(cat <<'EOF'
+feat(android): the bar goes up, New pebble becomes a FAB (#852)
+
+Bar visibility is `topKey is BarKey`, read off the stack, so it cannot
+disagree with what is on screen. The pinned New pebble button occupied
+exactly the space the bar now takes, so it moved to a Path-only FAB,
+keeping tap-for-flow and long-press-for-form (M58 D1).
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+### Task 11: Redistribute Profile's children
+
+**Files:**
+- Modify: `apps/android/app/src/main/kotlin/app/pbbls/android/navigation/PebblesEntryProvider.kt`
+- Modify: `apps/android/app/src/main/kotlin/app/pbbls/android/features/profile/ProfileScreen.kt`
+- Modify: `apps/android/app/src/main/kotlin/app/pbbls/android/features/profile/components/ProfileSoulsCard.kt`
+- Modify: `apps/android/app/src/main/kotlin/app/pbbls/android/features/profile/components/ProfileCollectionsCard.kt`
+
+- [ ] **Step 1: Retarget the People and Collections entries**
+
+In `PebblesEntryProvider.kt`, the `People` and `Collections` entries already render `SoulsListScreen` and `CollectionsListScreen`. Now that they are tab roots, their `onBack` is meaningless — a tab root has nothing to go back to within its own stack. Change both to hide the back affordance.
+
+`SoulsListScreen` and `CollectionsListScreen` each take a non-optional `onBack: () -> Unit`. Make it nullable so a tab root can say "no back button":
+
+```kotlin
+fun SoulsListScreen(
+    onBack: (() -> Unit)?,
+    ...
+```
+
+and render the back button only when non-null. Do the same for `CollectionsListScreen`. Then:
+
+```kotlin
+    entry<PebblesKey.People>(metadata = NavTransitions.forKey(PebblesKey.People)) {
+        SoulsListScreen(
+            onBack = null,
+            onOpenSoul = { navigator.navigate(PebblesKey.SoulDetail(it.id)) },
+        )
+    }
+```
+
+- [ ] **Step 2: Strip the moved entry points from Profile**
+
+`ProfileScreen` loses three parameters — `onOpenSouls`, `onOpenCollections`, `onOpenConnections` — because those surfaces are now one tap away in the bar and a second route into the same place is a maintenance trap. Its signature becomes:
+
+```kotlin
+fun ProfileScreen(
+    onSignOut: () -> Unit,
+    onOpenCollection: (Collection) -> Unit,
+    onOpenGlyphs: () -> Unit,
+    onOpenLab: () -> Unit,
+    onOpenAchievements: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: ProfileViewModel = hiltViewModel(),
+) {
+```
+
+`onBack` goes too: `You` is a tab root.
+
+In `ProfileSoulsCard`, remove `onOpenSouls` and `onOpenConnections`. In `ProfileCollectionsCard`, remove `onOpenList` but **keep** `onOpenCollection` — tapping a specific collection from the profile hub still makes sense and lands on `CollectionDetail` within the `You` stack.
+
+Update the `You` entry to match.
+
+- [ ] **Step 3: Update the screenshot previews**
+
+Any `@PreviewTest` that constructs `ProfileScreen`, `ProfileSoulsCard` or `ProfileCollectionsCard` now has wrong parameters.
+
+```bash
+grep -rln "ProfileScreen\|ProfileSoulsCard\|ProfileCollectionsCard" apps/android/app/src/screenshotTest/
+```
+
+Fix each. Then re-baseline, because the cards genuinely changed:
+
+```bash
+./gradlew updateDebugScreenshotTest
+./gradlew validateDebugScreenshotTest
+```
+
+Inspect the regenerated PNGs before committing them — a re-baseline that hides an unintended layout break is worse than a failing test.
+
+- [ ] **Step 4: Build, lint, test, commit**
+
+```bash
+npm run build --workspace=@pbbls/android && ./gradlew lint && npm run test --workspace=@pbbls/android
+git add apps/android/app/src/main/kotlin/app/pbbls/android/ apps/android/app/src/screenshotTest/
+git commit -m "$(cat <<'EOF'
+feat(android): Souls and Collections become tabs, not Profile children (#852)
+
+ProfileScreen loses onOpenSouls, onOpenCollections, onOpenConnections and
+onBack: those surfaces are one tap away in the bar now, and a second route
+into the same place is a trap. Tapping a specific collection from the hub
+still works and lands within the You stack.
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+### Task 12: Decision-log entries
+
+**Files:**
+- Modify: `docs/decisions/log.md` (append only — never edit a prior entry)
+
+- [ ] **Step 1: Append both entries**
+
+Append to the end of `docs/decisions/log.md`. Match the existing entry format exactly: `## YYYY-MM-DD — Title (#issue)` then the Status / Scope / Context / Decision / Why / Consequences / Supersedes / Refs fields.
+
+Entry 1 — the IA choice and the deliberate mirror break. It must state: the four tabs and what moved; that this breaks the standing 1:1 iOS rule on purpose; that the rule's actual target (schema, RPC payloads, cross-surface semantics) is untouched; the cost (two IAs to reason about for every future surface); and the iOS follow-up issue number from Step 2.
+
+Entry 2 — the supersession of M38 D5. It must state: that "modal surfaces stay conditionally-composed covers" no longer holds; that every full-screen cover is now a nav entry; and that D5's sibling decisions (D1's push IA for the authed tree, D9's z-order) are consumed by this too. Mark it **Supersedes: D5** in
+`docs/superpowers/specs/2026-07-10-android-bootstrap-design.md`.
+
+- [ ] **Step 2: File the iOS follow-up issue**
+
+```bash
+gh issue create \
+  --title "[Feat] Decide whether iOS adopts a TabView to match Android's four-tab IA" \
+  --label feat --label ios --label ui --label core \
+  --body "Android moved to an M3 NavigationBar with four tabs (Path / People / Collections / You) and per-tab back stacks in #852, deliberately breaking the standing 1:1 iOS/Android mirror at the navigation layer. See the decision log entry of 2026-09-20 and docs/superpowers/specs/2026-09-20-android-nav3-design.md D1.
+
+This issue decides iOS's answer: adopt a TabView and converge, or keep the push IA and accept that the two surfaces navigate differently. Not a bug — a deliberate fork that needs a deliberate resolution."
+```
+
+Put the issue number into Entry 1 before committing.
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add docs/decisions/log.md
+git commit -m "$(cat <<'EOF'
+docs: the Android four-tab IA, and D5 superseded (#852)
+
+Two appended entries: the bottom-bar IA as a deliberate break from the 1:1
+iOS mirror rule (with the iOS follow-up filed), and the supersession of
+M38 D5's "modal surfaces stay conditionally-composed covers".
+
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+### Task 13: Update the Arkaik map
+
+The IA changed, which is exactly what the `arkaik` skill exists for.
+
+- [ ] **Step 1: Confirm the MCP tools are available**
+
+The map is **hosted**. `docs/arkaik/bundle.json` is a frozen snapshot and must not be edited — editing it and running `arkaik restore` has already silently deleted this project's federation feed once ([arkaik#423](https://github.com/alexisbohns/arkaik/issues/423)).
+
+If `mcp__arkaik-mcp__*` tools are not available, **say so and stop this task**. Do not fall back to the file. In a container the usual cause is a missing `ARKAIK_TOKEN`.
+
+- [ ] **Step 2: Move the nodes**
+
+Using `mcp__arkaik-mcp__list_nodes` and `mcp__arkaik-mcp__update_node`:
+
+- Add view nodes for the four tabs if they do not exist; set the `android` platform status of the ones this stack is building to `development`.
+- Re-parent the souls / collections / connections view nodes from the Profile view to their new tab roots with `add_edge` / `remove_edge`.
+- Record the new `LabAnnouncement` and `LabLogList` views.
+
+Note the node ids returned — they are what the Part 2 and Part 4 Lab Notes put in `nodes:`.
+
+- [ ] **Step 3: Nothing to commit**
+
+Hosted mutations emit their own journal events. There is no repo change for this task.
+
+---
+
+### Task 14: Verify Part 2 and open the PR
+
+- [ ] **Step 1: Walk the tab behavior on a device**
+
+```bash
+./gradlew installDebug
+```
+
+| Check | Expect |
+|---|---|
+| Launch | Path, bar visible, FAB visible |
+| Tap People, then a soul | soul detail, **bar still visible** |
+| Tap People again (reselect) | back at the souls list |
+| From People root, press back | Path |
+| From Path root, press back | app exits |
+| Path → You → People → back | **Path** (You is skipped, D4) |
+| You → Glyphs, switch to People, switch back to You | still on Glyphs — the stack was retained |
+| Scroll Path, go to Collections, come back | scroll position retained |
+| Rotate on any tab | stack and scroll survive |
+| Kill the process on People › SoulDetail and relaunch | **back on that soul's detail** |
+
+That last row is the acceptance criterion this part delivers — per-tab stacks are saveable, so it should already hold for pushes even though the covers are not promoted until parts 3–4.
+
+- [ ] **Step 2: Open the PR with a Lab Note**
+
+This part is highly visible, so the PR body needs a `## Lab Note (EN/FR)` section with exactly one ```yaml fence. Double-quote every title and summary. No em dashes in either language. French uses "Tu" and is an adaptation, not a translation.
+
+```yaml
+species: feature
+platform: android
+status: in_progress
+published: false
+en:
+  title: "A new way around the app"
+  summary: "Your path, your people, your collections and your profile now each have their own tab at the bottom of the screen. Everything keeps its place, so you can jump away and come back to exactly where you were."
+fr:
+  title: "Une nouvelle façon de circuler"
+  summary: "Ton chemin, tes proches, tes collections et ton profil ont maintenant chacun leur onglet en bas de l'écran. Chaque onglet garde sa place, donc tu peux partir et revenir exactement là où tu étais."
+nodes: [V-path, V-souls-list, V-collections-list, V-profile]
+suggested:
+  molecule: pbbls
+  type: feature
+  tags: [changelog]
+```
+
+Replace the `nodes:` ids with the real ones from Task 13. An id that matches nothing is dropped and reported in the App's delivery response.
+
+```bash
+gh pr create --base feat/852-navigation3-migration \
+  --title "feat(android): a four-tab NavigationBar with per-tab back stacks (#852)" \
+  --label feat --label android --label core --label ui \
+  --milestone "M61 · Android Refacto"
+```
+
+---
 
 ---
 

@@ -63,6 +63,7 @@ import app.pbbls.android.theme.PebblesTypography
 fun CollectionsListScreen(
     onBack: () -> Unit,
     onOpenCollection: (Collection) -> Unit,
+    onCreateCollection: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CollectionsListViewModel = hiltViewModel(),
 ) {
@@ -94,7 +95,7 @@ fun CollectionsListScreen(
                     }
                 },
                 trailing = {
-                    IconButton(onClick = viewModel::openCreate) {
+                    IconButton(onClick = onCreateCollection) {
                         Icon(
                             painter = painterResource(R.drawable.ic_plus),
                             contentDescription = stringResource(R.string.collections_add_a11y),
@@ -169,15 +170,6 @@ fun CollectionsListScreen(
                     }
                 }
         }
-    }
-
-    if (covers.isPresentingCreate) {
-        CollectionFormScreen(
-            original = null,
-            onDismiss = viewModel::closeCreate,
-            onSaved = viewModel::onCollectionSaved,
-            modifier = Modifier.fillMaxSize(),
-        )
     }
 
     covers.pendingDeletion?.let { target ->

@@ -1,6 +1,5 @@
 package app.pbbls.android.features.glyph.carve
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -97,8 +96,6 @@ fun GlyphCarveScreen(
             GlyphCarveEffect.Cancelled -> onCancel()
         }
     }
-
-    BackHandler(enabled = !uiState.isSaving) { viewModel.onCancelRequested() }
 
     PebblesScreen(
         modifier = modifier.background(system.background),

@@ -2,6 +2,7 @@ package app.pbbls.android.features.profile
 
 import android.util.Log
 import androidx.annotation.StringRes
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
@@ -25,25 +26,40 @@ import javax.inject.Inject
 
 private const val TAG = "collection-form"
 
+/** The [SavedStateHandle] key the nav key's argument lands under (#852). */
+internal const val COLLECTION_FORM_ID_KEY = "collectionId"
+
 data class CollectionFormUiState(
-    /** Null means create — the title, the write and the save gate all key off it. */
+    /**
+     * The collection id this form is for; null means create. Set by
+     * [CollectionFormViewModel.start] up front, independent of whether the
+     * by-id fetch below has resolved — see [SoulFormUiState.soulId].
+     */
+    val collectionId: String? = null,
+    /** The loaded row, once the by-id fetch succeeds. Null during create, while loading, or on failure. */
     val original: Collection? = null,
     val name: String = "",
     val mode: CollectionMode? = null,
     val isSaving: Boolean = false,
     val didSaveFail: Boolean = false,
+    /** True while fetching an existing collection by id. Always false for create. */
+    val isLoading: Boolean = false,
+    /** Set when the by-id fetch fails — the screen shows this instead of an empty form. */
+    @StringRes val loadErrorRes: Int? = null,
 ) {
     val isEditing: Boolean
-        get() = original != null
+        get() = collectionId != null
 
     val canSave: Boolean
         get() =
-            collectionFormCanSave(
-                originalName = original?.name,
-                originalMode = original?.mode,
-                name = name,
-                mode = mode,
-            )
+            !isLoading &&
+                loadErrorRes == null &&
+                collectionFormCanSave(
+                    originalName = original?.name,
+                    originalMode = original?.mode,
+                    name = name,
+                    mode = mode,
+                )
 
     @get:StringRes
     val titleRes: Int
@@ -62,21 +78,26 @@ sealed interface CollectionFormEffect {
 }
 
 /**
- * State holder for the collection create/edit cover (#849).
+ * State holder for the collection create/edit cover (#849, #852).
  *
  * [SoulFormViewModel]'s twin: the same `rememberCoroutineScope` write hole (a
  * collection created on the server that neither the list nor the composer's
- * picker learned about), the same `NonCancellable` fix, and the same
- * [start]/[finish] pair standing in for the lifecycle a cover does not have.
+ * picker learned about), the same `NonCancellable` fix, the same
+ * [start]/[finish] pair standing in for the lifecycle a cover does not have,
+ * and — as of Task 15 — the same move from receiving the whole [Collection]
+ * to loading it from an id (see [SoulFormViewModel]'s KDoc for the
+ * [SavedStateHandle] rationale, which applies here verbatim).
  *
  * It has one more host than its twin — Profile's empty-carousel tile opens it
  * for a create — which makes the reset load-bearing in three places rather than
- * two. It persists nothing, for the reason spelled out on [SoulFormViewModel].
+ * two. It persists nothing but the id being edited, for the reason spelled out
+ * on [SoulFormViewModel].
  */
 @HiltViewModel
 class CollectionFormViewModel
     @Inject
     constructor(
+        private val savedState: SavedStateHandle,
         private val collectionsService: CollectionsServicing,
         private val refs: ReferenceDataServicing,
         private val achievements: AchievementsServicing,
@@ -90,17 +111,50 @@ class CollectionFormViewModel
         private var hasStarted = false
         private var startedFor: String? = null
 
-        /** See [SoulFormViewModel.start] — the guard is the same two fields. */
-        fun start(original: Collection?) {
-            if (hasStarted && startedFor == original?.id) return
+        init {
+            // Empty today — live once a real nav entry populates the handle
+            // before construction. See [SoulFormViewModel]'s KDoc.
+            start(savedState[COLLECTION_FORM_ID_KEY])
+        }
+
+        /** See [SoulFormViewModel.start] — the guard and the id-vs-object move are the same. */
+        fun start(id: String?) {
+            if (hasStarted && startedFor == id) return
             hasStarted = true
-            startedFor = original?.id
-            _uiState.value =
-                CollectionFormUiState(
-                    original = original,
-                    name = original?.name.orEmpty(),
-                    mode = original?.mode,
-                )
+            startedFor = id
+            savedState[COLLECTION_FORM_ID_KEY] = id
+            if (id == null) {
+                _uiState.value = CollectionFormUiState()
+            } else {
+                _uiState.value = CollectionFormUiState(collectionId = id, isLoading = true)
+                loadCollection(id)
+            }
+        }
+
+        private fun loadCollection(id: String) {
+            viewModelScope.launch {
+                runCatchingCancellable { collectionsService.loadCollection(id) }
+                    .fold(
+                        onSuccess = { collection ->
+                            // A newer `start` must not be clobbered by this stale
+                            // response landing late — see [SoulFormViewModel.loadSoul].
+                            if (startedFor != id) return@fold
+                            _uiState.value =
+                                CollectionFormUiState(
+                                    collectionId = id,
+                                    original = collection,
+                                    name = collection.name,
+                                    mode = collection.mode,
+                                )
+                        },
+                        onFailure = {
+                            Log.e(TAG, "collection load failed", it)
+                            if (startedFor != id) return@fold
+                            _uiState.value =
+                                CollectionFormUiState(collectionId = id, loadErrorRes = R.string.collection_form_load_error)
+                        },
+                    )
+            }
         }
 
         // MARK: - Form edits

@@ -2,6 +2,7 @@ package app.pbbls.android.features.profile
 
 import android.util.Log
 import androidx.annotation.StringRes
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
@@ -26,28 +27,44 @@ import javax.inject.Inject
 
 private const val TAG = "soul-form"
 
+/** The [SavedStateHandle] key the nav key's argument lands under (#852). */
+internal const val SOUL_FORM_ID_KEY = "soulId"
+
 data class SoulFormUiState(
-    /** Null means create — the title, the write and the save gate all key off it. */
+    /**
+     * The soul id this form is for; null means create. Set by [SoulFormViewModel.start]
+     * up front, independent of whether the by-id fetch below has resolved — the
+     * title and [canSave]'s editing branch must not flip back to "create" while
+     * an edit is loading or failed to load.
+     */
+    val soulId: String? = null,
+    /** The loaded row, once the by-id fetch succeeds. Null during create, while loading, or on failure. */
     val original: SoulWithGlyph? = null,
     val name: String = "",
     val glyphId: String = SystemGlyph.DEFAULT,
-    /** The picked (or fetched default) glyph, for the row's thumbnail. */
+    /** The picked (or fetched default, or loaded) glyph, for the row's thumbnail. */
     val glyph: Glyph? = null,
     val isSaving: Boolean = false,
     val didSaveFail: Boolean = false,
     val isPresentingPicker: Boolean = false,
+    /** True while fetching an existing soul by id. Always false for create. */
+    val isLoading: Boolean = false,
+    /** Set when the by-id fetch fails — the screen shows this instead of an empty form. */
+    @StringRes val loadErrorRes: Int? = null,
 ) {
     val isEditing: Boolean
-        get() = original != null
+        get() = soulId != null
 
     val canSave: Boolean
         get() =
-            soulFormCanSave(
-                originalName = original?.name,
-                originalGlyphId = original?.glyphId,
-                name = name,
-                glyphId = glyphId,
-            )
+            !isLoading &&
+                loadErrorRes == null &&
+                soulFormCanSave(
+                    originalName = original?.name,
+                    originalGlyphId = original?.glyphId,
+                    name = name,
+                    glyphId = glyphId,
+                )
 
     @get:StringRes
     val titleRes: Int
@@ -66,7 +83,14 @@ sealed interface SoulFormEffect {
 }
 
 /**
- * State holder for the soul create/edit cover (#849).
+ * State holder for the soul create/edit cover (#849, #852).
+ *
+ * **This ViewModel loads its own subject.** It used to receive the whole
+ * [SoulWithGlyph] from whichever screen already had it loaded — but a
+ * navigation key can only carry an id, so before this cover can become a real
+ * Nav3 destination (#852) it has to fetch the row itself, the way
+ * [SoulDetailViewModel] already fetches its soul from an id. [start] takes the
+ * id instead of the object now, and a non-null id drives [loadSoul].
  *
  * **The write this moves.** `save()` ran in `rememberCoroutineScope`, so leaving
  * the cover between the insert landing and `onSaved()` firing meant the row
@@ -80,23 +104,26 @@ sealed interface SoulFormEffect {
  * to whichever back stack entry hosts it — the souls list for a create, the
  * soul detail for an edit — and that entry outlives the cover many times over.
  * [start] is therefore guarded and [finish] is explicit: without the reset, the
- * next "+" opens onto the soul just saved. #852 turns these covers into real
- * destinations and takes the pair away.
+ * next "+" opens onto the soul just saved. #852 turns these covers into
+ * real destinations and takes the pair away.
  *
- * **No [androidx.lifecycle.SavedStateHandle].** A typed name is the kind of
- * thing the contract says to persist, but the *presentation* is not persisted:
- * the host keeps `isPresentingCreate` in a plain `MutableStateFlow`, so after
- * process death there is no cover for a restored draft to land in. The draft
- * could therefore only ever reappear on a later, unrelated presentation — a "+"
- * pre-filled with a name the user typed for a different soul ten minutes ago.
- * Restoring it properly means persisting the cover flag too, which is #852's
- * back stack, not this part. Its siblings `CreatePebbleViewModel` and
- * `EditPebbleViewModel` persist nothing for the same reason.
+ * **[SavedStateHandle] now carries the id being edited** — the one thing this
+ * class holds that a nav key contract says to persist (root `AGENTS.md` /
+ * `apps/android/CLAUDE.md`: "an id from a nav key IS appropriate to read from
+ * `SavedStateHandle`"). [init] reads it eagerly, which is what will make a
+ * future Nav3 entry work with zero changes to this file once the framework
+ * populates the handle from the key's argument before construction. Today,
+ * hosted as a cover, nothing populates it ahead of time — `hiltViewModel()`'s
+ * Compose entry point has no hook for that outside of assisted injection or a
+ * real back stack entry — so [start], called from the host's `LaunchedEffect`,
+ * is what actually drives production loads, and it mirrors the id into the
+ * handle for the same reason. See the PR description for the full note.
  */
 @HiltViewModel
 class SoulFormViewModel
     @Inject
     constructor(
+        private val savedState: SavedStateHandle,
         private val soulsService: SoulsServicing,
         private val refs: ReferenceDataServicing,
         private val achievements: AchievementsServicing,
@@ -110,27 +137,60 @@ class SoulFormViewModel
         private var hasStarted = false
         private var startedFor: String? = null
 
+        init {
+            // Empty today (see class KDoc) — live once a real nav entry
+            // populates the handle before this ViewModel is constructed.
+            start(savedState[SOUL_FORM_ID_KEY])
+        }
+
         /**
-         * Seed from the row the host already has (edit) or from nothing
-         * (create).
+         * Seed from an id: load the row for a non-null one (edit), or start
+         * clean and fetch the default glyph for null (create).
          *
-         * Guarded on the pair "started at all" + "for which soul", so a rotation
+         * Guarded on the pair "started at all" + "for which id", so a rotation
          * cannot re-seed over what the user has typed, while opening the form on
          * a *different* soul starts clean. Create mode has no id, which is why
          * the guard is two fields rather than a nullable one.
          */
-        fun start(original: SoulWithGlyph?) {
-            if (hasStarted && startedFor == original?.id) return
+        fun start(id: String?) {
+            if (hasStarted && startedFor == id) return
             hasStarted = true
-            startedFor = original?.id
-            _uiState.value =
-                SoulFormUiState(
-                    original = original,
-                    name = original?.name.orEmpty(),
-                    glyphId = original?.glyphId ?: SystemGlyph.DEFAULT,
-                    glyph = original?.glyph,
-                )
-            if (original == null) loadDefaultGlyph()
+            startedFor = id
+            savedState[SOUL_FORM_ID_KEY] = id
+            if (id == null) {
+                _uiState.value = SoulFormUiState()
+                loadDefaultGlyph()
+            } else {
+                _uiState.value = SoulFormUiState(soulId = id, isLoading = true)
+                loadSoul(id)
+            }
+        }
+
+        private fun loadSoul(id: String) {
+            viewModelScope.launch {
+                runCatchingCancellable { soulsService.loadSoul(id) }
+                    .fold(
+                        onSuccess = { soul ->
+                            // A newer `start` (a different id, or a reset) must
+                            // not be clobbered by this stale response landing late.
+                            if (startedFor != id) return@fold
+                            _uiState.value =
+                                SoulFormUiState(
+                                    soulId = id,
+                                    original = soul,
+                                    name = soul.name,
+                                    glyphId = soul.glyphId,
+                                    glyph = soul.glyph,
+                                )
+                        },
+                        onFailure = {
+                            Log.e(TAG, "soul load failed", it)
+                            if (startedFor != id) return@fold
+                            _uiState.value =
+                                SoulFormUiState(soulId = id, loadErrorRes = R.string.soul_form_load_error)
+                        },
+                    )
+            }
         }
 
         /**
@@ -142,6 +202,12 @@ class SoulFormViewModel
          */
         private fun loadDefaultGlyph() {
             viewModelScope.launch {
+                // `init` fires `start(null)` eagerly, before the host's
+                // `LaunchedEffect` has a chance to call `start` with the real id
+                // for an edit — skip the fetch entirely (not just the state
+                // update below) once a later `start` has moved on, or an edit
+                // form issues a default-glyph network call it will never use.
+                if (startedFor != null) return@launch
                 runCatchingCancellable { soulsService.loadGlyph(SystemGlyph.DEFAULT) }
                     .fold(
                         onSuccess = { fetched ->

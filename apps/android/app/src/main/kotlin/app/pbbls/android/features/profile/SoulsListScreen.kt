@@ -54,6 +54,7 @@ import app.pbbls.android.theme.PebblesTypography
 fun SoulsListScreen(
     onBack: () -> Unit,
     onOpenSoul: (SoulWithGlyph) -> Unit,
+    onCreateSoul: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SoulsListViewModel = hiltViewModel(),
 ) {
@@ -85,7 +86,7 @@ fun SoulsListScreen(
                     }
                 },
                 trailing = {
-                    IconButton(onClick = viewModel::openCreate) {
+                    IconButton(onClick = onCreateSoul) {
                         Icon(
                             painter = painterResource(R.drawable.ic_plus),
                             contentDescription = stringResource(R.string.souls_add_a11y),
@@ -148,15 +149,6 @@ fun SoulsListScreen(
                     }
                 }
         }
-    }
-
-    if (covers.isPresentingCreate) {
-        SoulFormScreen(
-            original = null,
-            onDismiss = viewModel::closeCreate,
-            onSaved = viewModel::onSoulSaved,
-            modifier = Modifier.fillMaxSize(),
-        )
     }
 
     covers.pendingDeletion?.let { target ->

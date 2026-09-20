@@ -25,6 +25,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.components.PebbleRow
@@ -60,6 +61,7 @@ import java.util.Locale
 fun CollectionDetailScreen(
     collectionId: String,
     onBack: () -> Unit,
+    onEditCollection: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: CollectionDetailViewModel = hiltViewModel(),
 ) {
@@ -70,6 +72,13 @@ fun CollectionDetailScreen(
 
     // Guarded on the id, so a rotation re-runs this without re-fetching.
     LaunchedEffect(collectionId) { viewModel.start(collectionId) }
+
+    // Returning from the edit form must re-read the collection: the ViewModel
+    // is scoped to the back stack entry, which survives the round trip.
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onResumed()
+        onPauseOrDispose {}
+    }
 
     val locale = Locale.getDefault()
     val monthFormatter = remember(locale) { DateTimeFormatter.ofPattern("MMMM yyyy", locale) }
@@ -93,7 +102,7 @@ fun CollectionDetailScreen(
                     if (uiState is CollectionDetailUiState.Content) {
                         PebblesTopBarTextButton(
                             text = stringResource(R.string.pebble_detail_edit),
-                            onClick = viewModel::openEdit,
+                            onClick = onEditCollection,
                         )
                     }
                 },
@@ -180,17 +189,6 @@ fun CollectionDetailScreen(
                         }
                     }
                 }
-        }
-    }
-
-    if (covers.isPresentingEdit) {
-        (uiState as? CollectionDetailUiState.Content)?.let { content ->
-            CollectionFormScreen(
-                original = content.collection,
-                onDismiss = viewModel::closeEdit,
-                onSaved = viewModel::onCollectionSaved,
-                modifier = Modifier.fillMaxSize(),
-            )
         }
     }
 

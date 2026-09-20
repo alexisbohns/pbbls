@@ -1,7 +1,6 @@
 package app.pbbls.android.features.connections
 
 import android.content.Intent
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -71,11 +70,8 @@ fun InviteScreen(
     LaunchedEffect(Unit) { viewModel.start() }
 
     fun dismiss() {
-        viewModel.finish()
         onDismiss()
     }
-
-    BackHandler { dismiss() }
 
     InviteContent(
         uiState = uiState,

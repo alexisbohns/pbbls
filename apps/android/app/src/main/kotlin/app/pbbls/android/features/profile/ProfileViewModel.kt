@@ -6,7 +6,6 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
-import app.pbbls.android.features.glyph.models.Glyph
 import app.pbbls.android.features.glyph.models.GlyphStroke
 import app.pbbls.android.features.profile.models.Collection
 import app.pbbls.android.features.shared.ripples.RippleSummary
@@ -20,7 +19,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -55,12 +53,6 @@ sealed interface ProfileUiState {
         val providers: List<String>,
     ) : ProfileUiState
 }
-
-/** Which of Profile's two covers is up. */
-data class ProfileCovers(
-    val isPresentingSettings: Boolean = false,
-    val isPresentingCreateCollection: Boolean = false,
-)
 
 /**
  * State holder for the Profile screen (#849).
@@ -97,9 +89,6 @@ class ProfileViewModel
         private val _uiState = MutableStateFlow<ProfileUiState>(ProfileUiState.Loading)
         val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
 
-        private val _covers = MutableStateFlow(ProfileCovers())
-        val covers: StateFlow<ProfileCovers> = _covers.asStateFlow()
-
         private var loadJob: Job? = null
         private var resumeCount = 0
 
@@ -124,6 +113,11 @@ class ProfileViewModel
          * Glyphs, Connections, Lab or Achievements. So renaming a collection in
          * its own list left Profile's carousel showing the old name, and the
          * stats card stale after anything that changes counts.
+         *
+         * Since #852, this is also what refreshes after Settings and the
+         * create-collection form: both are entries now, with no callback back
+         * into this ViewModel, so their old `onXSaved` hooks are gone and this
+         * generic resume is what picks up the change instead.
          *
          * The first resume is skipped (`init` has already loaded). Deferred from
          * PR #896.
@@ -209,47 +203,5 @@ class ProfileViewModel
                                 ),
                         )
                 }
-        }
-
-        // MARK: - Covers
-
-        fun openSettings() = _covers.update { it.copy(isPresentingSettings = true) }
-
-        fun closeSettings() = _covers.update { it.copy(isPresentingSettings = false) }
-
-        fun openCreateCollection() = _covers.update { it.copy(isPresentingCreateCollection = true) }
-
-        fun closeCreateCollection() = _covers.update { it.copy(isPresentingCreateCollection = false) }
-
-        fun onCollectionCreated() {
-            _covers.update { it.copy(isPresentingCreateCollection = false) }
-            refresh()
-            // The composer's collection picker also reads the new collection,
-            // but that cache refresh belongs to [CollectionFormViewModel]'s
-            // uncancellable save — where it survives this host being destroyed
-            // mid-write, which it would not here. Do not add it back.
-        }
-
-        /**
-         * Settings saved: fold the new values into the row already on screen
-         * rather than refetching, so closing the cover does not flash a spinner
-         * over content that is already correct.
-         */
-        fun onSettingsSaved(
-            displayName: String,
-            glyph: Glyph?,
-            handle: String?,
-            isPublic: Boolean,
-        ) {
-            profile =
-                profile?.copy(
-                    displayName = displayName,
-                    glyphId = glyph?.id ?: profile?.glyphId,
-                    handle = handle,
-                    publicProfile = isPublic,
-                )
-            glyph?.strokes?.let { glyphStrokes = it }
-            _covers.update { it.copy(isPresentingSettings = false) }
-            publish()
         }
     }

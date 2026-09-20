@@ -23,6 +23,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.components.PebbleRow
@@ -55,6 +56,7 @@ import app.pbbls.android.theme.PebblesTypography
 fun SoulDetailScreen(
     soulId: String,
     onBack: () -> Unit,
+    onEditSoul: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SoulDetailViewModel = hiltViewModel(),
 ) {
@@ -65,6 +67,13 @@ fun SoulDetailScreen(
 
     // Guarded on the id, so a rotation re-runs this without re-fetching.
     LaunchedEffect(soulId) { viewModel.start(soulId) }
+
+    // Returning from the edit form must re-read the soul: the ViewModel is
+    // scoped to the back stack entry, which survives the round trip.
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onResumed()
+        onPauseOrDispose {}
+    }
 
     PebblesScreen(
         modifier = modifier,
@@ -85,7 +94,7 @@ fun SoulDetailScreen(
                     if (uiState is SoulDetailUiState.Content) {
                         PebblesTopBarTextButton(
                             text = stringResource(R.string.pebble_detail_edit),
-                            onClick = viewModel::openEdit,
+                            onClick = onEditSoul,
                         )
                     }
                 },
@@ -152,17 +161,6 @@ fun SoulDetailScreen(
                         }
                     }
                 }
-        }
-    }
-
-    if (covers.isPresentingEdit) {
-        (uiState as? SoulDetailUiState.Content)?.let { content ->
-            SoulFormScreen(
-                original = content.soul,
-                onDismiss = viewModel::closeEdit,
-                onSaved = viewModel::onSoulSaved,
-                modifier = Modifier.fillMaxSize(),
-            )
         }
     }
 

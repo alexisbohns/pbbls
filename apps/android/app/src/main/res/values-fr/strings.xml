@@ -112,6 +112,7 @@
     <string name="settings_providers_header">Fournisseurs</string>
     <string name="settings_legal_header">Mentions légales</string>
     <string name="settings_save_error">Impossible d\'enregistrer vos modifications. Veuillez réessayer.</string>
+    <string name="settings_load_error">Impossible de charger vos réglages. Veuillez réessayer.</string>
     <string name="settings_account_header">Compte</string>
     <string name="settings_delete_account">Supprimer le compte</string>
     <string name="settings_delete_account_title">Supprimer votre compte ?</string>
@@ -132,6 +133,7 @@
     <string name="soul_edit_title">Modifier l\'âme</string>
     <string name="soul_form_glyph_choose">Touchez pour choisir</string>
     <string name="soul_save_error">Impossible d\'enregistrer l\'âme. Veuillez réessayer.</string>
+    <string name="soul_form_load_error">Impossible de charger cette âme. Veuillez réessayer.</string>
 
     <!-- ==== Gestion des collections (M41 sous-projet E). Stack/Pack/Track :
          vocabulaire produit — identique en FR en attendant le mot du mainteneur. -->
@@ -143,6 +145,7 @@
     <string name="collection_detail_empty_message">Les pebbles ajoutés à cette collection apparaîtront ici.</string>
     <string name="collection_edit_title">Modifier la collection</string>
     <string name="collection_save_error">Impossible d\'enregistrer la collection. Veuillez réessayer.</string>
+    <string name="collection_form_load_error">Impossible de charger cette collection. Veuillez réessayer.</string>
     <string name="collection_count_zero">Aucun pebble</string>
     <string name="collection_mode_header">Mode</string>
     <string name="collection_mode_none">Aucun</string>
@@ -399,6 +402,7 @@
     <string name="lab_see_all">Voir tout</string>
     <string name="lab_load_error">Couldn\'t load the Lab.</string>
     <string name="lab_list_load_error">Couldn\'t load the list.</string>
+    <string name="lab_announcement_load_error">Impossible de charger cette annonce.</string>
     <string name="lab_list_empty">Pas grand chose pour le moment.</string>
     <string name="lab_card_subtitle">Actus &amp; communauté</string>
     <string name="lab_reaction_upvote_a11y">Voter</string>

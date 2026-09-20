@@ -75,6 +75,11 @@ class InviteViewModel
         private val _uiState = MutableStateFlow<InviteUiState>(InviteUiState.Loading)
         val uiState: StateFlow<InviteUiState> = _uiState.asStateFlow()
 
+        // Guards a double-start within ONE instance (a re-fired LaunchedEffect).
+        // It needs no release: Invite is a nav entry (#852), so its ViewModel is
+        // destroyed when the entry pops and the next presentation is always a
+        // fresh instance. The `finish()` that used to reset this existed only
+        // because a cover's ViewModel outlived the cover.
         private var hasStarted = false
         private var loadJob: Job? = null
 
@@ -138,15 +143,5 @@ class InviteViewModel
                         )
                 }
             }
-        }
-
-        /**
-         * Release the start guard so the next presentation re-reads the invite.
-         *
-         * Leaves the visible state alone, for the reason spelled out on
-         * `SoulFormViewModel.finish`: the cover is still composed when this runs.
-         */
-        fun finish() {
-            hasStarted = false
         }
     }

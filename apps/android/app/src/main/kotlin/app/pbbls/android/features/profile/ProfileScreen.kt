@@ -64,11 +64,12 @@ fun ProfileScreen(
     onOpenConnections: () -> Unit,
     onOpenLab: () -> Unit,
     onOpenAchievements: () -> Unit,
+    onOpenSettings: () -> Unit,
+    onCreateCollection: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ProfileViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val covers by viewModel.covers.collectAsStateWithLifecycle()
     val system = PebblesTheme.colors.system
 
     // Coming back from a pushed screen must re-read the page: the ViewModel is
@@ -94,7 +95,7 @@ fun ProfileScreen(
                     }
                 },
                 trailing = {
-                    IconButton(onClick = viewModel::openSettings) {
+                    IconButton(onClick = onOpenSettings) {
                         Icon(
                             painter = painterResource(R.drawable.ic_gear),
                             contentDescription = stringResource(R.string.settings_title),
@@ -171,38 +172,13 @@ fun ProfileScreen(
                         hasLoaded = content.collectionsLoaded,
                         onOpenList = onOpenCollections,
                         onOpenCollection = onOpenCollection,
-                        onCreate = viewModel::openCreateCollection,
+                        onCreate = onCreateCollection,
                     )
                     ProfileLabCard(onOpen = onOpenLab)
                     ProfileLogoutButton(onClick = onSignOut)
                 }
             }
         }
-    }
-
-    if (covers.isPresentingCreateCollection) {
-        CollectionFormScreen(
-            original = null,
-            onDismiss = viewModel::closeCreateCollection,
-            onSaved = viewModel::onCollectionCreated,
-            modifier = Modifier.fillMaxSize(),
-        )
-    }
-
-    if (covers.isPresentingSettings) {
-        val content = uiState as? ProfileUiState.Content
-        SettingsScreen(
-            initialDisplayName = content?.profile?.displayName.orEmpty(),
-            initialGlyphId = content?.profile?.glyphId,
-            initialGlyphStrokes = content?.glyphStrokes,
-            email = content?.email,
-            providers = content?.providers.orEmpty(),
-            onDismiss = viewModel::closeSettings,
-            onSaved = viewModel::onSettingsSaved,
-            modifier = Modifier.fillMaxSize(),
-            initialHandle = content?.profile?.handle,
-            initialPublicProfile = content?.profile?.publicProfile ?: false,
-        )
     }
 }
 

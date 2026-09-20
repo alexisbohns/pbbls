@@ -32,10 +32,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.components.PebblesTextInput
-import app.pbbls.android.features.glyph.carve.GlyphCarveScreen
 import app.pbbls.android.features.glyph.models.GlyphGridItem
 import app.pbbls.android.features.glyph.views.GlyphView
 import app.pbbls.android.features.glyph.views.GlyphViewCase
@@ -62,12 +62,21 @@ private const val TAG = "glyphs-store"
 @Composable
 fun GlyphsListScreen(
     onBack: () -> Unit,
+    onCarve: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: GlyphsListViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val covers by viewModel.covers.collectAsStateWithLifecycle()
     val system = PebblesTheme.colors.system
+
+    // Returning from the carve studio must re-read the current tab: the
+    // ViewModel is scoped to the back stack entry, which survives the round
+    // trip that used to be a callback-driven optimistic prepend.
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onResumed()
+        onPauseOrDispose {}
+    }
 
     PebblesScreen(
         modifier = modifier,
@@ -85,7 +94,7 @@ fun GlyphsListScreen(
                     }
                 },
                 trailing = {
-                    IconButton(onClick = viewModel::openCarve) {
+                    IconButton(onClick = onCarve) {
                         Icon(
                             painter = painterResource(R.drawable.ic_plus),
                             contentDescription = stringResource(R.string.glyphs_carve_a11y),
@@ -159,14 +168,6 @@ fun GlyphsListScreen(
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
         }
-    }
-
-    if (covers.isPresentingCarve) {
-        GlyphCarveScreen(
-            onSaved = viewModel::onCarved,
-            onCancel = viewModel::closeCarve,
-            modifier = Modifier.fillMaxSize(),
-        )
     }
 
     covers.renaming?.let { glyph ->

@@ -44,9 +44,8 @@ sealed interface SoulDetailUiState {
     ) : SoulDetailUiState
 }
 
-/** The edit cover, the pebble-edit cover, and the delete dialogs. */
+/** The pebble-edit cover and the delete dialogs. */
 data class SoulDetailCovers(
-    val isPresentingEdit: Boolean = false,
     val editingPebbleId: String? = null,
     val pendingDeletion: Pebble? = null,
     val didDeleteFail: Boolean = false,
@@ -90,6 +89,7 @@ class SoulDetailViewModel
         val covers: StateFlow<SoulDetailCovers> = _covers.asStateFlow()
 
         private var loadJob: Job? = null
+        private var resumeCount = 0
 
         /**
          * Load [id], unless it is the one already loaded.
@@ -106,6 +106,19 @@ class SoulDetailViewModel
 
         fun retry() = load()
 
+        /**
+         * The destination came back to the foreground.
+         *
+         * `SoulForm` is a separate entry now (#852), with no callback
+         * back into this instance, so an edit made there has to be picked up by
+         * a resume — same mechanism as [SoulsListViewModel.onResumed]. The first
+         * resume is skipped because [start] has already loaded.
+         */
+        fun onResumed() {
+            resumeCount += 1
+            if (resumeCount > 1) reload()
+        }
+
         private fun load() {
             val id = soulId ?: return
             loadJob?.cancel()
@@ -114,7 +127,11 @@ class SoulDetailViewModel
             loadJob = viewModelScope.launch { fetch(id) }
         }
 
-        /** Refresh after a write, keeping the content that is already on screen. */
+        /**
+         * Refresh after a write, keeping the content that is already on screen.
+         *
+         * Called by [onPebbleSaved], [confirmDelete] and [onResumed].
+         */
         private fun reload() {
             val id = soulId ?: return
             loadJob?.cancel()
@@ -152,16 +169,6 @@ class SoulDetailViewModel
         }
 
         // MARK: - Covers
-
-        fun openEdit() = _covers.update { it.copy(isPresentingEdit = true) }
-
-        fun closeEdit() = _covers.update { it.copy(isPresentingEdit = false) }
-
-        /** The soul was edited: close the cover and refresh (see [SoulsListViewModel.onSoulSaved]). */
-        fun onSoulSaved() {
-            _covers.update { it.copy(isPresentingEdit = false) }
-            reload()
-        }
 
         fun openPebble(pebbleId: String) = _covers.update { it.copy(editingPebbleId = pebbleId) }
 

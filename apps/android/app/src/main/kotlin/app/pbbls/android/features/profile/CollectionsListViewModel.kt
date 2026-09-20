@@ -44,9 +44,8 @@ sealed interface CollectionsListUiState {
     ) : CollectionsListUiState
 }
 
-/** The create cover and the delete dialogs. */
+/** The delete dialogs. */
 data class CollectionsListCovers(
-    val isPresentingCreate: Boolean = false,
     val pendingDeletion: Collection? = null,
     val didDeleteFail: Boolean = false,
 )
@@ -179,17 +178,6 @@ class CollectionsListViewModel
         fun onResumed() {
             resumeCount += 1
             if (resumeCount > 1) reload()
-        }
-
-        // MARK: - Covers
-
-        fun openCreate() = _covers.update { it.copy(isPresentingCreate = true) }
-
-        fun closeCreate() = _covers.update { it.copy(isPresentingCreate = false) }
-
-        fun onCollectionSaved() {
-            _covers.update { it.copy(isPresentingCreate = false) }
-            reload()
         }
 
         // MARK: - Delete

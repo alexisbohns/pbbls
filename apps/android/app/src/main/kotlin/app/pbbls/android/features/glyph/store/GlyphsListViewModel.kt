@@ -54,13 +54,12 @@ sealed interface GlyphsUiState {
     ) : GlyphsUiState
 }
 
-/** The rename dialog, the detail drawer and the carve cover. */
+/** The rename dialog and the detail drawer. */
 data class GlyphsCovers(
     val renaming: Glyph? = null,
     val didRenameFail: Boolean = false,
     /** The drawer's subject. Replaced in place when a purchase lands. */
     val selected: GlyphGridItem? = null,
-    val isPresentingCarve: Boolean = false,
 )
 
 /**
@@ -86,6 +85,16 @@ data class GlyphsCovers(
  * `withContext(NonCancellable)`; [onPurchased] is what this screen does with a
  * purchase that landed. `GlyphPickerSheet` keeps its own duplicated copy of the
  * store's state and is a migration of its own, not folded in here.
+ *
+ * **The carve cover is gone (#852).** It used to prepend the fresh
+ * glyph to Mine and switch straight to it on save, an optimistic update with no
+ * round trip. `GlyphCarve` is a separate entry now, with no callback back into
+ * this instance; [onResumed] (#852) reloads whichever tab is on screen when
+ * the trip back lands, which restores correctness (a carved glyph is visible
+ * once you're on Mine) but not the optimism — carving while on Owned or Commu
+ * reloads that tab, not Mine, and there is no auto-switch to Mine on return.
+ * Restoring that is a product behaviour that needs a real mechanism (a nav
+ * result) and is out of scope here.
  */
 @HiltViewModel
 class GlyphsListViewModel
@@ -107,6 +116,7 @@ class GlyphsListViewModel
         val covers: StateFlow<GlyphsCovers> = _covers.asStateFlow()
 
         private var loadJob: Job? = null
+        private var resumeCount = 0
 
         init {
             viewModelScope.launch { stats.load() }
@@ -121,6 +131,20 @@ class GlyphsListViewModel
             if (tab == next) return
             tab = next
             loadTab(next)
+        }
+
+        /**
+         * The destination came back to the foreground.
+         *
+         * Reloads the tab currently on screen — the same per-tab refetch
+         * [loadTab] already does for a tab switch, just re-run on the tab you
+         * never left. This is what picks up a glyph carved in `GlyphCarve`
+         * (#852 removed the optimistic prepend-and-switch). The first
+         * resume is skipped because `init` has already loaded Mine.
+         */
+        fun onResumed() {
+            resumeCount += 1
+            if (resumeCount > 1) loadTab(tab)
         }
 
         private fun loadTab(target: GlyphTab) {
@@ -164,26 +188,6 @@ class GlyphsListViewModel
                             isLoadingTab = isLoadingTab,
                         )
                 }
-        }
-
-        // MARK: - Carve cover
-
-        fun openCarve() = _covers.update { it.copy(isPresentingCarve = true) }
-
-        fun closeCarve() = _covers.update { it.copy(isPresentingCarve = false) }
-
-        /**
-         * A carve landed. The fresh glyph is prepended to Mine and the tab
-         * switches to it rather than refetching — the glyph is already in hand,
-         * so a round trip would only delay showing the user what they just drew.
-         */
-        fun onCarved(glyph: Glyph) {
-            _covers.update { it.copy(isPresentingCarve = false) }
-            val fresh =
-                GlyphGridItem(glyph = glyph, price = 0, owned = false, createdAt = null, acquiredAt = null)
-            itemsByTab[GlyphTab.MINE] = listOf(fresh) + itemsByTab[GlyphTab.MINE].orEmpty()
-            tab = GlyphTab.MINE
-            publish()
         }
 
         // MARK: - Rename

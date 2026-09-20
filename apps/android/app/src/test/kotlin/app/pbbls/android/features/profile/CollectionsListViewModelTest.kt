@@ -211,28 +211,6 @@ class CollectionsListViewModelTest {
             assertTrue(service.deleteCalls.isEmpty())
         }
 
-    // MARK: - Create cover
-
-    /** See the souls twin: the cover's own save owns the picker-cache refresh. */
-    @Test
-    fun `saving a collection closes the cover and reloads the list only`() =
-        runTest {
-            val service = FakeCollectionsService()
-            val refs = FakeReferenceDataService()
-            val viewModel = viewModel(collections = service, refs = refs)
-            advanceUntilIdle()
-
-            viewModel.openCreate()
-            assertTrue(viewModel.covers.value.isPresentingCreate)
-
-            viewModel.onCollectionSaved()
-            advanceUntilIdle()
-
-            assertFalse(viewModel.covers.value.isPresentingCreate)
-            assertEquals(2, service.listCount)
-            assertEquals(0, refs.refreshCollectionsCount)
-        }
-
     // MARK: - Returning from the detail
 
     /** See [SoulsListViewModelTest]: the back stack entry outlives the round trip. */
@@ -258,9 +236,11 @@ class CollectionsListViewModelTest {
             val service = FakeCollectionsService(collections = listOf(collection("a")))
             val viewModel = viewModel(collections = service)
             advanceUntilIdle()
+            viewModel.onResumed()
+            advanceUntilIdle()
 
             service.failNext = IOException("offline")
-            viewModel.onCollectionSaved()
+            viewModel.onResumed()
             advanceUntilIdle()
 
             val state = viewModel.uiState.value as CollectionsListUiState.Content

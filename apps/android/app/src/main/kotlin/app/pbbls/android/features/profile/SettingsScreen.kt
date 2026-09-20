@@ -2,7 +2,6 @@ package app.pbbls.android.features.profile
 
 import android.content.Context
 import android.content.Intent
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -24,7 +23,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -42,7 +40,6 @@ import app.pbbls.android.R
 import app.pbbls.android.components.LegalDoc
 import app.pbbls.android.components.openLegalDoc
 import app.pbbls.android.features.glyph.models.Glyph
-import app.pbbls.android.features.glyph.models.GlyphStroke
 import app.pbbls.android.features.glyph.views.GlyphView
 import app.pbbls.android.features.glyph.views.GlyphViewCase
 import app.pbbls.android.features.path.create.pickers.GlyphPickerSheet
@@ -69,40 +66,21 @@ private const val TAG = "settings"
  * accounts a new-password field. Save sends only changed fields —
  * `update_profile` (null = keep; cannot clear glyph_id by design) then the
  * GoTrue password update — and stays open with an inline error on failure.
+ *
+ * The profile, its glyph, and the account's email/providers are fetched by
+ * [SettingsViewModel] itself (#852) rather than handed down by
+ * `ProfileScreen` — `SettingsKey` carries no argument to seed from.
  */
 @Composable
 fun SettingsScreen(
-    initialDisplayName: String,
-    initialGlyphId: String?,
-    initialGlyphStrokes: List<GlyphStroke>?,
-    email: String?,
-    providers: List<String>,
     onDismiss: () -> Unit,
     onSaved: (displayName: String, glyph: Glyph?, handle: String?, isPublic: Boolean) -> Unit,
     modifier: Modifier = Modifier,
-    initialHandle: String? = null,
-    initialPublicProfile: Boolean = false,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val system = PebblesTheme.colors.system
     val context = LocalContext.current
-
-    // Seeded from the profile the caller already loaded rather than refetched.
-    // `start` guards itself, so a rotation cannot re-seed over the user's edits.
-    LaunchedEffect(Unit) {
-        viewModel.start(
-            SettingsInitial(
-                displayName = initialDisplayName,
-                glyphId = initialGlyphId,
-                glyphStrokes = initialGlyphStrokes,
-                handle = initialHandle,
-                publicProfile = initialPublicProfile,
-                email = email,
-                providers = providers,
-            ),
-        )
-    }
 
     ObserveUiEffects(viewModel.effects) { effect ->
         when (effect) {
@@ -111,10 +89,6 @@ fun SettingsScreen(
 
             SettingsEffect.Dismiss -> onDismiss()
         }
-    }
-
-    BackHandler(enabled = !uiState.isSaving && uiState.deletion != DeletionState.DELETING) {
-        viewModel.onDismissRequested()
     }
 
     PebblesScreen(
@@ -147,6 +121,29 @@ fun SettingsScreen(
             )
         },
     ) {
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
+            }
+            return@PebblesScreen
+        }
+
+        val loadErrorRes = uiState.loadErrorRes
+        if (loadErrorRes != null) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                PebblesText(
+                    text = stringResource(loadErrorRes),
+                    style = PebblesTypography.body,
+                    color = PebblesDestructive,
+                    textAlign = TextAlign.Center,
+                )
+            }
+            return@PebblesScreen
+        }
+
         Column(
             modifier =
                 Modifier
@@ -218,7 +215,7 @@ fun SettingsScreen(
                                 )
                                 Spacer(Modifier.weight(1f))
                                 PebblesText(
-                                    text = email ?: "—",
+                                    text = uiState.initial.email ?: "—",
                                     style = PebblesTypography.body,
                                     color = system.secondary,
                                     maxLines = 1,
@@ -288,13 +285,13 @@ fun SettingsScreen(
                                 PebblesText(
                                     text = stringResource(R.string.settings_public_profile_toggle),
                                     style = PebblesTypography.body,
-                                    color = if (initialHandle != null) system.foreground else system.muted,
+                                    color = if (uiState.initial.handle != null) system.foreground else system.muted,
                                 )
                                 Spacer(Modifier.weight(1f))
                                 Switch(
                                     checked = uiState.form.isPublicProfile,
                                     onCheckedChange = viewModel::onPublicProfileChange,
-                                    enabled = initialHandle != null,
+                                    enabled = uiState.initial.handle != null,
                                     colors =
                                         SwitchDefaults.colors(
                                             checkedTrackColor = PebblesTheme.colors.accent.primary,
@@ -334,7 +331,7 @@ fun SettingsScreen(
                 PebblesText(
                     text =
                         uiState.handleErrorRes?.let { stringResource(it) }
-                            ?: if (initialHandle == null) {
+                            ?: if (uiState.initial.handle == null) {
                                 stringResource(R.string.settings_public_profile_needs_handle)
                             } else {
                                 stringResource(R.string.settings_handle_footer)
@@ -344,11 +341,11 @@ fun SettingsScreen(
                 )
             }
 
-            if (providers.isNotEmpty()) {
+            if (uiState.initial.providers.isNotEmpty()) {
                 PebblesListSection(
                     header = stringResource(R.string.settings_providers_header),
                     rows =
-                        providers.map { provider ->
+                        uiState.initial.providers.map { provider ->
                             {
                                 // Brand names render verbatim — never localized.
                                 PebblesText(

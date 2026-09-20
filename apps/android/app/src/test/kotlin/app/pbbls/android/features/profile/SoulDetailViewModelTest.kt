@@ -166,27 +166,6 @@ class SoulDetailViewModelTest {
 
     // MARK: - Covers
 
-    /** The cover's own save owns the picker-cache refresh (see the list twin). */
-    @Test
-    fun `saving the soul closes the cover and reloads only`() =
-        runTest {
-            val service = FakeSoulsService(soul = soul("a"))
-            val refs = FakeReferenceDataService()
-            val viewModel = viewModel(souls = service, refs = refs)
-            viewModel.start("a")
-            advanceUntilIdle()
-
-            viewModel.openEdit()
-            assertTrue(viewModel.covers.value.isPresentingEdit)
-
-            viewModel.onSoulSaved()
-            advanceUntilIdle()
-
-            assertFalse(viewModel.covers.value.isPresentingEdit)
-            assertEquals(2, service.loadSoulCount)
-            assertEquals(0, refs.refreshSoulsCount)
-        }
-
     @Test
     fun `saving an edited pebble closes its cover and reloads`() =
         runTest {
@@ -220,5 +199,32 @@ class SoulDetailViewModelTest {
 
             val state = viewModel.uiState.value as SoulDetailUiState.Content
             assertEquals(listOf("p1"), state.pebbles.map { it.id })
+        }
+
+    // MARK: - Returning from the edit form
+
+    /**
+     * The gap Task 17 opened: `SoulForm` is now a separate entry with no
+     * callback back into this instance, so a name edited there has to be
+     * picked up by a resume — same mechanism as [SoulsListViewModel.onResumed].
+     */
+    @Test
+    fun `returning from the edit form re-reads the soul`() =
+        runTest {
+            val service = FakeSoulsService(soul = soul("a"), pebbles = listOf(pebble("p1")))
+            val viewModel = viewModel(souls = service)
+            viewModel.start("a")
+            advanceUntilIdle()
+            assertEquals(1, service.loadSoulCount)
+
+            // First resume: the screen just opened, `start` already loaded.
+            viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals(1, service.loadSoulCount)
+
+            // Second: back from the edit form.
+            viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals(2, service.loadSoulCount)
         }
 }

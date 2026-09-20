@@ -26,6 +26,11 @@ class FakeLogsService(
     var backlogFailure: Exception? = null
     var reactionsFailure: Exception? = null
 
+    /** [log]'s answer and failure switch — [AnnouncementDetailViewModel]'s by-id load. */
+    var log: Log? = null
+    var logFailure: Exception? = null
+    val logCalls = mutableListOf<String>()
+
     /** Every limit the Lab asked each capped feed for, oldest first. */
     val changelogLimits = mutableListOf<Int?>()
     val backlogLimits = mutableListOf<Int?>()
@@ -60,6 +65,12 @@ class FakeLogsService(
     override suspend fun announcements(limit: Int?): List<Log> {
         announcementsFailure?.let { throw it }
         return announcements
+    }
+
+    override suspend fun log(id: String): Log? {
+        logCalls += id
+        logFailure?.let { throw it }
+        return log
     }
 
     override suspend fun changelog(limit: Int?): List<Log> {

@@ -1,6 +1,5 @@
 package app.pbbls.android.features.connections
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,19 +48,18 @@ import app.pbbls.android.theme.PebblesTypography
 @Composable
 fun ConnectionsScreen(
     onDismiss: () -> Unit,
+    onOpenInvite: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: ConnectionsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val covers by viewModel.covers.collectAsStateWithLifecycle()
 
-    BackHandler { onDismiss() }
-
     ConnectionsContent(
         uiState = uiState,
         onRetry = viewModel::retry,
         onRemoveRequest = viewModel::requestRemoval,
-        onOpenInvite = viewModel::openInvite,
+        onOpenInvite = onOpenInvite,
         onDismiss = onDismiss,
         modifier = modifier,
     )
@@ -80,10 +78,6 @@ fun ConnectionsScreen(
             onDismiss = viewModel::dismissRemoveError,
             message = stringResource(res),
         )
-    }
-
-    if (covers.isPresentingInvite) {
-        InviteScreen(onDismiss = viewModel::closeInvite)
     }
 }
 
