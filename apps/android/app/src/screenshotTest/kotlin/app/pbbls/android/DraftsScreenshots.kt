@@ -4,6 +4,7 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import app.pbbls.android.features.path.DraftsContent
+import app.pbbls.android.features.path.DraftsUiState
 import app.pbbls.android.features.path.models.PebbleDraftPayload
 import app.pbbls.android.services.PebbleDraftRecord
 import app.pbbls.android.theme.PebblesTheme
@@ -47,9 +48,7 @@ private val sampleDrafts =
 fun DraftsListLight() {
     PebblesTheme {
         DraftsContent(
-            drafts = sampleDrafts,
-            isLoading = false,
-            loadFailed = false,
+            uiState = DraftsUiState.Content(sampleDrafts),
             onRetry = {},
             onResume = {},
             onDelete = {},
@@ -64,9 +63,7 @@ fun DraftsListLight() {
 fun DraftsListDark() {
     PebblesTheme {
         DraftsContent(
-            drafts = sampleDrafts,
-            isLoading = false,
-            loadFailed = false,
+            uiState = DraftsUiState.Content(sampleDrafts),
             onRetry = {},
             onResume = {},
             onDelete = {},
@@ -81,9 +78,7 @@ fun DraftsListDark() {
 fun DraftsEmptyLight() {
     PebblesTheme {
         DraftsContent(
-            drafts = emptyList(),
-            isLoading = false,
-            loadFailed = false,
+            uiState = DraftsUiState.Content(emptyList()),
             onRetry = {},
             onResume = {},
             onDelete = {},
@@ -98,9 +93,7 @@ fun DraftsEmptyLight() {
 fun DraftsLoadErrorDark() {
     PebblesTheme {
         DraftsContent(
-            drafts = emptyList(),
-            isLoading = false,
-            loadFailed = true,
+            uiState = DraftsUiState.Error,
             onRetry = {},
             onResume = {},
             onDelete = {},
