@@ -1,7 +1,6 @@
 package app.pbbls.android.features.welcome
 
 import android.provider.Settings
-import android.util.Log
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -23,9 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,19 +35,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.components.GoogleSignInButton
 import app.pbbls.android.components.LegalDisclaimer
 import app.pbbls.android.components.LegalDoc
 import app.pbbls.android.components.PebblesPrimaryButton
 import app.pbbls.android.components.openLegalDoc
-import app.pbbls.android.features.auth.authErrorMessage
 import app.pbbls.android.rive.RiveLogo
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlin.coroutines.cancellation.CancellationException
 
 private const val TAG = "welcome"
 
@@ -77,18 +73,41 @@ fun WelcomeScreen(
     contentRevealed: Boolean,
     onCreateAccount: () -> Unit,
     onLogin: () -> Unit,
-    onGoogleSignIn: suspend () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: WelcomeViewModel = hiltViewModel(),
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    WelcomeContent(
+        uiState = uiState,
+        contentRevealed = contentRevealed,
+        onCreateAccount = onCreateAccount,
+        onLogin = onLogin,
+        onGoogleSignIn = viewModel::signInWithGoogle,
+        modifier = modifier,
+    )
+}
+
+/**
+ * Stateless Welcome hero — what the screenshots drive. Takes its state and its
+ * callbacks rather than reading a ViewModel, so it renders without Hilt.
+ */
+@Composable
+fun WelcomeContent(
+    uiState: WelcomeUiState,
+    contentRevealed: Boolean,
+    onCreateAccount: () -> Unit,
+    onLogin: () -> Unit,
+    onGoogleSignIn: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val system = PebblesTheme.colors.system
     val context = LocalContext.current
     val reduceMotion = rememberReduceMotion()
     val inspection = LocalInspectionMode.current
-    val scope = rememberCoroutineScope()
 
-    var isSubmitting by remember { mutableStateOf(false) }
-    // A resource id, never a message (D9, #850) — see authErrorMessage.
-    var authErrorRes by remember { mutableStateOf<Int?>(null) }
+    // The reveal stays in the composable: it is presentation driven by
+    // `contentRevealed` and the reduce-motion setting, with nothing to survive.
     var revealStep by remember { mutableIntStateOf(if (inspection) REVEAL_STEPS else 0) }
 
     LaunchedEffectReveal(contentRevealed, reduceMotion, revealStep) { revealStep = it }
@@ -119,27 +138,11 @@ fun WelcomeScreen(
                 WelcomeRevealedContent(
                     revealStep = revealStep,
                     reduceMotion = reduceMotion,
-                    isSubmitting = isSubmitting,
-                    authErrorRes = authErrorRes,
+                    isSubmitting = uiState.isSubmitting,
+                    authErrorRes = uiState.authErrorRes,
                     onCreateAccount = onCreateAccount,
                     onLogin = onLogin,
-                    onGoogleSignIn = {
-                        if (!isSubmitting) {
-                            scope.launch {
-                                isSubmitting = true
-                                authErrorRes = null
-                                try {
-                                    onGoogleSignIn()
-                                } catch (e: CancellationException) {
-                                    throw e
-                                } catch (e: Exception) {
-                                    Log.e(TAG, "google sign-in failed", e)
-                                    authErrorRes = authErrorMessage(e)
-                                }
-                                isSubmitting = false
-                            }
-                        }
-                    },
+                    onGoogleSignIn = onGoogleSignIn,
                     onTermsTap = { openLegalDoc(context, LegalDoc.TERMS) },
                     onPrivacyTap = { openLegalDoc(context, LegalDoc.PRIVACY) },
                 )
