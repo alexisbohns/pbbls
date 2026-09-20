@@ -60,6 +60,24 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" android:host="www.pbbls.app" android:pathPrefix="/invite/" />
             </intent-filter>
+
+            <!--
+              OAuth App Link return (#852 Task 29c). https://www.pbbls.app/auth/callback
+              is the web-hosted OAuth redirect target; pebbles://auth-callback above
+              stays as the fallback for a browser that doesn't hand the https link to
+              the app (autoVerify not yet run, or the user picked the browser once).
+              Same assetlinks.json as the invite filter above — see its comment for
+              the ANDROID_ASSETLINKS_SHA256 dependency.
+            -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="www.pbbls.app"
+                    android:pathPrefix="/auth/callback" />
+            </intent-filter>
         </activity>
     </application>
 

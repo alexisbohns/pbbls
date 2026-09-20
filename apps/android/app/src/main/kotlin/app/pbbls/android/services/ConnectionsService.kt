@@ -1,9 +1,6 @@
 package app.pbbls.android.services
 
 import androidx.annotation.StringRes
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.R
 import app.pbbls.android.features.glyph.models.GlyphStroke
@@ -18,14 +15,8 @@ import javax.inject.Singleton
 /**
  * The connections seam (#849) — what [ConnectionsViewModel], [InviteViewModel]
  * and [AcceptInviteViewModel] are tested against.
- *
- * [pendingInviteToken] is on the interface because it is not a call: it is
- * shared Compose state that `RootScreen` observes to raise the accept surface
- * over whatever is on screen. A fake has to be able to set it.
  */
 interface ConnectionsServicing {
-    var pendingInviteToken: String?
-
     suspend fun list(): List<Connection>
 
     suspend fun createInvite(rotate: Boolean = false): ConnectionInvite
@@ -55,13 +46,6 @@ class ConnectionsService
     constructor(
         private val supabase: SupabaseService,
     ) : ConnectionsServicing {
-        /**
-         * Token lifted from an invite App Link. Compose-observable so `RootScreen`
-         * reacts both to a cold start (token parked before the session resolves)
-         * and to `onNewIntent` on an already-running, already-signed-in app.
-         */
-        override var pendingInviteToken: String? by mutableStateOf(null)
-
         /** `get_connections() returns jsonb` — the caller's connections, newest first. */
         override suspend fun list(): List<Connection> =
             supabase.client.postgrest
