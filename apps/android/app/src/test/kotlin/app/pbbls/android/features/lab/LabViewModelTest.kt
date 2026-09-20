@@ -15,7 +15,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -298,25 +297,5 @@ class LabViewModelTest {
                 9,
                 state.backlog.single().reactionCount,
             )
-        }
-
-    // MARK: - Covers
-
-    @Test
-    fun `the announcement and see-all covers open and close`() =
-        runTest {
-            val viewModel = viewModel()
-            advanceUntilIdle()
-
-            viewModel.openAnnouncement(log("a"))
-            val open = viewModel.covers.value.openAnnouncement
-            assertEquals("a", open?.id)
-            viewModel.closeAnnouncement()
-            assertNull(viewModel.covers.value.openAnnouncement)
-
-            viewModel.openSeeAll(LogListMode.BACKLOG)
-            assertEquals(LogListMode.BACKLOG, viewModel.covers.value.seeAllMode)
-            viewModel.closeSeeAll()
-            assertNull(viewModel.covers.value.seeAllMode)
         }
 }

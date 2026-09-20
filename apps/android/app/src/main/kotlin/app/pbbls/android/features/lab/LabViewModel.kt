@@ -16,7 +16,6 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -51,20 +50,15 @@ sealed interface LabUiState {
     ) : LabUiState
 }
 
-/** The two covers the Lab stacks over itself. */
-data class LabCovers(
-    val openAnnouncement: Log? = null,
-    val seeAllMode: LogListMode? = null,
-)
-
 /**
  * State holder for the Lab (#849).
  *
  * **The write this moves is the reaction toggle.** It is optimistic: the heart
  * fills and the count moves before the request, and a failure reverts both.
- * That revert ran in `rememberCoroutineScope`, so leaving the Lab — or opening
- * the see-all cover over it — cancelled it and left a reaction showing as
- * registered when the server had rejected it, with a count one too high. The
+ * That revert ran in `rememberCoroutineScope`, so leaving the Lab — or, back
+ * when the see-all list was a cover rather than its own entry, opening it over
+ * the Lab — cancelled it and left a reaction showing as registered when the
+ * server had rejected it, with a count one too high. The
  * lie survived until the next full reload, and re-tapping sent the *opposite*
  * request because the client believed its own optimism.
  *
@@ -82,9 +76,6 @@ class LabViewModel
 
         private val _uiState = MutableStateFlow<LabUiState>(LabUiState.Loading)
         val uiState: StateFlow<LabUiState> = _uiState.asStateFlow()
-
-        private val _covers = MutableStateFlow(LabCovers())
-        val covers: StateFlow<LabCovers> = _covers.asStateFlow()
 
         private var loadJob: Job? = null
         private var resumeCount = 0
@@ -104,9 +95,11 @@ class LabViewModel
         fun retry() = load()
 
         /**
-         * Returning from the see-all cover does not need this — the cover is
-         * composed over the Lab, so the destination never leaves RESUMED. It is
-         * here for the trip back from Profile, which does.
+         * The Lab's entry leaves RESUMED on any trip to a child destination —
+         * Profile, and, since #852 Task 19, the announcement detail and the
+         * see-all list too, now that both are entries stacked on top rather
+         * than a swap composed over this one. Returning re-reads the feeds, so
+         * a reaction toggled in the see-all list is reflected back here.
          */
         fun onResumed() {
             resumeCount += 1
@@ -184,16 +177,6 @@ class LabViewModel
                     else -> content
                 }
         }
-
-        // MARK: - Covers
-
-        fun openAnnouncement(log: Log) = _covers.update { it.copy(openAnnouncement = log) }
-
-        fun closeAnnouncement() = _covers.update { it.copy(openAnnouncement = null) }
-
-        fun openSeeAll(mode: LogListMode) = _covers.update { it.copy(seeAllMode = mode) }
-
-        fun closeSeeAll() = _covers.update { it.copy(seeAllMode = null) }
 
         // MARK: - Reactions
 

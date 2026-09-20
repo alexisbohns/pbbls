@@ -6,7 +6,10 @@ import app.pbbls.android.features.connections.ConnectionsScreen
 import app.pbbls.android.features.connections.InviteScreen
 import app.pbbls.android.features.glyph.carve.GlyphCarveScreen
 import app.pbbls.android.features.glyph.store.GlyphsListScreen
+import app.pbbls.android.features.lab.AnnouncementDetailScreen
 import app.pbbls.android.features.lab.LabScreen
+import app.pbbls.android.features.lab.LogListMode
+import app.pbbls.android.features.lab.LogListScreen
 import app.pbbls.android.features.path.PathScreen
 import app.pbbls.android.features.profile.AchievementsScreen
 import app.pbbls.android.features.profile.CollectionDetailScreen
@@ -101,7 +104,11 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     }
 
     entry<PebblesKey.Lab>(metadata = NavTransitions.forKey(PebblesKey.Lab)) {
-        LabScreen(onBack = navigator::goBack)
+        LabScreen(
+            onBack = navigator::goBack,
+            onOpenAnnouncement = { navigator.navigate(PebblesKey.LabAnnouncement(it)) },
+            onSeeAll = { navigator.navigate(PebblesKey.LabLogList(it.name)) },
+        )
     }
 
     entry<PebblesKey.Achievements>(metadata = NavTransitions.forKey(PebblesKey.Achievements)) {
@@ -138,5 +145,17 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
 
     entry<PebblesKey.Invite>(metadata = NavTransitions.forKey(PebblesKey.Invite)) {
         InviteScreen(onDismiss = navigator::goBack)
+    }
+
+    // ---- Lab's content swaps promoted to entries (#852 Task 19) ----
+
+    entry<PebblesKey.LabAnnouncement>(metadata = NavTransitions.forKey(PebblesKey.LabAnnouncement(""))) { key ->
+        AnnouncementDetailScreen(logId = key.logId, onBack = navigator::goBack)
+    }
+
+    entry<PebblesKey.LabLogList>(
+        metadata = NavTransitions.forKey(PebblesKey.LabLogList(LogListMode.CHANGELOG.name)),
+    ) { key ->
+        LogListScreen(mode = key.mode, onBack = navigator::goBack)
     }
 }

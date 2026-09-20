@@ -38,23 +38,42 @@ sealed interface LogListUiState {
     ) : LogListUiState
 
     data class Content(
+        val mode: LogListMode,
         val logs: List<Log>,
         val reactedIds: Set<String>,
     ) : LogListUiState
 }
 
 /**
- * State holder for the see-all cover (#849).
+ * State holder for the see-all list (#849, #852 Task 19).
  *
  * The same optimistic reaction toggle as [LabViewModel], with the same hole:
- * the revert ran in `rememberCoroutineScope`, and this is a *cover*, so simply
- * closing it cancelled the revert and left a rejected reaction showing as
- * registered underneath. Request and revert are one `withContext(NonCancellable)`
- * step now.
+ * the revert ran in `rememberCoroutineScope`, and this used to be a *cover*,
+ * so simply closing it cancelled the revert and left a rejected reaction
+ * showing as registered underneath. Request and revert are one
+ * `withContext(NonCancellable)` step now.
  *
- * A cover inside the Lab destination, so [start] is guarded on the mode and
- * [finish] releases it — the ViewModel outlives the presentation, and opening
- * "see all" on the backlog after the changelog must not show the changelog.
+ * **A real Nav3 entry now, not a cover.** [start] takes the raw
+ * `PebblesKey.LabLogList.mode` string and maps it back to [LogListMode] with
+ * [LogListMode.valueOf] — caught, not propagated: a value that does not match
+ * any constant (a stale persisted key from a dropped one, or tampering)
+ * publishes [LogListUiState.Error] rather than crashing or silently falling
+ * back to the first constant, which is the `AuthMode.fromRoute` bug this
+ * migration deleted elsewhere.
+ *
+ * **`finish()` is gone, not just its `BackHandler` call site.** It used to
+ * release the mode guard so the next *presentation* would re-read — needed
+ * only because a cover's `hiltViewModel()` binds to the host destination's
+ * back stack entry, which outlives the cover's own open/close cycle many
+ * times over. An entry's ViewModel is destroyed when the entry is popped
+ * (`rememberViewModelStoreNavEntryDecorator`, wired in `RootScreen`), so the
+ * next presentation is always a fresh instance with `startedMode == null` —
+ * there is nothing left to release. [InviteViewModel] was promoted to an
+ * entry in Task 17 under the same decorator and has the identical shape
+ * (`hasStarted` + a `finish()` called from `InviteScreen.dismiss()`), so the
+ * same reasoning applies there too; that cleanup was out of scope here and is
+ * flagged in the PR rather than made in this file (root `CLAUDE.md`: no
+ * refactors without approval).
  */
 @HiltViewModel
 class LogListViewModel
@@ -65,14 +84,14 @@ class LogListViewModel
         private val _uiState = MutableStateFlow<LogListUiState>(LogListUiState.Loading)
         val uiState: StateFlow<LogListUiState> = _uiState.asStateFlow()
 
-        private var startedMode: LogListMode? = null
+        private var startedMode: String? = null
         private var loadJob: Job? = null
 
-        /** Load [mode], unless it is the one already loaded. */
-        fun start(mode: LogListMode) {
-            if (startedMode == mode) return
-            startedMode = mode
-            load(mode)
+        /** Load [rawMode], unless it is the one already loaded. */
+        fun start(rawMode: String) {
+            if (startedMode == rawMode) return
+            startedMode = rawMode
+            load(rawMode)
         }
 
         fun retry() = startedMode?.let { load(it) }
@@ -80,8 +99,14 @@ class LogListViewModel
         /** Cover-image URL for [log] — a pure projection, not a call. */
         fun coverImageUrl(log: Log): String? = logsService.coverImageUrl(log)
 
-        private fun load(mode: LogListMode) {
+        private fun load(rawMode: String) {
             loadJob?.cancel()
+            val mode = runCatching { LogListMode.valueOf(rawMode) }.getOrNull()
+            if (mode == null) {
+                AndroidLog.e(TAG, "unknown LogListMode: $rawMode")
+                _uiState.value = LogListUiState.Error(R.string.lab_list_load_error)
+                return
+            }
             _uiState.value = LogListUiState.Loading
             loadJob =
                 viewModelScope.launch {
@@ -99,7 +124,7 @@ class LogListViewModel
                         }
                     }.fold(
                         onSuccess = { (logs, reactions) ->
-                            _uiState.value = LogListUiState.Content(logs = logs, reactedIds = reactions)
+                            _uiState.value = LogListUiState.Content(mode = mode, logs = logs, reactedIds = reactions)
                         },
                         onFailure = {
                             AndroidLog.e(TAG, "list fetch failed", it)
@@ -114,7 +139,7 @@ class LogListViewModel
             val before = ReactionToggle.State(reactedIds = current.reactedIds, logs = current.logs)
             val wasReacted = ReactionToggle.wasReacted(before, log.id)
             val next = ReactionToggle.toggle(before, log.id)
-            _uiState.value = LogListUiState.Content(logs = next.logs, reactedIds = next.reactedIds)
+            _uiState.value = current.copy(logs = next.logs, reactedIds = next.reactedIds)
 
             viewModelScope.launch {
                 withContext(NonCancellable) {
@@ -129,15 +154,9 @@ class LogListViewModel
                                 log.id,
                                 wasReacted,
                             )
-                        _uiState.value =
-                            LogListUiState.Content(logs = reverted.logs, reactedIds = reverted.reactedIds)
+                        _uiState.value = shown.copy(logs = reverted.logs, reactedIds = reverted.reactedIds)
                     }
                 }
             }
-        }
-
-        /** Release the mode guard so the next presentation re-reads. */
-        fun finish() {
-            startedMode = null
         }
     }

@@ -12,9 +12,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -22,6 +27,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.features.lab.components.LabMarkdownBody
 import app.pbbls.android.features.lab.models.LabMarkdown
@@ -38,17 +45,21 @@ import java.util.Locale
  * Announcement detail — ports iOS `AnnouncementDetailView`: 200dp cover,
  * display title, subtitle summary, then the V1 markdown body (design D5). iOS
  * sets no toolbar title here (inline empty bar) — matched with an empty
- * [PebblesTopBar] title. Rendered as a content swap inside the Lab route
- * (design D9), so [onBack] just unwinds the swap.
+ * [PebblesTopBar] title. A real Nav3 entry now (#852 Task 19): it loads its
+ * own row by [logId], so [onBack] pops the entry rather than unwinding a swap.
  */
 @Composable
 fun AnnouncementDetailScreen(
-    log: Log,
-    coverUrl: String?,
+    logId: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: AnnouncementDetailViewModel = hiltViewModel(),
 ) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val system = PebblesTheme.colors.system
+
+    LaunchedEffect(logId) { viewModel.start(logId) }
+
     PebblesScreen(
         modifier = modifier,
         topBar = {
@@ -67,11 +78,41 @@ fun AnnouncementDetailScreen(
             )
         },
     ) {
-        AnnouncementDetailContent(
-            log = log,
-            coverUrl = coverUrl,
-            modifier = Modifier.fillMaxSize(),
-        )
+        // Exhaustive with no `else`: a new AnnouncementDetailUiState case must
+        // be rendered.
+        when (val state = uiState) {
+            AnnouncementDetailUiState.Loading ->
+                Box(Modifier.fillMaxSize(), Alignment.Center) {
+                    CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
+                }
+
+            is AnnouncementDetailUiState.Error ->
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    PebblesText(
+                        text = stringResource(state.messageRes),
+                        style = PebblesTypography.body,
+                        color = system.secondary,
+                    )
+                    TextButton(onClick = viewModel::retry) {
+                        PebblesText(
+                            text = stringResource(R.string.profile_retry),
+                            style = PebblesTypography.buttonLabel,
+                            color = PebblesTheme.colors.accent.primary,
+                        )
+                    }
+                }
+
+            is AnnouncementDetailUiState.Content ->
+                AnnouncementDetailContent(
+                    log = state.log,
+                    coverUrl = state.coverUrl,
+                    modifier = Modifier.fillMaxSize(),
+                )
+        }
     }
 }
 

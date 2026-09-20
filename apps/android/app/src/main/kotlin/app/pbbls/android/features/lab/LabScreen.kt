@@ -4,7 +4,6 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -57,19 +56,20 @@ private const val TAG = "lab"
  * only when ALL FOUR content feeds fail (a reactions-only failure just means
  * an empty reacted set). Sections render only when non-empty. The optimistic
  * reaction toggle adjusts only the backlog list (D4). Announcement detail and
- * the see-all lists render as content swaps inside this single route (D9) —
- * back (gesture or bar button) unwinds the swap before popping the route, and
- * the feed state stays resident across swaps (iOS keeps the pushed-from view
- * alive the same way).
+ * the see-all lists are real Nav3 entries (design D9a, #852 Task 19) rather
+ * than a content swap over this route — [onOpenAnnouncement] and [onSeeAll]
+ * are the entry's navigation, wired in `PebblesEntryProvider`; this screen
+ * never reaches for `Navigator` itself.
  */
 @Composable
 fun LabScreen(
     onBack: () -> Unit,
+    onOpenAnnouncement: (String) -> Unit,
+    onSeeAll: (LogListMode) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LabViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val covers by viewModel.covers.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val system = PebblesTheme.colors.system
 
@@ -80,87 +80,62 @@ fun LabScreen(
         onPauseOrDispose {}
     }
 
-    // Content swaps unwind before the route itself pops (design D9).
-    val announcement = covers.openAnnouncement
-    val listMode = covers.seeAllMode
-    BackHandler(enabled = announcement != null || listMode != null) {
-        if (announcement != null) viewModel.closeAnnouncement() else viewModel.closeSeeAll()
-    }
-
-    when {
-        announcement != null ->
-            AnnouncementDetailScreen(
-                log = announcement,
-                coverUrl = viewModel.coverImageUrl(announcement),
-                onBack = viewModel::closeAnnouncement,
-                modifier = modifier,
-            )
-
-        listMode != null ->
-            LogListScreen(
-                mode = listMode,
-                onBack = viewModel::closeSeeAll,
-                modifier = modifier,
-            )
-
-        else ->
-            PebblesScreen(
-                modifier = modifier,
-                topBar = {
-                    PebblesTopBar(
-                        title = stringResource(R.string.lab_title),
-                        leading = {
-                            IconButton(onClick = onBack) {
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_arrow_back),
-                                    contentDescription = stringResource(R.string.profile_back_a11y),
-                                    tint = system.secondary,
-                                    modifier = Modifier.size(24.dp),
-                                )
-                            }
-                        },
-                    )
-                },
-            ) {
-                // Exhaustive with no `else`: a new LabUiState case must be rendered.
-                when (val state = uiState) {
-                    LabUiState.Loading ->
-                        Box(Modifier.fillMaxSize(), Alignment.Center) {
-                            CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
-                        }
-
-                    is LabUiState.Error ->
-                        Column(
-                            modifier = Modifier.fillMaxSize(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ) {
-                            PebblesText(
-                                text = stringResource(state.messageRes),
-                                style = PebblesTypography.body,
-                                color = system.secondary,
-                            )
-                            TextButton(onClick = viewModel::retry) {
-                                PebblesText(
-                                    text = stringResource(R.string.profile_retry),
-                                    style = PebblesTypography.buttonLabel,
-                                    color = PebblesTheme.colors.accent.primary,
-                                )
-                            }
-                        }
-
-                    is LabUiState.Content ->
-                        LabContent(
-                            state = state,
-                            coverUrl = viewModel::coverImageUrl,
-                            onOpenAnnouncement = viewModel::openAnnouncement,
-                            onToggleReaction = viewModel::toggleReaction,
-                            onOpenCommunity = { openCommunityInvite(context) },
-                            onSeeAllChangelog = { viewModel.openSeeAll(LogListMode.CHANGELOG) },
-                            onSeeAllBacklog = { viewModel.openSeeAll(LogListMode.BACKLOG) },
+    PebblesScreen(
+        modifier = modifier,
+        topBar = {
+            PebblesTopBar(
+                title = stringResource(R.string.lab_title),
+                leading = {
+                    IconButton(onClick = onBack) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_arrow_back),
+                            contentDescription = stringResource(R.string.profile_back_a11y),
+                            tint = system.secondary,
+                            modifier = Modifier.size(24.dp),
                         )
+                    }
+                },
+            )
+        },
+    ) {
+        // Exhaustive with no `else`: a new LabUiState case must be rendered.
+        when (val state = uiState) {
+            LabUiState.Loading ->
+                Box(Modifier.fillMaxSize(), Alignment.Center) {
+                    CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
                 }
-            }
+
+            is LabUiState.Error ->
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    PebblesText(
+                        text = stringResource(state.messageRes),
+                        style = PebblesTypography.body,
+                        color = system.secondary,
+                    )
+                    TextButton(onClick = viewModel::retry) {
+                        PebblesText(
+                            text = stringResource(R.string.profile_retry),
+                            style = PebblesTypography.buttonLabel,
+                            color = PebblesTheme.colors.accent.primary,
+                        )
+                    }
+                }
+
+            is LabUiState.Content ->
+                LabContent(
+                    state = state,
+                    coverUrl = viewModel::coverImageUrl,
+                    onOpenAnnouncement = { onOpenAnnouncement(it.id) },
+                    onToggleReaction = viewModel::toggleReaction,
+                    onOpenCommunity = { openCommunityInvite(context) },
+                    onSeeAllChangelog = { onSeeAll(LogListMode.CHANGELOG) },
+                    onSeeAllBacklog = { onSeeAll(LogListMode.BACKLOG) },
+                )
+        }
     }
 }
 

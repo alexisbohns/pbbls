@@ -1,6 +1,5 @@
 package app.pbbls.android.features.lab
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,12 +46,16 @@ enum class LogListMode(
 /**
  * The see-all list — ports iOS `LogListView`: the unlimited feed and
  * `myReactions` load together and, unlike the Lab screen, ANY failure shows
- * the error state (design D3). Reactions toggle only in backlog mode. A
- * content swap inside the Lab route (design D9).
+ * the error state (design D3). Reactions toggle only in backlog mode. A real
+ * Nav3 entry now (#852 Task 19): [mode] is `PebblesKey.LabLogList.mode`, the
+ * enum's `.name` — a `NavKey` argument can only carry primitives.
+ * [LogListViewModel] maps it back and fails loudly into an `Error` state
+ * rather than silently defaulting to the first constant, which is the
+ * `AuthMode.fromRoute` bug this migration deleted elsewhere.
  */
 @Composable
 fun LogListScreen(
-    mode: LogListMode,
+    mode: String,
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: LogListViewModel = hiltViewModel(),
@@ -63,27 +66,16 @@ fun LogListScreen(
     // Guarded on the mode, so a rotation re-runs this without re-fetching.
     LaunchedEffect(mode) { viewModel.start(mode) }
 
-    fun back() {
-        viewModel.finish()
-        onBack()
-    }
-
-    // Its own handler, innermost, so system/gesture back takes the same exit as
-    // the toolbar arrow. The Lab's handler only knows to clear its cover flag,
-    // which would leave this ViewModel's mode guard set and serve the next
-    // presentation a stale list — two behaviours for one gesture.
-    //
-    // This one is NOT deleted with the five covers Task 17 promoted: this screen
-    // is still a content swap inside `LabScreen`, not an entry, so nothing else
-    // owns its back. It goes in Task 19, which promotes it to `LabLogList`.
-    BackHandler { back() }
     PebblesScreen(
         modifier = modifier,
         topBar = {
             PebblesTopBar(
-                title = stringResource(mode.titleRes),
+                // Only Content has resolved a real LogListMode to title with —
+                // Loading and a bad-mode Error show an empty bar, same as
+                // AnnouncementDetailScreen's (iOS sets none here either).
+                title = (uiState as? LogListUiState.Content)?.mode?.let { stringResource(it.titleRes) } ?: "",
                 leading = {
-                    IconButton(onClick = { back() }) {
+                    IconButton(onClick = onBack) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
                             contentDescription = stringResource(R.string.profile_back_a11y),
@@ -141,11 +133,11 @@ fun LogListScreen(
                                 .padding(bottom = PebblesTheme.spacing.xxl),
                     ) {
                         LogTimeline(
-                            mode = mode.timelineMode,
+                            mode = state.mode.timelineMode,
                             logs = state.logs,
                             reactedIds = state.reactedIds,
                             onToggleReaction = {
-                                if (mode == LogListMode.BACKLOG) viewModel.toggleReaction(it)
+                                if (state.mode == LogListMode.BACKLOG) viewModel.toggleReaction(it)
                             },
                         )
                     }

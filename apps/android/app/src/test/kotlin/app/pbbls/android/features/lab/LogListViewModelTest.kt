@@ -17,7 +17,7 @@ import org.junit.Test
 import java.io.IOException
 import java.time.OffsetDateTime
 
-/** The see-all cover's load, mode guard and reaction contract (#849). */
+/** The see-all list's load, mode parsing and reaction contract (#849, #852 Task 19). */
 class LogListViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
@@ -45,11 +45,12 @@ class LogListViewModelTest {
             val logs = FakeLogsService(changelog = listOf(log("c")))
             val viewModel = viewModel(logs)
 
-            viewModel.start(LogListMode.CHANGELOG)
+            viewModel.start(LogListMode.CHANGELOG.name)
             assertEquals(LogListUiState.Loading, viewModel.uiState.value)
             advanceUntilIdle()
 
             val state = viewModel.uiState.value as LogListUiState.Content
+            assertEquals(LogListMode.CHANGELOG, state.mode)
             assertEquals(listOf("c"), state.logs.map { it.id })
         }
 
@@ -60,7 +61,7 @@ class LogListViewModelTest {
             val logs = FakeLogsService()
             val viewModel = viewModel(logs)
 
-            viewModel.start(LogListMode.BACKLOG)
+            viewModel.start(LogListMode.BACKLOG.name)
             advanceUntilIdle()
 
             assertEquals(listOf<Int?>(null), logs.backlogLimits)
@@ -73,9 +74,9 @@ class LogListViewModelTest {
             val logs = FakeLogsService()
             val viewModel = viewModel(logs)
 
-            viewModel.start(LogListMode.CHANGELOG)
+            viewModel.start(LogListMode.CHANGELOG.name)
             advanceUntilIdle()
-            repeat(3) { viewModel.start(LogListMode.CHANGELOG) }
+            repeat(3) { viewModel.start(LogListMode.CHANGELOG.name) }
             advanceUntilIdle()
 
             assertEquals(1, logs.changelogLimits.size)
@@ -88,7 +89,7 @@ class LogListViewModelTest {
             logs.changelogFailure = IOException("offline")
             val viewModel = viewModel(logs)
 
-            viewModel.start(LogListMode.CHANGELOG)
+            viewModel.start(LogListMode.CHANGELOG.name)
             advanceUntilIdle()
             assertEquals(
                 R.string.lab_list_load_error,
@@ -112,10 +113,37 @@ class LogListViewModelTest {
             logs.reactionsFailure = IOException("offline")
             val viewModel = viewModel(logs)
 
-            viewModel.start(LogListMode.CHANGELOG)
+            viewModel.start(LogListMode.CHANGELOG.name)
             advanceUntilIdle()
 
             assertTrue(viewModel.uiState.value is LogListUiState.Error)
+        }
+
+    // MARK: - Mode parsing
+
+    /**
+     * `PebblesKey.LabLogList.mode` is a `String` (a `NavKey` argument can only
+     * carry primitives) mapped back with `LogListMode.valueOf`. A value that
+     * matches no constant — a stale persisted key from a dropped one, or
+     * tampering — must not silently become the first constant (the
+     * `AuthMode.fromRoute` bug this migration deleted elsewhere): it publishes
+     * `Error` instead, without ever touching the service.
+     */
+    @Test
+    fun `an unrecognized mode is Error, not the first constant`() =
+        runTest {
+            val logs = FakeLogsService(changelog = listOf(log("c")))
+            val viewModel = viewModel(logs)
+
+            viewModel.start("not-a-real-mode")
+            advanceUntilIdle()
+
+            assertEquals(
+                R.string.lab_list_load_error,
+                (viewModel.uiState.value as LogListUiState.Error).messageRes,
+            )
+            assertTrue("must not fetch on an unresolved mode", logs.changelogLimits.isEmpty())
+            assertTrue("must not fetch on an unresolved mode", logs.backlogLimits.isEmpty())
         }
 
     // MARK: - Reactions
@@ -125,7 +153,7 @@ class LogListViewModelTest {
         runTest {
             val logs = FakeLogsService(backlog = listOf(log("b", reactionCount = 2)))
             val viewModel = viewModel(logs)
-            viewModel.start(LogListMode.BACKLOG)
+            viewModel.start(LogListMode.BACKLOG.name)
             advanceUntilIdle()
 
             viewModel.toggleReaction(log("b"))
@@ -137,13 +165,13 @@ class LogListViewModelTest {
             assertEquals(listOf("b"), logs.reactCalls)
         }
 
-    /** The cover can be closed mid-toggle, so the revert has to survive it. */
+    /** The list can be left mid-toggle, so the revert has to survive it. */
     @Test
     fun `a failed reaction reverts both the flag and the count`() =
         runTest {
             val logs = FakeLogsService(backlog = listOf(log("b", reactionCount = 2)))
             val viewModel = viewModel(logs)
-            viewModel.start(LogListMode.BACKLOG)
+            viewModel.start(LogListMode.BACKLOG.name)
             advanceUntilIdle()
 
             logs.failNextReaction = IOException("offline")
@@ -155,40 +183,24 @@ class LogListViewModelTest {
             assertEquals(2, state.logs.single().reactionCount)
         }
 
-    // MARK: - Reset
+    // MARK: - Mode changes
 
     /**
-     * Re-opening the SAME mode is what actually tests `finish()` — a different
-     * mode reloads on its own (the test below), so asserting on one would pass
-     * with the reset deleted.
+     * A different mode re-reads. Re-opening the SAME mode (`start is idempotent`
+     * above) is what covers the guard actually skipping a redundant fetch; the
+     * mode guard's release on close (`finish()`) is gone as of #852 Task 19 — an
+     * entry's ViewModel is destroyed when the entry is popped, so the next
+     * presentation is always a fresh instance with nothing to release.
      */
-    @Test
-    fun `finish releases the mode guard`() =
-        runTest {
-            val logs = FakeLogsService(changelog = listOf(log("c")))
-            val viewModel = viewModel(logs)
-
-            viewModel.start(LogListMode.CHANGELOG)
-            advanceUntilIdle()
-            assertEquals(1, logs.changelogLimits.size)
-
-            viewModel.finish()
-            viewModel.start(LogListMode.CHANGELOG)
-            advanceUntilIdle()
-
-            assertEquals("the next presentation must re-read", 2, logs.changelogLimits.size)
-        }
-
-    /** A different mode re-reads even without a finish. */
     @Test
     fun `start on a different mode reloads`() =
         runTest {
             val logs = FakeLogsService(changelog = listOf(log("c")), backlog = listOf(log("b")))
             val viewModel = viewModel(logs)
 
-            viewModel.start(LogListMode.CHANGELOG)
+            viewModel.start(LogListMode.CHANGELOG.name)
             advanceUntilIdle()
-            viewModel.start(LogListMode.BACKLOG)
+            viewModel.start(LogListMode.BACKLOG.name)
             advanceUntilIdle()
 
             assertEquals(
