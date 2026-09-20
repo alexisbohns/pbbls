@@ -484,7 +484,6 @@ Create `app/src/main/kotlin/app/pbbls/android/navigation/NavTransitions.kt`:
 package app.pbbls.android.navigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -502,6 +501,12 @@ import androidx.navigation3.ui.NavDisplay
  *
  * These are handed to `NavDisplay` as per-entry metadata rather than decided in
  * a `when` at the display, so a key's animation travels with the key.
+ *
+ * Every lambda parameter below is named rather than left implicit. The three
+ * spec builders are extension lambdas on `AnimatedContentTransitionScope`, and
+ * `predictivePopTransitionSpec` carries an extra `Int` parameter — so a bare
+ * `it` inside one of them is ambiguous between that parameter and the slide
+ * offset lambda's own. Naming both is what keeps this compiling.
  */
 object NavTransitions {
     private const val DURATION_MS = 350
@@ -510,22 +515,24 @@ object NavTransitions {
     /** Slide-up / slide-down. Applied to every non-[BarKey]. */
     val modal: Map<String, Any> =
         NavDisplay.transitionSpec {
-            slideInVertically(tween(DURATION_MS)) { it } togetherWith fadeOut(tween(FADE_MS))
+            slideInVertically(tween(DURATION_MS)) { height -> height } togetherWith fadeOut(tween(FADE_MS))
         } +
             NavDisplay.popTransitionSpec {
-                fadeIn(tween(FADE_MS)) togetherWith slideOutVertically(tween(DURATION_MS)) { it }
+                fadeIn(tween(FADE_MS)) togetherWith slideOutVertically(tween(DURATION_MS)) { height -> height }
             } +
-            NavDisplay.predictivePopTransitionSpec {
-                fadeIn(tween(FADE_MS)) togetherWith slideOutVertically(tween(DURATION_MS)) { it }
+            // The Int parameter is the swipe edge; this app animates the same
+            // way from either edge, so it is deliberately ignored.
+            NavDisplay.predictivePopTransitionSpec { _ ->
+                fadeIn(tween(FADE_MS)) togetherWith slideOutVertically(tween(DURATION_MS)) { height -> height }
             }
 
     /** M3 shared-axis X. Applied to [BarKey] pushes. */
     val push: Map<String, Any> =
         NavDisplay.transitionSpec { sharedAxisForward() } +
             NavDisplay.popTransitionSpec { sharedAxisBackward() } +
-            NavDisplay.predictivePopTransitionSpec { sharedAxisBackward() }
+            NavDisplay.predictivePopTransitionSpec { _ -> sharedAxisBackward() }
 
-    private fun AnimatedContentTransitionScope<*>.sharedAxisForward(): ContentTransform =
+    private fun AnimatedContentTransitionScope<*>.sharedAxisForward() =
         (
             slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Left, tween(DURATION_MS)) +
                 fadeIn(tween(FADE_MS))
@@ -534,7 +541,7 @@ object NavTransitions {
                 fadeOut(tween(FADE_MS))
         )
 
-    private fun AnimatedContentTransitionScope<*>.sharedAxisBackward(): ContentTransform =
+    private fun AnimatedContentTransitionScope<*>.sharedAxisBackward() =
         (
             slideIntoContainer(AnimatedContentTransitionScope.SlideDirection.Right, tween(DURATION_MS)) +
                 fadeIn(tween(FADE_MS))
@@ -548,12 +555,26 @@ object NavTransitions {
 }
 ```
 
+**Verified against the 1.1.7 artifact before this plan was written:**
+
+```
+transitionSpec(Function1<AnimatedContentTransitionScope<Scene<?>>, ContentTransform>)
+popTransitionSpec(Function1<AnimatedContentTransitionScope<Scene<?>>, ContentTransform>)
+predictivePopTransitionSpec(Function2<AnimatedContentTransitionScope<Scene<?>>, Integer, ContentTransform>)
+```
+
+All three exist. The third's `Function2` is the extra `Int`, which is why its
+lambda is written `{ _ -> … }` and the other two are not.
+
 - [ ] **Step 2: Verify it compiles**
 
 Run: `npm run build --workspace=@pbbls/android`
 Expected: `BUILD SUCCESSFUL`.
 
-If `NavDisplay.predictivePopTransitionSpec` does not resolve, check the 1.1.7 API surface with `./gradlew :app:dependencies --configuration debugCompileClasspath | grep navigation3` and read the artifact rather than guessing at a replacement name — this spec key is what makes the gesture scrubbable, so do not silently drop it.
+All three spec builders are confirmed present in 1.1.7 (signatures above), so a
+failure here is a syntax problem in the lambdas, not a missing API. Do not drop
+`predictivePopTransitionSpec` to get green — it is what makes the gesture
+scrubbable, which is an acceptance criterion.
 
 - [ ] **Step 3: Commit**
 
