@@ -16,6 +16,31 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
+ * The connections seam (#849) — what [ConnectionsViewModel], [InviteViewModel]
+ * and [AcceptInviteViewModel] are tested against.
+ *
+ * [pendingInviteToken] is on the interface because it is not a call: it is
+ * shared Compose state that `RootScreen` observes to raise the accept surface
+ * over whatever is on screen. A fake has to be able to set it.
+ */
+interface ConnectionsServicing {
+    var pendingInviteToken: String?
+
+    suspend fun list(): List<Connection>
+
+    suspend fun createInvite(rotate: Boolean = false): ConnectionInvite
+
+    suspend fun preview(token: String): InvitePreview
+
+    suspend fun accept(token: String): AcceptInviteResult
+
+    suspend fun remove(
+        connectionId: String,
+        block: Boolean = false,
+    )
+}
+
+/**
  * Mutual connections (M49) — ports iOS `ConnectionsService`.
  *
  * Every write goes through a `security definer` RPC: the three tables carry
@@ -29,16 +54,16 @@ class ConnectionsService
     @Inject
     constructor(
         private val supabase: SupabaseService,
-    ) {
+    ) : ConnectionsServicing {
         /**
          * Token lifted from an invite App Link. Compose-observable so `RootScreen`
          * reacts both to a cold start (token parked before the session resolves)
          * and to `onNewIntent` on an already-running, already-signed-in app.
          */
-        var pendingInviteToken: String? by mutableStateOf(null)
+        override var pendingInviteToken: String? by mutableStateOf(null)
 
         /** `get_connections() returns jsonb` — the caller's connections, newest first. */
-        suspend fun list(): List<Connection> =
+        override suspend fun list(): List<Connection> =
             supabase.client.postgrest
                 .rpc("get_connections")
                 .decodeAs()
@@ -48,7 +73,7 @@ class ConnectionsService
          * [rotate] revokes the live invite and issues a fresh token — the whole
          * revocation surface, so a link already shared stays alive until then.
          */
-        suspend fun createInvite(rotate: Boolean = false): ConnectionInvite =
+        override suspend fun createInvite(rotate: Boolean): ConnectionInvite =
             supabase.client.postgrest
                 .rpc(
                     "create_connection_invite",
@@ -59,7 +84,7 @@ class ConnectionsService
          * Anon-callable preview: who is inviting, before accepting. Never raises —
          * an unusable token comes back as a status, not an error.
          */
-        suspend fun preview(token: String): InvitePreview =
+        override suspend fun preview(token: String): InvitePreview =
             supabase.client.postgrest
                 .rpc(
                     "preview_connection_invite",
@@ -71,7 +96,7 @@ class ConnectionsService
          * `alreadyConnected` — re-scanning a shared QR is the normal case, not an
          * error. A block in either direction surfaces as `invite_expired`.
          */
-        suspend fun accept(token: String): AcceptInviteResult =
+        override suspend fun accept(token: String): AcceptInviteResult =
             supabase.client.postgrest
                 .rpc(
                     "accept_connection_invite",
@@ -82,9 +107,9 @@ class ConnectionsService
          * Severs the connection for both sides. [block] additionally records a
          * one-way block that stops the peer re-entering through a live invite.
          */
-        suspend fun remove(
+        override suspend fun remove(
             connectionId: String,
-            block: Boolean = false,
+            block: Boolean,
         ) {
             supabase.client.postgrest.rpc(
                 "remove_connection",
@@ -205,6 +230,6 @@ fun connectionsErrorMessage(error: DataError): Int =
 
 /** CompositionLocal for [ConnectionsService]. */
 val LocalConnectionsService =
-    staticCompositionLocalOf<ConnectionsService> {
+    staticCompositionLocalOf<ConnectionsServicing> {
         error("LocalConnectionsService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

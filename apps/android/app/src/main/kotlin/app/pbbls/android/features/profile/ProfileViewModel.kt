@@ -95,6 +95,7 @@ class ProfileViewModel
         val covers: StateFlow<ProfileCovers> = _covers.asStateFlow()
 
         private var loadJob: Job? = null
+        private var resumeCount = 0
 
         init {
             load()
@@ -107,6 +108,24 @@ class ProfileViewModel
         }
 
         fun retry() = load()
+
+        /**
+         * Profile came back to the foreground.
+         *
+         * [refresh] has carried the KDoc "for returning from a pushed screen"
+         * since #893 and was never called for it: the ViewModel is scoped to the
+         * `NavBackStackEntry`, which survives the trip to Souls, Collections,
+         * Glyphs, Connections, Lab or Achievements. So renaming a collection in
+         * its own list left Profile's carousel showing the old name, and the
+         * stats card stale after anything that changes counts.
+         *
+         * The first resume is skipped (`init` has already loaded). Deferred from
+         * PR #896.
+         */
+        fun onResumed() {
+            resumeCount += 1
+            if (resumeCount > 1) refresh()
+        }
 
         private fun load() {
             loadJob?.cancel()

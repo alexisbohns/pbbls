@@ -1,6 +1,5 @@
 package app.pbbls.android.features.connections
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -18,34 +17,24 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.features.glyph.views.GlyphView
 import app.pbbls.android.features.glyph.views.GlyphViewCase
 import app.pbbls.android.features.profile.components.DeleteErrorDialog
 import app.pbbls.android.services.Connection
-import app.pbbls.android.services.LocalConnectionsService
-import app.pbbls.android.services.connectionsErrorMessage
-import app.pbbls.android.services.toDataError
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar
 import app.pbbls.android.theme.PebblesTopBarTextButton
 import app.pbbls.android.theme.PebblesTypography
-import kotlinx.coroutines.launch
-
-private const val TAG = "connections"
 
 /**
  * The people you're connected with (M49) — ports iOS `ConnectionsListView`.
@@ -61,81 +50,40 @@ private const val TAG = "connections"
 fun ConnectionsScreen(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: ConnectionsViewModel = hiltViewModel(),
 ) {
-    val service = LocalConnectionsService.current
-    val scope = rememberCoroutineScope()
-
-    var rows by remember { mutableStateOf<List<Connection>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
-    var loadFailed by remember { mutableStateOf(false) }
-    var retryKey by remember { mutableIntStateOf(0) }
-    var pendingRemoval by remember { mutableStateOf<Connection?>(null) }
-    var removeErrorRes by remember { mutableStateOf<Int?>(null) }
-    var isPresentingInvite by remember { mutableStateOf(false) }
-
-    LaunchedEffect(retryKey) {
-        isLoading = true
-        loadFailed = false
-        try {
-            rows = service.list()
-            isLoading = false
-        } catch (e: Exception) {
-            Log.e(TAG, "connections load failed", e)
-            loadFailed = true
-            isLoading = false
-        }
-    }
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val covers by viewModel.covers.collectAsStateWithLifecycle()
 
     BackHandler { onDismiss() }
 
-    // Optimistic removal: the row leaves immediately and a failure reloads the
-    // truth back in.
-    fun remove(
-        row: Connection,
-        block: Boolean,
-    ) {
-        pendingRemoval = null
-        rows = rows.filterNot { it.connectionId == row.connectionId }
-        scope.launch {
-            try {
-                service.remove(connectionId = row.connectionId, block = block)
-            } catch (e: Exception) {
-                Log.e(TAG, "connection removal failed", e)
-                removeErrorRes = connectionsErrorMessage(e.toDataError())
-                retryKey++
-            }
-        }
-    }
-
     ConnectionsContent(
-        connections = rows,
-        isLoading = isLoading,
-        loadFailed = loadFailed,
-        onRetry = { retryKey++ },
-        onRemoveRequest = { pendingRemoval = it },
-        onOpenInvite = { isPresentingInvite = true },
+        uiState = uiState,
+        onRetry = viewModel::retry,
+        onRemoveRequest = viewModel::requestRemoval,
+        onOpenInvite = viewModel::openInvite,
         onDismiss = onDismiss,
         modifier = modifier,
     )
 
-    pendingRemoval?.let { row ->
+    covers.pendingRemoval?.let { row ->
         RemoveConnectionDialog(
             peerName = row.peer.displayName ?: stringResource(R.string.connections_unnamed_peer),
-            onRemove = { remove(row, block = false) },
-            onRemoveAndBlock = { remove(row, block = true) },
-            onDismiss = { pendingRemoval = null },
+            onRemove = { viewModel.confirmRemoval(block = false) },
+            onRemoveAndBlock = { viewModel.confirmRemoval(block = true) },
+            onDismiss = viewModel::cancelRemoval,
         )
     }
 
-    removeErrorRes?.let { res ->
+    covers.removeErrorRes?.let { res ->
         DeleteErrorDialog(
-            onDismiss = { removeErrorRes = null },
+            onDismiss = viewModel::dismissRemoveError,
             message = stringResource(res),
         )
     }
 
-    if (isPresentingInvite) {
-        InviteScreen(onDismiss = { isPresentingInvite = false })
+    if (covers.isPresentingInvite) {
+        InviteScreen(onDismiss = viewModel::closeInvite)
     }
 }
 
@@ -145,9 +93,7 @@ fun ConnectionsScreen(
  */
 @Composable
 fun ConnectionsContent(
-    connections: List<Connection>,
-    isLoading: Boolean,
-    loadFailed: Boolean,
+    uiState: ConnectionsUiState,
     onRetry: () -> Unit,
     onRemoveRequest: (Connection) -> Unit,
     onOpenInvite: () -> Unit,
@@ -188,16 +134,18 @@ fun ConnectionsContent(
             modifier = Modifier.fillMaxSize(),
             contentAlignment = Alignment.Center,
         ) {
-            when {
-                isLoading -> CircularProgressIndicator(color = accent.primary)
+            // Exhaustive with no `else`: a new ConnectionsUiState case must be
+            // rendered. The empty list is Content, not a fourth case.
+            when (uiState) {
+                ConnectionsUiState.Loading -> CircularProgressIndicator(color = accent.primary)
 
-                loadFailed ->
+                is ConnectionsUiState.Error ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         PebblesText(
-                            text = stringResource(R.string.connections_load_error),
+                            text = stringResource(uiState.messageRes),
                             style = PebblesTypography.body,
                             color = system.secondary,
                             textAlign = TextAlign.Center,
@@ -212,26 +160,27 @@ fun ConnectionsContent(
                         }
                     }
 
-                connections.isEmpty() ->
-                    PebblesText(
-                        text = stringResource(R.string.connections_empty),
-                        style = PebblesTypography.body,
-                        color = system.secondary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 32.dp),
-                    )
-
-                else ->
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                    ) {
-                        items(connections, key = { it.connectionId }) { row ->
-                            ConnectionRow(
-                                connection = row,
-                                onRemoveRequest = { onRemoveRequest(row) },
-                            )
+                is ConnectionsUiState.Content ->
+                    if (uiState.connections.isEmpty()) {
+                        PebblesText(
+                            text = stringResource(R.string.connections_empty),
+                            style = PebblesTypography.body,
+                            color = system.secondary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 32.dp),
+                        )
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            items(uiState.connections, key = { it.connectionId }) { row ->
+                                ConnectionRow(
+                                    connection = row,
+                                    onRemoveRequest = { onRemoveRequest(row) },
+                                )
+                            }
                         }
                     }
             }

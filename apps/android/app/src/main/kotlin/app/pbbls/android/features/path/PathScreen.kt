@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.features.path.components.NewPebbleButton
@@ -69,6 +70,13 @@ fun PathScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val covers by viewModel.covers.collectAsStateWithLifecycle()
+
+    // Coming back from a pushed screen must re-read the timeline: the ViewModel is
+    // scoped to the back stack entry, which survives that round trip.
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onResumed()
+        onPauseOrDispose {}
+    }
     val palettes = LocalEmotionPaletteService.current
     val system = PebblesTheme.colors.system
     val accent = PebblesTheme.colors.accent

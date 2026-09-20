@@ -142,6 +142,45 @@ class ProfileViewModelTest {
             assertEquals(42, (viewModel.uiState.value as ProfileUiState.Content).karma)
         }
 
+    // MARK: - Returning from a pushed screen
+
+    /**
+     * `refresh()` has carried the KDoc "for returning from a pushed screen"
+     * since #893 and was never called for it: the ViewModel is scoped to the
+     * `NavBackStackEntry`, which survives the trip to Souls, Collections,
+     * Glyphs, Connections, Lab or Achievements. So renaming a collection in its
+     * own list left Profile's carousel showing the old name. (Deferred from
+     * PR #896.)
+     */
+    @Test
+    fun `returning to Profile re-reads it`() =
+        runTest {
+            val profile = FakeProfileService(profile = row)
+            val viewModel = viewModel(profile)
+            advanceUntilIdle()
+            val loadsAfterInit = profile.loadProfileCount
+
+            viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals(loadsAfterInit, profile.loadProfileCount)
+
+            viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals(loadsAfterInit + 1, profile.loadProfileCount)
+        }
+
+    /** The refresh is silent — it must not blank the page to a spinner. */
+    @Test
+    fun `returning does not flash the spinner`() =
+        runTest {
+            val viewModel = viewModel()
+            advanceUntilIdle()
+            viewModel.onResumed()
+
+            viewModel.onResumed()
+            assertTrue(viewModel.uiState.value is ProfileUiState.Content)
+        }
+
     // MARK: - Covers
 
     @Test

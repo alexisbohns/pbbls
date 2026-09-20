@@ -9,7 +9,7 @@ import app.pbbls.android.features.path.valence.ValencePrewarmer
 import app.pbbls.android.features.pebblemedia.SnapProcessor
 import app.pbbls.android.services.AchievementsServicing
 import app.pbbls.android.services.ComposerSnapshotStoring
-import app.pbbls.android.services.ConnectionsService
+import app.pbbls.android.services.ConnectionsServicing
 import app.pbbls.android.services.EmotionPaletteService
 import app.pbbls.android.services.PathServicing
 import app.pbbls.android.services.PathStatsServicing
@@ -58,7 +58,7 @@ class ServiceGraph
         val referenceData: ReferenceDataServicing,
         val pebbleWrite: PebbleWriteServicing,
         val draftsService: PebbleDraftsServicing,
-        val connectionsService: ConnectionsService,
+        val connectionsService: ConnectionsServicing,
         val composerSnapshots: ComposerSnapshotStoring,
         val glyphService: GlyphService,
         val glyphMarket: GlyphMarketService,

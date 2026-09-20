@@ -6,6 +6,8 @@ import app.pbbls.android.services.AchievementsService
 import app.pbbls.android.services.AchievementsServicing
 import app.pbbls.android.services.CollectionsService
 import app.pbbls.android.services.CollectionsServicing
+import app.pbbls.android.services.ConnectionsService
+import app.pbbls.android.services.ConnectionsServicing
 import app.pbbls.android.services.PathService
 import app.pbbls.android.services.PathServicing
 import app.pbbls.android.services.PathStatsService
@@ -90,4 +92,8 @@ interface ServiceBindings {
     @Binds
     @Singleton
     fun bindCollectionsServicing(impl: CollectionsService): CollectionsServicing
+
+    @Binds
+    @Singleton
+    fun bindConnectionsServicing(impl: ConnectionsService): ConnectionsServicing
 }

@@ -4,8 +4,11 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import app.pbbls.android.features.connections.AcceptInviteContent
+import app.pbbls.android.features.connections.AcceptInviteUiState
 import app.pbbls.android.features.connections.ConnectionsContent
+import app.pbbls.android.features.connections.ConnectionsUiState
 import app.pbbls.android.features.connections.InviteContent
+import app.pbbls.android.features.connections.InviteUiState
 import app.pbbls.android.features.glyph.models.GlyphStroke
 import app.pbbls.android.services.AcceptInviteResult
 import app.pbbls.android.services.Connection
@@ -20,6 +23,11 @@ import com.android.tools.screenshot.PreviewTest
  * Render-to-view previews for the M49 connections surfaces — the SDK-less
  * maintainer reviews these as the `ui-screenshots` CI artifact. Drives the
  * stateless `*Content` layers, never the service-reading screens.
+ *
+ * Since #849 each one takes its screen's sealed `UiState` rather than a bag of
+ * nullables and flags, so a preview now names the case it renders instead of
+ * spelling it out as "not loading, did not fail, these rows". No reference PNG
+ * moves: the rendered trees are identical.
  */
 private val sampleGlyph =
     PeerGlyph(
@@ -51,9 +59,7 @@ private val sampleInvite =
 private fun ConnectionsListPreview() {
     PebblesTheme {
         ConnectionsContent(
-            connections = sampleConnections,
-            isLoading = false,
-            loadFailed = false,
+            uiState = ConnectionsUiState.Content(sampleConnections),
             onRetry = {},
             onRemoveRequest = {},
             onOpenInvite = {},
@@ -68,9 +74,7 @@ private fun ConnectionsListPreview() {
 private fun ConnectionsEmptyPreview() {
     PebblesTheme {
         ConnectionsContent(
-            connections = emptyList(),
-            isLoading = false,
-            loadFailed = false,
+            uiState = ConnectionsUiState.Content(emptyList()),
             onRetry = {},
             onRemoveRequest = {},
             onOpenInvite = {},
@@ -85,9 +89,7 @@ private fun ConnectionsEmptyPreview() {
 private fun ConnectionsListDarkPreview() {
     PebblesTheme {
         ConnectionsContent(
-            connections = sampleConnections,
-            isLoading = false,
-            loadFailed = false,
+            uiState = ConnectionsUiState.Content(sampleConnections),
             onRetry = {},
             onRemoveRequest = {},
             onOpenInvite = {},
@@ -102,10 +104,7 @@ private fun ConnectionsListDarkPreview() {
 private fun InviteLinkPreview() {
     PebblesTheme {
         InviteContent(
-            invite = sampleInvite,
-            isLoading = false,
-            errorRes = null,
-            isRotating = false,
+            uiState = InviteUiState.Content(sampleInvite),
             onRetry = {},
             onCopy = {},
             onShare = {},
@@ -121,12 +120,12 @@ private fun InviteLinkPreview() {
 private fun AcceptValidPreview() {
     PebblesTheme {
         AcceptInviteContent(
-            preview = InvitePreview(status = "valid", inviter = peer("Lea")),
-            accepted = null,
-            isLoading = false,
-            isAccepting = false,
-            errorRes = null,
+            uiState =
+                AcceptInviteUiState.Ready(
+                    InvitePreview(status = "valid", inviter = peer("Lea")),
+                ),
             onAccept = {},
+            onRetry = {},
             onDismiss = {},
         )
     }
@@ -138,13 +137,13 @@ private fun AcceptValidPreview() {
 private fun AcceptAlreadyConnectedPreview() {
     PebblesTheme {
         AcceptInviteContent(
-            preview = InvitePreview(status = "valid", inviter = peer("Lea")),
             // A repeat accept is a success state, never an error.
-            accepted = AcceptInviteResult("c1", alreadyConnected = true, peer = peer("Lea")),
-            isLoading = false,
-            isAccepting = false,
-            errorRes = null,
+            uiState =
+                AcceptInviteUiState.Accepted(
+                    AcceptInviteResult("c1", alreadyConnected = true, peer = peer("Lea")),
+                ),
             onAccept = {},
+            onRetry = {},
             onDismiss = {},
         )
     }
@@ -157,12 +156,9 @@ private fun AcceptUnusablePreview() {
     PebblesTheme {
         AcceptInviteContent(
             // Expired, revoked and blocked all render this one dark state.
-            preview = InvitePreview(status = "expired", inviter = null),
-            accepted = null,
-            isLoading = false,
-            isAccepting = false,
-            errorRes = null,
+            uiState = AcceptInviteUiState.Ready(InvitePreview(status = "expired", inviter = null)),
             onAccept = {},
+            onRetry = {},
             onDismiss = {},
         )
     }
