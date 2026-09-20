@@ -143,6 +143,7 @@
     <string name="soul_edit_title">Edit soul</string>
     <string name="soul_form_glyph_choose">Tap to choose</string>
     <string name="soul_save_error">Couldn\'t save the soul. Please try again.</string>
+    <string name="soul_form_load_error">Couldn\'t load this soul. Please try again.</string>
 
     <!-- ==== Collections management (M41 sub-project E). Stack/Pack/Track are
          product vocabulary — FR stays identical pending the maintainer's word
@@ -155,6 +156,7 @@
     <string name="collection_detail_empty_message">Pebbles added to this collection will appear here.</string>
     <string name="collection_edit_title">Edit collection</string>
     <string name="collection_save_error">Couldn\'t save the collection. Please try again.</string>
+    <string name="collection_form_load_error">Couldn\'t load this collection. Please try again.</string>
     <string name="collection_count_zero">No pebbles</string>
     <string name="collection_mode_header">Mode</string>
     <string name="collection_mode_none">None</string>

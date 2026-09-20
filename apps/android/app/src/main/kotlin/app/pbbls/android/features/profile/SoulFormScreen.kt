@@ -4,6 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,6 +28,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,7 +38,6 @@ import app.pbbls.android.features.glyph.models.SystemGlyph
 import app.pbbls.android.features.glyph.views.GlyphView
 import app.pbbls.android.features.glyph.views.GlyphViewCase
 import app.pbbls.android.features.path.create.pickers.GlyphPickerSheet
-import app.pbbls.android.features.profile.models.SoulWithGlyph
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesListSection
 import app.pbbls.android.theme.PebblesScreen
@@ -51,10 +52,12 @@ import app.pbbls.android.ui.ObserveUiEffects
  * Create/edit form for a soul — merges iOS `CreateSoulSheet` + `EditSoulSheet`
  * (which differ only in initial state and the write call) into one full-screen
  * surface (D5): name field + glyph row → [GlyphPickerSheet] (the M39 D12
- * parked glyph slot, landing here per D8). [original] `null` means create —
- * the glyph defaults to [SystemGlyph.DEFAULT] and [SoulFormViewModel] fetches
- * its strokes for the thumbnail. Writes are direct RLS-scoped single-table
- * calls (D6); `souls_glyph_usable` enforces glyph ownership server-side.
+ * parked glyph slot, landing here per D8). [soulId] `null` means create — the
+ * glyph defaults to [SystemGlyph.DEFAULT] and [SoulFormViewModel] fetches its
+ * strokes for the thumbnail; a non-null id is fetched by the ViewModel itself
+ * (#852 Task 15), so this screen never receives the row from its caller.
+ * Writes are direct RLS-scoped single-table calls (D6); `souls_glyph_usable`
+ * enforces glyph ownership server-side.
  *
  * Deviation from iOS: the picker already returns the full `Glyph`, so the
  * post-pick thumbnail refetch iOS carries ("tracked separately" in its
@@ -62,7 +65,7 @@ import app.pbbls.android.ui.ObserveUiEffects
  */
 @Composable
 fun SoulFormScreen(
-    original: SoulWithGlyph?,
+    soulId: String?,
     onDismiss: () -> Unit,
     onSaved: () -> Unit,
     modifier: Modifier = Modifier,
@@ -72,7 +75,7 @@ fun SoulFormScreen(
     val system = PebblesTheme.colors.system
 
     // `start` is guarded, so a rotation cannot re-seed over the user's edits.
-    LaunchedEffect(original?.id) { viewModel.start(original) }
+    LaunchedEffect(soulId) { viewModel.start(soulId) }
 
     ObserveUiEffects(viewModel.effects) { effect ->
         when (effect) {
@@ -113,6 +116,29 @@ fun SoulFormScreen(
             )
         },
     ) {
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
+            }
+            return@PebblesScreen
+        }
+
+        val loadErrorRes = uiState.loadErrorRes
+        if (loadErrorRes != null) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                PebblesText(
+                    text = stringResource(loadErrorRes),
+                    style = PebblesTypography.body,
+                    color = PebblesDestructive,
+                    textAlign = TextAlign.Center,
+                )
+            }
+            return@PebblesScreen
+        }
+
         Column(
             modifier =
                 Modifier

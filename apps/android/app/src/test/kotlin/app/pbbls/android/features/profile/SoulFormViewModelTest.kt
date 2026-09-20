@@ -1,5 +1,6 @@
 package app.pbbls.android.features.profile
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
@@ -24,11 +25,16 @@ import org.junit.Test
 import java.io.IOException
 
 /**
- * The soul form's seed, save and reset contract (#849).
+ * The soul form's seed, save and reset contract (#849, #852 Task 15).
  *
  * The reset half is the load-bearing one: this ViewModel is hosted behind a
  * conditionally-composed cover, so `hiltViewModel()` scopes it to the back
  * stack entry underneath, which outlives the cover many times over.
+ *
+ * As of Task 15, [SoulFormViewModel.start] takes an id instead of the whole
+ * row and fetches it itself — [FakeSoulsService.loadSoul] stands in for the
+ * server round trip, so a load is asynchronous and needs `advanceUntilIdle()`
+ * before the result lands in [SoulFormViewModel.uiState].
  */
 class SoulFormViewModelTest {
     @get:Rule
@@ -46,9 +52,60 @@ class SoulFormViewModelTest {
         souls: FakeSoulsService = FakeSoulsService(glyph = glyph(SystemGlyph.DEFAULT)),
         refs: FakeReferenceDataService = FakeReferenceDataService(),
         achievements: FakeAchievementsService = FakeAchievementsService(),
-    ) = SoulFormViewModel(souls, refs, achievements)
+        savedState: SavedStateHandle = SavedStateHandle(),
+    ) = SoulFormViewModel(savedState, souls, refs, achievements)
 
-    // MARK: - Seeding
+    // MARK: - Seeding by id
+
+    @Test
+    fun `a non-null id loads that soul into the form`() =
+        runTest {
+            val service = FakeSoulsService(glyph = glyph(SystemGlyph.DEFAULT))
+            service.soul = soul("s1", name = "Otis", glyphId = "glyph-s1")
+
+            // No `start()` call: `init` reads the id straight off the handle,
+            // exactly as it will once a real nav entry supplies one (#852 Task 17).
+            val viewModel = viewModel(souls = service, savedState = SavedStateHandle(mapOf(SOUL_FORM_ID_KEY to "s1")))
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertEquals("Otis", state.name)
+            assertEquals("glyph-s1", state.glyphId)
+            assertEquals("glyph-s1", state.glyph?.id)
+            assertTrue(state.isEditing)
+            assertEquals(R.string.soul_edit_title, state.titleRes)
+            assertEquals(1, service.loadSoulCount)
+        }
+
+    @Test
+    fun `a null id opens an empty create form and does not hit the service`() =
+        runTest {
+            val service = FakeSoulsService(glyph = glyph(SystemGlyph.DEFAULT))
+            val viewModel = viewModel(souls = service, savedState = SavedStateHandle())
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertEquals("", state.name)
+            assertFalse(state.isEditing)
+            assertEquals(0, service.loadSoulCount)
+        }
+
+    @Test
+    fun `a failed load surfaces an error, not an empty form`() =
+        runTest {
+            val service = FakeSoulsService(glyph = glyph(SystemGlyph.DEFAULT))
+            service.failNext = IOException("offline")
+            val viewModel = viewModel(souls = service, savedState = SavedStateHandle(mapOf(SOUL_FORM_ID_KEY to "s1")))
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertFalse(state.isLoading)
+            assertEquals(R.string.soul_form_load_error, state.loadErrorRes)
+            assertFalse(state.canSave)
+            assertNull(state.original)
+        }
+
+    // MARK: - Seeding via `start`
 
     @Test
     fun `create seeds empty and fetches the default glyph`() =
@@ -69,12 +126,13 @@ class SoulFormViewModelTest {
         }
 
     @Test
-    fun `edit seeds from the row and skips the default-glyph fetch`() =
+    fun `edit seeds from the loaded row and skips the default-glyph fetch`() =
         runTest {
             val service = FakeSoulsService(glyph = glyph(SystemGlyph.DEFAULT))
+            service.soul = soul("a")
             val viewModel = viewModel(souls = service)
 
-            viewModel.start(soul("a"))
+            viewModel.start("a")
             advanceUntilIdle()
 
             val state = viewModel.uiState.value
@@ -96,14 +154,16 @@ class SoulFormViewModelTest {
     @Test
     fun `start does not re-seed over the user's edits`() =
         runTest {
-            val viewModel = viewModel()
-            viewModel.start(soul("a"))
+            val service = FakeSoulsService(glyph = glyph(SystemGlyph.DEFAULT))
+            service.soul = soul("a")
+            val viewModel = viewModel(souls = service)
+            viewModel.start("a")
             advanceUntilIdle()
 
             viewModel.onNameChange("Maude")
             viewModel.onGlyphPicked(glyph("picked"))
 
-            viewModel.start(soul("a"))
+            viewModel.start("a")
 
             val state = viewModel.uiState.value
             assertEquals("Maude", state.name)
@@ -115,13 +175,17 @@ class SoulFormViewModelTest {
     @Test
     fun `start on a different soul re-seeds`() =
         runTest {
-            val viewModel = viewModel()
-            viewModel.start(soul("a", name = "Molly"))
+            val service = FakeSoulsService(glyph = glyph(SystemGlyph.DEFAULT))
+            service.soul = soul("a", name = "Molly")
+            val viewModel = viewModel(souls = service)
+            viewModel.start("a")
             advanceUntilIdle()
             viewModel.onNameChange("Maude")
             viewModel.onGlyphPicked(glyph("picked"))
 
-            viewModel.start(soul("b", name = "Otis", glyphId = "glyph-b"))
+            service.soul = soul("b", name = "Otis", glyphId = "glyph-b")
+            viewModel.start("b")
+            advanceUntilIdle()
 
             val state = viewModel.uiState.value
             assertEquals("Otis", state.name)
@@ -192,10 +256,11 @@ class SoulFormViewModelTest {
     fun `edit updates rather than creating`() =
         runTest {
             val service = FakeSoulsService(glyph = glyph(SystemGlyph.DEFAULT))
+            service.soul = soul("a")
             val achievements = FakeAchievementsService()
             val viewModel = viewModel(souls = service, achievements = achievements)
 
-            viewModel.start(soul("a"))
+            viewModel.start("a")
             advanceUntilIdle()
             viewModel.onNameChange("Maude")
             viewModel.save()
@@ -384,15 +449,17 @@ class SoulFormViewModelTest {
     fun `an edited soul re-seeds from the saved row on re-open`() =
         runTest {
             val service = FakeSoulsService(glyph = glyph(SystemGlyph.DEFAULT))
+            service.soul = soul("a", name = "Molly")
             val viewModel = viewModel(souls = service)
 
-            viewModel.start(soul("a", name = "Molly"))
+            viewModel.start("a")
             advanceUntilIdle()
             viewModel.onNameChange("Maude")
             viewModel.save()
             advanceUntilIdle()
 
-            viewModel.start(soul("a", name = "Maude"))
+            service.soul = soul("a", name = "Maude")
+            viewModel.start("a")
             advanceUntilIdle()
 
             assertEquals("Maude", viewModel.uiState.value.name)

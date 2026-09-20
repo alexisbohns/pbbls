@@ -182,7 +182,7 @@ fun ProfileScreen(
 
     if (covers.isPresentingCreateCollection) {
         CollectionFormScreen(
-            original = null,
+            collectionId = null,
             onDismiss = viewModel::closeCreateCollection,
             onSaved = viewModel::onCollectionCreated,
             modifier = Modifier.fillMaxSize(),

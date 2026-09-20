@@ -158,7 +158,7 @@ fun SoulDetailScreen(
     if (covers.isPresentingEdit) {
         (uiState as? SoulDetailUiState.Content)?.let { content ->
             SoulFormScreen(
-                original = content.soul,
+                soulId = content.soul.id,
                 onDismiss = viewModel::closeEdit,
                 onSaved = viewModel::onSoulSaved,
                 modifier = Modifier.fillMaxSize(),

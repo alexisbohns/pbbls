@@ -132,6 +132,7 @@
     <string name="soul_edit_title">Modifier l\'âme</string>
     <string name="soul_form_glyph_choose">Touchez pour choisir</string>
     <string name="soul_save_error">Impossible d\'enregistrer l\'âme. Veuillez réessayer.</string>
+    <string name="soul_form_load_error">Impossible de charger cette âme. Veuillez réessayer.</string>
 
     <!-- ==== Gestion des collections (M41 sous-projet E). Stack/Pack/Track :
          vocabulaire produit — identique en FR en attendant le mot du mainteneur. -->
@@ -143,6 +144,7 @@
     <string name="collection_detail_empty_message">Les pebbles ajoutés à cette collection apparaîtront ici.</string>
     <string name="collection_edit_title">Modifier la collection</string>
     <string name="collection_save_error">Impossible d\'enregistrer la collection. Veuillez réessayer.</string>
+    <string name="collection_form_load_error">Impossible de charger cette collection. Veuillez réessayer.</string>
     <string name="collection_count_zero">Aucun pebble</string>
     <string name="collection_mode_header">Mode</string>
     <string name="collection_mode_none">Aucun</string>

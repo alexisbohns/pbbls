@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +22,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
@@ -32,7 +34,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.features.profile.components.labelRes
-import app.pbbls.android.features.profile.models.Collection
 import app.pbbls.android.features.profile.models.CollectionMode
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesListSection
@@ -48,10 +49,12 @@ import app.pbbls.android.ui.ObserveUiEffects
  * Create/edit form for a collection — merges iOS `CreateCollectionSheet` +
  * `EditCollectionSheet` (they differ only in initial state and the write call)
  * into one full-screen surface (D5): name field + mode picker (None / Stack /
- * Pack / Track). [original] `null` means create. Selecting "None" on edit
- * really clears the column — the payload encodes mode as explicit JSON null
- * (see `collectionUpdatePayload`). Writes are direct RLS-scoped single-table
- * calls (D6), driven by [CollectionFormViewModel].
+ * Pack / Track). [collectionId] `null` means create; a non-null id is fetched
+ * by the ViewModel itself (#852 Task 15), so this screen never receives the
+ * row from its caller. Selecting "None" on edit really clears the column — the
+ * payload encodes mode as explicit JSON null (see `collectionUpdatePayload`).
+ * Writes are direct RLS-scoped single-table calls (D6), driven by
+ * [CollectionFormViewModel].
  *
  * Deviation from iOS: the segmented mode control renders as Pebbles-styled
  * capsule toggles rather than Material's segmented buttons — same reason the
@@ -59,7 +62,7 @@ import app.pbbls.android.ui.ObserveUiEffects
  */
 @Composable
 fun CollectionFormScreen(
-    original: Collection?,
+    collectionId: String?,
     onDismiss: () -> Unit,
     onSaved: () -> Unit,
     modifier: Modifier = Modifier,
@@ -69,7 +72,7 @@ fun CollectionFormScreen(
     val system = PebblesTheme.colors.system
 
     // `start` is guarded, so a rotation cannot re-seed over the user's edits.
-    LaunchedEffect(original?.id) { viewModel.start(original) }
+    LaunchedEffect(collectionId) { viewModel.start(collectionId) }
 
     ObserveUiEffects(viewModel.effects) { effect ->
         when (effect) {
@@ -110,6 +113,29 @@ fun CollectionFormScreen(
             )
         },
     ) {
+        if (uiState.isLoading) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
+            }
+            return@PebblesScreen
+        }
+
+        val loadErrorRes = uiState.loadErrorRes
+        if (loadErrorRes != null) {
+            Box(
+                modifier = Modifier.fillMaxSize().padding(16.dp),
+                contentAlignment = Alignment.Center,
+            ) {
+                PebblesText(
+                    text = stringResource(loadErrorRes),
+                    style = PebblesTypography.body,
+                    color = PebblesDestructive,
+                    textAlign = TextAlign.Center,
+                )
+            }
+            return@PebblesScreen
+        }
+
         Column(
             modifier =
                 Modifier

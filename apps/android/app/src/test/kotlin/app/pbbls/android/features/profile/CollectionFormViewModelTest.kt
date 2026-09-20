@@ -1,5 +1,6 @@
 package app.pbbls.android.features.profile
 
+import androidx.lifecycle.SavedStateHandle
 import app.pbbls.android.R
 import app.pbbls.android.features.profile.models.Collection
 import app.pbbls.android.features.profile.models.CollectionMode
@@ -19,7 +20,16 @@ import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
 
-/** The collection form's seed, save and reset contract (#849). */
+/**
+ * The collection form's seed, save and reset contract (#849, #852 Task 15).
+ *
+ * As of Task 15, [CollectionFormViewModel.start] takes an id instead of the
+ * whole row and fetches it itself — [FakeCollectionsService.loadCollection]
+ * stands in for the server round trip, so a load is asynchronous and needs
+ * `advanceUntilIdle()` before the result lands in
+ * [CollectionFormViewModel.uiState]. See [SoulFormViewModelTest] for the twin
+ * suite this mirrors.
+ */
 class CollectionFormViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
@@ -34,15 +44,69 @@ class CollectionFormViewModelTest {
         collections: FakeCollectionsService = FakeCollectionsService(),
         refs: FakeReferenceDataService = FakeReferenceDataService(),
         achievements: FakeAchievementsService = FakeAchievementsService(),
-    ) = CollectionFormViewModel(collections, refs, achievements)
+        savedState: SavedStateHandle = SavedStateHandle(),
+    ) = CollectionFormViewModel(savedState, collections, refs, achievements)
 
-    // MARK: - Seeding
+    // MARK: - Seeding by id
+
+    @Test
+    fun `a non-null id loads that collection into the form`() =
+        runTest {
+            val service = FakeCollectionsService()
+            service.collection = collection("c1", name = "Journeys", mode = CollectionMode.TRACK)
+
+            // No `start()` call: `init` reads the id straight off the handle,
+            // exactly as it will once a real nav entry supplies one (#852 Task 17).
+            val viewModel =
+                viewModel(collections = service, savedState = SavedStateHandle(mapOf(COLLECTION_FORM_ID_KEY to "c1")))
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertEquals("Journeys", state.name)
+            assertEquals(CollectionMode.TRACK, state.mode)
+            assertTrue(state.isEditing)
+            assertEquals(R.string.collection_edit_title, state.titleRes)
+            assertEquals(1, service.loadCollectionCount)
+        }
+
+    @Test
+    fun `a null id opens an empty create form and does not hit the service`() =
+        runTest {
+            val service = FakeCollectionsService()
+            val viewModel = viewModel(collections = service, savedState = SavedStateHandle())
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertEquals("", state.name)
+            assertNull(state.mode)
+            assertFalse(state.isEditing)
+            assertEquals(0, service.loadCollectionCount)
+        }
+
+    @Test
+    fun `a failed load surfaces an error, not an empty form`() =
+        runTest {
+            val service = FakeCollectionsService()
+            service.failNext = IOException("offline")
+            val viewModel =
+                viewModel(collections = service, savedState = SavedStateHandle(mapOf(COLLECTION_FORM_ID_KEY to "c1")))
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value
+            assertFalse(state.isLoading)
+            assertEquals(R.string.collection_form_load_error, state.loadErrorRes)
+            assertFalse(state.canSave)
+            assertNull(state.original)
+        }
+
+    // MARK: - Seeding via `start`
 
     @Test
     fun `create seeds empty`() =
         runTest {
             val viewModel = viewModel()
             viewModel.start(null)
+            advanceUntilIdle()
 
             val state = viewModel.uiState.value
             assertEquals("", state.name)
@@ -52,10 +116,14 @@ class CollectionFormViewModelTest {
         }
 
     @Test
-    fun `edit seeds from the row`() =
+    fun `edit seeds from the loaded row`() =
         runTest {
-            val viewModel = viewModel()
-            viewModel.start(collection("a"))
+            val service = FakeCollectionsService()
+            service.collection = collection("a")
+            val viewModel = viewModel(collections = service)
+
+            viewModel.start("a")
+            advanceUntilIdle()
 
             val state = viewModel.uiState.value
             assertEquals("Trips", state.name)
@@ -72,12 +140,15 @@ class CollectionFormViewModelTest {
     @Test
     fun `start does not re-seed over the user's edits`() =
         runTest {
-            val viewModel = viewModel()
-            viewModel.start(collection("a"))
+            val service = FakeCollectionsService()
+            service.collection = collection("a")
+            val viewModel = viewModel(collections = service)
+            viewModel.start("a")
+            advanceUntilIdle()
             viewModel.onNameChange("Journeys")
             viewModel.onModeChange(CollectionMode.PACK)
 
-            viewModel.start(collection("a"))
+            viewModel.start("a")
 
             val state = viewModel.uiState.value
             assertEquals("Journeys", state.name)
@@ -87,12 +158,17 @@ class CollectionFormViewModelTest {
     @Test
     fun `start on a different collection re-seeds`() =
         runTest {
-            val viewModel = viewModel()
-            viewModel.start(collection("a", name = "Trips"))
+            val service = FakeCollectionsService()
+            service.collection = collection("a", name = "Trips")
+            val viewModel = viewModel(collections = service)
+            viewModel.start("a")
+            advanceUntilIdle()
             viewModel.onNameChange("Journeys")
             viewModel.onModeChange(CollectionMode.PACK)
 
-            viewModel.start(collection("b", name = "Moods", mode = CollectionMode.TRACK))
+            service.collection = collection("b", name = "Moods", mode = CollectionMode.TRACK)
+            viewModel.start("b")
+            advanceUntilIdle()
 
             val state = viewModel.uiState.value
             assertEquals("Moods", state.name)
@@ -111,6 +187,7 @@ class CollectionFormViewModelTest {
             val effects = recordEffects(viewModel.effects)
 
             viewModel.start(null)
+            advanceUntilIdle()
             viewModel.onNameChange("  Trips  ")
             viewModel.onModeChange(CollectionMode.TRACK)
             viewModel.save()
@@ -128,10 +205,12 @@ class CollectionFormViewModelTest {
     fun `edit can clear the mode`() =
         runTest {
             val service = FakeCollectionsService()
+            service.collection = collection("a")
             val achievements = FakeAchievementsService()
             val viewModel = viewModel(collections = service, achievements = achievements)
 
-            viewModel.start(collection("a"))
+            viewModel.start("a")
+            advanceUntilIdle()
             viewModel.onModeChange(null)
             assertTrue(viewModel.uiState.value.canSave)
 
@@ -151,6 +230,7 @@ class CollectionFormViewModelTest {
             val effects = recordEffects(viewModel.effects)
 
             viewModel.start(null)
+            advanceUntilIdle()
             viewModel.onNameChange("Trips")
             service.failNext = IOException("offline")
             viewModel.save()
@@ -171,6 +251,7 @@ class CollectionFormViewModelTest {
             val viewModel = viewModel(collections = service)
 
             viewModel.start(null)
+            advanceUntilIdle()
             viewModel.onNameChange("   ")
             viewModel.save()
             advanceUntilIdle()
@@ -187,6 +268,7 @@ class CollectionFormViewModelTest {
             val effects = recordEffects(viewModel.effects)
 
             viewModel.start(null)
+            advanceUntilIdle()
             viewModel.onNameChange("Trips")
             viewModel.save()
             advanceUntilIdle()
@@ -215,12 +297,14 @@ class CollectionFormViewModelTest {
             val viewModel = viewModel()
 
             viewModel.start(null)
+            advanceUntilIdle()
             viewModel.onNameChange("Trips")
             viewModel.onModeChange(CollectionMode.PACK)
             viewModel.save()
             advanceUntilIdle()
 
             viewModel.start(null)
+            advanceUntilIdle()
 
             val state = viewModel.uiState.value
             assertEquals("", state.name)
@@ -235,6 +319,7 @@ class CollectionFormViewModelTest {
             val effects = recordEffects(viewModel.effects)
 
             viewModel.start(null)
+            advanceUntilIdle()
             viewModel.onNameChange("Trips")
             viewModel.onDismissRequested()
             advanceUntilIdle()
@@ -242,6 +327,7 @@ class CollectionFormViewModelTest {
             assertEquals(listOf(CollectionFormEffect.Dismiss), effects.values)
 
             viewModel.start(null)
+            advanceUntilIdle()
             assertEquals("", viewModel.uiState.value.name)
             effects.stop()
         }

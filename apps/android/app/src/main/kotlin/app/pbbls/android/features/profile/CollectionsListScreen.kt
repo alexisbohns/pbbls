@@ -173,7 +173,7 @@ fun CollectionsListScreen(
 
     if (covers.isPresentingCreate) {
         CollectionFormScreen(
-            original = null,
+            collectionId = null,
             onDismiss = viewModel::closeCreate,
             onSaved = viewModel::onCollectionSaved,
             modifier = Modifier.fillMaxSize(),

@@ -152,7 +152,7 @@ fun SoulsListScreen(
 
     if (covers.isPresentingCreate) {
         SoulFormScreen(
-            original = null,
+            soulId = null,
             onDismiss = viewModel::closeCreate,
             onSaved = viewModel::onSoulSaved,
             modifier = Modifier.fillMaxSize(),

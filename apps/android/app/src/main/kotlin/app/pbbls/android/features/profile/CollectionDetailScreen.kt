@@ -186,7 +186,7 @@ fun CollectionDetailScreen(
     if (covers.isPresentingEdit) {
         (uiState as? CollectionDetailUiState.Content)?.let { content ->
             CollectionFormScreen(
-                original = content.collection,
+                collectionId = content.collection.id,
                 onDismiss = viewModel::closeEdit,
                 onSaved = viewModel::onCollectionSaved,
                 modifier = Modifier.fillMaxSize(),
