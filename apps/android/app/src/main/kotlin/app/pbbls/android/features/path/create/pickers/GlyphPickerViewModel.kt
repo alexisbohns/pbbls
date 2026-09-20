@@ -100,7 +100,9 @@ sealed interface GlyphPickerEffect {
 class GlyphPickerViewModel
     @Inject
     constructor(
-        private val market: GlyphMarketServicing,
+        // Not private: GlyphPickerContent reads it to hand GlyphSwapPanel its
+        // buy dependency directly, rather than through a CompositionLocal (#852).
+        val market: GlyphMarketServicing,
         private val stats: PathStatsServicing,
     ) : ViewModel() {
         private val itemsByTab = mutableMapOf<GlyphTab, List<GlyphGridItem>>()

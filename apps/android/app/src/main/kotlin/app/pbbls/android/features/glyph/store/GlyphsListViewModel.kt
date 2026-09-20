@@ -100,7 +100,9 @@ data class GlyphsCovers(
 class GlyphsListViewModel
     @Inject
     constructor(
-        private val market: GlyphMarketServicing,
+        // Not private: GlyphsListScreen reads it to hand GlyphDetailDrawer its
+        // buy dependency directly, rather than through a CompositionLocal (#852).
+        val market: GlyphMarketServicing,
         private val glyphService: GlyphServicing,
         private val stats: PathStatsServicing,
     ) : ViewModel() {

@@ -70,7 +70,7 @@ class EmotionPaletteService
         }
     }
 
-/** CompositionLocal for [EmotionPaletteService] — see [LocalSupabaseService]. */
+/** CompositionLocal for [EmotionPaletteService] — one of three permanent ones (`apps/android/CLAUDE.md`). */
 val LocalEmotionPaletteService =
     staticCompositionLocalOf<EmotionPaletteService> {
         error("LocalEmotionPaletteService not provided — wrap the tree in MainActivity's CompositionLocalProvider")

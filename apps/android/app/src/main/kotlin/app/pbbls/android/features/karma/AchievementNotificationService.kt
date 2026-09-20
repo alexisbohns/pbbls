@@ -4,7 +4,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.services.AchievementRecord
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -103,9 +102,4 @@ class AchievementNotificationService
             cards = emptyList()
             index = 0
         }
-    }
-
-val LocalAchievementNotificationService =
-    staticCompositionLocalOf<AchievementNotificationService> {
-        error("LocalAchievementNotificationService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

@@ -76,6 +76,22 @@ class RootViewModelTest {
         }
 
     @Test
+    fun `a resolved session publishes its user id, cleared on sign-out`() =
+        runTest(rule.dispatcher) {
+            val supabase = FakeSupabaseService()
+            val vm = RootViewModel(supabase, karma(), achievements(), SavedStateHandle())
+
+            supabase.emitResolved(session = session(userId = "u1"))
+            advanceUntilIdle()
+            assertEquals("u1", vm.uiState.value.userId)
+
+            vm.onSignOut()
+            advanceUntilIdle()
+
+            assertEquals(1, supabase.signOutCount)
+        }
+
+    @Test
     fun `an unresolved session asks for neither`() =
         runTest(rule.dispatcher) {
             val vm = RootViewModel(FakeSupabaseService(), karma(), achievements(), SavedStateHandle())

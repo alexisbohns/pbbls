@@ -11,18 +11,14 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.snapshotFlow
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
-import app.pbbls.android.di.ServiceGraph
-import app.pbbls.android.features.glyph.services.LocalGlyphMarketService
-import app.pbbls.android.features.karma.LocalAchievementNotificationService
-import app.pbbls.android.features.karma.LocalKarmaNotificationService
-import app.pbbls.android.services.LocalAchievementsService
-import app.pbbls.android.services.LocalConnectionsService
+import app.pbbls.android.services.EmotionPaletteService
 import app.pbbls.android.services.LocalEmotionPaletteService
-import app.pbbls.android.services.LocalPathStatsService
 import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSnapURLCache
-import app.pbbls.android.services.LocalSupabaseService
+import app.pbbls.android.services.ReferenceDataServicing
+import app.pbbls.android.services.SnapURLCache
 import app.pbbls.android.services.SupabaseService
+import app.pbbls.android.services.SupabaseServicing
 import app.pbbls.android.services.parseInviteToken
 import app.pbbls.android.theme.PebblesTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -42,32 +38,36 @@ private const val SPLASH_CEILING_MILLIS = 8_000L
 
 /**
  * The single activity hosting the Compose tree and the auth gate (D5). Provides
- * the [SupabaseService][app.pbbls.android.services.SupabaseService] and its
- * siblings — injected from the Hilt graph (#848), not read off [PebblesApp] —
- * to the tree via CompositionLocal, and forwards OAuth deep-link returns
- * (`pebbles://auth-callback`) to supabase-kt so the session lands (D15).
- * `launchMode="singleTask"` (manifest) means the redirect reuses this activity
- * and arrives at [onNewIntent].
+ * the three permanent ambient-reference-data CompositionLocals — injected from
+ * the Hilt graph, not read off [PebblesApp] — and forwards OAuth deep-link
+ * returns (`pebbles://auth-callback`) to supabase-kt so the session lands
+ * (D15). `launchMode="singleTask"` (manifest) means the redirect reuses this
+ * activity and arrives at [onNewIntent].
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    /**
-     * Injected in `super.onCreate`, which runs before the first read below.
-     * [ServiceGraph] is the temporary bridge to the CompositionLocals — #849
-     * deletes it and this field with it.
-     */
+    /** For the splash predicate only — everything else auth-related goes through [RootViewModel]. */
     @Inject
-    internal lateinit var graph: ServiceGraph
+    internal lateinit var supabase: SupabaseServicing
 
     /**
      * The concrete client owner, for `handleDeeplinks` only — it is the one
-     * caller that needs the raw `SupabaseClient`. The composition root is the one
-     * place allowed to know a concrete service type; everything below it, the
-     * splash gate included, goes through
-     * [app.pbbls.android.services.SupabaseServicing] off [graph].
+     * caller that needs the raw `SupabaseClient`. The composition root is the
+     * one place allowed to know a concrete service type; everything below it
+     * goes through [SupabaseServicing].
      */
     @Inject
     internal lateinit var supabaseClientOwner: SupabaseService
+
+    /** Ambient reference data for leaf components (#852) — see `apps/android/CLAUDE.md`. */
+    @Inject
+    internal lateinit var palettes: EmotionPaletteService
+
+    @Inject
+    internal lateinit var referenceData: ReferenceDataServicing
+
+    @Inject
+    internal lateinit var snapUrls: SnapURLCache
 
     /**
      * The same instance `RootScreen` reads via `hiltViewModel()` (#852):
@@ -98,7 +98,7 @@ class MainActivity : ComponentActivity() {
         splashScreen.setKeepOnScreenCondition { keepSplashOnScreen }
         lifecycleScope.launch {
             withTimeoutOrNull(SPLASH_CEILING_MILLIS) {
-                snapshotFlow { graph.supabase.isInitializing }.first { !it }
+                snapshotFlow { supabase.isInitializing }.first { !it }
             }
             keepSplashOnScreen = false
             // The predicate is only re-read on a draw pass, and a stalled launch
@@ -112,16 +112,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             PebblesTheme {
                 CompositionLocalProvider(
-                    LocalSupabaseService provides graph.supabase,
-                    LocalEmotionPaletteService provides graph.palettes,
-                    LocalPathStatsService provides graph.pathStats,
-                    LocalSnapURLCache provides graph.snapUrls,
-                    LocalReferenceDataService provides graph.referenceData,
-                    LocalConnectionsService provides graph.connectionsService,
-                    LocalGlyphMarketService provides graph.glyphMarket,
-                    LocalKarmaNotificationService provides graph.karma,
-                    LocalAchievementNotificationService provides graph.achievementNotify,
-                    LocalAchievementsService provides graph.achievements,
+                    LocalEmotionPaletteService provides palettes,
+                    LocalReferenceDataService provides referenceData,
+                    LocalSnapURLCache provides snapUrls,
                 ) {
                     RootScreen()
                 }

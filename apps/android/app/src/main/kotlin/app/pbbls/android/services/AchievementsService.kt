@@ -1,7 +1,6 @@
 package app.pbbls.android.services
 
 import android.util.Log
-import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.di.ApplicationScope
 import app.pbbls.android.features.karma.AchievementMomentCard
 import app.pbbls.android.features.karma.AchievementNotificationService
@@ -213,9 +212,4 @@ class AchievementsService
                 "id, slug, family, threshold, emotion_id, domain_id, sort_order, " +
                     "glyph_id, karma_reward, is_active, title_en, title_fr, description_en, description_fr"
         }
-    }
-
-val LocalAchievementsService =
-    staticCompositionLocalOf<AchievementsServicing> {
-        error("LocalAchievementsService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

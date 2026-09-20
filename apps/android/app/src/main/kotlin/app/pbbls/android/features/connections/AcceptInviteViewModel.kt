@@ -64,11 +64,11 @@ sealed interface AcceptInviteUiState {
  * that is meant for a re-scanned QR. It runs in [viewModelScope] under
  * `withContext(NonCancellable)` now.
  *
- * **The most exposed cover in the app.** `RootScreen` composes it *above* the
- * nav host, so `hiltViewModel()` binds it to the activity's store rather than
- * any back-stack entry — it outlives every destination, not just one. [start]
- * is guarded on the token and [finish] is explicit; without them a second
- * invite link in the same session would open onto the first one's result.
+ * A [app.pbbls.android.navigation.PebblesKey.AcceptInvite] nav entry (#852):
+ * `hiltViewModel()` is scoped to the entry, so this instance is destroyed when
+ * it pops and a second invite link always gets a fresh one. [start] is still
+ * guarded on the token, against a re-fired `LaunchedEffect` within one
+ * instance.
  */
 @HiltViewModel
 class AcceptInviteViewModel
@@ -81,20 +81,6 @@ class AcceptInviteViewModel
 
         private var startedToken: String? = null
         private var loadJob: Job? = null
-
-        /**
-         * Bumped by [finish]. Every write carries the epoch it started under and
-         * publishes only if it still matches.
-         *
-         * The accept runs under `withContext(NonCancellable)`, which is what
-         * makes it survive the scope dying — and therefore also what stops
-         * [finish] from stopping it. Without this fence, backing out of a
-         * pending accept lets the late success overwrite the reset, and the next
-         * invite link renders at least one frame of "you're connected with
-         * <the previous peer>" over a Done button. A tap landing in that frame
-         * dismisses and discards the new invite unseen.
-         */
-        private var epoch = 0
 
         /** Preview [token], unless it is the one already previewed. */
         fun start(token: String) {
@@ -135,47 +121,25 @@ class AcceptInviteViewModel
             val current = _uiState.value
             if (current !is AcceptInviteUiState.Ready || current.isAccepting) return
             _uiState.value = current.copy(isAccepting = true, acceptErrorRes = null)
-            val startedEpoch = epoch
 
+            // NonCancellable: the RPC has real side effects (spends nothing here,
+            // but records a connection), so a dismiss mid-request must not drop
+            // the write. A write that lands after the entry has popped only
+            // updates an orphaned StateFlow nobody is collecting anymore — this
+            // ViewModel is nav-entry-scoped (#852), so there is no next invite
+            // link to leak into, unlike when this was an activity-scoped cover.
             viewModelScope.launch {
                 withContext(NonCancellable) {
                     runCatchingCancellable { service.accept(token) }
                         .fold(
-                            onSuccess = {
-                                // The request still lands — that is the point of
-                                // NonCancellable — but it only reaches the screen
-                                // if this surface is still the one it belongs to.
-                                if (epoch == startedEpoch) {
-                                    _uiState.value = AcceptInviteUiState.Accepted(it)
-                                }
-                            },
+                            onSuccess = { _uiState.value = AcceptInviteUiState.Accepted(it) },
                             onFailure = {
                                 Log.e(TAG, "invite accept failed", it)
                                 val res = connectionsErrorMessage(it.toDataError())
-                                if (epoch == startedEpoch) {
-                                    _uiState.value = current.copy(isAccepting = false, acceptErrorRes = res)
-                                }
+                                _uiState.value = current.copy(isAccepting = false, acceptErrorRes = res)
                             },
                         )
                 }
             }
-        }
-
-        /**
-         * Clear for the next invite link. Explicit because this ViewModel is
-         * activity-scoped — see the class KDoc.
-         *
-         * Unlike the form covers, this one *does* reset its state: the host
-         * drops the surface in the same tap (`onDismiss` pops the back stack
-         * entry), so there is no frame in which the cleared state is still
-         * rendered, and leaving a stranger's accepted result in memory for the
-         * rest of the session is worse than the alternative.
-         */
-        fun finish() {
-            startedToken = null
-            loadJob?.cancel()
-            // Fences any accept already in flight — see [epoch].
-            epoch += 1
-            _uiState.value = AcceptInviteUiState.Loading
         }
     }

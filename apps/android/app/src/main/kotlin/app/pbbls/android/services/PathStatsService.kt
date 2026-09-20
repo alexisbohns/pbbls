@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.features.profile.models.KarmaSummary
 import app.pbbls.android.features.profile.models.ProfileEngagement
 import app.pbbls.android.features.shared.ripples.RippleSummary
@@ -177,10 +176,4 @@ class PathStatsService
         companion object {
             private const val TAG = "path-stats"
         }
-    }
-
-/** CompositionLocal for [PathStatsServicing] — see [LocalSupabaseService]. */
-val LocalPathStatsService =
-    staticCompositionLocalOf<PathStatsServicing> {
-        error("LocalPathStatsService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

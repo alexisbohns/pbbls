@@ -1,7 +1,6 @@
 package app.pbbls.android.features.glyph.services
 
 import androidx.annotation.StringRes
-import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.R
 import app.pbbls.android.features.glyph.models.BuyGlyphResult
 import app.pbbls.android.features.glyph.models.GlyphGridItem
@@ -186,10 +185,4 @@ fun glyphMarketErrorMessage(error: DataError): Int =
         DataError.Quota,
         is DataError.Unknown,
         -> R.string.glyph_error_generic
-    }
-
-/** CompositionLocal for [GlyphMarketService] — see [LocalSupabaseService]. */
-val LocalGlyphMarketService =
-    staticCompositionLocalOf<GlyphMarketServicing> {
-        error("LocalGlyphMarketService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

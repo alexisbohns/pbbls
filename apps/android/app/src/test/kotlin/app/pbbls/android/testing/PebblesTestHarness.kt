@@ -3,17 +3,29 @@ package app.pbbls.android.testing
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import app.pbbls.android.services.AchievementsServicing
-import app.pbbls.android.services.LocalAchievementsService
-import app.pbbls.android.services.LocalPathStatsService
+import app.pbbls.android.services.EmotionPaletteService
+import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalReferenceDataService
-import app.pbbls.android.services.LocalSupabaseService
+import app.pbbls.android.services.LocalSnapURLCache
 import app.pbbls.android.services.PathServicing
 import app.pbbls.android.services.PathStatsServicing
 import app.pbbls.android.services.PebbleDraftsServicing
 import app.pbbls.android.services.PebbleWriteServicing
 import app.pbbls.android.services.ProfileServicing
 import app.pbbls.android.services.ReferenceDataServicing
+import app.pbbls.android.services.SignedUrlProviding
+import app.pbbls.android.services.SnapURLCache
+import app.pbbls.android.services.SupabaseService
 import app.pbbls.android.services.SupabaseServicing
+import io.github.jan.supabase.annotations.SupabaseInternal
+import io.github.jan.supabase.auth.Auth
+import io.github.jan.supabase.auth.MemoryCodeVerifierCache
+import io.github.jan.supabase.auth.MemorySessionManager
+import io.github.jan.supabase.createSupabaseClient
+import io.github.jan.supabase.postgrest.Postgrest
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.test.TestScope
 
 /**
  * The fake graph a test drives (#848). Every field defaults to a fresh fake, so
@@ -26,18 +38,15 @@ import app.pbbls.android.services.SupabaseServicing
  * Only the extracted seams are here — the five from #848 plus one per screen
  * #849 has migrated. The rest still have no interface, on purpose
  * (`apps/android/CLAUDE.md`: extract a seam when a test needs one, not before).
+ * These fields back ViewModel constructors directly in most tests; only
+ * [referenceData] is also handed to [PebblesTestHarness] below, since it is one
+ * of the three permanent CompositionLocals.
  *
  * **Where the fakes live, and why.** Not one of them holds a `SupabaseClient` or
  * reads `BuildConfig` — that is the whole point: each screen's load, error and
  * save path becomes drivable without a live project. They sit in `src/test`
  * because that is their only consumer until #857 lands Robolectric; they move to
  * a real `core/testing` module with #851.
- *
- * **It provides four locals now, not eight.** #849 deleted eleven of them as
- * their screens moved to ViewModels; what a Robolectric screen test will need
- * from a `CompositionLocal` is the ambient data the leaves still read, plus the
- * session. The fakes themselves are unaffected — a ViewModel takes them by
- * constructor, which is how every test in this suite already drives them.
  */
 class FakeServiceGraph(
     val supabase: SupabaseServicing = FakeSupabaseService(),
@@ -51,28 +60,68 @@ class FakeServiceGraph(
 )
 
 /**
- * Provides the whole graph of fakes in one place, so a screen test is one wrap
- * rather than five nested `CompositionLocalProvider`s.
+ * A real [EmotionPaletteService] over a syntactically valid but fake project —
+ * the same recipe `ServiceGraphFakesTest.servicesConstructWithoutSecrets` uses,
+ * because [EmotionPaletteService] is concrete with no extracted interface
+ * (nothing calls `load()` through this harness, so `createSupabaseClient`'s
+ * client never leaves the JVM — see `di/SupabaseModule`'s KDoc). The `@OptIn`
+ * is `autoSetupPlatform`'s, documented there as "For testing."
+ */
+@OptIn(SupabaseInternal::class)
+private fun fakeEmotionPaletteService(): EmotionPaletteService {
+    val client =
+        createSupabaseClient(
+            supabaseUrl = "https://example.supabase.co",
+            supabaseKey = "not-a-real-key",
+        ) {
+            install(Auth) {
+                sessionManager = MemorySessionManager()
+                codeVerifierCache = MemoryCodeVerifierCache()
+                autoLoadFromStorage = false
+                autoSetupPlatform = false
+            }
+            install(Postgrest)
+        }
+    return EmotionPaletteService(SupabaseService(client, TestScope()))
+}
+
+/** A real [SnapURLCache] whose provider is never expected to be called from this harness. */
+private fun fakeSnapURLCache(): SnapURLCache =
+    SnapURLCache(
+        provider =
+            object : SignedUrlProviding {
+                override suspend fun signedUrls(storagePrefix: String) =
+                    error("SnapURLCache.signedUrls should not be reached through PebblesTestHarness")
+            },
+        scope = CoroutineScope(SupervisorJob()),
+        nowMillis = { 0L },
+    )
+
+/**
+ * Provides the three permanent CompositionLocals in one place, so a screen
+ * test is one wrap rather than three nested `CompositionLocalProvider`s.
  *
  * Nothing composes this yet: driving a composable on the JVM needs Robolectric,
- * which is #857. It is written now because #849 will move screens to ViewModels
- * against exactly this shape, and because a harness that arrives with the seams
- * is one that gets used.
+ * which is #857. It is written now because a harness that arrives with the
+ * seams is one that gets used.
  *
- * This file COMPILING is itself the gate: if a surviving `Local…` reverts to a
- * concrete type, or a screen re-acquires a dependency a fake cannot supply, this
- * stops compiling and `testDebugUnitTest` goes red.
+ * This file COMPILING is itself the gate: if one of the three reverts to a
+ * concrete type this fake cannot supply, or a screen re-acquires a dependency
+ * through a fourth local, this stops compiling and `testDebugUnitTest` goes
+ * red (#852: `di/ServiceGraph` and every other `Local…Service` are gone —
+ * `apps/android/CLAUDE.md`).
  */
 @Composable
 fun PebblesTestHarness(
     graph: FakeServiceGraph = FakeServiceGraph(),
+    palettes: EmotionPaletteService = fakeEmotionPaletteService(),
+    snapUrls: SnapURLCache = fakeSnapURLCache(),
     content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(
-        LocalSupabaseService provides graph.supabase,
+        LocalEmotionPaletteService provides palettes,
         LocalReferenceDataService provides graph.referenceData,
-        LocalAchievementsService provides graph.achievements,
-        LocalPathStatsService provides graph.pathStats,
+        LocalSnapURLCache provides snapUrls,
         content = content,
     )
 }

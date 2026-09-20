@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.features.glyph.models.BuyGlyphResult
 import app.pbbls.android.features.glyph.models.GlyphGridItem
-import app.pbbls.android.features.glyph.services.LocalGlyphMarketService
+import app.pbbls.android.features.glyph.services.GlyphMarketServicing
 import app.pbbls.android.features.glyph.services.glyphMarketErrorMessage
 import app.pbbls.android.features.glyph.views.GlyphBanner
 import app.pbbls.android.features.glyph.views.GlyphBannerSubtitle
@@ -62,6 +62,7 @@ private const val TAG = "glyph-detail"
 fun GlyphDetailDrawer(
     item: GlyphGridItem,
     balance: Int,
+    market: GlyphMarketServicing,
     onRecorded: (BuyGlyphResult) -> Unit,
     onSwapped: (BuyGlyphResult) -> Unit = {},
     onDismiss: () -> Unit,
@@ -70,7 +71,7 @@ fun GlyphDetailDrawer(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     ) {
-        GlyphSwapPanel(item = item, balance = balance, onRecorded = onRecorded, onSwapped = onSwapped)
+        GlyphSwapPanel(item = item, balance = balance, market = market, onRecorded = onRecorded, onSwapped = onSwapped)
     }
 }
 
@@ -83,6 +84,7 @@ fun GlyphDetailDrawer(
 internal fun GlyphSwapPanel(
     item: GlyphGridItem,
     balance: Int,
+    market: GlyphMarketServicing,
     /**
      * Runs inside the uncancellable section — see [GlyphPurchase]. Record only:
      * the new balance, caches that now disagree with the server. Never
@@ -96,8 +98,6 @@ internal fun GlyphSwapPanel(
      */
     onSwapped: (BuyGlyphResult) -> Unit = {},
 ) {
-    val market = LocalGlyphMarketService.current
-
     var isOwned by remember(item.id) { mutableStateOf(item.owned) }
     var acquiredAt by remember(item.id) { mutableStateOf(item.acquiredAt) }
     var currentBalance by remember(item.id) { mutableStateOf(balance) }

@@ -8,7 +8,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -31,10 +30,8 @@ import app.pbbls.android.navigation.pebblesEntries
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSnapURLCache
-import app.pbbls.android.services.LocalSupabaseService
 import app.pbbls.android.services.OnboardingPreferences
 import app.pbbls.android.theme.PebblesTheme
-import kotlinx.coroutines.launch
 
 /**
  * Top-level auth gate — the `RootView` analog (D5). Auth is now a condition,
@@ -56,12 +53,10 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun RootScreen() {
-    val supabase = LocalSupabaseService.current
     val palettes = LocalEmotionPaletteService.current
     val referenceData = LocalReferenceDataService.current
     val snapUrls = LocalSnapURLCache.current
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
 
     val viewModel: RootViewModel = hiltViewModel()
     val root by viewModel.uiState.collectAsStateWithLifecycle()
@@ -79,7 +74,7 @@ fun RootScreen() {
     // lives in RootViewModel's init, not here.
     LaunchedEffect(Unit) { palettes.load() }
 
-    val userId = supabase.session?.user?.id
+    val userId = root.userId
     val welcomeContentRevealed = root.destination == RootDestination.SignedOut
 
     // Sign-out flushes the signed-URL cache (the iOS RootView
@@ -149,7 +144,7 @@ fun RootScreen() {
         PebblesNavDisplay(
             navigator = navigator,
             backStack = backStack,
-            onSignOut = { scope.launch { supabase.signOut() } },
+            onSignOut = viewModel::onSignOut,
             welcomeContentRevealed = welcomeContentRevealed,
             onOnboardingFinished = {
                 OnboardingPreferences.setHasSeenOnboarding(context, true)

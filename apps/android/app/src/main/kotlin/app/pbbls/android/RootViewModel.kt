@@ -47,6 +47,8 @@ sealed interface RootDestination {
  */
 data class RootUiState(
     val destination: RootDestination = RootDestination.Unresolved,
+    /** Mirrors [SupabaseServicing.session]'s user id — data only, never used to call the service. */
+    val userId: String? = null,
     val pendingInvite: String? = null,
     /** The "+N karma" pastille content, or null when idle. Mirrors [KarmaNotificationService.activeCapsule]. */
     val karmaFlash: KarmaEarnedContent? = null,
@@ -154,7 +156,7 @@ class RootViewModel
             // Only a resolved status updates hasHadSession — Unresolved must
             // never be mistaken for a session, real or absent.
             if (!isInitializing) hasHadSession = userId != null
-            _uiState.update { it.copy(destination = destination) }
+            _uiState.update { it.copy(destination = destination, userId = userId) }
         }
 
         /**
@@ -169,6 +171,15 @@ class RootViewModel
 
         /** Consumed once the accept surface has been navigated to. */
         fun onInviteConsumed() = clearPendingInvite()
+
+        /**
+         * Signs out (#852) — moved off `RootScreen`'s own `LocalSupabaseService`
+         * read, which was the last call through that local outside the three
+         * permanent ambient-data ones (`apps/android/CLAUDE.md`).
+         */
+        fun onSignOut() {
+            viewModelScope.launch { supabase.signOut() }
+        }
 
         /** Tap-to-dismiss on the karma pastille (D9). */
         fun onKarmaDismissed() = karma.dismiss()

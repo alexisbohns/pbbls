@@ -201,6 +201,7 @@ fun GlyphPickerContent(
                 GlyphSwapPanel(
                     item = buyingItem,
                     balance = (uiState as? GlyphPickerUiState.Content)?.karma ?: 0,
+                    market = viewModel.market,
                     // The balance is a record of the purchase, so it runs inside
                     // the uncancellable section and survives the sheet closing.
                     onRecorded = { result -> viewModel.onPurchaseRecorded(result) },
