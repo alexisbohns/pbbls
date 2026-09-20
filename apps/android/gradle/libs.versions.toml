@@ -67,6 +67,18 @@ ksp = "2.3.12"
 hilt = "2.60.1"
 hiltNavigationCompose = "1.4.0"
 
+# Navigation 3 (#852, supersedes M38 D5). Stable — none of these are alpha.
+# navigation3-runtime/-ui are the back stack and the display; the lifecycle
+# artifact supplies rememberViewModelStoreNavEntryDecorator, which is what
+# scopes a ViewModel to a NavEntry rather than to the screen hosting it.
+#
+# lifecycleViewmodelNavigation3 deliberately tracks `lifecycleRuntimeKtx`
+# (2.11.0) rather than carrying its own number: androidx ships lifecycle-* as
+# one coordinated release and mixing versions across the group is the classic
+# NoSuchMethodError.
+navigation3 = "1.1.7"
+navigationEvent = "1.1.2"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
@@ -136,6 +148,14 @@ androidx-lifecycle-viewmodel-savedstate = { group = "androidx.lifecycle", name =
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
 androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hiltNavigationCompose" }
+
+# Navigation 3 (#852). material3-adaptive-navigation3 is deliberately NOT here:
+# it exists for adaptive list-detail/supporting-pane Scenes on large screens,
+# and this app is phone-only and portrait-locked, so it would have no call site.
+androidx-navigation3-runtime = { group = "androidx.navigation3", name = "navigation3-runtime", version.ref = "navigation3" }
+androidx-navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3" }
+androidx-lifecycle-viewmodel-navigation3 = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-navigation3", version.ref = "lifecycleRuntimeKtx" }
+androidx-navigationevent-compose = { group = "androidx.navigationevent", name = "navigationevent-compose", version.ref = "navigationEvent" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
