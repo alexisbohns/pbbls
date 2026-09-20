@@ -222,9 +222,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.foundation)
-    implementation(libs.androidx.navigation.compose)
-    // Navigation 3 (#852). navigation-compose above is still here because Part 1
-    // is a move, not a rewrite — it is removed in Part 5 once nothing imports it.
+    // Navigation 3 (#852). navigation-compose is gone (Part 5) — nothing imports it.
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
     implementation(libs.androidx.lifecycle.viewmodel.navigation3)

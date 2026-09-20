@@ -166,10 +166,10 @@ class AcceptInviteViewModel
          * activity-scoped — see the class KDoc.
          *
          * Unlike the form covers, this one *does* reset its state: the host
-         * drops the surface by clearing `pendingInviteToken` in the same tap, so
-         * there is no frame in which the cleared state is still rendered, and
-         * leaving a stranger's accepted result in memory for the rest of the
-         * session is worse than the alternative.
+         * drops the surface in the same tap (`onDismiss` pops the back stack
+         * entry), so there is no frame in which the cleared state is still
+         * rendered, and leaving a stranger's accepted result in memory for the
+         * rest of the session is worse than the alternative.
          */
         fun finish() {
             startedToken = null

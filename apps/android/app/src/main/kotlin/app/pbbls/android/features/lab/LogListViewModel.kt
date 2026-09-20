@@ -45,7 +45,7 @@ sealed interface LogListUiState {
 }
 
 /**
- * State holder for the see-all list (#849, #852 Task 19).
+ * State holder for the see-all list (#849, #852).
  *
  * The same optimistic reaction toggle as [LabViewModel], with the same hole:
  * the revert ran in `rememberCoroutineScope`, and this used to be a *cover*,
@@ -69,7 +69,7 @@ sealed interface LogListUiState {
  * (`rememberViewModelStoreNavEntryDecorator`, wired in `RootScreen`), so the
  * next presentation is always a fresh instance with `startedMode == null` —
  * there is nothing left to release. [InviteViewModel] was promoted to an
- * entry in Task 17 under the same decorator and has the identical shape
+ * entry under the same decorator (#852) and has the identical shape
  * (`hasStarted` + a `finish()` called from `InviteScreen.dismiss()`), so the
  * same reasoning applies there too; that cleanup was out of scope here and is
  * flagged in the PR rather than made in this file (root `CLAUDE.md`: no

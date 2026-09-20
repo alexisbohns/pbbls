@@ -17,7 +17,7 @@ import java.io.IOException
 import java.time.OffsetDateTime
 
 /**
- * The announcement detail's by-id load (#852 Task 19).
+ * The announcement detail's by-id load (#852).
  *
  * Unlike the Lab page's content swap this replaces, the screen no longer
  * receives its [Log] and cover URL from a parent already holding them — it

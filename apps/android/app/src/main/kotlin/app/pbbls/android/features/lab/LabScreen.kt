@@ -56,7 +56,7 @@ private const val TAG = "lab"
  * only when ALL FOUR content feeds fail (a reactions-only failure just means
  * an empty reacted set). Sections render only when non-empty. The optimistic
  * reaction toggle adjusts only the backlog list (D4). Announcement detail and
- * the see-all lists are real Nav3 entries (design D9a, #852 Task 19) rather
+ * the see-all lists are real Nav3 entries (design D9a, #852) rather
  * than a content swap over this route — [onOpenAnnouncement] and [onSeeAll]
  * are the entry's navigation, wired in `PebblesEntryProvider`; this screen
  * never reaches for `Navigator` itself.

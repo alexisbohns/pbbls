@@ -60,6 +60,38 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" android:host="www.pbbls.app" android:pathPrefix="/invite/" />
             </intent-filter>
+
+            <!--
+              OAuth App Link return (#852). https://www.pbbls.app/auth/callback is
+              the web-hosted OAuth redirect target; pebbles://auth-callback above
+              stays as the fallback for a browser that doesn't hand the https link to
+              the app (autoVerify not yet run, or the user picked the browser once).
+              Same assetlinks.json as the invite filter above — see its comment for
+              the ANDROID_ASSETLINKS_SHA256 dependency.
+
+              ⚠ THIS FILTER IS CURRENTLY INERT FOR OAUTH, AND THAT IS A TRAP.
+              supabase-kt is installed with `scheme = "pebbles"; host =
+              "auth-callback"` (di/SupabaseModule.kt), so `handleDeeplinks` only
+              recognises the custom-scheme return. Supabase's configured redirect
+              still points there, so nothing sends a user to the https URL today
+              and this filter never fires for sign-in.
+
+              If you switch the Supabase redirect URL to the https one, the intent
+              WILL reach this activity and `handleDeeplinks` will silently ignore
+              it — the app opens and the sign-in never completes, with no error.
+              Change `scheme`/`host` in SupabaseModule in the same edit, or delete
+              this filter. The invite App Link is unaffected either way: it is
+              parsed by `parseInviteToken`, not by supabase-kt.
+            -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="www.pbbls.app"
+                    android:pathPrefix="/auth/callback" />
+            </intent-filter>
         </activity>
     </application>
 

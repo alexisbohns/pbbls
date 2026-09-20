@@ -20,7 +20,7 @@ import android.util.Log as AndroidLog
 
 private const val TAG = "lab-announcement"
 
-/** What the announcement detail can be showing (#852 Task 19). */
+/** What the announcement detail can be showing (#852). */
 sealed interface AnnouncementDetailUiState {
     data object Loading : AnnouncementDetailUiState
 
@@ -35,7 +35,7 @@ sealed interface AnnouncementDetailUiState {
 }
 
 /**
- * State holder for the announcement detail (#852 Task 19).
+ * State holder for the announcement detail (#852).
  *
  * **This screen used to receive a whole [Log] plus a `coverUrl` the Lab page
  * had already computed** — it was a content swap inside `LabScreen`, so the

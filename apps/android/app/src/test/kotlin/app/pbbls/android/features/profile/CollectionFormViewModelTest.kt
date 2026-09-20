@@ -23,7 +23,7 @@ import java.io.IOException
 /**
  * The collection form's seed, save and reset contract (#849, #852).
  *
- * As of Task 15, [CollectionFormViewModel.start] takes an id instead of the
+ * Since #852, [CollectionFormViewModel.start] takes an id instead of the
  * whole row and fetches it itself — [FakeCollectionsService.loadCollection]
  * stands in for the server round trip, so a load is asynchronous and needs
  * `advanceUntilIdle()` before the result lands in

@@ -24,8 +24,6 @@ class FakeConnectionsService(
     var acceptResult: AcceptInviteResult =
         AcceptInviteResult(connectionId = "conn-1", peer = ConnectionPeer(displayName = "Mo")),
 ) : ConnectionsServicing {
-    override var pendingInviteToken: String? = null
-
     var listCount = 0
         private set
 

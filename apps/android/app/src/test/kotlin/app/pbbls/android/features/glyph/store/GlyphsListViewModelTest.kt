@@ -171,11 +171,11 @@ class GlyphsListViewModelTest {
     // MARK: - Returning from the carve studio
 
     /**
-     * The gap Task 17 opened: `GlyphCarve` is now a separate entry with no
+     * The gap promotion opened (#852): `GlyphCarve` is now a separate entry with no
      * `onCarved` callback back into this instance, so a freshly carved glyph
      * has to be picked up by a resume of the current tab — same mechanism as
      * [SoulsListViewModel.onResumed]. The optimistic prepend-and-switch-to-Mine
-     * behaviour Task 17 removed is NOT restored here: a carve made while on
+     * behaviour #852 removed is NOT restored here: a carve made while on
      * another tab reloads that tab, not Mine.
      */
     @Test

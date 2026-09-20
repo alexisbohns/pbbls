@@ -1,6 +1,5 @@
 package app.pbbls.android.features.onboarding
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -26,6 +25,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
 import app.pbbls.android.components.PebblesPrimaryButton
 import app.pbbls.android.theme.PebblesTheme
@@ -36,11 +38,14 @@ import app.pbbls.android.theme.PebblesTypography
  * per step inside a [HorizontalPager] with page dots; a top bar with close (✕)
  * and Skip (both finish), and a "Start your path" button on the last page.
  *
- * Rendered by `RootScreen` as a full-screen overlay (the `fullScreenCover`
- * analog); [onFinish] persists the `hasSeenOnboarding` flag at the call site so
- * this view stays previewable and serves both the initial gate and any replay.
- * System back is blocked while shown — the flow is dismissible only via skip or
- * close (D5).
+ * Pushed as an ordinary [app.pbbls.android.navigation.PebblesKey.Onboarding]
+ * entry (#852); [onFinish] persists the `hasSeenOnboarding` flag at the
+ * call site so this view stays previewable and serves both the initial gate
+ * and any replay. System back is consumed entirely rather than popping the
+ * entry — the flow is dismissible only via skip or close (D5) — via
+ * [NavigationBackHandler] rather than the legacy `BackHandler`, so it shows no
+ * exit animation: a completed gesture never reaches `NavDisplay`'s own
+ * predictive-pop transition (design §6).
  */
 @Composable
 fun OnboardingScreen(
@@ -52,10 +57,13 @@ fun OnboardingScreen(
     val accent = PebblesTheme.colors.accent
     val pagerState = rememberPagerState(pageCount = { steps.size })
 
-    // Block system back so the flow is dismissible only via skip/close. Skipped
-    // under @Preview/screenshot rendering, where no back dispatcher is provided.
+    // Block system back so the flow is dismissible only via skip/close, and
+    // consume it entirely (no exit animation) rather than letting NavDisplay
+    // scrub its predictive-pop transition. Skipped under @Preview/screenshot
+    // rendering, where no NavigationEventDispatcherOwner is provided.
     if (!LocalInspectionMode.current) {
-        BackHandler(enabled = true) { /* consume — no-op */ }
+        val backState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
+        NavigationBackHandler(state = backState) { /* consume — no-op */ }
     }
 
     Box(

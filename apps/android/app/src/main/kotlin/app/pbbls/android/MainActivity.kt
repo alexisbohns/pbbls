@@ -6,6 +6,7 @@ import android.view.View
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.snapshotFlow
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -69,6 +70,17 @@ class MainActivity : ComponentActivity() {
     internal lateinit var supabaseClientOwner: SupabaseService
 
     /**
+     * The same instance `RootScreen` reads via `hiltViewModel()` (#852):
+     * `RootScreen` calls it above `PebblesNavDisplay`, outside any `NavEntry`, so
+     * it resolves off the ambient `LocalViewModelStoreOwner` — the activity —
+     * same as this delegate. If `RootScreen` ever moved inside an entry
+     * decorated by `rememberViewModelStoreNavEntryDecorator()`, this would
+     * silently become a second instance and the invite would never arrive; see
+     * the class doc.
+     */
+    private val rootViewModel: RootViewModel by viewModels()
+
+    /**
      * Read on every pre-draw pass by the splash screen. Not Compose state: the
      * splash's predicate is polled from the view hierarchy, not composed.
      */
@@ -125,13 +137,15 @@ class MainActivity : ComponentActivity() {
     }
 
     /**
-     * Parks an invite App Link token on the service (M49). `handleDeeplinks`
-     * only reacts to `pebbles://auth-callback`, so both run safely on every
-     * intent. `RootScreen` presents the accept surface once a session exists,
-     * which is why this only stores rather than navigating.
+     * Hands an invite App Link token to [RootViewModel] (#852,
+     * replacing the M49 `ConnectionsService.pendingInviteToken` field).
+     * `handleDeeplinks` only reacts to `pebbles://auth-callback`, so both run
+     * safely on every intent. `RootScreen` pushes the accept surface once a
+     * session exists and onboarding is past, which is why this only parks the
+     * token rather than navigating.
      */
     private fun captureInviteToken(intent: Intent) {
         val token = parseInviteToken(intent.data?.toString()) ?: return
-        graph.connectionsService.pendingInviteToken = token
+        rootViewModel.onInviteTokenReceived(token)
     }
 }

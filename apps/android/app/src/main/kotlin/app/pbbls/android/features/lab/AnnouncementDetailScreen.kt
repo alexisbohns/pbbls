@@ -45,7 +45,7 @@ import java.util.Locale
  * Announcement detail — ports iOS `AnnouncementDetailView`: 200dp cover,
  * display title, subtitle summary, then the V1 markdown body (design D5). iOS
  * sets no toolbar title here (inline empty bar) — matched with an empty
- * [PebblesTopBar] title. A real Nav3 entry now (#852 Task 19): it loads its
+ * [PebblesTopBar] title. A real Nav3 entry now (#852): it loads its
  * own row by [logId], so [onBack] pops the entry rather than unwinding a swap.
  */
 @Composable
