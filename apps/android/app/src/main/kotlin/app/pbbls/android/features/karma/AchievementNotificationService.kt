@@ -25,6 +25,20 @@ data class AchievementMomentCard(
 )
 
 /**
+ * One unlock moment: the card on screen plus where it sits in the queue.
+ *
+ * The queue is the reason this is not simply a nullable card — a mutation that
+ * unlocks three badges shows three cards with "1 of 3" progress, and flattening
+ * that to a single card would silently drop the progress UI.
+ */
+data class AchievementMoment(
+    val card: AchievementMomentCard,
+    val position: Int,
+    val total: Int,
+    val isLast: Boolean,
+)
+
+/**
  * Explicit-fire entry point for the achievement unlock moment (D13).
  *
  * Sibling of [KarmaNotificationService], but a different shape of celebration:
@@ -53,6 +67,22 @@ class AchievementNotificationService
 
         val isShowingLastCard: Boolean
             get() = index + 1 >= cards.size
+
+        /**
+         * The moment [AchievementMomentOverlay] renders (#852: state, not this
+         * service). A getter, not a stored field, so it can never drift from
+         * [cards]/[index] — the same reasoning as [currentCard]/[isShowingLastCard].
+         */
+        val moment: AchievementMoment?
+            get() =
+                currentCard?.let { card ->
+                    AchievementMoment(
+                        card = card,
+                        position = index + 1,
+                        total = cards.size.coerceAtLeast(1),
+                        isLast = isShowingLastCard,
+                    )
+                }
 
         fun present(cards: List<AchievementMomentCard>) {
             if (cards.isEmpty()) return

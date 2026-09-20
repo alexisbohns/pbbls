@@ -4,6 +4,8 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.pbbls.android.features.karma.AchievementMoment
+import app.pbbls.android.features.karma.AchievementNotificationService
 import app.pbbls.android.features.karma.KarmaEarnedContent
 import app.pbbls.android.features.karma.KarmaNotificationService
 import app.pbbls.android.services.SupabaseServicing
@@ -48,6 +50,8 @@ data class RootUiState(
     val pendingInvite: String? = null,
     /** The "+N karma" pastille content, or null when idle. Mirrors [KarmaNotificationService.activeCapsule]. */
     val karmaFlash: KarmaEarnedContent? = null,
+    /** The unlock moment on screen, or null when idle. Mirrors [AchievementNotificationService.moment]. */
+    val achievementMoment: AchievementMoment? = null,
 )
 
 /**
@@ -77,6 +81,7 @@ class RootViewModel
     constructor(
         private val supabase: SupabaseServicing,
         private val karma: KarmaNotificationService,
+        private val achievementNotify: AchievementNotificationService,
         private val savedStateHandle: SavedStateHandle,
     ) : ViewModel() {
         private val _uiState =
@@ -124,6 +129,13 @@ class RootViewModel
                 snapshotFlow { karma.activeCapsule }
                     .collect { flash -> _uiState.update { it.copy(karmaFlash = flash) } }
             }
+            // Same reasoning, its own coroutine: the unlock queue is unrelated to
+            // both auth and karma, and folding it into either collector above
+            // risks the same deadlock rule the moment one of them grows.
+            viewModelScope.launch {
+                snapshotFlow { achievementNotify.moment }
+                    .collect { moment -> _uiState.update { it.copy(achievementMoment = moment) } }
+            }
         }
 
         private fun onAuthState(
@@ -160,6 +172,12 @@ class RootViewModel
 
         /** Tap-to-dismiss on the karma pastille (D9). */
         fun onKarmaDismissed() = karma.dismiss()
+
+        /** Advances the unlock queue to its next card, ending the moment after the last one. */
+        fun onAchievementAdvanced() = achievementNotify.advance()
+
+        /** Tap-the-scrim or back-gesture dismissal — skips the rest of the unlock queue (D13). */
+        fun onAchievementDismissed() = achievementNotify.dismiss()
 
         private fun clearPendingInvite() {
             savedStateHandle.remove<String>(KEY_PENDING_INVITE)
