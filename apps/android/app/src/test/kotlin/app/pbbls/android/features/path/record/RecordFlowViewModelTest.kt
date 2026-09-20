@@ -10,10 +10,10 @@ import app.pbbls.android.services.ComposeResult
 import app.pbbls.android.services.PebbleDraftRecord
 import app.pbbls.android.services.TapHaptic
 import app.pbbls.android.testing.FakeAchievementsService
+import app.pbbls.android.testing.FakeComposerMedia
 import app.pbbls.android.testing.FakeComposerSnapshotStore
 import app.pbbls.android.testing.FakePebbleDraftsService
 import app.pbbls.android.testing.FakePebbleWriteService
-import app.pbbls.android.testing.FakeRecordFlowMedia
 import app.pbbls.android.testing.FakeReferenceDataService
 import app.pbbls.android.testing.FakeSnapWriteRepository
 import app.pbbls.android.testing.FakeSupabaseService
@@ -65,7 +65,7 @@ class RecordFlowViewModelTest {
         val drafts: FakePebbleDraftsService = FakePebbleDraftsService(),
         val snapshots: FakeComposerSnapshotStore = FakeComposerSnapshotStore(),
         val snapRepo: FakeSnapWriteRepository = FakeSnapWriteRepository(),
-        val media: FakeRecordFlowMedia = FakeRecordFlowMedia(),
+        val media: FakeComposerMedia = FakeComposerMedia(),
         val savedState: SavedStateHandle = SavedStateHandle(),
     ) {
         val karma = KarmaNotificationService(scope)

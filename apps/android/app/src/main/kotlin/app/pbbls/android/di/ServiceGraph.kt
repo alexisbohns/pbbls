@@ -14,7 +14,7 @@ import app.pbbls.android.services.ConnectionsService
 import app.pbbls.android.services.EmotionPaletteService
 import app.pbbls.android.services.PathServicing
 import app.pbbls.android.services.PathStatsServicing
-import app.pbbls.android.services.PebbleDetailService
+import app.pbbls.android.services.PebbleDetailServicing
 import app.pbbls.android.services.PebbleDraftsServicing
 import app.pbbls.android.services.PebbleSnapRepository
 import app.pbbls.android.services.PebbleWriteServicing
@@ -50,7 +50,7 @@ class ServiceGraph
         val pathService: PathServicing,
         val pathStats: PathStatsServicing,
         val profileService: ProfileServicing,
-        val pebbleDetailService: PebbleDetailService,
+        val pebbleDetailService: PebbleDetailServicing,
         val snapUrls: SnapURLCache,
         val snapWrites: PebbleSnapRepository,
         val referenceData: ReferenceDataServicing,

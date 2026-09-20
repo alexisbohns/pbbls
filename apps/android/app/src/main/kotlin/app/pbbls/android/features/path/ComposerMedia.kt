@@ -1,4 +1,4 @@
-package app.pbbls.android.features.path.record
+package app.pbbls.android.features.path
 
 import android.content.Context
 import android.net.Uri
@@ -11,7 +11,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * The record flow's Android-only work, behind an interface (#849).
+ * The composers' Android-only work, behind an interface (#849).
  *
  * Every method here needs a `Context`, and a `Context` in a `ViewModel` is what
  * makes it untestable on the JVM — not because holding one leaks (the
@@ -24,7 +24,7 @@ import javax.inject.Singleton
  * the fake refuses them loudly in the meantime rather than returning a
  * plausible-looking nothing.
  */
-interface RecordFlowMedia {
+interface ComposerMedia {
     /** EXIF capture date, or null when the pick carries no metadata. */
     suspend fun captureDate(uri: Uri): OffsetDateTime?
 
@@ -33,20 +33,22 @@ interface RecordFlowMedia {
 
     /**
      * Warm the valence fan's eighteen wobbled assets. Process-wide caches, so a
-     * second flow pays nothing.
+     * second flow pays nothing. Only the record flow draws the fan; the other
+     * composers inherit the method and never call it, which is cheaper than a
+     * second interface for one method.
      */
     suspend fun prewarmValence()
 }
 
-/** [RecordFlowMedia] over the real processors, holding the one application context. */
+/** [ComposerMedia] over the real processors, holding the one application context. */
 @Singleton
-class AndroidRecordFlowMedia
+class AndroidComposerMedia
     @Inject
     constructor(
         @ApplicationContext private val context: Context,
         private val snapProcessor: SnapProcessor,
         private val valencePrewarmer: ValencePrewarmer,
-    ) : RecordFlowMedia {
+    ) : ComposerMedia {
         override suspend fun captureDate(uri: Uri): OffsetDateTime? = snapProcessor.captureDate(context, uri)
 
         override suspend fun process(uri: Uri): ProcessedImage = snapProcessor.process(context, uri)
