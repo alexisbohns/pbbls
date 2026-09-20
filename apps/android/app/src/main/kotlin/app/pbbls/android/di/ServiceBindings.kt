@@ -1,5 +1,11 @@
 package app.pbbls.android.di
 
+import app.pbbls.android.features.glyph.services.GlyphMarketService
+import app.pbbls.android.features.glyph.services.GlyphMarketServicing
+import app.pbbls.android.features.glyph.services.GlyphService
+import app.pbbls.android.features.glyph.services.GlyphServicing
+import app.pbbls.android.features.lab.services.LogsService
+import app.pbbls.android.features.lab.services.LogsServicing
 import app.pbbls.android.features.path.AndroidComposerMedia
 import app.pbbls.android.features.path.ComposerMedia
 import app.pbbls.android.services.AchievementsService
@@ -96,4 +102,16 @@ interface ServiceBindings {
     @Binds
     @Singleton
     fun bindConnectionsServicing(impl: ConnectionsService): ConnectionsServicing
+
+    @Binds
+    @Singleton
+    fun bindGlyphServicing(impl: GlyphService): GlyphServicing
+
+    @Binds
+    @Singleton
+    fun bindGlyphMarketServicing(impl: GlyphMarketService): GlyphMarketServicing
+
+    @Binds
+    @Singleton
+    fun bindLogsServicing(impl: LogsService): LogsServicing
 }

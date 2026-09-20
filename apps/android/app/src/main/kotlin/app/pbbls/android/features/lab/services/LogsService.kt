@@ -18,6 +18,34 @@ import javax.inject.Singleton
 private const val TAG = "logs-service"
 
 /**
+ * The Lab seam (#849) — what [app.pbbls.android.features.lab.LabViewModel] and
+ * [app.pbbls.android.features.lab.LogListViewModel] are tested against.
+ */
+interface LogsServicing {
+    suspend fun announcements(limit: Int? = null): List<Log>
+
+    suspend fun changelog(limit: Int? = null): List<Log>
+
+    suspend fun initiatives(): List<Log>
+
+    suspend fun backlog(limit: Int? = null): List<Log>
+
+    suspend fun myReactions(): Set<String>
+
+    suspend fun react(logId: String)
+
+    suspend fun unreact(logId: String)
+
+    /**
+     * Not a call — a pure projection of [Log.coverImagePath] against the project
+     * URL. On the interface so the ViewModel can fold it into state and the
+     * screen never reads a service; a fake supplies its own base rather than
+     * touching `AppEnvironment`.
+     */
+    fun coverImageUrl(log: Log): String?
+}
+
+/**
  * The Lab data layer — ports iOS `LogsService` (M44 design D3/D4). Four feed
  * reads over `v_logs_with_counts` (decoded lossily via [LossyLogList]) and the
  * reaction writes, which go straight to `log_reactions` — a single-table,
@@ -26,14 +54,15 @@ private const val TAG = "logs-service"
  * comments the same). Methods throw; screens own view state and the
  * optimistic revert.
  */
+
 @Singleton
 class LogsService
     @Inject
     constructor(
         private val supabase: SupabaseService,
-    ) {
+    ) : LogsServicing {
         /** Published announcements, newest published first. */
-        suspend fun announcements(limit: Int? = null): List<Log> =
+        override suspend fun announcements(limit: Int?): List<Log> =
             feed {
                 filter {
                     eq("species", "announcement")
@@ -50,7 +79,7 @@ class LogsService
          * collapses the two `order` calls; only a `limit` truncation under tied
          * timestamps could theoretically differ (design risk 3).
          */
-        suspend fun changelog(limit: Int? = null): List<Log> =
+        override suspend fun changelog(limit: Int?): List<Log> =
             feed {
                 filter {
                     eq("species", "feature")
@@ -63,7 +92,7 @@ class LogsService
             }.sortedWith(changelogOrder)
 
         /** Features in progress, newest published first — always unlimited (iOS). */
-        suspend fun initiatives(): List<Log> =
+        override suspend fun initiatives(): List<Log> =
             feed {
                 filter {
                     eq("species", "feature")
@@ -74,7 +103,7 @@ class LogsService
             }
 
         /** Backlog features — most upvoted first, then newest created. */
-        suspend fun backlog(limit: Int? = null): List<Log> =
+        override suspend fun backlog(limit: Int?): List<Log> =
             feed {
                 filter {
                     eq("species", "feature")
@@ -91,7 +120,7 @@ class LogsService
          * (iOS: an anonymous Lab renders with zero reactions); the writes below
          * DO throw without a session.
          */
-        suspend fun myReactions(): Set<String> {
+        override suspend fun myReactions(): Set<String> {
             val me = supabase.session?.user?.id ?: return emptySet()
             return supabase.client
                 .from("log_reactions")
@@ -107,7 +136,7 @@ class LogsService
          * conflicts on the PK and throws like any failure, triggering the
          * caller's optimistic revert.
          */
-        suspend fun react(logId: String) {
+        override suspend fun react(logId: String) {
             val me = requireUserId()
             try {
                 supabase.client
@@ -120,7 +149,7 @@ class LogsService
         }
 
         /** Remove an upvote — deletes by both PK columns. */
-        suspend fun unreact(logId: String) {
+        override suspend fun unreact(logId: String) {
             val me = requireUserId()
             try {
                 supabase.client
@@ -138,7 +167,7 @@ class LogsService
         }
 
         /** Public cover-image URL for [log], or null (design D7). */
-        fun coverImageUrl(log: Log): String? = LabConfig.coverImageUrl(AppEnvironment.supabaseUrl, log.coverImagePath)
+        override fun coverImageUrl(log: Log): String? = LabConfig.coverImageUrl(AppEnvironment.supabaseUrl, log.coverImagePath)
 
         // android.util.Log stays fully qualified in this file — the imported Log
         // is the Lab model.
@@ -187,6 +216,6 @@ class LogsService
 
 /** CompositionLocal for [LogsService] — see [LocalSupabaseService]. */
 val LocalLogsService =
-    staticCompositionLocalOf<LogsService> {
+    staticCompositionLocalOf<LogsServicing> {
         error("LocalLogsService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

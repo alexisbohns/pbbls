@@ -19,18 +19,37 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
+ * The glyph seam (#849) — what [app.pbbls.android.features.glyph.carve.GlyphCarveViewModel]
+ * and the store's ViewModel are tested against.
+ */
+interface GlyphServicing {
+    suspend fun list(): List<Glyph>
+
+    suspend fun create(
+        strokes: List<GlyphStroke>,
+        name: String?,
+    ): Glyph
+
+    suspend fun updateName(
+        glyphId: String,
+        name: String?,
+    ): Glyph
+}
+
+/**
  * Glyph CRUD — the iOS `GlyphService` analog: the attachable-glyph list
  * (D13), plus M43's carve insert and rename. Market reads/buys live in
  * `GlyphMarketService` (M43 design D9). Methods throw to the caller, which
  * owns view state (keeps the seam JVM-testable). Mirrors
  * ReferenceDataService.fetchSouls's supabase-kt call shape.
  */
+
 @Singleton
 class GlyphService
     @Inject
     constructor(
         private val supabase: SupabaseService,
-    ) {
+    ) : GlyphServicing {
         /**
          * Every glyph the user may attach: own + system (`is_system`, #872) +
          * marketplace-entitled (#562) — the same set the server-side
@@ -40,7 +59,7 @@ class GlyphService
          * bare list would offer community glyphs whose attachment the server
          * rejects (SQLSTATE 42501).
          */
-        suspend fun list(): List<Glyph> =
+        override suspend fun list(): List<Glyph> =
             coroutineScope {
                 val me = supabase.session?.user?.id
                 val ownAndSystem =
@@ -73,7 +92,7 @@ class GlyphService
          * JSON null — never a shape key, #503), select-back so the fresh glyph
          * lands in pickers without a refetch.
          */
-        suspend fun create(
+        override suspend fun create(
             strokes: List<GlyphStroke>,
             name: String?,
         ): Glyph {
@@ -95,7 +114,7 @@ class GlyphService
         }
 
         /** Rename — empty/whitespace input CLEARS the name (explicit null; M43 D8). */
-        suspend fun updateName(
+        override suspend fun updateName(
             glyphId: String,
             name: String?,
         ): Glyph =
@@ -152,6 +171,6 @@ private data class EntitlementRow(
 )
 
 val LocalGlyphService =
-    staticCompositionLocalOf<GlyphService> {
+    staticCompositionLocalOf<GlyphServicing> {
         error("LocalGlyphService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

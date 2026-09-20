@@ -11,6 +11,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.features.lab.AnnouncementDetailContent
 import app.pbbls.android.features.lab.LabContent
+import app.pbbls.android.features.lab.LabUiState
 import app.pbbls.android.features.lab.models.Log
 import app.pbbls.android.features.lab.models.LogPlatform
 import app.pbbls.android.features.lab.models.LogSpecies
@@ -111,11 +112,16 @@ private fun LabGallery() {
                 .width(400.dp),
     ) {
         LabContent(
-            announcements = announcements,
-            changelog = changelog,
-            initiatives = initiatives,
-            backlog = backlog,
-            reactedIds = setOf("55555555-5555-5555-5555-555555555555"),
+            // Since #849 the preview names the case it renders instead of
+            // spelling it out as four lists plus a set.
+            state =
+                LabUiState.Content(
+                    announcements = announcements,
+                    changelog = changelog,
+                    initiatives = initiatives,
+                    backlog = backlog,
+                    reactedIds = setOf("55555555-5555-5555-5555-555555555555"),
+                ),
             coverUrl = { null },
             onOpenAnnouncement = {},
             onToggleReaction = {},

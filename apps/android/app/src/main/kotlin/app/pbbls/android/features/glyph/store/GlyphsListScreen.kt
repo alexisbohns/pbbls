@@ -1,6 +1,5 @@
 package app.pbbls.android.features.glyph.store
 
-import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,12 +21,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,25 +31,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.components.PebblesTextInput
 import app.pbbls.android.features.glyph.carve.GlyphCarveScreen
-import app.pbbls.android.features.glyph.models.Glyph
 import app.pbbls.android.features.glyph.models.GlyphGridItem
-import app.pbbls.android.features.glyph.services.GlyphService
-import app.pbbls.android.features.glyph.services.LocalGlyphMarketService
-import app.pbbls.android.features.glyph.services.LocalGlyphService
 import app.pbbls.android.features.glyph.views.GlyphView
 import app.pbbls.android.features.glyph.views.GlyphViewCase
 import app.pbbls.android.features.profile.components.ProfileEmptyState
-import app.pbbls.android.services.LocalPathStatsService
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesScreen
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar
 import app.pbbls.android.theme.PebblesTypography
-import kotlinx.coroutines.launch
 
 private const val TAG = "glyphs-store"
 
@@ -71,43 +63,11 @@ private const val TAG = "glyphs-store"
 fun GlyphsListScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: GlyphsListViewModel = hiltViewModel(),
 ) {
-    val market = LocalGlyphMarketService.current
-    val glyphService = LocalGlyphService.current
-    val stats = LocalPathStatsService.current
-    val scope = rememberCoroutineScope()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val covers by viewModel.covers.collectAsStateWithLifecycle()
     val system = PebblesTheme.colors.system
-
-    var tab by remember { mutableStateOf(GlyphTab.MINE) }
-    val itemsByTab = remember { mutableStateMapOf<GlyphTab, List<GlyphGridItem>>() }
-    var isLoading by remember { mutableStateOf(false) }
-    var loadFailed by remember { mutableStateOf(false) }
-    var renaming by remember { mutableStateOf<Glyph?>(null) }
-    var renameError by remember { mutableStateOf(false) }
-    var selected by remember { mutableStateOf<GlyphGridItem?>(null) }
-    var isPresentingCarve by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) { stats.load() }
-    LaunchedEffect(tab) {
-        isLoading = true
-        loadFailed = false
-        try {
-            itemsByTab[tab] =
-                when (tab) {
-                    GlyphTab.MINE -> market.listMine()
-                    GlyphTab.OWNED -> market.listOwned()
-                    GlyphTab.COMMU -> market.listCommunity()
-                }
-        } catch (e: Exception) {
-            Log.e(TAG, "glyph tab load failed: $tab", e)
-            // Stale cache keeps rendering; the error state needs an empty tab.
-            if (itemsByTab[tab].isNullOrEmpty()) loadFailed = true
-        } finally {
-            isLoading = false
-        }
-    }
-
-    val items = itemsByTab[tab].orEmpty()
 
     PebblesScreen(
         modifier = modifier,
@@ -125,7 +85,7 @@ fun GlyphsListScreen(
                     }
                 },
                 trailing = {
-                    IconButton(onClick = { isPresentingCarve = true }) {
+                    IconButton(onClick = viewModel::openCarve) {
                         Icon(
                             painter = painterResource(R.drawable.ic_plus),
                             contentDescription = stringResource(R.string.glyphs_carve_a11y),
@@ -138,118 +98,91 @@ fun GlyphsListScreen(
         },
     ) {
         Box(Modifier.fillMaxSize()) {
-            when {
-                isLoading && items.isEmpty() ->
+            // Exhaustive with no `else`: a new GlyphsUiState case must be rendered.
+            when (val state = uiState) {
+                GlyphsUiState.Loading ->
                     Box(Modifier.fillMaxSize(), Alignment.Center) {
                         CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
                     }
 
-                loadFailed ->
+                is GlyphsUiState.Error ->
                     ProfileEmptyState(
-                        title = stringResource(R.string.glyphs_load_error),
+                        title = stringResource(state.messageRes),
                         message = stringResource(R.string.glyphs_load_error_hint),
                     )
 
-                items.isEmpty() ->
-                    ProfileEmptyState(
-                        title = stringResource(tab.emptyTitleRes),
-                        message = stringResource(tab.emptyMessageRes),
-                    )
-
-                else ->
-                    Column(Modifier.fillMaxSize()) {
-                        if (renameError) {
-                            PebblesText(
-                                text = stringResource(R.string.glyph_rename_error),
-                                style = PebblesTypography.callout,
-                                color = PebblesDestructive,
-                                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                            )
-                        }
-                        LazyVerticalGrid(
-                            columns = GridCells.Adaptive(96.dp),
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            items(items, key = { it.id }) { item ->
-                                val startRename: () -> Unit = {
-                                    renameError = false
-                                    renaming = item.glyph
-                                }
-                                GlyphStoreCell(
-                                    item = item,
-                                    onTap =
-                                        when {
-                                            tab != GlyphTab.MINE -> ({ selected = item })
-                                            item.glyph.userId != null -> startRename
-                                            else -> null
-                                        },
+                is GlyphsUiState.Content ->
+                    if (state.items.isEmpty()) {
+                        ProfileEmptyState(
+                            title = stringResource(state.tab.emptyTitleRes),
+                            message = stringResource(state.tab.emptyMessageRes),
+                        )
+                    } else {
+                        Column(Modifier.fillMaxSize()) {
+                            if (covers.didRenameFail) {
+                                PebblesText(
+                                    text = stringResource(R.string.glyph_rename_error),
+                                    style = PebblesTypography.callout,
+                                    color = PebblesDestructive,
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 8.dp),
                                 )
+                            }
+                            LazyVerticalGrid(
+                                columns = GridCells.Adaptive(96.dp),
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding =
+                                    PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                            ) {
+                                items(state.items, key = { it.id }) { item ->
+                                    GlyphStoreCell(
+                                        item = item,
+                                        onTap =
+                                            when {
+                                                state.tab != GlyphTab.MINE -> ({ viewModel.openDetail(item) })
+                                                item.glyph.userId != null -> ({ viewModel.requestRename(item.glyph) })
+                                                else -> null
+                                            },
+                                    )
+                                }
                             }
                         }
                     }
             }
             GlyphTabBar(
-                selection = tab,
-                onSelect = { tab = it },
+                selection = uiState.tab,
+                onSelect = viewModel::onSelectTab,
                 modifier = Modifier.align(Alignment.BottomCenter),
             )
         }
     }
 
-    if (isPresentingCarve) {
+    if (covers.isPresentingCarve) {
         GlyphCarveScreen(
-            onSaved = { glyph ->
-                isPresentingCarve = false
-                val fresh = GlyphGridItem(glyph = glyph, price = 0, owned = false, createdAt = null, acquiredAt = null)
-                itemsByTab[GlyphTab.MINE] = listOf(fresh) + itemsByTab[GlyphTab.MINE].orEmpty()
-                tab = GlyphTab.MINE
-            },
-            onCancel = { isPresentingCarve = false },
+            onSaved = viewModel::onCarved,
+            onCancel = viewModel::closeCarve,
             modifier = Modifier.fillMaxSize(),
         )
     }
 
-    renaming?.let { glyph ->
+    covers.renaming?.let { glyph ->
         RenameGlyphDialog(
             initialName = glyph.name.orEmpty(),
-            onDismiss = { renaming = null },
-            onSave = { draft ->
-                renaming = null
-                val original = itemsByTab[GlyphTab.MINE].orEmpty()
-                val optimistic = glyph.copy(name = GlyphService.normalizedName(draft))
-                itemsByTab[GlyphTab.MINE] =
-                    original.map { if (it.id == glyph.id) it.copy(glyph = optimistic) else it }
-                scope.launch {
-                    try {
-                        val server = glyphService.updateName(glyphId = glyph.id, name = draft)
-                        itemsByTab[GlyphTab.MINE] =
-                            itemsByTab[GlyphTab.MINE].orEmpty().map {
-                                if (it.id == glyph.id) it.copy(glyph = server) else it
-                            }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "glyph rename failed", e)
-                        itemsByTab[GlyphTab.MINE] = original
-                        renameError = true
-                    }
-                }
-            },
+            onDismiss = viewModel::cancelRename,
+            onSave = viewModel::confirmRename,
         )
     }
 
-    selected?.let { item ->
+    covers.selected?.let { item ->
         GlyphDetailDrawer(
             item = item,
-            balance = stats.karma ?: 0,
-            onSwapped = { result ->
-                stats.applyKarmaBalance(result.balance)
-                itemsByTab[GlyphTab.COMMU] = itemsByTab[GlyphTab.COMMU].orEmpty().filter { it.id != item.id }
-                // Owned refetches lazily on its next visit (iOS parity).
-                itemsByTab.remove(GlyphTab.OWNED)
-            },
-            onDismiss = { selected = null },
+            balance = (uiState as? GlyphsUiState.Content)?.karma ?: 0,
+            onRecorded = { result -> viewModel.onPurchased(item, result) },
+            onDismiss = viewModel::closeDetail,
         )
     }
 }
@@ -268,6 +201,15 @@ private val GlyphTab.emptyMessageRes: Int
             GlyphTab.MINE -> R.string.glyphs_empty_mine_message
             GlyphTab.OWNED -> R.string.glyphs_empty_owned_message
             GlyphTab.COMMU -> R.string.glyphs_empty_commu_message
+        }
+
+/** Whichever tab the store is on, failed or not — the bar must not lie. */
+private val GlyphsUiState.tab: GlyphTab
+    get() =
+        when (this) {
+            is GlyphsUiState.Content -> tab
+            is GlyphsUiState.Error -> tab
+            GlyphsUiState.Loading -> GlyphTab.MINE
         }
 
 /** Grid cell: 96dp glyph + optional name caption + price badge when listed. */
