@@ -571,4 +571,10 @@
     <string name="record_karma">+%1$d karma</string>
     <string name="record_karma_a11y">Earned %1$d karma</string>
     <string name="record_signed_out_error">You must be signed in to save.</string>
+
+    <!-- Bottom navigation bar (#852) -->
+    <string name="tab_path">Path</string>
+    <string name="tab_people">People</string>
+    <string name="tab_collections">Collections</string>
+    <string name="tab_you">You</string>
 </resources>
