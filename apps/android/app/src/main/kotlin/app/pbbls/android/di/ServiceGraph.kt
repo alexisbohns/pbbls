@@ -1,23 +1,12 @@
 package app.pbbls.android.di
 
 import app.pbbls.android.features.glyph.services.GlyphMarketServicing
-import app.pbbls.android.features.glyph.services.GlyphServicing
 import app.pbbls.android.features.karma.AchievementNotificationService
 import app.pbbls.android.features.karma.KarmaNotificationService
-import app.pbbls.android.features.lab.services.LogsServicing
-import app.pbbls.android.features.path.valence.ValencePrewarmer
-import app.pbbls.android.features.pebblemedia.SnapProcessor
 import app.pbbls.android.services.AchievementsServicing
-import app.pbbls.android.services.ComposerSnapshotStoring
 import app.pbbls.android.services.ConnectionsServicing
 import app.pbbls.android.services.EmotionPaletteService
-import app.pbbls.android.services.PathServicing
 import app.pbbls.android.services.PathStatsServicing
-import app.pbbls.android.services.PebbleDetailServicing
-import app.pbbls.android.services.PebbleDraftsServicing
-import app.pbbls.android.services.PebbleSnapRepository
-import app.pbbls.android.services.PebbleWriteServicing
-import app.pbbls.android.services.ProfileServicing
 import app.pbbls.android.services.ReferenceDataServicing
 import app.pbbls.android.services.SnapURLCache
 import app.pbbls.android.services.SupabaseServicing
@@ -25,23 +14,33 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * TEMPORARY. Deleted by #849.
+ * TEMPORARY, and now half the size it was.
  *
  * This is, honestly, still a service locator — and it is kept on purpose with
- * its eyes open. The screens still read `Local…Service.current` (85 call sites,
- * down from 87) until #849 gives each one a ViewModel, so `MainActivity` still
- * has to fill a 21-entry `CompositionLocalProvider` from somewhere. The
- * alternative is as many `@Inject lateinit var` fields on the activity, which
- * costs the same for the same lifespan and leaves #849 unpicking twenty-odd
- * fields instead of deleting one file.
+ * its eyes open. #849 migrated every screen and took 11 of its 21 entries with
+ * them; the 10 below are what is left, and each has a named reason:
  *
- * It shrinks as screens migrate: #849's souls/collections part deleted
- * `LocalSoulsService` and `LocalCollectionsService` outright, because after the
- * migration nothing read them.
+ * - **`palettes` (10 reads) and `referenceData` (6)** are read by *leaf*
+ *   components — `PathPebbleRow`, `ValenceGlyph`, `WeekHeader`, the pickers —
+ *   not by screens. They are ambient reference data every leaf needs, which is
+ *   the one shape a `CompositionLocal` is actually for, and they stay
+ *   deliberately (see `docs/decisions/log.md`, 2026-09-20). `snapUrls` (3) is
+ *   the same category.
+ * - **`glyphMarket` and `pathStats`** are read by `GlyphPickerSheet`, which
+ *   keeps its own duplicated copy of the glyph store's state and is a migration
+ *   of its own.
+ * - **`supabase`, `connectionsService`, `karma` and `achievementNotify`** are
+ *   read by `RootScreen`, the one stateful surface without a ViewModel; the two
+ *   overlay hosts take the service object rather than its state.
+ * - **`achievements`** is three scattered `fireCheck()` calls.
+ *
+ * So this file dies when `GlyphPickerSheet` and `RootScreen` are migrated and
+ * the three `fireCheck()` calls become lambdas — not before, and the remaining
+ * three locals are meant to outlive it.
  *
  * **Do not copy this pattern.** New code takes its dependencies by constructor
- * (`@Inject`) or, once #849 lands, through `hiltViewModel()`. Nothing should
- * ever inject `ServiceGraph` except `MainActivity`.
+ * (`@Inject`) or through `hiltViewModel()`. Nothing should ever inject
+ * `ServiceGraph` except `MainActivity`, and nothing should add an entry to it.
  */
 @Singleton
 class ServiceGraph
@@ -49,23 +48,12 @@ class ServiceGraph
     constructor(
         val supabase: SupabaseServicing,
         val palettes: EmotionPaletteService,
-        val pathService: PathServicing,
         val pathStats: PathStatsServicing,
-        val profileService: ProfileServicing,
-        val pebbleDetailService: PebbleDetailServicing,
         val snapUrls: SnapURLCache,
-        val snapWrites: PebbleSnapRepository,
         val referenceData: ReferenceDataServicing,
-        val pebbleWrite: PebbleWriteServicing,
-        val draftsService: PebbleDraftsServicing,
         val connectionsService: ConnectionsServicing,
-        val composerSnapshots: ComposerSnapshotStoring,
-        val glyphService: GlyphServicing,
         val glyphMarket: GlyphMarketServicing,
-        val logsService: LogsServicing,
         val karma: KarmaNotificationService,
         val achievementNotify: AchievementNotificationService,
         val achievements: AchievementsServicing,
-        val snapProcessor: SnapProcessor,
-        val valencePrewarmer: ValencePrewarmer,
     )

@@ -5,6 +5,7 @@ import app.pbbls.android.features.glyph.models.Glyph
 import app.pbbls.android.services.ProfileRow
 import app.pbbls.android.testing.FakePathStatsService
 import app.pbbls.android.testing.FakeProfileService
+import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.MainDispatcherRule
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -38,7 +39,8 @@ class ProfileViewModelTest {
     private fun viewModel(
         profile: FakeProfileService = FakeProfileService(profile = row),
         stats: FakePathStatsService = FakePathStatsService(),
-    ) = ProfileViewModel(profile, stats)
+        supabase: FakeSupabaseService = FakeSupabaseService(),
+    ) = ProfileViewModel(profile, stats, supabase)
 
     // MARK: - Load
 

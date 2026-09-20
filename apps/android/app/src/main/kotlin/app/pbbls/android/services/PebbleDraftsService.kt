@@ -1,6 +1,5 @@
 package app.pbbls.android.services
 
-import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.features.path.models.OffsetDateTimeSerializer
 import app.pbbls.android.features.path.models.PebbleDraftPayload
 import io.github.jan.supabase.postgrest.from
@@ -170,8 +169,3 @@ private data class DraftUpsertPayload(
     val userId: String,
     val payload: PebbleDraftPayload,
 )
-
-val LocalPebbleDraftsService =
-    staticCompositionLocalOf<PebbleDraftsServicing> {
-        error("LocalPebbleDraftsService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
-    }

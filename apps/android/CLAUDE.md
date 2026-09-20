@@ -104,11 +104,16 @@ real settings exist), `android-skills:rxjava-migration`,
   non-Compose consumer needs it), annotated `@Singleton class X @Inject
   constructor(…)`. Adding a service is that one annotation — do **not** add a
   `@Provides` unless Dagger genuinely cannot infer the constructor, and do not
-  add a new `Local…Service`. `di/SupabaseModule` is the only place
-  `AppEnvironment` is read. Screens still read `Local…Service.current` through a
-  temporary `di/ServiceGraph` bridge; #849 replaces those reads with ViewModels
-  and deletes the bridge, so write new screens against `hiltViewModel()`, not
-  against the locals.
+  add a new `Local…Service` **for anything a screen calls** — see the carve-out
+  below. `di/SupabaseModule` is the only place `AppEnvironment` is read.
+- **Three CompositionLocals are permanent, the rest of the bridge is not.**
+  `LocalEmotionPaletteService`, `LocalReferenceDataService` and
+  `LocalSnapURLCache` carry ambient reference data read by *leaf* components
+  (`PathPebbleRow`, `ValenceGlyph`, `WeekHeader`, the pickers), which is what a
+  `CompositionLocal` is for; they stay (decision log, 2026-09-20). `ServiceGraph`
+  is down to 10 entries and dies once `GlyphPickerSheet` and `RootScreen` have
+  ViewModels. Write new screens against `hiltViewModel()`, never against a local,
+  and do not add an entry to `ServiceGraph`.
 - **Log, don't swallow.** Use `android.util.Log` (or a thin logger) with a
   consistent tag on every error path — mirror the web/iOS discipline that silent
   failures are bugs. No empty `catch` blocks. No `println`. JVM unit tests set

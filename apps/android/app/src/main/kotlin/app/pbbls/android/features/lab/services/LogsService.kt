@@ -1,6 +1,5 @@
 package app.pbbls.android.features.lab.services
 
-import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.AppEnvironment
 import app.pbbls.android.features.lab.models.LabConfig
 import app.pbbls.android.features.lab.models.Log
@@ -212,10 +211,4 @@ class LogsService
                 compareByDescending<Log> { it.reactionCount }
                     .thenByDescending { it.createdAt }
         }
-    }
-
-/** CompositionLocal for [LogsService] — see [LocalSupabaseService]. */
-val LocalLogsService =
-    staticCompositionLocalOf<LogsServicing> {
-        error("LocalLogsService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

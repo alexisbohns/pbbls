@@ -2,7 +2,6 @@ package app.pbbls.android.services
 
 import android.content.Context
 import android.util.Log
-import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.features.path.models.PebbleDraftPayload
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -143,9 +142,4 @@ fun ComposerSnapshotStoring.asSink(): ComposerAutosave.SnapshotSink =
         override fun write(payload: PebbleDraftPayload) = save(payload)
 
         override fun erase() = clear()
-    }
-
-val LocalComposerSnapshotStore =
-    staticCompositionLocalOf<ComposerSnapshotStoring> {
-        error("LocalComposerSnapshotStore not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

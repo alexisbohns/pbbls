@@ -2,7 +2,6 @@ package app.pbbls.android.features.pebblemedia
 
 import android.content.Context
 import android.net.Uri
-import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.di.IoDispatcher
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
@@ -42,13 +41,4 @@ class SnapProcessor
             context: Context,
             uri: Uri,
         ): ProcessedImage = withContext(io) { ImagePipeline.process(context, uri) }
-    }
-
-/**
- * CompositionLocal for [SnapProcessor]. Temporary, like every `Local…` in this
- * app — #849 replaces it with a ViewModel dependency.
- */
-val LocalSnapProcessor =
-    staticCompositionLocalOf<SnapProcessor> {
-        error("LocalSnapProcessor not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

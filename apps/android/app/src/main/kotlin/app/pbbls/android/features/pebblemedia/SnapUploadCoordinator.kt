@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.features.pebblemedia.models.AttachedSnap
 import app.pbbls.android.features.pebblemedia.models.FormSnap
 import app.pbbls.android.services.SnapWriteRepositing
@@ -202,17 +201,3 @@ class SnapUploadCoordinator(
         formSnap = FormSnap.Pending(pending.snap.copy(state = newState))
     }
 }
-
-/**
- * CompositionLocal for the snap write surface [SnapUploadCoordinator] needs.
- *
- * The three composer screens used to build a [app.pbbls.android.services.PebbleSnapRepository]
- * themselves from a concrete `SupabaseService`; once the auth local carries
- * `SupabaseServicing` (#848) they cannot, and a screen assembling a repository
- * was the wrong layer regardless. Temporary, like every `Local…` here — #849
- * replaces it with a ViewModel dependency.
- */
-val LocalSnapWriteRepository =
-    staticCompositionLocalOf<SnapWriteRepositing> {
-        error("LocalSnapWriteRepository not provided — wrap the tree in MainActivity's CompositionLocalProvider")
-    }

@@ -13,6 +13,7 @@ import app.pbbls.android.features.shared.ripples.RippleSummary
 import app.pbbls.android.services.PathStatsServicing
 import app.pbbls.android.services.ProfileRow
 import app.pbbls.android.services.ProfileServicing
+import app.pbbls.android.services.SupabaseServicing
 import app.pbbls.android.ui.runCatchingCancellable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -48,6 +49,10 @@ sealed interface ProfileUiState {
         val daysPracticed: Int?,
         val assiduity: List<Boolean>?,
         val ripple: RippleSummary?,
+        /** The account's own identity, for the Settings cover. */
+        val email: String?,
+        /** SSO brand labels, rendered verbatim and never localized. */
+        val providers: List<String>,
     ) : ProfileUiState
 }
 
@@ -80,6 +85,7 @@ class ProfileViewModel
     constructor(
         private val profileService: ProfileServicing,
         private val stats: PathStatsServicing,
+        private val supabase: SupabaseServicing,
     ) : ViewModel() {
         private var profile: ProfileRow? = null
         private var glyphStrokes: List<GlyphStroke>? = null
@@ -193,6 +199,14 @@ class ProfileViewModel
                             daysPracticed = stats.daysPracticed,
                             assiduity = stats.assiduity,
                             ripple = stats.ripple,
+                            email = supabase.session?.user?.email,
+                            providers =
+                                linkedProviders(
+                                    supabase.session
+                                        ?.user
+                                        ?.identities
+                                        ?.map { it.provider },
+                                ),
                         )
                 }
         }

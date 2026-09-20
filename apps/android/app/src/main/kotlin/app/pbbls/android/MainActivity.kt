@@ -12,23 +12,12 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import app.pbbls.android.di.ServiceGraph
 import app.pbbls.android.features.glyph.services.LocalGlyphMarketService
-import app.pbbls.android.features.glyph.services.LocalGlyphService
 import app.pbbls.android.features.karma.LocalAchievementNotificationService
 import app.pbbls.android.features.karma.LocalKarmaNotificationService
-import app.pbbls.android.features.lab.services.LocalLogsService
-import app.pbbls.android.features.path.valence.LocalValencePrewarmer
-import app.pbbls.android.features.pebblemedia.LocalSnapProcessor
-import app.pbbls.android.features.pebblemedia.LocalSnapWriteRepository
 import app.pbbls.android.services.LocalAchievementsService
-import app.pbbls.android.services.LocalComposerSnapshotStore
 import app.pbbls.android.services.LocalConnectionsService
 import app.pbbls.android.services.LocalEmotionPaletteService
-import app.pbbls.android.services.LocalPathService
 import app.pbbls.android.services.LocalPathStatsService
-import app.pbbls.android.services.LocalPebbleDetailService
-import app.pbbls.android.services.LocalPebbleDraftsService
-import app.pbbls.android.services.LocalPebbleWriteService
-import app.pbbls.android.services.LocalProfileService
 import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSnapURLCache
 import app.pbbls.android.services.LocalSupabaseService
@@ -113,25 +102,14 @@ class MainActivity : ComponentActivity() {
                 CompositionLocalProvider(
                     LocalSupabaseService provides graph.supabase,
                     LocalEmotionPaletteService provides graph.palettes,
-                    LocalPathService provides graph.pathService,
                     LocalPathStatsService provides graph.pathStats,
-                    LocalProfileService provides graph.profileService,
                     LocalSnapURLCache provides graph.snapUrls,
-                    LocalSnapWriteRepository provides graph.snapWrites,
                     LocalReferenceDataService provides graph.referenceData,
-                    LocalPebbleWriteService provides graph.pebbleWrite,
-                    LocalPebbleDetailService provides graph.pebbleDetailService,
-                    LocalPebbleDraftsService provides graph.draftsService,
                     LocalConnectionsService provides graph.connectionsService,
-                    LocalComposerSnapshotStore provides graph.composerSnapshots,
-                    LocalGlyphService provides graph.glyphService,
                     LocalGlyphMarketService provides graph.glyphMarket,
-                    LocalLogsService provides graph.logsService,
                     LocalKarmaNotificationService provides graph.karma,
                     LocalAchievementNotificationService provides graph.achievementNotify,
                     LocalAchievementsService provides graph.achievements,
-                    LocalSnapProcessor provides graph.snapProcessor,
-                    LocalValencePrewarmer provides graph.valencePrewarmer,
                 ) {
                     RootScreen()
                 }

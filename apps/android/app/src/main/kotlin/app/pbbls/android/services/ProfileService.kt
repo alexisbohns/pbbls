@@ -1,6 +1,5 @@
 package app.pbbls.android.services
 
-import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.features.glyph.models.GlyphStroke
 import app.pbbls.android.features.path.models.OffsetDateTimeSerializer
 import app.pbbls.android.features.profile.models.Collection
@@ -171,9 +170,3 @@ data class ProfileRow(
     @SerialName("public_profile")
     val publicProfile: Boolean = false,
 )
-
-/** CompositionLocal for [ProfileService] — see [LocalSupabaseService]. */
-val LocalProfileService =
-    staticCompositionLocalOf<ProfileServicing> {
-        error("LocalProfileService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
-    }
