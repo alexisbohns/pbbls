@@ -1,6 +1,5 @@
 package app.pbbls.android.features.path.record
 
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -30,6 +29,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
 import app.pbbls.android.features.path.create.pickers.rememberGlyphPickerState
 import app.pbbls.android.features.path.models.Valence
@@ -121,7 +123,17 @@ fun RecordFlowScreen(
     // an explicit branch rather than an absent handler. That is also why the
     // terminal step handles it — it has no back chevron, but the system button
     // exists regardless and has to mean "leave", not "exit the app".
-    BackHandler { viewModel.onSystemBack(unwindGlyphPicker = glyphPickerState::unwind) }
+    //
+    // NavigationBackHandler (not the legacy BackHandler) so a half-swipe is
+    // cancellable: onSystemBack only runs on onBackCompleted, so a cancelled
+    // gesture never touches the step machine — nothing to undo, because
+    // nothing was mutated during the scrub. The wizard's steps stay internal
+    // state (not nav entries), so this is the one handler in the flow that
+    // still walks its own step machine rather than popping a key.
+    val recordFlowBackState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
+    NavigationBackHandler(state = recordFlowBackState) {
+        viewModel.onSystemBack(unwindGlyphPicker = glyphPickerState::unwind)
+    }
 
     Column(
         modifier =
