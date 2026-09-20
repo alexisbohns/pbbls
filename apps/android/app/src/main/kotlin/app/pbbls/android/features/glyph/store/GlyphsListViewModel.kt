@@ -89,7 +89,7 @@ data class GlyphsCovers(
  * **The carve cover is gone (#852 Task 17).** It used to prepend the fresh
  * glyph to Mine and switch straight to it on save, an optimistic update with no
  * round trip. `GlyphCarve` is a separate entry now, with no callback back into
- * this instance; [onResumed] (Task 18) reloads whichever tab is on screen when
+ * this instance; [onResumed] (#852) reloads whichever tab is on screen when
  * the trip back lands, which restores correctness (a carved glyph is visible
  * once you're on Mine) but not the optimism — carving while on Owned or Commu
  * reloads that tab, not Mine, and there is no auto-switch to Mine on return.

@@ -127,7 +127,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             onDismiss = navigator::goBack,
             // The saved values used to be folded straight into ProfileViewModel's
             // state; an entry has no such handle back to its parent, so the
-            // parent picks them up on its own resume refresh instead (Task 18).
+            // parent picks them up on its own resume refresh instead (#852).
             onSaved = { _, _, _, _ -> navigator.goBack() },
         )
     }
