@@ -1635,6 +1635,16 @@ private fun AuthedNavDisplay(onSignOut: () -> Unit) {
 
 **The `NavDisplay(entries = …)` overload** is what takes pre-decorated entries; the `backStack = …` overload used in Part 1 decorates internally and cannot express per-tab decorators. Confirm the parameter name against the 1.1.7 artifact before assuming it is `entries`.
 
+> **⚠ The two FAB targets do not exist yet in Part 2.** `RecordFlow` and
+> `CreatePebble` are declared keys with **no entry** in `pebblesEntries` until
+> **Part 4** promotes them, and navigating to a key with no entry crashes.
+>
+> So in Part 2 the FAB must either keep `PathViewModel`'s existing
+> cover-opening callbacks, or be wired to no-ops with a TODO naming Part 4. The
+> `navigator.navigate(...)` calls shown above are the **Part 4 end state**, not
+> what Part 2 ships. Part 4's task swaps them in at the same time as it adds the
+> entries.
+
 - [ ] **Step 2: Move the FAB out of `PathScreen`**
 
 In `PathScreen.kt`, find the pinned "New pebble" block around line 316 and cut it into a new file `features/path/components/NewPebbleFab.kt`, keeping the tap/long-press pair:
