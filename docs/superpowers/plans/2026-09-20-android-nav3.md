@@ -416,8 +416,14 @@ sealed interface PebblesKey : NavKey {
     }
 }
 
-/** A key that is one of the four bar destinations. Always also a [BarKey]. */
-sealed interface TopLevelKey
+/**
+ * A key that is one of the four bar destinations.
+ *
+ * It extends [BarKey] rather than each tab object declaring both: a tab that
+ * did not render the bar would be unreachable from every other tab, so the
+ * relationship is an invariant of the type, not a per-object choice.
+ */
+sealed interface TopLevelKey : BarKey
 
 /**
  * A key that renders the [NavigationBar]. Everything else is modal and covers
