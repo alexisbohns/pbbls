@@ -93,6 +93,7 @@ class CollectionDetailViewModel
         val covers: StateFlow<CollectionDetailCovers> = _covers.asStateFlow()
 
         private var loadJob: Job? = null
+        private var resumeCount = 0
 
         /** Load [id], unless it is the one already loaded. */
         fun start(id: String) {
@@ -103,6 +104,19 @@ class CollectionDetailViewModel
 
         fun retry() = load()
 
+        /**
+         * The destination came back to the foreground.
+         *
+         * `CollectionForm` is a separate entry now (#852 Task 17), with no
+         * callback back into this instance, so an edit made there has to be
+         * picked up by a resume — see [SoulDetailViewModel.onResumed]. The first
+         * resume is skipped because [start] has already loaded.
+         */
+        fun onResumed() {
+            resumeCount += 1
+            if (resumeCount > 1) reload()
+        }
+
         private fun load() {
             val id = collectionId ?: return
             loadJob?.cancel()
@@ -112,11 +126,9 @@ class CollectionDetailViewModel
         }
 
         /**
-         * Still called by [onPebbleSaved] and [confirmDelete]. It used to also
-         * run when the edit-collection cover closed; since #852 Task 17 that
-         * edit is a separate `CollectionForm` entry with no callback back into
-         * this instance, so nothing calls this after an edit yet — Task 18
-         * wires a resume refresh for that gap (see [SoulDetailViewModel.reload]).
+         * Refresh after a write, keeping the content that is already on screen.
+         *
+         * Called by [onPebbleSaved], [confirmDelete] and [onResumed].
          */
         private fun reload() {
             val id = collectionId ?: return

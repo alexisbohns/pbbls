@@ -89,9 +89,12 @@ data class GlyphsCovers(
  * **The carve cover is gone (#852 Task 17).** It used to prepend the fresh
  * glyph to Mine and switch straight to it on save, an optimistic update with no
  * round trip. `GlyphCarve` is a separate entry now, with no callback back into
- * this instance, so that optimism is lost until Task 18 gives this screen a
- * resume refresh — until then, a carved glyph only appears in Mine on the next
- * full reload of that tab.
+ * this instance; [onResumed] (Task 18) reloads whichever tab is on screen when
+ * the trip back lands, which restores correctness (a carved glyph is visible
+ * once you're on Mine) but not the optimism — carving while on Owned or Commu
+ * reloads that tab, not Mine, and there is no auto-switch to Mine on return.
+ * Restoring that is a product behaviour that needs a real mechanism (a nav
+ * result) and is out of scope here.
  */
 @HiltViewModel
 class GlyphsListViewModel
@@ -113,6 +116,7 @@ class GlyphsListViewModel
         val covers: StateFlow<GlyphsCovers> = _covers.asStateFlow()
 
         private var loadJob: Job? = null
+        private var resumeCount = 0
 
         init {
             viewModelScope.launch { stats.load() }
@@ -127,6 +131,20 @@ class GlyphsListViewModel
             if (tab == next) return
             tab = next
             loadTab(next)
+        }
+
+        /**
+         * The destination came back to the foreground.
+         *
+         * Reloads the tab currently on screen — the same per-tab refetch
+         * [loadTab] already does for a tab switch, just re-run on the tab you
+         * never left. This is what picks up a glyph carved in `GlyphCarve`
+         * (#852 Task 17 removed the optimistic prepend-and-switch). The first
+         * resume is skipped because `init` has already loaded Mine.
+         */
+        fun onResumed() {
+            resumeCount += 1
+            if (resumeCount > 1) loadTab(tab)
         }
 
         private fun loadTab(target: GlyphTab) {

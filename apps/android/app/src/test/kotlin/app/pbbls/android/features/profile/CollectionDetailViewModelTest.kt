@@ -220,4 +220,32 @@ class CollectionDetailViewModelTest {
             assertNull(viewModel.covers.value.editingPebbleId)
             assertEquals(2, service.loadCollectionCount)
         }
+
+    // MARK: - Returning from the edit form
+
+    /**
+     * The gap Task 17 opened: `CollectionForm` is now a separate entry with no
+     * callback back into this instance, so a name edited there has to be
+     * picked up by a resume — same mechanism as
+     * [CollectionsListViewModel.onResumed].
+     */
+    @Test
+    fun `returning from the edit form re-reads the collection`() =
+        runTest {
+            val service = FakeCollectionsService(collection = collection("a"))
+            val viewModel = viewModel(collections = service)
+            viewModel.start("a")
+            advanceUntilIdle()
+            assertEquals(1, service.loadCollectionCount)
+
+            // First resume: the screen just opened, `start` already loaded.
+            viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals(1, service.loadCollectionCount)
+
+            // Second: back from the edit form.
+            viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals(2, service.loadCollectionCount)
+        }
 }

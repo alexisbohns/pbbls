@@ -168,6 +168,64 @@ class GlyphsListViewModelTest {
             assertEquals(listOf("a"), state.items.map { it.id })
         }
 
+    // MARK: - Returning from the carve studio
+
+    /**
+     * The gap Task 17 opened: `GlyphCarve` is now a separate entry with no
+     * `onCarved` callback back into this instance, so a freshly carved glyph
+     * has to be picked up by a resume of the current tab — same mechanism as
+     * [SoulsListViewModel.onResumed]. The optimistic prepend-and-switch-to-Mine
+     * behaviour Task 17 removed is NOT restored here: a carve made while on
+     * another tab reloads that tab, not Mine.
+     */
+    @Test
+    fun `returning from the carve studio reloads the current tab`() =
+        runTest {
+            val market = FakeGlyphMarketService(mine = listOf(item("a")))
+            val viewModel = viewModel(market)
+            advanceUntilIdle()
+            assertEquals(1, market.mineCount)
+
+            // First resume: the screen just opened, `init` already loaded Mine.
+            viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals(1, market.mineCount)
+
+            // Second: back from carving a glyph. The fake now returns the carved
+            // glyph too, simulating the server-side insert.
+            market.mine = listOf(item("a"), item("b"))
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            assertEquals(2, market.mineCount)
+            val state = viewModel.uiState.value as GlyphsUiState.Content
+            assertEquals(listOf("a", "b"), state.items.map { it.id })
+        }
+
+    /** A resume while on a different tab reloads that tab, not Mine. */
+    @Test
+    fun `returning while on another tab reloads that tab, not Mine`() =
+        runTest {
+            val market = FakeGlyphMarketService(mine = listOf(item("a")), community = listOf(item("c")))
+            val viewModel = viewModel(market)
+            advanceUntilIdle()
+            viewModel.onSelectTab(GlyphTab.COMMU)
+            advanceUntilIdle()
+
+            // First resume ever is skipped, whichever tab it lands on.
+            viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals(1, market.mineCount)
+            assertEquals(1, market.communityCount)
+
+            // Second: back from carving, while still on Community.
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            assertEquals(1, market.mineCount)
+            assertEquals(2, market.communityCount)
+        }
+
     // MARK: - Purchase bookkeeping
 
     /**

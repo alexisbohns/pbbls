@@ -32,6 +32,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.components.PebblesTextInput
@@ -68,6 +69,14 @@ fun GlyphsListScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val covers by viewModel.covers.collectAsStateWithLifecycle()
     val system = PebblesTheme.colors.system
+
+    // Returning from the carve studio must re-read the current tab: the
+    // ViewModel is scoped to the back stack entry, which survives the round
+    // trip that used to be a callback-driven optimistic prepend.
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onResumed()
+        onPauseOrDispose {}
+    }
 
     PebblesScreen(
         modifier = modifier,
