@@ -1,6 +1,5 @@
 package app.pbbls.android.features.path
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,29 +23,22 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
-import app.pbbls.android.services.LocalPebbleDraftsService
 import app.pbbls.android.services.PebbleDraftRecord
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar
 import app.pbbls.android.theme.PebblesTopBarTextButton
 import app.pbbls.android.theme.PebblesTypography
-import kotlinx.coroutines.launch
 import java.time.Duration
 import java.time.OffsetDateTime
-
-private const val TAG = "drafts"
 
 /**
  * Unpublished quick captures, most recently saved first (M47) — ports iOS
@@ -65,50 +57,19 @@ fun DraftsScreen(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
     reloadKey: Int = 0,
+    viewModel: DraftsViewModel = hiltViewModel(),
 ) {
-    val draftsService = LocalPebbleDraftsService.current
-    val scope = rememberCoroutineScope()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    var drafts by remember { mutableStateOf<List<PebbleDraftRecord>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
-    var loadFailed by remember { mutableStateOf(false) }
-    // Retry token, the EditPebbleScreen idiom.
-    var retryKey by remember { mutableIntStateOf(0) }
-
-    LaunchedEffect(reloadKey, retryKey) {
-        isLoading = true
-        loadFailed = false
-        try {
-            drafts = draftsService.list()
-            isLoading = false
-        } catch (e: Exception) {
-            Log.e(TAG, "drafts load failed", e)
-            loadFailed = true
-            isLoading = false
-        }
-    }
+    LaunchedEffect(reloadKey) { viewModel.start(reloadKey) }
 
     BackHandler { onDismiss() }
 
     DraftsContent(
-        drafts = drafts,
-        isLoading = isLoading,
-        loadFailed = loadFailed,
-        onRetry = { retryKey++ },
+        uiState = uiState,
+        onRetry = viewModel::retry,
         onResume = onResume,
-        onDelete = { record ->
-            // Optimistic: the row leaves immediately and a failure reloads the
-            // truth back in.
-            drafts = drafts.filterNot { it.id == record.id }
-            scope.launch {
-                try {
-                    draftsService.delete(record.id)
-                } catch (e: Exception) {
-                    Log.e(TAG, "draft delete failed", e)
-                    retryKey++
-                }
-            }
-        },
+        onDelete = viewModel::delete,
         onDismiss = onDismiss,
         modifier = modifier,
     )
@@ -121,9 +82,7 @@ fun DraftsScreen(
  */
 @Composable
 fun DraftsContent(
-    drafts: List<PebbleDraftRecord>,
-    isLoading: Boolean,
-    loadFailed: Boolean,
+    uiState: DraftsUiState,
     onRetry: () -> Unit,
     onResume: (PebbleDraftRecord) -> Unit,
     onDelete: (PebbleDraftRecord) -> Unit,
@@ -153,13 +112,14 @@ fun DraftsContent(
             },
         )
 
-        when {
-            isLoading ->
+        // Exhaustive with no `else`: a new DraftsUiState case must render.
+        when (uiState) {
+            DraftsUiState.Loading ->
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator(color = accent.primary)
                 }
 
-            loadFailed ->
+            DraftsUiState.Error ->
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         PebblesText(
@@ -178,29 +138,30 @@ fun DraftsContent(
                     }
                 }
 
-            drafts.isEmpty() ->
-                Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    PebblesText(
-                        text = stringResource(R.string.drafts_empty),
-                        style = PebblesTypography.body,
-                        color = system.secondary,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(horizontal = 32.dp),
-                    )
-                }
-
-            else ->
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    items(drafts, key = { it.id }) { record ->
-                        DraftRow(
-                            record = record,
-                            onClick = { onResume(record) },
-                            onDelete = { onDelete(record) },
+            is DraftsUiState.Content ->
+                if (uiState.drafts.isEmpty()) {
+                    Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        PebblesText(
+                            text = stringResource(R.string.drafts_empty),
+                            style = PebblesTypography.body,
+                            color = system.secondary,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(horizontal = 32.dp),
                         )
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        items(uiState.drafts, key = { it.id }) { record ->
+                            DraftRow(
+                                record = record,
+                                onClick = { onResume(record) },
+                                onDelete = { onDelete(record) },
+                            )
+                        }
                     }
                 }
         }

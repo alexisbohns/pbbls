@@ -1,7 +1,6 @@
 package app.pbbls.android.features.path
 
 import android.content.Intent
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -21,10 +20,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInput
@@ -32,15 +27,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
-import app.pbbls.android.features.path.models.PebbleDetail
 import app.pbbls.android.features.path.models.SharedPebbleLink
 import app.pbbls.android.features.path.models.Visibility
 import app.pbbls.android.features.path.read.PebblePrivacyBadge
 import app.pbbls.android.features.path.read.PebbleReadView
 import app.pbbls.android.features.path.read.pebblePageColors
 import app.pbbls.android.services.LocalEmotionPaletteService
-import app.pbbls.android.services.LocalPebbleDetailService
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography
@@ -63,35 +58,23 @@ fun PebbleDetailScreen(
     modifier: Modifier = Modifier,
     reloadKey: Int = 0,
     onEditRequested: () -> Unit = {},
+    viewModel: PebbleDetailViewModel = hiltViewModel(),
 ) {
-    val detailService = LocalPebbleDetailService.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val palettes = LocalEmotionPaletteService.current
     val system = PebblesTheme.colors.system
     val accent = PebblesTheme.colors.accent
     val context = LocalContext.current
 
-    var detail by remember(pebbleId) { mutableStateOf<PebbleDetail?>(null) }
-    var isLoading by remember(pebbleId) { mutableStateOf(true) }
-    var loadError by remember(pebbleId) { mutableStateOf(false) }
-    var reloadToken by remember(pebbleId) { mutableIntStateOf(0) }
+    // reloadKey is the host saying "read it again" after an edit saved; the
+    // ViewModel ignores a repeat of the same pair, so a rotation does not
+    // re-fetch. The caller closes this cover when the pebble is deleted, so a
+    // load against a stale id never renders.
+    LaunchedEffect(pebbleId, reloadKey) { viewModel.start(pebbleId, reloadKey) }
 
     BackHandler { onDismiss() }
 
-    // Re-runs on retry (reloadToken++). isLoading gates the spinner; loadError
-    // gates the error view. The caller (PathScreen) closes this cover when the
-    // pebble is deleted, so a load against a stale id never renders.
-    LaunchedEffect(pebbleId, reloadToken, reloadKey) {
-        isLoading = true
-        loadError = false
-        try {
-            detail = detailService.load(pebbleId)
-        } catch (e: Exception) {
-            Log.e(TAG, "pebble detail load failed", e)
-            loadError = true
-        } finally {
-            isLoading = false
-        }
-    }
+    val detail = (uiState as? PebbleDetailUiState.Content)?.detail
 
     // Once loaded, the whole page (top bar + insets included) tints to the
     // emotion palette background (#605); before load / on a cache miss it stays
@@ -141,18 +124,18 @@ fun PebbleDetailScreen(
             onEdit = onEditRequested,
             onShare = onShare,
         )
-        val loaded = detail
-        when {
-            isLoading ->
+        // Exhaustive with no `else`: a new PebbleDetailUiState case must render.
+        when (val state = uiState) {
+            PebbleDetailUiState.Loading ->
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
                     CircularProgressIndicator(color = accent.primary)
                 }
-            loadError || loaded == null ->
-                DetailLoadError(onRetry = { reloadToken++ })
-            else ->
+            PebbleDetailUiState.Error ->
+                DetailLoadError(onRetry = viewModel::retry)
+            is PebbleDetailUiState.Content ->
                 PebbleReadView(
-                    detail = loaded,
-                    palette = palettes.palette(loaded.emotion.id),
+                    detail = state.detail,
+                    palette = palettes.palette(state.detail.emotion.id),
                     modifier = Modifier.fillMaxSize(),
                 )
         }
