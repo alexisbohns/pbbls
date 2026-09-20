@@ -1457,18 +1457,35 @@ Per the repo's formatting-sensitive-catalogs rule, **insert these at the right a
 
 - [ ] **Step 2: Write the bar**
 
+**Icons — already resolved, do not go looking.** The app uses **zero** Material
+Icons; it has its own vector set in `res/drawable/ic_*.xml`, read with
+`painterResource`. So the bar takes a `@DrawableRes Int`, not an `ImageVector`,
+and **`material-icons-extended` must not be added** — it is a large dependency
+and the app has its own visual language.
+
+Four icons already exist and fit exactly:
+
+| Tab | Drawable | Why |
+|---|---|---|
+| Path | `ic_stack` | the stacked-pebble cairn, the app's own metaphor for the timeline |
+| People | `ic_people` | (`ic_person_pair` is the alternative; `ic_people` reads better at bar size) |
+| Collections | `ic_pebble_collection` | the existing collection mark |
+| You | `ic_person` | singular, against People's plural |
+
 ```kotlin
 package app.pbbls.android.navigation
 
+import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import app.pbbls.android.R
+import app.pbbls.android.theme.PebblesText
 
 /**
  * The four top-level destinations (#852, D2).
@@ -1490,25 +1507,29 @@ fun PebblesNavigationBar(
             NavigationBarItem(
                 selected = selected,
                 onClick = { if (selected) onReselect(tab) else onSelect(tab) },
-                icon = { Icon(imageVector = tab.icon(), contentDescription = null) },
-                label = { Text(stringResource(tab.labelRes())) },
+                icon = {
+                    Icon(
+                        painter = painterResource(tab.iconRes()),
+                        contentDescription = null,
+                    )
+                },
+                label = { PebblesText(stringResource(tab.labelRes())) },
             )
         }
     }
 }
-```
 
-Pick the four icons from whatever icon set the app already uses. Check first:
+@DrawableRes
+private fun PebblesKey.iconRes(): Int =
+    when (this) {
+        PebblesKey.Path -> R.drawable.ic_stack
+        PebblesKey.People -> R.drawable.ic_people
+        PebblesKey.Collections -> R.drawable.ic_pebble_collection
+        PebblesKey.You -> R.drawable.ic_person
+        else -> error("$this is not a tab")
+    }
 
-```bash
-grep -rn "Icons\.\|painterResource(R.drawable" apps/android/app/src/main/kotlin/app/pbbls/android/features/profile/components/ | head
-```
-
-If the app uses its own drawables (likely, given the design system), add `tab.icon()` as a `@Composable` returning `painterResource(...)` and adjust `Icon` accordingly. **Do not introduce `material-icons-extended`** for this — it is a large dependency and the app has its own visual language.
-
-Add the two extension functions at the bottom of the file:
-
-```kotlin
+@StringRes
 private fun PebblesKey.labelRes(): Int =
     when (this) {
         PebblesKey.Path -> R.string.tab_path
@@ -1518,6 +1539,19 @@ private fun PebblesKey.labelRes(): Int =
         else -> error("$this is not a tab")
     }
 ```
+
+**`PebblesText`, not raw `Text`** — the repo rule is that uppercase typography
+tokens only get their case transform through `PebblesText`. Check its signature
+before using it; if it does not take a bare `String` plus a style, match however
+the rest of the app calls it.
+
+**The bar's own colours.** `NavigationBar` defaults to Material 3 colour roles,
+which the app deliberately does not use (M38 D6 — Material 3 is the rendering
+engine only, no Material colour roles in app code). Pass
+`NavigationBarDefaults`/`NavigationBarItemDefaults` colours built from
+`PebblesTheme.colors` so the bar matches the app rather than Material's palette.
+Read `PebblesTheme.colors.system.*` and `.accent.*` and pick the closest
+existing tokens; do not invent new ones.
 
 - [ ] **Step 3: Build and commit**
 
