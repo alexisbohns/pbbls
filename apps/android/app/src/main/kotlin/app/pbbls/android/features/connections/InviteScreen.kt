@@ -70,7 +70,6 @@ fun InviteScreen(
     LaunchedEffect(Unit) { viewModel.start() }
 
     fun dismiss() {
-        viewModel.finish()
         onDismiss()
     }
 

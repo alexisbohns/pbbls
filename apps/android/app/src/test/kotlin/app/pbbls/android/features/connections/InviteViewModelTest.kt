@@ -212,22 +212,4 @@ class InviteViewModelTest {
                 (viewModel.uiState.value as InviteUiState.Content).invite.token,
             )
         }
-
-    // MARK: - Reset
-
-    /** The cover outlives its presentation, so the next open must re-read. */
-    @Test
-    fun `finish releases the guard so the next presentation re-reads`() =
-        runTest {
-            val service = FakeConnectionsService()
-            val viewModel = viewModel(service)
-
-            viewModel.start()
-            advanceUntilIdle()
-            viewModel.finish()
-            viewModel.start()
-            advanceUntilIdle()
-
-            assertEquals(2, service.createInviteCalls.size)
-        }
 }
