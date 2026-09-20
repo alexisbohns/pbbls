@@ -111,8 +111,8 @@ real settings exist), `android-skills:rxjava-migration`,
   `LocalSnapURLCache` carry ambient reference data read by *leaf* components
   (`PathPebbleRow`, `ValenceGlyph`, `WeekHeader`, the pickers), which is what a
   `CompositionLocal` is for; they stay (decision log, 2026-09-20). `ServiceGraph`
-  is down to 10 entries and dies once `GlyphPickerSheet` and `RootScreen` have
-  ViewModels. Write new screens against `hiltViewModel()`, never against a local,
+  is down to 10 entries and dies in **#852**, which carries the `RootScreen` and
+  `GlyphPickerSheet` migrations as folded-in scope. Write new screens against `hiltViewModel()`, never against a local,
   and do not add an entry to `ServiceGraph`.
 - **Log, don't swallow.** Use `android.util.Log` (or a thin logger) with a
   consistent tag on every error path — mirror the web/iOS discipline that silent

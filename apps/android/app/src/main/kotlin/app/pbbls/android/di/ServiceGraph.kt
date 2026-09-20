@@ -34,9 +34,11 @@ import javax.inject.Singleton
  *   overlay hosts take the service object rather than its state.
  * - **`achievements`** is three scattered `fireCheck()` calls.
  *
- * So this file dies when `GlyphPickerSheet` and `RootScreen` are migrated and
- * the three `fireCheck()` calls become lambdas — not before, and the remaining
- * three locals are meant to outlive it.
+ * So this file dies in **#852**, which owns all three: it rewrites `RootScreen`
+ * (auth becomes a condition, not a branch), promotes `GlyphCarve` to a nav entry
+ * and carries the `GlyphPickerSheet` migration and the `fireCheck()` lambdas as
+ * folded-in scope. Not before — and the three ambient locals above are meant to
+ * outlive it.
  *
  * **Do not copy this pattern.** New code takes its dependencies by constructor
  * (`@Inject`) or through `hiltViewModel()`. Nothing should ever inject
