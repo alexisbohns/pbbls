@@ -62,14 +62,15 @@ private const val TAG = "glyph-detail"
 fun GlyphDetailDrawer(
     item: GlyphGridItem,
     balance: Int,
-    onSwapped: (BuyGlyphResult) -> Unit,
+    onRecorded: (BuyGlyphResult) -> Unit,
+    onSwapped: (BuyGlyphResult) -> Unit = {},
     onDismiss: () -> Unit,
 ) {
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     ) {
-        GlyphSwapPanel(item = item, balance = balance, onSwapped = onSwapped)
+        GlyphSwapPanel(item = item, balance = balance, onRecorded = onRecorded, onSwapped = onSwapped)
     }
 }
 
@@ -82,7 +83,18 @@ fun GlyphDetailDrawer(
 internal fun GlyphSwapPanel(
     item: GlyphGridItem,
     balance: Int,
-    onSwapped: (BuyGlyphResult) -> Unit,
+    /**
+     * Runs inside the uncancellable section — see [GlyphPurchase]. Record only:
+     * the new balance, caches that now disagree with the server. Never
+     * navigate, dismiss or select from here.
+     */
+    onRecorded: (BuyGlyphResult) -> Unit,
+    /**
+     * Runs after, in the gesture's own scope, and is therefore skipped when the
+     * user has walked away — which is exactly right for "select this glyph and
+     * hand control back to the caller".
+     */
+    onSwapped: (BuyGlyphResult) -> Unit = {},
 ) {
     val market = LocalGlyphMarketService.current
 
@@ -102,21 +114,28 @@ internal fun GlyphSwapPanel(
         onConfirm = {
             isBuying = true
             errorRes = null
-            try {
-                val result = market.buy(item.glyph.id)
-                currentBalance = result.balance
-                // iOS stamps the client's now, not a server timestamp.
-                acquiredAt = OffsetDateTime.now()
-                isOwned = true
-                onSwapped(result)
-                true
-            } catch (e: Exception) {
-                Log.e(TAG, "glyph swap failed", e)
-                errorRes = glyphMarketErrorMessage(e.toDataError())
-                false
-            } finally {
-                isBuying = false
-            }
+            val result =
+                GlyphPurchase.buyAndRecord(
+                    market = market,
+                    glyphId = item.glyph.id,
+                    onRecorded = { landed ->
+                        currentBalance = landed.balance
+                        // iOS stamps the client's now, not a server timestamp.
+                        acquiredAt = OffsetDateTime.now()
+                        isOwned = true
+                        onRecorded(landed)
+                    },
+                    onError = { e ->
+                        Log.e(TAG, "glyph swap failed", e)
+                        errorRes = glyphMarketErrorMessage(e.toDataError())
+                    },
+                )
+            isBuying = false
+            // Outside the uncancellable section on purpose: a host that reacts
+            // by selecting the glyph into a form must not do so once the user
+            // has dismissed the sheet.
+            result?.let(onSwapped)
+            result != null
         },
     )
 }

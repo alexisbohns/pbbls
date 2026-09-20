@@ -1,10 +1,10 @@
 package app.pbbls.android.di
 
-import app.pbbls.android.features.glyph.services.GlyphMarketService
-import app.pbbls.android.features.glyph.services.GlyphService
+import app.pbbls.android.features.glyph.services.GlyphMarketServicing
+import app.pbbls.android.features.glyph.services.GlyphServicing
 import app.pbbls.android.features.karma.AchievementNotificationService
 import app.pbbls.android.features.karma.KarmaNotificationService
-import app.pbbls.android.features.lab.services.LogsService
+import app.pbbls.android.features.lab.services.LogsServicing
 import app.pbbls.android.features.path.valence.ValencePrewarmer
 import app.pbbls.android.features.pebblemedia.SnapProcessor
 import app.pbbls.android.services.AchievementsServicing
@@ -60,9 +60,9 @@ class ServiceGraph
         val draftsService: PebbleDraftsServicing,
         val connectionsService: ConnectionsServicing,
         val composerSnapshots: ComposerSnapshotStoring,
-        val glyphService: GlyphService,
-        val glyphMarket: GlyphMarketService,
-        val logsService: LogsService,
+        val glyphService: GlyphServicing,
+        val glyphMarket: GlyphMarketServicing,
+        val logsService: LogsServicing,
         val karma: KarmaNotificationService,
         val achievementNotify: AchievementNotificationService,
         val achievements: AchievementsServicing,

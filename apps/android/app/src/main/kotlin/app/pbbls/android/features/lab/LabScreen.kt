@@ -24,13 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +32,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.features.lab.components.AnnouncementRow
 import app.pbbls.android.features.lab.components.FeaturedCommunityCard
@@ -45,22 +42,14 @@ import app.pbbls.android.features.lab.components.LogTimeline
 import app.pbbls.android.features.lab.components.LogTimelineMode
 import app.pbbls.android.features.lab.models.LabConfig
 import app.pbbls.android.features.lab.models.Log
-import app.pbbls.android.features.lab.models.ReactionToggle
-import app.pbbls.android.features.lab.services.LocalLogsService
 import app.pbbls.android.theme.PebblesScreen
 import app.pbbls.android.theme.PebblesSectionHeader
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar
 import app.pbbls.android.theme.PebblesTypography
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 
 private const val TAG = "lab"
-
-/** Lab-screen limit for changelog + backlog; announcements/initiatives are unlimited (iOS `feedLimit`). */
-private const val FEED_LIMIT = 5
 
 /**
  * The Lab — ports iOS `LabView` (M44 design D3/D9): five concurrent fetches
@@ -77,89 +66,40 @@ private const val FEED_LIMIT = 5
 fun LabScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: LabViewModel = hiltViewModel(),
 ) {
-    val logsService = LocalLogsService.current
-    val scope = rememberCoroutineScope()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val covers by viewModel.covers.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val system = PebblesTheme.colors.system
 
-    var announcements by remember { mutableStateOf<List<Log>>(emptyList()) }
-    var changelog by remember { mutableStateOf<List<Log>>(emptyList()) }
-    var initiatives by remember { mutableStateOf<List<Log>>(emptyList()) }
-    var backlog by remember { mutableStateOf<List<Log>>(emptyList()) }
-    var reactedIds by remember { mutableStateOf<Set<String>>(emptySet()) }
-    var isLoading by remember { mutableStateOf(true) }
-    var allFeedsFailed by remember { mutableStateOf(false) }
-    var loadKey by remember { mutableIntStateOf(0) }
-    var openAnnouncement by remember { mutableStateOf<Log?>(null) }
-    var seeAllMode by remember { mutableStateOf<LogListMode?>(null) }
-
-    LaunchedEffect(loadKey) {
-        isLoading = true
-        allFeedsFailed = false
-        coroutineScope {
-            val ann = async { fetchOrNull("announcements") { logsService.announcements() } }
-            val chg = async { fetchOrNull("changelog") { logsService.changelog(limit = FEED_LIMIT) } }
-            val ini = async { fetchOrNull("initiatives") { logsService.initiatives() } }
-            val bck = async { fetchOrNull("backlog") { logsService.backlog(limit = FEED_LIMIT) } }
-            val rea = async { fetchOrNull("reactions") { logsService.myReactions() } }
-            val annR = ann.await()
-            val chgR = chg.await()
-            val iniR = ini.await()
-            val bckR = bck.await()
-            allFeedsFailed = annR == null && chgR == null && iniR == null && bckR == null
-            announcements = annR.orEmpty()
-            changelog = chgR.orEmpty()
-            initiatives = iniR.orEmpty()
-            backlog = bckR.orEmpty()
-            reactedIds = rea.await() ?: emptySet()
-        }
-        isLoading = false
-    }
-
-    fun toggleReaction(log: Log) {
-        val before = ReactionToggle.State(reactedIds = reactedIds, logs = backlog)
-        val wasReacted = ReactionToggle.wasReacted(before, log.id)
-        val next = ReactionToggle.toggle(before, log.id)
-        reactedIds = next.reactedIds
-        backlog = next.logs
-        scope.launch {
-            try {
-                if (wasReacted) logsService.unreact(log.id) else logsService.react(log.id)
-            } catch (e: Exception) {
-                android.util.Log.e(TAG, "reaction toggle failed", e)
-                val reverted =
-                    ReactionToggle.revert(
-                        ReactionToggle.State(reactedIds = reactedIds, logs = backlog),
-                        log.id,
-                        wasReacted,
-                    )
-                reactedIds = reverted.reactedIds
-                backlog = reverted.logs
-            }
-        }
+    // Coming back from a pushed screen must re-read the feeds: the ViewModel is
+    // scoped to the back stack entry, which survives that round trip.
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onResumed()
+        onPauseOrDispose {}
     }
 
     // Content swaps unwind before the route itself pops (design D9).
-    val announcement = openAnnouncement
-    val listMode = seeAllMode
+    val announcement = covers.openAnnouncement
+    val listMode = covers.seeAllMode
     BackHandler(enabled = announcement != null || listMode != null) {
-        if (announcement != null) openAnnouncement = null else seeAllMode = null
+        if (announcement != null) viewModel.closeAnnouncement() else viewModel.closeSeeAll()
     }
 
     when {
         announcement != null ->
             AnnouncementDetailScreen(
                 log = announcement,
-                coverUrl = logsService.coverImageUrl(announcement),
-                onBack = { openAnnouncement = null },
+                coverUrl = viewModel.coverImageUrl(announcement),
+                onBack = viewModel::closeAnnouncement,
                 modifier = modifier,
             )
 
         listMode != null ->
             LogListScreen(
                 mode = listMode,
-                onBack = { seeAllMode = null },
+                onBack = viewModel::closeSeeAll,
                 modifier = modifier,
             )
 
@@ -182,24 +122,25 @@ fun LabScreen(
                     )
                 },
             ) {
-                when {
-                    isLoading ->
+                // Exhaustive with no `else`: a new LabUiState case must be rendered.
+                when (val state = uiState) {
+                    LabUiState.Loading ->
                         Box(Modifier.fillMaxSize(), Alignment.Center) {
                             CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
                         }
 
-                    allFeedsFailed ->
+                    is LabUiState.Error ->
                         Column(
                             modifier = Modifier.fillMaxSize(),
                             verticalArrangement = Arrangement.Center,
                             horizontalAlignment = Alignment.CenterHorizontally,
                         ) {
                             PebblesText(
-                                text = stringResource(R.string.lab_load_error),
+                                text = stringResource(state.messageRes),
                                 style = PebblesTypography.body,
                                 color = system.secondary,
                             )
-                            TextButton(onClick = { loadKey++ }) {
+                            TextButton(onClick = viewModel::retry) {
                                 PebblesText(
                                     text = stringResource(R.string.profile_retry),
                                     style = PebblesTypography.buttonLabel,
@@ -208,19 +149,15 @@ fun LabScreen(
                             }
                         }
 
-                    else ->
+                    is LabUiState.Content ->
                         LabContent(
-                            announcements = announcements,
-                            changelog = changelog,
-                            initiatives = initiatives,
-                            backlog = backlog,
-                            reactedIds = reactedIds,
-                            coverUrl = { logsService.coverImageUrl(it) },
-                            onOpenAnnouncement = { openAnnouncement = it },
-                            onToggleReaction = { toggleReaction(it) },
+                            state = state,
+                            coverUrl = viewModel::coverImageUrl,
+                            onOpenAnnouncement = viewModel::openAnnouncement,
+                            onToggleReaction = viewModel::toggleReaction,
                             onOpenCommunity = { openCommunityInvite(context) },
-                            onSeeAllChangelog = { seeAllMode = LogListMode.CHANGELOG },
-                            onSeeAllBacklog = { seeAllMode = LogListMode.BACKLOG },
+                            onSeeAllChangelog = { viewModel.openSeeAll(LogListMode.CHANGELOG) },
+                            onSeeAllBacklog = { viewModel.openSeeAll(LogListMode.BACKLOG) },
                         )
                 }
             }
@@ -234,11 +171,7 @@ fun LabScreen(
  */
 @Composable
 fun LabContent(
-    announcements: List<Log>,
-    changelog: List<Log>,
-    initiatives: List<Log>,
-    backlog: List<Log>,
-    reactedIds: Set<String>,
+    state: LabUiState.Content,
     coverUrl: (Log) -> String?,
     onOpenAnnouncement: (Log) -> Unit,
     onToggleReaction: (Log) -> Unit,
@@ -259,38 +192,38 @@ fun LabContent(
     ) {
         FeaturedCommunityCard(onOpen = onOpenCommunity)
 
-        if (announcements.isNotEmpty()) {
+        if (state.announcements.isNotEmpty()) {
             LabSection(title = stringResource(R.string.lab_section_announcements)) {
-                announcements.forEachIndexed { index, log ->
+                state.announcements.forEachIndexed { index, log ->
                     AnnouncementRow(
                         log = log,
                         coverUrl = coverUrl(log),
                         onTap = { onOpenAnnouncement(log) },
                     )
-                    if (index != announcements.lastIndex) HorizontalDivider(color = system.muted)
+                    if (index != state.announcements.lastIndex) HorizontalDivider(color = system.muted)
                 }
             }
         }
 
-        if (changelog.isNotEmpty()) {
+        if (state.changelog.isNotEmpty()) {
             LabSection(title = stringResource(R.string.lab_section_changelog)) {
-                LogTimeline(mode = LogTimelineMode.CHANGELOG, logs = changelog)
+                LogTimeline(mode = LogTimelineMode.CHANGELOG, logs = state.changelog)
                 SeeAllLink(onTap = onSeeAllChangelog)
             }
         }
 
-        if (initiatives.isNotEmpty()) {
+        if (state.initiatives.isNotEmpty()) {
             LabSection(title = stringResource(R.string.lab_section_in_progress)) {
-                LogTimeline(mode = LogTimelineMode.IN_PROGRESS, logs = initiatives)
+                LogTimeline(mode = LogTimelineMode.IN_PROGRESS, logs = state.initiatives)
             }
         }
 
-        if (backlog.isNotEmpty()) {
+        if (state.backlog.isNotEmpty()) {
             LabSection(title = stringResource(R.string.lab_section_backlog)) {
                 LogTimeline(
                     mode = LogTimelineMode.BACKLOG,
-                    logs = backlog,
-                    reactedIds = reactedIds,
+                    logs = state.backlog,
+                    reactedIds = state.reactedIds,
                     onToggleReaction = onToggleReaction,
                 )
                 SeeAllLink(onTap = onSeeAllBacklog)

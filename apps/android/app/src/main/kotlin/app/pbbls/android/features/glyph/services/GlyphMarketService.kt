@@ -20,18 +20,35 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
+ * The glyph-market seam (#849) — what the store's ViewModel is tested against.
+ *
+ * [buy] is the one call in this app that spends the user's karma, so its test
+ * is the reason this interface exists.
+ */
+interface GlyphMarketServicing {
+    suspend fun listMine(): List<GlyphGridItem>
+
+    suspend fun listOwned(): List<GlyphGridItem>
+
+    suspend fun listCommunity(): List<GlyphGridItem>
+
+    suspend fun buy(glyphId: String): BuyGlyphResult
+}
+
+/**
  * Market reads + the `buy_glyph` purchase — ports iOS `GlyphMarketService`
  * (M43 design D4/D9). Three PostgREST reads (no RPCs) and one RPC whose
  * scalar jsonb result decodes directly (never a single-row accessor).
  * Methods throw; callers own view state and map errors through
  * [glyphMarketErrorMessage].
  */
+
 @Singleton
 class GlyphMarketService
     @Inject
     constructor(
         private val supabase: SupabaseService,
-    ) {
+    ) : GlyphMarketServicing {
         /**
          * The Mine tab: the caller's creations (newest first, price from the
          * embedded approved+listed submission) THEN system glyphs — Android keeps
@@ -39,7 +56,7 @@ class GlyphMarketService
          * `eq(user_id, me)` which silently drops them) — membership is
          * `is_system`, not a null owner (#872).
          */
-        suspend fun listMine(): List<GlyphGridItem> {
+        override suspend fun listMine(): List<GlyphGridItem> {
             val me = requireUserId()
             val rows =
                 supabase.client
@@ -64,7 +81,7 @@ class GlyphMarketService
         }
 
         /** The Owned tab: entitlements (RLS-scoped — no user filter), newest acquisition first. */
-        suspend fun listOwned(): List<GlyphGridItem> =
+        override suspend fun listOwned(): List<GlyphGridItem> =
             supabase.client
                 .from("glyph_entitlements")
                 .select(
@@ -89,7 +106,7 @@ class GlyphMarketService
          * view does NOT exclude them — the `.neq` is load-bearing). The picker
          * additionally client-filters `!owned` (design D10).
          */
-        suspend fun listCommunity(): List<GlyphGridItem> {
+        override suspend fun listCommunity(): List<GlyphGridItem> {
             val me = requireUserId()
             return supabase.client
                 .from("v_glyph_market")
@@ -115,7 +132,7 @@ class GlyphMarketService
          * (`insufficient_karma` bubbles from `spend_karma`); the message must
          * reach the caller intact for [glyphMarketErrorMessage]'s substring match.
          */
-        suspend fun buy(glyphId: String): BuyGlyphResult =
+        override suspend fun buy(glyphId: String): BuyGlyphResult =
             supabase.client.postgrest
                 .rpc(
                     "buy_glyph",
@@ -173,6 +190,6 @@ fun glyphMarketErrorMessage(error: DataError): Int =
 
 /** CompositionLocal for [GlyphMarketService] — see [LocalSupabaseService]. */
 val LocalGlyphMarketService =
-    staticCompositionLocalOf<GlyphMarketService> {
+    staticCompositionLocalOf<GlyphMarketServicing> {
         error("LocalGlyphMarketService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

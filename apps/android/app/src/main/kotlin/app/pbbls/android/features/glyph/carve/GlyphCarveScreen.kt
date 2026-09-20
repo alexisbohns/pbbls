@@ -1,6 +1,5 @@
 package app.pbbls.android.features.glyph.carve
 
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -31,7 +30,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,12 +49,12 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.features.glyph.models.Glyph
 import app.pbbls.android.features.glyph.models.GlyphStroke
-import app.pbbls.android.features.glyph.services.LocalGlyphService
 import app.pbbls.android.features.path.render.GlyphImage
-import app.pbbls.android.services.LocalAchievementsService
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesScreen
 import app.pbbls.android.theme.PebblesText
@@ -64,7 +62,7 @@ import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar
 import app.pbbls.android.theme.PebblesTopBarTextButton
 import app.pbbls.android.theme.PebblesTypography
-import kotlinx.coroutines.launch
+import app.pbbls.android.ui.ObserveUiEffects
 
 private const val TAG = "glyph-carve"
 
@@ -88,41 +86,19 @@ fun GlyphCarveScreen(
     onSaved: (Glyph) -> Unit,
     onCancel: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: GlyphCarveViewModel = hiltViewModel(),
 ) {
-    val glyphService = LocalGlyphService.current
-    val achievements = LocalAchievementsService.current
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val system = PebblesTheme.colors.system
-    val scope = rememberCoroutineScope()
 
-    var name by remember { mutableStateOf("") }
-    var strokes by remember { mutableStateOf<List<GlyphStroke>>(emptyList()) }
-    var isSaving by remember { mutableStateOf(false) }
-    var showSaveError by remember { mutableStateOf(false) }
-    var showDiscardAlert by remember { mutableStateOf(false) }
-
-    fun cancel() {
-        if (isSaving) return
-        if (strokes.isEmpty()) onCancel() else showDiscardAlert = true
-    }
-
-    fun save() {
-        if (strokes.isEmpty() || isSaving) return
-        scope.launch {
-            isSaving = true
-            showSaveError = false
-            try {
-                val glyph = glyphService.create(strokes = strokes, name = name)
-                achievements.fireCheck()
-                onSaved(glyph)
-            } catch (e: Exception) {
-                Log.e(TAG, "glyph save failed", e)
-                showSaveError = true
-                isSaving = false
-            }
+    ObserveUiEffects(viewModel.effects) { effect ->
+        when (effect) {
+            is GlyphCarveEffect.Saved -> onSaved(effect.glyph)
+            GlyphCarveEffect.Cancelled -> onCancel()
         }
     }
 
-    BackHandler(enabled = !isSaving) { cancel() }
+    BackHandler(enabled = !uiState.isSaving) { viewModel.onCancelRequested() }
 
     PebblesScreen(
         modifier = modifier.background(system.background),
@@ -132,11 +108,11 @@ fun GlyphCarveScreen(
                 leading = {
                     PebblesTopBarTextButton(
                         text = stringResource(R.string.action_cancel),
-                        onClick = { cancel() },
+                        onClick = viewModel::onCancelRequested,
                     )
                 },
                 trailing = {
-                    if (isSaving) {
+                    if (uiState.isSaving) {
                         CircularProgressIndicator(
                             color = PebblesTheme.colors.accent.primary,
                             strokeWidth = 2.dp,
@@ -145,9 +121,9 @@ fun GlyphCarveScreen(
                     } else {
                         PebblesTopBarTextButton(
                             text = stringResource(R.string.action_save),
-                            onClick = { save() },
-                            enabled = strokes.isNotEmpty(),
-                            color = if (strokes.isNotEmpty()) system.secondary else system.muted,
+                            onClick = viewModel::save,
+                            enabled = uiState.canSave,
+                            color = if (uiState.canSave) system.secondary else system.muted,
                         )
                     }
                 },
@@ -166,8 +142,8 @@ fun GlyphCarveScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             BasicTextField(
-                value = name,
-                onValueChange = { name = it },
+                value = uiState.name,
+                onValueChange = viewModel::onNameChange,
                 singleLine = true,
                 textStyle =
                     PebblesTypography.title.copy(
@@ -178,7 +154,7 @@ fun GlyphCarveScreen(
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                 decorationBox = { inner ->
                     Box(contentAlignment = Alignment.Center) {
-                        if (name.isEmpty()) {
+                        if (uiState.name.isEmpty()) {
                             PebblesText(
                                 text = stringResource(R.string.carve_name_placeholder),
                                 style = PebblesTypography.title,
@@ -193,11 +169,11 @@ fun GlyphCarveScreen(
             )
 
             CarveCanvas(
-                strokes = strokes,
-                onStrokeCommitted = { stroke -> strokes = strokes + stroke },
+                strokes = uiState.strokes,
+                onStrokeCommitted = { stroke -> viewModel.onStrokesChange(uiState.strokes + stroke) },
             )
 
-            if (showSaveError) {
+            if (uiState.didSaveFail) {
                 PebblesText(
                     text = stringResource(R.string.carve_save_error),
                     style = PebblesTypography.callout,
@@ -209,22 +185,22 @@ fun GlyphCarveScreen(
                 CarvePillButton(
                     iconRes = R.drawable.ic_undo,
                     label = stringResource(R.string.carve_undo),
-                    enabled = strokes.isNotEmpty(),
-                    onClick = { strokes = strokes.dropLast(1) },
+                    enabled = uiState.strokes.isNotEmpty(),
+                    onClick = { viewModel.onStrokesChange(uiState.strokes.dropLast(1)) },
                 )
                 CarvePillButton(
                     iconRes = R.drawable.ic_trash,
                     label = stringResource(R.string.carve_clear),
-                    enabled = strokes.isNotEmpty(),
-                    onClick = { strokes = emptyList() },
+                    enabled = uiState.strokes.isNotEmpty(),
+                    onClick = { viewModel.onStrokesChange(emptyList()) },
                 )
             }
         }
     }
 
-    if (showDiscardAlert) {
+    if (uiState.isConfirmingDiscard) {
         AlertDialog(
-            onDismissRequest = { showDiscardAlert = false },
+            onDismissRequest = viewModel::dismissDiscard,
             containerColor = system.background,
             title = {
                 PebblesText(
@@ -234,12 +210,7 @@ fun GlyphCarveScreen(
                 )
             },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        showDiscardAlert = false
-                        onCancel()
-                    },
-                ) {
+                TextButton(onClick = viewModel::confirmDiscard) {
                     PebblesText(
                         text = stringResource(R.string.carve_discard),
                         style = PebblesTypography.buttonLabel,
@@ -248,7 +219,7 @@ fun GlyphCarveScreen(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showDiscardAlert = false }) {
+                TextButton(onClick = viewModel::dismissDiscard) {
                     PebblesText(
                         text = stringResource(R.string.carve_keep_editing),
                         style = PebblesTypography.buttonLabel,

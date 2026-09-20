@@ -34,8 +34,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import app.pbbls.android.R
 import app.pbbls.android.features.glyph.carve.GlyphCarveScreen
+import app.pbbls.android.features.glyph.carve.GlyphCarveViewModel
 import app.pbbls.android.features.glyph.models.Glyph
 import app.pbbls.android.features.glyph.models.GlyphGridItem
 import app.pbbls.android.features.glyph.services.LocalGlyphMarketService
@@ -178,6 +180,18 @@ fun GlyphPickerContent(
         }
     }
 
+    // The carve surface owns its strokes in a ViewModel now (#849), and this
+    // picker closes that surface by flipping `isCarving` — through `unwind()`
+    // for a dismiss gesture, a scrim tap or the record flow stepping back —
+    // without ever reaching the screen's own cancel path. This is the same
+    // instance `GlyphCarveScreen` resolves, so releasing it here is what keeps
+    // an abandoned drawing from surfacing under the next carve. Idempotent
+    // after a save or a discard.
+    val carveViewModel: GlyphCarveViewModel = hiltViewModel()
+    LaunchedEffect(state.isCarving) {
+        if (!state.isCarving) carveViewModel.reset()
+    }
+
     /** Every select leaves the picker showing its grid — see [GlyphPickerState]. */
     fun select(glyph: Glyph) {
         state.reset()
@@ -210,13 +224,20 @@ fun GlyphPickerContent(
                 GlyphSwapPanel(
                     item = buyingItem,
                     balance = stats.karma ?: 0,
-                    onSwapped = { result ->
-                        stats.applyKarmaBalance(result.balance)
+                    // The balance is a record of the purchase, so it runs inside
+                    // the uncancellable section and survives the sheet closing.
+                    onRecorded = { result -> stats.applyKarmaBalance(result.balance) },
+                    onSwapped = {
                         // First successful swap selects and hands control back to
                         // the call site (iOS parity). `select` closes the panel
                         // first: the panel flips to its owned state rather than
                         // dismissing itself, so a caller that does not dismiss
                         // would otherwise be left holding it.
+                        //
+                        // Deliberately OUTSIDE the uncancellable section: this
+                        // writes into the form that opened the picker, and a
+                        // user who dismissed the sheet mid-buy must not find
+                        // their profile glyph silently changed.
                         select(buyingItem.glyph)
                     },
                 )
