@@ -1009,6 +1009,7 @@ import androidx.compose.runtime.saveable.rememberSerializable
 import androidx.compose.runtime.setValue
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberDecoratedNavEntries
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
@@ -1031,16 +1032,23 @@ import androidx.savedstate.compose.serialization.serializers.MutableStateSeriali
 class NavigationState(
     val startRoute: PebblesKey,
     topLevelRoute: MutableState<PebblesKey>,
-    val backStacks: Map<PebblesKey, NavBackStack<PebblesKey>>,
+    val backStacks: Map<PebblesKey, NavBackStack<NavKey>>,
 ) {
     var topLevelRoute: PebblesKey by topLevelRoute
 
     /** The stack the user is currently in. Modals are pushed here (D6). */
-    val currentStack: NavBackStack<PebblesKey>
+    val currentStack: NavBackStack<NavKey>
         get() = backStacks[topLevelRoute] ?: error("No stack for $topLevelRoute")
 
-    /** The key on top of everything — what the bar check reads. */
-    val topKey: PebblesKey
+    /**
+     * The key on top of everything — what the bar check reads.
+     *
+     * Typed [NavKey], not [PebblesKey], and deliberately NOT cast: `topKey is
+     * BarKey` and `topKey == PebblesKey.Path` both work on a `NavKey`, because
+     * [BarKey] is a marker unrelated to the stack's element type. A cast here
+     * would buy nothing and could throw.
+     */
+    val topKey: NavKey
         get() = currentStack.last()
 
     /**
@@ -1055,7 +1063,7 @@ class NavigationState(
     fun topLevelRoutesInUse(): List<PebblesKey> = if (topLevelRoute == startRoute) listOf(startRoute) else listOf(startRoute, topLevelRoute)
 
     @Composable
-    fun toDecoratedEntries(entryProvider: (PebblesKey) -> NavEntry<PebblesKey>): List<NavEntry<PebblesKey>> {
+    fun toDecoratedEntries(entryProvider: (NavKey) -> NavEntry<NavKey>): List<NavEntry<NavKey>> {
         val decorated =
             backStacks.mapValues { (_, stack) ->
                 rememberDecoratedNavEntries(
@@ -1084,7 +1092,7 @@ fun rememberNavigationState(
             serializer = MutableStateSerializer(NavKeySerializer()),
         ) { mutableStateOf<PebblesKey>(startRoute) }
 
-    val backStacks = tabs.associateWith { key -> rememberNavBackStack<PebblesKey>(key) }
+    val backStacks = tabs.associateWith { key -> rememberNavBackStack(key) }
 
     return remember(startRoute, tabs) {
         NavigationState(startRoute = startRoute, topLevelRoute = topLevelRoute, backStacks = backStacks)
@@ -1098,6 +1106,18 @@ Run: `npm run build --workspace=@pbbls/android`
 Expected: `BUILD SUCCESSFUL`.
 
 `rememberSerializable` and `MutableStateSerializer` come from `androidx.savedstate`, which arrives transitively with `lifecycle-viewmodel-savedstate`. If they do not resolve, add `androidx-savedstate-compose` to the catalog rather than hand-rolling a `Saver` — a hand-rolled one will silently drop the tab on process death.
+
+**Why the stacks are typed `NavBackStack<NavKey>` and not `NavBackStack<PebblesKey>`.**
+Verified against the 1.1.7 artifact during Part 1: both `rememberNavBackStack`
+overloads are fixed to `NavBackStack<NavKey>` — there is no reified per-call
+generic. The `NavBackStack` *class* is generic (`NavBackStack<T : NavKey>`), but
+the saveable composable that builds one is not, because it restores through a
+reflection-based serializer.
+
+This costs nothing in practice: [Navigator] is the only writer and its `navigate`
+/ `replaceAll` take a `PebblesKey`, so every element on every stack is a
+`PebblesKey` by construction, and callers keep full compile-time safety. Only the
+storage type is widened. Do not "fix" this with a cast.
 
 - [ ] **Step 3: Commit**
 
@@ -1135,6 +1155,7 @@ Create `app/src/test/kotlin/app/pbbls/android/navigation/NavigatorTest.kt`:
 package app.pbbls.android.navigation
 
 import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -1157,7 +1178,7 @@ class NavigatorTest {
             NavigationState(
                 startRoute = PebblesKey.Path,
                 topLevelRoute = androidx.compose.runtime.mutableStateOf(PebblesKey.Path),
-                backStacks = PebblesKey.tabs.associateWith { NavBackStack(it) },
+                backStacks = PebblesKey.tabs.associateWith { NavBackStack<NavKey>(it) },
             )
         navigator = Navigator(state)
     }
@@ -1363,7 +1384,10 @@ class Navigator(val state: NavigationState) {
 - [ ] **Step 4: Run the tests**
 
 Run: `npm run test --workspace=@pbbls/android -- --tests '*NavigatorTest*'`
-Expected: PASS, 10 tests. If `NavBackStack(it)` is not a valid constructor on the JVM, substitute whatever `rememberNavBackStack` wraps — check with `./gradlew :app:dependencies` and read the artifact. Do **not** replace `NavBackStack` with a plain `mutableStateListOf` in the test: the test would then stop exercising the type the production code uses.
+Expected: PASS, 10 tests. `NavBackStack<T : NavKey>` has a `vararg T` constructor
+(verified in the 1.1.7 artifact), so `NavBackStack<NavKey>(it)` is valid on the
+JVM. Do **not** replace it with a plain `mutableStateListOf`: the test would then
+stop exercising the type the production code uses.
 
 - [ ] **Step 5: Commit**
 
