@@ -19,6 +19,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.features.profile.components.ProfileAchievementsCard
@@ -42,9 +43,13 @@ import app.pbbls.android.theme.PebblesTypography
  * collections carousel (header → list, card → detail, empty tile → the create
  * form as a cover), and log out, with the gear button opening [SettingsScreen]
  * as a full-screen cover (the D5 surface pattern), and the Lab card (M44 —
- * the last M41 D11 reversal) pushing the Lab. Navigating away disposes this
- * destination, so returning re-runs the load — the carousel stays fresh after
- * edits in the pushed screens.
+ * the last M41 D11 reversal) pushing the Lab.
+ *
+ * Returning from a pushed screen refreshes through [ProfileViewModel.onResumed].
+ * This comment used to say navigating away disposed the destination so returning
+ * re-ran the load — true while the state lived in `remember`, and false from
+ * #893 onward: the ViewModel is scoped to the `NavBackStackEntry`, which
+ * survives the round trip.
  *
  * Deviation from iOS (design D13): a failed profile fetch shows the standard
  * error + Retry treatment instead of iOS's silent empty banner.
@@ -67,6 +72,13 @@ fun ProfileScreen(
     val covers by viewModel.covers.collectAsStateWithLifecycle()
     val supabase = LocalSupabaseService.current
     val system = PebblesTheme.colors.system
+
+    // Coming back from a pushed screen must re-read the page: the ViewModel is
+    // scoped to the back stack entry, which survives that round trip.
+    LifecycleResumeEffect(viewModel) {
+        viewModel.onResumed()
+        onPauseOrDispose {}
+    }
 
     PebblesScreen(
         modifier = modifier,

@@ -89,6 +89,10 @@ fun RootScreen() {
     var hasSeenOnboarding by rememberSaveable { mutableStateOf(OnboardingPreferences.hasSeenOnboarding(context)) }
     var isPresentingOnboarding by rememberSaveable { mutableStateOf(false) }
 
+    // Distinguishes "signed out" from "auth has not resolved yet", which are the
+    // same `userId == null` to everything above.
+    var hasHadSession by rememberSaveable { mutableStateOf(false) }
+
     // supabase.start() collects the auth-status stream for the app's lifetime.
     LaunchedEffect(Unit) { supabase.start() }
     // Warm the emotion-palette cache concurrently with the launch — the
@@ -114,7 +118,16 @@ fun RootScreen() {
         // is a harmless clear of an empty cache.
         if (userId == null) {
             snapUrls?.invalidateAll()
+            // A parked invite belongs to the session it arrived in. Dropping the
+            // session removes the accept surface from the composition WITHOUT
+            // dismissing it, so nothing calls the ViewModel's reset — and the
+            // token would re-present it on the next sign-in, guard satisfied,
+            // still showing the previous session's result. Only on a REAL
+            // sign-out: clearing on the initial null would throw away a token
+            // parked by a cold-start App Link before auth resolves (D12).
+            if (hasHadSession) connections.pendingInviteToken = null
         }
+        hasHadSession = userId != null
     }
 
     // Warm the create/edit reference lists (domains, souls, collections) once a

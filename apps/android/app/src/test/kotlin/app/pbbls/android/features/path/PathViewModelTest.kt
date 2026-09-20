@@ -57,6 +57,47 @@ class PathViewModelTest {
         writes: FakePebbleWriteService = FakePebbleWriteService(),
     ) = PathViewModel(path, stats, drafts, writes)
 
+    // MARK: - Returning from a pushed screen
+
+    /**
+     * `PathScreen` kept its pebbles in `remember`, so pushing Profile and popping
+     * back rebuilt it and re-ran the fetch. The ViewModel is scoped to the
+     * `NavBackStackEntry`, which survives that round trip — so without the resume
+     * hook, a pebble edited from a pushed screen stayed stale on the timeline.
+     * (Deferred from PR #896, where the souls and collections lists got the same
+     * treatment.)
+     */
+    @Test
+    fun `returning to the timeline re-reads it`() =
+        runTest {
+            val path = FakePathService(pebbles = listOf(pebble("p1")))
+            val viewModel = viewModel(path = path)
+            advanceUntilIdle()
+            val loadsAfterInit = path.loadCount
+
+            // First resume: the screen just opened, `init` already loaded.
+            viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals(loadsAfterInit, path.loadCount)
+
+            // Second: back from Profile.
+            viewModel.onResumed()
+            advanceUntilIdle()
+            assertEquals(loadsAfterInit + 1, path.loadCount)
+        }
+
+    /** The refresh is silent — it must not blank the timeline to a spinner. */
+    @Test
+    fun `returning does not flash the spinner`() =
+        runTest {
+            val viewModel = viewModel(path = FakePathService(pebbles = listOf(pebble("p1"))))
+            advanceUntilIdle()
+            viewModel.onResumed()
+
+            viewModel.onResumed()
+            assertTrue(viewModel.uiState.value is PathUiState.Content)
+        }
+
     // MARK: - Load
 
     @Test

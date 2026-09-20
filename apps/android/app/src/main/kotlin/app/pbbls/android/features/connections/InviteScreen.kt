@@ -1,7 +1,6 @@
 package app.pbbls.android.features.connections
 
 import android.content.Intent
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -22,11 +21,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -41,11 +36,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
-import app.pbbls.android.services.ConnectionInvite
-import app.pbbls.android.services.LocalConnectionsService
-import app.pbbls.android.services.connectionsErrorMessage
-import app.pbbls.android.services.toDataError
+import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar
@@ -56,9 +50,6 @@ import com.google.zxing.EncodeHintType
 import com.google.zxing.common.BitMatrix
 import com.google.zxing.qrcode.QRCodeWriter
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel
-import kotlinx.coroutines.launch
-
-private const val TAG = "connections-invite"
 
 /**
  * Your invite (M49) — ports iOS `InviteSheet`. One link, shown as text and as
@@ -70,39 +61,25 @@ private const val TAG = "connections-invite"
 fun InviteScreen(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    viewModel: InviteViewModel = hiltViewModel(),
 ) {
-    val service = LocalConnectionsService.current
-    val scope = rememberCoroutineScope()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val clipboard = LocalClipboardManager.current
 
-    var invite by remember { mutableStateOf<ConnectionInvite?>(null) }
-    var isLoading by remember { mutableStateOf(true) }
-    var errorRes by remember { mutableStateOf<Int?>(null) }
-    var retryKey by remember { mutableIntStateOf(0) }
-    var isRotating by remember { mutableStateOf(false) }
+    // Guarded, so a rotation is not undone by a configuration change.
+    LaunchedEffect(Unit) { viewModel.start() }
 
-    LaunchedEffect(retryKey) {
-        isLoading = true
-        errorRes = null
-        try {
-            invite = service.createInvite()
-            isLoading = false
-        } catch (e: Exception) {
-            Log.e(TAG, "invite load failed", e)
-            errorRes = connectionsErrorMessage(e.toDataError())
-            isLoading = false
-        }
+    fun dismiss() {
+        viewModel.finish()
+        onDismiss()
     }
 
-    BackHandler { onDismiss() }
+    BackHandler { dismiss() }
 
     InviteContent(
-        invite = invite,
-        isLoading = isLoading,
-        errorRes = errorRes,
-        isRotating = isRotating,
-        onRetry = { retryKey++ },
+        uiState = uiState,
+        onRetry = viewModel::retry,
         onCopy = { url -> clipboard.setText(AnnotatedString(url)) },
         onShare = { url ->
             val send =
@@ -114,19 +91,8 @@ fun InviteScreen(
                 Intent.createChooser(send, context.getString(R.string.connections_invite_share)),
             )
         },
-        onRotate = {
-            isRotating = true
-            scope.launch {
-                try {
-                    invite = service.createInvite(rotate = true)
-                } catch (e: Exception) {
-                    Log.e(TAG, "invite rotation failed", e)
-                    errorRes = connectionsErrorMessage(e.toDataError())
-                }
-                isRotating = false
-            }
-        },
-        onDismiss = onDismiss,
+        onRotate = viewModel::rotate,
+        onDismiss = { dismiss() },
         modifier = modifier,
     )
 }
@@ -134,10 +100,7 @@ fun InviteScreen(
 /** Stateless invite surface — what screenshot previews drive. */
 @Composable
 fun InviteContent(
-    invite: ConnectionInvite?,
-    isLoading: Boolean,
-    errorRes: Int?,
-    isRotating: Boolean,
+    uiState: InviteUiState,
     onRetry: () -> Unit,
     onCopy: (String) -> Unit,
     onShare: (String) -> Unit,
@@ -169,16 +132,17 @@ fun InviteContent(
         )
 
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            when {
-                isLoading -> CircularProgressIndicator(color = accent.primary)
+            // Exhaustive with no `else`: a new InviteUiState case must be rendered.
+            when (uiState) {
+                InviteUiState.Loading -> CircularProgressIndicator(color = accent.primary)
 
-                invite == null ->
+                is InviteUiState.Error ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         PebblesText(
-                            text = stringResource(errorRes ?: R.string.connections_error_generic),
+                            text = stringResource(uiState.messageRes),
                             style = PebblesTypography.body,
                             color = system.secondary,
                             textAlign = TextAlign.Center,
@@ -193,7 +157,7 @@ fun InviteContent(
                         }
                     }
 
-                else ->
+                is InviteUiState.Content ->
                     Column(
                         modifier =
                             Modifier
@@ -211,28 +175,28 @@ fun InviteContent(
                         )
 
                         QrCode(
-                            content = invite.url,
+                            content = uiState.invite.url,
                             contentDescription = stringResource(R.string.connections_invite_qr_alt),
                         )
 
                         // The link is always shown and copyable: the QR is
                         // never the sole affordance.
                         PebblesText(
-                            text = invite.url,
+                            text = uiState.invite.url,
                             style = PebblesTypography.meta,
                             color = system.secondary,
                             textAlign = TextAlign.Center,
                         )
 
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            TextButton(onClick = { onCopy(invite.url) }) {
+                            TextButton(onClick = { onCopy(uiState.invite.url) }) {
                                 PebblesText(
                                     text = stringResource(R.string.connections_invite_copy),
                                     style = PebblesTypography.buttonLabel,
                                     color = accent.primary,
                                 )
                             }
-                            TextButton(onClick = { onShare(invite.url) }) {
+                            TextButton(onClick = { onShare(uiState.invite.url) }) {
                                 PebblesText(
                                     text = stringResource(R.string.connections_invite_share),
                                     style = PebblesTypography.buttonLabel,
@@ -241,7 +205,7 @@ fun InviteContent(
                             }
                         }
 
-                        TextButton(onClick = onRotate, enabled = !isRotating) {
+                        TextButton(onClick = onRotate, enabled = !uiState.isRotating) {
                             PebblesText(
                                 text = stringResource(R.string.connections_invite_rotate),
                                 style = PebblesTypography.buttonLabel,
@@ -255,6 +219,18 @@ fun InviteContent(
                             color = system.secondary,
                             textAlign = TextAlign.Center,
                         )
+
+                        // A rotation that failed leaves the live invite on
+                        // screen — it is still the server's answer — with the
+                        // reason under it.
+                        uiState.rotateErrorRes?.let { res ->
+                            PebblesText(
+                                text = stringResource(res),
+                                style = PebblesTypography.meta,
+                                color = PebblesDestructive,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
                     }
             }
         }

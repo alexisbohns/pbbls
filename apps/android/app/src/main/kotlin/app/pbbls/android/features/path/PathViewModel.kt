@@ -156,6 +156,7 @@ class PathViewModel
         val covers: StateFlow<PathCovers> = _covers.asStateFlow()
 
         private var loadJob: Job? = null
+        private var resumeCount = 0
 
         init {
             load()
@@ -170,6 +171,26 @@ class PathViewModel
                 snapshotFlow { stats.karma to stats.ripple }.collect { publish() }
             }
             refreshDraftCount()
+        }
+
+        /**
+         * The timeline came back to the foreground.
+         *
+         * `PathScreen` used to keep its pebbles in `remember`, so pushing Profile
+         * took it out of composition and popping back rebuilt it, re-running the
+         * fetch. This ViewModel is scoped to the `NavBackStackEntry`, which
+         * survives that round trip — so without this, editing a pebble's souls or
+         * collections from a pushed screen, or deleting one there, left the
+         * timeline showing what it showed before, until a write of its own
+         * happened to reload it.
+         *
+         * The first resume is skipped (`init` has already loaded); every later
+         * one refreshes without the spinner. Deferred from PR #896, where the
+         * same gap was fixed for the souls and collections lists.
+         */
+        fun onResumed() {
+            resumeCount += 1
+            if (resumeCount > 1) reload()
         }
 
         // MARK: - Loading
