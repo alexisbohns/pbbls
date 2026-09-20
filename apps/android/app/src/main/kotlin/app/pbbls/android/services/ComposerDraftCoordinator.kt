@@ -134,10 +134,11 @@ class ComposerDraftCoordinator(
      * Forget that this composer ever opened, so the next presentation hydrates
      * again (#849).
      *
-     * Needed because `RecordFlowViewModel` is activity-scoped while the cover it
-     * drives is a conditionally-composed child: the coordinator's
-     * decide-only-once guard is per-presentation, and without this the second
-     * "New pebble" of a session would skip hydration entirely. Deliberately does
+     * Was needed when `RecordFlowViewModel` was activity-scoped and outlived the
+     * cover it drove: the decide-only-once guard is per-presentation, and
+     * without this the second "New pebble" of a session skipped hydration
+     * entirely. Since #852 each presentation is a fresh entry with a fresh
+     * coordinator, so this guards the within-presentation reuse only. Deliberately does
      * NOT touch the stored snapshot — only [discardSnapshot] and a publish may
      * clear that.
      */

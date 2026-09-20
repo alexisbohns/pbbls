@@ -113,11 +113,13 @@ data class RecordFlowUiState(
  * (M58 D4), and none of that is orchestration. What changed is its storage —
  * a `StateFlow<RecordFlowState>` this class persists and exposes.
  *
- * **Activity-scoped.** The cover is a conditionally-composed child of
- * `PathScreen`, not a navigation destination, so `hiltViewModel()` binds to the
- * activity's store and this outlives the cover. [startFlow] and [resetForNext]
- * are the explicit lifecycle that buys back; #852 replaces both with a back
- * stack entry.
+ * **Entry-scoped (#852).** The flow is its own `PebblesKey.RecordFlow`
+ * destination, and `RootScreen` decorates entries with
+ * `rememberViewModelStoreNavEntryDecorator()`, so this ViewModel is created
+ * with the entry and cleared when it is popped — verified on device by logging
+ * one init/clear pair per visit with fresh identities. [startFlow] and
+ * [resetForNext] survive as defence in depth rather than as the lifecycle: they
+ * were load-bearing when the ViewModel outlived the cover it drove.
  */
 @HiltViewModel
 class RecordFlowViewModel
@@ -239,11 +241,13 @@ class RecordFlowViewModel
         fun startFlow(resumeDraftId: String?) = hydrate(resumeDraftId)
 
         /**
-         * Clears the machine for the next presentation. Explicit because the
-         * ViewModel is activity-scoped: without it, reopening the composer would
-         * show the pebble the user published five minutes ago, and the
-         * coordinator's decide-once guard would skip hydration for the rest of
-         * the session.
+         * Clears the machine after a terminal step, before the entry pops.
+         *
+         * This was load-bearing when the ViewModel was activity-scoped and
+         * outlived the cover: without it, reopening the composer showed the
+         * pebble published five minutes ago. Since #852 the entry takes the
+         * ViewModel with it, so this is belt to that braces — kept because the
+         * publish and discard paths call it before the pop, not after.
          */
         private fun resetForNext() {
             model.reset()

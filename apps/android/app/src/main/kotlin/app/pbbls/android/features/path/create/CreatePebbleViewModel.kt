@@ -97,9 +97,11 @@ sealed interface CreatePebbleEffect {
  * Adopting the coordinator is the consolidation, not a new abstraction: every
  * method used here already existed and is covered by its own tests.
  *
- * Activity-scoped, like its siblings — the cover is a conditionally-composed
- * child of `PathScreen`, so [start] and the reset in [finish] are the explicit
- * lifecycle until #852.
+ * Entry-scoped since #852, like its siblings — this is its own
+ * `PebblesKey.CreatePebble` destination, and the entry decorator clears the
+ * ViewModel when it pops. [start] and the reset in [finish] were the explicit
+ * lifecycle while it was an activity-scoped cover; they now run before the pop
+ * rather than instead of one.
  */
 @HiltViewModel
 class CreatePebbleViewModel
@@ -351,10 +353,11 @@ class CreatePebbleViewModel
         }
 
         /**
-         * Clear for the next presentation. Explicit because the ViewModel is
-         * activity-scoped: without it the next long-press opens onto the pebble
-         * just published, and the coordinator's decide-once guard would skip
-         * hydration for the rest of the session.
+         * Clear after a terminal step, before the entry pops.
+         *
+         * Load-bearing while the ViewModel was activity-scoped: without it the
+         * next long-press opened onto the pebble just published. Since #852 the
+         * entry takes the ViewModel with it, so this is defence in depth.
          */
         private fun finish() {
             drafts.reset()

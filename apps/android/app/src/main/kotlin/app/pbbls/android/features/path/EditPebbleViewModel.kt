@@ -116,10 +116,11 @@ class EditPebbleViewModel
         /**
          * Load the pebble, unless it is the one already loaded.
          *
-         * The guard is what makes an activity-scoped ViewModel safe behind a
-         * cover: a rotation re-runs the screen's `LaunchedEffect` and must not
-         * throw away edits in progress, while opening a *different* pebble must
-         * start clean.
+         * The guard is what keeps a rotation safe: it re-runs the screen's
+         * `LaunchedEffect`, which must not throw away edits in progress, while
+         * opening a *different* pebble must start clean. Since #852 this is its
+         * own nav entry, so a different pebble is a different entry — but the
+         * rotation case is unchanged and still needs the guard.
          */
         fun start(pebbleId: String) {
             if (loadedPebbleId == pebbleId) return

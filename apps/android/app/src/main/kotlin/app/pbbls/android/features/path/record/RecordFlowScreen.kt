@@ -89,10 +89,10 @@ fun RecordFlowScreen(
     val haptic = rememberTapHaptics()
     val glyphPickerState = rememberGlyphPickerState()
 
-    // The ViewModel is activity-scoped (the cover is a conditionally-composed
-    // child, not a destination — #852), so opening is explicit. `startFlow`
-    // guards itself, which is what keeps a rotation from re-hydrating over what
-    // the user has typed since.
+    // The entry carries `resumeDraftId` as a key argument, and Nav3 does not
+    // populate SavedStateHandle from a key, so the screen drives the start
+    // (#852). `startFlow` guards itself, which is what keeps a rotation from
+    // re-hydrating over what the user has typed since.
     LaunchedEffect(resumeDraftId, refs.hasLoaded) { viewModel.startFlow(resumeDraftId) }
 
     // Haptics come back out as effects because a ViewModel has no View to buzz;
