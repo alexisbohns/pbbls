@@ -176,16 +176,9 @@ fun RootScreen() {
                 )
             }
         } else {
-            WelcomeAuthNavHost(
-                contentRevealed = welcomeContentRevealed,
-                onGoogleSignIn = { supabase.signInWithGoogle() },
-                onSubmit = { mode, email, password ->
-                    when (mode) {
-                        AuthMode.LOGIN -> supabase.signIn(email, password)
-                        AuthMode.SIGNUP -> supabase.signUp(email, password)
-                    }
-                },
-            )
+            // The funnel calls supabase-kt through its own ViewModels now, so
+            // this gate only decides WHICH tree is up, not how it signs in.
+            WelcomeAuthNavHost(contentRevealed = welcomeContentRevealed)
         }
     }
 }
@@ -268,11 +261,7 @@ private fun AuthedNavHost(onSignOut: () -> Unit) {
 }
 
 @Composable
-private fun WelcomeAuthNavHost(
-    contentRevealed: Boolean,
-    onGoogleSignIn: suspend () -> Unit,
-    onSubmit: suspend (AuthMode, String, String) -> Unit,
-) {
+private fun WelcomeAuthNavHost(contentRevealed: Boolean) {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = ROUTE_WELCOME) {
         composable(ROUTE_WELCOME) {
@@ -280,7 +269,6 @@ private fun WelcomeAuthNavHost(
                 contentRevealed = contentRevealed,
                 onCreateAccount = { navController.navigate("$ROUTE_AUTH/${AuthMode.SIGNUP.route}") },
                 onLogin = { navController.navigate("$ROUTE_AUTH/${AuthMode.LOGIN.route}") },
-                onGoogleSignIn = onGoogleSignIn,
             )
         }
         composable(
@@ -288,11 +276,7 @@ private fun WelcomeAuthNavHost(
             arguments = listOf(navArgument("mode") { type = NavType.StringType }),
         ) { backStackEntry ->
             val mode = AuthMode.fromRoute(backStackEntry.arguments?.getString("mode"))
-            AuthScreen(
-                initialMode = mode,
-                onSubmit = onSubmit,
-                onGoogleSignIn = onGoogleSignIn,
-            )
+            AuthScreen(initialMode = mode)
         }
     }
 }

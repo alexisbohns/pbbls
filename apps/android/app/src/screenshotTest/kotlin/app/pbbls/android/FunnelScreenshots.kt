@@ -3,11 +3,13 @@ package app.pbbls.android
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import app.pbbls.android.features.auth.AuthContent
 import app.pbbls.android.features.auth.AuthMode
-import app.pbbls.android.features.auth.AuthScreen
+import app.pbbls.android.features.auth.AuthUiState
 import app.pbbls.android.features.onboarding.OnboardingScreen
 import app.pbbls.android.features.onboarding.OnboardingSteps
-import app.pbbls.android.features.welcome.WelcomeScreen
+import app.pbbls.android.features.welcome.WelcomeContent
+import app.pbbls.android.features.welcome.WelcomeUiState
 import app.pbbls.android.theme.PebblesTheme
 import com.android.tools.screenshot.PreviewTest
 
@@ -26,7 +28,8 @@ import com.android.tools.screenshot.PreviewTest
 @Composable
 fun WelcomeScreenLight() {
     PebblesTheme {
-        WelcomeScreen(
+        WelcomeContent(
+            uiState = WelcomeUiState(),
             contentRevealed = true,
             onCreateAccount = {},
             onLogin = {},
@@ -40,7 +43,8 @@ fun WelcomeScreenLight() {
 @Composable
 fun WelcomeScreenDark() {
     PebblesTheme {
-        WelcomeScreen(
+        WelcomeContent(
+            uiState = WelcomeUiState(),
             contentRevealed = true,
             onCreateAccount = {},
             onLogin = {},
@@ -56,9 +60,15 @@ fun WelcomeScreenDark() {
 @Composable
 fun AuthScreenLogin() {
     PebblesTheme {
-        AuthScreen(
-            initialMode = AuthMode.LOGIN,
-            onSubmit = { _, _, _ -> },
+        AuthContent(
+            uiState = AuthUiState(mode = AuthMode.LOGIN),
+            onModeChange = {},
+            onEmailChange = {},
+            onPasswordChange = {},
+            onTermsChange = {},
+            onPrivacyChange = {},
+            onDismissError = {},
+            onSubmit = {},
             onGoogleSignIn = {},
         )
     }
@@ -69,9 +79,15 @@ fun AuthScreenLogin() {
 @Composable
 fun AuthScreenSignup() {
     PebblesTheme {
-        AuthScreen(
-            initialMode = AuthMode.SIGNUP,
-            onSubmit = { _, _, _ -> },
+        AuthContent(
+            uiState = AuthUiState(mode = AuthMode.SIGNUP),
+            onModeChange = {},
+            onEmailChange = {},
+            onPasswordChange = {},
+            onTermsChange = {},
+            onPrivacyChange = {},
+            onDismissError = {},
+            onSubmit = {},
             onGoogleSignIn = {},
         )
     }
