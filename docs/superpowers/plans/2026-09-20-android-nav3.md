@@ -1027,7 +1027,6 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.runtime.serialization.NavKeySerializer
 import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import androidx.savedstate.compose.serialization.serializers.MutableStateSerializer
 
 /**
  * Per-tab back stacks (#852, D4), modelled on the AndroidX `multiplestacks`
@@ -1097,12 +1096,18 @@ fun rememberNavigationState(
     startRoute: PebblesKey = PebblesKey.Path,
     tabs: List<PebblesKey> = PebblesKey.tabs,
 ): NavigationState {
+    // NB: `androidx.savedstate...MutableStateSerializer` exists but is the wrong
+    // shape here — it serializes a `MutableState<T>` and pairs with a
+    // `rememberSerializable(serializer = …)` overload returning `T` directly. The
+    // overload that returns a `MutableState<T>` (what `by` needs) lives in
+    // `androidx.compose.runtime.saveable` and takes the INNER serializer as
+    // `stateSerializer`.
     val topLevelRoute =
         rememberSerializable(
             startRoute,
             tabs,
-            serializer = MutableStateSerializer(NavKeySerializer()),
-        ) { mutableStateOf<PebblesKey>(startRoute) }
+            stateSerializer = NavKeySerializer<PebblesKey>(),
+        ) { mutableStateOf(startRoute) }
 
     val backStacks = tabs.associateWith { key -> rememberNavBackStack(key) }
 
@@ -1118,6 +1123,14 @@ Run: `npm run build --workspace=@pbbls/android`
 Expected: `BUILD SUCCESSFUL`.
 
 `rememberSerializable` and `MutableStateSerializer` come from `androidx.savedstate`, which arrives transitively with `lifecycle-viewmodel-savedstate`. If they do not resolve, add `androidx-savedstate-compose` to the catalog rather than hand-rolling a `Saver` — a hand-rolled one will silently drop the tab on process death.
+
+**`rememberSerializable` is in `androidx.compose.runtime.saveable`, not
+`androidx.savedstate`** — verified by decompiling the resolved artifacts during
+Part 2. Its `MutableState`-returning overload names the parameter
+`stateSerializer` and takes the INNER value's serializer
+(`NavKeySerializer<PebblesKey>()`), not a `MutableStateSerializer` wrapper. The
+wrapper is real but pairs with a different overload that returns `T` rather than
+`MutableState<T>`, which the `by` delegate cannot use.
 
 **Why the stacks are typed `NavBackStack<NavKey>` and not `NavBackStack<PebblesKey>`.**
 Verified against the 1.1.7 artifact during Part 1: both `rememberNavBackStack`
