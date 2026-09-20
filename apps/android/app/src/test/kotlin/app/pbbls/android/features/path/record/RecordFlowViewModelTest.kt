@@ -338,17 +338,81 @@ class RecordFlowViewModelTest {
         runTest {
             val harness = Harness(backgroundScope).also { it.supabase.session = session() }
             harness.refs.hasLoaded = false
-            val record = PebbleDraftRecord("d1", PebbleDraftPayload(name = "resumed"), OffsetDateTime.now())
+            harness.drafts.records.add(
+                PebbleDraftRecord("d1", PebbleDraftPayload(name = "resumed"), OffsetDateTime.now()),
+            )
 
-            harness.viewModel.startFlow(record)
+            harness.viewModel.startFlow("d1")
             advanceUntilIdle()
             assertEquals("", harness.viewModel.uiState.value.flow.draft.name)
 
             harness.refs.hasLoaded = true
-            harness.viewModel.startFlow(record)
+            harness.viewModel.startFlow("d1")
             advanceUntilIdle()
 
             assertEquals("resumed", harness.viewModel.uiState.value.flow.draft.name)
+        }
+
+    // MARK: - Resume by id (#852)
+
+    /**
+     * The composer used to receive the whole [PebbleDraftRecord] from
+     * `PathViewModel`; a nav key can only carry an id, so [RecordFlowViewModel]
+     * now fetches the row itself. This is the by-id load actually seeding the
+     * flow's state, not just "a load happened".
+     */
+    @Test
+    fun `a non-null resume id loads that draft and seeds the flow`() =
+        runTest {
+            val harness = signedIn(Harness(backgroundScope))
+            harness.drafts.records.add(
+                PebbleDraftRecord(
+                    "d1",
+                    PebbleDraftPayload(name = "resumed", emotionId = "emotion-1", domainIds = listOf("domain-1")),
+                    OffsetDateTime.now(),
+                ),
+            )
+
+            harness.viewModel.startFlow("d1")
+            advanceUntilIdle()
+
+            val draft = harness.viewModel.uiState.value.flow.draft
+            assertEquals("resumed", draft.name)
+            assertEquals("emotion-1", draft.emotionId)
+            assertEquals("domain-1", draft.domainId)
+            assertEquals(1, harness.drafts.loadCallCount)
+        }
+
+    /** A fresh flow must never touch the by-id read — there is nothing to resume. */
+    @Test
+    fun `a null resume id starts fresh and never calls the by-id load`() =
+        runTest {
+            val harness = signedIn(Harness(backgroundScope))
+
+            harness.viewModel.startFlow(null)
+            advanceUntilIdle()
+
+            assertEquals("", harness.viewModel.uiState.value.flow.draft.name)
+            assertEquals(0, harness.drafts.loadCallCount)
+        }
+
+    /**
+     * A failed by-id load must not leave the composer silently blank — the user
+     * would have no idea their draft failed to open. It surfaces through the
+     * same [RecordFlowModel.fail] banner a failed publish uses.
+     */
+    @Test
+    fun `a failed draft load surfaces an error instead of a blank composer`() =
+        runTest {
+            val harness = signedIn(Harness(backgroundScope))
+            harness.drafts.failNext = RuntimeException("boom")
+
+            harness.viewModel.startFlow("d1")
+            advanceUntilIdle()
+
+            val flow = harness.viewModel.uiState.value.flow
+            assertEquals("", flow.draft.name)
+            assertEquals(R.string.draft_resume_load_error, flow.publishErrorRes)
         }
 
     /**
@@ -376,9 +440,10 @@ class RecordFlowViewModelTest {
             assertNull(flow.published)
 
             // And hydration works again for the next presentation.
-            harness.viewModel.startFlow(
+            harness.drafts.records.add(
                 PebbleDraftRecord("d2", PebbleDraftPayload(name = "next one"), OffsetDateTime.now()),
             )
+            harness.viewModel.startFlow("d2")
             advanceUntilIdle()
             assertEquals("next one", harness.viewModel.uiState.value.flow.draft.name)
         }

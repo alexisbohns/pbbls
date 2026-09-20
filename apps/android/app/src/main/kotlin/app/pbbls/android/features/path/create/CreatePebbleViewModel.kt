@@ -23,7 +23,6 @@ import app.pbbls.android.services.AchievementsServicing
 import app.pbbls.android.services.ComposeResult
 import app.pbbls.android.services.ComposerDraftCoordinator
 import app.pbbls.android.services.ComposerSnapshotStoring
-import app.pbbls.android.services.PebbleDraftRecord
 import app.pbbls.android.services.PebbleDraftsServicing
 import app.pbbls.android.services.PebbleWriteServicing
 import app.pbbls.android.services.ReferenceDataServicing
@@ -148,16 +147,24 @@ class CreatePebbleViewModel
          * Called on open and again when reference data lands. No guard of its
          * own: the coordinator returns null until `refs.hasLoaded` and then
          * decides exactly once (#647).
+         *
+         * Takes the draft's id rather than the record (#852): a navigation key
+         * can only carry an id, so the coordinator does the by-id fetch itself.
          */
-        fun start(resuming: PebbleDraftRecord?) {
+        fun start(resumeDraftId: String?) {
             viewModelScope.launch {
-                val decision = drafts.hydrate(resuming, refs.hasLoaded)
+                val decision = drafts.hydrate(resumeDraftId, refs.hasLoaded)
                 _uiState.update { it.copy(isRestorePromptPresented = drafts.isRestorePromptPresented) }
                 if (decision is ComposerDraftCoordinator.Decision.Resume) {
                     _uiState.update { it.copy(draft = decision.payload.toDraft(knownIds)) }
                     decision.payload.existingSnap?.let { snaps.seedExisting(it) }
                     _uiState.value.draft.glyphId
                         ?.let { verifyGlyph(it) }
+                } else if (decision is ComposerDraftCoordinator.Decision.Failed) {
+                    // No form state to seed — surface the failure through the same
+                    // banner a failed publish uses (there is no other error slot
+                    // on this state) rather than leaving the form silently blank.
+                    _uiState.update { it.copy(saveErrorRes = decision.messageRes) }
                 }
             }
         }

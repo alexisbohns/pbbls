@@ -1,11 +1,13 @@
 package app.pbbls.android.services
 
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import app.pbbls.android.R
 import app.pbbls.android.features.path.models.PebbleDraftPayload
+import app.pbbls.android.ui.runCatchingCancellable
 
 private const val TAG = "composer-drafts"
 
@@ -40,6 +42,16 @@ class ComposerDraftCoordinator(
 
         /** Nothing to restore. */
         data object Fresh : Decision
+
+        /**
+         * The by-id fetch for [resumeDraftId][hydrate] failed, or the row is gone.
+         * Surfaced rather than silently falling through to [Fresh] — that would
+         * make a resumed draft that failed to load indistinguishable from a
+         * pebble the user genuinely started blank (#852).
+         */
+        data class Failed(
+            @StringRes val messageRes: Int,
+        ) : Decision
     }
 
     /** Outcome of the `can_use_glyph` check on a resumed draft's glyph. */
@@ -74,16 +86,22 @@ class ComposerDraftCoordinator(
      * soul and collection on the draft (#647). Resuming a server draft wins over
      * the local snapshot — it is the more deliberate of the two, so we never
      * prompt on top of it.
+     *
+     * **[resumeDraftId] rather than the whole record (#852).** A navigation key
+     * can only carry an id, so this now does the by-id fetch itself instead of
+     * being handed an already-loaded [PebbleDraftRecord] — the reason "kill the
+     * app mid-flow" used to lose the draft: nothing durable recorded which one
+     * was open. A missing or failed row surfaces [Decision.Failed] rather than
+     * silently falling through to [Decision.Fresh].
      */
-    fun hydrate(
-        resuming: PebbleDraftRecord?,
+    suspend fun hydrate(
+        resumeDraftId: String?,
         refsLoaded: Boolean,
     ): Decision? {
         if (hasHydrated || !refsLoaded) return null
         hasHydrated = true
-        if (resuming != null) {
-            serverDraftId = resuming.id
-            return Decision.Resume(resuming.payload)
+        if (resumeDraftId != null) {
+            return loadResumeDraft(resumeDraftId)
         }
         restorable = snapshots.load()
         return if (restorable != null) {
@@ -93,6 +111,24 @@ class ComposerDraftCoordinator(
             Decision.Fresh
         }
     }
+
+    private suspend fun loadResumeDraft(id: String): Decision =
+        runCatchingCancellable { drafts.load(id) }
+            .fold(
+                onSuccess = { record ->
+                    if (record == null) {
+                        Log.e(TAG, "resume draft not found: $id")
+                        Decision.Failed(R.string.draft_resume_load_error)
+                    } else {
+                        serverDraftId = record.id
+                        Decision.Resume(record.payload)
+                    }
+                },
+                onFailure = {
+                    Log.e(TAG, "resume draft load failed", it)
+                    Decision.Failed(R.string.draft_resume_load_error)
+                },
+            )
 
     /**
      * Forget that this composer ever opened, so the next presentation hydrates

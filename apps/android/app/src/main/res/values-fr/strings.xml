@@ -413,6 +413,7 @@
     <string name="action_delete">Supprimer</string>
     <string name="draft_save">Garder pour plus tard</string>
     <string name="draft_save_error">Impossible de garder ce brouillon. Réessaie.</string>
+    <string name="draft_resume_load_error">Impossible de charger ce brouillon. Réessaie.</string>
     <string name="draft_restore_title">On reprend où tu t\'étais arrêté ?</string>
     <string name="draft_restore_body">On a gardé ce que tu écrivais ici. Remets ta photo quand tu veux.</string>
     <string name="draft_restore_confirm">Reprendre</string>

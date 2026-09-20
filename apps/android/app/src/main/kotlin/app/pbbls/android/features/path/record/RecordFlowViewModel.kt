@@ -22,7 +22,6 @@ import app.pbbls.android.services.AchievementsServicing
 import app.pbbls.android.services.ComposeResult
 import app.pbbls.android.services.ComposerDraftCoordinator
 import app.pbbls.android.services.ComposerSnapshotStoring
-import app.pbbls.android.services.PebbleDraftRecord
 import app.pbbls.android.services.PebbleDraftsServicing
 import app.pbbls.android.services.PebbleWriteServicing
 import app.pbbls.android.services.ReferenceDataServicing
@@ -233,8 +232,11 @@ class RecordFlowViewModel
          * behaviour #647 put there. A guard here would latch on the first call —
          * the one that happens *before* refs load — and the draft would never
          * hydrate at all.
+         *
+         * Takes the draft's id rather than the record (#852): a navigation key
+         * can only carry an id, so the coordinator does the by-id fetch itself.
          */
-        fun startFlow(resuming: PebbleDraftRecord?) = hydrate(resuming)
+        fun startFlow(resumeDraftId: String?) = hydrate(resumeDraftId)
 
         /**
          * Clears the machine for the next presentation. Explicit because the
@@ -257,9 +259,9 @@ class RecordFlowViewModel
          * before the souls / collections caches arrive would sanitize against
          * empty sets and silently drop every soul and collection.
          */
-        private fun hydrate(resuming: PebbleDraftRecord?) {
+        private fun hydrate(resumeDraftId: String?) {
             viewModelScope.launch {
-                val decision = drafts.hydrate(resuming, refs.hasLoaded)
+                val decision = drafts.hydrate(resumeDraftId, refs.hasLoaded)
                 _uiState.update {
                     it.copy(isRestorePromptPresented = drafts.isRestorePromptPresented)
                 }
@@ -271,6 +273,11 @@ class RecordFlowViewModel
                     }
                     model.draft.glyphId?.let { verifyGlyph(it) }
                     restoreStep()
+                } else if (decision is ComposerDraftCoordinator.Decision.Failed) {
+                    // No composer state to seed — surface the failure through the
+                    // same banner a failed publish uses rather than leaving the
+                    // flow silently blank.
+                    model.fail(decision.messageRes)
                 }
             }
         }

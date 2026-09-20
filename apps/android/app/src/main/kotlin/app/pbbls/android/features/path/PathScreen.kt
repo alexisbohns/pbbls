@@ -170,7 +170,7 @@ fun PathScreen(
                 onPublished = viewModel::onFlowPublished,
                 onDismiss = viewModel::closeFlow,
                 modifier = Modifier.fillMaxSize(),
-                resuming = covers.resumingDraft,
+                resumeDraftId = covers.resumingDraft?.id,
                 onDraftSaved = viewModel::onFlowDraftSaved,
             )
         }
@@ -186,7 +186,7 @@ fun PathScreen(
                 onCreated = viewModel::onFormCreated,
                 onCancel = viewModel::closeForm,
                 modifier = Modifier.fillMaxSize(),
-                resuming = covers.resumingDraft,
+                resumeDraftId = covers.resumingDraft?.id,
                 onDraftSaved = viewModel::onFormDraftSaved,
             )
         }

@@ -225,17 +225,79 @@ class CreatePebbleViewModelTest {
         runTest {
             val h = signedIn(Harness(backgroundScope))
             h.refs.hasLoaded = false
-            val record = PebbleDraftRecord("d1", PebbleDraftPayload(name = "resumed"), OffsetDateTime.now())
+            h.drafts.records.add(PebbleDraftRecord("d1", PebbleDraftPayload(name = "resumed"), OffsetDateTime.now()))
 
-            h.viewModel.start(record)
+            h.viewModel.start("d1")
             advanceUntilIdle()
             assertEquals("", h.viewModel.uiState.value.draft.name)
 
             h.refs.hasLoaded = true
-            h.viewModel.start(record)
+            h.viewModel.start("d1")
             advanceUntilIdle()
 
             assertEquals("resumed", h.viewModel.uiState.value.draft.name)
+        }
+
+    // MARK: - Resume by id (#852)
+
+    /**
+     * The composer used to receive the whole [PebbleDraftRecord] from
+     * `PathViewModel`; a nav key can only carry an id, so [CreatePebbleViewModel]
+     * now fetches the row itself. Asserts the payload actually landed in the
+     * composer state, not just that a load happened.
+     */
+    @Test
+    fun `a non-null resume id loads that draft and seeds the form`() =
+        runTest {
+            val h = signedIn(Harness(backgroundScope))
+            h.drafts.records.add(
+                PebbleDraftRecord(
+                    "d1",
+                    PebbleDraftPayload(name = "resumed", emotionId = "emotion-1", domainIds = listOf("domain-1")),
+                    OffsetDateTime.now(),
+                ),
+            )
+
+            h.viewModel.start("d1")
+            advanceUntilIdle()
+
+            val draft = h.viewModel.uiState.value.draft
+            assertEquals("resumed", draft.name)
+            assertEquals("emotion-1", draft.emotionId)
+            assertEquals("domain-1", draft.domainId)
+            assertEquals(1, h.drafts.loadCallCount)
+        }
+
+    /** A fresh create must never touch the by-id read — there is nothing to resume. */
+    @Test
+    fun `a null resume id starts fresh and never calls the by-id load`() =
+        runTest {
+            val h = signedIn(Harness(backgroundScope))
+
+            h.viewModel.start(null)
+            advanceUntilIdle()
+
+            assertEquals("", h.viewModel.uiState.value.draft.name)
+            assertEquals(0, h.drafts.loadCallCount)
+        }
+
+    /**
+     * A failed by-id load must not leave the form silently blank. It surfaces
+     * through the same [saveErrorRes][CreatePebbleUiState.saveErrorRes] banner a
+     * failed publish uses — there is no other error slot on this state.
+     */
+    @Test
+    fun `a failed draft load surfaces an error instead of a blank form`() =
+        runTest {
+            val h = signedIn(Harness(backgroundScope))
+            h.drafts.failNext = RuntimeException("boom")
+
+            h.viewModel.start("d1")
+            advanceUntilIdle()
+
+            val state = h.viewModel.uiState.value
+            assertEquals("", state.draft.name)
+            assertEquals(R.string.draft_resume_load_error, state.saveErrorRes)
         }
 
     @Test
@@ -260,10 +322,9 @@ class CreatePebbleViewModelTest {
         runTest {
             val h = signedIn(Harness(backgroundScope))
             h.snapshots.snapshot = PebbleDraftPayload(name = "crashed halfway")
+            h.drafts.records.add(PebbleDraftRecord("d1", PebbleDraftPayload(name = "resumed"), OffsetDateTime.now()))
 
-            h.viewModel.start(
-                PebbleDraftRecord("d1", PebbleDraftPayload(name = "resumed"), OffsetDateTime.now()),
-            )
+            h.viewModel.start("d1")
             advanceUntilIdle()
 
             assertFalse(h.viewModel.uiState.value.isRestorePromptPresented)
@@ -293,14 +354,15 @@ class CreatePebbleViewModelTest {
         runTest {
             val h = signedIn(Harness(backgroundScope))
             h.drafts.glyphIsUsable = false
-
-            h.viewModel.start(
+            h.drafts.records.add(
                 PebbleDraftRecord(
                     "d1",
                     PebbleDraftPayload(name = "resumed", glyphId = "glyph-9"),
                     OffsetDateTime.now(),
                 ),
             )
+
+            h.viewModel.start("d1")
             advanceUntilIdle()
 
             val state = h.viewModel.uiState.value
@@ -340,9 +402,8 @@ class CreatePebbleViewModelTest {
             advanceUntilIdle()
             assertEquals("", h.viewModel.uiState.value.draft.name)
 
-            h.viewModel.start(
-                PebbleDraftRecord("d2", PebbleDraftPayload(name = "next one"), OffsetDateTime.now()),
-            )
+            h.drafts.records.add(PebbleDraftRecord("d2", PebbleDraftPayload(name = "next one"), OffsetDateTime.now()))
+            h.viewModel.start("d2")
             advanceUntilIdle()
 
             assertEquals("next one", h.viewModel.uiState.value.draft.name)
