@@ -3487,6 +3487,31 @@ Rebase onto `main` **after #909 merges**, not before, or you will do it twice.
 
 ### What still has to be decided during the rebase
 
+0. **`PathBottomBar` collides with the new bar — this is NOT yet resolved anywhere.**
+   `features/path/components/PathBottomBar.kt` is Path's own chrome since M38:
+   profile button on the left, karma stat and Ripples badge on the right. Part 6
+   **never touched it** (`git diff main..feat/852-navigation-bar-tabs -- '*PathBottomBar*'`
+   is empty), and Task 10 only resolved the *"New pebble"* button's collision.
+
+   With the four-tab bar up, Path ends with **two stacked bottom bars**, and the
+   profile button duplicates the `You` tab exactly. Options, in rough order of
+   preference:
+
+   - **Keep `PathBottomBar`, drop its profile button.** Karma and the Ripples
+     badge are Path-specific status, not navigation, and have nowhere else to
+     live. The profile button is pure duplication once `You` is a tab. Smallest
+     change, keeps both affordances honest.
+   - **Move karma/Ripples into the Path top bar** and delete `PathBottomBar`
+     entirely. Cleaner vertically, but the week roll already owns the top and
+     this is a visual redesign rather than a migration step.
+   - **Keep both as-is.** Two stacked bars cost roughly 140dp on a phone, which
+     is what D3 rejected for the "New pebble" button — so rejecting it there and
+     accepting it here would be inconsistent.
+
+   **This is a product decision and wants the maintainer.** It was found by
+   looking at a running device, not at the diff.
+
+
 1. **Where the FAB lives.** Part 6 built it inside `PathScreen`. That still holds and should be kept.
 2. **`Navigator.rootAt` over per-tab stacks.** Part 4 added it to fix a cold restore being wiped by the auth gate — see that fix's commit message. The per-tab version must preserve the same property: *do not re-root if already rooted there*, or process-death restoration breaks again. **This is the single highest-risk item in the rebase**, because it fails silently and every gate stays green.
 3. **Bar visibility vs. the promoted entries.** `topKey is BarKey` now works properly, because every cover became an entry in Parts 2–4. That is why Part 6 runs last (see the ordering note at the top of this document).
