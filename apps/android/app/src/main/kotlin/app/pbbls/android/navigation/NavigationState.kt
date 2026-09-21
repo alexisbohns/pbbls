@@ -86,10 +86,21 @@ class NavigationState(
     }
 }
 
+/**
+ * @param seed what the **start tab** is rooted at on a first composition, which
+ *   is not always the start tab's own key. The auth gate seeds [PebblesKey.Welcome]
+ *   there and lets [Navigator.rootAt] swap it for [PebblesKey.Path] once a session
+ *   resolves — and that seed is load-bearing, not cosmetic. `rootAt` decides
+ *   "is this a cold restore?" by asking whether the start tab is already rooted at
+ *   `Path`, so seeding `Path` here would make every cold launch look like a restore
+ *   and silently skip the first-run onboarding push. Restores are unaffected:
+ *   `rememberNavBackStack` only uses the seed when it has nothing saved.
+ */
 @Composable
 fun rememberNavigationState(
     startRoute: PebblesKey = PebblesKey.Path,
     tabs: List<PebblesKey> = PebblesKey.tabs,
+    seed: PebblesKey = startRoute,
 ): NavigationState {
     // NB: the `androidx.savedstate.compose.serialization.serializers.MutableStateSerializer`
     // class exists but is the wrong shape here — it serializes a `MutableState<T>` and pairs
@@ -103,7 +114,7 @@ fun rememberNavigationState(
             stateSerializer = NavKeySerializer<PebblesKey>(),
         ) { mutableStateOf(startRoute) }
 
-    val backStacks = tabs.associateWith { key -> rememberNavBackStack(key) }
+    val backStacks = tabs.associateWith { key -> rememberNavBackStack(if (key == startRoute) seed else key) }
 
     return remember(startRoute, tabs) {
         NavigationState(startRoute = startRoute, topLevelRoute = topLevelRoute, backStacks = backStacks)

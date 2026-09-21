@@ -1,63 +1,100 @@
 package app.pbbls.android.navigation
 
 import androidx.compose.runtime.Stable
-import androidx.navigation3.runtime.NavBackStack
-import androidx.navigation3.runtime.NavKey
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 /**
- * The only writer of navigation state (#852).
+ * The only writer of [NavigationState] (#852).
  *
- * Part 1 backs this with one flat [NavBackStack], preserving the IA exactly as
- * the two NavHosts had it. Part 2 swaps the internals for four per-tab stacks
- * without touching a single call site — which is why the seam exists now rather
- * than arriving with the tabs.
- *
- * The back stack is typed [NavKey] rather than [PebblesKey]: 1.1.7's Android
- * `rememberNavBackStack(vararg elements: NavKey)` (the reflection-based
- * saveable overload — see its KDoc) returns `NavBackStack<NavKey>`, not a
- * per-call generic `NavBackStack<T>`. [navigate] and [replaceAll] still only
- * accept a [PebblesKey], so callers get the same compile-time safety.
+ * Part 1 backed this with one flat stack; the call sites written then are
+ * unchanged, which is what the seam was for.
  */
 @Stable
 class Navigator(
-    private val backStack: NavBackStack<NavKey>,
+    val state: NavigationState,
 ) {
+    private val _reselectEvents = MutableSharedFlow<PebblesKey>(extraBufferCapacity = 1)
+
+    /** Emitted when a tab is reselected, for screens that also reset scroll. */
+    val reselectEvents = _reselectEvents.asSharedFlow()
+
+    /**
+     * A [TopLevelKey] switches tab; anything else pushes onto the current tab's
+     * own stack (D6).
+     */
     fun navigate(key: PebblesKey) {
-        backStack.add(key)
-    }
-
-    fun goBack() {
-        // Never pop the last entry: an empty back stack has nothing to render,
-        // and NavDisplay throws rather than closing the app. Letting the system
-        // handle back at the root is what exits.
-        if (backStack.size > 1) backStack.removeAt(backStack.lastIndex)
-    }
-
-    /** The key at the bottom of the stack — what the stack is currently rooted at. */
-    val rootKey: NavKey?
-        get() = backStack.firstOrNull()
-
-    /** Clears the stack and seeds [key]. The auth gate drives this (#852, D8). */
-    fun replaceAll(key: PebblesKey) {
-        backStack.clear()
-        backStack.add(key)
+        if (key is TopLevelKey) {
+            state.topLevelRoute = key
+        } else {
+            state.currentStack.add(key)
+        }
     }
 
     /**
-     * Re-root the stack at [key], but **only if it is not already rooted there**.
+     * Unwind the current tab, then fall back to the start route, then let the
+     * system exit (D4). Popping the start route's last entry is deliberately a
+     * no-op: an empty stack has nothing to render.
+     */
+    fun goBack() {
+        val stack = state.currentStack
+        if (stack.size > 1) {
+            stack.removeAt(stack.lastIndex)
+        } else if (state.topLevelRoute != state.startRoute) {
+            state.topLevelRoute = state.startRoute
+        }
+    }
+
+    /** Reselecting a tab pops it to its root and signals anyone resetting scroll. */
+    fun onReselect(key: PebblesKey) {
+        val stack = state.backStacks[key] ?: return
+        while (stack.size > 1) stack.removeAt(stack.lastIndex)
+        state.topLevelRoute = key
+        _reselectEvents.tryEmit(key)
+    }
+
+    /**
+     * What the app is currently rooted at — the bottom of the **start tab's**
+     * stack.
+     *
+     * The start tab is the right one to read because [replaceAll] is what seeds
+     * a root, and it always seeds into the start tab. The other three tabs are
+     * rooted at their own tab key by construction and say nothing about whether
+     * the user is signed in.
+     */
+    val rootKey: PebblesKey?
+        get() = state.backStacks[state.startRoute]?.firstOrNull() as? PebblesKey
+
+    /**
+     * Resets every tab to its root, returns to the start tab, and seeds [key]
+     * there. Part 5 drives the auth switch with this: sign-out must not leave a
+     * signed-in user's stack sitting under the Welcome screen.
+     */
+    fun replaceAll(key: PebblesKey) {
+        state.backStacks.forEach { (tab, stack) ->
+            while (stack.size > 1) stack.removeAt(stack.lastIndex)
+            if (stack.isNotEmpty()) stack[0] = tab
+        }
+        state.topLevelRoute = state.startRoute
+        val start = state.backStacks.getValue(state.startRoute)
+        start[0] = key
+    }
+
+    /**
+     * Re-root at [key], but **only if it is not already rooted there**.
      *
      * This is what the auth gate must call rather than [replaceAll] directly,
      * and the distinction is not cosmetic. The gate runs on every resolution of
-     * the session, including a **cold restore** — and by then
-     * `rememberNavBackStack` has already restored the saved stack. An
-     * unconditional `replaceAll(Path)` at that moment throws away the very thing
-     * process-death restoration exists to preserve: a user killed on Settings
+     * the session, including a **cold restore** — and by then the saveable
+     * per-tab stacks have already restored themselves. An unconditional
+     * `replaceAll(Path)` at that moment throws away the very thing process-death
+     * restoration exists to preserve: a user killed on `People › SoulDetail`
      * comes back to Path, silently, with every test still green.
      *
      * Rooting is the right signal because it distinguishes the two cases exactly:
-     * a genuine sign-in has the stack rooted at `Welcome` (so it re-roots), while
-     * a cold restore of an authed session is already rooted at `Path` (so it is
-     * left alone, deep entries and all).
+     * a genuine sign-in has the start tab rooted at `Welcome` (so it re-roots),
+     * while a cold restore of an authed session is already rooted at `Path` (so
+     * it is left alone — every tab's stack, and the selected tab, intact).
      */
     fun rootAt(key: PebblesKey) {
         if (rootKey == key) return
