@@ -27,14 +27,12 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.features.path.components.NewPebbleFab
-import app.pbbls.android.features.path.components.PathTopStats
 import app.pbbls.android.features.path.components.WeekHeader
 import app.pbbls.android.features.path.components.WeekPebbleList
 import app.pbbls.android.features.path.components.WeekRoll
 import app.pbbls.android.features.path.models.EmotionPalette
 import app.pbbls.android.features.path.models.Pebble
 import app.pbbls.android.features.path.models.WeekRollEntry
-import app.pbbls.android.features.shared.ripples.RippleSummary
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesText
@@ -124,8 +122,6 @@ fun PathScreen(
                         onCreatePebble = onCreatePebble,
                         onOpenDrafts = onOpenDrafts,
                         draftCount = content.draftCount,
-                        karma = content.karma,
-                        ripple = content.ripple,
                     )
                 }
             }
@@ -187,8 +183,6 @@ fun PathContent(
     onCreatePebble: () -> Unit = {},
     onOpenDrafts: () -> Unit = {},
     draftCount: Int = 0,
-    karma: Int? = null,
-    ripple: RippleSummary? = null,
     modifier: Modifier = Modifier,
 ) {
     val initialIndex =
@@ -210,13 +204,6 @@ fun PathContent(
     }
 
     Column(modifier = modifier.fillMaxSize()) {
-        // Karma + Ripples (#852): this was the bottom bar until the four-tab bar
-        // took that space. See [PathTopStats] for why it moved rather than went.
-        PathTopStats(
-            karma = karma,
-            ripple = ripple,
-            modifier = Modifier.fillMaxWidth().padding(top = 4.dp),
-        )
         WeekRoll(
             entries = entries,
             focusedWeekStart = focusedWeekStart,
