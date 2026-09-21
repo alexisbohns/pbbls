@@ -20,10 +20,15 @@ import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography
 
 /**
- * Full-width "New pebble" entry pill pinned at the bottom of the Path timeline
- * and repeated in the empty-week affordance — the `NewPebbleButton.swift`
- * analog. `system.muted` fill, `accent.primary` label. Pattern:
- * [PebblesPrimaryButton] (fill + clip + clickable Box).
+ * Full-width "New pebble" entry pill — the `NewPebbleButton.swift` analog.
+ * `system.muted` fill, `accent.primary` label. Pattern: [PebblesPrimaryButton]
+ * (fill + clip + clickable Box).
+ *
+ * Formerly also pinned at the bottom of the Path timeline; #852 moved that
+ * spot to [app.pbbls.android.features.path.components.NewPebbleFab] (the bar
+ * now occupies the space it used), so this component is left only in the
+ * empty-week affordance ([WeekPebbleList]'s `EmptyWeek`), which the FAB does
+ * not cover since it is not scoped to a single page.
  *
  * A tap opens the step-by-step record flow; [onLongPress] opens the all-at-once
  * composer instead (M58 D1). Two composers is a cost accepted deliberately and
