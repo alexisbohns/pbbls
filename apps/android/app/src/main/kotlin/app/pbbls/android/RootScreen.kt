@@ -3,6 +3,8 @@ package app.pbbls.android
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -14,19 +16,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
-import androidx.navigation3.runtime.NavBackStack
-import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberNavBackStack
-import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import app.pbbls.android.features.karma.AchievementMomentOverlay
 import app.pbbls.android.features.karma.KarmaOverlayHost
 import app.pbbls.android.features.onboarding.OnboardingGate
+import app.pbbls.android.navigation.BarKey
+import app.pbbls.android.navigation.NavigationState
 import app.pbbls.android.navigation.Navigator
 import app.pbbls.android.navigation.PebblesKey
+import app.pbbls.android.navigation.PebblesNavigationBar
 import app.pbbls.android.navigation.pebblesEntries
+import app.pbbls.android.navigation.rememberNavigationState
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSnapURLCache
@@ -63,10 +64,12 @@ fun RootScreen() {
 
     var hasSeenOnboarding by rememberSaveable { mutableStateOf(OnboardingPreferences.hasSeenOnboarding(context)) }
 
-    // Welcome is the initial seed for both real sign-outs and the Unresolved
-    // splash hold — see the class doc above for why that is safe.
-    val backStack = rememberNavBackStack(PebblesKey.Welcome)
-    val navigator = remember(backStack) { Navigator(backStack) }
+    // Four per-tab back stacks (#852, D4). Welcome is the initial seed of the
+    // START tab for both real sign-outs and the Unresolved splash hold — see the
+    // class doc above for why that is safe, and `rememberNavigationState`'s
+    // `seed` doc for why it must not be Path.
+    val navState = rememberNavigationState(seed = PebblesKey.Welcome)
+    val navigator = remember(navState) { Navigator(navState) }
 
     // Warm the emotion-palette cache concurrently with the launch — the
     // RootView `.task { await palettes.load() }` analog. Path renders with a
@@ -143,7 +146,7 @@ fun RootScreen() {
     ) {
         PebblesNavDisplay(
             navigator = navigator,
-            backStack = backStack,
+            state = navState,
             onSignOut = viewModel::onSignOut,
             welcomeContentRevealed = welcomeContentRevealed,
             onOnboardingFinished = {
@@ -171,39 +174,65 @@ fun RootScreen() {
 }
 
 /**
- * One [NavDisplay] over one saveable back stack, for every destination — signed
+ * One [NavDisplay] over the per-tab back stacks, for every destination — signed
  * in or out (#852). Renamed from `AuthedNavDisplay`: it is no longer
  * authed-only, since `RootScreen`'s effects above are what decide which key
- * sits at the bottom of the stack, not which tree gets composed.
+ * sits at the bottom of the start tab's stack, not which tree gets composed.
  *
- * `rememberViewModelStoreNavEntryDecorator` is what scopes a `hiltViewModel()`
- * to its entry rather than to the composition that happens to host it, so a
- * popped entry takes its ViewModel with it.
+ * Part 6 adds the four-tab bar (D2) and moves the decorators inside
+ * [NavigationState.toDecoratedEntries] — they have to run once per tab stack
+ * rather than once over a single flat stack, which is also why this calls the
+ * [NavDisplay] overload taking pre-decorated `entries` rather than a raw
+ * `backStack`. `rememberViewModelStoreNavEntryDecorator` is still what scopes a
+ * `hiltViewModel()` to its entry rather than to the composition that happens to
+ * host it, so a popped entry takes its ViewModel with it.
+ *
+ * The FAB is deliberately NOT here. It lives inside `PathScreen`, because
+ * `PathViewModel` is scoped to the Path entry and a Scaffold-level FAB sits
+ * outside that entry's ViewModel store — it could not reach it.
  */
 @Composable
 private fun PebblesNavDisplay(
     navigator: Navigator,
-    backStack: NavBackStack<NavKey>,
+    state: NavigationState,
     onSignOut: () -> Unit,
     welcomeContentRevealed: Boolean,
     onOnboardingFinished: () -> Unit,
 ) {
-    NavDisplay(
-        backStack = backStack,
-        onBack = { navigator.goBack() },
-        entryDecorators =
-            listOf(
-                rememberSaveableStateHolderNavEntryDecorator(),
-                rememberViewModelStoreNavEntryDecorator(),
-            ),
-        entryProvider =
-            entryProvider {
-                pebblesEntries(
-                    navigator = navigator,
-                    onSignOut = onSignOut,
-                    welcomeContentRevealed = welcomeContentRevealed,
-                    onOnboardingFinished = onOnboardingFinished,
+    val topKey = state.topKey
+
+    Scaffold(
+        bottomBar = {
+            // D5: bar visibility is read straight off the stack, so it cannot
+            // drift out of sync with what is on screen. Every cover became an
+            // entry in Parts 2-4, which is what makes this check sufficient —
+            // and why Part 6 runs last. Welcome and Auth are not BarKey, so the
+            // signed-out funnel gets no bar without a second condition.
+            if (topKey is BarKey) {
+                PebblesNavigationBar(
+                    current = state.topLevelRoute,
+                    onSelect = navigator::navigate,
+                    onReselect = navigator::onReselect,
                 )
-            },
-    )
+            }
+        },
+        containerColor = PebblesTheme.colors.system.background,
+    ) { padding ->
+        NavDisplay(
+            entries =
+                state.toDecoratedEntries(
+                    entryProvider =
+                        entryProvider {
+                            pebblesEntries(
+                                navigator = navigator,
+                                onSignOut = onSignOut,
+                                welcomeContentRevealed = welcomeContentRevealed,
+                                onOnboardingFinished = onOnboardingFinished,
+                            )
+                        },
+                ),
+            onBack = { navigator.goBack() },
+            modifier = Modifier.padding(padding),
+        )
+    }
 }
