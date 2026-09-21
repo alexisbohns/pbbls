@@ -3452,6 +3452,10 @@ gh pr create --base feat/852-navigation3-migration \
 
 ## Part 6 handoff — read this first if you are picking this up fresh
 
+> **Resolved 2026-09-21.** Part 6 was rebased and shipped; what follows is kept
+> as the record of what the rebase faced, with an outcome note at the end of the
+> section. The status table below is superseded by that note.
+
 **State as of 2026-09-21.**
 
 | Part | Branch | Status |
@@ -3544,9 +3548,57 @@ That last one is the property Part 4 broke once already. Test it explicitly.
 - **Arkaik map update** (plan Task 13) — the IA changed, so the hosted map needs it. `arkaik-mcp` tools only; never edit `docs/arkaik/bundle.json`.
 - **A Lab Note** on the Part 6 PR — it is the one user-visible part of the whole stack.
 
+### Outcome — what the rebase actually did
+
+The 21-commit branch was **not** rebased. It forked before Part 1 and carried
+every one of Parts 1–5's commits, all of which were already squash-merged into
+`main`, so `git rebase origin/main` would have conflicted on all of them and the
+net `main..branch` diff was mostly a *revert* of Parts 2–5. Instead: a fresh
+branch off `main`, the two conflict-free commits cherry-picked
+(`NavigationState`, `PebblesNavigationBar` + strings), and the three conflicting
+files re-applied as deltas onto `main`'s versions rather than taken from the
+branch. The old branch is kept as `archive/852-navigation-bar-tabs-prerebase`.
+
+Resolutions for the three flagged decisions:
+
+1. **FAB stays in `PathScreen`** — as the handoff said. Its original rationale
+   (`PathViewModel` scoping) no longer applies, because Part 3 moved the create
+   destinations out to lambdas the entry provider binds; the placement is right
+   for a different reason now, recorded in the comment there.
+2. **`rootAt` survived**, asking whether the **start tab** is rooted at `Path`.
+   This turned up a second half the handoff had not predicted:
+   `rememberNavigationState` rooted the start tab at its own key, but the gate
+   seeds `Welcome` there, and seeding `Path` would make every cold launch look
+   like a restore and silently skip the first-run onboarding push. Hence the new
+   `seed` parameter. `NavigatorRootAtTest` came across with the property.
+3. **`PathBottomBar` was resolved by the maintainer**: karma and Ripples moved
+   above the week roll as `PathTopStats`, and the profile button was deleted as
+   a duplicate of the `You` tab. `PathScreen` no longer takes `onProfile`.
+
 ## Lessons learned
 
-*Fill this in after the stack merges. Candidates for promotion into `apps/android/CLAUDE.md` at the next milestone-boundary grooming pass — remember the bar is **durable** and **action-guiding**, and that CLAUDE.md is never edited per-PR for learnings.*
+Candidates for promotion into `apps/android/CLAUDE.md` at the next
+milestone-boundary grooming pass — the bar is **durable** and **action-guiding**,
+and CLAUDE.md is never edited per-PR for learnings.
+
+- **A branch that forked before its own stack is re-applied, not rebased.** When
+  the parts were split out of one dev branch and squash-merged, the parent branch
+  holds a duplicate of every merged commit; rebasing replays all of them against
+  their own squashed selves. Branch from `main`, cherry-pick what does not
+  conflict, and hand-apply the rest as a delta onto `main`'s version. Read the
+  *net* `main..branch` diff first — if it is mostly a revert, that is the signal.
+- **A rewrite that changes a data structure has to be asked what invisible
+  properties the old one carried.** `rootAt`'s cold-restore guard fails silently
+  with every gate green, and it had already regressed once. It survived this
+  rewrite only because the handoff named it in advance — which is the argument
+  for handoffs naming *properties*, not just files.
+- **A defaulted parameter can carry a load-bearing meaning.** `rememberNavigationState`
+  rooting the start tab at its own key looks like the obvious default and is the
+  wrong one, because a sibling function reads that value as a signal. Defaults
+  that another function interprets deserve a doc comment saying so.
+- **Two-bars-in-one-space is not visible in a diff, a test, or a lint run.** The
+  `PathBottomBar` collision was found by installing the app and looking at it.
+  Task 14 is not ceremony.
 
 - [ ] Did `rememberViewModelStoreNavEntryDecorator` scope the coordinators as expected, or did something else own them?
 - [ ] Did `NavigationBackHandler`'s cancellable form exist in `navigationevent-compose` 1.1.2, or was the commit-only fallback taken?
