@@ -3450,6 +3450,100 @@ gh pr create --base feat/852-navigation3-migration \
 
 ---
 
+## Part 6 handoff — read this first if you are picking this up fresh
+
+**State as of 2026-09-21.**
+
+| Part | Branch | Status |
+|---|---|---|
+| 1 | `feat/852-navigation3-migration` | **merged** — PR #902 |
+| 2 | `feat/852-profile-covers-as-entries` | **merged** — PR #904 |
+| 3 | `feat/852-write-path-as-entries` | **merged** — PR #907 |
+| 4 | `feat/852-auth-and-deep-links` | **merged** — PR #908 |
+| 5 | `feat/852-service-graph-dies` | **open** — PR #909 |
+| 6 | `feat/852-navigation-bar-tabs` | **parked, built, NOT rebased** |
+
+Also merged: PR #906 (`ignoreCommand` so Vercel skips apps a push did not touch).
+
+### What Part 6 already contains
+
+Tasks 7–13 are **implemented** on `feat/852-navigation-bar-tabs` — do not rebuild them:
+
+- `navigation/NavigationState.kt` — four per-tab `NavBackStack`s, exit-through-home
+- `navigation/Navigator.kt` — rewritten over `NavigationState`, **with ten tests** covering every D4 rule and the D6 invariant
+- `navigation/PebblesNavigationBar.kt` — the four-tab M3 bar, EN/FR strings
+- `features/path/components/NewPebbleFab.kt` — and the FAB lives **inside `PathScreen`**, not in the Scaffold, because `PathViewModel` is scoped to the Path entry and a Scaffold-level FAB cannot reach it
+
+### The rebase is the whole job, and it will conflict
+
+The branch forked at `a7a867be`, **before Part 1**. Everything since — five squash-merged parts — landed underneath it. Expect real conflicts, concentrated in:
+
+- **`RootScreen.kt`** — rewritten in Parts 1, 4 and 5. It now hosts one `NavDisplay` driven by `RootViewModel`, uses `navigator.rootAt(...)` rather than `replaceAll`, and provides three CompositionLocals. Part 6's version predates all of that.
+- **`PathScreen.kt`** — Part 3 gutted eight fields of cover state and added the resume refresh.
+- **`Navigator.kt`** — Part 6 rewrites it over `NavigationState`; Part 4 added `rootAt`/`rootKey` to the flat version. **Both are needed.** `rootAt` must survive the rewrite, and it must re-root the *current tab's* stack rather than a flat one.
+- **`PebblesEntryProvider.kt`** — grew from 11 entries to 22 across Parts 2–4.
+
+Rebase onto `main` **after #909 merges**, not before, or you will do it twice.
+
+### What still has to be decided during the rebase
+
+0. **`PathBottomBar` collides with the new bar — this is NOT yet resolved anywhere.**
+   `features/path/components/PathBottomBar.kt` is Path's own chrome since M38:
+   profile button on the left, karma stat and Ripples badge on the right. Part 6
+   **never touched it** (`git diff main..feat/852-navigation-bar-tabs -- '*PathBottomBar*'`
+   is empty), and Task 10 only resolved the *"New pebble"* button's collision.
+
+   With the four-tab bar up, Path ends with **two stacked bottom bars**, and the
+   profile button duplicates the `You` tab exactly. Options, in rough order of
+   preference:
+
+   - **Keep `PathBottomBar`, drop its profile button.** Karma and the Ripples
+     badge are Path-specific status, not navigation, and have nowhere else to
+     live. The profile button is pure duplication once `You` is a tab. Smallest
+     change, keeps both affordances honest.
+   - **Move karma/Ripples into the Path top bar** and delete `PathBottomBar`
+     entirely. Cleaner vertically, but the week roll already owns the top and
+     this is a visual redesign rather than a migration step.
+   - **Keep both as-is.** Two stacked bars cost roughly 140dp on a phone, which
+     is what D3 rejected for the "New pebble" button — so rejecting it there and
+     accepting it here would be inconsistent.
+
+   **This is a product decision and wants the maintainer.** It was found by
+   looking at a running device, not at the diff.
+
+
+1. **Where the FAB lives.** Part 6 built it inside `PathScreen`. That still holds and should be kept.
+2. **`Navigator.rootAt` over per-tab stacks.** Part 4 added it to fix a cold restore being wiped by the auth gate — see that fix's commit message. The per-tab version must preserve the same property: *do not re-root if already rooted there*, or process-death restoration breaks again. **This is the single highest-risk item in the rebase**, because it fails silently and every gate stays green.
+3. **Bar visibility vs. the promoted entries.** `topKey is BarKey` now works properly, because every cover became an entry in Parts 2–4. That is why Part 6 runs last (see the ordering note at the top of this document).
+
+### Task 14 — device verification, still outstanding
+
+Nothing in Part 6 has been checked on a device. The plan's Task 14 table is the list. The rows that matter most:
+
+- tab switch retains each tab's own stack
+- re-tapping the active tab pops it to its root
+- from a tab root, back goes to Path; from Path, back exits
+- `Path → You → People → back` lands on **Path** (You is skipped — D4's bounded history)
+- kill the process on `People › SoulDetail` and it comes back there
+
+That last one is the property Part 4 broke once already. Test it explicitly.
+
+### Facts already established — do not re-derive
+
+- `rememberNavBackStack` is fixed to `NavBackStack<NavKey>`; there is no per-call generic. The class is generic, the composable is not.
+- `rememberSerializable` lives in `androidx.compose.runtime.saveable`, its parameter is `stateSerializer`, and it takes the inner serializer (`NavKeySerializer<PebblesKey>()`), not a `MutableStateSerializer` wrapper.
+- `entry<T>` is a member of `EntryProviderScope`, not a top-level import.
+- `NavDisplay`'s pre-decorated-entries parameter is named `entries`.
+- `NavigationBackHandler(state, isBackEnabled, onBackCancelled, onBackCompleted)` + `rememberNavigationEventState(currentInfo = NavigationEventInfo.None)`. It throws under Preview (`checkNotNull(LocalNavigationEventDispatcherOwner.current)`), so guard with `LocalInspectionMode` where a preview drives the screen.
+- The app has **zero** Material Icons; the bar uses `painterResource` over `ic_stack` / `ic_people` / `ic_pebble_collection` / `ic_person`.
+- `NavigationBar` defaults to Material 3 colour roles, which this app deliberately does not use (M38 D6). Part 6 already passes Pebbles tokens — keep that.
+
+### Still owed at the end of the stack
+
+- **Two decision-log entries** (plan Task 12): the four-tab IA as a deliberate break from the 1:1 iOS mirror, and the supersession of M38 D5. **Neither is written yet.** The iOS follow-up issue is filed: **#903**.
+- **Arkaik map update** (plan Task 13) — the IA changed, so the hosted map needs it. `arkaik-mcp` tools only; never edit `docs/arkaik/bundle.json`.
+- **A Lab Note** on the Part 6 PR — it is the one user-visible part of the whole stack.
+
 ## Lessons learned
 
 *Fill this in after the stack merges. Candidates for promotion into `apps/android/CLAUDE.md` at the next milestone-boundary grooming pass — remember the bar is **durable** and **action-guiding**, and that CLAUDE.md is never edited per-PR for learnings.*

@@ -9,6 +9,8 @@ import app.pbbls.android.R
 import app.pbbls.android.features.glyph.models.GlyphStroke
 import app.pbbls.android.features.profile.models.Collection
 import app.pbbls.android.features.shared.ripples.RippleSummary
+import app.pbbls.android.services.AchievementRecord
+import app.pbbls.android.services.AchievementsServicing
 import app.pbbls.android.services.PathStatsServicing
 import app.pbbls.android.services.ProfileRow
 import app.pbbls.android.services.ProfileServicing
@@ -23,6 +25,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 private const val TAG = "profile"
+
+/** How many recent badges the shelf shows before "view all" takes over. */
+private const val ACHIEVEMENTS_SHELF_SIZE = 6
 
 /** What the Profile screen can be showing (#849). */
 sealed interface ProfileUiState {
@@ -51,6 +56,14 @@ sealed interface ProfileUiState {
         val email: String?,
         /** SSO brand labels, rendered verbatim and never localized. */
         val providers: List<String>,
+        /** Most recently unlocked badges, newest first — the shelf's row. */
+        val recentAchievements: List<AchievementRecord>,
+        val unlockedAchievementCount: Int,
+        /**
+         * Distinct from an empty list for the same reason [collectionsLoaded]
+         * is: "nothing unlocked yet" and "still loading" render differently.
+         */
+        val achievementsLoaded: Boolean,
     ) : ProfileUiState
 }
 
@@ -78,11 +91,15 @@ class ProfileViewModel
         private val profileService: ProfileServicing,
         private val stats: PathStatsServicing,
         private val supabase: SupabaseServicing,
+        private val achievementsService: AchievementsServicing,
     ) : ViewModel() {
         private var profile: ProfileRow? = null
         private var glyphStrokes: List<GlyphStroke>? = null
         private var collections: List<Collection> = emptyList()
         private var collectionsLoaded = false
+        private var recentAchievements: List<AchievementRecord> = emptyList()
+        private var unlockedAchievementCount = 0
+        private var achievementsLoaded = false
         private var hasFailed = false
         private var isLoaded = false
 
@@ -175,6 +192,27 @@ class ProfileViewModel
                 )
             collectionsLoaded = true
             publish()
+
+            // Reads only — the shelf never fires an evaluation. The grid's
+            // screen-open call is the retroactive grant; doing it here too
+            // would double the work on every profile visit. A failure is not
+            // worth taking the screen down for: the card still navigates, and
+            // the grid surfaces real failures.
+            runCatchingCancellable {
+                val catalog = achievementsService.loadCatalog().associateBy { it.id }
+                achievementsService
+                    .loadUnlocks()
+                    .sortedByDescending { it.unlockedAt }
+                    .mapNotNull { catalog[it.achievementId] }
+            }.fold(
+                onSuccess = {
+                    unlockedAchievementCount = it.size
+                    recentAchievements = it.take(ACHIEVEMENTS_SHELF_SIZE)
+                },
+                onFailure = { Log.e(TAG, "achievements shelf fetch failed", it) },
+            )
+            achievementsLoaded = true
+            publish()
         }
 
         private fun publish() {
@@ -201,6 +239,9 @@ class ProfileViewModel
                                         ?.identities
                                         ?.map { it.provider },
                                 ),
+                            recentAchievements = recentAchievements,
+                            unlockedAchievementCount = unlockedAchievementCount,
+                            achievementsLoaded = achievementsLoaded,
                         )
                 }
         }

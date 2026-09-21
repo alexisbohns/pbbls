@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.di.ApplicationScope
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -56,11 +55,12 @@ interface SupabaseServicing {
 }
 
 /**
- * Wraps the supabase-kt client and exposes auth state to Compose. Screens read
- * this from the [LocalSupabaseService] CompositionLocal (the
- * `@Environment(SupabaseService.self)` analog) and read [session] to decide what
- * to render. Actions (`signIn`, `signUp`, `signInWithGoogle`, `signOut`) are
- * called from the funnel that drives them. Ports
+ * Wraps the supabase-kt client and exposes auth state to Compose. Injected as
+ * [SupabaseServicing] wherever a screen or ViewModel needs [session] to decide
+ * what to render — `LocalSupabaseService` is gone (#852: it is not one of the
+ * three permanent ambient-data CompositionLocals, `apps/android/CLAUDE.md`).
+ * Actions (`signIn`, `signUp`, `signInWithGoogle`, `signOut`) are called from
+ * the funnel that drives them. Ports
  * `apps/ios/Pebbles/Services/SupabaseService.swift`.
  *
  * The client is built by [app.pbbls.android.di.SupabaseModule] and injected, so
@@ -257,18 +257,4 @@ class SupabaseService
                     put("privacy_accepted_at", nowIso)
                 }
         }
-    }
-
-/**
- * CompositionLocal for [SupabaseService] — the `@Environment(SupabaseService.self)`
- * analog. `MainActivity` provides the singleton Hilt built (#848, which
- * supersedes D4); screens read it with `LocalSupabaseService.current`. One
- * `staticCompositionLocalOf` per service — the sibling locals' KDocs point here.
- *
- * Every one of them is temporary: #849 replaces these reads with ViewModels and
- * deletes the locals. Do not add another.
- */
-val LocalSupabaseService =
-    staticCompositionLocalOf<SupabaseServicing> {
-        error("LocalSupabaseService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

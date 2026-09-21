@@ -1,6 +1,5 @@
 package app.pbbls.android.features.profile.components
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,12 +13,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,17 +23,11 @@ import app.pbbls.android.R
 import app.pbbls.android.features.shared.achievements.achievementFamilyIcon
 import app.pbbls.android.features.shared.achievements.achievementTitle
 import app.pbbls.android.services.AchievementRecord
-import app.pbbls.android.services.LocalAchievementsService
 import app.pbbls.android.theme.PebblesIconToken
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography
 import app.pbbls.android.theme.profileCard
-
-private const val TAG = "profile-achievements"
-
-/** How many recent badges the shelf shows before "view all" takes over. */
-private const val SHELF_SIZE = 6
 
 /**
  * The Profile achievements shelf (D14) — ports web `AchievementsShelf` and iOS
@@ -51,41 +38,22 @@ private const val SHELF_SIZE = 6
  * The shelf shows what you have EARNED; the grid shows the whole ladder. So
  * locked badges never appear here, and a profile with nothing unlocked yet
  * falls back to a plain invitation rather than an empty row.
+ *
+ * Stateless since #852 — [ProfileViewModel] owns the load (mirroring every
+ * other Profile card) and reports [recent]/[unlockedCount]/[hasLoaded]; this
+ * used to read the achievements CompositionLocal and fetch for itself via a
+ * bare `LaunchedEffect(Unit)`, which never fired again after the first resume.
  */
 @Composable
 fun ProfileAchievementsCard(
+    recent: List<AchievementRecord>,
+    unlockedCount: Int,
+    hasLoaded: Boolean,
     onOpen: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val achievements = LocalAchievementsService.current
     val system = PebblesTheme.colors.system
     val accent = PebblesTheme.colors.accent
-
-    var recent by remember { mutableStateOf<List<AchievementRecord>>(emptyList()) }
-    var unlockedCount by remember { mutableIntStateOf(0) }
-    var hasLoaded by remember { mutableStateOf(false) }
-
-    // Reads only — the shelf never fires an evaluation. The grid's screen-open
-    // call is the retroactive grant; doing it here too would double the work on
-    // every profile visit.
-    LaunchedEffect(Unit) {
-        try {
-            val catalog = achievements.loadCatalog().associateBy { it.id }
-            val earned =
-                achievements
-                    .loadUnlocks()
-                    .sortedByDescending { it.unlockedAt }
-                    .mapNotNull { catalog[it.achievementId] }
-            unlockedCount = earned.size
-            recent = earned.take(SHELF_SIZE)
-        } catch (e: Exception) {
-            // A failed shelf is not worth an error state on the profile: the
-            // card still navigates, and the grid surfaces real failures.
-            Log.e(TAG, "achievements shelf fetch failed", e)
-        } finally {
-            hasLoaded = true
-        }
-    }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,

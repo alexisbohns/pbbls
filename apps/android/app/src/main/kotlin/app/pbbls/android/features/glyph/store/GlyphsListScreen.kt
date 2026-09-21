@@ -182,6 +182,7 @@ fun GlyphsListScreen(
         GlyphDetailDrawer(
             item = item,
             balance = (uiState as? GlyphsUiState.Content)?.karma ?: 0,
+            market = viewModel.market,
             onRecorded = { result -> viewModel.onPurchased(item, result) },
             onDismiss = viewModel::closeDetail,
         )

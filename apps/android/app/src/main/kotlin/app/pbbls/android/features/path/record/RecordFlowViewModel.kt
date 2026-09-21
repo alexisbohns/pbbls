@@ -383,6 +383,9 @@ class RecordFlowViewModel
         /** The flow's state machine. Every tap goes through it (M58 D4). */
         fun machine(): RecordFlowModel = model
 
+        /** Wired into the souls step's inline soul creation (#852). */
+        fun onAchievementCheck() = achievements.fireCheck()
+
         // MARK: - Photo
 
         /**

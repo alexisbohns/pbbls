@@ -1,6 +1,5 @@
 package app.pbbls.android.features.connections
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +21,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
 import app.pbbls.android.features.glyph.views.GlyphView
 import app.pbbls.android.features.glyph.views.GlyphViewCase
@@ -36,9 +38,10 @@ import app.pbbls.android.theme.PebblesTypography
  * who is inviting first, then waits for an explicit tap: accepting is the
  * mutual consent, so it is never fired automatically (design D5/D12).
  *
- * `RootScreen` composes this *above* the nav host, so its ViewModel is
- * activity-scoped — see [AcceptInviteViewModel] for why its `finish()` is
- * load-bearing here in a way it is not for a cover inside a destination.
+ * A [app.pbbls.android.navigation.PebblesKey.AcceptInvite] nav entry (#852,
+ * replacing the earlier cover composed above the nav host) —
+ * `rememberViewModelStoreNavEntryDecorator()` scopes `hiltViewModel()` to this
+ * entry, so [AcceptInviteViewModel] is destroyed when it pops.
  */
 @Composable
 fun AcceptInviteScreen(
@@ -52,18 +55,17 @@ fun AcceptInviteScreen(
     // Guarded on the token, so a rotation re-runs this without re-previewing.
     LaunchedEffect(token) { viewModel.start(token) }
 
-    fun dismiss() {
-        viewModel.finish()
-        onDismiss()
-    }
-
-    BackHandler { dismiss() }
+    // NavigationBackHandler (not the legacy BackHandler), matching every other
+    // migrated surface (#852) — never previewed with a real hiltViewModel, so
+    // no LocalInspectionMode guard is needed here (contrast OnboardingScreen).
+    val backState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
+    NavigationBackHandler(state = backState) { onDismiss() }
 
     AcceptInviteContent(
         uiState = uiState,
         onAccept = viewModel::accept,
         onRetry = viewModel::retry,
-        onDismiss = { dismiss() },
+        onDismiss = onDismiss,
         modifier = modifier,
     )
 }

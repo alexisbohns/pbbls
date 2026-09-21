@@ -3,7 +3,6 @@ package app.pbbls.android.features.karma
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.di.ApplicationScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -70,9 +69,4 @@ class KarmaNotificationService
         companion object {
             const val CAPSULE_DURATION_MS = 2_500L
         }
-    }
-
-val LocalKarmaNotificationService =
-    staticCompositionLocalOf<KarmaNotificationService> {
-        error("LocalKarmaNotificationService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

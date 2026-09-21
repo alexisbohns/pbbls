@@ -8,7 +8,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -24,8 +23,6 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import app.pbbls.android.features.karma.AchievementMomentOverlay
 import app.pbbls.android.features.karma.KarmaOverlayHost
-import app.pbbls.android.features.karma.LocalAchievementNotificationService
-import app.pbbls.android.features.karma.LocalKarmaNotificationService
 import app.pbbls.android.features.onboarding.OnboardingGate
 import app.pbbls.android.navigation.Navigator
 import app.pbbls.android.navigation.PebblesKey
@@ -33,10 +30,8 @@ import app.pbbls.android.navigation.pebblesEntries
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalReferenceDataService
 import app.pbbls.android.services.LocalSnapURLCache
-import app.pbbls.android.services.LocalSupabaseService
 import app.pbbls.android.services.OnboardingPreferences
 import app.pbbls.android.theme.PebblesTheme
-import kotlinx.coroutines.launch
 
 /**
  * Top-level auth gate — the `RootView` analog (D5). Auth is now a condition,
@@ -58,14 +53,10 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun RootScreen() {
-    val supabase = LocalSupabaseService.current
     val palettes = LocalEmotionPaletteService.current
     val referenceData = LocalReferenceDataService.current
-    val karma = LocalKarmaNotificationService.current
-    val achievementNotify = LocalAchievementNotificationService.current
     val snapUrls = LocalSnapURLCache.current
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
 
     val viewModel: RootViewModel = hiltViewModel()
     val root by viewModel.uiState.collectAsStateWithLifecycle()
@@ -83,7 +74,7 @@ fun RootScreen() {
     // lives in RootViewModel's init, not here.
     LaunchedEffect(Unit) { palettes.load() }
 
-    val userId = supabase.session?.user?.id
+    val userId = root.userId
     val welcomeContentRevealed = root.destination == RootDestination.SignedOut
 
     // Sign-out flushes the signed-URL cache (the iOS RootView
@@ -153,7 +144,7 @@ fun RootScreen() {
         PebblesNavDisplay(
             navigator = navigator,
             backStack = backStack,
-            onSignOut = { scope.launch { supabase.signOut() } },
+            onSignOut = viewModel::onSignOut,
             welcomeContentRevealed = welcomeContentRevealed,
             onOnboardingFinished = {
                 OnboardingPreferences.setHasSeenOnboarding(context, true)
@@ -164,9 +155,15 @@ fun RootScreen() {
         if (root.destination == RootDestination.SignedIn) {
             // Karma + achievement flashes only ever fire from signed-in
             // actions — floats above the nav host, drawn last for z-order (D9).
-            KarmaOverlayHost(service = karma, modifier = Modifier.fillMaxSize())
+            KarmaOverlayHost(
+                flash = root.karmaFlash,
+                onDismiss = viewModel::onKarmaDismissed,
+                modifier = Modifier.fillMaxSize(),
+            )
             AchievementMomentOverlay(
-                service = achievementNotify,
+                moment = root.achievementMoment,
+                onAdvance = viewModel::onAchievementAdvanced,
+                onDismiss = viewModel::onAchievementDismissed,
                 modifier = Modifier.fillMaxSize(),
             )
         }

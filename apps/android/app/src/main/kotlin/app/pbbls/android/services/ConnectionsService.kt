@@ -1,7 +1,6 @@
 package app.pbbls.android.services
 
 import androidx.annotation.StringRes
-import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.R
 import app.pbbls.android.features.glyph.models.GlyphStroke
 import io.github.jan.supabase.postgrest.postgrest
@@ -210,10 +209,4 @@ fun connectionsErrorMessage(error: DataError): Int =
 
         DataError.NotFound -> R.string.connections_error_invite_unusable
         DataError.Quota, is DataError.Unknown -> R.string.connections_error_generic
-    }
-
-/** CompositionLocal for [ConnectionsService]. */
-val LocalConnectionsService =
-    staticCompositionLocalOf<ConnectionsServicing> {
-        error("LocalConnectionsService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

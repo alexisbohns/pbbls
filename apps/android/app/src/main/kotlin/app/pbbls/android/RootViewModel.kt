@@ -4,6 +4,10 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.pbbls.android.features.karma.AchievementMoment
+import app.pbbls.android.features.karma.AchievementNotificationService
+import app.pbbls.android.features.karma.KarmaEarnedContent
+import app.pbbls.android.features.karma.KarmaNotificationService
 import app.pbbls.android.services.SupabaseServicing
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,7 +47,13 @@ sealed interface RootDestination {
  */
 data class RootUiState(
     val destination: RootDestination = RootDestination.Unresolved,
+    /** Mirrors [SupabaseServicing.session]'s user id — data only, never used to call the service. */
+    val userId: String? = null,
     val pendingInvite: String? = null,
+    /** The "+N karma" pastille content, or null when idle. Mirrors [KarmaNotificationService.activeCapsule]. */
+    val karmaFlash: KarmaEarnedContent? = null,
+    /** The unlock moment on screen, or null when idle. Mirrors [AchievementNotificationService.moment]. */
+    val achievementMoment: AchievementMoment? = null,
 )
 
 /**
@@ -72,6 +82,8 @@ class RootViewModel
     @Inject
     constructor(
         private val supabase: SupabaseServicing,
+        private val karma: KarmaNotificationService,
+        private val achievementNotify: AchievementNotificationService,
         private val savedStateHandle: SavedStateHandle,
     ) : ViewModel() {
         private val _uiState =
@@ -111,6 +123,21 @@ class RootViewModel
                     .distinctUntilChanged()
                     .collect { (userId, isInitializing) -> onAuthState(userId, isInitializing) }
             }
+            // Its own coroutine, deliberately: karma is unrelated to auth, and
+            // folding it into the sessionStatus collector above would risk the
+            // "never call back into supabase-kt from inside its own collector"
+            // deadlock rule (apps/android/CLAUDE.md) the moment either grows.
+            viewModelScope.launch {
+                snapshotFlow { karma.activeCapsule }
+                    .collect { flash -> _uiState.update { it.copy(karmaFlash = flash) } }
+            }
+            // Same reasoning, its own coroutine: the unlock queue is unrelated to
+            // both auth and karma, and folding it into either collector above
+            // risks the same deadlock rule the moment one of them grows.
+            viewModelScope.launch {
+                snapshotFlow { achievementNotify.moment }
+                    .collect { moment -> _uiState.update { it.copy(achievementMoment = moment) } }
+            }
         }
 
         private fun onAuthState(
@@ -129,7 +156,7 @@ class RootViewModel
             // Only a resolved status updates hasHadSession — Unresolved must
             // never be mistaken for a session, real or absent.
             if (!isInitializing) hasHadSession = userId != null
-            _uiState.update { it.copy(destination = destination) }
+            _uiState.update { it.copy(destination = destination, userId = userId) }
         }
 
         /**
@@ -144,6 +171,24 @@ class RootViewModel
 
         /** Consumed once the accept surface has been navigated to. */
         fun onInviteConsumed() = clearPendingInvite()
+
+        /**
+         * Signs out (#852) — moved off `RootScreen`'s own `LocalSupabaseService`
+         * read, which was the last call through that local outside the three
+         * permanent ambient-data ones (`apps/android/CLAUDE.md`).
+         */
+        fun onSignOut() {
+            viewModelScope.launch { supabase.signOut() }
+        }
+
+        /** Tap-to-dismiss on the karma pastille (D9). */
+        fun onKarmaDismissed() = karma.dismiss()
+
+        /** Advances the unlock queue to its next card, ending the moment after the last one. */
+        fun onAchievementAdvanced() = achievementNotify.advance()
+
+        /** Tap-the-scrim or back-gesture dismissal — skips the rest of the unlock queue (D13). */
+        fun onAchievementDismissed() = achievementNotify.dismiss()
 
         private fun clearPendingInvite() {
             savedStateHandle.remove<String>(KEY_PENDING_INVITE)

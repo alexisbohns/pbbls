@@ -57,6 +57,7 @@ fun RecordStepContent(
     onRemovePhoto: () -> Unit,
     onGlyphPicked: (Glyph) -> Unit,
     modifier: Modifier = Modifier,
+    onAchievementCheck: () -> Unit = {},
 ) {
     when (step) {
         RecordStep.PHOTO ->
@@ -113,6 +114,7 @@ fun RecordStepContent(
                 selectedIds = draft.soulIds,
                 onToggle = { model.toggleSoul(it) },
                 modifier = modifier,
+                onAchievementCheck = onAchievementCheck,
             )
 
         RecordStep.COLLECTION ->

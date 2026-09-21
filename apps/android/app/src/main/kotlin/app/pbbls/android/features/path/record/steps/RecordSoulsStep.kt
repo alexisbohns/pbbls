@@ -9,7 +9,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import app.pbbls.android.features.path.create.pickers.CreateSoulDialog
 import app.pbbls.android.features.path.create.pickers.SoulPickerBody
-import app.pbbls.android.services.LocalAchievementsService
 import app.pbbls.android.services.LocalReferenceDataService
 import kotlinx.coroutines.launch
 
@@ -28,9 +27,9 @@ fun RecordSoulsStep(
     selectedIds: List<String>,
     onToggle: (String) -> Unit,
     modifier: Modifier = Modifier,
+    onAchievementCheck: () -> Unit = {},
 ) {
     val refs = LocalReferenceDataService.current
-    val achievements = LocalAchievementsService.current
     val scope = rememberCoroutineScope()
     var showCreate by remember { mutableStateOf(false) }
 
@@ -49,7 +48,7 @@ fun RecordSoulsStep(
                 scope.launch {
                     val created = refs.createSoul(name)
                     if (created != null) {
-                        achievements.fireCheck()
+                        onAchievementCheck()
                         // Select it immediately — the user created it *for* this
                         // pebble, so making them tap it again is friction.
                         onToggle(created.id)

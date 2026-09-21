@@ -205,6 +205,7 @@ fun RecordFlowScreen(
                         onRetryPhoto = viewModel::onRetryPhoto,
                         onRemovePhoto = viewModel::onRemovePhoto,
                         onGlyphPicked = { model.selectGlyph(it.id) },
+                        onAchievementCheck = viewModel::onAchievementCheck,
                     )
                 }
             }

@@ -4,7 +4,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
 import app.pbbls.android.services.AchievementRecord
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,6 +21,20 @@ data class AchievementMomentCard(
     val slug: String,
     val record: AchievementRecord?,
     val karmaGranted: Int,
+)
+
+/**
+ * One unlock moment: the card on screen plus where it sits in the queue.
+ *
+ * The queue is the reason this is not simply a nullable card — a mutation that
+ * unlocks three badges shows three cards with "1 of 3" progress, and flattening
+ * that to a single card would silently drop the progress UI.
+ */
+data class AchievementMoment(
+    val card: AchievementMomentCard,
+    val position: Int,
+    val total: Int,
+    val isLast: Boolean,
 )
 
 /**
@@ -54,6 +67,22 @@ class AchievementNotificationService
         val isShowingLastCard: Boolean
             get() = index + 1 >= cards.size
 
+        /**
+         * The moment [AchievementMomentOverlay] renders (#852: state, not this
+         * service). A getter, not a stored field, so it can never drift from
+         * [cards]/[index] — the same reasoning as [currentCard]/[isShowingLastCard].
+         */
+        val moment: AchievementMoment?
+            get() =
+                currentCard?.let { card ->
+                    AchievementMoment(
+                        card = card,
+                        position = index + 1,
+                        total = cards.size.coerceAtLeast(1),
+                        isLast = isShowingLastCard,
+                    )
+                }
+
         fun present(cards: List<AchievementMomentCard>) {
             if (cards.isEmpty()) return
             this.cards = cards
@@ -73,9 +102,4 @@ class AchievementNotificationService
             cards = emptyList()
             index = 0
         }
-    }
-
-val LocalAchievementNotificationService =
-    staticCompositionLocalOf<AchievementNotificationService> {
-        error("LocalAchievementNotificationService not provided — wrap the tree in MainActivity's CompositionLocalProvider")
     }

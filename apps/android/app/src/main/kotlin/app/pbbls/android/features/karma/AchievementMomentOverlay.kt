@@ -1,7 +1,6 @@
 package app.pbbls.android.features.karma
 
 import android.view.HapticFeedbackConstants
-import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -35,6 +34,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
 import app.pbbls.android.components.PebblesPrimaryButton
 import app.pbbls.android.features.shared.achievements.achievementDescription
@@ -50,29 +52,37 @@ import app.pbbls.android.theme.PebblesTypography
  * shows the flash behind the card — and the card's own "+N karma" line is the
  * badge's, never the pebble's.
  *
+ * Takes state, not the service (#852) — [moment] is
+ * [AchievementNotificationService.moment], surfaced through `RootViewModel`'s
+ * `RootUiState` the same way [KarmaOverlayHost] took `karmaFlash` since #849.
+ * It is a queue position rather than a single card because the queue is real:
+ * three badges from one mutation show three cards with "1 of 3" progress, and
+ * flattening that to `(card, onDismiss)` would silently drop the progress UI.
+ *
  * Dismissal is never blocking: the scrim and the back gesture both skip the
  * rest of the queue.
  */
 @Composable
 fun AchievementMomentOverlay(
-    service: AchievementNotificationService,
+    moment: AchievementMoment?,
+    onAdvance: () -> Unit,
+    onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val card = service.currentCard
     val view = LocalView.current
 
-    // Retain the last card through the exit animation so the panel fades out
+    // Retain the last moment through the exit animation so the panel fades out
     // with its content instead of blanking (the KarmaOverlayHost idiom).
-    var lastCard by remember { mutableStateOf<AchievementMomentCard?>(null) }
-    if (card != null) lastCard = card
+    var lastMoment by remember { mutableStateOf<AchievementMoment?>(null) }
+    if (moment != null) lastMoment = moment
 
     // One reward buzz per moment, not per card — the queue is a single event.
-    LaunchedEffect(card != null) {
-        if (card != null) view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
+    LaunchedEffect(moment != null) {
+        if (moment != null) view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
     }
 
     AnimatedVisibility(
-        visible = card != null,
+        visible = moment != null,
         enter = fadeIn(),
         exit = fadeOut(),
         modifier = modifier,
@@ -88,19 +98,25 @@ fun AchievementMomentOverlay(
                     .clickable(
                         interactionSource = interaction,
                         indication = null,
-                        onClick = { service.dismiss() },
+                        onClick = onDismiss,
                     ),
             contentAlignment = Alignment.Center,
         ) {
-            val shown = card ?: lastCard
+            val shown = moment ?: lastMoment
             if (shown != null) {
-                BackHandler(enabled = card != null) { service.dismiss() }
+                // NavigationBackHandler (not the legacy BackHandler, #852): still a
+                // handler rather than a nav entry, since this overlay is drawn above
+                // `NavDisplay`, not on its back stack.
+                val backState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
+                NavigationBackHandler(state = backState, isBackEnabled = moment != null) {
+                    onDismiss()
+                }
                 MomentCard(
-                    card = shown,
-                    position = service.index + 1,
-                    total = service.cards.size.coerceAtLeast(1),
-                    isLast = service.isShowingLastCard,
-                    onAdvance = { service.advance() },
+                    card = shown.card,
+                    position = shown.position,
+                    total = shown.total,
+                    isLast = shown.isLast,
+                    onAdvance = onAdvance,
                 )
             }
         }

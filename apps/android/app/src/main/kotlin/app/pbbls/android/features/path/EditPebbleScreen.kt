@@ -1,6 +1,5 @@
 package app.pbbls.android.features.path
 
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -27,6 +26,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigationevent.NavigationEventInfo
+import androidx.navigationevent.compose.NavigationBackHandler
+import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
 import app.pbbls.android.features.path.create.PebbleForm
 import app.pbbls.android.features.path.create.VisibilityChip
@@ -47,12 +49,13 @@ import app.pbbls.android.ui.ObserveUiEffects
  * (any 5xx) advances; the pebbleEnriched flash fires only when karma_delta > 0
  * (D10, guarded inside KarmaNotificationService).
  *
- * A pushed entry now (#852). Keeps a `BackHandler`, unlike its detail/drafts
+ * A pushed entry now (#852). Keeps a `NavigationBackHandler` (converted from
+ * the legacy `BackHandler` in the same PR), unlike its detail/drafts
  * siblings — deliberately: `viewModel.dismiss()` runs snap cleanup
  * (`cancelAndCleanup`) that a bare `Navigator.goBack()` would skip, so system
  * back has to route through it rather than through `NavDisplay`'s default. The
  * handler is now unconditionally **enabled** rather than
- * `enabled = content?.isSaving != true` (D9): a *disabled* `BackHandler`
+ * `enabled = content?.isSaving != true` (D9): a *disabled* handler
  * declines the event instead of blocking it, so it fell through and popped
  * this screen anyway while saving, skipping the cleanup the disabled state was
  * trying to preserve. `dismiss()` already no-ops while `isSaving`, so always
@@ -88,7 +91,8 @@ fun EditPebbleScreen(
         }
 
     val content = uiState as? EditPebbleUiState.Content
-    BackHandler { viewModel.dismiss() }
+    val backState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
+    NavigationBackHandler(state = backState) { viewModel.dismiss() }
 
     Column(
         modifier
@@ -144,6 +148,7 @@ fun EditPebbleScreen(
                         onRemovePending = viewModel::onRemovePhoto,
                         isRemovingExistingSnap = state.isRemovingExistingSnap,
                         onRemoveExistingSnap = viewModel::onRemoveExistingSnap,
+                        onAchievementCheck = viewModel::onAchievementCheck,
                     )
                     // Grade chip (M51) — mirrors iOS EditPebbleSheet's bottomBar
                     // ToolbarItemGroup, matching CreatePebbleScreen's row treatment.
