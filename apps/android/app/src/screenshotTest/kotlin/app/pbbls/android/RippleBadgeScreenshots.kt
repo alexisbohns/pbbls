@@ -13,7 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.features.path.components.PathBottomBar
+import app.pbbls.android.features.path.components.PathTopStats
 import app.pbbls.android.features.shared.ripples.RippleBadge
 import app.pbbls.android.features.shared.ripples.RippleSummary
 import app.pbbls.android.theme.PebblesText
@@ -24,7 +24,7 @@ import com.android.tools.screenshot.PreviewTest
 /**
  * Ripple badge + bottom-bar previews (#566): every level 0–6 in active and
  * inactive states (compare against the iOS `RipplePreviewGrid` side-by-side —
- * the B acceptance gate), plus the PathBottomBar with real stats and the
+ * the B acceptance gate), plus the PathTopStats row with real stats and the
  * loading (null) state — light and dark.
  */
 @Composable
@@ -53,17 +53,15 @@ private fun RippleGallery() {
                 }
             }
         }
-        PathBottomBar(
+        PathTopStats(
             karma = 42,
             ripple = RippleSummary(rippleLevel = 3, pebbles28d = 11, activeToday = true),
-            onProfile = {},
             modifier = Modifier.fillMaxWidth(),
         )
         // Loading state: em-dash number, level-0 inactive badge.
-        PathBottomBar(
+        PathTopStats(
             karma = null,
             ripple = null,
-            onProfile = {},
             modifier = Modifier.fillMaxWidth(),
         )
     }
