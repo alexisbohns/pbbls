@@ -3571,9 +3571,18 @@ Resolutions for the three flagged decisions:
    seeds `Welcome` there, and seeding `Path` would make every cold launch look
    like a restore and silently skip the first-run onboarding push. Hence the new
    `seed` parameter. `NavigatorRootAtTest` came across with the property.
-3. **`PathBottomBar` was resolved by the maintainer**: karma and Ripples moved
-   above the week roll as `PathTopStats`, and the profile button was deleted as
-   a duplicate of the `You` tab. `PathScreen` no longer takes `onProfile`.
+3. **`PathBottomBar` was resolved by the maintainer**, in two rounds. First
+   karma and Ripples moved above the week roll as `PathTopStats`, with the
+   profile button deleted as a duplicate of the `You` tab. Seen on a device,
+   that row cost more than it earned — a full-width band pushing the week roll
+   down for two small numbers — so it was **deleted too**. Karma and Ripples are
+   temporarily unrendered and return in a top bar of their own design; the data
+   stays in `PathUiState.Content`. `PathScreen` no longer takes `onProfile`.
+4. **The `Scaffold` needed `consumeWindowInsets`**, which nothing in the plan
+   anticipated. Passing its padding on with `Modifier.padding` alone left the
+   twelve screens that apply `safeDrawingPadding()` themselves adding the
+   status-bar inset a second time, so *every* page opened with a dead band under
+   the status bar.
 
 ## Lessons learned
 
@@ -3597,8 +3606,18 @@ and CLAUDE.md is never edited per-PR for learnings.
   wrong one, because a sibling function reads that value as a signal. Defaults
   that another function interprets deserve a doc comment saying so.
 - **Two-bars-in-one-space is not visible in a diff, a test, or a lint run.** The
-  `PathBottomBar` collision was found by installing the app and looking at it.
-  Task 14 is not ceremony.
+  `PathBottomBar` collision was found by installing the app and looking at it —
+  and so was the failure of the first fix for it, and the double status-bar inset
+  on every page. Three defects, one install. Task 14 is not ceremony.
+- **A `Scaffold` that hands its padding to a child must also
+  `consumeWindowInsets(padding)`.** `Modifier.padding` does not consume insets, so
+  any descendant calling `safeDrawingPadding()` / `systemBarsPadding()` applies
+  them again. This repo has twelve such screens, so the bug was global and looked
+  like a design choice rather than a defect.
+- **Moving a component is not the only alternative to deleting it.** The stats
+  bar was moved because the data had "nowhere else to live"; on the device the
+  honest answer was that it had nowhere to live *yet*, and deleting the render
+  while keeping the data loaded was cheaper than a bad home for it.
 
 - [ ] Did `rememberViewModelStoreNavEntryDecorator` scope the coordinators as expected, or did something else own them?
 - [ ] Did `NavigationBackHandler`'s cancellable form exist in `navigationevent-compose` 1.1.2, or was the commit-only fallback taken?

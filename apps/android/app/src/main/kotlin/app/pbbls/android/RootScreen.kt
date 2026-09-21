@@ -2,6 +2,7 @@ package app.pbbls.android
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -232,7 +233,18 @@ private fun PebblesNavDisplay(
                         },
                 ),
             onBack = { navigator.goBack() },
-            modifier = Modifier.padding(padding),
+            // `consumeWindowInsets` is not optional next to `padding`. Scaffold's
+            // padding already carries the status-bar inset, but `Modifier.padding`
+            // does NOT consume it, so the twelve screens that apply
+            // `safeDrawingPadding()` themselves (via `PebblesScreen`, mostly) were
+            // adding it a second time and every page opened with a dead band under
+            // the status bar. Consuming it makes those calls correctly resolve to
+            // zero, and leaves them right for any surface rendered outside this
+            // Scaffold. IME insets are untouched, so `imePadding()` still works.
+            modifier =
+                Modifier
+                    .padding(padding)
+                    .consumeWindowInsets(padding),
         )
     }
 }
