@@ -26,15 +26,13 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
-import app.pbbls.android.features.path.components.NewPebbleButton
-import app.pbbls.android.features.path.components.PathBottomBar
+import app.pbbls.android.features.path.components.NewPebbleFab
 import app.pbbls.android.features.path.components.WeekHeader
 import app.pbbls.android.features.path.components.WeekPebbleList
 import app.pbbls.android.features.path.components.WeekRoll
 import app.pbbls.android.features.path.models.EmotionPalette
 import app.pbbls.android.features.path.models.Pebble
 import app.pbbls.android.features.path.models.WeekRollEntry
-import app.pbbls.android.features.shared.ripples.RippleSummary
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesText
@@ -46,8 +44,8 @@ import kotlin.math.abs
 /**
  * The Path timeline — the authenticated landing surface (`PathView.swift`
  * analog). Loads every pebble once via `path_pebbles()`, groups by ISO week,
- * pages the body by week, and hosts the bottom stats bar. Sign-out moved to the
- * Profile screen (sub-project C); [onProfile] navigates there.
+ * pages the body by week, and shows the karma/Ripples status above the roll.
+ * Sign-out lives on the Profile screen, which is the `You` tab (#852).
  *
  * Every piece of state it used to hold in `remember` now lives in
  * [PathViewModel] (#849), so a rotation no longer re-fetches the timeline or
@@ -60,7 +58,6 @@ import kotlin.math.abs
  */
 @Composable
 fun PathScreen(
-    onProfile: () -> Unit,
     onOpenDetail: (String) -> Unit,
     onOpenDrafts: () -> Unit,
     onCreatePebble: () -> Unit,
@@ -123,14 +120,32 @@ fun PathScreen(
                         onPebbleTap = { pebble -> onOpenDetail(pebble.id) },
                         onPebbleDelete = viewModel::requestDelete,
                         onCreatePebble = onCreatePebble,
-                        onCreatePebbleLongPress = onCreatePebbleLongPress,
                         onOpenDrafts = onOpenDrafts,
                         draftCount = content.draftCount,
-                        karma = content.karma,
-                        ripple = content.ripple,
-                        onProfile = onProfile,
                     )
                 }
+            }
+
+            // "New pebble" (#852, D3). It lives HERE, inside the Path entry,
+            // rather than in `RootScreen`'s Scaffold: the create destinations
+            // are reached through the lambdas `PebblesEntryProvider` binds to
+            // THIS entry, and a Scaffold-level FAB sits outside every entry, so
+            // it would have to be told which screen is showing and what its
+            // actions are — exactly the coupling the entry provider exists to
+            // avoid. It is also Path-only chrome, which the Scaffold is not.
+            //
+            // It floats clear of the four-tab bar because the Path entry renders
+            // inside the Scaffold's content padding. Tap opens the record flow,
+            // long-press the all-at-once composer (M58 D1).
+            if (uiState is PathUiState.Content) {
+                NewPebbleFab(
+                    onClick = onCreatePebble,
+                    onLongClick = onCreatePebbleLongPress,
+                    modifier =
+                        Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(PebblesTheme.spacing.lg),
+                )
             }
         }
 
@@ -166,12 +181,8 @@ fun PathContent(
     onPebbleTap: (Pebble) -> Unit = {},
     onPebbleDelete: (Pebble) -> Unit = {},
     onCreatePebble: () -> Unit = {},
-    onCreatePebbleLongPress: (() -> Unit)? = null,
     onOpenDrafts: () -> Unit = {},
     draftCount: Int = 0,
-    karma: Int? = null,
-    ripple: RippleSummary? = null,
-    onProfile: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val initialIndex =
@@ -244,20 +255,6 @@ fun PathContent(
                 }
             }
         }
-        // Pinned "New pebble" entry — the PathView.safeAreaInset(.bottom) analog.
-        NewPebbleButton(
-            onTap = onCreatePebble,
-            onLongPress = onCreatePebbleLongPress,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-        )
-        // Bottom stats bar (sub-project B) — karma + ripple; all taps push
-        // Profile (sub-project C), which now owns sign-out.
-        PathBottomBar(
-            karma = karma,
-            ripple = ripple,
-            onProfile = onProfile,
-            modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
-        )
     }
 }
 

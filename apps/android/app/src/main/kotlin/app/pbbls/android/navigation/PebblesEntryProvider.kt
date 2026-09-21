@@ -55,7 +55,6 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
 ) {
     entry<PebblesKey.Path>(metadata = NavTransitions.forKey(PebblesKey.Path)) {
         PathScreen(
-            onProfile = { navigator.navigate(PebblesKey.You) },
             onOpenDetail = { pebbleId -> navigator.navigate(PebblesKey.PebbleDetail(pebbleId)) },
             onOpenDrafts = { navigator.navigate(PebblesKey.Drafts) },
             onCreatePebble = { navigator.navigate(PebblesKey.RecordFlow()) },
