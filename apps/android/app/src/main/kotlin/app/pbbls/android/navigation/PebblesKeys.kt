@@ -1,7 +1,7 @@
 package app.pbbls.android.navigation
 
 import androidx.navigation3.runtime.NavKey
-import app.pbbls.android.features.auth.AuthMode
+import app.pbbls.android.core.model.AuthMode
 import kotlinx.serialization.Serializable
 
 /**

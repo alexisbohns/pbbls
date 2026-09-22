@@ -84,7 +84,7 @@
         errorLine1="    val locale = Locale.getDefault()"
         errorLine2="                 ~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/kotlin/app/pbbls/android/components/PebbleRow.kt"
+            file="src/main/kotlin/app/pbbls/android/core/ui/PebbleRow.kt"
             line="65"
             column="18"/>
     </issue>
@@ -95,7 +95,7 @@
         errorLine1="    val displayText = if (style in PebblesTypography.uppercaseTokens) text.uppercase(Locale.getDefault()) else text"
         errorLine2="                                                                                     ~~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/kotlin/app/pbbls/android/theme/PebblesText.kt"
+            file="src/main/kotlin/app/pbbls/android/core/designsystem/PebblesText.kt"
             line="29"
             column="86"/>
     </issue>
@@ -139,7 +139,7 @@
         errorLine1="            context.resources"
         errorLine2="            ~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/kotlin/app/pbbls/android/features/path/render/PebbleOutlineBackdrop.kt"
+            file="src/main/kotlin/app/pbbls/android/core/ui/render/PebbleOutlineBackdrop.kt"
             line="71"
             column="13"/>
     </issue>
@@ -150,7 +150,7 @@
         errorLine1="                context.resources"
         errorLine2="                ~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/kotlin/app/pbbls/android/features/path/render/ValenceGlyph.kt"
+            file="src/main/kotlin/app/pbbls/android/core/ui/render/ValenceGlyph.kt"
             line="59"
             column="17"/>
     </issue>
@@ -161,7 +161,7 @@
         errorLine1="    modifier: Modifier = Modifier,"
         errorLine2="    ~~~~~~~~">
         <location
-            file="src/main/kotlin/app/pbbls/android/components/CheckGlyph.kt"
+            file="src/main/kotlin/app/pbbls/android/core/designsystem/CheckGlyph.kt"
             line="20"
             column="5"/>
     </issue>
@@ -612,7 +612,7 @@
         errorLine1="    CustomTabsIntent.Builder().build().launchUrl(context, Uri.parse(doc.url))"
         errorLine2="                                                          ~~~~~~~~~~~~~~~~~~">
         <location
-            file="src/main/kotlin/app/pbbls/android/components/LegalDocs.kt"
+            file="src/main/kotlin/app/pbbls/android/core/designsystem/LegalDocs.kt"
             line="28"
             column="59"/>
     </issue>
@@ -634,7 +634,7 @@
         errorLine1="            val checkpoint = native.save()"
         errorLine2="                             ~~~~~~~~~~~~~">
         <location
-            file="src/main/kotlin/app/pbbls/android/features/path/render/PebbleSvg.kt"
+            file="src/main/kotlin/app/pbbls/android/core/ui/render/PebbleSvg.kt"
             line="59"
             column="30"/>
     </issue>

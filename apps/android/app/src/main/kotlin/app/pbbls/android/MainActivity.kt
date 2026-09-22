@@ -20,7 +20,7 @@ import app.pbbls.android.core.data.SnapURLCache
 import app.pbbls.android.core.data.SupabaseService
 import app.pbbls.android.core.data.SupabaseServicing
 import app.pbbls.android.core.data.parseInviteToken
-import app.pbbls.android.theme.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTheme
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.jan.supabase.auth.handleDeeplinks
 import kotlinx.coroutines.flow.first

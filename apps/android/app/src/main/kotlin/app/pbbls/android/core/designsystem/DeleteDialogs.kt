@@ -1,0 +1,92 @@
+package app.pbbls.android.core.designsystem
+
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
+import app.pbbls.android.R
+
+/**
+ * Destructive-action confirmation for the profile surfaces — the same chrome
+ * as PathScreen's pebble-delete dialog (M39 D8 idiom) with the title/message
+ * parameterized, because souls and pebbles carry different consequences
+ * ("linked pebbles stay" vs "can't be undone"). `confirmText` defaults to the
+ * generic Delete label; account deletion passes its own.
+ */
+@Composable
+internal fun ConfirmDeleteDialog(
+    title: String,
+    message: String,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+    confirmText: String? = null,
+) {
+    val system = PebblesTheme.colors.system
+    val accent = PebblesTheme.colors.accent
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = system.background,
+        title = {
+            PebblesText(
+                text = title,
+                style = PebblesTypography.headlineEmphasized,
+                color = system.foreground,
+            )
+        },
+        text = {
+            PebblesText(
+                text = message,
+                style = PebblesTypography.body,
+                color = system.secondary,
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onConfirm) {
+                PebblesText(
+                    text = confirmText ?: stringResource(R.string.pebble_delete),
+                    style = PebblesTypography.buttonLabel,
+                    color = PebblesDestructive,
+                )
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                PebblesText(
+                    text = stringResource(R.string.action_cancel),
+                    style = PebblesTypography.buttonLabel,
+                    color = accent.primary,
+                )
+            }
+        },
+    )
+}
+
+/** Delete-failure notice — mirrors PathScreen's single-action error dialog. */
+@Composable
+internal fun DeleteErrorDialog(
+    onDismiss: () -> Unit,
+    message: String? = null,
+) {
+    val system = PebblesTheme.colors.system
+    val accent = PebblesTheme.colors.accent
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = system.background,
+        text = {
+            PebblesText(
+                text = message ?: stringResource(R.string.pebble_delete_error),
+                style = PebblesTypography.body,
+                color = system.secondary,
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                PebblesText(
+                    text = stringResource(R.string.action_cancel),
+                    style = PebblesTypography.buttonLabel,
+                    color = accent.primary,
+                )
+            }
+        },
+    )
+}

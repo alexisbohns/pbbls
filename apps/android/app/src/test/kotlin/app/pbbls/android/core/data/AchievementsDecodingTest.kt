@@ -1,7 +1,7 @@
 package app.pbbls.android.core.data
 
+import app.pbbls.android.core.ui.achievementOverride
 import app.pbbls.android.features.profile.visibleFamilyGroups
-import app.pbbls.android.features.shared.achievements.achievementOverride
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals

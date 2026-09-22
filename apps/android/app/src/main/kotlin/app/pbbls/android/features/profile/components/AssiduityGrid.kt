@@ -14,7 +14,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.theme.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTheme
 
 /**
  * 7-column grid of the last 28 days — ports iOS `AssiduityGrid.swift`: active

@@ -25,13 +25,13 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
-import app.pbbls.android.features.glyph.views.GlyphView
-import app.pbbls.android.features.glyph.views.GlyphViewCase
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTopBar
-import app.pbbls.android.theme.PebblesTopBarTextButton
-import app.pbbls.android.theme.PebblesTypography
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTopBar
+import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
+import app.pbbls.android.core.designsystem.PebblesTypography
+import app.pbbls.android.core.ui.GlyphView
+import app.pbbls.android.core.ui.GlyphViewCase
 
 /**
  * Opened by an invite App Link (M49) — ports iOS `InviteAcceptSheet`. Shows

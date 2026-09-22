@@ -33,15 +33,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalEmotionPaletteService
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.EmotionWithPalette
 import app.pbbls.android.core.model.Valence
+import app.pbbls.android.core.ui.ReferenceStrings
+import app.pbbls.android.core.ui.ReferenceType
 import app.pbbls.android.features.path.create.CategoryGroup
 import app.pbbls.android.features.path.create.EmotionPickerGrouping
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTypography
-import app.pbbls.android.theme.ReferenceStrings
-import app.pbbls.android.theme.ReferenceType
 
 /**
  * The emotion picker (D5/D14) — ports iOS `EmotionPickerSheet`. Reads the

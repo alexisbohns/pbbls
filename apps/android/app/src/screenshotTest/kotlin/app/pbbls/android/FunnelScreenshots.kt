@@ -3,14 +3,14 @@ package app.pbbls.android
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.model.AuthMode
 import app.pbbls.android.features.auth.AuthContent
-import app.pbbls.android.features.auth.AuthMode
 import app.pbbls.android.features.auth.AuthUiState
 import app.pbbls.android.features.onboarding.OnboardingScreen
 import app.pbbls.android.features.onboarding.OnboardingSteps
 import app.pbbls.android.features.welcome.WelcomeContent
 import app.pbbls.android.features.welcome.WelcomeUiState
-import app.pbbls.android.theme.PebblesTheme
 import com.android.tools.screenshot.PreviewTest
 
 /**

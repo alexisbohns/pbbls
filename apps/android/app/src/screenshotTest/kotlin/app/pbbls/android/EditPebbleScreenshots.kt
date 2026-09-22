@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.EmotionWithPalette
@@ -18,7 +19,6 @@ import app.pbbls.android.core.model.PebbleDraft
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.features.path.create.PebbleForm
-import app.pbbls.android.theme.PebblesTheme
 import com.android.tools.screenshot.PreviewTest
 import java.time.OffsetDateTime
 

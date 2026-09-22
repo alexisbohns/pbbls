@@ -20,16 +20,16 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.features.glyph.views.GlyphView
-import app.pbbls.android.features.glyph.views.GlyphViewCase
-import app.pbbls.android.theme.PebblesDestructive
-import app.pbbls.android.theme.PebblesListSection
-import app.pbbls.android.theme.PebblesScreen
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTopBar
-import app.pbbls.android.theme.PebblesTopBarTextButton
-import app.pbbls.android.theme.PebblesTypography
+import app.pbbls.android.core.designsystem.PebblesDestructive
+import app.pbbls.android.core.designsystem.PebblesListSection
+import app.pbbls.android.core.designsystem.PebblesScreen
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTopBar
+import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
+import app.pbbls.android.core.designsystem.PebblesTypography
+import app.pbbls.android.core.ui.GlyphView
+import app.pbbls.android.core.ui.GlyphViewCase
 import com.android.tools.screenshot.PreviewTest
 
 /**

@@ -29,18 +29,18 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.ConfirmDeleteDialog
+import app.pbbls.android.core.designsystem.DeleteErrorDialog
+import app.pbbls.android.core.designsystem.PebblesDestructive
+import app.pbbls.android.core.designsystem.PebblesScreen
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTopBar
+import app.pbbls.android.core.designsystem.PebblesTypography
+import app.pbbls.android.core.designsystem.ProfileEmptyState
 import app.pbbls.android.core.model.SoulWithGlyph
-import app.pbbls.android.features.profile.components.ConfirmDeleteDialog
-import app.pbbls.android.features.profile.components.DeleteErrorDialog
-import app.pbbls.android.features.profile.components.ProfileEmptyState
-import app.pbbls.android.features.shared.SoulItem
-import app.pbbls.android.features.shared.SoulItemCase
-import app.pbbls.android.theme.PebblesDestructive
-import app.pbbls.android.theme.PebblesScreen
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTopBar
-import app.pbbls.android.theme.PebblesTypography
+import app.pbbls.android.core.ui.SoulItem
+import app.pbbls.android.core.ui.SoulItemCase
 
 /**
  * The souls grid — ports iOS `SoulsListView.swift` as a NavHost push (D1):

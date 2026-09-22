@@ -1,6 +1,6 @@
 package app.pbbls.android.navigation
 
-import app.pbbls.android.features.auth.AuthMode
+import app.pbbls.android.core.model.AuthMode
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

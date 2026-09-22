@@ -4,10 +4,10 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
+import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.LogsServicing
 import app.pbbls.android.core.model.Log
 import app.pbbls.android.core.model.ReactionToggle
-import app.pbbls.android.ui.runCatchingCancellable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable

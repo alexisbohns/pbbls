@@ -9,6 +9,7 @@ import app.pbbls.android.core.data.ConnectionInvite
 import app.pbbls.android.core.data.ConnectionPeer
 import app.pbbls.android.core.data.InvitePreview
 import app.pbbls.android.core.data.PeerGlyph
+import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.features.connections.AcceptInviteContent
 import app.pbbls.android.features.connections.AcceptInviteUiState
@@ -16,7 +17,6 @@ import app.pbbls.android.features.connections.ConnectionsContent
 import app.pbbls.android.features.connections.ConnectionsUiState
 import app.pbbls.android.features.connections.InviteContent
 import app.pbbls.android.features.connections.InviteUiState
-import app.pbbls.android.theme.PebblesTheme
 import com.android.tools.screenshot.PreviewTest
 
 /**

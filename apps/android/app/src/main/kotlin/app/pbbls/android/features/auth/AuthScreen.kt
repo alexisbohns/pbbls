@@ -29,16 +29,17 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
-import app.pbbls.android.components.GoogleSignInButton
-import app.pbbls.android.components.LegalDisclaimer
-import app.pbbls.android.components.LegalDoc
-import app.pbbls.android.components.PebblesAuthSwitcher
-import app.pbbls.android.components.PebblesCheckbox
-import app.pbbls.android.components.PebblesPrimaryButton
-import app.pbbls.android.components.PebblesTextInput
-import app.pbbls.android.components.openLegalDoc
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTypography
+import app.pbbls.android.core.designsystem.GoogleSignInButton
+import app.pbbls.android.core.designsystem.LegalDisclaimer
+import app.pbbls.android.core.designsystem.LegalDoc
+import app.pbbls.android.core.designsystem.PebblesAuthSwitcher
+import app.pbbls.android.core.designsystem.PebblesCheckbox
+import app.pbbls.android.core.designsystem.PebblesPrimaryButton
+import app.pbbls.android.core.designsystem.PebblesTextInput
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTypography
+import app.pbbls.android.core.designsystem.openLegalDoc
+import app.pbbls.android.core.model.AuthMode
 
 private const val TAG = "auth"
 

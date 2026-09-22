@@ -21,14 +21,14 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PebblesDestructive
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTypography
+import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.core.ui.iconRes
 import app.pbbls.android.core.ui.labelRes
-import app.pbbls.android.theme.PebblesDestructive
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTypography
-import app.pbbls.android.theme.Spacing
 
 /**
  * Step 9 — who gets to see it, and the publish button — ports iOS

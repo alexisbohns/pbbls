@@ -1,9 +1,9 @@
 package app.pbbls.android.core.data
 
 import android.util.Log
+import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.model.OffsetDateTimeSerializer
 import app.pbbls.android.di.ApplicationScope
-import app.pbbls.android.ui.runCatchingCancellable
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns

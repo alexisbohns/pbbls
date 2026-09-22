@@ -14,15 +14,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.theme.PebblesIcon
-import app.pbbls.android.theme.PebblesIconToken
-import app.pbbls.android.theme.PebblesListSection
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTopBar
-import app.pbbls.android.theme.PebblesTopBarTextButton
-import app.pbbls.android.theme.PebblesTypography
-import app.pbbls.android.theme.profileCard
+import app.pbbls.android.core.designsystem.PebblesIcon
+import app.pbbls.android.core.designsystem.PebblesIconToken
+import app.pbbls.android.core.designsystem.PebblesListSection
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTopBar
+import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
+import app.pbbls.android.core.designsystem.PebblesTypography
+import app.pbbls.android.core.designsystem.profileCard
 import com.android.tools.screenshot.PreviewTest
 
 /**

@@ -33,17 +33,17 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
+import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.data.rememberTapHaptics
+import app.pbbls.android.core.designsystem.PebblesDestructive
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.features.path.create.pickers.rememberGlyphPickerState
 import app.pbbls.android.features.path.record.steps.RecordSuccessStep
-import app.pbbls.android.theme.PebblesDestructive
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTypography
-import app.pbbls.android.ui.ObserveUiEffects
 
 /** Enough for the slide to read as one motion without holding the user up. */
 private const val STEP_TRANSITION_MS = 280

@@ -35,18 +35,18 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PebblesScreen
+import app.pbbls.android.core.designsystem.PebblesSectionHeader
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTopBar
+import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.LabConfig
 import app.pbbls.android.core.model.Log
 import app.pbbls.android.features.lab.components.AnnouncementRow
 import app.pbbls.android.features.lab.components.FeaturedCommunityCard
 import app.pbbls.android.features.lab.components.LogTimeline
 import app.pbbls.android.features.lab.components.LogTimelineMode
-import app.pbbls.android.theme.PebblesScreen
-import app.pbbls.android.theme.PebblesSectionHeader
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTopBar
-import app.pbbls.android.theme.PebblesTypography
 
 private const val TAG = "lab"
 

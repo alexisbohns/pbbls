@@ -17,14 +17,14 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
+import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Valence
-import app.pbbls.android.features.path.render.Affine
-import app.pbbls.android.features.path.render.OutlineAssets
-import app.pbbls.android.features.path.render.PebbleOutlineGeometry
-import app.pbbls.android.features.path.render.PebbleSvgModel
-import app.pbbls.android.features.path.render.wobble.WobbleRenderer
-import app.pbbls.android.features.path.render.wobble.wobbleInkPath
-import app.pbbls.android.theme.PebblesTheme
+import app.pbbls.android.core.ui.render.Affine
+import app.pbbls.android.core.ui.render.OutlineAssets
+import app.pbbls.android.core.ui.render.PebbleOutlineGeometry
+import app.pbbls.android.core.ui.render.PebbleSvgModel
+import app.pbbls.android.core.ui.render.wobble.WobbleRenderer
+import app.pbbls.android.core.ui.render.wobble.wobbleInkPath
 
 private const val TAG = "ValenceStone"
 

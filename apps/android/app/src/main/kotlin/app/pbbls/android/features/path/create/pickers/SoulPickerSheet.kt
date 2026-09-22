@@ -23,14 +23,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.components.PebblesTextInput
 import app.pbbls.android.core.data.LocalReferenceDataService
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTextInput
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.SoulWithGlyph
-import app.pbbls.android.features.shared.SoulItem
-import app.pbbls.android.features.shared.SoulItemCase
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTypography
+import app.pbbls.android.core.ui.SoulItem
+import app.pbbls.android.core.ui.SoulItemCase
 import kotlinx.coroutines.launch
 
 /**

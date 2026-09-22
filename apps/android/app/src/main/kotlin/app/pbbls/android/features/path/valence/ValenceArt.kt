@@ -3,9 +3,9 @@ package app.pbbls.android.features.path.valence
 import app.pbbls.android.R
 import app.pbbls.android.core.model.ValencePolarity
 import app.pbbls.android.core.model.ValenceSizeGroup
-import app.pbbls.android.features.path.render.PebbleSvgModel
-import app.pbbls.android.features.path.render.wobble.WobblePoint
-import app.pbbls.android.features.path.render.wobble.WobbleRenderer
+import app.pbbls.android.core.ui.render.PebbleSvgModel
+import app.pbbls.android.core.ui.render.wobble.WobblePoint
+import app.pbbls.android.core.ui.render.wobble.WobbleRenderer
 
 /**
  * (size, polarity) → raw artwork resource — compile-checked and greppable,

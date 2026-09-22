@@ -4,10 +4,10 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import app.pbbls.android.core.data.PebbleDraftRecord
+import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.PebbleDraftPayload
 import app.pbbls.android.features.path.DraftsContent
 import app.pbbls.android.features.path.DraftsUiState
-import app.pbbls.android.theme.PebblesTheme
 import com.android.tools.screenshot.PreviewTest
 import java.time.OffsetDateTime
 import java.time.ZoneOffset
