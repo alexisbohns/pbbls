@@ -1,8 +1,8 @@
 package app.pbbls.android.testing
 
 import android.net.Uri
+import app.pbbls.android.core.data.ProcessedImage
 import app.pbbls.android.features.path.ComposerMedia
-import app.pbbls.android.features.pebblemedia.ProcessedImage
 import java.time.OffsetDateTime
 
 /**

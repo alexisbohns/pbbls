@@ -1,11 +1,11 @@
 package app.pbbls.android.testing
 
-import app.pbbls.android.services.AcceptInviteResult
-import app.pbbls.android.services.Connection
-import app.pbbls.android.services.ConnectionInvite
-import app.pbbls.android.services.ConnectionPeer
-import app.pbbls.android.services.ConnectionsServicing
-import app.pbbls.android.services.InvitePreview
+import app.pbbls.android.core.data.AcceptInviteResult
+import app.pbbls.android.core.data.Connection
+import app.pbbls.android.core.data.ConnectionInvite
+import app.pbbls.android.core.data.ConnectionPeer
+import app.pbbls.android.core.data.ConnectionsServicing
+import app.pbbls.android.core.data.InvitePreview
 import kotlinx.coroutines.CompletableDeferred
 
 /**

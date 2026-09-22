@@ -9,7 +9,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import app.pbbls.android.services.LocalSnapURLCache
+import app.pbbls.android.core.data.LocalSnapURLCache
 import coil3.compose.AsyncImage
 
 private const val TAG = "path-row-thumb"

@@ -4,11 +4,11 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.pbbls.android.features.karma.AchievementMoment
-import app.pbbls.android.features.karma.AchievementNotificationService
-import app.pbbls.android.features.karma.KarmaEarnedContent
-import app.pbbls.android.features.karma.KarmaNotificationService
-import app.pbbls.android.services.SupabaseServicing
+import app.pbbls.android.core.data.AchievementMoment
+import app.pbbls.android.core.data.AchievementNotificationService
+import app.pbbls.android.core.data.KarmaEarnedContent
+import app.pbbls.android.core.data.KarmaNotificationService
+import app.pbbls.android.core.data.SupabaseServicing
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

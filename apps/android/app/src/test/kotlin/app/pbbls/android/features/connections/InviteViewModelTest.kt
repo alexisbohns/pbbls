@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import app.pbbls.android.R
-import app.pbbls.android.services.ConnectionInvite
+import app.pbbls.android.core.data.ConnectionInvite
 import app.pbbls.android.testing.FakeConnectionsService
 import app.pbbls.android.testing.MainDispatcherRule
 import kotlinx.coroutines.CompletableDeferred

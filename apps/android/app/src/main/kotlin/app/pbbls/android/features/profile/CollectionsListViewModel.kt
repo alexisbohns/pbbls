@@ -5,9 +5,9 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
+import app.pbbls.android.core.data.CollectionsServicing
+import app.pbbls.android.core.data.ReferenceDataServicing
 import app.pbbls.android.core.model.Collection
-import app.pbbls.android.services.CollectionsServicing
-import app.pbbls.android.services.ReferenceDataServicing
 import app.pbbls.android.ui.runCatchingCancellable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job

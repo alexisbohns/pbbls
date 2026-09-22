@@ -4,7 +4,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.Snapshot
-import app.pbbls.android.services.SupabaseServicing
+import app.pbbls.android.core.data.SupabaseServicing
 import io.github.jan.supabase.auth.user.UserSession
 
 /**
@@ -56,7 +56,7 @@ class FakeSupabaseService(
         }
 
     /**
-     * Returns immediately. The real [app.pbbls.android.services.SupabaseService.start]
+     * Returns immediately. The real [app.pbbls.android.core.data.SupabaseService.start]
      * collects `sessionStatus` and suspends forever — a fake that did the same
      * would hang every test that called it. Deliberately does NOT resolve
      * [isInitializing] itself: the real stream resolves on its first event, not

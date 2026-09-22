@@ -29,8 +29,8 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
-import app.pbbls.android.services.LocalEmotionPaletteService
-import app.pbbls.android.services.LocalReferenceDataService
+import app.pbbls.android.core.data.LocalEmotionPaletteService
+import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTopBar

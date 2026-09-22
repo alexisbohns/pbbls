@@ -1,7 +1,7 @@
 package app.pbbls.android.testing
 
+import app.pbbls.android.core.data.PebbleDetailServicing
 import app.pbbls.android.core.model.PebbleDetail
-import app.pbbls.android.services.PebbleDetailServicing
 
 /** In-memory [PebbleDetailServicing] (#849) — the detail/edit load path. */
 class FakePebbleDetailService(

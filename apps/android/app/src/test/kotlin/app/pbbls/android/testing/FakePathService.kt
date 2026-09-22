@@ -1,7 +1,7 @@
 package app.pbbls.android.testing
 
+import app.pbbls.android.core.data.PathServicing
 import app.pbbls.android.core.model.Pebble
-import app.pbbls.android.services.PathServicing
 
 /**
  * In-memory [PathServicing] (#848) — the Path load path, drivable without a live

@@ -1,11 +1,11 @@
 package app.pbbls.android.testing
 
+import app.pbbls.android.core.data.PathService
+import app.pbbls.android.core.data.PebbleWriteService
+import app.pbbls.android.core.data.ProfileService
+import app.pbbls.android.core.data.ReferenceDataService
+import app.pbbls.android.core.data.SupabaseService
 import app.pbbls.android.core.model.Pebble
-import app.pbbls.android.services.PathService
-import app.pbbls.android.services.PebbleWriteService
-import app.pbbls.android.services.ProfileService
-import app.pbbls.android.services.ReferenceDataService
-import app.pbbls.android.services.SupabaseService
 import io.github.jan.supabase.annotations.SupabaseInternal
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.MemoryCodeVerifierCache

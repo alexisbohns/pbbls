@@ -1,8 +1,8 @@
 package app.pbbls.android.testing
 
+import app.pbbls.android.core.data.GlyphMarketServicing
 import app.pbbls.android.core.model.BuyGlyphResult
 import app.pbbls.android.core.model.GlyphGridItem
-import app.pbbls.android.features.glyph.services.GlyphMarketServicing
 import kotlinx.coroutines.CompletableDeferred
 
 /**

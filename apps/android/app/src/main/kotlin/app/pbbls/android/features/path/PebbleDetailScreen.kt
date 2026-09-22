@@ -30,12 +30,12 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
+import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.model.SharedPebbleLink
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.features.path.read.PebblePrivacyBadge
 import app.pbbls.android.features.path.read.PebbleReadView
 import app.pbbls.android.features.path.read.pebblePageColors
-import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography

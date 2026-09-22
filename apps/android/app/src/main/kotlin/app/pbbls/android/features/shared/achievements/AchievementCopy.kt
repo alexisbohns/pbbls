@@ -4,9 +4,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import app.pbbls.android.R
-import app.pbbls.android.services.AchievementRecord
-import app.pbbls.android.services.LocalEmotionPaletteService
-import app.pbbls.android.services.LocalReferenceDataService
+import app.pbbls.android.core.data.AchievementRecord
+import app.pbbls.android.core.data.LocalEmotionPaletteService
+import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.theme.ReferenceStrings
 import app.pbbls.android.theme.ReferenceType
 import java.util.Locale

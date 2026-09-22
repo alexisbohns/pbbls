@@ -2,9 +2,9 @@ package app.pbbls.android
 
 import androidx.compose.runtime.snapshots.Snapshot
 import androidx.lifecycle.SavedStateHandle
-import app.pbbls.android.features.karma.AchievementMomentCard
-import app.pbbls.android.features.karma.AchievementNotificationService
-import app.pbbls.android.features.karma.KarmaNotificationService
+import app.pbbls.android.core.data.AchievementMomentCard
+import app.pbbls.android.core.data.AchievementNotificationService
+import app.pbbls.android.core.data.KarmaNotificationService
 import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.MainDispatcherRule
 import io.github.jan.supabase.auth.user.UserInfo

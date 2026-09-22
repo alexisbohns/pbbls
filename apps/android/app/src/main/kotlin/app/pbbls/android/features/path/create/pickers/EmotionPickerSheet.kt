@@ -32,11 +32,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.pbbls.android.R
+import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.model.EmotionWithPalette
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.features.path.create.CategoryGroup
 import app.pbbls.android.features.path.create.EmotionPickerGrouping
-import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography

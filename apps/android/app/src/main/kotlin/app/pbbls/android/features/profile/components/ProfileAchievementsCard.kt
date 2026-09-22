@@ -20,9 +20,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.data.AchievementRecord
 import app.pbbls.android.features.shared.achievements.achievementFamilyIcon
 import app.pbbls.android.features.shared.achievements.achievementTitle
-import app.pbbls.android.services.AchievementRecord
 import app.pbbls.android.theme.PebblesIconToken
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme

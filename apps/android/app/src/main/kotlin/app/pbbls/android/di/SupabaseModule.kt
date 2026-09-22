@@ -17,7 +17,7 @@ import javax.inject.Singleton
 /**
  * The one place `AppEnvironment` is read (#848, supersedes D4).
  *
- * Moving the client out of [app.pbbls.android.services.SupabaseService]'s
+ * Moving the client out of [app.pbbls.android.core.data.SupabaseService]'s
  * initializer is what makes the services constructible in a JVM test: nothing
  * reaches `BuildConfig` unless [provideSupabaseClient] is CALLED, and a test
  * never calls it. (`AppEnvironment`'s values are property getters, so merely

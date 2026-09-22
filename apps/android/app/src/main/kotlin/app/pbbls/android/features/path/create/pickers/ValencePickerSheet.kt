@@ -16,10 +16,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import app.pbbls.android.R
+import app.pbbls.android.core.data.TapHaptic
+import app.pbbls.android.core.data.rememberTapHaptics
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.features.path.valence.ValenceFan
-import app.pbbls.android.services.TapHaptic
-import app.pbbls.android.services.rememberTapHaptics
 import app.pbbls.android.theme.Spacing
 
 /**

@@ -6,13 +6,13 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
+import app.pbbls.android.core.data.GlyphMarketServicing
+import app.pbbls.android.core.data.GlyphService
+import app.pbbls.android.core.data.GlyphServicing
+import app.pbbls.android.core.data.PathStatsServicing
 import app.pbbls.android.core.model.BuyGlyphResult
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphGridItem
-import app.pbbls.android.features.glyph.services.GlyphMarketServicing
-import app.pbbls.android.features.glyph.services.GlyphService
-import app.pbbls.android.features.glyph.services.GlyphServicing
-import app.pbbls.android.services.PathStatsServicing
 import app.pbbls.android.ui.runCatchingCancellable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job

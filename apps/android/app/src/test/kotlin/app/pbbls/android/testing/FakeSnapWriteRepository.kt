@@ -1,7 +1,7 @@
 package app.pbbls.android.testing
 
-import app.pbbls.android.features.pebblemedia.ProcessedImage
-import app.pbbls.android.services.SnapWriteRepositing
+import app.pbbls.android.core.data.ProcessedImage
+import app.pbbls.android.core.data.SnapWriteRepositing
 
 /**
  * In-memory [SnapWriteRepositing] (#849).

@@ -1,9 +1,9 @@
 package app.pbbls.android.features.profile
 
 import app.pbbls.android.R
-import app.pbbls.android.services.AchievementRecord
-import app.pbbls.android.services.AchievementUnlockRecord
-import app.pbbls.android.services.ProfileRow
+import app.pbbls.android.core.data.AchievementRecord
+import app.pbbls.android.core.data.AchievementUnlockRecord
+import app.pbbls.android.core.data.ProfileRow
 import app.pbbls.android.testing.FakeAchievementsService
 import app.pbbls.android.testing.FakePathStatsService
 import app.pbbls.android.testing.FakeProfileService

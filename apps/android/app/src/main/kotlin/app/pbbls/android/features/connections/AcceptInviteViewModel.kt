@@ -4,11 +4,11 @@ import android.util.Log
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import app.pbbls.android.services.AcceptInviteResult
-import app.pbbls.android.services.ConnectionsServicing
-import app.pbbls.android.services.InvitePreview
-import app.pbbls.android.services.connectionsErrorMessage
-import app.pbbls.android.services.toDataError
+import app.pbbls.android.core.data.AcceptInviteResult
+import app.pbbls.android.core.data.ConnectionsServicing
+import app.pbbls.android.core.data.InvitePreview
+import app.pbbls.android.core.data.connectionsErrorMessage
+import app.pbbls.android.core.data.toDataError
 import app.pbbls.android.ui.runCatchingCancellable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job

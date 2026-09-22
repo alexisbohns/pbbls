@@ -2,10 +2,10 @@ package app.pbbls.android.features.path
 
 import androidx.compose.runtime.snapshots.Snapshot
 import app.pbbls.android.R
+import app.pbbls.android.core.data.PebbleDraftRecord
 import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.core.model.PebbleDraftPayload
 import app.pbbls.android.core.model.RippleSummary
-import app.pbbls.android.services.PebbleDraftRecord
 import app.pbbls.android.testing.FakePathService
 import app.pbbls.android.testing.FakePathStatsService
 import app.pbbls.android.testing.FakePebbleDraftsService

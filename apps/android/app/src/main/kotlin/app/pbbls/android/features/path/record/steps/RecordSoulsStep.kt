@@ -7,9 +7,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.features.path.create.pickers.CreateSoulDialog
 import app.pbbls.android.features.path.create.pickers.SoulPickerBody
-import app.pbbls.android.services.LocalReferenceDataService
 import kotlinx.coroutines.launch
 
 /**

@@ -1,10 +1,10 @@
 package app.pbbls.android.testing
 
+import app.pbbls.android.core.data.ComposeResult
+import app.pbbls.android.core.data.PebbleWriteServicing
 import app.pbbls.android.core.model.ComposePebbleResponse
 import app.pbbls.android.core.model.PebbleDraft
 import app.pbbls.android.core.model.PebbleSnapPayload
-import app.pbbls.android.services.ComposeResult
-import app.pbbls.android.services.PebbleWriteServicing
 
 /**
  * In-memory [PebbleWriteServicing] (#848) — the composer's save path, drivable

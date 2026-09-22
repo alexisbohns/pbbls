@@ -1,9 +1,9 @@
 package app.pbbls.android.testing
 
+import app.pbbls.android.core.data.SoulsServicing
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.core.model.SoulWithGlyph
-import app.pbbls.android.services.SoulsServicing
 import kotlinx.coroutines.CompletableDeferred
 
 /**

@@ -3,10 +3,10 @@ package app.pbbls.android.features.glyph.carve
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.pbbls.android.core.data.AchievementsServicing
+import app.pbbls.android.core.data.GlyphServicing
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphStroke
-import app.pbbls.android.features.glyph.services.GlyphServicing
-import app.pbbls.android.services.AchievementsServicing
 import app.pbbls.android.ui.UiEffects
 import app.pbbls.android.ui.runCatchingCancellable
 import dagger.hilt.android.lifecycle.HiltViewModel
