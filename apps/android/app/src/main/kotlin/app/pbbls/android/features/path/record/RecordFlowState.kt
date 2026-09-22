@@ -1,8 +1,8 @@
 package app.pbbls.android.features.path.record
 
 import androidx.annotation.StringRes
-import app.pbbls.android.features.path.models.ComposePebbleResponse
-import app.pbbls.android.features.path.models.PebbleDraft
+import app.pbbls.android.core.model.ComposePebbleResponse
+import app.pbbls.android.core.model.PebbleDraft
 
 /**
  * Everything the record flow's state machine owns, as one immutable value

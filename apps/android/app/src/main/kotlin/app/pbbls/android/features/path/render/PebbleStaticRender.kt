@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.vector.PathParser
-import app.pbbls.android.features.path.models.EmotionPalette
+import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.features.path.render.wobble.WobbleFlags
 import app.pbbls.android.features.path.render.wobble.WobbleRenderer
 import app.pbbls.android.features.path.render.wobble.wobbleInkPath

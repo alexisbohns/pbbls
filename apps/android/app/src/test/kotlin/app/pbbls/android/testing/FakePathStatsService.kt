@@ -3,7 +3,7 @@ package app.pbbls.android.testing
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import app.pbbls.android.features.shared.ripples.RippleSummary
+import app.pbbls.android.core.model.RippleSummary
 import app.pbbls.android.services.PathStatsServicing
 
 /**

@@ -20,7 +20,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.features.profile.models.Collection
+import app.pbbls.android.core.model.Collection
 import app.pbbls.android.theme.PebblesIcon
 import app.pbbls.android.theme.PebblesIconToken
 import app.pbbls.android.theme.PebblesText

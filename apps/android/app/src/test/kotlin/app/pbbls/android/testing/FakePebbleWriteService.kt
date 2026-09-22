@@ -1,8 +1,8 @@
 package app.pbbls.android.testing
 
-import app.pbbls.android.features.path.models.ComposePebbleResponse
-import app.pbbls.android.features.path.models.PebbleDraft
-import app.pbbls.android.features.path.models.PebbleSnapPayload
+import app.pbbls.android.core.model.ComposePebbleResponse
+import app.pbbls.android.core.model.PebbleDraft
+import app.pbbls.android.core.model.PebbleSnapPayload
 import app.pbbls.android.services.ComposeResult
 import app.pbbls.android.services.PebbleWriteServicing
 

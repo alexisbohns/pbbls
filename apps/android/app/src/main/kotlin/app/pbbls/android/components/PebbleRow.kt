@@ -25,8 +25,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.features.path.models.EmotionPalette
-import app.pbbls.android.features.path.models.Pebble
+import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.features.path.render.PebbleThumbnail
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesText

@@ -11,9 +11,9 @@ import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.platform.LocalContext
 import app.pbbls.android.R
-import app.pbbls.android.features.path.models.EmotionPalette
-import app.pbbls.android.features.path.models.ValencePolarity
-import app.pbbls.android.features.path.models.ValenceSizeGroup
+import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.ValencePolarity
+import app.pbbls.android.core.model.ValenceSizeGroup
 import app.pbbls.android.features.path.render.wobble.WobbleFlags
 import app.pbbls.android.features.path.render.wobble.WobbleRenderer
 import app.pbbls.android.features.path.render.wobble.wobbleInkPath

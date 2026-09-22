@@ -1,8 +1,8 @@
 package app.pbbls.android.features.path
 
-import app.pbbls.android.features.path.models.EmotionRef
-import app.pbbls.android.features.path.models.PebbleDetail
-import app.pbbls.android.features.path.models.Visibility
+import app.pbbls.android.core.model.EmotionRef
+import app.pbbls.android.core.model.PebbleDetail
+import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.testing.FakePebbleDetailService
 import app.pbbls.android.testing.MainDispatcherRule
 import kotlinx.coroutines.test.advanceUntilIdle

@@ -7,9 +7,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import app.pbbls.android.features.path.models.EmotionPalette
-import app.pbbls.android.features.path.models.Pebble
-import app.pbbls.android.features.path.models.PebbleFrameColors
+import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.PebbleFrameColors
 import app.pbbls.android.theme.PebblesTheme
 
 /**

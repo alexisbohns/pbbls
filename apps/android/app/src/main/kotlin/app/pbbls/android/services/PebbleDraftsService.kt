@@ -1,7 +1,7 @@
 package app.pbbls.android.services
 
-import app.pbbls.android.features.path.models.OffsetDateTimeSerializer
-import app.pbbls.android.features.path.models.PebbleDraftPayload
+import app.pbbls.android.core.model.OffsetDateTimeSerializer
+import app.pbbls.android.core.model.PebbleDraftPayload
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns

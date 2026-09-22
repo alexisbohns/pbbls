@@ -1,7 +1,7 @@
 package app.pbbls.android.features.path.read
 
-import app.pbbls.android.features.path.models.EmotionPalette
-import app.pbbls.android.features.path.models.ValenceSizeGroup
+import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.ValenceSizeGroup
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

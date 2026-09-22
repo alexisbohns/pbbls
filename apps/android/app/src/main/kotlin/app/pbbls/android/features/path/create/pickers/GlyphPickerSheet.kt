@@ -34,10 +34,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
+import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.GlyphGridItem
 import app.pbbls.android.features.glyph.carve.GlyphCarveScreen
 import app.pbbls.android.features.glyph.carve.GlyphCarveViewModel
-import app.pbbls.android.features.glyph.models.Glyph
-import app.pbbls.android.features.glyph.models.GlyphGridItem
 import app.pbbls.android.features.glyph.store.GlyphSwapPanel
 import app.pbbls.android.features.glyph.store.GlyphTab
 import app.pbbls.android.features.glyph.store.GlyphTabBar

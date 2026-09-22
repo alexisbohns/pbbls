@@ -11,9 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.pbbls.android.core.model.CollectionMode
 import app.pbbls.android.features.profile.CollectionModePicker
 import app.pbbls.android.features.profile.components.CollectionModeBadge
-import app.pbbls.android.features.profile.models.CollectionMode
 import app.pbbls.android.theme.PebblesTheme
 import com.android.tools.screenshot.PreviewTest
 

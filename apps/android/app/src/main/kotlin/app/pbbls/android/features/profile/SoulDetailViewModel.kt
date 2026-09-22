@@ -5,8 +5,8 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
-import app.pbbls.android.features.path.models.Pebble
-import app.pbbls.android.features.profile.models.SoulWithGlyph
+import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.services.PebbleWriteServicing
 import app.pbbls.android.services.ReferenceDataServicing
 import app.pbbls.android.services.SoulsServicing

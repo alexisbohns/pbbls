@@ -1,9 +1,9 @@
 package app.pbbls.android.features.path.create
 
-import app.pbbls.android.features.path.models.EmotionCategoryOrdering
-import app.pbbls.android.features.path.models.EmotionPalette
-import app.pbbls.android.features.path.models.EmotionWithPalette
-import app.pbbls.android.features.path.models.Valence
+import app.pbbls.android.core.model.EmotionCategoryOrdering
+import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.EmotionWithPalette
+import app.pbbls.android.core.model.Valence
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

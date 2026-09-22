@@ -9,7 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.features.shared.ripples.RippleSummary
+import app.pbbls.android.core.model.RippleSummary
 import app.pbbls.android.theme.PebblesSectionHeader
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.profileCard

@@ -1,6 +1,6 @@
 package app.pbbls.android.features.profile
 
-import app.pbbls.android.features.profile.models.CollectionMode
+import app.pbbls.android.core.model.CollectionMode
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test

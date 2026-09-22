@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.PathParser
-import app.pbbls.android.features.glyph.models.GlyphStroke
+import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.features.path.render.wobble.WobbleFlags
 import app.pbbls.android.features.path.render.wobble.WobbleRenderer
 import app.pbbls.android.features.path.render.wobble.wobbleInkPath

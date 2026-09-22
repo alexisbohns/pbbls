@@ -21,11 +21,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.features.path.models.EmotionPalette
-import app.pbbls.android.features.path.models.PebbleDetail
-import app.pbbls.android.features.path.models.Valence
+import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.PebbleDetail
+import app.pbbls.android.core.model.SoulWithGlyph
+import app.pbbls.android.core.model.Valence
 import app.pbbls.android.features.path.render.GlyphImage
-import app.pbbls.android.features.profile.models.SoulWithGlyph
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography

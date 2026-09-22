@@ -19,7 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.features.path.models.PebbleCollection
+import app.pbbls.android.core.model.PebbleCollection
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography

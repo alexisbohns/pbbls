@@ -1,11 +1,11 @@
 package app.pbbls.android.services
 
-import app.pbbls.android.features.path.models.Pebble
-import app.pbbls.android.features.profile.models.Collection
-import app.pbbls.android.features.profile.models.CollectionMode
-import app.pbbls.android.features.profile.models.CollectionRow
-import app.pbbls.android.features.profile.models.collectionInsertPayload
-import app.pbbls.android.features.profile.models.collectionUpdatePayload
+import app.pbbls.android.core.model.Collection
+import app.pbbls.android.core.model.CollectionMode
+import app.pbbls.android.core.model.CollectionRow
+import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.collectionInsertPayload
+import app.pbbls.android.core.model.collectionUpdatePayload
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order

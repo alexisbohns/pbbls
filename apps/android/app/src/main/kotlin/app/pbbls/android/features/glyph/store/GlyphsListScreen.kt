@@ -36,7 +36,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.components.PebblesTextInput
-import app.pbbls.android.features.glyph.models.GlyphGridItem
+import app.pbbls.android.core.model.GlyphGridItem
 import app.pbbls.android.features.glyph.views.GlyphView
 import app.pbbls.android.features.glyph.views.GlyphViewCase
 import app.pbbls.android.features.profile.components.ProfileEmptyState

@@ -30,9 +30,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
+import app.pbbls.android.core.model.LabMarkdown
+import app.pbbls.android.core.model.Log
 import app.pbbls.android.features.lab.components.LabMarkdownBody
-import app.pbbls.android.features.lab.models.LabMarkdown
-import app.pbbls.android.features.lab.models.Log
 import app.pbbls.android.theme.PebblesScreen
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme

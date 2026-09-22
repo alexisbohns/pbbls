@@ -2,7 +2,7 @@ package app.pbbls.android.services
 
 import androidx.annotation.StringRes
 import app.pbbls.android.R
-import app.pbbls.android.features.glyph.models.GlyphStroke
+import app.pbbls.android.core.model.GlyphStroke
 import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

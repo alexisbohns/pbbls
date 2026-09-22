@@ -19,9 +19,9 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.features.path.models.Visibility
-import app.pbbls.android.features.path.models.iconRes
-import app.pbbls.android.features.path.models.labelRes
+import app.pbbls.android.core.model.Visibility
+import app.pbbls.android.core.ui.iconRes
+import app.pbbls.android.core.ui.labelRes
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography

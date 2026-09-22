@@ -51,8 +51,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
-import app.pbbls.android.features.glyph.models.Glyph
-import app.pbbls.android.features.glyph.models.GlyphStroke
+import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.features.path.render.GlyphImage
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesScreen

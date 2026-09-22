@@ -6,9 +6,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
-import app.pbbls.android.features.path.models.Pebble
-import app.pbbls.android.features.path.models.WeekRollEntry
-import app.pbbls.android.features.shared.ripples.RippleSummary
+import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.RippleSummary
+import app.pbbls.android.core.model.WeekRollEntry
 import app.pbbls.android.services.PathServicing
 import app.pbbls.android.services.PathStatsServicing
 import app.pbbls.android.services.PebbleDraftsServicing

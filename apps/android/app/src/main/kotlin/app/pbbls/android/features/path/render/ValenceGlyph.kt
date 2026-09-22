@@ -7,8 +7,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import app.pbbls.android.R
-import app.pbbls.android.features.path.models.ValencePolarity
-import app.pbbls.android.features.path.models.ValenceSizeGroup
+import app.pbbls.android.core.model.ValencePolarity
+import app.pbbls.android.core.model.ValenceSizeGroup
 import java.util.Locale
 
 /**

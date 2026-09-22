@@ -1,7 +1,7 @@
 package app.pbbls.android.testing
 
-import app.pbbls.android.features.glyph.models.GlyphStroke
-import app.pbbls.android.features.profile.models.Collection
+import app.pbbls.android.core.model.Collection
+import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.services.ProfileRow
 import app.pbbls.android.services.ProfileServicing
 import kotlinx.coroutines.CompletableDeferred

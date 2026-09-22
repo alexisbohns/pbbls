@@ -1,9 +1,9 @@
 package app.pbbls.android.features.glyph.store
 
 import app.pbbls.android.R
-import app.pbbls.android.features.glyph.models.BuyGlyphResult
-import app.pbbls.android.features.glyph.models.Glyph
-import app.pbbls.android.features.glyph.models.GlyphGridItem
+import app.pbbls.android.core.model.BuyGlyphResult
+import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.GlyphGridItem
 import app.pbbls.android.testing.FakeGlyphMarketService
 import app.pbbls.android.testing.FakeGlyphService
 import app.pbbls.android.testing.FakePathStatsService

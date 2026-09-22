@@ -6,9 +6,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
-import app.pbbls.android.features.glyph.models.GlyphStroke
-import app.pbbls.android.features.profile.models.Collection
-import app.pbbls.android.features.shared.ripples.RippleSummary
+import app.pbbls.android.core.model.Collection
+import app.pbbls.android.core.model.GlyphStroke
+import app.pbbls.android.core.model.RippleSummary
 import app.pbbls.android.services.AchievementRecord
 import app.pbbls.android.services.AchievementsServicing
 import app.pbbls.android.services.PathStatsServicing

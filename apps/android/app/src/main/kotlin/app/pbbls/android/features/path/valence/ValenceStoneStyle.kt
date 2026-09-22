@@ -9,7 +9,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.SolidColor
-import app.pbbls.android.features.path.models.ValencePolarity
+import app.pbbls.android.core.model.ValencePolarity
 import app.pbbls.android.theme.AccentPalette
 import app.pbbls.android.theme.SystemPalette
 

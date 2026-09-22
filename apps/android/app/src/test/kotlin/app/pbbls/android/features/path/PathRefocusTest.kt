@@ -1,6 +1,6 @@
 package app.pbbls.android.features.path
 
-import app.pbbls.android.features.path.models.WeekRollEntry
+import app.pbbls.android.core.model.WeekRollEntry
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test

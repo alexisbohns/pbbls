@@ -3,8 +3,8 @@
 
 package app.pbbls.android.features.path.render.wobble
 
-import app.pbbls.android.features.path.models.ValencePolarity
-import app.pbbls.android.features.path.models.ValenceSizeGroup
+import app.pbbls.android.core.model.ValencePolarity
+import app.pbbls.android.core.model.ValenceSizeGroup
 import app.pbbls.android.features.path.render.PebbleSvgModel
 import app.pbbls.android.features.path.render.parsePebbleSvg
 import org.junit.Assert.assertEquals

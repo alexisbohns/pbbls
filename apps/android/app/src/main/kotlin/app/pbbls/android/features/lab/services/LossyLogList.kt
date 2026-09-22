@@ -1,6 +1,6 @@
 package app.pbbls.android.features.lab.services
 
-import app.pbbls.android.features.lab.models.Log
+import app.pbbls.android.core.model.Log
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray

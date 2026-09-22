@@ -1,6 +1,6 @@
 package app.pbbls.android.features.profile
 
-import app.pbbls.android.features.path.models.Pebble
+import app.pbbls.android.core.model.Pebble
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test

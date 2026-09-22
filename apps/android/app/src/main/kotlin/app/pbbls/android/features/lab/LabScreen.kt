@@ -35,12 +35,12 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
+import app.pbbls.android.core.model.LabConfig
+import app.pbbls.android.core.model.Log
 import app.pbbls.android.features.lab.components.AnnouncementRow
 import app.pbbls.android.features.lab.components.FeaturedCommunityCard
 import app.pbbls.android.features.lab.components.LogTimeline
 import app.pbbls.android.features.lab.components.LogTimelineMode
-import app.pbbls.android.features.lab.models.LabConfig
-import app.pbbls.android.features.lab.models.Log
 import app.pbbls.android.theme.PebblesScreen
 import app.pbbls.android.theme.PebblesSectionHeader
 import app.pbbls.android.theme.PebblesText

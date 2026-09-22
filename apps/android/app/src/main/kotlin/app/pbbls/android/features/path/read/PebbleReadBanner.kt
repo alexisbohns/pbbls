@@ -17,8 +17,8 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.features.path.models.EmotionPalette
-import app.pbbls.android.features.path.models.Valence
+import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.Valence
 import app.pbbls.android.services.LocalSnapURLCache
 import coil3.SingletonImageLoader
 import coil3.request.ImageRequest

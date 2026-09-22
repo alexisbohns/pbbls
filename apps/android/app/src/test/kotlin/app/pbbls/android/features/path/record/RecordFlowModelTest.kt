@@ -1,10 +1,10 @@
 package app.pbbls.android.features.path.record
 
-import app.pbbls.android.features.path.models.ComposePebbleResponse
-import app.pbbls.android.features.path.models.KnownDraftIds
-import app.pbbls.android.features.path.models.PebbleDraftPayload
-import app.pbbls.android.features.path.models.Valence
-import app.pbbls.android.features.path.models.Visibility
+import app.pbbls.android.core.model.ComposePebbleResponse
+import app.pbbls.android.core.model.KnownDraftIds
+import app.pbbls.android.core.model.PebbleDraftPayload
+import app.pbbls.android.core.model.Valence
+import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.services.TapHaptic
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

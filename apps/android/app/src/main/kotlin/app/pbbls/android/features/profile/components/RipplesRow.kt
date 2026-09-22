@@ -12,8 +12,8 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.model.RippleSummary
 import app.pbbls.android.features.shared.ripples.RippleBadge
-import app.pbbls.android.features.shared.ripples.RippleSummary
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography

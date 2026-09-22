@@ -5,10 +5,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
-import app.pbbls.android.features.path.models.Domain
-import app.pbbls.android.features.path.models.PebbleCollection
-import app.pbbls.android.features.profile.models.SoulRow
-import app.pbbls.android.features.profile.models.SoulWithGlyph
+import app.pbbls.android.core.model.Domain
+import app.pbbls.android.core.model.PebbleCollection
+import app.pbbls.android.core.model.SoulRow
+import app.pbbls.android.core.model.SoulWithGlyph
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order

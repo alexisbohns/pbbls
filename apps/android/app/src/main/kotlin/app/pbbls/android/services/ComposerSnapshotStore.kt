@@ -2,7 +2,7 @@ package app.pbbls.android.services
 
 import android.content.Context
 import android.util.Log
-import app.pbbls.android.features.path.models.PebbleDraftPayload
+import app.pbbls.android.core.model.PebbleDraftPayload
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

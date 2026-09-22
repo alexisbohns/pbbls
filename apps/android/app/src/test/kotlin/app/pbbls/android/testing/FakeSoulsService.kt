@@ -1,8 +1,8 @@
 package app.pbbls.android.testing
 
-import app.pbbls.android.features.glyph.models.Glyph
-import app.pbbls.android.features.path.models.Pebble
-import app.pbbls.android.features.profile.models.SoulWithGlyph
+import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.services.SoulsServicing
 import kotlinx.coroutines.CompletableDeferred
 

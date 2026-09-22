@@ -4,9 +4,9 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import app.pbbls.android.features.profile.models.KarmaSummary
-import app.pbbls.android.features.profile.models.ProfileEngagement
-import app.pbbls.android.features.shared.ripples.RippleSummary
+import app.pbbls.android.core.model.KarmaSummary
+import app.pbbls.android.core.model.ProfileEngagement
+import app.pbbls.android.core.model.RippleSummary
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns

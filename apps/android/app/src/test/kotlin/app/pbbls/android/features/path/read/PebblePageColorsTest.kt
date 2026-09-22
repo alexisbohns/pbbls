@@ -1,7 +1,7 @@
 package app.pbbls.android.features.path.read
 
 import androidx.compose.ui.graphics.Color
-import app.pbbls.android.features.path.models.EmotionPalette
+import app.pbbls.android.core.model.EmotionPalette
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

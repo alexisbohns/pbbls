@@ -1,10 +1,10 @@
 package app.pbbls.android.services
 
 import android.util.Log
+import app.pbbls.android.core.model.OffsetDateTimeSerializer
 import app.pbbls.android.di.ApplicationScope
 import app.pbbls.android.features.karma.AchievementMomentCard
 import app.pbbls.android.features.karma.AchievementNotificationService
-import app.pbbls.android.features.path.models.OffsetDateTimeSerializer
 import app.pbbls.android.ui.runCatchingCancellable
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest

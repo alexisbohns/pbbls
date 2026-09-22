@@ -1,6 +1,6 @@
 package app.pbbls.android.services
 
-import app.pbbls.android.features.path.models.PebbleDetail
+import app.pbbls.android.core.model.PebbleDetail
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import javax.inject.Inject

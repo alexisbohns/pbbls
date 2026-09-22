@@ -4,7 +4,7 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
-import app.pbbls.android.features.lab.models.Log
+import app.pbbls.android.core.model.Log
 import app.pbbls.android.features.lab.services.LogsServicing
 import app.pbbls.android.services.DataError
 import app.pbbls.android.services.toDataError

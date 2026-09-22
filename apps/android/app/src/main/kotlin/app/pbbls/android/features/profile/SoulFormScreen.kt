@@ -33,7 +33,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.components.DashedPlaceholder
-import app.pbbls.android.features.glyph.models.SystemGlyph
+import app.pbbls.android.core.model.SystemGlyph
 import app.pbbls.android.features.glyph.views.GlyphView
 import app.pbbls.android.features.glyph.views.GlyphViewCase
 import app.pbbls.android.features.path.create.pickers.GlyphPickerSheet

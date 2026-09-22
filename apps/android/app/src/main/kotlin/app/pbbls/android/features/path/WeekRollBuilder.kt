@@ -1,7 +1,7 @@
 package app.pbbls.android.features.path
 
-import app.pbbls.android.features.path.models.Pebble
-import app.pbbls.android.features.path.models.WeekRollEntry
+import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.WeekRollEntry
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId

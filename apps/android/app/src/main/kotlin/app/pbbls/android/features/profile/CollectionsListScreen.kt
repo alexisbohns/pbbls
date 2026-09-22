@@ -37,11 +37,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
+import app.pbbls.android.core.model.Collection
 import app.pbbls.android.features.profile.components.CollectionModeBadge
 import app.pbbls.android.features.profile.components.ConfirmDeleteDialog
 import app.pbbls.android.features.profile.components.DeleteErrorDialog
 import app.pbbls.android.features.profile.components.ProfileEmptyState
-import app.pbbls.android.features.profile.models.Collection
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesListSection
 import app.pbbls.android.theme.PebblesScreen

@@ -1,6 +1,6 @@
 package app.pbbls.android.features.path
 
-import app.pbbls.android.features.path.models.PebbleDraftPayload
+import app.pbbls.android.core.model.PebbleDraftPayload
 import app.pbbls.android.services.PebbleDraftRecord
 import app.pbbls.android.testing.FakePebbleDraftsService
 import app.pbbls.android.testing.MainDispatcherRule

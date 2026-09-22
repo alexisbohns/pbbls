@@ -10,9 +10,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.components.PebbleRow
-import app.pbbls.android.features.path.models.EmotionPalette
-import app.pbbls.android.features.path.models.EmotionRef
-import app.pbbls.android.features.path.models.Pebble
+import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.EmotionRef
+import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.theme.PebblesTheme
 import com.android.tools.screenshot.PreviewTest
 import java.time.OffsetDateTime
