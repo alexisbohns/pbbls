@@ -1,9 +1,15 @@
 # @pbbls/android — agent context
 
 Native Android app for Pebbles. Kotlin + Jetpack Compose, minSdk 33, phone-only,
-portrait. It mirrors `apps/ios` 1:1 — same architecture, same tokens, same funnel.
-When this file says "mirror X", read the named iOS file under `apps/ios/Pebbles/`
-and port its structure, not just its behavior.
+portrait. It mirrors `apps/ios` 1:1 in **behavior, tokens and funnel** — file for
+file, screen for screen. When this file says "mirror X", read the named iOS file
+under `apps/ios/Pebbles/` and port its structure, not just its behavior.
+
+Two deliberate divergences, both recorded in `docs/decisions/log.md`: the
+**four-tab bottom bar** (#852, 2026-09-21), which iOS does not have, and the
+**`core/` vs `features/` package split** (#851, 2026-09-22), where iOS groups by
+feature all the way down. Neither crosses a data contract. Anything else that
+differs is drift, not design — fix it rather than documenting it.
 
 > This app was bootstrapped in milestone **M38 · Android App** (design doc:
 > `docs/superpowers/specs/2026-07-10-android-bootstrap-design.md`, decisions
@@ -127,7 +133,7 @@ real settings exist), `android-skills:rxjava-migration`,
 - **Let cancellation travel: `runCatchingCancellable`, never a bare `catch (e:
   Exception)`.** Both that and `kotlin.runCatching` swallow
   `CancellationException`, and a coroutine that catches its own cancellation
-  keeps running inside a scope that believes it stopped. `ui/CoroutineErrors.kt`
+  keeps running inside a scope that believes it stopped. `core/common/CoroutineErrors.kt`
   rethrows it first. The inverse case — a write that must finish once the request
   has left the device — is `withContext(NonCancellable)` around that section, not
   a catch.
@@ -150,7 +156,7 @@ One `@HiltViewModel` per stateful screen. The shape, of which
   A field has to be recomputed at every construction site and joins `equals`; a
   getter replaces a per-recomposition recompute with a per-state-value one.
 - **One-shot effects (navigate, snackbar, haptic) go through `UiEffects<T>`**
-  (`ui/UiEffects.kt`) and are collected with `ObserveUiEffects`, never held in
+  (`core/common/UiEffects.kt`) and are collected with `ObserveUiEffects`, never held in
   state — a `StateFlow` replays to every new collector, so "navigate back" in
   state navigates back again after a rotation.
 - **Writes run in `viewModelScope`**, never `rememberCoroutineScope` — leaving
@@ -221,19 +227,52 @@ happens in a separate coroutine, not inline in the collector.
 
 ```
 app/src/main/kotlin/app/pbbls/android/
-  PebblesApp.kt          Application entry — constructs the service graph, Rive.init()
+  PebblesApp.kt          Application entry — Hilt root, Rive.init()
   MainActivity.kt        Single activity, hosts the Compose tree + auth gate
   DebugTokenPreviewScreen.kt  Design-system screenshot preview (B's temporary MainActivity home)
-  features/<feature>/     welcome, auth, onboarding, path (matches Pebbles/Features)
-  services/              SupabaseService, EmotionPaletteService, … (non-view code)
-  components/            PebblesTextInput, PebblesCheckbox, PebblesPrimaryButton, CheckGlyph (Pebbles/Components)
-  theme/                 PebblesTheme, Palettes, Spacing, Typography, PebblesText,
-                          ReferenceSlugs, ReferenceStrings (Pebbles/Theme +
-                          Pebbles/Features/Path/Models localization helpers)
+  core/model/            Pebble, Domain, Glyph, Collection, EmotionPalette, … (@Serializable, no UI)
+  core/data/             SupabaseService, EmotionPaletteService, GlyphService, LogsService, …
+  core/designsystem/     PebblesTheme, Palettes, Spacing, Typography, PebblesText,
+                          PebblesTextInput, PebblesCheckbox, PebblesPrimaryButton, CheckGlyph
+  core/ui/               Shared UI that knows the domain: GlyphView, SoulItem, PebbleRow,
+                          RippleBadge, karma overlays, ReferenceSlugs/ReferenceStrings,
+                          and core/ui/render/ (PebbleSvg, GlyphImage, the wobble stack)
+  core/common/           runCatchingCancellable, UiEffects — cross-cutting, no UI of its own
+  di/                    Hilt modules and qualifiers
+  navigation/            Navigation 3 keys, entry provider, the nav bar
+  features/<feature>/    welcome, auth, onboarding, path, profile, glyph, lab, connections
   rive/                  RiveLogo (Pebbles Rive usage, e.g. WelcomeView.swift)
 ```
 
-A 1:1 map of `apps/ios/Pebbles/{Features,Services,Components,Theme}`.
+**The `core/` ↔ `features/` split is a test, not a convention (#851).**
+`ArchitectureBoundaryTest` (Konsist, a plain JVM unit test) fails the build on
+either violation:
+
+- **`core` never imports `features`.** Absolute. If shared code needs a feature,
+  it is not shared code — it is that feature's code in the wrong folder.
+- **A feature never imports another feature.** Seven exceptions are frozen in
+  the test and may only shrink; emptying them is #914. Anything else fails, so
+  the answer to "profile needs this bit of path" is to move the bit to `core/`,
+  not to add an import.
+
+Which `core` package: `model` if it is data, `data` if Hilt constructs it,
+`designsystem` if it would look at home in any app, `ui` if it renders a Pebbles
+domain type, `common` if it is neither data nor UI. Inside `core`,
+`ui -> designsystem -> model` and `data -> model`; there are no upward edges and
+the test is what keeps it that way.
+
+This is no longer a 1:1 map of `apps/ios/Pebbles/{Features,Services,Components,Theme}`
+— iOS still groups by feature all the way down. The **files** still mirror 1:1
+and the "mirror X" instruction still means "read the named iOS file"; only the
+Kotlin package a file lands in differs.
+
+**Gradle modules are deliberately not cut.** `:core:model`, `:core:data`,
+`:core:designsystem`, `:feature:*` and a `build-logic/convention` plugin are the
+obvious next step and the package split is exactly what makes them cheap — but
+one maintainer and one module that builds in CI in minutes do not pay for the
+ceremony. The trigger to revisit is a **second regular contributor** or a
+**clean `assembleDebug` past ~3 minutes in CI**, whichever lands first
+(decision log, 2026-09-22).
 
 ### Theme (sub-project B)
 
@@ -271,7 +310,7 @@ A 1:1 map of `apps/ios/Pebbles/{Features,Services,Components,Theme}`.
   is ≥ API 26, so one file serves all densities.
 - **`values/colors.xml` is only for what the platform reads before Compose runs**
   — the icon ground and the splash background (with its `values-night` override).
-  It duplicates two values from `theme/Palettes.kt` because XML cannot read
+  It duplicates two values from `core/designsystem/Palettes.kt` because XML cannot read
   Kotlin; keep them in sync and do **not** grow it into a second palette.
 - **The cold-start splash is the system splash** (`androidx.core:core-splashscreen`).
   `Theme.Pebbles.Starting` (parent `Theme.SplashScreen.IconBackground`) is the
@@ -302,7 +341,7 @@ bundled. Android resource filenames must be lowercase
 
 ### Path rendering (sub-project D)
 
-- **`render_svg` renders through `PebbleSvg`** (`features/path/render/`):
+- **`render_svg` renders through `PebbleSvg`** (`core/ui/render/`):
   AndroidSVG parses the RPC string after a literal `currentColor` →
   palette-hex substitution (D10, mirrors iOS `PebbleRenderView`). Injected
   hex must be **6-digit** — `EmotionPalette` truncates the DB's 8-digit
@@ -359,6 +398,11 @@ bundled. Android resource filenames must be lowercase
 - **JUnit4 + `kotlinx-coroutines-test`, JVM unit tests only.** No Robolectric, no
   instrumented tests. Test pure logic (auth `canSubmit`, week grouping, valence
   mapping, palette parsing, slug resolution) and localization parity.
+- **`ArchitectureBoundaryTest` is a gate too (#851).** Konsist parses the `main`
+  sources and fails the build on a `core -> features` import, or on a
+  cross-feature import that is not one of the seven frozen entries. If it fires,
+  the fix is to move the shared code into `core/` — not to add a line to the
+  frozen list, which is a ratchet and has a size assertion guarding it.
 ### Screenshot validation gate (#847)
 
 **Compose Preview Screenshot Testing** (`com.android.compose.screenshot`) renders
