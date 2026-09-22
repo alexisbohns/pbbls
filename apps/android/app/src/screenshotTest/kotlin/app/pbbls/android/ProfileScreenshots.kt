@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Collection
 import app.pbbls.android.core.model.CollectionMode
 import app.pbbls.android.core.model.GlyphStroke
@@ -18,7 +19,6 @@ import app.pbbls.android.features.profile.components.ProfileBanner
 import app.pbbls.android.features.profile.components.ProfileCollectionsCard
 import app.pbbls.android.features.profile.components.ProfileLogoutButton
 import app.pbbls.android.features.profile.components.ProfileStatsCard
-import app.pbbls.android.theme.PebblesTheme
 import com.android.tools.screenshot.PreviewTest
 import java.time.OffsetDateTime
 

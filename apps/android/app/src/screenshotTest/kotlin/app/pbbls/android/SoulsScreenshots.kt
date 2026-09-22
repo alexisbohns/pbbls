@@ -10,14 +10,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.SystemGlyph
+import app.pbbls.android.core.ui.SoulItem
+import app.pbbls.android.core.ui.SoulItemCase
 import app.pbbls.android.features.profile.components.ProfileShortcutsRow
-import app.pbbls.android.features.shared.SoulItem
-import app.pbbls.android.features.shared.SoulItemCase
-import app.pbbls.android.theme.PebblesTheme
 import com.android.tools.screenshot.PreviewTest
 
 /**

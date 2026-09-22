@@ -22,8 +22,8 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.Spacing
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.Spacing
 
 /**
  * The record flow's top bar: back chevron, progress dots, close — ports iOS

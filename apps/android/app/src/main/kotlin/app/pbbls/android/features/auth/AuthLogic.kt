@@ -1,5 +1,7 @@
 package app.pbbls.android.features.auth
 
+import app.pbbls.android.core.model.AuthMode
+
 /**
  * Pure auth-form logic, extracted so it is unit-tested to iOS parity without a
  * live client — the `AuthView.canSubmit` / `AuthView.normalizeEmailInput`

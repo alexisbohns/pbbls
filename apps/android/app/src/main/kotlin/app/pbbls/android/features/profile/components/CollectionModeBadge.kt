@@ -13,10 +13,10 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.CollectionMode
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTypography
 
 /**
  * Capsule badge showing a collection's mode with emoji + label — ports iOS

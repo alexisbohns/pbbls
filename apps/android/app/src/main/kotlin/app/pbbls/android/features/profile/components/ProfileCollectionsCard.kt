@@ -16,11 +16,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PebblesIconToken
+import app.pbbls.android.core.designsystem.PebblesSectionHeader
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.profileCard
 import app.pbbls.android.core.model.Collection
-import app.pbbls.android.theme.PebblesIconToken
-import app.pbbls.android.theme.PebblesSectionHeader
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.profileCard
 
 /**
  * Profile "Collections" card — ports iOS `ProfileCollectionsCard.swift`: a

@@ -2,6 +2,7 @@ package app.pbbls.android.features.auth
 
 import androidx.lifecycle.SavedStateHandle
 import app.pbbls.android.R
+import app.pbbls.android.core.model.AuthMode
 import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.MainDispatcherRule
 import kotlinx.coroutines.test.advanceUntilIdle

@@ -21,13 +21,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.data.AchievementRecord
-import app.pbbls.android.features.shared.achievements.achievementFamilyIcon
-import app.pbbls.android.features.shared.achievements.achievementTitle
-import app.pbbls.android.theme.PebblesIconToken
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTypography
-import app.pbbls.android.theme.profileCard
+import app.pbbls.android.core.designsystem.PebblesIconToken
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTypography
+import app.pbbls.android.core.designsystem.profileCard
+import app.pbbls.android.core.ui.achievementFamilyIcon
+import app.pbbls.android.core.ui.achievementTitle
 
 /**
  * The Profile achievements shelf (D14) — ports web `AchievementsShelf` and iOS

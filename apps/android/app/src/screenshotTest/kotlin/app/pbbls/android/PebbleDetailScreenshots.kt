@@ -11,6 +11,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.DomainRef
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.EmotionRef
@@ -25,7 +26,6 @@ import app.pbbls.android.features.path.DeleteConfirmDialog
 import app.pbbls.android.features.path.read.BannerAspect
 import app.pbbls.android.features.path.read.PebbleReadView
 import app.pbbls.android.features.path.read.PebbleSnapFrame
-import app.pbbls.android.theme.PebblesTheme
 import com.android.tools.screenshot.PreviewTest
 import java.time.OffsetDateTime
 

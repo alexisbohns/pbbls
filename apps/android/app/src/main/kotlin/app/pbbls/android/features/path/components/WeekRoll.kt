@@ -23,11 +23,11 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.WeekRollEntry
 import app.pbbls.android.features.path.WeekRollBuilder
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTypography
 import java.time.LocalDate
 
 private val CELL_WIDTH = 72.dp

@@ -1,8 +1,8 @@
 package app.pbbls.android.features.glyph.store
 
+import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.GlyphMarketServicing
 import app.pbbls.android.core.model.BuyGlyphResult
-import app.pbbls.android.ui.runCatchingCancellable
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.withContext
 

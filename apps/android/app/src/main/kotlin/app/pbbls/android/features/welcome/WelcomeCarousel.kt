@@ -17,7 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.theme.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTheme
 import kotlinx.coroutines.delay
 
 private const val AUTO_ADVANCE_MILLIS = 4_000L

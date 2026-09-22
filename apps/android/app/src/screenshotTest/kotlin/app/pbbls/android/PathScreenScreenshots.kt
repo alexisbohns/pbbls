@@ -6,12 +6,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.EmotionRef
 import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.core.model.WeekRollEntry
 import app.pbbls.android.features.path.PathContent
-import app.pbbls.android.theme.PebblesTheme
 import com.android.tools.screenshot.PreviewTest
 import java.time.LocalDate
 import java.time.OffsetDateTime

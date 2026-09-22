@@ -30,14 +30,14 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PebblesScreen
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTopBar
+import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.LabMarkdown
 import app.pbbls.android.core.model.Log
 import app.pbbls.android.features.lab.components.LabMarkdownBody
-import app.pbbls.android.theme.PebblesScreen
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTopBar
-import app.pbbls.android.theme.PebblesTypography
 import coil3.compose.AsyncImage
 import java.util.Locale
 

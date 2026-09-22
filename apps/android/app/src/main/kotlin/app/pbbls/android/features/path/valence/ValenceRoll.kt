@@ -29,6 +29,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTypography
+import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.ValencePolarity
 import app.pbbls.android.core.model.ValenceSizeGroup
@@ -37,10 +41,6 @@ import app.pbbls.android.core.model.polarityBefore
 import app.pbbls.android.core.model.polarityIndex
 import app.pbbls.android.core.model.sizeIndex
 import app.pbbls.android.core.model.valenceAt
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTypography
-import app.pbbls.android.theme.Spacing
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.min

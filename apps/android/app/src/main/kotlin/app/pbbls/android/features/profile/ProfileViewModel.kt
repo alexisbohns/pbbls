@@ -6,6 +6,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
+import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.AchievementRecord
 import app.pbbls.android.core.data.AchievementsServicing
 import app.pbbls.android.core.data.PathStatsServicing
@@ -15,7 +16,6 @@ import app.pbbls.android.core.data.SupabaseServicing
 import app.pbbls.android.core.model.Collection
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.model.RippleSummary
-import app.pbbls.android.ui.runCatchingCancellable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow

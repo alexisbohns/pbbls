@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Log
 import app.pbbls.android.core.model.LogPlatform
 import app.pbbls.android.core.model.LogSpecies
@@ -16,7 +17,6 @@ import app.pbbls.android.core.model.LogStatus
 import app.pbbls.android.features.lab.AnnouncementDetailContent
 import app.pbbls.android.features.lab.LabContent
 import app.pbbls.android.features.lab.LabUiState
-import app.pbbls.android.theme.PebblesTheme
 import com.android.tools.screenshot.PreviewTest
 import java.time.OffsetDateTime
 

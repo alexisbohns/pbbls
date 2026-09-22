@@ -20,14 +20,14 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.components.PebblesPrimaryButton
+import app.pbbls.android.core.designsystem.PebblesPrimaryButton
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTypography
+import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.features.path.read.PebbleReadPetroglyph
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTypography
-import app.pbbls.android.theme.Spacing
 
 /**
  * Step 10 — the pebble, drawn on — ports iOS `RecordSuccessStep`.

@@ -3,7 +3,7 @@ package app.pbbls.android.navigation
 import androidx.compose.runtime.mutableStateOf
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavKey
-import app.pbbls.android.features.auth.AuthMode
+import app.pbbls.android.core.model.AuthMode
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

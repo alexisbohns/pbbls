@@ -4,10 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.GlyphStroke
-import app.pbbls.android.features.glyph.views.GlyphBanner
-import app.pbbls.android.features.glyph.views.GlyphBannerSubtitle
-import app.pbbls.android.theme.PebblesTypography
+import app.pbbls.android.core.ui.GlyphBanner
+import app.pbbls.android.core.ui.GlyphBannerSubtitle
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter

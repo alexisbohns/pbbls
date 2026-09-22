@@ -34,7 +34,7 @@ import javax.inject.Singleton
  *   `new` one from a `SupabaseService` they read off a CompositionLocal. Once
  *   that local carries `SupabaseServicing` (#848) they cannot, and they should
  *   not have been building a repository anyway — they take
- *   [app.pbbls.android.features.pebblemedia.LocalSnapWriteRepository] instead.
+ *   [app.pbbls.android.features.path.create.LocalSnapWriteRepository] instead.
  *   The class is stateless, so one instance serves every form.
  * - [SnapURLCache]'s real injection point is its `internal` primary
  *   constructor, which `SnapURLCacheTest` drives with a fake provider, a test

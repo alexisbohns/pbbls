@@ -8,12 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
+import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.Valence
-import app.pbbls.android.features.path.render.PebbleOutlineBackdrop
-import app.pbbls.android.features.path.render.PebbleOutlineGeometry
-import app.pbbls.android.features.path.render.PebbleStaticRender
-import app.pbbls.android.theme.PebblesTheme
+import app.pbbls.android.core.ui.render.PebbleOutlineBackdrop
+import app.pbbls.android.core.ui.render.PebbleOutlineGeometry
+import app.pbbls.android.core.ui.render.PebbleStaticRender
 
 /**
  * The read-view "Petroglyph" (issue #599): the outline silhouette backfill with

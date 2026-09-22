@@ -7,11 +7,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import app.pbbls.android.theme.PebblesIcon
-import app.pbbls.android.theme.PebblesIconToken
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTypography
+import app.pbbls.android.core.designsystem.PebblesIcon
+import app.pbbls.android.core.designsystem.PebblesIconToken
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTypography
 
 /**
  * Single value/icon/label tile inside the Profile Stats card — ports iOS

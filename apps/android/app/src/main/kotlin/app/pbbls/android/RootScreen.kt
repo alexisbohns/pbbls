@@ -23,8 +23,9 @@ import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.data.LocalSnapURLCache
 import app.pbbls.android.core.data.OnboardingPreferences
-import app.pbbls.android.features.karma.AchievementMomentOverlay
-import app.pbbls.android.features.karma.KarmaOverlayHost
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.ui.AchievementMomentOverlay
+import app.pbbls.android.core.ui.KarmaOverlayHost
 import app.pbbls.android.features.onboarding.OnboardingGate
 import app.pbbls.android.navigation.BarKey
 import app.pbbls.android.navigation.NavigationState
@@ -33,7 +34,6 @@ import app.pbbls.android.navigation.PebblesKey
 import app.pbbls.android.navigation.PebblesNavigationBar
 import app.pbbls.android.navigation.pebblesEntries
 import app.pbbls.android.navigation.rememberNavigationState
-import app.pbbls.android.theme.PebblesTheme
 
 /**
  * Top-level auth gate — the `RootView` analog (D5). Auth is now a condition,

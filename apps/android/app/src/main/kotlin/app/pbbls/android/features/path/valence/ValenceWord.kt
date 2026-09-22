@@ -9,11 +9,11 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.ValencePolarity
 import app.pbbls.android.core.model.ValenceSizeGroup
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTypography
 import java.util.Locale
 
 /**

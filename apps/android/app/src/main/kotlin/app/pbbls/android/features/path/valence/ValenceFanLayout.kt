@@ -3,7 +3,7 @@ package app.pbbls.android.features.path.valence
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.ValencePolarity
 import app.pbbls.android.core.model.ValenceSizeGroup
-import app.pbbls.android.features.path.render.PebbleOutlineGeometry
+import app.pbbls.android.core.ui.render.PebbleOutlineGeometry
 
 /**
  * Geometry of the valence fan: where each of the nine stones sits, and how big

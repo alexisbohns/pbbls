@@ -17,14 +17,14 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTypography
+import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.Domain
-import app.pbbls.android.features.path.render.GlyphImage
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTypography
-import app.pbbls.android.theme.ReferenceStrings
-import app.pbbls.android.theme.ReferenceType
-import app.pbbls.android.theme.Spacing
+import app.pbbls.android.core.ui.ReferenceStrings
+import app.pbbls.android.core.ui.ReferenceType
+import app.pbbls.android.core.ui.render.GlyphImage
 
 /**
  * The domain picker: one row per domain carrying its glyph, localized name and

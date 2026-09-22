@@ -16,7 +16,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.theme.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTheme
 
 /**
  * The Path tab's create affordance, now a Path-only FAB (#852, D3) — the bar

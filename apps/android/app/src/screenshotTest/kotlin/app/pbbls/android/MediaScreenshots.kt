@@ -10,10 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.AttachedSnap
-import app.pbbls.android.features.pebblemedia.AttachedPhotoView
-import app.pbbls.android.features.pebblemedia.ExistingSnapRow
-import app.pbbls.android.theme.PebblesTheme
+import app.pbbls.android.features.path.create.AttachedPhotoView
+import app.pbbls.android.features.path.create.ExistingSnapRow
 import com.android.tools.screenshot.PreviewTest
 
 /**

@@ -6,8 +6,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import app.pbbls.android.R
+import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.model.PebbleDraftPayload
-import app.pbbls.android.ui.runCatchingCancellable
 
 private const val TAG = "composer-drafts"
 

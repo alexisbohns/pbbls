@@ -32,20 +32,20 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
-import app.pbbls.android.components.DashedPlaceholder
+import app.pbbls.android.core.common.ObserveUiEffects
+import app.pbbls.android.core.designsystem.DashedPlaceholder
+import app.pbbls.android.core.designsystem.PebblesDestructive
+import app.pbbls.android.core.designsystem.PebblesListSection
+import app.pbbls.android.core.designsystem.PebblesScreen
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTopBar
+import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
+import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.SystemGlyph
-import app.pbbls.android.features.glyph.views.GlyphView
-import app.pbbls.android.features.glyph.views.GlyphViewCase
+import app.pbbls.android.core.ui.GlyphView
+import app.pbbls.android.core.ui.GlyphViewCase
 import app.pbbls.android.features.path.create.pickers.GlyphPickerSheet
-import app.pbbls.android.theme.PebblesDestructive
-import app.pbbls.android.theme.PebblesListSection
-import app.pbbls.android.theme.PebblesScreen
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTopBar
-import app.pbbls.android.theme.PebblesTopBarTextButton
-import app.pbbls.android.theme.PebblesTypography
-import app.pbbls.android.ui.ObserveUiEffects
 
 /**
  * Create/edit form for a soul — merges iOS `CreateSoulSheet` + `EditSoulSheet`

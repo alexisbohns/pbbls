@@ -11,8 +11,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import app.pbbls.android.R
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.SurfaceTile
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.SurfaceTile
 
 /**
  * The Profile shortcut tiles — ports iOS `ProfileShortcutsRow.swift`

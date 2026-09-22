@@ -11,14 +11,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.GlyphStroke
-import app.pbbls.android.features.glyph.views.GlyphBanner
-import app.pbbls.android.features.glyph.views.GlyphBannerSubtitle
-import app.pbbls.android.features.glyph.views.GlyphView
-import app.pbbls.android.features.glyph.views.GlyphViewCase
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTypography
+import app.pbbls.android.core.ui.GlyphBanner
+import app.pbbls.android.core.ui.GlyphBannerSubtitle
+import app.pbbls.android.core.ui.GlyphView
+import app.pbbls.android.core.ui.GlyphViewCase
 import com.android.tools.screenshot.PreviewTest
 
 /**

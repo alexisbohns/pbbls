@@ -18,9 +18,9 @@ import androidx.compose.ui.res.stringResource
 import app.pbbls.android.R
 import app.pbbls.android.core.data.TapHaptic
 import app.pbbls.android.core.data.rememberTapHaptics
+import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.features.path.valence.ValenceFan
-import app.pbbls.android.theme.Spacing
 
 /**
  * The valence picker (D5) — ports iOS `ValencePickerSheet`. A single

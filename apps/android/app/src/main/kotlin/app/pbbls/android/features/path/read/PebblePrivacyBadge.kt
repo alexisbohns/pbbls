@@ -10,10 +10,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.core.ui.iconRes
 import app.pbbls.android.core.ui.labelRes
-import app.pbbls.android.theme.PebblesTheme
 
 /**
  * Privacy chip — ports the `.chip` style of iOS `PebblePrivacyBadge.swift` (the

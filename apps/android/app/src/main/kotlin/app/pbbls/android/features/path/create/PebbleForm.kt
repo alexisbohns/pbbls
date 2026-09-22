@@ -38,8 +38,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import app.pbbls.android.R
-import app.pbbls.android.components.DashedPlaceholder
-import app.pbbls.android.components.PebblesTextInput
+import app.pbbls.android.core.designsystem.DashedPlaceholder
+import app.pbbls.android.core.designsystem.PebblesDestructive
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTextInput
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionWithPalette
 import app.pbbls.android.core.model.FormSnap
@@ -49,21 +53,15 @@ import app.pbbls.android.core.model.PebbleDraft
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.ValencePolarity
+import app.pbbls.android.core.ui.ReferenceStrings
+import app.pbbls.android.core.ui.ReferenceType
+import app.pbbls.android.core.ui.render.GlyphImage
+import app.pbbls.android.core.ui.render.PebbleStaticRender
+import app.pbbls.android.core.ui.render.ValenceGlyph
 import app.pbbls.android.features.path.create.pickers.EmotionPickerSheet
 import app.pbbls.android.features.path.create.pickers.GlyphPickerSheet
 import app.pbbls.android.features.path.create.pickers.SoulPickerSheet
 import app.pbbls.android.features.path.create.pickers.ValencePickerSheet
-import app.pbbls.android.features.path.render.GlyphImage
-import app.pbbls.android.features.path.render.PebbleStaticRender
-import app.pbbls.android.features.path.render.ValenceGlyph
-import app.pbbls.android.features.pebblemedia.AttachedPhotoView
-import app.pbbls.android.features.pebblemedia.ExistingSnapRow
-import app.pbbls.android.theme.PebblesDestructive
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTypography
-import app.pbbls.android.theme.ReferenceStrings
-import app.pbbls.android.theme.ReferenceType
 
 /** Which picker sheet is open — exactly one `ModalBottomSheet` at a time (D5). */
 enum class PickerKind { EMOTION, VALENCE, SOUL, GLYPH }

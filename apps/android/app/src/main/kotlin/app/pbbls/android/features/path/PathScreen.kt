@@ -27,6 +27,10 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalEmotionPaletteService
+import app.pbbls.android.core.designsystem.PebblesDestructive
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.core.model.WeekRollEntry
@@ -34,10 +38,6 @@ import app.pbbls.android.features.path.components.NewPebbleFab
 import app.pbbls.android.features.path.components.WeekHeader
 import app.pbbls.android.features.path.components.WeekPebbleList
 import app.pbbls.android.features.path.components.WeekRoll
-import app.pbbls.android.theme.PebblesDestructive
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTypography
 import java.time.LocalDate
 import kotlin.math.abs
 

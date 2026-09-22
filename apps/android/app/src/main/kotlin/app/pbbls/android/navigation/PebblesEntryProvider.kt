@@ -2,7 +2,7 @@ package app.pbbls.android.navigation
 
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
-import app.pbbls.android.features.auth.AuthMode
+import app.pbbls.android.core.model.AuthMode
 import app.pbbls.android.features.auth.AuthScreen
 import app.pbbls.android.features.connections.AcceptInviteScreen
 import app.pbbls.android.features.connections.ConnectionsScreen

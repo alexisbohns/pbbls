@@ -34,19 +34,19 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
+import app.pbbls.android.core.common.ObserveUiEffects
+import app.pbbls.android.core.designsystem.PebblesText
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphGridItem
+import app.pbbls.android.core.ui.GlyphView
+import app.pbbls.android.core.ui.GlyphViewCase
 import app.pbbls.android.features.glyph.carve.GlyphCarveScreen
 import app.pbbls.android.features.glyph.carve.GlyphCarveViewModel
 import app.pbbls.android.features.glyph.store.GlyphSwapPanel
 import app.pbbls.android.features.glyph.store.GlyphTab
 import app.pbbls.android.features.glyph.store.GlyphTabBar
-import app.pbbls.android.features.glyph.views.GlyphView
-import app.pbbls.android.features.glyph.views.GlyphViewCase
-import app.pbbls.android.theme.PebblesText
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTypography
-import app.pbbls.android.ui.ObserveUiEffects
 
 /**
  * The glyph picker's content-swap state, hoisted out of the picker so both

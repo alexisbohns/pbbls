@@ -4,11 +4,11 @@ import android.util.Log
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.ConnectionInvite
 import app.pbbls.android.core.data.ConnectionsServicing
 import app.pbbls.android.core.data.connectionsErrorMessage
 import app.pbbls.android.core.data.toDataError
-import app.pbbls.android.ui.runCatchingCancellable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable

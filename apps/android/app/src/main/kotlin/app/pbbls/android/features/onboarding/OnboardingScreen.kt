@@ -29,9 +29,9 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
-import app.pbbls.android.components.PebblesPrimaryButton
-import app.pbbls.android.theme.PebblesTheme
-import app.pbbls.android.theme.PebblesTypography
+import app.pbbls.android.core.designsystem.PebblesPrimaryButton
+import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.PebblesTypography
 
 /**
  * Paged onboarding flow — the `OnboardingView` analog. One [OnboardingPageView]
