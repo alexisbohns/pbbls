@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import app.pbbls.android.R
-import app.pbbls.android.features.profile.models.Collection
+import app.pbbls.android.core.model.Collection
 import app.pbbls.android.theme.PebblesIconToken
 import app.pbbls.android.theme.PebblesSectionHeader
 import app.pbbls.android.theme.PebblesTheme

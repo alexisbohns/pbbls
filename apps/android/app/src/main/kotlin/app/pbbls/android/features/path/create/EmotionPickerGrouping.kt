@@ -1,9 +1,9 @@
 package app.pbbls.android.features.path.create
 
-import app.pbbls.android.features.path.models.EmotionCategoryOrdering
-import app.pbbls.android.features.path.models.EmotionPalette
-import app.pbbls.android.features.path.models.EmotionWithPalette
-import app.pbbls.android.features.path.models.Valence
+import app.pbbls.android.core.model.EmotionCategoryOrdering
+import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.EmotionWithPalette
+import app.pbbls.android.core.model.Valence
 
 /**
  * One emotion category + the emotions inside it, ready to render in the picker.

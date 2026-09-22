@@ -3,7 +3,7 @@ package app.pbbls.android.features.glyph.carve
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
-import app.pbbls.android.features.glyph.models.GlyphStroke
+import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.testing.FakeAchievementsService
 import app.pbbls.android.testing.FakeGlyphService
 import app.pbbls.android.testing.MainDispatcherRule

@@ -3,7 +3,7 @@ package app.pbbls.android.features.path.record.steps
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import app.pbbls.android.features.path.models.Valence
+import app.pbbls.android.core.model.Valence
 import app.pbbls.android.features.path.valence.ValenceFan
 
 /**

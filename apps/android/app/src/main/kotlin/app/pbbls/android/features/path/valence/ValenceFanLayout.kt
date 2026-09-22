@@ -1,8 +1,8 @@
 package app.pbbls.android.features.path.valence
 
-import app.pbbls.android.features.path.models.Valence
-import app.pbbls.android.features.path.models.ValencePolarity
-import app.pbbls.android.features.path.models.ValenceSizeGroup
+import app.pbbls.android.core.model.Valence
+import app.pbbls.android.core.model.ValencePolarity
+import app.pbbls.android.core.model.ValenceSizeGroup
 import app.pbbls.android.features.path.render.PebbleOutlineGeometry
 
 /**

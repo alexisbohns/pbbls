@@ -1,9 +1,9 @@
 package app.pbbls.android.features.profile
 
 import app.pbbls.android.R
-import app.pbbls.android.features.glyph.models.Glyph
-import app.pbbls.android.features.path.models.Pebble
-import app.pbbls.android.features.profile.models.SoulWithGlyph
+import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.testing.FakePebbleWriteService
 import app.pbbls.android.testing.FakeReferenceDataService
 import app.pbbls.android.testing.FakeSoulsService

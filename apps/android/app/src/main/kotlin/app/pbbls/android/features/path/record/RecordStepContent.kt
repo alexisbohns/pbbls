@@ -2,11 +2,12 @@ package app.pbbls.android.features.path.record
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import app.pbbls.android.features.glyph.models.Glyph
+import app.pbbls.android.core.model.Domain
+import app.pbbls.android.core.model.FormSnap
+import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.PebbleCollection
+import app.pbbls.android.core.model.PebbleDraft
 import app.pbbls.android.features.path.create.pickers.GlyphPickerState
-import app.pbbls.android.features.path.models.Domain
-import app.pbbls.android.features.path.models.PebbleCollection
-import app.pbbls.android.features.path.models.PebbleDraft
 import app.pbbls.android.features.path.record.steps.RecordCollectionStep
 import app.pbbls.android.features.path.record.steps.RecordDomainStep
 import app.pbbls.android.features.path.record.steps.RecordEmotionStep
@@ -17,7 +18,6 @@ import app.pbbls.android.features.path.record.steps.RecordPrivacyStep
 import app.pbbls.android.features.path.record.steps.RecordSoulsStep
 import app.pbbls.android.features.path.record.steps.RecordValenceStep
 import app.pbbls.android.features.path.record.steps.RecordWhenStep
-import app.pbbls.android.features.pebblemedia.models.FormSnap
 
 /**
  * Renders the body of whichever step the flow is on — ports iOS

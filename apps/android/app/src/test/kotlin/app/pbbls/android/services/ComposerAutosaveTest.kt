@@ -1,7 +1,7 @@
 package app.pbbls.android.services
 
-import app.pbbls.android.features.path.models.PebbleDraft
-import app.pbbls.android.features.path.models.PebbleDraftPayload
+import app.pbbls.android.core.model.PebbleDraft
+import app.pbbls.android.core.model.PebbleDraftPayload
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Test

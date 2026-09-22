@@ -2,8 +2,8 @@ package app.pbbls.android.features.profile
 
 import androidx.lifecycle.SavedStateHandle
 import app.pbbls.android.R
-import app.pbbls.android.features.profile.models.Collection
-import app.pbbls.android.features.profile.models.CollectionMode
+import app.pbbls.android.core.model.Collection
+import app.pbbls.android.core.model.CollectionMode
 import app.pbbls.android.testing.FakeAchievementsService
 import app.pbbls.android.testing.FakeCollectionsService
 import app.pbbls.android.testing.FakeReferenceDataService

@@ -1,9 +1,9 @@
 package app.pbbls.android.services
 
-import app.pbbls.android.features.glyph.models.Glyph
-import app.pbbls.android.features.path.models.Pebble
-import app.pbbls.android.features.profile.models.SoulRow
-import app.pbbls.android.features.profile.models.SoulWithGlyph
+import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.SoulRow
+import app.pbbls.android.core.model.SoulWithGlyph
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order

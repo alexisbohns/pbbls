@@ -22,6 +22,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
+import app.pbbls.android.core.model.Collection
 import app.pbbls.android.features.profile.components.ProfileAchievementsCard
 import app.pbbls.android.features.profile.components.ProfileBanner
 import app.pbbls.android.features.profile.components.ProfileCollectionsCard
@@ -29,7 +30,6 @@ import app.pbbls.android.features.profile.components.ProfileLabCard
 import app.pbbls.android.features.profile.components.ProfileLogoutButton
 import app.pbbls.android.features.profile.components.ProfileShortcutsRow
 import app.pbbls.android.features.profile.components.ProfileStatsCard
-import app.pbbls.android.features.profile.models.Collection
 import app.pbbls.android.theme.PebblesScreen
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme

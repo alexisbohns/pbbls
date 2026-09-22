@@ -31,9 +31,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isFinite
 import androidx.compose.ui.zIndex
 import app.pbbls.android.R
+import app.pbbls.android.core.model.Valence
+import app.pbbls.android.core.model.ValenceSizeGroup
 import app.pbbls.android.features.path.create.valencePolarityLabelRes
-import app.pbbls.android.features.path.models.Valence
-import app.pbbls.android.features.path.models.ValenceSizeGroup
 import app.pbbls.android.features.path.render.OutlineAssets
 import app.pbbls.android.features.path.render.wobble.WobbleRenderer
 import app.pbbls.android.theme.Spacing

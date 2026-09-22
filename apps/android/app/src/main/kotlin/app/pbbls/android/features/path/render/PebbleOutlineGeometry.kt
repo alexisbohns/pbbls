@@ -1,6 +1,6 @@
 package app.pbbls.android.features.path.render
 
-import app.pbbls.android.features.path.models.ValenceSizeGroup
+import app.pbbls.android.core.model.ValenceSizeGroup
 
 /**
  * Layout constants for composing [PebbleOutlineBackdrop] underneath

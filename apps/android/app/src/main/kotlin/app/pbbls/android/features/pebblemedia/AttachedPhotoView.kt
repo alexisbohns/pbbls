@@ -27,7 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.features.pebblemedia.models.AttachedSnap
+import app.pbbls.android.core.model.AttachedSnap
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesSuccess
 import app.pbbls.android.theme.PebblesText

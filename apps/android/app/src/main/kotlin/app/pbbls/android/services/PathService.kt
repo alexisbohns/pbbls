@@ -1,8 +1,8 @@
 package app.pbbls.android.services
 
 import android.util.Log
-import app.pbbls.android.features.path.models.Pebble
-import app.pbbls.android.features.path.models.Valence
+import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.Valence
 import io.github.jan.supabase.postgrest.postgrest
 import javax.inject.Inject
 import javax.inject.Singleton

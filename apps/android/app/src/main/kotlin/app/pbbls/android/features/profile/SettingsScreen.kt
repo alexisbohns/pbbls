@@ -39,7 +39,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.components.LegalDoc
 import app.pbbls.android.components.openLegalDoc
-import app.pbbls.android.features.glyph.models.Glyph
+import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.features.glyph.views.GlyphView
 import app.pbbls.android.features.glyph.views.GlyphViewCase
 import app.pbbls.android.features.path.create.pickers.GlyphPickerSheet

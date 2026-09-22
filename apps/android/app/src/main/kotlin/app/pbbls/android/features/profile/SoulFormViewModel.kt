@@ -6,9 +6,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
-import app.pbbls.android.features.glyph.models.Glyph
-import app.pbbls.android.features.glyph.models.SystemGlyph
-import app.pbbls.android.features.profile.models.SoulWithGlyph
+import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.SoulWithGlyph
+import app.pbbls.android.core.model.SystemGlyph
 import app.pbbls.android.services.AchievementsServicing
 import app.pbbls.android.services.ReferenceDataServicing
 import app.pbbls.android.services.SoulsServicing

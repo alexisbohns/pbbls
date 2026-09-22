@@ -4,10 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import app.pbbls.android.R
-import app.pbbls.android.features.lab.models.Log
-import app.pbbls.android.features.lab.models.LogPlatform
-import app.pbbls.android.features.lab.models.LogSpecies
-import app.pbbls.android.features.lab.models.LogStatus
+import app.pbbls.android.core.model.Log
+import app.pbbls.android.core.model.LogPlatform
+import app.pbbls.android.core.model.LogSpecies
+import app.pbbls.android.core.model.LogStatus
 import app.pbbls.android.testing.FakeLogsService
 import app.pbbls.android.testing.MainDispatcherRule
 import kotlinx.coroutines.CompletableDeferred

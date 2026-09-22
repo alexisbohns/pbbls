@@ -1,7 +1,7 @@
 package app.pbbls.android.features.pebblemedia
 
-import app.pbbls.android.features.pebblemedia.models.AttachedSnap
-import app.pbbls.android.features.pebblemedia.models.FormSnap
+import app.pbbls.android.core.model.AttachedSnap
+import app.pbbls.android.core.model.FormSnap
 import app.pbbls.android.services.SnapWriteRepositing
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch

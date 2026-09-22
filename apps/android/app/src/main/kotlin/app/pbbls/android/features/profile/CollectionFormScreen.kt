@@ -32,8 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
+import app.pbbls.android.core.model.CollectionMode
 import app.pbbls.android.features.profile.components.labelRes
-import app.pbbls.android.features.profile.models.CollectionMode
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesListSection
 import app.pbbls.android.theme.PebblesScreen

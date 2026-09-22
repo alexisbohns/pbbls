@@ -24,9 +24,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.model.WeekRollEntry
 import app.pbbls.android.features.path.WeekHeaderFormatting
 import app.pbbls.android.features.path.WeekRollBuilder
-import app.pbbls.android.features.path.models.WeekRollEntry
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography

@@ -19,9 +19,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.features.glyph.views.GlyphView
 import app.pbbls.android.features.glyph.views.GlyphViewCase
-import app.pbbls.android.features.profile.models.SoulWithGlyph
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme
 import app.pbbls.android.theme.PebblesTypography

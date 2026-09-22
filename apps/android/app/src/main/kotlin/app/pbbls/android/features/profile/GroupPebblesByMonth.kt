@@ -1,6 +1,6 @@
 package app.pbbls.android.features.profile
 
-import app.pbbls.android.features.path.models.Pebble
+import app.pbbls.android.core.model.Pebble
 import java.time.YearMonth
 import java.time.ZoneId
 

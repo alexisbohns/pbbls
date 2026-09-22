@@ -4,11 +4,11 @@ import android.util.Log
 import androidx.annotation.StringRes
 import app.pbbls.android.AppEnvironment
 import app.pbbls.android.R
-import app.pbbls.android.features.path.models.ComposePebbleResponse
-import app.pbbls.android.features.path.models.PebbleCreatePayload
-import app.pbbls.android.features.path.models.PebbleDraft
-import app.pbbls.android.features.path.models.PebbleSnapPayload
-import app.pbbls.android.features.path.models.PebbleUpdatePayload
+import app.pbbls.android.core.model.ComposePebbleResponse
+import app.pbbls.android.core.model.PebbleCreatePayload
+import app.pbbls.android.core.model.PebbleDraft
+import app.pbbls.android.core.model.PebbleSnapPayload
+import app.pbbls.android.core.model.PebbleUpdatePayload
 import io.github.jan.supabase.postgrest.postgrest
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp

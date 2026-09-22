@@ -3,9 +3,9 @@ package app.pbbls.android.features.path.record.steps
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import app.pbbls.android.core.model.Valence
 import app.pbbls.android.features.path.create.EmotionPickerGrouping
 import app.pbbls.android.features.path.create.pickers.EmotionPickerBody
-import app.pbbls.android.features.path.models.Valence
 import app.pbbls.android.services.LocalEmotionPaletteService
 
 /**

@@ -1,7 +1,7 @@
 package app.pbbls.android.features.glyph.services
 
-import app.pbbls.android.features.glyph.models.Glyph
-import app.pbbls.android.features.glyph.models.GlyphStroke
+import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.services.SupabaseService
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns

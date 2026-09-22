@@ -33,8 +33,8 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
+import app.pbbls.android.core.model.Valence
 import app.pbbls.android.features.path.create.pickers.rememberGlyphPickerState
-import app.pbbls.android.features.path.models.Valence
 import app.pbbls.android.features.path.record.steps.RecordSuccessStep
 import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.services.LocalReferenceDataService

@@ -10,11 +10,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.features.glyph.models.Glyph
-import app.pbbls.android.features.glyph.models.GlyphStroke
-import app.pbbls.android.features.glyph.models.SystemGlyph
+import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.GlyphStroke
+import app.pbbls.android.core.model.SoulWithGlyph
+import app.pbbls.android.core.model.SystemGlyph
 import app.pbbls.android.features.profile.components.ProfileShortcutsRow
-import app.pbbls.android.features.profile.models.SoulWithGlyph
 import app.pbbls.android.features.shared.SoulItem
 import app.pbbls.android.features.shared.SoulItemCase
 import app.pbbls.android.theme.PebblesTheme

@@ -6,8 +6,8 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
-import app.pbbls.android.features.glyph.models.Glyph
-import app.pbbls.android.features.glyph.models.GlyphStroke
+import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.services.ProfileRow
 import app.pbbls.android.services.ProfileServicing
 import app.pbbls.android.services.SupabaseServicing

@@ -14,8 +14,8 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.features.path.models.EmotionPalette
-import app.pbbls.android.features.path.models.Valence
+import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.Valence
 
 /**
  * The snap-present heading of the read view (issue #599): the whole picture at

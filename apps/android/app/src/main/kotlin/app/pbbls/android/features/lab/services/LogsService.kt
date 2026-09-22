@@ -1,8 +1,8 @@
 package app.pbbls.android.features.lab.services
 
 import app.pbbls.android.AppEnvironment
-import app.pbbls.android.features.lab.models.LabConfig
-import app.pbbls.android.features.lab.models.Log
+import app.pbbls.android.core.model.LabConfig
+import app.pbbls.android.core.model.Log
 import app.pbbls.android.services.SupabaseService
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns

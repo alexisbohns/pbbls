@@ -1,9 +1,9 @@
 package app.pbbls.android.features.profile
 
 import app.pbbls.android.R
-import app.pbbls.android.features.path.models.Pebble
-import app.pbbls.android.features.profile.models.Collection
-import app.pbbls.android.features.profile.models.CollectionMode
+import app.pbbls.android.core.model.Collection
+import app.pbbls.android.core.model.CollectionMode
+import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.testing.FakeCollectionsService
 import app.pbbls.android.testing.FakePebbleWriteService
 import app.pbbls.android.testing.FakeReferenceDataService

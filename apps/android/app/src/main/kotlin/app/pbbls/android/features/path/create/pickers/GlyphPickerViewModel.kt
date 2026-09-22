@@ -6,9 +6,9 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
-import app.pbbls.android.features.glyph.models.BuyGlyphResult
-import app.pbbls.android.features.glyph.models.Glyph
-import app.pbbls.android.features.glyph.models.GlyphGridItem
+import app.pbbls.android.core.model.BuyGlyphResult
+import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.GlyphGridItem
 import app.pbbls.android.features.glyph.services.GlyphMarketServicing
 import app.pbbls.android.features.glyph.store.GlyphTab
 import app.pbbls.android.services.PathStatsServicing

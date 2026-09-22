@@ -1,6 +1,6 @@
 package app.pbbls.android.features.path.components
 
-import app.pbbls.android.features.path.models.ValenceSizeGroup
+import app.pbbls.android.core.model.ValenceSizeGroup
 import app.pbbls.android.features.path.render.PebbleOutlineGeometry
 import org.junit.Assert.assertEquals
 import org.junit.Test

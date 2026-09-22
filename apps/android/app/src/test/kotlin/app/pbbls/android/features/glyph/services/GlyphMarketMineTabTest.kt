@@ -1,6 +1,6 @@
 package app.pbbls.android.features.glyph.services
 
-import app.pbbls.android.features.glyph.models.MineGlyphRow
+import app.pbbls.android.core.model.MineGlyphRow
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

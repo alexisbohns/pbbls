@@ -17,7 +17,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
-import app.pbbls.android.features.path.models.Valence
+import app.pbbls.android.core.model.Valence
 import app.pbbls.android.features.path.render.Affine
 import app.pbbls.android.features.path.render.OutlineAssets
 import app.pbbls.android.features.path.render.PebbleOutlineGeometry

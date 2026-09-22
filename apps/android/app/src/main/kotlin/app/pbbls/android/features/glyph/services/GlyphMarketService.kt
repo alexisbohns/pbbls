@@ -2,11 +2,11 @@ package app.pbbls.android.features.glyph.services
 
 import androidx.annotation.StringRes
 import app.pbbls.android.R
-import app.pbbls.android.features.glyph.models.BuyGlyphResult
-import app.pbbls.android.features.glyph.models.GlyphGridItem
-import app.pbbls.android.features.glyph.models.MarketGlyphRow
-import app.pbbls.android.features.glyph.models.MineGlyphRow
-import app.pbbls.android.features.glyph.models.OwnedGlyphRow
+import app.pbbls.android.core.model.BuyGlyphResult
+import app.pbbls.android.core.model.GlyphGridItem
+import app.pbbls.android.core.model.MarketGlyphRow
+import app.pbbls.android.core.model.MineGlyphRow
+import app.pbbls.android.core.model.OwnedGlyphRow
 import app.pbbls.android.services.DataError
 import app.pbbls.android.services.SupabaseService
 import io.github.jan.supabase.postgrest.from

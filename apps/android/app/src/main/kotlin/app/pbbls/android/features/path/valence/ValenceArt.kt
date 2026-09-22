@@ -1,8 +1,8 @@
 package app.pbbls.android.features.path.valence
 
 import app.pbbls.android.R
-import app.pbbls.android.features.path.models.ValencePolarity
-import app.pbbls.android.features.path.models.ValenceSizeGroup
+import app.pbbls.android.core.model.ValencePolarity
+import app.pbbls.android.core.model.ValenceSizeGroup
 import app.pbbls.android.features.path.render.PebbleSvgModel
 import app.pbbls.android.features.path.render.wobble.WobblePoint
 import app.pbbls.android.features.path.render.wobble.WobbleRenderer

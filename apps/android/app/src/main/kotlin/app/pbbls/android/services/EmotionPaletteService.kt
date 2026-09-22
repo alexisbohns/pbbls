@@ -5,9 +5,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
-import app.pbbls.android.features.path.models.EmotionPalette
-import app.pbbls.android.features.path.models.EmotionWithPalette
-import app.pbbls.android.features.path.models.EmotionWithPaletteRow
+import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.EmotionWithPalette
+import app.pbbls.android.core.model.EmotionWithPaletteRow
 import io.github.jan.supabase.postgrest.from
 import javax.inject.Inject
 import javax.inject.Singleton

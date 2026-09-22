@@ -2,8 +2,8 @@ package app.pbbls.android.features.path.record.steps
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import app.pbbls.android.core.model.Domain
 import app.pbbls.android.features.path.create.pickers.DomainPickerContent
-import app.pbbls.android.features.path.models.Domain
 
 /**
  * Step 5 — the life domain, with its glyph and description (M58 D6) — ports iOS

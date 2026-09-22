@@ -18,7 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.features.glyph.models.GlyphStroke
+import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.features.path.render.GlyphImage
 import app.pbbls.android.theme.PebblesTheme
 

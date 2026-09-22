@@ -1,6 +1,6 @@
 package app.pbbls.android.features.glyph.store
 
-import app.pbbls.android.features.glyph.models.BuyGlyphResult
+import app.pbbls.android.core.model.BuyGlyphResult
 import app.pbbls.android.testing.FakeGlyphMarketService
 import app.pbbls.android.testing.MainDispatcherRule
 import kotlinx.coroutines.CompletableDeferred

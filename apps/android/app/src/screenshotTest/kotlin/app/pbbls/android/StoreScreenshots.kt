@@ -10,9 +10,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.features.glyph.models.Glyph
-import app.pbbls.android.features.glyph.models.GlyphGridItem
-import app.pbbls.android.features.glyph.models.GlyphStroke
+import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.GlyphGridItem
+import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.features.glyph.store.GlyphDetailDrawerContent
 import app.pbbls.android.features.glyph.store.GlyphTab
 import app.pbbls.android.features.glyph.store.GlyphTabBar

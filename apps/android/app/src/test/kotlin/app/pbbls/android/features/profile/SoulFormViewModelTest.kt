@@ -5,9 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import app.pbbls.android.R
-import app.pbbls.android.features.glyph.models.Glyph
-import app.pbbls.android.features.glyph.models.SystemGlyph
-import app.pbbls.android.features.profile.models.SoulWithGlyph
+import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.SoulWithGlyph
+import app.pbbls.android.core.model.SystemGlyph
 import app.pbbls.android.testing.FakeAchievementsService
 import app.pbbls.android.testing.FakeReferenceDataService
 import app.pbbls.android.testing.FakeSoulsService

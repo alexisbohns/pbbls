@@ -1,6 +1,6 @@
 package app.pbbls.android.testing
 
-import app.pbbls.android.features.path.models.Pebble
+import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.services.PathService
 import app.pbbls.android.services.PebbleWriteService
 import app.pbbls.android.services.ProfileService

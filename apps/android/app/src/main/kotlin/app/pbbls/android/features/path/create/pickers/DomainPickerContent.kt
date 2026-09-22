@@ -17,7 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.features.path.models.Domain
+import app.pbbls.android.core.model.Domain
 import app.pbbls.android.features.path.render.GlyphImage
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme

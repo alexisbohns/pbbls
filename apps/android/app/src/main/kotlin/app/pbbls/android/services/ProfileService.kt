@@ -1,9 +1,9 @@
 package app.pbbls.android.services
 
-import app.pbbls.android.features.glyph.models.GlyphStroke
-import app.pbbls.android.features.path.models.OffsetDateTimeSerializer
-import app.pbbls.android.features.profile.models.Collection
-import app.pbbls.android.features.profile.models.CollectionRow
+import app.pbbls.android.core.model.Collection
+import app.pbbls.android.core.model.CollectionRow
+import app.pbbls.android.core.model.GlyphStroke
+import app.pbbls.android.core.model.OffsetDateTimeSerializer
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.functions.functions
 import io.github.jan.supabase.postgrest.from

@@ -1,6 +1,6 @@
 package app.pbbls.android.testing
 
-import app.pbbls.android.features.lab.models.Log
+import app.pbbls.android.core.model.Log
 import app.pbbls.android.features.lab.services.LogsServicing
 import kotlinx.coroutines.CompletableDeferred
 

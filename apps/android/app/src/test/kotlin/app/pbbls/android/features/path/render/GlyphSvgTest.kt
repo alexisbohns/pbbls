@@ -1,6 +1,6 @@
 package app.pbbls.android.features.path.render
 
-import app.pbbls.android.features.glyph.models.GlyphStroke
+import app.pbbls.android.core.model.GlyphStroke
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue

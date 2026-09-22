@@ -1,11 +1,11 @@
 package app.pbbls.android.features.path.create
 
 import app.pbbls.android.R
+import app.pbbls.android.core.model.ComposePebbleResponse
+import app.pbbls.android.core.model.PebbleDraft
+import app.pbbls.android.core.model.PebbleDraftPayload
+import app.pbbls.android.core.model.Valence
 import app.pbbls.android.features.karma.KarmaNotificationService
-import app.pbbls.android.features.path.models.ComposePebbleResponse
-import app.pbbls.android.features.path.models.PebbleDraft
-import app.pbbls.android.features.path.models.PebbleDraftPayload
-import app.pbbls.android.features.path.models.Valence
 import app.pbbls.android.services.ComposeResult
 import app.pbbls.android.services.PebbleDraftRecord
 import app.pbbls.android.testing.FakeAchievementsService
