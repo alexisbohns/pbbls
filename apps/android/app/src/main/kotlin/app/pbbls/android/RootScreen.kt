@@ -19,6 +19,10 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
+import app.pbbls.android.core.data.LocalEmotionPaletteService
+import app.pbbls.android.core.data.LocalReferenceDataService
+import app.pbbls.android.core.data.LocalSnapURLCache
+import app.pbbls.android.core.data.OnboardingPreferences
 import app.pbbls.android.features.karma.AchievementMomentOverlay
 import app.pbbls.android.features.karma.KarmaOverlayHost
 import app.pbbls.android.features.onboarding.OnboardingGate
@@ -29,10 +33,6 @@ import app.pbbls.android.navigation.PebblesKey
 import app.pbbls.android.navigation.PebblesNavigationBar
 import app.pbbls.android.navigation.pebblesEntries
 import app.pbbls.android.navigation.rememberNavigationState
-import app.pbbls.android.services.LocalEmotionPaletteService
-import app.pbbls.android.services.LocalReferenceDataService
-import app.pbbls.android.services.LocalSnapURLCache
-import app.pbbls.android.services.OnboardingPreferences
 import app.pbbls.android.theme.PebblesTheme
 
 /**

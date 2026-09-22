@@ -1,10 +1,10 @@
 package app.pbbls.android.testing
 
+import app.pbbls.android.core.data.ReferenceDataServicing
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.PebbleCollection
 import app.pbbls.android.core.model.SoulWithGlyph
-import app.pbbls.android.services.ReferenceDataServicing
 
 /**
  * In-memory [ReferenceDataServicing] (#848). See [PebblesTestHarness] for where
@@ -13,7 +13,7 @@ import app.pbbls.android.services.ReferenceDataServicing
  * The four state properties are plain `var`s; a fake needs no Compose state.
  *
  * **It cannot be made to throw, deliberately.** Every method on the real
- * [app.pbbls.android.services.ReferenceDataService] swallows its own failure:
+ * [app.pbbls.android.core.data.ReferenceDataService] swallows its own failure:
  * `load`, `refreshSouls` and `refreshCollections` wrap their whole body in
  * `try`/`catch` + `Log.e` and return normally, and `createSoul` returns null.
  * Reference-data failure is observable ONLY as "the lists stayed empty" or

@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import app.pbbls.android.R
-import app.pbbls.android.services.Connection
-import app.pbbls.android.services.ConnectionPeer
+import app.pbbls.android.core.data.Connection
+import app.pbbls.android.core.data.ConnectionPeer
 import app.pbbls.android.testing.FakeConnectionsService
 import app.pbbls.android.testing.MainDispatcherRule
 import app.pbbls.android.testing.postgrestException

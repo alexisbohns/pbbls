@@ -29,12 +29,12 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.components.PebbleRow
+import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.features.path.EditPebbleScreen
 import app.pbbls.android.features.profile.components.CollectionModeBadge
 import app.pbbls.android.features.profile.components.ConfirmDeleteDialog
 import app.pbbls.android.features.profile.components.DeleteErrorDialog
 import app.pbbls.android.features.profile.components.ProfileEmptyState
-import app.pbbls.android.services.LocalEmotionPaletteService
 import app.pbbls.android.theme.PebblesListSection
 import app.pbbls.android.theme.PebblesScreen
 import app.pbbls.android.theme.PebblesText

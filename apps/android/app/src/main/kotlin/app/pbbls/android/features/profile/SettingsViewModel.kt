@@ -6,12 +6,12 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
+import app.pbbls.android.core.data.ProfileRow
+import app.pbbls.android.core.data.ProfileServicing
+import app.pbbls.android.core.data.SupabaseServicing
+import app.pbbls.android.core.data.toDataError
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphStroke
-import app.pbbls.android.services.ProfileRow
-import app.pbbls.android.services.ProfileServicing
-import app.pbbls.android.services.SupabaseServicing
-import app.pbbls.android.services.toDataError
 import app.pbbls.android.ui.UiEffects
 import app.pbbls.android.ui.runCatchingCancellable
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -6,11 +6,11 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
+import app.pbbls.android.core.data.AchievementsServicing
+import app.pbbls.android.core.data.CollectionsServicing
+import app.pbbls.android.core.data.ReferenceDataServicing
 import app.pbbls.android.core.model.Collection
 import app.pbbls.android.core.model.CollectionMode
-import app.pbbls.android.services.AchievementsServicing
-import app.pbbls.android.services.CollectionsServicing
-import app.pbbls.android.services.ReferenceDataServicing
 import app.pbbls.android.ui.UiEffects
 import app.pbbls.android.ui.runCatchingCancellable
 import dagger.hilt.android.lifecycle.HiltViewModel

@@ -1,8 +1,8 @@
 package app.pbbls.android.testing
 
+import app.pbbls.android.core.data.GlyphServicing
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphStroke
-import app.pbbls.android.features.glyph.services.GlyphServicing
 import kotlinx.coroutines.CompletableDeferred
 
 /**

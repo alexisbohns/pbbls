@@ -1,9 +1,9 @@
 package app.pbbls.android.testing
 
+import app.pbbls.android.core.data.CollectionsServicing
 import app.pbbls.android.core.model.Collection
 import app.pbbls.android.core.model.CollectionMode
 import app.pbbls.android.core.model.Pebble
-import app.pbbls.android.services.CollectionsServicing
 import kotlinx.coroutines.CompletableDeferred
 
 /**

@@ -5,7 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import app.pbbls.android.R
-import app.pbbls.android.services.ProfileRow
+import app.pbbls.android.core.data.ProfileRow
 import app.pbbls.android.testing.FakeProfileService
 import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.MainDispatcherRule

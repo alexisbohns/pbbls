@@ -1,7 +1,7 @@
 package app.pbbls.android.di
 
-import app.pbbls.android.features.pebblemedia.SnapProcessor
-import app.pbbls.android.services.SnapURLCache
+import app.pbbls.android.core.data.SnapProcessor
+import app.pbbls.android.core.data.SnapURLCache
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

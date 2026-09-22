@@ -1,12 +1,12 @@
 package app.pbbls.android.di
 
 import android.content.Context
-import app.pbbls.android.services.ComposerSnapshotStore
-import app.pbbls.android.services.ComposerSnapshotStoring
-import app.pbbls.android.services.PebbleSnapRepository
-import app.pbbls.android.services.SnapURLCache
-import app.pbbls.android.services.SnapWriteRepositing
-import app.pbbls.android.services.SupabaseService
+import app.pbbls.android.core.data.ComposerSnapshotStore
+import app.pbbls.android.core.data.ComposerSnapshotStoring
+import app.pbbls.android.core.data.PebbleSnapRepository
+import app.pbbls.android.core.data.SnapURLCache
+import app.pbbls.android.core.data.SnapWriteRepositing
+import app.pbbls.android.core.data.SupabaseService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -27,11 +27,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
+import app.pbbls.android.core.data.AchievementRecord
 import app.pbbls.android.features.shared.achievements.achievementDescription
 import app.pbbls.android.features.shared.achievements.achievementFamilyIcon
 import app.pbbls.android.features.shared.achievements.achievementGroupName
 import app.pbbls.android.features.shared.achievements.achievementTitle
-import app.pbbls.android.services.AchievementRecord
 import app.pbbls.android.theme.PebblesIconToken
 import app.pbbls.android.theme.PebblesScreen
 import app.pbbls.android.theme.PebblesText

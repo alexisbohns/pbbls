@@ -1,5 +1,6 @@
 package app.pbbls.android.features.path.record
 
+import app.pbbls.android.core.data.TapHaptic
 import app.pbbls.android.core.model.ComposePebbleResponse
 import app.pbbls.android.core.model.KnownDraftIds
 import app.pbbls.android.core.model.PebbleDraft
@@ -7,7 +8,6 @@ import app.pbbls.android.core.model.PebbleDraftPayload
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.core.model.toDraft
-import app.pbbls.android.services.TapHaptic
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

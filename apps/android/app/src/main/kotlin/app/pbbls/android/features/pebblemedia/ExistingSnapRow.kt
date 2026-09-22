@@ -23,7 +23,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.services.LocalSnapURLCache
+import app.pbbls.android.core.data.LocalSnapURLCache
 import app.pbbls.android.theme.PebblesSuccess
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme

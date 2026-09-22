@@ -2,9 +2,9 @@ package app.pbbls.android.features.path
 
 import android.content.Context
 import android.net.Uri
+import app.pbbls.android.core.data.ProcessedImage
+import app.pbbls.android.core.data.SnapProcessor
 import app.pbbls.android.features.path.valence.ValencePrewarmer
-import app.pbbls.android.features.pebblemedia.ProcessedImage
-import app.pbbls.android.features.pebblemedia.SnapProcessor
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.OffsetDateTime
 import javax.inject.Inject

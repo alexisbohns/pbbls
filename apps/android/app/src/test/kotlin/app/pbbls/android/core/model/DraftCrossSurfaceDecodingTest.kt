@@ -1,6 +1,6 @@
 package app.pbbls.android.core.model
 
-import app.pbbls.android.services.PebbleDraftRecord
+import app.pbbls.android.core.data.PebbleDraftRecord
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals

@@ -1,8 +1,8 @@
 package app.pbbls.android.testing
 
+import app.pbbls.android.core.data.PebbleDraftRecord
+import app.pbbls.android.core.data.PebbleDraftsServicing
 import app.pbbls.android.core.model.PebbleDraftPayload
-import app.pbbls.android.services.PebbleDraftRecord
-import app.pbbls.android.services.PebbleDraftsServicing
 import java.util.UUID
 
 /** In-memory [PebbleDraftsServicing] (#849), backed by a mutable list. */

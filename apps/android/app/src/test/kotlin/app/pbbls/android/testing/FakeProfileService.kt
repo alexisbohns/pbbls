@@ -1,9 +1,9 @@
 package app.pbbls.android.testing
 
+import app.pbbls.android.core.data.ProfileRow
+import app.pbbls.android.core.data.ProfileServicing
 import app.pbbls.android.core.model.Collection
 import app.pbbls.android.core.model.GlyphStroke
-import app.pbbls.android.services.ProfileRow
-import app.pbbls.android.services.ProfileServicing
 import kotlinx.coroutines.CompletableDeferred
 import java.time.OffsetDateTime
 

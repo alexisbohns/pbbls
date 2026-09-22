@@ -3,8 +3,8 @@ package app.pbbls.android.features.path
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import app.pbbls.android.core.data.PebbleDetailServicing
 import app.pbbls.android.core.model.PebbleDetail
-import app.pbbls.android.services.PebbleDetailServicing
 import app.pbbls.android.ui.runCatchingCancellable
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job

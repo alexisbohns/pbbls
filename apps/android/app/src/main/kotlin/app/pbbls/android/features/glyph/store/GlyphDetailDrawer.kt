@@ -31,13 +31,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.data.GlyphMarketServicing
+import app.pbbls.android.core.data.glyphMarketErrorMessage
+import app.pbbls.android.core.data.toDataError
 import app.pbbls.android.core.model.BuyGlyphResult
 import app.pbbls.android.core.model.GlyphGridItem
-import app.pbbls.android.features.glyph.services.GlyphMarketServicing
-import app.pbbls.android.features.glyph.services.glyphMarketErrorMessage
 import app.pbbls.android.features.glyph.views.GlyphBanner
 import app.pbbls.android.features.glyph.views.GlyphBannerSubtitle
-import app.pbbls.android.services.toDataError
 import app.pbbls.android.theme.PebblesDestructive
 import app.pbbls.android.theme.PebblesText
 import app.pbbls.android.theme.PebblesTheme

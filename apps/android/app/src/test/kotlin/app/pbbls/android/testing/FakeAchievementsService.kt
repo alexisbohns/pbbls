@@ -1,8 +1,8 @@
 package app.pbbls.android.testing
 
-import app.pbbls.android.services.AchievementRecord
-import app.pbbls.android.services.AchievementUnlockRecord
-import app.pbbls.android.services.AchievementsServicing
+import app.pbbls.android.core.data.AchievementRecord
+import app.pbbls.android.core.data.AchievementUnlockRecord
+import app.pbbls.android.core.data.AchievementsServicing
 
 /**
  * In-memory [AchievementsServicing] (#849) — the achievements load path,

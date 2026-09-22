@@ -1,7 +1,7 @@
 package app.pbbls.android.testing
 
+import app.pbbls.android.core.data.ComposerSnapshotStoring
 import app.pbbls.android.core.model.PebbleDraftPayload
-import app.pbbls.android.services.ComposerSnapshotStoring
 
 /**
  * In-memory [ComposerSnapshotStoring] (#849) — the crash snapshot, without

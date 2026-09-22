@@ -1,7 +1,7 @@
 package app.pbbls.android.features.profile
 
 import app.pbbls.android.R
-import app.pbbls.android.services.DataError
+import app.pbbls.android.core.data.DataError
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull

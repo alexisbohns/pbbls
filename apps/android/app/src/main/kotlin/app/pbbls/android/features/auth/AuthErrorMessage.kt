@@ -2,8 +2,8 @@ package app.pbbls.android.features.auth
 
 import androidx.annotation.StringRes
 import app.pbbls.android.R
-import app.pbbls.android.services.DataError
-import app.pbbls.android.services.toDataError
+import app.pbbls.android.core.data.DataError
+import app.pbbls.android.core.data.toDataError
 import io.github.jan.supabase.auth.exception.AuthErrorCode
 import io.github.jan.supabase.auth.exception.AuthRestException
 
