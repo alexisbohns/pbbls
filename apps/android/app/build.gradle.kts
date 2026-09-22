@@ -265,6 +265,11 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.ktor.client.mock)
 
+    // Konsist parses the Kotlin sources and asserts the core/features boundary
+    // (#851). Test-only, and a JVM test like any other, so `testDebugUnitTest`
+    // in android.yml is already its CI gate.
+    testImplementation(libs.konsist)
+
     // Compose Preview Screenshot Testing renders the @PreviewTest composables in
     // src/screenshotTest/ to PNGs. ui-tooling supplies the @Preview runtime.
     screenshotTestImplementation(libs.screenshot.validation.api)
