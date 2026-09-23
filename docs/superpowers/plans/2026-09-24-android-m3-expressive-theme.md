@@ -477,7 +477,7 @@ git commit -m "feat(android): six m3-evo color schemes with an aa contrast test"
 **Files:**
 - Create: `$SRC/core/designsystem/Typography.kt`
 - Create: `$SRC/core/designsystem/Shapes.kt`
-- Create: `$SRC/core/designsystem/HandTypography.kt`
+- Create: `$SRC/core/designsystem/PebblesHandTypography.kt`
 - Modify: `$SRC/core/designsystem/PebblesTypography.kt`
 - Create: `$TEST/core/designsystem/MaterialTypographyTest.kt`
 
@@ -605,9 +605,9 @@ import androidx.compose.material3.Shapes
 val PebblesShapes: Shapes = Shapes()
 ```
 
-- [ ] **Step 5: Move the hand faces into `HandTypography.kt`**
+- [ ] **Step 5: Move the hand faces into `PebblesHandTypography.kt`**
 
-Create `HandTypography.kt` holding `ReenieBeanieFamily`, `CaveatFamily`, the `caveat()` / `reenieBeanie()` builders, and:
+Create `PebblesHandTypography.kt` holding `ReenieBeanieFamily`, `CaveatFamily`, the `caveat()` / `reenieBeanie()` builders, and:
 
 ```kotlin
 /**
@@ -1664,7 +1664,7 @@ Temporarily add `val x = Color(0xFF000000)` to any `features/` file, run `./grad
 ```
 
   - `values/colors.xml` bullet under "Launcher icon & splash": point at `ColorSchemes.kt` instead of `core/designsystem/Palettes.kt`, and mention `splash_icon_background`.
-  - Folder layout `core/designsystem/` line: replace "PebblesTheme, Palettes, Spacing, Typography, PebblesText" with "PebblesTheme, ColorSchemes, Typography, Shapes, Spacing, HandTypography".
+  - Folder layout `core/designsystem/` line: replace "PebblesTheme, Palettes, Spacing, Typography, PebblesText" with "PebblesTheme, ColorSchemes, Typography, Shapes, Spacing, PebblesHandTypography".
 - [ ] Commit `docs(android): the agent guide describes the m3 theme (#853)`.
 
 ### Task 7.5: Close out
