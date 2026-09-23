@@ -15,7 +15,7 @@
 | D5 | **All six schemes ship.** Android 14+ follows the system contrast level live; Android 13 uses standard. |
 | D6 | **Wallpaper (dynamic) colour is on by default**, with a "Use wallpaper colours" switch in Settings. |
 | D7 | **Shapes are M3 Expressive's defaults**; **Spacing moves to M3's 4 dp grid** (4/8/12/16/24/32). |
-| D8 | **Stay on material3 1.4.0** (BOM `2026.09.00`) and opt in to `ExperimentalMaterial3ExpressiveApi`; no 1.5 alpha. |
+| D8 | **Pin material3 `1.5.0-alpha27`** over the BOM's 1.4.0 and opt in to `ExperimentalMaterial3ExpressiveApi`. In 1.4.0 `MotionScheme.expressive()`, the `*Emphasized` type getters and `shapes.largeIncreased`/`extraLargeIncreased` are `internal`. alpha27 is the newest alpha whose Compose deps (`1.12.0-beta01`) sit under the BOM's stable 1.12.1, so material3 is the only alpha on the classpath; alpha28+ drag ui/foundation/runtime to `1.13.0-alpha01`. The bump is its own commit. Move to 1.5.0 stable when it ships. |
 | D9 | **Launcher icon unchanged** (store identity, generated from the iOS mark). Splash background and icon circle in `colors.xml` move to the new `surface` / `primary`. |
 
 Out of scope, owned by #854: replacing hand-rolled components with stock ones (`Button`, `TopAppBar`, `OutlinedTextField`, `LoadingIndicator`, …). This work changes tokens and the theme, not which components are drawn. #854's "align Spacing to 4/8/12/16/24/32" line is delivered here (Part 6).
