@@ -9,6 +9,12 @@ coreKtx = "1.19.0"
 activityCompose = "1.13.0"
 lifecycleRuntimeKtx = "2.11.0"
 composeBom = "2026.09.00"
+# Over the BOM's 1.4.0 (#853): 1.4.0 keeps MotionScheme.expressive(), the
+# *Emphasized type getters and the increased shape steps internal. alpha27 is
+# the newest alpha whose Compose deps (1.12.0-beta01) sit under the BOM's
+# stable 1.12.1 — alpha28+ drag ui/foundation/runtime to 1.13.0-alpha01.
+# Drop this line when 1.5.0 stable is in the BOM.
+material3 = "1.5.0-alpha27"
 junit = "4.13.2"
 coroutines = "1.11.0"
 # Google's official Compose Preview Screenshot Testing (renders @Preview to PNG
@@ -94,7 +100,7 @@ androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-compose-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
-androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 screenshot-validation-api = { group = "com.android.tools.screenshot", name = "screenshot-validation-api", version.ref = "screenshot" }
