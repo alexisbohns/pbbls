@@ -165,7 +165,7 @@ This is the first real setting, which is the trigger D5 named for DataStore. One
 
 ## Lockdown (Part 7)
 
-- Delete the bridge: `Palettes.kt`, `PebblesTheme.colors`, `PebblesTheme.type`, `PebblesTypography`, `PebblesText`, `res/font/nunito.ttf`, `res/font/ysabeau_semibold.ttf`. `DebugTokenPreviewScreen` is rewritten to show scheme roles.
+- Delete the bridge: `Palettes.kt`, `PebblesTheme.colors`, `PebblesTheme.type`, `PebblesTypography`, `PebblesText`. (`nunito.ttf` and `ysabeau_semibold.ttf` go in Part 1, the moment nothing references them: `lint` fails on `UnusedResources`.) `DebugTokenPreviewScreen` is rewritten to show scheme roles.
 - `ThemeLiteralsTest` (Konsist, JVM) fails on any of these in `features/**` and `core/ui/**`: `Color(0x`, `RoundedCornerShape(` with a numeric literal argument, `.copy(fontSize`.
 - Android `CLAUDE.md`: rewrite the "Theme" section, and the opening "two deliberate divergences" becomes three. The full guide rewrite stays with #858.
 
