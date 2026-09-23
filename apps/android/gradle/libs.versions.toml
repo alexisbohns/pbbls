@@ -14,6 +14,9 @@ composeBom = "2026.09.00"
 # the newest alpha whose Compose deps (1.12.0-beta01) sit under the BOM's
 # stable 1.12.1 — alpha28+ drag ui/foundation/runtime to 1.13.0-alpha01.
 # Drop this line when 1.5.0 stable is in the BOM.
+# Held on alpha27 on purpose (see above), so lint's "newer version" finding for
+# it is expected until the pin is dropped.
+#noinspection GradleDependency
 material3 = "1.5.0-alpha27"
 junit = "4.13.2"
 coroutines = "1.11.0"
