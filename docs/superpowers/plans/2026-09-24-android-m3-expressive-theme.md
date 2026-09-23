@@ -351,7 +351,7 @@ out += [
  '/**',
  ' * Ink for the Google sign-in capsule, which is a pinned white surface under',
  " * Google's branding rules and must not follow the theme (the old",
- ' * `SystemPalette.onLight`). 9.8:1 on white.',
+ ' * `SystemPalette.onLight`). 11.2:1 on white.',
  ' */',
  'internal val GoogleCapsuleInk = Color(0xFF4A3639)', '',
  '/** One of the six static schemes. Wallpaper schemes bypass this entirely. */',

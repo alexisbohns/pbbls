@@ -27,7 +27,7 @@ Out of scope, owned by #854: replacing hand-rolled components with stock ones (`
 | File | Role |
 |---|---|
 | `ColorSchemes.kt` | The six `ColorScheme`s transcribed from the export, plus the one pinned value (`GoogleCapsuleInk`, see below). The only file allowed `Color(0x…)`. |
-| `PebblesTypeface.kt` | `FontFamily`s: `InclusiveSans`, `Ysabeau` (variable, wght axis, with italics), `Caveat`, `ReenieBeanie`. Resources `res/font/inclusive_sans.ttf`, `inclusive_sans_italic.ttf`, `ysabeau.ttf`, `ysabeau_italic.ttf` from `google/fonts` `ofl/`. |
+| `PebblesTypeface.kt` | `FontFamily`s: `InclusiveSans`, `Ysabeau` (variable, wght axis, with italics). Resources `res/font/inclusive_sans.ttf`, `inclusive_sans_italic.ttf`, `ysabeau.ttf`, `ysabeau_italic.ttf` from `google/fonts` `ofl/`. Caveat and Reenie Beanie live in `PebblesHandTypography.kt` (see below), not here. |
 | `Typography.kt` | `PebblesMaterialTypography`: `Typography()` baseline with font families swapped per D4, including every `*Emphasized` style. Ysabeau styles keep `fontFeatureSettings = "pnum, lnum"`. |
 | `Shapes.kt` | `PebblesShapes = Shapes()` (Expressive defaults: `extraSmall 4`, `small 8`, `medium 12`, `large 16`, `largeIncreased 20`, `extraLarge 28`, `extraLargeIncreased 32`, `extraExtraLarge 48`). Exists so the choice is named in one place. |
 | `PebblesHandTypography.kt` | `PebblesHandTypography`: `bodyLeadHand`, `largeTitleHand`, `nameInputHand`, `valenceWord`, plus `inkOverhang`/`needsInkPadding`, moved verbatim from `PebblesTypography`. |
