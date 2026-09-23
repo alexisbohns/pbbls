@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.core.content.edit
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -42,7 +43,7 @@ class AppearancePreferences internal constructor(
 
     fun setUseWallpaperColors(value: Boolean) {
         useWallpaperColors = value
-        prefs.edit().putBoolean(KEY_USE_WALLPAPER_COLORS, value).apply()
+        prefs.edit { putBoolean(KEY_USE_WALLPAPER_COLORS, value) }
     }
 
     private companion object {

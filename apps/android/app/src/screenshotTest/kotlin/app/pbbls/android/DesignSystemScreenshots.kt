@@ -9,19 +9,25 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.pbbls.android.core.designsystem.ContrastLevel
 import app.pbbls.android.core.designsystem.PebblesIcon
 import app.pbbls.android.core.designsystem.PebblesIconToken
 import app.pbbls.android.core.designsystem.PebblesListSection
+import app.pbbls.android.core.designsystem.PebblesMaterialTypography
+import app.pbbls.android.core.designsystem.PebblesShapes
 import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
 import app.pbbls.android.core.designsystem.PebblesTypography
+import app.pbbls.android.core.designsystem.pebblesColorScheme
 import app.pbbls.android.core.designsystem.profileCard
 import com.android.tools.screenshot.PreviewTest
 
@@ -132,4 +138,35 @@ fun DesignSystemChromeLight() {
 @Composable
 fun DesignSystemChromeDark() {
     PebblesTheme { ChromeGallery() }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun HighContrast(
+    dark: Boolean,
+    content: @Composable () -> Unit,
+) {
+    // PebblesTheme supplies the Pebbles locals; the inner theme swaps only the scheme.
+    PebblesTheme {
+        MaterialExpressiveTheme(
+            colorScheme = pebblesColorScheme(dark, ContrastLevel.HIGH),
+            typography = PebblesMaterialTypography,
+            shapes = PebblesShapes,
+            content = content,
+        )
+    }
+}
+
+@PreviewTest
+@Preview(showBackground = true)
+@Composable
+fun ChromeGalleryHighContrastLight() {
+    HighContrast(dark = false) { ChromeGallery() }
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun ChromeGalleryHighContrastDark() {
+    HighContrast(dark = true) { ChromeGallery() }
 }

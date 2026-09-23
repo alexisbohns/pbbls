@@ -2,15 +2,21 @@
 <!--
   The only colours the platform reads before Compose is running: the launcher
   icon and the cold-start splash (#846). Everything else lives in
-  theme/Palettes.kt — do NOT grow this file into a second palette.
+  core/designsystem/ColorSchemes.kt — do NOT grow this file into a second
+  palette.
 
-  Values are copied from that palette by hand because XML cannot read Kotlin;
-  keep them in sync with `AccentPaletteShared` / `SystemPaletteLight`.
+  Values are copied from that scheme by hand because XML cannot read Kotlin;
+  keep them in sync with `LightScheme` / `DarkScheme`.
 -->
 <resources>
-    <!-- AccentPaletteShared.primary — the iOS app icon's own ground. -->
+    <!-- Launcher icon ground. Deliberately NOT the new scheme (#853 D9): the icon
+         is generated from the iOS mark and is the store identity. -->
     <color name="ic_launcher_background">#C07A7A</color>
-    <!-- SystemPaletteLight.background — matches the first Compose frame, so the
-         splash hands off without a colour flash. values-night overrides it. -->
-    <color name="splash_background">#FFFFFF</color>
+    <!-- LightScheme.primary — the splash icon circle. Same in both modes: the
+         cream mark needs a dark ground, and the dark scheme's primary is pale. -->
+    <color name="splash_icon_background">#8E4955</color>
+    <!-- LightScheme.surface — matches the first Compose frame under the brand
+         scheme. With wallpaper colours on the first frame differs; the splash
+         cannot know the wallpaper scheme before Compose runs. -->
+    <color name="splash_background">#FFF8F7</color>
 </resources>
