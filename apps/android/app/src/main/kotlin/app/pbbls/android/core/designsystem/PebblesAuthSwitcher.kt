@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -48,7 +49,7 @@ fun PebblesAuthSwitcher(
                     Modifier
                         .weight(1f)
                         .clip(trackShape)
-                        .background(if (selected) system.secondary else Color.Transparent)
+                        .background(if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
                         .clickable(role = Role.Tab) { onModeChange(entry) }
                         .padding(vertical = 10.dp),
                 contentAlignment = Alignment.Center,
@@ -56,7 +57,7 @@ fun PebblesAuthSwitcher(
                 Text(
                     text = stringResource(entry.labelRes),
                     style = PebblesTypography.callout,
-                    color = if (selected) Color.White else system.secondary,
+                    color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else system.secondary,
                 )
             }
         }
