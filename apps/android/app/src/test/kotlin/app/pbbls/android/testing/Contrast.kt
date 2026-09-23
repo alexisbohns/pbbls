@@ -6,7 +6,7 @@ import kotlin.math.min
 import kotlin.math.pow
 
 /** WCAG 2.x relative luminance. Test-only: the app ships no contrast utility. */
-fun luminance(color: Color): Double {
+private fun luminance(color: Color): Double {
     fun channel(v: Float): Double {
         val c = v.toDouble()
         return if (c <= 0.03928) c / 12.92 else ((c + 0.055) / 1.055).pow(2.4)

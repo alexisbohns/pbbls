@@ -27,27 +27,18 @@ class AppearancePreferences internal constructor(
         @ApplicationContext context: Context,
     ) : this(context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE))
 
-    /**
-     * Wallpaper (dynamic) colour. On by default (#853, maintainer decision).
-     *
-     * `@set:JvmName` sidesteps a JVM signature clash: the Kotlin compiler
-     * synthesises a bean setter named `setUseWallpaperColors` for this
-     * delegated property, which otherwise collides with the function below —
-     * same name, same erased signature. The rename is JVM-only; every Kotlin
-     * call site (including the property's own `private set` from this class)
-     * is unaffected.
-     */
-    @set:JvmName("setUseWallpaperColorsState")
-    var useWallpaperColors: Boolean by mutableStateOf(prefs.getBoolean(KEY_USE_WALLPAPER_COLORS, true))
-        private set
+    private var wallpaperColorsState by mutableStateOf(prefs.getBoolean(KEY_USE_WALLPAPER_COLORS, true))
+
+    /** Wallpaper (dynamic) colour. On by default (#853, maintainer decision). */
+    val useWallpaperColors: Boolean get() = wallpaperColorsState
 
     fun setUseWallpaperColors(value: Boolean) {
-        useWallpaperColors = value
+        wallpaperColorsState = value
         prefs.edit { putBoolean(KEY_USE_WALLPAPER_COLORS, value) }
     }
 
     private companion object {
-        /** Shared with OnboardingPreferences: one prefs file for the app. */
+        /** Shared with OnboardingPreferences and ComposerSnapshotStore: one prefs file for the app. */
         const val PREFS_NAME = "pebbles_prefs"
         const val KEY_USE_WALLPAPER_COLORS = "useWallpaperColors"
     }

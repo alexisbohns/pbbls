@@ -12,11 +12,14 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.ContrastLevel
+import app.pbbls.android.core.designsystem.LocalAccentPalette
+import app.pbbls.android.core.designsystem.LocalSystemPalette
 import app.pbbls.android.core.designsystem.PebblesIcon
 import app.pbbls.android.core.designsystem.PebblesIconToken
 import app.pbbls.android.core.designsystem.PebblesListSection
@@ -27,8 +30,10 @@ import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
 import app.pbbls.android.core.designsystem.PebblesTypography
+import app.pbbls.android.core.designsystem.accentPaletteFrom
 import app.pbbls.android.core.designsystem.pebblesColorScheme
 import app.pbbls.android.core.designsystem.profileCard
+import app.pbbls.android.core.designsystem.systemPaletteFrom
 import com.android.tools.screenshot.PreviewTest
 
 /**
@@ -146,14 +151,23 @@ private fun HighContrast(
     dark: Boolean,
     content: @Composable () -> Unit,
 ) {
-    // PebblesTheme supplies the Pebbles locals; the inner theme swaps only the scheme.
+    // Swaps the scheme to the high-contrast variant and re-derives the bridged
+    // palettes from it, so both MaterialTheme roles and the PebblesTheme.colors
+    // bridge see the same high-contrast scheme as stock M3 components.
     PebblesTheme {
-        MaterialExpressiveTheme(
-            colorScheme = pebblesColorScheme(dark, ContrastLevel.HIGH),
-            typography = PebblesMaterialTypography,
-            shapes = PebblesShapes,
-            content = content,
-        )
+        val scheme = pebblesColorScheme(dark, ContrastLevel.HIGH)
+        @Suppress("DEPRECATION")
+        CompositionLocalProvider(
+            LocalSystemPalette provides systemPaletteFrom(scheme),
+            LocalAccentPalette provides accentPaletteFrom(scheme),
+        ) {
+            MaterialExpressiveTheme(
+                colorScheme = scheme,
+                typography = PebblesMaterialTypography,
+                shapes = PebblesShapes,
+                content = content,
+            )
+        }
     }
 }
 

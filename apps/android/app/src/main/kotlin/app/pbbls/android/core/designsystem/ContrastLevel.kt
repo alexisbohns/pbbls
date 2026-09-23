@@ -47,6 +47,9 @@ internal fun rememberContrastLevel(): ContrastLevel {
     DisposableEffect(uiModeManager) {
         val listener = UiModeManager.ContrastChangeListener { contrast = it }
         uiModeManager.addContrastChangeListener(context.mainExecutor, listener)
+        // The system contrast may have changed between the initial read above and
+        // the listener registering; re-read now to close that gap.
+        contrast = uiModeManager.contrast
         onDispose { uiModeManager.removeContrastChangeListener(listener) }
     }
     return ContrastLevel.fromSystemContrast(contrast)

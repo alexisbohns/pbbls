@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 import app.pbbls.android.testing.AA_NON_TEXT
 import app.pbbls.android.testing.AA_TEXT
 import app.pbbls.android.testing.contrastRatio
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -85,9 +86,9 @@ class ColorSchemeContrastTest {
 
     @Test
     fun `contrast levels map from the system float`() {
-        assertTrue(ContrastLevel.fromSystemContrast(0f) == ContrastLevel.STANDARD)
-        assertTrue(ContrastLevel.fromSystemContrast(-1f) == ContrastLevel.STANDARD)
-        assertTrue(ContrastLevel.fromSystemContrast(0.5f) == ContrastLevel.MEDIUM)
-        assertTrue(ContrastLevel.fromSystemContrast(1f) == ContrastLevel.HIGH)
+        assertEquals(ContrastLevel.STANDARD, ContrastLevel.fromSystemContrast(0f))
+        assertEquals(ContrastLevel.STANDARD, ContrastLevel.fromSystemContrast(-1f))
+        assertEquals(ContrastLevel.MEDIUM, ContrastLevel.fromSystemContrast(0.5f))
+        assertEquals(ContrastLevel.HIGH, ContrastLevel.fromSystemContrast(1f))
     }
 }
