@@ -16,7 +16,8 @@ import app.pbbls.android.R
 // Number Spacing (type 6) → Proportional Numbers, Number Case (type 21) →
 // Upper Case Numbers/lining — same OpenType feature pair the iOS
 // `ysabeauSemibold` font descriptor sets so digits align to cap height.
-private const val YSABEAU_NUMBER_FEATURES = "pnum, lnum"
+// Declared in PebblesTypeface.kt (same package, #853) — shared with the new
+// Ysabeau family rather than redeclared here.
 
 @OptIn(ExperimentalTextApi::class)
 private val NunitoFamily =
