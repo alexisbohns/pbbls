@@ -1,7 +1,6 @@
 package app.pbbls.android.features.path.valence
 
 import android.content.Context
-import android.provider.Settings
 import android.util.Log
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -21,8 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
@@ -32,6 +29,7 @@ import androidx.compose.ui.unit.isFinite
 import androidx.compose.ui.zIndex
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.Spacing
+import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.ValenceSizeGroup
 import app.pbbls.android.core.ui.render.OutlineAssets
@@ -196,24 +194,6 @@ private fun valenceGroupNameRes(size: ValenceSizeGroup): Int =
         ValenceSizeGroup.MEDIUM -> R.string.valence_group_medium_name
         ValenceSizeGroup.LARGE -> R.string.valence_group_large_name
     }
-
-/**
- * Mirrors the private helper in `WelcomeScreen`, deliberately copied rather
- * than lifted: the original is inside a shipped screen and hoisting it is a
- * refactor of code this change has no other business in.
- */
-@Composable
-private fun rememberReduceMotion(): Boolean {
-    if (LocalInspectionMode.current) return true
-    val context = LocalContext.current
-    return remember {
-        Settings.Global.getFloat(
-            context.contentResolver,
-            Settings.Global.ANIMATOR_DURATION_SCALE,
-            1f,
-        ) == 0f
-    }
-}
 
 /**
  * Wobbles all nine silhouettes and artworks ahead of the fan needing them.

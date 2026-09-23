@@ -1,105 +1,106 @@
 package app.pbbls.android.core.designsystem
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialExpressiveTheme
+import androidx.compose.material3.MotionScheme
+import androidx.compose.material3.dynamicDarkColorScheme
+import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
+import androidx.compose.ui.platform.LocalContext
 
-val LocalSystemPalette = staticCompositionLocalOf { SystemPaletteLight }
-val LocalAccentPalette = staticCompositionLocalOf { AccentPaletteShared }
+@Suppress("DEPRECATION")
+val LocalSystemPalette = staticCompositionLocalOf { systemPaletteFrom(LightScheme) }
+
+@Suppress("DEPRECATION")
+val LocalAccentPalette = staticCompositionLocalOf { accentPaletteFrom(LightScheme) }
+
 val LocalSpacing = staticCompositionLocalOf { Spacing }
+
+@Suppress("DEPRECATION")
 val LocalPebblesTypography = staticCompositionLocalOf { PebblesTypography }
 
-/** Bundles the two palettes behind one `.colors.system.*` / `.colors.accent.*` accessor. */
+val LocalHandTypography = staticCompositionLocalOf { PebblesHandTypography }
+
+@Suppress("DEPRECATION")
+@Deprecated("Bridge for #853: use MaterialTheme.colorScheme roles")
 data class PebblesColors(
     val system: SystemPalette,
     val accent: AccentPalette,
 )
 
 /**
- * Token accessor — `PebblesTheme.colors.system.*`, `.colors.accent.*`,
- * `.spacing.*`, `.type.*`. Paired with the [PebblesTheme] composable below,
- * which resolves and provides the CompositionLocals (same dual object+function
- * pattern Compose's own `MaterialTheme` uses).
+ * Pebbles' own tokens beside Material's (#853). Colour, type and shape are
+ * `MaterialTheme.*`; this object keeps only what M3 has no slot for —
+ * [spacing] and the handwritten faces ([hand]). [colors] and [type] are the
+ * Part 1 bridge and go in Part 7.
  */
 object PebblesTheme {
+    @Suppress("DEPRECATION")
+    @Deprecated("Bridge for #853: use MaterialTheme.colorScheme roles")
     val colors: PebblesColors
         @Composable get() = PebblesColors(LocalSystemPalette.current, LocalAccentPalette.current)
 
     val spacing: Spacing
         @Composable get() = LocalSpacing.current
 
+    @Suppress("DEPRECATION")
+    @Deprecated("Bridge for #853: use MaterialTheme.typography roles")
     val type: PebblesTypography
         @Composable get() = LocalPebblesTypography.current
+
+    val hand: PebblesHandTypography
+        @Composable get() = LocalHandTypography.current
 }
 
 /**
- * Root theme wrapper. Resolves light/dark system palette from
- * `isSystemInDarkTheme()`, provides all four design-system CompositionLocals,
- * and wraps Material 3 as the rendering engine only — no dynamic color, no
- * Material color roles in app code (D6).
+ * Root theme (#853, supersedes D6). The M3-evo export in
+ * `MaterialExpressiveTheme`, with Expressive motion, the export's type on the
+ * M3 scale, and Expressive shapes.
  *
- * The Pebbles system palette is mapped onto Material's color roles so the
- * Material components the app can't avoid — `ModalBottomSheet`, `DropdownMenu`,
- * `AlertDialog`, the date/time pickers, `TextField` — render on the themed
- * surface instead of Material's default light scheme (the root of the dark-mode
- * "white sheet / unreadable label" bugs). Every surface/container tier maps to
- * `background` (flat, no tonal tint): light mode keeps its white surfaces, dark
- * mode goes dark, and elevation reads from the scrim + shadow — the app's flat
- * aesthetic. `onSurface`/`onSurfaceVariant` carry the readable foreground.
+ * Scheme precedence: wallpaper colour when [dynamicColor] (minSdk 33 always
+ * supports it; the OS applies its own contrast level to those), otherwise the
+ * export's scheme for the system contrast level. [dynamicColor] defaults to
+ * false so previews and screenshot references render the brand scheme; only
+ * `MainActivity` passes the user's setting.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun PebblesTheme(content: @Composable () -> Unit) {
+fun PebblesTheme(
+    dynamicColor: Boolean = false,
+    content: @Composable () -> Unit,
+) {
     val dark = isSystemInDarkTheme()
-    val systemPalette = if (dark) SystemPaletteDark else SystemPaletteLight
-    val accent = AccentPaletteShared
-    val colorScheme =
-        if (dark) {
-            darkColorScheme(
-                primary = accent.primary,
-                onPrimary = accent.light,
-                background = systemPalette.background,
-                onBackground = systemPalette.foreground,
-                surface = systemPalette.background,
-                onSurface = systemPalette.foreground,
-                surfaceVariant = systemPalette.muted,
-                onSurfaceVariant = systemPalette.secondary,
-                surfaceContainerLowest = systemPalette.background,
-                surfaceContainerLow = systemPalette.background,
-                surfaceContainer = systemPalette.background,
-                surfaceContainerHigh = systemPalette.background,
-                surfaceContainerHighest = systemPalette.background,
-                outline = systemPalette.secondary,
-                outlineVariant = systemPalette.muted,
-            )
-        } else {
-            lightColorScheme(
-                primary = accent.primary,
-                onPrimary = accent.light,
-                background = systemPalette.background,
-                onBackground = systemPalette.foreground,
-                surface = systemPalette.background,
-                onSurface = systemPalette.foreground,
-                surfaceVariant = systemPalette.muted,
-                onSurfaceVariant = systemPalette.secondary,
-                surfaceContainerLowest = systemPalette.background,
-                surfaceContainerLow = systemPalette.background,
-                surfaceContainer = systemPalette.background,
-                surfaceContainerHigh = systemPalette.background,
-                surfaceContainerHighest = systemPalette.background,
-                outline = systemPalette.secondary,
-                outlineVariant = systemPalette.muted,
-            )
+    val contrast = rememberContrastLevel()
+    val context = LocalContext.current
+    val scheme =
+        when {
+            dynamicColor -> if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            else -> pebblesColorScheme(dark, contrast)
         }
+
+    @Suppress("DEPRECATION")
+    val system = remember(scheme) { systemPaletteFrom(scheme) }
+
+    @Suppress("DEPRECATION")
+    val accent = remember(scheme) { accentPaletteFrom(scheme) }
+    @Suppress("DEPRECATION")
     CompositionLocalProvider(
-        LocalSystemPalette provides systemPalette,
+        LocalSystemPalette provides system,
         LocalAccentPalette provides accent,
         LocalSpacing provides Spacing,
         LocalPebblesTypography provides PebblesTypography,
+        LocalHandTypography provides PebblesHandTypography,
     ) {
-        MaterialTheme(colorScheme = colorScheme, content = content)
+        MaterialExpressiveTheme(
+            colorScheme = scheme,
+            motionScheme = MotionScheme.expressive(),
+            typography = PebblesMaterialTypography,
+            shapes = PebblesShapes,
+            content = content,
+        )
     }
 }
