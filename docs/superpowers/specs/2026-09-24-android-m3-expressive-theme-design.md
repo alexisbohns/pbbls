@@ -197,5 +197,5 @@ Arkaik: at the start of Part 1, move the affected acceptances/views to `developm
 
 ## Follow-ups
 
-- iOS issue: decide whether iOS adopts the M3-evo palette and amber error, or keeps the current palette and records the divergence (filed alongside this spec).
+- iOS issue: decide whether iOS adopts the M3-evo palette and amber error, or keeps the current palette and records the divergence (#921).
 - #858: supersede D5 (DataStore) now that the trigger has fired.
