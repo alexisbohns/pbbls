@@ -111,7 +111,7 @@ Part 1 flips the whole app's look in one step without touching call sites: `Pebb
 
 The two `tonalElevation = 3.dp` surfaces (`KarmaEarnedCapsule`, `AchievementMomentOverlay`) take an explicit `color = surfaceContainerHigh` and `tonalElevation = 0.dp`: lift comes from the ladder, not a `surfaceTint` wash.
 
-Literal colours outside `ColorSchemes.kt`: `ValenceStoneStyle.joySurface` → `tertiaryContainer`; `RiveLogo` placeholder → `surfaceContainerHighest` fill + `outlineVariant` border. `EmotionPalette.kt:106` is hex-parsing bit arithmetic on data, not a design literal, and stays.
+Literal colours outside `ColorSchemes.kt`: `ValenceStoneStyle.joySurface` is Joy's emotion colour (data, not a theme role) and stays, parsed from a hex beside the mesh samples; `RiveLogo` placeholder → `surfaceContainerHighest` fill + `outlineVariant` border. `EmotionPalette.kt:106` is hex-parsing bit arithmetic on data, not a design literal, and stays.
 
 ### Type
 
