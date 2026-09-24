@@ -10,8 +10,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,11 +34,9 @@ import app.pbbls.android.core.designsystem.ConfirmDeleteDialog
 import app.pbbls.android.core.designsystem.DeleteErrorDialog
 import app.pbbls.android.core.designsystem.PebblesListSection
 import app.pbbls.android.core.designsystem.PebblesScreen
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.designsystem.ProfileEmptyState
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.ui.GlyphView
@@ -63,7 +64,7 @@ fun SoulDetailScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val covers by viewModel.covers.collectAsStateWithLifecycle()
     val palettes = LocalEmotionPaletteService.current
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
 
     // Guarded on the id, so a rotation re-runs this without re-fetching.
     LaunchedEffect(soulId) { viewModel.start(soulId) }
@@ -85,7 +86,7 @@ fun SoulDetailScreen(
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
                             contentDescription = stringResource(R.string.profile_back_a11y),
-                            tint = system.secondary,
+                            tint = colors.onSurfaceVariant,
                             modifier = Modifier.size(24.dp),
                         )
                     }
@@ -105,7 +106,7 @@ fun SoulDetailScreen(
         when (val state = uiState) {
             SoulDetailUiState.Loading ->
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
+                    CircularProgressIndicator(color = colors.primary)
                 }
 
             is SoulDetailUiState.Error ->
@@ -114,16 +115,16 @@ fun SoulDetailScreen(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    PebblesText(
+                    Text(
                         text = stringResource(state.messageRes),
-                        style = PebblesTypography.body,
-                        color = system.secondary,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.onSurfaceVariant,
                     )
                     TextButton(onClick = viewModel::retry) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.profile_retry),
-                            style = PebblesTypography.buttonLabel,
-                            color = PebblesTheme.colors.accent.primary,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = colors.primary,
                         )
                     }
                 }
@@ -185,12 +186,13 @@ fun SoulDetailScreen(
 }
 
 /** Compact identity header — 56dp glyph + hand-face name + live pebble count. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun SoulHeader(
     soul: SoulWithGlyph,
     pebbleCount: Int,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     Row(
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -203,17 +205,17 @@ private fun SoulHeader(
             side = 56.dp,
         )
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            PebblesText(
+            Text(
                 text = soul.name,
-                style = PebblesTypography.bodyLeadHand,
-                color = system.foreground,
+                style = PebblesTheme.hand.bodyLeadHand,
+                color = colors.onSurface,
             )
-            // iOS uses the system caption face; the token set's closest match
-            // is captionEmphasized (also the shared PebbleRow date treatment).
-            PebblesText(
+            // iOS uses the system caption face; the closest role is
+            // labelMediumEmphasized (also the shared PebbleRow date treatment).
+            Text(
                 text = pluralStringResource(R.plurals.pebbles_count, pebbleCount, pebbleCount),
-                style = PebblesTypography.captionEmphasized,
-                color = system.secondary,
+                style = MaterialTheme.typography.labelMediumEmphasized,
+                color = colors.onSurfaceVariant,
             )
         }
     }

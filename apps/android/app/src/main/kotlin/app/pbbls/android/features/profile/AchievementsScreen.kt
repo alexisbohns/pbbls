@@ -15,6 +15,8 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -30,10 +32,8 @@ import app.pbbls.android.R
 import app.pbbls.android.core.data.AchievementRecord
 import app.pbbls.android.core.designsystem.PebblesIconToken
 import app.pbbls.android.core.designsystem.PebblesScreen
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.designsystem.profileCard
 import app.pbbls.android.core.ui.achievementDescription
 import app.pbbls.android.core.ui.achievementFamilyIcon
@@ -87,7 +87,7 @@ fun AchievementsScreen(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
 
     PebblesScreen(
         modifier = modifier,
@@ -99,7 +99,7 @@ fun AchievementsScreen(
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
                             contentDescription = stringResource(R.string.profile_back_a11y),
-                            tint = system.secondary,
+                            tint = colors.onSurfaceVariant,
                             modifier = Modifier.size(24.dp),
                         )
                     }
@@ -117,7 +117,7 @@ fun AchievementsScreen(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
+                    CircularProgressIndicator(color = colors.primary)
                 }
 
             is AchievementsUiState.Error ->
@@ -126,16 +126,16 @@ fun AchievementsScreen(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    PebblesText(
+                    Text(
                         text = stringResource(uiState.messageRes),
-                        style = PebblesTypography.body,
-                        color = system.secondary,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.onSurfaceVariant,
                     )
                     TextButton(onClick = onRetry) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.profile_retry),
-                            style = PebblesTypography.buttonLabel,
-                            color = PebblesTheme.colors.accent.primary,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = colors.primary,
                         )
                     }
                 }
@@ -168,10 +168,10 @@ fun AchievementsContent(
     ) {
         groups.forEach { group ->
             item(key = "header-${group.family}", span = { GridItemSpan(maxLineSpan) }) {
-                PebblesText(
+                Text(
                     text = achievementGroupName(group.family),
-                    style = PebblesTypography.headline,
-                    color = PebblesTheme.colors.system.foreground,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
             }
             items(group.records, key = { it.id }) { record ->
@@ -190,8 +190,7 @@ private fun AchievementBadgeCell(
     record: AchievementRecord,
     unlockedAt: OffsetDateTime?,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     val isUnlocked = unlockedAt != null
 
     Column(
@@ -206,7 +205,9 @@ private fun AchievementBadgeCell(
             Icon(
                 painter = painterResource(achievementFamilyIcon(record.family)),
                 contentDescription = null,
-                tint = if (isUnlocked) accent.primary else system.muted,
+                // Locked: a faint family mark. The lock and the caption below
+                // carry the state legibly, so the mark itself needn't clear 3:1.
+                tint = if (isUnlocked) colors.primary else colors.outlineVariant,
                 modifier = Modifier.size(PebblesIconToken.LARGE.size),
             )
             Spacer(Modifier.weight(1f))
@@ -214,38 +215,38 @@ private fun AchievementBadgeCell(
                 Icon(
                     painter = painterResource(R.drawable.ic_lock),
                     contentDescription = null,
-                    tint = system.muted,
+                    tint = colors.onSurfaceVariant,
                     modifier = Modifier.size(PebblesIconToken.MEDIUM.size),
                 )
             }
         }
-        PebblesText(
+        Text(
             text = achievementTitle(record),
-            style = PebblesTypography.headline,
-            color = if (isUnlocked) system.foreground else system.secondary,
+            style = MaterialTheme.typography.titleMedium,
+            color = if (isUnlocked) colors.onSurface else colors.onSurfaceVariant,
         )
         achievementDescription(record)?.let { description ->
-            PebblesText(
+            Text(
                 text = description,
-                style = PebblesTypography.subhead,
-                color = system.secondary,
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.onSurfaceVariant,
             )
         }
         if (unlockedAt != null) {
-            PebblesText(
+            Text(
                 text =
                     stringResource(
                         R.string.achievement_unlocked_on,
                         unlockedAt.toLocalDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)),
                     ),
-                style = PebblesTypography.subhead,
-                color = accent.primary,
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.primary,
             )
         } else {
-            PebblesText(
+            Text(
                 text = stringResource(R.string.achievement_locked),
-                style = PebblesTypography.subhead,
-                color = system.muted,
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.onSurfaceVariant,
             )
         }
     }

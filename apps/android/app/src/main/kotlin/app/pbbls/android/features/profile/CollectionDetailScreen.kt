@@ -12,8 +12,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,11 +36,9 @@ import app.pbbls.android.core.designsystem.ConfirmDeleteDialog
 import app.pbbls.android.core.designsystem.DeleteErrorDialog
 import app.pbbls.android.core.designsystem.PebblesListSection
 import app.pbbls.android.core.designsystem.PebblesScreen
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.designsystem.ProfileEmptyState
 import app.pbbls.android.core.ui.PebbleRow
 import app.pbbls.android.features.path.EditPebbleScreen
@@ -57,6 +58,7 @@ import java.util.Locale
  * locale-dependent header formatting stays here, because only the view knows
  * the active locale.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CollectionDetailScreen(
     collectionId: String,
@@ -68,7 +70,7 @@ fun CollectionDetailScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val covers by viewModel.covers.collectAsStateWithLifecycle()
     val palettes = LocalEmotionPaletteService.current
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
 
     // Guarded on the id, so a rotation re-runs this without re-fetching.
     LaunchedEffect(collectionId) { viewModel.start(collectionId) }
@@ -93,7 +95,7 @@ fun CollectionDetailScreen(
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
                             contentDescription = stringResource(R.string.profile_back_a11y),
-                            tint = system.secondary,
+                            tint = colors.onSurfaceVariant,
                             modifier = Modifier.size(24.dp),
                         )
                     }
@@ -113,7 +115,7 @@ fun CollectionDetailScreen(
         when (val state = uiState) {
             CollectionDetailUiState.Loading ->
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
+                    CircularProgressIndicator(color = colors.primary)
                 }
 
             is CollectionDetailUiState.Error ->
@@ -122,16 +124,16 @@ fun CollectionDetailScreen(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    PebblesText(
+                    Text(
                         text = stringResource(state.messageRes),
-                        style = PebblesTypography.body,
-                        color = system.secondary,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.onSurfaceVariant,
                     )
                     TextButton(onClick = viewModel::retry) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.profile_retry),
-                            style = PebblesTypography.buttonLabel,
-                            color = PebblesTheme.colors.accent.primary,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = colors.primary,
                         )
                     }
                 }
@@ -162,10 +164,10 @@ fun CollectionDetailScreen(
                                         ) {
                                             CollectionModeBadge(mode = state.collection.mode)
                                             Spacer(Modifier.weight(1f))
-                                            PebblesText(
+                                            Text(
                                                 text = pebbleCountLabel(state.pebbles.size),
-                                                style = PebblesTypography.captionEmphasized,
-                                                color = system.secondary,
+                                                style = MaterialTheme.typography.labelMediumEmphasized,
+                                                color = colors.onSurfaceVariant,
                                             )
                                         }
                                     },
