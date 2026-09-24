@@ -282,10 +282,13 @@ internal fun CarveCanvas(
                     }
                 },
     ) {
+        // The canvas is paper-white in both themes, so the ink is a Fixed role:
+        // dark mode's primary is a pale pink that all but vanishes on white.
+        val ink = colors.onPrimaryFixedVariant
         GlyphImage(
             strokes = strokes,
             viewBox = "0 0 200 200",
-            strokeColor = colors.primary,
+            strokeColor = ink,
             modifier = Modifier.fillMaxSize(),
         )
         Canvas(modifier = Modifier.fillMaxSize()) {
@@ -298,7 +301,7 @@ internal fun CarveCanvas(
                     }
                 drawPath(
                     path = path,
-                    color = colors.primary,
+                    color = ink,
                     style =
                         Stroke(
                             width = px(STORED_WIDTH * (CANVAS_SIDE / VIEW_BOX_SIDE)),
