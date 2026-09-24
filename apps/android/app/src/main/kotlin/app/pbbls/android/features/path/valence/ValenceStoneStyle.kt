@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.SolidColor
+import androidx.core.graphics.toColorInt
 import app.pbbls.android.core.model.ValencePolarity
 
 /**
@@ -41,6 +42,15 @@ internal data class ValenceStoneStyle(
  * Path — a `light` stroke over an opaque `primary` fill.
  */
 internal object ValenceStoneStyles {
+    /**
+     * Joy's `surface_color` at 10%, copied for the same reason as the gradient
+     * samples: `EmotionPaletteService` needs the network and is not loaded when
+     * this view first draws. Emotion data, so it is parsed from its hex like
+     * the mesh rather than written as a theme literal.
+     */
+    private val joySurface =
+        Color(ValenceMesh.JOY_SURFACE_HEX.toColorInt()).copy(alpha = 0.10f)
+
     private val wash = MeshShaderBrush(ValenceMesh.washHexes)
     private val selectedWash = MeshShaderBrush(ValenceMesh.selectedWashHexes)
     private val ink = MeshShaderBrush(ValenceMesh.inkHexes)
@@ -88,7 +98,7 @@ internal object ValenceStoneStyles {
                 }
 
                 ValencePolarity.HIGHLIGHT -> {
-                    ValenceStoneStyle(restingWash(isDark, scheme), ink, restingWashAlpha(isDark))
+                    ValenceStoneStyle(restingWash(isDark), ink, restingWashAlpha(isDark))
                 }
             }
         }
@@ -117,14 +127,11 @@ internal object ValenceStoneStyles {
      * gradient over black goes muddy and opaque, and the highlight stone ends
      * up looking nothing like its neighbours, which wear flat container
      * colours (neutral's `primaryContainer`). So dark mode joins that
-     * convention rather than fighting it, in `tertiaryContainer` — the
-     * scheme's third accent, which keeps highlight distinct from neutral's
-     * `primaryContainer`.
+     * convention rather than fighting it, in Joy's own warm gold, which keeps
+     * highlight distinct from neutral's rose. That gold is emotion data (like
+     * the mesh samples), not a theme role: no scheme role means "joy".
      */
-    private fun restingWash(
-        isDark: Boolean,
-        scheme: ColorScheme,
-    ): Brush = if (isDark) SolidColor(scheme.tertiaryContainer) else wash
+    private fun restingWash(isDark: Boolean): Brush = if (isDark) SolidColor(joySurface) else wash
 
     private fun restingWashAlpha(isDark: Boolean): Float = if (isDark) 1f else 0.35f
 }
