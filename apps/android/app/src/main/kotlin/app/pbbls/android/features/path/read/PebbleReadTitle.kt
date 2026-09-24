@@ -3,6 +3,8 @@ package app.pbbls.android.features.path.read
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -10,22 +12,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.features.path.PebbleReadDateFormat
 import java.time.OffsetDateTime
 import java.time.ZoneId
 
 /**
- * Detail title block — ports iOS `PebbleReadTitle.swift`: centered Ysabeau
- * SemiBold 24 name over a localized date/time meta line. [buttonLabel] is the
- * Ysabeau token; only the 24sp size differs from its 17sp default. The `meta`
- * token uppercases the date at draw time (iOS `.textCase(.uppercase)`).
+ * Detail title block — ports iOS `PebbleReadTitle.swift`: a centered name in
+ * `headlineSmall` (Ysabeau, 24 sp) over a localized date/time line in
+ * `labelSmall`, sentence case (#853 dropped the iOS uppercase transform).
  *
  * [nameColor] / [dateColor] override the default chrome colors — the read page
- * tints them to the emotion palette (#605). Null keeps the system chrome.
+ * tints them to the emotion palette (#605). Null keeps `onSurface` /
+ * `onSurfaceVariant`.
  */
 @Composable
 fun PebbleReadTitle(
@@ -35,24 +33,24 @@ fun PebbleReadTitle(
     nameColor: Color? = null,
     dateColor: Color? = null,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     val locale = LocalConfiguration.current.locales[0]
     Column(
         modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        PebblesText(
+        Text(
             name,
-            style = PebblesTypography.buttonLabel.copy(fontSize = 24.sp),
-            color = nameColor ?: system.foreground,
+            style = MaterialTheme.typography.headlineSmall,
+            color = nameColor ?: colors.onSurface,
             textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth(),
         )
-        PebblesText(
+        Text(
             PebbleReadDateFormat.format(happenedAt, ZoneId.systemDefault(), locale),
-            style = PebblesTypography.meta,
-            color = dateColor ?: system.secondary,
+            style = MaterialTheme.typography.labelSmall,
+            color = dateColor ?: colors.onSurfaceVariant,
         )
     }
 }
