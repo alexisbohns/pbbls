@@ -410,7 +410,7 @@ bundled. Android resource filenames must be lowercase
   ktlintFormat` auto-fixes. No detekt yet.
 - **Android Lint is a gate, not a report (#845).** `abortOnError`,
   `warningsAsErrors`, `checkDependencies`, and a committed baseline
-  (`app/lint-baseline.xml`, 60 accepted findings) — `./gradlew lint` is green on
+  (`app/lint-baseline.xml`, 56 accepted findings) — `./gradlew lint` is green on
   main and `android.yml` runs it on every PR. A *new* finding fails the PR.
   Regenerate the baseline with `./gradlew updateLintBaseline` only when a finding
   is deliberately accepted; never to silence one you introduced. The one check
