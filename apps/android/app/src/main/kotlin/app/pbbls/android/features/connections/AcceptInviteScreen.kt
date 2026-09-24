@@ -10,6 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,11 +28,8 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.ui.GlyphView
 import app.pbbls.android.core.ui.GlyphViewCase
 
@@ -71,6 +71,7 @@ fun AcceptInviteScreen(
 }
 
 /** Stateless accept surface — what screenshot previews drive. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AcceptInviteContent(
     uiState: AcceptInviteUiState,
@@ -79,25 +80,24 @@ fun AcceptInviteContent(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
 
     Column(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(system.background)
+                .background(colors.surface)
                 .safeDrawingPadding(),
     ) {
         PebblesTopBar(
             title = stringResource(R.string.connections_accept_title),
-            titleStyle = PebblesTypography.headlineEmphasized,
-            titleColor = system.foreground,
+            titleStyle = MaterialTheme.typography.titleMediumEmphasized,
+            titleColor = colors.onSurface,
             leading = {
                 PebblesTopBarTextButton(
                     text = stringResource(R.string.action_close),
                     onClick = onDismiss,
-                    color = accent.primary,
+                    color = colors.primary,
                 )
             },
         )
@@ -114,7 +114,7 @@ fun AcceptInviteContent(
                 // Exhaustive with no `else`: a new AcceptInviteUiState case must
                 // be rendered.
                 when (uiState) {
-                    AcceptInviteUiState.Loading -> CircularProgressIndicator(color = accent.primary)
+                    AcceptInviteUiState.Loading -> CircularProgressIndicator(color = colors.primary)
 
                     is AcceptInviteUiState.Error -> PreviewFailed(uiState.messageRes, onRetry)
 
@@ -145,19 +145,18 @@ private fun ColumnScope.PreviewFailed(
     messageRes: Int,
     onRetry: () -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
-    PebblesText(
+    val colors = MaterialTheme.colorScheme
+    Text(
         text = stringResource(messageRes),
-        style = PebblesTypography.body,
-        color = system.secondary,
+        style = MaterialTheme.typography.bodyLarge,
+        color = colors.onSurfaceVariant,
         textAlign = TextAlign.Center,
     )
     TextButton(onClick = onRetry) {
-        PebblesText(
+        Text(
             text = stringResource(R.string.action_retry),
-            style = PebblesTypography.buttonLabel,
-            color = accent.primary,
+            style = MaterialTheme.typography.labelLarge,
+            color = colors.primary,
         )
     }
 }
@@ -168,8 +167,7 @@ private fun ColumnScope.AcceptedPeer(
     state: AcceptInviteUiState.Accepted,
     onDismiss: () -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     val accepted = state.result
 
     accepted.peer.glyph?.let { glyph ->
@@ -181,22 +179,22 @@ private fun ColumnScope.AcceptedPeer(
         )
     }
     val name = accepted.peer.displayName ?: stringResource(R.string.connections_unnamed_peer)
-    PebblesText(
+    Text(
         text =
             if (accepted.alreadyConnected) {
                 stringResource(R.string.connections_accept_already, name)
             } else {
                 stringResource(R.string.connections_accept_done, name)
             },
-        style = PebblesTypography.cardHeading,
-        color = system.foreground,
+        style = MaterialTheme.typography.titleSmall,
+        color = colors.onSurface,
         textAlign = TextAlign.Center,
     )
     TextButton(onClick = onDismiss) {
-        PebblesText(
+        Text(
             text = stringResource(R.string.action_done),
-            style = PebblesTypography.buttonLabel,
-            color = accent.primary,
+            style = MaterialTheme.typography.labelLarge,
+            color = colors.primary,
         )
     }
 }
@@ -207,8 +205,7 @@ private fun ColumnScope.ConsentPrompt(
     state: AcceptInviteUiState.Ready,
     onAccept: () -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     val inviter = state.preview.inviter
 
     inviter?.glyph?.let { glyph ->
@@ -219,37 +216,37 @@ private fun ColumnScope.ConsentPrompt(
             side = 72.dp,
         )
     }
-    PebblesText(
+    Text(
         text =
             stringResource(
                 R.string.connections_accept_prompt,
                 inviter?.displayName ?: stringResource(R.string.connections_unnamed_peer),
             ),
-        style = PebblesTypography.cardHeading,
-        color = system.foreground,
+        style = MaterialTheme.typography.titleSmall,
+        color = colors.onSurface,
         textAlign = TextAlign.Center,
     )
-    PebblesText(
+    Text(
         text = stringResource(R.string.connections_accept_explainer),
-        style = PebblesTypography.meta,
-        color = system.secondary,
+        style = MaterialTheme.typography.labelSmall,
+        color = colors.onSurfaceVariant,
         textAlign = TextAlign.Center,
     )
     // A failed accept leaves the prompt up: the token may well still be good,
     // so the tap is worth offering again.
     state.acceptErrorRes?.let { res ->
-        PebblesText(
+        Text(
             text = stringResource(res),
-            style = PebblesTypography.meta,
-            color = system.secondary,
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
     }
     TextButton(onClick = onAccept, enabled = !state.isAccepting) {
-        PebblesText(
+        Text(
             text = stringResource(R.string.connections_accept_action),
-            style = PebblesTypography.buttonLabel,
-            color = accent.primary,
+            style = MaterialTheme.typography.labelLarge,
+            color = colors.primary,
         )
     }
 }
@@ -260,25 +257,24 @@ private fun ColumnScope.ConsentPrompt(
  */
 @Composable
 private fun ColumnScope.UnusableInvite(onDismiss: () -> Unit) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
-    PebblesText(
+    val colors = MaterialTheme.colorScheme
+    Text(
         text = stringResource(R.string.connections_accept_unusable),
-        style = PebblesTypography.cardHeading,
-        color = system.foreground,
+        style = MaterialTheme.typography.titleSmall,
+        color = colors.onSurface,
         textAlign = TextAlign.Center,
     )
-    PebblesText(
+    Text(
         text = stringResource(R.string.connections_accept_unusable_hint),
-        style = PebblesTypography.meta,
-        color = system.secondary,
+        style = MaterialTheme.typography.labelSmall,
+        color = colors.onSurfaceVariant,
         textAlign = TextAlign.Center,
     )
     TextButton(onClick = onDismiss) {
-        PebblesText(
+        Text(
             text = stringResource(R.string.action_close),
-            style = PebblesTypography.buttonLabel,
-            color = accent.primary,
+            style = MaterialTheme.typography.labelLarge,
+            color = colors.primary,
         )
     }
 }
