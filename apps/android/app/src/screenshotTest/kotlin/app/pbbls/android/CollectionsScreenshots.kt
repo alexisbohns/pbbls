@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -26,11 +27,10 @@ import com.android.tools.screenshot.PreviewTest
  */
 @Composable
 private fun CollectionsGallery() {
-    val system = PebblesTheme.colors.system
     Column(
         modifier =
             Modifier
-                .background(system.background)
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(24.dp)
                 .width(360.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),

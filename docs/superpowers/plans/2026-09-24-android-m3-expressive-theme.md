@@ -333,7 +333,9 @@ out = ['package app.pbbls.android.core.designsystem', '',
        'import androidx.compose.material3.ColorScheme',
        'import androidx.compose.material3.darkColorScheme',
        'import androidx.compose.material3.lightColorScheme',
-       'import androidx.compose.ui.graphics.Color', '',
+       'import androidx.compose.ui.graphics.Color',
+       'import androidx.compose.ui.graphics.toArgb',
+       'import java.util.Locale', '',
        '// GENERATED from the M3-evo Material Theme Builder export (seed #CE7E8A,',
        f"// {d['description'].splitlines()[-1]}) for #853. Regenerate with the script in",
        '// docs/superpowers/plans/2026-09-24-android-m3-expressive-theme.md (Task 1.3);',
@@ -350,8 +352,8 @@ for name, key, fn in schemes:
 out += [
  '/**',
  ' * Ink for the Google sign-in capsule, which is a pinned white surface under',
- " * Google's branding rules and must not follow the theme (the old",
- ' * `SystemPalette.onLight`). 11.2:1 on white.',
+ " * Google's branding rules and must not follow the theme (the old iOS",
+ ' * `onLight` token). 11.2:1 on white.',
  ' */',
  'internal val GoogleCapsuleInk = Color(0xFF4A3639)', '',
  '/** One of the six static schemes. Wallpaper schemes bypass this entirely. */',
@@ -363,7 +365,11 @@ out += [
  '        ContrastLevel.STANDARD -> if (dark) DarkScheme else LightScheme',
  '        ContrastLevel.MEDIUM -> if (dark) DarkMediumContrastScheme else LightMediumContrastScheme',
  '        ContrastLevel.HIGH -> if (dark) DarkHighContrastScheme else LightHighContrastScheme',
- '    }', '']
+ '    }', '',
+ '// Hand-written, not from the export: the generator script emits this block',
+ '// verbatim so a regeneration keeps it. Keep the two in step.', '',
+ '/** `#RRGGBB`, alpha dropped — the SVG pipeline misparses 8-digit hex. */',
+ 'internal fun Color.toRgbHex(): String = String.format(Locale.ROOT, "#%06X", toArgb() and 0xFFFFFF)', '']
 dst = 'app/src/main/kotlin/app/pbbls/android/core/designsystem/ColorSchemes.kt'
 open(dst, 'w').write('\n'.join(out))
 print(dst, sum(1 for l in out if 'Color(0xFF' in l), 'literals')
@@ -1674,3 +1680,15 @@ Temporarily add `val x = Color(0xFF000000)` to any `features/` file, run `./grad
 - [ ] Tick #853's acceptance criteria in the PR body with where each is proven: screenshot matrix (Parts 1–6 re-baselines), `ThemeLiteralsTest`, `ColorSchemeContrastTest`, `MaterialExpressiveTheme` root + `rememberReduceMotion` call sites, decision-log entry.
 - [ ] Arkaik: the App moves statuses from the PRs; do not claim `live`.
 - [ ] Append "Lessons learned" to this plan.
+
+---
+
+## Lessons learned (2026-09-24, after the stack #922–#929 opened)
+
+- **Check the pinned library's visibility before writing the spec.** Material3 1.4.0 ships `MaterialExpressiveTheme` public but keeps `MotionScheme.expressive()`, the `*Emphasized` getters and the increased shape steps `internal`; the plan was written against 1.4.0 and had to move to `1.5.0-alpha27`. `javap` on the AAR's `classes.jar` answers "is this public?" in seconds. The newest alpha is not automatically the right one: alpha28+ dragged Compose ui/foundation/runtime to a `1.13.0-alpha01`, alpha27 stayed under the BOM's stable line.
+- **A bridge that re-points old token names onto scheme roles flips the whole app in one reviewable step**, and it makes every later part a pure rename that still compiles on its own. It cannot fix code that bypassed the tokens: hard-coded `Color.White` labels on the (now pale, in dark) primary fill only showed up on the emulator. Grep `Color.White` / `Color.Black` next to any accent fill when the accent changes.
+- **Name a colour by what it is, not by what it looks like.** `joySurface` looked like an accent and the spec mapped it to `tertiaryContainer` (green here). It was Joy's emotion-palette colour, which is server data. Anything copied from an emotion palette stays data.
+- **The role rulebook needed two conventions the spec did not have**, both settled in Part 3 and applied everywhere after: interactive boundaries take `outline` (3:1, WCAG 1.4.11) and decorative ones `outlineVariant`; muted-but-informative content takes `onSurfaceVariant`, and `onSurface @ 0.38` is for disabled controls only. They now live in `apps/android/CLAUDE.md`.
+- **`gh stack submit/push` force-pushes over the `rebaseline-screenshots` bot's commit** if the local branch lacks it. Fetch and fast-forward before every stack push. When two stacked layers are re-baselined independently, the upper one's PNGs are the correct final renders: replay it with `git rebase -X theirs` onto the lower re-baseline and verify the tree equals the bot's tip.
+- **Label edits cancel the re-baseline run.** Each label event restarts `android-screenshots.yml`; add `rebaseline-screenshots` last and alone.
+- **Plan counts from a regex over-match.** `palette\.(primary|…)` counted emotion-palette reads as theme reads (`PebblePageColors`, `PetroglyphColors` needed no change). Read the type before trusting a count.

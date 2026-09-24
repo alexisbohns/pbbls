@@ -4,6 +4,7 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -210,7 +211,6 @@ private fun FormPreview(
     selectedGlyph: Glyph?,
     saveError: String?,
 ) {
-    val system = PebblesTheme.colors.system
     PebbleForm(
         draft = draft,
         onDraftChange = {},
@@ -221,46 +221,42 @@ private fun FormPreview(
         selectedGlyph = selectedGlyph,
         onGlyphPicked = {},
         saveError = saveError,
-        modifier = Modifier.fillMaxSize().background(system.background),
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface),
     )
 }
 
 @Composable
 private fun ValenceBodyPreview(current: Valence?) {
-    val system = PebblesTheme.colors.system
     ValenceFan(
         selected = current,
         onSelect = {},
-        modifier = Modifier.fillMaxSize().background(system.background),
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface),
     )
 }
 
 @Composable
 private fun EmotionBodyPreview() {
-    val system = PebblesTheme.colors.system
     EmotionPickerBody(
         groups = emotionGroups,
         stagedId = "e-joy",
         onToggle = {},
-        modifier = Modifier.fillMaxSize().background(system.background),
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface),
     )
 }
 
 @Composable
 private fun SoulBodyPreview() {
-    val system = PebblesTheme.colors.system
     SoulPickerBody(
         souls = souls,
         selection = setOf("s1", "s3"),
         onToggle = {},
         onCreateTap = {},
-        modifier = Modifier.fillMaxSize().background(system.background),
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface),
     )
 }
 
 @Composable
 private fun GlyphBodyPreview() {
-    val system = PebblesTheme.colors.system
     GlyphPickerGrid(
         items =
             glyphs.mapIndexed { index, glyph ->
@@ -270,14 +266,13 @@ private fun GlyphBodyPreview() {
         showCarveRow = true,
         onCarve = {},
         onSelect = {},
-        modifier = Modifier.fillMaxSize().background(system.background),
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface),
     )
 }
 
 @Composable
 private fun KarmaCapsulePreview(content: KarmaEarnedContent) {
-    val system = PebblesTheme.colors.system
-    val gradient = Brush.verticalGradient(listOf(system.background, system.muted))
+    val gradient = Brush.verticalGradient(listOf(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.surfaceContainerHighest))
     Box(
         modifier = Modifier.fillMaxSize().background(gradient),
         contentAlignment = Alignment.Center,

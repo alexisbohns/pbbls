@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.ui.render.PebbleStaticRender
 import app.pbbls.android.core.ui.render.PebbleSvg
 import com.android.tools.screenshot.PreviewTest
@@ -33,9 +34,9 @@ import com.android.tools.screenshot.PreviewTest
  * match iOS. Fallback ladder if not: (a) server-side SVG tweak, (b) scoped
  * custom renderer — see the plan doc.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun FidelityGrid(strokeHex: String) {
-    val system = PebblesTheme.colors.system
     Column(
         modifier = Modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -53,8 +54,8 @@ private fun FidelityGrid(strokeHex: String) {
                         }
                         Text(
                             text = name,
-                            style = PebblesTypography.captionEmphasized,
-                            color = system.secondary,
+                            style = MaterialTheme.typography.labelMediumEmphasized,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -76,8 +77,8 @@ private fun FidelityGrid(strokeHex: String) {
                 }
                 Text(
                     text = label,
-                    style = PebblesTypography.captionEmphasized,
-                    color = system.secondary,
+                    style = MaterialTheme.typography.labelMediumEmphasized,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -107,9 +108,9 @@ fun PebbleSvgFidelityDark() {
  * of their authored (custom-heavy / domain-light) width, so glyph == outline
  * and custom vs domain glyphs match. The outline itself is unchanged.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun TracedGrid(strokeHex: String) {
-    val system = PebblesTheme.colors.system
     Column(
         modifier = Modifier.padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -127,8 +128,8 @@ private fun TracedGrid(strokeHex: String) {
                         }
                         Text(
                             text = name,
-                            style = PebblesTypography.captionEmphasized,
-                            color = system.secondary,
+                            style = MaterialTheme.typography.labelMediumEmphasized,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }

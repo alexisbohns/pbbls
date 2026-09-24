@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -51,11 +52,10 @@ private val previewItem =
 
 @Composable
 private fun StoreGallery() {
-    val system = PebblesTheme.colors.system
     Column(
         modifier =
             Modifier
-                .background(system.background)
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(24.dp)
                 .width(360.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
@@ -68,8 +68,7 @@ private fun StoreGallery() {
 
 @Composable
 private fun DrawerGallery(isOwned: Boolean) {
-    val system = PebblesTheme.colors.system
-    Column(modifier = Modifier.background(system.background).width(400.dp)) {
+    Column(modifier = Modifier.background(MaterialTheme.colorScheme.surface).width(400.dp)) {
         GlyphDetailDrawerContent(
             item = previewItem,
             isOwned = isOwned,

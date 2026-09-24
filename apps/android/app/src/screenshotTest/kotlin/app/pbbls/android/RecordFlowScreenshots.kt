@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -100,7 +102,7 @@ private fun StepPreview(
     Column(
         Modifier
             .fillMaxSize()
-            .background(PebblesTheme.colors.system.background),
+            .background(MaterialTheme.colorScheme.surface),
     ) {
         RecordFlowChrome(step = step, onBack = {}, onClose = {})
         RecordStepScaffold(
@@ -180,7 +182,7 @@ private fun SuccessStepPreview(renderSvg: String?) {
     Column(
         Modifier
             .fillMaxSize()
-            .background(PebblesTheme.colors.system.background),
+            .background(MaterialTheme.colorScheme.surface),
     ) {
         RecordSuccessStep(
             name = "Shipped the Android record flow",
@@ -199,7 +201,7 @@ private fun SuccessStepPreview(renderSvg: String?) {
 @Composable
 fun RecordChromeStepsLight() {
     PebblesTheme {
-        Column(Modifier.background(PebblesTheme.colors.system.background)) {
+        Column(Modifier.background(MaterialTheme.colorScheme.surface)) {
             RecordStep.counted.forEach { step ->
                 RecordFlowChrome(step = step, onBack = {}, onClose = {})
                 Spacer(Modifier.height(4.dp))

@@ -1,15 +1,17 @@
 # @pbbls/android — agent context
 
 Native Android app for Pebbles. Kotlin + Jetpack Compose, minSdk 33, phone-only,
-portrait. It mirrors `apps/ios` 1:1 in **behavior, tokens and funnel** — file for
+portrait. It mirrors `apps/ios` 1:1 in **behavior and funnel** — file for
 file, screen for screen. When this file says "mirror X", read the named iOS file
 under `apps/ios/Pebbles/` and port its structure, not just its behavior.
 
-Two deliberate divergences, both recorded in `docs/decisions/log.md`: the
-**four-tab bottom bar** (#852, 2026-09-21), which iOS does not have, and the
+Three deliberate divergences, all recorded in `docs/decisions/log.md`: the
+**four-tab bottom bar** (#852, 2026-09-21), which iOS does not have, the
 **`core/` vs `features/` package split** (#851, 2026-09-22), where iOS groups by
-feature all the way down. Neither crosses a data contract. Anything else that
-differs is drift, not design — fix it rather than documenting it.
+feature all the way down, and **the M3-evo theme** (#853, 2026-09-24) — palette,
+error colour and type no longer mirror iOS. None crosses a data contract.
+Anything else that differs is drift, not design — fix it rather than
+documenting it.
 
 > This app was bootstrapped in milestone **M38 · Android App** (design doc:
 > `docs/superpowers/specs/2026-07-10-android-bootstrap-design.md`, decisions
@@ -232,8 +234,9 @@ app/src/main/kotlin/app/pbbls/android/
   DebugTokenPreviewScreen.kt  Design-system screenshot preview (B's temporary MainActivity home)
   core/model/            Pebble, Domain, Glyph, Collection, EmotionPalette, … (@Serializable, no UI)
   core/data/             SupabaseService, EmotionPaletteService, GlyphService, LogsService, …
-  core/designsystem/     PebblesTheme, Palettes, Spacing, Typography, PebblesText,
-                          PebblesTextInput, PebblesCheckbox, PebblesPrimaryButton, CheckGlyph
+  core/designsystem/     PebblesTheme, ColorSchemes, Typography, Shapes, Spacing,
+                          PebblesHandTypography, PebblesTextInput, PebblesCheckbox,
+                          PebblesPrimaryButton, CheckGlyph
   core/ui/               Shared UI that knows the domain: GlyphView, SoulItem, PebbleRow,
                           RippleBadge, karma overlays, ReferenceSlugs/ReferenceStrings,
                           and core/ui/render/ (PebbleSvg, GlyphImage, the wobble stack)
@@ -274,31 +277,39 @@ ceremony. The trigger to revisit is a **second regular contributor** or a
 **clean `assembleDebug` past ~3 minutes in CI**, whichever lands first
 (decision log, 2026-09-22).
 
-### Theme (sub-project B)
+### Theme (#853)
 
-- **Superseded by #853 (decision log 2026-09-24).** The app is moving to the
-  M3-evo Material 3 Expressive theme (core/designsystem/ColorSchemes.kt,
-  Typography.kt, Shapes.kt); until #853's last part lands, PebblesTheme.colors/.type
-  are a deprecated bridge onto MaterialTheme roles. Write new code against
-  MaterialTheme.colorScheme/typography/shapes; the bullets below describe the
-  pre-#853 state.
-- `PebblesTheme` is both an object (`PebblesTheme.colors.system.*`,
-  `.colors.accent.*`, `.spacing.*`, `.type.*`) and a `@Composable` wrapper
-  (`PebblesTheme { content }`) that resolves light/dark from
-  `isSystemInDarkTheme()` and provides all four CompositionLocals — same
-  dual object+function pattern Compose's own `MaterialTheme` uses. Material 3
-  is the rendering engine only; no dynamic color, no Material color roles in
-  app code (D6).
-- `PebblesTypography` exposes 18 `TextStyle` tokens directly (`.body`,
-  `.headlineEmphasized`, …) rather than an enum + lookup — call `PebblesText`
-  (not raw `Text`) so uppercase tokens (`meta`, `metaEmphasized`,
-  `cardHeading`, `cardHeadingEmphasized`) get their case transform; Compose
-  `TextStyle` has no text-case property.
-- All "rounded" iOS tokens (SF Pro/Compact Rounded) map to **Nunito**
-  (maintainer-approved 2026-07-11) — a single variable-font TTF
-  (`res/font/nunito.ttf`, OFL, from the Google Fonts repo) declared at four
-  weights via `FontVariation` in `Typography.kt`, not four separate files
-  (deleted in #853; body text is Inclusive Sans).
+- **App code reads `MaterialTheme.colorScheme`, `.typography` and `.shapes` —
+  nothing else decides a colour, a type style or a corner.** The theme is the
+  M3-evo Material Theme Builder export: six generated schemes in
+  `core/designsystem/ColorSchemes.kt` (regenerate with the script in
+  `docs/superpowers/plans/2026-09-24-android-m3-expressive-theme.md`, never
+  hand-edit), `PebblesMaterialTypography` (Inclusive Sans + Ysabeau, bundled
+  variable TTFs, M3 default scale), `PebblesShapes` (M3 Expressive defaults),
+  under `MaterialExpressiveTheme` with `MotionScheme.expressive()`.
+  `ThemeLiteralsTest` fails the build on a `Color(0x…)`, a literal
+  `RoundedCornerShape` radius or a `.copy(fontSize = …)` in `features/` or
+  `core/ui`.
+- **Pick the role by use:** an interactive boundary is `outline`, a decorative
+  one `outlineVariant`; muted-but-informative text is `onSurfaceVariant`, and
+  `onSurface.copy(alpha = 0.38f)` is for disabled only.
+- **Emotion palettes are server data, never scheme roles** — including the
+  valence mesh and Joy's surface hex (`ValenceMesh.JOY_SURFACE_HEX`). Don't map
+  them onto `primary`/`tertiary` because they look close.
+- **`PebblesTheme` holds only what M3 has no slot for:** `.spacing` (the M3
+  4 dp grid) and `.hand` (Caveat and Reenie Beanie: name input, valence word,
+  soul names).
+- **Error is amber**, not red — a product decision (decision log 2026-09-24).
+- **Scheme choice:** wallpaper colour when the user's Settings switch is on
+  (the default; `AppearancePreferences`), else the export's scheme for the
+  system contrast level, live on Android 14+. `PebblesTheme(dynamicColor =
+  false)` is the default so every preview renders the brand scheme — only
+  `MainActivity` passes the setting.
+- **material3 is pinned to `1.5.0-alpha27`** in `libs.versions.toml` for the
+  Expressive API; drop the pin when 1.5.0 stable is in the BOM, and do not
+  move to an alpha that drags Compose ui/foundation off the BOM's stable line.
+- Motion: `rememberReduceMotion()` (`core/designsystem`) gates every custom
+  animation; stock components follow the system animator scale themselves.
 - Reference-data names (`emotion.<slug>`, `domain.<slug>`,
   `emotionCategory.<slug>`) resolve through `ReferenceStrings.referenceName`,
   never the DB `name` column directly — see Localization below.
@@ -317,8 +328,9 @@ ceremony. The trigger to revisit is a **second regular contributor** or a
   is ≥ API 26, so one file serves all densities.
 - **`values/colors.xml` is only for what the platform reads before Compose runs**
   — the icon ground and the splash background (with its `values-night` override).
-  It duplicates three values from `core/designsystem/ColorSchemes.kt` (the splash
-  icon ground, and the light/dark splash backgrounds) because XML cannot read
+  It duplicates three values from `core/designsystem/ColorSchemes.kt`
+  (`splash_icon_background` = `LightScheme.primary` in both modes, and the
+  light/dark `splash_background` surfaces) because XML cannot read
   Kotlin; the launcher icon ground `#C07A7A` is deliberately not a scheme value.
   Keep the duplicated values in sync and do **not** grow this file into a second
   palette.
@@ -398,7 +410,7 @@ bundled. Android resource filenames must be lowercase
   ktlintFormat` auto-fixes. No detekt yet.
 - **Android Lint is a gate, not a report (#845).** `abortOnError`,
   `warningsAsErrors`, `checkDependencies`, and a committed baseline
-  (`app/lint-baseline.xml`, 60 accepted findings) — `./gradlew lint` is green on
+  (`app/lint-baseline.xml`, 56 accepted findings) — `./gradlew lint` is green on
   main and `android.yml` runs it on every PR. A *new* finding fails the PR.
   Regenerate the baseline with `./gradlew updateLintBaseline` only when a finding
   is deliberately accepted; never to silence one you introduced. The one check

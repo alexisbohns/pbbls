@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -280,7 +281,6 @@ private fun SnapFramePreview(
     valence: Valence,
     renderSvg: String,
 ) {
-    val system = PebblesTheme.colors.system
     PebbleSnapFrame(
         photo = previewSnap,
         aspect = aspect,
@@ -290,7 +290,7 @@ private fun SnapFramePreview(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .background(system.background)
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(vertical = 24.dp),
     )
 }

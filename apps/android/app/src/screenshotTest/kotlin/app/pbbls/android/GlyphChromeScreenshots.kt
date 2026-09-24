@@ -6,14 +6,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.ui.GlyphBanner
 import app.pbbls.android.core.ui.GlyphBannerSubtitle
@@ -37,11 +37,10 @@ private val previewStrokes =
 
 @Composable
 private fun GlyphGallery() {
-    val system = PebblesTheme.colors.system
     Column(
         modifier =
             Modifier
-                .background(system.background)
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -59,7 +58,7 @@ private fun GlyphGallery() {
         GlyphBanner(
             title = "Alexis",
             strokes = previewStrokes,
-            titleStyle = PebblesTypography.largeTitleHand,
+            titleStyle = PebblesTheme.hand.largeTitleHand,
             subtitle = GlyphBannerSubtitle.Meta("Member since July 2026"),
         )
         GlyphBanner(
@@ -77,14 +76,13 @@ private fun LabeledCase(
     case: GlyphViewCase,
     label: String,
 ) {
-    val system = PebblesTheme.colors.system
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         val strokes = if (case == GlyphViewCase.CARVE || case == GlyphViewCase.CREATE) null else previewStrokes
         GlyphView(case = case, strokes = strokes)
-        PebblesText(label, PebblesTypography.meta, color = system.secondary)
+        Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
 
