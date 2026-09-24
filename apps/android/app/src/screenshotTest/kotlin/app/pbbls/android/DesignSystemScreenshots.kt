@@ -11,29 +11,24 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialExpressiveTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.ContrastLevel
-import app.pbbls.android.core.designsystem.LocalAccentPalette
-import app.pbbls.android.core.designsystem.LocalSystemPalette
 import app.pbbls.android.core.designsystem.PebblesIcon
 import app.pbbls.android.core.designsystem.PebblesIconToken
 import app.pbbls.android.core.designsystem.PebblesListSection
 import app.pbbls.android.core.designsystem.PebblesMaterialTypography
 import app.pbbls.android.core.designsystem.PebblesShapes
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
-import app.pbbls.android.core.designsystem.PebblesTypography
-import app.pbbls.android.core.designsystem.accentPaletteFrom
 import app.pbbls.android.core.designsystem.pebblesColorScheme
 import app.pbbls.android.core.designsystem.profileCard
-import app.pbbls.android.core.designsystem.systemPaletteFrom
 import com.android.tools.screenshot.PreviewTest
 
 /**
@@ -43,18 +38,19 @@ import com.android.tools.screenshot.PreviewTest
  * light and dark. These are the maintainer's visual review surface for the
  * idiom kit before Profile screens compose from it.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ChromeGallery() {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
+    val type = MaterialTheme.typography
     Column(
         modifier =
             Modifier
-                .background(system.background)
+                .background(colors.surface)
                 .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
     ) {
-        // iOS-idiom defaults: meta title in system.secondary, secondary buttons.
+        // Defaults: labelSmall title in onSurfaceVariant, text buttons.
         PebblesTopBar(
             title = "Settings",
             leading = { PebblesTopBarTextButton(text = "Cancel", onClick = {}) },
@@ -63,12 +59,12 @@ private fun ChromeGallery() {
         // The shipped M39 create-bar look, via the override parameters.
         PebblesTopBar(
             title = "New pebble",
-            titleStyle = PebblesTypography.headlineEmphasized,
-            titleColor = system.foreground,
-            leading = { PebblesTopBarTextButton(text = "Cancel", onClick = {}, color = accent.primary) },
+            titleStyle = type.titleMediumEmphasized,
+            titleColor = colors.onSurface,
+            leading = { PebblesTopBarTextButton(text = "Cancel", onClick = {}, color = colors.primary) },
             trailing = {
                 CircularProgressIndicator(
-                    color = accent.primary,
+                    color = colors.primary,
                     strokeWidth = 2.dp,
                     modifier = Modifier.size(20.dp),
                 )
@@ -78,21 +74,21 @@ private fun ChromeGallery() {
             header = "Single",
             rows =
                 listOf(
-                    { PebblesText("Single row", PebblesTypography.body, color = system.foreground) },
+                    { Text("Single row", style = type.bodyLarge, color = colors.onSurface) },
                 ),
         )
         PebblesListSection(
             header = "Multi-row",
             rows =
                 listOf(
-                    { PebblesText("Top row", PebblesTypography.body, color = system.foreground) },
-                    { PebblesText("Middle row", PebblesTypography.body, color = system.foreground) },
-                    { PebblesText("Bottom row", PebblesTypography.body, color = system.foreground) },
+                    { Text("Top row", style = type.bodyLarge, color = colors.onSurface) },
+                    { Text("Middle row", style = type.bodyLarge, color = colors.onSurface) },
+                    { Text("Bottom row", style = type.bodyLarge, color = colors.onSurface) },
                 ),
         )
         Column(modifier = Modifier.fillMaxWidth().profileCard()) {
-            PebblesText("Stats", PebblesTypography.cardHeading, color = system.secondary)
-            PebblesText("Profile card chrome", PebblesTypography.body, color = system.foreground)
+            Text("Stats", style = type.titleSmall, color = colors.onSurfaceVariant)
+            Text("Profile card chrome", style = type.bodyLarge, color = colors.onSurface)
         }
         IconGallery()
     }
@@ -100,7 +96,6 @@ private fun ChromeGallery() {
 
 @Composable
 private fun IconGallery() {
-    val system = PebblesTheme.colors.system
     val icons =
         listOf(
             R.drawable.ic_gear,
@@ -123,7 +118,7 @@ private fun IconGallery() {
                         painter = painterResource(resId),
                         token = token,
                         contentDescription = null,
-                        tint = system.secondary,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -151,23 +146,15 @@ private fun HighContrast(
     dark: Boolean,
     content: @Composable () -> Unit,
 ) {
-    // Swaps the scheme to the high-contrast variant and re-derives the bridged
-    // palettes from it, so both MaterialTheme roles and the PebblesTheme.colors
-    // bridge see the same high-contrast scheme as stock M3 components.
+    // Swaps the scheme to the high-contrast variant. The outer PebblesTheme
+    // stays for what M3 has no slot for (LocalSpacing, LocalHandTypography).
     PebblesTheme {
-        val scheme = pebblesColorScheme(dark, ContrastLevel.HIGH)
-        @Suppress("DEPRECATION")
-        CompositionLocalProvider(
-            LocalSystemPalette provides systemPaletteFrom(scheme),
-            LocalAccentPalette provides accentPaletteFrom(scheme),
-        ) {
-            MaterialExpressiveTheme(
-                colorScheme = scheme,
-                typography = PebblesMaterialTypography,
-                shapes = PebblesShapes,
-                content = content,
-            )
-        }
+        MaterialExpressiveTheme(
+            colorScheme = pebblesColorScheme(dark, ContrastLevel.HIGH),
+            typography = PebblesMaterialTypography,
+            shapes = PebblesShapes,
+            content = content,
+        )
     }
 }
 

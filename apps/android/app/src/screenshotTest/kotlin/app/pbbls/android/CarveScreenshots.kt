@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,11 +31,10 @@ private val committedStrokes =
 
 @Composable
 private fun CarveGallery() {
-    val system = PebblesTheme.colors.system
     Column(
         modifier =
             Modifier
-                .background(system.background)
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

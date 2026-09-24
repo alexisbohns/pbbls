@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -104,11 +105,10 @@ private val backlog =
 
 @Composable
 private fun LabGallery() {
-    val system = PebblesTheme.colors.system
     Column(
         modifier =
             Modifier
-                .background(system.background)
+                .background(MaterialTheme.colorScheme.surface)
                 .width(400.dp),
     ) {
         LabContent(
@@ -150,11 +150,10 @@ private val detailLog =
 
 @Composable
 private fun DetailGallery() {
-    val system = PebblesTheme.colors.system
     Column(
         modifier =
             Modifier
-                .background(system.background)
+                .background(MaterialTheme.colorScheme.surface)
                 .width(400.dp),
     ) {
         AnnouncementDetailContent(log = detailLog, coverUrl = null)

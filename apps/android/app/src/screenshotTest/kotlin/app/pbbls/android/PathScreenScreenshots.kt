@@ -3,6 +3,7 @@ package app.pbbls.android
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -88,7 +89,7 @@ private fun ScreenPreview(entries: List<WeekRollEntry>) {
         today = today,
         onFocusChange = {},
         paletteFor = { screenPalette },
-        modifier = Modifier.fillMaxSize().background(PebblesTheme.colors.system.background),
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface),
     )
 }
 

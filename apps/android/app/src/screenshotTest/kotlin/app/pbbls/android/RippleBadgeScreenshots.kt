@@ -7,14 +7,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.ui.RippleBadge
 import com.android.tools.screenshot.PreviewTest
 
@@ -29,13 +30,13 @@ import com.android.tools.screenshot.PreviewTest
  * home in the UI right now and will come back in a top bar of their own; the
  * data is still loaded and still in `PathUiState.Content`.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun RippleGallery() {
-    val system = PebblesTheme.colors.system
     Column(
         modifier =
             Modifier
-                .background(system.background)
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
@@ -44,10 +45,10 @@ private fun RippleGallery() {
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                PebblesText(
+                Text(
                     text = if (active) "active" else "inactive",
-                    style = PebblesTypography.captionEmphasized,
-                    color = system.secondary,
+                    style = MaterialTheme.typography.labelMediumEmphasized,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.width(60.dp),
                 )
                 (0..6).forEach { level ->

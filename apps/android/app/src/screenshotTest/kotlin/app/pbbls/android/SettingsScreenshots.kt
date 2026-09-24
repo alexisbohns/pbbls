@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,14 +21,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.core.designsystem.PebblesDestructive
 import app.pbbls.android.core.designsystem.PebblesListSection
 import app.pbbls.android.core.designsystem.PebblesScreen
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.ui.GlyphView
 import app.pbbls.android.core.ui.GlyphViewCase
 import com.android.tools.screenshot.PreviewTest
@@ -59,16 +55,16 @@ private fun SettingsLabelValueRow(
     value: String,
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        PebblesText(
+        Text(
             text = label,
-            style = PebblesTypography.body,
-            color = PebblesTheme.colors.system.secondary,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(Modifier.weight(1f))
-        PebblesText(
+        Text(
             text = value,
-            style = PebblesTypography.body.copy(textAlign = TextAlign.End),
-            color = PebblesTheme.colors.system.foreground,
+            style = MaterialTheme.typography.bodyLarge.copy(textAlign = TextAlign.End),
+            color = MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(2f),
         )
     }
@@ -79,22 +75,22 @@ private fun SettingsDisclosureRow(
     label: String,
     destructive: Boolean = false,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        PebblesText(
+        Text(
             text = label,
-            style = PebblesTypography.body,
-            color = if (destructive) PebblesDestructive else system.foreground,
+            style = MaterialTheme.typography.bodyLarge,
+            color = if (destructive) colors.error else colors.onSurface,
         )
         Spacer(Modifier.weight(1f))
         if (!destructive) {
             Icon(
                 painter = painterResource(R.drawable.ic_chevron_right),
                 contentDescription = null,
-                tint = system.secondary,
+                tint = colors.onSurfaceVariant,
                 modifier = Modifier.size(16.dp),
             )
         }
@@ -125,7 +121,7 @@ private fun SettingsWallpaperColorsRow(checked: Boolean) {
 
 @Composable
 private fun SettingsSections() {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     PebblesScreen(
         topBar = {
             PebblesTopBar(
@@ -194,20 +190,13 @@ private fun SettingsSections() {
                                     verticalAlignment = Alignment.CenterVertically,
                                     modifier = Modifier.fillMaxWidth(),
                                 ) {
-                                    PebblesText(
+                                    Text(
                                         text = stringResource(R.string.settings_public_profile_toggle),
-                                        style = PebblesTypography.body,
-                                        color = system.foreground,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = colors.onSurface,
                                     )
                                     Spacer(Modifier.weight(1f))
-                                    Switch(
-                                        checked = true,
-                                        onCheckedChange = {},
-                                        colors =
-                                            SwitchDefaults.colors(
-                                                checkedTrackColor = PebblesTheme.colors.accent.primary,
-                                            ),
-                                    )
+                                    Switch(checked = true, onCheckedChange = {})
                                 }
                             },
                             {
@@ -217,10 +206,10 @@ private fun SettingsSections() {
                             },
                         ),
                 )
-                PebblesText(
+                Text(
                     text = stringResource(R.string.settings_handle_footer),
-                    style = PebblesTypography.subhead,
-                    color = system.secondary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.onSurfaceVariant,
                 )
             }
 
@@ -230,19 +219,19 @@ private fun SettingsSections() {
                     rows =
                         listOf(
                             {
-                                PebblesText(
+                                Text(
                                     text = stringResource(R.string.settings_password_placeholder),
-                                    style = PebblesTypography.body,
-                                    color = system.muted,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = colors.onSurfaceVariant,
                                     modifier = Modifier.fillMaxWidth(),
                                 )
                             },
                         ),
                 )
-                PebblesText(
+                Text(
                     text = stringResource(R.string.settings_password_footer),
-                    style = PebblesTypography.subhead,
-                    color = system.secondary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.onSurfaceVariant,
                 )
             }
 
