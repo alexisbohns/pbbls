@@ -6,15 +6,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.ZeroCornerSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 
 /**
  * Where a row sits inside its section, used to pick which corners of the
- * 1dp `system.muted` border round. `ONLY` is the default for single-row
+ * 1dp `outlineVariant` border round. `ONLY` is the default for single-row
  * sections. Mirrors iOS `Theme/PebblesList.swift`.
  */
 enum class PebblesListRowPosition {
@@ -37,22 +40,22 @@ fun pebblesRowPosition(
     }
 
 /**
- * Row chrome — the `pebblesListRow(position:)` analog: a 1dp `system.muted`
- * border whose corner radii (Spacing.lg) round only the edges this row owns.
+ * Row chrome — the `pebblesListRow(position:)` analog: a 1dp `outlineVariant`
+ * border whose `shapes.large` corners round only the edges this row owns.
  * [PebblesListSection] overlaps adjacent rows by the border width so the
  * shared edge renders as a single divider, completing the bordered card.
  */
 fun Modifier.pebblesListRow(position: PebblesListRowPosition = PebblesListRowPosition.ONLY): Modifier =
     composed {
-        val radius = PebblesTheme.spacing.lg
+        val large = MaterialTheme.shapes.large
         val shape =
             when (position) {
-                PebblesListRowPosition.ONLY -> RoundedCornerShape(radius)
-                PebblesListRowPosition.TOP -> RoundedCornerShape(topStart = radius, topEnd = radius)
-                PebblesListRowPosition.MIDDLE -> RoundedCornerShape(0.dp)
-                PebblesListRowPosition.BOTTOM -> RoundedCornerShape(bottomStart = radius, bottomEnd = radius)
+                PebblesListRowPosition.ONLY -> large
+                PebblesListRowPosition.TOP -> large.copy(bottomStart = ZeroCornerSize, bottomEnd = ZeroCornerSize)
+                PebblesListRowPosition.MIDDLE -> RectangleShape
+                PebblesListRowPosition.BOTTOM -> large.copy(topStart = ZeroCornerSize, topEnd = ZeroCornerSize)
             }
-        border(1.dp, PebblesTheme.colors.system.muted, shape)
+        border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
     }
 
 /**
@@ -96,18 +99,18 @@ fun PebblesListSection(
 
 /**
  * Section header typography matching profile cards — the
- * `pebblesSectionHeader()` analog: `cardHeading` token (uppercase via
- * [PebblesText]) in `system.secondary`.
+ * `pebblesSectionHeader()` analog: `titleSmall` in `onSurfaceVariant`,
+ * sentence case (#853 dropped the uppercase transform).
  */
 @Composable
 fun PebblesSectionHeader(
     text: String,
     modifier: Modifier = Modifier,
 ) {
-    PebblesText(
+    Text(
         text = text,
-        style = PebblesTypography.cardHeading,
-        color = PebblesTheme.colors.system.secondary,
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = modifier,
     )
 }

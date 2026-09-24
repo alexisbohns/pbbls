@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,9 +21,9 @@ import app.pbbls.android.core.model.AuthMode
 
 /**
  * Login/Sign-up segmented switcher — the `PebblesAuthSwitcher` analog. A pill
- * track in `system.muted` with the selected segment filled `system.secondary`
- * and a white label; unselected labels are `system.secondary`. Colors mirror the
- * globally-restyled iOS `UISegmentedControl` (`PebblesApp.init`).
+ * track in `surfaceContainerHighest` with the selected segment filled
+ * `secondaryContainer` and labelled `onSecondaryContainer`; unselected labels
+ * are `onSurfaceVariant` (#853).
  */
 @Composable
 fun PebblesAuthSwitcher(
@@ -31,15 +31,15 @@ fun PebblesAuthSwitcher(
     onModeChange: (AuthMode) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val trackShape = RoundedCornerShape(50)
+    val colors = MaterialTheme.colorScheme
+    val trackShape = CircleShape
 
     Row(
         modifier =
             modifier
                 .fillMaxWidth()
                 .clip(trackShape)
-                .background(system.muted)
+                .background(colors.surfaceContainerHighest)
                 .padding(4.dp),
     ) {
         AuthMode.entries.forEach { entry ->
@@ -49,15 +49,15 @@ fun PebblesAuthSwitcher(
                     Modifier
                         .weight(1f)
                         .clip(trackShape)
-                        .background(if (selected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent)
+                        .background(if (selected) colors.secondaryContainer else Color.Transparent)
                         .clickable(role = Role.Tab) { onModeChange(entry) }
                         .padding(vertical = 10.dp),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = stringResource(entry.labelRes),
-                    style = PebblesTypography.callout,
-                    color = if (selected) MaterialTheme.colorScheme.onSecondaryContainer else system.secondary,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (selected) colors.onSecondaryContainer else colors.onSurfaceVariant,
                 )
             }
         }

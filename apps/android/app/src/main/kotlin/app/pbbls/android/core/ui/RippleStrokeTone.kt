@@ -1,11 +1,11 @@
 package app.pbbls.android.core.ui
 
+import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
-import app.pbbls.android.core.designsystem.PebblesColors
 
 /**
  * Logical color slot for a Ripple stroke — ports iOS `RippleStrokeColor.swift`.
- * [color] resolves a tone against the active palette bundle (a pure function,
+ * [color] resolves a tone against the active [ColorScheme] (a pure function,
  * not a composable, so DrawScope lambdas can call it).
  */
 enum class RippleStrokeTone {
@@ -33,9 +33,9 @@ fun rippleStrokeTone(
     }
 
 /** Resolved theme-aware color for this tone. */
-fun RippleStrokeTone.color(colors: PebblesColors): Color =
+fun RippleStrokeTone.color(scheme: ColorScheme): Color =
     when (this) {
-        RippleStrokeTone.DEFAULT -> colors.system.muted
-        RippleStrokeTone.ACTIVE -> colors.accent.primary
-        RippleStrokeTone.INACTIVE -> colors.system.secondary
+        RippleStrokeTone.DEFAULT -> scheme.outlineVariant
+        RippleStrokeTone.ACTIVE -> scheme.primary
+        RippleStrokeTone.INACTIVE -> scheme.onSurfaceVariant
     }

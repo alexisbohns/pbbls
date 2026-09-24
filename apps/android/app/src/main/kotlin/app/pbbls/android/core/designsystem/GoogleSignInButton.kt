@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,17 +31,17 @@ internal val GoogleButtonSurface = Color.White
 
 /**
  * White capsule button with the multi-color Google G mark and "Continue with
- * Google" label; 1dp `system.muted` border so it reads against the page. Ports
+ * Google" label; 1dp `outlineVariant` border so it reads against the page. Ports
  * `GoogleSignInButton.swift`. (No Apple sign-in on Android — settled non-goal.)
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun GoogleSignInButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
 ) {
-    val system = PebblesTheme.colors.system
-    val shape = RoundedCornerShape(50)
+    val shape = CircleShape
 
     Row(
         modifier =
@@ -48,7 +50,7 @@ fun GoogleSignInButton(
                 .heightIn(min = 52.dp)
                 .clip(shape)
                 .background(GoogleButtonSurface)
-                .border(1.dp, system.muted, shape)
+                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
                 .clickable(enabled = enabled, role = Role.Button) { onClick() },
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically,
@@ -61,7 +63,7 @@ fun GoogleSignInButton(
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = stringResource(R.string.welcome_continue_google),
-            style = PebblesTypography.calloutEmphasized,
+            style = MaterialTheme.typography.bodyLargeEmphasized,
             color = GoogleCapsuleInk,
         )
     }

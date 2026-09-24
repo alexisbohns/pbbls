@@ -5,8 +5,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,7 +17,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 
 /**
- * Icon-above-label metadata card on `accent.surface` — ports iOS
+ * Icon-above-label metadata card on `primaryContainer` — ports iOS
  * `SurfaceTile.swift`. The vector [iconPainter] is tinted here (no icon-library
  * dependency; same `painterResource` convention as `WeekRoll`/`CheckGlyph`).
  * Width comes from the caller's `Modifier.weight(1f)`; content is centered. Set
@@ -24,7 +25,7 @@ import androidx.compose.ui.unit.dp
  *
  * [backgroundColor] / [iconTint] / [labelColor] override the default chrome
  * colors — the pebble read page tints its tiles to the emotion palette (#605).
- * Each is null by default, reproducing the accent-surface chrome elsewhere.
+ * Each is null by default, reproducing the `primaryContainer` chrome elsewhere.
  * [muted] still wins for the icon/label so an empty placeholder reads muted even
  * on a tinted background.
  */
@@ -38,14 +39,15 @@ fun SurfaceTile(
     iconTint: Color? = null,
     labelColor: Color? = null,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     val spacing = PebblesTheme.spacing
-    val tileBackground = backgroundColor ?: accent.surface
-    val resolvedIconTint = if (muted) system.muted else (iconTint ?: accent.primary)
-    val resolvedLabelColor = if (muted) system.muted else (labelColor ?: system.secondary)
+    val tileBackground = backgroundColor ?: colors.primaryContainer
+    // Placeholder tiles read as disabled content (#853 rulebook: onSurface at 38%).
+    val disabled = colors.onSurface.copy(alpha = 0.38f)
+    val resolvedIconTint = if (muted) disabled else (iconTint ?: colors.onPrimaryContainer)
+    val resolvedLabelColor = if (muted) disabled else (labelColor ?: colors.onPrimaryContainer)
     Column(
-        modifier.background(tileBackground, RoundedCornerShape(spacing.lg)).padding(vertical = spacing.md),
+        modifier.background(tileBackground, MaterialTheme.shapes.large).padding(vertical = spacing.md),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(spacing.xs),
     ) {
@@ -55,9 +57,9 @@ fun SurfaceTile(
             tint = resolvedIconTint,
             modifier = Modifier.size(30.dp),
         )
-        PebblesText(
+        Text(
             label,
-            style = PebblesTypography.callout,
+            style = MaterialTheme.typography.bodyLarge,
             color = resolvedLabelColor,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,

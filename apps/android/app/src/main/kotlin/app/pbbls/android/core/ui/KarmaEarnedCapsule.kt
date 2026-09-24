@@ -2,6 +2,8 @@ package app.pbbls.android.core.ui
 
 import android.view.HapticFeedbackConstants
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -18,7 +20,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,9 +50,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.data.KarmaEarnedContent
 import app.pbbls.android.core.data.KarmaNotificationService
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
+import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.core.model.KarmaReason
 
 /**
@@ -70,12 +72,13 @@ fun KarmaOverlayHost(
     // Retain the last content during the exit animation so it doesn't blank out.
     var lastContent by remember { mutableStateOf(KarmaEarnedContent(0, KarmaReason.PEBBLE_CREATED)) }
     if (flash != null) lastContent = flash
+    val reduceMotion = rememberReduceMotion()
 
     Box(modifier.fillMaxSize(), contentAlignment = Alignment.BottomCenter) {
         AnimatedVisibility(
             visible = flash != null,
-            enter = fadeIn() + slideInVertically { it / 2 },
-            exit = fadeOut() + slideOutVertically { it / 2 },
+            enter = if (reduceMotion) EnterTransition.None else fadeIn() + slideInVertically { it / 2 },
+            exit = if (reduceMotion) ExitTransition.None else fadeOut() + slideOutVertically { it / 2 },
         ) {
             val shown = flash ?: lastContent
             KarmaEarnedCapsule(
@@ -88,7 +91,8 @@ fun KarmaOverlayHost(
 }
 
 /**
- * The pastille itself: a tonal-elevation [Surface] capsule with a sparkle, the
+ * The pastille itself: a `surfaceContainerHigh` [Surface] capsule (lift from
+ * the container ladder, not a `surfaceTint` wash — #853) with a sparkle, the
  * "+N karma" label, and a countdown ring that drains over
  * [KarmaNotificationService.CAPSULE_DURATION_MS]. Fires one
  * [HapticFeedbackConstants.CONFIRM] per fresh [content] (needs a `View`, so it
@@ -100,8 +104,7 @@ fun KarmaEarnedCapsule(
     onTap: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     val view = LocalView.current
     val ring = remember { Animatable(1f) }
     val reasonLabel = stringResource(content.reason.labelRes)
@@ -120,8 +123,8 @@ fun KarmaEarnedCapsule(
 
     Surface(
         shape = CircleShape,
-        color = system.background,
-        tonalElevation = 3.dp,
+        color = colors.surfaceContainerHigh,
+        tonalElevation = 0.dp,
         shadowElevation = 8.dp,
         modifier =
             modifier
@@ -129,7 +132,7 @@ fun KarmaEarnedCapsule(
                 .clickable(onClick = onTap)
                 .drawWithContent {
                     drawContent()
-                    drawKarmaRing(ring.value, accent.primary)
+                    drawKarmaRing(ring.value, colors.primary)
                 },
     ) {
         Row(
@@ -140,13 +143,13 @@ fun KarmaEarnedCapsule(
             Icon(
                 painter = painterResource(R.drawable.ic_sparkle),
                 contentDescription = null,
-                tint = accent.primary,
+                tint = colors.primary,
                 modifier = Modifier.size(16.dp),
             )
-            PebblesText(
+            Text(
                 text = stringResource(R.string.karma_flash_amount, content.amount),
-                style = PebblesTypography.buttonLabel,
-                color = system.foreground,
+                style = MaterialTheme.typography.labelLarge,
+                color = colors.onSurface,
             )
         }
     }

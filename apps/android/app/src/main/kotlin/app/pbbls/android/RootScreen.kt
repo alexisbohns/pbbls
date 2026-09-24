@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,7 +24,6 @@ import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.data.LocalSnapURLCache
 import app.pbbls.android.core.data.OnboardingPreferences
-import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.ui.AchievementMomentOverlay
 import app.pbbls.android.core.ui.KarmaOverlayHost
 import app.pbbls.android.features.onboarding.OnboardingGate
@@ -143,7 +143,7 @@ fun RootScreen() {
         modifier =
             Modifier
                 .fillMaxSize()
-                .background(PebblesTheme.colors.system.background),
+                .background(MaterialTheme.colorScheme.surface),
     ) {
         PebblesNavDisplay(
             navigator = navigator,
@@ -217,7 +217,7 @@ private fun PebblesNavDisplay(
                 )
             }
         },
-        containerColor = PebblesTheme.colors.system.background,
+        containerColor = MaterialTheme.colorScheme.surface,
     ) { padding ->
         NavDisplay(
             entries =

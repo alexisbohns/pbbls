@@ -2,18 +2,18 @@ package app.pbbls.android.navigation
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 
 /**
  * The four top-level destinations (#852, D2).
@@ -22,14 +22,14 @@ import app.pbbls.android.core.designsystem.PebblesTypography
  * tapping the one you ARE on pops it to its root, which is the standard M3
  * escape hatch and the only reliable way out of a deep stack.
  *
- * Material 3 is the rendering engine only here (M38 D6): `containerColor` and
- * every `NavigationBarItemDefaults.colors(...)` role below is built from
- * `PebblesTheme` tokens rather than left at Material's defaults, which would
- * otherwise paint the bar in Material's own palette instead of the app's.
- * `Icon`/`PebblesText` read their color from `LocalContentColor`, which
+ * `containerColor` and every `NavigationBarItemDefaults.colors(...)` role below
+ * is set explicitly (#853): the bar sits on `surface` like the screen, the
+ * selected tab is `primary` on a `primaryContainer` indicator, the rest
+ * `onSurfaceVariant`. `Icon`/`Text` read their color from `LocalContentColor`, which
  * `NavigationBarItem` sets from these `colors` per selection state, so the
  * icon and label need no explicit `tint`/`color` of their own.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PebblesNavigationBar(
     current: PebblesKey,
@@ -37,12 +37,11 @@ fun PebblesNavigationBar(
     onReselect: (PebblesKey) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     NavigationBar(
         modifier = modifier,
-        containerColor = system.background,
-        contentColor = system.foreground,
+        containerColor = colors.surface,
+        contentColor = colors.onSurface,
     ) {
         PebblesKey.tabs.forEach { tab ->
             val selected = tab == current
@@ -51,18 +50,20 @@ fun PebblesNavigationBar(
                 onClick = { if (selected) onReselect(tab) else onSelect(tab) },
                 icon = { Icon(painter = painterResource(tab.iconRes()), contentDescription = null) },
                 label = {
-                    PebblesText(
+                    Text(
                         text = stringResource(tab.labelRes()),
-                        style = PebblesTypography.captionEmphasized,
+                        style = MaterialTheme.typography.labelMediumEmphasized,
                     )
                 },
                 colors =
                     NavigationBarItemDefaults.colors(
-                        selectedIconColor = accent.primary,
-                        selectedTextColor = accent.primary,
-                        indicatorColor = accent.surface,
-                        unselectedIconColor = system.secondary,
-                        unselectedTextColor = system.secondary,
+                        // The icon sits on the indicator, so it pairs with it;
+                        // the label sits below it, on the bar.
+                        selectedIconColor = colors.onPrimaryContainer,
+                        selectedTextColor = colors.primary,
+                        indicatorColor = colors.primaryContainer,
+                        unselectedIconColor = colors.onSurfaceVariant,
+                        unselectedTextColor = colors.onSurfaceVariant,
                     ),
             )
         }

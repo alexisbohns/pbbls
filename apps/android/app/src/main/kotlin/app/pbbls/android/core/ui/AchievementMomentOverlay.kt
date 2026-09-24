@@ -2,6 +2,8 @@ package app.pbbls.android.core.ui
 
 import android.view.HapticFeedbackConstants
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
@@ -16,9 +18,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,7 +32,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -42,9 +45,8 @@ import app.pbbls.android.core.data.AchievementMoment
 import app.pbbls.android.core.data.AchievementMomentCard
 import app.pbbls.android.core.data.AchievementNotificationService
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
+import app.pbbls.android.core.designsystem.rememberReduceMotion
 
 /**
  * The unlock moment (D13): one card per newly unlocked badge, chained in
@@ -82,10 +84,11 @@ fun AchievementMomentOverlay(
         if (moment != null) view.performHapticFeedback(HapticFeedbackConstants.CONFIRM)
     }
 
+    val reduceMotion = rememberReduceMotion()
     AnimatedVisibility(
         visible = moment != null,
-        enter = fadeIn(),
-        exit = fadeOut(),
+        enter = if (reduceMotion) EnterTransition.None else fadeIn(),
+        exit = if (reduceMotion) ExitTransition.None else fadeOut(),
         modifier = modifier,
     ) {
         // The scrim swallows taps so nothing behind the moment reacts while it
@@ -95,7 +98,7 @@ fun AchievementMomentOverlay(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.55f))
+                    .background(MaterialTheme.colorScheme.scrim.copy(alpha = 0.55f))
                     .clickable(
                         interactionSource = interaction,
                         indication = null,
@@ -124,6 +127,7 @@ fun AchievementMomentOverlay(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun MomentCard(
     card: AchievementMomentCard,
@@ -132,14 +136,15 @@ private fun MomentCard(
     isLast: Boolean,
     onAdvance: () -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
+    val type = MaterialTheme.typography
     val interaction = remember { MutableInteractionSource() }
 
     Surface(
-        shape = RoundedCornerShape(20.dp),
-        color = system.background,
-        tonalElevation = 3.dp,
+        shape = MaterialTheme.shapes.largeIncreased,
+        // Lift from the container ladder, not a `surfaceTint` wash (#853).
+        color = colors.surfaceContainerHigh,
+        tonalElevation = 0.dp,
         shadowElevation = 12.dp,
         modifier =
             Modifier
@@ -159,12 +164,12 @@ private fun MomentCard(
                     Modifier
                         .size(88.dp)
                         .clip(CircleShape)
-                        .background(accent.primary.copy(alpha = 0.12f)),
+                        .background(colors.primaryContainer),
             ) {
                 Icon(
                     painter = painterResource(R.drawable.ic_trophy),
                     contentDescription = null,
-                    tint = accent.primary,
+                    tint = colors.onPrimaryContainer,
                     modifier = Modifier.size(40.dp),
                 )
             }
@@ -173,23 +178,23 @@ private fun MomentCard(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.achievement_moment_eyebrow),
-                    style = PebblesTypography.subhead,
-                    color = system.secondary,
+                    style = type.bodyMedium,
+                    color = colors.onSurfaceVariant,
                 )
-                PebblesText(
+                Text(
                     text = card.record?.let { achievementTitle(it) } ?: card.slug,
-                    style = PebblesTypography.headlineEmphasized,
-                    color = system.foreground,
+                    style = type.titleMediumEmphasized,
+                    color = colors.onSurface,
                     textAlign = TextAlign.Center,
                 )
                 card.record?.let { record ->
                     achievementDescription(record)?.let { description ->
-                        PebblesText(
+                        Text(
                             text = description,
-                            style = PebblesTypography.subhead,
-                            color = system.secondary,
+                            style = type.bodyMedium,
+                            color = colors.onSurfaceVariant,
                             textAlign = TextAlign.Center,
                         )
                     }
@@ -197,18 +202,20 @@ private fun MomentCard(
             }
 
             if (card.karmaGranted > 0) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.karma_flash_amount, card.karmaGranted),
-                    style = PebblesTypography.headline,
-                    color = accent.primary,
+                    style = type.titleMedium,
+                    color = colors.primary,
                 )
             }
 
             if (total > 1) {
-                PebblesText(
+                // Informative, not disabled: `onSurfaceVariant` keeps it legible
+                // where the 38% disabled alpha would fail contrast (#853).
+                Text(
                     text = stringResource(R.string.achievement_moment_progress, position, total),
-                    style = PebblesTypography.subhead,
-                    color = system.muted,
+                    style = type.bodyMedium,
+                    color = colors.onSurfaceVariant,
                 )
             }
 

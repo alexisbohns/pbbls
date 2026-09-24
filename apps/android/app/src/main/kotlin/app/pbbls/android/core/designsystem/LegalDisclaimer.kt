@@ -1,5 +1,6 @@
 package app.pbbls.android.core.designsystem
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -12,7 +13,6 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withLink
-import androidx.compose.ui.unit.sp
 import app.pbbls.android.R
 
 /**
@@ -32,12 +32,11 @@ fun LegalDisclaimer(
     onPrivacyTap: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     val template = stringResource(R.string.welcome_legal_disclaimer)
     val termsLabel = stringResource(R.string.legal_link_terms)
     val privacyLabel = stringResource(R.string.legal_link_privacy)
-    val linkStyles = TextLinkStyles(SpanStyle(color = accent.primary, textDecoration = TextDecoration.Underline))
+    val linkStyles = TextLinkStyles(SpanStyle(color = colors.primary, textDecoration = TextDecoration.Underline))
 
     val text =
         buildLegalDisclaimer(
@@ -52,8 +51,8 @@ fun LegalDisclaimer(
 
     Text(
         text = text,
-        style = PebblesTypography.subhead.copy(fontSize = 12.sp),
-        color = system.secondary,
+        style = MaterialTheme.typography.labelMedium,
+        color = colors.onSurfaceVariant,
         textAlign = TextAlign.Center,
         modifier = modifier,
     )
