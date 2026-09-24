@@ -8,8 +8,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,9 +24,6 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 
 /** The three store tabs — ports iOS `GlyphTab` (rawValues mine/owned/commu). */
 enum class GlyphTab(
@@ -37,26 +37,26 @@ enum class GlyphTab(
 
 /**
  * Floating capsule tab pill pinned over the grid's bottom edge — ports iOS
- * `GlyphTabBar` (icon-over-caption segments, selected = accent on
- * accent-surface capsule; the "liquid glass" chrome maps to a shadowed
- * system-background capsule).
+ * `GlyphTabBar` (icon-over-caption segments, selected = `onPrimaryContainer`
+ * on a `primaryContainer` capsule; the "liquid glass" chrome maps to a
+ * shadowed `surfaceContainer` capsule).
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun GlyphTabBar(
     selection: GlyphTab,
     onSelect: (GlyphTab) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     Row(
         modifier =
             modifier
                 .widthIn(max = 320.dp)
                 .padding(bottom = 10.dp)
-                .shadow(elevation = 12.dp, shape = RoundedCornerShape(50))
-                .clip(RoundedCornerShape(50))
-                .background(system.background)
+                .shadow(elevation = 12.dp, shape = CircleShape)
+                .clip(CircleShape)
+                .background(colors.surfaceContainer)
                 .padding(3.dp),
         horizontalArrangement = Arrangement.spacedBy(3.dp),
     ) {
@@ -67,8 +67,8 @@ fun GlyphTabBar(
                 modifier =
                     Modifier
                         .weight(1f)
-                        .clip(RoundedCornerShape(50))
-                        .then(if (isSelected) Modifier.background(accent.surface) else Modifier)
+                        .clip(CircleShape)
+                        .then(if (isSelected) Modifier.background(colors.primaryContainer) else Modifier)
                         .clickable { onSelect(tab) }
                         .padding(vertical = 10.dp)
                         .semantics { selected = isSelected },
@@ -76,13 +76,13 @@ fun GlyphTabBar(
                 Icon(
                     painter = painterResource(tab.iconRes),
                     contentDescription = null,
-                    tint = if (isSelected) accent.primary else system.secondary,
+                    tint = if (isSelected) colors.onPrimaryContainer else colors.onSurfaceVariant,
                     modifier = Modifier.size(15.dp),
                 )
-                PebblesText(
+                Text(
                     text = stringResource(tab.labelRes),
-                    style = PebblesTypography.captionEmphasized,
-                    color = if (isSelected) accent.primary else system.secondary,
+                    style = MaterialTheme.typography.labelMediumEmphasized,
+                    color = if (isSelected) colors.onPrimaryContainer else colors.onSurfaceVariant,
                 )
             }
         }

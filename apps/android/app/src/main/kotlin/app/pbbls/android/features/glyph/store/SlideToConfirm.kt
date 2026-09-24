@@ -13,8 +13,9 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -36,9 +37,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -69,12 +67,14 @@ object SlideMath {
 /**
  * Slide-to-confirm purchase control — ports iOS `SlideToConfirm` (M43 D6):
  * 56dp thumb carrying the karma cost, drag engages only when the press starts
- * on the resting thumb, the accent fill grows with the drag, confirm at 0.9 ×
+ * on the resting thumb, a `surfaceContainerLowest` trail wipes the
+ * `primaryContainer` track as the drag grows, confirm at 0.9 ×
  * travel parks the thumb (springing back when [onConfirm] returns false).
  * Feedback is haptic-only v1 (the audio half is a named deviation): a
  * long-press tick on engage, confirm on the threshold — fired BEFORE the RPC,
  * verbatim iOS quirk.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SlideToConfirm(
     cost: Int,
@@ -82,7 +82,7 @@ fun SlideToConfirm(
     onConfirm: suspend () -> Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     val density = LocalDensity.current
     val haptics = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
@@ -97,8 +97,8 @@ fun SlideToConfirm(
                 .fillMaxWidth()
                 .height(THUMB)
                 .onSizeChanged { trackWidthPx = it.width }
-                .clip(RoundedCornerShape(50))
-                .background(accent.surface)
+                .clip(CircleShape)
+                .background(colors.primaryContainer)
                 .alpha(if (enabled) 1f else 0.5f)
                 .clearAndSetSemantics { contentDescription = a11y }
                 .pointerInput(enabled, trackWidthPx) {
@@ -135,13 +135,13 @@ fun SlideToConfirm(
                 Modifier
                     .width(with(density) { (dragX.value + thumbPx).toDp() })
                     .fillMaxHeight()
-                    .clip(RoundedCornerShape(50))
-                    .background(accent.light),
+                    .clip(CircleShape)
+                    .background(colors.surfaceContainerLowest),
         )
-        PebblesText(
+        Text(
             text = stringResource(R.string.glyph_drawer_slide),
-            style = PebblesTypography.subheadEmphasized,
-            color = accent.primary,
+            style = MaterialTheme.typography.bodyMediumEmphasized,
+            color = colors.onPrimaryContainer,
             modifier = Modifier.align(Alignment.Center),
         )
         Box(
@@ -150,13 +150,13 @@ fun SlideToConfirm(
                     .offset { IntOffset(dragX.value.roundToInt(), 0) }
                     .size(THUMB)
                     .clip(CircleShape)
-                    .background(accent.primary),
+                    .background(colors.primary),
             contentAlignment = Alignment.Center,
         ) {
-            PebblesText(
+            Text(
                 text = cost.toString(),
-                style = PebblesTypography.headline,
-                color = MaterialTheme.colorScheme.onPrimary,
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.onPrimary,
             )
         }
     }

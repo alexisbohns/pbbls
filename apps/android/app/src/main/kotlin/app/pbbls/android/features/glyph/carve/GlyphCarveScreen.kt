@@ -17,13 +17,16 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -52,13 +55,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
-import app.pbbls.android.core.designsystem.PebblesDestructive
 import app.pbbls.android.core.designsystem.PebblesScreen
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.ui.render.GlyphImage
@@ -80,6 +79,7 @@ private const val VIEW_BOX_SIDE = 200.0
  * `GlyphStroke(d, 6.0)`. Cancel with strokes asks "Discard your glyph?";
  * save failure keeps the strokes with an inline error.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun GlyphCarveScreen(
     onSaved: (Glyph) -> Unit,
@@ -88,7 +88,7 @@ fun GlyphCarveScreen(
     viewModel: GlyphCarveViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
 
     ObserveUiEffects(viewModel.effects) { effect ->
         when (effect) {
@@ -98,7 +98,7 @@ fun GlyphCarveScreen(
     }
 
     PebblesScreen(
-        modifier = modifier.background(system.background),
+        modifier = modifier.background(colors.surface),
         topBar = {
             PebblesTopBar(
                 title = stringResource(R.string.carve_title),
@@ -111,7 +111,7 @@ fun GlyphCarveScreen(
                 trailing = {
                     if (uiState.isSaving) {
                         CircularProgressIndicator(
-                            color = PebblesTheme.colors.accent.primary,
+                            color = colors.primary,
                             strokeWidth = 2.dp,
                             modifier = Modifier.size(20.dp),
                         )
@@ -120,7 +120,7 @@ fun GlyphCarveScreen(
                             text = stringResource(R.string.action_save),
                             onClick = viewModel::save,
                             enabled = uiState.canSave,
-                            color = if (uiState.canSave) system.secondary else system.muted,
+                            color = if (uiState.canSave) colors.onSurfaceVariant else colors.onSurface.copy(alpha = 0.38f),
                         )
                     }
                 },
@@ -143,19 +143,19 @@ fun GlyphCarveScreen(
                 onValueChange = viewModel::onNameChange,
                 singleLine = true,
                 textStyle =
-                    PebblesTypography.title.copy(
-                        color = system.foreground,
+                    MaterialTheme.typography.headlineMedium.copy(
+                        color = colors.onSurface,
                         textAlign = TextAlign.Center,
                     ),
-                cursorBrush = SolidColor(PebblesTheme.colors.accent.primary),
+                cursorBrush = SolidColor(colors.primary),
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                 decorationBox = { inner ->
                     Box(contentAlignment = Alignment.Center) {
                         if (uiState.name.isEmpty()) {
-                            PebblesText(
+                            Text(
                                 text = stringResource(R.string.carve_name_placeholder),
-                                style = PebblesTypography.title,
-                                color = system.muted,
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = colors.onSurfaceVariant,
                                 textAlign = TextAlign.Center,
                             )
                         }
@@ -171,10 +171,10 @@ fun GlyphCarveScreen(
             )
 
             if (uiState.didSaveFail) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.carve_save_error),
-                    style = PebblesTypography.callout,
-                    color = PebblesDestructive,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colors.error,
                 )
             }
 
@@ -198,29 +198,29 @@ fun GlyphCarveScreen(
     if (uiState.isConfirmingDiscard) {
         AlertDialog(
             onDismissRequest = viewModel::dismissDiscard,
-            containerColor = system.background,
+            containerColor = colors.surfaceContainerHigh,
             title = {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.carve_discard_title),
-                    style = PebblesTypography.headlineEmphasized,
-                    color = system.foreground,
+                    style = MaterialTheme.typography.titleMediumEmphasized,
+                    color = colors.onSurface,
                 )
             },
             confirmButton = {
                 TextButton(onClick = viewModel::confirmDiscard) {
-                    PebblesText(
+                    Text(
                         text = stringResource(R.string.carve_discard),
-                        style = PebblesTypography.buttonLabel,
-                        color = PebblesDestructive,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = colors.error,
                     )
                 }
             },
             dismissButton = {
                 TextButton(onClick = viewModel::dismissDiscard) {
-                    PebblesText(
+                    Text(
                         text = stringResource(R.string.carve_keep_editing),
-                        style = PebblesTypography.buttonLabel,
-                        color = PebblesTheme.colors.accent.primary,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = colors.primary,
                     )
                 }
             },
@@ -241,8 +241,8 @@ internal fun CarveCanvas(
     onStrokeCommitted: (GlyphStroke) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val accent = PebblesTheme.colors.accent
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
+    val shape = MaterialTheme.shapes.extraLarge
     val density = LocalDensity.current
     var activePoints by remember { mutableStateOf<List<CarvePoint>>(emptyList()) }
     val strokesA11y = stringResource(R.string.carve_canvas_strokes_a11y, strokes.size)
@@ -262,9 +262,11 @@ internal fun CarveCanvas(
         modifier =
             modifier
                 .size(CANVAS_SIDE.dp)
-                .clip(RoundedCornerShape(PebblesTheme.spacing.xxl))
+                .clip(shape)
+                // Literal white, not a scheme role: the carve surface is paper in
+                // both themes (M43 D2), so it must not follow the surface ladder.
                 .background(Color.White)
-                .border(1.dp, system.muted, RoundedCornerShape(PebblesTheme.spacing.xxl))
+                .border(1.dp, colors.outlineVariant, shape)
                 .clearAndSetSemantics { contentDescription = strokesA11y }
                 .pointerInput(Unit) {
                     awaitEachGesture {
@@ -283,7 +285,7 @@ internal fun CarveCanvas(
         GlyphImage(
             strokes = strokes,
             viewBox = "0 0 200 200",
-            strokeColor = accent.primary,
+            strokeColor = colors.primary,
             modifier = Modifier.fillMaxSize(),
         )
         Canvas(modifier = Modifier.fillMaxSize()) {
@@ -296,7 +298,7 @@ internal fun CarveCanvas(
                     }
                 drawPath(
                     path = path,
-                    color = accent.primary,
+                    color = colors.primary,
                     style =
                         Stroke(
                             width = px(STORED_WIDTH * (CANVAS_SIDE / VIEW_BOX_SIDE)),
@@ -309,7 +311,10 @@ internal fun CarveCanvas(
     }
 }
 
-/** Undo/Clear pill — accent label + icon on an accent-surface capsule (iOS chrome). */
+/**
+ * Undo/Clear pill — `onPrimaryContainer` label + icon on a `primaryContainer`
+ * capsule (iOS chrome); disabled content drops to the 38% `onSurface` ink.
+ */
 @Composable
 private fun CarvePillButton(
     iconRes: Int,
@@ -317,16 +322,15 @@ private fun CarvePillButton(
     enabled: Boolean,
     onClick: () -> Unit,
 ) {
-    val accent = PebblesTheme.colors.accent
-    val system = PebblesTheme.colors.system
-    val color = if (enabled) accent.primary else system.muted
+    val colors = MaterialTheme.colorScheme
+    val color = if (enabled) colors.onPrimaryContainer else colors.onSurface.copy(alpha = 0.38f)
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
         modifier =
             Modifier
-                .clip(RoundedCornerShape(50))
-                .background(accent.surface)
+                .clip(CircleShape)
+                .background(colors.primaryContainer)
                 .clickable(enabled = enabled, onClick = onClick)
                 .padding(horizontal = 16.dp, vertical = 10.dp),
     ) {
@@ -336,9 +340,9 @@ private fun CarvePillButton(
             tint = color,
             modifier = Modifier.size(16.dp),
         )
-        PebblesText(
+        Text(
             text = label,
-            style = PebblesTypography.buttonLabel,
+            style = MaterialTheme.typography.labelLarge,
             color = color,
         )
     }

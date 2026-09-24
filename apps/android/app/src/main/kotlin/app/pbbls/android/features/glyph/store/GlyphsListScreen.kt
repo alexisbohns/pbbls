@@ -14,11 +14,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,13 +37,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesDestructive
 import app.pbbls.android.core.designsystem.PebblesScreen
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTextInput
-import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.designsystem.ProfileEmptyState
 import app.pbbls.android.core.model.GlyphGridItem
 import app.pbbls.android.core.ui.GlyphView
@@ -68,7 +66,7 @@ fun GlyphsListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val covers by viewModel.covers.collectAsStateWithLifecycle()
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
 
     // Returning from the carve studio must re-read the current tab: the
     // ViewModel is scoped to the back stack entry, which survives the round
@@ -88,7 +86,7 @@ fun GlyphsListScreen(
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
                             contentDescription = stringResource(R.string.profile_back_a11y),
-                            tint = system.secondary,
+                            tint = colors.onSurfaceVariant,
                             modifier = Modifier.size(24.dp),
                         )
                     }
@@ -98,7 +96,7 @@ fun GlyphsListScreen(
                         Icon(
                             painter = painterResource(R.drawable.ic_plus),
                             contentDescription = stringResource(R.string.glyphs_carve_a11y),
-                            tint = system.secondary,
+                            tint = colors.onSurfaceVariant,
                             modifier = Modifier.size(22.dp),
                         )
                     }
@@ -111,7 +109,7 @@ fun GlyphsListScreen(
             when (val state = uiState) {
                 GlyphsUiState.Loading ->
                     Box(Modifier.fillMaxSize(), Alignment.Center) {
-                        CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
+                        CircularProgressIndicator(color = colors.primary)
                     }
 
                 is GlyphsUiState.Error ->
@@ -129,10 +127,10 @@ fun GlyphsListScreen(
                     } else {
                         Column(Modifier.fillMaxSize()) {
                             if (covers.didRenameFail) {
-                                PebblesText(
+                                Text(
                                     text = stringResource(R.string.glyph_rename_error),
-                                    style = PebblesTypography.callout,
-                                    color = PebblesDestructive,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = colors.error,
                                     modifier =
                                         Modifier
                                             .fillMaxWidth()
@@ -215,19 +213,20 @@ private val GlyphsUiState.tab: GlyphTab
         }
 
 /** Grid cell: 96dp glyph + optional name caption + price badge when listed. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun GlyphStoreCell(
     item: GlyphGridItem,
     onTap: (() -> Unit)?,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier =
             Modifier
                 .width(96.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(MaterialTheme.shapes.medium)
                 .let { base -> if (onTap != null) base.clickable(onClick = onTap) else base },
     ) {
         GlyphView(
@@ -237,10 +236,10 @@ private fun GlyphStoreCell(
             side = 96.dp,
         )
         item.glyph.name?.let { name ->
-            PebblesText(
+            Text(
                 text = name,
-                style = PebblesTypography.captionEmphasized,
-                color = system.secondary,
+                style = MaterialTheme.typography.labelMediumEmphasized,
+                color = colors.onSurfaceVariant,
                 maxLines = 1,
             )
         }
@@ -252,13 +251,13 @@ private fun GlyphStoreCell(
                 Icon(
                     painter = painterResource(R.drawable.ic_sparkle),
                     contentDescription = null,
-                    tint = system.muted,
+                    tint = colors.onSurfaceVariant,
                     modifier = Modifier.size(11.dp),
                 )
-                PebblesText(
+                Text(
                     text = item.price.toString(),
-                    style = PebblesTypography.meta,
-                    color = system.muted,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colors.onSurfaceVariant,
                 )
             }
         }
@@ -266,23 +265,23 @@ private fun GlyphStoreCell(
 }
 
 /** Rename alert — the iOS "Rename glyph" TextField alert on the M39 dialog chrome. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun RenameGlyphDialog(
     initialName: String,
     onDismiss: () -> Unit,
     onSave: (String) -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     var draft by remember { mutableStateOf(initialName) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = system.background,
+        containerColor = colors.surfaceContainerHigh,
         title = {
-            PebblesText(
+            Text(
                 text = stringResource(R.string.glyph_rename_title),
-                style = PebblesTypography.headlineEmphasized,
-                color = system.foreground,
+                style = MaterialTheme.typography.titleMediumEmphasized,
+                color = colors.onSurface,
             )
         },
         text = {
@@ -294,19 +293,19 @@ private fun RenameGlyphDialog(
         },
         confirmButton = {
             TextButton(onClick = { onSave(draft) }) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.action_save),
-                    style = PebblesTypography.buttonLabel,
-                    color = accent.primary,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colors.primary,
                 )
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.action_cancel),
-                    style = PebblesTypography.buttonLabel,
-                    color = accent.primary,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colors.primary,
                 )
             }
         },
