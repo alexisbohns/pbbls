@@ -4,6 +4,9 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,9 +19,6 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 
 /**
  * 44×44 ring-and-digit badge representing the user's Ripples level — ports
@@ -27,6 +27,7 @@ import app.pbbls.android.core.designsystem.PebblesTypography
  * first so inner rings paint on top; ring opacity steps 0.33 / 0.66 / 1.0
  * from outside in.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun RippleBadge(
     level: Int,
@@ -34,10 +35,10 @@ fun RippleBadge(
     modifier: Modifier = Modifier,
 ) {
     val clampedLevel = level.coerceIn(0, 6)
-    // Resolve the palette bundle in composition; the tone→color mapping is a
-    // pure function so the DrawScope lambda can call it.
-    val colors = PebblesTheme.colors
-    val digitColor = colors.system.foreground
+    // Resolve the scheme in composition; the tone→color mapping is a pure
+    // function so the DrawScope lambda can call it.
+    val colors = MaterialTheme.colorScheme
+    val digitColor = colors.onSurface
     val label =
         if (activeToday) {
             stringResource(R.string.ripple_badge_active, clampedLevel)
@@ -79,9 +80,9 @@ fun RippleBadge(
             }
         }
         // The Box's clearAndSetSemantics carries the combined a11y label.
-        PebblesText(
+        Text(
             text = clampedLevel.toString(),
-            style = PebblesTypography.captionEmphasized,
+            style = MaterialTheme.typography.labelMediumEmphasized,
             color = digitColor,
         )
     }

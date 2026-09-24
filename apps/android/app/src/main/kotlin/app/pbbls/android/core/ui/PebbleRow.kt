@@ -9,10 +9,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -25,10 +27,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesDestructive
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.core.ui.render.PebbleThumbnail
@@ -51,7 +49,7 @@ import java.util.Locale
  * outline silhouette (Android's established no-render treatment, richer than
  * iOS's neutral rounded rectangle — deviation noted in the port).
  */
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PebbleRow(
     pebble: Pebble,
@@ -60,7 +58,7 @@ fun PebbleRow(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     var menuExpanded by remember { mutableStateOf(false) }
     val locale = Locale.getDefault()
     val dateText =
@@ -75,7 +73,7 @@ fun PebbleRow(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(MaterialTheme.shapes.medium)
                     .combinedClickable(onClick = onTap, onLongClick = { menuExpanded = true })
                     .padding(vertical = 8.dp, horizontal = 4.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -87,32 +85,32 @@ fun PebbleRow(
                 modifier = Modifier.size(40.dp),
             )
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                PebblesText(
+                Text(
                     text = pebble.name,
-                    style = PebblesTypography.body,
-                    color = system.foreground,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colors.onSurface,
                 )
-                PebblesText(
+                Text(
                     text = dateText,
-                    style = PebblesTypography.captionEmphasized,
-                    color = system.secondary,
+                    style = MaterialTheme.typography.labelMediumEmphasized,
+                    color = colors.onSurfaceVariant,
                 )
             }
         }
         DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
             DropdownMenuItem(
                 text = {
-                    PebblesText(
+                    Text(
                         text = stringResource(R.string.pebble_delete),
-                        style = PebblesTypography.buttonLabel,
-                        color = PebblesDestructive,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = colors.error,
                     )
                 },
                 leadingIcon = {
                     Icon(
                         painter = painterResource(R.drawable.ic_trash),
                         contentDescription = null,
-                        tint = PebblesDestructive,
+                        tint = colors.error,
                     )
                 },
                 onClick = {

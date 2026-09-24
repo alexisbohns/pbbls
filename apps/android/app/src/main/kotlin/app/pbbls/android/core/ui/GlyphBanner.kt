@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -11,9 +13,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.GlyphStroke
 
 /**
@@ -30,10 +30,10 @@ fun GlyphBanner(
     strokes: List<GlyphStroke>? = null,
     viewBox: String = "0 0 200 200",
     // Profile uses largeTitleHand; the swap drawer keeps the serif-slot title.
-    titleStyle: TextStyle = PebblesTypography.title,
+    titleStyle: TextStyle = MaterialTheme.typography.headlineMedium,
     subtitle: GlyphBannerSubtitle? = null,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -48,30 +48,30 @@ fun GlyphBanner(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.xs),
         ) {
-            PebblesText(text = title, style = titleStyle, color = system.foreground)
+            Text(text = title, style = titleStyle, color = colors.onSurface)
             when (subtitle) {
                 null -> Unit
                 is GlyphBannerSubtitle.Meta ->
-                    PebblesText(
+                    Text(
                         text = subtitle.text,
-                        style = PebblesTypography.meta,
-                        color = system.secondary,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colors.onSurfaceVariant,
                     )
                 is GlyphBannerSubtitle.Byline ->
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.xs),
                         verticalAlignment = Alignment.Bottom,
                     ) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.glyph_banner_by),
-                            style = PebblesTypography.meta,
-                            color = system.secondary,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colors.onSurfaceVariant,
                         )
                         // A name is always hand — issue #515.
-                        PebblesText(
+                        Text(
                             text = subtitle.name,
-                            style = PebblesTypography.bodyLeadHand,
-                            color = system.secondary,
+                            style = PebblesTheme.hand.bodyLeadHand,
+                            color = colors.onSurfaceVariant,
                         )
                     }
             }
@@ -79,7 +79,7 @@ fun GlyphBanner(
     }
 }
 
-/** A byline renders its name in the handwritten face; meta is a plain small-caps line. */
+/** A byline renders its name in the handwritten face; meta is a plain `labelSmall` line. */
 sealed interface GlyphBannerSubtitle {
     data class Meta(
         val text: String,

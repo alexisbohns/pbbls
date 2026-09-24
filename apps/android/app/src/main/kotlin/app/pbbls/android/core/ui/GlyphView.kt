@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,7 +19,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.ui.render.GlyphImage
 
@@ -26,16 +26,16 @@ import app.pbbls.android.core.ui.render.GlyphImage
  * Which chrome + tint a glyph slot renders — ports iOS `GlyphView.Case`
  * (visual spec table: `docs/superpowers/specs/2026-05-17-issue-459-glyph-souls-consistency-design.md` §2).
  * Only the carving/empty states ([CARVE], [CREATE]) draw the dashed
- * `Spacing.xxl`-radius frame; glyph-bearing states render chromeless
+ * `shapes.extraLarge` frame; glyph-bearing states render chromeless
  * (issue #515) — selection is carried by glyph color, not a frame.
  */
 enum class GlyphViewCase {
-    PROFILE, // no frame; glyph in accent.primary
-    CARVE, // dashed 2dp system.muted; scribble in system.secondary
-    CREATE, // dashed 2dp system.muted; plus in system.muted
-    SELECTED, // no frame; glyph in accent.primary
-    UNSELECTED, // no frame; glyph in system.muted
-    DEFAULT, // no frame; glyph in system.secondary
+    PROFILE, // no frame; glyph in primary
+    CARVE, // dashed 2dp outlineVariant; scribble in onSurfaceVariant
+    CREATE, // dashed 2dp outlineVariant; plus in outline
+    SELECTED, // no frame; glyph in primary
+    UNSELECTED, // no frame; glyph in onSurface at 38%
+    DEFAULT, // no frame; glyph in onSurfaceVariant
 }
 
 /**
@@ -53,11 +53,12 @@ fun GlyphView(
     viewBox: String = "0 0 200 200",
     side: Dp = 96.dp,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     val dashed = case == GlyphViewCase.CARVE || case == GlyphViewCase.CREATE
-    val frameColor = system.muted
-    val cornerRadius = PebblesTheme.spacing.xxl
+    val frameColor = colors.outlineVariant
+    // A drawn round-rect needs a radius, not a Shape: resolve the role's corner
+    // against the slot size inside the draw scope (#853, was Spacing.xxl).
+    val corner = MaterialTheme.shapes.extraLarge.topStart
 
     Box(
         modifier =
@@ -76,7 +77,7 @@ fun GlyphView(
                                     size.width - strokeWidth,
                                     size.height - strokeWidth,
                                 ),
-                            cornerRadius = CornerRadius(cornerRadius.toPx() - inset),
+                            cornerRadius = CornerRadius(corner.toPx(size, this) - inset),
                             style =
                                 Stroke(
                                     width = strokeWidth,
@@ -89,15 +90,15 @@ fun GlyphView(
     ) {
         when (case) {
             GlyphViewCase.CARVE ->
-                PlaceholderIcon(R.drawable.ic_scribble, side, tint = system.secondary)
+                PlaceholderIcon(R.drawable.ic_scribble, side, tint = colors.onSurfaceVariant)
             GlyphViewCase.CREATE ->
-                PlaceholderIcon(R.drawable.ic_plus, side, tint = system.muted)
+                PlaceholderIcon(R.drawable.ic_plus, side, tint = colors.outline)
             GlyphViewCase.PROFILE, GlyphViewCase.SELECTED ->
-                GlyphStrokes(strokes, viewBox, accent.primary)
+                GlyphStrokes(strokes, viewBox, colors.primary)
             GlyphViewCase.UNSELECTED ->
-                GlyphStrokes(strokes, viewBox, system.muted)
+                GlyphStrokes(strokes, viewBox, colors.onSurface.copy(alpha = 0.38f))
             GlyphViewCase.DEFAULT ->
-                GlyphStrokes(strokes, viewBox, system.secondary)
+                GlyphStrokes(strokes, viewBox, colors.onSurfaceVariant)
         }
     }
 }

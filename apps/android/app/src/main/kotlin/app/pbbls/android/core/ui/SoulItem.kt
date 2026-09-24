@@ -2,14 +2,14 @@ package app.pbbls.android.core.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,9 +19,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.SoulWithGlyph
 
 /**
@@ -29,9 +27,9 @@ import app.pbbls.android.core.model.SoulWithGlyph
  * (spec table: `docs/superpowers/specs/2026-05-17-issue-459-glyph-souls-consistency-design.md` §3).
  */
 enum class SoulItemCase {
-    SELECTED, // picker: in the current selection — accent glyph + name
-    UNSELECTED, // picker: a selection exists elsewhere — muted glyph + secondary name
-    DEFAULT, // lists: no selection semantics — secondary glyph + name
+    SELECTED, // picker: in the current selection — primary glyph + name
+    UNSELECTED, // picker: a selection exists elsewhere — 38% glyph + onSurfaceVariant name
+    DEFAULT, // lists: no selection semantics — onSurfaceVariant glyph + name
     CREATE, // trailing "New soul" affordance — plus-in-dashed-frame
 }
 
@@ -53,8 +51,7 @@ fun SoulItem(
     onTap: (() -> Unit)? = null,
     onLongPress: (() -> Unit)? = null,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     val glyphCase =
         when (case) {
             SoulItemCase.SELECTED -> GlyphViewCase.SELECTED
@@ -62,9 +59,11 @@ fun SoulItem(
             SoulItemCase.DEFAULT -> GlyphViewCase.DEFAULT
             SoulItemCase.CREATE -> GlyphViewCase.CREATE
         }
-    val nameColor = if (case == SoulItemCase.SELECTED) accent.primary else system.secondary
-    // Count icon uses AccentSecondary in light, AccentShaded in dark (iOS parity).
-    val fossilColor = if (isSystemInDarkTheme()) accent.shaded else accent.secondary
+    val nameColor = if (case == SoulItemCase.SELECTED) colors.primary else colors.onSurfaceVariant
+    // The count icon is the same pale rose in light and dark (iOS parity: it
+    // was AccentSecondary in light, AccentShaded in dark). `primaryFixed` is the
+    // one role that holds that tone across both, so no dark-theme branch (#853).
+    val fossilColor = colors.primaryFixed
     val displayName =
         if (case == SoulItemCase.CREATE) stringResource(R.string.create_soul_add) else soul?.name.orEmpty()
 
@@ -72,7 +71,7 @@ fun SoulItem(
         modifier =
             modifier
                 .width(side)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(MaterialTheme.shapes.medium)
                 .let { base ->
                     if (onTap != null || onLongPress != null) {
                         base.combinedClickable(onClick = onTap ?: {}, onLongClick = onLongPress)
@@ -88,9 +87,9 @@ fun SoulItem(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.xs),
         ) {
-            PebblesText(
+            Text(
                 text = displayName,
-                style = PebblesTypography.bodyLeadHand,
+                style = PebblesTheme.hand.bodyLeadHand,
                 color = nameColor,
                 maxLines = 1,
             )
@@ -105,10 +104,10 @@ fun SoulItem(
                         tint = fossilColor,
                         modifier = Modifier.size(11.dp),
                     )
-                    PebblesText(
+                    Text(
                         text = count.toString(),
-                        style = PebblesTypography.meta,
-                        color = system.secondary,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colors.onSurfaceVariant,
                     )
                 }
             }

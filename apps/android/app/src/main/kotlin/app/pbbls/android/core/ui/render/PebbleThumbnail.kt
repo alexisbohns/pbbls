@@ -3,11 +3,13 @@ package app.pbbls.android.core.ui.render
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
-import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.toRgbHex
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.core.model.PebbleFrameColors
@@ -28,7 +30,8 @@ fun PebbleThumbnail(
     palette: EmotionPalette?,
     modifier: Modifier = Modifier,
 ) {
-    val accentHex = PebblesTheme.colors.accent.primaryHex
+    val primary = MaterialTheme.colorScheme.primary
+    val accentHex = remember(primary) { primary.toRgbHex() }
     val frame =
         palette?.pebbleFrameColors(pebble.intensity)
             ?: PebbleFrameColors(strokeHex = accentHex, fillHex = accentHex, fillOpacity = 1f)
