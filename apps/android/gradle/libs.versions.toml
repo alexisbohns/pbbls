@@ -36,13 +36,13 @@ coroutines = "1.11.0"
 screenshot = { strictly = "0.0.1-alpha16" }
 # Rive (D14) — bundled logo animation on the Welcome screen. Requires
 # androidx-startup for Rive.init(); see PebblesApp.onCreate().
-rive = "11.12.0"
+rive = "11.12.1"
 androidxStartup = "1.2.0"
 # Entry funnel (sub-project C). supabase-kt is the auth/data client; it needs a
 # Ktor engine on the classpath — supabase-kt 3.1.4 is built against Ktor 3.1.2,
 # so the OkHttp engine is pinned to the same version to avoid Ktor version skew.
 supabase = "3.8.0"
-ktor = "3.5.2"
+ktor = "3.6.0"
 kotlinxSerializationJson = "1.11.0"
 # Custom Tabs — the in-app-browser analog of iOS SFSafariViewController, used
 # for the legal document links (D15).
@@ -54,7 +54,7 @@ androidsvg = "1.4"
 # Snap thumbnails (sub-project D) — Coil 3 loads the signed storage URLs; the
 # okhttp fetcher reuses the OkHttp already on the classpath via ktor-client-okhttp
 # (the AsyncImage analog of iOS AsyncImage + SnapURLCache).
-coil = "3.6.2"
+coil = "3.6.3"
 
 # Invite QR codes (M49). Encode-only use of the pure-JVM `core` artifact — no
 # `android-core`, no camera/scanning: a stock camera app reads the code, and the
