@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -29,9 +31,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.designsystem.Spacing
 
 /**
@@ -56,8 +56,7 @@ fun RecordNameStep(
     onChange: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     val focusRequester = remember { FocusRequester() }
 
     var field by remember {
@@ -91,10 +90,10 @@ fun RecordNameStep(
     ) {
         Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             if (field.text.isEmpty()) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.record_name_placeholder),
-                    style = PebblesTypography.nameInputHand,
-                    color = system.muted,
+                    style = PebblesTheme.hand.nameInputHand,
+                    color = colors.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
             }
@@ -116,11 +115,11 @@ fun RecordNameStep(
                     onChange(clamped)
                 },
                 textStyle =
-                    PebblesTypography.nameInputHand.copy(
-                        color = system.foreground,
+                    PebblesTheme.hand.nameInputHand.copy(
+                        color = colors.onSurface,
                         textAlign = TextAlign.Center,
                     ),
-                cursorBrush = SolidColor(accent.primary),
+                cursorBrush = SolidColor(colors.primary),
                 singleLine = false,
                 maxLines = 3,
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
@@ -133,10 +132,10 @@ fun RecordNameStep(
         }
 
         val remainingLabel = stringResource(R.string.record_name_remaining_a11y, remaining)
-        PebblesText(
+        Text(
             text = remaining.toString(),
-            style = PebblesTypography.subhead,
-            color = if (remaining == 0) accent.primary else system.secondary,
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (remaining == 0) colors.primary else colors.onSurfaceVariant,
             modifier =
                 Modifier
                     .alpha(countdownAlpha)

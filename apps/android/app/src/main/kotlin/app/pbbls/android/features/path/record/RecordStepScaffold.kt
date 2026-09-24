@@ -7,15 +7,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.designsystem.Spacing
 
 /**
@@ -67,7 +66,7 @@ fun RecordStepScaffold(
     contentScrolls: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(Spacing.lg),
@@ -78,17 +77,17 @@ fun RecordStepScaffold(
             verticalArrangement = Arrangement.spacedBy(Spacing.xs),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            PebblesText(
+            Text(
                 text = title,
-                style = PebblesTypography.title,
-                color = system.foreground,
+                style = MaterialTheme.typography.headlineMedium,
+                color = colors.onSurface,
                 textAlign = TextAlign.Center,
             )
             if (subtitle != null) {
-                PebblesText(
+                Text(
                     text = subtitle,
-                    style = PebblesTypography.subhead,
-                    color = system.secondary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
             }
@@ -115,10 +114,10 @@ fun RecordStepScaffold(
                     onClick = action.onClick,
                     modifier = Modifier.padding(bottom = Spacing.sm),
                 ) {
-                    PebblesText(
+                    Text(
                         text = action.label,
-                        style = PebblesTypography.callout,
-                        color = system.secondary,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.onSurfaceVariant,
                     )
                 }
             is RecordStepAction.Primary ->
