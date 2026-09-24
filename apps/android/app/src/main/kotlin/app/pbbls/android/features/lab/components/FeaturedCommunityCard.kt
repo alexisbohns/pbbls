@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,13 +17,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 
 /**
  * The WhatsApp community card — ports iOS `FeaturedCommunityCard`: chat
- * bubbles + copy, then a full-width filled-accent button. Always the Lab's
+ * bubbles + copy, then a full-width primary button. Always the Lab's
  * first block regardless of feed outcomes (design D8); [onOpen] fires the
  * external `ACTION_VIEW` on `LabConfig.WHATSAPP_INVITE_URL` at the caller.
  */
@@ -30,8 +29,7 @@ fun FeaturedCommunityCard(
     onOpen: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = modifier.fillMaxWidth().padding(vertical = 4.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -43,19 +41,19 @@ fun FeaturedCommunityCard(
             Icon(
                 painter = painterResource(R.drawable.ic_chat_bubbles),
                 contentDescription = null,
-                tint = accent.primary,
+                tint = colors.primary,
                 modifier = Modifier.size(24.dp),
             )
             Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.lab_community_title),
-                    style = PebblesTypography.headline,
-                    color = system.foreground,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = colors.onSurface,
                 )
-                PebblesText(
+                Text(
                     text = stringResource(R.string.lab_community_subtitle),
-                    style = PebblesTypography.subhead,
-                    color = system.secondary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.onSurfaceVariant,
                 )
             }
         }

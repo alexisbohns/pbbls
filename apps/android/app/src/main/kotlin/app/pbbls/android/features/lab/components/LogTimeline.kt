@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,9 +22,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.Log
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
@@ -37,7 +36,7 @@ enum class LogTimelineMode {
 
 /**
  * Vertical timeline — ports iOS `LogTimeline`: a 16dp icon column whose 1dp
- * muted connector bridges rows (transparent 12dp lead-in on the first row, no
+ * `outlineVariant` connector bridges rows (transparent 12dp lead-in on the first row, no
  * descender on the last), content beside it, and a trailing [ReactionButton]
  * in backlog mode. Changelog rows lead with `released_at ?? published_at` as
  * a locale-aware long date.
@@ -73,8 +72,7 @@ private fun TimelineRow(
     isReacted: Boolean,
     onToggleReaction: () -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     val locale = Locale.getDefault()
     val iconRes =
         when (mode) {
@@ -82,7 +80,7 @@ private fun TimelineRow(
             LogTimelineMode.IN_PROGRESS -> R.drawable.ic_circle_inset_filled
             LogTimelineMode.BACKLOG -> R.drawable.ic_circle_dashed
         }
-    val iconTint = if (mode == LogTimelineMode.CHANGELOG) accent.primary else system.secondary
+    val iconTint = if (mode == LogTimelineMode.CHANGELOG) colors.primary else colors.onSurfaceVariant
 
     Row(
         modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
@@ -97,7 +95,7 @@ private fun TimelineRow(
                     Modifier
                         .width(1.dp)
                         .height(12.dp)
-                        .background(if (isFirst) Color.Transparent else system.muted),
+                        .background(if (isFirst) Color.Transparent else colors.outlineVariant),
             )
             Icon(
                 painter = painterResource(iconRes),
@@ -112,7 +110,7 @@ private fun TimelineRow(
                             .weight(1f)
                             .padding(top = 2.dp)
                             .width(1.dp)
-                            .background(system.muted),
+                            .background(colors.outlineVariant),
                 )
             }
         }
@@ -130,25 +128,25 @@ private fun TimelineRow(
                 if (mode == LogTimelineMode.CHANGELOG) {
                     val date = log.releasedAt ?: log.publishedAt
                     if (date != null) {
-                        PebblesText(
+                        Text(
                             text =
                                 date
                                     .toLocalDate()
                                     .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.LONG).withLocale(locale)),
-                            style = PebblesTypography.subhead,
-                            color = system.secondary,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colors.onSurfaceVariant,
                         )
                     }
                 }
-                PebblesText(
+                Text(
                     text = log.title(locale),
-                    style = PebblesTypography.body,
-                    color = system.foreground,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colors.onSurface,
                 )
-                PebblesText(
+                Text(
                     text = log.summary(locale),
-                    style = PebblesTypography.subhead,
-                    color = system.secondary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.onSurfaceVariant,
                     maxLines = 3,
                 )
             }

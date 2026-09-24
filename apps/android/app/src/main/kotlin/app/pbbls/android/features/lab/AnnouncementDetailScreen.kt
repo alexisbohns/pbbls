@@ -10,11 +10,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -26,15 +27,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesScreen
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.LabMarkdown
 import app.pbbls.android.core.model.Log
 import app.pbbls.android.features.lab.components.LabMarkdownBody
@@ -56,7 +54,7 @@ fun AnnouncementDetailScreen(
     viewModel: AnnouncementDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
 
     LaunchedEffect(logId) { viewModel.start(logId) }
 
@@ -70,7 +68,7 @@ fun AnnouncementDetailScreen(
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
                             contentDescription = stringResource(R.string.profile_back_a11y),
-                            tint = system.secondary,
+                            tint = colors.onSurfaceVariant,
                             modifier = Modifier.size(24.dp),
                         )
                     }
@@ -83,7 +81,7 @@ fun AnnouncementDetailScreen(
         when (val state = uiState) {
             AnnouncementDetailUiState.Loading ->
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
+                    CircularProgressIndicator(color = colors.primary)
                 }
 
             is AnnouncementDetailUiState.Error ->
@@ -92,16 +90,16 @@ fun AnnouncementDetailScreen(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    PebblesText(
+                    Text(
                         text = stringResource(state.messageRes),
-                        style = PebblesTypography.body,
-                        color = system.secondary,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.onSurfaceVariant,
                     )
                     TextButton(onClick = viewModel::retry) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.profile_retry),
-                            style = PebblesTypography.buttonLabel,
-                            color = PebblesTheme.colors.accent.primary,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = colors.primary,
                         )
                     }
                 }
@@ -123,7 +121,7 @@ fun AnnouncementDetailContent(
     coverUrl: String?,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     val locale = Locale.getDefault()
     Column(
         modifier =
@@ -138,8 +136,8 @@ fun AnnouncementDetailContent(
                     Modifier
                         .fillMaxWidth()
                         .height(200.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(system.muted.copy(alpha = 0.3f)),
+                        .clip(MaterialTheme.shapes.medium)
+                        .background(colors.surfaceContainerHighest),
             ) {
                 AsyncImage(
                     model = coverUrl,
@@ -149,16 +147,16 @@ fun AnnouncementDetailContent(
                 )
             }
         }
-        PebblesText(
+        Text(
             text = log.title(locale),
-            style = PebblesTypography.title,
-            color = system.foreground,
+            style = MaterialTheme.typography.headlineMedium,
+            color = colors.onSurface,
         )
-        // iOS title3 (20pt) — no matching token, so the display face at 20sp.
-        PebblesText(
+        // iOS title3 (20pt) — M3's titleLarge (22 sp, Ysabeau).
+        Text(
             text = log.summary(locale),
-            style = PebblesTypography.title.copy(fontSize = 20.sp),
-            color = system.secondary,
+            style = MaterialTheme.typography.titleLarge,
+            color = colors.onSurfaceVariant,
         )
         val body = log.body(locale)
         if (!body.isNullOrEmpty()) {
