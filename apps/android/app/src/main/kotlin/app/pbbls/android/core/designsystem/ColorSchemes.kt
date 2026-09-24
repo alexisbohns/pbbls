@@ -4,6 +4,8 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import java.util.Locale
 
 // GENERATED from the M3-evo Material Theme Builder export (seed #CE7E8A,
 // Material Theme Builder export 2026-09-24 12:15:20) for #853. Regenerate with the script in
@@ -325,8 +327,8 @@ internal val DarkHighContrastScheme: ColorScheme =
 
 /**
  * Ink for the Google sign-in capsule, which is a pinned white surface under
- * Google's branding rules and must not follow the theme (the old
- * `SystemPalette.onLight`). 11.2:1 on white.
+ * Google's branding rules and must not follow the theme (the old iOS
+ * `onLight` token). 11.2:1 on white.
  */
 internal val GoogleCapsuleInk = Color(0xFF4A3639)
 
@@ -340,3 +342,9 @@ internal fun pebblesColorScheme(
         ContrastLevel.MEDIUM -> if (dark) DarkMediumContrastScheme else LightMediumContrastScheme
         ContrastLevel.HIGH -> if (dark) DarkHighContrastScheme else LightHighContrastScheme
     }
+
+// Hand-written, not from the export: the generator script emits this block
+// verbatim so a regeneration keeps it. Keep the two in step.
+
+/** `#RRGGBB`, alpha dropped — the SVG pipeline misparses 8-digit hex. */
+internal fun Color.toRgbHex(): String = String.format(Locale.ROOT, "#%06X", toArgb() and 0xFFFFFF)

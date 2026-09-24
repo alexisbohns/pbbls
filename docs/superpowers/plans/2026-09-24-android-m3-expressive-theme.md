@@ -333,7 +333,9 @@ out = ['package app.pbbls.android.core.designsystem', '',
        'import androidx.compose.material3.ColorScheme',
        'import androidx.compose.material3.darkColorScheme',
        'import androidx.compose.material3.lightColorScheme',
-       'import androidx.compose.ui.graphics.Color', '',
+       'import androidx.compose.ui.graphics.Color',
+       'import androidx.compose.ui.graphics.toArgb',
+       'import java.util.Locale', '',
        '// GENERATED from the M3-evo Material Theme Builder export (seed #CE7E8A,',
        f"// {d['description'].splitlines()[-1]}) for #853. Regenerate with the script in",
        '// docs/superpowers/plans/2026-09-24-android-m3-expressive-theme.md (Task 1.3);',
@@ -350,8 +352,8 @@ for name, key, fn in schemes:
 out += [
  '/**',
  ' * Ink for the Google sign-in capsule, which is a pinned white surface under',
- " * Google's branding rules and must not follow the theme (the old",
- ' * `SystemPalette.onLight`). 11.2:1 on white.',
+ " * Google's branding rules and must not follow the theme (the old iOS",
+ ' * `onLight` token). 11.2:1 on white.',
  ' */',
  'internal val GoogleCapsuleInk = Color(0xFF4A3639)', '',
  '/** One of the six static schemes. Wallpaper schemes bypass this entirely. */',
@@ -363,7 +365,11 @@ out += [
  '        ContrastLevel.STANDARD -> if (dark) DarkScheme else LightScheme',
  '        ContrastLevel.MEDIUM -> if (dark) DarkMediumContrastScheme else LightMediumContrastScheme',
  '        ContrastLevel.HIGH -> if (dark) DarkHighContrastScheme else LightHighContrastScheme',
- '    }', '']
+ '    }', '',
+ '// Hand-written, not from the export: the generator script emits this block',
+ '// verbatim so a regeneration keeps it. Keep the two in step.', '',
+ '/** `#RRGGBB`, alpha dropped — the SVG pipeline misparses 8-digit hex. */',
+ 'internal fun Color.toRgbHex(): String = String.format(Locale.ROOT, "#%06X", toArgb() and 0xFFFFFF)', '']
 dst = 'app/src/main/kotlin/app/pbbls/android/core/designsystem/ColorSchemes.kt'
 open(dst, 'w').write('\n'.join(out))
 print(dst, sum(1 for l in out if 'Color(0xFF' in l), 'literals')
