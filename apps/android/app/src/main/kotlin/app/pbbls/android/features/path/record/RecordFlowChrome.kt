@@ -112,6 +112,9 @@ private fun ProgressDots(
                 Modifier
                     .size(6.dp)
                     .clip(CircleShape)
+                    // outlineVariant, not the surfaceContainerHighest a placeholder fill
+                    // would take: an unfilled dot still carries progress, and it reads
+                    // more clearly on the surface (matches the Welcome/Onboarding dots).
                     .background(if (filled) colors.primary else colors.outlineVariant),
             )
         }
