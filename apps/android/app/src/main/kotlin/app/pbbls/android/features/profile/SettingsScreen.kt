@@ -15,13 +15,16 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -30,6 +33,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
@@ -167,6 +171,42 @@ fun SettingsScreen(
                     modifier = Modifier.clickable(onClick = viewModel::openGlyphPicker),
                 )
             }
+
+            PebblesListSection(
+                header = stringResource(R.string.settings_appearance_section),
+                rows =
+                    listOf(
+                        {
+                            Row(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .toggleable(
+                                            value = viewModel.useWallpaperColors,
+                                            role = Role.Switch,
+                                            onValueChange = viewModel::onUseWallpaperColorsChange,
+                                        ),
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Column(Modifier.weight(1f)) {
+                                    Text(
+                                        stringResource(R.string.settings_wallpaper_colors_title),
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                    )
+                                    Text(
+                                        stringResource(R.string.settings_wallpaper_colors_body),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    )
+                                }
+                                // null onCheckedChange: the Row owns the toggle, so
+                                // TalkBack announces one "switch, on" node rather than two.
+                                Switch(checked = viewModel.useWallpaperColors, onCheckedChange = null)
+                            }
+                        },
+                    ),
+            )
 
             PebblesListSection(
                 header = stringResource(R.string.settings_informations_header),

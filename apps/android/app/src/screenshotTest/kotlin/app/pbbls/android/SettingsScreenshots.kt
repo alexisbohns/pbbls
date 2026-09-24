@@ -10,8 +10,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -100,6 +102,28 @@ private fun SettingsDisclosureRow(
 }
 
 @Composable
+private fun SettingsWallpaperColorsRow(checked: Boolean) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f)) {
+            Text(
+                stringResource(R.string.settings_wallpaper_colors_title),
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                stringResource(R.string.settings_wallpaper_colors_body),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Switch(checked = checked, onCheckedChange = null)
+    }
+}
+
+@Composable
 private fun SettingsSections() {
     val system = PebblesTheme.colors.system
     PebblesScreen(
@@ -125,6 +149,15 @@ private fun SettingsSections() {
             ) {
                 GlyphView(case = GlyphViewCase.CARVE, strokes = null, side = 120.dp)
             }
+
+            PebblesListSection(
+                header = stringResource(R.string.settings_appearance_section),
+                rows =
+                    listOf(
+                        { SettingsWallpaperColorsRow(checked = true) },
+                        { SettingsWallpaperColorsRow(checked = false) },
+                    ),
+            )
 
             PebblesListSection(
                 header = stringResource(R.string.settings_informations_header),

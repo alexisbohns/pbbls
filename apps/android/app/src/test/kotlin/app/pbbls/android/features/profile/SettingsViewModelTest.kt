@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import app.pbbls.android.R
+import app.pbbls.android.core.data.AppearancePreferences
 import app.pbbls.android.core.data.ProfileRow
 import app.pbbls.android.testing.FakeProfileService
 import app.pbbls.android.testing.FakeSupabaseService
+import app.pbbls.android.testing.InMemoryPrefs
 import app.pbbls.android.testing.MainDispatcherRule
 import app.pbbls.android.testing.postgrestException
 import app.pbbls.android.testing.recordEffects
@@ -85,7 +87,19 @@ class SettingsViewModelTest {
         profile: FakeProfileService = FakeProfileService(profile = profileRow()),
         supabase: FakeSupabaseService = FakeSupabaseService(),
         savedState: SavedStateHandle = SavedStateHandle(),
-    ) = SettingsViewModel(savedState, profile, supabase)
+        appearance: AppearancePreferences = AppearancePreferences(InMemoryPrefs()),
+    ) = SettingsViewModel(savedState, profile, supabase, appearance)
+
+    // MARK: - Appearance (#853)
+
+    @Test
+    fun `wallpaper switch writes through to appearance preferences`() {
+        val appearance = AppearancePreferences(InMemoryPrefs())
+        val vm = viewModel(appearance = appearance)
+        vm.onUseWallpaperColorsChange(false)
+        assertFalse(appearance.useWallpaperColors)
+        assertFalse(vm.useWallpaperColors)
+    }
 
     // MARK: - Loading its own profile (#852)
 

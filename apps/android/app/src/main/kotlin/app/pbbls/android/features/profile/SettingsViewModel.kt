@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
 import app.pbbls.android.core.common.UiEffects
 import app.pbbls.android.core.common.runCatchingCancellable
+import app.pbbls.android.core.data.AppearancePreferences
 import app.pbbls.android.core.data.ProfileRow
 import app.pbbls.android.core.data.ProfileServicing
 import app.pbbls.android.core.data.SupabaseServicing
@@ -160,12 +161,24 @@ class SettingsViewModel
         private val savedState: SavedStateHandle,
         private val profileService: ProfileServicing,
         private val supabase: SupabaseServicing,
+        private val appearance: AppearancePreferences,
     ) : ViewModel() {
         private val effectsOut = UiEffects<SettingsEffect>(viewModelScope)
         val effects: Flow<SettingsEffect> = effectsOut.flow
 
         private val _uiState = MutableStateFlow(SettingsUiState())
         val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
+
+        /**
+         * Device-local and applied instantly, so it bypasses the form and the
+         * dirty/save cycle — there is nothing to send to the server (#853).
+         */
+        val useWallpaperColors: Boolean
+            get() = appearance.useWallpaperColors
+
+        fun onUseWallpaperColorsChange(value: Boolean) {
+            appearance.setUseWallpaperColors(value)
+        }
 
         init {
             load()
