@@ -28,12 +28,6 @@ import app.pbbls.android.R
 internal val GoogleButtonSurface = Color.White
 
 /**
- * Ink for [GoogleButtonSurface]. Never `system.foreground`, which flips to a pale
- * grey in dark theme and lands at 1.28:1 on white. See [SystemPalette.onLight].
- */
-internal fun googleButtonLabelColor(system: SystemPalette): Color = system.onLight
-
-/**
  * White capsule button with the multi-color Google G mark and "Continue with
  * Google" label; 1dp `system.muted` border so it reads against the page. Ports
  * `GoogleSignInButton.swift`. (No Apple sign-in on Android — settled non-goal.)
@@ -68,7 +62,7 @@ fun GoogleSignInButton(
         Text(
             text = stringResource(R.string.welcome_continue_google),
             style = PebblesTypography.calloutEmphasized,
-            color = googleButtonLabelColor(system),
+            color = GoogleCapsuleInk,
         )
     }
 }

@@ -276,6 +276,12 @@ ceremony. The trigger to revisit is a **second regular contributor** or a
 
 ### Theme (sub-project B)
 
+- **Superseded by #853 (decision log 2026-09-24).** The app is moving to the
+  M3-evo Material 3 Expressive theme (core/designsystem/ColorSchemes.kt,
+  Typography.kt, Shapes.kt); until #853's last part lands, PebblesTheme.colors/.type
+  are a deprecated bridge onto MaterialTheme roles. Write new code against
+  MaterialTheme.colorScheme/typography/shapes; the bullets below describe the
+  pre-#853 state.
 - `PebblesTheme` is both an object (`PebblesTheme.colors.system.*`,
   `.colors.accent.*`, `.spacing.*`, `.type.*`) and a `@Composable` wrapper
   (`PebblesTheme { content }`) that resolves light/dark from
@@ -291,7 +297,8 @@ ceremony. The trigger to revisit is a **second regular contributor** or a
 - All "rounded" iOS tokens (SF Pro/Compact Rounded) map to **Nunito**
   (maintainer-approved 2026-07-11) — a single variable-font TTF
   (`res/font/nunito.ttf`, OFL, from the Google Fonts repo) declared at four
-  weights via `FontVariation` in `Typography.kt`, not four separate files.
+  weights via `FontVariation` in `Typography.kt`, not four separate files
+  (deleted in #853; body text is Inclusive Sans).
 - Reference-data names (`emotion.<slug>`, `domain.<slug>`,
   `emotionCategory.<slug>`) resolve through `ReferenceStrings.referenceName`,
   never the DB `name` column directly — see Localization below.
@@ -310,8 +317,11 @@ ceremony. The trigger to revisit is a **second regular contributor** or a
   is ≥ API 26, so one file serves all densities.
 - **`values/colors.xml` is only for what the platform reads before Compose runs**
   — the icon ground and the splash background (with its `values-night` override).
-  It duplicates two values from `core/designsystem/Palettes.kt` because XML cannot read
-  Kotlin; keep them in sync and do **not** grow it into a second palette.
+  It duplicates three values from `core/designsystem/ColorSchemes.kt` (the splash
+  icon ground, and the light/dark splash backgrounds) because XML cannot read
+  Kotlin; the launcher icon ground `#C07A7A` is deliberately not a scheme value.
+  Keep the duplicated values in sync and do **not** grow this file into a second
+  palette.
 - **The cold-start splash is the system splash** (`androidx.core:core-splashscreen`).
   `Theme.Pebbles.Starting` (parent `Theme.SplashScreen.IconBackground`) is the
   activity's declared theme and names `Theme.Pebbles` as its

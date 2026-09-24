@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -68,12 +69,12 @@ fun PebblesPrimaryButton(
         contentAlignment = Alignment.Center,
     ) {
         if (isLoading) {
-            CircularProgressIndicator(color = Color.White, strokeWidth = 2.dp, modifier = Modifier.size(20.dp))
+            CircularProgressIndicator(color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp, modifier = Modifier.size(20.dp))
         } else {
             Text(
                 text = text,
                 style = PebblesTypography.buttonLabel,
-                color = if (enabled) Color.White else system.muted,
+                color = if (enabled) MaterialTheme.colorScheme.onPrimary else system.muted,
             )
         }
     }

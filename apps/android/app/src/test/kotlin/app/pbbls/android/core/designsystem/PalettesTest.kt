@@ -4,40 +4,40 @@ import androidx.compose.ui.graphics.Color
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/** Regression guard for the hand-transcribed hex values (plan: exact iOS asset-catalog colors). */
+/** The #853 bridge: old token names resolve to scheme roles. Deleted in Part 7. */
+@Suppress("DEPRECATION")
 class PalettesTest {
     @Test
-    fun systemLightMatchesSpec() {
-        assertEquals(Color(0xFF4A3639), SystemPaletteLight.foreground)
-        assertEquals(Color(0xFF7A5E64), SystemPaletteLight.secondary)
-        assertEquals(Color(0xFFE9E2E4), SystemPaletteLight.muted)
-        assertEquals(Color(0xFFFFFFFF), SystemPaletteLight.background)
-        assertEquals(Color(0xFF4A3639), SystemPaletteLight.onLight)
+    fun `system palette reads scheme roles`() {
+        val s = LightScheme
+        val p = systemPaletteFrom(s)
+        assertEquals(s.onSurface, p.foreground)
+        assertEquals(s.onSurfaceVariant, p.secondary)
+        assertEquals(s.outlineVariant, p.muted)
+        assertEquals(s.surface, p.background)
+        assertEquals(GoogleCapsuleInk, p.onLight)
     }
 
     @Test
-    fun systemDarkMatchesSpec() {
-        assertEquals(Color(0xFFE9E2E4), SystemPaletteDark.foreground)
-        assertEquals(Color(0xFFAF979D), SystemPaletteDark.secondary)
-        assertEquals(Color(0xFF2E2024), SystemPaletteDark.muted)
-        assertEquals(Color(0xFF171012), SystemPaletteDark.background)
-        assertEquals(Color(0xFF4A3639), SystemPaletteDark.onLight)
+    fun `accent palette reads scheme roles`() {
+        val s = DarkScheme
+        val a = accentPaletteFrom(s)
+        assertEquals(s.primary, a.primary)
+        assertEquals(s.onPrimary, a.light)
+        assertEquals(s.primaryContainer, a.secondary)
+        assertEquals(s.onPrimaryContainer, a.shaded)
+        assertEquals(s.onPrimaryContainer, a.dark)
+        assertEquals(s.primary.copy(alpha = 0.10f), a.surface)
     }
 
     @Test
-    fun accentPaletteHasNoDarkVariantAndExposesPrimaryHex() {
-        assertEquals(Color(0xFFC07A7A), AccentPaletteShared.primary)
-        assertEquals(Color(0x1AC07A7A), AccentPaletteShared.surface)
-        assertEquals("#C07A7A", AccentPaletteShared.primaryHex)
+    fun `primary hex is six digit rgb`() {
+        assertEquals("#8E4955", accentPaletteFrom(LightScheme).primaryHex)
+        assertEquals("#FFB2BC", accentPaletteFrom(DarkScheme).primaryHex)
     }
 
     @Test
-    fun spacingMatchesSpec() {
-        assertEquals(3.0, Spacing.xs.value.toDouble(), 0.0)
-        assertEquals(10.0, Spacing.sm.value.toDouble(), 0.0)
-        assertEquals(13.0, Spacing.md.value.toDouble(), 0.0)
-        assertEquals(17.0, Spacing.lg.value.toDouble(), 0.0)
-        assertEquals(22.0, Spacing.xl.value.toDouble(), 0.0)
-        assertEquals(34.0, Spacing.xxl.value.toDouble(), 0.0)
+    fun `toRgbHex drops alpha`() {
+        assertEquals("#112233", Color(0x80112233).toRgbHex())
     }
 }

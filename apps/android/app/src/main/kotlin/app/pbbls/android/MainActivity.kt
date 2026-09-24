@@ -11,6 +11,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.snapshotFlow
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
+import app.pbbls.android.core.data.AppearancePreferences
 import app.pbbls.android.core.data.EmotionPaletteService
 import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.LocalReferenceDataService
@@ -69,6 +70,10 @@ class MainActivity : ComponentActivity() {
     @Inject
     internal lateinit var snapUrls: SnapURLCache
 
+    /** Read by the theme root; Settings writes it (#853). */
+    @Inject
+    internal lateinit var appearance: AppearancePreferences
+
     /**
      * The same instance `RootScreen` reads via `hiltViewModel()` (#852):
      * `RootScreen` calls it above `PebblesNavDisplay`, outside any `NavEntry`, so
@@ -110,7 +115,7 @@ class MainActivity : ComponentActivity() {
         supabaseClientOwner.client.handleDeeplinks(intent)
         captureInviteToken(intent)
         setContent {
-            PebblesTheme {
+            PebblesTheme(dynamicColor = appearance.useWallpaperColors) {
                 CompositionLocalProvider(
                     LocalEmotionPaletteService provides palettes,
                     LocalReferenceDataService provides referenceData,

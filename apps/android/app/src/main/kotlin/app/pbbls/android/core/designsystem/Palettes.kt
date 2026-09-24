@@ -1,30 +1,30 @@
 package app.pbbls.android.core.designsystem
 
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import java.util.Locale
 
-/**
- * Four-tier system palette for interface chrome. Mirrors the structural shape
- * used for per-emotion palettes so token-aware UI code reads uniformly.
- * Ported from `apps/ios/Pebbles/Theme/Palettes.swift`.
- */
+// The #853 bridge. The old iOS-derived token vocabulary, kept only so Part 1
+// can change the whole app's look without touching ~650 call sites. Every
+// value is a role of the active ColorScheme. Parts 3–5 move call sites to
+// MaterialTheme.colorScheme; Part 7 deletes this file.
+
+private const val BRIDGE = "Bridge for #853: use MaterialTheme.colorScheme roles"
+
+@Deprecated(BRIDGE)
 data class SystemPalette(
     val foreground: Color,
     val secondary: Color,
     val muted: Color,
     val background: Color,
-    /**
-     * Ink for content painted on a *pinned light* surface (the Google capsule),
-     * where [foreground] would flip to #E9E2E4 and vanish at 1.28:1. Identical in
-     * both palettes on purpose: it does not follow the theme, because its ground
-     * does not either.
-     */
     val onLight: Color,
 )
 
-/**
- * Six-tier brand-accent palette. `primaryHex` is exposed for SVG-text
- * injection (D — `currentColor` replacement in path-rendered SVG markup).
- */
+@Deprecated(BRIDGE)
 data class AccentPalette(
     val dark: Color,
     val shaded: Color,
@@ -32,50 +32,41 @@ data class AccentPalette(
     val secondary: Color,
     val light: Color,
     val surface: Color,
+    /** `primary` as `#RRGGBB`, for `currentColor` injection into SVG markup (6-digit only). */
     val primaryHex: String,
 )
 
-internal val SystemPaletteLight =
+@Suppress("DEPRECATION")
+internal fun systemPaletteFrom(scheme: ColorScheme): SystemPalette =
     SystemPalette(
-        foreground = Color(0xFF4A3639),
-        secondary = Color(0xFF7A5E64),
-        muted = Color(0xFFE9E2E4),
-        background = Color(0xFFFFFFFF),
-        onLight = Color(0xFF4A3639),
+        foreground = scheme.onSurface,
+        secondary = scheme.onSurfaceVariant,
+        muted = scheme.outlineVariant,
+        background = scheme.surface,
+        onLight = GoogleCapsuleInk,
     )
 
-internal val SystemPaletteDark =
-    SystemPalette(
-        foreground = Color(0xFFE9E2E4),
-        secondary = Color(0xFFAF979D),
-        muted = Color(0xFF2E2024),
-        background = Color(0xFF171012),
-        onLight = Color(0xFF4A3639),
-    )
-
-// No dark variant — identical in both themes (mirrors iOS `AccentPalette`).
-internal val AccentPaletteShared =
+@Suppress("DEPRECATION")
+internal fun accentPaletteFrom(scheme: ColorScheme): AccentPalette =
     AccentPalette(
-        dark = Color(0xFF341B1B),
-        shaded = Color(0xFF8C4949),
-        primary = Color(0xFFC07A7A),
-        secondary = Color(0xFFEAD3D3),
-        light = Color(0xFFFAF4F4),
-        surface = Color(0x1AC07A7A),
-        primaryHex = "#C07A7A",
+        dark = scheme.onPrimaryContainer,
+        shaded = scheme.onPrimaryContainer,
+        primary = scheme.primary,
+        secondary = scheme.primaryContainer,
+        light = scheme.onPrimary,
+        surface = scheme.primary.copy(alpha = 0.10f),
+        primaryHex = scheme.primary.toRgbHex(),
     )
 
-/**
- * Destructive-action accent (delete). iOS renders this via SwiftUI's
- * `.destructive` button role, which has no design-system token; this is the
- * Android stand-in. Warm red tuned toward the mauve system palette. Graduate to
- * a SystemPalette field if a second destructive surface appears.
- */
-internal val PebblesDestructive = Color(0xFFD1453B)
+/** `#RRGGBB`, alpha dropped — the SVG pipeline misparses 8-digit hex. */
+internal fun Color.toRgbHex(): String = String.format(Locale.ROOT, "#%06X", toArgb() and 0xFFFFFF)
 
-/**
- * Success/confirmation accent — the [PebblesDestructive] counterpart for iOS's
- * `.green` (the photo section's "Ready"/"Saved" state labels, M42). Same
- * graduate-to-token rule.
- */
-internal val PebblesSuccess = Color(0xFF34A853)
+@Deprecated("Bridge for #853: use MaterialTheme.colorScheme.error")
+internal val PebblesDestructive: Color
+    @Composable @ReadOnlyComposable
+    get() = MaterialTheme.colorScheme.error
+
+@Deprecated("Bridge for #853: use MaterialTheme.colorScheme.tertiary")
+internal val PebblesSuccess: Color
+    @Composable @ReadOnlyComposable
+    get() = MaterialTheme.colorScheme.tertiary

@@ -1,6 +1,5 @@
 package app.pbbls.android.features.welcome
 
-import android.provider.Settings
 import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -45,6 +44,7 @@ import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.designsystem.openLegalDoc
+import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.rive.RiveLogo
 import kotlinx.coroutines.delay
 
@@ -282,25 +282,5 @@ private fun LaunchedEffectReveal(
             onStep(index + 1)
             previous = at
         }
-    }
-}
-
-/**
- * The Android analog of SwiftUI's `accessibilityReduceMotion`. Compose has no
- * first-class signal, so this reads the system animator duration scale — `0` when
- * the user disabled animations. In `@Preview`/screenshot rendering
- * ([LocalInspectionMode]) it returns `true` so the reveal renders fully in one
- * frame.
- */
-@Composable
-private fun rememberReduceMotion(): Boolean {
-    if (LocalInspectionMode.current) return true
-    val context = LocalContext.current
-    return remember {
-        Settings.Global.getFloat(
-            context.contentResolver,
-            Settings.Global.ANIMATOR_DURATION_SCALE,
-            1f,
-        ) == 0f
     }
 }
