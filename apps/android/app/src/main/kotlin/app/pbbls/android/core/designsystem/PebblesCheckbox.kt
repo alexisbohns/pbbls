@@ -76,7 +76,7 @@ fun PebblesCheckbox(
                 Modifier
                     .size(boxSize)
                     .background(if (isChecked) colors.primary else colors.surfaceContainerLowest, shape)
-                    .border(1.dp, if (isChecked) colors.primary else colors.outlineVariant, shape)
+                    .border(1.dp, if (isChecked) colors.primary else colors.outline, shape)
                     .clickable { onCheckedChange(!isChecked) },
             contentAlignment = Alignment.Center,
         ) {

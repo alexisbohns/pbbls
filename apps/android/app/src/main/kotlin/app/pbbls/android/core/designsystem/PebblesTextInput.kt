@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 /**
  * Rounded-rectangle text input with a static 1dp border (no focus state, to
  * match iOS 1:1). `surface` fill (never a hardcoded white, which is unreadable
- * in dark mode), `outlineVariant` border, `onSurfaceVariant` for both
+ * in dark mode), `outline` border (an input boundary needs 3:1, WCAG 1.4.11), `onSurfaceVariant` for both
  * placeholder and typed content. Ports
  * `apps/ios/Pebbles/Components/Inputs/PebblesTextInput.swift`.
  */
@@ -59,7 +59,7 @@ fun PebblesTextInput(
                 .fillMaxWidth()
                 .heightIn(min = minHeight)
                 .background(colors.surface, shape)
-                .border(1.dp, colors.outlineVariant, shape),
+                .border(1.dp, colors.outline, shape),
         contentAlignment = Alignment.CenterStart,
     ) {
         BasicTextField(
