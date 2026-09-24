@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,7 +17,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesTheme
 
 /**
  * The Path tab's create affordance, now a Path-only FAB (#852, D3) — the bar
@@ -24,8 +24,7 @@ import app.pbbls.android.core.designsystem.PebblesTheme
  * ([NewPebbleButton]) used to sit in, so the affordance moved up and became
  * circular. The tap/long-press pair is preserved verbatim (M58 D1): a tap
  * opens the step-by-step record flow, a long press opens the all-at-once
- * composer instead. `accent.primary` / `accent.light` are the same fill/label
- * pair [NewPebbleButton]'s pill used, carried over rather than invented.
+ * composer instead. The `primary` fill carries its `onPrimary` icon.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -34,7 +33,7 @@ fun NewPebbleFab(
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     val label = stringResource(R.string.create_new_pebble)
     Box(
         modifier =
@@ -42,14 +41,14 @@ fun NewPebbleFab(
                 .size(56.dp)
                 .shadow(elevation = 6.dp, shape = CircleShape)
                 .clip(CircleShape)
-                .background(accent.primary)
+                .background(colors.primary)
                 .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(
             painter = painterResource(R.drawable.ic_plus),
             contentDescription = label,
-            tint = accent.light,
+            tint = colors.onPrimary,
             modifier = Modifier.size(24.dp),
         )
     }

@@ -8,16 +8,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.core.model.WeekRollEntry
@@ -69,22 +67,22 @@ private fun EmptyWeek(
     onCreate: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp, Alignment.CenterVertically),
     ) {
-        // iOS: Ysabeau Semibold 20 — buttonLabel is the Ysabeau token.
-        PebblesText(
+        // iOS: Ysabeau Semibold 20 — titleLarge is the Ysabeau role at that size.
+        Text(
             text = stringResource(R.string.path_empty_week_title),
-            style = PebblesTypography.buttonLabel.copy(fontSize = 20.sp),
-            color = system.foreground,
+            style = MaterialTheme.typography.titleLarge,
+            color = colors.onSurface,
         )
-        PebblesText(
+        Text(
             text = stringResource(R.string.path_empty_week_subtitle),
-            style = PebblesTypography.meta,
-            color = system.secondary,
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.onSurfaceVariant,
         )
         NewPebbleButton(
             onTap = onCreate,
