@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,9 +23,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.Valence
@@ -53,8 +52,7 @@ fun RecordSuccessStep(
     onExit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
 
     Column(
         modifier =
@@ -81,10 +79,10 @@ fun RecordSuccessStep(
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             // User-authored, so never localized.
-            PebblesText(
+            Text(
                 text = name,
-                style = PebblesTypography.title,
-                color = system.foreground,
+                style = MaterialTheme.typography.headlineMedium,
+                color = colors.onSurface,
                 textAlign = TextAlign.Center,
             )
 
@@ -98,13 +96,13 @@ fun RecordSuccessStep(
                     Icon(
                         painter = painterResource(R.drawable.ic_sparkle),
                         contentDescription = null,
-                        tint = accent.primary,
+                        tint = colors.primary,
                         modifier = Modifier.size(16.dp),
                     )
-                    PebblesText(
+                    Text(
                         text = stringResource(R.string.record_karma, karmaDelta),
-                        style = PebblesTypography.headline,
-                        color = system.foreground,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = colors.onSurface,
                     )
                 }
             }

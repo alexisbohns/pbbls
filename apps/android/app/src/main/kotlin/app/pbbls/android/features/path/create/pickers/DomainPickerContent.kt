@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,9 +19,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.ui.ReferenceStrings
@@ -60,24 +59,26 @@ fun DomainPickerContent(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun DomainRow(
     domain: Domain,
     isSelected: Boolean,
     onSelect: () -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     val name = ReferenceStrings.referenceName(ReferenceType.DOMAIN, domain.slug, domain.name)
     val label = ReferenceStrings.domainLabel(domain.slug, domain.label)
-    val foreground = if (isSelected) accent.primary else system.foreground
+    // A selected row is a primaryContainer fill, so its content reads the paired role.
+    val foreground = if (isSelected) colors.onPrimaryContainer else colors.onSurface
+    val secondaryForeground = if (isSelected) colors.onPrimaryContainer else colors.onSurfaceVariant
 
     Row(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(if (isSelected) accent.primary.copy(alpha = 0.12f) else system.muted)
+                .clip(MaterialTheme.shapes.medium)
+                .background(if (isSelected) colors.primaryContainer else colors.surfaceContainerHighest)
                 .clickable(onClick = onSelect)
                 .padding(horizontal = Spacing.md, vertical = Spacing.sm)
                 // Two lines, one target: the glyph is decorative and the name +
@@ -98,11 +99,9 @@ private fun DomainRow(
             }
         }
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            PebblesText(text = name, style = PebblesTypography.bodyEmphasized, color = foreground)
-            // subhead, not meta: the `meta` token uppercases and letter-spaces,
-            // which is right for a label and wrong for a sentence-length
-            // description.
-            PebblesText(text = label, style = PebblesTypography.subhead, color = system.secondary)
+            Text(text = name, style = MaterialTheme.typography.bodyLargeEmphasized, color = foreground)
+            // A body role, not a label one: this is a sentence-length description.
+            Text(text = label, style = MaterialTheme.typography.bodyMedium, color = secondaryForeground)
         }
     }
 }

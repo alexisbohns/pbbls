@@ -1485,7 +1485,7 @@ Commit per feature folder (six commits). Part 4 is the largest diff by file coun
 `create/`: `AttachedPhotoView` (19), `CreatePebbleScreen` (26), `ExistingSnapRow` (9), `PebbleForm` (57), `VisibilityChip` (12), `WhenRow` (14), `pickers/DomainPickerContent` (8), `pickers/EmotionPickerSheet` (21), `pickers/GlyphPickerSheet` (29), `pickers/SoulPickerSheet` (17).
 `read/`: `PebblePageColors` (18), `PebblePrivacyBadge` (3), `PebbleReadPetroglyph` (1), `PebbleReadTitle` (8 — 24 sp → `headlineSmall`), `PebbleReadView` (12), `PebbleSnapFrame` (1), `PetroglyphColors` (14).
 `record/`: `RecordFlowChrome` (6), `RecordFlowScreen` (33), `RecordStepScaffold` (11), `steps/RecordCollectionStep` (12), `steps/RecordNameStep` (12 — `nameInputHand` → `PebblesTheme.hand`), `steps/RecordPhotoStep` (35), `steps/RecordPrivacyStep` (20), `steps/RecordSuccessStep` (10), `steps/RecordWhenStep` (28).
-`valence/`: `ValenceRoll` (7), `ValenceStone` (1), `ValenceStoneStyle` (11 — parameters to `scheme: ColorScheme`; `joySurface` literal → `scheme.tertiaryContainer`), `ValenceWord` (6 — `valenceWord`/`inkOverhang` → `PebblesTheme.hand` / `PebblesHandTypography`).
+`valence/`: `ValenceRoll` (7), `ValenceStone` (1), `ValenceStoneStyle` (11 — parameters to `scheme: ColorScheme`; `joySurface` is emotion data: keep it, parsed from a hex in `ValenceMesh` (corrected after Part 5 turned the dark highlight stone green)), `ValenceWord` (6 — `valenceWord`/`inkOverhang` → `PebblesTheme.hand` / `PebblesHandTypography`).
 
 Extra task in Part 5:
 

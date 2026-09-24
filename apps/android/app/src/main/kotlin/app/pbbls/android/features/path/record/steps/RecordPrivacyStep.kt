@@ -8,8 +8,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,10 +23,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesDestructive
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.core.ui.iconRes
@@ -50,7 +48,7 @@ fun RecordPrivacyStep(
     snapBlockedMessage: String? = null,
     publishError: String? = null,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
@@ -60,20 +58,20 @@ fun RecordPrivacyStep(
         }
 
         if (snapBlockedMessage != null) {
-            PebblesText(
+            Text(
                 text = snapBlockedMessage,
-                style = PebblesTypography.subhead,
-                color = system.secondary,
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.onSurfaceVariant,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
             )
         }
 
         if (publishError != null) {
-            PebblesText(
+            Text(
                 text = publishError,
-                style = PebblesTypography.callout,
-                color = PebblesDestructive,
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.error,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth().padding(top = Spacing.sm),
             )
@@ -81,14 +79,17 @@ fun RecordPrivacyStep(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun GradeRow(
     grade: Visibility,
     isSelected: Boolean,
     onSelect: () -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
+    // A selected row is a primaryContainer fill, so its content reads the paired role.
+    val foreground = if (isSelected) colors.onPrimaryContainer else colors.onSurface
+    val secondaryForeground = if (isSelected) colors.onPrimaryContainer else colors.onSurfaceVariant
     val label = stringResource(grade.labelRes)
     val explanation = stringResource(grade.explanationRes)
 
@@ -96,8 +97,8 @@ private fun GradeRow(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(if (isSelected) accent.primary.copy(alpha = 0.12f) else system.muted)
+                .clip(MaterialTheme.shapes.medium)
+                .background(if (isSelected) colors.primaryContainer else colors.surfaceContainerHighest)
                 .clickable(onClick = onSelect)
                 .padding(Spacing.md)
                 .clearAndSetSemantics { contentDescription = "$label. $explanation" },
@@ -107,19 +108,19 @@ private fun GradeRow(
         Icon(
             painter = painterResource(grade.iconRes),
             contentDescription = null,
-            tint = if (isSelected) accent.primary else system.secondary,
+            tint = secondaryForeground,
             modifier = Modifier.size(24.dp),
         )
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
-            PebblesText(
+            Text(
                 text = label,
-                style = PebblesTypography.bodyEmphasized,
-                color = if (isSelected) accent.primary else system.foreground,
+                style = MaterialTheme.typography.bodyLargeEmphasized,
+                color = foreground,
             )
-            PebblesText(
+            Text(
                 text = explanation,
-                style = PebblesTypography.subhead,
-                color = system.secondary,
+                style = MaterialTheme.typography.bodyMedium,
+                color = secondaryForeground,
             )
         }
     }

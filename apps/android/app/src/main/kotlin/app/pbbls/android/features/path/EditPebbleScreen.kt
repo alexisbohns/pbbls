@@ -16,10 +16,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -33,9 +36,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.LocalReferenceDataService
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
+import app.pbbls.android.core.designsystem.toRgbHex
 import app.pbbls.android.core.model.renderHeightDp
 import app.pbbls.android.features.path.create.PebbleForm
 import app.pbbls.android.features.path.create.VisibilityChip
@@ -73,8 +74,10 @@ fun EditPebbleScreen(
     val referenceData = LocalReferenceDataService.current
     val palettes = LocalEmotionPaletteService.current
     val isDark = isSystemInDarkTheme()
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
+    // SVG stroke fallback when the pebble has no emotion palette: the theme's
+    // primary, formatted once per scheme for injection into the render.
+    val fallbackStrokeHex = remember(colors.primary) { colors.primary.toRgbHex() }
 
     LaunchedEffect(pebbleId) { viewModel.start(pebbleId) }
 
@@ -97,7 +100,7 @@ fun EditPebbleScreen(
     Column(
         modifier
             .fillMaxSize()
-            .background(system.background)
+            .background(colors.surface)
             .safeDrawingPadding(),
     ) {
         EditTopBar(
@@ -110,7 +113,7 @@ fun EditPebbleScreen(
         when (val state = uiState) {
             EditPebbleUiState.Loading ->
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    CircularProgressIndicator(color = accent.primary)
+                    CircularProgressIndicator(color = colors.primary)
                 }
             EditPebbleUiState.Error ->
                 EditLoadError(onRetry = viewModel::retry)
@@ -120,7 +123,7 @@ fun EditPebbleScreen(
                 // EditPebbleSheet uses strokeHex(colorScheme), NOT the
                 // intensity-based pebbleFrameColors the read banner uses).
                 val strokeColor =
-                    state.emotionId?.let { palettes.palette(it)?.strokeHex(isDark) } ?: accent.primaryHex
+                    state.emotionId?.let { palettes.palette(it)?.strokeHex(isDark) } ?: fallbackStrokeHex
                 val selectedEmotion = state.draft.emotionId?.let { palettes.byEmotionId[it] }
                 val saveError = state.saveErrorRes?.let { stringResource(it) }
                 Column(Modifier.fillMaxSize()) {
@@ -178,39 +181,38 @@ private fun EditTopBar(
     onCancel: () -> Unit,
     onSave: () -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     Row(
         modifier = Modifier.padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         TextButton(onClick = onCancel) {
-            PebblesText(
+            Text(
                 stringResource(R.string.action_cancel),
-                PebblesTypography.buttonLabel,
-                color = accent.primary,
+                style = MaterialTheme.typography.labelLarge,
+                color = colors.primary,
             )
         }
         Spacer(Modifier.weight(1f))
-        PebblesText(
+        Text(
             stringResource(R.string.edit_pebble_title),
-            PebblesTypography.buttonLabel,
-            color = system.foreground,
+            style = MaterialTheme.typography.labelLarge,
+            color = colors.onSurface,
         )
         Spacer(Modifier.weight(1f))
         if (isSaving) {
             Box(Modifier.size(48.dp), Alignment.Center) {
                 CircularProgressIndicator(
-                    color = accent.primary,
+                    color = colors.primary,
                     modifier = Modifier.size(20.dp),
                 )
             }
         } else {
             TextButton(onClick = onSave, enabled = saveEnabled) {
-                PebblesText(
+                Text(
                     stringResource(R.string.action_save),
-                    PebblesTypography.buttonLabel,
-                    color = accent.primary,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colors.primary,
                 )
             }
         }
@@ -219,23 +221,22 @@ private fun EditTopBar(
 
 @Composable
 private fun EditLoadError(onRetry: () -> Unit) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = Modifier.fillMaxSize().padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        PebblesText(
+        Text(
             stringResource(R.string.pebble_detail_load_error),
-            PebblesTypography.body,
-            color = system.secondary,
+            style = MaterialTheme.typography.bodyLarge,
+            color = colors.onSurfaceVariant,
         )
         TextButton(onClick = onRetry) {
-            PebblesText(
+            Text(
                 stringResource(R.string.pebble_detail_retry),
-                PebblesTypography.buttonLabel,
-                color = accent.primary,
+                style = MaterialTheme.typography.labelLarge,
+                color = colors.primary,
             )
         }
     }

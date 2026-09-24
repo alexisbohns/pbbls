@@ -12,6 +12,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,9 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.designsystem.SurfaceTile
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.PebbleDetail
@@ -42,7 +42,8 @@ import app.pbbls.android.core.ui.render.GlyphImage
  *
  * The whole page tints to the pebble's emotion palette (#605) — background plus
  * every text/tile/soul color resolves through [pebblePageColors]. On a palette
- * cache miss ([palette] null) the page falls back to the system/accent chrome.
+ * cache miss ([palette] null) the page falls back to the theme's `surface` and
+ * `on*` roles.
  */
 @Composable
 fun PebbleReadView(
@@ -50,12 +51,12 @@ fun PebbleReadView(
     palette: EmotionPalette?,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     val pageColors = palette?.let { pebblePageColors(it, isSystemInDarkTheme()) }
     Column(
         modifier
             .fillMaxSize()
-            .background(pageColors?.background ?: system.background)
+            .background(pageColors?.background ?: colors.surface)
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp)
             .padding(top = 8.dp, bottom = 32.dp),
@@ -77,10 +78,10 @@ fun PebbleReadView(
         PebbleReadMeta(detail = detail, pageColors = pageColors)
         val desc = detail.description
         if (!desc.isNullOrEmpty()) {
-            PebblesText(
+            Text(
                 desc,
-                style = PebblesTypography.body,
-                color = pageColors?.description ?: system.foreground,
+                style = MaterialTheme.typography.bodyLarge,
+                color = pageColors?.description ?: colors.onSurface,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
@@ -193,7 +194,7 @@ private fun PebbleReadSouls(
 /**
  * One soul cell — ports iOS `SoulItem(case: .default)`: the soul's glyph above
  * its name in the hand font, no pebble count. [glyphColor] / [nameColor] tint to
- * the emotion palette on the read page (#605); null keeps `system.secondary`.
+ * the emotion palette on the read page (#605); null keeps `onSurfaceVariant`.
  */
 @Composable
 private fun DetailSoulCell(
@@ -202,7 +203,7 @@ private fun DetailSoulCell(
     glyphColor: Color? = null,
     nameColor: Color? = null,
 ) {
-    val system = PebblesTheme.colors.system
+    val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
     Column(
         modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -211,13 +212,13 @@ private fun DetailSoulCell(
         GlyphImage(
             strokes = soul.glyph.strokes,
             viewBox = soul.glyph.viewBox,
-            strokeColor = glyphColor ?: system.secondary,
+            strokeColor = glyphColor ?: onSurfaceVariant,
             modifier = Modifier.size(72.dp),
         )
-        PebblesText(
+        Text(
             soul.name,
-            style = PebblesTypography.bodyLeadHand,
-            color = nameColor ?: system.secondary,
+            style = PebblesTheme.hand.bodyLeadHand,
+            color = nameColor ?: onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
         )

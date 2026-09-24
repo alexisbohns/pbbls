@@ -13,6 +13,9 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,10 +30,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalEmotionPaletteService
-import app.pbbls.android.core.designsystem.PebblesDestructive
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.core.model.WeekRollEntry
@@ -77,14 +77,13 @@ fun PathScreen(
         onPauseOrDispose {}
     }
     val palettes = LocalEmotionPaletteService.current
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
 
     Box(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(system.background),
+                .background(colors.surface),
     ) {
         Box(
             modifier =
@@ -96,15 +95,15 @@ fun PathScreen(
             when (uiState) {
                 PathUiState.Loading ->
                     CircularProgressIndicator(
-                        color = accent.primary,
+                        color = colors.primary,
                         modifier = Modifier.align(Alignment.Center),
                     )
 
                 is PathUiState.Error ->
-                    PebblesText(
+                    Text(
                         text = stringResource((uiState as PathUiState.Error).messageRes),
-                        style = PebblesTypography.body,
-                        color = system.secondary,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.onSurfaceVariant,
                         modifier = Modifier.align(Alignment.Center),
                     )
 
@@ -247,10 +246,10 @@ fun PathContent(
                 horizontalArrangement = Arrangement.Center,
             ) {
                 TextButton(onClick = onOpenDrafts) {
-                    PebblesText(
+                    Text(
                         text = stringResource(R.string.drafts_entry, draftCount),
-                        style = PebblesTypography.meta,
-                        color = PebblesTheme.colors.system.secondary,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -282,46 +281,46 @@ internal fun refocusedWeekStart(
  * (D8): "Delete <name>? This can't be undone." with a destructive Delete and a
  * Cancel. `internal` (not `private`) so the screenshot preview can drive it.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun DeleteConfirmDialog(
     pebbleName: String,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = system.background,
+        containerColor = colors.surfaceContainerHigh,
         title = {
-            PebblesText(
+            Text(
                 text = stringResource(R.string.pebble_delete_confirm_title, pebbleName),
-                style = PebblesTypography.headlineEmphasized,
-                color = system.foreground,
+                style = MaterialTheme.typography.titleMediumEmphasized,
+                color = colors.onSurface,
             )
         },
         text = {
-            PebblesText(
+            Text(
                 text = stringResource(R.string.pebble_delete_confirm_message),
-                style = PebblesTypography.body,
-                color = system.secondary,
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.onSurfaceVariant,
             )
         },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.pebble_delete),
-                    style = PebblesTypography.buttonLabel,
-                    color = PebblesDestructive,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colors.error,
                 )
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.action_cancel),
-                    style = PebblesTypography.buttonLabel,
-                    color = accent.primary,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colors.primary,
                 )
             }
         },
@@ -331,24 +330,23 @@ internal fun DeleteConfirmDialog(
 /** Delete-failure notice — a single-action AlertDialog dismissing back to the timeline. */
 @Composable
 private fun DeleteErrorDialog(onDismiss: () -> Unit) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = system.background,
+        containerColor = colors.surfaceContainerHigh,
         text = {
-            PebblesText(
+            Text(
                 text = stringResource(R.string.pebble_delete_error),
-                style = PebblesTypography.body,
-                color = system.secondary,
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.onSurfaceVariant,
             )
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.action_cancel),
-                    style = PebblesTypography.buttonLabel,
-                    color = accent.primary,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colors.primary,
                 )
             }
         },

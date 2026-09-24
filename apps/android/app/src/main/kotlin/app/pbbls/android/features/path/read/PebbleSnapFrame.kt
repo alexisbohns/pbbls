@@ -5,7 +5,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -34,6 +35,7 @@ import app.pbbls.android.core.model.Valence
  * picture; the tilt is draw-only (`rotate`), so the rounded rectangle turns with
  * the image. The snap is hidden from accessibility (iOS/web parity).
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PebbleSnapFrame(
     photo: Painter,
@@ -64,7 +66,7 @@ fun PebbleSnapFrame(
                         .padding(top = PHOTO_POKE_TOP, end = PHOTO_POKE_END)
                         .size(width = photoWidth, height = photoHeight)
                         .rotate(PHOTO_TILT)
-                        .clip(RoundedCornerShape(PHOTO_CORNER)),
+                        .clip(MaterialTheme.shapes.largeIncreased),
             )
             PebbleReadPetroglyph(
                 renderSvg = renderSvg,
@@ -94,8 +96,6 @@ private val PHOTO_POKE_END = 28.dp
 
 /** Layout slot for the overlapping Petroglyph (its tilt bounding runs a touch larger). */
 private val OVERLAY_PETROGLYPH = 96.dp
-
-private val PHOTO_CORNER = 18.dp
 
 /** Counter-clockwise photo tilt, clockwise Petroglyph tilt — the web `-rotate-4` / `rotate-7`. */
 private const val PHOTO_TILT = -5f

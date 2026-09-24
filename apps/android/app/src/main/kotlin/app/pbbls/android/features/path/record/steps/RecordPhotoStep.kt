@@ -9,9 +9,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -29,10 +30,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesDestructive
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.AttachedSnap
 import app.pbbls.android.core.model.FormSnap
@@ -74,17 +71,22 @@ fun RecordPhotoStep(
 
 @Composable
 private fun AddTile(onPick: () -> Unit) {
-    val system = PebblesTheme.colors.system
-    val muted = system.muted
+    val colors = MaterialTheme.colorScheme
+    // `outline`, not `outlineVariant`: an empty slot the user must find and tap,
+    // so its boundary needs 3:1 (WCAG 1.4.11) — the DashedPlaceholder rule.
+    val dashColor = colors.outline
+    val shape = MaterialTheme.shapes.extraLarge
     Column(
         modifier =
             Modifier
                 .fillMaxWidth()
                 .height(TILE_HEIGHT)
                 .drawBehind {
+                    // The dashes trace the clip below, so both read the same shape.
+                    val radius = shape.topStart.toPx(size, this)
                     drawRoundRect(
-                        color = muted,
-                        cornerRadius = CornerRadius(34.dp.toPx()),
+                        color = dashColor,
+                        cornerRadius = CornerRadius(radius),
                         style =
                             Stroke(
                                 width = 2.dp.toPx(),
@@ -94,7 +96,7 @@ private fun AddTile(onPick: () -> Unit) {
                                     ),
                             ),
                     )
-                }.clip(RoundedCornerShape(Spacing.xxl))
+                }.clip(shape)
                 .clickable(onClick = onPick),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -102,13 +104,13 @@ private fun AddTile(onPick: () -> Unit) {
         Icon(
             painter = painterResource(R.drawable.ic_image),
             contentDescription = null,
-            tint = system.secondary,
+            tint = colors.onSurfaceVariant,
             modifier = Modifier.size(40.dp),
         )
-        PebblesText(
+        Text(
             text = stringResource(R.string.photo_add),
-            style = PebblesTypography.callout,
-            color = system.secondary,
+            style = MaterialTheme.typography.bodyLarge,
+            color = colors.onSurfaceVariant,
         )
     }
 }
@@ -120,7 +122,7 @@ private fun PickedPhoto(
     onRetry: () -> Unit,
     onRemove: () -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     // Decoded once per byte array: the thumb is a fixed 420px JPEG the pipeline
     // already produced, so there is nothing to reload or resize.
     val bitmap =
@@ -141,7 +143,7 @@ private fun PickedPhoto(
                 Modifier
                     .fillMaxWidth()
                     .height(TILE_HEIGHT)
-                    .clip(RoundedCornerShape(Spacing.xxl)),
+                    .clip(MaterialTheme.shapes.extraLarge),
         )
     }
 
@@ -152,23 +154,23 @@ private fun PickedPhoto(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 CircularProgressIndicator(
-                    color = PebblesTheme.colors.accent.primary,
+                    color = colors.primary,
                     strokeWidth = 2.dp,
                     modifier = Modifier.size(16.dp),
                 )
-                PebblesText(
+                Text(
                     text = stringResource(R.string.photo_state_uploading),
-                    style = PebblesTypography.subhead,
-                    color = system.secondary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.onSurfaceVariant,
                 )
             }
 
         AttachedSnap.UploadState.UPLOADED ->
             TextButton(onClick = onPick) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.record_photo_choose_another),
-                    style = PebblesTypography.subhead,
-                    color = system.secondary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.onSurfaceVariant,
                 )
             }
 
@@ -177,25 +179,25 @@ private fun PickedPhoto(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(Spacing.xs),
             ) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.record_photo_upload_failed),
-                    style = PebblesTypography.subhead,
-                    color = PebblesDestructive,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.error,
                     textAlign = TextAlign.Center,
                 )
                 Row(horizontalArrangement = Arrangement.spacedBy(Spacing.lg)) {
                     TextButton(onClick = onRetry) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.record_photo_retry),
-                            style = PebblesTypography.subhead,
-                            color = PebblesTheme.colors.accent.primary,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colors.primary,
                         )
                     }
                     TextButton(onClick = onRemove) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.record_photo_remove),
-                            style = PebblesTypography.subhead,
-                            color = PebblesDestructive,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = colors.error,
                         )
                     }
                 }
@@ -205,7 +207,7 @@ private fun PickedPhoto(
 
 @Composable
 private fun AttachedWithoutThumb(onRemove: () -> Unit) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     Box(
         modifier = Modifier.fillMaxWidth().height(TILE_HEIGHT),
         contentAlignment = Alignment.Center,
@@ -217,20 +219,20 @@ private fun AttachedWithoutThumb(onRemove: () -> Unit) {
             Icon(
                 painter = painterResource(R.drawable.ic_image),
                 contentDescription = null,
-                tint = system.secondary,
+                tint = colors.onSurfaceVariant,
                 modifier = Modifier.size(40.dp),
             )
-            PebblesText(
+            Text(
                 text = stringResource(R.string.record_photo_attached),
-                style = PebblesTypography.subhead,
-                color = system.secondary,
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.onSurfaceVariant,
                 textAlign = TextAlign.Center,
             )
             TextButton(onClick = onRemove) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.record_photo_remove),
-                    style = PebblesTypography.subhead,
-                    color = PebblesDestructive,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.error,
                 )
             }
         }

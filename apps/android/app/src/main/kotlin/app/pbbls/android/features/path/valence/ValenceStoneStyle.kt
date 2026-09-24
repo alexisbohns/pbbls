@@ -4,13 +4,13 @@ import android.graphics.Bitmap
 import android.graphics.BitmapShader
 import android.graphics.Matrix
 import android.graphics.Shader
+import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ShaderBrush
 import androidx.compose.ui.graphics.SolidColor
-import app.pbbls.android.core.designsystem.AccentPalette
-import app.pbbls.android.core.designsystem.SystemPalette
+import androidx.core.graphics.toColorInt
 import app.pbbls.android.core.model.ValencePolarity
 
 /**
@@ -33,7 +33,7 @@ internal data class ValenceStoneStyle(
 )
 
 /**
- * The nine stones' materials, resolved from the theme's palettes.
+ * The nine stones' materials, resolved from the active [ColorScheme].
  *
  * Selection **inverts the two roles**: the wash becomes the solid and the ink
  * goes pale, so the chosen stone reads as filled in rather than merely less
@@ -45,9 +45,11 @@ internal object ValenceStoneStyles {
     /**
      * Joy's `surface_color` at 10%, copied for the same reason as the gradient
      * samples: `EmotionPaletteService` needs the network and is not loaded when
-     * this view first draws.
+     * this view first draws. Emotion data, so it is parsed from its hex like
+     * the mesh rather than written as a theme literal.
      */
-    private val joySurface = Color(0x1AA15C08)
+    private val joySurface =
+        Color(ValenceMesh.JOY_SURFACE_HEX.toColorInt()).copy(alpha = 0.10f)
 
     private val wash = MeshShaderBrush(ValenceMesh.washHexes)
     private val selectedWash = MeshShaderBrush(ValenceMesh.selectedWashHexes)
@@ -57,22 +59,24 @@ internal object ValenceStoneStyles {
         polarity: ValencePolarity,
         isSelected: Boolean,
         isDark: Boolean,
-        system: SystemPalette,
-        accent: AccentPalette,
+        scheme: ColorScheme,
     ): ValenceStoneStyle =
         if (isSelected) {
             when (polarity) {
+                // The inverse pair is M3's own "flip the surface" role, which is
+                // exactly what selection does to the grey stone.
                 ValencePolarity.LOWLIGHT -> {
-                    ValenceStoneStyle(SolidColor(system.secondary), SolidColor(system.background))
+                    ValenceStoneStyle(SolidColor(scheme.inverseSurface), SolidColor(scheme.inverseOnSurface))
                 }
 
                 ValencePolarity.NEUTRAL -> {
-                    ValenceStoneStyle(SolidColor(accent.primary), SolidColor(accent.light))
+                    ValenceStoneStyle(SolidColor(scheme.primary), SolidColor(scheme.onPrimary))
                 }
 
-                // White rather than `accent.light`, and against a wash taken to
+                // White rather than `onPrimary`, and against a wash taken to
                 // full strength: on the resting peach the artwork had almost
-                // nothing to push against.
+                // nothing to push against. The mesh is baked from fixed samples
+                // and does not follow the theme, so its ink cannot either.
                 ValencePolarity.HIGHLIGHT -> {
                     ValenceStoneStyle(selectedWash, SolidColor(Color.White))
                 }
@@ -80,13 +84,17 @@ internal object ValenceStoneStyles {
         } else {
             when (polarity) {
                 ValencePolarity.LOWLIGHT -> {
-                    ValenceStoneStyle(SolidColor(system.muted), SolidColor(system.secondary))
+                    ValenceStoneStyle(
+                        SolidColor(scheme.surfaceContainerHighest),
+                        SolidColor(scheme.onSurfaceVariant),
+                    )
                 }
 
-                // `accent.surface` already carries a low alpha, so it lands as
-                // a wash behind the opaque `accent.primary` artwork.
+                // `primary` rather than the paired `onPrimaryContainer`: the
+                // artwork is what makes the neutral stone rose, and the two
+                // tones sit far enough apart for line art (3:1).
                 ValencePolarity.NEUTRAL -> {
-                    ValenceStoneStyle(SolidColor(accent.surface), SolidColor(accent.primary))
+                    ValenceStoneStyle(SolidColor(scheme.primaryContainer), SolidColor(scheme.primary))
                 }
 
                 ValencePolarity.HIGHLIGHT -> {
@@ -103,12 +111,11 @@ internal object ValenceStoneStyles {
      */
     fun headlineInk(
         polarity: ValencePolarity,
-        system: SystemPalette,
-        accent: AccentPalette,
+        scheme: ColorScheme,
     ): Brush =
         when (polarity) {
-            ValencePolarity.LOWLIGHT -> SolidColor(system.foreground)
-            ValencePolarity.NEUTRAL -> SolidColor(accent.primary)
+            ValencePolarity.LOWLIGHT -> SolidColor(scheme.onSurface)
+            ValencePolarity.NEUTRAL -> SolidColor(scheme.primary)
             ValencePolarity.HIGHLIGHT -> ink
         }
 
@@ -118,10 +125,11 @@ internal object ValenceStoneStyles {
      * Light mode keeps the sampled gradient at low opacity: over a light page
      * it stays the pastel it was sampled from. Dark mode cannot — the same
      * gradient over black goes muddy and opaque, and the highlight stone ends
-     * up looking nothing like its neighbours, which wear flat 10%-alpha surface
-     * colours (`accent.surface` is `accent.primary` at 0.10). So dark mode
-     * joins that convention rather than fighting it, in a warm gold that keeps
-     * highlight distinct from neutral's rose.
+     * up looking nothing like its neighbours, which wear flat container
+     * colours (neutral's `primaryContainer`). So dark mode joins that
+     * convention rather than fighting it, in Joy's own warm gold, which keeps
+     * highlight distinct from neutral's rose. That gold is emotion data (like
+     * the mesh samples), not a theme role: no scheme role means "joy".
      */
     private fun restingWash(isDark: Boolean): Brush = if (isDark) SolidColor(joySurface) else wash
 

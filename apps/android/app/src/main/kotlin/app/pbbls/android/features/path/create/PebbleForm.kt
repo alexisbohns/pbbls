@@ -18,11 +18,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,14 +36,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.DashedPlaceholder
-import app.pbbls.android.core.designsystem.PebblesDestructive
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTextInput
 import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionWithPalette
 import app.pbbls.android.core.model.FormSnap
@@ -186,10 +182,10 @@ fun PebbleForm(
                 )
         }
         if (saveError != null) {
-            PebblesText(
+            Text(
                 text = saveError,
-                style = PebblesTypography.callout,
-                color = PebblesDestructive,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.error,
                 modifier = Modifier.fillMaxWidth(),
             )
         }
@@ -252,27 +248,27 @@ internal fun FormRow(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     Row(
         modifier =
             modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
+                .clip(MaterialTheme.shapes.medium)
                 .clickable(onClick = onClick)
                 .padding(vertical = 12.dp, horizontal = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         leading()
-        PebblesText(label, PebblesTypography.body, color = system.foreground)
+        Text(label, style = MaterialTheme.typography.bodyLarge, color = colors.onSurface)
         Spacer(Modifier.weight(1f))
         if (value != null) {
-            PebblesText(value, PebblesTypography.body, color = system.secondary, maxLines = 1)
+            Text(value, style = MaterialTheme.typography.bodyLarge, color = colors.onSurfaceVariant, maxLines = 1)
         }
         Icon(
             painter = painterResource(R.drawable.ic_chevron_right),
             contentDescription = null,
-            tint = system.secondary,
+            tint = colors.onSurfaceVariant,
             modifier = Modifier.size(16.dp),
         )
     }
@@ -283,10 +279,10 @@ private fun FormSectionHeader(
     text: String,
     modifier: Modifier = Modifier,
 ) {
-    PebblesText(
+    Text(
         text = text,
-        style = PebblesTypography.cardHeading,
-        color = PebblesTheme.colors.system.secondary,
+        style = MaterialTheme.typography.titleSmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = modifier,
     )
 }
@@ -294,12 +290,12 @@ private fun FormSectionHeader(
 /** The empty photo slot — iOS `Label("Add a photo", systemImage: "photo.badge.plus")` row. */
 @Composable
 private fun AddPhotoRow(onClick: () -> Unit) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     Row(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
+                .clip(MaterialTheme.shapes.medium)
                 .clickable(onClick = onClick)
                 .padding(vertical = 12.dp, horizontal = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -308,13 +304,13 @@ private fun AddPhotoRow(onClick: () -> Unit) {
         Icon(
             painter = painterResource(R.drawable.ic_image),
             contentDescription = null,
-            tint = PebblesTheme.colors.accent.primary,
+            tint = colors.primary,
             modifier = Modifier.size(24.dp),
         )
-        PebblesText(
+        Text(
             text = stringResource(R.string.photo_add),
-            style = PebblesTypography.body,
-            color = system.foreground,
+            style = MaterialTheme.typography.bodyLarge,
+            color = colors.onSurface,
         )
     }
 }
@@ -331,7 +327,7 @@ private fun EmotionRow(
     FormRow(
         leading = {
             if (selectedEmotion != null) {
-                Text(text = selectedEmotion.emoji, fontSize = 24.sp, modifier = Modifier.size(32.dp))
+                Text(text = selectedEmotion.emoji, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.size(32.dp))
             } else {
                 DashedPlaceholder()
             }
@@ -347,7 +343,7 @@ private fun ValenceRow(
     valence: Valence?,
     onTap: () -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     val value =
         valence?.let {
             stringResource(valencePolarityLabelRes(it.polarity))
@@ -358,7 +354,7 @@ private fun ValenceRow(
                 ValenceGlyph(
                     size = valence.sizeGroup,
                     polarity = valence.polarity,
-                    tintColor = system.secondary,
+                    tintColor = colors.onSurfaceVariant,
                     modifier = Modifier.size(32.dp),
                 )
             } else {
@@ -378,7 +374,7 @@ private fun GlyphRow(
     onTap: () -> Unit,
     onRemove: (() -> Unit)?,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     var menuExpanded by remember { mutableStateOf(false) }
     val label =
         if (glyph == null) {
@@ -391,7 +387,7 @@ private fun GlyphRow(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(MaterialTheme.shapes.medium)
                     .combinedClickable(
                         onClick = onTap,
                         onLongClick = { if (onRemove != null) menuExpanded = true },
@@ -403,35 +399,35 @@ private fun GlyphRow(
                 GlyphImage(
                     strokes = glyph.strokes,
                     viewBox = glyph.viewBox,
-                    strokeColor = system.secondary,
+                    strokeColor = colors.onSurfaceVariant,
                     modifier = Modifier.size(32.dp),
                 )
             } else {
                 DashedPlaceholder()
             }
-            PebblesText(label, PebblesTypography.body, color = system.foreground)
+            Text(label, style = MaterialTheme.typography.bodyLarge, color = colors.onSurface)
             Spacer(Modifier.weight(1f))
             Icon(
                 painter = painterResource(R.drawable.ic_chevron_right),
                 contentDescription = null,
-                tint = system.secondary,
+                tint = colors.onSurfaceVariant,
                 modifier = Modifier.size(16.dp),
             )
         }
         DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
             DropdownMenuItem(
                 text = {
-                    PebblesText(
+                    Text(
                         text = stringResource(R.string.create_glyph_remove),
-                        style = PebblesTypography.buttonLabel,
-                        color = PebblesDestructive,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = colors.error,
                     )
                 },
                 leadingIcon = {
                     Icon(
                         painter = painterResource(R.drawable.ic_trash),
                         contentDescription = null,
-                        tint = PebblesDestructive,
+                        tint = colors.error,
                     )
                 },
                 onClick = {
@@ -449,8 +445,7 @@ private fun DomainRow(
     selectedId: String?,
     onSelect: (String?) -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     var expanded by remember { mutableStateOf(false) }
     val selected = domains.firstOrNull { it.id == selectedId }
     val value =
@@ -463,7 +458,7 @@ private fun DomainRow(
                 Icon(
                     painter = painterResource(R.drawable.ic_pebble_domain),
                     contentDescription = null,
-                    tint = accent.primary,
+                    tint = colors.primary,
                     modifier = Modifier.size(28.dp),
                 )
             },
@@ -475,10 +470,10 @@ private fun DomainRow(
             domains.forEach { domain ->
                 DropdownMenuItem(
                     text = {
-                        PebblesText(
+                        Text(
                             text = ReferenceStrings.referenceName(ReferenceType.DOMAIN, domain.slug, domain.name),
-                            style = PebblesTypography.body,
-                            color = system.foreground,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = colors.onSurface,
                         )
                     },
                     onClick = {
@@ -497,8 +492,7 @@ private fun CollectionRow(
     selectedId: String?,
     onSelect: (String?) -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     var expanded by remember { mutableStateOf(false) }
     val selected = collections.firstOrNull { it.id == selectedId }
     val value = selected?.name ?: stringResource(R.string.create_none)
@@ -508,7 +502,7 @@ private fun CollectionRow(
                 Icon(
                     painter = painterResource(R.drawable.ic_pebble_collection),
                     contentDescription = null,
-                    tint = accent.primary,
+                    tint = colors.primary,
                     modifier = Modifier.size(28.dp),
                 )
             },
@@ -519,10 +513,10 @@ private fun CollectionRow(
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             DropdownMenuItem(
                 text = {
-                    PebblesText(
+                    Text(
                         text = stringResource(R.string.create_none),
-                        style = PebblesTypography.body,
-                        color = system.foreground,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.onSurface,
                     )
                 },
                 onClick = {
@@ -533,10 +527,10 @@ private fun CollectionRow(
             collections.forEach { collection ->
                 DropdownMenuItem(
                     text = {
-                        PebblesText(
+                        Text(
                             text = collection.name,
-                            style = PebblesTypography.body,
-                            color = system.foreground,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = colors.onSurface,
                         )
                     },
                     onClick = {
@@ -574,12 +568,12 @@ private fun SoulPill(
     soul: SoulWithGlyph,
     onClick: () -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier =
             Modifier
                 .width(72.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(MaterialTheme.shapes.medium)
                 .clickable(onClick = onClick)
                 .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -588,36 +582,36 @@ private fun SoulPill(
         GlyphImage(
             strokes = soul.glyph.strokes,
             viewBox = soul.glyph.viewBox,
-            strokeColor = system.secondary,
+            strokeColor = colors.onSurfaceVariant,
             modifier = Modifier.size(40.dp),
         )
-        PebblesText(soul.name, PebblesTypography.bodyLeadHand, color = system.secondary, maxLines = 1)
+        Text(soul.name, style = PebblesTheme.hand.bodyLeadHand, color = colors.onSurfaceVariant, maxLines = 1)
     }
 }
 
 @Composable
 private fun AddSoulPill(onClick: () -> Unit) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier =
             Modifier
                 .width(72.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(MaterialTheme.shapes.medium)
                 .clickable(onClick = onClick)
                 .padding(4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         Box(
-            modifier = Modifier.size(40.dp).border(1.dp, system.secondary, RoundedCornerShape(12.dp)),
+            modifier = Modifier.size(40.dp).border(1.dp, colors.outline, MaterialTheme.shapes.medium),
             contentAlignment = Alignment.Center,
         ) {
-            PebblesText("+", PebblesTypography.title, color = system.secondary)
+            Text("+", style = MaterialTheme.typography.headlineMedium, color = colors.onSurfaceVariant)
         }
-        PebblesText(
+        Text(
             text = stringResource(R.string.create_soul_add),
-            style = PebblesTypography.meta,
-            color = system.secondary,
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.onSurfaceVariant,
             maxLines = 1,
         )
     }

@@ -7,6 +7,8 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
@@ -23,9 +25,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import java.time.OffsetDateTime
 import java.time.ZoneId
 
@@ -50,6 +49,7 @@ fun WhenRow(
     val zone = ZoneId.systemDefault()
     val locale = LocalConfiguration.current.locales[0]
     val context = LocalContext.current
+    val colors = MaterialTheme.colorScheme
     var stage by remember { mutableStateOf<WhenStage?>(null) }
     var pendingDateMillis by remember { mutableStateOf<Long?>(null) }
 
@@ -58,7 +58,7 @@ fun WhenRow(
             Icon(
                 painter = painterResource(R.drawable.ic_pebble_when),
                 contentDescription = null,
-                tint = PebblesTheme.colors.accent.primary,
+                tint = colors.primary,
                 modifier = Modifier.size(28.dp),
             )
         },
@@ -83,19 +83,19 @@ fun WhenRow(
                             stage = WhenStage.TIME
                         },
                     ) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.action_next),
-                            style = PebblesTypography.buttonLabel,
-                            color = PebblesTheme.colors.accent.primary,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = colors.primary,
                         )
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { stage = null }) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.action_cancel),
-                            style = PebblesTypography.buttonLabel,
-                            color = PebblesTheme.colors.accent.primary,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = colors.primary,
                         )
                     }
                 },
@@ -121,19 +121,19 @@ fun WhenRow(
                             stage = null
                         },
                     ) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.action_done),
-                            style = PebblesTypography.buttonLabel,
-                            color = PebblesTheme.colors.accent.primary,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = colors.primary,
                         )
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { stage = null }) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.action_cancel),
-                            style = PebblesTypography.buttonLabel,
-                            color = PebblesTheme.colors.accent.primary,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = colors.primary,
                         )
                     }
                 },

@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,7 +23,6 @@ import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.Spacing
 
 /**
@@ -40,7 +40,7 @@ fun RecordFlowChrome(
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     val canGoBack = step.previous != null
 
     Row(
@@ -61,7 +61,7 @@ fun RecordFlowChrome(
             Icon(
                 painter = painterResource(R.drawable.ic_arrow_back),
                 contentDescription = if (canGoBack) stringResource(R.string.record_back_a11y) else null,
-                tint = system.secondary,
+                tint = colors.onSurfaceVariant,
                 modifier = Modifier.size(20.dp),
             )
         }
@@ -79,7 +79,7 @@ fun RecordFlowChrome(
             Icon(
                 painter = painterResource(R.drawable.ic_x_circle),
                 contentDescription = stringResource(R.string.action_close),
-                tint = system.secondary,
+                tint = colors.onSurfaceVariant,
                 modifier = Modifier.size(20.dp),
             )
         }
@@ -95,8 +95,7 @@ private fun ProgressDots(
     step: RecordStep,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     val current = step.dotIndex
     val announcement =
         stringResource(R.string.record_step_a11y, (current ?: 0) + 1, RecordStep.counted.size)
@@ -113,7 +112,10 @@ private fun ProgressDots(
                 Modifier
                     .size(6.dp)
                     .clip(CircleShape)
-                    .background(if (filled) accent.primary else system.muted),
+                    // outlineVariant, not the surfaceContainerHighest a placeholder fill
+                    // would take: an unfilled dot still carries progress, and it reads
+                    // more clearly on the surface (matches the Welcome/Onboarding dots).
+                    .background(if (filled) colors.primary else colors.outlineVariant),
             )
         }
     }

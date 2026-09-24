@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,11 +33,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.data.PebbleDraftRecord
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
-import app.pbbls.android.core.designsystem.PebblesTypography
 import java.time.Duration
 import java.time.OffsetDateTime
 
@@ -78,6 +77,7 @@ fun DraftsScreen(
  * parameters rather than reading services, the same previewability rule the
  * funnel and Path screens follow.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun DraftsContent(
     uiState: DraftsUiState,
@@ -87,25 +87,24 @@ fun DraftsContent(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
 
     Column(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(system.background)
+                .background(colors.surface)
                 .safeDrawingPadding(),
     ) {
         PebblesTopBar(
             title = stringResource(R.string.drafts_title),
-            titleStyle = PebblesTypography.headlineEmphasized,
-            titleColor = system.foreground,
+            titleStyle = MaterialTheme.typography.titleMediumEmphasized,
+            titleColor = colors.onSurface,
             leading = {
                 PebblesTopBarTextButton(
                     text = stringResource(R.string.action_done),
                     onClick = onDismiss,
-                    color = accent.primary,
+                    color = colors.primary,
                 )
             },
         )
@@ -114,23 +113,23 @@ fun DraftsContent(
         when (uiState) {
             DraftsUiState.Loading ->
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = accent.primary)
+                    CircularProgressIndicator(color = colors.primary)
                 }
 
             DraftsUiState.Error ->
                 Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.drafts_load_error),
-                            style = PebblesTypography.body,
-                            color = system.secondary,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = colors.onSurfaceVariant,
                             textAlign = TextAlign.Center,
                         )
                         TextButton(onClick = onRetry) {
-                            PebblesText(
+                            Text(
                                 text = stringResource(R.string.action_retry),
-                                style = PebblesTypography.body,
-                                color = accent.primary,
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = colors.primary,
                             )
                         }
                     }
@@ -139,10 +138,10 @@ fun DraftsContent(
             is DraftsUiState.Content ->
                 if (uiState.drafts.isEmpty()) {
                     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.drafts_empty),
-                            style = PebblesTypography.body,
-                            color = system.secondary,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = colors.onSurfaceVariant,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(horizontal = 32.dp),
                         )
@@ -176,7 +175,7 @@ private fun DraftRow(
     onClick: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     val name = record.payload.name
 
     Row(
@@ -191,28 +190,28 @@ private fun DraftRow(
             modifier =
                 Modifier
                     .size(36.dp)
-                    .background(system.muted, RoundedCornerShape(8.dp)),
+                    .background(colors.surfaceContainerHighest, MaterialTheme.shapes.small),
         )
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
-            PebblesText(
+            Text(
                 text = name ?: stringResource(R.string.drafts_untitled),
-                style = PebblesTypography.body,
-                color = if (name != null) system.foreground else system.secondary,
+                style = MaterialTheme.typography.bodyLarge,
+                color = if (name != null) colors.onSurface else colors.onSurfaceVariant,
                 maxLines = 1,
             )
-            PebblesText(
+            Text(
                 text = stringResource(R.string.drafts_saved_ago, relativeAgo(record.updatedAt)),
-                style = PebblesTypography.meta,
-                color = system.secondary,
+                style = MaterialTheme.typography.labelSmall,
+                color = colors.onSurfaceVariant,
                 maxLines = 1,
             )
         }
         TextButton(onClick = onDelete) {
-            PebblesText(
+            Text(
                 text = stringResource(R.string.action_delete),
-                style = PebblesTypography.body,
-                color = system.secondary,
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.onSurfaceVariant,
             )
         }
     }

@@ -9,12 +9,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TimePicker
 import androidx.compose.material3.rememberDatePickerState
@@ -34,9 +35,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.features.path.create.WhenDateTime
 import java.time.OffsetDateTime
@@ -69,8 +67,7 @@ fun RecordWhenStep(
     seededFromPhoto: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     val zone = remember { ZoneId.systemDefault() }
     val locale = LocalConfiguration.current.locales[0]
     val context = LocalContext.current
@@ -105,13 +102,13 @@ fun RecordWhenStep(
                 Icon(
                     painter = painterResource(R.drawable.ic_sparkle),
                     contentDescription = null,
-                    tint = system.secondary,
+                    tint = colors.onSurfaceVariant,
                     modifier = Modifier.size(14.dp),
                 )
-                PebblesText(
+                Text(
                     text = stringResource(R.string.record_when_from_photo),
-                    style = PebblesTypography.subhead,
-                    color = system.secondary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.onSurfaceVariant,
                     textAlign = TextAlign.Center,
                 )
             }
@@ -134,19 +131,19 @@ fun RecordWhenStep(
                         }
                         picker = null
                     }) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.action_done),
-                            style = PebblesTypography.buttonLabel,
-                            color = accent.primary,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = colors.primary,
                         )
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { picker = null }) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.action_cancel),
-                            style = PebblesTypography.buttonLabel,
-                            color = accent.primary,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = colors.primary,
                         )
                     }
                 },
@@ -164,7 +161,7 @@ fun RecordWhenStep(
                 )
             AlertDialog(
                 onDismissRequest = { picker = null },
-                containerColor = system.background,
+                containerColor = colors.surfaceContainerHigh,
                 confirmButton = {
                     TextButton(onClick = {
                         onChange(
@@ -177,19 +174,19 @@ fun RecordWhenStep(
                         )
                         picker = null
                     }) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.action_done),
-                            style = PebblesTypography.buttonLabel,
-                            color = accent.primary,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = colors.primary,
                         )
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { picker = null }) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.action_cancel),
-                            style = PebblesTypography.buttonLabel,
-                            color = accent.primary,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = colors.primary,
                         )
                     }
                 },
@@ -208,14 +205,13 @@ private fun WhenPill(
     label: String,
     onClick: () -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     Row(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(system.muted)
+                .clip(MaterialTheme.shapes.medium)
+                .background(colors.surfaceContainerHighest)
                 .clickable(onClick = onClick)
                 .padding(horizontal = Spacing.lg, vertical = Spacing.md),
         horizontalArrangement = Arrangement.spacedBy(Spacing.md, Alignment.CenterHorizontally),
@@ -224,13 +220,13 @@ private fun WhenPill(
         Icon(
             painter = painterResource(iconRes),
             contentDescription = null,
-            tint = accent.primary,
+            tint = colors.primary,
             modifier = Modifier.size(20.dp),
         )
-        PebblesText(
+        Text(
             text = label,
-            style = PebblesTypography.body,
-            color = system.foreground,
+            style = MaterialTheme.typography.bodyLarge,
+            color = colors.onSurface,
             textAlign = TextAlign.Center,
         )
     }

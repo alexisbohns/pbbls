@@ -32,6 +32,9 @@ internal object ValenceMesh {
             listOf(0.0f to 1.0f, 0.3f to 1.0f, 0.7f to 1.0f, 1.0f to 1.0f),
         ).flatten()
 
+    /** Joy's `surface_color` (the emotion palette's), for the dark-mode resting stone. */
+    const val JOY_SURFACE_HEX = "#A15C08"
+
     /**
      * The highlight material, sampled from the reference gradient at each
      * control point (patch-averaged, so no single noisy pixel decided a

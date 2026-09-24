@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,9 +33,6 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalEmotionPaletteService
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.SharedPebbleLink
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.features.path.read.PebblePrivacyBadge
@@ -61,8 +60,7 @@ fun PebbleDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val palettes = LocalEmotionPaletteService.current
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     val context = LocalContext.current
 
     LaunchedEffect(pebbleId) { viewModel.start(pebbleId) }
@@ -78,12 +76,12 @@ fun PebbleDetailScreen(
 
     // Once loaded, the whole page (top bar + insets included) tints to the
     // emotion palette background (#605); before load / on a cache miss it stays
-    // on the system background. PebbleReadView repaints the same tint over its
+    // on the surface. PebbleReadView repaints the same tint over its
     // own body, so the two meet seamlessly.
     val pageBackground =
         detail?.let { palettes.palette(it.emotion.id) }?.let {
             pebblePageColors(it, isSystemInDarkTheme()).background
-        } ?: system.background
+        } ?: colors.surface
 
     // Share is only offered for public pebbles (M51) — anyone with the /p
     // link can open a public pebble, so sharing a secret/connections one
@@ -128,7 +126,7 @@ fun PebbleDetailScreen(
         when (val state = uiState) {
             PebbleDetailUiState.Loading ->
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    CircularProgressIndicator(color = accent.primary)
+                    CircularProgressIndicator(color = colors.primary)
                 }
             PebbleDetailUiState.Error ->
                 DetailLoadError(onRetry = viewModel::retry)
@@ -157,8 +155,7 @@ private fun DetailTopBar(
     onEdit: () -> Unit,
     onShare: (() -> Unit)?,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -167,7 +164,7 @@ private fun DetailTopBar(
             Icon(
                 painter = painterResource(R.drawable.ic_arrow_back),
                 contentDescription = stringResource(R.string.pebble_detail_back_a11y),
-                tint = system.secondary,
+                tint = colors.onSurfaceVariant,
             )
         }
         if (visibility != null) {
@@ -179,15 +176,15 @@ private fun DetailTopBar(
                 Icon(
                     painter = painterResource(R.drawable.ic_share),
                     contentDescription = stringResource(R.string.pebble_share_a11y),
-                    tint = system.secondary,
+                    tint = colors.onSurfaceVariant,
                 )
             }
         }
         TextButton(onClick = onEdit, enabled = editEnabled) {
-            PebblesText(
+            Text(
                 stringResource(R.string.pebble_detail_edit),
-                PebblesTypography.buttonLabel,
-                color = accent.primary,
+                style = MaterialTheme.typography.labelLarge,
+                color = colors.primary,
             )
         }
     }
@@ -196,23 +193,22 @@ private fun DetailTopBar(
 /** Centered error view with a Retry action — mirrors `PebbleDetailSheet.content`'s error branch. */
 @Composable
 private fun DetailLoadError(onRetry: () -> Unit) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        PebblesText(
+        Text(
             stringResource(R.string.pebble_detail_load_error),
-            PebblesTypography.body,
-            color = system.secondary,
+            style = MaterialTheme.typography.bodyLarge,
+            color = colors.onSurfaceVariant,
         )
         TextButton(onClick = onRetry) {
-            PebblesText(
+            Text(
                 stringResource(R.string.pebble_detail_retry),
-                PebblesTypography.buttonLabel,
-                color = accent.primary,
+                style = MaterialTheme.typography.labelLarge,
+                color = colors.primary,
             )
         }
     }

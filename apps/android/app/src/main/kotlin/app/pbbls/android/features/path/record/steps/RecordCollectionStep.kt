@@ -8,8 +8,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -19,9 +20,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.PebbleCollection
 
@@ -40,14 +38,13 @@ fun RecordCollectionStep(
     onSelect: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
 
     if (collections.isEmpty()) {
-        PebblesText(
+        Text(
             text = stringResource(R.string.record_collection_empty),
-            style = PebblesTypography.callout,
-            color = system.secondary,
+            style = MaterialTheme.typography.bodyLarge,
+            color = colors.onSurfaceVariant,
             textAlign = TextAlign.Center,
             modifier = modifier.fillMaxWidth().padding(vertical = Spacing.xxl),
         )
@@ -60,13 +57,14 @@ fun RecordCollectionStep(
     ) {
         collections.forEach { collection ->
             val isSelected = collection.id == selectedId
-            val foreground = if (isSelected) accent.primary else system.foreground
+            // A selected row is a primaryContainer fill, so its content reads the paired role.
+            val foreground = if (isSelected) colors.onPrimaryContainer else colors.onSurface
             Row(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(if (isSelected) accent.primary.copy(alpha = 0.12f) else system.muted)
+                        .clip(MaterialTheme.shapes.medium)
+                        .background(if (isSelected) colors.primaryContainer else colors.surfaceContainerHighest)
                         .clickable { onSelect(collection.id) }
                         .padding(Spacing.md),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.md),
@@ -75,13 +73,13 @@ fun RecordCollectionStep(
                 Icon(
                     painter = painterResource(R.drawable.ic_pebble_collection),
                     contentDescription = null,
-                    tint = if (isSelected) accent.primary else system.secondary,
+                    tint = if (isSelected) colors.onPrimaryContainer else colors.onSurfaceVariant,
                     modifier = Modifier.size(24.dp),
                 )
                 // Collection names are user-authored, so never localized.
-                PebblesText(
+                Text(
                     text = collection.name,
-                    style = PebblesTypography.body,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = foreground,
                     maxLines = 1,
                 )

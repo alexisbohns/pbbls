@@ -24,7 +24,7 @@ import app.pbbls.android.core.model.EmotionPalette
  * Pure — no Compose runtime dependency (only the `Color` value class), so it
  * unit-tests directly. Resolved once at the page root and threaded into the leaf
  * read composables as parameters, keeping them previewable. Callers fall back to
- * the system/accent chrome when the palette is unavailable (cache miss).
+ * the theme's surface and `on*` roles when the palette is unavailable (cache miss).
  */
 data class PebblePageColors(
     val background: Color,

@@ -4,6 +4,8 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -20,6 +22,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,10 +42,7 @@ import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.data.rememberTapHaptics
-import app.pbbls.android.core.designsystem.PebblesDestructive
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
+import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.features.path.create.pickers.rememberGlyphPickerState
 import app.pbbls.android.features.path.record.steps.RecordSuccessStep
@@ -69,7 +71,10 @@ private const val STEP_TRANSITION_MS = 280
  * [resumeDraftId] carries an id rather than the whole draft record (#852): a
  * navigation key can only carry an id, and [RecordFlowViewModel] fetches the row
  * itself once reference data has loaded.
+ *
+ * With reduce motion on, steps swap without the slide (#853).
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun RecordFlowScreen(
     onPublished: (String) -> Unit,
@@ -83,8 +88,7 @@ fun RecordFlowScreen(
     val model = viewModel.machine()
     val refs = LocalReferenceDataService.current
     val palettes = LocalEmotionPaletteService.current
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
 
     val haptic = rememberTapHaptics()
     val glyphPickerState = rememberGlyphPickerState()
@@ -139,7 +143,7 @@ fun RecordFlowScreen(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(system.background)
+                .background(colors.surface)
                 .safeDrawingPadding()
                 .imePadding(),
     ) {
@@ -151,9 +155,11 @@ fun RecordFlowScreen(
             )
         }
 
+        val reduceMotion = rememberReduceMotion()
         AnimatedContent(
             targetState = flow.step,
             transitionSpec = {
+                if (reduceMotion) return@AnimatedContent EnterTransition.None togetherWith ExitTransition.None
                 // Direction comes from the transition itself rather than a
                 // remembered "previous step", which would be a second source of
                 // truth for something the animation already knows.
@@ -217,36 +223,36 @@ fun RecordFlowScreen(
     if (uiState.isRestorePromptPresented) {
         AlertDialog(
             onDismissRequest = viewModel::discardRestore,
-            containerColor = system.background,
+            containerColor = colors.surfaceContainerHigh,
             title = {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.draft_restore_title),
-                    style = PebblesTypography.headlineEmphasized,
-                    color = system.foreground,
+                    style = MaterialTheme.typography.titleMediumEmphasized,
+                    color = colors.onSurface,
                 )
             },
             text = {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.draft_restore_body),
-                    style = PebblesTypography.body,
-                    color = system.secondary,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colors.onSurfaceVariant,
                 )
             },
             confirmButton = {
                 TextButton(onClick = viewModel::acceptRestore) {
-                    PebblesText(
+                    Text(
                         text = stringResource(R.string.draft_restore_confirm),
-                        style = PebblesTypography.body,
-                        color = accent.primary,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.primary,
                     )
                 }
             },
             dismissButton = {
                 TextButton(onClick = viewModel::discardRestore) {
-                    PebblesText(
+                    Text(
                         text = stringResource(R.string.draft_restore_discard),
-                        style = PebblesTypography.body,
-                        color = system.secondary,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.onSurfaceVariant,
                     )
                 }
             },
@@ -270,23 +276,23 @@ fun RecordFlowScreen(
  *
  * `internal` so the screenshot preview can render it directly.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun CloseConfirmDialog(
     onSaveAsDraft: () -> Unit,
     onDiscard: () -> Unit,
     onKeepGoing: () -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     AlertDialog(
         // Tapping outside is "keep going": the least destructive of the three.
         onDismissRequest = onKeepGoing,
-        containerColor = system.background,
+        containerColor = colors.surfaceContainerHigh,
         title = {
-            PebblesText(
+            Text(
                 text = stringResource(R.string.record_close_title),
-                style = PebblesTypography.headlineEmphasized,
-                color = system.foreground,
+                style = MaterialTheme.typography.titleMediumEmphasized,
+                color = colors.onSurface,
             )
         },
         // Material lays out exactly two action slots, and the flow needs three —
@@ -295,27 +301,27 @@ internal fun CloseConfirmDialog(
         confirmButton = {
             Row(horizontalArrangement = Arrangement.End) {
                 TextButton(onClick = onDiscard) {
-                    PebblesText(
+                    Text(
                         text = stringResource(R.string.record_close_discard),
-                        style = PebblesTypography.body,
-                        color = PebblesDestructive,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.error,
                     )
                 }
                 TextButton(onClick = onSaveAsDraft) {
-                    PebblesText(
+                    Text(
                         text = stringResource(R.string.draft_save),
-                        style = PebblesTypography.body,
-                        color = accent.primary,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.primary,
                     )
                 }
             }
         },
         dismissButton = {
             TextButton(onClick = onKeepGoing) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.record_close_keep_going),
-                    style = PebblesTypography.body,
-                    color = system.secondary,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colors.onSurfaceVariant,
                 )
             }
         },

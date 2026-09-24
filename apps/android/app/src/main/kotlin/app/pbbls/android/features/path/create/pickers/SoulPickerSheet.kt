@@ -10,7 +10,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -24,10 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalReferenceDataService
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTextInput
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.ui.SoulItem
 import app.pbbls.android.core.ui.SoulItemCase
@@ -100,16 +100,16 @@ fun SoulPickerBody(
     onCreateTap: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         if (souls.isEmpty()) {
-            PebblesText(
+            Text(
                 text = stringResource(R.string.create_souls_empty),
-                style = PebblesTypography.subhead,
-                color = system.secondary,
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.onSurfaceVariant,
             )
         }
         FlowRow(
@@ -149,22 +149,22 @@ fun SoulPickerBody(
  * directly. Ports `CreateSoulSheet` minus the glyph row (souls carry a
  * system-glyph default).
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun CreateSoulDialog(
     onDismiss: () -> Unit,
     onCreate: (String) -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     var name by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = system.background,
+        containerColor = colors.surfaceContainerHigh,
         title = {
-            PebblesText(
+            Text(
                 text = stringResource(R.string.create_soul_title),
-                style = PebblesTypography.headlineEmphasized,
-                color = system.foreground,
+                style = MaterialTheme.typography.titleMediumEmphasized,
+                color = colors.onSurface,
             )
         },
         text = {
@@ -176,19 +176,19 @@ internal fun CreateSoulDialog(
         },
         confirmButton = {
             TextButton(onClick = { onCreate(name.trim()) }, enabled = name.isNotBlank()) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.action_save),
-                    style = PebblesTypography.buttonLabel,
-                    color = if (name.isNotBlank()) accent.primary else system.muted,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = if (name.isNotBlank()) colors.primary else colors.onSurface.copy(alpha = 0.38f),
                 )
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.action_cancel),
-                    style = PebblesTypography.buttonLabel,
-                    color = accent.primary,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colors.primary,
                 )
             }
         },

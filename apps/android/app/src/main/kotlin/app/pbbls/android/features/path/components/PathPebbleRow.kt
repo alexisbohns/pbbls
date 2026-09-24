@@ -11,10 +11,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -31,10 +32,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesDestructive
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.core.ui.ReferenceStrings
@@ -55,7 +52,7 @@ import java.time.ZoneId
  *
  * Name/time color follows the scheme at every size (light=`primary`,
  * dark=`light`; the text sits on the row background, not the pebble fill —
- * iOS #510), falling back to `system.foreground` without a palette. A first
+ * iOS #510), falling back to `onSurface` without a palette. A first
  * snap renders as a 64dp white-bordered photo on the trailing edge, rotated
  * by row parity.
  *
@@ -77,14 +74,14 @@ fun PathPebbleRow(
     onRequestDelete: () -> Unit = {},
 ) {
     val isDark = isSystemInDarkTheme()
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     val locale = LocalConfiguration.current.locales[0]
 
     val isLarge = pebble.intensity >= 3
     val hasPhoto = pebble.firstSnapPath != null
     val nameColor =
         when {
-            palette == null -> system.foreground
+            palette == null -> colors.onSurface
             isDark -> palette.light
             else -> palette.primary
         }
@@ -118,19 +115,19 @@ fun PathPebbleRow(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier.weight(1f),
             ) {
-                PebblesText(
+                Text(
                     text = pebble.name,
-                    style = PebblesTypography.buttonLabel,
+                    style = MaterialTheme.typography.labelLarge,
                     color = nameColor,
                 )
-                PebblesText(
+                Text(
                     text = metaLine,
-                    style = PebblesTypography.meta,
+                    style = MaterialTheme.typography.labelSmall,
                     color = nameColor.copy(alpha = 0.5f),
                 )
             }
             if (pebble.firstSnapPath != null) {
-                val shape = RoundedCornerShape(8.dp)
+                val shape = MaterialTheme.shapes.small
                 PathSnapThumb(
                     storagePath = pebble.firstSnapPath,
                     modifier =
@@ -139,6 +136,7 @@ fun PathPebbleRow(
                             .graphicsLayer {
                                 rotationZ = PathPebbleRowMetrics.rotationDegrees(positionIndex)
                             }.shadow(elevation = 6.dp, shape = shape)
+                            // Paper-white print mat: a physical photo's border, white in both themes.
                             .border(4.dp, Color.White, shape)
                             .clip(shape),
                 )
@@ -150,17 +148,17 @@ fun PathPebbleRow(
         ) {
             DropdownMenuItem(
                 text = {
-                    PebblesText(
+                    Text(
                         text = stringResource(R.string.pebble_delete),
-                        style = PebblesTypography.buttonLabel,
-                        color = PebblesDestructive,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = colors.error,
                     )
                 },
                 leadingIcon = {
                     Icon(
                         painter = painterResource(R.drawable.ic_trash),
                         contentDescription = null,
-                        tint = PebblesDestructive,
+                        tint = colors.error,
                     )
                 },
                 onClick = {

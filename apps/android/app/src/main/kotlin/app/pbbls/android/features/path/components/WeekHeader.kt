@@ -8,7 +8,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,9 +25,6 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.WeekRollEntry
 import app.pbbls.android.features.path.WeekHeaderFormatting
 import app.pbbls.android.features.path.WeekRollBuilder
@@ -46,7 +44,7 @@ fun WeekHeader(
     onFocusChange: (LocalDate) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     val locale = LocalConfiguration.current.locales[0]
     val label =
         WeekHeaderFormatting
@@ -59,7 +57,7 @@ fun WeekHeader(
         modifier =
             modifier
                 .height(40.dp)
-                .border(1.dp, system.muted, RoundedCornerShape(17.dp))
+                .border(1.dp, colors.outlineVariant, MaterialTheme.shapes.large)
                 .padding(horizontal = 16.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -70,10 +68,10 @@ fun WeekHeader(
             onFocusChange = onFocusChange,
         )
         Spacer(modifier = Modifier.weight(1f))
-        PebblesText(
+        Text(
             text = label,
-            style = PebblesTypography.buttonLabel,
-            color = system.secondary,
+            style = MaterialTheme.typography.labelLarge,
+            color = colors.onSurfaceVariant,
         )
         Spacer(modifier = Modifier.weight(1f))
         ChevronButton(
@@ -92,10 +90,10 @@ private fun ChevronButton(
     a11yLabel: String,
     onFocusChange: (LocalDate) -> Unit,
 ) {
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     ChevronGlyph(
         pointsLeft = pointsLeft,
-        tint = accent.primary,
+        tint = colors.primary,
         modifier =
             Modifier
                 .size(24.dp)

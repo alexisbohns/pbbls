@@ -5,7 +5,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -19,9 +22,6 @@ import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.core.ui.iconRes
 import app.pbbls.android.core.ui.labelRes
@@ -32,20 +32,21 @@ import app.pbbls.android.core.ui.labelRes
  * label already names the grade, so the leading icons stay decorative
  * (`contentDescription = null`), matching the neighboring `FormRow`/
  * `DomainRow` picker rows rather than adding a separate semantics label.
- * Tinted `system.secondary` end to end, mirroring iOS's `.tint(Color.system.secondary)`
+ * Tinted `onSurfaceVariant` end to end, mirroring iOS's `.tint(Color.system.secondary)`
  * on the chip and the existing `PebblePrivacyBadge` chip tint. The chip's merged
  * semantics carry the same "Privacy: <grade>" a11y string as the iOS chip's
  * `accessibilityLabel` (M51). The dropdown marks the current grade with a
  * checkmark, mirroring the system checkmark iOS's Menu-hosted `Picker` renders
  * on the selected option.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun VisibilityChip(
     value: Visibility,
     onChange: (Visibility) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     var expanded by remember { mutableStateOf(false) }
     val a11y = stringResource(R.string.visibility_badge_a11y, stringResource(value.labelRes))
     Box(modifier) {
@@ -56,15 +57,15 @@ fun VisibilityChip(
                 Icon(
                     painter = painterResource(value.iconRes),
                     contentDescription = null,
-                    tint = system.secondary,
+                    tint = colors.onSurfaceVariant,
                     modifier = Modifier.size(16.dp),
                 )
             },
             label = {
-                PebblesText(
+                Text(
                     text = stringResource(value.labelRes),
-                    style = PebblesTypography.captionEmphasized,
-                    color = system.secondary,
+                    style = MaterialTheme.typography.labelMediumEmphasized,
+                    color = colors.onSurfaceVariant,
                 )
             },
         )
@@ -76,15 +77,15 @@ fun VisibilityChip(
                         Icon(
                             painter = painterResource(grade.iconRes),
                             contentDescription = null,
-                            tint = system.secondary,
+                            tint = colors.onSurfaceVariant,
                             modifier = Modifier.size(16.dp),
                         )
                     },
                     text = {
-                        PebblesText(
+                        Text(
                             text = stringResource(grade.labelRes),
-                            style = PebblesTypography.body,
-                            color = system.foreground,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = colors.onSurface,
                         )
                     },
                     // Marks the current grade — mirrors the system checkmark iOS's
@@ -97,7 +98,7 @@ fun VisibilityChip(
                                 Icon(
                                     painter = painterResource(R.drawable.ic_check),
                                     contentDescription = null,
-                                    tint = system.foreground,
+                                    tint = colors.onSurface,
                                     modifier = Modifier.size(16.dp),
                                 )
                             }

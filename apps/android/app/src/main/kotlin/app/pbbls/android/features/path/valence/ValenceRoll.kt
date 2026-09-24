@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -29,9 +31,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.ValencePolarity
@@ -93,7 +92,6 @@ internal fun ValenceRoll(
     onChange: (Valence) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val colors = PebblesTheme.colors
     val current by rememberUpdatedState(valence)
     val change by rememberUpdatedState(onChange)
     val offset = remember { Animatable(0f) }
@@ -212,10 +210,10 @@ internal fun ValenceRoll(
             ValenceWord(valence = valence, scale = wordScale)
         }
 
-        PebblesText(
+        Text(
             text = stringResource(valenceSpanRes(valence.sizeGroup)),
-            style = PebblesTypography.cardHeading,
-            color = colors.system.secondary,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
 
@@ -252,7 +250,7 @@ private fun Pyramid(
     current: ValenceSizeGroup,
     modifier: Modifier = Modifier,
 ) {
-    val accent = PebblesTheme.colors.accent
+    val primary = MaterialTheme.colorScheme.primary
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -269,7 +267,7 @@ private fun Pyramid(
                     Modifier
                         .size(width = markWidth(size), height = MarkHeight)
                         .alpha(lit)
-                        .background(accent.primary, CircleShape),
+                        .background(primary, CircleShape),
             )
         }
     }

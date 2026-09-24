@@ -12,6 +12,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
@@ -21,11 +23,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.WeekRollEntry
 import app.pbbls.android.features.path.WeekRollBuilder
 import java.time.LocalDate
@@ -35,7 +33,7 @@ private val CELL_WIDTH = 72.dp
 /**
  * The horizontal week strip above the header — the `WeekRollView` analog.
  * Each cell is a static cairn (v1 — the iOS Rive state machine is a
- * fast-follow) + the ISO week number, accent-tinted when focused. Tapping a
+ * fast-follow) + the ISO week number, primary-tinted when focused. Tapping a
  * cell drives [onFocusChange]; the strip auto-centers the focused cell.
  */
 @Composable
@@ -79,9 +77,8 @@ private fun WeekRollCell(
     isFocused: Boolean,
     onTap: () -> Unit,
 ) {
-    val accent = PebblesTheme.colors.accent
-    val system = PebblesTheme.colors.system
-    val tint = if (isFocused) accent.primary else system.secondary
+    val colors = MaterialTheme.colorScheme
+    val tint = if (isFocused) colors.primary else colors.onSurfaceVariant
     val weekNumber = WeekRollBuilder.isoWeekNumber(entry.weekStart)
     val cellLabel = stringResource(R.string.path_week_cell_a11y, weekNumber, entry.pebbles.size)
 
@@ -101,11 +98,10 @@ private fun WeekRollCell(
             tint = tint,
             modifier = Modifier.size(56.dp),
         )
-        // iOS renders the week number in Ysabeau Semibold 13 — buttonLabel is
-        // the Ysabeau token; only the size differs from its 17sp default.
-        PebblesText(
+        // iOS renders the week number at 13 sp — bodySmall is the role at that size.
+        Text(
             text = weekNumber.toString(),
-            style = PebblesTypography.buttonLabel.copy(fontSize = 13.sp),
+            style = MaterialTheme.typography.bodySmall,
             color = tint,
         )
     }
