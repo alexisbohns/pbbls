@@ -34,7 +34,7 @@ enum class GlyphViewCase {
     CARVE, // dashed 2dp outlineVariant; scribble in onSurfaceVariant
     CREATE, // dashed 2dp outlineVariant; plus in outline
     SELECTED, // no frame; glyph in primary
-    UNSELECTED, // no frame; glyph in onSurface at 38%
+    UNSELECTED, // no frame; glyph in outlineVariant — faint, but still tappable, so not the 38% disabled ink
     DEFAULT, // no frame; glyph in onSurfaceVariant
 }
 
@@ -96,7 +96,7 @@ fun GlyphView(
             GlyphViewCase.PROFILE, GlyphViewCase.SELECTED ->
                 GlyphStrokes(strokes, viewBox, colors.primary)
             GlyphViewCase.UNSELECTED ->
-                GlyphStrokes(strokes, viewBox, colors.onSurface.copy(alpha = 0.38f))
+                GlyphStrokes(strokes, viewBox, colors.outlineVariant)
             GlyphViewCase.DEFAULT ->
                 GlyphStrokes(strokes, viewBox, colors.onSurfaceVariant)
         }
