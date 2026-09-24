@@ -7,6 +7,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -17,7 +18,6 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
-import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.ui.render.Affine
 import app.pbbls.android.core.ui.render.OutlineAssets
@@ -77,7 +77,7 @@ internal fun ValenceStone(
     val width = height * PebbleOutlineGeometry.aspectRatio(size)
     val context = LocalContext.current
     val density = LocalDensity.current
-    val colors = PebblesTheme.colors
+    val scheme = MaterialTheme.colorScheme
     val isDark = isSystemInDarkTheme()
 
     val assetKey = valenceAssetKey(valence)
@@ -136,16 +136,14 @@ internal fun ValenceStone(
             polarity = valence.polarity,
             isSelected = false,
             isDark = isDark,
-            system = colors.system,
-            accent = colors.accent,
+            scheme = scheme,
         )
     val selected =
         ValenceStoneStyles.style(
             polarity = valence.polarity,
             isSelected = true,
             isDark = isDark,
-            system = colors.system,
-            accent = colors.accent,
+            scheme = scheme,
         )
     // The crossfade itself: one number, and the only thing about the fill that
     // ever moves.

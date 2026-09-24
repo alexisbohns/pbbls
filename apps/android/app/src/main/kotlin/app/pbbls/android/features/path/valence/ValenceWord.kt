@@ -2,6 +2,7 @@ package app.pbbls.android.features.path.valence
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.BasicText
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.TransformOrigin
@@ -9,8 +10,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.PebblesHandTypography
 import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.ValencePolarity
 import app.pbbls.android.core.model.ValenceSizeGroup
@@ -51,28 +52,26 @@ internal fun ValenceWord(
     scale: Float,
     modifier: Modifier = Modifier,
 ) {
-    val colors = PebblesTheme.colors
-    val token = PebblesTypography.valenceWord
+    val scheme = MaterialTheme.colorScheme
+    val token = PebblesTheme.hand.valenceWord
     val raw = stringResource(valenceWordRes(valence.polarity))
     // Lowercased here rather than through a case transform, and padded with a
     // space on each side so the hand font's terminal flick has advance width to
-    // live in — see `PebblesTypography.needsInkPadding`. A space is what
+    // live in — see `PebblesHandTypography.needsInkPadding`. A space is what
     // survives: it is part of the line the glyphs are clipped to, where a
     // layout box's padding is not.
     val cased = if (valence.sizeGroup == ValenceSizeGroup.SMALL) raw.lowercase(Locale.getDefault()) else raw
-    val word = if (PebblesTypography.needsInkPadding(token)) " $cased " else cased
+    val word = if (PebblesHandTypography.needsInkPadding(token)) " $cased " else cased
 
-    // `BasicText` rather than `PebblesText` (or Material's `Text`): the
-    // highlight word is painted with the stone's baked mesh, which only rides
-    // on `TextStyle.brush`, and `Text` resolves a foreground *colour* into the
-    // style it merges — the one thing that can quietly win over a brush. None
-    // of the word tokens is an uppercase token, so the case transform
-    // `PebblesText` exists for has nothing to do here either.
+    // `BasicText` rather than Material's `Text`: the highlight word is painted
+    // with the stone's baked mesh, which only rides on `TextStyle.brush`, and
+    // `Text` resolves a foreground *colour* into the style it merges — the one
+    // thing that can quietly win over a brush.
     BasicText(
         text = word,
         style =
             token.copy(
-                brush = ValenceStoneStyles.headlineInk(valence.polarity, colors.system, colors.accent),
+                brush = ValenceStoneStyles.headlineInk(valence.polarity, scheme),
                 textAlign = TextAlign.Center,
             ),
         modifier =
@@ -81,7 +80,7 @@ internal fun ValenceWord(
                     scaleX = scale
                     scaleY = scale
                     transformOrigin = TransformOrigin(0.5f, 1f)
-                }.padding(horizontal = PebblesTypography.inkOverhang(token)),
+                }.padding(horizontal = PebblesHandTypography.inkOverhang(token)),
     )
 }
 
