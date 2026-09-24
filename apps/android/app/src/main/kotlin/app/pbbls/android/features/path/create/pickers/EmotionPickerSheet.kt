@@ -12,9 +12,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -30,12 +31,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalEmotionPaletteService
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.EmotionWithPalette
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.ui.ReferenceStrings
@@ -90,7 +87,7 @@ fun EmotionPickerBody(
     onToggle: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     // referenceName is @Composable — resolve every localized name up-front in a
     // for-loop so the sort/lookups below stay pure (a @Composable call inside a
     // non-inline sort lambda would not compile).
@@ -114,7 +111,7 @@ fun EmotionPickerBody(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Box(Modifier.size(10.dp).clip(CircleShape).background(group.palette.primary))
-                    PebblesText(header, PebblesTypography.cardHeading, color = system.secondary)
+                    Text(header, style = MaterialTheme.typography.titleSmall, color = colors.onSurfaceVariant)
                 }
                 val sortedRows = group.rows.sortedBy { (emotionNames[it.id] ?: it.name).lowercase() }
                 sortedRows.chunked(2).forEach { rowPair ->
@@ -149,22 +146,22 @@ private fun EmotionChip(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     val palette = emotion.palette
     val background = if (selected) palette.primary else palette.surface
-    val foreground = if (selected) palette.light else system.foreground
+    val foreground = if (selected) palette.light else colors.onSurface
     Row(
         modifier =
             modifier
-                .clip(RoundedCornerShape(12.dp))
+                .clip(MaterialTheme.shapes.medium)
                 .background(background)
                 .clickable(onClick = onClick)
                 .padding(horizontal = 12.dp, vertical = 10.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(text = emotion.emoji, fontSize = 20.sp)
-        PebblesText(label, PebblesTypography.subhead, color = foreground, maxLines = 1)
+        Text(text = emotion.emoji, style = MaterialTheme.typography.titleLarge)
+        Text(label, style = MaterialTheme.typography.bodyMedium, color = foreground, maxLines = 1)
     }
 }
 
@@ -173,6 +170,7 @@ private fun EmotionChip(
  * emotion and soul sheets). `internal` so the sibling [SoulPickerSheet] reuses
  * it without a second copy.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun SheetToolbar(
     title: String,
@@ -180,31 +178,30 @@ internal fun SheetToolbar(
     onDone: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     Row(
         modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         TextButton(onClick = onCancel) {
-            PebblesText(
+            Text(
                 text = stringResource(R.string.action_cancel),
-                style = PebblesTypography.buttonLabel,
-                color = accent.primary,
+                style = MaterialTheme.typography.labelLarge,
+                color = colors.primary,
             )
         }
-        PebblesText(
+        Text(
             text = title,
-            style = PebblesTypography.headlineEmphasized,
-            color = system.foreground,
+            style = MaterialTheme.typography.titleMediumEmphasized,
+            color = colors.onSurface,
             modifier = Modifier.weight(1f),
             textAlign = TextAlign.Center,
         )
         TextButton(onClick = onDone) {
-            PebblesText(
+            Text(
                 text = stringResource(R.string.action_done),
-                style = PebblesTypography.buttonLabel,
-                color = accent.primary,
+                style = MaterialTheme.typography.labelLarge,
+                color = colors.primary,
             )
         }
     }

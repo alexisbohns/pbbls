@@ -10,10 +10,12 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -27,11 +29,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesDestructive
-import app.pbbls.android.core.designsystem.PebblesSuccess
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.AttachedSnap
 
 /**
@@ -48,7 +45,7 @@ fun AttachedPhotoView(
     onRemove: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     val thumb: ImageBitmap? =
         remember(snap.localThumb) {
             snap.localThumb
@@ -64,29 +61,29 @@ fun AttachedPhotoView(
     ) {
         MediaThumb(thumb)
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            PebblesText(
+            Text(
                 text = stringResource(R.string.photo_label),
-                style = PebblesTypography.subhead,
-                color = system.foreground,
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.onSurface,
             )
             when (snap.state) {
                 AttachedSnap.UploadState.UPLOADING ->
                     MediaStateLabel(
                         iconRes = R.drawable.ic_arrow_up_circle,
                         text = stringResource(R.string.photo_state_uploading),
-                        color = system.secondary,
+                        color = colors.onSurfaceVariant,
                     )
                 AttachedSnap.UploadState.UPLOADED ->
                     MediaStateLabel(
                         iconRes = R.drawable.ic_check_circle,
                         text = stringResource(R.string.photo_state_ready),
-                        color = PebblesSuccess,
+                        color = colors.tertiary,
                     )
                 AttachedSnap.UploadState.FAILED ->
                     MediaStateLabel(
                         iconRes = R.drawable.ic_warning,
                         text = stringResource(R.string.photo_state_failed),
-                        color = PebblesDestructive,
+                        color = colors.error,
                     )
             }
         }
@@ -94,7 +91,7 @@ fun AttachedPhotoView(
         when (snap.state) {
             AttachedSnap.UploadState.UPLOADING ->
                 CircularProgressIndicator(
-                    color = PebblesTheme.colors.accent.primary,
+                    color = colors.primary,
                     strokeWidth = 2.dp,
                     modifier = Modifier.size(20.dp),
                 )
@@ -106,7 +103,7 @@ fun AttachedPhotoView(
                         Icon(
                             painter = painterResource(R.drawable.ic_refresh),
                             contentDescription = stringResource(R.string.photo_retry_a11y),
-                            tint = PebblesTheme.colors.accent.primary,
+                            tint = colors.primary,
                             modifier = Modifier.size(22.dp),
                         )
                     }
@@ -127,7 +124,7 @@ internal fun MediaThumb(thumb: ImageBitmap?) {
             modifier =
                 Modifier
                     .size(56.dp)
-                    .clip(RoundedCornerShape(8.dp)),
+                    .clip(MaterialTheme.shapes.small),
         )
     } else {
         MediaThumbPlaceholder()
@@ -136,17 +133,17 @@ internal fun MediaThumb(thumb: ImageBitmap?) {
 
 @Composable
 internal fun MediaThumbPlaceholder() {
-    val system = PebblesTheme.colors.system
     Box(
         modifier =
             Modifier
                 .size(56.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(system.secondary.copy(alpha = 0.2f)),
+                .clip(MaterialTheme.shapes.small)
+                .background(MaterialTheme.colorScheme.surfaceContainerHighest),
     )
 }
 
 /** Icon + caption state line (the iOS `Label` analog). */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun MediaStateLabel(
     iconRes: Int,
@@ -163,9 +160,9 @@ internal fun MediaStateLabel(
             tint = color,
             modifier = Modifier.size(14.dp),
         )
-        PebblesText(
+        Text(
             text = text,
-            style = PebblesTypography.captionEmphasized,
+            style = MaterialTheme.typography.labelMediumEmphasized,
             color = color,
         )
     }
@@ -178,7 +175,7 @@ internal fun RemovePhotoButton(onRemove: () -> Unit) {
         Icon(
             painter = painterResource(R.drawable.ic_x_circle),
             contentDescription = stringResource(R.string.photo_remove_a11y),
-            tint = PebblesTheme.colors.system.secondary,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.size(22.dp),
         )
     }

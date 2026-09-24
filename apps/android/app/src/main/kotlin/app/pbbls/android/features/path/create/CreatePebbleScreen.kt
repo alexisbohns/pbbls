@@ -15,6 +15,9 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -32,11 +35,8 @@ import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.LocalReferenceDataService
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
-import app.pbbls.android.core.designsystem.PebblesTypography
 
 /**
  * The create-pebble surface (D5) — ports iOS `CreatePebbleSheet`. Owns the
@@ -69,6 +69,7 @@ import app.pbbls.android.core.designsystem.PebblesTypography
  * the disabled state was trying to preserve. `cancel()` already no-ops while
  * `isBusy`, so always calling it gets both cases right.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CreatePebbleScreen(
     onCreated: (String) -> Unit,
@@ -81,8 +82,7 @@ fun CreatePebbleScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val refs = LocalReferenceDataService.current
     val palettes = LocalEmotionPaletteService.current
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
 
     // Re-run when reference data lands: the coordinator refuses to hydrate
     // before it, so the first call may legitimately decide nothing (#647).
@@ -112,7 +112,7 @@ fun CreatePebbleScreen(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(system.background)
+                .background(colors.surface)
                 .safeDrawingPadding()
                 .imePadding(),
     ) {
@@ -154,10 +154,10 @@ fun CreatePebbleScreen(
             VisibilityChip(value = draft.visibility, onChange = { viewModel.onDraftChange(draft.copy(visibility = it)) })
             Spacer(Modifier.weight(1f))
             TextButton(onClick = viewModel::saveAsDraft, enabled = draftEnabled) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.draft_save),
-                    style = PebblesTypography.body,
-                    color = if (draftEnabled) accent.primary else system.muted,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (draftEnabled) colors.primary else colors.onSurface.copy(alpha = 0.38f),
                 )
             }
         }
@@ -169,34 +169,34 @@ fun CreatePebbleScreen(
         AlertDialog(
             onDismissRequest = viewModel::discardRestore,
             title = {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.draft_restore_title),
-                    style = PebblesTypography.headlineEmphasized,
-                    color = system.foreground,
+                    style = MaterialTheme.typography.titleMediumEmphasized,
+                    color = colors.onSurface,
                 )
             },
             text = {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.draft_restore_body),
-                    style = PebblesTypography.body,
-                    color = system.secondary,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colors.onSurfaceVariant,
                 )
             },
             confirmButton = {
                 TextButton(onClick = viewModel::acceptRestore) {
-                    PebblesText(
+                    Text(
                         text = stringResource(R.string.draft_restore_confirm),
-                        style = PebblesTypography.body,
-                        color = accent.primary,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.primary,
                     )
                 }
             },
             dismissButton = {
                 TextButton(onClick = viewModel::discardRestore) {
-                    PebblesText(
+                    Text(
                         text = stringResource(R.string.draft_restore_discard),
-                        style = PebblesTypography.body,
-                        color = system.secondary,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.onSurfaceVariant,
                     )
                 }
             },
@@ -208,10 +208,11 @@ fun CreatePebbleScreen(
  * Create-surface top bar: Cancel (left), the title (centered), and a Save
  * button that swaps to an inline spinner while [isSaving] and is disabled until
  * the draft is valid. Ports `CreatePebbleSheet`'s toolbar, composed on the
- * shared [PebblesTopBar]; keeps the shipped M39 look (headline title, accent
+ * shared [PebblesTopBar]; keeps the shipped M39 look (emphasized title, primary
  * buttons) via the style overrides — see the PebblesTopBar doc for the
  * iOS-idiom defaults new screens should use.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun CreateTopBar(
     saveEnabled: Boolean,
@@ -219,23 +220,22 @@ private fun CreateTopBar(
     onCancel: () -> Unit,
     onSave: () -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     PebblesTopBar(
         title = stringResource(R.string.create_new_pebble),
-        titleStyle = PebblesTypography.headlineEmphasized,
-        titleColor = system.foreground,
+        titleStyle = MaterialTheme.typography.titleMediumEmphasized,
+        titleColor = colors.onSurface,
         leading = {
             PebblesTopBarTextButton(
                 text = stringResource(R.string.action_cancel),
                 onClick = onCancel,
-                color = accent.primary,
+                color = colors.primary,
             )
         },
         trailing = {
             if (isSaving) {
                 CircularProgressIndicator(
-                    color = accent.primary,
+                    color = colors.primary,
                     strokeWidth = 2.dp,
                     modifier = Modifier.size(20.dp),
                 )
@@ -244,7 +244,7 @@ private fun CreateTopBar(
                     text = stringResource(R.string.action_save),
                     onClick = onSave,
                     enabled = saveEnabled,
-                    color = if (saveEnabled) accent.primary else system.muted,
+                    color = if (saveEnabled) colors.primary else colors.onSurface.copy(alpha = 0.38f),
                 )
             }
         },

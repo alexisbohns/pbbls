@@ -11,12 +11,13 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -35,9 +36,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphGridItem
 import app.pbbls.android.core.ui.GlyphView
@@ -148,7 +146,7 @@ fun GlyphPickerContent(
     viewModel: GlyphPickerViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
 
     // Every select leaves the picker showing its grid: the effect resets the
     // content swap before handing the glyph to the caller, so a selection
@@ -192,10 +190,10 @@ fun GlyphPickerContent(
         buyingItem != null ->
             Column(modifier.fillMaxWidth()) {
                 TextButton(onClick = { state.buying = null }) {
-                    PebblesText(
+                    Text(
                         text = stringResource(R.string.action_cancel),
-                        style = PebblesTypography.buttonLabel,
-                        color = accent.primary,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = colors.primary,
                     )
                 }
                 GlyphSwapPanel(
@@ -229,7 +227,7 @@ fun GlyphPickerContent(
                             modifier = Modifier.fillMaxWidth().padding(48.dp),
                             contentAlignment = Alignment.Center,
                         ) {
-                            CircularProgressIndicator(color = accent.primary)
+                            CircularProgressIndicator(color = colors.primary)
                         }
                     is GlyphPickerUiState.Error -> GlyphLoadError(onRetry = viewModel::retry)
                     is GlyphPickerUiState.Content ->
@@ -281,15 +279,15 @@ fun GlyphPickerGrid(
     onSelect: (GlyphGridItem) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = modifier.fillMaxWidth().verticalScroll(rememberScrollState()).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        PebblesText(
+        Text(
             text = stringResource(R.string.create_glyph_title),
-            style = PebblesTypography.cardHeading,
-            color = system.secondary,
+            style = MaterialTheme.typography.titleSmall,
+            color = colors.onSurfaceVariant,
         )
         val cells: List<PickerCell> =
             buildList {
@@ -332,21 +330,21 @@ private sealed interface PickerCell {
 
 @Composable
 private fun CarveTile(onCarve: () -> Unit) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier =
             Modifier
-                .clip(RoundedCornerShape(12.dp))
+                .clip(MaterialTheme.shapes.medium)
                 .clickable(onClick = onCarve)
                 .padding(8.dp),
     ) {
         GlyphView(case = GlyphViewCase.CREATE, side = 72.dp)
-        PebblesText(
+        Text(
             text = stringResource(R.string.carve_title),
-            style = PebblesTypography.meta,
-            color = system.secondary,
+            style = MaterialTheme.typography.labelSmall,
+            color = colors.onSurfaceVariant,
             maxLines = 1,
         )
     }
@@ -358,13 +356,13 @@ private fun PickerGlyphTile(
     isSelected: Boolean,
     onTap: () -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp),
         modifier =
             Modifier
-                .clip(RoundedCornerShape(12.dp))
+                .clip(MaterialTheme.shapes.medium)
                 .clickable(onClick = onTap)
                 .padding(8.dp),
     ) {
@@ -382,13 +380,13 @@ private fun PickerGlyphTile(
                 Icon(
                     painter = painterResource(R.drawable.ic_sparkle),
                     contentDescription = null,
-                    tint = system.muted,
+                    tint = colors.onSurfaceVariant,
                     modifier = Modifier.size(11.dp),
                 )
-                PebblesText(
+                Text(
                     text = item.price.toString(),
-                    style = PebblesTypography.meta,
-                    color = system.muted,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colors.onSurfaceVariant,
                 )
             }
         }
@@ -400,23 +398,22 @@ private fun GlyphLoadError(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = modifier.fillMaxWidth().padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        PebblesText(
+        Text(
             text = stringResource(R.string.create_glyph_load_error),
-            style = PebblesTypography.callout,
-            color = system.secondary,
+            style = MaterialTheme.typography.bodyLarge,
+            color = colors.onSurfaceVariant,
         )
         TextButton(onClick = onRetry) {
-            PebblesText(
+            Text(
                 text = stringResource(R.string.pebble_detail_retry),
-                style = PebblesTypography.buttonLabel,
-                color = accent.primary,
+                style = MaterialTheme.typography.labelLarge,
+                color = colors.primary,
             )
         }
     }

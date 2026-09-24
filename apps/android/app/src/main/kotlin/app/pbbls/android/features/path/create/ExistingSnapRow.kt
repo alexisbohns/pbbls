@@ -8,8 +8,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -24,10 +25,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalSnapURLCache
-import app.pbbls.android.core.designsystem.PebblesSuccess
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import coil3.compose.AsyncImage
 
 private const val TAG = "existing-snap-row"
@@ -51,7 +48,7 @@ fun ExistingSnapRow(
     onRemove: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     val snapUrls = LocalSnapURLCache.current
     var thumbUrl by remember(storagePath) { mutableStateOf<String?>(null) }
 
@@ -78,28 +75,28 @@ fun ExistingSnapRow(
                 modifier =
                     Modifier
                         .size(56.dp)
-                        .clip(RoundedCornerShape(8.dp)),
+                        .clip(MaterialTheme.shapes.small),
             )
         } else {
             MediaThumbPlaceholder()
         }
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            PebblesText(
+            Text(
                 text = stringResource(R.string.photo_label),
-                style = PebblesTypography.subhead,
-                color = system.foreground,
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.onSurface,
             )
             MediaStateLabel(
                 iconRes = R.drawable.ic_check_circle,
                 text = stringResource(R.string.photo_state_saved),
-                color = PebblesSuccess,
+                color = colors.tertiary,
             )
         }
         Spacer(Modifier.weight(1f))
         if (isRemoving) {
             Box(Modifier.size(48.dp), Alignment.Center) {
                 CircularProgressIndicator(
-                    color = PebblesTheme.colors.accent.primary,
+                    color = colors.primary,
                     strokeWidth = 2.dp,
                     modifier = Modifier.size(20.dp),
                 )
