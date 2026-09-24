@@ -12,20 +12,19 @@ import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.ContentType
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
@@ -36,14 +35,10 @@ import app.pbbls.android.core.designsystem.PebblesAuthSwitcher
 import app.pbbls.android.core.designsystem.PebblesCheckbox
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.PebblesTextInput
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.designsystem.openLegalDoc
 import app.pbbls.android.core.model.AuthMode
 
 private const val TAG = "auth"
-
-private val ErrorRed = Color(0xFFDC2626)
 
 /**
  * Email + password auth screen — the `AuthView` analog. The switcher toggles
@@ -97,14 +92,13 @@ fun AuthContent(
     onGoogleSignIn: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
     val context = LocalContext.current
 
     Column(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(system.background)
+                .background(MaterialTheme.colorScheme.surface)
                 .systemBarsPadding()
                 .imePadding()
                 .verticalScroll(rememberScrollState())
@@ -132,8 +126,8 @@ fun AuthContent(
                 if (uiState.showPlusError) {
                     Text(
                         text = stringResource(R.string.auth_email_plus_error),
-                        style = PebblesTypography.subhead.copy(fontSize = 12.sp),
-                        color = ErrorRed,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error,
                     )
                 }
             }
@@ -178,8 +172,8 @@ fun AuthContent(
         uiState.authErrorRes?.let { messageRes ->
             Text(
                 text = stringResource(messageRes),
-                style = PebblesTypography.subhead.copy(fontSize = 12.sp),
-                color = ErrorRed,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.error,
                 textAlign = TextAlign.Start,
                 modifier = Modifier.fillMaxWidth(),
             )
