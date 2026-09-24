@@ -12,20 +12,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.rive.RiveLogo
 
 private data class TokenSwatch(
@@ -33,22 +31,108 @@ private data class TokenSwatch(
     val color: Color,
 )
 
-private val SwatchLabelStyle = TextStyle(fontFamily = FontFamily.Monospace, fontSize = 10.sp)
+private data class SwatchGroup(
+    val title: String,
+    val swatches: List<TokenSwatch>,
+)
+
+/** Every role of [scheme], grouped the way the Material Theme Builder lays them out. */
+private fun schemeGroups(scheme: ColorScheme): List<SwatchGroup> =
+    listOf(
+        SwatchGroup(
+            "Primary",
+            listOf(
+                TokenSwatch("primary", scheme.primary),
+                TokenSwatch("onPrimary", scheme.onPrimary),
+                TokenSwatch("primaryContainer", scheme.primaryContainer),
+                TokenSwatch("onPrimaryContainer", scheme.onPrimaryContainer),
+                TokenSwatch("inversePrimary", scheme.inversePrimary),
+            ),
+        ),
+        SwatchGroup(
+            "Secondary",
+            listOf(
+                TokenSwatch("secondary", scheme.secondary),
+                TokenSwatch("onSecondary", scheme.onSecondary),
+                TokenSwatch("secondaryContainer", scheme.secondaryContainer),
+                TokenSwatch("onSecondaryContainer", scheme.onSecondaryContainer),
+            ),
+        ),
+        SwatchGroup(
+            "Tertiary",
+            listOf(
+                TokenSwatch("tertiary", scheme.tertiary),
+                TokenSwatch("onTertiary", scheme.onTertiary),
+                TokenSwatch("tertiaryContainer", scheme.tertiaryContainer),
+                TokenSwatch("onTertiaryContainer", scheme.onTertiaryContainer),
+            ),
+        ),
+        SwatchGroup(
+            "Error",
+            listOf(
+                TokenSwatch("error", scheme.error),
+                TokenSwatch("onError", scheme.onError),
+                TokenSwatch("errorContainer", scheme.errorContainer),
+                TokenSwatch("onErrorContainer", scheme.onErrorContainer),
+            ),
+        ),
+        SwatchGroup(
+            "Surface",
+            listOf(
+                TokenSwatch("surfaceDim", scheme.surfaceDim),
+                TokenSwatch("surface", scheme.surface),
+                TokenSwatch("surfaceBright", scheme.surfaceBright),
+                TokenSwatch("surfaceContainerLowest", scheme.surfaceContainerLowest),
+                TokenSwatch("surfaceContainerLow", scheme.surfaceContainerLow),
+                TokenSwatch("surfaceContainer", scheme.surfaceContainer),
+                TokenSwatch("surfaceContainerHigh", scheme.surfaceContainerHigh),
+                TokenSwatch("surfaceContainerHighest", scheme.surfaceContainerHighest),
+                TokenSwatch("onSurface", scheme.onSurface),
+                TokenSwatch("onSurfaceVariant", scheme.onSurfaceVariant),
+                TokenSwatch("inverseSurface", scheme.inverseSurface),
+                TokenSwatch("inverseOnSurface", scheme.inverseOnSurface),
+            ),
+        ),
+        SwatchGroup(
+            "Outline",
+            listOf(
+                TokenSwatch("outline", scheme.outline),
+                TokenSwatch("outlineVariant", scheme.outlineVariant),
+                TokenSwatch("scrim", scheme.scrim),
+            ),
+        ),
+        SwatchGroup(
+            "Fixed",
+            listOf(
+                TokenSwatch("primaryFixed", scheme.primaryFixed),
+                TokenSwatch("primaryFixedDim", scheme.primaryFixedDim),
+                TokenSwatch("onPrimaryFixed", scheme.onPrimaryFixed),
+                TokenSwatch("onPrimaryFixedVariant", scheme.onPrimaryFixedVariant),
+                TokenSwatch("secondaryFixed", scheme.secondaryFixed),
+                TokenSwatch("secondaryFixedDim", scheme.secondaryFixedDim),
+                TokenSwatch("onSecondaryFixed", scheme.onSecondaryFixed),
+                TokenSwatch("onSecondaryFixedVariant", scheme.onSecondaryFixedVariant),
+                TokenSwatch("tertiaryFixed", scheme.tertiaryFixed),
+                TokenSwatch("tertiaryFixedDim", scheme.tertiaryFixedDim),
+                TokenSwatch("onTertiaryFixed", scheme.onTertiaryFixed),
+                TokenSwatch("onTertiaryFixedVariant", scheme.onTertiaryFixedVariant),
+            ),
+        ),
+    )
 
 /**
- * Debug composable: color swatches (System + Accent), the full type ramp, and
- * the Rive logo — one screen the maintainer can review as a screenshot
- * without a device. Mirrors `apps/ios/Pebbles/Theme/ColorTokensPreview.swift`,
- * extended with the type ramp + logo. This is `MainActivity`'s temporary home
- * for sub-project B; the real home lands in C.
+ * Debug composable: every `MaterialTheme.colorScheme` role, the
+ * `MaterialTheme.typography` scale (with the emphasized styles the app reads)
+ * plus the handwritten faces, and the Rive logo — one screen the maintainer can
+ * review as a screenshot without a device (#853 replaced the old
+ * `system.*`/`accent.*` swatches with the scheme's roles).
  */
 @Composable
 fun DebugTokenPreviewScreen() {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     val spacing = PebblesTheme.spacing
 
-    Box(modifier = Modifier.fillMaxSize().background(system.background)) {
+    Box(modifier = Modifier.fillMaxSize().background(colors.surface)) {
         Column(
             modifier =
                 Modifier
@@ -57,33 +141,11 @@ fun DebugTokenPreviewScreen() {
                     .padding(spacing.lg),
             verticalArrangement = Arrangement.spacedBy(spacing.xxl),
         ) {
-            TokenSection(
-                title = "System",
-                swatches =
-                    listOf(
-                        TokenSwatch("system.foreground", system.foreground),
-                        TokenSwatch("system.secondary", system.secondary),
-                        TokenSwatch("system.muted", system.muted),
-                        TokenSwatch("system.background", system.background),
-                        TokenSwatch("system.onLight", system.onLight),
-                    ),
-            )
-            TokenSection(
-                title = "Accent",
-                swatches =
-                    listOf(
-                        TokenSwatch("accent.dark", accent.dark),
-                        TokenSwatch("accent.shaded", accent.shaded),
-                        TokenSwatch("accent.primary", accent.primary),
-                        TokenSwatch("accent.secondary", accent.secondary),
-                        TokenSwatch("accent.light", accent.light),
-                        TokenSwatch("accent.surface", accent.surface),
-                    ),
-            )
+            schemeGroups(colors).forEach { group -> TokenSection(group) }
             TypeRampSection()
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                PebblesText(text = "Rive logo", style = PebblesTypography.headline, color = system.foreground)
+                Text(text = "Rive logo", style = MaterialTheme.typography.titleMedium, color = colors.onSurface)
                 RiveLogo(modifier = Modifier.fillMaxWidth().height(160.dp))
             }
         }
@@ -91,14 +153,10 @@ fun DebugTokenPreviewScreen() {
 }
 
 @Composable
-private fun TokenSection(
-    title: String,
-    swatches: List<TokenSwatch>,
-) {
-    val system = PebblesTheme.colors.system
+private fun TokenSection(group: SwatchGroup) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        PebblesText(text = title, style = PebblesTypography.headline, color = system.foreground)
-        swatches.chunked(3).forEach { row ->
+        Text(text = group.title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
+        group.swatches.chunked(3).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
                 row.forEach { swatch -> Swatch(swatch, modifier = Modifier.weight(1f)) }
                 repeat(3 - row.size) { Spacer(modifier = Modifier.weight(1f)) }
@@ -112,7 +170,8 @@ private fun Swatch(
     swatch: TokenSwatch,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
+    val shape = MaterialTheme.shapes.small
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -123,42 +182,53 @@ private fun Swatch(
                 Modifier
                     .fillMaxWidth()
                     .height(56.dp)
-                    .background(swatch.color, RoundedCornerShape(8.dp))
-                    .border(1.dp, system.foreground.copy(alpha = 0.08f), RoundedCornerShape(8.dp)),
+                    .background(swatch.color, shape)
+                    .border(1.dp, colors.outlineVariant, shape),
         )
-        Text(text = swatch.name, style = SwatchLabelStyle, color = system.foreground)
+        Text(
+            text = swatch.name,
+            style = MaterialTheme.typography.labelSmall.copy(fontFamily = FontFamily.Monospace),
+            color = colors.onSurface,
+        )
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun TypeRampSection() {
-    val system = PebblesTheme.colors.system
+    val type = MaterialTheme.typography
+    val hand = PebblesTheme.hand
     val samples =
         listOf(
-            "body" to PebblesTypography.body,
-            "bodyEmphasized" to PebblesTypography.bodyEmphasized,
-            "subhead" to PebblesTypography.subhead,
-            "subheadEmphasized" to PebblesTypography.subheadEmphasized,
-            "headline" to PebblesTypography.headline,
-            "headlineEmphasized" to PebblesTypography.headlineEmphasized,
-            "callout" to PebblesTypography.callout,
-            "calloutEmphasized" to PebblesTypography.calloutEmphasized,
-            "meta" to PebblesTypography.meta,
-            "metaEmphasized" to PebblesTypography.metaEmphasized,
-            "cardHeading" to PebblesTypography.cardHeading,
-            "cardHeadingEmphasized" to PebblesTypography.cardHeadingEmphasized,
-            "counterLg" to PebblesTypography.counterLg,
-            "captionEmphasized" to PebblesTypography.captionEmphasized,
-            "title" to PebblesTypography.title,
-            "buttonLabel" to PebblesTypography.buttonLabel,
-            "bodyLeadHand" to PebblesTypography.bodyLeadHand,
-            "largeTitleHand" to PebblesTypography.largeTitleHand,
+            "displayLarge" to type.displayLarge,
+            "displayMedium" to type.displayMedium,
+            "displaySmall" to type.displaySmall,
+            "headlineLarge" to type.headlineLarge,
+            "headlineMedium" to type.headlineMedium,
+            "headlineSmall" to type.headlineSmall,
+            "titleLarge" to type.titleLarge,
+            "titleMedium" to type.titleMedium,
+            "titleMediumEmphasized" to type.titleMediumEmphasized,
+            "titleSmall" to type.titleSmall,
+            "bodyLarge" to type.bodyLarge,
+            "bodyLargeEmphasized" to type.bodyLargeEmphasized,
+            "bodyMedium" to type.bodyMedium,
+            "bodyMediumEmphasized" to type.bodyMediumEmphasized,
+            "bodySmall" to type.bodySmall,
+            "labelLarge" to type.labelLarge,
+            "labelMedium" to type.labelMedium,
+            "labelMediumEmphasized" to type.labelMediumEmphasized,
+            "labelSmall" to type.labelSmall,
+            "hand.bodyLeadHand" to hand.bodyLeadHand,
+            "hand.largeTitleHand" to hand.largeTitleHand,
+            "hand.nameInputHand" to hand.nameInputHand,
+            "hand.valenceWord" to hand.valenceWord,
         )
 
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        PebblesText(text = "Type ramp", style = PebblesTypography.headline, color = system.foreground)
+        Text(text = "Type ramp", style = type.titleMedium, color = MaterialTheme.colorScheme.onSurface)
         samples.forEach { (name, style) ->
-            PebblesText(text = "$name — Pebbles 123", style = style, color = system.foreground)
+            Text(text = "$name — Pebbles 123", style = style, color = MaterialTheme.colorScheme.onSurface)
         }
     }
 }

@@ -4,11 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -34,7 +34,10 @@ import app.rive.runtime.kotlin.RiveAnimationView
 fun RiveLogo(modifier: Modifier = Modifier) {
     if (LocalInspectionMode.current) {
         Box(
-            modifier = modifier.background(Color(0x14000000)).border(1.dp, Color(0x33000000)),
+            modifier =
+                modifier
+                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
+                    .border(1.dp, MaterialTheme.colorScheme.outlineVariant),
             contentAlignment = Alignment.Center,
         ) {
             Text(
