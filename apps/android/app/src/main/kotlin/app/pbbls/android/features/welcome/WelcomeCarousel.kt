@@ -11,13 +11,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import app.pbbls.android.core.designsystem.PebblesTheme
 import kotlinx.coroutines.delay
 
 private const val AUTO_ADVANCE_MILLIS = 4_000L
@@ -34,8 +34,7 @@ fun WelcomeCarousel(
     modifier: Modifier = Modifier,
 ) {
     val steps = WelcomeSteps.all
-    val accent = PebblesTheme.colors.accent
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     val pagerState = rememberPagerState(pageCount = { steps.size })
 
     LaunchedEffect(pagerState, reduceMotion) {
@@ -69,7 +68,7 @@ fun WelcomeCarousel(
                         Modifier
                             .size(6.dp)
                             .clip(CircleShape)
-                            .background(if (index == pagerState.currentPage) accent.primary else system.muted),
+                            .background(if (index == pagerState.currentPage) colors.primary else colors.outlineVariant),
                 )
             }
         }
