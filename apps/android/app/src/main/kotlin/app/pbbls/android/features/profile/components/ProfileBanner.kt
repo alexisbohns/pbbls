@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesTypography
+import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.ui.GlyphBanner
 import app.pbbls.android.core.ui.GlyphBannerSubtitle
@@ -36,7 +36,7 @@ fun ProfileBanner(
     GlyphBanner(
         title = displayName.orEmpty(),
         strokes = glyphStrokes,
-        titleStyle = PebblesTypography.largeTitleHand,
+        titleStyle = PebblesTheme.hand.largeTitleHand,
         subtitle = subtitle,
         modifier = modifier,
     )

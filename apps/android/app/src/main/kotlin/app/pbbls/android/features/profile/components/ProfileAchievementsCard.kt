@@ -10,8 +10,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,9 +23,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.data.AchievementRecord
 import app.pbbls.android.core.designsystem.PebblesIconToken
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.designsystem.profileCard
 import app.pbbls.android.core.ui.achievementFamilyIcon
 import app.pbbls.android.core.ui.achievementTitle
@@ -52,8 +51,7 @@ fun ProfileAchievementsCard(
     onOpen: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -61,34 +59,34 @@ fun ProfileAchievementsCard(
         modifier =
             modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(PebblesTheme.spacing.lg))
+                .clip(MaterialTheme.shapes.large)
                 .clickable(onClick = onOpen)
                 .profileCard(),
     ) {
         Icon(
             painter = painterResource(R.drawable.ic_trophy),
             contentDescription = null,
-            tint = accent.primary,
+            tint = colors.primary,
             modifier = Modifier.size(PebblesIconToken.LARGE.size),
         )
         Column(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
-            PebblesText(
+            Text(
                 text = stringResource(R.string.achievements_title),
-                style = PebblesTypography.headline,
-                color = system.foreground,
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.onSurface,
             )
-            PebblesText(
+            Text(
                 text =
                     if (hasLoaded && unlockedCount > 0) {
                         stringResource(R.string.achievements_shelf_count, unlockedCount)
                     } else {
                         stringResource(R.string.achievements_card_subtitle)
                     },
-                style = PebblesTypography.subhead,
-                color = system.secondary,
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.onSurfaceVariant,
             )
             if (recent.isNotEmpty()) {
                 Row(
@@ -102,7 +100,7 @@ fun ProfileAchievementsCard(
         Icon(
             painter = painterResource(R.drawable.ic_chevron_right),
             contentDescription = null,
-            tint = system.muted,
+            tint = colors.onSurfaceVariant,
             modifier = Modifier.size(PebblesIconToken.MEDIUM.size),
         )
     }
@@ -111,19 +109,19 @@ fun ProfileAchievementsCard(
 /** One earned badge: icon only, with the localized title as its accessible name. */
 @Composable
 private fun ShelfBadge(record: AchievementRecord) {
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     Box(
         contentAlignment = Alignment.Center,
         modifier =
             Modifier
                 .size(32.dp)
                 .clip(CircleShape)
-                .background(accent.primary.copy(alpha = 0.12f)),
+                .background(colors.primaryContainer),
     ) {
         Icon(
             painter = painterResource(achievementFamilyIcon(record.family)),
             contentDescription = achievementTitle(record),
-            tint = accent.primary,
+            tint = colors.onPrimaryContainer,
             modifier = Modifier.size(16.dp),
         )
     }

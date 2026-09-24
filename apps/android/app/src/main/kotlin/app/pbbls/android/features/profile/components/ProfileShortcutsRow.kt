@@ -4,7 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,7 +69,7 @@ private fun RowScope.ShortcutTile(
         modifier =
             Modifier
                 .weight(1f)
-                .clip(RoundedCornerShape(PebblesTheme.spacing.lg))
+                .clip(MaterialTheme.shapes.large)
                 .clickable(onClick = onClick),
     )
 }

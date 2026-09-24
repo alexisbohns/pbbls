@@ -7,7 +7,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,9 +23,7 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesIcon
 import app.pbbls.android.core.designsystem.PebblesIconToken
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.Collection
 
 /**
@@ -39,23 +38,24 @@ fun ProfileCollectionCard(
     collection: Collection?,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
-    val radius = PebblesTheme.spacing.lg
+    val colors = MaterialTheme.colorScheme
+    // The stroke is drawn by hand (Modifier.border has no dash), so the
+    // `shapes.large` corner is resolved to pixels here.
+    val corner = MaterialTheme.shapes.large.topStart
     val borderModifier =
         if (collection != null) {
             Modifier.drawBehind {
                 drawRoundRect(
-                    color = system.muted,
-                    cornerRadius = CornerRadius(radius.toPx()),
+                    color = colors.outlineVariant,
+                    cornerRadius = CornerRadius(corner.toPx(size, this)),
                     style = Stroke(width = 1.dp.toPx()),
                 )
             }
         } else {
             Modifier.drawBehind {
                 drawRoundRect(
-                    color = system.muted,
-                    cornerRadius = CornerRadius(radius.toPx()),
+                    color = colors.outlineVariant,
+                    cornerRadius = CornerRadius(corner.toPx(size, this)),
                     style =
                         Stroke(
                             width = 1.dp.toPx(),
@@ -77,33 +77,33 @@ fun ProfileCollectionCard(
             modifier =
                 Modifier
                     .size(PebblesTheme.spacing.xxl)
-                    .background(accent.surface, RoundedCornerShape(PebblesTheme.spacing.sm)),
+                    .background(colors.primaryContainer, MaterialTheme.shapes.small),
             contentAlignment = Alignment.Center,
         ) {
             PebblesIcon(
                 painter = painterResource(if (collection != null) R.drawable.ic_stack else R.drawable.ic_plus),
                 token = PebblesIconToken.SMALL,
                 contentDescription = null,
-                tint = accent.primary,
+                tint = colors.onPrimaryContainer,
             )
         }
         Column(verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.xs)) {
-            PebblesText(
+            Text(
                 text = collection?.name ?: stringResource(R.string.profile_collection_new),
-                style = PebblesTypography.headline,
-                color = system.foreground,
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.onSurface,
                 maxLines = 1,
             )
             if (collection != null) {
-                PebblesText(
+                Text(
                     text =
                         pluralStringResource(
                             R.plurals.pebbles_count,
                             collection.pebbleCount,
                             collection.pebbleCount,
                         ),
-                    style = PebblesTypography.subhead,
-                    color = system.secondary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.onSurfaceVariant,
                 )
             }
         }
