@@ -14,8 +14,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,10 +37,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.data.GlyphMarketServicing
 import app.pbbls.android.core.data.glyphMarketErrorMessage
 import app.pbbls.android.core.data.toDataError
-import app.pbbls.android.core.designsystem.PebblesDestructive
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.designsystem.SurfaceTile
 import app.pbbls.android.core.model.BuyGlyphResult
 import app.pbbls.android.core.model.GlyphGridItem
@@ -141,6 +141,7 @@ internal fun GlyphSwapPanel(
 }
 
 /** Pure drawer body — split from the sheet so screenshots can drive both states. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun GlyphDetailDrawerContent(
     item: GlyphGridItem,
@@ -151,8 +152,7 @@ internal fun GlyphDetailDrawerContent(
     errorRes: Int?,
     onConfirm: suspend () -> Boolean,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     val canAfford = currentBalance >= item.price
     val locale = Locale.getDefault()
 
@@ -165,10 +165,10 @@ internal fun GlyphDetailDrawerContent(
         verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.lg),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        PebblesText(
+        Text(
             text = stringResource(if (isOwned) R.string.glyph_drawer_owned else R.string.glyph_drawer_swap),
-            style = PebblesTypography.headlineEmphasized,
-            color = system.foreground,
+            style = MaterialTheme.typography.titleMediumEmphasized,
+            color = colors.onSurface,
         )
 
         GlyphBanner(
@@ -208,10 +208,10 @@ internal fun GlyphDetailDrawerContent(
                 horizontalAlignment = Alignment.Start,
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.glyph_drawer_me),
-                    style = PebblesTypography.captionEmphasized,
-                    color = system.secondary,
+                    style = MaterialTheme.typography.labelMediumEmphasized,
+                    color = colors.onSurfaceVariant,
                 )
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(2.dp),
@@ -220,20 +220,20 @@ internal fun GlyphDetailDrawerContent(
                     Icon(
                         painter = painterResource(R.drawable.ic_sparkle),
                         contentDescription = null,
-                        tint = accent.primary,
+                        tint = colors.primary,
                         modifier = Modifier.size(13.dp),
                     )
-                    PebblesText(
+                    Text(
                         text = currentBalance.toString(),
-                        style = PebblesTypography.subheadEmphasized,
-                        color = system.foreground,
+                        style = MaterialTheme.typography.bodyMediumEmphasized,
+                        color = colors.onSurface,
                     )
                 }
             }
             Icon(
                 painter = painterResource(R.drawable.ic_alternating_current),
                 contentDescription = null,
-                tint = system.muted,
+                tint = colors.onSurfaceVariant,
                 modifier = Modifier.size(16.dp),
             )
             Column(
@@ -241,21 +241,21 @@ internal fun GlyphDetailDrawerContent(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(2.dp),
             ) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.glyph_drawer_creator),
-                    style = PebblesTypography.captionEmphasized,
-                    color = system.secondary,
+                    style = MaterialTheme.typography.labelMediumEmphasized,
+                    color = colors.onSurfaceVariant,
                 )
-                PebblesText(
+                Text(
                     text = "@community",
-                    style = PebblesTypography.bodyLeadHand,
-                    color = system.muted,
+                    style = PebblesTheme.hand.bodyLeadHand,
+                    color = colors.onSurfaceVariant,
                 )
             }
         }
 
         if (isOwned) {
-            PebblesText(
+            Text(
                 text =
                     acquiredAt?.let {
                         stringResource(
@@ -263,8 +263,8 @@ internal fun GlyphDetailDrawerContent(
                             it.format(DateTimeFormatter.ofPattern("MMM d, yyyy", locale)),
                         )
                     } ?: stringResource(R.string.glyph_drawer_owned),
-                style = PebblesTypography.subhead,
-                color = system.secondary,
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.onSurfaceVariant,
             )
         } else {
             SlideToConfirm(
@@ -273,40 +273,40 @@ internal fun GlyphDetailDrawerContent(
                 onConfirm = onConfirm,
             )
             if (!canAfford) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.glyph_error_insufficient_karma),
-                    style = PebblesTypography.captionEmphasized,
-                    color = PebblesDestructive,
+                    style = MaterialTheme.typography.labelMediumEmphasized,
+                    color = colors.error,
                 )
             }
         }
 
         errorRes?.let { res ->
-            PebblesText(
+            Text(
                 text = stringResource(res),
-                style = PebblesTypography.captionEmphasized,
-                color = PebblesDestructive,
+                style = MaterialTheme.typography.labelMediumEmphasized,
+                color = colors.error,
             )
         }
     }
 }
 
 /**
- * The dotted rule (4dp round dots in accent.secondary) with the centered
- * price/seal badge masking it on a system-background chip — iOS
- * `dividerWithBadge`.
+ * The dotted rule (4dp round dots in `primaryContainer`) with the centered
+ * price/seal badge masking it on a `surfaceContainerLow` chip — the
+ * `ModalBottomSheet` default container, so the chip reads as a gap in the
+ * rule — iOS `dividerWithBadge`.
  */
 @Composable
 private fun DottedRuleWithBadge(
     isOwned: Boolean,
     price: Int,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         Canvas(modifier = Modifier.fillMaxWidth().height(4.dp)) {
             drawLine(
-                color = accent.secondary,
+                color = colors.primaryContainer,
                 start = Offset(0f, size.height / 2),
                 end = Offset(size.width, size.height / 2),
                 strokeWidth = size.height,
@@ -319,27 +319,27 @@ private fun DottedRuleWithBadge(
             verticalAlignment = Alignment.CenterVertically,
             modifier =
                 Modifier
-                    .background(system.background)
+                    .background(colors.surfaceContainerLow)
                     .padding(horizontal = PebblesTheme.spacing.sm),
         ) {
             if (isOwned) {
                 Icon(
                     painter = painterResource(R.drawable.ic_check_circle),
                     contentDescription = null,
-                    tint = accent.primary,
+                    tint = colors.primary,
                     modifier = Modifier.size(18.dp),
                 )
             } else {
                 Icon(
                     painter = painterResource(R.drawable.ic_sparkle),
                     contentDescription = null,
-                    tint = accent.primary,
+                    tint = colors.primary,
                     modifier = Modifier.size(14.dp),
                 )
-                PebblesText(
+                Text(
                     text = price.toString(),
-                    style = PebblesTypography.headline,
-                    color = accent.primary,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = colors.primary,
                 )
             }
         }

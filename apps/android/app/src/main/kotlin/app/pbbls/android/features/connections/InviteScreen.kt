@@ -13,9 +13,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -38,12 +40,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesDestructive
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
-import app.pbbls.android.core.designsystem.PebblesTypography
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.common.BitMatrix
@@ -94,6 +92,7 @@ fun InviteScreen(
 }
 
 /** Stateless invite surface — what screenshot previews drive. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun InviteContent(
     uiState: InviteUiState,
@@ -104,25 +103,24 @@ fun InviteContent(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
 
     Column(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(system.background)
+                .background(colors.surface)
                 .safeDrawingPadding(),
     ) {
         PebblesTopBar(
             title = stringResource(R.string.connections_invite_title),
-            titleStyle = PebblesTypography.headlineEmphasized,
-            titleColor = system.foreground,
+            titleStyle = MaterialTheme.typography.titleMediumEmphasized,
+            titleColor = colors.onSurface,
             leading = {
                 PebblesTopBarTextButton(
                     text = stringResource(R.string.action_done),
                     onClick = onDismiss,
-                    color = accent.primary,
+                    color = colors.primary,
                 )
             },
         )
@@ -130,25 +128,25 @@ fun InviteContent(
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             // Exhaustive with no `else`: a new InviteUiState case must be rendered.
             when (uiState) {
-                InviteUiState.Loading -> CircularProgressIndicator(color = accent.primary)
+                InviteUiState.Loading -> CircularProgressIndicator(color = colors.primary)
 
                 is InviteUiState.Error ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        PebblesText(
+                        Text(
                             text = stringResource(uiState.messageRes),
-                            style = PebblesTypography.body,
-                            color = system.secondary,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = colors.onSurfaceVariant,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(horizontal = 32.dp),
                         )
                         TextButton(onClick = onRetry) {
-                            PebblesText(
+                            Text(
                                 text = stringResource(R.string.action_retry),
-                                style = PebblesTypography.buttonLabel,
-                                color = accent.primary,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = colors.primary,
                             )
                         }
                     }
@@ -163,10 +161,10 @@ fun InviteContent(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                     ) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.connections_invite_explainer),
-                            style = PebblesTypography.body,
-                            color = system.secondary,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = colors.onSurfaceVariant,
                             textAlign = TextAlign.Center,
                         )
 
@@ -177,42 +175,42 @@ fun InviteContent(
 
                         // The link is always shown and copyable: the QR is
                         // never the sole affordance.
-                        PebblesText(
+                        Text(
                             text = uiState.invite.url,
-                            style = PebblesTypography.meta,
-                            color = system.secondary,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colors.onSurfaceVariant,
                             textAlign = TextAlign.Center,
                         )
 
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             TextButton(onClick = { onCopy(uiState.invite.url) }) {
-                                PebblesText(
+                                Text(
                                     text = stringResource(R.string.connections_invite_copy),
-                                    style = PebblesTypography.buttonLabel,
-                                    color = accent.primary,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = colors.primary,
                                 )
                             }
                             TextButton(onClick = { onShare(uiState.invite.url) }) {
-                                PebblesText(
+                                Text(
                                     text = stringResource(R.string.connections_invite_share),
-                                    style = PebblesTypography.buttonLabel,
-                                    color = accent.primary,
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = colors.primary,
                                 )
                             }
                         }
 
                         TextButton(onClick = onRotate, enabled = !uiState.isRotating) {
-                            PebblesText(
+                            Text(
                                 text = stringResource(R.string.connections_invite_rotate),
-                                style = PebblesTypography.buttonLabel,
-                                color = accent.primary,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = colors.primary,
                             )
                         }
 
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.connections_invite_rotate_note),
-                            style = PebblesTypography.meta,
-                            color = system.secondary,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = colors.onSurfaceVariant,
                             textAlign = TextAlign.Center,
                         )
 
@@ -220,10 +218,10 @@ fun InviteContent(
                         // screen — it is still the server's answer — with the
                         // reason under it.
                         uiState.rotateErrorRes?.let { res ->
-                            PebblesText(
+                            Text(
                                 text = stringResource(res),
-                                style = PebblesTypography.meta,
-                                color = PebblesDestructive,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = colors.error,
                                 textAlign = TextAlign.Center,
                             )
                         }
@@ -245,11 +243,13 @@ private fun QrCode(
 ) {
     val matrix = remember(content) { encodeQr(content) } ?: return
 
+    // Literal black on white, not theme roles: scanners need the highest
+    // contrast and a light quiet zone whatever the app's scheme is.
     Box(
         modifier =
             modifier
                 .size(220.dp)
-                .clip(RoundedCornerShape(16.dp))
+                .clip(MaterialTheme.shapes.large)
                 .background(Color.White)
                 .padding(12.dp)
                 .semantics { this.contentDescription = contentDescription },

@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -35,7 +36,7 @@ fun ProfileStatsCard(
     ) {
         PebblesSectionHeader(text = stringResource(R.string.profile_stats_header))
         RipplesRow(ripple = ripple, assiduity = assiduity)
-        HorizontalDivider(thickness = 1.dp, color = PebblesTheme.colors.system.muted)
+        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
         ProfileCountersRow(daysPracticed = daysPracticed, pebbles = pebbles, karma = karma)
     }
 }

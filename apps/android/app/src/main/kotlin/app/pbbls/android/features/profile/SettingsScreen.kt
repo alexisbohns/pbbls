@@ -23,7 +23,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -46,14 +45,11 @@ import app.pbbls.android.core.data.DataError
 import app.pbbls.android.core.designsystem.ConfirmDeleteDialog
 import app.pbbls.android.core.designsystem.DeleteErrorDialog
 import app.pbbls.android.core.designsystem.LegalDoc
-import app.pbbls.android.core.designsystem.PebblesDestructive
 import app.pbbls.android.core.designsystem.PebblesListSection
 import app.pbbls.android.core.designsystem.PebblesScreen
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.designsystem.openLegalDoc
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.ui.GlyphView
@@ -83,7 +79,7 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     val context = LocalContext.current
 
     ObserveUiEffects(viewModel.effects) { effect ->
@@ -96,7 +92,7 @@ fun SettingsScreen(
     }
 
     PebblesScreen(
-        modifier = modifier.background(system.background),
+        modifier = modifier.background(colors.surface),
         topBar = {
             PebblesTopBar(
                 title = stringResource(R.string.settings_title),
@@ -109,7 +105,7 @@ fun SettingsScreen(
                 trailing = {
                     if (uiState.isSaving) {
                         CircularProgressIndicator(
-                            color = PebblesTheme.colors.accent.primary,
+                            color = colors.primary,
                             strokeWidth = 2.dp,
                             modifier = Modifier.size(20.dp),
                         )
@@ -118,7 +114,7 @@ fun SettingsScreen(
                             text = stringResource(R.string.action_save),
                             onClick = viewModel::save,
                             enabled = uiState.isDirty,
-                            color = if (uiState.isDirty) system.secondary else system.muted,
+                            color = if (uiState.isDirty) colors.onSurfaceVariant else colors.onSurface.copy(alpha = 0.38f),
                         )
                     }
                 },
@@ -127,7 +123,7 @@ fun SettingsScreen(
     ) {
         if (uiState.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
+                CircularProgressIndicator(color = colors.primary)
             }
             return@PebblesScreen
         }
@@ -138,10 +134,10 @@ fun SettingsScreen(
                 modifier = Modifier.fillMaxSize().padding(16.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                PebblesText(
+                Text(
                     text = stringResource(loadErrorRes),
-                    style = PebblesTypography.body,
-                    color = PebblesDestructive,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colors.error,
                     textAlign = TextAlign.Center,
                 )
             }
@@ -192,12 +188,12 @@ fun SettingsScreen(
                                     Text(
                                         stringResource(R.string.settings_wallpaper_colors_title),
                                         style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.onSurface,
+                                        color = colors.onSurface,
                                     )
                                     Text(
                                         stringResource(R.string.settings_wallpaper_colors_body),
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        color = colors.onSurfaceVariant,
                                     )
                                 }
                                 // null onCheckedChange: the Row owns the toggle, so
@@ -214,10 +210,10 @@ fun SettingsScreen(
                     listOf(
                         {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                PebblesText(
+                                Text(
                                     text = stringResource(R.string.settings_name_label),
-                                    style = PebblesTypography.body,
-                                    color = system.secondary,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = colors.onSurfaceVariant,
                                 )
                                 Spacer(Modifier.weight(1f))
                                 BasicTextField(
@@ -225,19 +221,19 @@ fun SettingsScreen(
                                     onValueChange = viewModel::onDisplayNameChange,
                                     singleLine = true,
                                     textStyle =
-                                        PebblesTypography.body.copy(
-                                            color = system.foreground,
+                                        MaterialTheme.typography.bodyLarge.copy(
+                                            color = colors.onSurface,
                                             textAlign = TextAlign.End,
                                         ),
-                                    cursorBrush = SolidColor(PebblesTheme.colors.accent.primary),
+                                    cursorBrush = SolidColor(colors.primary),
                                     keyboardOptions =
                                         KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                                     decorationBox = { inner ->
                                         if (uiState.form.displayName.isEmpty()) {
-                                            PebblesText(
+                                            Text(
                                                 text = stringResource(R.string.settings_name_placeholder),
-                                                style = PebblesTypography.body,
-                                                color = system.muted,
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                color = colors.onSurfaceVariant,
                                             )
                                         }
                                         inner()
@@ -248,16 +244,16 @@ fun SettingsScreen(
                         },
                         {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                PebblesText(
+                                Text(
                                     text = stringResource(R.string.settings_email_label),
-                                    style = PebblesTypography.body,
-                                    color = system.secondary,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = colors.onSurfaceVariant,
                                 )
                                 Spacer(Modifier.weight(1f))
-                                PebblesText(
+                                Text(
                                     text = uiState.initial.email ?: "—",
-                                    style = PebblesTypography.body,
-                                    color = system.secondary,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = colors.onSurfaceVariant,
                                     maxLines = 1,
                                 )
                             }
@@ -271,27 +267,27 @@ fun SettingsScreen(
                     buildList {
                         add {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                PebblesText(
+                                Text(
                                     text = stringResource(R.string.settings_handle_label),
-                                    style = PebblesTypography.body,
-                                    color = system.secondary,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = colors.onSurfaceVariant,
                                 )
                                 Spacer(Modifier.weight(1f))
-                                PebblesText(
+                                Text(
                                     text = "@",
-                                    style = PebblesTypography.body,
-                                    color = system.secondary,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = colors.onSurfaceVariant,
                                 )
                                 BasicTextField(
                                     value = uiState.form.handle,
                                     onValueChange = viewModel::onHandleChange,
                                     singleLine = true,
                                     textStyle =
-                                        PebblesTypography.body.copy(
-                                            color = system.foreground,
+                                        MaterialTheme.typography.bodyLarge.copy(
+                                            color = colors.onSurface,
                                             textAlign = TextAlign.End,
                                         ),
-                                    cursorBrush = SolidColor(PebblesTheme.colors.accent.primary),
+                                    cursorBrush = SolidColor(colors.primary),
                                     keyboardOptions =
                                         KeyboardOptions(
                                             capitalization = KeyboardCapitalization.None,
@@ -299,10 +295,10 @@ fun SettingsScreen(
                                         ),
                                     decorationBox = { inner ->
                                         if (uiState.form.handle.isEmpty()) {
-                                            PebblesText(
+                                            Text(
                                                 text = stringResource(R.string.settings_handle_placeholder),
-                                                style = PebblesTypography.body,
-                                                color = system.muted,
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                color = colors.onSurfaceVariant,
                                             )
                                         }
                                         inner()
@@ -322,20 +318,17 @@ fun SettingsScreen(
                                             onClick = viewModel::togglePublicProfile,
                                         ),
                             ) {
-                                PebblesText(
+                                Text(
                                     text = stringResource(R.string.settings_public_profile_toggle),
-                                    style = PebblesTypography.body,
-                                    color = if (uiState.initial.handle != null) system.foreground else system.muted,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    // No handle yet: the whole row is disabled, not merely quiet.
+                                    color = if (uiState.initial.handle != null) colors.onSurface else colors.onSurface.copy(alpha = 0.38f),
                                 )
                                 Spacer(Modifier.weight(1f))
                                 Switch(
                                     checked = uiState.form.isPublicProfile,
                                     onCheckedChange = viewModel::onPublicProfileChange,
                                     enabled = uiState.initial.handle != null,
-                                    colors =
-                                        SwitchDefaults.colors(
-                                            checkedTrackColor = PebblesTheme.colors.accent.primary,
-                                        ),
                                 )
                             }
                         }
@@ -348,16 +341,16 @@ fun SettingsScreen(
                                             .fillMaxWidth()
                                             .clickable { sharePublicProfile(context, shareUrl) },
                                 ) {
-                                    PebblesText(
+                                    Text(
                                         text = stringResource(R.string.settings_public_profile_share),
-                                        style = PebblesTypography.body,
-                                        color = system.foreground,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = colors.onSurface,
                                     )
                                     Spacer(Modifier.weight(1f))
                                     Icon(
                                         painter = painterResource(R.drawable.ic_chevron_right),
                                         contentDescription = null,
-                                        tint = system.secondary,
+                                        tint = colors.onSurfaceVariant,
                                         modifier = Modifier.size(16.dp),
                                     )
                                 }
@@ -368,7 +361,7 @@ fun SettingsScreen(
                     header = stringResource(R.string.settings_public_profile_header),
                     rows = publicProfileRows,
                 )
-                PebblesText(
+                Text(
                     text =
                         uiState.handleErrorRes?.let { stringResource(it) }
                             ?: if (uiState.initial.handle == null) {
@@ -376,8 +369,8 @@ fun SettingsScreen(
                             } else {
                                 stringResource(R.string.settings_handle_footer)
                             },
-                    style = PebblesTypography.subhead,
-                    color = if (uiState.handleErrorRes != null) PebblesDestructive else system.secondary,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (uiState.handleErrorRes != null) colors.error else colors.onSurfaceVariant,
                 )
             }
 
@@ -388,10 +381,10 @@ fun SettingsScreen(
                         uiState.initial.providers.map { provider ->
                             {
                                 // Brand names render verbatim — never localized.
-                                PebblesText(
+                                Text(
                                     text = provider,
-                                    style = PebblesTypography.body,
-                                    color = system.foreground,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = colors.onSurface,
                                 )
                             }
                         },
@@ -408,14 +401,14 @@ fun SettingsScreen(
                                         onValueChange = viewModel::onPasswordChange,
                                         singleLine = true,
                                         visualTransformation = PasswordVisualTransformation(),
-                                        textStyle = PebblesTypography.body.copy(color = system.foreground),
-                                        cursorBrush = SolidColor(PebblesTheme.colors.accent.primary),
+                                        textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.onSurface),
+                                        cursorBrush = SolidColor(colors.primary),
                                         decorationBox = { inner ->
                                             if (uiState.form.newPassword.isEmpty()) {
-                                                PebblesText(
+                                                Text(
                                                     text = stringResource(R.string.settings_password_placeholder),
-                                                    style = PebblesTypography.body,
-                                                    color = system.muted,
+                                                    style = MaterialTheme.typography.bodyLarge,
+                                                    color = colors.onSurfaceVariant,
                                                 )
                                             }
                                             inner()
@@ -425,19 +418,19 @@ fun SettingsScreen(
                                 },
                             ),
                     )
-                    PebblesText(
+                    Text(
                         text = stringResource(R.string.settings_password_footer),
-                        style = PebblesTypography.subhead,
-                        color = system.secondary,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = colors.onSurfaceVariant,
                     )
                 }
             }
 
             if (uiState.didSaveFail) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.settings_save_error),
-                    style = PebblesTypography.subhead,
-                    color = PebblesDestructive,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.error,
                 )
             }
 
@@ -453,16 +446,16 @@ fun SettingsScreen(
                                         .fillMaxWidth()
                                         .clickable { openLegalDoc(context, LegalDoc.TERMS) },
                             ) {
-                                PebblesText(
+                                Text(
                                     text = stringResource(R.string.auth_consent_terms_link),
-                                    style = PebblesTypography.body,
-                                    color = system.foreground,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = colors.onSurface,
                                 )
                                 Spacer(Modifier.weight(1f))
                                 Icon(
                                     painter = painterResource(R.drawable.ic_chevron_right),
                                     contentDescription = null,
-                                    tint = system.secondary,
+                                    tint = colors.onSurfaceVariant,
                                     modifier = Modifier.size(16.dp),
                                 )
                             }
@@ -475,16 +468,16 @@ fun SettingsScreen(
                                         .fillMaxWidth()
                                         .clickable { openLegalDoc(context, LegalDoc.PRIVACY) },
                             ) {
-                                PebblesText(
+                                Text(
                                     text = stringResource(R.string.auth_consent_privacy_link),
-                                    style = PebblesTypography.body,
-                                    color = system.foreground,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = colors.onSurface,
                                 )
                                 Spacer(Modifier.weight(1f))
                                 Icon(
                                     painter = painterResource(R.drawable.ic_chevron_right),
                                     contentDescription = null,
-                                    tint = system.secondary,
+                                    tint = colors.onSurfaceVariant,
                                     modifier = Modifier.size(16.dp),
                                 )
                             }
@@ -509,15 +502,15 @@ fun SettingsScreen(
                                             onClick = viewModel::requestDelete,
                                         ),
                             ) {
-                                PebblesText(
+                                Text(
                                     text = stringResource(R.string.settings_delete_account),
-                                    style = PebblesTypography.body,
-                                    color = PebblesDestructive,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = colors.error,
                                 )
                                 Spacer(Modifier.weight(1f))
                                 if (uiState.deletion == DeletionState.DELETING) {
                                     CircularProgressIndicator(
-                                        color = PebblesDestructive,
+                                        color = colors.error,
                                         strokeWidth = 2.dp,
                                         modifier = Modifier.size(16.dp),
                                     )

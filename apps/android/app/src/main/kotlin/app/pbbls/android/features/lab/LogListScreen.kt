@@ -12,6 +12,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -25,10 +27,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesScreen
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.features.lab.components.LogTimeline
 import app.pbbls.android.features.lab.components.LogTimelineMode
 
@@ -61,7 +61,7 @@ fun LogListScreen(
     viewModel: LogListViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
 
     // Guarded on the mode, so a rotation re-runs this without re-fetching.
     LaunchedEffect(mode) { viewModel.start(mode) }
@@ -79,7 +79,7 @@ fun LogListScreen(
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
                             contentDescription = stringResource(R.string.profile_back_a11y),
-                            tint = system.secondary,
+                            tint = colors.onSurfaceVariant,
                             modifier = Modifier.size(24.dp),
                         )
                     }
@@ -91,7 +91,7 @@ fun LogListScreen(
         when (val state = uiState) {
             LogListUiState.Loading ->
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
+                    CircularProgressIndicator(color = colors.primary)
                 }
 
             is LogListUiState.Error ->
@@ -100,16 +100,16 @@ fun LogListScreen(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    PebblesText(
+                    Text(
                         text = stringResource(state.messageRes),
-                        style = PebblesTypography.body,
-                        color = system.secondary,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.onSurfaceVariant,
                     )
                     TextButton(onClick = viewModel::retry) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.profile_retry),
-                            style = PebblesTypography.buttonLabel,
-                            color = PebblesTheme.colors.accent.primary,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = colors.primary,
                         )
                     }
                 }
@@ -117,10 +117,10 @@ fun LogListScreen(
             is LogListUiState.Content ->
                 if (state.logs.isEmpty()) {
                     Box(Modifier.fillMaxSize(), Alignment.Center) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.lab_list_empty),
-                            style = PebblesTypography.body,
-                            color = system.secondary,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = colors.onSurfaceVariant,
                         )
                     }
                 } else {

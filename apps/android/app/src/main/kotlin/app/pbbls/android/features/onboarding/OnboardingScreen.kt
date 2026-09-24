@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -30,8 +31,6 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 
 /**
  * Paged onboarding flow — the `OnboardingView` analog. One [OnboardingPageView]
@@ -53,8 +52,7 @@ fun OnboardingScreen(
     onFinish: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     val pagerState = rememberPagerState(pageCount = { steps.size })
 
     // Block system back so the flow is dismissible only via skip/close, and
@@ -70,7 +68,7 @@ fun OnboardingScreen(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(system.background),
+                .background(colors.surface),
     ) {
         Column(
             modifier =
@@ -91,13 +89,13 @@ fun OnboardingScreen(
                     onClick = onFinish,
                     modifier = Modifier.clearAndSetSemantics { contentDescription = closeLabel },
                 ) {
-                    Text(text = "✕", style = PebblesTypography.headline, color = system.secondary)
+                    Text(text = "✕", style = MaterialTheme.typography.titleMedium, color = colors.onSurfaceVariant)
                 }
                 TextButton(onClick = onFinish) {
                     Text(
                         text = stringResource(R.string.onboarding_skip),
-                        style = PebblesTypography.callout,
-                        color = system.secondary,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.onSurfaceVariant,
                     )
                 }
             }
@@ -126,7 +124,7 @@ fun OnboardingScreen(
                                 .padding(horizontal = 4.dp)
                                 .size(if (index == pagerState.currentPage) 8.dp else 6.dp)
                                 .clip(CircleShape)
-                                .background(if (index == pagerState.currentPage) accent.primary else system.muted),
+                                .background(if (index == pagerState.currentPage) colors.primary else colors.outlineVariant),
                     )
                 }
             }

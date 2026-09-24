@@ -3,15 +3,14 @@ package app.pbbls.android.features.connections
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesDestructive
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 
 /**
  * Remove-a-connection confirmation (M49) — the iOS `confirmationDialog`
@@ -23,6 +22,7 @@ import app.pbbls.android.core.designsystem.PebblesTypography
  * design D6), so it must be its own explicit choice rather than a checkbox
  * or a hidden default.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun RemoveConnectionDialog(
     peerName: String,
@@ -30,49 +30,48 @@ internal fun RemoveConnectionDialog(
     onRemoveAndBlock: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = system.background,
+        containerColor = colors.surfaceContainerHigh,
         title = {
-            PebblesText(
+            Text(
                 text = stringResource(R.string.connections_remove_title, peerName),
-                style = PebblesTypography.headlineEmphasized,
-                color = system.foreground,
+                style = MaterialTheme.typography.titleMediumEmphasized,
+                color = colors.onSurface,
             )
         },
         text = {
-            PebblesText(
+            Text(
                 text = stringResource(R.string.connections_remove_message),
-                style = PebblesTypography.body,
-                color = system.secondary,
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.onSurfaceVariant,
             )
         },
         confirmButton = {
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                 TextButton(onClick = onRemove) {
-                    PebblesText(
+                    Text(
                         text = stringResource(R.string.connections_remove_confirm),
-                        style = PebblesTypography.buttonLabel,
-                        color = PebblesDestructive,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = colors.error,
                     )
                 }
                 TextButton(onClick = onRemoveAndBlock) {
-                    PebblesText(
+                    Text(
                         text = stringResource(R.string.connections_remove_block_confirm),
-                        style = PebblesTypography.buttonLabel,
-                        color = PebblesDestructive,
+                        style = MaterialTheme.typography.labelLarge,
+                        color = colors.error,
                     )
                 }
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.action_cancel),
-                    style = PebblesTypography.buttonLabel,
-                    color = accent.primary,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colors.primary,
                 )
             }
         },

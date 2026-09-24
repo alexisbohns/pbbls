@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,7 +41,6 @@ fun ProfileCollectionsCard(
     onOpenCollection: ((Collection) -> Unit)? = null,
     onCreate: (() -> Unit)? = null,
 ) {
-    val system = PebblesTheme.colors.system
     Column(
         verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.lg),
         modifier = modifier.fillMaxWidth().profileCard(),
@@ -59,7 +59,7 @@ fun ProfileCollectionsCard(
             Icon(
                 painter = painterResource(R.drawable.ic_chevron_right),
                 contentDescription = null,
-                tint = system.muted,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(PebblesIconToken.MEDIUM.size),
             )
         }

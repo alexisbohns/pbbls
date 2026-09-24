@@ -13,11 +13,14 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -33,14 +36,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
-import app.pbbls.android.core.designsystem.PebblesDestructive
 import app.pbbls.android.core.designsystem.PebblesListSection
 import app.pbbls.android.core.designsystem.PebblesScreen
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.CollectionMode
 import app.pbbls.android.features.profile.components.labelRes
 
@@ -68,7 +68,7 @@ fun CollectionFormScreen(
     viewModel: CollectionFormViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
 
     // `start` is guarded, so a rotation cannot re-seed over the user's edits.
     LaunchedEffect(collectionId) { viewModel.start(collectionId) }
@@ -81,7 +81,7 @@ fun CollectionFormScreen(
     }
 
     PebblesScreen(
-        modifier = modifier.background(system.background),
+        modifier = modifier.background(colors.surface),
         topBar = {
             PebblesTopBar(
                 title = stringResource(uiState.titleRes),
@@ -94,7 +94,7 @@ fun CollectionFormScreen(
                 trailing = {
                     if (uiState.isSaving) {
                         CircularProgressIndicator(
-                            color = PebblesTheme.colors.accent.primary,
+                            color = colors.primary,
                             strokeWidth = 2.dp,
                             modifier = Modifier.size(20.dp),
                         )
@@ -103,7 +103,7 @@ fun CollectionFormScreen(
                             text = stringResource(R.string.action_save),
                             onClick = viewModel::save,
                             enabled = uiState.canSave,
-                            color = if (uiState.canSave) system.secondary else system.muted,
+                            color = if (uiState.canSave) colors.onSurfaceVariant else colors.onSurface.copy(alpha = 0.38f),
                         )
                     }
                 },
@@ -112,7 +112,7 @@ fun CollectionFormScreen(
     ) {
         if (uiState.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
+                CircularProgressIndicator(color = colors.primary)
             }
             return@PebblesScreen
         }
@@ -123,10 +123,10 @@ fun CollectionFormScreen(
                 modifier = Modifier.fillMaxSize().padding(16.dp),
                 contentAlignment = Alignment.Center,
             ) {
-                PebblesText(
+                Text(
                     text = stringResource(loadErrorRes),
-                    style = PebblesTypography.body,
-                    color = PebblesDestructive,
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = colors.error,
                     textAlign = TextAlign.Center,
                 )
             }
@@ -152,16 +152,16 @@ fun CollectionFormScreen(
                                 value = uiState.name,
                                 onValueChange = viewModel::onNameChange,
                                 singleLine = true,
-                                textStyle = PebblesTypography.body.copy(color = system.foreground),
-                                cursorBrush = SolidColor(PebblesTheme.colors.accent.primary),
+                                textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.onSurface),
+                                cursorBrush = SolidColor(colors.primary),
                                 keyboardOptions =
                                     KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                                 decorationBox = { inner ->
                                     if (uiState.name.isEmpty()) {
-                                        PebblesText(
+                                        Text(
                                             text = stringResource(R.string.create_soul_name_placeholder),
-                                            style = PebblesTypography.body,
-                                            color = system.muted,
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color = colors.onSurfaceVariant,
                                         )
                                     }
                                     inner()
@@ -186,10 +186,10 @@ fun CollectionFormScreen(
             )
 
             if (uiState.didSaveFail) {
-                PebblesText(
+                Text(
                     text = stringResource(uiState.saveErrorRes),
-                    style = PebblesTypography.subhead,
-                    color = PebblesDestructive,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.error,
                 )
             }
         }
@@ -198,8 +198,9 @@ fun CollectionFormScreen(
 
 /**
  * The segmented-control port: four equal-width capsule toggles (None + the
- * three modes). Selection is carried by accent color, mirroring how the rest
- * of the design system marks selected state. `internal` for screenshots.
+ * three modes). Selection is carried by `primary` (label and border) against
+ * an `outline` boundary, mirroring how the rest of the design system marks
+ * selected state. `internal` for screenshots.
  */
 @Composable
 internal fun CollectionModePicker(
@@ -223,6 +224,7 @@ internal fun CollectionModePicker(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun ModeOption(
     label: String,
@@ -230,19 +232,18 @@ private fun ModeOption(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
-    val shape = RoundedCornerShape(50)
-    PebblesText(
+    val colors = MaterialTheme.colorScheme
+    val shape = CircleShape
+    Text(
         text = label,
-        style = PebblesTypography.captionEmphasized,
-        color = if (isSelected) accent.primary else system.secondary,
+        style = MaterialTheme.typography.labelMediumEmphasized,
+        color = if (isSelected) colors.primary else colors.onSurfaceVariant,
         textAlign = TextAlign.Center,
         maxLines = 1,
         modifier =
             modifier
                 .clip(shape)
-                .border(1.dp, if (isSelected) accent.primary else system.muted, shape)
+                .border(1.dp, if (isSelected) colors.primary else colors.outline, shape)
                 .clickable(onClick = onClick)
                 .padding(horizontal = 4.dp, vertical = 6.dp),
     )

@@ -11,8 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,17 +22,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.Log
 import coil3.compose.AsyncImage
 import java.util.Locale
 
 /**
  * One announcement — ports iOS `AnnouncementRow`: optional 140dp cover
- * (cover-crop, 10dp corners, muted-30% placeholder behind the load), headline
- * title, 3-line summary, and a muted chevron standing in for iOS's automatic
+ * (cover-crop, `shapes.small` corners, `surfaceContainerHighest` placeholder
+ * behind the load), `titleMedium` title, 3-line summary, and an
+ * `onSurfaceVariant` chevron standing in for iOS's automatic
  * nav-link disclosure. [coverUrl] comes from `LogsService.coverImageUrl`
  * (public `lab-assets` bucket — design D7); the cover is decorative
  * (`contentDescription = null`).
@@ -43,13 +42,13 @@ fun AnnouncementRow(
     onTap: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     val locale = Locale.getDefault()
     Row(
         modifier =
             modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(10.dp))
+                .clip(MaterialTheme.shapes.small)
                 .clickable(onClick = onTap)
                 .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -65,8 +64,8 @@ fun AnnouncementRow(
                         Modifier
                             .fillMaxWidth()
                             .height(140.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(system.muted.copy(alpha = 0.3f)),
+                            .clip(MaterialTheme.shapes.small)
+                            .background(colors.surfaceContainerHighest),
                 ) {
                     AsyncImage(
                         model = coverUrl,
@@ -76,22 +75,22 @@ fun AnnouncementRow(
                     )
                 }
             }
-            PebblesText(
+            Text(
                 text = log.title(locale),
-                style = PebblesTypography.headline,
-                color = system.foreground,
+                style = MaterialTheme.typography.titleMedium,
+                color = colors.onSurface,
             )
-            PebblesText(
+            Text(
                 text = log.summary(locale),
-                style = PebblesTypography.subhead,
-                color = system.secondary,
+                style = MaterialTheme.typography.bodyMedium,
+                color = colors.onSurfaceVariant,
                 maxLines = 3,
             )
         }
         Icon(
             painter = painterResource(R.drawable.ic_chevron_right),
             contentDescription = null,
-            tint = system.muted,
+            tint = colors.onSurfaceVariant,
             modifier = Modifier.size(16.dp),
         )
     }

@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -18,14 +18,11 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 
 /**
  * Renders a single [OnboardingStep] — the `OnboardingPageView` analog: a large
  * illustration card, title, and body. The illustration switches on the image
- * type; [OnboardingImage.Placeholder] shows the accent surface until real
+ * type; [OnboardingImage.Placeholder] shows the `primaryContainer` tint until real
  * artwork is exported (risk 6).
  */
 @Composable
@@ -33,8 +30,7 @@ fun OnboardingPageView(
     step: OnboardingStep,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
 
     Column(
         modifier =
@@ -49,8 +45,8 @@ fun OnboardingPageView(
                 Modifier
                     .fillMaxWidth()
                     .height(360.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(accent.surface),
+                    .clip(MaterialTheme.shapes.extraLarge)
+                    .background(colors.primaryContainer),
         ) {
             when (val image = step.image) {
                 is OnboardingImage.Asset -> {
@@ -74,13 +70,13 @@ fun OnboardingPageView(
         ) {
             Text(
                 text = stringResource(step.titleRes),
-                style = PebblesTypography.title.copy(fontSize = 24.sp),
-                color = system.foreground,
+                style = MaterialTheme.typography.headlineSmall,
+                color = colors.onSurface,
             )
             Text(
                 text = stringResource(step.descriptionRes),
-                style = PebblesTypography.body,
-                color = system.secondary,
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.onSurfaceVariant,
             )
         }
     }

@@ -14,6 +14,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,11 +30,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.data.Connection
 import app.pbbls.android.core.designsystem.DeleteErrorDialog
-import app.pbbls.android.core.designsystem.PebblesText
-import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.ui.GlyphView
 import app.pbbls.android.core.ui.GlyphViewCase
 
@@ -85,6 +85,7 @@ fun ConnectionsScreen(
  * Stateless connections list — what screenshot previews drive. Takes its data
  * as parameters rather than reading services.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ConnectionsContent(
     uiState: ConnectionsUiState,
@@ -94,32 +95,31 @@ fun ConnectionsContent(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
 
     Column(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(system.background)
+                .background(colors.surface)
                 .safeDrawingPadding(),
     ) {
         PebblesTopBar(
             title = stringResource(R.string.connections_title),
-            titleStyle = PebblesTypography.headlineEmphasized,
-            titleColor = system.foreground,
+            titleStyle = MaterialTheme.typography.titleMediumEmphasized,
+            titleColor = colors.onSurface,
             leading = {
                 PebblesTopBarTextButton(
                     text = stringResource(R.string.action_done),
                     onClick = onDismiss,
-                    color = accent.primary,
+                    color = colors.primary,
                 )
             },
             trailing = {
                 PebblesTopBarTextButton(
                     text = stringResource(R.string.connections_invite_action),
                     onClick = onOpenInvite,
-                    color = accent.primary,
+                    color = colors.primary,
                 )
             },
         )
@@ -131,35 +131,35 @@ fun ConnectionsContent(
             // Exhaustive with no `else`: a new ConnectionsUiState case must be
             // rendered. The empty list is Content, not a fourth case.
             when (uiState) {
-                ConnectionsUiState.Loading -> CircularProgressIndicator(color = accent.primary)
+                ConnectionsUiState.Loading -> CircularProgressIndicator(color = colors.primary)
 
                 is ConnectionsUiState.Error ->
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
-                        PebblesText(
+                        Text(
                             text = stringResource(uiState.messageRes),
-                            style = PebblesTypography.body,
-                            color = system.secondary,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = colors.onSurfaceVariant,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(horizontal = 32.dp),
                         )
                         TextButton(onClick = onRetry) {
-                            PebblesText(
+                            Text(
                                 text = stringResource(R.string.action_retry),
-                                style = PebblesTypography.buttonLabel,
-                                color = accent.primary,
+                                style = MaterialTheme.typography.labelLarge,
+                                color = colors.primary,
                             )
                         }
                     }
 
                 is ConnectionsUiState.Content ->
                     if (uiState.connections.isEmpty()) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.connections_empty),
-                            style = PebblesTypography.body,
-                            color = system.secondary,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = colors.onSurfaceVariant,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(horizontal = 32.dp),
                         )
@@ -188,8 +188,7 @@ private fun ConnectionRow(
     connection: Connection,
     onRemoveRequest: () -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -207,19 +206,19 @@ private fun ConnectionRow(
             }
         }
 
-        PebblesText(
+        Text(
             text = connection.peer.displayName ?: stringResource(R.string.connections_unnamed_peer),
-            style = PebblesTypography.body,
-            color = system.foreground,
+            style = MaterialTheme.typography.bodyLarge,
+            color = colors.onSurface,
             modifier = Modifier.weight(1f),
             maxLines = 1,
         )
 
         TextButton(onClick = onRemoveRequest) {
-            PebblesText(
+            Text(
                 text = stringResource(R.string.connections_remove_action),
-                style = PebblesTypography.buttonLabel,
-                color = accent.primary,
+                style = MaterialTheme.typography.labelLarge,
+                color = colors.primary,
             )
         }
     }

@@ -16,7 +16,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,13 +28,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
@@ -41,8 +40,6 @@ import app.pbbls.android.core.designsystem.GoogleSignInButton
 import app.pbbls.android.core.designsystem.LegalDisclaimer
 import app.pbbls.android.core.designsystem.LegalDoc
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
-import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.designsystem.openLegalDoc
 import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.rive.RiveLogo
@@ -54,8 +51,6 @@ private const val TAG = "welcome"
 // with Apple) is dropped — no Apple sign-in on Android (settled non-goal).
 private const val REVEAL_STEPS = 6
 private val REVEAL_SCHEDULE_MILLIS = longArrayOf(0, 200, 450, 600, 750, 1100)
-
-private val ErrorRed = Color(0xFFDC2626)
 
 /**
  * Pre-login landing AND splash — the `WelcomeView` analog. `RootScreen` keeps
@@ -101,7 +96,6 @@ fun WelcomeContent(
     onGoogleSignIn: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
     val context = LocalContext.current
     val reduceMotion = rememberReduceMotion()
     val inspection = LocalInspectionMode.current
@@ -116,7 +110,7 @@ fun WelcomeContent(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(system.background),
+                .background(MaterialTheme.colorScheme.surface),
     ) {
         Column(
             modifier =
@@ -203,8 +197,8 @@ private fun WelcomeRevealedContent(
             authErrorRes?.let { messageRes ->
                 Text(
                     text = stringResource(messageRes),
-                    style = PebblesTypography.subhead.copy(fontSize = 12.sp),
-                    color = ErrorRed,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -230,19 +224,19 @@ private fun WelcomeOutlineButton(
     enabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val accent = PebblesTheme.colors.accent
-    val shape = RoundedCornerShape(50)
+    val primary = MaterialTheme.colorScheme.primary
+    val shape = CircleShape
     Box(
         modifier =
             modifier
                 .fillMaxWidth()
                 .heightIn(min = 52.dp)
                 .clip(shape)
-                .border(1.dp, accent.primary, shape)
+                .border(1.dp, primary, shape)
                 .clickable(enabled = enabled) { onClick() },
         contentAlignment = Alignment.Center,
     ) {
-        Text(text = text, style = PebblesTypography.buttonLabel, color = accent.primary)
+        Text(text = text, style = MaterialTheme.typography.labelLarge, color = primary)
     }
 }
 

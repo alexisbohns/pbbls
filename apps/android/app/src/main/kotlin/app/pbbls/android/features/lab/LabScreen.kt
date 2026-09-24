@@ -15,12 +15,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -37,10 +40,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.designsystem.PebblesSectionHeader
-import app.pbbls.android.core.designsystem.PebblesText
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
-import app.pbbls.android.core.designsystem.PebblesTypography
 import app.pbbls.android.core.model.LabConfig
 import app.pbbls.android.core.model.Log
 import app.pbbls.android.features.lab.components.AnnouncementRow
@@ -71,7 +72,7 @@ fun LabScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
 
     // Coming back from a pushed screen must re-read the feeds: the ViewModel is
     // scoped to the back stack entry, which survives that round trip.
@@ -90,7 +91,7 @@ fun LabScreen(
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
                             contentDescription = stringResource(R.string.profile_back_a11y),
-                            tint = system.secondary,
+                            tint = colors.onSurfaceVariant,
                             modifier = Modifier.size(24.dp),
                         )
                     }
@@ -102,7 +103,7 @@ fun LabScreen(
         when (val state = uiState) {
             LabUiState.Loading ->
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    CircularProgressIndicator(color = PebblesTheme.colors.accent.primary)
+                    CircularProgressIndicator(color = colors.primary)
                 }
 
             is LabUiState.Error ->
@@ -111,16 +112,16 @@ fun LabScreen(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    PebblesText(
+                    Text(
                         text = stringResource(state.messageRes),
-                        style = PebblesTypography.body,
-                        color = system.secondary,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = colors.onSurfaceVariant,
                     )
                     TextButton(onClick = viewModel::retry) {
-                        PebblesText(
+                        Text(
                             text = stringResource(R.string.profile_retry),
-                            style = PebblesTypography.buttonLabel,
-                            color = PebblesTheme.colors.accent.primary,
+                            style = MaterialTheme.typography.labelLarge,
+                            color = colors.primary,
                         )
                     }
                 }
@@ -155,7 +156,6 @@ fun LabContent(
     onSeeAllBacklog: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
     Column(
         modifier =
             modifier
@@ -175,7 +175,7 @@ fun LabContent(
                         coverUrl = coverUrl(log),
                         onTap = { onOpenAnnouncement(log) },
                     )
-                    if (index != state.announcements.lastIndex) HorizontalDivider(color = system.muted)
+                    if (index != state.announcements.lastIndex) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
                 }
             }
         }
@@ -219,28 +219,28 @@ private fun LabSection(
 }
 
 /** iOS's see-all label style tints only the arrow accent; the text stays secondary. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun SeeAllLink(onTap: () -> Unit) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     Row(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
         modifier =
             Modifier
-                .clip(RoundedCornerShape(50))
+                .clip(CircleShape)
                 .clickable(onClick = onTap)
                 .padding(horizontal = 4.dp, vertical = 4.dp),
     ) {
-        PebblesText(
+        Text(
             text = stringResource(R.string.lab_see_all),
-            style = PebblesTypography.subheadEmphasized,
-            color = system.secondary,
+            style = MaterialTheme.typography.bodyMediumEmphasized,
+            color = colors.onSurfaceVariant,
         )
         Icon(
             painter = painterResource(R.drawable.ic_arrow_right),
             contentDescription = null,
-            tint = accent.primary,
+            tint = colors.primary,
             modifier = Modifier.size(14.dp),
         )
     }
