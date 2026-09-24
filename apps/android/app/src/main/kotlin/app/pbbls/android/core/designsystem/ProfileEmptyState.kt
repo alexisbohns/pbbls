@@ -4,6 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,28 +18,29 @@ import androidx.compose.ui.unit.dp
  * `ContentUnavailableView` analog (text-only; the SF-symbol slot doesn't
  * carry enough meaning to justify porting per-screen artwork).
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun ProfileEmptyState(
     title: String,
     message: String,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier = modifier.fillMaxSize().padding(horizontal = 32.dp),
         verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.sm, Alignment.CenterVertically),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        PebblesText(
+        Text(
             text = title,
-            style = PebblesTypography.headlineEmphasized,
-            color = system.foreground,
+            style = MaterialTheme.typography.titleMediumEmphasized,
+            color = colors.onSurface,
             textAlign = TextAlign.Center,
         )
-        PebblesText(
+        Text(
             text = message,
-            style = PebblesTypography.subhead,
-            color = system.secondary,
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
     }

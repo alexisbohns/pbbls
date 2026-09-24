@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -24,11 +26,11 @@ import androidx.compose.ui.unit.dp
 
 /**
  * Screen scaffold — the `pebblesScreen()` analog (iOS `Theme/PebblesScreen.swift`):
- * fills the window with `system.background`, applies safe-drawing insets, and
- * seeds `LocalContentColor` with `system.secondary` so unstyled content inherits
- * the branded foreground the way iOS's `.foregroundStyle` cascade does.
- * Background is always `system.background` — no override knob; screens should
- * not deviate.
+ * fills the window with `surface`, applies safe-drawing insets, and seeds
+ * `LocalContentColor` with `onSurfaceVariant` so unstyled content inherits the
+ * branded foreground the way iOS's `.foregroundStyle` cascade does.
+ * Background is always `surface` — no override knob; screens should not
+ * deviate.
  *
  * Compose has no NavigationStack toolbar, so the bar is an explicit [topBar]
  * slot (use [PebblesTopBar]) stacked above the content column.
@@ -39,15 +41,15 @@ fun PebblesScreen(
     topBar: @Composable () -> Unit = {},
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    val system = PebblesTheme.colors.system
+    val colors = MaterialTheme.colorScheme
     Column(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(system.background)
+                .background(colors.surface)
                 .safeDrawingPadding(),
     ) {
-        CompositionLocalProvider(LocalContentColor provides system.secondary) {
+        CompositionLocalProvider(LocalContentColor provides colors.onSurfaceVariant) {
             topBar()
             content()
         }
@@ -57,10 +59,9 @@ fun PebblesScreen(
 /**
  * Shared top bar: leading slot, centered title, trailing slot — the
  * `pebblesToolbarTitle` + toolbar-row analog (iOS `Theme/PebblesToolbarTitle.swift`).
- * Defaults follow the iOS idiom: `meta` token (uppercase via [PebblesText]) in
- * `system.secondary`. The M39 create bar predates this idiom and keeps its
- * shipped look (`headlineEmphasized` title, accent buttons) via the style
- * parameters — harmonizing it with iOS is a separate, deliberate change.
+ * Defaults: `labelSmall` in `onSurfaceVariant` (sentence case since #853). The
+ * M39 create bar predates this idiom and keeps its shipped look (emphasized
+ * title, primary buttons) via the style parameters — harmonizing it with iOS is a separate, deliberate change.
  *
  * Geometry matches the shipped M39 bar exactly: 8dp horizontal / 4dp vertical
  * row padding, title weighted between the slots. The title carries the
@@ -71,8 +72,8 @@ fun PebblesScreen(
 fun PebblesTopBar(
     title: String,
     modifier: Modifier = Modifier,
-    titleStyle: TextStyle = PebblesTypography.meta,
-    titleColor: Color = PebblesTheme.colors.system.secondary,
+    titleStyle: TextStyle = MaterialTheme.typography.labelSmall,
+    titleColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     leading: @Composable RowScope.() -> Unit = {},
     trailing: @Composable RowScope.() -> Unit = {},
 ) {
@@ -84,7 +85,7 @@ fun PebblesTopBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         leading()
-        PebblesText(
+        Text(
             text = title,
             style = titleStyle,
             color = titleColor,
@@ -100,7 +101,7 @@ fun PebblesTopBar(
 
 /**
  * Text button for [PebblesTopBar] slots — the `PebbleToolbarButton` analog
- * (iOS `Theme/PebbleToolbarButton.swift`): label pinned to `system.secondary`
+ * (iOS `Theme/PebbleToolbarButton.swift`): label pinned to `onSurfaceVariant`
  * by default rather than the ambient accent, so toolbar actions read in the
  * branded secondary color and the rule has one grep target. [color] exists for
  * the shipped create-bar accent look and disabled-muted states; it is applied
@@ -113,12 +114,12 @@ fun PebblesTopBarTextButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    color: Color = PebblesTheme.colors.system.secondary,
+    color: Color = MaterialTheme.colorScheme.onSurfaceVariant,
 ) {
     TextButton(onClick = onClick, enabled = enabled, modifier = modifier) {
-        PebblesText(
+        Text(
             text = text,
-            style = PebblesTypography.buttonLabel,
+            style = MaterialTheme.typography.labelLarge,
             color = color,
         )
     }

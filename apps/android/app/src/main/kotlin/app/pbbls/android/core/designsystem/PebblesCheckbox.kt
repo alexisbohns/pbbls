@@ -8,7 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,8 +27,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 
 /**
- * Consent checkbox: a 44dp rounded-square box (white when empty, accent when
- * checked) followed by a label with a tappable link fragment. Box tap toggles
+ * Consent checkbox: a 44dp rounded-square box (`surfaceContainerLowest` when
+ * empty, `primary` when checked) followed by a label with a tappable link fragment. Box tap toggles
  * [isChecked]; the whole label fires [onLinkTap] (per-range tap gestures
  * don't compose cleanly on annotated-string text). Ports
  * `apps/ios/Pebbles/Components/Checkboxes/PebblesCheckbox.swift`.
@@ -42,15 +42,14 @@ fun PebblesCheckbox(
     onLinkTap: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     val boxSize = 44.dp
-    val shape = RoundedCornerShape(12.dp)
+    val shape = MaterialTheme.shapes.medium
 
     val label =
         buildAnnotatedString {
             append(prefix)
-            withStyle(SpanStyle(color = accent.primary, textDecoration = TextDecoration.Underline)) {
+            withStyle(SpanStyle(color = colors.primary, textDecoration = TextDecoration.Underline)) {
                 append(linkText)
             }
         }
@@ -76,20 +75,20 @@ fun PebblesCheckbox(
             modifier =
                 Modifier
                     .size(boxSize)
-                    .background(if (isChecked) accent.primary else Color.White, shape)
-                    .border(1.dp, if (isChecked) accent.primary else system.muted, shape)
+                    .background(if (isChecked) colors.primary else colors.surfaceContainerLowest, shape)
+                    .border(1.dp, if (isChecked) colors.primary else colors.outlineVariant, shape)
                     .clickable { onCheckedChange(!isChecked) },
             contentAlignment = Alignment.Center,
         ) {
-            CheckboxGlyph(isChecked = isChecked, tint = if (isChecked) system.background else system.secondary)
+            CheckboxGlyph(isChecked = isChecked, tint = if (isChecked) colors.onPrimary else colors.onSurfaceVariant)
         }
 
         Spacer(modifier = Modifier.size(12.dp))
 
         Text(
             text = label,
-            style = PebblesTypography.subhead,
-            color = system.secondary,
+            style = MaterialTheme.typography.bodyMedium,
+            color = colors.onSurfaceVariant,
             modifier = Modifier.weight(1f).clickable { onLinkTap() },
         )
     }
@@ -104,6 +103,6 @@ private fun CheckboxGlyph(
     if (isChecked) {
         CheckGlyph(tint = tint, size = 20.dp)
     } else {
-        Box(modifier = Modifier.size(20.dp).border(1.5.dp, tint, RoundedCornerShape(3.dp)))
+        Box(modifier = Modifier.size(20.dp).border(1.5.dp, tint, MaterialTheme.shapes.extraSmall))
     }
 }

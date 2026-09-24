@@ -6,10 +6,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,9 +24,9 @@ import androidx.compose.ui.unit.dp
 
 /**
  * Rounded-rectangle text input with a static 1dp border (no focus state, to
- * match iOS 1:1). `system.background` fill (white in light, dark in dark —
- * never a hardcoded white, which is unreadable in dark mode), `system.secondary`
- * for both placeholder and typed content. Ports
+ * match iOS 1:1). `surface` fill (never a hardcoded white, which is unreadable
+ * in dark mode), `outlineVariant` border, `onSurfaceVariant` for both
+ * placeholder and typed content. Ports
  * `apps/ios/Pebbles/Components/Inputs/PebblesTextInput.swift`.
  */
 @Composable
@@ -42,11 +42,10 @@ fun PebblesTextInput(
     singleLine: Boolean = true,
     maxLines: Int = 1,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     val minHeight = 52.dp
     val horizontalPadding = 16.dp
-    val shape = RoundedCornerShape(12.dp)
+    val shape = MaterialTheme.shapes.medium
 
     val fieldModifier =
         Modifier
@@ -59,25 +58,25 @@ fun PebblesTextInput(
             modifier
                 .fillMaxWidth()
                 .heightIn(min = minHeight)
-                .background(system.background, shape)
-                .border(1.dp, system.muted, shape),
+                .background(colors.surface, shape)
+                .border(1.dp, colors.outlineVariant, shape),
         contentAlignment = Alignment.CenterStart,
     ) {
         BasicTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = fieldModifier,
-            textStyle = PebblesTypography.body.copy(color = system.secondary),
+            textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.onSurfaceVariant),
             singleLine = singleLine,
             maxLines = maxLines,
-            cursorBrush = SolidColor(accent.primary),
+            cursorBrush = SolidColor(colors.primary),
             visualTransformation = if (isSecure) PasswordVisualTransformation() else VisualTransformation.None,
             keyboardOptions = keyboardOptions,
             keyboardActions = keyboardActions,
             decorationBox = { innerTextField ->
                 Box(contentAlignment = Alignment.CenterStart) {
                     if (value.isEmpty()) {
-                        Text(text = placeholder, style = PebblesTypography.body, color = system.secondary)
+                        Text(text = placeholder, style = MaterialTheme.typography.bodyLarge, color = colors.onSurfaceVariant)
                     }
                     innerTextField()
                 }

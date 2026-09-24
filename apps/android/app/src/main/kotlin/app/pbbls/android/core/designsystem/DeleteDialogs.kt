@@ -1,6 +1,9 @@
 package app.pbbls.android.core.designsystem
 
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
@@ -13,6 +16,7 @@ import app.pbbls.android.R
  * ("linked pebbles stay" vs "can't be undone"). `confirmText` defaults to the
  * generic Delete label; account deletion passes its own.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun ConfirmDeleteDialog(
     title: String,
@@ -21,40 +25,39 @@ internal fun ConfirmDeleteDialog(
     onDismiss: () -> Unit,
     confirmText: String? = null,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = system.background,
+        containerColor = colors.surfaceContainerHigh,
         title = {
-            PebblesText(
+            Text(
                 text = title,
-                style = PebblesTypography.headlineEmphasized,
-                color = system.foreground,
+                style = MaterialTheme.typography.titleMediumEmphasized,
+                color = colors.onSurface,
             )
         },
         text = {
-            PebblesText(
+            Text(
                 text = message,
-                style = PebblesTypography.body,
-                color = system.secondary,
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.onSurfaceVariant,
             )
         },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                PebblesText(
+                Text(
                     text = confirmText ?: stringResource(R.string.pebble_delete),
-                    style = PebblesTypography.buttonLabel,
-                    color = PebblesDestructive,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colors.error,
                 )
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.action_cancel),
-                    style = PebblesTypography.buttonLabel,
-                    color = accent.primary,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colors.primary,
                 )
             }
         },
@@ -67,24 +70,23 @@ internal fun DeleteErrorDialog(
     onDismiss: () -> Unit,
     message: String? = null,
 ) {
-    val system = PebblesTheme.colors.system
-    val accent = PebblesTheme.colors.accent
+    val colors = MaterialTheme.colorScheme
     AlertDialog(
         onDismissRequest = onDismiss,
-        containerColor = system.background,
+        containerColor = colors.surfaceContainerHigh,
         text = {
-            PebblesText(
+            Text(
                 text = message ?: stringResource(R.string.pebble_delete_error),
-                style = PebblesTypography.body,
-                color = system.secondary,
+                style = MaterialTheme.typography.bodyLarge,
+                color = colors.onSurfaceVariant,
             )
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                PebblesText(
+                Text(
                     text = stringResource(R.string.action_cancel),
-                    style = PebblesTypography.buttonLabel,
-                    color = accent.primary,
+                    style = MaterialTheme.typography.labelLarge,
+                    color = colors.primary,
                 )
             }
         },
