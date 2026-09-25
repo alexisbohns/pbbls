@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -20,7 +22,6 @@ import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesIconToken
 import app.pbbls.android.core.designsystem.PebblesSectionHeader
 import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.profileCard
 import app.pbbls.android.core.model.Collection
 
 /**
@@ -41,48 +42,50 @@ fun ProfileCollectionsCard(
     onOpenCollection: ((Collection) -> Unit)? = null,
     onCreate: (() -> Unit)? = null,
 ) {
-    Column(
-        verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.lg),
-        modifier = modifier.fillMaxWidth().profileCard(),
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier =
-                if (onOpenList != null) {
-                    Modifier.fillMaxWidth().clickable(onClick = onOpenList)
-                } else {
-                    Modifier.fillMaxWidth()
-                },
+    OutlinedCard(modifier = modifier.fillMaxWidth()) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.lg),
+            modifier = Modifier.fillMaxWidth().padding(PebblesTheme.spacing.lg),
         ) {
-            PebblesSectionHeader(text = stringResource(R.string.profile_collections_header))
-            Spacer(Modifier.weight(1f))
-            Icon(
-                painter = painterResource(R.drawable.ic_chevron_right),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(PebblesIconToken.MEDIUM.size),
-            )
-        }
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.sm)) {
-            if (collections.isEmpty() && hasLoaded) {
-                item {
-                    ProfileCollectionCard(
-                        collection = null,
-                        modifier =
-                            if (onCreate != null) Modifier.clickable(onClick = onCreate) else Modifier,
-                    )
-                }
-            } else {
-                items(collections, key = { it.id }) { collection ->
-                    ProfileCollectionCard(
-                        collection = collection,
-                        modifier =
-                            if (onOpenCollection != null) {
-                                Modifier.clickable { onOpenCollection(collection) }
-                            } else {
-                                Modifier
-                            },
-                    )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier =
+                    if (onOpenList != null) {
+                        Modifier.fillMaxWidth().clickable(onClick = onOpenList)
+                    } else {
+                        Modifier.fillMaxWidth()
+                    },
+            ) {
+                PebblesSectionHeader(text = stringResource(R.string.profile_collections_header))
+                Spacer(Modifier.weight(1f))
+                Icon(
+                    painter = painterResource(R.drawable.ic_chevron_right),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(PebblesIconToken.MEDIUM.size),
+                )
+            }
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.sm)) {
+                if (collections.isEmpty() && hasLoaded) {
+                    item {
+                        ProfileCollectionCard(
+                            collection = null,
+                            modifier =
+                                if (onCreate != null) Modifier.clickable(onClick = onCreate) else Modifier,
+                        )
+                    }
+                } else {
+                    items(collections, key = { it.id }) { collection ->
+                        ProfileCollectionCard(
+                            collection = collection,
+                            modifier =
+                                if (onOpenCollection != null) {
+                                    Modifier.clickable { onOpenCollection(collection) }
+                                } else {
+                                    Modifier
+                                },
+                        )
+                    }
                 }
             }
         }

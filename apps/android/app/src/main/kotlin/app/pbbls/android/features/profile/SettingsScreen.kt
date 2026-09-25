@@ -7,8 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -20,6 +18,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
@@ -28,6 +28,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -45,6 +46,8 @@ import app.pbbls.android.core.data.DataError
 import app.pbbls.android.core.designsystem.ConfirmDeleteDialog
 import app.pbbls.android.core.designsystem.DeleteErrorDialog
 import app.pbbls.android.core.designsystem.LegalDoc
+import app.pbbls.android.core.designsystem.PebblesIconToken
+import app.pbbls.android.core.designsystem.PebblesListDefaults
 import app.pbbls.android.core.designsystem.PebblesListSection
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.designsystem.PebblesSectionHeader
@@ -171,36 +174,24 @@ fun SettingsScreen(
 
             PebblesListSection(
                 header = stringResource(R.string.settings_appearance_section),
+                rowPadding = PebblesListDefaults.ListItemRowPadding,
                 rows =
                     listOf(
                         {
-                            Row(
+                            // The row owns the toggle (Switch onCheckedChange = null), so
+                            // TalkBack announces one "switch, on" node rather than two.
+                            ListItem(
+                                headlineContent = { Text(stringResource(R.string.settings_wallpaper_colors_title)) },
+                                supportingContent = { Text(stringResource(R.string.settings_wallpaper_colors_body)) },
+                                trailingContent = { Switch(checked = viewModel.useWallpaperColors, onCheckedChange = null) },
                                 modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .toggleable(
-                                            value = viewModel.useWallpaperColors,
-                                            role = Role.Switch,
-                                            onValueChange = viewModel::onUseWallpaperColorsChange,
-                                        ),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Column(Modifier.weight(1f)) {
-                                    Text(
-                                        stringResource(R.string.settings_wallpaper_colors_title),
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = colors.onSurface,
-                                    )
-                                    Text(
-                                        stringResource(R.string.settings_wallpaper_colors_body),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = colors.onSurfaceVariant,
-                                    )
-                                }
-                                // null onCheckedChange: the Row owns the toggle, so
-                                // TalkBack announces one "switch, on" node rather than two.
-                                Switch(checked = viewModel.useWallpaperColors, onCheckedChange = null)
-                            }
+                                    Modifier.toggleable(
+                                        value = viewModel.useWallpaperColors,
+                                        role = Role.Switch,
+                                        onValueChange = viewModel::onUseWallpaperColorsChange,
+                                    ),
+                                colors = settingsRowColors(),
+                            )
                         },
                     ),
             )
@@ -230,55 +221,41 @@ fun SettingsScreen(
 
             // Public profile (M50): claim a handle, opt in, then share the link.
             Column(verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.sm)) {
+                val canGoPublic = uiState.initial.handle != null
                 val publicProfileRows: List<@Composable () -> Unit> =
                     buildList {
                         add {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
+                            ListItem(
+                                headlineContent = {
+                                    Text(
+                                        stringResource(R.string.settings_public_profile_toggle),
+                                        // No handle yet: the whole row is disabled, not merely quiet.
+                                        color = if (canGoPublic) colors.onSurface else colors.onSurface.copy(alpha = 0.38f),
+                                    )
+                                },
+                                trailingContent = {
+                                    Switch(
+                                        checked = uiState.form.isPublicProfile,
+                                        onCheckedChange = null,
+                                        enabled = canGoPublic,
+                                    )
+                                },
                                 modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .clickable(
-                                            enabled = uiState.initial.handle != null,
-                                            onClick = viewModel::togglePublicProfile,
-                                        ),
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.settings_public_profile_toggle),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    // No handle yet: the whole row is disabled, not merely quiet.
-                                    color = if (uiState.initial.handle != null) colors.onSurface else colors.onSurface.copy(alpha = 0.38f),
-                                )
-                                Spacer(Modifier.weight(1f))
-                                Switch(
-                                    checked = uiState.form.isPublicProfile,
-                                    onCheckedChange = viewModel::onPublicProfileChange,
-                                    enabled = uiState.initial.handle != null,
-                                )
-                            }
+                                    Modifier.toggleable(
+                                        value = uiState.form.isPublicProfile,
+                                        enabled = canGoPublic,
+                                        role = Role.Switch,
+                                        onValueChange = viewModel::onPublicProfileChange,
+                                    ),
+                                colors = settingsRowColors(),
+                            )
                         }
                         uiState.shareUrl?.let { shareUrl ->
                             add {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    modifier =
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .clickable { sharePublicProfile(context, shareUrl) },
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.settings_public_profile_share),
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = colors.onSurface,
-                                    )
-                                    Spacer(Modifier.weight(1f))
-                                    Icon(
-                                        painter = painterResource(R.drawable.ic_chevron_right),
-                                        contentDescription = null,
-                                        tint = colors.onSurfaceVariant,
-                                        modifier = Modifier.size(16.dp),
-                                    )
-                                }
+                                SettingsNavRow(
+                                    text = stringResource(R.string.settings_public_profile_share),
+                                    onClick = { sharePublicProfile(context, shareUrl) },
+                                )
                             }
                         }
                     }
@@ -305,21 +282,18 @@ fun SettingsScreen(
                         KeyboardOptions(capitalization = KeyboardCapitalization.None, autoCorrectEnabled = false),
                     modifier = Modifier.fillMaxWidth(),
                 )
-                PebblesListSection(rows = publicProfileRows)
+                PebblesListSection(rows = publicProfileRows, rowPadding = PebblesListDefaults.ListItemRowPadding)
             }
 
             if (uiState.initial.providers.isNotEmpty()) {
                 PebblesListSection(
                     header = stringResource(R.string.settings_providers_header),
+                    rowPadding = PebblesListDefaults.ListItemRowPadding,
                     rows =
                         uiState.initial.providers.map { provider ->
                             {
                                 // Brand names render verbatim — never localized.
-                                Text(
-                                    text = provider,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = colors.onSurface,
-                                )
+                                ListItem(headlineContent = { Text(provider) }, colors = settingsRowColors())
                             }
                         },
                 )
@@ -349,51 +323,20 @@ fun SettingsScreen(
 
             PebblesListSection(
                 header = stringResource(R.string.settings_legal_header),
+                rowPadding = PebblesListDefaults.ListItemRowPadding,
                 rows =
                     listOf(
                         {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .clickable { openLegalDoc(context, LegalDoc.TERMS) },
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.auth_consent_terms_link),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = colors.onSurface,
-                                )
-                                Spacer(Modifier.weight(1f))
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_chevron_right),
-                                    contentDescription = null,
-                                    tint = colors.onSurfaceVariant,
-                                    modifier = Modifier.size(16.dp),
-                                )
-                            }
+                            SettingsNavRow(
+                                text = stringResource(R.string.auth_consent_terms_link),
+                                onClick = { openLegalDoc(context, LegalDoc.TERMS) },
+                            )
                         },
                         {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .clickable { openLegalDoc(context, LegalDoc.PRIVACY) },
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.auth_consent_privacy_link),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = colors.onSurface,
-                                )
-                                Spacer(Modifier.weight(1f))
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_chevron_right),
-                                    contentDescription = null,
-                                    tint = colors.onSurfaceVariant,
-                                    modifier = Modifier.size(16.dp),
-                                )
-                            }
+                            SettingsNavRow(
+                                text = stringResource(R.string.auth_consent_privacy_link),
+                                onClick = { openLegalDoc(context, LegalDoc.PRIVACY) },
+                            )
                         },
                     ),
             )
@@ -402,33 +345,28 @@ fun SettingsScreen(
             // parity with iOS Settings → Account).
             PebblesListSection(
                 header = stringResource(R.string.settings_account_header),
+                rowPadding = PebblesListDefaults.ListItemRowPadding,
                 rows =
                     listOf(
                         {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .clickable(
-                                            enabled = uiState.deletion != DeletionState.DELETING,
-                                            onClick = viewModel::requestDelete,
-                                        ),
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.settings_delete_account),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = colors.error,
-                                )
-                                Spacer(Modifier.weight(1f))
-                                if (uiState.deletion == DeletionState.DELETING) {
-                                    CircularProgressIndicator(
-                                        color = colors.error,
-                                        strokeWidth = 2.dp,
-                                        modifier = Modifier.size(16.dp),
-                                    )
-                                }
-                            }
+                            val isDeleting = uiState.deletion == DeletionState.DELETING
+                            ListItem(
+                                headlineContent = { Text(stringResource(R.string.settings_delete_account), color = colors.error) },
+                                trailingContent =
+                                    if (isDeleting) {
+                                        {
+                                            CircularProgressIndicator(
+                                                color = colors.error,
+                                                strokeWidth = 2.dp,
+                                                modifier = Modifier.size(16.dp),
+                                            )
+                                        }
+                                    } else {
+                                        null
+                                    },
+                                modifier = Modifier.clickable(enabled = !isDeleting, onClick = viewModel::requestDelete),
+                                colors = settingsRowColors(),
+                            )
                         },
                     ),
             )
@@ -462,6 +400,30 @@ fun SettingsScreen(
             },
         )
     }
+}
+
+/** Rows sit on the section's outlined card, so they take its container rather than painting their own. */
+@Composable
+internal fun settingsRowColors() = ListItemDefaults.colors(containerColor = Color.Transparent)
+
+/** A settings row that opens something: headline + trailing chevron, one full-width target. */
+@Composable
+internal fun SettingsNavRow(
+    text: String,
+    onClick: () -> Unit,
+) {
+    ListItem(
+        headlineContent = { Text(text) },
+        trailingContent = {
+            Icon(
+                painter = painterResource(R.drawable.ic_chevron_right),
+                contentDescription = null,
+                modifier = Modifier.size(PebblesIconToken.MEDIUM.size),
+            )
+        },
+        modifier = Modifier.clickable(onClick = onClick),
+        colors = settingsRowColors(),
+    )
 }
 
 /**
