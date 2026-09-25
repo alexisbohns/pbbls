@@ -4,8 +4,6 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,8 +14,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -27,7 +27,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
@@ -39,6 +38,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.GoogleSignInButton
 import app.pbbls.android.core.designsystem.LegalDisclaimer
 import app.pbbls.android.core.designsystem.LegalDoc
+import app.pbbls.android.core.designsystem.PebblesActionHeight
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.openLegalDoc
 import app.pbbls.android.core.designsystem.rememberReduceMotion
@@ -216,7 +216,8 @@ private fun WelcomeRevealedContent(
     }
 }
 
-/** Outlined accent capsule for the secondary "Log in" action. */
+/** The secondary "Log in" action: a stock outlined button at the funnel's action height. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun WelcomeOutlineButton(
     text: String,
@@ -224,19 +225,14 @@ private fun WelcomeOutlineButton(
     enabled: Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val primary = MaterialTheme.colorScheme.primary
-    val shape = CircleShape
-    Box(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .heightIn(min = 52.dp)
-                .clip(shape)
-                .border(1.dp, primary, shape)
-                .clickable(enabled = enabled) { onClick() },
-        contentAlignment = Alignment.Center,
+    OutlinedButton(
+        onClick = onClick,
+        shapes = ButtonDefaults.shapesFor(PebblesActionHeight),
+        modifier = modifier.fillMaxWidth().heightIn(min = PebblesActionHeight),
+        enabled = enabled,
+        contentPadding = ButtonDefaults.contentPaddingFor(PebblesActionHeight),
     ) {
-        Text(text = text, style = MaterialTheme.typography.labelLarge, color = primary)
+        Text(text = text, style = ButtonDefaults.textStyleFor(PebblesActionHeight))
     }
 }
 
