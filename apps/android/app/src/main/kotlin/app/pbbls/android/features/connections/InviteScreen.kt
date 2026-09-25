@@ -114,8 +114,6 @@ fun InviteContent(
     ) {
         PebblesTopBar(
             title = stringResource(R.string.connections_invite_title),
-            titleStyle = MaterialTheme.typography.titleMediumEmphasized,
-            titleColor = colors.onSurface,
             leading = {
                 PebblesTopBarTextButton(
                     text = stringResource(R.string.action_done),

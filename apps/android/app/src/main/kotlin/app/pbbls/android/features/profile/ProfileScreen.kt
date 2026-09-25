@@ -4,21 +4,27 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LargeFlexibleTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
@@ -26,7 +32,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.model.Collection
 import app.pbbls.android.features.profile.components.ProfileAchievementsCard
 import app.pbbls.android.features.profile.components.ProfileBanner
@@ -53,6 +58,7 @@ import app.pbbls.android.features.profile.components.ProfileStatsCard
  * Deviation from iOS (design D13): a failed profile fetch shows the standard
  * error + Retry treatment instead of iOS's silent empty banner.
  */
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ProfileScreen(
     onBack: () -> Unit,
@@ -79,31 +85,41 @@ fun ProfileScreen(
         onPauseOrDispose {}
     }
 
+    // The Expressive large flexible bar: the title sits large over the page and
+    // collapses into the bar as the column scrolls (#854).
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     PebblesScreen(
-        modifier = modifier,
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            PebblesTopBar(
-                title = stringResource(R.string.profile_title),
-                leading = {
+            LargeFlexibleTopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(R.string.profile_title),
+                        modifier = Modifier.semantics { heading() },
+                    )
+                },
+                navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
                             painter = painterResource(R.drawable.ic_arrow_back),
                             contentDescription = stringResource(R.string.profile_back_a11y),
-                            tint = colors.onSurfaceVariant,
-                            modifier = Modifier.size(24.dp),
                         )
                     }
                 },
-                trailing = {
+                actions = {
                     IconButton(onClick = onOpenSettings) {
                         Icon(
                             painter = painterResource(R.drawable.ic_gear),
                             contentDescription = stringResource(R.string.settings_title),
-                            tint = colors.onSurfaceVariant,
-                            modifier = Modifier.size(22.dp),
                         )
                     }
                 },
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = colors.surface,
+                        scrolledContainerColor = colors.surfaceContainer,
+                    ),
+                scrollBehavior = scrollBehavior,
             )
         },
     ) {

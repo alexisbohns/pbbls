@@ -6,28 +6,27 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -147,6 +146,7 @@ fun PebbleDetailScreen(
  * swipe-to-dismiss; Android adds the explicit back arrow + [BackHandler] for
  * discoverability (D5, documented divergence).
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DetailTopBar(
     visibility: Visibility?,
@@ -155,39 +155,33 @@ private fun DetailTopBar(
     onEdit: () -> Unit,
     onShare: (() -> Unit)?,
 ) {
-    val colors = MaterialTheme.colorScheme
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        IconButton(onClick = onBack) {
-            Icon(
-                painter = painterResource(R.drawable.ic_arrow_back),
-                contentDescription = stringResource(R.string.pebble_detail_back_a11y),
-                tint = colors.onSurfaceVariant,
-            )
-        }
-        if (visibility != null) {
-            PebblePrivacyBadge(visibility = visibility)
-        }
-        Spacer(Modifier.weight(1f))
-        if (onShare != null) {
-            IconButton(onClick = onShare) {
+    // A stock top app bar (#854) on a clear container: the read page below is
+    // tinted to the pebble's emotion, and the bar should sit on that, not on surface.
+    TopAppBar(
+        title = { if (visibility != null) PebblePrivacyBadge(visibility = visibility) },
+        navigationIcon = {
+            IconButton(onClick = onBack) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_share),
-                    contentDescription = stringResource(R.string.pebble_share_a11y),
-                    tint = colors.onSurfaceVariant,
+                    painter = painterResource(R.drawable.ic_arrow_back),
+                    contentDescription = stringResource(R.string.pebble_detail_back_a11y),
                 )
             }
-        }
-        TextButton(onClick = onEdit, enabled = editEnabled) {
-            Text(
-                stringResource(R.string.pebble_detail_edit),
-                style = MaterialTheme.typography.labelLarge,
-                color = colors.primary,
-            )
-        }
-    }
+        },
+        actions = {
+            if (onShare != null) {
+                IconButton(onClick = onShare) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_share),
+                        contentDescription = stringResource(R.string.pebble_share_a11y),
+                    )
+                }
+            }
+            TextButton(onClick = onEdit, enabled = editEnabled) {
+                Text(stringResource(R.string.pebble_detail_edit))
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
+    )
 }
 
 /** Centered error view with a Retry action — mirrors `PebbleDetailSheet.content`'s error branch. */

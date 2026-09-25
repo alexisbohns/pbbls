@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
@@ -13,8 +14,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -22,6 +23,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,9 +33,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.semantics.heading
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalEmotionPaletteService
@@ -189,11 +193,12 @@ private fun EmotionChip(
 }
 
 /**
- * Cancel · centered title · Done toolbar for the sheet pickers (shared by the
- * emotion and soul sheets). `internal` so the sibling [SoulPickerSheet] reuses
- * it without a second copy.
+ * Cancel · centered title · Done for the sheet pickers — a stock
+ * `CenterAlignedTopAppBar` with no window insets (the sheet owns those) on the
+ * sheet's own container colour (#854). `internal` so the sibling
+ * [SoulPickerSheet] and [ValencePickerSheet] reuse it without a second copy.
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun SheetToolbar(
     title: String,
@@ -201,31 +206,16 @@ internal fun SheetToolbar(
     onDone: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val colors = MaterialTheme.colorScheme
-    Row(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        TextButton(onClick = onCancel) {
-            Text(
-                text = stringResource(R.string.action_cancel),
-                style = MaterialTheme.typography.labelLarge,
-                color = colors.primary,
-            )
-        }
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMediumEmphasized,
-            color = colors.onSurface,
-            modifier = Modifier.weight(1f),
-            textAlign = TextAlign.Center,
-        )
-        TextButton(onClick = onDone) {
-            Text(
-                text = stringResource(R.string.action_done),
-                style = MaterialTheme.typography.labelLarge,
-                color = colors.primary,
-            )
-        }
-    }
+    CenterAlignedTopAppBar(
+        title = { Text(text = title, modifier = Modifier.semantics { heading() }) },
+        modifier = modifier,
+        navigationIcon = {
+            TextButton(onClick = onCancel) { Text(stringResource(R.string.action_cancel)) }
+        },
+        actions = {
+            TextButton(onClick = onDone) { Text(stringResource(R.string.action_done)) }
+        },
+        windowInsets = WindowInsets(0),
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color.Transparent),
+    )
 }
