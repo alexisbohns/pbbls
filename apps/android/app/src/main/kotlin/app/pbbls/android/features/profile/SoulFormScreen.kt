@@ -5,8 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
@@ -17,6 +15,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -25,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -35,6 +36,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.designsystem.DashedPlaceholder
+import app.pbbls.android.core.designsystem.PebblesIconToken
+import app.pbbls.android.core.designsystem.PebblesListDefaults
 import app.pbbls.android.core.designsystem.PebblesListSection
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.designsystem.PebblesTheme
@@ -156,41 +159,35 @@ fun SoulFormScreen(
 
             PebblesListSection(
                 header = stringResource(R.string.create_glyph_header),
+                rowPadding = PebblesListDefaults.ListItemRowPadding,
                 rows =
                     listOf(
                         {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                modifier =
-                                    Modifier
-                                        .fillMaxWidth()
-                                        .clickable(onClick = viewModel::openPicker),
-                            ) {
-                                val glyph = uiState.glyph
-                                if (glyph != null) {
-                                    GlyphView(
-                                        case = GlyphViewCase.DEFAULT,
-                                        strokes = glyph.strokes,
-                                        viewBox = glyph.viewBox,
-                                        side = 32.dp,
+                            ListItem(
+                                leadingContent = {
+                                    val glyph = uiState.glyph
+                                    if (glyph != null) {
+                                        GlyphView(
+                                            case = GlyphViewCase.DEFAULT,
+                                            strokes = glyph.strokes,
+                                            viewBox = glyph.viewBox,
+                                            side = 32.dp,
+                                        )
+                                    } else {
+                                        DashedPlaceholder()
+                                    }
+                                },
+                                headlineContent = { Text(stringResource(R.string.soul_form_glyph_choose)) },
+                                trailingContent = {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_chevron_right),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(PebblesIconToken.MEDIUM.size),
                                     )
-                                } else {
-                                    DashedPlaceholder()
-                                }
-                                Text(
-                                    text = stringResource(R.string.soul_form_glyph_choose),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = colors.onSurface,
-                                )
-                                Spacer(Modifier.weight(1f))
-                                Icon(
-                                    painter = painterResource(R.drawable.ic_chevron_right),
-                                    contentDescription = null,
-                                    tint = colors.onSurfaceVariant,
-                                    modifier = Modifier.size(16.dp),
-                                )
-                            }
+                                },
+                                modifier = Modifier.clickable(onClick = viewModel::openPicker),
+                                colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+                            )
                         },
                     ),
             )

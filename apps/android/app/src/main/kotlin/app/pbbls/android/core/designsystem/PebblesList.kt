@@ -1,78 +1,43 @@
 package app.pbbls.android.core.designsystem
 
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.ZeroCornerSize
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 
-/**
- * Where a row sits inside its section, used to pick which corners of the
- * 1dp `outlineVariant` border round. `ONLY` is the default for single-row
- * sections. Mirrors iOS `Theme/PebblesList.swift`.
- */
-enum class PebblesListRowPosition {
-    ONLY,
-    TOP,
-    MIDDLE,
-    BOTTOM,
+/** Row insets for [PebblesListSection]. */
+object PebblesListDefaults {
+    /** For free-form rows (a pebble row, a picker): the section pads them. */
+    val ContentRowPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp)
+
+    /** For `ListItem` rows, which carry their own insets and must reach the card's edges to ripple there. */
+    val ListItemRowPadding = PaddingValues(0.dp)
 }
 
-/** Pure position rule — ports `pebblesRowPosition(index:count:)` (JVM-tested). */
-fun pebblesRowPosition(
-    index: Int,
-    count: Int,
-): PebblesListRowPosition =
-    when {
-        count <= 1 -> PebblesListRowPosition.ONLY
-        index == 0 -> PebblesListRowPosition.TOP
-        index == count - 1 -> PebblesListRowPosition.BOTTOM
-        else -> PebblesListRowPosition.MIDDLE
-    }
-
 /**
- * Row chrome — the `pebblesListRow(position:)` analog: a 1dp `outlineVariant`
- * border whose `shapes.large` corners round only the edges this row owns.
- * [PebblesListSection] overlaps adjacent rows by the border width so the
- * shared edge renders as a single divider, completing the bordered card.
- */
-fun Modifier.pebblesListRow(position: PebblesListRowPosition = PebblesListRowPosition.ONLY): Modifier =
-    composed {
-        val large = MaterialTheme.shapes.large
-        val shape =
-            when (position) {
-                PebblesListRowPosition.ONLY -> large
-                PebblesListRowPosition.TOP -> large.copy(bottomStart = ZeroCornerSize, bottomEnd = ZeroCornerSize)
-                PebblesListRowPosition.MIDDLE -> RectangleShape
-                PebblesListRowPosition.BOTTOM -> large.copy(topStart = ZeroCornerSize, topEnd = ZeroCornerSize)
-            }
-        border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
-    }
-
-/**
- * A bordered section of rows — the `List`/`Form` + `pebblesListRow` idiom as
- * one composable, since Compose has no grouped-list container. Each row is
- * wrapped in the position-aware border and given the standard row insets;
- * rows overlap by 1dp so adjacent borders coincide into a single divider.
+ * A grouped section of rows — a stock `OutlinedCard` with a `HorizontalDivider`
+ * between rows, under an optional [header] (#854; it was a hand-drawn,
+ * position-aware border per row, the iOS `List`/`Form` idiom). [rows] stays an
+ * explicit list so the dividers go between rows rather than around them.
  *
- * [rows] is an explicit list (not a free content block) because the border
- * needs each row's index/count — the same reason the iOS API takes an
- * explicit `position:`.
+ * Settings-style rows (text, switch, chevron) should be `ListItem`s passed
+ * with [PebblesListDefaults.ListItemRowPadding], so each is one full-width
+ * target; free-form content keeps the default [rowPadding].
  */
 @Composable
 fun PebblesListSection(
     rows: List<@Composable () -> Unit>,
     modifier: Modifier = Modifier,
     header: String? = null,
+    rowPadding: PaddingValues = PebblesListDefaults.ContentRowPadding,
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         if (header != null) {
@@ -81,15 +46,10 @@ fun PebblesListSection(
                 modifier = Modifier.padding(bottom = PebblesTheme.spacing.sm),
             )
         }
-        Column(verticalArrangement = Arrangement.spacedBy((-1).dp)) {
+        OutlinedCard(modifier = Modifier.fillMaxWidth()) {
             rows.forEachIndexed { index, row ->
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .pebblesListRow(pebblesRowPosition(index, rows.size))
-                            .padding(horizontal = PebblesTheme.spacing.lg, vertical = PebblesTheme.spacing.md),
-                ) {
+                if (index > 0) HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                Box(modifier = Modifier.fillMaxWidth().padding(rowPadding)) {
                     row()
                 }
             }
