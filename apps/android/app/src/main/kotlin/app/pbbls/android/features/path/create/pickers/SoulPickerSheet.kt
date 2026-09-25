@@ -13,6 +13,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -27,7 +28,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalReferenceDataService
-import app.pbbls.android.core.designsystem.PebblesTextInput
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.ui.SoulItem
 import app.pbbls.android.core.ui.SoulItemCase
@@ -168,10 +168,12 @@ internal fun CreateSoulDialog(
             )
         },
         text = {
-            PebblesTextInput(
-                placeholder = stringResource(R.string.create_soul_name_placeholder),
+            OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
+                label = { Text(stringResource(R.string.create_soul_name_placeholder)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
             )
         },
         confirmButton = {
