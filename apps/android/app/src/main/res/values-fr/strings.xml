@@ -388,7 +388,11 @@
     <string name="glyph_drawer_slide">Glissez pour confirmer</string>
     <string name="glyph_drawer_slide_a11y">Glissez pour confirmer l\'échange</string>
     <string name="glyph_drawer_slide_confirm_action">confirmer l\'échange</string>
-    <string name="glyph_drawer_slide_cost_a11y">%1$d karma</string>
+    <plurals name="glyph_drawer_slide_cost_a11y">
+        <item quantity="one">%1$d karma</item>
+        <item quantity="many">%1$d karma</item>
+        <item quantity="other">%1$d karma</item>
+    </plurals>
 
     <!-- Lab (M44). lab_load_error reste volontairement en anglais — parité
          iOS (design D6) ; les libellés de réaction portent les valeurs du

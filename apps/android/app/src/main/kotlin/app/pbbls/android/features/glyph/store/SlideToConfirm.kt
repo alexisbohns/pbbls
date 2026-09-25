@@ -32,6 +32,7 @@ import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -102,7 +103,7 @@ fun SlideToConfirm(
     val layoutDirection = LocalLayoutDirection.current
     val a11y = stringResource(R.string.glyph_drawer_slide_a11y)
     val confirmAction = stringResource(R.string.glyph_drawer_slide_confirm_action)
-    val costA11y = stringResource(R.string.glyph_drawer_slide_cost_a11y, cost)
+    val costA11y = pluralStringResource(R.plurals.glyph_drawer_slide_cost_a11y, cost, cost)
 
     // The drag and TalkBack's double-tap end in the same place: park the
     // thumb, run the purchase, spring back if it failed. The haptic fires
