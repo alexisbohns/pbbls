@@ -23,6 +23,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,7 +39,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.DashedPlaceholder
-import app.pbbls.android.core.designsystem.PebblesTextInput
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionWithPalette
@@ -118,17 +118,19 @@ fun PebbleForm(
             happenedAt = draft.happenedAt,
             onChange = { onDraftChange(draft.copy(happenedAt = it)) },
         )
-        PebblesTextInput(
-            placeholder = stringResource(R.string.create_name_placeholder),
+        OutlinedTextField(
             value = draft.name,
             onValueChange = { onDraftChange(draft.copy(name = it)) },
+            label = { Text(stringResource(R.string.create_name_placeholder)) },
+            singleLine = true,
+            modifier = Modifier.fillMaxWidth(),
         )
-        PebblesTextInput(
-            placeholder = stringResource(R.string.create_description_placeholder),
+        OutlinedTextField(
             value = draft.description,
             onValueChange = { onDraftChange(draft.copy(description = it)) },
-            singleLine = false,
+            label = { Text(stringResource(R.string.create_description_placeholder)) },
             maxLines = 5,
+            modifier = Modifier.fillMaxWidth(),
         )
         FormSectionHeader(stringResource(R.string.create_mood_header))
         EmotionRow(selectedEmotion = selectedEmotion, onTap = { activePicker = PickerKind.EMOTION })

@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -21,8 +22,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentType
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -34,7 +38,6 @@ import app.pbbls.android.core.designsystem.LegalDoc
 import app.pbbls.android.core.designsystem.PebblesAuthSwitcher
 import app.pbbls.android.core.designsystem.PebblesCheckbox
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
-import app.pbbls.android.core.designsystem.PebblesTextInput
 import app.pbbls.android.core.designsystem.openLegalDoc
 import app.pbbls.android.core.model.AuthMode
 
@@ -110,43 +113,47 @@ fun AuthContent(
         PebblesAuthSwitcher(mode = uiState.mode, onModeChange = onModeChange)
 
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                PebblesTextInput(
-                    placeholder = stringResource(R.string.auth_email_placeholder),
-                    value = uiState.email,
-                    onValueChange = onEmailChange,
-                    contentType = ContentType.EmailAddress,
-                    keyboardOptions =
-                        KeyboardOptions(
-                            keyboardType = KeyboardType.Email,
-                            capitalization = KeyboardCapitalization.None,
-                            autoCorrectEnabled = false,
-                        ),
-                )
-                if (uiState.showPlusError) {
-                    Text(
-                        text = stringResource(R.string.auth_email_plus_error),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.error,
-                    )
-                }
-            }
+            // The "+" ban (product policy) is the field's own error state, not a loose line under it.
+            OutlinedTextField(
+                value = uiState.email,
+                onValueChange = onEmailChange,
+                label = { Text(stringResource(R.string.auth_email_placeholder)) },
+                isError = uiState.showPlusError,
+                supportingText =
+                    if (uiState.showPlusError) {
+                        { Text(stringResource(R.string.auth_email_plus_error)) }
+                    } else {
+                        null
+                    },
+                singleLine = true,
+                keyboardOptions =
+                    KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        capitalization = KeyboardCapitalization.None,
+                        autoCorrectEnabled = false,
+                    ),
+                modifier = Modifier.fillMaxWidth().semantics { contentType = ContentType.EmailAddress },
+            )
 
-            PebblesTextInput(
-                placeholder = stringResource(R.string.auth_password_placeholder),
+            OutlinedTextField(
                 value = uiState.password,
                 onValueChange = {
                     if (uiState.authErrorRes != null) onDismissError()
                     onPasswordChange(it)
                 },
-                isSecure = true,
-                contentType = if (uiState.mode == AuthMode.LOGIN) ContentType.Password else ContentType.NewPassword,
+                label = { Text(stringResource(R.string.auth_password_placeholder)) },
+                singleLine = true,
+                visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions =
                     KeyboardOptions(
                         keyboardType = KeyboardType.Password,
                         capitalization = KeyboardCapitalization.None,
                         autoCorrectEnabled = false,
                     ),
+                modifier =
+                    Modifier.fillMaxWidth().semantics {
+                        contentType = if (uiState.mode == AuthMode.LOGIN) ContentType.Password else ContentType.NewPassword
+                    },
             )
         }
 

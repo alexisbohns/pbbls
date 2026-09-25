@@ -14,12 +14,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,7 +27,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
@@ -143,33 +142,14 @@ fun CollectionFormScreen(
                     .padding(top = 8.dp, bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.xl),
         ) {
-            PebblesListSection(
-                header = stringResource(R.string.settings_name_label),
-                rows =
-                    listOf(
-                        {
-                            BasicTextField(
-                                value = uiState.name,
-                                onValueChange = viewModel::onNameChange,
-                                singleLine = true,
-                                textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.onSurface),
-                                cursorBrush = SolidColor(colors.primary),
-                                keyboardOptions =
-                                    KeyboardOptions(capitalization = KeyboardCapitalization.Words),
-                                decorationBox = { inner ->
-                                    if (uiState.name.isEmpty()) {
-                                        Text(
-                                            text = stringResource(R.string.create_soul_name_placeholder),
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            color = colors.onSurfaceVariant,
-                                        )
-                                    }
-                                    inner()
-                                },
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                        },
-                    ),
+            OutlinedTextField(
+                value = uiState.name,
+                onValueChange = viewModel::onNameChange,
+                label = { Text(stringResource(R.string.settings_name_label)) },
+                placeholder = { Text(stringResource(R.string.create_soul_name_placeholder)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
+                modifier = Modifier.fillMaxWidth(),
             )
 
             PebblesListSection(

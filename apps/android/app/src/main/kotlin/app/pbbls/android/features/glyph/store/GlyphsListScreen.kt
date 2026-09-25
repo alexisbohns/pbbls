@@ -20,6 +20,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -38,7 +39,6 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesScreen
-import app.pbbls.android.core.designsystem.PebblesTextInput
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.ProfileEmptyState
 import app.pbbls.android.core.model.GlyphGridItem
@@ -285,10 +285,12 @@ private fun RenameGlyphDialog(
             )
         },
         text = {
-            PebblesTextInput(
-                placeholder = stringResource(R.string.carve_name_placeholder),
+            OutlinedTextField(
                 value = draft,
                 onValueChange = { draft = it },
+                label = { Text(stringResource(R.string.carve_name_placeholder)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
             )
         },
         confirmButton = {
