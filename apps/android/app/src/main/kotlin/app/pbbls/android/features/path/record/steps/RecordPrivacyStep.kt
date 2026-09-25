@@ -1,16 +1,19 @@
 package app.pbbls.android.features.path.record.steps
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,8 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
@@ -53,8 +55,14 @@ fun RecordPrivacyStep(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(Spacing.md),
     ) {
-        Visibility.entries.forEach { grade ->
-            GradeRow(grade = grade, isSelected = grade == selected, onSelect = { onSelect(grade) })
+        // One radio group: TalkBack reads "Private, selected, 2 of 3".
+        Column(
+            modifier = Modifier.fillMaxWidth().selectableGroup(),
+            verticalArrangement = Arrangement.spacedBy(Spacing.md),
+        ) {
+            Visibility.entries.forEach { grade ->
+                GradeRow(grade = grade, isSelected = grade == selected, onSelect = { onSelect(grade) })
+            }
         }
 
         if (snapBlockedMessage != null) {
@@ -99,9 +107,8 @@ private fun GradeRow(
                 .fillMaxWidth()
                 .clip(MaterialTheme.shapes.medium)
                 .background(if (isSelected) colors.primaryContainer else colors.surfaceContainerHighest)
-                .clickable(onClick = onSelect)
-                .padding(Spacing.md)
-                .clearAndSetSemantics { contentDescription = "$label. $explanation" },
+                .selectable(selected = isSelected, role = Role.RadioButton, onClick = onSelect)
+                .padding(Spacing.md),
         horizontalArrangement = Arrangement.spacedBy(Spacing.md),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -111,7 +118,7 @@ private fun GradeRow(
             tint = secondaryForeground,
             modifier = Modifier.size(24.dp),
         )
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyLargeEmphasized,
@@ -123,6 +130,12 @@ private fun GradeRow(
                 color = secondaryForeground,
             )
         }
+        // onClick = null: the row owns the selection; the radio is its visible state.
+        RadioButton(
+            selected = isSelected,
+            onClick = null,
+            colors = RadioButtonDefaults.colors(selectedColor = foreground, unselectedColor = secondaryForeground),
+        )
     }
 }
 
