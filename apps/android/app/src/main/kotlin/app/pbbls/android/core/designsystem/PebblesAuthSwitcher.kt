@@ -1,64 +1,52 @@
 package app.pbbls.android.core.designsystem
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.material3.ButtonGroupDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Text
+import androidx.compose.material3.ToggleButton
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import app.pbbls.android.core.model.AuthMode
 
 /**
- * Login/Sign-up segmented switcher — the `PebblesAuthSwitcher` analog. A pill
- * track in `surfaceContainerHighest` with the selected segment filled
- * `secondaryContainer` and labelled `onSecondaryContainer`; unselected labels
- * are `onSurfaceVariant` (#853).
+ * Login / Sign-up switcher — an M3 Expressive connected button group: one
+ * `ToggleButton` per [AuthMode] with the connected leading / trailing shapes,
+ * in a `selectableGroup` with the radio-button role, so TalkBack reads
+ * "Log In, selected, 1 of 2" rather than a tab with no state (#854).
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PebblesAuthSwitcher(
     mode: AuthMode,
     onModeChange: (AuthMode) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val colors = MaterialTheme.colorScheme
-    val trackShape = CircleShape
-
+    val modes = AuthMode.entries
     Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .clip(trackShape)
-                .background(colors.surfaceContainerHighest)
-                .padding(4.dp),
+        modifier = modifier.fillMaxWidth().selectableGroup(),
+        horizontalArrangement = Arrangement.spacedBy(ButtonGroupDefaults.ConnectedSpaceBetween),
     ) {
-        AuthMode.entries.forEach { entry ->
-            val selected = entry == mode
-            Box(
-                modifier =
-                    Modifier
-                        .weight(1f)
-                        .clip(trackShape)
-                        .background(if (selected) colors.secondaryContainer else Color.Transparent)
-                        .clickable(role = Role.Tab) { onModeChange(entry) }
-                        .padding(vertical = 10.dp),
-                contentAlignment = Alignment.Center,
+        modes.forEachIndexed { index, entry ->
+            ToggleButton(
+                checked = entry == mode,
+                onCheckedChange = { onModeChange(entry) },
+                modifier = Modifier.weight(1f).semantics { role = Role.RadioButton },
+                shapes =
+                    when (index) {
+                        0 -> ButtonGroupDefaults.connectedLeadingButtonShapes()
+                        modes.lastIndex -> ButtonGroupDefaults.connectedTrailingButtonShapes()
+                        else -> ButtonGroupDefaults.connectedMiddleButtonShapes()
+                    },
             ) {
-                Text(
-                    text = stringResource(entry.labelRes),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = if (selected) colors.onSecondaryContainer else colors.onSurfaceVariant,
-                )
+                Text(text = stringResource(entry.labelRes))
             }
         }
     }
