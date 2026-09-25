@@ -38,9 +38,9 @@ drop out of scope.
 
 | # | Branch | Change |
 |---|---|---|
-| 1 | `feat/854-custom-control-a11y` | Controls that stay custom get fixed. `SlideToConfirm`: a `CustomAccessibilityAction` that confirms, and drag math with a `LayoutDirection` multiplier. `ValenceRoll`: same RTL fix. `WeekHeader` chevron and `CheckGlyph`: `Icons.Rounded` in place of Canvas, the chevron becomes an `IconButton`. `minimumInteractiveComponentSize()` on remaining custom clickables (Lab `ReactionButton`, record-flow chrome, …); `ValenceFan`'s `MinimumHitTarget` 44 → 48 dp. `WelcomeCarousel` 110 dp and `WeekRoll` 96 dp fixed heights → `heightIn(min = …)`. |
+| 1 | `feat/854-custom-control-a11y` | Controls that stay custom get fixed. `SlideToConfirm`: `onClick` semantics with a button role and the cost as state, so TalkBack's double-tap confirms (mirrors the iOS activate action; a custom action would hide it in the actions menu), and drag math with a `LayoutDirection` multiplier. `ValenceRoll`: same RTL fix. `WeekHeader` chevron: an `IconButton` with an auto-mirrored vector in place of Canvas; direction-bearing drawables become auto-mirrored. (`CheckGlyph` goes in Part 3 with its only caller, `PebblesCheckbox`.) `minimumInteractiveComponentSize()` on remaining custom clickables (Lab `ReactionButton`, record-flow chrome, …); `ValenceFan`'s `MinimumHitTarget` 44 → 48 dp. `WelcomeCarousel` 110 dp and `WeekRoll` 96 dp fixed heights → `heightIn(min = …)`. |
 | 2 | `feat/854-buttons` | `PebblesPrimaryButton` → `Button` with `ButtonDefaults.shapes()`; `WelcomeOutlineButton`, `GoogleSignInButton` → `OutlinedButton` with brand colours; `NewPebbleButton` → `FilledTonalButton`. Decision-log entry for the chrome divergence. |
-| 3 | `feat/854-selection` | `PebblesCheckbox` → `Checkbox` in `Row.toggleable` (announces "checked"); `PebblesAuthSwitcher` → connected `ButtonGroup` of `ToggleButton`s in a `selectableGroup`; `GlyphTabBar` → floating toolbar (above); `EmotionChip` → `FilterChip(selected)`; privacy / collection / domain rows → `RadioButton` rows in a `selectableGroup`. |
+| 3 | `feat/854-selection` | `PebblesCheckbox` and `CheckGlyph` → `Checkbox` in `Row.toggleable` (announces "checked"); `PebblesAuthSwitcher` → connected `ButtonGroup` of `ToggleButton`s in a `selectableGroup`; `GlyphTabBar` → floating toolbar (above); `EmotionChip` → `FilterChip(selected)`; privacy / collection / domain rows → `RadioButton` rows in a `selectableGroup`. |
 | 4 | `feat/854-text-fields` | `PebblesTextInput` and the raw `BasicTextField` rows in Settings → `OutlinedTextField` (focus, error and supporting-text states). The hand-lettered name inputs that use `PebblesTheme.hand` keep their typography through the field's `textStyle`. |
 | 5 | `feat/854-lists-cards` | `PebblesList`, `profileCard`, `SurfaceTile` → `OutlinedCard` + `ListItem` + `HorizontalDivider`. |
 | 6 | `feat/854-top-bars` | `PebblesScreen` → `Scaffold`; `PebblesTopBar`, `SheetToolbar` → `CenterAlignedTopAppBar`; Profile → `LargeFlexibleTopAppBar`; `RecordFlowChrome` → top app bar with `LinearWavyProgressIndicator` in place of `ProgressDots`. Inset handling under the outer four-tab `NavigationBar` is the risk here: inner `Scaffold`s take `contentWindowInsets` that exclude what the outer one consumed. |
@@ -55,9 +55,9 @@ unit tests and `assembleDebug` on its own.
 
 ## Cross-surface and bookkeeping
 
-- **iOS `SlideToConfirm`**: check `apps/ios/Pebbles/Features/Glyph/Views/SlideToConfirm.swift`
-  for the same VoiceOver gap during Part 1. If present, file a separate
-  `[Fix]` issue (`fix`, `ios`, `ui`) — not fixed in this stack.
+- **iOS `SlideToConfirm`** already exposes a button trait, the cost as value and
+  an activate action (`SlideToConfirm.swift:66-70`) — no iOS gap; Android
+  mirrors it.
 - **Arkaik**: at the start of each part, move the acceptances and views it
   touches to `development` over MCP. PR bodies list those node ids in `nodes:`
   and never cite a finding id. The three findings are resolved with
