@@ -9,8 +9,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -112,7 +112,7 @@ fun AcceptInviteContent(
                 // Exhaustive with no `else`: a new AcceptInviteUiState case must
                 // be rendered.
                 when (uiState) {
-                    AcceptInviteUiState.Loading -> CircularProgressIndicator(color = colors.primary)
+                    AcceptInviteUiState.Loading -> LoadingIndicator()
 
                     is AcceptInviteUiState.Error -> PreviewFailed(uiState.messageRes, onRetry)
 

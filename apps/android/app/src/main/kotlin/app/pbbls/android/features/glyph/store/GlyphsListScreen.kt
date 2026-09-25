@@ -15,10 +15,10 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -57,6 +57,7 @@ private const val TAG = "glyphs-store"
  * balance to the shared stats, drops the item from Commu, and invalidates
  * Owned so it refetches lazily.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun GlyphsListScreen(
     onBack: () -> Unit,
@@ -109,7 +110,7 @@ fun GlyphsListScreen(
             when (val state = uiState) {
                 GlyphsUiState.Loading ->
                     Box(Modifier.fillMaxSize(), Alignment.Center) {
-                        CircularProgressIndicator(color = colors.primary)
+                        LoadingIndicator()
                     }
 
                 is GlyphsUiState.Error ->

@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -126,7 +126,7 @@ fun InviteContent(
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             // Exhaustive with no `else`: a new InviteUiState case must be rendered.
             when (uiState) {
-                InviteUiState.Loading -> CircularProgressIndicator(color = colors.primary)
+                InviteUiState.Loading -> LoadingIndicator()
 
                 is InviteUiState.Error ->
                     Column(

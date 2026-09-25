@@ -9,8 +9,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -115,6 +116,7 @@ private fun AddTile(onPick: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun PickedPhoto(
     snap: AttachedSnap,
@@ -153,10 +155,8 @@ private fun PickedPhoto(
                 horizontalArrangement = Arrangement.spacedBy(Spacing.sm),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                CircularProgressIndicator(
-                    color = colors.primary,
-                    strokeWidth = 2.dp,
-                    modifier = Modifier.size(16.dp),
+                LoadingIndicator(
+                    modifier = Modifier.size(24.dp),
                 )
                 Text(
                     text = stringResource(R.string.photo_state_uploading),

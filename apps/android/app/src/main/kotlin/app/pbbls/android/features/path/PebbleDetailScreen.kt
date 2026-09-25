@@ -8,10 +8,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -49,6 +50,7 @@ import app.pbbls.android.features.path.read.pebblePageColors
  * [onEditRequested] opens the `EditPebble` entry; returning from it is picked
  * up by [PebbleDetailViewModel.onResumed] rather than a callback.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PebbleDetailScreen(
     pebbleId: String,
@@ -125,7 +127,7 @@ fun PebbleDetailScreen(
         when (val state = uiState) {
             PebbleDetailUiState.Loading ->
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    CircularProgressIndicator(color = colors.primary)
+                    LoadingIndicator()
                 }
             PebbleDetailUiState.Error ->
                 DetailLoadError(onRetry = viewModel::retry)

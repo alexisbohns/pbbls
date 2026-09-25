@@ -16,10 +16,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
@@ -75,6 +76,7 @@ private const val TAG = "settings"
  * [SettingsViewModel] itself (#852) rather than handed down by
  * `ProfileScreen` — `SettingsKey` carries no argument to seed from.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsScreen(
     onDismiss: () -> Unit,
@@ -108,10 +110,8 @@ fun SettingsScreen(
                 },
                 trailing = {
                     if (uiState.isSaving) {
-                        CircularProgressIndicator(
-                            color = colors.primary,
-                            strokeWidth = 2.dp,
-                            modifier = Modifier.size(20.dp),
+                        LoadingIndicator(
+                            modifier = Modifier.size(24.dp),
                         )
                     } else {
                         PebblesTopBarTextButton(
@@ -127,7 +127,7 @@ fun SettingsScreen(
     ) {
         if (uiState.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = colors.primary)
+                LoadingIndicator()
             }
             return@PebblesScreen
         }
@@ -355,10 +355,9 @@ fun SettingsScreen(
                                 trailingContent =
                                     if (isDeleting) {
                                         {
-                                            CircularProgressIndicator(
+                                            LoadingIndicator(
                                                 color = colors.error,
-                                                strokeWidth = 2.dp,
-                                                modifier = Modifier.size(16.dp),
+                                                modifier = Modifier.size(24.dp),
                                             )
                                         }
                                     } else {

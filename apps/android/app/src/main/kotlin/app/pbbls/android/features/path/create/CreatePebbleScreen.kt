@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -232,10 +232,8 @@ private fun CreateTopBar(
         },
         trailing = {
             if (isSaving) {
-                CircularProgressIndicator(
-                    color = colors.primary,
-                    strokeWidth = 2.dp,
-                    modifier = Modifier.size(20.dp),
+                LoadingIndicator(
+                    modifier = Modifier.size(24.dp),
                 )
             } else {
                 PebblesTopBarTextButton(

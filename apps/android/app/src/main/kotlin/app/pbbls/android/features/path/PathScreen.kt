@@ -12,8 +12,8 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -56,6 +56,7 @@ import kotlin.math.abs
  * [onCreatePebbleLongPress] are how this screen reaches them; only the caller
  * (`PebblesEntryProvider`) ever touches a `Navigator`.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PathScreen(
     onOpenDetail: (String) -> Unit,
@@ -94,8 +95,7 @@ fun PathScreen(
             // Exhaustive with no `else` — a new PathUiState case must be rendered.
             when (uiState) {
                 PathUiState.Loading ->
-                    CircularProgressIndicator(
-                        color = colors.primary,
+                    LoadingIndicator(
                         modifier = Modifier.align(Alignment.Center),
                     )
 
