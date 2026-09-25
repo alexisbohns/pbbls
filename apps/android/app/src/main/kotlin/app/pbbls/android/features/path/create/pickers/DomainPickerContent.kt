@@ -1,7 +1,6 @@
 package app.pbbls.android.features.path.create.pickers
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,15 +8,18 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.Domain
@@ -45,8 +47,9 @@ fun DomainPickerContent(
     onSelect: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // One radio group: TalkBack reads the domain, "selected", and "3 of 8".
     Column(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().selectableGroup(),
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         domains.forEach { domain ->
@@ -79,11 +82,10 @@ private fun DomainRow(
                 .fillMaxWidth()
                 .clip(MaterialTheme.shapes.medium)
                 .background(if (isSelected) colors.primaryContainer else colors.surfaceContainerHighest)
-                .clickable(onClick = onSelect)
-                .padding(horizontal = Spacing.md, vertical = Spacing.sm)
-                // Two lines, one target: the glyph is decorative and the name +
-                // description read as a single choice.
-                .clearAndSetSemantics { contentDescription = "$name. $label" },
+                // Two lines, one target: `selectable` merges the name and the
+                // description into a single choice; the glyph is decorative.
+                .selectable(selected = isSelected, role = Role.RadioButton, onClick = onSelect)
+                .padding(horizontal = Spacing.md, vertical = Spacing.sm),
         horizontalArrangement = Arrangement.spacedBy(Spacing.md),
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -98,11 +100,17 @@ private fun DomainRow(
                 )
             }
         }
-        Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+        Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
             Text(text = name, style = MaterialTheme.typography.bodyLargeEmphasized, color = foreground)
             // A body role, not a label one: this is a sentence-length description.
             Text(text = label, style = MaterialTheme.typography.bodyMedium, color = secondaryForeground)
         }
+        // onClick = null: the row owns the selection; the radio is its visible state.
+        RadioButton(
+            selected = isSelected,
+            onClick = null,
+            colors = RadioButtonDefaults.colors(selectedColor = foreground, unselectedColor = secondaryForeground),
+        )
     }
 }
 

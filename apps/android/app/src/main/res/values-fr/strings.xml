@@ -33,7 +33,7 @@
     <string name="auth_error_invalid_email">Saisis une adresse e-mail valide.</string>
 
     <string name="error_offline">Tu sembles hors ligne. Vérifie ta connexion.</string>
-    <string name="auth_consent_prefix">J\'accepte </string>
+    <string name="auth_consent_prefix">"J'accepte "</string>
     <string name="auth_consent_terms_link">les Conditions d\'utilisation</string>
     <string name="auth_consent_privacy_link">la politique de confidentialité</string>
     <string name="auth_submit_login">Se connecter</string>

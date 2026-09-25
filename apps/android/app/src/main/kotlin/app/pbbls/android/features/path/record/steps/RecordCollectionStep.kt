@@ -1,15 +1,18 @@
 package app.pbbls.android.features.path.record.steps
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -17,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
@@ -51,8 +55,9 @@ fun RecordCollectionStep(
         return
     }
 
+    // One radio group: TalkBack reads the name, "selected", and "2 of 5".
     Column(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth().selectableGroup(),
         verticalArrangement = Arrangement.spacedBy(Spacing.sm),
     ) {
         collections.forEach { collection ->
@@ -65,7 +70,7 @@ fun RecordCollectionStep(
                         .fillMaxWidth()
                         .clip(MaterialTheme.shapes.medium)
                         .background(if (isSelected) colors.primaryContainer else colors.surfaceContainerHighest)
-                        .clickable { onSelect(collection.id) }
+                        .selectable(selected = isSelected, role = Role.RadioButton) { onSelect(collection.id) }
                         .padding(Spacing.md),
                 horizontalArrangement = Arrangement.spacedBy(Spacing.md),
                 verticalAlignment = Alignment.CenterVertically,
@@ -82,6 +87,17 @@ fun RecordCollectionStep(
                     style = MaterialTheme.typography.bodyLarge,
                     color = foreground,
                     maxLines = 1,
+                    modifier = Modifier.weight(1f),
+                )
+                // onClick = null: the row owns the selection; the radio is its visible state.
+                RadioButton(
+                    selected = isSelected,
+                    onClick = null,
+                    colors =
+                        RadioButtonDefaults.colors(
+                            selectedColor = foreground,
+                            unselectedColor = colors.onSurfaceVariant,
+                        ),
                 )
             }
         }

@@ -1,13 +1,13 @@
 package app.pbbls.android.features.path.create.pickers
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -15,6 +15,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -28,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -138,6 +142,11 @@ fun EmotionPickerBody(
     }
 }
 
+/**
+ * One emotion as an M3 `FilterChip`: the state is announced ("selected") and
+ * drawn twice — the emotion's own palette fill (server data, never a scheme
+ * role) and a check mark — so selection no longer rests on colour alone (#854).
+ */
 @Composable
 private fun EmotionChip(
     emotion: EmotionWithPalette,
@@ -148,21 +157,35 @@ private fun EmotionChip(
 ) {
     val colors = MaterialTheme.colorScheme
     val palette = emotion.palette
-    val background = if (selected) palette.primary else palette.surface
-    val foreground = if (selected) palette.light else colors.onSurface
-    Row(
-        modifier =
-            modifier
-                .clip(MaterialTheme.shapes.medium)
-                .background(background)
-                .clickable(onClick = onClick)
-                .padding(horizontal = 12.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Text(text = emotion.emoji, style = MaterialTheme.typography.titleLarge)
-        Text(label, style = MaterialTheme.typography.bodyMedium, color = foreground, maxLines = 1)
-    }
+    FilterChip(
+        selected = selected,
+        onClick = onClick,
+        label = { Text(label, style = MaterialTheme.typography.bodyMedium, maxLines = 1) },
+        modifier = modifier.heightIn(min = 48.dp),
+        leadingIcon = { Text(text = emotion.emoji, style = MaterialTheme.typography.titleLarge) },
+        trailingIcon =
+            if (selected) {
+                {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_check),
+                        contentDescription = null,
+                        modifier = Modifier.size(FilterChipDefaults.IconSize),
+                    )
+                }
+            } else {
+                null
+            },
+        shape = MaterialTheme.shapes.medium,
+        colors =
+            FilterChipDefaults.filterChipColors(
+                containerColor = palette.surface,
+                labelColor = colors.onSurface,
+                selectedContainerColor = palette.primary,
+                selectedLabelColor = palette.light,
+                selectedTrailingIconColor = palette.light,
+            ),
+        border = null,
+    )
 }
 
 /**
