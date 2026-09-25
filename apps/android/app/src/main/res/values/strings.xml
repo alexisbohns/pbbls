@@ -41,7 +41,7 @@
 
     <!-- Shared across every feature's error mapping: no answer from the server. -->
     <string name="error_offline">You appear to be offline. Please check your connection.</string>
-    <string name="auth_consent_prefix">I accept the </string>
+    <string name="auth_consent_prefix">"I accept the "</string>
     <string name="auth_consent_terms_link">Terms of Service</string>
     <string name="auth_consent_privacy_link">Privacy Policy</string>
     <string name="auth_submit_login">Connect</string>
