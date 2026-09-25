@@ -1,28 +1,23 @@
 package app.pbbls.android.core.designsystem
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 
@@ -30,9 +25,11 @@ import app.pbbls.android.R
 internal val GoogleButtonSurface = Color.White
 
 /**
- * White capsule button with the multi-color Google G mark and "Continue with
- * Google" label; 1dp `outlineVariant` border so it reads against the page. Ports
- * `GoogleSignInButton.swift`. (No Apple sign-in on Android — settled non-goal.)
+ * "Continue with Google": a stock M3 `OutlinedButton` at the funnel's action
+ * height, pinned to a white container because the multi-colour G mark requires
+ * one (Google's branding rules), with a 1 dp `outlineVariant` border so it reads
+ * against the page. Kept as a component because the logo + label layout
+ * repeats on Welcome and Auth. (No Apple sign-in on Android — settled non-goal.)
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -41,19 +38,18 @@ fun GoogleSignInButton(
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
 ) {
-    val shape = CircleShape
-
-    Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .heightIn(min = 52.dp)
-                .clip(shape)
-                .background(GoogleButtonSurface)
-                .border(1.dp, MaterialTheme.colorScheme.outlineVariant, shape)
-                .clickable(enabled = enabled, role = Role.Button) { onClick() },
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically,
+    OutlinedButton(
+        onClick = onClick,
+        shapes = ButtonDefaults.shapesFor(PebblesActionHeight),
+        modifier = modifier.fillMaxWidth().heightIn(min = PebblesActionHeight),
+        enabled = enabled,
+        colors =
+            ButtonDefaults.outlinedButtonColors(
+                containerColor = GoogleButtonSurface,
+                contentColor = GoogleCapsuleInk,
+            ),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+        contentPadding = ButtonDefaults.contentPaddingFor(PebblesActionHeight),
     ) {
         Image(
             painter = painterResource(R.drawable.ic_google_g),
@@ -63,8 +59,7 @@ fun GoogleSignInButton(
         Spacer(modifier = Modifier.width(8.dp))
         Text(
             text = stringResource(R.string.welcome_continue_google),
-            style = MaterialTheme.typography.bodyLargeEmphasized,
-            color = GoogleCapsuleInk,
+            style = ButtonDefaults.textStyleFor(PebblesActionHeight),
         )
     }
 }
