@@ -106,8 +106,6 @@ fun ConnectionsContent(
     ) {
         PebblesTopBar(
             title = stringResource(R.string.connections_title),
-            titleStyle = MaterialTheme.typography.titleMediumEmphasized,
-            titleColor = colors.onSurface,
             leading = {
                 PebblesTopBarTextButton(
                     text = stringResource(R.string.action_done),

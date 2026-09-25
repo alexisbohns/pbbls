@@ -98,8 +98,6 @@ fun DraftsContent(
     ) {
         PebblesTopBar(
             title = stringResource(R.string.drafts_title),
-            titleStyle = MaterialTheme.typography.titleMediumEmphasized,
-            titleColor = colors.onSurface,
             leading = {
                 PebblesTopBarTextButton(
                     text = stringResource(R.string.action_done),

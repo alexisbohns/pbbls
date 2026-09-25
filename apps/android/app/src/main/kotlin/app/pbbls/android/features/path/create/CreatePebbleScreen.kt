@@ -223,8 +223,6 @@ private fun CreateTopBar(
     val colors = MaterialTheme.colorScheme
     PebblesTopBar(
         title = stringResource(R.string.create_new_pebble),
-        titleStyle = MaterialTheme.typography.titleMediumEmphasized,
-        titleColor = colors.onSurface,
         leading = {
             PebblesTopBarTextButton(
                 text = stringResource(R.string.action_cancel),

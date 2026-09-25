@@ -56,11 +56,9 @@ private fun ChromeGallery() {
             leading = { PebblesTopBarTextButton(text = "Cancel", onClick = {}) },
             trailing = { PebblesTopBarTextButton(text = "Save", onClick = {}) },
         )
-        // The shipped M39 create-bar look, via the override parameters.
+        // The create bar: accent actions and a busy spinner in the trailing slot.
         PebblesTopBar(
             title = "New pebble",
-            titleStyle = type.titleMediumEmphasized,
-            titleColor = colors.onSurface,
             leading = { PebblesTopBarTextButton(text = "Cancel", onClick = {}, color = colors.primary) },
             trailing = {
                 CircularProgressIndicator(

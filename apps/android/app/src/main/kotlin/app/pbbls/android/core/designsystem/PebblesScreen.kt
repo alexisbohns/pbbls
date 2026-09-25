@@ -1,18 +1,23 @@
 package app.pbbls.android.core.designsystem
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -20,20 +25,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextOverflow
 
 /**
- * Screen scaffold — the `pebblesScreen()` analog (iOS `Theme/PebblesScreen.swift`):
- * fills the window with `surface`, applies safe-drawing insets, and seeds
- * `LocalContentColor` with `onSurfaceVariant` so unstyled content inherits the
+ * Screen scaffold — a stock M3 `Scaffold` (#854) on `surface`, with the
+ * [topBar] slot (use [PebblesTopBar]) and a content column that seeds
+ * `LocalContentColor` with `onSurfaceVariant`, so unstyled content inherits the
  * branded foreground the way iOS's `.foregroundStyle` cascade does.
- * Background is always `surface` — no override knob; screens should not
- * deviate.
  *
- * Compose has no NavigationStack toolbar, so the bar is an explicit [topBar]
- * slot (use [PebblesTopBar]) stacked above the content column.
+ * Insets: `contentWindowInsets` is `safeDrawing` (IME included, as the
+ * hand-rolled `safeDrawingPadding()` was). Inside the app's tab scaffold those
+ * insets are already consumed, and both `Scaffold` and `TopAppBar` subtract
+ * consumed insets, so nothing pads twice; outside it, this scaffold pads for
+ * itself. The content padding is consumed in turn, so an `imePadding()` below
+ * resolves to what is left.
  */
 @Composable
 fun PebblesScreen(
@@ -42,61 +47,62 @@ fun PebblesScreen(
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
-    Column(
-        modifier =
-            modifier
-                .fillMaxSize()
-                .background(colors.surface)
-                .safeDrawingPadding(),
-    ) {
-        CompositionLocalProvider(LocalContentColor provides colors.onSurfaceVariant) {
-            topBar()
-            content()
+    Scaffold(
+        modifier = modifier,
+        topBar = topBar,
+        containerColor = colors.surface,
+        contentWindowInsets = WindowInsets.safeDrawing,
+    ) { padding ->
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .consumeWindowInsets(padding),
+        ) {
+            CompositionLocalProvider(LocalContentColor provides colors.onSurfaceVariant) {
+                content()
+            }
         }
     }
 }
 
 /**
- * Shared top bar: leading slot, centered title, trailing slot — the
- * `pebblesToolbarTitle` + toolbar-row analog (iOS `Theme/PebblesToolbarTitle.swift`).
- * Defaults: `labelSmall` in `onSurfaceVariant` (sentence case since #853). The
- * M39 create bar predates this idiom and keeps its shipped look (emphasized
- * title, primary buttons) via the style parameters — harmonizing it with iOS is a separate, deliberate change.
- *
- * Geometry matches the shipped M39 bar exactly: 8dp horizontal / 4dp vertical
- * row padding, title weighted between the slots. The title carries the
- * `heading()` semantics role — the TalkBack analog of iOS keeping
- * `navigationTitle` alive for VoiceOver.
+ * Shared top bar — a stock `CenterAlignedTopAppBar` (#854): the M3 title
+ * style, 64 dp, 48 dp action targets, status-bar insets handled by the bar.
+ * [leading] is the navigation slot and [trailing] the actions. The title
+ * carries the `heading()` semantics role — the TalkBack analog of iOS keeping
+ * `navigationTitle` alive for VoiceOver. Pass [scrollBehavior] (and the
+ * matching `nestedScroll` on the screen) for the scrolled container colour.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PebblesTopBar(
     title: String,
     modifier: Modifier = Modifier,
-    titleStyle: TextStyle = MaterialTheme.typography.labelSmall,
-    titleColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
     leading: @Composable RowScope.() -> Unit = {},
     trailing: @Composable RowScope.() -> Unit = {},
+    scrollBehavior: TopAppBarScrollBehavior? = null,
 ) {
-    Row(
-        modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        leading()
-        Text(
-            text = title,
-            style = titleStyle,
-            color = titleColor,
-            textAlign = TextAlign.Center,
-            modifier =
-                Modifier
-                    .weight(1f)
-                    .semantics { heading() },
-        )
-        trailing()
-    }
+    CenterAlignedTopAppBar(
+        title = {
+            Text(
+                text = title,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.semantics { heading() },
+            )
+        },
+        modifier = modifier,
+        navigationIcon = { Row(verticalAlignment = Alignment.CenterVertically) { leading() } },
+        actions = trailing,
+        colors =
+            TopAppBarDefaults.centerAlignedTopAppBarColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+                scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+            ),
+        scrollBehavior = scrollBehavior,
+    )
 }
 
 /**
