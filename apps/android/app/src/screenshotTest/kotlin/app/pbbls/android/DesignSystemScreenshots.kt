@@ -12,6 +12,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -28,7 +29,6 @@ import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
 import app.pbbls.android.core.designsystem.pebblesColorScheme
-import app.pbbls.android.core.designsystem.profileCard
 import com.android.tools.screenshot.PreviewTest
 
 /**
@@ -86,9 +86,11 @@ private fun ChromeGallery() {
                     { Text("Bottom row", style = type.bodyLarge, color = colors.onSurface) },
                 ),
         )
-        Column(modifier = Modifier.fillMaxWidth().profileCard()) {
-            Text("Stats", style = type.titleSmall, color = colors.onSurfaceVariant)
-            Text("Profile card chrome", style = type.bodyLarge, color = colors.onSurface)
+        OutlinedCard(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(PebblesTheme.spacing.lg)) {
+                Text("Stats", style = type.titleSmall, color = colors.onSurfaceVariant)
+                Text("Profile card chrome", style = type.bodyLarge, color = colors.onSurface)
+            }
         }
         IconGallery()
     }

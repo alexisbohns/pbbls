@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -16,6 +17,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -34,7 +36,6 @@ import app.pbbls.android.core.designsystem.PebblesIconToken
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
-import app.pbbls.android.core.designsystem.profileCard
 import app.pbbls.android.core.ui.achievementDescription
 import app.pbbls.android.core.ui.achievementFamilyIcon
 import app.pbbls.android.core.ui.achievementGroupName
@@ -193,61 +194,63 @@ private fun AchievementBadgeCell(
     val colors = MaterialTheme.colorScheme
     val isUnlocked = unlockedAt != null
 
-    Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .profileCard()
-                .alpha(if (isUnlocked) 1f else 0.72f),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                painter = painterResource(achievementFamilyIcon(record.family)),
-                contentDescription = null,
-                // Locked: a faint family mark. The lock and the caption below
-                // carry the state legibly, so the mark itself needn't clear 3:1.
-                tint = if (isUnlocked) colors.primary else colors.outlineVariant,
-                modifier = Modifier.size(PebblesIconToken.LARGE.size),
-            )
-            Spacer(Modifier.weight(1f))
-            if (!isUnlocked) {
+    // Locked cards fade as a whole, border included.
+    OutlinedCard(modifier = Modifier.fillMaxWidth().alpha(if (isUnlocked) 1f else 0.72f)) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(PebblesTheme.spacing.lg),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    painter = painterResource(R.drawable.ic_lock),
+                    painter = painterResource(achievementFamilyIcon(record.family)),
                     contentDescription = null,
-                    tint = colors.onSurfaceVariant,
-                    modifier = Modifier.size(PebblesIconToken.MEDIUM.size),
+                    // Locked: a faint family mark. The lock and the caption below
+                    // carry the state legibly, so the mark itself needn't clear 3:1.
+                    tint = if (isUnlocked) colors.primary else colors.outlineVariant,
+                    modifier = Modifier.size(PebblesIconToken.LARGE.size),
+                )
+                Spacer(Modifier.weight(1f))
+                if (!isUnlocked) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_lock),
+                        contentDescription = null,
+                        tint = colors.onSurfaceVariant,
+                        modifier = Modifier.size(PebblesIconToken.MEDIUM.size),
+                    )
+                }
+            }
+            Text(
+                text = achievementTitle(record),
+                style = MaterialTheme.typography.titleMedium,
+                color = if (isUnlocked) colors.onSurface else colors.onSurfaceVariant,
+            )
+            achievementDescription(record)?.let { description ->
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.onSurfaceVariant,
                 )
             }
-        }
-        Text(
-            text = achievementTitle(record),
-            style = MaterialTheme.typography.titleMedium,
-            color = if (isUnlocked) colors.onSurface else colors.onSurfaceVariant,
-        )
-        achievementDescription(record)?.let { description ->
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodyMedium,
-                color = colors.onSurfaceVariant,
-            )
-        }
-        if (unlockedAt != null) {
-            Text(
-                text =
-                    stringResource(
-                        R.string.achievement_unlocked_on,
-                        unlockedAt.toLocalDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)),
-                    ),
-                style = MaterialTheme.typography.bodyMedium,
-                color = colors.primary,
-            )
-        } else {
-            Text(
-                text = stringResource(R.string.achievement_locked),
-                style = MaterialTheme.typography.bodyMedium,
-                color = colors.onSurfaceVariant,
-            )
+            if (unlockedAt != null) {
+                Text(
+                    text =
+                        stringResource(
+                            R.string.achievement_unlocked_on,
+                            unlockedAt.toLocalDate().format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)),
+                        ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.primary,
+                )
+            } else {
+                Text(
+                    text = stringResource(R.string.achievement_locked),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = colors.onSurfaceVariant,
+                )
+            }
         }
     }
 }
