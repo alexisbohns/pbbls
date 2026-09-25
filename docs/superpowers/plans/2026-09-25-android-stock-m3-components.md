@@ -426,7 +426,9 @@ centre when dragged right; chevrons and back arrows point the mirrored way.
 - `WelcomeOutlineButton` (in `WelcomeScreen.kt`) → `OutlinedButton` inline.
 - `core/designsystem/GoogleSignInButton.kt` → `OutlinedButton` with brand
   content colours; keep the file only if the logo + label layout repeats.
-- `features/path/components/NewPebbleButton.kt` → `FilledTonalButton`.
+- `features/path/components/NewPebbleButton.kt` **stays custom**: its long-press opens the
+  all-at-once composer (M58 D1) and no stock button takes a long press. It already
+  has a ripple, 52 dp and click + long-click semantics via `combinedClickable`.
 - Append the decision-log entry: Android chrome is stock M3, extending the #853
   divergence.
 
