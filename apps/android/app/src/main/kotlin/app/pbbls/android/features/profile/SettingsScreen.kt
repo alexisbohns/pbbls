@@ -16,24 +16,24 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -47,6 +47,7 @@ import app.pbbls.android.core.designsystem.DeleteErrorDialog
 import app.pbbls.android.core.designsystem.LegalDoc
 import app.pbbls.android.core.designsystem.PebblesListSection
 import app.pbbls.android.core.designsystem.PebblesScreen
+import app.pbbls.android.core.designsystem.PebblesSectionHeader
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
@@ -204,109 +205,33 @@ fun SettingsScreen(
                     ),
             )
 
-            PebblesListSection(
-                header = stringResource(R.string.settings_informations_header),
-                rows =
-                    listOf(
-                        {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = stringResource(R.string.settings_name_label),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = colors.onSurfaceVariant,
-                                )
-                                Spacer(Modifier.weight(1f))
-                                BasicTextField(
-                                    value = uiState.form.displayName,
-                                    onValueChange = viewModel::onDisplayNameChange,
-                                    singleLine = true,
-                                    textStyle =
-                                        MaterialTheme.typography.bodyLarge.copy(
-                                            color = colors.onSurface,
-                                            textAlign = TextAlign.End,
-                                        ),
-                                    cursorBrush = SolidColor(colors.primary),
-                                    keyboardOptions =
-                                        KeyboardOptions(capitalization = KeyboardCapitalization.Words),
-                                    decorationBox = { inner ->
-                                        if (uiState.form.displayName.isEmpty()) {
-                                            Text(
-                                                text = stringResource(R.string.settings_name_placeholder),
-                                                style = MaterialTheme.typography.bodyLarge,
-                                                color = colors.onSurfaceVariant,
-                                            )
-                                        }
-                                        inner()
-                                    },
-                                    modifier = Modifier.weight(2f),
-                                )
-                            }
-                        },
-                        {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = stringResource(R.string.settings_email_label),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = colors.onSurfaceVariant,
-                                )
-                                Spacer(Modifier.weight(1f))
-                                Text(
-                                    text = uiState.initial.email ?: "—",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = colors.onSurfaceVariant,
-                                    maxLines = 1,
-                                )
-                            }
-                        },
-                    ),
-            )
+            // Editable fields are stock outlined fields under the section header (#854);
+            // the bordered list keeps only rows that are not text input.
+            Column(verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.sm)) {
+                PebblesSectionHeader(text = stringResource(R.string.settings_informations_header))
+                OutlinedTextField(
+                    value = uiState.form.displayName,
+                    onValueChange = viewModel::onDisplayNameChange,
+                    label = { Text(stringResource(R.string.settings_name_label)) },
+                    placeholder = { Text(stringResource(R.string.settings_name_placeholder)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                OutlinedTextField(
+                    value = uiState.initial.email ?: "—",
+                    onValueChange = {},
+                    readOnly = true,
+                    label = { Text(stringResource(R.string.settings_email_label)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
 
             // Public profile (M50): claim a handle, opt in, then share the link.
             Column(verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.sm)) {
                 val publicProfileRows: List<@Composable () -> Unit> =
                     buildList {
-                        add {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = stringResource(R.string.settings_handle_label),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = colors.onSurfaceVariant,
-                                )
-                                Spacer(Modifier.weight(1f))
-                                Text(
-                                    text = "@",
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = colors.onSurfaceVariant,
-                                )
-                                BasicTextField(
-                                    value = uiState.form.handle,
-                                    onValueChange = viewModel::onHandleChange,
-                                    singleLine = true,
-                                    textStyle =
-                                        MaterialTheme.typography.bodyLarge.copy(
-                                            color = colors.onSurface,
-                                            textAlign = TextAlign.End,
-                                        ),
-                                    cursorBrush = SolidColor(colors.primary),
-                                    keyboardOptions =
-                                        KeyboardOptions(
-                                            capitalization = KeyboardCapitalization.None,
-                                            autoCorrectEnabled = false,
-                                        ),
-                                    decorationBox = { inner ->
-                                        if (uiState.form.handle.isEmpty()) {
-                                            Text(
-                                                text = stringResource(R.string.settings_handle_placeholder),
-                                                style = MaterialTheme.typography.bodyLarge,
-                                                color = colors.onSurfaceVariant,
-                                            )
-                                        }
-                                        inner()
-                                    },
-                                    modifier = Modifier.weight(2f),
-                                )
-                            }
-                        }
                         add {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -357,21 +282,30 @@ fun SettingsScreen(
                             }
                         }
                     }
-                PebblesListSection(
-                    header = stringResource(R.string.settings_public_profile_header),
-                    rows = publicProfileRows,
+                PebblesSectionHeader(text = stringResource(R.string.settings_public_profile_header))
+                OutlinedTextField(
+                    value = uiState.form.handle,
+                    onValueChange = viewModel::onHandleChange,
+                    label = { Text(stringResource(R.string.settings_handle_label)) },
+                    placeholder = { Text(stringResource(R.string.settings_handle_placeholder)) },
+                    prefix = { Text("@") },
+                    isError = uiState.handleErrorRes != null,
+                    supportingText = {
+                        Text(
+                            uiState.handleErrorRes?.let { stringResource(it) }
+                                ?: if (uiState.initial.handle == null) {
+                                    stringResource(R.string.settings_public_profile_needs_handle)
+                                } else {
+                                    stringResource(R.string.settings_handle_footer)
+                                },
+                        )
+                    },
+                    singleLine = true,
+                    keyboardOptions =
+                        KeyboardOptions(capitalization = KeyboardCapitalization.None, autoCorrectEnabled = false),
+                    modifier = Modifier.fillMaxWidth(),
                 )
-                Text(
-                    text =
-                        uiState.handleErrorRes?.let { stringResource(it) }
-                            ?: if (uiState.initial.handle == null) {
-                                stringResource(R.string.settings_public_profile_needs_handle)
-                            } else {
-                                stringResource(R.string.settings_handle_footer)
-                            },
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (uiState.handleErrorRes != null) colors.error else colors.onSurfaceVariant,
-                )
+                PebblesListSection(rows = publicProfileRows)
             }
 
             if (uiState.initial.providers.isNotEmpty()) {
@@ -391,37 +325,16 @@ fun SettingsScreen(
                 )
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(PebblesTheme.spacing.sm)) {
-                    PebblesListSection(
-                        header = stringResource(R.string.settings_password_header),
-                        rows =
-                            listOf(
-                                {
-                                    BasicTextField(
-                                        value = uiState.form.newPassword,
-                                        onValueChange = viewModel::onPasswordChange,
-                                        singleLine = true,
-                                        visualTransformation = PasswordVisualTransformation(),
-                                        textStyle = MaterialTheme.typography.bodyLarge.copy(color = colors.onSurface),
-                                        cursorBrush = SolidColor(colors.primary),
-                                        decorationBox = { inner ->
-                                            if (uiState.form.newPassword.isEmpty()) {
-                                                Text(
-                                                    text = stringResource(R.string.settings_password_placeholder),
-                                                    style = MaterialTheme.typography.bodyLarge,
-                                                    color = colors.onSurfaceVariant,
-                                                )
-                                            }
-                                            inner()
-                                        },
-                                        modifier = Modifier.fillMaxWidth(),
-                                    )
-                                },
-                            ),
-                    )
-                    Text(
-                        text = stringResource(R.string.settings_password_footer),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = colors.onSurfaceVariant,
+                    PebblesSectionHeader(text = stringResource(R.string.settings_password_header))
+                    OutlinedTextField(
+                        value = uiState.form.newPassword,
+                        onValueChange = viewModel::onPasswordChange,
+                        label = { Text(stringResource(R.string.settings_password_placeholder)) },
+                        supportingText = { Text(stringResource(R.string.settings_password_footer)) },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, autoCorrectEnabled = false),
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
