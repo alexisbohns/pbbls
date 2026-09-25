@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.Spacing
+import app.pbbls.android.core.designsystem.logicalDelta
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.ValencePolarity
 import app.pbbls.android.core.model.ValenceSizeGroup
@@ -94,6 +96,7 @@ internal fun ValenceRoll(
 ) {
     val current by rememberUpdatedState(valence)
     val change by rememberUpdatedState(onChange)
+    val layoutDirection = LocalLayoutDirection.current
     val offset = remember { Animatable(0f) }
     val scope = rememberCoroutineScope()
     val wordScale by animateFloatAsState(
@@ -111,7 +114,7 @@ internal fun ValenceRoll(
                 // container: `detectDragGestures` consumes every change it
                 // handles, and Compose dispatches to the child first, so the
                 // parent never sees the vertical drag the size axis needs.
-                .pointerInput(Unit) {
+                .pointerInput(layoutDirection) {
                     val polarityStepPx = PolarityStep.toPx()
                     val sizeStepPx = SizeStep.toPx()
                     val overscrollPx = Overscroll.toPx()
@@ -158,7 +161,9 @@ internal fun ValenceRoll(
                                     if (abs(travel.x) > abs(travel.y)) RollAxis.POLARITY else RollAxis.SIZE
                                 ).also { axis = it }
 
-                            val amount = if (locked == RollAxis.POLARITY) travel.x else travel.y
+                            // Logical x: in RTL the values after this one sit to the left.
+                            val amount =
+                                if (locked == RollAxis.POLARITY) layoutDirection.logicalDelta(travel.x) else travel.y
                             val step = if (locked == RollAxis.POLARITY) polarityStepPx else sizeStepPx
 
                             // Content follows the finger, so dragging left
