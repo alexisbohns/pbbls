@@ -1,13 +1,10 @@
 package app.pbbls.android.features.profile.components
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import app.pbbls.android.R
@@ -66,10 +63,7 @@ private fun RowScope.ShortcutTile(
     SurfaceTile(
         iconPainter = painterResource(iconRes),
         label = label,
-        modifier =
-            Modifier
-                .weight(1f)
-                .clip(MaterialTheme.shapes.large)
-                .clickable(onClick = onClick),
+        modifier = Modifier.weight(1f),
+        onClick = onClick,
     )
 }
