@@ -41,8 +41,8 @@ import kotlin.math.min
 private const val DIMMED_OPACITY = 0.45f
 private const val SELECTED_SCALE = 1.14f
 
-/** Android's minimum comfortable target; the small stones are under it on both axes. */
-private val MinimumHitTarget = 44.dp
+/** The Android 48 dp touch floor (iOS uses 44 pt); the small stones are under it on both axes. */
+private val MinimumHitTarget = 48.dp
 
 /** The tallest state: the large hand word, the span, and the pyramid. */
 private val LockupHeight = 144.dp
