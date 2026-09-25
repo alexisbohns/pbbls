@@ -22,9 +22,9 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -110,10 +110,8 @@ fun GlyphCarveScreen(
                 },
                 trailing = {
                     if (uiState.isSaving) {
-                        CircularProgressIndicator(
-                            color = colors.primary,
-                            strokeWidth = 2.dp,
-                            modifier = Modifier.size(20.dp),
+                        LoadingIndicator(
+                            modifier = Modifier.size(24.dp),
                         )
                     } else {
                         PebblesTopBarTextButton(

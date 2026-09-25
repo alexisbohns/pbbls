@@ -474,4 +474,28 @@ centre when dragged right; chevrons and back arrows point the mirrored way.
 
 ## Lessons learned
 
-(Filled in after the stack opens.)
+(2026-09-26, after the stack #930–#939 opened.)
+
+- **Add `rebaseline-screenshots` on its own `gh pr edit`.** Adding it with the
+  other labels fires one `labeled` event per label, and the workflow's
+  concurrency group cancels the run for the one that matters (#930 needed a
+  remove/re-add).
+- **Stacked re-baselines conflict on shared PNGs, and the upper branch wins.**
+  When two parts both move a preview (Auth moved in Parts 2 and 3), rebasing
+  the upper branch onto the lower's bot commit conflicts on the binary; take
+  the replayed commit (`git checkout --theirs`), because its render already
+  includes both layers.
+- **Every bot commit holds CI at `action_required`.** After fast-forwarding a
+  part to its re-baseline commit, approve the held runs for that head
+  (`gh api -X POST …/actions/runs/<id>/approve`) or the part never goes green.
+- **A network-resolved lint can turn `main` red overnight.** Gradle 9.8.0
+  shipped mid-stack and `AndroidGradlePluginVersion` failed every PR; it was
+  fixed off-stack (#936) rather than inside #854.
+- **Nested scaffolds are safe here** because `RootScreen` consumes the
+  system-bar insets and M3's `Scaffold` / `TopAppBar` subtract consumed insets;
+  screens outside that scaffold still pad for themselves.
+- **Compile to find opt-ins.** `LoadingIndicator` is Expressive-experimental;
+  sweeping 27 files was two scripts: replace, then read the compiler's
+  "experimental" errors and add `@OptIn` to each enclosing function.
+- **Settings has no screenshot coverage of its own** (the gallery composes
+  rows, not the screen); its field layout was checked on a device.

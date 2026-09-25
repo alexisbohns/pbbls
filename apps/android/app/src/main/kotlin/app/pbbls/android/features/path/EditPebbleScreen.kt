@@ -15,7 +15,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -62,6 +63,7 @@ import app.pbbls.android.features.path.create.VisibilityChip
  * trying to preserve. `dismiss()` already no-ops while `isSaving`, so always
  * calling it gets both cases right.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun EditPebbleScreen(
     pebbleId: String,
@@ -113,7 +115,7 @@ fun EditPebbleScreen(
         when (val state = uiState) {
             EditPebbleUiState.Loading ->
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    CircularProgressIndicator(color = colors.primary)
+                    LoadingIndicator()
                 }
             EditPebbleUiState.Error ->
                 EditLoadError(onRetry = viewModel::retry)
@@ -174,6 +176,7 @@ fun EditPebbleScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun EditTopBar(
     isSaving: Boolean,
@@ -202,9 +205,8 @@ private fun EditTopBar(
         Spacer(Modifier.weight(1f))
         if (isSaving) {
             Box(Modifier.size(48.dp), Alignment.Center) {
-                CircularProgressIndicator(
-                    color = colors.primary,
-                    modifier = Modifier.size(20.dp),
+                LoadingIndicator(
+                    modifier = Modifier.size(24.dp),
                 )
             }
         } else {

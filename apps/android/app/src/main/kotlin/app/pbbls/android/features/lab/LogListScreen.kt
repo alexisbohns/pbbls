@@ -9,9 +9,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -53,6 +54,7 @@ enum class LogListMode(
  * rather than silently defaulting to the first constant, which is the
  * `AuthMode.fromRoute` bug this migration deleted elsewhere.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun LogListScreen(
     mode: String,
@@ -91,7 +93,7 @@ fun LogListScreen(
         when (val state = uiState) {
             LogListUiState.Loading ->
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    CircularProgressIndicator(color = colors.primary)
+                    LoadingIndicator()
                 }
 
             is LogListUiState.Error ->

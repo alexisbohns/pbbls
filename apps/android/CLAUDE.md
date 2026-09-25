@@ -235,8 +235,9 @@ app/src/main/kotlin/app/pbbls/android/
   core/model/            Pebble, Domain, Glyph, Collection, EmotionPalette, … (@Serializable, no UI)
   core/data/             SupabaseService, EmotionPaletteService, GlyphService, LogsService, …
   core/designsystem/     PebblesTheme, ColorSchemes, Typography, Shapes, Spacing,
-                          PebblesHandTypography, PebblesTextInput, PebblesCheckbox,
-                          PebblesPrimaryButton, CheckGlyph
+                          PebblesHandTypography, PebblesScreen/PebblesTopBar (Scaffold +
+                          top app bar), PebblesList, PebblesPrimaryButton, PebblesCheckbox,
+                          SurfaceTile — thin defaults over stock M3 (#854)
   core/ui/               Shared UI that knows the domain: GlyphView, SoulItem, PebbleRow,
                           RippleBadge, karma overlays, ReferenceSlugs/ReferenceStrings,
                           and core/ui/render/ (PebbleSvg, GlyphImage, the wobble stack)

@@ -13,9 +13,10 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
@@ -81,6 +82,7 @@ fun AchievementsScreen(
  * watching it (`apps/android/CLAUDE.md`, "Screens that read services cannot be
  * previewed").
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AchievementsScreen(
     uiState: AchievementsUiState,
@@ -118,7 +120,7 @@ fun AchievementsScreen(
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    CircularProgressIndicator(color = colors.primary)
+                    LoadingIndicator()
                 }
 
             is AchievementsUiState.Error ->

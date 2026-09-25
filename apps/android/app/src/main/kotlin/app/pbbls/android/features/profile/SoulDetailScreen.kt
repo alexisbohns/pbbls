@@ -9,10 +9,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -53,6 +53,7 @@ import app.pbbls.android.features.path.EditPebbleScreen
  * soul id, so [SoulDetailViewModel] fetches the soul itself (iOS receives the
  * row from the list; deviation noted in the plan).
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SoulDetailScreen(
     soulId: String,
@@ -106,7 +107,7 @@ fun SoulDetailScreen(
         when (val state = uiState) {
             SoulDetailUiState.Loading ->
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    CircularProgressIndicator(color = colors.primary)
+                    LoadingIndicator()
                 }
 
             is SoulDetailUiState.Error ->

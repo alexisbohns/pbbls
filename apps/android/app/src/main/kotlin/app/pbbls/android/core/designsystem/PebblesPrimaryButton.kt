@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -43,7 +43,7 @@ fun PebblesPrimaryButton(
         contentPadding = ButtonDefaults.contentPaddingFor(PebblesActionHeight),
     ) {
         if (isLoading) {
-            CircularProgressIndicator(color = LocalContentColor.current, strokeWidth = 2.dp, modifier = Modifier.size(20.dp))
+            LoadingIndicator(color = LocalContentColor.current, modifier = Modifier.size(24.dp))
         } else {
             Text(text = text, style = ButtonDefaults.textStyleFor(PebblesActionHeight))
         }

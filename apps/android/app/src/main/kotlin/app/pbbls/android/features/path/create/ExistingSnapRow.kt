@@ -8,7 +8,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,6 +42,7 @@ private const val TAG = "existing-snap-row"
  * previews render the placeholder); failures log and keep the placeholder,
  * never a user-facing error (iOS parity).
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun ExistingSnapRow(
     storagePath: String,
@@ -95,10 +97,8 @@ fun ExistingSnapRow(
         Spacer(Modifier.weight(1f))
         if (isRemoving) {
             Box(Modifier.size(48.dp), Alignment.Center) {
-                CircularProgressIndicator(
-                    color = colors.primary,
-                    strokeWidth = 2.dp,
-                    modifier = Modifier.size(20.dp),
+                LoadingIndicator(
+                    modifier = Modifier.size(24.dp),
                 )
             }
         } else {

@@ -13,10 +13,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -63,6 +64,7 @@ import app.pbbls.android.features.path.create.pickers.GlyphPickerSheet
  * post-pick thumbnail refetch iOS carries ("tracked separately" in its
  * comments) is dropped rather than ported.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SoulFormScreen(
     soulId: String?,
@@ -97,10 +99,8 @@ fun SoulFormScreen(
                 },
                 trailing = {
                     if (uiState.isSaving) {
-                        CircularProgressIndicator(
-                            color = colors.primary,
-                            strokeWidth = 2.dp,
-                            modifier = Modifier.size(20.dp),
+                        LoadingIndicator(
+                            modifier = Modifier.size(24.dp),
                         )
                     } else {
                         PebblesTopBarTextButton(
@@ -116,7 +116,7 @@ fun SoulFormScreen(
     ) {
         if (uiState.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = colors.primary)
+                LoadingIndicator()
             }
             return@PebblesScreen
         }

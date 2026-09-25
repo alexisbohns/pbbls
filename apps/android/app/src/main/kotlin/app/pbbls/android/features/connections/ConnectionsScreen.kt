@@ -13,8 +13,8 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -129,7 +129,7 @@ fun ConnectionsContent(
             // Exhaustive with no `else`: a new ConnectionsUiState case must be
             // rendered. The empty list is Content, not a fourth case.
             when (uiState) {
-                ConnectionsUiState.Loading -> CircularProgressIndicator(color = colors.primary)
+                ConnectionsUiState.Loading -> LoadingIndicator()
 
                 is ConnectionsUiState.Error ->
                     Column(

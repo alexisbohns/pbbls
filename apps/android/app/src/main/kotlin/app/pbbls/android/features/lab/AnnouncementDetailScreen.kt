@@ -11,9 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -46,6 +47,7 @@ import java.util.Locale
  * [PebblesTopBar] title. A real Nav3 entry now (#852): it loads its
  * own row by [logId], so [onBack] pops the entry rather than unwinding a swap.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun AnnouncementDetailScreen(
     logId: String,
@@ -81,7 +83,7 @@ fun AnnouncementDetailScreen(
         when (val state = uiState) {
             AnnouncementDetailUiState.Loading ->
                 Box(Modifier.fillMaxSize(), Alignment.Center) {
-                    CircularProgressIndicator(color = colors.primary)
+                    LoadingIndicator()
                 }
 
             is AnnouncementDetailUiState.Error ->

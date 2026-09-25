@@ -16,8 +16,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -58,6 +58,7 @@ import app.pbbls.android.features.profile.components.labelRes
  * capsule toggles rather than Material's segmented buttons — same reason the
  * app avoids Material color roles everywhere (M38 D6).
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CollectionFormScreen(
     collectionId: String?,
@@ -92,10 +93,8 @@ fun CollectionFormScreen(
                 },
                 trailing = {
                     if (uiState.isSaving) {
-                        CircularProgressIndicator(
-                            color = colors.primary,
-                            strokeWidth = 2.dp,
-                            modifier = Modifier.size(20.dp),
+                        LoadingIndicator(
+                            modifier = Modifier.size(24.dp),
                         )
                     } else {
                         PebblesTopBarTextButton(
@@ -111,7 +110,7 @@ fun CollectionFormScreen(
     ) {
         if (uiState.isLoading) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(color = colors.primary)
+                LoadingIndicator()
             }
             return@PebblesScreen
         }

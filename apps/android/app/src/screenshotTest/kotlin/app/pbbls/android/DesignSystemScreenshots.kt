@@ -8,8 +8,8 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
@@ -61,10 +61,8 @@ private fun ChromeGallery() {
             title = "New pebble",
             leading = { PebblesTopBarTextButton(text = "Cancel", onClick = {}, color = colors.primary) },
             trailing = {
-                CircularProgressIndicator(
-                    color = colors.primary,
-                    strokeWidth = 2.dp,
-                    modifier = Modifier.size(20.dp),
+                LoadingIndicator(
+                    modifier = Modifier.size(24.dp),
                 )
             },
         )
