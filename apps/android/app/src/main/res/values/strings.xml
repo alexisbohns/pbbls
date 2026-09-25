@@ -406,6 +406,11 @@
     <string name="glyph_drawer_acquired">Acquired · %1$s</string>
     <string name="glyph_drawer_slide">Slide to confirm</string>
     <string name="glyph_drawer_slide_a11y">Slide to confirm swap</string>
+    <string name="glyph_drawer_slide_confirm_action">confirm the swap</string>
+    <plurals name="glyph_drawer_slide_cost_a11y">
+        <item quantity="one">%1$d karma</item>
+        <item quantity="other">%1$d karma</item>
+    </plurals>
 
     <!-- Lab (M44). lab_load_error stays English in BOTH locales — iOS assigns
          it as a raw string bypassing its catalog, a named parity quirk

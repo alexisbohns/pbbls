@@ -1,7 +1,6 @@
 package app.pbbls.android.features.path.record
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -11,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -49,14 +49,10 @@ fun RecordFlowChrome(
     ) {
         // Kept in the layout at zero alpha rather than removed, so the dots do
         // not shift sideways between step 0 and step 1.
-        Box(
-            modifier =
-                Modifier
-                    .size(44.dp)
-                    .alpha(if (canGoBack) 1f else 0f)
-                    .clip(CircleShape)
-                    .clickable(enabled = canGoBack, onClick = onBack),
-            contentAlignment = Alignment.Center,
+        IconButton(
+            onClick = onBack,
+            enabled = canGoBack,
+            modifier = Modifier.alpha(if (canGoBack) 1f else 0f),
         ) {
             Icon(
                 painter = painterResource(R.drawable.ic_arrow_back),
@@ -72,10 +68,7 @@ fun RecordFlowChrome(
 
         Spacer(Modifier.weight(1f))
 
-        Box(
-            modifier = Modifier.size(44.dp).clip(CircleShape).clickable(onClick = onClose),
-            contentAlignment = Alignment.Center,
-        ) {
+        IconButton(onClick = onClose) {
             Icon(
                 painter = painterResource(R.drawable.ic_x_circle),
                 contentDescription = stringResource(R.string.action_close),

@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -56,7 +56,7 @@ fun WelcomeCarousel(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .height(110.dp),
+                    .heightIn(min = 110.dp),
         ) { page ->
             WelcomeSlideView(step = steps[page])
         }

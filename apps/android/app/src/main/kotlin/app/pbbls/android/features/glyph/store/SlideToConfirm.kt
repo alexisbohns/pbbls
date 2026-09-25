@@ -31,12 +31,21 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.distanceFromStart
+import app.pbbls.android.core.designsystem.logicalDelta
 import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -72,7 +81,9 @@ object SlideMath {
  * travel parks the thumb (springing back when [onConfirm] returns false).
  * Feedback is haptic-only v1 (the audio half is a named deviation): a
  * long-press tick on engage, confirm on the threshold — fired BEFORE the RPC,
- * verbatim iOS quirk.
+ * verbatim iOS quirk. TalkBack's double-tap runs the same confirm directly (a
+ * button with the cost as its state, mirroring iOS's activate action), and the
+ * drag reads logical x, so in RTL the thumb starts at the right and slides left.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -89,7 +100,22 @@ fun SlideToConfirm(
     val dragX = remember { Animatable(0f) }
     var trackWidthPx by remember { mutableIntStateOf(0) }
     val thumbPx = with(density) { THUMB.toPx() }
+    val layoutDirection = LocalLayoutDirection.current
     val a11y = stringResource(R.string.glyph_drawer_slide_a11y)
+    val confirmAction = stringResource(R.string.glyph_drawer_slide_confirm_action)
+    val costA11y = pluralStringResource(R.plurals.glyph_drawer_slide_cost_a11y, cost, cost)
+
+    // The drag and TalkBack's double-tap end in the same place: park the
+    // thumb, run the purchase, spring back if it failed. The haptic fires
+    // before the RPC — verbatim iOS quirk.
+    fun confirm(travel: Float) {
+        haptics.performHapticFeedback(HapticFeedbackType.Confirm)
+        scope.launch {
+            dragX.animateTo(travel)
+            val success = onConfirm()
+            if (!success) dragX.animateTo(0f)
+        }
+    }
 
     Box(
         modifier =
@@ -100,29 +126,36 @@ fun SlideToConfirm(
                 .clip(CircleShape)
                 .background(colors.primaryContainer)
                 .alpha(if (enabled) 1f else 0.5f)
-                .clearAndSetSemantics { contentDescription = a11y }
-                .pointerInput(enabled, trackWidthPx) {
+                .clearAndSetSemantics {
+                    contentDescription = a11y
+                    stateDescription = costA11y
+                    role = Role.Button
+                    if (enabled) {
+                        onClick(label = confirmAction) {
+                            confirm(SlideMath.travel(trackWidthPx.toFloat(), thumbPx))
+                            true
+                        }
+                    } else {
+                        disabled()
+                    }
+                }.pointerInput(enabled, trackWidthPx, layoutDirection) {
                     if (!enabled) return@pointerInput
                     awaitEachGesture {
                         val down = awaitFirstDown()
-                        if (down.position.x > thumbPx) return@awaitEachGesture
+                        // The press must start on the resting thumb, which sits at the start edge.
+                        if (layoutDirection.distanceFromStart(down.position.x, trackWidthPx.toFloat()) > thumbPx) {
+                            return@awaitEachGesture
+                        }
                         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                         val travel = SlideMath.travel(trackWidthPx.toFloat(), thumbPx)
                         drag(down.id) { change ->
-                            val delta = change.position.x - change.previousPosition.x
+                            val delta = layoutDirection.logicalDelta(change.position.x - change.previousPosition.x)
                             val next = (dragX.value + delta).coerceIn(0f, travel)
                             scope.launch { dragX.snapTo(next) }
                             change.consume()
                         }
-                        val progress = SlideMath.progress(dragX.value, travel)
-                        if (SlideMath.isConfirmed(progress)) {
-                            // iOS fires success feedback at the threshold, before the RPC.
-                            haptics.performHapticFeedback(HapticFeedbackType.Confirm)
-                            scope.launch {
-                                dragX.animateTo(travel)
-                                val success = onConfirm()
-                                if (!success) dragX.animateTo(0f)
-                            }
+                        if (SlideMath.isConfirmed(SlideMath.progress(dragX.value, travel))) {
+                            confirm(travel)
                         } else {
                             scope.launch { dragX.animateTo(0f) }
                         }
