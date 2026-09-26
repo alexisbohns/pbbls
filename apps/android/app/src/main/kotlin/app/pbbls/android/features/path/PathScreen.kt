@@ -137,8 +137,9 @@ fun PathScreen(
             // actions are — exactly the coupling the entry provider exists to
             // avoid. It is also Path-only chrome, which the Scaffold is not.
             //
-            // It floats clear of the four-tab bar because the Path entry renders
-            // inside the Scaffold's content padding. Tap opens the record flow,
+            // It floats clear of the bottom bar because the navigation suite lays
+            // the Path entry out above it, and on large screens it keeps the window
+            // corner opposite the rail (#855). Tap opens the record flow,
             // long-press the all-at-once composer (M58 D1).
             if (uiState is PathUiState.Content) {
                 NewPebbleFab(
