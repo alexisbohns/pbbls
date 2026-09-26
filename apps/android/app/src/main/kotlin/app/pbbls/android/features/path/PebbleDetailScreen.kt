@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -24,7 +24,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -42,12 +41,13 @@ import app.pbbls.android.features.path.read.PebbleReadView
 import app.pbbls.android.features.path.read.pebblePageColors
 
 /**
- * Pebble detail — a pushed entry now (#852, ports iOS `PebbleDetailSheet`,
- * D5/D7). Self-applies `safeDrawingPadding()`. Loads a [PebbleDetail] via
+ * Pebble detail (#852, ports iOS `PebbleDetailSheet`, D7): a docked sheet on
+ * phones and a pane beside Path on large screens (#940). The scene decides
+ * which, and owns dismissal. Loads a [PebbleDetail] via
  * [LocalPebbleDetailService], owns its loading/error/retry state, hosts the
  * top bar, and delegates the body to the pure [PebbleReadView]. System back is
- * `NavDisplay`'s own — this screen has no in-flight write to protect, so it no
- * longer needs its own `BackHandler`.
+ * the scene's own (the sheet's window, or `NavDisplay` beside Path) — this
+ * screen has no in-flight write to protect, so it needs no `BackHandler`.
  *
  * [onEditRequested] opens the `EditPebble` entry; returning from it is picked
  * up by [PebbleDetailViewModel.onResumed] rather than a callback.
@@ -55,7 +55,6 @@ import app.pbbls.android.features.path.read.pebblePageColors
 @Composable
 fun PebbleDetailScreen(
     pebbleId: String,
-    onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
     onEditRequested: () -> Unit = {},
     viewModel: PebbleDetailViewModel = hiltViewModel(),
@@ -96,7 +95,6 @@ fun PebbleDetailScreen(
     PebbleDetailContent(
         uiState = uiState,
         palette = palette,
-        onBack = onDismiss,
         onEdit = onEditRequested,
         onShare = onShare,
         onRetry = viewModel::retry,
@@ -116,7 +114,6 @@ fun PebbleDetailScreen(
 fun PebbleDetailContent(
     uiState: PebbleDetailUiState,
     palette: EmotionPalette?,
-    onBack: () -> Unit,
     onEdit: () -> Unit,
     onShare: (() -> Unit)?,
     onRetry: () -> Unit,
@@ -136,22 +133,11 @@ fun PebbleDetailContent(
         modifier
             .fillMaxSize()
             .background(pageBackground)
-            // Swallow all pointer input so this cover is input-opaque like the
-            // iOS fullScreenCover (D5) — without it, taps over the loading/error
-            // states fall through to the PathScreen rows' combinedClickable.
-            .pointerInput(Unit) {
-                awaitPointerEventScope {
-                    while (true) {
-                        awaitPointerEvent().changes.forEach { it.consume() }
-                    }
-                }
-            }.safeDrawingPadding()
             .readableWidth(),
     ) {
         DetailTopBar(
             visibility = detail?.visibility,
             editEnabled = detail != null,
-            onBack = onBack,
             onEdit = onEdit,
             onShare = onShare,
         )
@@ -167,25 +153,25 @@ fun PebbleDetailContent(
                 PebbleReadView(
                     detail = state.detail,
                     palette = palette,
-                    modifier = Modifier.fillMaxSize(),
+                    // Clear of the gesture bar in the sheet and in the pane
+                    // alike (#940), on this page's own tint.
+                    modifier = Modifier.fillMaxSize().navigationBarsPadding(),
                 )
         }
     }
 }
 
 /**
- * Detail top bar: leading system-back arrow, an optional privacy badge once the
- * pebble is loaded, an optional share button (public pebbles only, M51), and a
- * trailing Edit button (enabled only after load; inert in B). iOS relies on
- * swipe-to-dismiss; Android adds the explicit back arrow + [BackHandler] for
- * discoverability (D5, documented divergence).
+ * Detail top bar: an optional privacy badge once the pebble is loaded, an
+ * optional share button (public pebbles only, M51), and a trailing Edit button
+ * (enabled only after load). No back arrow (#940): on a phone it is a sheet,
+ * dismissed by drag, scrim or system back; on a large screen Path is beside it.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DetailTopBar(
     visibility: Visibility?,
     editEnabled: Boolean,
-    onBack: () -> Unit,
     onEdit: () -> Unit,
     onShare: (() -> Unit)?,
 ) {
@@ -193,14 +179,6 @@ private fun DetailTopBar(
     // tinted to the pebble's emotion, and the bar should sit on that, not on surface.
     TopAppBar(
         title = { if (visibility != null) PebblePrivacyBadge(visibility = visibility) },
-        navigationIcon = {
-            IconButton(onClick = onBack) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_arrow_back),
-                    contentDescription = stringResource(R.string.pebble_detail_back_a11y),
-                )
-            }
-        },
         actions = {
             if (onShare != null) {
                 IconButton(onClick = onShare) {

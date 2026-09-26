@@ -1,5 +1,9 @@
 package app.pbbls.android.navigation
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -75,6 +79,11 @@ private class BottomSheetScene<T : Any>(
         ModalBottomSheet(
             onDismissRequest = onBack,
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+            // The sheet keeps the status bar clear; the entry pads the
+            // gesture bar itself, so its own page colour runs under it rather
+            // than a band of sheet colour. It has to anyway: the same entry is
+            // a pane on large screens, where no sheet pads anything.
+            contentWindowInsets = { WindowInsets.safeDrawing.only(WindowInsetsSides.Top) },
         ) {
             CompositionLocalProvider(LocalLifecycleOwner provides lifecycleOwner) {
                 entry.Content()

@@ -205,7 +205,6 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     ) { key ->
         PebbleDetailScreen(
             pebbleId = key.pebbleId,
-            onDismiss = navigator::goBack,
             onEditRequested = { navigator.navigate(PebblesKey.EditPebble(key.pebbleId)) },
         )
     }
