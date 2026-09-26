@@ -39,10 +39,12 @@ import androidx.navigation3.scene.SceneStrategyScope
  * drag, system or predictive back, all handled by the sheet's window) animates
  * the sheet away and then calls `onBack`, so leaving it is always a pop.
  *
- * There is deliberately no `onRemove` animation. The only way the sheet leaves
- * without dismissing itself is an entry pushed over it (Edit), and a sheet
- * sliding down on top of that entry's own slide-up would be worse than the
- * sheet simply giving way to it.
+ * There is deliberately no `onRemove` animation. The sheet leaves without
+ * dismissing itself when an entry is pushed over it (Edit), when the window
+ * grows past one pane (the list-detail strategy claims the entry), and when
+ * sign-out's `replaceAll` clears the stack. A sheet sliding down over Edit's
+ * slide-up, over the new pair or over Welcome would be worse than the sheet
+ * simply giving way.
  */
 class BottomSheetSceneStrategy<T : Any> : SceneStrategy<T> {
     override fun SceneStrategyScope<T>.calculateScene(entries: List<NavEntry<T>>): Scene<T>? {
@@ -103,10 +105,9 @@ private class BottomSheetScene<T : Any>(
                 }
             },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-            // The sheet keeps the status bar clear; the entry pads the
-            // gesture bar itself, so its own page colour runs under it rather
-            // than a band of sheet colour. It has to anyway: the same entry is
-            // a pane on large screens, where no sheet pads anything.
+            // The sheet keeps only the status bar clear and leaves the gesture
+            // bar to the entry: the same entry is a pane on large screens,
+            // where nothing pads it, so it has to handle that inset itself.
             contentWindowInsets = { WindowInsets.safeDrawing.only(WindowInsetsSides.Top) },
         ) {
             CompositionLocalProvider(LocalLifecycleOwner provides lifecycleOwner) {
