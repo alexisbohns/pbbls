@@ -247,9 +247,13 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             resumeDraftId = key.resumeDraftId,
             // The flow deliberately does NOT reveal the pebble through the
             // detail entry: the user has just spent ten screens on it and the
-            // success step already showed it (M58 D10). Just pop; Path's own
-            // resume refresh picks up the new pebble.
-            onPublished = { navigator.goBack() },
+            // success step shows it (M58 D10). So publishing must NOT pop — the
+            // success step is still to come, and its exit button is what
+            // dismisses (`onDismiss`). Popping here skipped the success step
+            // outright (#857 caught it). Path's own resume refresh picks up the
+            // new pebble once the flow is gone, which is what the old
+            // `onPublished` reload used to do.
+            onPublished = {},
             onDismiss = navigator::goBack,
         )
     }
