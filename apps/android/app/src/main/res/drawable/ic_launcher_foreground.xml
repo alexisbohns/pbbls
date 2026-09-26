@@ -5,7 +5,7 @@
   the script when the brand mark changes.
 
   The adaptive-icon foreground: the mark in the iOS icon's cream, sized to
-  66dp inside the 108dp canvas so no launcher mask can clip it.
+  within 28dp of the 108dp canvas's centre so no launcher mask can clip it.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
@@ -13,10 +13,10 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
     <group
-        android:scaleX="0.262965"
-        android:scaleY="0.262965"
-        android:translateX="20.9985"
-        android:translateY="21.0097">
+        android:scaleX="0.194861"
+        android:scaleY="0.194861"
+        android:translateX="29.5454"
+        android:translateY="29.5537">
         <path
             android:name="pebble-outline"
             android:strokeColor="#F8F0F0"
