@@ -223,6 +223,7 @@ dependencies {
     implementation(libs.androidx.compose.material3)
     implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
     implementation(libs.androidx.compose.material3.adaptive)
+    implementation(libs.androidx.compose.material3.adaptive.navigation3)
     implementation(libs.androidx.window.core)
     implementation(libs.androidx.compose.foundation)
     // Navigation 3 (#852). navigation-compose is gone (Part 5) — nothing imports it.
