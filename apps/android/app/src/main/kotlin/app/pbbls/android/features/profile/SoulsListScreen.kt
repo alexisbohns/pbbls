@@ -46,11 +46,11 @@ import app.pbbls.android.core.ui.SoulItemCase
  * The souls grid — ports iOS `SoulsListView.swift` as a NavHost push (D1):
  * adaptive-96 grid of shared [SoulItem] cells, "+" top-bar create, tap → the
  * detail route, long-press → delete menu + confirm (D7 unifies on the M39 D8
- * idiom over iOS's context menu). [SoulsListViewModel] owns the fetch, the
- * delete and the reference-data refresh that keeps the pebble-form picker in
- * sync; this function is render and callbacks only.
+ * idiom over iOS's context menu). This function wires [SoulsListViewModel] —
+ * the fetch, the delete and the reference-data refresh that keeps the
+ * pebble-form picker in sync — and owns the delete dialogs; [SoulsListContent]
+ * renders (#940).
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SoulsListScreen(
     onBack: () -> Unit,

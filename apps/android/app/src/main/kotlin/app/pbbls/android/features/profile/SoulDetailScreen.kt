@@ -55,7 +55,6 @@ import app.pbbls.android.features.path.EditPebbleScreen
  * soul id, so [SoulDetailViewModel] fetches the soul itself (iOS receives the
  * row from the list; deviation noted in the plan).
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SoulDetailScreen(
     soulId: String,

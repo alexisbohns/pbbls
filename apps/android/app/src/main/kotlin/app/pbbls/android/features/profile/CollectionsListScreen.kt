@@ -56,7 +56,6 @@ import app.pbbls.android.features.profile.components.CollectionModeBadge
  * [CollectionsListViewModel] owns the fetch (D10), the delete and the
  * reference-data refresh that keeps the pebble-form picker in sync.
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun CollectionsListScreen(
     onBack: () -> Unit,

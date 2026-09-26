@@ -57,10 +57,9 @@ import java.util.Locale
  * swap). The NavHost passes only the collection id, so
  * [CollectionDetailViewModel] fetches the collection itself (same named
  * deviation as the soul detail), and it owns the month grouping — only the
- * locale-dependent header formatting stays here, because only the view knows
- * the active locale.
+ * locale-dependent header formatting lives in [CollectionDetailContent],
+ * because only the view knows the active locale.
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun CollectionDetailScreen(
     collectionId: String,
