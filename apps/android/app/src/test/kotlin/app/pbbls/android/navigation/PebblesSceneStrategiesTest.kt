@@ -8,8 +8,10 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.SceneStrategyScope
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /** Which back stacks become a list-detail scene (#940). */
@@ -129,5 +131,15 @@ class PebblesSceneStrategiesTest {
         assertEquals(entries.takeLast(1), scene!!.entries)
         // Back leaves the tab and lands on the pebble beside Path.
         assertEquals(entries.take(2), scene.previousEntries)
+    }
+
+    @Test
+    fun `only Path is a full-width list`() {
+        // Asked for by name, not inferred from a missing placeholder: the
+        // souls and collections lists keep their placeholder pane when idle.
+        assertTrue(PanePairs.isFullWidthWhenIdle(entry(PebblesKey.Path)))
+        assertFalse(PanePairs.isFullWidthWhenIdle(entry(PebblesKey.People)))
+        assertFalse(PanePairs.isFullWidthWhenIdle(entry(PebblesKey.Collections)))
+        assertFalse(PanePairs.isFullWidthWhenIdle(entry(PebblesKey.PebbleDetail("p1"))))
     }
 }

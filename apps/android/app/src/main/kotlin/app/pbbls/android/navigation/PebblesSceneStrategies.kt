@@ -35,9 +35,9 @@ enum class PanePair { SOULS, COLLECTIONS, PEBBLES }
  * - **A detail with no list under it is not a pair.** `CollectionDetail`
  *   pushed from the You tab has only You beneath it; the library would still
  *   build a one-entry scaffold for it.
- * - **A list without a placeholder (Path) is a list only while a detail is
- *   open.** Idle, it keeps its full readable column; the split animates as a
- *   scene change.
+ * - **A full-width list (Path) is a list only while a detail is open.** Idle,
+ *   it keeps its full readable column; the split animates as a scene change.
+ *   It is asked for by name (`fullWidthList`), never inferred.
  */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 fun pebblesListDetailStrategy(directive: PaneScaffoldDirective): SceneStrategy<NavKey> {
@@ -94,19 +94,19 @@ object PanePairs {
     private const val IS_LIST = "pebbles.pane.list"
     private const val FULL_WIDTH_WHEN_IDLE = "pebbles.pane.fullWidthWhenIdle"
 
-    /**
-     * A list with no [placeholder] has nothing to show beside it, so it stays
-     * full width until a detail opens.
-     */
+    /** A list that shows [placeholder] beside it while no detail is open. */
     private fun list(
         pair: PanePair,
-        placeholder: (@Composable () -> Unit)? = null,
-    ): Map<String, Any> =
-        if (placeholder == null) {
-            ListDetailSceneStrategy.listPane(pair) + (IS_LIST to true) + (FULL_WIDTH_WHEN_IDLE to true)
-        } else {
-            ListDetailSceneStrategy.listPane(pair) { placeholder() } + (IS_LIST to true)
-        }
+        placeholder: @Composable () -> Unit,
+    ): Map<String, Any> = ListDetailSceneStrategy.listPane(pair) { placeholder() } + (IS_LIST to true)
+
+    /**
+     * A list that stays full width until a detail opens, rather than showing a
+     * placeholder beside it (Path). Asked for by name, so a future list is
+     * never full width by accident.
+     */
+    private fun fullWidthList(pair: PanePair): Map<String, Any> =
+        ListDetailSceneStrategy.listPane(pair) + (IS_LIST to true) + (FULL_WIDTH_WHEN_IDLE to true)
 
     /** [sheetWhenCompact]: on one pane the detail is a docked sheet over its list. */
     private fun detail(
@@ -122,7 +122,7 @@ object PanePairs {
             is PebblesKey.SoulDetail -> detail(PanePair.SOULS)
             PebblesKey.Collections -> list(PanePair.COLLECTIONS) { CollectionsPlaceholder() }
             is PebblesKey.CollectionDetail -> detail(PanePair.COLLECTIONS)
-            PebblesKey.Path -> list(PanePair.PEBBLES)
+            PebblesKey.Path -> fullWidthList(PanePair.PEBBLES)
             is PebblesKey.PebbleDetail -> detail(PanePair.PEBBLES, sheetWhenCompact = true)
             else -> emptyMap()
         }
