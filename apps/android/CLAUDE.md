@@ -418,10 +418,20 @@ do not bring it back for a single asset.
   disabled outright is `NewerVersionAvailable` (network-resolved, so every
   upstream release would be a finding no baseline can hold — Dependabot owns
   bumps).
-- **JUnit4 + `kotlinx-coroutines-test`, JVM unit tests only.** No Robolectric, no
-  instrumented tests — `:baselineprofile`'s on-device journey (#856) is a
-  profiling tool run by hand, not a test suite. Test pure logic (auth `canSubmit`, week grouping, valence
-  mapping, palette parsing, slug resolution) and localization parity.
+- **JUnit4 + `kotlinx-coroutines-test`, JVM unit tests only.** No instrumented
+  tests — `:baselineprofile`'s on-device journey (#856) is a profiling tool run
+  by hand, not a test suite. Test pure logic (auth `canSubmit`, week grouping,
+  valence mapping, palette parsing, slug resolution) and localization parity.
+- **Whole-app UI tests run on Robolectric, in the same task (#857).** A test
+  under `src/test/.../ui/` extends `testing/AppUiTest`, carries
+  `@HiltAndroidTest`, and launches the real `MainActivity` over
+  `testing/FakeServicesModule` — every `…Servicing` seam bound to its fake, and
+  a `SupabaseClient` on a Ktor `MockEngine` for the services with no seam, so
+  nothing reaches a network or `BuildConfig`. Inject the fake (`FakePathService`),
+  arm it, *then* `launch()`. Find nodes by string resource (`onText(R.string.…)`)
+  and fall back to `JourneyTags` only for what has no text. A bar the
+  navigation suite hides stays composed off-screen: assert
+  `assertIsNotDisplayed()`, not `assertDoesNotExist()`.
 - **`ArchitectureBoundaryTest` is a gate too (#851).** Konsist parses the `main`
   sources and fails the build on a `core -> features` import, or on a
   cross-feature import that is not one of the seven frozen entries. If it fires,
