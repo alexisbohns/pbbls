@@ -2,11 +2,11 @@ package app.pbbls.android
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldValue
+import androidx.compose.material3.adaptive.navigationsuite.rememberNavigationSuiteScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -31,8 +31,10 @@ import app.pbbls.android.navigation.BarKey
 import app.pbbls.android.navigation.NavigationState
 import app.pbbls.android.navigation.Navigator
 import app.pbbls.android.navigation.PebblesKey
-import app.pbbls.android.navigation.PebblesNavigationBar
+import app.pbbls.android.navigation.PebblesNavigationItems
 import app.pbbls.android.navigation.pebblesEntries
+import app.pbbls.android.navigation.pebblesNavigationSuiteColors
+import app.pbbls.android.navigation.pebblesNavigationSuiteType
 import app.pbbls.android.navigation.rememberNavigationState
 
 /**
@@ -200,25 +202,45 @@ private fun PebblesNavDisplay(
     welcomeContentRevealed: Boolean,
     onOnboardingFinished: () -> Unit,
 ) {
-    val topKey = state.topKey
+    // D5: bar visibility is read straight off the stack, so it cannot drift out
+    // of sync with what is on screen. Every cover became an entry in Parts 2-4,
+    // which is what makes this check sufficient — and why Part 6 runs last.
+    // Welcome and Auth are not BarKey, so the signed-out funnel gets no bar
+    // without a second condition.
+    val isNavigationVisible = state.topKey is BarKey
+    val navigationSuiteType = pebblesNavigationSuiteType()
+    val suiteState =
+        rememberNavigationSuiteScaffoldState(
+            initialValue = if (isNavigationVisible) NavigationSuiteScaffoldValue.Visible else NavigationSuiteScaffoldValue.Hidden,
+        )
+    // Snapped, not animated: the bar (or rail) comes and goes with the entry
+    // transition, as the conditional bottomBar it replaces did. An animated
+    // hide would resize the content under a transition already in flight.
+    LaunchedEffect(isNavigationVisible) {
+        suiteState.snapTo(
+            if (isNavigationVisible) NavigationSuiteScaffoldValue.Visible else NavigationSuiteScaffoldValue.Hidden,
+        )
+    }
 
-    Scaffold(
-        bottomBar = {
-            // D5: bar visibility is read straight off the stack, so it cannot
-            // drift out of sync with what is on screen. Every cover became an
-            // entry in Parts 2-4, which is what makes this check sufficient —
-            // and why Part 6 runs last. Welcome and Auth are not BarKey, so the
-            // signed-out funnel gets no bar without a second condition.
-            if (topKey is BarKey) {
-                PebblesNavigationBar(
-                    current = state.topLevelRoute,
-                    onSelect = navigator::navigate,
-                    onReselect = navigator::onReselect,
-                )
-            }
+    // Bottom bar on phones, rail on the start edge from 600 dp (#855). The
+    // suite consumes the insets its own component pads for (the bar's bottom
+    // inset, the rail's start inset), so a screen's `safeDrawingPadding()`
+    // resolves to what is left and nothing pads twice. When hidden it
+    // consumes nothing, and covers pad for themselves as before.
+    NavigationSuiteScaffold(
+        navigationItems = {
+            PebblesNavigationItems(
+                current = state.topLevelRoute,
+                navigationSuiteType = navigationSuiteType,
+                onSelect = navigator::navigate,
+                onReselect = navigator::onReselect,
+            )
         },
+        navigationSuiteType = navigationSuiteType,
+        navigationSuiteColors = pebblesNavigationSuiteColors(),
         containerColor = MaterialTheme.colorScheme.surface,
-    ) { padding ->
+        state = suiteState,
+    ) {
         NavDisplay(
             entries =
                 state.toDecoratedEntries(
@@ -233,18 +255,13 @@ private fun PebblesNavDisplay(
                         },
                 ),
             onBack = { navigator.goBack() },
-            // `consumeWindowInsets` is not optional next to `padding`. Scaffold's
-            // padding already carries the status-bar inset, but `Modifier.padding`
-            // does NOT consume it, so the twelve screens that apply
-            // `safeDrawingPadding()` themselves (via `PebblesScreen`, mostly) were
-            // adding it a second time and every page opened with a dead band under
-            // the status bar. Consuming it makes those calls correctly resolve to
-            // zero, and leaves them right for any surface rendered outside this
-            // Scaffold. IME insets are untouched, so `imePadding()` still works.
-            modifier =
-                Modifier
-                    .padding(padding)
-                    .consumeWindowInsets(padding),
+            // No padding here, unlike the Scaffold this replaced: the suite
+            // passes no content padding, only consumed insets (see above), and
+            // every screen pads the status bar itself through
+            // `safeDrawingPadding()` or `PebblesScreen`'s top app bar. Adding
+            // the status-bar inset here as well is what once opened every page
+            // with a dead band under it. IME insets are untouched, so
+            // `imePadding()` still works.
         )
     }
 }
