@@ -1,7 +1,9 @@
 package app.pbbls.android.navigation
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -9,6 +11,8 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.rememberLifecycleOwner
 import androidx.navigation3.runtime.NavEntry
@@ -75,6 +79,13 @@ private class BottomSheetScene<T : Any>(
         // DialogScene does, so the entry's lifecycle (the detail's resume
         // refresh) follows the overlay and not the activity.
         val lifecycleOwner = rememberLifecycleOwner()
+        // The celebrations draw in here while the sheet is up: the root's copy
+        // would sit under this window, unseen and untappable.
+        val overlaySlot = LocalSheetOverlaySlot.current
+        DisposableEffect(overlaySlot) {
+            overlaySlot.onSheetShown()
+            onDispose { overlaySlot.onSheetHidden() }
+        }
         // Full height only: the details it hosts are pages, not peeks.
         ModalBottomSheet(
             onDismissRequest = onBack,
@@ -86,7 +97,10 @@ private class BottomSheetScene<T : Any>(
             contentWindowInsets = { WindowInsets.safeDrawing.only(WindowInsetsSides.Top) },
         ) {
             CompositionLocalProvider(LocalLifecycleOwner provides lifecycleOwner) {
-                entry.Content()
+                Box(Modifier.fillMaxSize()) {
+                    entry.Content()
+                    overlaySlot.content()
+                }
             }
         }
     }
