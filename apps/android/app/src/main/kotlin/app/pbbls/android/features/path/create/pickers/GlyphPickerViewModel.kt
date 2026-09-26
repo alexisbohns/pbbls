@@ -88,7 +88,8 @@ sealed interface GlyphPickerEffect {
  * - **No rename, no detail drawer.** The picker's Commu tap opens the inline
  *   swap panel through [GlyphPickerState.buying] (still a presentation
  *   concern owned by the composable, not this ViewModel); the store opens
- *   [app.pbbls.android.features.glyph.store.GlyphDetailDrawer] instead.
+ *   the glyph detail entry
+ *   ([app.pbbls.android.features.glyph.store.GlyphDetailScreen]) instead.
  * - **A selection commits to the caller and closes the sheet**, so it goes
  *   out through [effects] rather than sitting in state — see
  *   [GlyphPickerEffect].

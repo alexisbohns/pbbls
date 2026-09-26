@@ -11,6 +11,7 @@ import app.pbbls.android.features.connections.AcceptInviteScreen
 import app.pbbls.android.features.connections.ConnectionsScreen
 import app.pbbls.android.features.connections.InviteScreen
 import app.pbbls.android.features.glyph.carve.GlyphCarveScreen
+import app.pbbls.android.features.glyph.store.GlyphDetailScreen
 import app.pbbls.android.features.glyph.store.GlyphsListScreen
 import app.pbbls.android.features.lab.AnnouncementDetailScreen
 import app.pbbls.android.features.lab.LabScreen
@@ -107,24 +108,24 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     }
 
     entry<PebblesKey.SoulDetail>(
-        metadata = NavTransitions.forKey(PebblesKey.SoulDetail("")) + PanePairs.metadataFor(PebblesKey.SoulDetail("")),
+        metadata = NavTransitions.forKey(PebblesKey.SoulDetail("")) + PanePairs.metadataFor<PebblesKey.SoulDetail>(),
     ) { key ->
         SoulDetailScreen(
             soulId = key.soulId,
             onBack = navigator::goBack,
             onEditSoul = { navigator.navigate(PebblesKey.SoulForm(key.soulId)) },
-            showBack = !isBesideList(),
+            showBack = !isInListDetailPane(),
         )
     }
 
     entry<PebblesKey.CollectionDetail>(
-        metadata = NavTransitions.forKey(PebblesKey.CollectionDetail("")) + PanePairs.metadataFor(PebblesKey.CollectionDetail("")),
+        metadata = NavTransitions.forKey(PebblesKey.CollectionDetail("")) + PanePairs.metadataFor<PebblesKey.CollectionDetail>(),
     ) { key ->
         CollectionDetailScreen(
             collectionId = key.collectionId,
             onBack = navigator::goBack,
             onEditCollection = { navigator.navigate(PebblesKey.CollectionForm(key.collectionId)) },
-            showBack = !isBesideList(),
+            showBack = !isInListDetailPane(),
         )
     }
 
@@ -135,14 +136,25 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         )
     }
 
-    entry<PebblesKey.Glyphs>(metadata = NavTransitions.forKey(PebblesKey.Glyphs)) {
+    entry<PebblesKey.Glyphs>(
+        metadata = NavTransitions.forKey(PebblesKey.Glyphs) + PanePairs.metadataFor(PebblesKey.Glyphs),
+    ) {
         GlyphsListScreen(
             onBack = navigator::goBack,
             onCarve = { navigator.navigate(PebblesKey.GlyphCarve) },
-            // The detail entry lands in the next commit; until then a tap is inert
-            // rather than a key with no entry.
-            onOpenGlyph = {},
+            onOpenGlyph = { navigator.navigateToDetail(PebblesKey.GlyphDetail(it)) },
+            isInListPane = isInListDetailPane(),
         )
+    }
+
+    // A sheet on phones, a pane beside the store on large screens (#940). The
+    // store and its placeholder are already a list-detail scene there, so
+    // opening a glyph stays inside one scene and the push spec never plays;
+    // it is the motion for the scene boundaries that remain.
+    entry<PebblesKey.GlyphDetail>(
+        metadata = NavTransitions.push + PanePairs.metadataFor<PebblesKey.GlyphDetail>(),
+    ) { key ->
+        GlyphDetailScreen(item = key.item)
     }
 
     entry<PebblesKey.Lab>(metadata = NavTransitions.forKey(PebblesKey.Lab)) {
@@ -206,7 +218,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     entry<PebblesKey.PebbleDetail>(
         // Fade-through, not the push BarKeys get: beside Path this is a scene
         // change, not a lateral move (#940).
-        metadata = NavTransitions.split + PanePairs.metadataFor(PebblesKey.PebbleDetail("")),
+        metadata = NavTransitions.split + PanePairs.metadataFor<PebblesKey.PebbleDetail>(),
     ) { key ->
         PebbleDetailScreen(
             pebbleId = key.pebbleId,
@@ -295,9 +307,10 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
 
 /**
  * Whether this entry is being shown as a pane of a list-detail scene (#940).
- * The strategy only builds that scene with two panes visible, so inside it
- * the list is always on screen.
+ * The strategy only builds that scene with two panes visible, so inside it a
+ * detail always has its list beside it (no back arrow), and a list is only as
+ * wide as its pane (the glyph store's toolbar goes back to the bottom).
  */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
-private fun isBesideList(): Boolean = LocalListDetailSceneScope.current != null
+private fun isInListDetailPane(): Boolean = LocalListDetailSceneScope.current != null

@@ -65,12 +65,18 @@ fun GlyphsListScreen(
     onCarve: () -> Unit,
     onOpenGlyph: (GlyphGridItem) -> Unit,
     modifier: Modifier = Modifier,
+    /**
+     * True as the list pane of a list-detail scene (#940): the grid is
+     * pane-wide there, so the toolbar goes back to the bottom.
+     */
+    isInListPane: Boolean = false,
     viewModel: GlyphsListViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val covers by viewModel.covers.collectAsStateWithLifecycle()
     val colors = MaterialTheme.colorScheme
-    val isWide = isWideWindow()
+    // The toolbar placement and the grid's padding both follow this.
+    val isWide = isWideWindow() && !isInListPane
 
     // Returning from the carve studio must re-read the current tab: the
     // ViewModel is scoped to the back stack entry, which survives the round

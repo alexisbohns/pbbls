@@ -7,6 +7,8 @@ import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.SceneStrategyScope
+import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.GlyphGridItem
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
@@ -21,6 +23,17 @@ class PebblesSceneStrategiesTest {
         PaneScaffoldDirective.Default.copy(
             maxHorizontalPartitions = partitions,
             horizontalPartitionSpacerSize = if (partitions > 1) 24.dp else 0.dp,
+        )
+
+    private val glyph =
+        PebblesKey.GlyphDetail(
+            GlyphGridItem(
+                glyph = Glyph(id = "g1", strokes = emptyList(), viewBox = "0 0 200 200"),
+                price = 10,
+                owned = false,
+                createdAt = null,
+                acquiredAt = null,
+            ),
         )
 
     private fun entry(key: PebblesKey) = NavEntry<NavKey>(key, metadata = PanePairs.metadataFor(key)) {}
@@ -134,6 +147,42 @@ class PebblesSceneStrategiesTest {
         assertEquals(entries.takeLast(1), scene!!.entries)
         // Back leaves the tab and lands on the pebble beside Path.
         assertEquals(entries.take(2), scene.previousEntries)
+    }
+
+    @Test
+    fun `two panes put a glyph beside the store`() {
+        val entries = listOf(PebblesKey.You, PebblesKey.Glyphs, glyph).map(::entry)
+        val scene = with(SceneStrategyScope<NavKey>()) { with(pebblesListDetailStrategy(directive(2))) { calculateScene(entries) } }
+
+        assertEquals(PanePair.GLYPHS, scene!!.key)
+        assertEquals(entries.drop(1), scene.entries)
+        // Back pops the glyph only, back to the idle store.
+        assertEquals(entries.take(2), scene.previousEntries)
+    }
+
+    @Test
+    fun `two panes show an idle store with its placeholder`() {
+        val scene = pebblesListDetailStrategy(directive(2)).sceneFor(PebblesKey.You, PebblesKey.Glyphs)
+
+        assertEquals(PanePair.GLYPHS, scene!!.key)
+        assertEquals(1, scene.entries.size)
+    }
+
+    @Test
+    fun `the store keeps its placeholder pane when idle`() {
+        assertFalse(PanePairs.isFullWidthWhenIdle(entry(PebblesKey.Glyphs)))
+        assertTrue(PanePairs.isList(entry(PebblesKey.Glyphs)))
+        assertFalse(PanePairs.isList(entry(glyph)))
+    }
+
+    @Test
+    fun `the typed lookup is the instance lookup`() {
+        // The entry provider asks by type, the tests by instance: both must be
+        // the same metadata, or the two would drift. The library's pane values
+        // have no equality, so the keys and our own markers are what compare.
+        assertEquals(PanePairs.metadataFor(glyph).keys, PanePairs.metadataFor<PebblesKey.GlyphDetail>().keys)
+        assertEquals(PanePairs.metadataFor(PebblesKey.SoulDetail("s1")).keys, PanePairs.metadataFor<PebblesKey.SoulDetail>().keys)
+        assertTrue(PanePairs.metadataFor<PebblesKey.Settings>().isEmpty())
     }
 
     @Test

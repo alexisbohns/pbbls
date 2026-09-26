@@ -16,13 +16,14 @@ import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.SceneStrategyScope
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.DetailPlaceholder
+import kotlin.reflect.KClass
 
 /**
  * The list-detail pairs (#940). Each pair is its own scaffold: the scene key
  * is what stops a soul detail from joining a collections list below it in the
  * flattened back stack.
  */
-enum class PanePair { SOULS, COLLECTIONS, PEBBLES }
+enum class PanePair { SOULS, COLLECTIONS, PEBBLES, GLYPHS }
 
 /**
  * List-detail on large screens (#940): the library strategy, with two rules
@@ -82,8 +83,11 @@ fun pebblesSceneStrategies(directive: PaneScaffoldDirective): List<SceneStrategy
  * Which entries are list panes and which are detail panes (#940).
  * [metadataFor] is the single source: the entry provider adds it to each
  * entry's transition metadata, and the tests build their entries from it, so
- * the two cannot drift. A detail's metadata does not depend on its id, so the
- * entry provider passes the same throwaway key it gives `NavTransitions`.
+ * the two cannot drift. A pane's metadata depends on the key's type, never on
+ * its arguments, so it is keyed by class: the entry provider asks for
+ * `metadataFor<PebblesKey.GlyphDetail>()` rather than building a throwaway
+ * key (a glyph detail's would need a whole grid item), and the tests pass the
+ * instance they already have.
  *
  * The library's pane metadata is internal, so a list pane also carries our
  * own marker: that is what the strategy wrapper reads, rather than guessing
@@ -116,14 +120,21 @@ object PanePairs {
         ListDetailSceneStrategy.detailPane(pair) +
             if (sheetWhenCompact) BottomSheetSceneStrategy.bottomSheet() else emptyMap()
 
-    fun metadataFor(key: PebblesKey): Map<String, Any> =
-        when (key) {
-            PebblesKey.People -> list(PanePair.SOULS) { SoulsPlaceholder() }
-            is PebblesKey.SoulDetail -> detail(PanePair.SOULS)
-            PebblesKey.Collections -> list(PanePair.COLLECTIONS) { CollectionsPlaceholder() }
-            is PebblesKey.CollectionDetail -> detail(PanePair.COLLECTIONS)
-            PebblesKey.Path -> fullWidthList(PanePair.PEBBLES)
-            is PebblesKey.PebbleDetail -> detail(PanePair.PEBBLES, sheetWhenCompact = true)
+    fun metadataFor(key: PebblesKey): Map<String, Any> = metadataFor(key::class)
+
+    /** [metadataFor] for a key type, where the entry provider has no instance. */
+    inline fun <reified K : PebblesKey> metadataFor(): Map<String, Any> = metadataFor(K::class)
+
+    fun metadataFor(keyClass: KClass<out PebblesKey>): Map<String, Any> =
+        when (keyClass) {
+            PebblesKey.People::class -> list(PanePair.SOULS) { SoulsPlaceholder() }
+            PebblesKey.SoulDetail::class -> detail(PanePair.SOULS)
+            PebblesKey.Collections::class -> list(PanePair.COLLECTIONS) { CollectionsPlaceholder() }
+            PebblesKey.CollectionDetail::class -> detail(PanePair.COLLECTIONS)
+            PebblesKey.Path::class -> fullWidthList(PanePair.PEBBLES)
+            PebblesKey.PebbleDetail::class -> detail(PanePair.PEBBLES, sheetWhenCompact = true)
+            PebblesKey.Glyphs::class -> list(PanePair.GLYPHS) { GlyphsPlaceholder() }
+            PebblesKey.GlyphDetail::class -> detail(PanePair.GLYPHS, sheetWhenCompact = true)
             else -> emptyMap()
         }
 
@@ -141,3 +152,7 @@ internal fun SoulsPlaceholder() =
 @Composable
 internal fun CollectionsPlaceholder() =
     DetailPlaceholder(iconRes = R.drawable.ic_pebble_collection, text = stringResource(R.string.collections_detail_placeholder))
+
+@Composable
+internal fun GlyphsPlaceholder() =
+    DetailPlaceholder(iconRes = R.drawable.ic_scribble, text = stringResource(R.string.glyphs_detail_placeholder))

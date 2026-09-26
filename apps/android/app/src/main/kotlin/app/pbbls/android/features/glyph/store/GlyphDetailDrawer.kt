@@ -7,19 +7,22 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +36,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.data.GlyphMarketServicing
 import app.pbbls.android.core.data.glyphMarketErrorMessage
@@ -50,28 +55,32 @@ import java.util.Locale
 private const val TAG = "glyph-detail"
 
 /**
- * The swap/owned drawer — ports iOS `GlyphDetailDrawer` as this screen's
- * single `ModalBottomSheet` level (D5): banner, stat tiles, dotted rule with
- * the price/seal badge, me-vs-creator row, then [SlideToConfirm] or the
- * acquired label. A successful swap does NOT dismiss — the drawer morphs in
- * place to its Owned state and [onSwapped] lets the host update caches +
- * karma. Buy errors map through `glyphMarketErrorMessage` (M43 D4).
+ * The glyph detail entry (#940): [GlyphSwapPanel] for the item in the key — the
+ * swap/owned drawer that ports iOS `GlyphDetailDrawer`. On a phone the
+ * bottom-sheet scene hosts it, on a large screen the list-detail scene puts it
+ * beside the store, so it draws no sheet of its own. A successful swap does
+ * NOT dismiss: the panel morphs in place to its Owned state (M43 D4).
+ *
+ * The background is `surfaceContainerLow`, the sheet's default container
+ * colour, so the page is identical in both hosts and the price badge's chip (which masks the dotted
+ * rule in that colour) has no seam in the pane. Nothing pads a pane, so the
+ * page clears the status and gesture bars itself; in the sheet the top is
+ * already consumed by the sheet's own insets and only the gesture bar is left.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GlyphDetailDrawer(
+fun GlyphDetailScreen(
     item: GlyphGridItem,
-    balance: Int,
-    market: GlyphMarketServicing,
-    onRecorded: (BuyGlyphResult) -> Unit,
-    onSwapped: (BuyGlyphResult) -> Unit = {},
-    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: GlyphDetailViewModel = hiltViewModel(),
 ) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    val balance by viewModel.balance.collectAsStateWithLifecycle()
+    Box(
+        modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Vertical)),
     ) {
-        GlyphSwapPanel(item = item, balance = balance, market = market, onRecorded = onRecorded, onSwapped = onSwapped)
+        GlyphSwapPanel(item = item, balance = balance, market = viewModel.market, onRecorded = viewModel::onRecorded)
     }
 }
 
