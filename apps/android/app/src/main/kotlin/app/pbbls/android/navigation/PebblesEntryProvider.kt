@@ -56,12 +56,15 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     welcomeContentRevealed: Boolean,
     onOnboardingFinished: () -> Unit,
 ) {
-    entry<PebblesKey.Path>(metadata = NavTransitions.forKey(PebblesKey.Path)) {
+    entry<PebblesKey.Path>(
+        metadata = NavTransitions.forKey(PebblesKey.Path) + PanePairs.metadataFor(PebblesKey.Path),
+    ) {
         PathScreen(
-            onOpenDetail = { pebbleId -> navigator.navigate(PebblesKey.PebbleDetail(pebbleId)) },
+            onOpenDetail = { pebbleId -> navigator.navigateToDetail(PebblesKey.PebbleDetail(pebbleId)) },
             onOpenDrafts = { navigator.navigate(PebblesKey.Drafts) },
             onCreatePebble = { navigator.navigate(PebblesKey.RecordFlow()) },
             onCreatePebbleLongPress = { navigator.navigate(PebblesKey.CreatePebble()) },
+            onDeleteConfirmed = { navigator.closeDetail(PebblesKey.PebbleDetail(it)) },
         )
     }
 
@@ -197,7 +200,9 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
 
     // ---- The write path promoted to entries (#852) ----
 
-    entry<PebblesKey.PebbleDetail>(metadata = NavTransitions.forKey(PebblesKey.PebbleDetail(""))) { key ->
+    entry<PebblesKey.PebbleDetail>(
+        metadata = NavTransitions.forKey(PebblesKey.PebbleDetail("")) + PanePairs.metadataFor(PebblesKey.PebbleDetail("")),
+    ) { key ->
         PebbleDetailScreen(
             pebbleId = key.pebbleId,
             onDismiss = navigator::goBack,

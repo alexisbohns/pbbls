@@ -74,7 +74,6 @@ class PebblesKeysTest {
                 PebblesKey.RecordFlow(null),
                 PebblesKey.CreatePebble(null),
                 PebblesKey.Drafts,
-                PebblesKey.PebbleDetail("p"),
                 PebblesKey.EditPebble("p"),
                 PebblesKey.Settings,
                 PebblesKey.SoulForm(null),
@@ -101,6 +100,7 @@ class PebblesKeysTest {
                 PebblesKey.Lab,
                 PebblesKey.LabAnnouncement("l"),
                 PebblesKey.LabLogList("m"),
+                PebblesKey.PebbleDetail("p"),
             )
         pushes.forEach {
             assertTrue("$it should render the bar", it is BarKey)
