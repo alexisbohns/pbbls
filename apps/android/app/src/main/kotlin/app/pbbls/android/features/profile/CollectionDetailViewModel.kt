@@ -52,9 +52,8 @@ sealed interface CollectionDetailUiState {
     }
 }
 
-/** The pebble-edit cover and the delete dialogs. */
+/** The delete dialogs. */
 data class CollectionDetailCovers(
-    val editingPebbleId: String? = null,
     val pendingDeletion: Pebble? = null,
     val didDeleteFail: Boolean = false,
 )
@@ -128,7 +127,7 @@ class CollectionDetailViewModel
         /**
          * Refresh after a write, keeping the content that is already on screen.
          *
-         * Called by [onPebbleSaved], [confirmDelete] and [onResumed].
+         * Called by [confirmDelete] and [onResumed].
          */
         private fun reload() {
             val id = collectionId ?: return
@@ -171,17 +170,6 @@ class CollectionDetailViewModel
                             zone = zone,
                         )
                 }
-        }
-
-        // MARK: - Covers
-
-        fun openPebble(pebbleId: String) = _covers.update { it.copy(editingPebbleId = pebbleId) }
-
-        fun closePebble() = _covers.update { it.copy(editingPebbleId = null) }
-
-        fun onPebbleSaved() {
-            _covers.update { it.copy(editingPebbleId = null) }
-            reload()
         }
 
         // MARK: - Delete

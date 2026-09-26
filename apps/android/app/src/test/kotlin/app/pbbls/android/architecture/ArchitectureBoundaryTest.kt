@@ -45,8 +45,6 @@ class ArchitectureBoundaryTest {
             "$FEATURES.path.create.pickers -> $FEATURES.glyph.store.GlyphTabBar",
             // …and profile reaches across path to get at that same sheet.
             "$FEATURES.profile -> $FEATURES.path.create.pickers.GlyphPickerSheet",
-            // Profile's two detail screens open the pebble editor in place.
-            "$FEATURES.profile -> $FEATURES.path.EditPebbleScreen",
         )
 
     @Test
@@ -99,7 +97,7 @@ class ArchitectureBoundaryTest {
         // makes growing it a deliberate, visible act rather than a quiet +1.
         assertEquals(
             "the frozen cross-feature list is a ratchet — shrink it (#914), never grow it",
-            7,
+            6,
             frozenCrossFeatureImports.size,
         )
     }

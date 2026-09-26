@@ -43,7 +43,6 @@ import app.pbbls.android.core.designsystem.ProfileEmptyState
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.core.ui.PebbleRow
-import app.pbbls.android.features.path.EditPebbleScreen
 import app.pbbls.android.features.profile.components.CollectionModeBadge
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -52,7 +51,7 @@ import java.util.Locale
  * Pushed detail for one collection — ports iOS `CollectionDetailView.swift`:
  * a subheader row (mode badge + live pebble count), the collection's pebbles
  * grouped by calendar month with locale-formatted headers (D14), tap →
- * [EditPebbleScreen] cover, long-press → `delete_pebble` with confirm, and an
+ * the `EditPebble` entry, long-press → `delete_pebble` with confirm, and an
  * Edit top-bar action opening [CollectionFormScreen] as a cover (D9 surface
  * swap). The NavHost passes only the collection id, so
  * [CollectionDetailViewModel] fetches the collection itself (same named
@@ -60,6 +59,8 @@ import java.util.Locale
  * locale-dependent header formatting lives in [CollectionDetailContent],
  * because only the view knows the active locale.
  *
+ * @param onOpenPebble Opens the pebble editor through navigation, as on the
+ *   soul detail (#914).
  * @param showBack False beside its list on a large screen (#940): the list is
  *   the way back, and system back still pops.
  */
@@ -68,6 +69,7 @@ fun CollectionDetailScreen(
     collectionId: String,
     onBack: () -> Unit,
     onEditCollection: () -> Unit,
+    onOpenPebble: (String) -> Unit,
     modifier: Modifier = Modifier,
     showBack: Boolean = true,
     viewModel: CollectionDetailViewModel = hiltViewModel(),
@@ -92,20 +94,11 @@ fun CollectionDetailScreen(
         onEditCollection = onEditCollection,
         showBack = showBack,
         onRetry = viewModel::retry,
-        onOpenPebble = viewModel::openPebble,
+        onOpenPebble = onOpenPebble,
         onDeletePebble = viewModel::requestDelete,
         paletteFor = { pebble -> pebble.emotion?.let { palettes.palette(it.id) } },
         modifier = modifier,
     )
-
-    covers.editingPebbleId?.let { pebbleId ->
-        EditPebbleScreen(
-            pebbleId = pebbleId,
-            onDismiss = viewModel::closePebble,
-            onSaved = viewModel::onPebbleSaved,
-            modifier = Modifier.fillMaxSize(),
-        )
-    }
 
     covers.pendingDeletion?.let { target ->
         ConfirmDeleteDialog(

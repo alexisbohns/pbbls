@@ -44,9 +44,8 @@ sealed interface SoulDetailUiState {
     ) : SoulDetailUiState
 }
 
-/** The pebble-edit cover and the delete dialogs. */
+/** The delete dialogs. */
 data class SoulDetailCovers(
-    val editingPebbleId: String? = null,
     val pendingDeletion: Pebble? = null,
     val didDeleteFail: Boolean = false,
 )
@@ -130,7 +129,7 @@ class SoulDetailViewModel
         /**
          * Refresh after a write, keeping the content that is already on screen.
          *
-         * Called by [onPebbleSaved], [confirmDelete] and [onResumed].
+         * Called by [confirmDelete] and [onResumed].
          */
         private fun reload() {
             val id = soulId ?: return
@@ -166,17 +165,6 @@ class SoulDetailViewModel
                     !isLoaded || current == null -> SoulDetailUiState.Loading
                     else -> SoulDetailUiState.Content(soul = current, pebbles = pebbles)
                 }
-        }
-
-        // MARK: - Covers
-
-        fun openPebble(pebbleId: String) = _covers.update { it.copy(editingPebbleId = pebbleId) }
-
-        fun closePebble() = _covers.update { it.copy(editingPebbleId = null) }
-
-        fun onPebbleSaved() {
-            _covers.update { it.copy(editingPebbleId = null) }
-            reload()
         }
 
         // MARK: - Delete

@@ -164,26 +164,6 @@ class SoulDetailViewModelTest {
             assertFalse(viewModel.covers.value.didDeleteFail)
         }
 
-    // MARK: - Covers
-
-    @Test
-    fun `saving an edited pebble closes its cover and reloads`() =
-        runTest {
-            val service = FakeSoulsService(soul = soul("a"), pebbles = listOf(pebble("p1")))
-            val viewModel = viewModel(souls = service)
-            viewModel.start("a")
-            advanceUntilIdle()
-
-            viewModel.openPebble("p1")
-            assertEquals("p1", viewModel.covers.value.editingPebbleId)
-
-            viewModel.onPebbleSaved()
-            advanceUntilIdle()
-
-            assertNull(viewModel.covers.value.editingPebbleId)
-            assertEquals(2, service.loadSoulCount)
-        }
-
     /** A failed refresh keeps the content that is already on screen. */
     @Test
     fun `a failed reload keeps the detail`() =
@@ -193,8 +173,11 @@ class SoulDetailViewModelTest {
             viewModel.start("a")
             advanceUntilIdle()
 
+            // The first resume is the screen opening; the second is a return
+            // from the pebble editor or the soul form, and reloads.
+            viewModel.onResumed()
             service.failNext = IOException("offline")
-            viewModel.onPebbleSaved()
+            viewModel.onResumed()
             advanceUntilIdle()
 
             val state = viewModel.uiState.value as SoulDetailUiState.Content

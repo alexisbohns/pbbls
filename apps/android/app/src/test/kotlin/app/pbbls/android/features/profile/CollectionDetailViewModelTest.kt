@@ -201,26 +201,6 @@ class CollectionDetailViewModelTest {
             assertFalse(viewModel.covers.value.didDeleteFail)
         }
 
-    // MARK: - Covers
-
-    @Test
-    fun `saving an edited pebble closes its cover and reloads`() =
-        runTest {
-            val service = FakeCollectionsService(collection = collection("a"))
-            val viewModel = viewModel(collections = service)
-            viewModel.start("a")
-            advanceUntilIdle()
-
-            viewModel.openPebble("p1")
-            assertEquals("p1", viewModel.covers.value.editingPebbleId)
-
-            viewModel.onPebbleSaved()
-            advanceUntilIdle()
-
-            assertNull(viewModel.covers.value.editingPebbleId)
-            assertEquals(2, service.loadCollectionCount)
-        }
-
     // MARK: - Returning from the edit form
 
     /**

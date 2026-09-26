@@ -44,17 +44,19 @@ import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.ui.GlyphView
 import app.pbbls.android.core.ui.GlyphViewCase
 import app.pbbls.android.core.ui.PebbleRow
-import app.pbbls.android.features.path.EditPebbleScreen
 
 /**
  * Pushed detail for one soul — ports iOS `SoulDetailView.swift`: compact
  * header (56dp glyph + name + live pebble count), the pebbles tagged with the
- * soul on the shared [PebbleRow] (tap → [EditPebbleScreen] cover, long-press →
+ * soul on the shared [PebbleRow] (tap → the `EditPebble` entry, long-press →
  * `delete_pebble` with confirm), and an Edit top-bar action opening
  * [SoulFormScreen] as a cover (D9 surface swap). The NavHost passes only the
  * soul id, so [SoulDetailViewModel] fetches the soul itself (iOS receives the
  * row from the list; deviation noted in the plan).
  *
+ * @param onOpenPebble Opens the pebble editor. It is path's screen, so it is
+ *   reached through navigation rather than composed here (#914); this screen's
+ *   resume refresh re-reads the pebbles when it pops.
  * @param showBack False beside its list on a large screen (#940): the list is
  *   the way back, and system back still pops.
  */
@@ -63,6 +65,7 @@ fun SoulDetailScreen(
     soulId: String,
     onBack: () -> Unit,
     onEditSoul: () -> Unit,
+    onOpenPebble: (String) -> Unit,
     modifier: Modifier = Modifier,
     showBack: Boolean = true,
     viewModel: SoulDetailViewModel = hiltViewModel(),
@@ -87,20 +90,11 @@ fun SoulDetailScreen(
         onEditSoul = onEditSoul,
         showBack = showBack,
         onRetry = viewModel::retry,
-        onOpenPebble = viewModel::openPebble,
+        onOpenPebble = onOpenPebble,
         onDeletePebble = viewModel::requestDelete,
         paletteFor = { pebble -> pebble.emotion?.let { palettes.palette(it.id) } },
         modifier = modifier,
     )
-
-    covers.editingPebbleId?.let { pebbleId ->
-        EditPebbleScreen(
-            pebbleId = pebbleId,
-            onDismiss = viewModel::closePebble,
-            onSaved = viewModel::onPebbleSaved,
-            modifier = Modifier.fillMaxSize(),
-        )
-    }
 
     covers.pendingDeletion?.let { target ->
         ConfirmDeleteDialog(
@@ -115,7 +109,7 @@ fun SoulDetailScreen(
 
 /**
  * One soul without its ViewModel (#940): top bar, header and tagged pebbles.
- * [SoulDetailScreen] wires it and owns the edit cover and delete dialogs.
+ * [SoulDetailScreen] wires it and owns the delete dialogs.
  *
  * @param showBack False beside its list on a large screen (#940): the list is
  *   the way back, and system back still pops.
