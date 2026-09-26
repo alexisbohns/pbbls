@@ -38,6 +38,8 @@ import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
 import app.pbbls.android.core.designsystem.ProfileEmptyState
+import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.ui.GlyphView
 import app.pbbls.android.core.ui.GlyphViewCase
@@ -53,7 +55,6 @@ import app.pbbls.android.features.path.EditPebbleScreen
  * soul id, so [SoulDetailViewModel] fetches the soul itself (iOS receives the
  * row from the list; deviation noted in the plan).
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SoulDetailScreen(
     soulId: String,
@@ -65,7 +66,6 @@ fun SoulDetailScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val covers by viewModel.covers.collectAsStateWithLifecycle()
     val palettes = LocalEmotionPaletteService.current
-    val colors = MaterialTheme.colorScheme
 
     // Guarded on the id, so a rotation re-runs this without re-fetching.
     LaunchedEffect(soulId) { viewModel.start(soulId) }
@@ -76,6 +76,55 @@ fun SoulDetailScreen(
         viewModel.onResumed()
         onPauseOrDispose {}
     }
+
+    SoulDetailContent(
+        uiState = uiState,
+        onBack = onBack,
+        onEditSoul = onEditSoul,
+        onRetry = viewModel::retry,
+        onOpenPebble = viewModel::openPebble,
+        onDeletePebble = viewModel::requestDelete,
+        paletteFor = { pebble -> pebble.emotion?.let { palettes.palette(it.id) } },
+        modifier = modifier,
+    )
+
+    covers.editingPebbleId?.let { pebbleId ->
+        EditPebbleScreen(
+            pebbleId = pebbleId,
+            onDismiss = viewModel::closePebble,
+            onSaved = viewModel::onPebbleSaved,
+            modifier = Modifier.fillMaxSize(),
+        )
+    }
+
+    covers.pendingDeletion?.let { target ->
+        ConfirmDeleteDialog(
+            title = stringResource(R.string.pebble_delete_confirm_title, target.name),
+            message = stringResource(R.string.pebble_delete_confirm_message),
+            onConfirm = viewModel::confirmDelete,
+            onDismiss = viewModel::cancelDelete,
+        )
+    }
+    if (covers.didDeleteFail) DeleteErrorDialog(onDismiss = viewModel::dismissDeleteError)
+}
+
+/**
+ * One soul without its ViewModel (#940): top bar, header and tagged pebbles.
+ * [SoulDetailScreen] wires it and owns the edit cover and delete dialogs.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun SoulDetailContent(
+    uiState: SoulDetailUiState,
+    onBack: () -> Unit,
+    onEditSoul: () -> Unit,
+    onRetry: () -> Unit,
+    onOpenPebble: (String) -> Unit,
+    onDeletePebble: (Pebble) -> Unit,
+    paletteFor: (Pebble) -> EmotionPalette?,
+    modifier: Modifier = Modifier,
+) {
+    val colors = MaterialTheme.colorScheme
 
     PebblesScreen(
         modifier = modifier,
@@ -121,7 +170,7 @@ fun SoulDetailScreen(
                         style = MaterialTheme.typography.bodyLarge,
                         color = colors.onSurfaceVariant,
                     )
-                    TextButton(onClick = viewModel::retry) {
+                    TextButton(onClick = onRetry) {
                         Text(
                             text = stringResource(R.string.profile_retry),
                             style = MaterialTheme.typography.labelLarge,
@@ -153,9 +202,9 @@ fun SoulDetailScreen(
                                         {
                                             PebbleRow(
                                                 pebble = pebble,
-                                                palette = pebble.emotion?.let { palettes.palette(it.id) },
-                                                onTap = { viewModel.openPebble(pebble.id) },
-                                                onDelete = { viewModel.requestDelete(pebble) },
+                                                palette = paletteFor(pebble),
+                                                onTap = { onOpenPebble(pebble.id) },
+                                                onDelete = { onDeletePebble(pebble) },
                                             )
                                         }
                                     },
@@ -165,25 +214,6 @@ fun SoulDetailScreen(
                 }
         }
     }
-
-    covers.editingPebbleId?.let { pebbleId ->
-        EditPebbleScreen(
-            pebbleId = pebbleId,
-            onDismiss = viewModel::closePebble,
-            onSaved = viewModel::onPebbleSaved,
-            modifier = Modifier.fillMaxSize(),
-        )
-    }
-
-    covers.pendingDeletion?.let { target ->
-        ConfirmDeleteDialog(
-            title = stringResource(R.string.pebble_delete_confirm_title, target.name),
-            message = stringResource(R.string.pebble_delete_confirm_message),
-            onConfirm = viewModel::confirmDelete,
-            onDismiss = viewModel::cancelDelete,
-        )
-    }
-    if (covers.didDeleteFail) DeleteErrorDialog(onDismiss = viewModel::dismissDeleteError)
 }
 
 /** Compact identity header — 56dp glyph + hand-face name + live pebble count. */

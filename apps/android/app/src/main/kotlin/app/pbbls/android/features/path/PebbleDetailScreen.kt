@@ -34,6 +34,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.designsystem.readableWidth
+import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.SharedPebbleLink
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.features.path.read.PebblePrivacyBadge
@@ -51,7 +52,6 @@ import app.pbbls.android.features.path.read.pebblePageColors
  * [onEditRequested] opens the `EditPebble` entry; returning from it is picked
  * up by [PebbleDetailViewModel.onResumed] rather than a callback.
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun PebbleDetailScreen(
     pebbleId: String,
@@ -62,7 +62,6 @@ fun PebbleDetailScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val palettes = LocalEmotionPaletteService.current
-    val colors = MaterialTheme.colorScheme
     val context = LocalContext.current
 
     LaunchedEffect(pebbleId) { viewModel.start(pebbleId) }
@@ -75,15 +74,7 @@ fun PebbleDetailScreen(
     }
 
     val detail = (uiState as? PebbleDetailUiState.Content)?.detail
-
-    // Once loaded, the whole page (top bar + insets included) tints to the
-    // emotion palette background (#605); before load / on a cache miss it stays
-    // on the surface. PebbleReadView repaints the same tint over its
-    // own body, so the two meet seamlessly.
-    val pageBackground =
-        detail?.let { palettes.palette(it.emotion.id) }?.let {
-            pebblePageColors(it, isSystemInDarkTheme()).background
-        } ?: colors.surface
+    val palette = detail?.let { palettes.palette(it.emotion.id) }
 
     // Share is only offered for public pebbles (M51) — anyone with the /p
     // link can open a public pebble, so sharing a secret/connections one
@@ -101,6 +92,45 @@ fun PebbleDetailScreen(
         } else {
             null
         }
+
+    PebbleDetailContent(
+        uiState = uiState,
+        palette = palette,
+        onBack = onDismiss,
+        onEdit = onEditRequested,
+        onShare = onShare,
+        onRetry = viewModel::retry,
+        modifier = modifier,
+    )
+}
+
+/**
+ * One pebble without its ViewModel (#940): the tinted page, the top bar and
+ * the three states. [PebbleDetailScreen] wires it; screenshots drive it.
+ *
+ * [palette] is the pebble's emotion palette once loaded, or null (loading, or
+ * a palette-cache miss), in which case the page stays on `surface`.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun PebbleDetailContent(
+    uiState: PebbleDetailUiState,
+    palette: EmotionPalette?,
+    onBack: () -> Unit,
+    onEdit: () -> Unit,
+    onShare: (() -> Unit)?,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = MaterialTheme.colorScheme
+    val detail = (uiState as? PebbleDetailUiState.Content)?.detail
+
+    // Once loaded, the whole page (top bar + insets included) tints to the
+    // emotion palette background (#605); before load / on a cache miss it stays
+    // on the surface. PebbleReadView repaints the same tint over its
+    // own body, so the two meet seamlessly.
+    val pageBackground =
+        palette?.let { pebblePageColors(it, isSystemInDarkTheme()).background } ?: colors.surface
 
     Column(
         modifier
@@ -121,8 +151,8 @@ fun PebbleDetailScreen(
         DetailTopBar(
             visibility = detail?.visibility,
             editEnabled = detail != null,
-            onBack = onDismiss,
-            onEdit = onEditRequested,
+            onBack = onBack,
+            onEdit = onEdit,
             onShare = onShare,
         )
         // Exhaustive with no `else`: a new PebbleDetailUiState case must render.
@@ -132,11 +162,11 @@ fun PebbleDetailScreen(
                     LoadingIndicator()
                 }
             PebbleDetailUiState.Error ->
-                DetailLoadError(onRetry = viewModel::retry)
+                DetailLoadError(onRetry = onRetry)
             is PebbleDetailUiState.Content ->
                 PebbleReadView(
                     detail = state.detail,
-                    palette = palettes.palette(state.detail.emotion.id),
+                    palette = palette,
                     modifier = Modifier.fillMaxSize(),
                 )
         }

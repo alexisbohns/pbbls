@@ -56,7 +56,6 @@ import app.pbbls.android.features.profile.components.CollectionModeBadge
  * [CollectionsListViewModel] owns the fetch (D10), the delete and the
  * reference-data refresh that keeps the pebble-form picker in sync.
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun CollectionsListScreen(
     onBack: () -> Unit,
@@ -67,7 +66,6 @@ fun CollectionsListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val covers by viewModel.covers.collectAsStateWithLifecycle()
-    val colors = MaterialTheme.colorScheme
 
     // Returning from the detail must re-read the list: the ViewModel is
     // scoped to the back stack entry, which survives the round trip that
@@ -76,6 +74,46 @@ fun CollectionsListScreen(
         viewModel.onResumed()
         onPauseOrDispose {}
     }
+
+    CollectionsListContent(
+        uiState = uiState,
+        onBack = onBack,
+        onOpenCollection = onOpenCollection,
+        onCreateCollection = onCreateCollection,
+        onRetry = viewModel::retry,
+        onRefresh = viewModel::refresh,
+        onDeleteCollection = viewModel::requestDelete,
+        modifier = modifier,
+    )
+
+    covers.pendingDeletion?.let { target ->
+        ConfirmDeleteDialog(
+            title = stringResource(R.string.pebble_delete_confirm_title, target.name),
+            message = stringResource(R.string.collections_delete_message),
+            onConfirm = viewModel::confirmDelete,
+            onDismiss = viewModel::cancelDelete,
+        )
+    }
+    if (covers.didDeleteFail) DeleteErrorDialog(onDismiss = viewModel::dismissDeleteError)
+}
+
+/**
+ * The collections list without its ViewModel (#940): top bar, states and the
+ * pull-to-refresh list. [CollectionsListScreen] wires it; screenshots drive it.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
+@Composable
+fun CollectionsListContent(
+    uiState: CollectionsListUiState,
+    onBack: () -> Unit,
+    onOpenCollection: (Collection) -> Unit,
+    onCreateCollection: () -> Unit,
+    onRetry: () -> Unit,
+    onRefresh: () -> Unit,
+    onDeleteCollection: (Collection) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = MaterialTheme.colorScheme
 
     PebblesScreen(
         modifier = modifier,
@@ -123,7 +161,7 @@ fun CollectionsListScreen(
                         style = MaterialTheme.typography.bodyLarge,
                         color = colors.onSurfaceVariant,
                     )
-                    TextButton(onClick = viewModel::retry) {
+                    TextButton(onClick = onRetry) {
                         Text(
                             text = stringResource(R.string.profile_retry),
                             style = MaterialTheme.typography.labelLarge,
@@ -141,7 +179,7 @@ fun CollectionsListScreen(
                 } else {
                     PullToRefreshBox(
                         isRefreshing = state.isRefreshing,
-                        onRefresh = viewModel::refresh,
+                        onRefresh = onRefresh,
                         modifier = Modifier.fillMaxSize(),
                     ) {
                         Column(
@@ -159,7 +197,7 @@ fun CollectionsListScreen(
                                             CollectionRow(
                                                 collection = collection,
                                                 onTap = { onOpenCollection(collection) },
-                                                onDelete = { viewModel.requestDelete(collection) },
+                                                onDelete = { onDeleteCollection(collection) },
                                             )
                                         }
                                     },
@@ -169,16 +207,6 @@ fun CollectionsListScreen(
                 }
         }
     }
-
-    covers.pendingDeletion?.let { target ->
-        ConfirmDeleteDialog(
-            title = stringResource(R.string.pebble_delete_confirm_title, target.name),
-            message = stringResource(R.string.collections_delete_message),
-            onConfirm = viewModel::confirmDelete,
-            onDismiss = viewModel::cancelDelete,
-        )
-    }
-    if (covers.didDeleteFail) DeleteErrorDialog(onDismiss = viewModel::dismissDeleteError)
 }
 
 /**

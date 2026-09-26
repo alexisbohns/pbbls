@@ -46,11 +46,11 @@ import app.pbbls.android.core.ui.SoulItemCase
  * The souls grid — ports iOS `SoulsListView.swift` as a NavHost push (D1):
  * adaptive-96 grid of shared [SoulItem] cells, "+" top-bar create, tap → the
  * detail route, long-press → delete menu + confirm (D7 unifies on the M39 D8
- * idiom over iOS's context menu). [SoulsListViewModel] owns the fetch, the
- * delete and the reference-data refresh that keeps the pebble-form picker in
- * sync; this function is render and callbacks only.
+ * idiom over iOS's context menu). This function wires [SoulsListViewModel] —
+ * the fetch, the delete and the reference-data refresh that keeps the
+ * pebble-form picker in sync — and owns the delete dialogs; [SoulsListContent]
+ * renders (#940).
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SoulsListScreen(
     onBack: () -> Unit,
@@ -61,7 +61,6 @@ fun SoulsListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val covers by viewModel.covers.collectAsStateWithLifecycle()
-    val colors = MaterialTheme.colorScheme
 
     // Returning from the detail must re-read the list: the ViewModel is
     // scoped to the back stack entry, which survives the round trip that
@@ -70,6 +69,44 @@ fun SoulsListScreen(
         viewModel.onResumed()
         onPauseOrDispose {}
     }
+
+    SoulsListContent(
+        uiState = uiState,
+        onBack = onBack,
+        onOpenSoul = onOpenSoul,
+        onCreateSoul = onCreateSoul,
+        onRetry = viewModel::retry,
+        onDeleteSoul = viewModel::requestDelete,
+        modifier = modifier,
+    )
+
+    covers.pendingDeletion?.let { target ->
+        ConfirmDeleteDialog(
+            title = stringResource(R.string.pebble_delete_confirm_title, target.name),
+            message = stringResource(R.string.souls_delete_message),
+            onConfirm = viewModel::confirmDelete,
+            onDismiss = viewModel::cancelDelete,
+        )
+    }
+    if (covers.didDeleteFail) DeleteErrorDialog(onDismiss = viewModel::dismissDeleteError)
+}
+
+/**
+ * The souls grid without its ViewModel (#940): the top bar, the three states
+ * and the grid. [SoulsListScreen] wires it; screenshots drive it directly.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun SoulsListContent(
+    uiState: SoulsListUiState,
+    onBack: () -> Unit,
+    onOpenSoul: (SoulWithGlyph) -> Unit,
+    onCreateSoul: () -> Unit,
+    onRetry: () -> Unit,
+    onDeleteSoul: (SoulWithGlyph) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = MaterialTheme.colorScheme
 
     PebblesScreen(
         modifier = modifier,
@@ -117,7 +154,7 @@ fun SoulsListScreen(
                         style = MaterialTheme.typography.bodyLarge,
                         color = colors.onSurfaceVariant,
                     )
-                    TextButton(onClick = viewModel::retry) {
+                    TextButton(onClick = onRetry) {
                         Text(
                             text = stringResource(R.string.profile_retry),
                             style = MaterialTheme.typography.labelLarge,
@@ -144,23 +181,13 @@ fun SoulsListScreen(
                             SoulCell(
                                 soul = soul,
                                 onTap = { onOpenSoul(soul) },
-                                onDelete = { viewModel.requestDelete(soul) },
+                                onDelete = { onDeleteSoul(soul) },
                             )
                         }
                     }
                 }
         }
     }
-
-    covers.pendingDeletion?.let { target ->
-        ConfirmDeleteDialog(
-            title = stringResource(R.string.pebble_delete_confirm_title, target.name),
-            message = stringResource(R.string.souls_delete_message),
-            onConfirm = viewModel::confirmDelete,
-            onDismiss = viewModel::cancelDelete,
-        )
-    }
-    if (covers.didDeleteFail) DeleteErrorDialog(onDismiss = viewModel::dismissDeleteError)
 }
 
 /** Grid cell wrapper anchoring the long-press delete menu — the PebbleRow menu idiom. */
