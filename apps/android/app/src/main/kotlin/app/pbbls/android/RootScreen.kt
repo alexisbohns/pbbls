@@ -51,13 +51,21 @@ import app.pbbls.android.navigation.rememberPebblesSceneStrategies
  * exists to satisfy.
  *
  * [RootDestination.Unresolved] leaves the initial `Welcome` seed on the back
- * stack, unrevealed (`welcomeContentRevealed = false`). That is harmless: the
- * system splash ([MainActivity]) covers the whole activity on exactly the
- * same `isInitializing` signal this gate reads, and releases at the same
- * moment [RootViewModel]'s own collector resolves the destination and the
- * effect below replaces the stack — both derive from the one snapshot state,
- * so they observe it in the same frame. There is no fixed splash duration
- * here (#846): a warm signed-in launch lands on Path immediately.
+ * stack, unrevealed. The system splash ([MainActivity]) covers the whole
+ * activity on the same `isInitializing` signal this gate reads. There is no
+ * fixed splash duration here (#846): a warm signed-in launch lands on Path
+ * immediately.
+ *
+ * **Welcome's reveal flag is passed down as a lambda, and must stay one
+ * (#856).** Nav 3 remembers each `NavEntry` per back-stack key, so a value the
+ * entry content *captures* is frozen at the entry's first composition. On a
+ * cold start that composes before auth resolves (a fresh release install, once
+ * Rive stopped slowing the first frame), Welcome captured `false`; the
+ * destination then became `SignedOut`, `rootAt(Welcome)` was a no-op because
+ * Welcome was already the root, and the buttons never appeared. The lambda
+ * reads [root] at the entry's own composition, so the entry recomposes when
+ * the destination changes. Anything else an entry reads from here that can
+ * change after first composition needs the same treatment.
  */
 @Composable
 fun RootScreen() {
@@ -85,7 +93,7 @@ fun RootScreen() {
     LaunchedEffect(Unit) { palettes.load() }
 
     val userId = root.userId
-    val welcomeContentRevealed = root.destination == RootDestination.SignedOut
+    val welcomeContentRevealed = { root.destination == RootDestination.SignedOut }
 
     // Sign-out flushes the signed-URL cache (the iOS RootView
     // `.onChange(of: session == nil)` analog). Firing on the initial null is a
@@ -225,7 +233,7 @@ private fun PebblesNavDisplay(
     navigator: Navigator,
     state: NavigationState,
     onSignOut: () -> Unit,
-    welcomeContentRevealed: Boolean,
+    welcomeContentRevealed: () -> Boolean,
     onOnboardingFinished: () -> Unit,
 ) {
     // D5: bar visibility is read straight off the stack, so it cannot drift out

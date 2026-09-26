@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
  * A single [WelcomeStep] as a centered title + description — the
  * `WelcomeSlideView` analog. Title is `titleLarge` (Ysabeau) and the
  * description `bodyLarge`, both in `onSurfaceVariant`.
- * No per-slide illustration — the Rive logo in `WelcomeScreen`'s header fills
+ * No per-slide illustration — the logo in `WelcomeScreen`'s header fills
  * that role.
  */
 @Composable

@@ -17,9 +17,8 @@ import com.android.tools.screenshot.PreviewTest
  * Screenshot-test previews for the entry funnel (sub-project C), rendered to PNGs
  * in CI so the maintainer can review Welcome/Auth/Onboarding without a device
  * (see `apps/android/CLAUDE.md`). The screens take plain action lambdas, so no
- * live `SupabaseService` is needed — previews pass no-ops. `RiveLogo` and the
- * timed reveal both collapse to their fully-revealed placeholder state under
- * `LocalInspectionMode`.
+ * live `SupabaseService` is needed — previews pass no-ops. The timed reveal
+ * collapses to its fully-revealed state under `LocalInspectionMode`.
  */
 @PreviewTest
 @Preview(showBackground = true)

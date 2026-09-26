@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Generate the adaptive launcher-icon layers from the iOS brand mark (#846).
+ * Generate the adaptive launcher-icon layers (#846) and the bare Welcome mark
+ * (#856) from the iOS brand mark.
  *
  * Source of truth is `apps/ios/Pebbles/Resources/pbbls-logo-loader.svg` — the
  * same stroked line art the iOS app icon renders and the loader draws on. This
@@ -10,9 +11,12 @@
  *
  *   node apps/android/scripts/logo-svg-to-launcher-icon.mjs
  *
- * Geometry: the mark's ink box (path bounds widened by half a stroke) is scaled
- * to `ART_DP` inside the 108dp adaptive canvas and centred, so it stays within
- * the 66dp circle every launcher mask is guaranteed to show. The group
+ * Geometry: the mark is centred on its ink box (path bounds widened by half a
+ * stroke) and scaled so its farthest ink sits `ART_RADIUS_DP` from the centre
+ * of the 108dp adaptive canvas — inside the 66dp circle every launcher mask is
+ * guaranteed to show, with room to spare. Fitting the box instead (the #846
+ * geometry, 66dp a side) put the pebble's bulges 37.8dp out, and round and
+ * squircle masks cut them off (#856). The group
  * transform carries the scale, which means stroke widths scale with it and the
  * path data stays byte-identical to the SVG's.
  */
@@ -24,9 +28,13 @@ const here = dirname(fileURLToPath(import.meta.url));
 const SRC = resolve(here, "../../ios/Pebbles/Resources/pbbls-logo-loader.svg");
 const OUT = resolve(here, "../app/src/main/res/drawable");
 
-/** Adaptive-icon canvas, and the mask-safe circle the mark has to fit inside. */
+/**
+ * Adaptive-icon canvas, and how far from its centre the ink may reach. 33dp is
+ * the mask-safe radius; 28dp keeps the mark near Material's 48dp product-icon
+ * keyline, so it reads at the same weight as the icons around it.
+ */
 const CANVAS_DP = 108;
-const ART_DP = 66;
+const ART_RADIUS_DP = 28;
 /** iOS app-icon colours (`AppIcon.appiconset/pbbls.png`), sampled exactly. */
 const INK = "#F8F0F0";
 /** Themed icons are re-tinted by the system; only this layer's alpha matters. */
@@ -104,28 +112,60 @@ for (const p of paths) {
 }
 const inkW = box.maxX - box.minX;
 const inkH = box.maxY - box.minY;
-const scale = ART_DP / Math.max(inkW, inkH);
-const translateX = (CANVAS_DP - inkW * scale) / 2 - box.minX * scale;
-const translateY = (CANVAS_DP - inkH * scale) / 2 - box.minY * scale;
+// Radius of the ink around the ink box's centre, strokes included.
+const cx = (box.minX + box.maxX) / 2;
+const cy = (box.minY + box.maxY) / 2;
+let inkRadius = 0;
+for (const p of paths) {
+  for (const [x, y] of samplePoints(p.d)) {
+    inkRadius = Math.max(inkRadius, Math.hypot(x - cx, y - cy) + p.strokeWidth / 2);
+  }
+}
+const scale = ART_RADIUS_DP / inkRadius;
+const translateX = CANVAS_DP / 2 - cx * scale;
+const translateY = CANVAS_DP / 2 - cy * scale;
 
 /**
  * VectorDrawable group transforms are `translate ∘ scale` with the translation
  * applied last, so translateX/Y are viewport units, not group-local ones.
  */
-function render(ink, header) {
+const launcherGeometry = {
+  width: CANVAS_DP,
+  height: CANVAS_DP,
+  scale,
+  translateX,
+  translateY,
+};
+
+/**
+ * The bare mark (#856): the viewport is the ink box itself, so the drawable has
+ * no adaptive-icon padding and fills whatever box Compose gives it. Welcome
+ * draws it in place of the retired Rive logo, tinted from the theme.
+ */
+const MARK_DP = 120;
+const markScale = MARK_DP / Math.max(inkW, inkH);
+const markGeometry = {
+  width: inkW * markScale,
+  height: inkH * markScale,
+  scale: markScale,
+  translateX: -box.minX * markScale,
+  translateY: -box.minY * markScale,
+};
+
+function render(ink, header, geo = launcherGeometry) {
   const lines = [
     '<?xml version="1.0" encoding="utf-8"?>',
     header,
     '<vector xmlns:android="http://schemas.android.com/apk/res/android"',
-    `    android:width="${CANVAS_DP}dp"`,
-    `    android:height="${CANVAS_DP}dp"`,
-    `    android:viewportWidth="${CANVAS_DP}"`,
-    `    android:viewportHeight="${CANVAS_DP}">`,
+    `    android:width="${geo.width.toFixed(2).replace(/\.00$/, "")}dp"`,
+    `    android:height="${geo.height.toFixed(2).replace(/\.00$/, "")}dp"`,
+    `    android:viewportWidth="${geo.width.toFixed(2).replace(/\.00$/, "")}"`,
+    `    android:viewportHeight="${geo.height.toFixed(2).replace(/\.00$/, "")}">`,
     "    <group",
-    `        android:scaleX="${scale.toFixed(6)}"`,
-    `        android:scaleY="${scale.toFixed(6)}"`,
-    `        android:translateX="${translateX.toFixed(4)}"`,
-    `        android:translateY="${translateY.toFixed(4)}">`,
+    `        android:scaleX="${geo.scale.toFixed(6)}"`,
+    `        android:scaleY="${geo.scale.toFixed(6)}"`,
+    `        android:translateX="${geo.translateX.toFixed(4)}"`,
+    `        android:translateY="${geo.translateY.toFixed(4)}">`,
   ];
   for (const p of paths) {
     lines.push("        <path");
@@ -152,7 +192,7 @@ writeFileSync(
     INK,
     generated(
       "\n  The adaptive-icon foreground: the mark in the iOS icon's cream, sized to\n" +
-        `  ${ART_DP}dp inside the ${CANVAS_DP}dp canvas so no launcher mask can clip it.\n`,
+        `  within ${ART_RADIUS_DP}dp of the ${CANVAS_DP}dp canvas's centre so no launcher mask can clip it.\n`,
     ),
   ),
 );
@@ -167,9 +207,22 @@ writeFileSync(
   ),
 );
 
+writeFileSync(
+  resolve(OUT, "pbbls_logo.xml"),
+  render(
+    MONO_INK,
+    generated(
+      "\n  The bare mark for Welcome (#856, replacing the Rive logo): cropped to its\n" +
+        "  ink box, drawn opaque so Compose can tint it with colorScheme.primary.\n",
+    ),
+    markGeometry,
+  ),
+);
+
 console.log(
   `ink box ${inkW.toFixed(2)}×${inkH.toFixed(2)} → scale ${scale.toFixed(6)}, ` +
     `translate (${translateX.toFixed(3)}, ${translateY.toFixed(3)})`,
 );
 console.log(`wrote ${OUT}/ic_launcher_foreground.xml`);
 console.log(`wrote ${OUT}/ic_launcher_monochrome.xml`);
+console.log(`wrote ${OUT}/pbbls_logo.xml`);

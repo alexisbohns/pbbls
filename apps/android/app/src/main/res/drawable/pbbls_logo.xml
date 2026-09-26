@@ -4,19 +4,19 @@
   apps/ios/Pebbles/Resources/pbbls-logo-loader.svg. Do not hand-edit — re-run
   the script when the brand mark changes.
 
-  The themed-icon (monochrome) layer: identical geometry, drawn opaque so
-  the system can re-tint it from the wallpaper palette.
+  The bare mark for Welcome (#856, replacing the Rive logo): cropped to its
+  ink box, drawn opaque so Compose can tint it with colorScheme.primary.
 -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="108dp"
-    android:height="108dp"
-    android:viewportWidth="108"
-    android:viewportHeight="108">
+    android:width="120dp"
+    android:height="119.96dp"
+    android:viewportWidth="120"
+    android:viewportHeight="119.96">
     <group
-        android:scaleX="0.194861"
-        android:scaleY="0.194861"
-        android:translateX="29.5454"
-        android:translateY="29.5537">
+        android:scaleX="0.478118"
+        android:scaleY="0.478118"
+        android:translateX="-0.0027"
+        android:translateY="0.0001">
         <path
             android:name="pebble-outline"
             android:strokeColor="#000000"

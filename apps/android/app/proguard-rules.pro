@@ -7,7 +7,6 @@
 # merges those automatically. Re-declaring them here would only widen the keep
 # radius and undo the shrinking. Verified against the resolved artifacts:
 #
-#   app.rive:rive-android            proguard.txt              -keep class app.rive.** { *; }
 #   io.ktor:ktor-utils               META-INF/proguard/ktor.pro
 #   org.jetbrains.kotlinx:…-serialization-core
 #                                    META-INF/com.android.tools/r8/*.pro (full-mode rules)

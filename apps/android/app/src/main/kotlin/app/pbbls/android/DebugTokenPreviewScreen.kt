@@ -23,8 +23,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import app.pbbls.android.core.designsystem.PebblesLogo
 import app.pbbls.android.core.designsystem.PebblesTheme
-import app.pbbls.android.rive.RiveLogo
 
 private data class TokenSwatch(
     val name: String,
@@ -123,7 +123,7 @@ private fun schemeGroups(scheme: ColorScheme): List<SwatchGroup> =
 /**
  * Debug composable: every `MaterialTheme.colorScheme` role, the
  * `MaterialTheme.typography` scale (with the emphasized styles the app reads)
- * plus the handwritten faces, and the Rive logo — one screen the maintainer can
+ * plus the handwritten faces, and the brand mark — one screen the maintainer can
  * review as a screenshot without a device (#853 replaced the old
  * `system.*`/`accent.*` swatches with the scheme's roles).
  */
@@ -145,8 +145,8 @@ fun DebugTokenPreviewScreen() {
             TypeRampSection()
 
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                Text(text = "Rive logo", style = MaterialTheme.typography.titleMedium, color = colors.onSurface)
-                RiveLogo(modifier = Modifier.fillMaxWidth().height(160.dp))
+                Text(text = "Logo", style = MaterialTheme.typography.titleMedium, color = colors.onSurface)
+                PebblesLogo(modifier = Modifier.fillMaxWidth().height(160.dp))
             }
         }
     }
