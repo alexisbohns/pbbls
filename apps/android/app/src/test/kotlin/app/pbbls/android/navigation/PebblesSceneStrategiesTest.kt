@@ -35,6 +35,26 @@ class PebblesSceneStrategiesTest {
     }
 
     @Test
+    fun `back from a soul beside its list pops only the soul`() {
+        // The real input: NavigationState flattens the start tab under the
+        // current one, so Path sits below People. PopLatest is what keeps back
+        // on the pair; the library default would unwind straight to Path,
+        // because an idle list with its placeholder looks the same.
+        val entries = listOf(PebblesKey.Path, PebblesKey.People, PebblesKey.SoulDetail("s1")).map(::entry)
+        val scene = with(SceneStrategyScope<NavKey>()) { with(pebblesListDetailStrategy(directive(2))) { calculateScene(entries) } }
+
+        assertEquals(entries.drop(1), scene!!.entries)
+        assertEquals(2, scene.previousEntries.size)
+    }
+
+    @Test
+    fun `back from an idle list leaves the pair`() {
+        val scene = pebblesListDetailStrategy(directive(2)).sceneFor(PebblesKey.Path, PebblesKey.People)
+
+        assertEquals(1, scene!!.previousEntries.size)
+    }
+
+    @Test
     fun `two panes show an idle souls list with its placeholder`() {
         assertNotNull(pebblesListDetailStrategy(directive(2)).sceneFor(PebblesKey.People))
     }
