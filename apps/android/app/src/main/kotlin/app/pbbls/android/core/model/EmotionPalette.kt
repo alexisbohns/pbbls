@@ -11,9 +11,10 @@ import androidx.compose.ui.graphics.Color
  * brand accent.
  *
  * [dark] is the #599 addition: the small/medium Petroglyph backfill in dark
- * mode (the "palette.dark" role). [shaded] is the #605 addition: a deeper tint
- * used for the read-page title / tile label / description in light mode (the
- * "shaded_color" role on the view).
+ * mode (the "palette.dark" role). [shaded] is the #605 addition (the
+ * "shaded_color" role on the view): it tinted the read page, which uses theme
+ * roles since #940, so Android no longer reads it. It is still decoded because
+ * the view carries it for every surface.
  */
 data class EmotionPalette(
     val primary: Color,

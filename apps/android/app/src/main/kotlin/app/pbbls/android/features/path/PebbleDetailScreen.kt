@@ -1,8 +1,6 @@
 package app.pbbls.android.features.path
 
 import android.content.Intent
-import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,7 +36,6 @@ import app.pbbls.android.core.model.SharedPebbleLink
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.features.path.read.PebblePrivacyBadge
 import app.pbbls.android.features.path.read.PebbleReadView
-import app.pbbls.android.features.path.read.pebblePageColors
 
 /**
  * Pebble detail (#852, ports iOS `PebbleDetailSheet`, D7): a docked sheet on
@@ -103,11 +100,14 @@ fun PebbleDetailScreen(
 }
 
 /**
- * One pebble without its ViewModel (#940): the tinted page, the top bar and
- * the three states. [PebbleDetailScreen] wires it; screenshots drive it.
+ * One pebble without its ViewModel (#940): the top bar and the three states.
+ * [PebbleDetailScreen] wires it; screenshots drive it.
  *
- * [palette] is the pebble's emotion palette once loaded, or null (loading, or
- * a palette-cache miss), in which case the page stays on `surface`.
+ * It draws no page background, so it takes the sheet's container colour on a
+ * phone and `surface` in the pane. The read page uses theme roles; only the
+ * pebble visual carries the emotion palette (#940, maintainer decision), which
+ * is all [palette] is passed down for. It is null while loading or on a
+ * palette-cache miss.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -119,20 +119,11 @@ fun PebbleDetailContent(
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val colors = MaterialTheme.colorScheme
     val detail = (uiState as? PebbleDetailUiState.Content)?.detail
-
-    // Once loaded, the whole page (top bar + insets included) tints to the
-    // emotion palette background (#605); before load / on a cache miss it stays
-    // on the surface. PebbleReadView repaints the same tint over its
-    // own body, so the two meet seamlessly.
-    val pageBackground =
-        palette?.let { pebblePageColors(it, isSystemInDarkTheme()).background } ?: colors.surface
 
     Column(
         modifier
             .fillMaxSize()
-            .background(pageBackground)
             .readableWidth(),
     ) {
         DetailTopBar(
@@ -154,7 +145,7 @@ fun PebbleDetailContent(
                     detail = state.detail,
                     palette = palette,
                     // Clear of the gesture bar in the sheet and in the pane
-                    // alike (#940), on this page's own tint.
+                    // alike (#940).
                     modifier = Modifier.fillMaxSize().navigationBarsPadding(),
                 )
         }
@@ -175,8 +166,8 @@ private fun DetailTopBar(
     onEdit: () -> Unit,
     onShare: (() -> Unit)?,
 ) {
-    // A stock top app bar (#854) on a clear container: the read page below is
-    // tinted to the pebble's emotion, and the bar should sit on that, not on surface.
+    // A stock top app bar (#854) on a clear container, so it sits on whatever
+    // hosts the page (the sheet's container, or surface in the pane) with no seam.
     TopAppBar(
         title = { if (visibility != null) PebblePrivacyBadge(visibility = visibility) },
         actions = {

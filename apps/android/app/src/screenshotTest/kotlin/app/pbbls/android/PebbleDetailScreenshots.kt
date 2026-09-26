@@ -188,12 +188,12 @@ private val noDomainDetail: PebbleDetail =
 
 @Composable
 private fun DetailPreview(detail: PebbleDetail) {
-    // PebbleReadView paints the emotion-palette page background itself (#605), so
-    // the preview needs no explicit backdrop.
+    // PebbleReadView draws no background of its own (#940): it sits on its
+    // host, which in production is the sheet's container or the pane's surface.
     PebbleReadView(
         detail = detail,
         palette = previewPalette,
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface),
     )
 }
 
