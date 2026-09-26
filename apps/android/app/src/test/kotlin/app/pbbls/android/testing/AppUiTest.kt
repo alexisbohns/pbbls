@@ -154,6 +154,20 @@ abstract class AppUiTest {
     }
 
     /**
+     * The user leaving the app and coming back to it: the activity stops and
+     * starts again without being destroyed, so every screen sees a fresh
+     * `ON_RESUME` — which is what drives the resume refreshes.
+     */
+    protected fun backgroundAndReturn() {
+        checkNotNull(controller) { "launch() first" }
+            .pause()
+            .stop()
+            .start()
+            .resume()
+        compose.waitForIdle()
+    }
+
+    /**
      * The system back gesture, delivered the way the platform delivers it:
      * through the activity's dispatcher, so whichever handler is registered
      * highest wins — `NavDisplay`'s, or a screen's own.
