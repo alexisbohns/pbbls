@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "pebbles-android"
 include(":app")
+include(":baselineprofile")

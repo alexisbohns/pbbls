@@ -97,6 +97,17 @@ navigationEvent = "1.1.2"
 # quotes — the latter does not exist on Maven Central.
 konsist = "0.17.3"
 
+# Baseline + startup profiles (#856). profileinstaller writes the shipped
+# profile into ART on install, so the first launches after an install or update
+# run pre-compiled code instead of interpreting it. The generator lives in the
+# :baselineprofile test module and runs on a device, by hand — see
+# apps/android/CLAUDE.md. benchmark ships the Gradle plugin and the
+# macrobenchmark rules on one version line, so both ride this one ref.
+profileinstaller = "1.4.1"
+benchmark = "1.5.0"
+uiautomator = "2.4.0"
+androidxTestExtJunit = "1.3.0"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
@@ -178,6 +189,12 @@ androidx-navigation3-ui = { group = "androidx.navigation3", name = "navigation3-
 androidx-lifecycle-viewmodel-navigation3 = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-navigation3", version.ref = "lifecycleRuntimeKtx" }
 androidx-navigationevent-compose = { group = "androidx.navigationevent", name = "navigationevent-compose", version.ref = "navigationEvent" }
 
+# Baseline profiles (#856).
+androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profileinstaller", version.ref = "profileinstaller" }
+androidx-benchmark-macro-junit4 = { group = "androidx.benchmark", name = "benchmark-macro-junit4", version.ref = "benchmark" }
+androidx-test-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
+androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxTestExtJunit" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 # AGP 9 has built-in Kotlin but does NOT bundle the Compose compiler — it must
@@ -190,4 +207,6 @@ ktlint = { id = "org.jlleitschuh.gradle.ktlint", version.ref = "ktlint" }
 screenshot = { id = "com.android.compose.screenshot", version.ref = "screenshot" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
-
+# The :baselineprofile module is a com.android.test module aimed at :app (#856).
+android-test = { id = "com.android.test", version.ref = "agp" }
+androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "benchmark" }

@@ -419,7 +419,8 @@ do not bring it back for a single asset.
   upstream release would be a finding no baseline can hold — Dependabot owns
   bumps).
 - **JUnit4 + `kotlinx-coroutines-test`, JVM unit tests only.** No Robolectric, no
-  instrumented tests. Test pure logic (auth `canSubmit`, week grouping, valence
+  instrumented tests — `:baselineprofile`'s on-device journey (#856) is a
+  profiling tool run by hand, not a test suite. Test pure logic (auth `canSubmit`, week grouping, valence
   mapping, palette parsing, slug resolution) and localization parity.
 - **`ArchitectureBoundaryTest` is a gate too (#851).** Konsist parses the `main`
   sources and fails the build on a `core -> features` import, or on a
@@ -493,6 +494,37 @@ its own text; it does not catch a regression in the screen's own scroll column o
 top bar. The real fix is a stateless content layer per screen, the way
 `PathScreen` has `PathContent` — #848/#849 own that architecture, so do not pull
 it forward from a screenshot PR.
+
+## Baseline profile (#856)
+
+- **The release build ships a baseline profile and a startup profile**,
+  committed under `app/src/release/generated/baselineProfiles/`
+  (`baseline-prof.txt`, `startup-prof.txt`). `profileinstaller` hands the
+  baseline profile to ART on install, so the first launches after an install or
+  update run pre-compiled code; R8 uses the startup profile to put what a cold
+  start touches in the primary dex. Every `bundleRelease` packs the committed
+  files; nothing re-generates them in CI (`automaticGenerationDuringBuild =
+  false`), because generation needs a device and a signed-in test account.
+- **Regenerate by hand when startup or Path changes shape** (a new launch-time
+  dependency, a new screen on the cold path, a big Path rework):
+  `ANDROID_SERIAL=<device> ./gradlew :app:generateBaselineProfile`, then commit
+  both files. Set `ANDROID_SERIAL` whenever more than one device is attached,
+  or the task runs on all of them. The journey (`:baselineprofile`,
+  `PebblesJourney.kt`) signs in with `BENCHMARK_EMAIL` / `BENCHMARK_PASSWORD`
+  from `secrets.properties` — a throwaway account with pebbles on its Path,
+  never a real one. Without them it profiles Welcome and Auth only; check the
+  diff's size before committing a regeneration.
+- **The journey finds the UI by `testTag`** (`core/common/JourneyTags.kt`,
+  exposed as resource ids by `MainActivity`). `:baselineprofile` is a separate
+  APK and repeats the strings; renaming a tag fails nothing, it silently
+  shortens the profiled journey.
+- **Measure with** `./gradlew :baselineprofile:connectedBenchmarkReleaseAndroidTest
+  -P android.testInstrumentationRunnerArguments.class=app.pbbls.android.baselineprofile.StartupBenchmark`
+  (cold start, no profile vs the committed one; results in the task's
+  `benchmarkData.json`). A phone is the authority. An emulator on a loaded host
+  swings by seconds; only its paired `None` vs `BaselineProfile` rows compare.
+- **Anything added to `PebblesApp.onCreate` runs before the first frame of
+  every launch.** It is empty on purpose — Rive's init was the last thing there.
 
 ## Release & distribution (Play internal testing)
 

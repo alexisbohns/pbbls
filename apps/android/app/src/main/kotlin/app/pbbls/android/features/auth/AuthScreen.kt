@@ -21,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentType
 import androidx.compose.ui.semantics.semantics
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
+import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.designsystem.GoogleSignInButton
 import app.pbbls.android.core.designsystem.LegalDisclaimer
 import app.pbbls.android.core.designsystem.LegalDoc
@@ -134,7 +136,11 @@ fun AuthContent(
                         capitalization = KeyboardCapitalization.None,
                         autoCorrectEnabled = false,
                     ),
-                modifier = Modifier.fillMaxWidth().semantics { contentType = ContentType.EmailAddress },
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .testTag(JourneyTags.AUTH_EMAIL)
+                        .semantics { contentType = ContentType.EmailAddress },
             )
 
             OutlinedTextField(
@@ -153,7 +159,7 @@ fun AuthContent(
                         autoCorrectEnabled = false,
                     ),
                 modifier =
-                    Modifier.fillMaxWidth().semantics {
+                    Modifier.fillMaxWidth().testTag(JourneyTags.AUTH_PASSWORD).semantics {
                         contentType = if (uiState.mode == AuthMode.LOGIN) ContentType.Password else ContentType.NewPassword
                     },
             )
@@ -196,6 +202,7 @@ fun AuthContent(
             onClick = onSubmit,
             enabled = uiState.canSubmit,
             isLoading = uiState.isSubmitting,
+            modifier = Modifier.testTag(JourneyTags.AUTH_SUBMIT),
         )
 
         // The screen scrolls (keyboard-safe), so OAuth follows the primary action
