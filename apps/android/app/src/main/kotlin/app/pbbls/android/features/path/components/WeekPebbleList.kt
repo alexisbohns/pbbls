@@ -13,9 +13,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.core.model.WeekRollEntry
@@ -42,7 +44,7 @@ fun WeekPebbleList(
         EmptyWeek(onCreate = onCreatePebble, modifier = modifier)
     } else {
         LazyColumn(
-            modifier = modifier,
+            modifier = modifier.testTag(JourneyTags.PATH_WEEK_LIST),
             contentPadding = PaddingValues(bottom = 80.dp),
         ) {
             itemsIndexed(entry.pebbles, key = { _, pebble -> pebble.id }) { index, pebble ->
@@ -53,7 +55,8 @@ fun WeekPebbleList(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp, horizontal = 24.dp),
+                            .padding(vertical = 8.dp, horizontal = 24.dp)
+                            .testTag(JourneyTags.PATH_PEBBLE_ROW),
                     onTap = { onPebbleTap(pebble) },
                     onRequestDelete = { onPebbleDelete(pebble) },
                 )

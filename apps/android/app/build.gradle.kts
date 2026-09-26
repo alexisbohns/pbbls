@@ -9,6 +9,7 @@ plugins {
     alias(libs.plugins.screenshot)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.androidx.baselineprofile)
 }
 
 // Secrets chain (D8): read the git-ignored secrets.properties if present,
@@ -198,6 +199,34 @@ tasks.withType<PreviewScreenshotValidationTask>().configureEach {
     testEngineInput.threshold.set(0.0005f)
 }
 
+// Baseline + startup profiles (#856). The profiles are generated on a device by
+// :baselineprofile and committed under src/release/generated/baselineProfiles/;
+// every release build (bundleRelease in CI included) packs the committed files
+// and never re-generates, because generation needs a device and a signed-in
+// test account that CI does not have. `dexLayoutOptimization` turns the
+// startup-flagged rules into a startup profile, which R8 uses to put the code
+// cold start touches into the primary dex. Regenerate with
+// `./gradlew :app:generateBaselineProfile` — see apps/android/CLAUDE.md.
+baselineProfile {
+    automaticGenerationDuringBuild = false
+    saveInSrc = true
+    dexLayoutOptimization = true
+}
+
+// The plugin's nonMinifiedRelease / benchmarkRelease build types copy the
+// release signing config, which is empty on any machine without the upload
+// keystore (the D8 fail-soft contract) — and an unsigned APK cannot be installed
+// on the device that generates the profile. Sign those two with the debug key
+// instead. `release` itself is untouched, so nothing uploadable changes.
+androidComponents {
+    onVariants(selector().withBuildType("nonMinifiedRelease")) { variant ->
+        variant.signingConfig.setConfig(android.signingConfigs.getByName("debug"))
+    }
+    onVariants(selector().withBuildType("benchmarkRelease")) { variant ->
+        variant.signingConfig.setConfig(android.signingConfigs.getByName("debug"))
+    }
+}
+
 // jvmToolchain sets sourceCompatibility/targetCompatibility for Java and the
 // jvmTarget for Kotlin in one place (JDK 21 toolchain, D3).
 kotlin {
@@ -262,6 +291,10 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.viewmodel.savedstate)
+
+    // Installs the committed baseline profile into ART on first launch (#856).
+    implementation(libs.androidx.profileinstaller)
+    baselineProfile(project(":baselineprofile"))
 
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

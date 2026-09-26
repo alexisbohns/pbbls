@@ -23,12 +23,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
+import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.readableWidth
@@ -154,7 +156,8 @@ fun PathScreen(
                     modifier =
                         Modifier
                             .align(Alignment.BottomEnd)
-                            .padding(PebblesTheme.spacing.lg),
+                            .padding(PebblesTheme.spacing.lg)
+                            .testTag(JourneyTags.NEW_PEBBLE),
                 )
             }
         }
@@ -242,7 +245,8 @@ fun PathContent(
                 Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .padding(top = 16.dp),
+                    .padding(top = 16.dp)
+                    .testTag(JourneyTags.PATH_WEEK_PAGER),
         ) { page ->
             WeekPebbleList(
                 entry = entries[page],

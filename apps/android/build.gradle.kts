@@ -16,8 +16,8 @@ buildscript {
 }
 
 // Plugins are declared here (resolved once for the whole build) and applied in
-// the module that needs them — the single :app module. The Kotlin Android
-// plugin is deliberately absent: AGP 9 provides it built-in, and applying it
+// the module that needs them — :app, or the :baselineprofile test module. The
+// Kotlin Android plugin is deliberately absent: AGP 9 provides it built-in, and applying it
 // explicitly would fail with a "duplicate kotlin extension" error.
 plugins {
     alias(libs.plugins.android.application) apply false
@@ -27,4 +27,6 @@ plugins {
     alias(libs.plugins.screenshot) apply false
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.hilt) apply false
+    alias(libs.plugins.android.test) apply false
+    alias(libs.plugins.androidx.baselineprofile) apply false
 }

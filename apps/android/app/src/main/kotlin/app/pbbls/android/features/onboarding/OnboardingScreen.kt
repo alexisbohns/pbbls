@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
@@ -30,6 +31,7 @@ import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
+import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.readableWidth
 
@@ -93,7 +95,7 @@ fun OnboardingScreen(
                 ) {
                     Text(text = "✕", style = MaterialTheme.typography.titleMedium, color = colors.onSurfaceVariant)
                 }
-                TextButton(onClick = onFinish) {
+                TextButton(onClick = onFinish, modifier = Modifier.testTag(JourneyTags.ONBOARDING_SKIP)) {
                     Text(
                         text = stringResource(R.string.onboarding_skip),
                         style = MaterialTheme.typography.bodyLarge,

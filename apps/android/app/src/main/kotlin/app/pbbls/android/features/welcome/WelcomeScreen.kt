@@ -29,12 +29,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
+import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.designsystem.GoogleSignInButton
 import app.pbbls.android.core.designsystem.LegalDisclaimer
 import app.pbbls.android.core.designsystem.LegalDoc
@@ -189,7 +191,7 @@ private fun WelcomeRevealedContent(
                 text = stringResource(R.string.welcome_log_in),
                 onClick = onLogin,
                 enabled = !isSubmitting,
-                modifier = Modifier.revealAlpha(revealStep >= 4),
+                modifier = Modifier.revealAlpha(revealStep >= 4).testTag(JourneyTags.WELCOME_LOG_IN),
             )
             GoogleSignInButton(
                 onClick = onGoogleSignIn,
