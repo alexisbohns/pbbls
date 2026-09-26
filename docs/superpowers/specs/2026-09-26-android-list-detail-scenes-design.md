@@ -105,16 +105,35 @@ so the two panes sit either side of it. It is a pure function with a JVM test.
 - **Glyph store in a pane** puts its tab toolbar back at the bottom of the list
   pane: `isWideWindow()` answers for the window, but the grid is pane-wide
   there. The grid's content padding follows the toolbar.
+- **Picking another item beside a list** replaces the detail
+  (`Navigator.navigateToDetail`) rather than stacking it.
 - **Placeholders** are a shared `DetailPlaceholder(icon, text)` in
   `core/designsystem`, one string per pair in `values/` and `values-fr/`.
 
 ### Glyph detail as an entry
 
-`GlyphDetail(glyphId: String)` replaces `GlyphsListViewModel.covers.selected`.
-A `GlyphDetailViewModel` (Loading / Error / Content, per #849) loads the grid
-item and the karma balance by id and owns the buy flow `GlyphSwapPanel` runs
-today. The list re-reads on its resume refresh after a swap, the way the other
-detail pairs already do, instead of taking `onPurchased` from the drawer.
+`GlyphDetail(item: GlyphGridItem)` replaces `GlyphsListViewModel.covers.selected`.
+Two deliberate choices, amended during Part 4:
+
+- **The key carries the whole grid item, not an id.** There is no "one glyph
+  by id" read in `GlyphMarketServicing`, and opening from the grid must stay
+  instant. `GlyphGridItem` becomes `@Serializable` (its `Glyph` and strokes
+  already are). The key's item can be stale: it still says unowned after a
+  buy. Ownership recorded on this device survives in `GlyphDetailViewModel`'s
+  saved state, so a panel rebuilt by rotation, resize or a sheet becoming a
+  pane shows the glyph owned rather than offering the swap again (a second
+  buy would fail with `already_owned`, the #849 failure). A purchase made
+  elsewhere (another device) still shows unowned until the store reloads; the
+  server refuses the second buy with `already_owned`. So the view model has
+  nothing to load; it holds the buyer's karma balance and records a purchase.
+  The buy itself stays in `GlyphSwapPanel`, which the composer's glyph picker
+  also hosts. The entry's content key is the glyph id, not the key's
+  `toString()`, which would carry every stroke's path data.
+- **A purchase reaches the list through `GlyphMarketServicing.purchases`.** In
+  a pane the list stays resumed beside the detail, so the resume refresh the
+  other pairs rely on never fires. The market service emits every successful
+  buy; `GlyphsListViewModel` applies its existing bookkeeping from it.
+
 `GlyphDetailDrawerContent` is already stateless and is reused as-is.
 
 ## The stack

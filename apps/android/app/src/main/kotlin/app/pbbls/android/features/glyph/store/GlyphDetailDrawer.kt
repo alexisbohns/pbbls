@@ -7,19 +7,22 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -33,6 +36,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.data.GlyphMarketServicing
 import app.pbbls.android.core.data.glyphMarketErrorMessage
@@ -50,28 +55,51 @@ import java.util.Locale
 private const val TAG = "glyph-detail"
 
 /**
- * The swap/owned drawer — ports iOS `GlyphDetailDrawer` as this screen's
- * single `ModalBottomSheet` level (D5): banner, stat tiles, dotted rule with
- * the price/seal badge, me-vs-creator row, then [SlideToConfirm] or the
- * acquired label. A successful swap does NOT dismiss — the drawer morphs in
- * place to its Owned state and [onSwapped] lets the host update caches +
- * karma. Buy errors map through `glyphMarketErrorMessage` (M43 D4).
+ * The glyph detail entry (#940): [GlyphSwapPanel] for the item in the key — the
+ * swap/owned drawer that ports iOS `GlyphDetailDrawer`. On a phone the
+ * bottom-sheet scene hosts it, on a large screen the list-detail scene puts it
+ * beside the store, so it draws no sheet of its own. A successful swap does
+ * NOT dismiss: the panel morphs in place to its Owned state (M43 D4).
+ *
+ * The background is `surfaceContainerLow`, the sheet's default container
+ * colour, so the page is identical in both hosts and the price badge's chip (which masks the dotted
+ * rule in that colour) has no seam in the pane. Nothing pads a pane, so the
+ * page clears the safe-drawing insets itself: top, bottom and the end edge (a
+ * landscape phone's 3-button bar), never the start, which the rail or the
+ * sheet already owns. In the sheet the top is consumed by the sheet's own
+ * insets, so only the bottom and end are left.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GlyphDetailDrawer(
+fun GlyphDetailScreen(
     item: GlyphGridItem,
-    balance: Int,
-    market: GlyphMarketServicing,
-    onRecorded: (BuyGlyphResult) -> Unit,
-    onSwapped: (BuyGlyphResult) -> Unit = {},
-    onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
+    viewModel: GlyphDetailViewModel = hiltViewModel(),
 ) {
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+    val balance by viewModel.balance.collectAsStateWithLifecycle()
+    GlyphDetailSurface(modifier) {
+        GlyphSwapPanel(
+            // Owned if this entry recorded a buy: a rebuilt panel must not offer it again.
+            item = viewModel.shown(item),
+            balance = balance,
+            market = viewModel.market,
+            onRecorded = { result -> viewModel.onRecorded(item, result) },
+        )
+    }
+}
+
+/** [GlyphDetailScreen]'s page, shared with the list-detail screenshots. */
+@Composable
+internal fun GlyphDetailSurface(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
+    Box(
+        modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surfaceContainerLow)
+            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical + WindowInsetsSides.End)),
     ) {
-        GlyphSwapPanel(item = item, balance = balance, market = market, onRecorded = onRecorded, onSwapped = onSwapped)
+        content()
     }
 }
 
@@ -100,7 +128,10 @@ internal fun GlyphSwapPanel(
 ) {
     var isOwned by remember(item.id) { mutableStateOf(item.owned) }
     var acquiredAt by remember(item.id) { mutableStateOf(item.acquiredAt) }
-    var currentBalance by remember(item.id) { mutableStateOf(balance) }
+    // Only the landed answer is kept: before a buy the panel follows [balance],
+    // which may still be loading when the panel first draws (#940).
+    var landed by remember(item.id) { mutableStateOf<BuyGlyphResult?>(null) }
+    val currentBalance = swapPanelBalance(landed = landed, live = balance)
     var isBuying by remember(item.id) { mutableStateOf(false) }
     var errorRes by remember(item.id) { mutableStateOf<Int?>(null) }
 
@@ -118,12 +149,12 @@ internal fun GlyphSwapPanel(
                 GlyphPurchase.buyAndRecord(
                     market = market,
                     glyphId = item.glyph.id,
-                    onRecorded = { landed ->
-                        currentBalance = landed.balance
+                    onRecorded = { result ->
+                        landed = result
                         // iOS stamps the client's now, not a server timestamp.
                         acquiredAt = OffsetDateTime.now()
                         isOwned = true
-                        onRecorded(landed)
+                        onRecorded(result)
                     },
                     onError = { e ->
                         Log.e(TAG, "glyph swap failed", e)
@@ -139,6 +170,15 @@ internal fun GlyphSwapPanel(
         },
     )
 }
+
+/**
+ * The balance [GlyphSwapPanel] shows: the server's answer once a buy has
+ * landed, the [live] shared balance until then.
+ */
+internal fun swapPanelBalance(
+    landed: BuyGlyphResult?,
+    live: Int,
+): Int = landed?.balance ?: live
 
 /** Pure drawer body — split from the sheet so screenshots can drive both states. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

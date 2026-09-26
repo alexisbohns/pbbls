@@ -2,6 +2,7 @@ package app.pbbls.android.navigation
 
 import androidx.navigation3.runtime.NavKey
 import app.pbbls.android.core.model.AuthMode
+import app.pbbls.android.core.model.GlyphGridItem
 import kotlinx.serialization.Serializable
 
 /**
@@ -51,6 +52,17 @@ sealed interface PebblesKey : NavKey {
 
     @Serializable
     data object Glyphs : PebblesKey, BarKey
+
+    /**
+     * One glyph's swap/owned panel (#940): a docked sheet on phones, a pane
+     * beside the store on large screens. Carries the grid item itself — there
+     * is no by-id read, and opening from the grid must be instant.
+     */
+    @Serializable
+    data class GlyphDetail(
+        val item: GlyphGridItem,
+    ) : PebblesKey,
+        BarKey
 
     @Serializable
     data object Achievements : PebblesKey, BarKey

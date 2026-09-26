@@ -11,6 +11,9 @@ import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
 import io.github.jan.supabase.postgrest.query.Order
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import javax.inject.Inject
@@ -30,7 +33,23 @@ interface GlyphMarketServicing {
     suspend fun listCommunity(): List<GlyphGridItem>
 
     suspend fun buy(glyphId: String): BuyGlyphResult
+
+    /**
+     * Every purchase that landed, as it lands (#940). The store's list sits
+     * beside the detail on large screens and never pauses, so it cannot rely
+     * on a resume refresh to learn about one.
+     *
+     * Relies on the implementation being a `@Singleton`: every host's buy and
+     * the store's collector must share one instance.
+     */
+    val purchases: SharedFlow<GlyphPurchased>
 }
+
+/** A `buy_glyph` that succeeded: which glyph, and the server's answer. */
+data class GlyphPurchased(
+    val glyphId: String,
+    val result: BuyGlyphResult,
+)
 
 /**
  * Market reads + the `buy_glyph` purchase — ports iOS `GlyphMarketService`
@@ -46,6 +65,14 @@ class GlyphMarketService
     constructor(
         private val supabase: SupabaseService,
     ) : GlyphMarketServicing {
+        // One flow for the app because this service is a @Singleton: a second
+        // instance would announce to nobody. `emit` suspends only while a
+        // collector's buffer is full, and `buy` runs uncancellable, so no
+        // purchase is dropped; with no collector (the store is not open) there
+        // is nothing to tell.
+        private val _purchases = MutableSharedFlow<GlyphPurchased>(extraBufferCapacity = 8)
+        override val purchases: SharedFlow<GlyphPurchased> = _purchases.asSharedFlow()
+
         /**
          * The Mine tab: the caller's creations (newest first, price from the
          * embedded approved+listed submission) THEN system glyphs — Android keeps
@@ -128,13 +155,20 @@ class GlyphMarketService
          * balance}`. Errors surface as Postgres exception text
          * (`insufficient_karma` bubbles from `spend_karma`); the message must
          * reach the caller intact for [glyphMarketErrorMessage]'s substring match.
+         *
+         * A success is announced on [purchases] before it returns, so it runs
+         * inside the caller's uncancellable section (`GlyphPurchase.buyAndRecord`).
          */
-        override suspend fun buy(glyphId: String): BuyGlyphResult =
-            supabase.client.postgrest
-                .rpc(
-                    "buy_glyph",
-                    buildJsonObject { put("p_glyph_id", glyphId) },
-                ).decodeAs()
+        override suspend fun buy(glyphId: String): BuyGlyphResult {
+            val result =
+                supabase.client.postgrest
+                    .rpc(
+                        "buy_glyph",
+                        buildJsonObject { put("p_glyph_id", glyphId) },
+                    ).decodeAs<BuyGlyphResult>()
+            _purchases.emit(GlyphPurchased(glyphId, result))
+            return result
+        }
 
         private fun requireUserId(): String =
             supabase.session?.user?.id

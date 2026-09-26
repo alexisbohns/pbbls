@@ -1,5 +1,6 @@
 package app.pbbls.android.features.glyph.store
 
+import androidx.compose.runtime.snapshots.Snapshot
 import app.pbbls.android.R
 import app.pbbls.android.core.model.BuyGlyphResult
 import app.pbbls.android.core.model.Glyph
@@ -8,6 +9,7 @@ import app.pbbls.android.testing.FakeGlyphMarketService
 import app.pbbls.android.testing.FakeGlyphService
 import app.pbbls.android.testing.FakePathStatsService
 import app.pbbls.android.testing.MainDispatcherRule
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -246,17 +248,33 @@ class GlyphsListViewModelTest {
     // MARK: - Purchase bookkeeping
 
     /**
-     * **What a landed purchase has to change, and why it is all in one place.**
+     * **What a landed purchase has to change on this screen.**
      *
      * `buy_glyph` spends karma, inserts the entitlement and credits the creator.
-     * Recording it means three separate things: the new balance, dropping the
-     * glyph from Community, and invalidating Owned so its next visit refetches.
-     * Before #849 all three lived in an `onSwapped` callback on the host, which
-     * a cancelled coroutine skipped — leaving karma spent against a glyph the
-     * screen still showed as unowned.
+     * The store records it in two places: the detail entry applies the new
+     * balance from inside the panel's uncancellable section, and this list
+     * drops the glyph from Community and invalidates Owned. The list learns of
+     * the purchase from `GlyphMarketServicing.purchases` (#940): beside the
+     * detail on a large screen it never pauses, so no resume refresh fires.
      */
     @Test
-    fun `a landed purchase applies the balance and updates both caches`() =
+    fun `a purchase made elsewhere drops the glyph from Community`() =
+        runTest {
+            val market = FakeGlyphMarketService(community = listOf(item("c1"), item("c2")))
+            val viewModel = viewModel(market)
+            advanceUntilIdle()
+            viewModel.onSelectTab(GlyphTab.COMMU)
+            advanceUntilIdle()
+
+            market.emitPurchase(glyphId = "c1", result = BuyGlyphResult(entitlementId = "e1", balance = 5))
+            advanceUntilIdle()
+
+            val state = viewModel.uiState.value as GlyphsUiState.Content
+            assertEquals(listOf("c2"), state.items.map { it.id })
+        }
+
+    @Test
+    fun `a landed purchase shows the new balance and updates both caches`() =
         runTest {
             val market =
                 FakeGlyphMarketService(
@@ -274,13 +292,15 @@ class GlyphsListViewModelTest {
             viewModel.onSelectTab(GlyphTab.COMMU)
             advanceUntilIdle()
 
-            val target = item("c1")
-            viewModel.openDetail(target)
-            viewModel.onPurchased(target, BuyGlyphResult(entitlementId = "ent-1", balance = 90))
+            // The detail entry records the balance (GlyphDetailViewModel.onRecorded);
+            // the market service announces the purchase.
+            stats.applyKarmaBalance(90)
+            market.emitPurchase(glyphId = "c1", result = BuyGlyphResult(entitlementId = "ent-1", balance = 90))
+            Snapshot.sendApplyNotifications()
             advanceUntilIdle()
 
-            assertEquals("the new balance must reach the shared stats", 90, stats.karma)
             val state = viewModel.uiState.value as GlyphsUiState.Content
+            assertEquals("the list shows the shared balance", 90, state.karma)
             assertEquals("the bought glyph leaves Community", listOf("c2"), state.items.map { it.id })
 
             // Owned was invalidated, so revisiting refetches rather than serving
@@ -290,55 +310,77 @@ class GlyphsListViewModelTest {
             assertEquals(2, market.ownedCount)
         }
 
-    /** The drawer morphs to Owned in place rather than dismissing (M43 D4). */
+    /**
+     * The list does not write the balance itself: the detail entry already
+     * did, inside the uncancellable section, and a second write from this
+     * asynchronous collector could land after a newer balance.
+     */
     @Test
-    fun `a landed purchase flips the open drawer to owned`() =
+    fun `the list leaves the balance to whoever recorded the purchase`() =
         runTest {
             val market = FakeGlyphMarketService(community = listOf(item("c1")))
-            val viewModel = viewModel(market)
+            val stats = FakePathStatsService(karma = 100)
+            val viewModel = viewModel(market, stats = stats)
             advanceUntilIdle()
-            viewModel.onSelectTab(GlyphTab.COMMU)
+
+            market.emitPurchase(glyphId = "c1", result = BuyGlyphResult(entitlementId = "ent-1", balance = 90))
             advanceUntilIdle()
 
-            val target = item("c1")
-            viewModel.openDetail(target)
-            assertFalse(
-                viewModel.covers.value.selected!!
-                    .owned,
-            )
-
-            viewModel.onPurchased(target, BuyGlyphResult(entitlementId = "ent-1", balance = 90))
-
-            val selected = viewModel.covers.value.selected
-            assertTrue(selected!!.owned)
-            assertTrue(selected.acquiredAt != null)
+            assertEquals(100, stats.karma)
         }
 
     /**
-     * The purchase records from inside the panel's uncancellable section, so it
-     * can land after the sheet was swiped away. An unconditional write would
-     * slide the drawer back up on its own, showing an Owned state nobody asked
-     * to see — and a tap landing there dismisses something else entirely.
+     * Beside the detail on a large screen the grid stays live, so a purchase
+     * can land while Owned is the tab on screen. Dropping its cache there
+     * would blank the tab; it refetches in place instead.
      */
     @Test
-    fun `a purchase landing after the drawer closed does not reopen it`() =
+    fun `a purchase landing while on Owned refetches it in place`() =
         runTest {
-            val market = FakeGlyphMarketService(community = listOf(item("c1")))
+            val market = FakeGlyphMarketService(owned = listOf(item("o1", owned = true)))
+            val viewModel = viewModel(market)
+            advanceUntilIdle()
+            viewModel.onSelectTab(GlyphTab.OWNED)
+            advanceUntilIdle()
+
+            market.owned = listOf(item("c1", owned = true), item("o1", owned = true))
+            market.emitPurchase(glyphId = "c1", result = BuyGlyphResult(entitlementId = "ent-1", balance = 90))
+            advanceUntilIdle()
+
+            assertEquals(2, market.ownedCount)
+            val state = viewModel.uiState.value as GlyphsUiState.Content
+            assertEquals(listOf("c1", "o1"), state.items.map { it.id })
+        }
+
+    /**
+     * Beside the detail the grid is live, so a Community load can be in flight
+     * when a purchase lands. Answered before `buy_glyph` committed, it still
+     * carries the bought glyph, and writing it to the cache used to bring the
+     * glyph back.
+     */
+    @Test
+    fun `a community load answered before the purchase does not bring the glyph back`() =
+        runTest {
+            val market = FakeGlyphMarketService(community = listOf(item("c1"), item("c2")))
             val viewModel = viewModel(market)
             advanceUntilIdle()
             viewModel.onSelectTab(GlyphTab.COMMU)
             advanceUntilIdle()
+            // The first resume is skipped; the second reloads Community.
+            viewModel.onResumed()
+            val gate = CompletableDeferred<Unit>()
+            market.communityGate = gate
+            viewModel.onResumed()
+            advanceUntilIdle()
 
-            val target = item("c1")
-            viewModel.openDetail(target)
-            viewModel.closeDetail()
+            market.emitPurchase(glyphId = "c1", result = BuyGlyphResult(entitlementId = "e1", balance = 5))
+            advanceUntilIdle()
+            gate.complete(Unit)
+            advanceUntilIdle()
 
-            viewModel.onPurchased(target, BuyGlyphResult(entitlementId = "ent-1", balance = 90))
-
-            assertNull("the sheet is gone — it must stay gone", viewModel.covers.value.selected)
-            // The purchase itself is still recorded.
+            assertEquals(2, market.communityCount)
             val state = viewModel.uiState.value as GlyphsUiState.Content
-            assertTrue(state.items.isEmpty())
+            assertEquals(listOf("c2"), state.items.map { it.id })
         }
 
     // MARK: - Rename

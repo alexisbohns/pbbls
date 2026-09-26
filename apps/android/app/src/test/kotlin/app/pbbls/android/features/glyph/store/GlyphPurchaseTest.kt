@@ -1,5 +1,6 @@
 package app.pbbls.android.features.glyph.store
 
+import app.pbbls.android.core.data.GlyphPurchased
 import app.pbbls.android.core.model.BuyGlyphResult
 import app.pbbls.android.testing.FakeGlyphMarketService
 import app.pbbls.android.testing.MainDispatcherRule
@@ -8,6 +9,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -115,5 +117,35 @@ class GlyphPurchaseTest {
             assertNull(result)
             assertTrue(recorded.isEmpty())
             assertEquals(1, errors.size)
+        }
+
+    /**
+     * The store list learns of a purchase from `purchases` (#940), whichever
+     * host ran it. On the fake: the real service's `buy` goes through the
+     * Supabase client, which a JVM test cannot construct.
+     */
+    @Test
+    fun `a landed purchase reaches purchases collectors`() =
+        runTest {
+            val market = FakeGlyphMarketService(buyResult = BuyGlyphResult("ent-1", balance = 90))
+            val heard = mutableListOf<GlyphPurchased>()
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { market.purchases.collect { heard += it } }
+
+            GlyphPurchase.buyAndRecord(market = market, glyphId = "g1", onRecorded = {}, onError = { error("unexpected: $it") })
+
+            assertEquals(listOf(GlyphPurchased("g1", BuyGlyphResult("ent-1", balance = 90))), heard)
+        }
+
+    @Test
+    fun `a refused purchase announces nothing`() =
+        runTest {
+            val market = FakeGlyphMarketService()
+            market.failNext = IOException("offline")
+            val heard = mutableListOf<GlyphPurchased>()
+            backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) { market.purchases.collect { heard += it } }
+
+            GlyphPurchase.buyAndRecord(market = market, glyphId = "g1", onRecorded = {}, onError = {})
+
+            assertTrue(heard.isEmpty())
         }
 }

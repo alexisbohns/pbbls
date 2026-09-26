@@ -42,6 +42,7 @@ import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.ProfileEmptyState
 import app.pbbls.android.core.designsystem.isWideWindow
+import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphGridItem
 import app.pbbls.android.core.ui.GlyphView
 import app.pbbls.android.core.ui.GlyphViewCase
@@ -54,22 +55,26 @@ private const val TAG = "glyphs-store"
  * Owned / Commu tabs (per-tab cache renders stale during refetch; error state
  * only over an empty cache), an adaptive glyph grid, "+" → the carve studio
  * as a cover, Mine-cell rename (own glyphs only — system glyphs are inert per
- * D7), Owned/Commu cells → [GlyphDetailDrawer]. A swap applies the returned
- * balance to the shared stats, drops the item from Commu, and invalidates
- * Owned so it refetches lazily.
+ * D7), Owned/Commu cells → [onOpenGlyph], the glyph detail entry (#940). A
+ * swap drops the item from Commu and invalidates Owned: the view model hears
+ * of it from the market service, whichever host ran the buy.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun GlyphsListScreen(
     onBack: () -> Unit,
     onCarve: () -> Unit,
+    onOpenGlyph: (GlyphGridItem) -> Unit,
     modifier: Modifier = Modifier,
+    /**
+     * True as the list pane of a list-detail scene (#940): the grid is
+     * pane-wide there, so the toolbar goes back to the bottom.
+     */
+    isInListPane: Boolean = false,
     viewModel: GlyphsListViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val covers by viewModel.covers.collectAsStateWithLifecycle()
-    val colors = MaterialTheme.colorScheme
-    val isWide = isWideWindow()
 
     // Returning from the carve studio must re-read the current tab: the
     // ViewModel is scoped to the back stack entry, which survives the round
@@ -78,6 +83,51 @@ fun GlyphsListScreen(
         viewModel.onResumed()
         onPauseOrDispose {}
     }
+
+    GlyphsListContent(
+        uiState = uiState,
+        didRenameFail = covers.didRenameFail,
+        toolbarOnEndEdge = isWideWindow() && !isInListPane,
+        onBack = onBack,
+        onCarve = onCarve,
+        onSelectTab = viewModel::onSelectTab,
+        onOpenGlyph = onOpenGlyph,
+        onRename = viewModel::requestRename,
+        modifier = modifier,
+    )
+
+    covers.renaming?.let { glyph ->
+        RenameGlyphDialog(
+            initialName = glyph.name.orEmpty(),
+            onDismiss = viewModel::cancelRename,
+            onSave = viewModel::confirmRename,
+        )
+    }
+}
+
+/**
+ * The store without its ViewModel (#940): the top bar, the tab toolbar and the
+ * three states. [GlyphsListScreen] wires it; the list-detail screenshots
+ * drive it in its pane layout.
+ *
+ * [toolbarOnEndEdge] puts the tabs on the window's end edge, opposite the
+ * rail — a wide window with the store alone in it. As a list pane the grid is
+ * pane-wide, so the tabs go back to the bottom. The grid's padding follows.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+internal fun GlyphsListContent(
+    uiState: GlyphsUiState,
+    didRenameFail: Boolean,
+    toolbarOnEndEdge: Boolean,
+    onBack: () -> Unit,
+    onCarve: () -> Unit,
+    onSelectTab: (GlyphTab) -> Unit,
+    onOpenGlyph: (GlyphGridItem) -> Unit,
+    onRename: (Glyph) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = MaterialTheme.colorScheme
 
     PebblesScreen(
         modifier = modifier,
@@ -112,9 +162,9 @@ fun GlyphsListScreen(
         overlay = {
             GlyphTabBar(
                 selection = uiState.tab,
-                onSelect = viewModel::onSelectTab,
-                vertical = isWide,
-                modifier = Modifier.align(if (isWide) Alignment.CenterEnd else Alignment.BottomCenter),
+                onSelect = onSelectTab,
+                vertical = toolbarOnEndEdge,
+                modifier = Modifier.align(if (toolbarOnEndEdge) Alignment.CenterEnd else Alignment.BottomCenter),
             )
         },
     ) {
@@ -140,7 +190,7 @@ fun GlyphsListScreen(
                         )
                     } else {
                         Column(Modifier.fillMaxSize()) {
-                            if (covers.didRenameFail) {
+                            if (didRenameFail) {
                                 Text(
                                     text = stringResource(R.string.glyph_rename_error),
                                     style = MaterialTheme.typography.bodyLarge,
@@ -157,7 +207,7 @@ fun GlyphsListScreen(
                                 // Clear of the tab toolbar: its height at the bottom
                                 // on phones, its width at the end edge on tablets.
                                 contentPadding =
-                                    if (isWide) {
+                                    if (toolbarOnEndEdge) {
                                         PaddingValues(start = 16.dp, end = 88.dp, top = 16.dp, bottom = 16.dp)
                                     } else {
                                         PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp)
@@ -170,8 +220,8 @@ fun GlyphsListScreen(
                                         item = item,
                                         onTap =
                                             when {
-                                                state.tab != GlyphTab.MINE -> ({ viewModel.openDetail(item) })
-                                                item.glyph.userId != null -> ({ viewModel.requestRename(item.glyph) })
+                                                state.tab != GlyphTab.MINE -> ({ onOpenGlyph(item) })
+                                                item.glyph.userId != null -> ({ onRename(item.glyph) })
                                                 else -> null
                                             },
                                     )
@@ -181,24 +231,6 @@ fun GlyphsListScreen(
                     }
             }
         }
-    }
-
-    covers.renaming?.let { glyph ->
-        RenameGlyphDialog(
-            initialName = glyph.name.orEmpty(),
-            onDismiss = viewModel::cancelRename,
-            onSave = viewModel::confirmRename,
-        )
-    }
-
-    covers.selected?.let { item ->
-        GlyphDetailDrawer(
-            item = item,
-            balance = (uiState as? GlyphsUiState.Content)?.karma ?: 0,
-            market = viewModel.market,
-            onRecorded = { result -> viewModel.onPurchased(item, result) },
-            onDismiss = viewModel::closeDetail,
-        )
     }
 }
 

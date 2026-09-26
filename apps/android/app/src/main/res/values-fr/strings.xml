@@ -367,6 +367,7 @@
     <!-- Boutique. « Commu » : libellé d'onglet iOS, verbatim. -->
     <string name="glyphs_title">Glyphes</string>
     <string name="glyphs_carve_a11y">Graver un nouveau glyphe</string>
+    <string name="glyphs_detail_placeholder">Choisissez un glyphe pour le voir de près.</string>
     <string name="glyph_tab_mine">À moi</string>
     <string name="glyph_tab_owned">Possédés</string>
     <string name="glyph_tab_commu">Commu</string>

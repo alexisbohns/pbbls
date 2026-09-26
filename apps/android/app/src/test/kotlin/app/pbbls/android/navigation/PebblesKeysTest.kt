@@ -1,10 +1,14 @@
 package app.pbbls.android.navigation
 
 import app.pbbls.android.core.model.AuthMode
+import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.GlyphGridItem
+import app.pbbls.android.core.model.GlyphStroke
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.time.OffsetDateTime
 
 /**
  * Every key must survive a serialization round-trip, because that is exactly
@@ -13,6 +17,30 @@ import org.junit.Test
  */
 class PebblesKeysTest {
     private val json = Json
+
+    private val sampleItem =
+        GlyphGridItem(
+            glyph = Glyph(id = "g1", name = "Wave", strokes = emptyList(), viewBox = "0 0 200 200", userId = "u1"),
+            price = 12,
+            owned = false,
+            createdAt = OffsetDateTime.parse("2026-09-01T10:00:00Z"),
+            acquiredAt = null,
+        )
+
+    /** A real stroke, and an acquisition time with sub-seconds and a non-UTC offset. */
+    private val ownedItem =
+        GlyphGridItem(
+            glyph =
+                Glyph(
+                    id = "g2",
+                    strokes = listOf(GlyphStroke(d = "M30,100 Q70,40 100,100 Q130,160 170,100", width = 6.0)),
+                    viewBox = "0 0 200 200",
+                ),
+            price = 7,
+            owned = true,
+            createdAt = null,
+            acquiredAt = OffsetDateTime.parse("2026-09-01T10:00:00.123456+02:00"),
+        )
 
     private fun roundTrip(key: PebblesKey): PebblesKey =
         json.decodeFromString(PebblesKey.serializer(), json.encodeToString(PebblesKey.serializer(), key))
@@ -39,6 +67,8 @@ class PebblesKeysTest {
                 PebblesKey.CreatePebble(resumeDraftId = "draft-1"),
                 PebblesKey.Drafts,
                 PebblesKey.PebbleDetail("pebble-1"),
+                PebblesKey.GlyphDetail(sampleItem),
+                PebblesKey.GlyphDetail(ownedItem),
                 PebblesKey.EditPebble("pebble-1"),
                 PebblesKey.Settings,
                 PebblesKey.SoulForm(soulId = null),
@@ -101,6 +131,7 @@ class PebblesKeysTest {
                 PebblesKey.LabAnnouncement("l"),
                 PebblesKey.LabLogList("m"),
                 PebblesKey.PebbleDetail("p"),
+                PebblesKey.GlyphDetail(sampleItem),
             )
         pushes.forEach {
             assertTrue("$it should render the bar", it is BarKey)

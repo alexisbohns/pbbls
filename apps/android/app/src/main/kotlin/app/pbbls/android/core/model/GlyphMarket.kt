@@ -8,12 +8,20 @@ import java.time.OffsetDateTime
  * One store/picker grid cell — ports iOS `GlyphGridItem`: the glyph plus its
  * market face. [price] is 0 when no approved+listed submission exists;
  * [acquiredAt] is the entitlement's creation time (Owned tab only).
+ *
+ * Serializable because the glyph detail key carries it whole (#940): there is
+ * no by-id read to rebuild it from. The computed [id] has no backing field, so
+ * it is not serialized. Navigation and saved state only (camelCase names):
+ * never decoded from PostgREST, which has its own wire rows below.
  */
+@Serializable
 data class GlyphGridItem(
     val glyph: Glyph,
     val price: Int,
     val owned: Boolean,
+    @Serializable(with = OffsetDateTimeSerializer::class)
     val createdAt: OffsetDateTime?,
+    @Serializable(with = OffsetDateTimeSerializer::class)
     val acquiredAt: OffsetDateTime?,
 ) {
     val id: String get() = glyph.id
