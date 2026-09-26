@@ -88,4 +88,46 @@ class PebblesSceneStrategiesTest {
         val scene = pebblesListDetailStrategy(directive(2)).sceneFor(PebblesKey.You, PebblesKey.CollectionDetail("c1"))
         assertNull(scene)
     }
+
+    @Test
+    fun `idle Path stays full width on two panes`() {
+        assertNull(pebblesListDetailStrategy(directive(2)).sceneFor(PebblesKey.Path))
+    }
+
+    @Test
+    fun `an open pebble sits beside Path on two panes`() {
+        val scene = pebblesListDetailStrategy(directive(2)).sceneFor(PebblesKey.Path, PebblesKey.PebbleDetail("p1"))
+        assertEquals(2, scene!!.entries.size)
+    }
+
+    @Test
+    fun `an open pebble on one pane is left to the sheet`() {
+        assertNull(pebblesListDetailStrategy(directive(1)).sceneFor(PebblesKey.Path, PebblesKey.PebbleDetail("p1")))
+    }
+
+    @Test
+    fun `a pebble left open on Path does not join the souls pair`() {
+        // The flattened stack after switching tab through the rail with a
+        // pebble open beside Path: Path's pair is below People's. The walk no
+        // longer stops at Path's entries (they carry pane metadata now); only
+        // the scene key keeps them out.
+        val entries =
+            listOf(PebblesKey.Path, PebblesKey.PebbleDetail("p1"), PebblesKey.People, PebblesKey.SoulDetail("s1"))
+                .map(::entry)
+        val scene = with(SceneStrategyScope<NavKey>()) { with(pebblesListDetailStrategy(directive(2))) { calculateScene(entries) } }
+
+        assertEquals(entries.drop(2), scene!!.entries)
+        // Back pops the soul only: the idle souls list, with Path's pair still below.
+        assertEquals(entries.take(3), scene.previousEntries)
+    }
+
+    @Test
+    fun `an idle souls list over an open pebble is the souls list alone`() {
+        val entries = listOf(PebblesKey.Path, PebblesKey.PebbleDetail("p1"), PebblesKey.People).map(::entry)
+        val scene = with(SceneStrategyScope<NavKey>()) { with(pebblesListDetailStrategy(directive(2))) { calculateScene(entries) } }
+
+        assertEquals(entries.takeLast(1), scene!!.entries)
+        // Back leaves the tab and lands on the pebble beside Path.
+        assertEquals(entries.take(2), scene.previousEntries)
+    }
 }
