@@ -1,5 +1,8 @@
 package app.pbbls.android.navigation
 
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.navigation3.LocalListDetailSceneScope
+import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import app.pbbls.android.core.model.AuthMode
@@ -78,35 +81,45 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         )
     }
 
-    entry<PebblesKey.People>(metadata = NavTransitions.forKey(PebblesKey.People)) {
+    entry<PebblesKey.People>(
+        metadata = NavTransitions.forKey(PebblesKey.People) + PanePairs.metadataFor(PebblesKey.People),
+    ) {
         SoulsListScreen(
             onBack = navigator::goBack,
-            onOpenSoul = { navigator.navigate(PebblesKey.SoulDetail(it.id)) },
+            onOpenSoul = { navigator.navigateToDetail(PebblesKey.SoulDetail(it.id)) },
             onCreateSoul = { navigator.navigate(PebblesKey.SoulForm()) },
         )
     }
 
-    entry<PebblesKey.Collections>(metadata = NavTransitions.forKey(PebblesKey.Collections)) {
+    entry<PebblesKey.Collections>(
+        metadata = NavTransitions.forKey(PebblesKey.Collections) + PanePairs.metadataFor(PebblesKey.Collections),
+    ) {
         CollectionsListScreen(
             onBack = navigator::goBack,
-            onOpenCollection = { navigator.navigate(PebblesKey.CollectionDetail(it.id)) },
+            onOpenCollection = { navigator.navigateToDetail(PebblesKey.CollectionDetail(it.id)) },
             onCreateCollection = { navigator.navigate(PebblesKey.CollectionForm()) },
         )
     }
 
-    entry<PebblesKey.SoulDetail>(metadata = NavTransitions.forKey(PebblesKey.SoulDetail(""))) { key ->
+    entry<PebblesKey.SoulDetail>(
+        metadata = NavTransitions.forKey(PebblesKey.SoulDetail("")) + PanePairs.detail(PanePair.SOULS),
+    ) { key ->
         SoulDetailScreen(
             soulId = key.soulId,
             onBack = navigator::goBack,
             onEditSoul = { navigator.navigate(PebblesKey.SoulForm(key.soulId)) },
+            showBack = !isBesideList(),
         )
     }
 
-    entry<PebblesKey.CollectionDetail>(metadata = NavTransitions.forKey(PebblesKey.CollectionDetail(""))) { key ->
+    entry<PebblesKey.CollectionDetail>(
+        metadata = NavTransitions.forKey(PebblesKey.CollectionDetail("")) + PanePairs.detail(PanePair.COLLECTIONS),
+    ) { key ->
         CollectionDetailScreen(
             collectionId = key.collectionId,
             onBack = navigator::goBack,
             onEditCollection = { navigator.navigate(PebblesKey.CollectionForm(key.collectionId)) },
+            showBack = !isBesideList(),
         )
     }
 
@@ -266,3 +279,12 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         AcceptInviteScreen(token = key.token, onDismiss = navigator::goBack)
     }
 }
+
+/**
+ * Whether this entry is being shown as a pane of a list-detail scene (#940).
+ * The strategy only builds that scene with two panes visible, so inside it
+ * the list is always on screen.
+ */
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+@Composable
+private fun isBesideList(): Boolean = LocalListDetailSceneScope.current != null

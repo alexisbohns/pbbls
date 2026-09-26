@@ -59,6 +59,9 @@ import java.util.Locale
  * deviation as the soul detail), and it owns the month grouping — only the
  * locale-dependent header formatting lives in [CollectionDetailContent],
  * because only the view knows the active locale.
+ *
+ * @param showBack False beside its list on a large screen (#940): the list is
+ *   the way back, and system back still pops.
  */
 @Composable
 fun CollectionDetailScreen(
@@ -66,6 +69,7 @@ fun CollectionDetailScreen(
     onBack: () -> Unit,
     onEditCollection: () -> Unit,
     modifier: Modifier = Modifier,
+    showBack: Boolean = true,
     viewModel: CollectionDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -86,6 +90,7 @@ fun CollectionDetailScreen(
         uiState = uiState,
         onBack = onBack,
         onEditCollection = onEditCollection,
+        showBack = showBack,
         onRetry = viewModel::retry,
         onOpenPebble = viewModel::openPebble,
         onDeletePebble = viewModel::requestDelete,
@@ -116,6 +121,9 @@ fun CollectionDetailScreen(
 /**
  * One collection without its ViewModel (#940): top bar and the month-grouped
  * pebbles. [CollectionDetailScreen] wires it and owns the covers and dialogs.
+ *
+ * @param showBack False beside its list on a large screen (#940): the list is
+ *   the way back, and system back still pops.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -128,6 +136,7 @@ fun CollectionDetailContent(
     onDeletePebble: (Pebble) -> Unit,
     paletteFor: (Pebble) -> EmotionPalette?,
     modifier: Modifier = Modifier,
+    showBack: Boolean = true,
 ) {
     val colors = MaterialTheme.colorScheme
     val locale = Locale.getDefault()
@@ -139,13 +148,15 @@ fun CollectionDetailContent(
             PebblesTopBar(
                 title = (uiState as? CollectionDetailUiState.Content)?.collection?.name.orEmpty(),
                 leading = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = stringResource(R.string.profile_back_a11y),
-                            tint = colors.onSurfaceVariant,
-                            modifier = Modifier.size(24.dp),
-                        )
+                    if (showBack) {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_arrow_back),
+                                contentDescription = stringResource(R.string.profile_back_a11y),
+                                tint = colors.onSurfaceVariant,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        }
                     }
                 },
                 trailing = {

@@ -54,6 +54,9 @@ import app.pbbls.android.features.path.EditPebbleScreen
  * [SoulFormScreen] as a cover (D9 surface swap). The NavHost passes only the
  * soul id, so [SoulDetailViewModel] fetches the soul itself (iOS receives the
  * row from the list; deviation noted in the plan).
+ *
+ * @param showBack False beside its list on a large screen (#940): the list is
+ *   the way back, and system back still pops.
  */
 @Composable
 fun SoulDetailScreen(
@@ -61,6 +64,7 @@ fun SoulDetailScreen(
     onBack: () -> Unit,
     onEditSoul: () -> Unit,
     modifier: Modifier = Modifier,
+    showBack: Boolean = true,
     viewModel: SoulDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -81,6 +85,7 @@ fun SoulDetailScreen(
         uiState = uiState,
         onBack = onBack,
         onEditSoul = onEditSoul,
+        showBack = showBack,
         onRetry = viewModel::retry,
         onOpenPebble = viewModel::openPebble,
         onDeletePebble = viewModel::requestDelete,
@@ -111,6 +116,9 @@ fun SoulDetailScreen(
 /**
  * One soul without its ViewModel (#940): top bar, header and tagged pebbles.
  * [SoulDetailScreen] wires it and owns the edit cover and delete dialogs.
+ *
+ * @param showBack False beside its list on a large screen (#940): the list is
+ *   the way back, and system back still pops.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -123,6 +131,7 @@ fun SoulDetailContent(
     onDeletePebble: (Pebble) -> Unit,
     paletteFor: (Pebble) -> EmotionPalette?,
     modifier: Modifier = Modifier,
+    showBack: Boolean = true,
 ) {
     val colors = MaterialTheme.colorScheme
 
@@ -132,13 +141,15 @@ fun SoulDetailContent(
             PebblesTopBar(
                 title = (uiState as? SoulDetailUiState.Content)?.soul?.name.orEmpty(),
                 leading = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_arrow_back),
-                            contentDescription = stringResource(R.string.profile_back_a11y),
-                            tint = colors.onSurfaceVariant,
-                            modifier = Modifier.size(24.dp),
-                        )
+                    if (showBack) {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_arrow_back),
+                                contentDescription = stringResource(R.string.profile_back_a11y),
+                                tint = colors.onSurfaceVariant,
+                                modifier = Modifier.size(24.dp),
+                            )
+                        }
                     }
                 },
                 trailing = {
