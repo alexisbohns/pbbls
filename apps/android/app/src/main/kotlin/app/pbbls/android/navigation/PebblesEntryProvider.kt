@@ -151,7 +151,12 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     // store and its placeholder are already a list-detail scene there, so
     // opening a glyph stays inside one scene and the push spec never plays;
     // it is the motion for the scene boundaries that remain.
+    //
+    // The content key is the glyph id. The default is the key's toString(),
+    // which here is the whole grid item, every stroke's path data included, and
+    // it keys the saved state, the view model store and the sheet scene.
     entry<PebblesKey.GlyphDetail>(
+        clazzContentKey = { key -> "glyph-detail:${key.item.id}" },
         metadata = NavTransitions.push + PanePairs.metadataFor<PebblesKey.GlyphDetail>(),
     ) { key ->
         GlyphDetailScreen(item = key.item)

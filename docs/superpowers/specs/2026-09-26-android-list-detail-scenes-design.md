@@ -118,11 +118,17 @@ Two deliberate choices, amended during Part 4:
 - **The key carries the whole grid item, not an id.** There is no "one glyph
   by id" read in `GlyphMarketServicing`, and opening from the grid must stay
   instant. `GlyphGridItem` becomes `@Serializable` (its `Glyph` and strokes
-  already are). A stale item after process death is harmless: `buy_glyph` is
-  server-authoritative and the panel morphs from the server's answer. So
-  `GlyphDetailViewModel` has nothing to load; it holds the buyer's karma
-  balance and records a purchase. The buy itself stays in `GlyphSwapPanel`,
-  which the composer's glyph picker also hosts.
+  already are). The key's item can be stale: it still says unowned after a
+  buy. Ownership recorded on this device survives in `GlyphDetailViewModel`'s
+  saved state, so a panel rebuilt by rotation, resize or a sheet becoming a
+  pane shows the glyph owned rather than offering the swap again (a second
+  buy would fail with `already_owned`, the #849 failure). A purchase made
+  elsewhere (another device) still shows unowned until the store reloads; the
+  server refuses the second buy with `already_owned`. So the view model has
+  nothing to load; it holds the buyer's karma balance and records a purchase.
+  The buy itself stays in `GlyphSwapPanel`, which the composer's glyph picker
+  also hosts. The entry's content key is the glyph id, not the key's
+  `toString()`, which would carry every stroke's path data.
 - **A purchase reaches the list through `GlyphMarketServicing.purchases`.** In
   a pane the list stays resumed beside the detail, so the resume refresh the
   other pairs rely on never fires. The market service emits every successful

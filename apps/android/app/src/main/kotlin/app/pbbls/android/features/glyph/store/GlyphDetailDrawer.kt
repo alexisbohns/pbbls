@@ -75,7 +75,13 @@ fun GlyphDetailScreen(
 ) {
     val balance by viewModel.balance.collectAsStateWithLifecycle()
     GlyphDetailSurface(modifier) {
-        GlyphSwapPanel(item = item, balance = balance, market = viewModel.market, onRecorded = viewModel::onRecorded)
+        GlyphSwapPanel(
+            // Owned if this entry recorded a buy: a rebuilt panel must not offer it again.
+            item = viewModel.shown(item),
+            balance = balance,
+            market = viewModel.market,
+            onRecorded = { result -> viewModel.onRecorded(item, result) },
+        )
     }
 }
 
