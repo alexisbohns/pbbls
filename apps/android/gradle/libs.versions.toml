@@ -173,8 +173,9 @@ androidx-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navig
 
 # Navigation 3 (#852). material3-adaptive-navigation3 is deliberately NOT here:
 # it exists for adaptive list-detail/supporting-pane Scenes on large screens,
-# which are the follow-up to #855 (the rail and the readable column shipped
-# first). Add it with its first Scene, not before: it would have no call site.
+# which are #940, the follow-up to #855 (the rail and the readable column
+# shipped first). Add it with its first Scene, not before: it would have no
+# call site.
 androidx-navigation3-runtime = { group = "androidx.navigation3", name = "navigation3-runtime", version.ref = "navigation3" }
 androidx-navigation3-ui = { group = "androidx.navigation3", name = "navigation3-ui", version.ref = "navigation3" }
 androidx-lifecycle-viewmodel-navigation3 = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-navigation3", version.ref = "lifecycleRuntimeKtx" }
