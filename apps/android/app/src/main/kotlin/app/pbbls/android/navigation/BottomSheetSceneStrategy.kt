@@ -12,6 +12,10 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.rememberLifecycleOwner
@@ -86,9 +90,18 @@ private class BottomSheetScene<T : Any>(
             overlaySlot.onSheetShown()
             onDispose { overlaySlot.onSheetHidden() }
         }
+        // One pop per scene. A second back in the frames between the pop and
+        // the scene leaving composition would otherwise pop whatever is
+        // under the sheet too.
+        var dismissed by remember { mutableStateOf(false) }
         // Full height only: the details it hosts are pages, not peeks.
         ModalBottomSheet(
-            onDismissRequest = onBack,
+            onDismissRequest = {
+                if (!dismissed) {
+                    dismissed = true
+                    onBack()
+                }
+            },
             sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
             // The sheet keeps the status bar clear; the entry pads the
             // gesture bar itself, so its own page colour runs under it rather
