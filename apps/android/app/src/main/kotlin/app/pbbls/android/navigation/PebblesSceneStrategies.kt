@@ -8,11 +8,14 @@ import androidx.compose.material3.adaptive.navigation.BackNavigationBehavior
 import androidx.compose.material3.adaptive.navigation3.ListDetailSceneStrategy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.res.stringResource
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.Scene
 import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.SceneStrategyScope
+import app.pbbls.android.R
+import app.pbbls.android.core.designsystem.DetailPlaceholder
 
 /**
  * The list-detail pairs (#940). Each pair is its own scaffold: the scene key
@@ -92,9 +95,9 @@ object PanePairs {
     fun isList(entry: NavEntry<*>): Boolean = entry.metadata[IS_LIST] == true
 }
 
-// Filled in with the real placeholders by the next change (#940).
 @Composable
-private fun SoulsPlaceholder() = Unit
+private fun SoulsPlaceholder() = DetailPlaceholder(iconRes = R.drawable.ic_people, text = stringResource(R.string.souls_detail_placeholder))
 
 @Composable
-private fun CollectionsPlaceholder() = Unit
+private fun CollectionsPlaceholder() =
+    DetailPlaceholder(iconRes = R.drawable.ic_pebble_collection, text = stringResource(R.string.collections_detail_placeholder))
