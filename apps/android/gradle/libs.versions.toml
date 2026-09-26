@@ -22,6 +22,9 @@ material3 = "1.5.0-alpha27"
 # navigation suite and the glyph toolbar read. navigation-suite has no version
 # of its own: it ships in lockstep with material3 and must stay on its pin.
 material3Adaptive = "1.3.0"
+# WindowSizeClass, which adaptive exposes in its own API. Declared so the
+# direct call site (isWideWindow) has a direct dependency, not a transitive one.
+windowCore = "1.5.1"
 junit = "4.13.2"
 coroutines = "1.11.0"
 # Google's official Compose Preview Screenshot Testing (renders @Preview to PNG
@@ -110,6 +113,7 @@ androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "u
 androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 androidx-compose-material3-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite", version.ref = "material3" }
 androidx-compose-material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive", version.ref = "material3Adaptive" }
+androidx-window-core = { group = "androidx.window", name = "window-core", version.ref = "windowCore" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 screenshot-validation-api = { group = "com.android.tools.screenshot", name = "screenshot-validation-api", version.ref = "screenshot" }

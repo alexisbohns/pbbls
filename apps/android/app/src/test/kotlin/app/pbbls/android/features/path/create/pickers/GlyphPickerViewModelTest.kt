@@ -55,7 +55,7 @@ class GlyphPickerViewModelTest {
                 )
             val viewModel = viewModel(market)
 
-            assertEquals(GlyphPickerUiState.Loading, viewModel.uiState.value)
+            assertEquals(GlyphPickerUiState.Loading(GlyphTab.MINE), viewModel.uiState.value)
             advanceUntilIdle()
 
             val mine = viewModel.uiState.value as GlyphPickerUiState.Content
@@ -71,6 +71,19 @@ class GlyphPickerViewModelTest {
             advanceUntilIdle()
             val commu = viewModel.uiState.value as GlyphPickerUiState.Content
             assertEquals(listOf("c1", "c2"), commu.items.map { it.id })
+        }
+
+    /** Same bug as the store: an uncached tab's Loading must name that tab (#855). */
+    @Test
+    fun `loading an uncached tab keeps that tab selected`() =
+        runTest {
+            val market = FakeGlyphMarketService(owned = listOf(item("o1", owned = true)))
+            val viewModel = viewModel(market)
+            advanceUntilIdle()
+
+            viewModel.onSelectTab(GlyphTab.OWNED)
+
+            assertEquals(GlyphPickerUiState.Loading(GlyphTab.OWNED), viewModel.uiState.value)
         }
 
     /** Design D10: the picker client-filters `!owned` on top of the server `.neq`. */

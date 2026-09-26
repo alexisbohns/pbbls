@@ -55,7 +55,7 @@ class GlyphsListViewModelTest {
             val market = FakeGlyphMarketService(mine = listOf(item("a")))
             val viewModel = viewModel(market)
 
-            assertEquals(GlyphsUiState.Loading, viewModel.uiState.value)
+            assertEquals(GlyphsUiState.Loading(GlyphTab.MINE), viewModel.uiState.value)
             advanceUntilIdle()
 
             val state = viewModel.uiState.value as GlyphsUiState.Content
@@ -77,6 +77,23 @@ class GlyphsListViewModelTest {
             val state = viewModel.uiState.value as GlyphsUiState.Content
             assertEquals(GlyphTab.COMMU, state.tab)
             assertEquals(listOf("c"), state.items.map { it.id })
+        }
+
+    /**
+     * The first visit to a tab has nothing cached, so it passes through
+     * Loading. Loading used to carry no tab, and the screen fell back to Mine:
+     * the tab bar flashed Mine on every first switch (#855).
+     */
+    @Test
+    fun `loading an uncached tab keeps that tab selected`() =
+        runTest {
+            val market = FakeGlyphMarketService(owned = listOf(item("o", owned = true)))
+            val viewModel = viewModel(market)
+            advanceUntilIdle()
+
+            viewModel.onSelectTab(GlyphTab.OWNED)
+
+            assertEquals(GlyphsUiState.Loading(GlyphTab.OWNED), viewModel.uiState.value)
         }
 
     /**
