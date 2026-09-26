@@ -261,28 +261,38 @@ fun PebbleDetailNoDomainDark() {
  * [PebbleDetailContent].
  */
 @OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SheetPreview() {
+    Surface(
+        modifier = Modifier.fillMaxSize().padding(top = 24.dp),
+        shape = MaterialTheme.shapes.extraLarge.copy(bottomStart = CornerSize(0), bottomEnd = CornerSize(0)),
+        color = BottomSheetDefaults.ContainerColor,
+    ) {
+        Column {
+            BottomSheetDefaults.DragHandle(modifier = Modifier.align(Alignment.CenterHorizontally))
+            PebbleDetailContent(
+                uiState = PebbleDetailUiState.Content(fullDetail),
+                palette = previewPalette,
+                onEdit = {},
+                onShare = null,
+                onRetry = {},
+            )
+        }
+    }
+}
+
 @PreviewTest
 @Preview(showBackground = true)
 @Composable
 fun PebbleDetailSheetLight() {
-    PebblesTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize().padding(top = 24.dp),
-            shape = MaterialTheme.shapes.extraLarge.copy(bottomStart = CornerSize(0), bottomEnd = CornerSize(0)),
-            color = BottomSheetDefaults.ContainerColor,
-        ) {
-            Column {
-                BottomSheetDefaults.DragHandle(modifier = Modifier.align(Alignment.CenterHorizontally))
-                PebbleDetailContent(
-                    uiState = PebbleDetailUiState.Content(fullDetail),
-                    palette = previewPalette,
-                    onEdit = {},
-                    onShare = null,
-                    onRetry = {},
-                )
-            }
-        }
-    }
+    PebblesTheme { SheetPreview() }
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun PebbleDetailSheetDark() {
+    PebblesTheme { SheetPreview() }
 }
 
 @PreviewTest
