@@ -1,5 +1,7 @@
 # Android port — parity audit & roadmap
 
+> **Read with the M61 audit (2026-09-17).** This doc audits *feature parity*: what Android was missing against iOS in July. The later M61 Android audit looked at *architecture*: how Android is built. It reversed this doc's working premise that Android ports iOS structure file for file. Its remediation is milestone **M61 · Android Refacto** (#845–#858), and its decisions are in `docs/decisions/log.md` from 2026-09-17 on. Where this doc names a file path, a service pattern, a CompositionLocal, a cover or the M38 design decisions, the M61 entries and `apps/android/CLAUDE.md` win. Its parity gaps are otherwise still worth reading as a snapshot. For current gaps, use the open issues on the `android` label, not this doc.
+
 > Full-source audit of `apps/android` against the iOS reference (`apps/ios/Pebbles`), taken after milestones **M38 · Android App** (bootstrap) and **M39 · Android Record Flow** both shipped. Ten feature areas were audited file-by-file and the findings adversarially verified: every headline "missing on Android" claim was attacked with full-tree greps (all 12 confirmed, zero false gaps), every DB object named below was verified to exist in `packages/supabase/supabase/migrations/`, and every deferral classification was checked against the two milestone design docs and the decisions log. This doc is the planning input for the next Android milestones; the first of them is specced in `2026-07-16-android-profile-design.md`.
 
 ## 1. Where the port stands
