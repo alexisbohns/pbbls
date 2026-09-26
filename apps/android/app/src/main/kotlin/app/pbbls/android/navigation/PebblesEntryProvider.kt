@@ -88,6 +88,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             onBack = navigator::goBack,
             onOpenSoul = { navigator.navigateToDetail(PebblesKey.SoulDetail(it.id)) },
             onCreateSoul = { navigator.navigate(PebblesKey.SoulForm()) },
+            onDeleteConfirmed = { navigator.closeDetail(PebblesKey.SoulDetail(it)) },
         )
     }
 
@@ -98,6 +99,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             onBack = navigator::goBack,
             onOpenCollection = { navigator.navigateToDetail(PebblesKey.CollectionDetail(it.id)) },
             onCreateCollection = { navigator.navigate(PebblesKey.CollectionForm()) },
+            onDeleteConfirmed = { navigator.closeDetail(PebblesKey.CollectionDetail(it)) },
         )
     }
 

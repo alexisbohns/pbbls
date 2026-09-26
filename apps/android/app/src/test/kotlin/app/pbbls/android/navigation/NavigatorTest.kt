@@ -178,4 +178,37 @@ class NavigatorTest {
             state.backStacks[PebblesKey.Path]!!.toList(),
         )
     }
+
+    @Test
+    fun `closing the open detail pops it`() {
+        navigator.navigate(PebblesKey.People)
+        navigator.navigateToDetail(PebblesKey.SoulDetail("s1"))
+
+        navigator.closeDetail(PebblesKey.SoulDetail("s1"))
+
+        assertEquals(listOf<NavKey>(PebblesKey.People), state.backStacks[PebblesKey.People]!!.toList())
+    }
+
+    @Test
+    fun `closing a detail that is not on top leaves the stack alone`() {
+        navigator.navigate(PebblesKey.People)
+        navigator.navigateToDetail(PebblesKey.SoulDetail("s1"))
+
+        navigator.closeDetail(PebblesKey.SoulDetail("s2"))
+
+        assertEquals(
+            listOf<NavKey>(PebblesKey.People, PebblesKey.SoulDetail("s1")),
+            state.backStacks[PebblesKey.People]!!.toList(),
+        )
+    }
+
+    @Test
+    fun `closing a detail at a tab root leaves the stack alone`() {
+        navigator.navigate(PebblesKey.People)
+
+        navigator.closeDetail(PebblesKey.SoulDetail("s1"))
+
+        assertEquals(PebblesKey.People, state.topLevelRoute)
+        assertEquals(listOf<NavKey>(PebblesKey.People), state.backStacks[PebblesKey.People]!!.toList())
+    }
 }
