@@ -203,8 +203,8 @@ class GlyphPickerViewModel
 
         /**
          * A purchase landed in the inline swap panel. Record-only, mirroring
-         * [app.pbbls.android.features.glyph.store.GlyphsListViewModel.onPurchased]'s
-         * balance half — the picker does not maintain a Commu/Owned cache
+         * [app.pbbls.android.features.glyph.store.GlyphDetailViewModel.onRecorded]
+         * — the picker does not maintain a Commu/Owned cache
          * invalidation because a successful buy immediately calls [selectGlyph]
          * and closes the sheet, so there is no stale list left on screen to fix
          * up.
