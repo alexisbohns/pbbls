@@ -114,6 +114,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             soulId = key.soulId,
             onBack = navigator::goBack,
             onEditSoul = { navigator.navigate(PebblesKey.SoulForm(key.soulId)) },
+            onOpenPebble = { navigator.navigate(PebblesKey.EditPebble(it)) },
             showBack = !isInListDetailPane(),
         )
     }
@@ -125,6 +126,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             collectionId = key.collectionId,
             onBack = navigator::goBack,
             onEditCollection = { navigator.navigate(PebblesKey.CollectionForm(key.collectionId)) },
+            onOpenPebble = { navigator.navigate(PebblesKey.EditPebble(it)) },
             showBack = !isInListDetailPane(),
         )
     }
