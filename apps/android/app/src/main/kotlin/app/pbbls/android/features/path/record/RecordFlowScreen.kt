@@ -42,6 +42,7 @@ import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.data.rememberTapHaptics
+import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.features.path.create.pickers.rememberGlyphPickerState
@@ -145,7 +146,8 @@ fun RecordFlowScreen(
                 .fillMaxSize()
                 .background(colors.surface)
                 .safeDrawingPadding()
-                .imePadding(),
+                .imePadding()
+                .readableWidth(),
     ) {
         if (flow.step != RecordStep.SUCCESS) {
             RecordFlowChrome(

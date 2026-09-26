@@ -37,6 +37,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.LocalReferenceDataService
+import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.designsystem.toRgbHex
 import app.pbbls.android.core.model.renderHeightDp
 import app.pbbls.android.features.path.create.PebbleForm
@@ -103,7 +104,8 @@ fun EditPebbleScreen(
         modifier
             .fillMaxSize()
             .background(colors.surface)
-            .safeDrawingPadding(),
+            .safeDrawingPadding()
+            .readableWidth(),
     ) {
         EditTopBar(
             isSaving = content?.isSaving == true,

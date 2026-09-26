@@ -3,6 +3,7 @@ package app.pbbls.android
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -12,6 +13,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.model.Collection
 import app.pbbls.android.core.model.CollectionMode
 import app.pbbls.android.core.model.GlyphStroke
@@ -98,4 +100,18 @@ fun ProfileComponentsLight() {
 @Composable
 fun ProfileComponentsDark() {
     PebblesTheme { ProfileGallery() }
+}
+
+// The real ProfileScreen hosts these in PebblesScreen's readable column
+// (#855). The gallery wraps its width, so the wide renders place it in that
+// column explicitly; the phone renders above stay untouched.
+@PreviewTest
+@PreviewWide
+@Composable
+fun ProfileComponentsWide() {
+    PebblesTheme {
+        Box(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface)) {
+            Box(Modifier.readableWidth()) { ProfileGallery() }
+        }
+    }
 }

@@ -39,6 +39,7 @@ import app.pbbls.android.core.designsystem.PebblesAuthSwitcher
 import app.pbbls.android.core.designsystem.PebblesCheckbox
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.openLegalDoc
+import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.model.AuthMode
 
 private const val TAG = "auth"
@@ -104,6 +105,7 @@ fun AuthContent(
                 .background(MaterialTheme.colorScheme.surface)
                 .systemBarsPadding()
                 .imePadding()
+                .readableWidth()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp),

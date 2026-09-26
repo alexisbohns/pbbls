@@ -30,6 +30,7 @@ import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
+import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.ui.GlyphView
 import app.pbbls.android.core.ui.GlyphViewCase
 
@@ -87,7 +88,8 @@ fun AcceptInviteContent(
             modifier
                 .fillMaxSize()
                 .background(colors.surface)
-                .safeDrawingPadding(),
+                .safeDrawingPadding()
+                .readableWidth(),
     ) {
         PebblesTopBar(
             title = stringResource(R.string.connections_accept_title),

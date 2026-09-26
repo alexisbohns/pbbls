@@ -33,6 +33,7 @@ import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalEmotionPaletteService
+import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.model.SharedPebbleLink
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.features.path.read.PebblePrivacyBadge
@@ -114,7 +115,8 @@ fun PebbleDetailScreen(
                         awaitPointerEvent().changes.forEach { it.consume() }
                     }
                 }
-            }.safeDrawingPadding(),
+            }.safeDrawingPadding()
+            .readableWidth(),
     ) {
         DetailTopBar(
             visibility = detail?.visibility,

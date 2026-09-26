@@ -32,6 +32,7 @@ import app.pbbls.android.core.data.Connection
 import app.pbbls.android.core.designsystem.DeleteErrorDialog
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
+import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.ui.GlyphView
 import app.pbbls.android.core.ui.GlyphViewCase
 
@@ -102,7 +103,8 @@ fun ConnectionsContent(
             modifier
                 .fillMaxSize()
                 .background(colors.surface)
-                .safeDrawingPadding(),
+                .safeDrawingPadding()
+                .readableWidth(),
     ) {
         PebblesTopBar(
             title = stringResource(R.string.connections_title),

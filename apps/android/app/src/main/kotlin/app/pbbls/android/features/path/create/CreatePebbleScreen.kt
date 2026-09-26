@@ -37,6 +37,7 @@ import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
+import app.pbbls.android.core.designsystem.readableWidth
 
 /**
  * The create-pebble surface (D5) — ports iOS `CreatePebbleSheet`. Owns the
@@ -114,7 +115,8 @@ fun CreatePebbleScreen(
                 .fillMaxSize()
                 .background(colors.surface)
                 .safeDrawingPadding()
-                .imePadding(),
+                .imePadding()
+                .readableWidth(),
     ) {
         CreateTopBar(
             saveEnabled = draft.isValid,

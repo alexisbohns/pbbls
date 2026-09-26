@@ -42,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
+import app.pbbls.android.core.designsystem.readableWidth
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.EncodeHintType
 import com.google.zxing.common.BitMatrix
@@ -110,7 +111,8 @@ fun InviteContent(
             modifier
                 .fillMaxSize()
                 .background(colors.surface)
-                .safeDrawingPadding(),
+                .safeDrawingPadding()
+                .readableWidth(),
     ) {
         PebblesTopBar(
             title = stringResource(R.string.connections_invite_title),

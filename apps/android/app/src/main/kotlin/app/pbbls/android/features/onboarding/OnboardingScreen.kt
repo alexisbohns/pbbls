@@ -31,6 +31,7 @@ import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
+import app.pbbls.android.core.designsystem.readableWidth
 
 /**
  * Paged onboarding flow — the `OnboardingView` analog. One [OnboardingPageView]
@@ -74,7 +75,8 @@ fun OnboardingScreen(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .safeDrawingPadding(),
+                    .safeDrawingPadding()
+                    .readableWidth(),
         ) {
             Row(
                 modifier =

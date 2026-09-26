@@ -14,6 +14,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.GlyphStroke
@@ -102,7 +103,8 @@ private fun StepPreview(
     Column(
         Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface),
+            .background(MaterialTheme.colorScheme.surface)
+            .readableWidth(),
     ) {
         RecordFlowChrome(step = step, onBack = {}, onClose = {})
         RecordStepScaffold(
@@ -227,6 +229,7 @@ fun RecordPhotoStepDark() {
 
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
+@PreviewWideTall
 @PreviewLargeFontTall
 @Composable
 fun RecordNameStepEmptyLight() {
@@ -251,6 +254,7 @@ fun RecordNameStepNearLimitDark() {
 
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
+@PreviewWideTall
 @PreviewLargeFontTall
 @Composable
 fun RecordDomainStepLight() {
