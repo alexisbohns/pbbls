@@ -108,6 +108,20 @@ benchmark = "1.5.0"
 uiautomator = "2.4.0"
 androidxTestExtJunit = "1.3.0"
 
+# Compose UI tests on the JVM (#857). Robolectric runs the real framework inside
+# `testDebugUnitTest`, so these need no emulator and no CI wiring of their own.
+# 4.17 is the first release with an SDK 37 android-all jar, which matches
+# compileSdk. The Compose ui-test artifacts are BOM-managed (no version here).
+# There is no navigation3-testing artifact to add: Nav 3 back stacks are plain
+# SnapshotStateLists, driven through the real UI instead.
+robolectric = "4.17"
+# Declared only to lift what ui-test-junit4 drags in transitively (espresso 3.5,
+# test-core 1.5): espresso 3.5 reflects on InputManager.getInstance(), which
+# SDK 37 removed, so every Compose test fails at its first idle wait. Drop these
+# once the Compose BOM's ui-test depends on the 1.7 line itself.
+espresso = "3.7.0"
+androidxTestCore = "1.7.0"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
@@ -194,6 +208,16 @@ androidx-profileinstaller = { group = "androidx.profileinstaller", name = "profi
 androidx-benchmark-macro-junit4 = { group = "androidx.benchmark", name = "benchmark-macro-junit4", version.ref = "benchmark" }
 androidx-test-uiautomator = { group = "androidx.test.uiautomator", name = "uiautomator", version.ref = "uiautomator" }
 androidx-test-ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "androidxTestExtJunit" }
+
+# Compose UI tests on the JVM (#857). ui-test-manifest registers the empty
+# ComponentActivity `createComposeRule()` launches; hilt-android-testing swaps the
+# production modules for the fakes in src/test/.../testing/.
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
+androidx-compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-test-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso" }
+androidx-test-core = { group = "androidx.test", name = "core", version.ref = "androidxTestCore" }
+hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

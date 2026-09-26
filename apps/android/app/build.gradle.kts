@@ -136,8 +136,20 @@ android {
     // quietly exercise a stub. It is bounded because these are JVM tests of pure
     // logic and state holders by policy — anything needing real framework
     // behaviour waits for Robolectric (#857).
+    //
+    // `isIncludeAndroidResources` is for the Robolectric suite (#857): it merges
+    // the app's resources, assets and manifest into the unit-test classpath, so a
+    // Compose UI test renders the real strings.xml, fonts and raw SVGs — and
+    // `onNodeWithText(context.getString(...))` means what it says. Plain JVM
+    // tests never read it.
     testOptions {
         unitTests.isReturnDefaultValues = true
+        unitTests.isIncludeAndroidResources = true
+        // Robolectric's SDK 36+ images set up shared memory through a JDK
+        // internal that JDK 17+ no longer exports; without this every Robolectric
+        // test dies in setup with "Failed to interact with raw FileDescriptor
+        // internals". Harmless to the plain JVM tests, which never touch it.
+        unitTests.all { it.jvmArgs("--add-opens=java.base/jdk.internal.access=ALL-UNNAMED") }
     }
 
     // Android Lint runs in android.yml on every PR (#845), so it has to be a
@@ -304,6 +316,23 @@ dependencies {
     // (#851). Test-only, and a JVM test like any other, so `testDebugUnitTest`
     // in android.yml is already its CI gate.
     testImplementation(libs.konsist)
+
+    // Compose UI and navigation tests on the JVM (#857). Robolectric supplies the
+    // framework, so these run in `testDebugUnitTest` beside everything else — no
+    // emulator, nothing new in android.yml. hilt-android-testing is what lets a
+    // test launch the real MainActivity over the fake graph in
+    // src/test/.../testing/FakeServicesModule.kt; kspTest generates the test
+    // components. ui-test-manifest is debugImplementation because it contributes
+    // a manifest entry (the empty ComponentActivity) the test APK merges from
+    // the debug variant.
+    testImplementation(composeBom)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.androidx.test.espresso.core)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.hilt.android.testing)
+    kspTest(libs.hilt.compiler)
+    debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     // Compose Preview Screenshot Testing renders the @PreviewTest composables in
     // src/screenshotTest/ to PNGs. ui-tooling supplies the @Preview runtime.
