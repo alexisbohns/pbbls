@@ -49,13 +49,14 @@ import app.pbbls.android.core.model.PebbleDraft
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.ValencePolarity
+import app.pbbls.android.core.ui.GlyphPickerSheet
+import app.pbbls.android.core.ui.GlyphPickerSlot
 import app.pbbls.android.core.ui.ReferenceStrings
 import app.pbbls.android.core.ui.ReferenceType
 import app.pbbls.android.core.ui.render.GlyphImage
 import app.pbbls.android.core.ui.render.PebbleStaticRender
 import app.pbbls.android.core.ui.render.ValenceGlyph
 import app.pbbls.android.features.path.create.pickers.EmotionPickerSheet
-import app.pbbls.android.features.path.create.pickers.GlyphPickerSheet
 import app.pbbls.android.features.path.create.pickers.SoulPickerSheet
 import app.pbbls.android.features.path.create.pickers.ValencePickerSheet
 
@@ -69,6 +70,9 @@ enum class PickerKind { EMOTION, VALENCE, SOUL, GLYPH }
  * every edit through [onDraftChange]. It hosts the four picker sheets and the
  * `When` dialogs, opening exactly one at a time. Reused by C's create screen and
  * D's edit screen — the optional [renderSvg]/[strokeColor] header is D's.
+ *
+ * @param glyphPicker The glyph picker's body. It is glyph's, so this form
+ *   receives it rather than importing it (#914).
  */
 @Composable
 fun PebbleForm(
@@ -81,6 +85,7 @@ fun PebbleForm(
     selectedGlyph: Glyph?,
     onGlyphPicked: (Glyph?) -> Unit,
     saveError: String?,
+    glyphPicker: GlyphPickerSlot,
     modifier: Modifier = Modifier,
     renderSvg: String? = null,
     strokeColor: String? = null,
@@ -232,6 +237,7 @@ fun PebbleForm(
                     onGlyphPicked(it)
                     activePicker = null
                 },
+                picker = glyphPicker,
             )
         null -> Unit
     }

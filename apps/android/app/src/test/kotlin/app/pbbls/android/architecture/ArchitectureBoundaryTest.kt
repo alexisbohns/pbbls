@@ -43,8 +43,6 @@ class ArchitectureBoundaryTest {
             "$FEATURES.path.create.pickers -> $FEATURES.glyph.store.GlyphSwapPanel",
             "$FEATURES.path.create.pickers -> $FEATURES.glyph.store.GlyphTab",
             "$FEATURES.path.create.pickers -> $FEATURES.glyph.store.GlyphTabBar",
-            // …and profile reaches across path to get at that same sheet.
-            "$FEATURES.profile -> $FEATURES.path.create.pickers.GlyphPickerSheet",
         )
 
     @Test
@@ -97,7 +95,7 @@ class ArchitectureBoundaryTest {
         // makes growing it a deliberate, visible act rather than a quiet +1.
         assertEquals(
             "the frozen cross-feature list is a ratchet — shrink it (#914), never grow it",
-            6,
+            5,
             frozenCrossFeatureImports.size,
         )
     }

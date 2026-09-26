@@ -57,9 +57,10 @@ import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
 import app.pbbls.android.core.designsystem.openLegalDoc
 import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.ui.GlyphPickerSheet
+import app.pbbls.android.core.ui.GlyphPickerSlot
 import app.pbbls.android.core.ui.GlyphView
 import app.pbbls.android.core.ui.GlyphViewCase
-import app.pbbls.android.features.path.create.pickers.GlyphPickerSheet
 
 private const val TAG = "settings"
 
@@ -75,12 +76,16 @@ private const val TAG = "settings"
  * The profile, its glyph, and the account's email/providers are fetched by
  * [SettingsViewModel] itself (#852) rather than handed down by
  * `ProfileScreen` — `SettingsKey` carries no argument to seed from.
+ *
+ * @param glyphPicker The glyph picker's body. It is glyph's, so the entry
+ *   provider hands it in rather than this screen importing it (#914).
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsScreen(
     onDismiss: () -> Unit,
     onSaved: (displayName: String, glyph: Glyph?, handle: String?, isPublic: Boolean) -> Unit,
+    glyphPicker: GlyphPickerSlot,
     modifier: Modifier = Modifier,
     viewModel: SettingsViewModel = hiltViewModel(),
 ) {
@@ -397,6 +402,7 @@ fun SettingsScreen(
             onSelected = { glyph ->
                 viewModel.onGlyphPicked(glyph)
             },
+            picker = glyphPicker,
         )
     }
 }

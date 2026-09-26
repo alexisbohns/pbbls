@@ -40,6 +40,7 @@ import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.designsystem.toRgbHex
 import app.pbbls.android.core.model.renderHeightDp
+import app.pbbls.android.core.ui.GlyphPickerSlot
 import app.pbbls.android.features.path.create.PebbleForm
 import app.pbbls.android.features.path.create.VisibilityChip
 
@@ -70,6 +71,7 @@ fun EditPebbleScreen(
     pebbleId: String,
     onDismiss: () -> Unit,
     onSaved: () -> Unit,
+    glyphPicker: GlyphPickerSlot,
     modifier: Modifier = Modifier,
     viewModel: EditPebbleViewModel = hiltViewModel(),
 ) {
@@ -141,6 +143,7 @@ fun EditPebbleScreen(
                         selectedGlyph = state.selectedGlyph,
                         onGlyphPicked = viewModel::onGlyphPicked,
                         saveError = saveError,
+                        glyphPicker = glyphPicker,
                         renderSvg = state.renderSvg,
                         strokeColor = strokeColor,
                         renderHeight = state.renderHeightDp.dp,

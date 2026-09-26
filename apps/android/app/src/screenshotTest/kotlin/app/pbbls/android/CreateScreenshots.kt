@@ -221,6 +221,8 @@ private fun FormPreview(
         selectedGlyph = selectedGlyph,
         onGlyphPicked = {},
         saveError = saveError,
+        // The picker sheet is closed in every capture.
+        glyphPicker = { _, _, _, _ -> },
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface),
     )
 }

@@ -7,7 +7,8 @@ import app.pbbls.android.core.model.FormSnap
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.PebbleCollection
 import app.pbbls.android.core.model.PebbleDraft
-import app.pbbls.android.features.path.create.pickers.GlyphPickerState
+import app.pbbls.android.core.ui.GlyphPickerSlot
+import app.pbbls.android.core.ui.GlyphPickerState
 import app.pbbls.android.features.path.record.steps.RecordCollectionStep
 import app.pbbls.android.features.path.record.steps.RecordDomainStep
 import app.pbbls.android.features.path.record.steps.RecordEmotionStep
@@ -52,6 +53,7 @@ fun RecordStepContent(
     snapBlockedMessage: String?,
     publishError: String?,
     glyphPickerState: GlyphPickerState,
+    glyphPicker: GlyphPickerSlot,
     onPickPhoto: () -> Unit,
     onRetryPhoto: () -> Unit,
     onRemovePhoto: () -> Unit,
@@ -130,6 +132,7 @@ fun RecordStepContent(
                 selectedGlyphId = draft.glyphId,
                 onSelect = onGlyphPicked,
                 state = glyphPickerState,
+                picker = glyphPicker,
                 modifier = modifier,
             )
 

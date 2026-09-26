@@ -38,6 +38,7 @@ import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
 import app.pbbls.android.core.designsystem.readableWidth
+import app.pbbls.android.core.ui.GlyphPickerSlot
 
 /**
  * The create-pebble surface (D5) — ports iOS `CreatePebbleSheet`. Owns the
@@ -75,6 +76,7 @@ import app.pbbls.android.core.designsystem.readableWidth
 fun CreatePebbleScreen(
     onCreated: (String) -> Unit,
     onCancel: () -> Unit,
+    glyphPicker: GlyphPickerSlot,
     modifier: Modifier = Modifier,
     resumeDraftId: String? = null,
     onDraftSaved: () -> Unit = onCancel,
@@ -134,6 +136,7 @@ fun CreatePebbleScreen(
             selectedGlyph = uiState.selectedGlyph,
             onGlyphPicked = viewModel::onGlyphPicked,
             saveError = saveError,
+            glyphPicker = glyphPicker,
             modifier = Modifier.weight(1f),
             formSnap = uiState.snap,
             onAddPhoto = {

@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation3.runtime.EntryProviderScope
 import androidx.navigation3.runtime.NavKey
 import app.pbbls.android.core.model.AuthMode
+import app.pbbls.android.core.ui.GlyphPickerSlot
 import app.pbbls.android.features.auth.AuthScreen
 import app.pbbls.android.features.connections.AcceptInviteScreen
 import app.pbbls.android.features.connections.ConnectionsScreen
@@ -24,6 +25,7 @@ import app.pbbls.android.features.path.EditPebbleScreen
 import app.pbbls.android.features.path.PathScreen
 import app.pbbls.android.features.path.PebbleDetailScreen
 import app.pbbls.android.features.path.create.CreatePebbleScreen
+import app.pbbls.android.features.path.create.pickers.GlyphPickerContent
 import app.pbbls.android.features.path.record.RecordFlowScreen
 import app.pbbls.android.features.profile.AchievementsScreen
 import app.pbbls.android.features.profile.CollectionDetailScreen
@@ -179,7 +181,12 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     // ---- Modal covers promoted to entries (#852) ----
 
     entry<PebblesKey.SoulForm>(metadata = NavTransitions.forKey(PebblesKey.SoulForm())) { key ->
-        SoulFormScreen(soulId = key.soulId, onDismiss = navigator::goBack, onSaved = navigator::goBack)
+        SoulFormScreen(
+            soulId = key.soulId,
+            onDismiss = navigator::goBack,
+            onSaved = navigator::goBack,
+            glyphPicker = glyphPicker,
+        )
     }
 
     entry<PebblesKey.CollectionForm>(metadata = NavTransitions.forKey(PebblesKey.CollectionForm())) { key ->
@@ -197,6 +204,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             // state; an entry has no such handle back to its parent, so the
             // parent picks them up on its own resume refresh instead (#852).
             onSaved = { _, _, _, _ -> navigator.goBack() },
+            glyphPicker = glyphPicker,
         )
     }
 
@@ -241,6 +249,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             // own resume refresh (mirroring PathViewModel.onResumed) is what
             // re-reads the pebble (M58 D5, #852).
             onSaved = navigator::goBack,
+            glyphPicker = glyphPicker,
         )
     }
 
@@ -257,6 +266,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             // `onPublished` reload used to do.
             onPublished = {},
             onDismiss = navigator::goBack,
+            glyphPicker = glyphPicker,
         )
     }
 
@@ -272,6 +282,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
                 navigator.navigateToDetail(PebblesKey.PebbleDetail(pebbleId))
             },
             onCancel = navigator::goBack,
+            glyphPicker = glyphPicker,
         )
     }
 
@@ -316,6 +327,21 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     entry<PebblesKey.AcceptInvite>(metadata = NavTransitions.forKey(PebblesKey.AcceptInvite(""))) { key ->
         AcceptInviteScreen(token = key.token, onDismiss = navigator::goBack)
     }
+}
+
+/**
+ * The glyph picker's body, for the path and profile screens that host it
+ * (#914). The picker is glyph's and a feature may not import another feature,
+ * so the hosts take it as a slot and this file, which sees every feature, is
+ * where it gets filled.
+ */
+private val glyphPicker: GlyphPickerSlot = { currentGlyphId, onSelected, state, modifier ->
+    GlyphPickerContent(
+        currentGlyphId = currentGlyphId,
+        onSelected = onSelected,
+        modifier = modifier,
+        state = state,
+    )
 }
 
 /**
