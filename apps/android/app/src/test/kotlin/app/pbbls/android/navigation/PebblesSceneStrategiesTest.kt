@@ -60,6 +60,15 @@ class PebblesSceneStrategiesTest {
     }
 
     @Test
+    fun `three partitions still pair a soul with its list`() {
+        // An extra-large window: the scaffold has room for an extra pane, but
+        // the pair has none, so the scene is still exactly the two entries.
+        val scene = pebblesListDetailStrategy(directive(3)).sceneFor(PebblesKey.People, PebblesKey.SoulDetail("s1"))
+
+        assertEquals(2, scene!!.entries.size)
+    }
+
+    @Test
     fun `one pane leaves the push to the default scene`() {
         assertNull(pebblesListDetailStrategy(directive(1)).sceneFor(PebblesKey.People, PebblesKey.SoulDetail("s1")))
     }

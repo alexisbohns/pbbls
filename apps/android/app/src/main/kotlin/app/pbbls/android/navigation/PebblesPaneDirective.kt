@@ -25,7 +25,15 @@ fun pebblesPaneDirective(info: WindowAdaptiveInfo): PaneScaffoldDirective {
     val recommended = calculatePaneScaffoldDirective(info)
     val isBookPosture = info.windowPosture.hingeList.any { it.isVertical && it.isSeparating }
     return if (isBookPosture && recommended.maxHorizontalPartitions < 2) {
-        recommended.copy(maxHorizontalPartitions = 2, horizontalPartitionSpacerSize = 24.dp)
+        // M3 also stacks two panes vertically in a single-column window that
+        // is Expanded in height; once the fold splits it side by side, that
+        // goes, as calculatePaneScaffoldDirectiveWithTwoPanesOnMediumWidth does.
+        recommended.copy(
+            maxHorizontalPartitions = 2,
+            horizontalPartitionSpacerSize = 24.dp,
+            maxVerticalPartitions = 1,
+            verticalPartitionSpacerSize = 0.dp,
+        )
     } else {
         recommended
     }
