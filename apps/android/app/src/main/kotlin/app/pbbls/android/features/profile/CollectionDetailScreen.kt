@@ -40,6 +40,8 @@ import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
 import app.pbbls.android.core.designsystem.ProfileEmptyState
+import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.core.ui.PebbleRow
 import app.pbbls.android.features.path.EditPebbleScreen
 import app.pbbls.android.features.profile.components.CollectionModeBadge
@@ -70,7 +72,6 @@ fun CollectionDetailScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val covers by viewModel.covers.collectAsStateWithLifecycle()
     val palettes = LocalEmotionPaletteService.current
-    val colors = MaterialTheme.colorScheme
 
     // Guarded on the id, so a rotation re-runs this without re-fetching.
     LaunchedEffect(collectionId) { viewModel.start(collectionId) }
@@ -82,6 +83,54 @@ fun CollectionDetailScreen(
         onPauseOrDispose {}
     }
 
+    CollectionDetailContent(
+        uiState = uiState,
+        onBack = onBack,
+        onEditCollection = onEditCollection,
+        onRetry = viewModel::retry,
+        onOpenPebble = viewModel::openPebble,
+        onDeletePebble = viewModel::requestDelete,
+        paletteFor = { pebble -> pebble.emotion?.let { palettes.palette(it.id) } },
+        modifier = modifier,
+    )
+
+    covers.editingPebbleId?.let { pebbleId ->
+        EditPebbleScreen(
+            pebbleId = pebbleId,
+            onDismiss = viewModel::closePebble,
+            onSaved = viewModel::onPebbleSaved,
+            modifier = Modifier.fillMaxSize(),
+        )
+    }
+
+    covers.pendingDeletion?.let { target ->
+        ConfirmDeleteDialog(
+            title = stringResource(R.string.pebble_delete_confirm_title, target.name),
+            message = stringResource(R.string.pebble_delete_confirm_message),
+            onConfirm = viewModel::confirmDelete,
+            onDismiss = viewModel::cancelDelete,
+        )
+    }
+    if (covers.didDeleteFail) DeleteErrorDialog(onDismiss = viewModel::dismissDeleteError)
+}
+
+/**
+ * One collection without its ViewModel (#940): top bar and the month-grouped
+ * pebbles. [CollectionDetailScreen] wires it and owns the covers and dialogs.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun CollectionDetailContent(
+    uiState: CollectionDetailUiState,
+    onBack: () -> Unit,
+    onEditCollection: () -> Unit,
+    onRetry: () -> Unit,
+    onOpenPebble: (String) -> Unit,
+    onDeletePebble: (Pebble) -> Unit,
+    paletteFor: (Pebble) -> EmotionPalette?,
+    modifier: Modifier = Modifier,
+) {
+    val colors = MaterialTheme.colorScheme
     val locale = Locale.getDefault()
     val monthFormatter = remember(locale) { DateTimeFormatter.ofPattern("MMMM yyyy", locale) }
 
@@ -129,7 +178,7 @@ fun CollectionDetailScreen(
                         style = MaterialTheme.typography.bodyLarge,
                         color = colors.onSurfaceVariant,
                     )
-                    TextButton(onClick = viewModel::retry) {
+                    TextButton(onClick = onRetry) {
                         Text(
                             text = stringResource(R.string.profile_retry),
                             style = MaterialTheme.typography.labelLarge,
@@ -181,9 +230,9 @@ fun CollectionDetailScreen(
                                         {
                                             PebbleRow(
                                                 pebble = pebble,
-                                                palette = pebble.emotion?.let { palettes.palette(it.id) },
-                                                onTap = { viewModel.openPebble(pebble.id) },
-                                                onDelete = { viewModel.requestDelete(pebble) },
+                                                palette = paletteFor(pebble),
+                                                onTap = { onOpenPebble(pebble.id) },
+                                                onDelete = { onDeletePebble(pebble) },
                                             )
                                         }
                                     },
@@ -193,23 +242,4 @@ fun CollectionDetailScreen(
                 }
         }
     }
-
-    covers.editingPebbleId?.let { pebbleId ->
-        EditPebbleScreen(
-            pebbleId = pebbleId,
-            onDismiss = viewModel::closePebble,
-            onSaved = viewModel::onPebbleSaved,
-            modifier = Modifier.fillMaxSize(),
-        )
-    }
-
-    covers.pendingDeletion?.let { target ->
-        ConfirmDeleteDialog(
-            title = stringResource(R.string.pebble_delete_confirm_title, target.name),
-            message = stringResource(R.string.pebble_delete_confirm_message),
-            onConfirm = viewModel::confirmDelete,
-            onDismiss = viewModel::cancelDelete,
-        )
-    }
-    if (covers.didDeleteFail) DeleteErrorDialog(onDismiss = viewModel::dismissDeleteError)
 }
