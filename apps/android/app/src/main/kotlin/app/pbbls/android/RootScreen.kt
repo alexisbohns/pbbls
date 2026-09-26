@@ -168,6 +168,9 @@ fun RootScreen() {
                 },
             )
             // Drawn last for z-order (D9), unless a sheet is hosting them.
+            // The hand-over lands one frame late: a sheet registers in an
+            // effect, so on the frame it opens both copies compose, and a
+            // celebration already on screen can replay its haptic once.
             if (!overlaySlot.isHostedBySheet) overlaySlot.content()
         }
     }

@@ -113,6 +113,10 @@ private class BottomSheetScene<T : Any>(
             CompositionLocalProvider(LocalLifecycleOwner provides lifecycleOwner) {
                 Box(Modifier.fillMaxSize()) {
                     entry.Content()
+                    // Above the entry, in the sheet's own window (#940). Back
+                    // reaches a moment's handler before the sheet's: this
+                    // window's dispatcher is the dialog's, and later handlers
+                    // win. See RootScreen for the one-frame hand-over.
                     overlaySlot.content()
                 }
             }
