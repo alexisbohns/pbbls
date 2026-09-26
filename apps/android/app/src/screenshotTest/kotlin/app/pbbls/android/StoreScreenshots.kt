@@ -28,8 +28,11 @@ import java.time.OffsetDateTime
  * enabled/disabled states, and the drawer body in swap and owned states —
  * light and dark. The list screen reads services; these pure pieces are the
  * review surface.
+ *
+ * [previewItem] is internal so the glyph list-detail screenshots open the
+ * same glyph (#940).
  */
-private val previewItem =
+internal val previewItem =
     GlyphGridItem(
         glyph =
             Glyph(

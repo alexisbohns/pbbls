@@ -14,9 +14,15 @@ import app.pbbls.android.core.model.CollectionMode
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.EmotionRef
 import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.GlyphGridItem
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.core.model.SoulWithGlyph
+import app.pbbls.android.features.glyph.store.GlyphDetailDrawerContent
+import app.pbbls.android.features.glyph.store.GlyphDetailSurface
+import app.pbbls.android.features.glyph.store.GlyphTab
+import app.pbbls.android.features.glyph.store.GlyphsListContent
+import app.pbbls.android.features.glyph.store.GlyphsUiState
 import app.pbbls.android.features.path.PathContent
 import app.pbbls.android.features.path.PebbleDetailContent
 import app.pbbls.android.features.path.PebbleDetailUiState
@@ -29,6 +35,7 @@ import app.pbbls.android.features.profile.SoulDetailUiState
 import app.pbbls.android.features.profile.SoulsListContent
 import app.pbbls.android.features.profile.SoulsListUiState
 import app.pbbls.android.navigation.CollectionsPlaceholder
+import app.pbbls.android.navigation.GlyphsPlaceholder
 import app.pbbls.android.navigation.PebblesKey
 import app.pbbls.android.navigation.SoulsPlaceholder
 import com.android.tools.screenshot.PreviewTest
@@ -49,6 +56,11 @@ import java.time.ZoneId
  * render, since idle Path stays full width) reuses the Path timeline and the
  * full pebble the Path and detail screenshots already render, so the pane
  * shows exactly what those do.
+ *
+ * The glyph store's pair renders the store's stateless content in its pane
+ * layout (tabs at the bottom of the list pane) beside the production
+ * [GlyphsPlaceholder], or beside the drawer body on the same page
+ * `GlyphDetailScreen` draws, opened on [StoreScreenshots]' glyph.
  */
 private val previewPalette: EmotionPalette =
     requireNotNull(
@@ -382,4 +394,87 @@ fun PathPebbleListDetailOpen() {
 @Composable
 fun PathPebbleListDetailOpenDark() {
     PebblesTheme { PathPebblePair() }
+}
+
+private val storeItems: List<GlyphGridItem> =
+    listOf(
+        previewItem,
+        GlyphGridItem(
+            glyph = Glyph(id = "g2", name = "Loop", strokes = listOf(loopStroke), viewBox = "0 0 200 200", userId = "u2"),
+            price = 7,
+            owned = false,
+            createdAt = null,
+            acquiredAt = null,
+        ),
+        GlyphGridItem(
+            glyph = Glyph(id = "g3", name = "Cross", strokes = crossStrokes, viewBox = "0 0 200 200", userId = "u3"),
+            price = 9,
+            owned = false,
+            createdAt = null,
+            acquiredAt = null,
+        ),
+        GlyphGridItem(
+            glyph = Glyph(id = "g4", name = "Peak", strokes = listOf(peakStroke), viewBox = "0 0 200 200", userId = "u4"),
+            price = 5,
+            owned = false,
+            createdAt = null,
+            acquiredAt = null,
+        ),
+    )
+
+@Composable
+private fun GlyphsPair(detail: @Composable () -> Unit) {
+    ListDetailPreviewFrame(
+        tab = PebblesKey.You,
+        list = {
+            GlyphsListContent(
+                uiState = GlyphsUiState.Content(tab = GlyphTab.COMMU, items = storeItems, karma = 21, isLoadingTab = false),
+                didRenameFail = false,
+                // A list pane: the tabs sit at the bottom of the pane, not the window's edge.
+                toolbarOnEndEdge = false,
+                onBack = {},
+                onCarve = {},
+                onSelectTab = {},
+                onOpenGlyph = {},
+                onRename = {},
+            )
+        },
+        detail = detail,
+    )
+}
+
+@Composable
+private fun GlyphDetailPane() {
+    GlyphDetailSurface {
+        GlyphDetailDrawerContent(
+            item = previewItem,
+            isOwned = false,
+            acquiredAt = null,
+            currentBalance = 21,
+            isBuying = false,
+            errorRes = null,
+            onConfirm = { true },
+        )
+    }
+}
+
+@PreviewTest
+@PreviewWideTall
+@Composable
+fun GlyphsListDetailIdle() {
+    PebblesTheme { GlyphsPair { GlyphsPlaceholder() } }
+}
+
+@PreviewTest
+@PreviewWideTall
+@Composable
+fun GlyphsListDetailOpen() {
+    PebblesTheme { GlyphsPair { GlyphDetailPane() } }
+}
+
+@PreviewTest
+@Preview(showBackground = true, widthDp = 1024, heightDp = 720, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun GlyphsListDetailOpenDark() {
+    PebblesTheme { GlyphsPair { GlyphDetailPane() } }
 }

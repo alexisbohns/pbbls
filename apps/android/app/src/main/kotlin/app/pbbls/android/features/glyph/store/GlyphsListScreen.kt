@@ -42,6 +42,7 @@ import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.ProfileEmptyState
 import app.pbbls.android.core.designsystem.isWideWindow
+import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphGridItem
 import app.pbbls.android.core.ui.GlyphView
 import app.pbbls.android.core.ui.GlyphViewCase
@@ -74,9 +75,6 @@ fun GlyphsListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val covers by viewModel.covers.collectAsStateWithLifecycle()
-    val colors = MaterialTheme.colorScheme
-    // The toolbar placement and the grid's padding both follow this.
-    val isWide = isWideWindow() && !isInListPane
 
     // Returning from the carve studio must re-read the current tab: the
     // ViewModel is scoped to the back stack entry, which survives the round
@@ -85,6 +83,51 @@ fun GlyphsListScreen(
         viewModel.onResumed()
         onPauseOrDispose {}
     }
+
+    GlyphsListContent(
+        uiState = uiState,
+        didRenameFail = covers.didRenameFail,
+        toolbarOnEndEdge = isWideWindow() && !isInListPane,
+        onBack = onBack,
+        onCarve = onCarve,
+        onSelectTab = viewModel::onSelectTab,
+        onOpenGlyph = onOpenGlyph,
+        onRename = viewModel::requestRename,
+        modifier = modifier,
+    )
+
+    covers.renaming?.let { glyph ->
+        RenameGlyphDialog(
+            initialName = glyph.name.orEmpty(),
+            onDismiss = viewModel::cancelRename,
+            onSave = viewModel::confirmRename,
+        )
+    }
+}
+
+/**
+ * The store without its ViewModel (#940): the top bar, the tab toolbar and the
+ * three states. [GlyphsListScreen] wires it; the list-detail screenshots
+ * drive it in its pane layout.
+ *
+ * [toolbarOnEndEdge] puts the tabs on the window's end edge, opposite the
+ * rail — a wide window with the store alone in it. As a list pane the grid is
+ * pane-wide, so the tabs go back to the bottom. The grid's padding follows.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+internal fun GlyphsListContent(
+    uiState: GlyphsUiState,
+    didRenameFail: Boolean,
+    toolbarOnEndEdge: Boolean,
+    onBack: () -> Unit,
+    onCarve: () -> Unit,
+    onSelectTab: (GlyphTab) -> Unit,
+    onOpenGlyph: (GlyphGridItem) -> Unit,
+    onRename: (Glyph) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val colors = MaterialTheme.colorScheme
 
     PebblesScreen(
         modifier = modifier,
@@ -119,9 +162,9 @@ fun GlyphsListScreen(
         overlay = {
             GlyphTabBar(
                 selection = uiState.tab,
-                onSelect = viewModel::onSelectTab,
-                vertical = isWide,
-                modifier = Modifier.align(if (isWide) Alignment.CenterEnd else Alignment.BottomCenter),
+                onSelect = onSelectTab,
+                vertical = toolbarOnEndEdge,
+                modifier = Modifier.align(if (toolbarOnEndEdge) Alignment.CenterEnd else Alignment.BottomCenter),
             )
         },
     ) {
@@ -147,7 +190,7 @@ fun GlyphsListScreen(
                         )
                     } else {
                         Column(Modifier.fillMaxSize()) {
-                            if (covers.didRenameFail) {
+                            if (didRenameFail) {
                                 Text(
                                     text = stringResource(R.string.glyph_rename_error),
                                     style = MaterialTheme.typography.bodyLarge,
@@ -164,7 +207,7 @@ fun GlyphsListScreen(
                                 // Clear of the tab toolbar: its height at the bottom
                                 // on phones, its width at the end edge on tablets.
                                 contentPadding =
-                                    if (isWide) {
+                                    if (toolbarOnEndEdge) {
                                         PaddingValues(start = 16.dp, end = 88.dp, top = 16.dp, bottom = 16.dp)
                                     } else {
                                         PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp)
@@ -178,7 +221,7 @@ fun GlyphsListScreen(
                                         onTap =
                                             when {
                                                 state.tab != GlyphTab.MINE -> ({ onOpenGlyph(item) })
-                                                item.glyph.userId != null -> ({ viewModel.requestRename(item.glyph) })
+                                                item.glyph.userId != null -> ({ onRename(item.glyph) })
                                                 else -> null
                                             },
                                     )
@@ -188,14 +231,6 @@ fun GlyphsListScreen(
                     }
             }
         }
-    }
-
-    covers.renaming?.let { glyph ->
-        RenameGlyphDialog(
-            initialName = glyph.name.orEmpty(),
-            onDismiss = viewModel::cancelRename,
-            onSave = viewModel::confirmRename,
-        )
     }
 }
 

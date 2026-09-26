@@ -74,13 +74,24 @@ fun GlyphDetailScreen(
     viewModel: GlyphDetailViewModel = hiltViewModel(),
 ) {
     val balance by viewModel.balance.collectAsStateWithLifecycle()
+    GlyphDetailSurface(modifier) {
+        GlyphSwapPanel(item = item, balance = balance, market = viewModel.market, onRecorded = viewModel::onRecorded)
+    }
+}
+
+/** [GlyphDetailScreen]'s page, shared with the list-detail screenshots. */
+@Composable
+internal fun GlyphDetailSurface(
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit,
+) {
     Box(
         modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
             .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Vertical)),
     ) {
-        GlyphSwapPanel(item = item, balance = balance, market = viewModel.market, onRecorded = viewModel::onRecorded)
+        content()
     }
 }
 
