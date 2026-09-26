@@ -1,9 +1,11 @@
 package app.pbbls.android.baselineprofile
 
+import android.util.Log
 import androidx.benchmark.macro.MacrobenchmarkScope
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.By
 import androidx.test.uiautomator.Direction
+import androidx.test.uiautomator.StaleObjectException
 import androidx.test.uiautomator.Until
 import java.util.regex.Pattern
 
@@ -130,18 +132,37 @@ internal fun MacrobenchmarkScope.browsePath() {
         device.waitForIdle()
     }
 
-    device.findObject(By.res(PATH_PEBBLE_ROW))?.let { row ->
-        row.click()
+    if (clickFresh(PATH_PEBBLE_ROW)) {
         Thread.sleep(DETAIL_SETTLE_MS)
         device.pressBack()
         device.wait(Until.hasObject(By.res(PATH_WEEK_PAGER)), UI_TIMEOUT_MS)
     }
 
-    device.findObject(By.res(NEW_PEBBLE))?.let { fab ->
-        fab.click()
+    if (clickFresh(NEW_PEBBLE)) {
         device.wait(Until.gone(By.res(NEW_PEBBLE)), UI_TIMEOUT_MS)
         device.waitForIdle()
         device.pressBack()
         device.wait(Until.hasObject(By.res(NEW_PEBBLE)), UI_TIMEOUT_MS)
     }
 }
+
+/**
+ * Finds [res] and taps it, re-finding once if the node was recomposed between
+ * the two (the pager settling after a swipe does that to every row). Returns
+ * false when there is nothing to tap, e.g. an empty week.
+ */
+private fun MacrobenchmarkScope.clickFresh(res: String): Boolean {
+    repeat(2) { attempt ->
+        device.waitForIdle()
+        val node = device.wait(Until.findObject(By.res(res)), UI_TIMEOUT_MS) ?: return false
+        try {
+            node.click()
+            return true
+        } catch (e: StaleObjectException) {
+            Log.w(TAG, "$res went stale before the tap (attempt ${attempt + 1})", e)
+        }
+    }
+    return false
+}
+
+private const val TAG = "PebblesJourney"
