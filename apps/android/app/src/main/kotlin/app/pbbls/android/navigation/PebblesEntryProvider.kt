@@ -201,7 +201,9 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     // ---- The write path promoted to entries (#852) ----
 
     entry<PebblesKey.PebbleDetail>(
-        metadata = NavTransitions.forKey(PebblesKey.PebbleDetail("")) + PanePairs.metadataFor(PebblesKey.PebbleDetail("")),
+        // Fade-through, not the push BarKeys get: beside Path this is a scene
+        // change, not a lateral move (#940).
+        metadata = NavTransitions.split + PanePairs.metadataFor(PebblesKey.PebbleDetail("")),
     ) { key ->
         PebbleDetailScreen(
             pebbleId = key.pebbleId,
