@@ -320,10 +320,13 @@ either violation:
 
 - **`core` never imports `features`.** Absolute. If shared code needs a feature,
   it is not shared code; it is that feature's code in the wrong folder.
-- **A feature never imports another feature.** Seven exceptions are frozen in
-  the test and may only shrink; emptying them is #914. Anything else fails, so
-  the answer to "profile needs this bit of path" is to move the bit to `core/`,
-  not to add an import.
+- **A feature never imports another feature.** No exceptions (#914 emptied the
+  frozen list #851 left). "Profile needs this bit of path" means moving the bit
+  to `core/`, not adding an import. "Profile hosts path's screen" means either
+  navigating to its entry (the soul and collection details open
+  `PebblesKey.EditPebble`) or taking the screen as a slot the entry provider
+  fills: the glyph picker is glyph's, and its path and profile hosts take a
+  `GlyphPickerSlot` (`core/ui/GlyphPickerSheet.kt`).
 
 Which `core` package: `model` if it is data, `data` if Hilt constructs it,
 `designsystem` if it would look at home in any app, `ui` if it renders a Pebbles

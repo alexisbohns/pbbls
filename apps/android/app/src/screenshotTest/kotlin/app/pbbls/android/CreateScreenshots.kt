@@ -24,11 +24,11 @@ import app.pbbls.android.core.model.PebbleDraft
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.ui.KarmaEarnedCapsule
+import app.pbbls.android.features.glyph.picker.GlyphPickerGrid
 import app.pbbls.android.features.path.create.CategoryGroup
 import app.pbbls.android.features.path.create.PebbleForm
 import app.pbbls.android.features.path.create.pickers.CreateSoulDialog
 import app.pbbls.android.features.path.create.pickers.EmotionPickerBody
-import app.pbbls.android.features.path.create.pickers.GlyphPickerGrid
 import app.pbbls.android.features.path.create.pickers.SoulPickerBody
 import app.pbbls.android.features.path.valence.ValenceFan
 import com.android.tools.screenshot.PreviewTest

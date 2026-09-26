@@ -1,4 +1,4 @@
-package app.pbbls.android.features.path.create.pickers
+package app.pbbls.android.features.glyph.picker
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

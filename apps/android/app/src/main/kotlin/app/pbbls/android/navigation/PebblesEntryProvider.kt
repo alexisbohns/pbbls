@@ -12,6 +12,7 @@ import app.pbbls.android.features.connections.AcceptInviteScreen
 import app.pbbls.android.features.connections.ConnectionsScreen
 import app.pbbls.android.features.connections.InviteScreen
 import app.pbbls.android.features.glyph.carve.GlyphCarveScreen
+import app.pbbls.android.features.glyph.picker.GlyphPickerContent
 import app.pbbls.android.features.glyph.store.GlyphDetailScreen
 import app.pbbls.android.features.glyph.store.GlyphsListScreen
 import app.pbbls.android.features.lab.AnnouncementDetailScreen
@@ -25,7 +26,6 @@ import app.pbbls.android.features.path.EditPebbleScreen
 import app.pbbls.android.features.path.PathScreen
 import app.pbbls.android.features.path.PebbleDetailScreen
 import app.pbbls.android.features.path.create.CreatePebbleScreen
-import app.pbbls.android.features.path.create.pickers.GlyphPickerContent
 import app.pbbls.android.features.path.record.RecordFlowScreen
 import app.pbbls.android.features.profile.AchievementsScreen
 import app.pbbls.android.features.profile.CollectionDetailScreen

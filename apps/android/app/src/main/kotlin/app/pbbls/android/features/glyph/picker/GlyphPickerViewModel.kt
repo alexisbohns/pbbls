@@ -1,4 +1,4 @@
-package app.pbbls.android.features.path.create.pickers
+package app.pbbls.android.features.glyph.picker
 
 import android.util.Log
 import androidx.annotation.StringRes

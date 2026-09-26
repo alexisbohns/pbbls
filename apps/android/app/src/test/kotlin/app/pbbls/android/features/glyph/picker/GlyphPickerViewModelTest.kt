@@ -1,4 +1,4 @@
-package app.pbbls.android.features.path.create.pickers
+package app.pbbls.android.features.glyph.picker
 
 import app.pbbls.android.R
 import app.pbbls.android.core.model.BuyGlyphResult
