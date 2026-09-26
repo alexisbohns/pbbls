@@ -5,6 +5,7 @@ import app.pbbls.android.core.data.PebbleWriteServicing
 import app.pbbls.android.core.model.ComposePebbleResponse
 import app.pbbls.android.core.model.PebbleDraft
 import app.pbbls.android.core.model.PebbleSnapPayload
+import kotlinx.coroutines.CompletableDeferred
 
 /**
  * In-memory [PebbleWriteServicing] (#848) — the composer's save path, drivable
@@ -28,6 +29,13 @@ class FakePebbleWriteService(
     /** Every pebble id passed to [delete], oldest first. */
     val deletedPebbleIds = mutableListOf<String>()
 
+    /**
+     * Awaited by [create] when set, so a test can hold a publish in flight and
+     * act on the screen meanwhile — back, close — then complete it to let the
+     * server "answer".
+     */
+    var createGate: CompletableDeferred<Unit>? = null
+
     private val armed = ArmedFailure()
 
     /**
@@ -46,6 +54,7 @@ class FakePebbleWriteService(
         snaps: List<PebbleSnapPayload>?,
     ): ComposeResult {
         createCalls += draft to snaps
+        createGate?.await()
         armed.fire()
         return createResult
     }
