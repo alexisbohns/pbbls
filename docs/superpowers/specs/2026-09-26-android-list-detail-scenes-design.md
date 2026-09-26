@@ -105,16 +105,29 @@ so the two panes sit either side of it. It is a pure function with a JVM test.
 - **Glyph store in a pane** puts its tab toolbar back at the bottom of the list
   pane: `isWideWindow()` answers for the window, but the grid is pane-wide
   there. The grid's content padding follows the toolbar.
+- **Picking another item beside a list** replaces the detail
+  (`Navigator.navigateToDetail`) rather than stacking it.
 - **Placeholders** are a shared `DetailPlaceholder(icon, text)` in
   `core/designsystem`, one string per pair in `values/` and `values-fr/`.
 
 ### Glyph detail as an entry
 
-`GlyphDetail(glyphId: String)` replaces `GlyphsListViewModel.covers.selected`.
-A `GlyphDetailViewModel` (Loading / Error / Content, per #849) loads the grid
-item and the karma balance by id and owns the buy flow `GlyphSwapPanel` runs
-today. The list re-reads on its resume refresh after a swap, the way the other
-detail pairs already do, instead of taking `onPurchased` from the drawer.
+`GlyphDetail(item: GlyphGridItem)` replaces `GlyphsListViewModel.covers.selected`.
+Two deliberate choices, amended during Part 4:
+
+- **The key carries the whole grid item, not an id.** There is no "one glyph
+  by id" read in `GlyphMarketServicing`, and opening from the grid must stay
+  instant. `GlyphGridItem` becomes `@Serializable` (its `Glyph` and strokes
+  already are). A stale item after process death is harmless: `buy_glyph` is
+  server-authoritative and the panel morphs from the server's answer. So
+  `GlyphDetailViewModel` has nothing to load; it holds the buyer's karma
+  balance and records a purchase. The buy itself stays in `GlyphSwapPanel`,
+  which the composer's glyph picker also hosts.
+- **A purchase reaches the list through `GlyphMarketServicing.purchases`.** In
+  a pane the list stays resumed beside the detail, so the resume refresh the
+  other pairs rely on never fires. The market service emits every successful
+  buy; `GlyphsListViewModel` applies its existing bookkeeping from it.
+
 `GlyphDetailDrawerContent` is already stateless and is reused as-is.
 
 ## The stack
