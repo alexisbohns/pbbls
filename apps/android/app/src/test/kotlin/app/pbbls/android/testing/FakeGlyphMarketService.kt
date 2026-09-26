@@ -35,6 +35,9 @@ class FakeGlyphMarketService(
     /** Awaited by [buy] when set, to hold a purchase open at the server call. */
     var buyGate: CompletableDeferred<Unit>? = null
 
+    /** Awaited by [listCommunity] when set, to hold a Community load in flight. */
+    var communityGate: CompletableDeferred<Unit>? = null
+
     private val armed = ArmedFailure()
 
     private val _purchases = MutableSharedFlow<GlyphPurchased>(extraBufferCapacity = 8)
@@ -69,6 +72,7 @@ class FakeGlyphMarketService(
 
     override suspend fun listCommunity(): List<GlyphGridItem> {
         communityCount += 1
+        communityGate?.await()
         armed.fire()
         return community
     }

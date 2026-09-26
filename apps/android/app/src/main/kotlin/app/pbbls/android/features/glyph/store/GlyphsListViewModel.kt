@@ -123,6 +123,14 @@ class GlyphsListViewModel
         private var isLoadingTab = false
         private var hasFailed = false
 
+        /**
+         * Every glyph bought while this screen lived (#940). Beside the detail
+         * the grid is live, so a Community load answered before `buy_glyph`
+         * committed can land after [recordPurchase]; filtering every write to
+         * the Community cache by this keeps the glyph from coming back.
+         */
+        private val purchasedIds = mutableSetOf<String>()
+
         private val _uiState = MutableStateFlow<GlyphsUiState>(GlyphsUiState.Loading(GlyphTab.MINE))
         val uiState: StateFlow<GlyphsUiState> = _uiState.asStateFlow()
 
@@ -176,7 +184,10 @@ class GlyphsListViewModel
                             GlyphTab.COMMU -> market.listCommunity()
                         }
                     }.fold(
-                        onSuccess = { itemsByTab[target] = it },
+                        onSuccess = { items ->
+                            itemsByTab[target] =
+                                if (target == GlyphTab.COMMU) items.filter { it.id !in purchasedIds } else items
+                        },
                         onFailure = {
                             Log.e(TAG, "glyph tab load failed: $target", it)
                             // A stale cache keeps rendering; only an empty tab
@@ -267,8 +278,9 @@ class GlyphsListViewModel
          * dropping its cache there would blank it.
          */
         private fun recordPurchase(glyphId: String) {
+            purchasedIds += glyphId
             itemsByTab[GlyphTab.COMMU] =
-                itemsByTab[GlyphTab.COMMU].orEmpty().filter { it.id != glyphId }
+                itemsByTab[GlyphTab.COMMU].orEmpty().filter { it.id !in purchasedIds }
             if (tab == GlyphTab.OWNED) {
                 loadTab(GlyphTab.OWNED)
             } else {

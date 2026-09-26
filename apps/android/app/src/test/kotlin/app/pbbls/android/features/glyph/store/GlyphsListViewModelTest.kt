@@ -9,6 +9,7 @@ import app.pbbls.android.testing.FakeGlyphMarketService
 import app.pbbls.android.testing.FakeGlyphService
 import app.pbbls.android.testing.FakePathStatsService
 import app.pbbls.android.testing.MainDispatcherRule
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -349,6 +350,37 @@ class GlyphsListViewModelTest {
             assertEquals(2, market.ownedCount)
             val state = viewModel.uiState.value as GlyphsUiState.Content
             assertEquals(listOf("c1", "o1"), state.items.map { it.id })
+        }
+
+    /**
+     * Beside the detail the grid is live, so a Community load can be in flight
+     * when a purchase lands. Answered before `buy_glyph` committed, it still
+     * carries the bought glyph, and writing it to the cache used to bring the
+     * glyph back.
+     */
+    @Test
+    fun `a community load answered before the purchase does not bring the glyph back`() =
+        runTest {
+            val market = FakeGlyphMarketService(community = listOf(item("c1"), item("c2")))
+            val viewModel = viewModel(market)
+            advanceUntilIdle()
+            viewModel.onSelectTab(GlyphTab.COMMU)
+            advanceUntilIdle()
+            // The first resume is skipped; the second reloads Community.
+            viewModel.onResumed()
+            val gate = CompletableDeferred<Unit>()
+            market.communityGate = gate
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            market.emitPurchase(glyphId = "c1", result = BuyGlyphResult(entitlementId = "e1", balance = 5))
+            advanceUntilIdle()
+            gate.complete(Unit)
+            advanceUntilIdle()
+
+            assertEquals(2, market.communityCount)
+            val state = viewModel.uiState.value as GlyphsUiState.Content
+            assertEquals(listOf("c2"), state.items.map { it.id })
         }
 
     // MARK: - Rename
