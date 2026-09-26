@@ -14,8 +14,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -64,8 +64,10 @@ private const val TAG = "glyph-detail"
  * The background is `surfaceContainerLow`, the sheet's default container
  * colour, so the page is identical in both hosts and the price badge's chip (which masks the dotted
  * rule in that colour) has no seam in the pane. Nothing pads a pane, so the
- * page clears the status and gesture bars itself; in the sheet the top is
- * already consumed by the sheet's own insets and only the gesture bar is left.
+ * page clears the safe-drawing insets itself: top, bottom and the end edge (a
+ * landscape phone's 3-button bar), never the start, which the rail or the
+ * sheet already owns. In the sheet the top is consumed by the sheet's own
+ * insets, so only the bottom and end are left.
  */
 @Composable
 fun GlyphDetailScreen(
@@ -95,7 +97,7 @@ internal fun GlyphDetailSurface(
         modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.surfaceContainerLow)
-            .windowInsetsPadding(WindowInsets.systemBars.only(WindowInsetsSides.Vertical)),
+            .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Vertical + WindowInsetsSides.End)),
     ) {
         content()
     }

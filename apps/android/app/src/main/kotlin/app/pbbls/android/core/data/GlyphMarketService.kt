@@ -38,6 +38,9 @@ interface GlyphMarketServicing {
      * Every purchase that landed, as it lands (#940). The store's list sits
      * beside the detail on large screens and never pauses, so it cannot rely
      * on a resume refresh to learn about one.
+     *
+     * Relies on the implementation being a `@Singleton`: every host's buy and
+     * the store's collector must share one instance.
      */
     val purchases: SharedFlow<GlyphPurchased>
 }
@@ -62,8 +65,11 @@ class GlyphMarketService
     constructor(
         private val supabase: SupabaseService,
     ) : GlyphMarketServicing {
-        // Buffered so tryEmit never drops a purchase for a slow collector; with
-        // no collector at all (the store is not open) there is nothing to tell.
+        // One flow for the app because this service is a @Singleton: a second
+        // instance would announce to nobody. `emit` suspends only while a
+        // collector's buffer is full, and `buy` runs uncancellable, so no
+        // purchase is dropped; with no collector (the store is not open) there
+        // is nothing to tell.
         private val _purchases = MutableSharedFlow<GlyphPurchased>(extraBufferCapacity = 8)
         override val purchases: SharedFlow<GlyphPurchased> = _purchases.asSharedFlow()
 
@@ -160,7 +166,7 @@ class GlyphMarketService
                         "buy_glyph",
                         buildJsonObject { put("p_glyph_id", glyphId) },
                     ).decodeAs<BuyGlyphResult>()
-            _purchases.tryEmit(GlyphPurchased(glyphId, result))
+            _purchases.emit(GlyphPurchased(glyphId, result))
             return result
         }
 

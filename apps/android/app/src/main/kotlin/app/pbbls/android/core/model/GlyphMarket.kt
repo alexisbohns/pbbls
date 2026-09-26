@@ -11,7 +11,8 @@ import java.time.OffsetDateTime
  *
  * Serializable because the glyph detail key carries it whole (#940): there is
  * no by-id read to rebuild it from. The computed [id] has no backing field, so
- * it is not serialized.
+ * it is not serialized. Navigation and saved state only (camelCase names):
+ * never decoded from PostgREST, which has its own wire rows below.
  */
 @Serializable
 data class GlyphGridItem(

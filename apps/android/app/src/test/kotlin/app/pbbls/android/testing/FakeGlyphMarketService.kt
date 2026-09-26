@@ -81,7 +81,7 @@ class FakeGlyphMarketService(
         buyCalls += glyphId
         buyGate?.await()
         armed.fire()
-        emitPurchase(glyphId, buyResult)
+        _purchases.emit(GlyphPurchased(glyphId, buyResult))
         return buyResult
     }
 }
