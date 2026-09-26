@@ -126,7 +126,10 @@ internal fun GlyphSwapPanel(
 ) {
     var isOwned by remember(item.id) { mutableStateOf(item.owned) }
     var acquiredAt by remember(item.id) { mutableStateOf(item.acquiredAt) }
-    var currentBalance by remember(item.id) { mutableStateOf(balance) }
+    // Only the landed answer is kept: before a buy the panel follows [balance],
+    // which may still be loading when the panel first draws (#940).
+    var landed by remember(item.id) { mutableStateOf<BuyGlyphResult?>(null) }
+    val currentBalance = swapPanelBalance(landed = landed, live = balance)
     var isBuying by remember(item.id) { mutableStateOf(false) }
     var errorRes by remember(item.id) { mutableStateOf<Int?>(null) }
 
@@ -144,12 +147,12 @@ internal fun GlyphSwapPanel(
                 GlyphPurchase.buyAndRecord(
                     market = market,
                     glyphId = item.glyph.id,
-                    onRecorded = { landed ->
-                        currentBalance = landed.balance
+                    onRecorded = { result ->
+                        landed = result
                         // iOS stamps the client's now, not a server timestamp.
                         acquiredAt = OffsetDateTime.now()
                         isOwned = true
-                        onRecorded(landed)
+                        onRecorded(result)
                     },
                     onError = { e ->
                         Log.e(TAG, "glyph swap failed", e)
@@ -165,6 +168,15 @@ internal fun GlyphSwapPanel(
         },
     )
 }
+
+/**
+ * The balance [GlyphSwapPanel] shows: the server's answer once a buy has
+ * landed, the [live] shared balance until then.
+ */
+internal fun swapPanelBalance(
+    landed: BuyGlyphResult?,
+    live: Int,
+): Int = landed?.balance ?: live
 
 /** Pure drawer body — split from the sheet so screenshots can drive both states. */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
