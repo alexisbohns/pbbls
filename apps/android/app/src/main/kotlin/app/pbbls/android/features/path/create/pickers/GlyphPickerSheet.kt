@@ -224,7 +224,7 @@ fun GlyphPickerContent(
         else ->
             Column(modifier.fillMaxWidth().heightIn(min = 200.dp)) {
                 when (val current = uiState) {
-                    GlyphPickerUiState.Loading ->
+                    is GlyphPickerUiState.Loading ->
                         Box(
                             modifier = Modifier.fillMaxWidth().padding(48.dp),
                             contentAlignment = Alignment.Center,
@@ -263,7 +263,7 @@ private val GlyphPickerUiState.tab: GlyphTab
         when (this) {
             is GlyphPickerUiState.Content -> tab
             is GlyphPickerUiState.Error -> tab
-            GlyphPickerUiState.Loading -> GlyphTab.MINE
+            is GlyphPickerUiState.Loading -> tab
         }
 
 /**

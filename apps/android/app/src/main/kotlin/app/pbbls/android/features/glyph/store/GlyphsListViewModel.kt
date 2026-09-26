@@ -38,7 +38,14 @@ private const val TAG = "glyph-store"
  * failed — a failed refresh over a populated tab keeps the glyphs on screen.
  */
 sealed interface GlyphsUiState {
-    data object Loading : GlyphsUiState
+    /**
+     * Carries its tab for the same reason [Error] does: the first visit to a
+     * tab passes through here, and a tab-less Loading made the bar flash Mine
+     * on every first switch (#855).
+     */
+    data class Loading(
+        val tab: GlyphTab,
+    ) : GlyphsUiState
 
     data class Error(
         /** Carried so the tab bar keeps highlighting the tab that failed. */
@@ -111,7 +118,7 @@ class GlyphsListViewModel
         private var isLoadingTab = false
         private var hasFailed = false
 
-        private val _uiState = MutableStateFlow<GlyphsUiState>(GlyphsUiState.Loading)
+        private val _uiState = MutableStateFlow<GlyphsUiState>(GlyphsUiState.Loading(GlyphTab.MINE))
         val uiState: StateFlow<GlyphsUiState> = _uiState.asStateFlow()
 
         private val _covers = MutableStateFlow(GlyphsCovers())
@@ -181,7 +188,7 @@ class GlyphsListViewModel
             _uiState.value =
                 when {
                     hasFailed && cached.isEmpty() -> GlyphsUiState.Error(tab, R.string.glyphs_load_error)
-                    isLoadingTab && cached.isEmpty() && !hasFailed -> GlyphsUiState.Loading
+                    isLoadingTab && cached.isEmpty() && !hasFailed -> GlyphsUiState.Loading(tab)
                     else ->
                         GlyphsUiState.Content(
                             tab = tab,

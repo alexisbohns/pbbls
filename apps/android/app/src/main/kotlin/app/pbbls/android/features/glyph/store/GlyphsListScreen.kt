@@ -121,7 +121,7 @@ fun GlyphsListScreen(
         Box(Modifier.fillMaxSize()) {
             // Exhaustive with no `else`: a new GlyphsUiState case must be rendered.
             when (val state = uiState) {
-                GlyphsUiState.Loading ->
+                is GlyphsUiState.Loading ->
                     Box(Modifier.fillMaxSize(), Alignment.Center) {
                         LoadingIndicator()
                     }
@@ -218,13 +218,13 @@ private val GlyphTab.emptyMessageRes: Int
             GlyphTab.COMMU -> R.string.glyphs_empty_commu_message
         }
 
-/** Whichever tab the store is on, failed or not — the bar must not lie. */
+/** Whichever tab the store is on, loading, failed or not — the bar must not lie. */
 private val GlyphsUiState.tab: GlyphTab
     get() =
         when (this) {
             is GlyphsUiState.Content -> tab
             is GlyphsUiState.Error -> tab
-            GlyphsUiState.Loading -> GlyphTab.MINE
+            is GlyphsUiState.Loading -> tab
         }
 
 /** Grid cell: 96dp glyph + optional name caption + price badge when listed. */

@@ -37,7 +37,10 @@ private const val TAG = "glyph-picker"
  * does.
  */
 sealed interface GlyphPickerUiState {
-    data object Loading : GlyphPickerUiState
+    /** Carries its tab, like [Error]: see `GlyphsUiState.Loading` (#855). */
+    data class Loading(
+        val tab: GlyphTab,
+    ) : GlyphPickerUiState
 
     /** Carried so the tab bar keeps highlighting the tab that failed. */
     data class Error(
@@ -110,7 +113,7 @@ class GlyphPickerViewModel
         private var isLoadingTab = false
         private var hasFailed = false
 
-        private val _uiState = MutableStateFlow<GlyphPickerUiState>(GlyphPickerUiState.Loading)
+        private val _uiState = MutableStateFlow<GlyphPickerUiState>(GlyphPickerUiState.Loading(GlyphTab.MINE))
         val uiState: StateFlow<GlyphPickerUiState> = _uiState.asStateFlow()
 
         private val effectsOut = UiEffects<GlyphPickerEffect>(viewModelScope)
@@ -172,7 +175,7 @@ class GlyphPickerViewModel
             _uiState.value =
                 when {
                     hasFailed && cached.isEmpty() -> GlyphPickerUiState.Error(tab, R.string.create_glyph_load_error)
-                    isLoadingTab && cached.isEmpty() && !hasFailed -> GlyphPickerUiState.Loading
+                    isLoadingTab && cached.isEmpty() && !hasFailed -> GlyphPickerUiState.Loading(tab)
                     else ->
                         GlyphPickerUiState.Content(
                             tab = tab,
