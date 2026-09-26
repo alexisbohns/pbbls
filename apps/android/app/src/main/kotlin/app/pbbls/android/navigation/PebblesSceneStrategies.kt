@@ -70,8 +70,13 @@ fun pebblesListDetailStrategy(directive: PaneScaffoldDirective): SceneStrategy<N
 @Composable
 fun rememberPebblesSceneStrategies(): List<SceneStrategy<NavKey>> {
     val directive = pebblesPaneDirective(currentWindowAdaptiveInfoV2())
-    return remember(directive) { listOf(pebblesListDetailStrategy(directive), BottomSheetSceneStrategy()) }
+    return remember(directive) { pebblesSceneStrategies(directive) }
 }
+
+/** The chain itself, for a given [directive]; `NavDisplay` takes the first scene. */
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+fun pebblesSceneStrategies(directive: PaneScaffoldDirective): List<SceneStrategy<NavKey>> =
+    listOf(pebblesListDetailStrategy(directive), BottomSheetSceneStrategy())
 
 /**
  * Which entries are list panes and which are detail panes (#940).
