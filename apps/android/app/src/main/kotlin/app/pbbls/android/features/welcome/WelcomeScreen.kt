@@ -41,6 +41,7 @@ import app.pbbls.android.core.designsystem.LegalDoc
 import app.pbbls.android.core.designsystem.PebblesActionHeight
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.openLegalDoc
+import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.rive.RiveLogo
 import kotlinx.coroutines.delay
@@ -116,7 +117,8 @@ fun WelcomeContent(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .safeDrawingPadding(),
+                    .safeDrawingPadding()
+                    .readableWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(modifier = Modifier.weight(1f))

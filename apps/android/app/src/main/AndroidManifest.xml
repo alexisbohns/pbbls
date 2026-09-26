@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- supabase-kt (auth, OAuth, Postgrest) requires network access. -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -18,11 +19,28 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Pebbles">
 
+        <!--
+          Large screens (#855): phones are portrait-locked, like the iPhone-only
+          iOS app. From Android 16 (targetSdk 36 and up; this app targets 37)
+          the system ignores orientation and resizability restrictions on
+          displays of 600 dp and wider, so tablets, foldables and desktop
+          windows still rotate and resize: the adaptive layer (the 600 dp
+          readable column, the navigation rail) is what carries them, not this
+          attribute. Do NOT add <compatible-screens> — it hides the app on
+          devices it runs fine on.
+
+          The two lint checks this trips (LockedOrientationActivity, DiscouragedApi)
+          are suppressed here, on purpose: both warn about exactly the large-screen
+          case that Android 16 already exempts, and the lock is a product decision
+          (decision log 2026-09-26), not an oversight for the baseline to hold.
+        -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
-            android:theme="@style/Theme.Pebbles.Starting">
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.Pebbles.Starting"
+            tools:ignore="LockedOrientationActivity,DiscouragedApi">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

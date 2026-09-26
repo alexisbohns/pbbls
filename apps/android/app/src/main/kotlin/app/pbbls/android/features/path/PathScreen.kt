@@ -31,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.core.model.WeekRollEntry
@@ -121,6 +122,9 @@ fun PathScreen(
                         onCreatePebble = onCreatePebble,
                         onOpenDrafts = onOpenDrafts,
                         draftCount = content.draftCount,
+                        // The timeline alone is capped (#855): the FAB below
+                        // stays anchored to the window's bottom-end corner.
+                        modifier = Modifier.readableWidth(),
                     )
                 }
             }

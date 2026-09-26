@@ -36,3 +36,20 @@ annotation class PreviewLargeFontTall
 /** French (`values-fr`), wrap-content height. */
 @Preview(name = "fr", showBackground = true, locale = "fr")
 annotation class PreviewFrench
+
+/*
+ * Large-screen widths (#855): 840 dp is the Medium/Expanded breakpoint (an
+ * unfolded foldable or a portrait tablet), 1024 dp a landscape tablet or a
+ * desktop window. Both sit above the 600 dp readable-column cap, so these
+ * renders are what show the cap holding: centered content, nothing stretched.
+ */
+
+/** Medium/Expanded widths, wrap-content height. */
+@Preview(name = "w840", showBackground = true, widthDp = 840)
+@Preview(name = "w1024", showBackground = true, widthDp = 1024)
+annotation class PreviewWide
+
+/** Medium/Expanded widths inside a tablet-height viewport. */
+@Preview(name = "w840", showBackground = true, widthDp = 840, heightDp = 720)
+@Preview(name = "w1024", showBackground = true, widthDp = 1024, heightDp = 720)
+annotation class PreviewWideTall

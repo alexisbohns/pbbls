@@ -39,6 +39,10 @@ import androidx.compose.ui.text.style.TextOverflow
  * consumed insets, so nothing pads twice; outside it, this scaffold pads for
  * itself. The content padding is consumed in turn, so an `imePadding()` below
  * resolves to what is left.
+ *
+ * Width: the content column is [readableWidth] — centered and capped at 600 dp
+ * on tablets and desktop windows (#855), a no-op on phones. The [topBar] sits
+ * outside it and stays full-width.
  */
 @Composable
 fun PebblesScreen(
@@ -58,7 +62,8 @@ fun PebblesScreen(
                 Modifier
                     .fillMaxSize()
                     .padding(padding)
-                    .consumeWindowInsets(padding),
+                    .consumeWindowInsets(padding)
+                    .readableWidth(),
         ) {
             CompositionLocalProvider(LocalContentColor provides colors.onSurfaceVariant) {
                 content()

@@ -35,6 +35,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.data.PebbleDraftRecord
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
+import app.pbbls.android.core.designsystem.readableWidth
 import java.time.Duration
 import java.time.OffsetDateTime
 
@@ -94,7 +95,8 @@ fun DraftsContent(
             modifier
                 .fillMaxSize()
                 .background(colors.surface)
-                .safeDrawingPadding(),
+                .safeDrawingPadding()
+                .readableWidth(),
     ) {
         PebblesTopBar(
             title = stringResource(R.string.drafts_title),

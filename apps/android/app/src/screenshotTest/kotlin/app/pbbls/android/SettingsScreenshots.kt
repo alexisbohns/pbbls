@@ -189,6 +189,8 @@ private fun SettingsSections() {
 @Preview(showBackground = true, heightDp = 1400)
 @Preview(name = "fs2", showBackground = true, heightDp = 1400, fontScale = 2f)
 @Preview(name = "fr", showBackground = true, heightDp = 1400, locale = "fr")
+@Preview(name = "w840", showBackground = true, widthDp = 840, heightDp = 1400)
+@Preview(name = "w1024", showBackground = true, widthDp = 1024, heightDp = 1400)
 @Composable
 fun SettingsSectionsLight() {
     PebblesTheme { SettingsSections() }

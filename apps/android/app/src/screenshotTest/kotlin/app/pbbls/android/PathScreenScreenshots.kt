@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.EmotionRef
 import app.pbbls.android.core.model.Pebble
@@ -89,12 +90,19 @@ private fun ScreenPreview(entries: List<WeekRollEntry>) {
         today = today,
         onFocusChange = {},
         paletteFor = { screenPalette },
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface),
+        // Mirrors PathScreen: the timeline is the readable column (#855), a
+        // no-op at phone widths.
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface)
+                .readableWidth(),
     )
 }
 
 @PreviewTest
 @Preview(showBackground = true)
+@PreviewWide
 @PreviewLargeFont
 @PreviewFrench
 @Composable
