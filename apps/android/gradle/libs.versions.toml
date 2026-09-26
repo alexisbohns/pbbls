@@ -122,6 +122,10 @@ robolectric = "4.17"
 espresso = "3.7.0"
 androidxTestCore = "1.7.0"
 
+# Coverage (#857). Reported per PR in android.yml's step summary; not a gate
+# yet. 0.9.4+ is what supports AGP 9 variants, and 0.9.6 fixed AGP 9 with Hilt.
+kover = "0.9.9"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
@@ -234,3 +238,4 @@ hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 # The :baselineprofile module is a com.android.test module aimed at :app (#856).
 android-test = { id = "com.android.test", version.ref = "agp" }
 androidx-baselineprofile = { id = "androidx.baselineprofile", version.ref = "benchmark" }
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }

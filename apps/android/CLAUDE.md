@@ -431,7 +431,14 @@ do not bring it back for a single asset.
   arm it, *then* `launch()`. Find nodes by string resource (`onText(R.string.…)`)
   and fall back to `JourneyTags` only for what has no text. A bar the
   navigation suite hides stays composed off-screen: assert
-  `assertIsNotDisplayed()`, not `assertDoesNotExist()`.
+  `assertIsNotDisplayed()`, not `assertDoesNotExist()`. Process death is
+  `restartAfterProcessDeath()` — `ActivityScenario.recreate()` is a config
+  change, keeps every ViewModel, and proves nothing about `SavedStateHandle`.
+- **Coverage is reported, not gated (#857).** Kover measures
+  `testDebugUnitTest` (Robolectric included); `android.yml` posts the totals
+  and a per-package table to the run summary and uploads the HTML report as
+  `android-coverage`. Locally: `./gradlew koverHtmlReportDebug`. Add a `verify`
+  floor only once a few PRs of numbers say where it belongs.
 - **`ArchitectureBoundaryTest` is a gate too (#851).** Konsist parses the `main`
   sources and fails the build on a `core -> features` import, or on a
   cross-feature import that is not one of the seven frozen entries. If it fires,

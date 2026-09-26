@@ -57,12 +57,32 @@ jobs:
       # already ships in the web and iOS clients — so a downloadable debug
       # artifact adds no exposure. If the secrets are unset (e.g. a fork), the
       # values default to empty and AppEnvironment fails loud at launch (D8).
-      - name: ktlint, unit tests, assemble debug APK
+      #
+      # testDebugUnitTest also runs the Robolectric Compose UI suite (#857) —
+      # whole-app tests over fakes, no emulator. The Kover reports ride the same
+      # invocation so the tests run once, instrumented.
+      - name: ktlint, unit tests, coverage, assemble debug APK
         working-directory: apps/android
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-        run: ./gradlew ktlintCheck testDebugUnitTest assembleDebug
+        run: ./gradlew ktlintCheck testDebugUnitTest koverXmlReportDebug koverHtmlReportDebug assembleDebug
+
+      # Coverage is reported, not gated (#857): the totals and a per-package
+      # table go to this run's summary, the HTML report to an artifact. Runs even
+      # when a test failed, so a red run still says what it covered.
+      - name: Coverage summary
+        if: ${{ !cancelled() && hashFiles('apps/android/app/build/reports/kover/reportDebug.xml') != '' }}
+        working-directory: apps/android
+        run: python3 scripts/kover-summary.py app/build/reports/kover/reportDebug.xml >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload coverage report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-coverage
+          path: apps/android/app/build/reports/kover/
+          if-no-files-found: ignore
 
       - name: Upload debug APK
         uses: actions/upload-artifact@v7
