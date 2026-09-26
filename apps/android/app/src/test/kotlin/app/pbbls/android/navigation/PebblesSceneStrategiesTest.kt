@@ -98,8 +98,11 @@ class PebblesSceneStrategiesTest {
 
     @Test
     fun `an open pebble sits beside Path on two panes`() {
-        val scene = pebblesListDetailStrategy(directive(2)).sceneFor(PebblesKey.Path, PebblesKey.PebbleDetail("p1"))
-        assertEquals(2, scene!!.entries.size)
+        val entries = listOf(PebblesKey.Path, PebblesKey.PebbleDetail("p1")).map(::entry)
+        val scene = with(SceneStrategyScope<NavKey>()) { with(pebblesListDetailStrategy(directive(2))) { calculateScene(entries) } }
+
+        assertEquals(PanePair.PEBBLES, scene!!.key)
+        assertEquals(entries, scene.entries)
     }
 
     @Test

@@ -2,7 +2,6 @@ package app.pbbls.android.navigation
 
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.runtime.contains
 import androidx.navigation3.scene.OverlayScene
 import androidx.navigation3.scene.SceneStrategyScope
 import org.junit.Assert.assertEquals
@@ -23,11 +22,6 @@ class BottomSheetSceneStrategyTest {
         with(strategy) { with(SceneStrategyScope<NavKey>()) { calculateScene(entries) } }
 
     @Test
-    fun `the marker is read through its typed key`() {
-        assertTrue(BottomSheetSceneStrategy.BottomSheetKey in BottomSheetSceneStrategy.bottomSheet())
-    }
-
-    @Test
     fun `a sheet entry on top becomes an overlay over what is below`() {
         val below = entry(PebblesKey.Path, sheet = false)
         val sheet = entry(PebblesKey.PebbleDetail("p1"), sheet = true)
@@ -38,6 +32,20 @@ class BottomSheetSceneStrategyTest {
         assertEquals(listOf(sheet), scene!!.entries)
         assertEquals(listOf(below), (scene as OverlayScene<NavKey>).overlaidEntries)
         assertEquals(listOf(below), scene.previousEntries)
+        assertEquals(sheet.contentKey, scene.key)
+    }
+
+    @Test
+    fun `the same entries give an equal scene`() {
+        // NavDisplay keeps an overlay's composition, and so the sheet's state,
+        // across recalculations only while the scenes compare equal.
+        val entries = listOf(entry(PebblesKey.Path, sheet = false), entry(PebblesKey.PebbleDetail("p1"), sheet = true))
+
+        val first = sceneFor(entries)
+        val second = sceneFor(entries)
+
+        assertEquals(first, second)
+        assertEquals(first.hashCode(), second.hashCode())
     }
 
     @Test

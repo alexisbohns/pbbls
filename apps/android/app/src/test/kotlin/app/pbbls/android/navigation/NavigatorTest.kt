@@ -217,6 +217,8 @@ class NavigatorTest {
         // The composer's reveal on a large screen, where a pebble can already
         // be open beside Path when the FAB is long-pressed: pop the composer,
         // then open the new pebble. Back must return to Path, not the old one.
+        // This tests the Navigator sequence, not the entry provider's
+        // `onCreated` wiring, which is Compose and has no JVM test.
         navigator.navigateToDetail(PebblesKey.PebbleDetail("old"))
         navigator.navigate(PebblesKey.CreatePebble())
 
