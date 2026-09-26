@@ -1,9 +1,13 @@
 package app.pbbls.android.testing
 
 import app.pbbls.android.core.data.GlyphMarketServicing
+import app.pbbls.android.core.data.GlyphPurchased
 import app.pbbls.android.core.model.BuyGlyphResult
 import app.pbbls.android.core.model.GlyphGridItem
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
 /**
  * In-memory [GlyphMarketServicing] (#849) — the store's three tabs and the one
@@ -32,6 +36,17 @@ class FakeGlyphMarketService(
     var buyGate: CompletableDeferred<Unit>? = null
 
     private val armed = ArmedFailure()
+
+    private val _purchases = MutableSharedFlow<GlyphPurchased>(extraBufferCapacity = 8)
+    override val purchases: SharedFlow<GlyphPurchased> = _purchases.asSharedFlow()
+
+    /** A purchase that landed somewhere else — the picker, or the detail entry. */
+    fun emitPurchase(
+        glyphId: String,
+        result: BuyGlyphResult,
+    ) {
+        _purchases.tryEmit(GlyphPurchased(glyphId, result))
+    }
 
     /** Thrown by the next call, then cleared. */
     var failNext: Exception?
@@ -62,6 +77,7 @@ class FakeGlyphMarketService(
         buyCalls += glyphId
         buyGate?.await()
         armed.fire()
+        emitPurchase(glyphId, buyResult)
         return buyResult
     }
 }

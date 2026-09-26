@@ -11,7 +11,6 @@ import app.pbbls.android.core.data.GlyphMarketServicing
 import app.pbbls.android.core.data.GlyphService
 import app.pbbls.android.core.data.GlyphServicing
 import app.pbbls.android.core.data.PathStatsServicing
-import app.pbbls.android.core.model.BuyGlyphResult
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphGridItem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +22,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.time.OffsetDateTime
 import javax.inject.Inject
 
 private const val TAG = "glyph-store"
@@ -61,12 +59,13 @@ sealed interface GlyphsUiState {
     ) : GlyphsUiState
 }
 
-/** The rename dialog and the detail drawer. */
+/**
+ * The rename dialog. The glyph detail used to be a drawer here too; it is its
+ * own entry now (`PebblesKey.GlyphDetail`, #940).
+ */
 data class GlyphsCovers(
     val renaming: Glyph? = null,
     val didRenameFail: Boolean = false,
-    /** The drawer's subject. Replaced in place when a purchase lands. */
-    val selected: GlyphGridItem? = null,
 )
 
 /**
@@ -89,9 +88,17 @@ data class GlyphsCovers(
  * The fix lives in [GlyphSwapPanel], not here, because that panel has a second
  * host — the composer's glyph picker — and a guarantee only one of two hosts
  * gets is not a guarantee. The panel wraps the call *and* its host callback in
- * `withContext(NonCancellable)`; [onPurchased] is what this screen does with a
- * purchase that landed. `GlyphPickerSheet` keeps its own duplicated copy of the
- * store's state and is a migration of its own, not folded in here.
+ * `withContext(NonCancellable)`. `GlyphPickerSheet` keeps its own duplicated
+ * copy of the store's state and is a migration of its own, not folded in here.
+ *
+ * **This list learns of a purchase from `GlyphMarketServicing.purchases`
+ * (#940).** The panel now lives in its own entry, `GlyphDetail`, which on a
+ * large screen sits beside this list — so the list never pauses and no resume
+ * refresh fires. The market service announces every successful buy, from any
+ * host, and [recordPurchase] fixes up this screen's caches from it. The
+ * balance is not written here: the host that ran the buy records it inside the
+ * uncancellable section (`GlyphDetailViewModel.onRecorded`, or the picker's
+ * own), and this screen observes the shared stats like every other.
  *
  * **The carve cover is gone (#852).** It used to prepend the fresh
  * glyph to Mine and switch straight to it on save, an optimistic update with no
@@ -107,9 +114,7 @@ data class GlyphsCovers(
 class GlyphsListViewModel
     @Inject
     constructor(
-        // Not private: GlyphsListScreen reads it to hand GlyphDetailDrawer its
-        // buy dependency directly, rather than through a CompositionLocal (#852).
-        val market: GlyphMarketServicing,
+        private val market: GlyphMarketServicing,
         private val glyphService: GlyphServicing,
         private val stats: PathStatsServicing,
     ) : ViewModel() {
@@ -133,6 +138,7 @@ class GlyphsListViewModel
             // Path and Profile write to the same singleton — so observe it
             // rather than copying it, as they do.
             viewModelScope.launch { snapshotFlow { stats.karma }.collect { publish() } }
+            viewModelScope.launch { market.purchases.collect { recordPurchase(it.glyphId) } }
             loadTab(GlyphTab.MINE)
         }
 
@@ -249,41 +255,25 @@ class GlyphsListViewModel
             }
         }
 
-        // MARK: - Detail drawer and the purchase
-
-        fun openDetail(item: GlyphGridItem) = _covers.update { it.copy(selected = item) }
-
-        fun closeDetail() = _covers.update { it.copy(selected = null) }
+        // MARK: - Purchases
 
         /**
-         * A purchase landed. Everything that records it on this screen lives
-         * here, and [GlyphSwapPanel] calls it from inside its
-         * `withContext(NonCancellable)` block — so leaving mid-request can no
-         * longer strand a spent balance against an unowned glyph.
+         * A purchase landed, here or in the composer's picker. Drops the glyph
+         * from Community and makes Owned refetch. The balance is already
+         * recorded by the host that ran the buy (see the class KDoc).
          *
-         * The call itself stays in the panel rather than moving here: the panel
-         * has a second host (the composer's glyph picker), and a guarantee that
-         * only one of two hosts gets is not a guarantee.
+         * Owned refetches lazily on its next visit (iOS parity), unless it is
+         * the tab on screen: beside the detail the grid stays live, and
+         * dropping its cache there would blank it.
          */
-        fun onPurchased(
-            item: GlyphGridItem,
-            result: BuyGlyphResult,
-        ) {
-            stats.applyKarmaBalance(result.balance)
-            // iOS stamps the client's now, not a server timestamp.
-            val owned = item.copy(owned = true, acquiredAt = OffsetDateTime.now())
+        private fun recordPurchase(glyphId: String) {
             itemsByTab[GlyphTab.COMMU] =
-                itemsByTab[GlyphTab.COMMU].orEmpty().filter { it.id != item.id }
-            // Owned refetches lazily on its next visit (iOS parity).
-            itemsByTab.remove(GlyphTab.OWNED)
-            // Only if that drawer is still up. This runs inside the panel's
-            // uncancellable section, so it can land after the user swiped the
-            // sheet away — and an unconditional write would slide it back up on
-            // its own, showing the Owned state nobody asked to see. The in-place
-            // morph is driven by the panel's own state anyway.
-            _covers.update { covers ->
-                if (covers.selected?.id == item.id) covers.copy(selected = owned) else covers
+                itemsByTab[GlyphTab.COMMU].orEmpty().filter { it.id != glyphId }
+            if (tab == GlyphTab.OWNED) {
+                loadTab(GlyphTab.OWNED)
+            } else {
+                itemsByTab.remove(GlyphTab.OWNED)
+                publish()
             }
-            publish()
         }
     }

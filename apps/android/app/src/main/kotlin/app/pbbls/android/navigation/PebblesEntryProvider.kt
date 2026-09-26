@@ -139,6 +139,9 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         GlyphsListScreen(
             onBack = navigator::goBack,
             onCarve = { navigator.navigate(PebblesKey.GlyphCarve) },
+            // The detail entry lands in the next commit; until then a tap is inert
+            // rather than a key with no entry.
+            onOpenGlyph = {},
         )
     }
 

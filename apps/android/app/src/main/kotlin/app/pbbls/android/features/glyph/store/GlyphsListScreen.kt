@@ -54,15 +54,16 @@ private const val TAG = "glyphs-store"
  * Owned / Commu tabs (per-tab cache renders stale during refetch; error state
  * only over an empty cache), an adaptive glyph grid, "+" → the carve studio
  * as a cover, Mine-cell rename (own glyphs only — system glyphs are inert per
- * D7), Owned/Commu cells → [GlyphDetailDrawer]. A swap applies the returned
- * balance to the shared stats, drops the item from Commu, and invalidates
- * Owned so it refetches lazily.
+ * D7), Owned/Commu cells → [onOpenGlyph], the glyph detail entry (#940). A
+ * swap drops the item from Commu and invalidates Owned: the view model hears
+ * of it from the market service, whichever host ran the buy.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun GlyphsListScreen(
     onBack: () -> Unit,
     onCarve: () -> Unit,
+    onOpenGlyph: (GlyphGridItem) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: GlyphsListViewModel = hiltViewModel(),
 ) {
@@ -170,7 +171,7 @@ fun GlyphsListScreen(
                                         item = item,
                                         onTap =
                                             when {
-                                                state.tab != GlyphTab.MINE -> ({ viewModel.openDetail(item) })
+                                                state.tab != GlyphTab.MINE -> ({ onOpenGlyph(item) })
                                                 item.glyph.userId != null -> ({ viewModel.requestRename(item.glyph) })
                                                 else -> null
                                             },
@@ -188,16 +189,6 @@ fun GlyphsListScreen(
             initialName = glyph.name.orEmpty(),
             onDismiss = viewModel::cancelRename,
             onSave = viewModel::confirmRename,
-        )
-    }
-
-    covers.selected?.let { item ->
-        GlyphDetailDrawer(
-            item = item,
-            balance = (uiState as? GlyphsUiState.Content)?.karma ?: 0,
-            market = viewModel.market,
-            onRecorded = { result -> viewModel.onPurchased(item, result) },
-            onDismiss = viewModel::closeDetail,
         )
     }
 }
