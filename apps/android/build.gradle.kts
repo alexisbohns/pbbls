@@ -29,4 +29,5 @@ plugins {
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.android.test) apply false
     alias(libs.plugins.androidx.baselineprofile) apply false
+    alias(libs.plugins.kover) apply false
 }

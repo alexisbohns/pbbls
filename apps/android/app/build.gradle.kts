@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.androidx.baselineprofile)
+    alias(libs.plugins.kover)
 }
 
 // Secrets chain (D8): read the git-ignored secrets.properties if present,
@@ -236,6 +237,41 @@ androidComponents {
     }
     onVariants(selector().withBuildType("benchmarkRelease")) { variant ->
         variant.signingConfig.setConfig(android.signingConfigs.getByName("debug"))
+    }
+}
+
+// Coverage (#857): `koverXmlReportDebug` / `koverHtmlReportDebug` measure what
+// `testDebugUnitTest` runs — the JVM tests and the Robolectric UI suite both —
+// and android.yml posts the line and branch totals to the PR's step summary.
+// It is a report, not a gate: there is no `verify` rule, on purpose, until a
+// few PRs of numbers say where a floor would sit.
+//
+// The exclusions are code no test is meant to reach, so counting it would only
+// make the number lie: Hilt and Dagger's generated factories and components,
+// Compose's generated singletons, BuildConfig and R, and the @Preview-only
+// DebugTokenPreviewScreen that exists for the screenshot suite.
+kover {
+    reports {
+        filters {
+            excludes {
+                classes(
+                    "*_Factory*",
+                    "*_MembersInjector",
+                    "*_HiltModules*",
+                    "*Hilt_*",
+                    "hilt_aggregated_deps.*",
+                    "dagger.hilt.internal.aggregatedroot.codegen.*",
+                    "*_GeneratedInjector",
+                    "*_ComponentTreeDeps",
+                    "*.ComposableSingletons*",
+                    "*.BuildConfig",
+                    "*.R",
+                    "*.R$*",
+                    "app.pbbls.android.DebugTokenPreviewScreenKt*",
+                )
+                annotatedBy("androidx.compose.ui.tooling.preview.Preview")
+            }
+        }
     }
 }
 
