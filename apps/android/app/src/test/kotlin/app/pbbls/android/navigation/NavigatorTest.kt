@@ -145,4 +145,70 @@ class NavigatorTest {
             assertTrue(state.backStacks[it]!!.last() is BarKey)
         }
     }
+
+    @Test
+    fun `opening a detail over a detail of the same kind replaces it`() {
+        navigator.navigate(PebblesKey.People)
+        navigator.navigateToDetail(PebblesKey.SoulDetail("s1"))
+        navigator.navigateToDetail(PebblesKey.SoulDetail("s2"))
+
+        assertEquals(
+            listOf<NavKey>(PebblesKey.People, PebblesKey.SoulDetail("s2")),
+            state.backStacks[PebblesKey.People]!!.toList(),
+        )
+    }
+
+    @Test
+    fun `opening a detail over a different key pushes`() {
+        navigator.navigate(PebblesKey.People)
+        navigator.navigateToDetail(PebblesKey.SoulDetail("s1"))
+
+        assertEquals(
+            listOf<NavKey>(PebblesKey.People, PebblesKey.SoulDetail("s1")),
+            state.backStacks[PebblesKey.People]!!.toList(),
+        )
+    }
+
+    @Test
+    fun `opening a detail over a tab root pushes`() {
+        navigator.navigateToDetail(PebblesKey.SoulDetail("s1"))
+
+        assertEquals(
+            listOf<NavKey>(PebblesKey.Path, PebblesKey.SoulDetail("s1")),
+            state.backStacks[PebblesKey.Path]!!.toList(),
+        )
+    }
+
+    @Test
+    fun `closing the open detail pops it`() {
+        navigator.navigate(PebblesKey.People)
+        navigator.navigateToDetail(PebblesKey.SoulDetail("s1"))
+
+        navigator.closeDetail(PebblesKey.SoulDetail("s1"))
+
+        assertEquals(listOf<NavKey>(PebblesKey.People), state.backStacks[PebblesKey.People]!!.toList())
+    }
+
+    @Test
+    fun `closing a detail that is not on top leaves the stack alone`() {
+        navigator.navigate(PebblesKey.People)
+        navigator.navigateToDetail(PebblesKey.SoulDetail("s1"))
+
+        navigator.closeDetail(PebblesKey.SoulDetail("s2"))
+
+        assertEquals(
+            listOf<NavKey>(PebblesKey.People, PebblesKey.SoulDetail("s1")),
+            state.backStacks[PebblesKey.People]!!.toList(),
+        )
+    }
+
+    @Test
+    fun `closing a detail at a tab root leaves the stack alone`() {
+        navigator.navigate(PebblesKey.People)
+
+        navigator.closeDetail(PebblesKey.SoulDetail("s1"))
+
+        assertEquals(PebblesKey.People, state.topLevelRoute)
+        assertEquals(listOf<NavKey>(PebblesKey.People), state.backStacks[PebblesKey.People]!!.toList())
+    }
 }

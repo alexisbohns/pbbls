@@ -138,6 +138,7 @@
     <string name="souls_empty_message">People and beings you tag on your pebbles will appear here.</string>
     <string name="souls_load_error">Couldn\'t load souls.</string>
     <string name="souls_delete_message">Linked pebbles stay; only the soul and its links are removed.</string>
+    <string name="souls_detail_placeholder">Pick a soul to see the pebbles you share.</string>
     <string name="soul_detail_empty_title">No pebbles yet</string>
     <string name="soul_detail_empty_message">Pebbles you tag with this soul will appear here.</string>
     <string name="soul_detail_load_error">Couldn\'t load pebbles.</string>
@@ -154,6 +155,7 @@
     <string name="collections_empty_message">Your collections will appear here.</string>
     <string name="collections_load_error">Couldn\'t load collections.</string>
     <string name="collections_delete_message">Linked pebbles stay; only the collection and its links are removed.</string>
+    <string name="collections_detail_placeholder">Pick a collection to open it.</string>
     <string name="collection_detail_empty_message">Pebbles added to this collection will appear here.</string>
     <string name="collection_edit_title">Edit collection</string>
     <string name="collection_save_error">Couldn\'t save the collection. Please try again.</string>

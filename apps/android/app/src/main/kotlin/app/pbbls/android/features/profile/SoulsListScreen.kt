@@ -50,6 +50,11 @@ import app.pbbls.android.core.ui.SoulItemCase
  * the fetch, the delete and the reference-data refresh that keeps the
  * pebble-form picker in sync — and owns the delete dialogs; [SoulsListContent]
  * renders (#940).
+ *
+ * @param onDeleteConfirmed Called with the deleted item's id once the user
+ *   confirms, so a detail open beside this list can close (#940). It runs on
+ *   confirm, not on success: if the delete fails, the error dialog says so and
+ *   the item can be reopened.
  */
 @Composable
 fun SoulsListScreen(
@@ -57,6 +62,7 @@ fun SoulsListScreen(
     onOpenSoul: (SoulWithGlyph) -> Unit,
     onCreateSoul: () -> Unit,
     modifier: Modifier = Modifier,
+    onDeleteConfirmed: (id: String) -> Unit = {},
     viewModel: SoulsListViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -84,7 +90,11 @@ fun SoulsListScreen(
         ConfirmDeleteDialog(
             title = stringResource(R.string.pebble_delete_confirm_title, target.name),
             message = stringResource(R.string.souls_delete_message),
-            onConfirm = viewModel::confirmDelete,
+            onConfirm = {
+                // `target` was captured before confirmDelete clears it.
+                viewModel.confirmDelete()
+                onDeleteConfirmed(target.id)
+            },
             onDismiss = viewModel::cancelDelete,
         )
     }

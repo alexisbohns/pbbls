@@ -55,6 +55,11 @@ import app.pbbls.android.features.profile.components.CollectionModeBadge
  * (D7 unifies on the M39 D8 idiom over iOS's swipe action).
  * [CollectionsListViewModel] owns the fetch (D10), the delete and the
  * reference-data refresh that keeps the pebble-form picker in sync.
+ *
+ * @param onDeleteConfirmed Called with the deleted item's id once the user
+ *   confirms, so a detail open beside this list can close (#940). It runs on
+ *   confirm, not on success: if the delete fails, the error dialog says so and
+ *   the item can be reopened.
  */
 @Composable
 fun CollectionsListScreen(
@@ -62,6 +67,7 @@ fun CollectionsListScreen(
     onOpenCollection: (Collection) -> Unit,
     onCreateCollection: () -> Unit,
     modifier: Modifier = Modifier,
+    onDeleteConfirmed: (id: String) -> Unit = {},
     viewModel: CollectionsListViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -90,7 +96,11 @@ fun CollectionsListScreen(
         ConfirmDeleteDialog(
             title = stringResource(R.string.pebble_delete_confirm_title, target.name),
             message = stringResource(R.string.collections_delete_message),
-            onConfirm = viewModel::confirmDelete,
+            onConfirm = {
+                // `target` was captured before confirmDelete clears it.
+                viewModel.confirmDelete()
+                onDeleteConfirmed(target.id)
+            },
             onDismiss = viewModel::cancelDelete,
         )
     }

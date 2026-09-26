@@ -36,6 +36,7 @@ import app.pbbls.android.navigation.pebblesEntries
 import app.pbbls.android.navigation.pebblesNavigationSuiteColors
 import app.pbbls.android.navigation.pebblesNavigationSuiteType
 import app.pbbls.android.navigation.rememberNavigationState
+import app.pbbls.android.navigation.rememberPebblesSceneStrategies
 
 /**
  * Top-level auth gate — the `RootView` analog (D5). Auth is now a condition,
@@ -190,6 +191,9 @@ fun RootScreen() {
  * `hiltViewModel()` to its entry rather than to the composition that happens to
  * host it, so a popped entry takes its ViewModel with it.
  *
+ * #940 hands it the list-detail Scene; anything the chain declines falls
+ * through to NavDisplay's own single pane, as before.
+ *
  * The FAB is deliberately NOT here. It lives inside `PathScreen`, because
  * `PathViewModel` is scoped to the Path entry and a Scaffold-level FAB sits
  * outside that entry's ViewModel store — it could not reach it.
@@ -209,6 +213,7 @@ private fun PebblesNavDisplay(
     // without a second condition.
     val isNavigationVisible = state.topKey is BarKey
     val navigationSuiteType = pebblesNavigationSuiteType()
+    val sceneStrategies = rememberPebblesSceneStrategies()
     val suiteState =
         rememberNavigationSuiteScaffoldState(
             initialValue = if (isNavigationVisible) NavigationSuiteScaffoldValue.Visible else NavigationSuiteScaffoldValue.Hidden,
@@ -254,6 +259,10 @@ private fun PebblesNavDisplay(
                             )
                         },
                 ),
+            // The list form of this parameter replaces the default single-pane
+            // strategy; NavDisplay still falls back to a single pane itself
+            // when every strategy here returns null.
+            sceneStrategies = sceneStrategies,
             onBack = { navigator.goBack() },
             // No padding here, unlike the Scaffold this replaced: the suite
             // passes no content padding, only consumed insets (see above), and

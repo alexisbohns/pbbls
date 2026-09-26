@@ -127,6 +127,7 @@
     <string name="souls_empty_message">Les personnes et les êtres que vous associez à vos pebbles apparaîtront ici.</string>
     <string name="souls_load_error">Impossible de charger les âmes.</string>
     <string name="souls_delete_message">Les pebbles liés restent ; seuls l\'âme et ses liens sont supprimés.</string>
+    <string name="souls_detail_placeholder">Choisissez une âme pour voir les pebbles que vous partagez.</string>
     <string name="soul_detail_empty_title">Pas encore de pebbles</string>
     <string name="soul_detail_empty_message">Les pebbles que vous associez à cette âme apparaîtront ici.</string>
     <string name="soul_detail_load_error">Impossible de charger les pebbles.</string>
@@ -142,6 +143,7 @@
     <string name="collections_empty_message">Vos collections apparaîtront ici.</string>
     <string name="collections_load_error">Impossible de charger les collections.</string>
     <string name="collections_delete_message">Les pebbles liés restent ; seuls la collection et ses liens sont supprimés.</string>
+    <string name="collections_detail_placeholder">Choisissez une collection pour l\'ouvrir.</string>
     <string name="collection_detail_empty_message">Les pebbles ajoutés à cette collection apparaîtront ici.</string>
     <string name="collection_edit_title">Modifier la collection</string>
     <string name="collection_save_error">Impossible d\'enregistrer la collection. Veuillez réessayer.</string>
