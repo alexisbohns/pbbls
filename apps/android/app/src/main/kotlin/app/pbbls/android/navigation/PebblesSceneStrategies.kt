@@ -97,9 +97,12 @@ object PanePairs {
     fun isList(entry: NavEntry<*>): Boolean = entry.metadata[IS_LIST] == true
 }
 
+// Internal rather than private so the list-detail screenshots render these
+// exact placeholders instead of restating them (#940).
 @Composable
-private fun SoulsPlaceholder() = DetailPlaceholder(iconRes = R.drawable.ic_people, text = stringResource(R.string.souls_detail_placeholder))
+internal fun SoulsPlaceholder() =
+    DetailPlaceholder(iconRes = R.drawable.ic_people, text = stringResource(R.string.souls_detail_placeholder))
 
 @Composable
-private fun CollectionsPlaceholder() =
+internal fun CollectionsPlaceholder() =
     DetailPlaceholder(iconRes = R.drawable.ic_pebble_collection, text = stringResource(R.string.collections_detail_placeholder))

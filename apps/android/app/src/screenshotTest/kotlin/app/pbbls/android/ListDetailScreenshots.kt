@@ -2,9 +2,7 @@ package app.pbbls.android
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import app.pbbls.android.core.designsystem.DetailPlaceholder
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Collection
 import app.pbbls.android.core.model.CollectionMode
@@ -22,14 +20,17 @@ import app.pbbls.android.features.profile.SoulDetailContent
 import app.pbbls.android.features.profile.SoulDetailUiState
 import app.pbbls.android.features.profile.SoulsListContent
 import app.pbbls.android.features.profile.SoulsListUiState
+import app.pbbls.android.navigation.CollectionsPlaceholder
 import app.pbbls.android.navigation.PebblesKey
+import app.pbbls.android.navigation.SoulsPlaceholder
 import com.android.tools.screenshot.PreviewTest
 import java.time.OffsetDateTime
 import java.time.ZoneId
 
 /**
  * Souls and collections beside their list on large screens (#940): the idle
- * state (list + [DetailPlaceholder]) and the open state (list + the real
+ * state (list + the production [SoulsPlaceholder] / [CollectionsPlaceholder],
+ * also in French) and the open state (list + the real
  * detail content, `showBack = false`) through [ListDetailPreviewFrame], at the
  * 840/1024 dp breakpoints plus a 1024 dp dark render. Fixtures are built the
  * same way [SoulsScreenshots], [CollectionsScreenshots] and
@@ -126,6 +127,9 @@ private val previewZone: ZoneId = ZoneId.of("UTC")
 
 @PreviewTest
 @PreviewWideTall
+// French at 840 dp rather than @PreviewFrench: that one has no width, and a
+// phone-width window never gets two panes, so it would only squeeze the pair.
+@Preview(name = "fr", showBackground = true, locale = "fr", widthDp = 840, heightDp = 720)
 @Composable
 fun SoulsListDetailIdle() {
     PebblesTheme {
@@ -142,10 +146,7 @@ fun SoulsListDetailIdle() {
                 )
             },
             detail = {
-                DetailPlaceholder(
-                    iconRes = R.drawable.ic_people,
-                    text = stringResource(R.string.souls_detail_placeholder),
-                )
+                SoulsPlaceholder()
             },
         )
     }
@@ -219,6 +220,9 @@ fun SoulsListDetailOpenDark() {
 
 @PreviewTest
 @PreviewWideTall
+// French at 840 dp rather than @PreviewFrench: that one has no width, and a
+// phone-width window never gets two panes, so it would only squeeze the pair.
+@Preview(name = "fr", showBackground = true, locale = "fr", widthDp = 840, heightDp = 720)
 @Composable
 fun CollectionsListDetailIdle() {
     PebblesTheme {
@@ -236,10 +240,7 @@ fun CollectionsListDetailIdle() {
                 )
             },
             detail = {
-                DetailPlaceholder(
-                    iconRes = R.drawable.ic_pebble_collection,
-                    text = stringResource(R.string.collections_detail_placeholder),
-                )
+                CollectionsPlaceholder()
             },
         )
     }
