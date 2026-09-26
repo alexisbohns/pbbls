@@ -54,7 +54,7 @@ import app.pbbls.android.features.welcome.WelcomeScreen
 fun EntryProviderScope<NavKey>.pebblesEntries(
     navigator: Navigator,
     onSignOut: () -> Unit,
-    welcomeContentRevealed: Boolean,
+    welcomeContentRevealed: () -> Boolean,
     onOnboardingFinished: () -> Unit,
 ) {
     entry<PebblesKey.Path>(
@@ -286,7 +286,9 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
 
     entry<PebblesKey.Welcome>(metadata = NavTransitions.forKey(PebblesKey.Welcome)) {
         WelcomeScreen(
-            contentRevealed = welcomeContentRevealed,
+            // Read here, inside the entry, not captured by the caller: see
+            // `RootScreen`'s class doc for why a plain Boolean froze Welcome.
+            contentRevealed = welcomeContentRevealed(),
             onCreateAccount = { navigator.navigate(PebblesKey.Auth(AuthMode.SIGNUP)) },
             onLogin = { navigator.navigate(PebblesKey.Auth(AuthMode.LOGIN)) },
         )
