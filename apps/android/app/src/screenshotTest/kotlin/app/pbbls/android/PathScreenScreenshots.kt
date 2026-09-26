@@ -54,10 +54,11 @@ private fun pebble(
         emotion = EmotionRef(id = "e1", slug = "joyful", name = "Joyful"),
     )
 
-// Focused week Monday 2026-07-06; "today" Saturday 2026-07-11.
-private val today: LocalDate = LocalDate.of(2026, 7, 11)
+// Focused week Monday 2026-07-06; "today" Saturday 2026-07-11. Both internal
+// so the Path list-detail renders show this exact timeline (#940).
+internal val pathPreviewToday: LocalDate = LocalDate.of(2026, 7, 11)
 
-private val populatedEntries: List<WeekRollEntry> =
+internal val populatedEntries: List<WeekRollEntry> =
     listOf(
         WeekRollEntry(
             weekStart = LocalDate.of(2026, 6, 22),
@@ -87,7 +88,7 @@ private fun ScreenPreview(entries: List<WeekRollEntry>) {
         entries = entries,
         initialWeekStart = focused,
         focusedWeekStart = focused,
-        today = today,
+        today = pathPreviewToday,
         onFocusChange = {},
         paletteFor = { screenPalette },
         // Mirrors PathScreen: the timeline is the readable column (#855), a

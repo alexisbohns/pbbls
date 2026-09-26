@@ -2,11 +2,17 @@ package app.pbbls.android
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.material3.BottomSheetDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
@@ -24,6 +30,8 @@ import app.pbbls.android.core.model.SoulRow
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.features.path.DeleteConfirmDialog
+import app.pbbls.android.features.path.PebbleDetailContent
+import app.pbbls.android.features.path.PebbleDetailUiState
 import app.pbbls.android.features.path.read.BannerAspect
 import app.pbbls.android.features.path.read.PebbleReadView
 import app.pbbls.android.features.path.read.PebbleSnapFrame
@@ -114,7 +122,8 @@ private fun detail(
         collectionPebbles = collections,
     )
 
-private val fullDetail: PebbleDetail =
+// Internal so the Path list-detail and sheet renders show this pebble (#940).
+internal val fullDetail: PebbleDetail =
     detail(
         name = "Morning walk",
         description = "Long loop around the park before work. The light was unreal.",
@@ -243,6 +252,37 @@ fun PebbleDetailNoDomainLight() {
 @Composable
 fun PebbleDetailNoDomainDark() {
     PebblesTheme { DetailPreview(noDomainDetail) }
+}
+
+/**
+ * The pebble as a docked sheet on a phone (#940). Layoutlib cannot render
+ * `ModalBottomSheet`'s own window, so this is the sheet's look without it: the
+ * top-rounded sheet surface and its drag handle over the real
+ * [PebbleDetailContent].
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@PreviewTest
+@Preview(showBackground = true)
+@Composable
+fun PebbleDetailSheetLight() {
+    PebblesTheme {
+        Surface(
+            modifier = Modifier.fillMaxSize().padding(top = 24.dp),
+            shape = MaterialTheme.shapes.extraLarge.copy(bottomStart = CornerSize(0), bottomEnd = CornerSize(0)),
+            color = BottomSheetDefaults.ContainerColor,
+        ) {
+            Column {
+                BottomSheetDefaults.DragHandle(modifier = Modifier.align(Alignment.CenterHorizontally))
+                PebbleDetailContent(
+                    uiState = PebbleDetailUiState.Content(fullDetail),
+                    palette = previewPalette,
+                    onEdit = {},
+                    onShare = null,
+                    onRetry = {},
+                )
+            }
+        }
+    }
 }
 
 @PreviewTest
