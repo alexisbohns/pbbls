@@ -211,4 +211,23 @@ class NavigatorTest {
         assertEquals(PebblesKey.People, state.topLevelRoute)
         assertEquals(listOf<NavKey>(PebblesKey.People), state.backStacks[PebblesKey.People]!!.toList())
     }
+
+    @Test
+    fun `revealing a created pebble beside an open one replaces it`() {
+        // The composer's reveal on a large screen, where a pebble can already
+        // be open beside Path when the FAB is long-pressed: pop the composer,
+        // then open the new pebble. Back must return to Path, not the old one.
+        // This tests the Navigator sequence, not the entry provider's
+        // `onCreated` wiring, which is Compose and has no JVM test.
+        navigator.navigateToDetail(PebblesKey.PebbleDetail("old"))
+        navigator.navigate(PebblesKey.CreatePebble())
+
+        navigator.goBack()
+        navigator.navigateToDetail(PebblesKey.PebbleDetail("new"))
+
+        assertEquals(
+            listOf<NavKey>(PebblesKey.Path, PebblesKey.PebbleDetail("new")),
+            state.backStacks[PebblesKey.Path]!!.toList(),
+        )
+    }
 }

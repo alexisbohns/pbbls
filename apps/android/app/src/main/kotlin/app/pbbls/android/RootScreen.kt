@@ -8,6 +8,7 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldValue
 import androidx.compose.material3.adaptive.navigationsuite.rememberNavigationSuiteScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,10 +29,12 @@ import app.pbbls.android.core.ui.AchievementMomentOverlay
 import app.pbbls.android.core.ui.KarmaOverlayHost
 import app.pbbls.android.features.onboarding.OnboardingGate
 import app.pbbls.android.navigation.BarKey
+import app.pbbls.android.navigation.LocalSheetOverlaySlot
 import app.pbbls.android.navigation.NavigationState
 import app.pbbls.android.navigation.Navigator
 import app.pbbls.android.navigation.PebblesKey
 import app.pbbls.android.navigation.PebblesNavigationItems
+import app.pbbls.android.navigation.SheetOverlaySlot
 import app.pbbls.android.navigation.pebblesEntries
 import app.pbbls.android.navigation.pebblesNavigationSuiteColors
 import app.pbbls.android.navigation.pebblesNavigationSuiteType
@@ -142,39 +145,58 @@ fun RootScreen() {
         viewModel.onInviteConsumed()
     }
 
-    Box(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surface),
-    ) {
-        PebblesNavDisplay(
-            navigator = navigator,
-            state = navState,
-            onSignOut = viewModel::onSignOut,
-            welcomeContentRevealed = welcomeContentRevealed,
-            onOnboardingFinished = {
-                OnboardingPreferences.setHasSeenOnboarding(context, true)
-                hasSeenOnboarding = true
-                navigator.goBack()
-            },
-        )
-        if (root.destination == RootDestination.SignedIn) {
-            // Karma + achievement flashes only ever fire from signed-in
-            // actions — floats above the nav host, drawn last for z-order (D9).
-            KarmaOverlayHost(
-                flash = root.karmaFlash,
-                onDismiss = viewModel::onKarmaDismissed,
-                modifier = Modifier.fillMaxSize(),
+    // The celebrations draw here, or inside a docked sheet's window while one
+    // is open (#940); the slot is what decides which, so never both.
+    val overlaySlot = remember(viewModel) { SheetOverlaySlot { CelebrationOverlays(viewModel) } }
+
+    CompositionLocalProvider(LocalSheetOverlaySlot provides overlaySlot) {
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.surface),
+        ) {
+            PebblesNavDisplay(
+                navigator = navigator,
+                state = navState,
+                onSignOut = viewModel::onSignOut,
+                welcomeContentRevealed = welcomeContentRevealed,
+                onOnboardingFinished = {
+                    OnboardingPreferences.setHasSeenOnboarding(context, true)
+                    hasSeenOnboarding = true
+                    navigator.goBack()
+                },
             )
-            AchievementMomentOverlay(
-                moment = root.achievementMoment,
-                onAdvance = viewModel::onAchievementAdvanced,
-                onDismiss = viewModel::onAchievementDismissed,
-                modifier = Modifier.fillMaxSize(),
-            )
+            // Drawn last for z-order (D9), unless a sheet is hosting them.
+            // The hand-over lands one frame late: a sheet registers in an
+            // effect, so on the frame it opens both copies compose, and a
+            // celebration already on screen can replay its haptic once.
+            if (!overlaySlot.isHostedBySheet) overlaySlot.content()
         }
     }
+}
+
+/**
+ * Karma + achievement flashes (D9). They only ever fire from signed-in
+ * actions, and float above whatever hosts them: the nav host, or a docked
+ * sheet (#940). Reads [RootViewModel]'s state itself, so the sheet can compose
+ * it without `RootScreen` passing state through the scene.
+ */
+@Composable
+private fun CelebrationOverlays(viewModel: RootViewModel) {
+    val root by viewModel.uiState.collectAsStateWithLifecycle()
+    if (root.destination != RootDestination.SignedIn) return
+    KarmaOverlayHost(
+        flash = root.karmaFlash,
+        onDismiss = viewModel::onKarmaDismissed,
+        modifier = Modifier.fillMaxSize(),
+    )
+    AchievementMomentOverlay(
+        moment = root.achievementMoment,
+        onAdvance = viewModel::onAchievementAdvanced,
+        onDismiss = viewModel::onAchievementDismissed,
+        modifier = Modifier.fillMaxSize(),
+    )
 }
 
 /**

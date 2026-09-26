@@ -1,9 +1,14 @@
 package app.pbbls.android
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import app.pbbls.android.core.designsystem.PebblesTheme
+import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.model.Collection
 import app.pbbls.android.core.model.CollectionMode
 import app.pbbls.android.core.model.EmotionPalette
@@ -12,6 +17,9 @@ import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.core.model.SoulWithGlyph
+import app.pbbls.android.features.path.PathContent
+import app.pbbls.android.features.path.PebbleDetailContent
+import app.pbbls.android.features.path.PebbleDetailUiState
 import app.pbbls.android.features.profile.CollectionDetailContent
 import app.pbbls.android.features.profile.CollectionDetailUiState
 import app.pbbls.android.features.profile.CollectionsListContent
@@ -36,6 +44,11 @@ import java.time.ZoneId
  * same way [SoulsScreenshots], [CollectionsScreenshots] and
  * [PebbleDetailScreenshots] do — a private palette and small hand-built rows —
  * rather than reusing those files' `private` values.
+ *
+ * Path's pair is the exception: an open pebble beside Path (there is no idle
+ * render, since idle Path stays full width) reuses the Path timeline and the
+ * full pebble the Path and detail screenshots already render, so the pane
+ * shows exactly what those do.
  */
 private val previewPalette: EmotionPalette =
     requireNotNull(
@@ -322,4 +335,51 @@ fun CollectionsListDetailOpenDark() {
             },
         )
     }
+}
+
+@Composable
+private fun PathPebblePair() {
+    ListDetailPreviewFrame(
+        tab = PebblesKey.Path,
+        list = {
+            val focused = populatedEntries.last().weekStart
+            PathContent(
+                entries = populatedEntries,
+                initialWeekStart = focused,
+                focusedWeekStart = focused,
+                today = pathPreviewToday,
+                onFocusChange = {},
+                paletteFor = { previewPalette },
+                // Mirrors PathScreen: the timeline is the readable column.
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .background(MaterialTheme.colorScheme.surface)
+                        .readableWidth(),
+            )
+        },
+        detail = {
+            PebbleDetailContent(
+                uiState = PebbleDetailUiState.Content(fullDetail),
+                palette = previewPalette,
+                onEdit = {},
+                onShare = null,
+                onRetry = {},
+            )
+        },
+    )
+}
+
+@PreviewTest
+@PreviewWideTall
+@Composable
+fun PathPebbleListDetailOpen() {
+    PebblesTheme { PathPebblePair() }
+}
+
+@PreviewTest
+@Preview(showBackground = true, widthDp = 1024, heightDp = 720, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun PathPebbleListDetailOpenDark() {
+    PebblesTheme { PathPebblePair() }
 }

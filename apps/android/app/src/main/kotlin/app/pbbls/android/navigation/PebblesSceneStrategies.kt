@@ -22,7 +22,7 @@ import app.pbbls.android.core.designsystem.DetailPlaceholder
  * is what stops a soul detail from joining a collections list below it in the
  * flattened back stack.
  */
-enum class PanePair { SOULS, COLLECTIONS }
+enum class PanePair { SOULS, COLLECTIONS, PEBBLES }
 
 /**
  * List-detail on large screens (#940): the library strategy, with two rules
@@ -35,6 +35,9 @@ enum class PanePair { SOULS, COLLECTIONS }
  * - **A detail with no list under it is not a pair.** `CollectionDetail`
  *   pushed from the You tab has only You beneath it; the library would still
  *   build a one-entry scaffold for it.
+ * - **A full-width list (Path) is a list only while a detail is open.** Idle,
+ *   it keeps its full readable column; the split animates as a scene change.
+ *   It is asked for by name (`fullWidthList`), never inferred.
  */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 fun pebblesListDetailStrategy(directive: PaneScaffoldDirective): SceneStrategy<NavKey> {
@@ -49,19 +52,31 @@ fun pebblesListDetailStrategy(directive: PaneScaffoldDirective): SceneStrategy<N
         )
     return object : SceneStrategy<NavKey> {
         override fun SceneStrategyScope<NavKey>.calculateScene(entries: List<NavEntry<NavKey>>): Scene<NavKey>? {
+            // Idle Path keeps its full-width readable column: it only becomes a
+            // list pane once a pebble is open beside it.
+            if (PanePairs.isFullWidthWhenIdle(entries.last())) return null
             val scene = with(library) { calculateScene(entries) } ?: return null
             return if (scene.entries.any(PanePairs::isList)) scene else null
         }
     }
 }
 
-/** The strategies `RootScreen`'s `NavDisplay` tries, in order (#940). */
+/**
+ * The strategies `RootScreen`'s `NavDisplay` tries, in order (#940). List-detail
+ * comes first, so on two panes a pebble sits beside Path; only when it declines
+ * (one pane) does the same entry fall to the sheet.
+ */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
 fun rememberPebblesSceneStrategies(): List<SceneStrategy<NavKey>> {
     val directive = pebblesPaneDirective(currentWindowAdaptiveInfoV2())
-    return remember(directive) { listOf(pebblesListDetailStrategy(directive)) }
+    return remember(directive) { pebblesSceneStrategies(directive) }
 }
+
+/** The chain itself, for a given [directive]; `NavDisplay` takes the first scene. */
+@OptIn(ExperimentalMaterial3AdaptiveApi::class)
+fun pebblesSceneStrategies(directive: PaneScaffoldDirective): List<SceneStrategy<NavKey>> =
+    listOf(pebblesListDetailStrategy(directive), BottomSheetSceneStrategy())
 
 /**
  * Which entries are list panes and which are detail panes (#940).
@@ -77,13 +92,29 @@ fun rememberPebblesSceneStrategies(): List<SceneStrategy<NavKey>> {
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 object PanePairs {
     private const val IS_LIST = "pebbles.pane.list"
+    private const val FULL_WIDTH_WHEN_IDLE = "pebbles.pane.fullWidthWhenIdle"
 
+    /** A list that shows [placeholder] beside it while no detail is open. */
     private fun list(
         pair: PanePair,
         placeholder: @Composable () -> Unit,
     ): Map<String, Any> = ListDetailSceneStrategy.listPane(pair) { placeholder() } + (IS_LIST to true)
 
-    private fun detail(pair: PanePair): Map<String, Any> = ListDetailSceneStrategy.detailPane(pair)
+    /**
+     * A list that stays full width until a detail opens, rather than showing a
+     * placeholder beside it (Path). Asked for by name, so a future list is
+     * never full width by accident.
+     */
+    private fun fullWidthList(pair: PanePair): Map<String, Any> =
+        ListDetailSceneStrategy.listPane(pair) + (IS_LIST to true) + (FULL_WIDTH_WHEN_IDLE to true)
+
+    /** [sheetWhenCompact]: on one pane the detail is a docked sheet over its list. */
+    private fun detail(
+        pair: PanePair,
+        sheetWhenCompact: Boolean = false,
+    ): Map<String, Any> =
+        ListDetailSceneStrategy.detailPane(pair) +
+            if (sheetWhenCompact) BottomSheetSceneStrategy.bottomSheet() else emptyMap()
 
     fun metadataFor(key: PebblesKey): Map<String, Any> =
         when (key) {
@@ -91,10 +122,14 @@ object PanePairs {
             is PebblesKey.SoulDetail -> detail(PanePair.SOULS)
             PebblesKey.Collections -> list(PanePair.COLLECTIONS) { CollectionsPlaceholder() }
             is PebblesKey.CollectionDetail -> detail(PanePair.COLLECTIONS)
+            PebblesKey.Path -> fullWidthList(PanePair.PEBBLES)
+            is PebblesKey.PebbleDetail -> detail(PanePair.PEBBLES, sheetWhenCompact = true)
             else -> emptyMap()
         }
 
     fun isList(entry: NavEntry<*>): Boolean = entry.metadata[IS_LIST] == true
+
+    fun isFullWidthWhenIdle(entry: NavEntry<*>): Boolean = entry.metadata[FULL_WIDTH_WHEN_IDLE] == true
 }
 
 // Internal rather than private so the list-detail screenshots render these

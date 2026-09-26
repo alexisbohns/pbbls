@@ -56,12 +56,15 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     welcomeContentRevealed: Boolean,
     onOnboardingFinished: () -> Unit,
 ) {
-    entry<PebblesKey.Path>(metadata = NavTransitions.forKey(PebblesKey.Path)) {
+    entry<PebblesKey.Path>(
+        metadata = NavTransitions.forKey(PebblesKey.Path) + PanePairs.metadataFor(PebblesKey.Path),
+    ) {
         PathScreen(
-            onOpenDetail = { pebbleId -> navigator.navigate(PebblesKey.PebbleDetail(pebbleId)) },
+            onOpenDetail = { pebbleId -> navigator.navigateToDetail(PebblesKey.PebbleDetail(pebbleId)) },
             onOpenDrafts = { navigator.navigate(PebblesKey.Drafts) },
             onCreatePebble = { navigator.navigate(PebblesKey.RecordFlow()) },
             onCreatePebbleLongPress = { navigator.navigate(PebblesKey.CreatePebble()) },
+            onDeleteConfirmed = { navigator.closeDetail(PebblesKey.PebbleDetail(it)) },
         )
     }
 
@@ -197,10 +200,13 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
 
     // ---- The write path promoted to entries (#852) ----
 
-    entry<PebblesKey.PebbleDetail>(metadata = NavTransitions.forKey(PebblesKey.PebbleDetail(""))) { key ->
+    entry<PebblesKey.PebbleDetail>(
+        // Fade-through, not the push BarKeys get: beside Path this is a scene
+        // change, not a lateral move (#940).
+        metadata = NavTransitions.split + PanePairs.metadataFor(PebblesKey.PebbleDetail("")),
+    ) { key ->
         PebbleDetailScreen(
             pebbleId = key.pebbleId,
-            onDismiss = navigator::goBack,
             onEditRequested = { navigator.navigate(PebblesKey.EditPebble(key.pebbleId)) },
         )
     }
@@ -232,10 +238,12 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         CreatePebbleScreen(
             resumeDraftId = key.resumeDraftId,
             // The form DOES reveal the new pebble through the detail entry
-            // (M58 D10) — pop the composer, then push detail on what is left.
+            // (M58 D10) — pop the composer, then open detail on what is left.
+            // On a large screen a pebble may already be open beside Path, so
+            // the new one replaces it rather than stacking over it (#940).
             onCreated = { pebbleId ->
                 navigator.goBack()
-                navigator.navigate(PebblesKey.PebbleDetail(pebbleId))
+                navigator.navigateToDetail(PebblesKey.PebbleDetail(pebbleId))
             },
             onCancel = navigator::goBack,
         )

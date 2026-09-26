@@ -8,8 +8,10 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.scene.SceneStrategy
 import androidx.navigation3.scene.SceneStrategyScope
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /** Which back stacks become a list-detail scene (#940). */
@@ -87,5 +89,60 @@ class PebblesSceneStrategiesTest {
         // one entry, so it must not claim the stack.
         val scene = pebblesListDetailStrategy(directive(2)).sceneFor(PebblesKey.You, PebblesKey.CollectionDetail("c1"))
         assertNull(scene)
+    }
+
+    @Test
+    fun `idle Path stays full width on two panes`() {
+        assertNull(pebblesListDetailStrategy(directive(2)).sceneFor(PebblesKey.Path))
+    }
+
+    @Test
+    fun `an open pebble sits beside Path on two panes`() {
+        val entries = listOf(PebblesKey.Path, PebblesKey.PebbleDetail("p1")).map(::entry)
+        val scene = with(SceneStrategyScope<NavKey>()) { with(pebblesListDetailStrategy(directive(2))) { calculateScene(entries) } }
+
+        assertEquals(PanePair.PEBBLES, scene!!.key)
+        assertEquals(entries, scene.entries)
+    }
+
+    @Test
+    fun `an open pebble on one pane is left to the sheet`() {
+        assertNull(pebblesListDetailStrategy(directive(1)).sceneFor(PebblesKey.Path, PebblesKey.PebbleDetail("p1")))
+    }
+
+    @Test
+    fun `a pebble left open on Path does not join the souls pair`() {
+        // The flattened stack after switching tab through the rail with a
+        // pebble open beside Path: Path's pair is below People's. The walk no
+        // longer stops at Path's entries (they carry pane metadata now); only
+        // the scene key keeps them out.
+        val entries =
+            listOf(PebblesKey.Path, PebblesKey.PebbleDetail("p1"), PebblesKey.People, PebblesKey.SoulDetail("s1"))
+                .map(::entry)
+        val scene = with(SceneStrategyScope<NavKey>()) { with(pebblesListDetailStrategy(directive(2))) { calculateScene(entries) } }
+
+        assertEquals(entries.drop(2), scene!!.entries)
+        // Back pops the soul only: the idle souls list, with Path's pair still below.
+        assertEquals(entries.take(3), scene.previousEntries)
+    }
+
+    @Test
+    fun `an idle souls list over an open pebble is the souls list alone`() {
+        val entries = listOf(PebblesKey.Path, PebblesKey.PebbleDetail("p1"), PebblesKey.People).map(::entry)
+        val scene = with(SceneStrategyScope<NavKey>()) { with(pebblesListDetailStrategy(directive(2))) { calculateScene(entries) } }
+
+        assertEquals(entries.takeLast(1), scene!!.entries)
+        // Back leaves the tab and lands on the pebble beside Path.
+        assertEquals(entries.take(2), scene.previousEntries)
+    }
+
+    @Test
+    fun `only Path is a full-width list`() {
+        // Asked for by name, not inferred from a missing placeholder: the
+        // souls and collections lists keep their placeholder pane when idle.
+        assertTrue(PanePairs.isFullWidthWhenIdle(entry(PebblesKey.Path)))
+        assertFalse(PanePairs.isFullWidthWhenIdle(entry(PebblesKey.People)))
+        assertFalse(PanePairs.isFullWidthWhenIdle(entry(PebblesKey.Collections)))
+        assertFalse(PanePairs.isFullWidthWhenIdle(entry(PebblesKey.PebbleDetail("p1"))))
     }
 }

@@ -70,6 +70,18 @@ sealed interface PebblesKey : NavKey {
     ) : PebblesKey,
         BarKey
 
+    /**
+     * A docked sheet on phones and a pane beside Path on large screens (#940),
+     * never a full-screen modal — so the bar stays: under the sheet's scrim on
+     * a phone, beside the panes on a tablet. D6 still holds because this is no
+     * longer a modal; [EditPebble], opened from it, still is.
+     */
+    @Serializable
+    data class PebbleDetail(
+        val pebbleId: String,
+    ) : PebblesKey,
+        BarKey
+
     // ---- Modal: full-screen, the bar is covered ----
 
     @Serializable
@@ -84,11 +96,6 @@ sealed interface PebblesKey : NavKey {
 
     @Serializable
     data object Drafts : PebblesKey
-
-    @Serializable
-    data class PebbleDetail(
-        val pebbleId: String,
-    ) : PebblesKey
 
     @Serializable
     data class EditPebble(

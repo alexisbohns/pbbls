@@ -263,7 +263,6 @@
     <string name="pebble_delete_error">Une erreur est survenue. Veuillez réessayer.</string>
     <string name="action_cancel">Annuler</string>
     <string name="pebble_detail_edit">Modifier</string>
-    <string name="pebble_detail_back_a11y">Retour</string>
     <string name="pebble_detail_no_domain">Aucun domaine</string>
     <string name="pebble_detail_load_error">Impossible de charger ce pebble.</string>
     <string name="pebble_detail_retry">Réessayer</string>

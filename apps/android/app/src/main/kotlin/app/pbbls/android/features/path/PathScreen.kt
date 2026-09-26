@@ -56,6 +56,11 @@ import kotlin.math.abs
  * now (#852) — [onOpenDetail], [onOpenDrafts], [onCreatePebble] and
  * [onCreatePebbleLongPress] are how this screen reaches them; only the caller
  * (`PebblesEntryProvider`) ever touches a `Navigator`.
+ *
+ * @param onDeleteConfirmed Called with the deleted pebble's id once the user
+ *   confirms, so a detail open beside Path can close (#940). It runs on
+ *   confirm, not on success: if the delete fails, the error dialog says so and
+ *   the pebble can be reopened.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -65,6 +70,7 @@ fun PathScreen(
     onCreatePebble: () -> Unit,
     onCreatePebbleLongPress: () -> Unit,
     modifier: Modifier = Modifier,
+    onDeleteConfirmed: (pebbleId: String) -> Unit = {},
     viewModel: PathViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -156,7 +162,11 @@ fun PathScreen(
         covers.pendingDeletion?.let { target ->
             DeleteConfirmDialog(
                 pebbleName = target.name,
-                onConfirm = viewModel::confirmDelete,
+                onConfirm = {
+                    // `target` was captured before confirmDelete clears it.
+                    viewModel.confirmDelete()
+                    onDeleteConfirmed(target.id)
+                },
                 onDismiss = viewModel::cancelDelete,
             )
         }
