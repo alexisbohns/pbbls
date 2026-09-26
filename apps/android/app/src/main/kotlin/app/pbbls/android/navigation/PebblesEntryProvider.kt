@@ -236,10 +236,12 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         CreatePebbleScreen(
             resumeDraftId = key.resumeDraftId,
             // The form DOES reveal the new pebble through the detail entry
-            // (M58 D10) — pop the composer, then push detail on what is left.
+            // (M58 D10) — pop the composer, then open detail on what is left.
+            // On a large screen a pebble may already be open beside Path, so
+            // the new one replaces it rather than stacking over it (#940).
             onCreated = { pebbleId ->
                 navigator.goBack()
-                navigator.navigate(PebblesKey.PebbleDetail(pebbleId))
+                navigator.navigateToDetail(PebblesKey.PebbleDetail(pebbleId))
             },
             onCancel = navigator::goBack,
         )
