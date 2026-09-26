@@ -41,6 +41,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.PebblesScreen
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.ProfileEmptyState
+import app.pbbls.android.core.designsystem.isWideWindow
 import app.pbbls.android.core.model.GlyphGridItem
 import app.pbbls.android.core.ui.GlyphView
 import app.pbbls.android.core.ui.GlyphViewCase
@@ -68,6 +69,7 @@ fun GlyphsListScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val covers by viewModel.covers.collectAsStateWithLifecycle()
     val colors = MaterialTheme.colorScheme
+    val isWide = isWideWindow()
 
     // Returning from the carve studio must re-read the current tab: the
     // ViewModel is scoped to the back stack entry, which survives the round
@@ -102,6 +104,17 @@ fun GlyphsListScreen(
                         )
                     }
                 },
+            )
+        },
+        // The tabs float over the window, not the readable column (#855): a
+        // bar across the bottom on phones, a vertical toolbar on the end edge
+        // of a tablet, opposite the navigation rail.
+        overlay = {
+            GlyphTabBar(
+                selection = uiState.tab,
+                onSelect = viewModel::onSelectTab,
+                vertical = isWide,
+                modifier = Modifier.align(if (isWide) Alignment.CenterEnd else Alignment.BottomCenter),
             )
         },
     ) {
@@ -141,8 +154,14 @@ fun GlyphsListScreen(
                             LazyVerticalGrid(
                                 columns = GridCells.Adaptive(96.dp),
                                 modifier = Modifier.fillMaxSize(),
+                                // Clear of the tab toolbar: its height at the bottom
+                                // on phones, its width at the end edge on tablets.
                                 contentPadding =
-                                    PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp),
+                                    if (isWide) {
+                                        PaddingValues(start = 16.dp, end = 88.dp, top = 16.dp, bottom = 16.dp)
+                                    } else {
+                                        PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 96.dp)
+                                    },
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 verticalArrangement = Arrangement.spacedBy(12.dp),
                             ) {
@@ -161,11 +180,6 @@ fun GlyphsListScreen(
                         }
                     }
             }
-            GlyphTabBar(
-                selection = uiState.tab,
-                onSelect = viewModel::onSelectTab,
-                modifier = Modifier.align(Alignment.BottomCenter),
-            )
         }
     }
 

@@ -3,10 +3,13 @@ package app.pbbls.android.core.designsystem
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.window.core.layout.WindowSizeClass.Companion.WIDTH_DP_MEDIUM_LOWER_BOUND
 
 /**
  * The widest a content column gets (#855): 600 dp, the M3 Compact/Medium
@@ -36,3 +39,13 @@ fun Modifier.readableWidth(): Modifier =
         .wrapContentWidth(Alignment.CenterHorizontally)
         .widthIn(max = ReadableContentMaxWidth)
         .fillMaxWidth()
+
+/**
+ * Whether the window is at least the Medium width class (600 dp), the same
+ * breakpoint the readable column caps at and the navigation rail replaces
+ * the bottom bar from (#855). For chrome that changes form on large screens,
+ * such as a floating toolbar moving from the bottom edge to the end edge.
+ * Content should not branch on it: [readableWidth] already adapts without it.
+ */
+@Composable
+fun isWideWindow(): Boolean = currentWindowAdaptiveInfo().windowSizeClass.isWidthAtLeastBreakpoint(WIDTH_DP_MEDIUM_LOWER_BOUND)

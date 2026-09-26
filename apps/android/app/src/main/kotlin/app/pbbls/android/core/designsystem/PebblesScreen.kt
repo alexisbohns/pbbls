@@ -1,5 +1,7 @@
 package app.pbbls.android.core.designsystem
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -43,11 +45,16 @@ import androidx.compose.ui.text.style.TextOverflow
  * Width: the content column is [readableWidth] — centered and capped at 600 dp
  * on tablets and desktop windows (#855), a no-op on phones. The [topBar] sits
  * outside it and stays full-width.
+ *
+ * [overlay] floats over the content across the full width, outside the cap:
+ * for chrome that belongs to the window's edges rather than the column's,
+ * such as the glyph store's floating toolbar on the end edge of a tablet.
  */
 @Composable
 fun PebblesScreen(
     modifier: Modifier = Modifier,
     topBar: @Composable () -> Unit = {},
+    overlay: @Composable BoxScope.() -> Unit = {},
     content: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -57,16 +64,18 @@ fun PebblesScreen(
         containerColor = colors.surface,
         contentWindowInsets = WindowInsets.safeDrawing,
     ) { padding ->
-        Column(
+        Box(
             modifier =
                 Modifier
                     .fillMaxSize()
                     .padding(padding)
-                    .consumeWindowInsets(padding)
-                    .readableWidth(),
+                    .consumeWindowInsets(padding),
         ) {
             CompositionLocalProvider(LocalContentColor provides colors.onSurfaceVariant) {
-                content()
+                Column(modifier = Modifier.fillMaxSize().readableWidth()) {
+                    content()
+                }
+                overlay()
             }
         }
     }

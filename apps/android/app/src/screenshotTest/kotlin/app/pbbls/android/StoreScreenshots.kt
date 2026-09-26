@@ -4,6 +4,7 @@ import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
@@ -108,4 +109,32 @@ fun DrawerSwapLight() {
 @Composable
 fun DrawerOwnedDark() {
     PebblesTheme { DrawerGallery(isOwned = true) }
+}
+
+// The large-screen form of the store tabs (#855): icon-only toggles in a
+// vertical toolbar, which GlyphsListScreen floats on the window's end edge.
+@Composable
+private fun VerticalTabBarGallery() {
+    Row(
+        modifier = Modifier.background(MaterialTheme.colorScheme.surface).padding(24.dp),
+        horizontalArrangement = Arrangement.spacedBy(24.dp),
+    ) {
+        GlyphTab.entries.forEach { tab ->
+            GlyphTabBar(selection = tab, onSelect = {}, vertical = true)
+        }
+    }
+}
+
+@PreviewTest
+@Preview(showBackground = true)
+@Composable
+fun StoreVerticalTabBarLight() {
+    PebblesTheme { VerticalTabBarGallery() }
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun StoreVerticalTabBarDark() {
+    PebblesTheme { VerticalTabBarGallery() }
 }
