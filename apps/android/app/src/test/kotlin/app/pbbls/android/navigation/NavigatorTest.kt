@@ -145,4 +145,37 @@ class NavigatorTest {
             assertTrue(state.backStacks[it]!!.last() is BarKey)
         }
     }
+
+    @Test
+    fun `opening a detail over a detail of the same kind replaces it`() {
+        navigator.navigate(PebblesKey.People)
+        navigator.navigateToDetail(PebblesKey.SoulDetail("s1"))
+        navigator.navigateToDetail(PebblesKey.SoulDetail("s2"))
+
+        assertEquals(
+            listOf<NavKey>(PebblesKey.People, PebblesKey.SoulDetail("s2")),
+            state.backStacks[PebblesKey.People]!!.toList(),
+        )
+    }
+
+    @Test
+    fun `opening a detail over a different key pushes`() {
+        navigator.navigate(PebblesKey.People)
+        navigator.navigateToDetail(PebblesKey.SoulDetail("s1"))
+
+        assertEquals(
+            listOf<NavKey>(PebblesKey.People, PebblesKey.SoulDetail("s1")),
+            state.backStacks[PebblesKey.People]!!.toList(),
+        )
+    }
+
+    @Test
+    fun `a detail never replaces a tab root`() {
+        navigator.navigateToDetail(PebblesKey.SoulDetail("s1"))
+
+        assertEquals(
+            listOf<NavKey>(PebblesKey.Path, PebblesKey.SoulDetail("s1")),
+            state.backStacks[PebblesKey.Path]!!.toList(),
+        )
+    }
 }

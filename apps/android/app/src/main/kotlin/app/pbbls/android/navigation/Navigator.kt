@@ -32,6 +32,23 @@ class Navigator(
     }
 
     /**
+     * Opens a detail, replacing the one on top if it is the same kind (#940).
+     *
+     * Beside a list pane the list stays tappable, and pushing each pick would
+     * make back walk through every soul looked at. On a phone the detail covers
+     * its list, so only the push branch is reachable there. A tab root is
+     * never replaced, whatever its type.
+     */
+    fun navigateToDetail(key: PebblesKey) {
+        val stack = state.currentStack
+        if (stack.size > 1 && stack.last()::class == key::class) {
+            stack[stack.lastIndex] = key
+        } else {
+            navigate(key)
+        }
+    }
+
+    /**
      * Unwind the current tab, then fall back to the start route, then let the
      * system exit (D4). Popping the start route's last entry is deliberately a
      * no-op: an empty stack has nothing to render.
