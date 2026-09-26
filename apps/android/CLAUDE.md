@@ -1,7 +1,8 @@
 # @pbbls/android — agent context
 
-Native Android app for Pebbles. Kotlin + Jetpack Compose, minSdk 33, phone-only,
-portrait. It mirrors `apps/ios` 1:1 in **behavior and funnel** — file for
+Native Android app for Pebbles. Kotlin + Jetpack Compose, minSdk 33, portrait on
+phones and adaptive on large screens (#855, readable column + navigation rail).
+It mirrors `apps/ios` 1:1 in **behavior and funnel** — file for
 file, screen for screen. When this file says "mirror X", read the named iOS file
 under `apps/ios/Pebbles/` and port its structure, not just its behavior.
 
