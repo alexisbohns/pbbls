@@ -1,5 +1,5 @@
 # Single source of truth for dependency versions (D2).
-# Kept minimal for sub-project A (scaffold). supabase-kt, rive-android,
+# Kept minimal for sub-project A (scaffold). supabase-kt,
 # AndroidSVG and Coil arrive with the design system / Path work (B/D).
 [versions]
 agp = "9.4.1"
@@ -41,10 +41,6 @@ coroutines = "1.11.0"
 # Bumping it is a deliberate, isolated commit that re-runs the re-baseline job —
 # see "Screenshot validation gate" in apps/android/CLAUDE.md.
 screenshot = { strictly = "0.0.1-alpha16" }
-# Rive (D14) — bundled logo animation on the Welcome screen. Requires
-# androidx-startup for Rive.init(); see PebblesApp.onCreate().
-rive = "11.12.1"
-androidxStartup = "1.2.0"
 # Entry funnel (sub-project C). supabase-kt is the auth/data client; it needs a
 # Ktor engine on the classpath — supabase-kt 3.1.4 is built against Ktor 3.1.2,
 # so the OkHttp engine is pinned to the same version to avoid Ktor version skew.
@@ -117,8 +113,6 @@ androidx-window-core = { group = "androidx.window", name = "window-core", versio
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 kotlinx-coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
 screenshot-validation-api = { group = "com.android.tools.screenshot", name = "screenshot-validation-api", version.ref = "screenshot" }
-rive-android = { group = "app.rive", name = "rive-android", version.ref = "rive" }
-androidx-startup-runtime = { group = "androidx.startup", name = "startup-runtime", version.ref = "androidxStartup" }
 
 # Compose (BOM-managed; no version here). foundation supplies HorizontalPager.
 androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }

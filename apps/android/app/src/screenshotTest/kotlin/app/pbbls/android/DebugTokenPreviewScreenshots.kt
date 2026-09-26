@@ -8,7 +8,7 @@ import com.android.tools.screenshot.PreviewTest
 
 /**
  * Screenshot-test previews for CI (see `apps/android/CLAUDE.md`). Renders the
- * whole design system — color tokens, type ramp, Rive logo — in light and
+ * whole design system — color tokens, type ramp, brand mark — in light and
  * dark so the maintainer can review B without a device, and confirm Inclusive
  * Sans / Ysabeau on a real screenshot.
  */

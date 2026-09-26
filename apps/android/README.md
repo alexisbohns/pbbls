@@ -87,7 +87,7 @@ Every CI run also **renders the app's screens to images** (Compose Preview
 Screenshot Testing) and uploads them as the **`ui-screenshots`** artifact — so you
 can review the UI as PNGs without Android Studio, an emulator, or a device.
 Download it from the PR's Actions run, alongside `app-debug`. Today it renders the
-design-system token preview (colors, type ramp, Rive logo) in light and dark;
+design-system token preview (colors, type ramp, brand mark) in light and dark;
 each new screen adds a preview under `app/src/screenshotTest/`.
 
 This renders-to-view — nothing fails on a visual diff. Committed baselines for

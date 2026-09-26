@@ -209,8 +209,6 @@ dependencies {
     implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
-    implementation(libs.rive.android)
-    implementation(libs.androidx.startup.runtime)
     implementation(libs.androidx.browser)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidsvg)

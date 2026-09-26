@@ -39,11 +39,11 @@ import app.pbbls.android.core.designsystem.GoogleSignInButton
 import app.pbbls.android.core.designsystem.LegalDisclaimer
 import app.pbbls.android.core.designsystem.LegalDoc
 import app.pbbls.android.core.designsystem.PebblesActionHeight
+import app.pbbls.android.core.designsystem.PebblesLogo
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.openLegalDoc
 import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.designsystem.rememberReduceMotion
-import app.pbbls.android.rive.RiveLogo
 import kotlinx.coroutines.delay
 
 private const val TAG = "welcome"
@@ -55,7 +55,7 @@ private val REVEAL_SCHEDULE_MILLIS = longArrayOf(0, 200, 450, 600, 750, 1100)
 
 /**
  * Pre-login landing AND splash — the `WelcomeView` analog. `RootScreen` keeps
- * this mounted for the whole splash hold so the Rive logo plays through without a
+ * this mounted for the whole splash hold so the logo stays put without a
  * view-swap. While [contentRevealed] is false only the logo shows, centered; when
  * the parent flips it true, the carousel + buttons + disclaimer fade in one-by-one
  * on a timed schedule (all at once under reduced motion).
@@ -122,7 +122,7 @@ fun WelcomeContent(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Spacer(modifier = Modifier.weight(1f))
-            RiveLogo(
+            PebblesLogo(
                 modifier =
                     Modifier
                         .fillMaxWidth(0.33f)
