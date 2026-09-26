@@ -170,7 +170,7 @@ class NavigatorTest {
     }
 
     @Test
-    fun `a detail never replaces a tab root`() {
+    fun `opening a detail over a tab root pushes`() {
         navigator.navigateToDetail(PebblesKey.SoulDetail("s1"))
 
         assertEquals(

@@ -104,7 +104,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     }
 
     entry<PebblesKey.SoulDetail>(
-        metadata = NavTransitions.forKey(PebblesKey.SoulDetail("")) + PanePairs.detail(PanePair.SOULS),
+        metadata = NavTransitions.forKey(PebblesKey.SoulDetail("")) + PanePairs.metadataFor(PebblesKey.SoulDetail("")),
     ) { key ->
         SoulDetailScreen(
             soulId = key.soulId,
@@ -115,7 +115,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     }
 
     entry<PebblesKey.CollectionDetail>(
-        metadata = NavTransitions.forKey(PebblesKey.CollectionDetail("")) + PanePairs.detail(PanePair.COLLECTIONS),
+        metadata = NavTransitions.forKey(PebblesKey.CollectionDetail("")) + PanePairs.metadataFor(PebblesKey.CollectionDetail("")),
     ) { key ->
         CollectionDetailScreen(
             collectionId = key.collectionId,

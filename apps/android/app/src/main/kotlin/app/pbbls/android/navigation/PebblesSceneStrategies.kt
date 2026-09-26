@@ -64,9 +64,11 @@ fun rememberPebblesSceneStrategies(): List<SceneStrategy<NavKey>> {
 }
 
 /**
- * Which entries are list panes and which are detail panes (#940). The entry
- * provider adds [list] or [detail] to an entry's own transition metadata;
- * [metadataFor] states the same per key, for tests.
+ * Which entries are list panes and which are detail panes (#940).
+ * [metadataFor] is the single source: the entry provider adds it to each
+ * entry's transition metadata, and the tests build their entries from it, so
+ * the two cannot drift. A detail's metadata does not depend on its id, so the
+ * entry provider passes the same throwaway key it gives `NavTransitions`.
  *
  * The library's pane metadata is internal, so a list pane also carries our
  * own marker: that is what the strategy wrapper reads, rather than guessing
@@ -76,12 +78,12 @@ fun rememberPebblesSceneStrategies(): List<SceneStrategy<NavKey>> {
 object PanePairs {
     private const val IS_LIST = "pebbles.pane.list"
 
-    fun list(
+    private fun list(
         pair: PanePair,
         placeholder: @Composable () -> Unit,
     ): Map<String, Any> = ListDetailSceneStrategy.listPane(pair) { placeholder() } + (IS_LIST to true)
 
-    fun detail(pair: PanePair): Map<String, Any> = ListDetailSceneStrategy.detailPane(pair)
+    private fun detail(pair: PanePair): Map<String, Any> = ListDetailSceneStrategy.detailPane(pair)
 
     fun metadataFor(key: PebblesKey): Map<String, Any> =
         when (key) {
