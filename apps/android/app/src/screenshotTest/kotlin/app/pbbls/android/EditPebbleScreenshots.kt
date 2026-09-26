@@ -142,6 +142,8 @@ private fun EditFormPreview(
         selectedGlyph = sampleGlyph,
         onGlyphPicked = {},
         saveError = saveError,
+        // The picker sheet is closed in every capture.
+        glyphPicker = { _, _, _, _ -> },
         renderSvg = renderSvg,
         strokeColor = strokeColor,
         renderHeight = renderHeight,

@@ -12,21 +12,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,8 +33,10 @@ import app.pbbls.android.R
 import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphGridItem
+import app.pbbls.android.core.ui.GlyphPickerState
 import app.pbbls.android.core.ui.GlyphView
 import app.pbbls.android.core.ui.GlyphViewCase
+import app.pbbls.android.core.ui.rememberGlyphPickerState
 import app.pbbls.android.features.glyph.carve.GlyphCarveScreen
 import app.pbbls.android.features.glyph.carve.GlyphCarveViewModel
 import app.pbbls.android.features.glyph.store.GlyphSwapPanel
@@ -48,90 +44,11 @@ import app.pbbls.android.features.glyph.store.GlyphTab
 import app.pbbls.android.features.glyph.store.GlyphTabBar
 
 /**
- * The glyph picker's content-swap state, hoisted out of the picker so both
- * callers can unwind it.
- *
- * The sheet unwinds on a dismiss gesture (back returns to the grid before it
- * closes the sheet); the record flow's glyph step unwinds on the system back
- * before stepping backwards. Without the hoist, the flow would have no way to
- * ask "is a swap panel open?" — and a nested panel that outlives its step is
- * exactly the trap the iOS port hit, where `GlyphDetailDrawer` survived onto the
- * next step because only the sheet's dismissal had ever taken it down.
- */
-class GlyphPickerState {
-    var isCarving: Boolean by mutableStateOf(false)
-        internal set
-
-    var buying: GlyphGridItem? by mutableStateOf(null)
-        internal set
-
-    /**
-     * Close the topmost content swap. Returns true when one was open (so the
-     * caller keeps its own surface), false when the grid is already showing.
-     */
-    fun unwind(): Boolean =
-        when {
-            isCarving -> {
-                isCarving = false
-                true
-            }
-            buying != null -> {
-                buying = null
-                true
-            }
-            else -> false
-        }
-
-    /** Back to the grid — after a select, or after a purchase completes. */
-    internal fun reset() {
-        isCarving = false
-        buying = null
-    }
-}
-
-@Composable
-fun rememberGlyphPickerState(): GlyphPickerState = remember { GlyphPickerState() }
-
-/**
- * The tabbed glyph picker — the #549 harmonization (M43 D10): the same
- * Mine / Owned / Commu tabs as the store inside the caller's single
- * `ModalBottomSheet` level, with inline buy and a carve row. The API is the
- * M39 drop-in (`currentGlyphId` + `onSelected`), so the three call sites
- * (pebble form, soul form, Settings) are untouched.
- *
- * D5 adaptations (named): the swap panel and the carve studio open as
- * CONTENT SWAPS inside this sheet rather than stacked sheets/covers — back
- * (or a dismiss gesture) returns to the grid first. Mine keeps system
- * glyphs (D7); Commu client-filters `!owned` on top of the server `.neq`
- * (owned community glyphs live under Owned — both filters load-bearing).
- *
- * The body itself lives in [GlyphPickerContent] (M58 D5) so the record flow's
- * glyph step renders the same grid inline, under the flow's own chrome.
- */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun GlyphPickerSheet(
-    currentGlyphId: String?,
-    onDismiss: () -> Unit,
-    onSelected: (Glyph) -> Unit,
-) {
-    val state = rememberGlyphPickerState()
-    ModalBottomSheet(
-        // Content swaps unwind before the sheet itself dismisses (D5).
-        onDismissRequest = { if (!state.unwind()) onDismiss() },
-        sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
-    ) {
-        GlyphPickerContent(
-            currentGlyphId = currentGlyphId,
-            onSelected = onSelected,
-            state = state,
-        )
-    }
-}
-
-/**
  * The picker body: tabs, grid, inline buy, and the carve entry point.
- * Presentation plus its own loading — no sheet, no dismissal (M58 D5).
+ * Presentation plus its own loading — no sheet, no dismissal (M58 D5). Hosts
+ * never call it directly: they take a [app.pbbls.android.core.ui.GlyphPickerSlot]
+ * that the entry provider fills with this (#914), and wrap it in
+ * [app.pbbls.android.core.ui.GlyphPickerSheet] when they want a sheet.
  *
  * Callers differ in commit semantics and own that difference: the sheet
  * dismisses on select, the flow's step advances. [state] is hoisted so either

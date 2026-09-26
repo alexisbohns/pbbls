@@ -45,7 +45,8 @@ import app.pbbls.android.core.data.rememberTapHaptics
 import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.core.model.Valence
-import app.pbbls.android.features.path.create.pickers.rememberGlyphPickerState
+import app.pbbls.android.core.ui.GlyphPickerSlot
+import app.pbbls.android.core.ui.rememberGlyphPickerState
 import app.pbbls.android.features.path.record.steps.RecordSuccessStep
 
 /** Enough for the slide to read as one motion without holding the user up. */
@@ -73,6 +74,9 @@ private const val STEP_TRANSITION_MS = 280
  * navigation key can only carry an id, and [RecordFlowViewModel] fetches the row
  * itself once reference data has loaded.
  *
+ * [glyphPicker] is the glyph step's body. It is glyph's, so the entry provider
+ * hands it in rather than this screen importing it (#914).
+ *
  * With reduce motion on, steps swap without the slide (#853).
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -80,6 +84,7 @@ private const val STEP_TRANSITION_MS = 280
 fun RecordFlowScreen(
     onPublished: (String) -> Unit,
     onDismiss: () -> Unit,
+    glyphPicker: GlyphPickerSlot,
     modifier: Modifier = Modifier,
     resumeDraftId: String? = null,
     onDraftSaved: () -> Unit = onDismiss,
@@ -205,6 +210,7 @@ fun RecordFlowScreen(
                         snapBlockedMessage = snapBlockedMessage,
                         publishError = publishError,
                         glyphPickerState = glyphPickerState,
+                        glyphPicker = glyphPicker,
                         onPickPhoto = {
                             photoPicker.launch(
                                 PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
