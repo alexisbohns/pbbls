@@ -38,6 +38,7 @@
     <string name="auth_consent_privacy_link">la politique de confidentialité</string>
     <string name="auth_consent_health">J\'accepte que Pebbles enregistre ce que je ressens : mes humeurs, les émotions que je choisis et ce que j\'écris. Ce sont des données sensibles sur mon bien-être mental.</string>
     <string name="auth_consent_age">J\'ai 16 ans ou plus.</string>
+    <string name="consent_gate_error">Impossible d\'enregistrer ta réponse. Réessaie.</string>
     <string name="auth_submit_login">Se connecter</string>
     <string name="auth_submit_signup">Créer un compte</string>
 

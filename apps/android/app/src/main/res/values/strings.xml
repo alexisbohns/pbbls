@@ -46,6 +46,7 @@
     <string name="auth_consent_privacy_link">Privacy Policy</string>
     <string name="auth_consent_health">I agree that Pebbles records how I feel: my moods, the emotions I pick and what I write. This is sensitive data about my mental well-being.</string>
     <string name="auth_consent_age">I am 16 years old or over.</string>
+    <string name="consent_gate_error">We couldn\'t save that. Please try again.</string>
     <string name="auth_submit_login">Connect</string>
     <string name="auth_submit_signup">Create an account</string>
 
