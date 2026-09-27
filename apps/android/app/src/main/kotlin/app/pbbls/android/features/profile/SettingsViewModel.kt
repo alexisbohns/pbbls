@@ -406,6 +406,14 @@ class SettingsViewModel
                         glyphId = glyphToSend?.id,
                         password = passwordToSend,
                     )
+                    // The password has landed: clear it now, not on overall
+                    // success. A later step can fail (the public write's
+                    // reauth_required re-runs the whole save from the form), and
+                    // re-sending an applied password is GoTrue's 422
+                    // same_password, which would fail the save for good.
+                    if (passwordToSend != null) {
+                        _uiState.update { it.copy(form = it.form.copy(newPassword = "")) }
+                    }
                     // Releasing the handle already cleared the flag server-side,
                     // so only write the toggle while a handle exists.
                     if (form.isPublicProfile != initial.publicProfile && savedHandle != null) {
@@ -414,9 +422,8 @@ class SettingsViewModel
                 }
             rest.fold(
                 onSuccess = {
-                    // The password is gone from memory the moment the save lands;
-                    // it was never in SavedStateHandle to begin with.
-                    _uiState.update { it.copy(form = it.form.copy(newPassword = "")) }
+                    // The password left memory as soon as it landed (above); it
+                    // was never in SavedStateHandle to begin with.
                     effectsOut.emit(
                         SettingsEffect.Saved(
                             displayName = nameToSend ?: initial.displayName,
@@ -431,8 +438,9 @@ class SettingsViewModel
                     if (it.isReauthRequired()) {
                         // The server's clock or the #977 switch disagrees with ours.
                         // The handle (if any) is already stored and re-sending it
-                        // is a no-op, so re-running the whole save after the
-                        // re-auth is safe.
+                        // is a no-op, and a landed password was cleared from the
+                        // form, so re-running the whole save after the re-auth
+                        // is safe.
                         _uiState.update { state -> state.copy(isSaving = false) }
                         startReauth(ReauthPurpose.SAVE)
                     } else {

@@ -700,6 +700,42 @@ class SettingsViewModelTest {
             assertEquals(listOf(false), goPrivate.setPublicProfileCalls)
         }
 
+    /**
+     * The re-run after a server `reauth_required` reads the form again. The
+     * password already landed on the first run, so it must not be re-sent:
+     * GoTrue rejects an unchanged password (422 same_password) and the public
+     * flag would never be written.
+     */
+    @Test
+    fun `a server re-auth after the password landed re-runs the save without re-sending it`() =
+        runTest {
+            val profile = FakeProfileService(profile = profileRow(handle = "sam"))
+            val supabase = FakeSupabaseService(session = session(providers = listOf("email")))
+            val viewModel = viewModel(profile, supabase)
+            advanceUntilIdle()
+            profile.setPublicProfileFailNext = postgrestException("reauth_required")
+
+            viewModel.onPasswordChange("new-secret")
+            viewModel.onPublicProfileChange(true)
+            viewModel.save()
+            advanceUntilIdle()
+            assertEquals(
+                ReauthPurpose.SAVE,
+                viewModel.uiState.value.reauth
+                    ?.purpose,
+            )
+            assertFalse(viewModel.uiState.value.didSaveFail)
+
+            viewModel.onReauthPasswordChange("new-secret") // already the account's password
+            viewModel.submitReauth()
+            advanceUntilIdle()
+
+            assertEquals(listOf("new-secret", null), profile.saveSettingsCalls.map { it.third })
+            assertEquals(listOf(true, true), profile.setPublicProfileCalls)
+            assertNull(viewModel.uiState.value.reauth)
+            assertFalse(viewModel.uiState.value.didSaveFail)
+        }
+
     // MARK: - Deletion
 
     @Test
