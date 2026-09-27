@@ -137,7 +137,7 @@ static float3 normalFromHeight(float h, float hx, float hy, float step, float re
         col += sheen * l.spec * lipLight * 0.8;
     } else {
         // Gem: flat facets, one random normal per Worley cell, blinking as
-        // the light crosses; sparse glitter where a fine noise peaks.
+        // the light crosses; sparse glitter points on their own cell grid.
         float d1, d2;
         float id = worley(p * scale * facetDensity, seed, d1, d2);
         float a = hash21(int2(id * 4096.0, 7), seed) * 2.0 * M_PI_F;
@@ -149,10 +149,19 @@ static float3 normalFromHeight(float h, float hx, float hy, float step, float re
         float seam = smoothstep(0.0, 0.04, d2 - d1);
         col = mix(col * 0.7, col, seam);
         col += sheen * l.spec * lipLight;
-        float sparkle = fractal(p, scale * 14.0, 1, seed + 9u);
-        float threshold = 1.0 - glitter * 0.12;
-        float twinkle = smoothstep(threshold, threshold + 0.03, sparkle) * (0.4 + 0.6 * l.spec);
-        col += twinkle * lipLight;
+        // Glitter: one candidate point per cell of its own grid, 1.5x finer than
+        // the facets at density 1. A cell keeps its point when its hash clears
+        // 1 - glitter * 0.15 (glitter 1 lights 15% of cells), drawn as a
+        // disc about 1 pt across at the cell's feature, whatever the stone's
+        // on-screen size. A peak-of-noise threshold cannot do this: gradient
+        // noise never reaches the top of its 0..1 range.
+        float gd1, gd2;
+        float grid = scale * 1.5;
+        float gid = worley(p * grid, seed + 9u, gd1, gd2);
+        float keep = step(1.0 - glitter * 0.15, gid);
+        float fromPoint = gd1 / grid * unit;
+        float twinkle = keep * (1.0 - smoothstep(0.4, 0.9, fromPoint)) * (0.4 + 0.6 * l.spec);
+        col = mix(col, lipLight, twinkle);
     }
 
     col = clamp(col, 0.0, 1.0);
