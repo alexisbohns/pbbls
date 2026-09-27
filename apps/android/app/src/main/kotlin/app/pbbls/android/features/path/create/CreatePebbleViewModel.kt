@@ -120,7 +120,7 @@ class CreatePebbleViewModel
         private val effectsOut = UiEffects<CreatePebbleEffect>(viewModelScope)
         val effects: Flow<CreatePebbleEffect> = effectsOut.flow
 
-        private val drafts = ComposerDraftCoordinator(draftsService, snapshots)
+        private val drafts = ComposerDraftCoordinator(draftsService, snapshots) { userId }
 
         /** Form-scoped (M42 D6), now surviving rotation with the ViewModel. */
         private val snaps = SnapUploadCoordinator(repo = snapRepo)
