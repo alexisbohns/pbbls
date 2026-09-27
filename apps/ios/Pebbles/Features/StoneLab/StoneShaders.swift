@@ -23,6 +23,7 @@ enum StoneShaders {
             rgb(tones.rgb(tones.ink, in: palette)),
             rgb(tones.rgb(tones.lipLight, in: palette)),
             rgb(tones.rgb(tones.lipShadow, in: palette)),
+            .float(tones.lipLight.opacity),
         ]
         arguments += material.uniforms.map { .float(Double($0)) }
         return Shader(function: ShaderFunction(library: .default, name: "stone"), arguments: arguments)
@@ -41,6 +42,7 @@ enum StoneShaders {
             rgb(tones.rgb(tones.ink, in: palette)),
             rgb(tones.rgb(tones.lipLight, in: palette)),
             rgb(tones.rgb(tones.lipShadow, in: palette)),
+            .float2(tones.lipLight.opacity, tones.lipShadow.opacity),
             .float(material.lipOpacity),
         ])
     }

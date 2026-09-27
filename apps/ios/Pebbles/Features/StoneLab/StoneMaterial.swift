@@ -40,7 +40,7 @@ struct StoneMaterial: Equatable {
     var lipOpacity: Double
 
     /// Material uniforms in the order `stone.metal` declares them after the
-    /// light and the tones: kind, scale, relief, contrast, sheen,
+    /// light, the tones and the lip-light opacity: kind, scale, relief, contrast, sheen,
     /// facetDensity, glitter, crack, banding.
     var uniforms: [Float] {
         [Float(kind.rawValue), Float(scale), Float(relief), Float(contrast), Float(sheen),

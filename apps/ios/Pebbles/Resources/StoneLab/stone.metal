@@ -95,9 +95,12 @@ static float3 normalFromHeight(float h, float hx, float hy, float step, float re
 /// screen. Tones are straight, display-referred sRGB (the hex bytes / 255,
 /// not linearised); the lighting works on them directly. `unit` is points per stone (viewBox) unit,
 /// so the grain has the same size on every stone at every on-screen size.
+/// `lipLightOpacity` is the lip-light tone's opacity; it scales every
+/// highlight drawn in that tone (specular and glitter).
 [[ stitchable ]] half4 stone(float2 position, half4 color,
                              float unit, float seedValue, float3 light,
                              float3 body, float3 ink, float3 lipLight, float3 lipShadow,
+                             float lipLightOpacity,
                              float kind, float scale, float relief, float contrast, float sheen,
                              float facetDensity, float glitter, float crack, float banding) {
     if (color.a <= 0.002h) { return color; }
@@ -121,7 +124,7 @@ static float3 normalFromHeight(float h, float hx, float hy, float step, float re
         float shade = 0.45 + 0.85 * l.diffuse;
         col = body * mix(1.0, shade, contrast);
         col = mix(ink, col, plate);
-        col += sheen * l.spec * lipLight;
+        col += sheen * l.spec * lipLight * lipLightOpacity;
     } else if (m == 1) {
         // River: continuous fine grain, one axis stretched into sediment
         // banding, a soft broad specular.
@@ -134,7 +137,7 @@ static float3 normalFromHeight(float h, float hx, float hy, float step, float re
         Lit l = lit(n, L, 18.0);
         float shade = 0.6 + 0.6 * l.diffuse;
         col = body * mix(1.0, shade, contrast);
-        col += sheen * l.spec * lipLight * 0.8;
+        col += sheen * l.spec * lipLight * lipLightOpacity * 0.8;
     } else {
         // Gem: flat facets, one random normal per Worley cell, blinking as
         // the light crosses; sparse glitter points on their own cell grid.
@@ -148,7 +151,7 @@ static float3 normalFromHeight(float h, float hx, float hy, float step, float re
         col = body * mix(1.0, shade, contrast);
         float seam = smoothstep(0.0, 0.04, d2 - d1);
         col = mix(col * 0.7, col, seam);
-        col += sheen * l.spec * lipLight;
+        col += sheen * l.spec * lipLight * lipLightOpacity;
         // Glitter: one candidate point per cell of its own grid, 1.5x finer than
         // the facets at density 1. A cell keeps its point when its hash clears
         // 1 - glitter * 0.15 (glitter 1 lights 15% of cells), drawn as a
@@ -161,7 +164,7 @@ static float3 normalFromHeight(float h, float hx, float hy, float step, float re
         float keep = step(1.0 - glitter * 0.15, gid);
         float fromPoint = gd1 / grid * unit;
         float twinkle = keep * (1.0 - smoothstep(0.4, 0.9, fromPoint)) * (0.4 + 0.6 * l.spec);
-        col = mix(col, lipLight, twinkle);
+        col = mix(col, lipLight, twinkle * lipLightOpacity);
     }
 
     col = clamp(col, 0.0, 1.0);
@@ -174,16 +177,18 @@ static float3 normalFromHeight(float h, float hx, float hy, float step, float re
 /// points. A groove's wall on the light side is in shadow and its far wall
 /// catches the light, so: ink with no ink toward the light → shadow lip; ink
 /// with no ink away from the light → light lip; the rest of the ink is `ink`.
+/// `lipOpacity` is the two tones' own opacities (x light, y shadow);
+/// `materialLipOpacity` is the material's overall lip strength over both.
 [[ stitchable ]] half4 carve(float2 position, SwiftUI::Layer layer,
                              float2 offset, float3 ink, float3 lipLight, float3 lipShadow,
-                             float lipOpacity) {
+                             float2 lipOpacity, float materialLipOpacity) {
     half4 here = layer.sample(position);
     float a = float(here.a);
     if (a <= 0.002) { return here; }
     float toward = float(layer.sample(position + offset).a);
     float away = float(layer.sample(position - offset).a);
-    float shadow = (1.0 - toward) * lipOpacity;
-    float light = (1.0 - away) * lipOpacity;
+    float shadow = (1.0 - toward) * lipOpacity.y * materialLipOpacity;
+    float light = (1.0 - away) * lipOpacity.x * materialLipOpacity;
     float3 col = mix(ink, lipShadow, shadow);
     col = mix(col, lipLight, light);
     return half4(half3(col) * a, a);
