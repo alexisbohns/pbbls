@@ -51,10 +51,10 @@ struct StoneLabSettingsTests {
     @Test("the summary names every polarity and the lowlight pick")
     func summary() {
         let text = StoneLabSettings().summary
-        #expect(text.contains("[lowlight] river"))
+        #expect(text.contains("[lowlight] blackstone"))
         #expect(text.contains("[neutral] river"))
         #expect(text.contains("[highlight] gem"))
-        #expect(text.contains("scale 0.13 relief 3.00 contrast 1.00 sheen 0.01"))
+        #expect(text.contains("scale 0.05 relief 3.00 contrast 1.00 sheen 0.05"))
         #expect(text.contains("body shaded@1.00 ink shaded@1.00 lipLight secondary@1.00"))
     }
 }

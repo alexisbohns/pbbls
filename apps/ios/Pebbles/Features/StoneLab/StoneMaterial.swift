@@ -47,22 +47,22 @@ struct StoneMaterial: Equatable, Codable {
          Float(facetDensity), Float(glitter), Float(pits), Float(banding)]
     }
 
+    /// The maintainer's picks on the phone (2026-09-27, second round),
+    /// pasted from the lab's Copy button.
     static func starting(for polarity: ValencePolarity) -> StoneMaterial {
         switch polarity {
         case .lowlight:
-            // The maintainer's pick on the phone (2026-09-27): river grain, deep
-            // relief, full contrast, almost no sheen, a hairline lip.
-            return StoneMaterial(kind: .river, scale: 0.13, relief: 3, contrast: 1, sheen: 0.01,
-                                 facetDensity: 1, glitter: 0, pits: 0.4, banding: 0,
+            return StoneMaterial(kind: .lava, scale: 0.05, relief: 3, contrast: 1, sheen: 0.05,
+                                 facetDensity: 1, glitter: 0, pits: 1, banding: 0,
                                  lipWidth: 0.5, lipOpacity: 0.84)
         case .neutral:
-            return StoneMaterial(kind: .river, scale: 0.35, relief: 0.6, contrast: 0.22, sheen: 0.18,
+            return StoneMaterial(kind: .river, scale: 0.2, relief: 1.28, contrast: 0.64, sheen: 0.18,
                                  facetDensity: 1, glitter: 0, pits: 0, banding: 0.5,
                                  lipWidth: 1.2, lipOpacity: 0.7)
         case .highlight:
-            return StoneMaterial(kind: .gem, scale: 0.06, relief: 1.2, contrast: 0.45, sheen: 0.35,
-                                 facetDensity: 1, glitter: 0.35, pits: 0, banding: 0,
-                                 lipWidth: 1.2, lipOpacity: 0.9)
+            return StoneMaterial(kind: .gem, scale: 0.11, relief: 1.94, contrast: 0.59, sheen: 0.35,
+                                 facetDensity: 3, glitter: 1, pits: 0, banding: 0,
+                                 lipWidth: 1.47, lipOpacity: 0.94)
         }
     }
 }

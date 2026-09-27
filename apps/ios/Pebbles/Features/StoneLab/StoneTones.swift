@@ -15,20 +15,18 @@ struct StoneTones: Equatable, Codable {
     var lipLight: Pick
     var lipShadow: Pick
 
+    /// The maintainer's picks on the phone (2026-09-27, second round).
     static func starting(for polarity: ValencePolarity) -> StoneTones {
         switch polarity {
         case .lowlight:
-            // The maintainer's pick (2026-09-27): body and ink both `shaded`, so
-            // only the lips draw the carving. The lip shadow was lost with the
-            // restart; `shaded` is a placeholder until re-chosen.
             return StoneTones(body: Pick(slot: .shaded, opacity: 1), ink: Pick(slot: .shaded, opacity: 1),
-                              lipLight: Pick(slot: .secondary, opacity: 1), lipShadow: Pick(slot: .shaded, opacity: 1))
+                              lipLight: Pick(slot: .secondary, opacity: 1), lipShadow: Pick(slot: .dark, opacity: 1))
         case .neutral:
-            return StoneTones(body: Pick(slot: .secondary, opacity: 1), ink: Pick(slot: .dark, opacity: 1),
-                              lipLight: Pick(slot: .light, opacity: 1), lipShadow: Pick(slot: .dark, opacity: 0.45))
+            return StoneTones(body: Pick(slot: .dark, opacity: 1), ink: Pick(slot: .shaded, opacity: 1),
+                              lipLight: Pick(slot: .secondary, opacity: 1), lipShadow: Pick(slot: .secondary, opacity: 0.45))
         case .highlight:
             return StoneTones(body: Pick(slot: .primary, opacity: 1), ink: Pick(slot: .dark, opacity: 1),
-                              lipLight: Pick(slot: .light, opacity: 1), lipShadow: Pick(slot: .dark, opacity: 1))
+                              lipLight: Pick(slot: .light, opacity: 0.84), lipShadow: Pick(slot: .shaded, opacity: 0.75))
         }
     }
 

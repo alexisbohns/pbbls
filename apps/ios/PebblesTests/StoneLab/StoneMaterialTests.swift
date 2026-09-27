@@ -9,7 +9,7 @@ struct StoneMaterialTests {
 
     @Test("each polarity starts on its own material kind")
     func startingKinds() {
-        #expect(StoneMaterial.starting(for: .lowlight).kind == .river)
+        #expect(StoneMaterial.starting(for: .lowlight).kind == .lava)
         #expect(StoneMaterial.starting(for: .neutral).kind == .river)
         #expect(StoneMaterial.starting(for: .highlight).kind == .gem)
     }
@@ -25,9 +25,10 @@ struct StoneMaterialTests {
     @Test("starting tones follow the spec table")
     func startingTones() {
         #expect(StoneTones.starting(for: .lowlight).body.slot == .shaded)
-        #expect(StoneTones.starting(for: .neutral).body.slot == .secondary)
+        #expect(StoneTones.starting(for: .neutral).body.slot == .dark)
         #expect(StoneTones.starting(for: .highlight).body.slot == .primary)
         #expect(StoneTones.starting(for: .highlight).ink.slot == .dark)
+        #expect(StoneTones.starting(for: .lowlight).lipShadow.slot == .dark)
         #expect(StoneTones.starting(for: .neutral).lipShadow.opacity < 1)
     }
 
