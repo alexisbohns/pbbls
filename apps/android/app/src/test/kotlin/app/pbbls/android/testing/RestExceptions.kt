@@ -1,5 +1,6 @@
 package app.pbbls.android.testing
 
+import io.github.jan.supabase.auth.exception.AuthRestException
 import io.github.jan.supabase.postgrest.exception.PostgrestRestException
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -35,6 +36,17 @@ fun postgrestException(
         code = sqlState,
         response = mockResponse(status),
     )
+
+/**
+ * The exception GoTrue's error body becomes (#976): `AuthImpl.parseErrorResponse`
+ * reads `error_code` into [AuthRestException.error], so a wrong password is
+ * `invalid_credentials` at 400 and a throttled one `over_request_rate_limit`
+ * at 429.
+ */
+fun authRestException(
+    errorCode: String,
+    status: HttpStatusCode = HttpStatusCode.BadRequest,
+): AuthRestException = AuthRestException(errorCode, "test", mockResponse(status))
 
 private fun mockResponse(status: HttpStatusCode): HttpResponse =
     runBlocking {

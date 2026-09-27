@@ -142,6 +142,8 @@
     <string name="settings_sign_out_everywhere_message">This signs you out on every phone and browser, this one included. You\'ll sign back in with your password or Google.</string>
     <string name="settings_sign_out_everywhere_confirm">Sign out everywhere</string>
     <string name="settings_sign_out_everywhere_error">We couldn\'t reach the server, so your other devices may still be signed in. Please try again.</string>
+    <string name="reauth_wrong_password">That password doesn\'t match. Try again.</string>
+    <string name="reauth_error">We couldn\'t confirm it\'s you. Please try again.</string>
 
     <!-- ==== Souls management (M41 sub-project D). "Souls" is product vocabulary
          but localizes ("Âmes"), unlike "Pebbles". ==== -->

@@ -7,15 +7,20 @@ import androidx.lifecycle.ViewModelStore
 import app.pbbls.android.R
 import app.pbbls.android.core.data.AppearancePreferences
 import app.pbbls.android.core.data.ProfileRow
+import app.pbbls.android.core.data.ReauthAccountMismatchException
+import app.pbbls.android.core.data.ReauthRequiredException
 import app.pbbls.android.testing.FakeProfileService
 import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.InMemoryPrefs
 import app.pbbls.android.testing.MainDispatcherRule
+import app.pbbls.android.testing.accessTokenSignedInAt
+import app.pbbls.android.testing.authRestException
 import app.pbbls.android.testing.postgrestException
 import app.pbbls.android.testing.recordEffects
 import io.github.jan.supabase.auth.user.Identity
 import io.github.jan.supabase.auth.user.UserInfo
 import io.github.jan.supabase.auth.user.UserSession
+import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
@@ -61,8 +66,18 @@ class SettingsViewModelTest {
     private fun session(
         email: String? = "pebbler@example.com",
         providers: List<String> = listOf("google"),
+        fresh: Boolean = true,
     ) = UserSession(
-        accessToken = "token",
+        accessToken =
+            accessTokenSignedInAt(
+                if (fresh) {
+                    java.time.Instant.now()
+                } else {
+                    java.time.Instant
+                        .now()
+                        .minus(java.time.Duration.ofHours(2))
+                },
+            ),
         refreshToken = "refresh",
         expiresIn = 3600,
         tokenType = "bearer",
@@ -152,7 +167,7 @@ class SettingsViewModelTest {
     fun `claiming a handle and going public writes the handle first`() =
         runTest {
             val profile = FakeProfileService(profile = profileRow())
-            val viewModel = viewModel(profile)
+            val viewModel = viewModel(profile, FakeSupabaseService(session = session()))
             advanceUntilIdle()
 
             viewModel.onHandleChange("pebbler")
@@ -183,7 +198,7 @@ class SettingsViewModelTest {
     fun `clearing the ViewModel mid-save still finishes the sequence`() =
         runTest {
             val profile = FakeProfileService(profile = profileRow())
-            val viewModel = viewModel(profile)
+            val viewModel = viewModel(profile, FakeSupabaseService(session = session()))
             advanceUntilIdle()
 
             val gate = CompletableDeferred<Unit>()
@@ -224,7 +239,7 @@ class SettingsViewModelTest {
     fun `a rejected handle stops the sequence before anything else is written`() =
         runTest {
             val profile = FakeProfileService(profile = profileRow())
-            val viewModel = viewModel(profile)
+            val viewModel = viewModel(profile, FakeSupabaseService(session = session()))
             advanceUntilIdle()
             profile.failNext = postgrestException("handle_taken")
 
@@ -434,13 +449,264 @@ class SettingsViewModelTest {
             assertEquals(SignOutEverywhereState.IDLE, viewModel.uiState.value.signOutEverywhere)
         }
 
+    // MARK: - Recent sign-in (#976)
+
+    @Test
+    fun `deleting with a stale sign-in asks to re-auth and deletes nothing yet`() =
+        runTest {
+            val profile = FakeProfileService(profile = profileRow())
+            val supabase = FakeSupabaseService(session = session(providers = listOf("email"), fresh = false))
+            val viewModel = viewModel(profile, supabase)
+            advanceUntilIdle()
+
+            viewModel.requestDelete()
+            viewModel.confirmDelete()
+            advanceUntilIdle()
+
+            assertEquals(DeletionState.REAUTHENTICATING, viewModel.uiState.value.deletion)
+            assertEquals(
+                ReauthMethod.PASSWORD,
+                viewModel.uiState.value.reauth
+                    ?.method,
+            )
+            assertEquals(0, profile.deleteAccountCount)
+        }
+
+    @Test
+    fun `re-entering the password then deletes and signs out`() =
+        runTest {
+            val profile = FakeProfileService(profile = profileRow())
+            val supabase = FakeSupabaseService(session = session(providers = listOf("email"), fresh = false))
+            val viewModel = viewModel(profile, supabase)
+            advanceUntilIdle()
+
+            viewModel.requestDelete()
+            viewModel.confirmDelete()
+            viewModel.onReauthPasswordChange("hunter2")
+            viewModel.submitReauth()
+            advanceUntilIdle()
+
+            assertEquals(listOf("hunter2"), supabase.reauthCalls)
+            assertNull(viewModel.uiState.value.reauth)
+            assertEquals(1, profile.deleteAccountCount)
+            assertEquals(1, supabase.signOutCount)
+        }
+
+    @Test
+    fun `a fresh sign-in skips the re-auth dialog`() =
+        runTest {
+            val profile = FakeProfileService(profile = profileRow())
+            val supabase = FakeSupabaseService(session = session())
+            val viewModel = viewModel(profile, supabase)
+            advanceUntilIdle()
+
+            viewModel.requestDelete()
+            viewModel.confirmDelete()
+            advanceUntilIdle()
+
+            assertNull(viewModel.uiState.value.reauth)
+            assertTrue(supabase.reauthCalls.isEmpty())
+            assertEquals(1, profile.deleteAccountCount)
+        }
+
+    /** The exception a real GoTrue wrong password produces: 400 `invalid_credentials`. */
+    @Test
+    fun `a wrong password keeps the dialog open with an error and deletes nothing`() =
+        runTest {
+            val profile = FakeProfileService(profile = profileRow())
+            val supabase = FakeSupabaseService(session = session(providers = listOf("email"), fresh = false))
+            val viewModel = viewModel(profile, supabase)
+            advanceUntilIdle()
+            viewModel.requestDelete()
+            viewModel.confirmDelete()
+            supabase.failNext = authRestException("invalid_credentials")
+
+            viewModel.onReauthPasswordChange("wrong")
+            viewModel.submitReauth()
+            advanceUntilIdle()
+
+            val reauth = viewModel.uiState.value.reauth
+            assertEquals(R.string.reauth_wrong_password, reauth?.errorRes)
+            assertFalse(reauth!!.isWorking)
+            assertEquals("", reauth.password)
+            assertEquals(DeletionState.REAUTHENTICATING, viewModel.uiState.value.deletion)
+            assertEquals(0, profile.deleteAccountCount)
+        }
+
+    /** Any other 4xx is also a `Conflict`; only `invalid_credentials` blames the password. */
+    @Test
+    fun `a throttled re-auth is not blamed on the password`() =
+        runTest {
+            val supabase = FakeSupabaseService(session = session(providers = listOf("email"), fresh = false))
+            val viewModel = viewModel(supabase = supabase)
+            advanceUntilIdle()
+            viewModel.requestDelete()
+            viewModel.confirmDelete()
+            supabase.failNext = authRestException("over_request_rate_limit", HttpStatusCode.TooManyRequests)
+
+            viewModel.onReauthPasswordChange("right-but-throttled")
+            viewModel.submitReauth()
+            advanceUntilIdle()
+
+            assertEquals(
+                R.string.reauth_error,
+                viewModel.uiState.value.reauth
+                    ?.errorRes,
+            )
+        }
+
+    @Test
+    fun `cancelling the re-auth returns to idle and deletes nothing`() =
+        runTest {
+            val profile = FakeProfileService(profile = profileRow())
+            val supabase = FakeSupabaseService(session = session(fresh = false))
+            val viewModel = viewModel(profile, supabase)
+            advanceUntilIdle()
+
+            viewModel.requestDelete()
+            viewModel.confirmDelete()
+            viewModel.cancelReauth()
+            advanceUntilIdle()
+
+            assertNull(viewModel.uiState.value.reauth)
+            assertEquals(DeletionState.IDLE, viewModel.uiState.value.deletion)
+            assertEquals(0, profile.deleteAccountCount)
+        }
+
+    @Test
+    fun `the server asking for a re-auth reopens the dialog instead of failing`() =
+        runTest {
+            val profile = FakeProfileService(profile = profileRow())
+            val supabase = FakeSupabaseService(session = session())
+            val viewModel = viewModel(profile, supabase)
+            advanceUntilIdle()
+            profile.failNext = ReauthRequiredException()
+
+            viewModel.requestDelete()
+            viewModel.confirmDelete()
+            advanceUntilIdle()
+
+            assertEquals(DeletionState.REAUTHENTICATING, viewModel.uiState.value.deletion)
+            assertEquals(0, supabase.signOutCount)
+        }
+
+    @Test
+    fun `a google-only account re-auths with google`() =
+        runTest {
+            val profile = FakeProfileService(profile = profileRow())
+            val supabase = FakeSupabaseService(session = session(providers = listOf("google"), fresh = false))
+            val viewModel = viewModel(profile, supabase)
+            advanceUntilIdle()
+
+            viewModel.requestDelete()
+            viewModel.confirmDelete()
+            assertEquals(
+                ReauthMethod.GOOGLE,
+                viewModel.uiState.value.reauth
+                    ?.method,
+            )
+            viewModel.submitReauth()
+            advanceUntilIdle()
+
+            assertEquals(1, supabase.googleReauthCount)
+            assertEquals(1, profile.deleteAccountCount)
+        }
+
+    @Test
+    fun `a google re-auth that comes back as someone else stops everything`() =
+        runTest {
+            val profile = FakeProfileService(profile = profileRow())
+            val supabase = FakeSupabaseService(session = session(providers = listOf("google"), fresh = false))
+            val viewModel = viewModel(profile, supabase)
+            advanceUntilIdle()
+            viewModel.requestDelete()
+            viewModel.confirmDelete()
+            supabase.failNext = ReauthAccountMismatchException()
+
+            viewModel.submitReauth()
+            advanceUntilIdle()
+
+            assertNull(viewModel.uiState.value.reauth)
+            assertEquals(DeletionState.IDLE, viewModel.uiState.value.deletion)
+            assertEquals(0, profile.deleteAccountCount)
+        }
+
+    @Test
+    fun `editing only the name never asks for a re-auth`() =
+        runTest {
+            val profile = FakeProfileService(profile = profileRow())
+            val supabase = FakeSupabaseService(session = session(fresh = false))
+            val viewModel = viewModel(profile, supabase)
+            advanceUntilIdle()
+
+            viewModel.onDisplayNameChange("Sam")
+            viewModel.save()
+            advanceUntilIdle()
+
+            assertNull(viewModel.uiState.value.reauth)
+            assertEquals(1, profile.saveSettingsCalls.size)
+        }
+
+    @Test
+    fun `a new password with a stale sign-in re-auths first, then saves it`() =
+        runTest {
+            val profile = FakeProfileService(profile = profileRow())
+            val supabase = FakeSupabaseService(session = session(providers = listOf("email"), fresh = false))
+            val viewModel = viewModel(profile, supabase)
+            advanceUntilIdle()
+
+            viewModel.onPasswordChange("new-secret")
+            viewModel.save()
+            advanceUntilIdle()
+            assertEquals(
+                ReauthPurpose.SAVE,
+                viewModel.uiState.value.reauth
+                    ?.purpose,
+            )
+            assertTrue(profile.saveSettingsCalls.isEmpty())
+
+            viewModel.onReauthPasswordChange("old-secret")
+            viewModel.submitReauth()
+            advanceUntilIdle()
+
+            assertEquals(listOf("old-secret"), supabase.reauthCalls)
+            assertEquals("new-secret", profile.saveSettingsCalls.single().third)
+        }
+
+    @Test
+    fun `going public needs a re-auth, going private does not`() =
+        runTest {
+            val stale = session(fresh = false)
+            val goPublic = FakeProfileService(profile = profileRow(handle = "sam"))
+            val vm1 = viewModel(goPublic, FakeSupabaseService(session = stale))
+            advanceUntilIdle()
+            vm1.onPublicProfileChange(true)
+            vm1.save()
+            advanceUntilIdle()
+            assertEquals(
+                ReauthPurpose.SAVE,
+                vm1.uiState.value.reauth
+                    ?.purpose,
+            )
+            assertTrue(goPublic.setPublicProfileCalls.isEmpty())
+
+            val goPrivate = FakeProfileService(profile = profileRow(handle = "sam", publicProfile = true))
+            val vm2 = viewModel(goPrivate, FakeSupabaseService(session = stale))
+            advanceUntilIdle()
+            vm2.onPublicProfileChange(false)
+            vm2.save()
+            advanceUntilIdle()
+            assertNull(vm2.uiState.value.reauth)
+            assertEquals(listOf(false), goPrivate.setPublicProfileCalls)
+        }
+
     // MARK: - Deletion
 
     @Test
     fun `deletion walks confirm to purge to sign-out`() =
         runTest {
             val profile = FakeProfileService(profile = profileRow())
-            val supabase = FakeSupabaseService()
+            val supabase = FakeSupabaseService(session = session())
             val viewModel = viewModel(profile, supabase)
             advanceUntilIdle()
 
@@ -458,7 +724,7 @@ class SettingsViewModelTest {
     fun `a failed deletion surfaces the error and leaves the session alone`() =
         runTest {
             val profile = FakeProfileService(profile = profileRow())
-            val supabase = FakeSupabaseService()
+            val supabase = FakeSupabaseService(session = session())
             val viewModel = viewModel(profile, supabase)
             advanceUntilIdle()
             profile.failNext = IOException("offline")
