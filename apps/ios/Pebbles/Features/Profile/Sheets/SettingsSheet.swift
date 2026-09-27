@@ -391,7 +391,12 @@ struct SettingsSheet: View {
     /// row never reaches the string catalog.
     private var developerSection: some View {
         Section {
-            Button { isPresentingStoneLab = true } label: {
+            Button {
+                // Start building the nine carvings off the main actor now, so
+                // the lab has less to wait for when it opens.
+                Task.detached(priority: .userInitiated) { StoneLabArt.prewarm() }
+                isPresentingStoneLab = true
+            } label: {
                 Label {
                     Text(verbatim: "Stone lab")
                 } icon: {

@@ -3,8 +3,8 @@ import SwiftUI
 
 /// The stone lab (#974): nine stones under one light, one emotion palette at
 /// a time, with the material knobs beside them. Debug-only. Nothing on this
-/// page is time-driven; the only animation is the light's spring back to
-/// rest on release.
+/// page is time-driven or animated: the stones redraw while the finger moves
+/// the light, and not after.
 struct StoneLabView: View {
     @Environment(\.dismiss) private var dismiss
 
@@ -21,6 +21,9 @@ struct StoneLabView: View {
     @State private var isLowPower = ProcessInfo.processInfo.isLowPowerModeEnabled
     @State private var detailValence: Valence?
     @State private var isKnobsOpen = false
+    /// False until the nine carvings are built off the main actor, so the
+    /// first open never wobbles them on the main thread.
+    @State private var isArtReady = false
 
     private var palette: StoneLabPalette { StoneLabPalettes.all[paletteIndex] }
     private var flat: Bool { isFlat || isLowPower }
@@ -39,7 +42,10 @@ struct StoneLabView: View {
                     Button { dismiss() } label: { Text(verbatim: "Close") }
                 }
             }
-            .onReceive(NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange)) { _ in
+            .onReceive(
+                NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange)
+                    .receive(on: DispatchQueue.main)
+            ) { _ in
                 isLowPower = ProcessInfo.processInfo.isLowPowerModeEnabled
             }
             .sheet(item: $detailValence) { valence in
@@ -50,6 +56,7 @@ struct StoneLabView: View {
             // The nine carvings cost about a second of wobbling; off the main
             // actor, before the grid asks for them.
             await Task.detached(priority: .userInitiated) { StoneLabArt.prewarm() }.value
+            isArtReady = true
         }
     }
 
@@ -83,7 +90,17 @@ struct StoneLabView: View {
 
     private static let gridSpacing: CGFloat = 10
 
+    @ViewBuilder
     private var grid: some View {
+        if isArtReady {
+            stoneGrid
+        } else {
+            ProgressView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+    }
+
+    private var stoneGrid: some View {
         GeometryReader { proxy in
             VStack(spacing: Self.gridSpacing) {
                 ForEach(ValenceSizeGroup.allCases) { size in
@@ -99,7 +116,9 @@ struct StoneLabView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .contentShape(Rectangle())
-            .gesture(lightDrag(center: CGPoint(x: proxy.size.width / 2, y: proxy.size.height / 2)))
+            // Simultaneous, so a drag that starts on a stone is not held back
+            // while the stone's long press decides.
+            .simultaneousGesture(lightDrag(center: CGPoint(x: proxy.size.width / 2, y: proxy.size.height / 2)))
         }
         .padding(.horizontal, 16)
     }
@@ -131,7 +150,9 @@ struct StoneLabView: View {
     }
 
     /// The light sits where the finger is, relative to the grid's centre.
-    /// Release springs it home so screenshots are repeatable.
+    /// Release puts it straight back to the rest direction so screenshots are
+    /// repeatable. No animation: `StoneLight` is not animatable, so the
+    /// material would snap anyway.
     private func lightDrag(center: CGPoint) -> some Gesture {
         DragGesture(minimumDistance: 4)
             .onChanged { value in
@@ -139,9 +160,7 @@ struct StoneLabView: View {
                 light = StoneLight(pointingTo: offset, elevationDegrees: light.elevationDegrees)
             }
             .onEnded { _ in
-                withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
-                    light = StoneLight(direction: StoneLight.rest.direction, elevationDegrees: light.elevationDegrees)
-                }
+                light = StoneLight(direction: StoneLight.rest.direction, elevationDegrees: light.elevationDegrees)
             }
     }
 
