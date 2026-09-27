@@ -1,4 +1,3 @@
-#if DEBUG
 import Foundation
 import SwiftUI
 
@@ -6,7 +5,7 @@ import SwiftUI
 /// itself is chosen on the page; the tones only say "body is `dark`".
 struct StoneTones: Equatable, Codable {
     struct Pick: Equatable, Codable {
-        var slot: StoneLabPalette.Slot
+        var slot: StonePalette.Slot
         var opacity: Double
     }
 
@@ -31,10 +30,11 @@ struct StoneTones: Equatable, Codable {
     }
 
     /// Straight (non-premultiplied) RGB for the shader.
-    func rgb(_ pick: Pick, in palette: StoneLabPalette) -> SIMD3<Float> { palette.rgb(pick.slot) }
+    func rgb(_ pick: Pick, in palette: StonePalette, scheme: ColorScheme) -> SIMD3<Float> {
+        palette.rgb(pick.slot, scheme: scheme)
+    }
 
-    func color(_ pick: Pick, in palette: StoneLabPalette) -> Color {
+    func color(_ pick: Pick, in palette: StonePalette) -> Color {
         palette.color(pick.slot).opacity(pick.opacity)
     }
 }
-#endif

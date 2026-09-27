@@ -1,4 +1,3 @@
-#if DEBUG
 import CoreGraphics
 import Foundation
 import os
@@ -7,9 +6,9 @@ import os
 /// glyph placed in the engine's slot, all inked as wobbled fills and merged;
 /// plus the fossil as a displaced region. Built once per valence and cached,
 /// the way `ValenceArt` does it.
-enum StoneLabArt {
+enum StoneCarvingArt {
 
-    private static let logger = Logger(subsystem: "app.pbbls.ios", category: "stone-lab")
+    private static let logger = Logger(subsystem: "app.pbbls.ios", category: "stone")
 
     /// `@unchecked Sendable`: immutable `CGPath` copies, never mutated.
     final class Art: @unchecked Sendable {
@@ -78,7 +77,7 @@ enum StoneLabArt {
     // MARK: - Build
 
     private static func build(_ valence: Valence) -> Art? {
-        let name = "stone-lab-shape-\(valence.sizeGroup.rawValue)-\(valence.polarity.rawValue)"
+        let name = "stone-shape-\(valence.sizeGroup.rawValue)-\(valence.polarity.rawValue)"
         guard let url = Bundle.main.url(forResource: name, withExtension: "svg"),
               let svg = try? String(contentsOf: url, encoding: .utf8),
               let parsed = StoneShapeParser.parse(svg) else {
@@ -145,7 +144,7 @@ enum StoneLabArt {
 
     /// Decoded once: a `static let` initialiser runs exactly once, thread-safely.
     private static let glyph: GlyphFile? = {
-        guard let url = Bundle.main.url(forResource: "stone-lab-glyph", withExtension: "json"),
+        guard let url = Bundle.main.url(forResource: "stone-glyph", withExtension: "json"),
               let data = try? Data(contentsOf: url),
               let file = try? JSONDecoder().decode(GlyphFile.self, from: data) else {
             logger.error("stone lab: missing sample glyph")
@@ -154,4 +153,3 @@ enum StoneLabArt {
         return file
     }()
 }
-#endif

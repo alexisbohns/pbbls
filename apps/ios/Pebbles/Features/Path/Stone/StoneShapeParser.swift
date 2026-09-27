@@ -1,4 +1,3 @@
-#if DEBUG
 import CoreGraphics
 import Foundation
 
@@ -93,4 +92,3 @@ enum StoneShapeParser {
         }
     }
 }
-#endif

@@ -1,4 +1,3 @@
-#if DEBUG
 import Foundation
 
 /// The knobs of one surface. Every field is a shader uniform; `uniforms`
@@ -71,4 +70,3 @@ struct StoneMaterial: Equatable, Codable {
         }
     }
 }
-#endif

@@ -89,7 +89,10 @@ struct RecordFlowView: View {
             TapHaptics.prepare()
             // The valence fan wobbles nine artworks on first sight, which is a
             // visible hitch on the main thread. Two steps of runway is plenty.
-            Task.detached(priority: .utility) { ValenceArt.prewarm() }
+            Task.detached(priority: .utility) {
+                ValenceArt.prewarm()
+                StoneCarvingArt.prewarm()
+            }
             if snaps == nil {
                 snaps = SnapUploadCoordinator(repo: PebbleSnapRepository(client: supabase.client))
             }

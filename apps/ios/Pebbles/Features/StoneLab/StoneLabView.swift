@@ -55,7 +55,7 @@ struct StoneLabView: View {
         .task(priority: .userInitiated) {
             // The nine carvings cost about a second of wobbling; off the main
             // actor, before the grid asks for them.
-            await Task.detached(priority: .userInitiated) { StoneLabArt.prewarm() }.value
+            await Task.detached(priority: .userInitiated) { StoneCarvingArt.prewarm() }.value
             isArtReady = true
         }
     }
@@ -140,17 +140,13 @@ struct StoneLabView: View {
     private func stone(_ valence: Valence, height: CGFloat) -> some View {
         StoneView(
             valence: valence,
-            palette: palette,
+            palette: palette.stonePalette,
             material: settings.material(for: valence.polarity),
             tones: settings.tones(for: valence.polarity),
             light: light,
             height: height,
             isFlat: flat,
-            showOutline: settings.showOutline,
-            carvingScale: settings.carvingScale,
-            shadowStrength: settings.shadowStrength,
-            edgeWidth: settings.edgeWidth,
-            edgeInset: settings.edgeInset
+            look: settings.look
         )
     }
 
@@ -273,12 +269,12 @@ struct StoneLabView: View {
     /// Options that belong to the stone as a whole, not to one material.
     @ViewBuilder
     private var stoneKnobs: some View {
-        Toggle(isOn: $settings.showOutline) { Text(verbatim: "Engine outline") }
+        Toggle(isOn: $settings.look.showOutline) { Text(verbatim: "Engine outline") }
             .font(.caption)
-        knob("Carving scale", $settings.carvingScale, 0.8...1.5)
-        knob("Shadow", $settings.shadowStrength, 0...1)
-        knob("Edge line", $settings.edgeWidth, 0...4)
-        knob("Edge inset", $settings.edgeInset, 0...0.1)
+        knob("Carving scale", $settings.look.carvingScale, 0.8...1.5)
+        knob("Shadow", $settings.look.shadowStrength, 0...1)
+        knob("Edge line", $settings.look.edgeWidth, 0...4)
+        knob("Edge inset", $settings.look.edgeInset, 0...0.1)
     }
 
     @ViewBuilder

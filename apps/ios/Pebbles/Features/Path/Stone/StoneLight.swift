@@ -1,4 +1,3 @@
-#if DEBUG
 import CoreGraphics
 import simd
 
@@ -57,4 +56,3 @@ struct StoneLight: Equatable {
         let y: Double
     }
 }
-#endif

@@ -1,4 +1,3 @@
-#if DEBUG
 import SwiftUI
 
 /// One stone under the lab's light. Bottom to top: the wobbled backdrop
@@ -10,23 +9,16 @@ import SwiftUI
 /// Nothing here reads time. The view redraws when a parameter changes.
 struct StoneView: View {
     let valence: Valence
-    let palette: StoneLabPalette
+    let palette: StonePalette
     let material: StoneMaterial
     let tones: StoneTones
     let light: StoneLight
     /// On-screen height of the whole stone, backdrop included.
     let height: CGFloat
     var isFlat: Bool = false
-    /// Draw the engine outline as a carving (the pre-lab look).
-    var showOutline: Bool = true
-    /// Multiplier on the engine's carving inset.
-    var carvingScale: Double = 1
-    /// Contact shadow under the stone, 0..1; 0 draws none.
-    var shadowStrength: Double = 0
-    /// Carved line along the silhouette's own edge, in points; 0 draws none.
-    var edgeWidth: Double = 0
-    /// Inset of that line as a fraction of the stone.
-    var edgeInset: Double = 0.035
+    var look: StoneLook = .standard
+
+    @Environment(\.colorScheme) private var scheme
 
     private var size: ValenceSizeGroup { valence.sizeGroup }
     private var width: CGFloat { height * PebbleOutlineGeometry.aspectRatio(for: size) }
@@ -35,15 +27,15 @@ struct StoneView: View {
 
     var body: some View {
         ZStack {
-            if !isFlat && shadowStrength > 0 {
+            if !isFlat && look.shadowStrength > 0 {
                 shadowLayer
             }
             bodyLayer
-            if edgeWidth > 0 {
+            if look.edgeWidth > 0 {
                 edgeLayer
             }
             carvingLayer
-                .scaleEffect(PebbleOutlineGeometry.pebbleScale(for: size) * carvingScale)
+                .scaleEffect(PebbleOutlineGeometry.pebbleScale(for: size) * look.carvingScale)
             if !isFlat {
                 sheenLayer
             }
@@ -67,7 +59,7 @@ struct StoneView: View {
                 let rim = CGFloat(material.rimWidth)
                 fill.layerEffect(
                     StoneShaders.stone(
-                        material: material, tones: tones, palette: palette,
+                        material: material, tones: tones, palette: palette, scheme: scheme,
                         light: light, unit: unit, seed: seed
                     ),
                     maxSampleOffset: CGSize(width: rim, height: rim)
@@ -82,7 +74,7 @@ struct StoneView: View {
 
     @ViewBuilder
     private var carvingLayer: some View {
-        if let art = StoneLabArt.art(for: valence) {
+        if let art = StoneCarvingArt.art(for: valence) {
             let ink = ZStack {
                 if let fossil = art.fossil {
                     WobbledPathShape(path: fossil.path, layerTransform: .identity, viewBox: art.viewBox)
@@ -90,7 +82,7 @@ struct StoneView: View {
                 }
                 WobbledPathShape(path: art.ink, layerTransform: .identity, viewBox: art.viewBox)
                     .fill(tones.color(tones.ink, in: palette))
-                if showOutline {
+                if look.showOutline {
                     WobbledPathShape(path: art.outline, layerTransform: .identity, viewBox: art.viewBox)
                         .fill(tones.color(tones.ink, in: palette))
                 }
@@ -101,7 +93,7 @@ struct StoneView: View {
             } else {
                 let lip = CGFloat(material.lipWidth)
                 ink.layerEffect(
-                    StoneShaders.carve(material: material, tones: tones, palette: palette, light: light),
+                    StoneShaders.carve(material: material, tones: tones, palette: palette, scheme: scheme, light: light),
                     maxSampleOffset: CGSize(width: lip, height: lip)
                 )
             }
@@ -117,15 +109,15 @@ struct StoneView: View {
     private var edgeLayer: some View {
         if let art = WobbleRenderer.backdropArt(size: size, polarity: valence.polarity) {
             let line = WobbledBackdropShape(art: art)
-                .stroke(tones.color(tones.ink, in: palette), style: StrokeStyle(lineWidth: edgeWidth, lineCap: .round, lineJoin: .round))
-                .scaleEffect(1 - edgeInset)
+                .stroke(tones.color(tones.ink, in: palette), style: StrokeStyle(lineWidth: look.edgeWidth, lineCap: .round, lineJoin: .round))
+                .scaleEffect(1 - look.edgeInset)
                 .compositingGroup()
             if isFlat {
                 line
             } else {
                 let lip = CGFloat(material.lipWidth)
                 line.layerEffect(
-                    StoneShaders.carve(material: material, tones: tones, palette: palette, light: light),
+                    StoneShaders.carve(material: material, tones: tones, palette: palette, scheme: scheme, light: light),
                     maxSampleOffset: CGSize(width: lip, height: lip)
                 )
             }
@@ -141,7 +133,7 @@ struct StoneView: View {
         if let art = WobbleRenderer.backdropArt(size: size, polarity: valence.polarity) {
             let push = light.lipOffset(width: -Double(height) * 0.03)
             WobbledBackdropShape(art: art)
-                .fill(Color.black.opacity(shadowStrength), style: FillStyle(eoFill: art.usesEvenOddFill))
+                .fill(Color.black.opacity(look.shadowStrength), style: FillStyle(eoFill: art.usesEvenOddFill))
                 .blur(radius: height * 0.03)
                 .offset(x: push.width, y: push.height)
         }
@@ -169,8 +161,8 @@ struct StoneView: View {
     }
 }
 
-#Preview("Nine stones · joy") {
-    let palette = StoneLabPalettes.all[2]
+#Preview("Nine stones · brand") {
+    let palette = StonePalette.brand
     return VStack(spacing: 12) {
         ForEach(ValenceSizeGroup.allCases) { size in
             HStack(spacing: 12) {
@@ -188,4 +180,3 @@ struct StoneView: View {
     .padding()
     .background(Color.system.background)
 }
-#endif

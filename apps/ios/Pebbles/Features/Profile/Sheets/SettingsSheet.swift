@@ -394,7 +394,7 @@ struct SettingsSheet: View {
             Button {
                 // Start building the nine carvings off the main actor now, so
                 // the lab has less to wait for when it opens.
-                Task.detached(priority: .userInitiated) { StoneLabArt.prewarm() }
+                Task.detached(priority: .userInitiated) { StoneCarvingArt.prewarm() }
                 isPresentingStoneLab = true
             } label: {
                 Label {

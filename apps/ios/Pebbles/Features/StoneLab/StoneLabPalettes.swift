@@ -14,10 +14,7 @@ struct StoneLabPalette: Identifiable, Hashable {
 
     var id: String { slug }
 
-    enum Slot: String, CaseIterable, Identifiable, Codable {
-        case primary, secondary, light, surface, dark, shaded
-        var id: String { rawValue }
-    }
+    typealias Slot = StonePalette.Slot
 
     func hex(_ slot: Slot) -> String {
         switch slot {
@@ -32,6 +29,12 @@ struct StoneLabPalette: Identifiable, Hashable {
 
     func rgb(_ slot: Slot) -> SIMD3<Float> { StoneLabPalettes.rgb(hex(slot)) }
     func color(_ slot: Slot) -> Color { Color(hex: hex(slot)) ?? .clear }
+
+    /// The same six tones as SwiftUI colours, for `StoneView`.
+    var stonePalette: StonePalette {
+        StonePalette(primary: color(.primary), secondary: color(.secondary), light: color(.light),
+                     surface: color(.surface), dark: color(.dark), shaded: color(.shaded))
+    }
 }
 
 /// The seven seeded palettes, hard-coded so the lab works offline and signed

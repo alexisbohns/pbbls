@@ -23,7 +23,7 @@ struct StoneShapeParserTests {
 
     @Test("splits every engine seed into one outline, N veins and a fossil where the seed has one", arguments: Valence.allCases)
     func splitsSeed(valence: Valence) throws {
-        let name = "stone-lab-shape-\(valence.sizeGroup.rawValue)-\(valence.polarity.rawValue)"
+        let name = "stone-shape-\(valence.sizeGroup.rawValue)-\(valence.polarity.rawValue)"
         let url = try #require(Bundle.main.url(forResource: name, withExtension: "svg"))
         let svg = try String(contentsOf: url, encoding: .utf8)
         let parsed = try #require(StoneShapeParser.parse(svg))
@@ -54,7 +54,7 @@ struct StoneShapeParserTests {
 
     @Test("large-neutral's outline is its third stroked path and spans the canvas")
     func largeNeutralOutline() throws {
-        let url = try #require(Bundle.main.url(forResource: "stone-lab-shape-large-neutral", withExtension: "svg"))
+        let url = try #require(Bundle.main.url(forResource: "stone-shape-large-neutral", withExtension: "svg"))
         let parsed = try #require(StoneShapeParser.parse(try String(contentsOf: url, encoding: .utf8)))
         #expect(parsed.outline.d.hasSuffix("Z"))
         #expect(parsed.veins.count == 2)

@@ -17,19 +17,8 @@ struct StoneLabSettings: Equatable, Codable {
     var paletteIndex: Int = 2 // joy: the warmest, easiest to judge
     var materials: [String: StoneMaterial] = [:]
     var tones: [String: StoneTones] = [:]
-    /// Draw the engine's outline as a carving. Off means the stone's own edge
-    /// is the only edge, lit by the rim.
-    var showOutline: Bool = false
-    /// Multiplier on the engine's carving scale inside the body (1 is the
-    /// engine's 12% inset).
-    var carvingScale: Double = 1.22
-    /// Contact shadow under the stone, 0..1.
-    var shadowStrength: Double = 0.8
-    /// A carved line following the silhouette's own edge, in points; 0 is off.
-    /// Drawn from the same wobbled path as the body, so it always aligns.
-    var edgeWidth: Double = 1.88
-    /// How far inside the edge that line sits, as a fraction of the stone.
-    var edgeInset: Double = 0.03
+    /// Stone-wide options; starts at the shipped look.
+    var look: StoneLook = .standard
 
     func material(for polarity: ValencePolarity) -> StoneMaterial {
         materials[polarity.rawValue] ?? .starting(for: polarity)
@@ -64,8 +53,8 @@ struct StoneLabSettings: Equatable, Codable {
     /// One line per knob, per polarity, in the order the page shows them.
     var summary: String {
         var lines = ["stone lab · palette \(StoneLabPalettes.all[min(max(paletteIndex, 0), StoneLabPalettes.all.count - 1)].slug)"]
-        lines.append("  outline \(showOutline) carvingScale \(f(carvingScale)) shadow \(f(shadowStrength))"
-                     + " edgeWidth \(f(edgeWidth)) edgeInset \(f(edgeInset))")
+        lines.append("  outline \(look.showOutline) carvingScale \(f(look.carvingScale)) shadow \(f(look.shadowStrength))"
+                     + " edgeWidth \(f(look.edgeWidth)) edgeInset \(f(look.edgeInset))")
         for polarity in ValencePolarity.allCases {
             let m = material(for: polarity)
             let t = tones(for: polarity)

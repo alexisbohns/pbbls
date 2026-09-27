@@ -1,4 +1,3 @@
-#if DEBUG
 import SwiftUI
 
 /// Builds the two lab shaders so the views never spell the argument order out.
@@ -10,7 +9,8 @@ enum StoneShaders {
     static func stone(
         material: StoneMaterial,
         tones: StoneTones,
-        palette: StoneLabPalette,
+        palette: StonePalette,
+        scheme: ColorScheme,
         light: StoneLight,
         unit: CGFloat,
         seed: Int
@@ -19,10 +19,10 @@ enum StoneShaders {
             .float(unit),
             .float(Double(seed)),
             .float3(Double(light.vector.x), Double(light.vector.y), Double(light.vector.z)),
-            rgb(tones.rgb(tones.body, in: palette)),
-            rgb(tones.rgb(tones.ink, in: palette)),
-            rgb(tones.rgb(tones.lipLight, in: palette)),
-            rgb(tones.rgb(tones.lipShadow, in: palette)),
+            rgb(tones.rgb(tones.body, in: palette, scheme: scheme)),
+            rgb(tones.rgb(tones.ink, in: palette, scheme: scheme)),
+            rgb(tones.rgb(tones.lipLight, in: palette, scheme: scheme)),
+            rgb(tones.rgb(tones.lipShadow, in: palette, scheme: scheme)),
             .float(tones.lipLight.opacity),
         ]
         arguments += material.uniforms.map { .float(Double($0)) }
@@ -33,15 +33,16 @@ enum StoneShaders {
     static func carve(
         material: StoneMaterial,
         tones: StoneTones,
-        palette: StoneLabPalette,
+        palette: StonePalette,
+        scheme: ColorScheme,
         light: StoneLight
     ) -> Shader {
         let offset = light.lipOffset(width: material.lipWidth)
         return Shader(function: ShaderFunction(library: .default, name: "carve"), arguments: [
             .float2(offset),
-            rgb(tones.rgb(tones.ink, in: palette)),
-            rgb(tones.rgb(tones.lipLight, in: palette)),
-            rgb(tones.rgb(tones.lipShadow, in: palette)),
+            rgb(tones.rgb(tones.ink, in: palette, scheme: scheme)),
+            rgb(tones.rgb(tones.lipLight, in: palette, scheme: scheme)),
+            rgb(tones.rgb(tones.lipShadow, in: palette, scheme: scheme)),
             .float2(tones.lipLight.opacity, tones.lipShadow.opacity),
             .float(material.lipOpacity),
         ])
@@ -51,4 +52,3 @@ enum StoneShaders {
         .float3(Double(v.x), Double(v.y), Double(v.z))
     }
 }
-#endif
