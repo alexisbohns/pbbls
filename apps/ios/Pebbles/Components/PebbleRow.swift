@@ -42,32 +42,12 @@ struct PebbleRow: View {
         }
     }
 
+    /// The lit stone (#974), at the rest light: the row never animates.
     @ViewBuilder
     private var thumbnail: some View {
-        if let svg = pebble.renderSvg {
-            ZStack {
-                PebbleOutlineBackdropView(
-                    size: pebble.valence.sizeGroup,
-                    polarity: pebble.valence.polarity,
-                    fillHex: frameColors?.fillHex ?? Color.accent.primaryHex,
-                    fillOpacity: frameColors?.fillOpacity ?? 1
-                )
-                if WobbleFlags.isEnabled {
-                    // Wobble experiment (#555): route through the model-based
-                    // static renderer, which self-falls-back to SVGView.
-                    PebbleStaticRenderView(
-                        svg: svg,
-                        strokeColor: Color(hex: frameColors?.strokeHex ?? Color.accent.primaryHex) ?? Color.accent.primary,
-                        strokeColorHex: frameColors?.strokeHex ?? Color.accent.primaryHex
-                    )
-                    .scaleEffect(PebbleOutlineGeometry.pebbleScale(for: pebble.valence.sizeGroup))
-                } else {
-                    PebbleRenderView(svg: svg, strokeColor: frameColors?.strokeHex ?? Color.accent.primaryHex)
-                        .scaleEffect(PebbleOutlineGeometry.pebbleScale(for: pebble.valence.sizeGroup))
-                }
-            }
-            .aspectRatio(PebbleOutlineGeometry.aspectRatio(for: pebble.valence.sizeGroup), contentMode: .fit)
-            .frame(width: 40, height: 40)
+        if pebble.renderSvg != nil {
+            PebbleStoneView(valence: pebble.valence, renderSvg: pebble.renderSvg, palette: palette)
+                .frame(width: 40, height: 40)
         } else {
             RoundedRectangle(cornerRadius: 6)
                 .fill(Color.secondary.opacity(0.15))

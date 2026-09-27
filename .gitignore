@@ -71,3 +71,6 @@ deno.lock
 .branches/
 .arkaik/
 docs/arkaik/.backups/
+
+# Git worktrees (superpowers)
+.worktrees/

@@ -30,6 +30,9 @@ struct SettingsSheet: View {
     @State private var presentedLegalDoc: LegalDoc?
     @State private var isPresentingGlyphPicker = false
     @State private var isPresentingDeleteConfirm = false
+    #if DEBUG
+    @State private var isPresentingStoneLab = false
+    #endif
     @State private var isDeleting = false
     @State private var deleteError: String?
     @FocusState private var focusedField: Field?
@@ -115,6 +118,9 @@ struct SettingsSheet: View {
                     }
                 }
                 legalSection
+                #if DEBUG
+                developerSection
+                #endif
                 deleteAccountSection
             }
             .pebblesList()
@@ -152,6 +158,11 @@ struct SettingsSheet: View {
                 LegalDocumentSheet(url: doc.url)
                     .ignoresSafeArea()
             }
+            #if DEBUG
+            .fullScreenCover(isPresented: $isPresentingStoneLab) {
+                StoneLabView()
+            }
+            #endif
             .confirmationDialog(
                 "Delete your account?",
                 isPresented: $isPresentingDeleteConfirm,
@@ -374,6 +385,31 @@ struct SettingsSheet: View {
             Text("Legal").pebblesSectionHeader()
         }
     }
+
+    #if DEBUG
+    /// Debug builds only: the stone material lab (#974). Verbatim text so the
+    /// row never reaches the string catalog.
+    private var developerSection: some View {
+        Section {
+            Button {
+                // Start building the nine carvings off the main actor now, so
+                // the lab has less to wait for when it opens.
+                Task.detached(priority: .userInitiated) { StoneCarvingArt.prewarm() }
+                isPresentingStoneLab = true
+            } label: {
+                Label {
+                    Text(verbatim: "Stone lab")
+                } icon: {
+                    Image(systemName: "sparkles")
+                }
+            }
+            .buttonStyle(.plain)
+            .pebblesListRow(position: .only)
+        } header: {
+            Text(verbatim: "Developer").pebblesSectionHeader()
+        }
+    }
+    #endif
 
     /// Store-mandated account deletion entry (Apple 5.1.1(v): easy to find).
     private var deleteAccountSection: some View {

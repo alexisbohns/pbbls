@@ -1,100 +1,81 @@
 import SwiftUI
 
-/// One valence stone, composed the way the Path and the read sheet compose a
-/// real pebble: a soft-filled silhouette behind, the artwork inked inside it.
+/// One valence stone in the picker: the lit stone render (#974) in the brand
+/// palette, with the maintainer's material, tone and look tables. Every stone
+/// is lit. Choosing one makes the light sweep across it once (top-left to
+/// top-right and back, dipping so the rim and the carving lips catch) and
+/// settle at the rest light, on top of the scale and dimming the picker
+/// applies. The sweep is finite: once it ends the stone stops redrawing.
 ///
-/// The backdrop is the wobbled `Outlines/<size>-<polarity>.svg` shape, filled
-/// and never stroked. The artwork on top is the wobbled `ValenceArt/valence-*`
-/// ink (the pebble's own outline plus its creature and fossil), tinted and
-/// scaled down by `PebbleOutlineGeometry.pebbleScale` so the backdrop frames it
-/// with the same ~12% margin a real stone gets — instead of the backdrop's edge
-/// and the artwork's edge landing on top of each other.
-///
-/// Both halves are wobbled by the same renderer a real pebble goes through, and
-/// both are memoized, so nine stones cost nine parses once per process — never
-/// per frame.
-///
-/// Selection crossfades two fixed layers rather than animating one changing
-/// fill. `AnyShapeStyle` is not animatable, and the resting and selected fills
-/// are not even the same kind of thing — in dark mode a flat colour gives way
-/// to a `MeshGradient` — so animating the style directly makes SwiftUI wipe the
-/// new fill across the stone on a hard diagonal edge. Each layer here keeps one
-/// style for its whole life and only its opacity moves.
-///
-/// Knows nothing about selection or placement: the picker owns both.
+/// Both wobbled layers are memoized (`WobbleRenderer`, `StoneCarvingArt`), so
+/// nine stones cost nine parses once per process, never per frame. Low Power
+/// Mode draws the flat rendering; Reduce Motion skips the sweep.
 struct ValenceStoneView: View {
     let valence: Valence
     /// On-screen height of the whole stone, backdrop included.
     let height: CGFloat
-    /// Inverts the wash and the ink — see `ValenceStoneStyle`.
+    /// Starts the light sweep when it turns true.
     var isSelected: Bool = false
+    /// The phone's lean, when this stone follows it (the chosen stone in the
+    /// picker); nil keeps the rest light.
+    var lean: Lean?
 
-    @Environment(\.colorScheme) private var colorScheme
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// When the current sweep started; nil when the stone is still.
+    @State private var sweepStart: Date?
 
-    private var size: ValenceSizeGroup { valence.sizeGroup }
-
-    private var width: CGFloat {
-        height * PebbleOutlineGeometry.aspectRatio(for: size)
-    }
-
-    private var resting: ValenceStoneStyle {
-        ValenceStoneStyle.style(for: valence.polarity, scheme: colorScheme, isSelected: false)
-    }
-
-    private var selected: ValenceStoneStyle {
-        ValenceStoneStyle.style(for: valence.polarity, scheme: colorScheme, isSelected: true)
-    }
+    private static let sweepDuration: TimeInterval = 1.6
+    /// How far the light swings each way from the rest direction, in radians.
+    private static let sweepSwing: Double = .pi / 3
 
     var body: some View {
-        ZStack {
-            backdrop(resting).opacity(isSelected ? 0 : 1)
-            backdrop(selected).opacity(isSelected ? 1 : 0)
-
-            artwork(resting)
-                .opacity(isSelected ? 0 : 1)
-                .scaleEffect(PebbleOutlineGeometry.pebbleScale(for: size))
-            artwork(selected)
-                .opacity(isSelected ? 1 : 0)
-                .scaleEffect(PebbleOutlineGeometry.pebbleScale(for: size))
+        TimelineView(.animation(minimumInterval: 1 / 60, paused: sweepStart == nil)) { context in
+            stone(light: light(at: context.date))
         }
-        .frame(width: width, height: height)
-    }
-
-    @ViewBuilder
-    private func backdrop(_ style: ValenceStoneStyle) -> some View {
-        if let art = WobbleRenderer.backdropArt(size: size, polarity: valence.polarity) {
-            WobbledBackdropShape(art: art)
-                .fill(style.backdrop, style: FillStyle(eoFill: art.usesEvenOddFill))
-        } else {
-            // Missing or unparseable outline asset — a setup bug, already
-            // logged by WobbleRenderer. Losing the wash still leaves the
-            // artwork readable, which is the better half to keep.
-            Color.clear
-        }
-    }
-
-    /// The leaky wobbled ink, aspect-fitted into the artwork's own viewBox the
-    /// same way `PebbleAnimatedRenderView` fits a real pebble's static body.
-    @ViewBuilder
-    private func artwork(_ style: ValenceStoneStyle) -> some View {
-        if let art = ValenceArt.art(for: valence) {
-            ZStack {
-                WobbledPathShape(path: art.ink, layerTransform: .identity, viewBox: art.viewBox)
-                    .fill(style.ink)
-                ForEach(Array(art.regions.enumerated()), id: \.offset) { _, region in
-                    WobbledPathShape(
-                        path: region.path, layerTransform: .identity, viewBox: art.viewBox
-                    )
-                    .fill(style.ink, style: FillStyle(eoFill: region.usesEvenOddFill))
-                }
+        // `lean` is part of this view's inputs, so a published lean re-renders
+        // the stone whether or not the timeline is running.
+        .frame(width: height * PebbleOutlineGeometry.aspectRatio(for: valence.sizeGroup), height: height)
+        .onChange(of: isSelected, initial: true) { _, selected in
+            guard selected, !reduceMotion else {
+                sweepStart = nil
+                return
             }
-            .aspectRatio(art.viewBox.width / art.viewBox.height, contentMode: .fit)
-        } else {
-            // Missing or unparseable artwork — logged by ValenceArt. The
-            // backdrop wash alone still reads as a stone of the right size and
-            // colour, so the picker stays usable.
-            Color.clear
+            sweepStart = .now
         }
+    }
+
+    private func stone(light: StoneLight) -> some View {
+        StoneView(
+            valence: valence,
+            palette: .brand,
+            material: .starting(for: valence.polarity),
+            tones: .starting(for: valence.polarity),
+            light: light,
+            height: height,
+            isFlat: ProcessInfo.processInfo.isLowPowerModeEnabled
+        )
+    }
+
+    /// The tilted (or rest) light, with the sweep's swing added while it runs.
+    /// The sweep ends exactly on the tilted light, so the last animated frame
+    /// and the still frame are the same picture.
+    private func light(at date: Date) -> StoneLight {
+        let base = StoneLight.tilted(by: lean ?? .zero)
+        guard let sweepStart else { return base }
+        let elapsed = date.timeIntervalSince(sweepStart)
+        guard elapsed < Self.sweepDuration else {
+            // Settle on the next run loop turn: mutating state inside a
+            // TimelineView body is refused.
+            DispatchQueue.main.async { self.sweepStart = nil }
+            return base
+        }
+        let t = elapsed / Self.sweepDuration
+        let eased = 0.5 - 0.5 * cos(t * .pi)           // ease in-out over the whole sweep
+        let swing = sin(eased * .pi)                    // out and back: 0 → 1 → 0
+        let baseAngle = atan2(base.direction.dy, base.direction.dx)
+        let angle = baseAngle + swing * Self.sweepSwing
+        let elevation = base.elevationDegrees - swing * 20
+        return StoneLight(direction: CGVector(dx: cos(angle), dy: sin(angle)), elevationDegrees: elevation)
     }
 }
 

@@ -14,11 +14,15 @@ struct ValencePickerContent: View {
     let selected: Valence?
     let onSelect: (Valence) -> Void
 
+    /// The phone's lean, read by the chosen stone only. Started with the fan,
+    /// stopped with it; a pick re-zeroes so the chosen stone starts level.
+    @State private var motion = StoneMotionSource()
+
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Opacity of the eight stones that are not the chosen one. With nothing
     /// chosen, all nine stay at full strength.
-    private static let dimmedOpacity: Double = 0.45
+    private static let dimmedOpacity: Double = 0.35
     private static let selectedScale: CGFloat = 1.14
     /// Apple's minimum comfortable target; the small stones are under it on
     /// both axes.
@@ -41,6 +45,8 @@ struct ValencePickerContent: View {
         }
         .frame(width: ValenceFanLayout.reference.width, height: ValenceFanLayout.reference.height)
         .animation(.snappy(duration: 0.22), value: selected)
+        .onAppear { motion.start() }
+        .onDisappear { motion.stop() }
     }
 
     @ViewBuilder
@@ -52,9 +58,10 @@ struct ValencePickerContent: View {
         let width = ValenceFanLayout.stoneWidth(for: valence.sizeGroup)
 
         Button {
+            motion.rezero()
             onSelect(valence)
         } label: {
-            ValenceStoneView(valence: valence, height: height, isSelected: isActive)
+            ValenceStoneView(valence: valence, height: height, isSelected: isActive, lean: isActive ? motion.lean : nil)
                 .frame(
                     width: max(width, Self.minimumHitTarget),
                     height: max(height, Self.minimumHitTarget)

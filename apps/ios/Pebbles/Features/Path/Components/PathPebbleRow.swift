@@ -75,27 +75,10 @@ struct PathPebbleRow: View {
         }
     }
 
-    @ViewBuilder
+    /// The lit stone (#974), at the rest light: the row never animates.
     private var thumbnail: some View {
-        ZStack {
-            PebbleOutlineBackdropView(
-                size: pebble.valence.sizeGroup,
-                polarity: pebble.valence.polarity,
-                fillHex: frameColors?.fillHex ?? Color.accent.primaryHex,
-                fillOpacity: frameColors?.fillOpacity ?? 1
-            )
-            if let svg = pebble.renderSvg {
-                let strokeHex = frameColors?.strokeHex ?? Color.accent.primaryHex
-                PebbleStaticRenderView(
-                    svg: svg,
-                    strokeColor: Color(hex: strokeHex) ?? Color.accent.primary,
-                    strokeColorHex: strokeHex
-                )
-                .scaleEffect(PebbleOutlineGeometry.pebbleScale(for: pebble.valence.sizeGroup))
-            }
-        }
-        .aspectRatio(PebbleOutlineGeometry.aspectRatio(for: pebble.valence.sizeGroup), contentMode: .fit)
-        .frame(width: thumbnailSize, height: thumbnailSize)
+        PebbleStoneView(valence: pebble.valence, renderSvg: pebble.renderSvg, palette: palette)
+            .frame(width: thumbnailSize, height: thumbnailSize)
     }
 
     @ViewBuilder
