@@ -5,6 +5,7 @@ import app.pbbls.android.core.model.CollectionRow
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.model.OffsetDateTimeSerializer
 import io.github.jan.supabase.auth.auth
+import io.github.jan.supabase.exceptions.RestException
 import io.github.jan.supabase.functions.functions
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
@@ -18,6 +19,8 @@ import kotlinx.serialization.json.put
 import java.time.OffsetDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
+
+private const val HTTP_PRECONDITION_REQUIRED = 428
 
 /** The Profile surface's data seam — see [SupabaseServicing] for why these exist (#848). */
 interface ProfileServicing {
@@ -141,13 +144,20 @@ class ProfileService
         /**
          * Invokes the `delete-account` edge function, which purges the row graph and
          * the auth user. Throws on failure; the caller signs out and maps the error.
+         * A 428 is the recent sign-in gate (#976) and becomes
+         * [ReauthRequiredException] so the caller prompts instead of failing.
          *
          * Lives here rather than on the screen (#848) so `SupabaseServicing` never
          * has to expose the raw client — a client on that interface would make every
          * fake of it pointless.
          */
         override suspend fun deleteAccount() {
-            supabase.client.functions.invoke("delete-account")
+            try {
+                supabase.client.functions.invoke("delete-account")
+            } catch (e: RestException) {
+                if (e.statusCode == HTTP_PRECONDITION_REQUIRED) throw ReauthRequiredException(e)
+                throw e
+            }
         }
 
         @Serializable

@@ -16,6 +16,9 @@ import io.github.jan.supabase.auth.user.UserSession
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.query.Columns
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.filterIsInstance
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.buildJsonObject
@@ -53,6 +56,22 @@ interface SupabaseServicing {
     )
 
     suspend fun signInWithGoogle()
+
+    /**
+     * Re-proves the password of the CURRENT user (#976): signs in again with the
+     * session's own email, which re-issues a session with a fresh `amr` stamp.
+     * Throws on a wrong password (supabase-kt's auth exception) or when the
+     * session has no email.
+     */
+    suspend fun reauthenticate(password: String)
+
+    /**
+     * Re-runs Google OAuth for the current user and suspends until a session
+     * with a fresh `amr` stamp arrives. If it comes back as a different user,
+     * that session is signed out and [ReauthAccountMismatchException] thrown.
+     * Suspends until then — cancel the caller to abandon.
+     */
+    suspend fun reauthenticateWithGoogle()
 
     /**
      * [everywhere] revokes every refresh token the user holds (all devices),
@@ -201,6 +220,40 @@ class SupabaseService
             } catch (e: Exception) {
                 Log.e(TAG, "signInWithGoogle failed", e)
                 throw e
+            }
+        }
+
+        override suspend fun reauthenticate(password: String) {
+            val email = session?.user?.email ?: error("reauthenticate: the session has no email")
+            signIn(email, password)
+        }
+
+        /**
+         * Collecting `sessionStatus` here is a second, short-lived collector,
+         * not [start]'s. The no-re-entry rule is about calling supabase-kt from
+         * INSIDE a collector; the sign-out below runs after `first` returned.
+         */
+        override suspend fun reauthenticateWithGoogle() {
+            val before = session?.user ?: error("reauthenticateWithGoogle: not authenticated")
+            try {
+                client.auth.signInWith(Google) {
+                    // Steer Google to the same account; a different one is caught below.
+                    before.email?.let { queryParams["login_hint"] = it }
+                    queryParams["prompt"] = "select_account"
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "reauthenticateWithGoogle failed", e)
+                throw e
+            }
+            val returned =
+                client.auth.sessionStatus
+                    .filterIsInstance<SessionStatus.Authenticated>()
+                    .map { it.session }
+                    .first { RecentAuth.isFresh(it.accessToken) }
+            if (returned.user?.id != before.id) {
+                Log.e(TAG, "reauthenticateWithGoogle: came back as a different user")
+                signOut()
+                throw ReauthAccountMismatchException()
             }
         }
 
