@@ -276,7 +276,7 @@ struct StoneLabView: View {
         Toggle(isOn: $settings.showOutline) { Text(verbatim: "Engine outline") }
             .font(.caption)
         knob("Carving scale", $settings.carvingScale, 0.8...1.5)
-        knob("Shadow", $settings.shadowStrength, 0...0.8)
+        knob("Shadow", $settings.shadowStrength, 0...1)
         knob("Edge line", $settings.edgeWidth, 0...4)
         knob("Edge inset", $settings.edgeInset, 0...0.1)
     }

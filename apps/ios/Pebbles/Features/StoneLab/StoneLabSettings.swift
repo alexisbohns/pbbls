@@ -22,14 +22,14 @@ struct StoneLabSettings: Equatable, Codable {
     var showOutline: Bool = false
     /// Multiplier on the engine's carving scale inside the body (1 is the
     /// engine's 12% inset).
-    var carvingScale: Double = 1.15
+    var carvingScale: Double = 1.22
     /// Contact shadow under the stone, 0..1.
-    var shadowStrength: Double = 0.25
+    var shadowStrength: Double = 0.8
     /// A carved line following the silhouette's own edge, in points; 0 is off.
     /// Drawn from the same wobbled path as the body, so it always aligns.
-    var edgeWidth: Double = 1.5
+    var edgeWidth: Double = 1.88
     /// How far inside the edge that line sits, as a fraction of the stone.
-    var edgeInset: Double = 0.035
+    var edgeInset: Double = 0.03
 
     func material(for polarity: ValencePolarity) -> StoneMaterial {
         materials[polarity.rawValue] ?? .starting(for: polarity)
