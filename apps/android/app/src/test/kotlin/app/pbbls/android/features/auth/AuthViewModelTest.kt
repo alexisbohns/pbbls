@@ -32,6 +32,8 @@ class AuthViewModelTest {
         onPasswordChange("hunter2hunter2")
         onTermsChange(true)
         onPrivacyChange(true)
+        onHealthChange(true)
+        onAgeChange(true)
     }
 
     // MARK: - Seeding
@@ -98,16 +100,20 @@ class AuthViewModelTest {
             viewModel.start(AuthMode.SIGNUP)
             viewModel.onTermsChange(true)
             viewModel.onPrivacyChange(true)
+            viewModel.onHealthChange(true)
+            viewModel.onAgeChange(true)
 
             viewModel.onModeChange(AuthMode.LOGIN)
 
             val state = viewModel.uiState.value
             assertFalse(state.termsAccepted)
             assertFalse(state.privacyAccepted)
+            assertFalse(state.healthAccepted)
+            assertFalse(state.ageAccepted)
         }
 
     @Test
-    fun `a sign-up cannot be submitted without both consents`() =
+    fun `a sign-up cannot be submitted without all four consents`() =
         runTest {
             val supabase = FakeSupabaseService()
             val viewModel = viewModel(supabase)
@@ -115,6 +121,8 @@ class AuthViewModelTest {
             viewModel.onEmailChange("someone@example.com")
             viewModel.onPasswordChange("hunter2hunter2")
             viewModel.onTermsChange(true)
+            viewModel.onPrivacyChange(true)
+            viewModel.onHealthChange(true)
 
             assertFalse(viewModel.uiState.value.canSubmit)
             viewModel.submit()
@@ -251,6 +259,8 @@ class AuthViewModelTest {
             first.onEmailChange("someone@example.com")
             first.onPasswordChange("hunter2hunter2")
             first.onTermsChange(true)
+            first.onHealthChange(true)
+            first.onAgeChange(true)
 
             val restored = viewModel(savedState = savedState)
             restored.start(AuthMode.LOGIN)
@@ -258,6 +268,8 @@ class AuthViewModelTest {
             val state = restored.uiState.value
             assertEquals("someone@example.com", state.email)
             assertTrue(state.termsAccepted)
+            assertTrue(state.healthAccepted)
+            assertTrue(state.ageAccepted)
             assertEquals("", state.password)
             assertEquals(AuthMode.SIGNUP, state.mode)
         }

@@ -85,3 +85,35 @@ fun PebblesCheckbox(
         )
     }
 }
+
+/**
+ * Consent row with a plain [label] and no document link — for statements that
+ * are themselves the whole consent (the Art. 9 statement, the 16+ attestation).
+ * Same row semantics as the linked overload: one `toggleable`, the box is not a
+ * second target.
+ */
+@Composable
+fun PebblesCheckbox(
+    isChecked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .heightIn(min = 48.dp)
+                .toggleable(value = isChecked, role = Role.Checkbox, onValueChange = onCheckedChange),
+        horizontalArrangement = Arrangement.spacedBy(Spacing.md),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Checkbox(checked = isChecked, onCheckedChange = null)
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}

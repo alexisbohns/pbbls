@@ -25,6 +25,8 @@ data class AuthUiState(
     val password: String = "",
     val termsAccepted: Boolean = false,
     val privacyAccepted: Boolean = false,
+    val healthAccepted: Boolean = false,
+    val ageAccepted: Boolean = false,
     val isSubmitting: Boolean = false,
     /** A resource id, never a message: raw SDK text must not reach a user (D9, #850). */
     @StringRes val authErrorRes: Int? = null,
@@ -42,6 +44,8 @@ data class AuthUiState(
                 password = password,
                 termsAccepted = termsAccepted,
                 privacyAccepted = privacyAccepted,
+                healthAccepted = healthAccepted,
+                ageAccepted = ageAccepted,
                 isSubmitting = isSubmitting,
             )
 }
@@ -97,6 +101,8 @@ class AuthViewModel
                     email = savedState[KEY_EMAIL] ?: "",
                     termsAccepted = savedState[KEY_TERMS] ?: false,
                     privacyAccepted = savedState[KEY_PRIVACY] ?: false,
+                    healthAccepted = savedState[KEY_HEALTH] ?: false,
+                    ageAccepted = savedState[KEY_AGE] ?: false,
                 )
             }
         }
@@ -132,6 +138,16 @@ class AuthViewModel
             _uiState.update { it.copy(privacyAccepted = value) }
         }
 
+        fun onHealthChange(value: Boolean) {
+            savedState[KEY_HEALTH] = value
+            _uiState.update { it.copy(healthAccepted = value) }
+        }
+
+        fun onAgeChange(value: Boolean) {
+            savedState[KEY_AGE] = value
+            _uiState.update { it.copy(ageAccepted = value) }
+        }
+
         /** Switching to Login drops the consents: they belong to a sign-up. */
         fun onModeChange(newMode: AuthMode) {
             savedState[KEY_MODE] = newMode.name
@@ -139,6 +155,8 @@ class AuthViewModel
             if (clearsConsents) {
                 savedState[KEY_TERMS] = false
                 savedState[KEY_PRIVACY] = false
+                savedState[KEY_HEALTH] = false
+                savedState[KEY_AGE] = false
             }
             _uiState.update {
                 it.copy(
@@ -146,6 +164,8 @@ class AuthViewModel
                     authErrorRes = null,
                     termsAccepted = if (clearsConsents) false else it.termsAccepted,
                     privacyAccepted = if (clearsConsents) false else it.privacyAccepted,
+                    healthAccepted = if (clearsConsents) false else it.healthAccepted,
+                    ageAccepted = if (clearsConsents) false else it.ageAccepted,
                 )
             }
         }
@@ -196,5 +216,7 @@ class AuthViewModel
             const val KEY_EMAIL = "auth-email"
             const val KEY_TERMS = "auth-terms"
             const val KEY_PRIVACY = "auth-privacy"
+            const val KEY_HEALTH = "auth-health"
+            const val KEY_AGE = "auth-age"
         }
     }
