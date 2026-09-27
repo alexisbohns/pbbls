@@ -16,7 +16,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.contentType
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -81,7 +86,8 @@ internal fun ReauthDialog(
                                 imeAction = ImeAction.Done,
                             ),
                         keyboardActions = KeyboardActions(onDone = { onConfirm() }),
-                        modifier = Modifier.fillMaxWidth(),
+                        // The saved password is exactly what this asks for.
+                        modifier = Modifier.fillMaxWidth().semantics { contentType = ContentType.Password },
                     )
                 }
                 if (errorText != null) {
@@ -90,6 +96,8 @@ internal fun ReauthDialog(
                         text = errorText,
                         style = MaterialTheme.typography.bodySmall,
                         color = colors.error,
+                        // Appears after a submit, away from focus: announce it.
+                        modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
                     )
                 }
             }
