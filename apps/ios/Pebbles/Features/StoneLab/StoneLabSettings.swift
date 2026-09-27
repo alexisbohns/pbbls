@@ -25,6 +25,11 @@ struct StoneLabSettings: Equatable, Codable {
     var carvingScale: Double = 1.15
     /// Contact shadow under the stone, 0..1.
     var shadowStrength: Double = 0.25
+    /// A carved line following the silhouette's own edge, in points; 0 is off.
+    /// Drawn from the same wobbled path as the body, so it always aligns.
+    var edgeWidth: Double = 1.5
+    /// How far inside the edge that line sits, as a fraction of the stone.
+    var edgeInset: Double = 0.035
 
     func material(for polarity: ValencePolarity) -> StoneMaterial {
         materials[polarity.rawValue] ?? .starting(for: polarity)
@@ -59,7 +64,8 @@ struct StoneLabSettings: Equatable, Codable {
     /// One line per knob, per polarity, in the order the page shows them.
     var summary: String {
         var lines = ["stone lab · palette \(StoneLabPalettes.all[min(max(paletteIndex, 0), StoneLabPalettes.all.count - 1)].slug)"]
-        lines.append("  outline \(showOutline) carvingScale \(f(carvingScale)) shadow \(f(shadowStrength))")
+        lines.append("  outline \(showOutline) carvingScale \(f(carvingScale)) shadow \(f(shadowStrength))"
+                     + " edgeWidth \(f(edgeWidth)) edgeInset \(f(edgeInset))")
         for polarity in ValencePolarity.allCases {
             let m = material(for: polarity)
             let t = tones(for: polarity)

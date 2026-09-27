@@ -23,6 +23,10 @@ struct StoneView: View {
     var carvingScale: Double = 1
     /// Contact shadow under the stone, 0..1; 0 draws none.
     var shadowStrength: Double = 0
+    /// Carved line along the silhouette's own edge, in points; 0 draws none.
+    var edgeWidth: Double = 0
+    /// Inset of that line as a fraction of the stone.
+    var edgeInset: Double = 0.035
 
     private var size: ValenceSizeGroup { valence.sizeGroup }
     private var width: CGFloat { height * PebbleOutlineGeometry.aspectRatio(for: size) }
@@ -35,6 +39,9 @@ struct StoneView: View {
                 shadowLayer
             }
             bodyLayer
+            if edgeWidth > 0 {
+                edgeLayer
+            }
             carvingLayer
                 .scaleEffect(PebbleOutlineGeometry.pebbleScale(for: size) * carvingScale)
             if !isFlat {
@@ -94,6 +101,30 @@ struct StoneView: View {
             } else {
                 let lip = CGFloat(material.lipWidth)
                 ink.layerEffect(
+                    StoneShaders.carve(material: material, tones: tones, palette: palette, light: light),
+                    maxSampleOffset: CGSize(width: lip, height: lip)
+                )
+            }
+        }
+    }
+
+    // MARK: - Edge line
+
+    /// The silhouette's own contour, stroked and pulled in by `edgeInset`, then
+    /// carved like any other ink. Because it is the same wobbled path as the
+    /// body, it follows the edge exactly, which the engine outline never could.
+    @ViewBuilder
+    private var edgeLayer: some View {
+        if let art = WobbleRenderer.backdropArt(size: size, polarity: valence.polarity) {
+            let line = WobbledBackdropShape(art: art)
+                .stroke(tones.color(tones.ink, in: palette), style: StrokeStyle(lineWidth: edgeWidth, lineCap: .round, lineJoin: .round))
+                .scaleEffect(1 - edgeInset)
+                .compositingGroup()
+            if isFlat {
+                line
+            } else {
+                let lip = CGFloat(material.lipWidth)
+                line.layerEffect(
                     StoneShaders.carve(material: material, tones: tones, palette: palette, light: light),
                     maxSampleOffset: CGSize(width: lip, height: lip)
                 )

@@ -36,19 +36,29 @@ struct StoneShapeParserTests {
         }
     }
 
-    @Test("the outline is the first stroked path, in document order")
+    @Test("the outline is the stroked path with the largest extent, veins keep document order")
     func outlineIsFirst() throws {
         let svg = """
-        <svg viewBox="0 0 10 10"><path d="M0 0L1 1" stroke="black" stroke-width="6"/>\
-        <path d="M2 2L3 3" stroke="black" stroke-width="6"/>\
+        <svg viewBox="0 0 10 10"><path d="M2 2L3 3" stroke="black" stroke-width="6"/>\
+        <path d="M0 0L9 9" stroke="black" stroke-width="6"/>\
+        <path d="M4 4L5 5" stroke="black" stroke-width="6"/>\
         <path fill-rule="evenodd" d="M5 5L6 6Z" fill="black"/></svg>
         """
         let parsed = try #require(StoneShapeParser.parse(svg))
-        #expect(parsed.outline.d == "M0 0L1 1")
-        #expect(parsed.veins.map(\.d) == ["M2 2L3 3"])
+        #expect(parsed.outline.d == "M0 0L9 9")
+        #expect(parsed.veins.map(\.d) == ["M2 2L3 3", "M4 4L5 5"])
         #expect(parsed.fossil?.d == "M5 5L6 6Z")
         #expect(parsed.fossil?.usesEvenOddFill == true)
         #expect(parsed.viewBox == CGRect(x: 0, y: 0, width: 10, height: 10))
+    }
+
+    @Test("large-neutral's outline is its third stroked path and spans the canvas")
+    func largeNeutralOutline() throws {
+        let url = try #require(Bundle.main.url(forResource: "stone-lab-shape-large-neutral", withExtension: "svg"))
+        let parsed = try #require(StoneShapeParser.parse(try String(contentsOf: url, encoding: .utf8)))
+        #expect(parsed.outline.d.hasSuffix("Z"))
+        #expect(parsed.veins.count == 2)
+        #expect(parsed.veins.allSatisfy { !$0.d.hasSuffix("Z") })
     }
 
     @Test("returns nil without a viewBox or without a stroked path")

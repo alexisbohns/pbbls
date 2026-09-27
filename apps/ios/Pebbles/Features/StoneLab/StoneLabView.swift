@@ -148,7 +148,9 @@ struct StoneLabView: View {
             isFlat: flat,
             showOutline: settings.showOutline,
             carvingScale: settings.carvingScale,
-            shadowStrength: settings.shadowStrength
+            shadowStrength: settings.shadowStrength,
+            edgeWidth: settings.edgeWidth,
+            edgeInset: settings.edgeInset
         )
     }
 
@@ -275,6 +277,8 @@ struct StoneLabView: View {
             .font(.caption)
         knob("Carving scale", $settings.carvingScale, 0.8...1.5)
         knob("Shadow", $settings.shadowStrength, 0...0.8)
+        knob("Edge line", $settings.edgeWidth, 0...4)
+        knob("Edge inset", $settings.edgeInset, 0...0.1)
     }
 
     @ViewBuilder

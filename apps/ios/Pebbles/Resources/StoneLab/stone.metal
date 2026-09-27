@@ -175,18 +175,18 @@ static float3 normalFromHeight(float h, float hx, float hy, float step, float re
         col = mix(col, lipLight, twinkle * lipLightOpacity);
     }
 
-    // Rim: two taps at the full and half width, so the shoulder rounds off
-    // instead of stepping.
+    // Rim: a crisp bevel. A hairline catch one point in on the lit shoulder,
+    // a narrower band of `rimWidth` behind it, and the mirror in shadow.
     if (rimWidth > 0.01 && rimStrength > 0.001) {
         float2 dir = normalize(L.xy + float2(1e-5, 0.0));
-        float2 o1 = dir * rimWidth;
-        float2 o2 = dir * rimWidth * 0.5;
-        float towardGap = 1.0 - 0.5 * (float(layer.sample(position + o1).a) + float(layer.sample(position + o2).a));
-        float awayGap = 1.0 - 0.5 * (float(layer.sample(position - o1).a) + float(layer.sample(position - o2).a));
-        float lit = clamp(towardGap, 0.0, 1.0) * rimStrength * lipLightOpacity;
-        float shade = clamp(awayGap, 0.0, 1.0) * rimStrength;
+        float catchLit = 1.0 - float(layer.sample(position + dir * 1.0).a);
+        float bandLit = 1.0 - float(layer.sample(position + dir * rimWidth).a);
+        float catchShade = 1.0 - float(layer.sample(position - dir * 1.0).a);
+        float bandShade = 1.0 - float(layer.sample(position - dir * rimWidth).a);
+        float lit = clamp(catchLit + 0.45 * bandLit, 0.0, 1.0) * rimStrength * lipLightOpacity;
+        float shade = clamp(catchShade + 0.45 * bandShade, 0.0, 1.0) * rimStrength;
         col = mix(col, lipLight, lit);
-        col = mix(col, lipShadow, shade * 0.8);
+        col = mix(col, lipShadow, shade * 0.85);
     }
 
     col = clamp(col, 0.0, 1.0);
