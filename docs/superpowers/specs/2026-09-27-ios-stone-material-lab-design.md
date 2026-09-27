@@ -28,7 +28,7 @@ crossed with the third and lets the fourth follow.
 
 | Axis | Values | What it drives |
 |---|---|---|
-| Size | small, medium, large | Which of the nine shapes; how many veins (0, 2, 3) |
+| Size | small, medium, large | Which of the nine shapes; how many veins the seed carries (see below) |
 | Polarity | lowlight, neutral, highlight | Which of the nine shapes; the material; which palette tone is the body |
 | Emotion group | anger, fear, joy, peace, pride, sadness, shame | The palette every tone is taken from |
 | Glyph | any carved glyph | The carving inside; fixed to one sample glyph in the lab |
@@ -69,6 +69,10 @@ surface already composes, and gives them new roles:
   the outline, every following stroked path is a vein, the single filled path
   is the fossil. Outline and veins go through `WobbleRenderer.glyphInk`, the
   fossil through `backdropArt(fromAsset:)`, exactly as `ValenceArt` does.
+  The seeds do not follow the 0/2/3-by-size rule the brief assumed. Measured
+  on 2026-09-27 (lowlight / neutral / highlight): small 0/0/0 veins, medium
+  1/1/2, large 1/2/6; and `large-highlight` carries no fossil at all. The lab
+  draws what the seeds hold; changing the seeds is engine work, not lab work.
 - **The glyph** is the first glyph of `docs/seeds/domain-glyph-seed.json`
   (the `identity` strokes), copied into the same resource folder, inked with
   `glyphInk` at its stored width and placed with the engine's zone transform
@@ -202,8 +206,8 @@ page.
 Unit tests in `PebblesTests/StoneLab/`:
 
 - `StoneShapeParserTests`: every one of the nine seeds parses to one outline,
-  one fossil and 0/2/3 veins by size (`small: 0, medium: 2, large: 3`), and
-  the outline is the first stroked path.
+  the measured vein count per valence, a fossil everywhere but
+  `large-highlight`, and the outline is the first stroked path.
 - `StoneLabPalettesTests`: the seven sextets equal the literals in
   `20260912120000_seed_emotion_reference_data.sql`, so a palette edit in the
   migration fails here rather than drifting.
