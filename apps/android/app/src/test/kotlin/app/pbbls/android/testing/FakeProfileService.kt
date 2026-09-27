@@ -60,6 +60,19 @@ class FakeProfileService(
     /** As [glyphStrokesFailure], for the collections card. */
     var collectionsFailure: Exception? = null
 
+    /**
+     * Thrown by the next [setPublicProfile] call only, then cleared. [failNext]
+     * would be consumed by whichever call comes first, and a save reaches the
+     * public write last — after the password has already landed (#976).
+     */
+    var setPublicProfileFailNext: Exception?
+        get() = armedPublicProfile.next
+        set(value) {
+            armedPublicProfile.next = value
+        }
+
+    private val armedPublicProfile = ArmedFailure()
+
     private val armed = ArmedFailure()
 
     /** Thrown by the next call, then cleared. */
@@ -106,6 +119,7 @@ class FakeProfileService(
 
     override suspend fun setPublicProfile(isPublic: Boolean) {
         setPublicProfileCalls += isPublic
+        armedPublicProfile.fire()
         armed.fire()
     }
 

@@ -132,6 +132,14 @@
     <string name="settings_sign_out_everywhere_message">Ça te déconnecte de tous tes téléphones et navigateurs, y compris celui-ci. Tu pourras revenir avec ton mot de passe ou Google.</string>
     <string name="settings_sign_out_everywhere_confirm">Tout déconnecter</string>
     <string name="settings_sign_out_everywhere_error">Impossible de joindre le serveur : tes autres appareils sont peut-être encore connectés. Réessaie.</string>
+    <string name="reauth_wrong_password">Ce mot de passe ne correspond pas. Réessaie.</string>
+    <string name="reauth_error">On n\'a pas pu confirmer que c\'est toi. Réessaie.</string>
+    <string name="reauth_title">Confirme que c\'est bien toi</string>
+    <string name="reauth_message_password">Saisis ton mot de passe pour continuer.</string>
+    <string name="reauth_message_google">Continue avec Google pour confirmer que c\'est bien toi.</string>
+    <string name="reauth_password_label">Mot de passe</string>
+    <string name="reauth_confirm">Confirmer</string>
+    <string name="reauth_continue_google">Continuer avec Google</string>
 
     <!-- ==== Gestion des âmes (M41 sous-projet D). -->
     <string name="souls_title">Âmes</string>

@@ -43,11 +43,25 @@ class FakeSupabaseService(
     var googleSignInCount = 0
         private set
 
+    /** Every password passed to [reauthenticate], oldest first. */
+    val reauthCalls = mutableListOf<String>()
+
+    var googleReauthCount = 0
+        private set
+
     var signOutCount = 0
         private set
 
     var signOutEverywhereCount = 0
         private set
+
+    /**
+     * What a successful re-auth leaves behind. Defaults to the same user with
+     * a freshly stamped token, which is what the real re-sign-in produces.
+     */
+    var sessionAfterReauth: () -> UserSession? = {
+        session?.let { freshSession(userId = it.user?.id ?: "user-1", email = it.user?.email, identities = it.user?.identities) }
+    }
 
     private val armed = ArmedFailure()
 
@@ -106,6 +120,18 @@ class FakeSupabaseService(
     override suspend fun signInWithGoogle() {
         googleSignInCount += 1
         armed.fire()
+    }
+
+    override suspend fun reauthenticate(password: String) {
+        reauthCalls += password
+        armed.fire()
+        session = sessionAfterReauth()
+    }
+
+    override suspend fun reauthenticateWithGoogle() {
+        googleReauthCount += 1
+        armed.fire()
+        session = sessionAfterReauth()
     }
 
     /**

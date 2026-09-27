@@ -12,6 +12,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.data.ProfileRow
 import app.pbbls.android.testing.AppUiTest
 import app.pbbls.android.testing.FakeProfileService
+import app.pbbls.android.testing.freshSession
 import dagger.hilt.android.testing.HiltAndroidTest
 import kotlinx.coroutines.CompletableDeferred
 import org.junit.Assert.assertEquals
@@ -46,7 +47,10 @@ class SettingsSaveTest : AppUiTest() {
             )
         skipOnboarding()
         launch()
-        signIn()
+        // Going public asks for a recent sign-in (#976), and these tests are
+        // about the save sequence, so the session carries a fresh one.
+        compose.runOnIdle { supabase.emitResolved(freshSession()) }
+        compose.waitForIdle()
         onText(R.string.tab_you).performClick()
         compose.onNodeWithContentDescription(string(R.string.settings_title)).performClick()
         onText(R.string.settings_title).assertIsDisplayed()

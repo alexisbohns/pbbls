@@ -9,13 +9,18 @@ import app.pbbls.android.R
 import app.pbbls.android.core.common.UiEffects
 import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.AppearancePreferences
+import app.pbbls.android.core.data.DataError
 import app.pbbls.android.core.data.ProfileRow
 import app.pbbls.android.core.data.ProfileServicing
+import app.pbbls.android.core.data.ReauthAccountMismatchException
+import app.pbbls.android.core.data.RecentAuth
 import app.pbbls.android.core.data.SupabaseServicing
+import app.pbbls.android.core.data.isReauthRequired
 import app.pbbls.android.core.data.toDataError
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphStroke
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,6 +33,9 @@ import javax.inject.Inject
 
 private const val TAG = "settings"
 
+/** GoTrue's `error_code` for a password that does not match. */
+private const val INVALID_CREDENTIALS = "invalid_credentials"
+
 /** What the screen opened with — the server's truth, for the dirty comparison. */
 data class SettingsInitial(
     val displayName: String = "",
@@ -37,6 +45,7 @@ data class SettingsInitial(
     val publicProfile: Boolean = false,
     val email: String? = null,
     val providers: List<String> = emptyList(),
+    val hasPasswordIdentity: Boolean = false,
 )
 
 /** What the user has typed. */
@@ -55,7 +64,25 @@ data class SettingsForm(
  * `showDeleteError`) — eight combinations of which four are real, and
  * "confirming while deleting" was reachable.
  */
-enum class DeletionState { IDLE, CONFIRMING, DELETING, FAILED }
+enum class DeletionState { IDLE, CONFIRMING, REAUTHENTICATING, DELETING, FAILED }
+
+/** How the user proves it is them again (#976). */
+enum class ReauthMethod { PASSWORD, GOOGLE }
+
+/** What runs once the re-auth succeeds. */
+enum class ReauthPurpose { DELETE, SAVE }
+
+/**
+ * The "Confirm it's you" dialog. [password] lives here and nowhere else — never
+ * in SavedStateHandle (see the class KDoc), and cleared after every attempt.
+ */
+data class ReauthUi(
+    val purpose: ReauthPurpose,
+    val method: ReauthMethod,
+    val password: String = "",
+    val isWorking: Boolean = false,
+    @StringRes val errorRes: Int? = null,
+)
 
 /** "Sign out of all devices": ask, run, or report that the server never heard. */
 enum class SignOutEverywhereState { IDLE, CONFIRMING, WORKING, FAILED }
@@ -69,6 +96,7 @@ data class SettingsUiState(
     val isPresentingGlyphPicker: Boolean = false,
     val deletion: DeletionState = DeletionState.IDLE,
     val signOutEverywhere: SignOutEverywhereState = SignOutEverywhereState.IDLE,
+    val reauth: ReauthUi? = null,
     /** True while the ViewModel fetches its own profile — see the class KDoc. */
     val isLoading: Boolean = true,
     /** Set when that fetch fails — the screen shows this instead of an empty form. */
@@ -93,6 +121,15 @@ data class SettingsUiState(
                     initialPublicProfile = initial.publicProfile,
                     isPublicProfile = form.isPublicProfile,
                 )
+
+    /**
+     * The save carries a gated change (#976): a new password, or turning the
+     * public profile on. Turning it off, or any other field, never asks.
+     */
+    val saveNeedsRecentAuth: Boolean
+        get() =
+            form.newPassword.isNotEmpty() ||
+                (!initial.publicProfile && form.isPublicProfile && normalizedHandle.isNotEmpty())
 
     val currentStrokes: List<GlyphStroke>?
         get() = form.pickedGlyph?.strokes ?: initial.glyphStrokes
@@ -234,6 +271,13 @@ class SettingsViewModel
                                 ?.identities
                                 ?.map { it.provider },
                         ),
+                    // From the RAW identities: the display list above drops `email`.
+                    hasPasswordIdentity =
+                        supabase.session
+                            ?.user
+                            ?.identities
+                            .orEmpty()
+                            .any { it.provider == "email" },
                 )
             _uiState.update {
                 it.copy(
@@ -308,9 +352,16 @@ class SettingsViewModel
 
         fun save() {
             val state = _uiState.value
-            if (!state.isDirty || state.isSaving) return
-            _uiState.update { it.copy(isSaving = true, didSaveFail = false, handleErrorRes = null) }
+            if (!state.isDirty || state.isSaving || state.reauth != null) return
+            if (state.saveNeedsRecentAuth && !isSignInFresh()) {
+                startReauth(ReauthPurpose.SAVE)
+                return
+            }
+            runSave(state)
+        }
 
+        private fun runSave(state: SettingsUiState) {
+            _uiState.update { it.copy(isSaving = true, didSaveFail = false, handleErrorRes = null) }
             viewModelScope.launch {
                 // Everything from the first write to the last, uninterruptibly:
                 // there is no point in this sequence where stopping leaves the
@@ -355,6 +406,14 @@ class SettingsViewModel
                         glyphId = glyphToSend?.id,
                         password = passwordToSend,
                     )
+                    // The password has landed: clear it now, not on overall
+                    // success. A later step can fail (the public write's
+                    // reauth_required re-runs the whole save from the form), and
+                    // re-sending an applied password is GoTrue's 422
+                    // same_password, which would fail the save for good.
+                    if (passwordToSend != null) {
+                        _uiState.update { it.copy(form = it.form.copy(newPassword = "")) }
+                    }
                     // Releasing the handle already cleared the flag server-side,
                     // so only write the toggle while a handle exists.
                     if (form.isPublicProfile != initial.publicProfile && savedHandle != null) {
@@ -363,9 +422,8 @@ class SettingsViewModel
                 }
             rest.fold(
                 onSuccess = {
-                    // The password is gone from memory the moment the save lands;
-                    // it was never in SavedStateHandle to begin with.
-                    _uiState.update { it.copy(form = it.form.copy(newPassword = "")) }
+                    // The password left memory as soon as it landed (above); it
+                    // was never in SavedStateHandle to begin with.
                     effectsOut.emit(
                         SettingsEffect.Saved(
                             displayName = nameToSend ?: initial.displayName,
@@ -377,7 +435,17 @@ class SettingsViewModel
                 },
                 onFailure = {
                     Log.e(TAG, "settings save failed", it)
-                    _uiState.update { state -> state.copy(isSaving = false, didSaveFail = true) }
+                    if (it.isReauthRequired()) {
+                        // The server's clock or the #977 switch disagrees with ours.
+                        // The handle (if any) is already stored and re-sending it
+                        // is a no-op, and a landed password was cleared from the
+                        // form, so re-running the whole save after the re-auth
+                        // is safe.
+                        _uiState.update { state -> state.copy(isSaving = false) }
+                        startReauth(ReauthPurpose.SAVE)
+                    } else {
+                        _uiState.update { state -> state.copy(isSaving = false, didSaveFail = true) }
+                    }
                 },
             )
         }
@@ -418,6 +486,16 @@ class SettingsViewModel
 
         fun dismissDeleteError() = _uiState.update { it.copy(deletion = DeletionState.IDLE) }
 
+        fun confirmDelete() {
+            val deletion = _uiState.value.deletion
+            if (deletion == DeletionState.DELETING || deletion == DeletionState.REAUTHENTICATING) return
+            if (!isSignInFresh()) {
+                startReauth(ReauthPurpose.DELETE)
+                return
+            }
+            runDelete()
+        }
+
         /**
          * Full erasure via the delete-account edge function (purge + storage +
          * auth user), then a local sign-out: the server session is already gone,
@@ -428,8 +506,7 @@ class SettingsViewModel
          * account is purged server-side, a client that skipped its sign-out is
          * left holding a session token for a user that no longer exists.
          */
-        fun confirmDelete() {
-            if (_uiState.value.deletion == DeletionState.DELETING) return
+        private fun runDelete() {
             _uiState.update { it.copy(deletion = DeletionState.DELETING) }
             viewModelScope.launch {
                 withContext(NonCancellable) {
@@ -438,9 +515,109 @@ class SettingsViewModel
                         supabase.signOut()
                     }.onFailure {
                         Log.e(TAG, "account deletion failed", it)
-                        _uiState.update { state -> state.copy(deletion = DeletionState.FAILED) }
+                        if (it.isReauthRequired()) {
+                            startReauth(ReauthPurpose.DELETE)
+                        } else {
+                            _uiState.update { state -> state.copy(deletion = DeletionState.FAILED) }
+                        }
                     }
                 }
+            }
+        }
+
+        // MARK: - Recent sign-in (#976)
+
+        private var reauthJob: Job? = null
+
+        private fun isSignInFresh(): Boolean = RecentAuth.isFresh(supabase.session?.accessToken)
+
+        private fun startReauth(purpose: ReauthPurpose) {
+            val method = if (_uiState.value.initial.hasPasswordIdentity) ReauthMethod.PASSWORD else ReauthMethod.GOOGLE
+            _uiState.update {
+                it.copy(
+                    reauth = ReauthUi(purpose = purpose, method = method),
+                    deletion = if (purpose == ReauthPurpose.DELETE) DeletionState.REAUTHENTICATING else it.deletion,
+                )
+            }
+        }
+
+        fun onReauthPasswordChange(value: String) = _uiState.update { it.copy(reauth = it.reauth?.copy(password = value, errorRes = null)) }
+
+        fun cancelReauth() {
+            reauthJob?.cancel()
+            reauthJob = null
+            _uiState.update {
+                it.copy(
+                    reauth = null,
+                    deletion = if (it.deletion == DeletionState.REAUTHENTICATING) DeletionState.IDLE else it.deletion,
+                )
+            }
+        }
+
+        /**
+         * Password: signs in again as the same user. Google: runs OAuth and
+         * suspends until the fresh session lands, so the dialog stays in its
+         * working state while the Custom Tab is up; Cancel abandons it.
+         */
+        fun submitReauth() {
+            val reauth = _uiState.value.reauth ?: return
+            if (reauth.isWorking) return
+            if (reauth.method == ReauthMethod.PASSWORD && reauth.password.isEmpty()) return
+            _uiState.update { it.copy(reauth = reauth.copy(isWorking = true, errorRes = null)) }
+            reauthJob =
+                viewModelScope.launch {
+                    runCatchingCancellable {
+                        when (reauth.method) {
+                            ReauthMethod.PASSWORD -> supabase.reauthenticate(reauth.password)
+                            ReauthMethod.GOOGLE -> supabase.reauthenticateWithGoogle()
+                        }
+                    }.fold(
+                        onSuccess = { onReauthenticated(reauth.purpose) },
+                        onFailure = { onReauthFailed(reauth, it) },
+                    )
+                }
+        }
+
+        private fun onReauthenticated(purpose: ReauthPurpose) {
+            // Cancel already closed the dialog: never run the action it was
+            // abandoning (deletion is irreversible), however late the sign-in lands.
+            if (_uiState.value.reauth == null) return
+            _uiState.update { it.copy(reauth = null) }
+            when (purpose) {
+                ReauthPurpose.DELETE -> runDelete()
+                // Re-reads the current form, so edits made while the dialog
+                // was up are included.
+                ReauthPurpose.SAVE -> runSave(_uiState.value)
+            }
+        }
+
+        private fun onReauthFailed(
+            reauth: ReauthUi,
+            error: Throwable,
+        ) {
+            Log.e(TAG, "re-auth failed", error)
+            if (error is ReauthAccountMismatchException) {
+                // That other account was signed out; the session is gone and the
+                // authed NavHost unmounts. Nothing further to run.
+                cancelReauth()
+                return
+            }
+            // GoTrue's wrong password is 400 `invalid_credentials`, which
+            // supabase-kt carries as `AuthRestException.error` and toDataError
+            // reads as Conflict. Matched exactly: every other 4xx (a throttle,
+            // say) is also a Conflict, and is not the password's fault.
+            val wrongPassword =
+                reauth.method == ReauthMethod.PASSWORD &&
+                    error.toDataError().let { it == DataError.Conflict(INVALID_CREDENTIALS) || it is DataError.Unauthorized }
+            _uiState.update {
+                it.copy(
+                    reauth =
+                        it.reauth?.copy(
+                            isWorking = false,
+                            password = "",
+                            errorRes = if (wrongPassword) R.string.reauth_wrong_password else R.string.reauth_error,
+                        ),
+                )
             }
         }
 
