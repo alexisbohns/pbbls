@@ -17,6 +17,14 @@ struct StoneLabSettings: Equatable, Codable {
     var paletteIndex: Int = 2 // joy: the warmest, easiest to judge
     var materials: [String: StoneMaterial] = [:]
     var tones: [String: StoneTones] = [:]
+    /// Draw the engine's outline as a carving. Off means the stone's own edge
+    /// is the only edge, lit by the rim.
+    var showOutline: Bool = false
+    /// Multiplier on the engine's carving scale inside the body (1 is the
+    /// engine's 12% inset).
+    var carvingScale: Double = 1.15
+    /// Contact shadow under the stone, 0..1.
+    var shadowStrength: Double = 0.25
 
     func material(for polarity: ValencePolarity) -> StoneMaterial {
         materials[polarity.rawValue] ?? .starting(for: polarity)
@@ -51,13 +59,15 @@ struct StoneLabSettings: Equatable, Codable {
     /// One line per knob, per polarity, in the order the page shows them.
     var summary: String {
         var lines = ["stone lab · palette \(StoneLabPalettes.all[min(max(paletteIndex, 0), StoneLabPalettes.all.count - 1)].slug)"]
+        lines.append("  outline \(showOutline) carvingScale \(f(carvingScale)) shadow \(f(shadowStrength))")
         for polarity in ValencePolarity.allCases {
             let m = material(for: polarity)
             let t = tones(for: polarity)
             lines.append("[\(polarity.rawValue)] \(m.kind.label.lowercased())")
             lines.append("  scale \(f(m.scale)) relief \(f(m.relief)) contrast \(f(m.contrast)) sheen \(f(m.sheen))")
             lines.append("  lipWidth \(f(m.lipWidth)) lipOpacity \(f(m.lipOpacity)) pits \(f(m.pits)) banding \(f(m.banding))"
-                         + " facetDensity \(f(m.facetDensity)) glitter \(f(m.glitter))")
+                         + " facetDensity \(f(m.facetDensity)) glitter \(f(m.glitter))"
+                         + " rimWidth \(f(m.rimWidth)) rimStrength \(f(m.rimStrength))")
             lines.append("  body \(pick(t.body)) ink \(pick(t.ink)) lipLight \(pick(t.lipLight)) lipShadow \(pick(t.lipShadow))")
         }
         return lines.joined(separator: "\n")

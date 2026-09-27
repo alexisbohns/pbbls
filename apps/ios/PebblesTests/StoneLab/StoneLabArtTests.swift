@@ -14,6 +14,7 @@ struct StoneLabArtTests {
     func builds(valence: Valence) throws {
         let art = try #require(StoneLabArt.art(for: valence))
         #expect(!art.ink.isEmpty)
+        #expect(!art.outline.isEmpty)
         if Self.valencesWithoutFossil.contains(valence) {
             #expect(art.fossil == nil)
         } else {
@@ -22,6 +23,7 @@ struct StoneLabArtTests {
         #expect(art.viewBox.width > 0)
         // The ink stays inside the canvas: nothing was placed off the stone.
         #expect(art.viewBox.insetBy(dx: -20, dy: -20).contains(art.ink.boundingBoxOfPath))
+        #expect(art.viewBox.insetBy(dx: -20, dy: -20).contains(art.outline.boundingBoxOfPath))
     }
 
     @Test("the glyph lands in the engine's slot")

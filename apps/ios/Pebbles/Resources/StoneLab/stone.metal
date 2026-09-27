@@ -97,12 +97,18 @@ static float3 normalFromHeight(float h, float hx, float hy, float step, float re
 /// so the grain has the same size on every stone at every on-screen size.
 /// `lipLightOpacity` is the lip-light tone's opacity; it scales every
 /// highlight drawn in that tone (specular and glitter).
-[[ stitchable ]] half4 stone(float2 position, half4 color,
+/// A layer effect so the stone's own edge can be lit: `rimWidth` points
+/// along the light direction, the silhouette's alpha falls off on the edge
+/// nearest the light (a lit shoulder) and the edge farthest from it (a
+/// shadowed one). `rimStrength` scales both; 0 or a zero width is off.
+[[ stitchable ]] half4 stone(float2 position, SwiftUI::Layer layer,
                              float unit, float seedValue, float3 light,
                              float3 body, float3 ink, float3 lipLight, float3 lipShadow,
                              float lipLightOpacity,
                              float kind, float scale, float relief, float contrast, float sheen,
-                             float facetDensity, float glitter, float pits, float banding) {
+                             float facetDensity, float glitter, float pits, float banding,
+                             float rimWidth, float rimStrength) {
+    half4 color = layer.sample(position);
     if (color.a <= 0.002h) { return color; }
     float2 p = position / max(unit, 0.0001);
     uint seed = uint(seedValue);
@@ -167,6 +173,20 @@ static float3 normalFromHeight(float h, float hx, float hy, float step, float re
         float fromPoint = gd1 / grid * unit;
         float twinkle = keep * (1.0 - smoothstep(0.4, 0.9, fromPoint)) * (0.4 + 0.6 * l.spec);
         col = mix(col, lipLight, twinkle * lipLightOpacity);
+    }
+
+    // Rim: two taps at the full and half width, so the shoulder rounds off
+    // instead of stepping.
+    if (rimWidth > 0.01 && rimStrength > 0.001) {
+        float2 dir = normalize(L.xy + float2(1e-5, 0.0));
+        float2 o1 = dir * rimWidth;
+        float2 o2 = dir * rimWidth * 0.5;
+        float towardGap = 1.0 - 0.5 * (float(layer.sample(position + o1).a) + float(layer.sample(position + o2).a));
+        float awayGap = 1.0 - 0.5 * (float(layer.sample(position - o1).a) + float(layer.sample(position - o2).a));
+        float lit = clamp(towardGap, 0.0, 1.0) * rimStrength * lipLightOpacity;
+        float shade = clamp(awayGap, 0.0, 1.0) * rimStrength;
+        col = mix(col, lipLight, lit);
+        col = mix(col, lipShadow, shade * 0.8);
     }
 
     col = clamp(col, 0.0, 1.0);

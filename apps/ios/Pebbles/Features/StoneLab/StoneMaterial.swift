@@ -34,6 +34,10 @@ struct StoneMaterial: Equatable, Codable {
     var pits: Double
     /// River: sediment anisotropy, 0..1.
     var banding: Double
+    /// Rim light width on the stone's own edge, in points. 0 is off.
+    var rimWidth: Double = 4
+    /// Rim light and shadow strength, 0..1.
+    var rimStrength: Double = 0.6
     /// Carving lip width in points.
     var lipWidth: Double
     /// Carving lip strength, 0..1.
@@ -41,10 +45,11 @@ struct StoneMaterial: Equatable, Codable {
 
     /// Material uniforms in the order `stone.metal` declares them after the
     /// light, the tones and the lip-light opacity: kind, scale, relief, contrast, sheen,
-    /// facetDensity, glitter, pits, banding.
+    /// facetDensity, glitter, pits, banding, rimWidth, rimStrength.
     var uniforms: [Float] {
         [Float(kind.rawValue), Float(scale), Float(relief), Float(contrast), Float(sheen),
-         Float(facetDensity), Float(glitter), Float(pits), Float(banding)]
+         Float(facetDensity), Float(glitter), Float(pits), Float(banding),
+         Float(rimWidth), Float(rimStrength)]
     }
 
     /// The maintainer's picks on the phone (2026-09-27, second round),

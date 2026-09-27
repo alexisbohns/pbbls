@@ -145,7 +145,10 @@ struct StoneLabView: View {
             tones: settings.tones(for: valence.polarity),
             light: light,
             height: height,
-            isFlat: flat
+            isFlat: flat,
+            showOutline: settings.showOutline,
+            carvingScale: settings.carvingScale,
+            shadowStrength: settings.shadowStrength
         )
     }
 
@@ -202,6 +205,7 @@ struct StoneLabView: View {
                         .pickerStyle(.segmented)
                         materialKnobs
                         toneKnobs
+                        stoneKnobs
                         lightKnobs
                     }
                     .padding(.horizontal, 16)
@@ -242,6 +246,8 @@ struct StoneLabView: View {
         knob("Sheen", m.sheen, 0...1)
         knob("Lip width", m.lipWidth, 0...4)
         knob("Lip opacity", m.lipOpacity, 0...1)
+        knob("Rim width", m.rimWidth, 0...10)
+        knob("Rim strength", m.rimStrength, 0...1)
         switch m.wrappedValue.kind {
         case .lava:
             knob("Pits", m.pits, 0...1)
@@ -260,6 +266,15 @@ struct StoneLabView: View {
         tonePick("Ink", t.ink)
         tonePick("Lip light", t.lipLight)
         tonePick("Lip shadow", t.lipShadow)
+    }
+
+    /// Options that belong to the stone as a whole, not to one material.
+    @ViewBuilder
+    private var stoneKnobs: some View {
+        Toggle(isOn: $settings.showOutline) { Text(verbatim: "Engine outline") }
+            .font(.caption)
+        knob("Carving scale", $settings.carvingScale, 0.8...1.5)
+        knob("Shadow", $settings.shadowStrength, 0...0.8)
     }
 
     @ViewBuilder

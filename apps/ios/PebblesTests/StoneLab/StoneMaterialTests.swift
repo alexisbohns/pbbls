@@ -19,7 +19,8 @@ struct StoneMaterialTests {
         var material = StoneMaterial.starting(for: .neutral)
         material.scale = 1; material.relief = 2; material.contrast = 3; material.sheen = 4
         material.facetDensity = 5; material.glitter = 6; material.pits = 7; material.banding = 8
-        #expect(material.uniforms == [1, 1, 2, 3, 4, 5, 6, 7, 8])
+        material.rimWidth = 9; material.rimStrength = 10
+        #expect(material.uniforms == [1, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     }
 
     @Test("starting tones follow the spec table")

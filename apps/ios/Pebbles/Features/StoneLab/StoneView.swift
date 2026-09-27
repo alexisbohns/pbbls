@@ -17,6 +17,12 @@ struct StoneView: View {
     /// On-screen height of the whole stone, backdrop included.
     let height: CGFloat
     var isFlat: Bool = false
+    /// Draw the engine outline as a carving (the pre-lab look).
+    var showOutline: Bool = true
+    /// Multiplier on the engine's carving inset.
+    var carvingScale: Double = 1
+    /// Contact shadow under the stone, 0..1; 0 draws none.
+    var shadowStrength: Double = 0
 
     private var size: ValenceSizeGroup { valence.sizeGroup }
     private var width: CGFloat { height * PebbleOutlineGeometry.aspectRatio(for: size) }
@@ -25,9 +31,12 @@ struct StoneView: View {
 
     var body: some View {
         ZStack {
+            if !isFlat && shadowStrength > 0 {
+                shadowLayer
+            }
             bodyLayer
             carvingLayer
-                .scaleEffect(PebbleOutlineGeometry.pebbleScale(for: size))
+                .scaleEffect(PebbleOutlineGeometry.pebbleScale(for: size) * carvingScale)
             if !isFlat {
                 sheenLayer
             }
@@ -48,10 +57,14 @@ struct StoneView: View {
                 // Points per viewBox unit for this on-screen size, so the
                 // shader's grain is the same size on every stone.
                 let unit = width / art.viewBox.width
-                fill.colorEffect(StoneShaders.stone(
-                    material: material, tones: tones, palette: palette,
-                    light: light, unit: unit, seed: seed
-                ))
+                let rim = CGFloat(material.rimWidth)
+                fill.layerEffect(
+                    StoneShaders.stone(
+                        material: material, tones: tones, palette: palette,
+                        light: light, unit: unit, seed: seed
+                    ),
+                    maxSampleOffset: CGSize(width: rim, height: rim)
+                )
             }
         } else {
             Color.clear
@@ -70,6 +83,10 @@ struct StoneView: View {
                 }
                 WobbledPathShape(path: art.ink, layerTransform: .identity, viewBox: art.viewBox)
                     .fill(tones.color(tones.ink, in: palette))
+                if showOutline {
+                    WobbledPathShape(path: art.outline, layerTransform: .identity, viewBox: art.viewBox)
+                        .fill(tones.color(tones.ink, in: palette))
+                }
             }
             .compositingGroup()
             if isFlat {
@@ -81,6 +98,21 @@ struct StoneView: View {
                     maxSampleOffset: CGSize(width: lip, height: lip)
                 )
             }
+        }
+    }
+
+    // MARK: - Contact shadow
+
+    /// A blurred copy of the silhouette pushed away from the light, so the
+    /// stone sits on the page. Static: rendered once per parameter change.
+    @ViewBuilder
+    private var shadowLayer: some View {
+        if let art = WobbleRenderer.backdropArt(size: size, polarity: valence.polarity) {
+            let push = light.lipOffset(width: -Double(height) * 0.03)
+            WobbledBackdropShape(art: art)
+                .fill(Color.black.opacity(shadowStrength), style: FillStyle(eoFill: art.usesEvenOddFill))
+                .blur(radius: height * 0.03)
+                .offset(x: push.width, y: push.height)
         }
     }
 

@@ -15,14 +15,17 @@ enum StoneLabArt {
     final class Art: @unchecked Sendable {
         /// The engine canvas for this size.
         let viewBox: CGRect
-        /// Outline + veins + glyph, wobbled ink, nonzero fill.
+        /// Veins + glyph, wobbled ink, nonzero fill.
         let ink: CGPath
+        /// The engine outline alone, wobbled ink, so the page can leave it out.
+        let outline: CGPath
         /// The fossil's displaced region, with its fill rule.
         let fossil: WobbleBackdropArt?
 
-        init(viewBox: CGRect, ink: CGPath, fossil: WobbleBackdropArt?) {
+        init(viewBox: CGRect, ink: CGPath, outline: CGPath, fossil: WobbleBackdropArt?) {
             self.viewBox = viewBox
             self.ink = ink
+            self.outline = outline
             self.fossil = fossil
         }
     }
@@ -83,10 +86,17 @@ enum StoneLabArt {
             return nil
         }
 
+        let outline = CGMutablePath()
+        if let path = WobbleRenderer.glyphInk(d: parsed.outline.d, width: parsed.outline.width) {
+            outline.addPath(path)
+        } else {
+            logger.error("stone lab: outline of \(name, privacy: .public) did not wobble")
+        }
+
         let ink = CGMutablePath()
-        for (index, stroke) in ([parsed.outline] + parsed.veins).enumerated() {
+        for (index, stroke) in parsed.veins.enumerated() {
             guard let path = WobbleRenderer.glyphInk(d: stroke.d, width: stroke.width) else {
-                logger.error("stone lab: stroke \(index, privacy: .public) of \(name, privacy: .public) did not wobble")
+                logger.error("stone lab: vein \(index, privacy: .public) of \(name, privacy: .public) did not wobble")
                 continue
             }
             ink.addPath(path)
@@ -108,11 +118,11 @@ enum StoneLabArt {
             }
         }
 
-        guard !ink.isEmpty else {
+        guard !ink.isEmpty || !outline.isEmpty else {
             logger.error("stone lab: no ink for \(name, privacy: .public)")
             return nil
         }
-        return Art(viewBox: parsed.viewBox, ink: ink.copy() ?? ink, fossil: fossil)
+        return Art(viewBox: parsed.viewBox, ink: ink.copy() ?? ink, outline: outline.copy() ?? outline, fossil: fossil)
     }
 
     /// The sample glyph's strokes, wobbled and placed in the engine's slot
