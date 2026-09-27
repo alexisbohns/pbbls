@@ -354,6 +354,20 @@ fun SettingsScreen(
                 rows =
                     listOf(
                         {
+                            val isWorking = uiState.signOutEverywhere == SignOutEverywhereState.WORKING
+                            ListItem(
+                                headlineContent = { Text(stringResource(R.string.settings_sign_out_everywhere)) },
+                                trailingContent =
+                                    if (isWorking) {
+                                        { LoadingIndicator(modifier = Modifier.size(24.dp)) }
+                                    } else {
+                                        null
+                                    },
+                                modifier = Modifier.clickable(enabled = !isWorking, onClick = viewModel::requestSignOutEverywhere),
+                                colors = settingsRowColors(),
+                            )
+                        },
+                        {
                             val isDeleting = uiState.deletion == DeletionState.DELETING
                             ListItem(
                                 headlineContent = { Text(stringResource(R.string.settings_delete_account), color = colors.error) },
@@ -392,6 +406,22 @@ fun SettingsScreen(
         DeleteErrorDialog(
             message = stringResource(R.string.settings_delete_account_error),
             onDismiss = viewModel::dismissDeleteError,
+        )
+    }
+
+    if (uiState.signOutEverywhere == SignOutEverywhereState.CONFIRMING) {
+        ConfirmDeleteDialog(
+            title = stringResource(R.string.settings_sign_out_everywhere_title),
+            message = stringResource(R.string.settings_sign_out_everywhere_message),
+            confirmText = stringResource(R.string.settings_sign_out_everywhere_confirm),
+            onConfirm = viewModel::confirmSignOutEverywhere,
+            onDismiss = viewModel::cancelSignOutEverywhere,
+        )
+    }
+    if (uiState.signOutEverywhere == SignOutEverywhereState.FAILED) {
+        DeleteErrorDialog(
+            message = stringResource(R.string.settings_sign_out_everywhere_error),
+            onDismiss = viewModel::dismissSignOutEverywhereError,
         )
     }
 

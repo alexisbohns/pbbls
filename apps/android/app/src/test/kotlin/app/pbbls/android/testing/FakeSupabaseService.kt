@@ -46,6 +46,9 @@ class FakeSupabaseService(
     var signOutCount = 0
         private set
 
+    var signOutEverywhereCount = 0
+        private set
+
     private val armed = ArmedFailure()
 
     /** Thrown by the next call, then cleared. */
@@ -106,11 +109,15 @@ class FakeSupabaseService(
     }
 
     /**
-     * Never throws, matching the real service: `signOut` catches and logs, because
-     * the local token is wiped regardless. A signed-out user is the only
-     * observable outcome, so there is no error path for a test to drive.
+     * A local sign-out never throws, matching the real service: it catches and
+     * logs, because the local token is wiped regardless. A global one fires
+     * [failNext], because the real one rethrows (the server must confirm).
      */
-    override suspend fun signOut() {
+    override suspend fun signOut(everywhere: Boolean) {
+        if (everywhere) {
+            armed.fire()
+            signOutEverywhereCount += 1
+        }
         signOutCount += 1
         session = null
     }
