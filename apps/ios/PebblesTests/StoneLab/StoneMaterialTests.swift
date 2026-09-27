@@ -27,7 +27,7 @@ struct StoneMaterialTests {
         #expect(StoneTones.starting(for: .lowlight).body.slot == .shaded)
         #expect(StoneTones.starting(for: .neutral).body.slot == .dark)
         #expect(StoneTones.starting(for: .highlight).body.slot == .primary)
-        #expect(StoneTones.starting(for: .highlight).ink.slot == .dark)
+        #expect(StoneTones.starting(for: .highlight).ink.slot == .secondary)
         #expect(StoneTones.starting(for: .lowlight).lipShadow.slot == .dark)
         #expect(StoneTones.starting(for: .neutral).lipShadow.opacity < 1)
     }

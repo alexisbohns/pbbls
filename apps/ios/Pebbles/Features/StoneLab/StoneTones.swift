@@ -25,7 +25,7 @@ struct StoneTones: Equatable, Codable {
             return StoneTones(body: Pick(slot: .dark, opacity: 1), ink: Pick(slot: .shaded, opacity: 1),
                               lipLight: Pick(slot: .secondary, opacity: 1), lipShadow: Pick(slot: .secondary, opacity: 0.45))
         case .highlight:
-            return StoneTones(body: Pick(slot: .primary, opacity: 1), ink: Pick(slot: .dark, opacity: 1),
+            return StoneTones(body: Pick(slot: .primary, opacity: 1), ink: Pick(slot: .secondary, opacity: 1),
                               lipLight: Pick(slot: .light, opacity: 0.84), lipShadow: Pick(slot: .shaded, opacity: 0.75))
         }
     }
