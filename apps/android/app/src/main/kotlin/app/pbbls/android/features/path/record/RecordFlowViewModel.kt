@@ -146,7 +146,7 @@ class RecordFlowViewModel
          */
         private val model = RecordFlowModel(haptic = { effectsOut.emit(RecordFlowEffect.Haptic(it)) })
 
-        private val drafts = ComposerDraftCoordinator(draftsService, snapshots)
+        private val drafts = ComposerDraftCoordinator(draftsService, snapshots) { userId }
 
         /**
          * Form-scoped (M42 D6): an in-flight upload must not outlive the form.

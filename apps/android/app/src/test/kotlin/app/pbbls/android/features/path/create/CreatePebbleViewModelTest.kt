@@ -318,6 +318,35 @@ class CreatePebbleViewModelTest {
         }
 
     @Test
+    fun `a snapshot left by another user is never offered, and is dropped`() =
+        runTest {
+            val h = signedIn(Harness(backgroundScope))
+            h.snapshots.snapshot = PebbleDraftPayload(name = "someone else's evening")
+            h.snapshots.ownerId = "previous-user"
+
+            h.viewModel.start(null)
+            advanceUntilIdle()
+
+            assertFalse(h.viewModel.uiState.value.isRestorePromptPresented)
+            assertEquals("", h.viewModel.uiState.value.draft.name)
+            assertNull(h.snapshots.snapshot)
+        }
+
+    @Test
+    fun `the autosave stamps the snapshot with the signed-in user`() =
+        runTest {
+            val h = signedIn(Harness(backgroundScope))
+
+            h.viewModel.start(null)
+            advanceUntilIdle()
+            h.viewModel.onDraftChange(PebbleDraft(name = "typing"))
+            advanceUntilIdle()
+
+            assertEquals("typing", h.snapshots.snapshot?.name)
+            assertEquals(USER_ID, h.snapshots.ownerId)
+        }
+
+    @Test
     fun `resuming a server draft never prompts on top of it`() =
         runTest {
             val h = signedIn(Harness(backgroundScope))

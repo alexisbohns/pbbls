@@ -466,6 +466,20 @@ class RecordFlowViewModelTest {
         }
 
     @Test
+    fun `a snapshot left by another user is never offered, and is dropped`() =
+        runTest {
+            val harness = signedIn(Harness(backgroundScope))
+            harness.snapshots.snapshot = PebbleDraftPayload(name = "someone else's evening")
+            harness.snapshots.ownerId = "previous-user"
+
+            harness.viewModel.startFlow(null)
+            advanceUntilIdle()
+
+            assertFalse(harness.viewModel.uiState.value.isRestorePromptPresented)
+            assertNull(harness.snapshots.snapshot)
+        }
+
+    @Test
     fun `declining the restore prompt clears the snapshot`() =
         runTest {
             val harness = signedIn(Harness(backgroundScope))

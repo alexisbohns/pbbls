@@ -3,6 +3,7 @@ package app.pbbls.android.core.data
 import android.content.Context
 import android.util.Log
 import app.pbbls.android.core.model.PebbleDraftPayload
+import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -13,13 +14,39 @@ import kotlinx.serialization.json.Json
  * `ComposerSnapshotStore` is SharedPreferences, so it needs a `Context` and a
  * JVM test cannot build one. `RecordFlowViewModel` drives the whole draft
  * lifecycle through this interface instead, and the fake is a map.
+ *
+ * **Owned by a user id.** The snapshot is intimate, unpublished content on a
+ * device that can change hands, so it is stamped with the user who wrote it and
+ * [load] only ever hands it back to that same user. A snapshot owned by anyone
+ * else is discarded on sight rather than left for its owner: they are not the
+ * one signed in, and whoever is must never see it. [clear] runs on every
+ * sign-out (`RootViewModel`) as well; the owner check is what still holds when
+ * a session swaps without passing through signed-out.
  */
 interface ComposerSnapshotStoring {
-    fun load(): PebbleDraftPayload?
+    fun load(ownerId: String): PebbleDraftPayload?
 
-    fun save(payload: PebbleDraftPayload)
+    fun save(
+        payload: PebbleDraftPayload,
+        ownerId: String,
+    )
 
     fun clear()
+}
+
+/**
+ * What is actually persisted: the payload plus who wrote it. A bare payload
+ * written by a build that predates the owner stamp fails to decode as this, and
+ * [ComposerSnapshotStore.load] discards it — an unowned snapshot cannot prove
+ * it belongs to whoever is signed in now.
+ */
+@Serializable
+data class OwnedComposerSnapshot(
+    val ownerId: String,
+    val payload: PebbleDraftPayload,
+) {
+    /** The payload, only for its owner and only when there is something to restore. */
+    fun restorableFor(requesterId: String): PebbleDraftPayload? = payload.takeIf { ownerId == requesterId && !it.isEmpty }
 }
 
 /**
@@ -28,7 +55,8 @@ interface ComposerSnapshotStoring {
  *
  * Deliberately **not** offline support: see the 2026-07-29 "Offline is a
  * non-goal on every surface" decision-log entry. No merge logic, no cross-device
- * sync, one composer at a time, cleared on publish or server-draft save. Media
+ * sync, one composer at a time, cleared on publish, server-draft save or
+ * sign-out, and scoped to the user who wrote it (GDP-07). Media
  * is excluded (design D3): an intentional "save as draft" earns durable media, an
  * accidental crash recovery does not.
  *
@@ -53,29 +81,40 @@ class ComposerSnapshotStore(
     private val json = Json { ignoreUnknownKeys = true }
 
     /**
-     * The stored snapshot, or null when there is nothing worth restoring. A
-     * payload written by an older build must never crash the composer, so a
-     * decode failure discards the entry rather than propagating.
+     * [ownerId]'s stored snapshot, or null when there is nothing worth
+     * restoring. A payload written by an older build must never crash the
+     * composer, so a decode failure discards the entry rather than propagating;
+     * so does a snapshot owned by someone other than [ownerId].
      */
-    override fun load(): PebbleDraftPayload? {
+    override fun load(ownerId: String): PebbleDraftPayload? {
         val raw = prefs().getString(KEY_SNAPSHOT, null) ?: return null
-        return try {
-            json.decodeFromString<PebbleDraftPayload>(raw).takeUnless { it.isEmpty }
-        } catch (e: Exception) {
-            Log.w(TAG, "discarding unreadable snapshot", e)
+        val stored =
+            try {
+                json.decodeFromString<OwnedComposerSnapshot>(raw)
+            } catch (e: Exception) {
+                Log.w(TAG, "discarding unreadable snapshot", e)
+                clear()
+                return null
+            }
+        if (stored.ownerId != ownerId) {
+            Log.i(TAG, "discarding a snapshot owned by another user")
             clear()
-            null
+            return null
         }
+        return stored.restorableFor(ownerId)
     }
 
     /** Overwrite the snapshot. Callers debounce; see [ComposerAutosave]. */
-    override fun save(payload: PebbleDraftPayload) {
+    override fun save(
+        payload: PebbleDraftPayload,
+        ownerId: String,
+    ) {
         if (payload.isEmpty) {
             clear()
             return
         }
         try {
-            val encoded = json.encodeToString(payload)
+            val encoded = json.encodeToString(OwnedComposerSnapshot(ownerId, payload))
             prefs().edit().putString(KEY_SNAPSHOT, encoded).apply()
         } catch (e: Exception) {
             Log.e(TAG, "snapshot write failed", e)
@@ -136,10 +175,17 @@ class ComposerAutosave(
     }
 }
 
-/** Adapts a store to [ComposerAutosave.SnapshotSink]. */
-fun ComposerSnapshotStoring.asSink(): ComposerAutosave.SnapshotSink =
+/**
+ * Adapts a store to [ComposerAutosave.SnapshotSink], stamping each write with
+ * [ownerId] read at write time. With nobody signed in there is no one to own
+ * the snapshot, so the write is dropped rather than stored unowned.
+ */
+fun ComposerSnapshotStoring.asSink(ownerId: () -> String?): ComposerAutosave.SnapshotSink =
     object : ComposerAutosave.SnapshotSink {
-        override fun write(payload: PebbleDraftPayload) = save(payload)
+        override fun write(payload: PebbleDraftPayload) {
+            val owner = ownerId() ?: return
+            save(payload, owner)
+        }
 
         override fun erase() = clear()
     }

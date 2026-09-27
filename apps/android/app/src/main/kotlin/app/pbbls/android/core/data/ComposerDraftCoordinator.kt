@@ -29,6 +29,8 @@ private const val TAG = "composer-drafts"
 class ComposerDraftCoordinator(
     private val drafts: PebbleDraftsServicing,
     private val snapshots: ComposerSnapshotStoring,
+    /** The signed-in user, read at use — the local snapshot is scoped to them (GDP-07). */
+    private val ownerId: () -> String?,
 ) {
     /** What [hydrate] decided the composer should open with. */
     sealed interface Decision {
@@ -64,7 +66,7 @@ class ComposerDraftCoordinator(
         data object Unknown : GlyphVerdict
     }
 
-    private val autosave = ComposerAutosave(snapshots.asSink())
+    private val autosave = ComposerAutosave(snapshots.asSink(ownerId))
 
     /** The row this composer is bound to — the resumed one, or the first save's. */
     var serverDraftId: String? = null
@@ -103,7 +105,7 @@ class ComposerDraftCoordinator(
         if (resumeDraftId != null) {
             return loadResumeDraft(resumeDraftId)
         }
-        restorable = snapshots.load()
+        restorable = ownerId()?.let(snapshots::load)
         return if (restorable != null) {
             isRestorePromptPresented = true
             Decision.OfferRestore
