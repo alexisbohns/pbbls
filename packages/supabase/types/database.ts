@@ -2391,6 +2391,7 @@ export type Database = {
         Args: { p_price?: number; p_submission_id: string }
         Returns: Json
       }
+      assert_recent_auth: { Args: never; Returns: undefined }
       buy_glyph: { Args: { p_glyph_id: string }; Returns: Json }
       can_use_glyph: {
         Args: { p_glyph_id: string; p_user: string }
@@ -2618,6 +2619,11 @@ export type Database = {
         Returns: Json
       }
       purge_account: { Args: { p_user_id: string }; Returns: Json }
+      recent_auth_enforced: { Args: never; Returns: boolean }
+      recent_auth_ok: {
+        Args: { p_amr: Json; p_max_age: string }
+        Returns: boolean
+      }
       record_consent: {
         Args: { p_document_version: string; p_kind: string; p_source: string }
         Returns: undefined

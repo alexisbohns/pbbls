@@ -18,6 +18,14 @@
  *     deleteUser is retried.
  *   - after 3   → the gateway still accepts the signed JWT but
  *     auth.getUser() finds no user → 401, which IS the converged state.
+ *
+ * Recent sign-in (#976): before step 1 the caller's own token must pass
+ * `assert_recent_auth()` (a sign-in within the last 10 minutes, read from the
+ * JWT `amr` claim). It runs on the auth-FORWARDED client so `auth.jwt()` is the
+ * caller's claims, never the service role's. A refusal is 428
+ * `{error:"reauth_required"}`: Precondition Required, because clients read
+ * 401/403 as a dead session and must instead prompt a re-auth and retry. Ships
+ * as a no-op until `recent_auth_enforced()` flips (#977).
  * If a user's JWT expires mid-failure, the service role can finish the job
  * manually (purge_account + auth.admin.deleteUser).
  */
@@ -53,6 +61,16 @@ serve(async (req: Request) => {
   if (userError || !userId) {
     console.error("delete-account: auth.getUser failed:", userError);
     return json({ error: "not_authenticated" }, 401);
+  }
+
+  // Recent sign-in gate — before anything irreversible (see header).
+  const { error: recentAuthError } = await authClient.rpc("assert_recent_auth");
+  if (recentAuthError) {
+    if (recentAuthError.code === "P0001" && recentAuthError.message === "reauth_required") {
+      return json({ error: "reauth_required" }, 428);
+    }
+    console.error("delete-account: assert_recent_auth failed:", recentAuthError);
+    return json({ error: `recent auth check failed: ${recentAuthError.message}` }, 500);
   }
 
   const admin = createAdminClient();

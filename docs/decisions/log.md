@@ -824,3 +824,28 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** `PebbleAnimatedRenderView`, `PebbleStaticRenderView`, `PebbleOutlineBackdropView` and the old `ValenceStoneStyle` washes are dead on these surfaces and await a cleanup PR. `render_svg` is still the source of the glyph (parsed and wobbled on device), so the engine is untouched; the maintainer's stated direction, once this holds, is for the client to draw the pebble and the server to keep only the glyph, which is a schema and engine decision for its own entry. Android and web now diverge visually on the Path, the read page and the picker until mirrored; the uniform table, the tone slots and the layer order in `Features/Path/Stone/` are the contract for that port.
 - **Supersedes / Superseded-by:** Supersedes the "in its own change" sequencing of the **2026-09-27 — The polished pebble render is a Metal material** entry; the material model and battery contract there stand.
 - **Refs:** #974, PR #975, `apps/ios/Pebbles/Features/Path/Stone/`, `apps/ios/Pebbles/Features/Path/Stone/Motion/`.
+
+## 2026-09-27 — High-harm account actions need a recent sign-in, read from the JWT `amr` claim and staged behind a server switch (#976, #977)
+
+- **Status:** taken
+- **Scope:** supabase, android (web and iOS follow in #977)
+- **Context:** Account deletion, password change and turning the public profile on were gated only by a live session. An unlocked phone or a copied token could purge or expose an account with no further proof.
+- **Decision:** These three actions need a sign-in from the last **10 minutes**. The proof is the access token's `amr` claim: GoTrue stamps each real authentication there, and a refresh keeps the original stamp.
+  - `recent_auth_ok` evaluates the claim and `assert_recent_auth()` raises `reauth_required` (`20260927120000`).
+  - The `delete-account` edge function calls it before purging and answers **428**. Android reads 401/403 as a dead session, so the condition needs a status nothing else uses.
+  - A `profiles` trigger calls it when `public_profile` goes false→true.
+  - Password change stays with GoTrue's `secure_password_change` (#977).
+  - Android decodes the same claim to decide when to show "Confirm it's you" (password, or Google for Google-only accounts), then runs the action. It also gains "Sign out of all devices" (global scope).
+  - Enforcement ships **off**: `recent_auth_enforced()` returns false until web and iOS prompt too, and #977 re-emits it as true.
+- **Why:**
+  - Reading `amr` needs no table and no token plumbing, and every surface can read it the same way.
+  - A server-issued step-up token would have meant a new table and a new call shape for every gated write, including a direct table update.
+  - GoTrue's `reauthenticate()` nonce is only consumed by its own `updateUser`, so deletion and the public flip could not have verified it.
+  - Enforcing now would have broken account deletion on shipped iOS builds.
+- **Consequences:**
+  - **A single pebble going public is deliberately not gated.** It is revocable, it affects one pebble, and it sits in the everyday record flow. Do not add a re-auth prompt there without revisiting this entry.
+  - Turning the profile off, releasing a handle and signing out everywhere are never gated.
+  - The 10-minute window is duplicated in the migration and in Android's `RecentAuth.WINDOW`; change both together.
+  - Until #977 lands, the server check is wired and tested for over-blocking only. The stale-token refusal harness case comes with the switch.
+- **Supersedes / Superseded-by:** None.
+- **Refs:** #976, #977, `docs/superpowers/specs/2026-09-27-recent-auth-step-up-design.md`, `packages/supabase/supabase/migrations/20260927120000_recent_auth.sql`, `packages/supabase/supabase/functions/delete-account/index.ts`, `apps/android/app/src/main/kotlin/app/pbbls/android/core/data/RecentAuth.kt`.
