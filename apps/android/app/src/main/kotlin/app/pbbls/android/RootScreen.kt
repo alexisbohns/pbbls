@@ -17,6 +17,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.entryProvider
@@ -27,6 +28,9 @@ import app.pbbls.android.core.data.LocalSnapURLCache
 import app.pbbls.android.core.data.OnboardingPreferences
 import app.pbbls.android.core.ui.AchievementMomentOverlay
 import app.pbbls.android.core.ui.KarmaOverlayHost
+import app.pbbls.android.features.consent.ConsentGateScreen
+import app.pbbls.android.features.consent.ConsentGateUiState
+import app.pbbls.android.features.consent.ConsentGateViewModel
 import app.pbbls.android.features.onboarding.OnboardingGate
 import app.pbbls.android.navigation.BarKey
 import app.pbbls.android.navigation.LocalSheetOverlaySlot
@@ -69,6 +73,11 @@ import kotlinx.coroutines.withContext
  * reads [root] at the entry's own composition, so the entry recomposes when
  * the destination changes. Anything else an entry reads from here that can
  * change after first composition needs the same treatment.
+ *
+ * **The consent gate is an overlay, not an entry (#967, design D9).** It
+ * draws above `NavDisplay` whenever the signed-in user has not passed
+ * [ConsentGateViewModel], so an App Link or a restored stack cannot route
+ * around it; the parked invite also waits for it.
  */
 @Composable
 fun RootScreen() {
@@ -79,6 +88,12 @@ fun RootScreen() {
 
     val viewModel: RootViewModel = hiltViewModel()
     val root by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // The consent gate (#967, design §5.4). Its own ViewModel, activity-scoped
+    // like RootViewModel; RootScreen owns it because the gate is an overlay
+    // above NavDisplay, not a back-stack entry (design D9).
+    val consentViewModel: ConsentGateViewModel = hiltViewModel()
+    val consent by consentViewModel.uiState.collectAsStateWithLifecycle()
 
     var hasSeenOnboarding by rememberSaveable { mutableStateOf(OnboardingPreferences.hasSeenOnboarding(context)) }
 
@@ -96,6 +111,14 @@ fun RootScreen() {
     LaunchedEffect(Unit) { palettes.load() }
 
     val userId = root.userId
+    LaunchedEffect(userId) { consentViewModel.start(userId) }
+
+    // Gated unless THIS user passed. Keyed on the id, so the frame between a
+    // user switch and start() re-checking can never show the app to the new
+    // user on the old user's pass. Fails closed while Idle/Checking.
+    val isConsentGated =
+        root.destination == RootDestination.SignedIn &&
+            consent != ConsentGateUiState.Satisfied(userId ?: "")
     val welcomeContentRevealed = { root.destination == RootDestination.SignedOut }
 
     // Sign-out flushes the signed-URL cache (the iOS RootView
@@ -161,11 +184,14 @@ fun RootScreen() {
     // A parked invite opens only once signed in AND past onboarding. This
     // ordering is the point of the whole task: the old parked-token field
     // composed the accept surface above onboarding, so a first-run user met a
-    // stranger's invite before the app had introduced itself.
-    LaunchedEffect(root.pendingInvite, root.destination, shouldPresentOnboarding) {
+    // stranger's invite before the app had introduced itself. And past the
+    // consent gate: an invite is a stranger's content, and nobody reaches
+    // content before consent is on record.
+    LaunchedEffect(root.pendingInvite, root.destination, shouldPresentOnboarding, isConsentGated) {
         val token = root.pendingInvite ?: return@LaunchedEffect
         if (root.destination != RootDestination.SignedIn) return@LaunchedEffect
         if (shouldPresentOnboarding) return@LaunchedEffect
+        if (isConsentGated) return@LaunchedEffect
         navigator.navigate(PebblesKey.AcceptInvite(token))
         viewModel.onInviteConsumed()
     }
@@ -181,22 +207,37 @@ fun RootScreen() {
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.surface),
         ) {
-            PebblesNavDisplay(
-                navigator = navigator,
-                state = navState,
-                onSignOut = viewModel::onSignOut,
-                welcomeContentRevealed = welcomeContentRevealed,
-                onOnboardingFinished = {
-                    OnboardingPreferences.setHasSeenOnboarding(context, true)
-                    hasSeenOnboarding = true
-                    navigator.goBack()
-                },
-            )
+            // While gated, what is beneath is hidden from accessibility services
+            // as well as covered: a TalkBack user must not be able to reach
+            // the app around the gate.
+            Box(modifier = if (isConsentGated) Modifier.clearAndSetSemantics {} else Modifier) {
+                PebblesNavDisplay(
+                    navigator = navigator,
+                    state = navState,
+                    onSignOut = viewModel::onSignOut,
+                    welcomeContentRevealed = welcomeContentRevealed,
+                    onOnboardingFinished = {
+                        OnboardingPreferences.setHasSeenOnboarding(context, true)
+                        hasSeenOnboarding = true
+                        navigator.goBack()
+                    },
+                )
+            }
             // Drawn last for z-order (D9), unless a sheet is hosting them.
             // The hand-over lands one frame late: a sheet registers in an
             // effect, so on the frame it opens both copies compose, and a
             // celebration already on screen can replay its haptic once.
             if (!overlaySlot.isHostedBySheet) overlaySlot.content()
+            // Above everything, celebrations included (design D9).
+            if (isConsentGated) {
+                ConsentGateScreen(
+                    uiState = consent,
+                    onToggle = consentViewModel::onToggle,
+                    onContinue = consentViewModel::onContinue,
+                    onRetry = consentViewModel::retry,
+                    onSignOut = viewModel::onSignOut,
+                )
+            }
         }
     }
 }
