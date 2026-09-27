@@ -75,7 +75,9 @@ struct ValenceStoneStyle {
     static func headlineInk(for polarity: ValencePolarity) -> AnyShapeStyle {
         switch polarity {
         case .lowlight:  return AnyShapeStyle(Color.system.foreground)
-        case .neutral:   return AnyShapeStyle(Color.accent.dark)
+        // The neutral stone's body is the emotion-convention `dark`, which on
+        // the brand accent is `AccentShaded` (see `StonePalette.brand`).
+        case .neutral:   return AnyShapeStyle(Color.accent.shaded)
         case .highlight: return AnyShapeStyle(Color.accent.primary)
         }
     }

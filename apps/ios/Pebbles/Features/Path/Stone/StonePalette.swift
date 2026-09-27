@@ -16,14 +16,18 @@ struct StonePalette: Equatable {
     let dark: Color
     let shaded: Color
 
-    /// The brand accent, whose asset colours carry their own dark variants.
+    /// The brand accent. Its tier names run the other way from the emotion
+    /// palettes the stone tables were tuned on: the emotion `shaded` is the
+    /// darkest tone and `dark` the mid one, while the brand's `AccentDark`
+    /// (#341B1B) is the darkest and `AccentShaded` (#8C4949) the mid. The two
+    /// are swapped here so a `StoneTones` slot means the same depth on both.
     static let brand = StonePalette(
         primary: Color.accent.primary,
         secondary: Color.accent.secondary,
         light: Color.accent.light,
         surface: Color.accent.surface,
-        dark: Color.accent.dark,
-        shaded: Color.accent.shaded
+        dark: Color.accent.shaded,
+        shaded: Color.accent.dark
     )
 
     func color(_ slot: Slot) -> Color {
