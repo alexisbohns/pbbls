@@ -579,6 +579,9 @@ class SettingsViewModel
         }
 
         private fun onReauthenticated(purpose: ReauthPurpose) {
+            // Cancel already closed the dialog: never run the action it was
+            // abandoning (deletion is irreversible), however late the sign-in lands.
+            if (_uiState.value.reauth == null) return
             _uiState.update { it.copy(reauth = null) }
             when (purpose) {
                 ReauthPurpose.DELETE -> runDelete()
