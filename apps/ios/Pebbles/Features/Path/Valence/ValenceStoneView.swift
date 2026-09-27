@@ -16,6 +16,9 @@ struct ValenceStoneView: View {
     let height: CGFloat
     /// Starts the light sweep when it turns true.
     var isSelected: Bool = false
+    /// The phone's lean, when this stone follows it (the chosen stone in the
+    /// picker); nil keeps the rest light.
+    var lean: Lean?
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// When the current sweep started; nil when the stone is still.
@@ -29,6 +32,8 @@ struct ValenceStoneView: View {
         TimelineView(.animation(minimumInterval: 1 / 60, paused: sweepStart == nil)) { context in
             stone(light: light(at: context.date))
         }
+        // `lean` is part of this view's inputs, so a published lean re-renders
+        // the stone whether or not the timeline is running.
         .frame(width: height * PebbleOutlineGeometry.aspectRatio(for: valence.sizeGroup), height: height)
         .onChange(of: isSelected, initial: true) { _, selected in
             guard selected, !reduceMotion else {
@@ -51,23 +56,25 @@ struct ValenceStoneView: View {
         )
     }
 
-    /// The rest light, or the sweep's light at `date`. Ends exactly at rest so
-    /// the last animated frame and the still frame are the same picture.
+    /// The tilted (or rest) light, with the sweep's swing added while it runs.
+    /// The sweep ends exactly on the tilted light, so the last animated frame
+    /// and the still frame are the same picture.
     private func light(at date: Date) -> StoneLight {
-        guard let sweepStart else { return .rest }
+        let base = StoneLight.tilted(by: lean ?? .zero)
+        guard let sweepStart else { return base }
         let elapsed = date.timeIntervalSince(sweepStart)
         guard elapsed < Self.sweepDuration else {
             // Settle on the next run loop turn: mutating state inside a
             // TimelineView body is refused.
             DispatchQueue.main.async { self.sweepStart = nil }
-            return .rest
+            return base
         }
         let t = elapsed / Self.sweepDuration
         let eased = 0.5 - 0.5 * cos(t * .pi)           // ease in-out over the whole sweep
         let swing = sin(eased * .pi)                    // out and back: 0 → 1 → 0
-        let restAngle = atan2(StoneLight.rest.direction.dy, StoneLight.rest.direction.dx)
-        let angle = restAngle + swing * Self.sweepSwing
-        let elevation = StoneLight.rest.elevationDegrees - swing * 20
+        let baseAngle = atan2(base.direction.dy, base.direction.dx)
+        let angle = baseAngle + swing * Self.sweepSwing
+        let elevation = base.elevationDegrees - swing * 20
         return StoneLight(direction: CGVector(dx: cos(angle), dy: sin(angle)), elevationDegrees: elevation)
     }
 }

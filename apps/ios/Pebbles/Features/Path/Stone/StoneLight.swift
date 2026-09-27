@@ -41,6 +41,19 @@ struct StoneLight: Equatable {
         )
     }
 
+    /// The rest light moved by the phone's lean: tilting the phone slides the
+    /// light the other way across the stone, as a fixed lamp would appear to,
+    /// and lowers it as the lean grows so the rim and lips rake harder at the
+    /// edge of the travel. A zero lean is `rest` exactly.
+    static func tilted(by lean: Lean, gain: Double = 1.4) -> StoneLight {
+        let offset = CGVector(
+            dx: rest.direction.dx - lean.x * gain,
+            dy: rest.direction.dy - lean.y * gain
+        )
+        let magnitude = min(1, hypot(lean.x, lean.y))
+        return StoneLight(pointingTo: offset, elevationDegrees: rest.elevationDegrees - magnitude * 25)
+    }
+
     /// The carving lip offset toward the light, in points.
     func lipOffset(width: Double) -> CGSize {
         CGSize(width: direction.dx * width, height: direction.dy * width)
