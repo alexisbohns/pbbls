@@ -362,6 +362,24 @@ try {
   });
   if (ageConsentErr) throw new Error(`record_consent age_assurance: ${ageConsentErr.message}`);
 
+  // Terms and privacy acceptance (#966). Same path as the app: the real RPC as
+  // the signed-in seller. Versions differ on purpose: the two documents version
+  // independently, and a harness that used one constant for both would not
+  // notice a client or trigger that swapped them.
+  const { error: termsConsentErr } = await seller.rpc("record_consent", {
+    p_kind: "terms",
+    p_document_version: "1.1.0",
+    p_source: "android_register",
+  });
+  if (termsConsentErr) throw new Error(`record_consent terms: ${termsConsentErr.message}`);
+
+  const { error: privacyConsentErr } = await seller.rpc("record_consent", {
+    p_kind: "privacy",
+    p_document_version: "1.3.0",
+    p_source: "android_register",
+  });
+  if (privacyConsentErr) throw new Error(`record_consent privacy: ${privacyConsentErr.message}`);
+
   // The age attestation must not be withdrawable: you cannot un-attest your
   // age, and a withdrawn row would be indistinguishable from an account that
   // never attested. Two things enforce that, and this block pins both:
@@ -385,7 +403,7 @@ try {
 
   // …and the refused call left the attestation ACTIVE. The consentCount check
   // below counts rows whatever their state, so a withdrawal that succeeded
-  // would still total 3; only the withdrawn_at/superseded_at predicates tell
+  // would still total 5; only the withdrawn_at/superseded_at predicates tell
   // the two apart. Read through `admin` like every other assertion here, so
   // the result is ground truth rather than a function of RLS.
   const { count: activeAge, error: activeAgeErr } = await admin
@@ -399,9 +417,20 @@ try {
   check("age attestation still active after the refused withdrawal", activeAge === 1,
     `found ${activeAge ?? 0} active age_assurance rows, expected 1`);
 
+  // Terms and privacy follow the age attestation: accepting a document ends
+  // with the account, never with a toggle (#966, design §3.2). Same message
+  // match, for the same reason as above.
+  for (const kind of ["terms", "privacy"] as const) {
+    const { error: withdrawErr } = await seller.rpc("withdraw_consent", { p_kind: kind });
+    check(`withdraw_consent refuses ${kind} with invalid_kind`,
+      withdrawErr?.message?.includes("invalid_kind") === true,
+      `expected invalid_kind, got: ${withdrawErr?.message ?? "no error at all"}` +
+        ` (code=${withdrawErr?.code ?? "none"})`);
+  }
+
   const consentCount = await countRows("user_consents", "user_id", sellerId);
-  if (consentCount !== 3) {
-    throw new Error(`expected 3 seeded consent rows, got ${consentCount}`);
+  if (consentCount !== 5) {
+    throw new Error(`expected 5 seeded consent rows, got ${consentCount}`);
   }
 
   // Achievement unlocks (M48). Earned through the real RPC as the signed-in
@@ -637,7 +666,7 @@ try {
     ["connections", 1], // the seller↔buyer row
     ["connection_invites", 1], // the seller's live invite
     ["connection_blocks", 2], // both directions
-    ["user_consents", 3], // health_data + public_profile + age_assurance
+    ["user_consents", 5], // health_data + public_profile + age_assurance + terms + privacy
   ];
   for (const [key, expected] of expectedPurged) {
     check(`purge itself counted ${key} = ${expected}`, purgedCounts[key] === expected,
