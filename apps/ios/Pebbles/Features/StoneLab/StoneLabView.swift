@@ -273,13 +273,20 @@ struct StoneLabView: View {
 
     // MARK: - Detail
 
+    /// The stone at up to 320 pt tall, narrowed to the sheet's width when its
+    /// silhouette would not fit; the light drags about the stone's own centre.
     private func detail(_ valence: Valence) -> some View {
-        VStack(spacing: 16) {
+        let aspect = CGFloat(PebbleOutlineGeometry.aspectRatio(for: valence.sizeGroup))
+        return VStack(spacing: 16) {
             Text(verbatim: valence.assetName).font(.caption).foregroundStyle(.secondary)
-            stone(valence, height: 320)
-                .contentShape(Rectangle())
-                .gesture(lightDrag(center: CGPoint(x: 180, y: 160)))
-            Spacer()
+            GeometryReader { proxy in
+                let width = max(0, min(proxy.size.width, 320 * aspect))
+                let height = width / aspect
+                stone(valence, height: height)
+                    .contentShape(Rectangle())
+                    .gesture(lightDrag(center: CGPoint(x: width / 2, y: height / 2)))
+                    .frame(maxWidth: .infinity)
+            }
         }
         .padding(24)
         .presentationDetents([.large])
