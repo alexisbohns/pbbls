@@ -4,6 +4,7 @@ import app.pbbls.android.core.data.AchievementsServicing
 import app.pbbls.android.core.data.CollectionsServicing
 import app.pbbls.android.core.data.ComposerSnapshotStoring
 import app.pbbls.android.core.data.ConnectionsServicing
+import app.pbbls.android.core.data.ConsentServicing
 import app.pbbls.android.core.data.GlyphMarketServicing
 import app.pbbls.android.core.data.GlyphServicing
 import app.pbbls.android.core.data.LogsServicing
@@ -149,6 +150,9 @@ object FakeServicesModule {
     fun fakeConnections() = FakeConnectionsService()
 
     @Provides @Singleton
+    fun fakeConsent() = FakeConsentService()
+
+    @Provides @Singleton
     fun fakeGlyph() = FakeGlyphService()
 
     @Provides @Singleton
@@ -203,6 +207,9 @@ object FakeServicesModule {
 
     @Provides
     fun connections(fake: FakeConnectionsService): ConnectionsServicing = fake
+
+    @Provides
+    fun consent(fake: FakeConsentService): ConsentServicing = fake
 
     @Provides
     fun glyph(fake: FakeGlyphService): GlyphServicing = fake
