@@ -40,6 +40,9 @@ import app.pbbls.android.navigation.pebblesNavigationSuiteColors
 import app.pbbls.android.navigation.pebblesNavigationSuiteType
 import app.pbbls.android.navigation.rememberNavigationState
 import app.pbbls.android.navigation.rememberPebblesSceneStrategies
+import coil3.SingletonImageLoader
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Top-level auth gate — the `RootView` analog (D5). Auth is now a condition,
@@ -100,6 +103,20 @@ fun RootScreen() {
     // harmless clear of an empty cache.
     LaunchedEffect(userId) {
         if (userId == null) snapUrls?.invalidateAll()
+    }
+
+    // Coil's memory and disk caches hold decoded snap photos — personal content
+    // that must not outlive the session on a device that can change hands
+    // (GDP-07). Keyed on the resolved SignedOut destination, NOT on `userId ==
+    // null`: that is also true while auth is Unresolved on every cold start, and
+    // clearing there would wipe a signed-in user's disk cache on each launch.
+    // Disk clearing is file I/O, so it runs off the main thread.
+    LaunchedEffect(root.destination) {
+        if (root.destination == RootDestination.SignedOut) {
+            val images = SingletonImageLoader.get(context)
+            images.memoryCache?.clear()
+            withContext(Dispatchers.IO) { images.diskCache?.clear() }
+        }
     }
 
     // Warm the create/edit reference lists (domains, souls, collections) once a

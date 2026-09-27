@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.core.data.AchievementMoment
 import app.pbbls.android.core.data.AchievementNotificationService
+import app.pbbls.android.core.data.ComposerSnapshotStoring
 import app.pbbls.android.core.data.KarmaEarnedContent
 import app.pbbls.android.core.data.KarmaNotificationService
 import app.pbbls.android.core.data.SupabaseServicing
@@ -84,6 +85,7 @@ class RootViewModel
         private val supabase: SupabaseServicing,
         private val karma: KarmaNotificationService,
         private val achievementNotify: AchievementNotificationService,
+        private val snapshots: ComposerSnapshotStoring,
         private val savedStateHandle: SavedStateHandle,
     ) : ViewModel() {
         private val _uiState =
@@ -153,6 +155,14 @@ class RootViewModel
             if (!isInitializing && userId == null && hasHadSession) {
                 clearPendingInvite()
             }
+            // Every resolved signed-out state drops the composer crash snapshot
+            // (GDP-07) — not only a real sign-out: a cold start that resolves
+            // signed-out (session expired, account deleted elsewhere) is the
+            // same device holding someone's unpublished draft with nobody
+            // entitled to it. Account deletion reaches here through its own
+            // `signOut()`. The store's owner check covers a session that swaps
+            // without passing through signed-out.
+            if (!isInitializing && userId == null) snapshots.clear()
             // Only a resolved status updates hasHadSession — Unresolved must
             // never be mistaken for a session, real or absent.
             if (!isInitializing) hasHadSession = userId != null
