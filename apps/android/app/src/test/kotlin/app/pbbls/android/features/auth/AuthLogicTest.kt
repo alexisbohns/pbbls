@@ -8,98 +8,113 @@ import org.junit.Test
 
 /**
  * Ports all 16 iOS `AuthViewLogicTests` cases 1:1
- * (`apps/ios/PebblesTests/Features/Auth/AuthViewLogicTests.swift`) so the
- * Android `canSubmit` / `normalizeEmailInput` stay at parity.
+ * (`apps/ios/PebblesTests/Features/Auth/AuthViewLogicTests.swift`) plus the two
+ * Android-first consent cases below (iOS gains them in #821), so the Android
+ * `canSubmit` / `normalizeEmailInput` stay at parity.
  */
 class AuthLogicTest {
     @Test
     fun loginInvalidEmailReturnsFalse() {
         assertFalse(
-            AuthLogic.canSubmit(AuthMode.LOGIN, "not-an-email", "password", false, false, false),
+            AuthLogic.canSubmit(AuthMode.LOGIN, "not-an-email", "password", false, false, true, true, false),
         )
     }
 
     @Test
     fun loginShortPasswordReturnsFalse() {
         assertFalse(
-            AuthLogic.canSubmit(AuthMode.LOGIN, "hello@bohns.design", "abc", false, false, false),
+            AuthLogic.canSubmit(AuthMode.LOGIN, "hello@bohns.design", "abc", false, false, true, true, false),
         )
     }
 
     @Test
     fun loginValidCredentialsReturnTrue() {
         assertTrue(
-            AuthLogic.canSubmit(AuthMode.LOGIN, "hello@bohns.design", "abcdef", false, false, false),
+            AuthLogic.canSubmit(AuthMode.LOGIN, "hello@bohns.design", "abcdef", false, false, true, true, false),
         )
     }
 
     @Test
     fun loginIgnoresConsentFlags() {
         assertTrue(
-            AuthLogic.canSubmit(AuthMode.LOGIN, "hello@bohns.design", "abcdef", true, true, false),
+            AuthLogic.canSubmit(AuthMode.LOGIN, "hello@bohns.design", "abcdef", true, true, true, true, false),
         )
     }
 
     @Test
     fun signupMissingTermsReturnsFalse() {
         assertFalse(
-            AuthLogic.canSubmit(AuthMode.SIGNUP, "hello@bohns.design", "abcdef", false, true, false),
+            AuthLogic.canSubmit(AuthMode.SIGNUP, "hello@bohns.design", "abcdef", false, true, true, true, false),
         )
     }
 
     @Test
     fun signupMissingPrivacyReturnsFalse() {
         assertFalse(
-            AuthLogic.canSubmit(AuthMode.SIGNUP, "hello@bohns.design", "abcdef", true, false, false),
+            AuthLogic.canSubmit(AuthMode.SIGNUP, "hello@bohns.design", "abcdef", true, false, true, true, false),
         )
     }
 
     @Test
     fun signupAllFourConditionsMetReturnsTrue() {
         assertTrue(
-            AuthLogic.canSubmit(AuthMode.SIGNUP, "hello@bohns.design", "abcdef", true, true, false),
+            AuthLogic.canSubmit(AuthMode.SIGNUP, "hello@bohns.design", "abcdef", true, true, true, true, false),
+        )
+    }
+
+    @Test
+    fun signupMissingHealthConsentReturnsFalse() {
+        assertFalse(
+            AuthLogic.canSubmit(AuthMode.SIGNUP, "hello@bohns.design", "abcdef", true, true, false, true, false),
+        )
+    }
+
+    @Test
+    fun signupMissingAgeAttestationReturnsFalse() {
+        assertFalse(
+            AuthLogic.canSubmit(AuthMode.SIGNUP, "hello@bohns.design", "abcdef", true, true, true, false, false),
         )
     }
 
     @Test
     fun isSubmittingTrueReturnsFalseInLogin() {
         assertFalse(
-            AuthLogic.canSubmit(AuthMode.LOGIN, "hello@bohns.design", "abcdef", false, false, true),
+            AuthLogic.canSubmit(AuthMode.LOGIN, "hello@bohns.design", "abcdef", false, false, true, true, true),
         )
     }
 
     @Test
     fun isSubmittingTrueReturnsFalseInSignup() {
         assertFalse(
-            AuthLogic.canSubmit(AuthMode.SIGNUP, "hello@bohns.design", "abcdef", true, true, true),
+            AuthLogic.canSubmit(AuthMode.SIGNUP, "hello@bohns.design", "abcdef", true, true, true, true, true),
         )
     }
 
     @Test
     fun loginEmailMissingDotReturnsFalse() {
         assertFalse(
-            AuthLogic.canSubmit(AuthMode.LOGIN, "hello@bohns", "abcdef", false, false, false),
+            AuthLogic.canSubmit(AuthMode.LOGIN, "hello@bohns", "abcdef", false, false, true, true, false),
         )
     }
 
     @Test
     fun loginEmailWithPlusReturnsFalse() {
         assertFalse(
-            AuthLogic.canSubmit(AuthMode.LOGIN, "hello+work@bohns.design", "abcdef", false, false, false),
+            AuthLogic.canSubmit(AuthMode.LOGIN, "hello+work@bohns.design", "abcdef", false, false, true, true, false),
         )
     }
 
     @Test
     fun loginWhitespaceOnlyEmailReturnsFalse() {
         assertFalse(
-            AuthLogic.canSubmit(AuthMode.LOGIN, "   ", "abcdef", false, false, false),
+            AuthLogic.canSubmit(AuthMode.LOGIN, "   ", "abcdef", false, false, true, true, false),
         )
     }
 
     @Test
     fun loginEmailWithSurroundingWhitespaceIsAccepted() {
         assertTrue(
-            AuthLogic.canSubmit(AuthMode.LOGIN, "  hello@bohns.design  ", "abcdef", false, false, false),
+            AuthLogic.canSubmit(AuthMode.LOGIN, "  hello@bohns.design  ", "abcdef", false, false, true, true, false),
         )
     }
 

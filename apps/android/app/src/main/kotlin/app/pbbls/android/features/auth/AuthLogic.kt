@@ -11,7 +11,8 @@ object AuthLogic {
     /**
      * Whether the submit button is enabled. Email must be non-blank, contain
      * `@` and `.`, and contain no `+`; password ≥ 6; sign-up additionally
-     * requires both consent checkboxes. Always false while a request is in flight.
+     * requires all four consent boxes (terms, privacy, the Art. 9 statement and
+     * 16+). Always false while a request is in flight.
      */
     fun canSubmit(
         mode: AuthMode,
@@ -19,6 +20,8 @@ object AuthLogic {
         password: String,
         termsAccepted: Boolean,
         privacyAccepted: Boolean,
+        healthAccepted: Boolean,
+        ageAccepted: Boolean,
         isSubmitting: Boolean,
     ): Boolean {
         val trimmed = email.trim()
@@ -28,7 +31,11 @@ object AuthLogic {
         if (!trimmed.contains(".")) return false
         if (trimmed.contains("+")) return false
         if (password.length < 6) return false
-        return if (mode == AuthMode.SIGNUP) termsAccepted && privacyAccepted else true
+        return if (mode == AuthMode.SIGNUP) {
+            termsAccepted && privacyAccepted && healthAccepted && ageAccepted
+        } else {
+            true
+        }
     }
 
     /**

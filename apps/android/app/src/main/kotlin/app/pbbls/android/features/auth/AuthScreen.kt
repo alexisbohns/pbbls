@@ -74,6 +74,8 @@ fun AuthScreen(
         onPasswordChange = viewModel::onPasswordChange,
         onTermsChange = viewModel::onTermsChange,
         onPrivacyChange = viewModel::onPrivacyChange,
+        onHealthChange = viewModel::onHealthChange,
+        onAgeChange = viewModel::onAgeChange,
         onDismissError = viewModel::dismissError,
         onSubmit = viewModel::submit,
         onGoogleSignIn = viewModel::signInWithGoogle,
@@ -93,6 +95,8 @@ fun AuthContent(
     onPasswordChange: (String) -> Unit,
     onTermsChange: (Boolean) -> Unit,
     onPrivacyChange: (Boolean) -> Unit,
+    onHealthChange: (Boolean) -> Unit,
+    onAgeChange: (Boolean) -> Unit,
     onDismissError: () -> Unit,
     onSubmit: () -> Unit,
     onGoogleSignIn: () -> Unit,
@@ -180,6 +184,16 @@ fun AuthContent(
                     prefix = stringResource(R.string.auth_consent_prefix),
                     linkText = stringResource(R.string.auth_consent_privacy_link),
                     onLinkTap = { openLegalDoc(context, LegalDoc.PRIVACY) },
+                )
+                PebblesCheckbox(
+                    isChecked = uiState.healthAccepted,
+                    onCheckedChange = onHealthChange,
+                    label = stringResource(R.string.auth_consent_health),
+                )
+                PebblesCheckbox(
+                    isChecked = uiState.ageAccepted,
+                    onCheckedChange = onAgeChange,
+                    label = stringResource(R.string.auth_consent_age),
                 )
             }
         }
