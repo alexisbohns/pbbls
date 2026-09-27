@@ -17,6 +17,9 @@ struct StoneView: View {
     let height: CGFloat
     var isFlat: Bool = false
     var look: StoneLook = .standard
+    /// A real pebble's composed SVG, whose glyph is carved instead of the
+    /// sample glyph. Nil draws the sample (the picker).
+    var pebbleSvg: String?
 
     @Environment(\.colorScheme) private var scheme
 
@@ -74,7 +77,7 @@ struct StoneView: View {
 
     @ViewBuilder
     private var carvingLayer: some View {
-        if let art = StoneCarvingArt.art(for: valence) {
+        if let art = pebbleSvg.map({ StoneCarvingArt.art(for: valence, pebbleSvg: $0) }) ?? StoneCarvingArt.art(for: valence) {
             let ink = ZStack {
                 if let fossil = art.fossil {
                     WobbledPathShape(path: fossil.path, layerTransform: .identity, viewBox: art.viewBox)

@@ -16,14 +16,17 @@ enum StoneCarvingArt {
         let viewBox: CGRect
         /// Veins + glyph, wobbled ink, nonzero fill.
         let ink: CGPath
+        /// The seed's veins alone, so a real pebble's carving can add its own glyph.
+        let veins: CGPath
         /// The engine outline alone, wobbled ink, so the page can leave it out.
         let outline: CGPath
         /// The fossil's displaced region, with its fill rule.
         let fossil: WobbleBackdropArt?
 
-        init(viewBox: CGRect, ink: CGPath, outline: CGPath, fossil: WobbleBackdropArt?) {
+        init(viewBox: CGRect, ink: CGPath, veins: CGPath, outline: CGPath, fossil: WobbleBackdropArt?) {
             self.viewBox = viewBox
             self.ink = ink
+            self.veins = veins
             self.outline = outline
             self.fossil = fossil
         }
@@ -41,6 +44,9 @@ enum StoneCarvingArt {
 
     private static let lock = NSLock()
     private static var cache: [Valence: Art] = [:]
+    /// Carvings for real pebbles, keyed by their composed SVG. An `NSCache`
+    /// so a long Path does not pin every pebble's paths forever.
+    private static let pebbleCache = NSCache<NSString, Art>()
 
     static func art(for valence: Valence) -> Art? {
         lock.lock()
@@ -48,6 +54,34 @@ enum StoneCarvingArt {
         if let cached = cache[valence] { return cached }
         guard let built = build(valence) else { return nil }
         cache[valence] = built
+        return built
+    }
+
+    /// The carving of a real pebble: the seed's veins and fossil for its
+    /// valence, plus the glyph (and any extra fossil layer) taken from the
+    /// pebble's own composed SVG, wobbled by the same renderer the Path uses.
+    /// The engine outline in that SVG is left out, as the seed's is. Nil when
+    /// the seed is missing; a pebble whose SVG will not parse keeps the seed
+    /// carving with no glyph, logged.
+    static func art(for valence: Valence, pebbleSvg svg: String) -> Art? {
+        let key = "\(valence.rawValue)|\(svg)" as NSString
+        if let cached = pebbleCache.object(forKey: key) { return cached }
+        guard let seed = art(for: valence) else { return nil }
+        let ink = CGMutablePath()
+        ink.addPath(seed.veins)
+        if let model = PebbleSVGModel(svg: svg) {
+            let wobbled = WobbleRenderer.pebbleArt(svg: svg, model: model)
+            for (index, layer) in model.layers.enumerated() where layer.kind != .shape {
+                var transform = layer.transform
+                let layerInk = wobbled.layers[index].ink
+                ink.addPath(layerInk.copy(using: &transform) ?? layerInk)
+            }
+        } else {
+            logger.error("stone: pebble svg did not parse; carving without its glyph")
+        }
+        let built = Art(viewBox: seed.viewBox, ink: ink.copy() ?? ink, veins: seed.veins,
+                        outline: seed.outline, fossil: seed.fossil)
+        pebbleCache.setObject(built, forKey: key)
         return built
     }
 
@@ -81,7 +115,7 @@ enum StoneCarvingArt {
         guard let url = Bundle.main.url(forResource: name, withExtension: "svg"),
               let svg = try? String(contentsOf: url, encoding: .utf8),
               let parsed = StoneShapeParser.parse(svg) else {
-            logger.error("stone lab: missing or unparseable seed \(name, privacy: .public)")
+            logger.error("stone: missing or unparseable seed \(name, privacy: .public)")
             return nil
         }
 
@@ -89,17 +123,19 @@ enum StoneCarvingArt {
         if let path = WobbleRenderer.glyphInk(d: parsed.outline.d, width: parsed.outline.width) {
             outline.addPath(path)
         } else {
-            logger.error("stone lab: outline of \(name, privacy: .public) did not wobble")
+            logger.error("stone: outline of \(name, privacy: .public) did not wobble")
         }
 
-        let ink = CGMutablePath()
+        let veins = CGMutablePath()
         for (index, stroke) in parsed.veins.enumerated() {
             guard let path = WobbleRenderer.glyphInk(d: stroke.d, width: stroke.width) else {
-                logger.error("stone lab: vein \(index, privacy: .public) of \(name, privacy: .public) did not wobble")
+                logger.error("stone: vein \(index, privacy: .public) of \(name, privacy: .public) did not wobble")
                 continue
             }
-            ink.addPath(path)
+            veins.addPath(path)
         }
+        let ink = CGMutablePath()
+        ink.addPath(veins)
 
         if let glyph = placedGlyphInk(size: valence.sizeGroup, polarity: valence.polarity) {
             ink.addPath(glyph)
@@ -113,15 +149,16 @@ enum StoneCarvingArt {
             """
             fossil = WobbleRenderer.backdropArt(fromAsset: asset)
             if fossil == nil {
-                logger.error("stone lab: fossil of \(name, privacy: .public) did not wobble")
+                logger.error("stone: fossil of \(name, privacy: .public) did not wobble")
             }
         }
 
         guard !ink.isEmpty || !outline.isEmpty else {
-            logger.error("stone lab: no ink for \(name, privacy: .public)")
+            logger.error("stone: no ink for \(name, privacy: .public)")
             return nil
         }
-        return Art(viewBox: parsed.viewBox, ink: ink.copy() ?? ink, outline: outline.copy() ?? outline, fossil: fossil)
+        return Art(viewBox: parsed.viewBox, ink: ink.copy() ?? ink, veins: veins.copy() ?? veins,
+                   outline: outline.copy() ?? outline, fossil: fossil)
     }
 
     /// The sample glyph's strokes, wobbled and placed in the engine's slot
@@ -134,7 +171,7 @@ enum StoneCarvingArt {
         for (index, stroke) in glyph.strokes.enumerated() {
             guard let path = WobbleRenderer.glyphInk(d: stroke.d, width: stroke.width),
                   let moved = path.copy(using: &transform) else {
-                logger.error("stone lab: glyph stroke \(index, privacy: .public) did not wobble")
+                logger.error("stone: glyph stroke \(index, privacy: .public) did not wobble")
                 continue
             }
             placed.addPath(moved)
@@ -147,7 +184,7 @@ enum StoneCarvingArt {
         guard let url = Bundle.main.url(forResource: "stone-glyph", withExtension: "json"),
               let data = try? Data(contentsOf: url),
               let file = try? JSONDecoder().decode(GlyphFile.self, from: data) else {
-            logger.error("stone lab: missing sample glyph")
+            logger.error("stone: missing sample glyph")
             return nil
         }
         return file

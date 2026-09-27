@@ -30,6 +30,22 @@ struct StonePalette: Equatable {
         shaded: Color.accent.dark
     )
 
+    /// An emotion's palette: same six slots, same convention (`shaded` is the
+    /// darkest tone, `dark` the mid one), so the tables apply unchanged.
+    init(emotion: EmotionPalette) {
+        self.init(primary: emotion.primary, secondary: emotion.secondary, light: emotion.light,
+                  surface: emotion.surface, dark: emotion.dark, shaded: emotion.shaded)
+    }
+
+    init(primary: Color, secondary: Color, light: Color, surface: Color, dark: Color, shaded: Color) {
+        self.primary = primary
+        self.secondary = secondary
+        self.light = light
+        self.surface = surface
+        self.dark = dark
+        self.shaded = shaded
+    }
+
     func color(_ slot: Slot) -> Color {
         switch slot {
         case .primary: return primary
