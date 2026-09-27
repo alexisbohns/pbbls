@@ -32,11 +32,11 @@ struct StoneLabView: View {
                 grid
                 knobs
             }
-            .navigationTitle("Stone lab")
+            .navigationTitle(Text(verbatim: "Stone lab"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button("Close") { dismiss() }
+                    Button { dismiss() } label: { Text(verbatim: "Close") }
                 }
             }
             .onReceive(NotificationCenter.default.publisher(for: .NSProcessInfoPowerStateDidChange)) { _ in
@@ -62,7 +62,7 @@ struct StoneLabView: View {
                     Button {
                         paletteIndex = index
                     } label: {
-                        Text(palette.slug.capitalized)
+                        Text(verbatim: palette.slug.capitalized)
                             .font(.footnote.weight(.medium))
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
@@ -135,17 +135,19 @@ struct StoneLabView: View {
     private var knobs: some View {
         VStack(spacing: 0) {
             HStack {
-                Toggle("Flat", isOn: $isFlat).toggleStyle(.button)
-                Text(isLowPower ? "Low Power: on" : "Low Power: off")
+                Toggle(isOn: $isFlat) { Text(verbatim: "Flat") }.toggleStyle(.button)
+                Text(verbatim: isLowPower ? "Low Power: on" : "Low Power: off")
                     .font(.caption).foregroundStyle(.secondary)
                 Spacer()
-                Button(isKnobsOpen ? "Hide knobs" : "Knobs") { isKnobsOpen.toggle() }
-                Button("Reset") {
+                Button { isKnobsOpen.toggle() } label: { Text(verbatim: isKnobsOpen ? "Hide knobs" : "Knobs") }
+                Button {
                     for polarity in ValencePolarity.allCases {
                         materials[polarity] = .starting(for: polarity)
                         tones[polarity] = .starting(for: polarity)
                     }
                     light = .rest
+                } label: {
+                    Text(verbatim: "Reset")
                 }
             }
             .padding(.horizontal, 16)
@@ -154,8 +156,12 @@ struct StoneLabView: View {
             if isKnobsOpen {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 10) {
-                        Picker("Polarity", selection: $knobPolarity) {
-                            ForEach(ValencePolarity.allCases, id: \.self) { Text($0.rawValue.capitalized).tag($0) }
+                        Picker(selection: $knobPolarity) {
+                            ForEach(ValencePolarity.allCases, id: \.self) {
+                                Text(verbatim: $0.rawValue.capitalized).tag($0)
+                            }
+                        } label: {
+                            Text(verbatim: "Polarity")
                         }
                         .pickerStyle(.segmented)
                         materialKnobs
@@ -188,8 +194,10 @@ struct StoneLabView: View {
     @ViewBuilder
     private var materialKnobs: some View {
         let m = materialBinding
-        Picker("Material", selection: m.kind) {
-            ForEach(StoneMaterial.Kind.allCases) { Text($0.label).tag($0) }
+        Picker(selection: m.kind) {
+            ForEach(StoneMaterial.Kind.allCases) { Text(verbatim: $0.label).tag($0) }
+        } label: {
+            Text(verbatim: "Material")
         }
         .pickerStyle(.segmented)
         knob("Scale", m.scale, 0.01...0.6)
@@ -228,18 +236,20 @@ struct StoneLabView: View {
 
     private func knob(_ label: String, _ value: Binding<Double>, _ range: ClosedRange<Double>) -> some View {
         HStack {
-            Text(label).font(.caption).frame(width: 96, alignment: .leading)
+            Text(verbatim: label).font(.caption).frame(width: 96, alignment: .leading)
             Slider(value: value, in: range)
-            Text(value.wrappedValue.formatted(.number.precision(.fractionLength(2))))
+            Text(verbatim: value.wrappedValue.formatted(.number.precision(.fractionLength(2))))
                 .font(.caption.monospacedDigit()).frame(width: 44, alignment: .trailing)
         }
     }
 
     private func tonePick(_ label: String, _ pick: Binding<StoneTones.Pick>) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(label).font(.caption)
-            Picker(label, selection: pick.slot) {
-                ForEach(StoneLabPalette.Slot.allCases) { Text($0.rawValue).tag($0) }
+            Text(verbatim: label).font(.caption)
+            Picker(selection: pick.slot) {
+                ForEach(StoneLabPalette.Slot.allCases) { Text(verbatim: $0.rawValue).tag($0) }
+            } label: {
+                Text(verbatim: label)
             }
             .pickerStyle(.segmented)
             knob("opacity", pick.opacity, 0...1)
@@ -250,7 +260,7 @@ struct StoneLabView: View {
 
     private func detail(_ valence: Valence) -> some View {
         VStack(spacing: 16) {
-            Text(valence.assetName).font(.caption).foregroundStyle(.secondary)
+            Text(verbatim: valence.assetName).font(.caption).foregroundStyle(.secondary)
             stone(valence, height: 320)
                 .contentShape(Rectangle())
                 .gesture(lightDrag(center: CGPoint(x: 180, y: 160)))
