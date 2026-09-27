@@ -47,8 +47,10 @@ enum StoneLabPalettes {
         StoneLabPalette(slug: "sadness", primary: "#59658AFF", secondary: "#8C98BDFF", light: "#EEF0F3FF", surface: "#59658A1A", dark: "#3E4761FF", shaded: "#12141CFF"),
     ]
 
-    /// `#RRGGBB` or `#RRGGBBAA` → linear-ish 0..1 RGB for the shader. Alpha is
-    /// ignored: opacity is a separate tone knob. Unparseable → black.
+    /// `#RRGGBB` or `#RRGGBBAA` → 0..1 RGB for the shader: the gamma-encoded
+    /// sRGB bytes divided by 255, not linearised. The shader lights these
+    /// display-referred values directly. Alpha is ignored: opacity is a
+    /// separate tone knob. Unparseable → black.
     static func rgb(_ hex: String) -> SIMD3<Float> {
         var digits = Substring(hex)
         if digits.hasPrefix("#") { digits = digits.dropFirst() }

@@ -22,8 +22,13 @@ struct StoneLight: Equatable {
         self.elevationDegrees = elevationDegrees
     }
 
+    /// A non-unit `direction` is normalised; a zero one keeps the rest
+    /// direction rather than producing NaN.
     init(direction: CGVector, elevationDegrees: Double) {
-        self.direction = direction
+        let length = hypot(direction.dx, direction.dy)
+        self.direction = length > 0.001
+            ? CGVector(dx: direction.dx / length, dy: direction.dy / length)
+            : StoneLight.rest.direction
         self.elevationDegrees = elevationDegrees
     }
 

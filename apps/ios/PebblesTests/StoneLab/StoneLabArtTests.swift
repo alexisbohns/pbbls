@@ -33,4 +33,18 @@ struct StoneLabArtTests {
         #expect(abs(transform.a - 0.75) < 0.001)
         #expect(abs(transform.d - 0.75) < 0.001)
     }
+
+    @Test("the glyph is carved into the ink")
+    func glyphInInk() throws {
+        let glyph = try #require(StoneLabArt.placedGlyphInk(size: .medium, polarity: .highlight))
+        // medium / highlight slot: origin (26, 84), 150 square. The sample
+        // glyph itself overruns its 200 box (a stroke ends at x 211.6), so pin
+        // the ink's centre to the slot rather than its whole extent.
+        let slot = CGRect(x: 26, y: 84, width: 150, height: 150)
+        let bounds = glyph.boundingBoxOfPath
+        #expect(slot.contains(CGPoint(x: bounds.midX, y: bounds.midY)))
+        let art = try #require(StoneLabArt.art(for: .highlightMedium))
+        #expect(art.ink.boundingBoxOfPath.intersects(slot))
+        #expect(art.ink.boundingBoxOfPath.contains(glyph.boundingBoxOfPath))
+    }
 }

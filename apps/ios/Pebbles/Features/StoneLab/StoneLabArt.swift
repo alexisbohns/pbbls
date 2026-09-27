@@ -84,19 +84,16 @@ enum StoneLabArt {
         }
 
         let ink = CGMutablePath()
-        for stroke in [parsed.outline] + parsed.veins {
-            if let path = WobbleRenderer.glyphInk(d: stroke.d, width: stroke.width) {
-                ink.addPath(path)
+        for (index, stroke) in ([parsed.outline] + parsed.veins).enumerated() {
+            guard let path = WobbleRenderer.glyphInk(d: stroke.d, width: stroke.width) else {
+                logger.error("stone lab: stroke \(index, privacy: .public) of \(name, privacy: .public) did not wobble")
+                continue
             }
+            ink.addPath(path)
         }
 
-        if let glyph = loadGlyph() {
-            var transform = glyphTransform(size: valence.sizeGroup, polarity: valence.polarity, glyphViewBox: glyph.viewBox)
-            for stroke in glyph.strokes {
-                guard let path = WobbleRenderer.glyphInk(d: stroke.d, width: stroke.width),
-                      let placed = path.copy(using: &transform) else { continue }
-                ink.addPath(placed)
-            }
+        if let glyph = placedGlyphInk(size: valence.sizeGroup, polarity: valence.polarity) {
+            ink.addPath(glyph)
         }
 
         var fossil: WobbleBackdropArt?
@@ -106,6 +103,9 @@ enum StoneLabArt {
             <path d="\(fill.d)"\(fill.usesEvenOddFill ? " fill-rule=\"evenodd\"" : "")/></svg>
             """
             fossil = WobbleRenderer.backdropArt(fromAsset: asset)
+            if fossil == nil {
+                logger.error("stone lab: fossil of \(name, privacy: .public) did not wobble")
+            }
         }
 
         guard !ink.isEmpty else {
@@ -115,7 +115,26 @@ enum StoneLabArt {
         return Art(viewBox: parsed.viewBox, ink: ink.copy() ?? ink, fossil: fossil)
     }
 
-    private static func loadGlyph() -> GlyphFile? {
+    /// The sample glyph's strokes, wobbled and placed in the engine's slot
+    /// for this size and polarity, merged into one ink path. Nil when the
+    /// glyph file is missing or no stroke wobbled.
+    static func placedGlyphInk(size: ValenceSizeGroup, polarity: ValencePolarity) -> CGPath? {
+        guard let glyph else { return nil }
+        var transform = glyphTransform(size: size, polarity: polarity, glyphViewBox: glyph.viewBox)
+        let placed = CGMutablePath()
+        for (index, stroke) in glyph.strokes.enumerated() {
+            guard let path = WobbleRenderer.glyphInk(d: stroke.d, width: stroke.width),
+                  let moved = path.copy(using: &transform) else {
+                logger.error("stone lab: glyph stroke \(index, privacy: .public) did not wobble")
+                continue
+            }
+            placed.addPath(moved)
+        }
+        return placed.isEmpty ? nil : placed.copy()
+    }
+
+    /// Decoded once: a `static let` initialiser runs exactly once, thread-safely.
+    private static let glyph: GlyphFile? = {
         guard let url = Bundle.main.url(forResource: "stone-lab-glyph", withExtension: "json"),
               let data = try? Data(contentsOf: url),
               let file = try? JSONDecoder().decode(GlyphFile.self, from: data) else {
@@ -123,6 +142,6 @@ enum StoneLabArt {
             return nil
         }
         return file
-    }
+    }()
 }
 #endif
