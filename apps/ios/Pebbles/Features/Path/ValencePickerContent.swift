@@ -18,7 +18,7 @@ struct ValencePickerContent: View {
 
     /// Opacity of the eight stones that are not the chosen one. With nothing
     /// chosen, all nine stay at full strength.
-    private static let dimmedOpacity: Double = 0.45
+    private static let dimmedOpacity: Double = 0.35
     private static let selectedScale: CGFloat = 1.14
     /// Apple's minimum comfortable target; the small stones are under it on
     /// both axes.

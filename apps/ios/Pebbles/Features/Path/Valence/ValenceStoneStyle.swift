@@ -66,15 +66,17 @@ struct ValenceStoneStyle {
         }
     }
 
-    /// Fill for the headline word naming the picked valence. Highlight carries
-    /// the same mesh its stone does, so the word and the stone read as one
-    /// thing. Lowlight goes darker than its stone ink: at headline size a grey
-    /// word looks disabled rather than quiet.
+    /// Fill for the headline word naming the picked valence. Since #974 the
+    /// stones are lit brand-coloured stone (`StoneTones.starting`: shaded,
+    /// dark and primary bodies), so the word takes the brand tone its stone
+    /// wears rather than the old peach mesh. Lowlight stays the system
+    /// foreground: at headline size the near-black `shaded` reads as disabled
+    /// in light mode and vanishes in dark mode.
     static func headlineInk(for polarity: ValencePolarity) -> AnyShapeStyle {
         switch polarity {
         case .lowlight:  return AnyShapeStyle(Color.system.foreground)
-        case .neutral:   return AnyShapeStyle(Color.accent.primary)
-        case .highlight: return highlightInk
+        case .neutral:   return AnyShapeStyle(Color.accent.dark)
+        case .highlight: return AnyShapeStyle(Color.accent.primary)
         }
     }
 
