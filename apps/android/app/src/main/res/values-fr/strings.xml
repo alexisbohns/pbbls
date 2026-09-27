@@ -127,6 +127,11 @@
     <string name="settings_delete_account_message">Votre compte et tout ce qu\'il contient seront supprimés définitivement : galets, photos, âmes, collections, glyphes et karma. Les glyphes achetés par d\'autres personnes restent disponibles pour elles, sans votre nom. Cette action est irréversible.</string>
     <string name="settings_delete_account_confirm">Supprimer définitivement</string>
     <string name="settings_delete_account_error">Impossible de supprimer votre compte. Rien n\'a été supprimé. Veuillez réessayer.</string>
+    <string name="settings_sign_out_everywhere">Se déconnecter de tous les appareils</string>
+    <string name="settings_sign_out_everywhere_title">Te déconnecter partout ?</string>
+    <string name="settings_sign_out_everywhere_message">Ça te déconnecte de tous tes téléphones et navigateurs, y compris celui-ci. Tu pourras revenir avec ton mot de passe ou Google.</string>
+    <string name="settings_sign_out_everywhere_confirm">Tout déconnecter</string>
+    <string name="settings_sign_out_everywhere_error">Impossible de joindre le serveur : tes autres appareils sont peut-être encore connectés. Réessaie.</string>
 
     <!-- ==== Gestion des âmes (M41 sous-projet D). -->
     <string name="souls_title">Âmes</string>

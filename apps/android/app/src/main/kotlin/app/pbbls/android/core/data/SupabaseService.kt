@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import app.pbbls.android.core.model.LegalVersions
 import app.pbbls.android.di.ApplicationScope
 import io.github.jan.supabase.SupabaseClient
+import io.github.jan.supabase.auth.SignOutScope
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.Email
@@ -53,7 +54,13 @@ interface SupabaseServicing {
 
     suspend fun signInWithGoogle()
 
-    suspend fun signOut()
+    /**
+     * [everywhere] revokes every refresh token the user holds (all devices),
+     * not just this one. A local sign-out never throws; a global one rethrows,
+     * because "your other devices are signed out" must not be claimed when the
+     * server was never reached.
+     */
+    suspend fun signOut(everywhere: Boolean = false)
 }
 
 /**
@@ -198,14 +205,17 @@ class SupabaseService
         }
 
         /**
-         * Sign out. Failures are logged but never surfaced — the local token is
-         * wiped regardless and the collector emits `NotAuthenticated`.
+         * Sign out. A local sign-out's failures are logged but never surfaced —
+         * the local token is wiped regardless and the collector emits
+         * `NotAuthenticated`. A global one ([everywhere]) rethrows: the caller
+         * must not report other devices signed out when the server never heard.
          */
-        override suspend fun signOut() {
+        override suspend fun signOut(everywhere: Boolean) {
             try {
-                client.auth.signOut()
+                client.auth.signOut(if (everywhere) SignOutScope.GLOBAL else SignOutScope.LOCAL)
             } catch (e: Exception) {
-                Log.e(TAG, "signOut failed", e)
+                Log.e(TAG, "signOut failed (everywhere=$everywhere)", e)
+                if (everywhere) throw e
             }
         }
 

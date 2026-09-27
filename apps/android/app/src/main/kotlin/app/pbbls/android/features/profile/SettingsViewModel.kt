@@ -57,6 +57,9 @@ data class SettingsForm(
  */
 enum class DeletionState { IDLE, CONFIRMING, DELETING, FAILED }
 
+/** "Sign out of all devices": ask, run, or report that the server never heard. */
+enum class SignOutEverywhereState { IDLE, CONFIRMING, WORKING, FAILED }
+
 data class SettingsUiState(
     val initial: SettingsInitial = SettingsInitial(),
     val form: SettingsForm = SettingsForm(),
@@ -65,6 +68,7 @@ data class SettingsUiState(
     val didSaveFail: Boolean = false,
     val isPresentingGlyphPicker: Boolean = false,
     val deletion: DeletionState = DeletionState.IDLE,
+    val signOutEverywhere: SignOutEverywhereState = SignOutEverywhereState.IDLE,
     /** True while the ViewModel fetches its own profile — see the class KDoc. */
     val isLoading: Boolean = true,
     /** Set when that fetch fails — the screen shows this instead of an empty form. */
@@ -379,6 +383,32 @@ class SettingsViewModel
         }
 
         fun dismissSaveError() = _uiState.update { it.copy(didSaveFail = false) }
+
+        // MARK: - Sign out everywhere (#976)
+
+        fun requestSignOutEverywhere() = _uiState.update { it.copy(signOutEverywhere = SignOutEverywhereState.CONFIRMING) }
+
+        fun cancelSignOutEverywhere() = _uiState.update { it.copy(signOutEverywhere = SignOutEverywhereState.IDLE) }
+
+        fun dismissSignOutEverywhereError() = _uiState.update { it.copy(signOutEverywhere = SignOutEverywhereState.IDLE) }
+
+        /**
+         * Revokes every session the user holds, this one included. On success
+         * the session drops and the authed NavHost unmounts to Welcome, so
+         * there is nothing to navigate. Not gated by a recent sign-in: it only
+         * ever takes access away.
+         */
+        fun confirmSignOutEverywhere() {
+            if (_uiState.value.signOutEverywhere == SignOutEverywhereState.WORKING) return
+            _uiState.update { it.copy(signOutEverywhere = SignOutEverywhereState.WORKING) }
+            viewModelScope.launch {
+                runCatchingCancellable { supabase.signOut(everywhere = true) }
+                    .onFailure {
+                        Log.e(TAG, "global sign-out failed", it)
+                        _uiState.update { state -> state.copy(signOutEverywhere = SignOutEverywhereState.FAILED) }
+                    }
+            }
+        }
 
         // MARK: - Deletion
 

@@ -383,6 +383,57 @@ class SettingsViewModelTest {
             )
         }
 
+    // MARK: - Sign out everywhere (#976)
+
+    @Test
+    fun `signing out everywhere asks first, then revokes every session`() =
+        runTest {
+            val supabase = FakeSupabaseService(session = session())
+            val viewModel = viewModel(supabase = supabase)
+            advanceUntilIdle()
+
+            viewModel.requestSignOutEverywhere()
+            assertEquals(SignOutEverywhereState.CONFIRMING, viewModel.uiState.value.signOutEverywhere)
+            assertEquals(0, supabase.signOutEverywhereCount)
+
+            viewModel.confirmSignOutEverywhere()
+            advanceUntilIdle()
+
+            assertEquals(1, supabase.signOutEverywhereCount)
+        }
+
+    @Test
+    fun `cancelling sign out everywhere signs nobody out`() =
+        runTest {
+            val supabase = FakeSupabaseService(session = session())
+            val viewModel = viewModel(supabase = supabase)
+            advanceUntilIdle()
+
+            viewModel.requestSignOutEverywhere()
+            viewModel.cancelSignOutEverywhere()
+            advanceUntilIdle()
+
+            assertEquals(SignOutEverywhereState.IDLE, viewModel.uiState.value.signOutEverywhere)
+            assertEquals(0, supabase.signOutCount)
+        }
+
+    @Test
+    fun `a failed global sign-out says so instead of pretending`() =
+        runTest {
+            val supabase = FakeSupabaseService(session = session())
+            val viewModel = viewModel(supabase = supabase)
+            advanceUntilIdle()
+            supabase.failNext = IOException("offline")
+
+            viewModel.requestSignOutEverywhere()
+            viewModel.confirmSignOutEverywhere()
+            advanceUntilIdle()
+
+            assertEquals(SignOutEverywhereState.FAILED, viewModel.uiState.value.signOutEverywhere)
+            viewModel.dismissSignOutEverywhereError()
+            assertEquals(SignOutEverywhereState.IDLE, viewModel.uiState.value.signOutEverywhere)
+        }
+
     // MARK: - Deletion
 
     @Test
