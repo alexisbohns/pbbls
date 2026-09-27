@@ -35,7 +35,7 @@ Whoever holds an unlocked phone or a copied session can therefore destroy or exp
 
 ### `delete-account` edge function
 
-After `auth.getUser()` succeeds and **before** `purge_account`: call `authClient.rpc("assert_recent_auth")` on the auth-forwarded client, so `auth.jwt()` is the caller's token. A `reauth_required` error returns `403 { error: "reauth_required" }`; any other error returns 500 and logs, like the other steps. With enforcement off the call is a no-op, and it already proves the wiring.
+After `auth.getUser()` succeeds and **before** `purge_account`: call `authClient.rpc("assert_recent_auth")` on the auth-forwarded client, so `auth.jwt()` is the caller's token. A `reauth_required` error returns `428 { error: "reauth_required" }` (Precondition Required: the Android client classifies every 401/403 as a dead session, so the condition needs a status nothing else uses); any other error returns 500 and logs, like the other steps. With enforcement off the call is a no-op, and it already proves the wiring.
 
 ### Password change
 
@@ -68,7 +68,7 @@ A Settings entry, "Sign out of all devices", under the existing sign-out. `Supab
 
 One `ReauthDialog` in `core/designsystem`, driven by a small `ReauthState` owned by the calling ViewModel:
 
-- **The account has an `email` identity** (`SettingsInitial.providers` contains `email`): a password field. Submit calls `auth.signInWith(Email) { email = currentEmail; password = entered }`. The email is fixed from the session, so this re-issues a session for the same user with a fresh `amr`. A wrong password shows an inline error and the dialog stays open.
+- **The account has an `email` identity** (a new `SettingsInitial.hasPasswordIdentity`, read from the raw session identities: the display-only `providers` list drops `email`): a password field. Submit calls `auth.signInWith(Email) { email = currentEmail; password = entered }`. The email is fixed from the session, so this re-issues a session for the same user with a fresh `amr`. A wrong password shows an inline error and the dialog stays open.
 - **Google-only account**: a "Continue with Google" button that re-runs the hosted OAuth flow with `login_hint = currentEmail` and `prompt = select_account`. When the session returns, compare the user id with the one captured before. On mismatch, sign out and surface an error rather than silently switching accounts.
 - Cancel aborts the pending action and changes nothing.
 
@@ -76,7 +76,7 @@ One `ReauthDialog` in `core/designsystem`, driven by a small `ReauthState` owned
 
 ### Wiring
 
-- **Delete account.** `DeletionState` gains `REAUTHENTICATING`. Flow: confirm dialog → if not fresh, re-auth dialog → `DELETING`. A `reauth_required` 403 (after #977, or clock skew) re-enters `REAUTHENTICATING` instead of `FAILED`.
+- **Delete account.** `DeletionState` gains `REAUTHENTICATING`. Flow: confirm dialog → if not fresh, re-auth dialog → `DELETING`. A `reauth_required` 428 (after #977, or clock skew) re-enters `REAUTHENTICATING` instead of `FAILED`.
 - **Settings save.** Before any write, if the form changes the password (non-empty) or turns `public_profile` false→true and the token isn't fresh, open the re-auth dialog, then run the unchanged save. Other field edits never prompt. A `reauth_required` error from the profile update re-opens the dialog.
 
 ### Risk to check during implementation
