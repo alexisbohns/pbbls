@@ -55,6 +55,7 @@ import app.pbbls.android.core.designsystem.PebblesSectionHeader
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
+import app.pbbls.android.core.designsystem.ReauthDialog
 import app.pbbls.android.core.designsystem.openLegalDoc
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.ui.GlyphPickerSheet
@@ -406,6 +407,19 @@ fun SettingsScreen(
         DeleteErrorDialog(
             message = stringResource(R.string.settings_delete_account_error),
             onDismiss = viewModel::dismissDeleteError,
+        )
+    }
+    // The delete row's spinner stays keyed on DELETING: while re-authenticating,
+    // this dialog is the feedback.
+    uiState.reauth?.let { reauth ->
+        ReauthDialog(
+            usesPassword = reauth.method == ReauthMethod.PASSWORD,
+            password = reauth.password,
+            onPasswordChange = viewModel::onReauthPasswordChange,
+            isWorking = reauth.isWorking,
+            errorText = reauth.errorRes?.let { stringResource(it) },
+            onConfirm = viewModel::submitReauth,
+            onDismiss = viewModel::cancelReauth,
         )
     }
 
