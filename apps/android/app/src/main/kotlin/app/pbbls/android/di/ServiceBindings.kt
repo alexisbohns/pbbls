@@ -6,6 +6,8 @@ import app.pbbls.android.core.data.CollectionsService
 import app.pbbls.android.core.data.CollectionsServicing
 import app.pbbls.android.core.data.ConnectionsService
 import app.pbbls.android.core.data.ConnectionsServicing
+import app.pbbls.android.core.data.ConsentService
+import app.pbbls.android.core.data.ConsentServicing
 import app.pbbls.android.core.data.GlyphMarketService
 import app.pbbls.android.core.data.GlyphMarketServicing
 import app.pbbls.android.core.data.GlyphService
@@ -114,4 +116,8 @@ interface ServiceBindings {
     @Binds
     @Singleton
     fun bindLogsServicing(impl: LogsService): LogsServicing
+
+    @Binds
+    @Singleton
+    fun bindConsentServicing(impl: ConsentService): ConsentServicing
 }

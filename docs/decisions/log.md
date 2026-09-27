@@ -786,3 +786,19 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Consequences:** `navigation/` is the only package that may see two features at once, and a slot filled there is how one feature's screen hosts another's. Hosts pay for it with a required parameter threaded down to the call site (three levels in the record flow); screenshot tests pass a no-op slot. From a large-screen list-detail pane, the pebble editor now opens as the full-screen modal entry it is from pebble detail, not as a cover inside the pane.
 - **Supersedes / Superseded-by:** Supersedes the frozen-list half of **2026-09-22 — `core/` vs `features/` is a package split enforced by a test (#851)**.
 - **Refs:** #914, #851, #852, `apps/android/app/src/test/kotlin/app/pbbls/android/architecture/ArchitectureBoundaryTest.kt`, `apps/android/app/src/main/kotlin/app/pbbls/android/core/ui/GlyphPickerSheet.kt`.
+
+## 2026-09-27 — Terms and privacy are ledger kinds, and Android gates on a complete, current consent record (#966, #967)
+
+- **Status:** taken
+- **Scope:** supabase, android (web and iOS follow)
+- **Context:** Google sign-in on Android created accounts with no consent record at all. Email signup recorded terms and privacy as two unversioned `profiles` timestamps, and recorded no Art. 9 consent and no 16+ attestation. The `user_consents` ledger (#775, #818) already bound `health_data`, `public_profile` and `age_assurance` to a document version, but terms and privacy were outside it, so no surface could say which document a user accepted.
+- **Decision:** `terms` and `privacy` become ledger kinds (`20260927090000`). Like `age_assurance`, a structural CHECK makes them non-withdrawable, and `handle_new_user` records them when a `terms_version` / `privacy_version` metadata key accompanies the existing timestamp. The `profiles` timestamps stay as legacy. Android records all four acts from signup metadata and adds a post-auth **consent gate**:
+  - It is an overlay drawn above `NavDisplay`, not a back-stack entry, so no navigation (App Link, restored stack, parked invite) can route around it.
+  - It asks only for the kinds that are missing or cite an older version.
+  - It fails closed with Retry and Log out.
+  - It caches a pass on the device as one `userId|fingerprint` entry.
+  - A same-or-newer version satisfies it.
+- **Why:** A pre-gate on the Google buttons cannot reach Login-mode Google or existing accounts, and needs a stashed consent flushed after the Custom Tab. One gate after any session covers every path and every future version bump. The cache keeps a consented user from being locked out offline by a fail-closed check. Newer-satisfies stops an older app from superseding a newer web acceptance with an older version, which would be a downgrade in an accountability record.
+- **Consequences:** Bump `LegalVersions` in the same change as the legal documents' `version:` frontmatter (`LegalVersionsTest` enforces it). Any bump re-prompts every Android user at next launch, for the bumped kinds only. Web and iOS still send no version keys, so their users have no terms/privacy ledger rows until their follow-ups land. Do not widen `withdraw_consent`'s allowlist to `terms` or `privacy`.
+- **Supersedes / Superseded-by:** None. Extends the version-bound ledger of `docs/superpowers/specs/2026-09-11-art9-consent-gate-design.md` (which has no entry here) to terms and privacy; the M55 re-consent surface (#788) now has an Android implementation.
+- **Refs:** #966, #822, #967, `docs/superpowers/specs/2026-09-27-android-consent-gate-design.md`, `packages/supabase/supabase/migrations/20260927090000_consent_terms_privacy.sql`, `apps/android/app/src/main/kotlin/app/pbbls/android/features/consent/`.

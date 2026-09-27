@@ -2,7 +2,7 @@ package app.pbbls.android.testing
 
 import android.content.SharedPreferences
 
-/** Minimal SharedPreferences for booleans — the only type AppearancePreferences writes. */
+/** Minimal SharedPreferences for booleans and strings. */
 internal class InMemoryPrefs : SharedPreferences {
     private val values = mutableMapOf<String, Any?>()
 
@@ -29,7 +29,7 @@ internal class InMemoryPrefs : SharedPreferences {
             override fun putString(
                 key: String?,
                 value: String?,
-            ) = this
+            ) = apply { pending[key!!] = value }
 
             override fun putStringSet(
                 key: String?,
@@ -61,7 +61,7 @@ internal class InMemoryPrefs : SharedPreferences {
     override fun getString(
         key: String?,
         defValue: String?,
-    ) = defValue
+    ) = values[key] as? String ?: defValue
 
     override fun getStringSet(
         key: String?,
