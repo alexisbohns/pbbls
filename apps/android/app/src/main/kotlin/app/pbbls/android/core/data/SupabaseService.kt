@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import app.pbbls.android.core.model.LegalVersions
 import app.pbbls.android.di.ApplicationScope
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.auth.auth
@@ -21,6 +22,7 @@ import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonPrimitive
 import kotlinx.serialization.json.put
 import java.time.Instant
+import java.time.temporal.ChronoUnit
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -156,10 +158,11 @@ class SupabaseService
         }
 
         /**
-         * Sign up with email + password. Consent timestamps are captured now and
-         * passed through `auth.users.raw_user_meta_data` via the sign-up data block.
-         * Mirrors iOS: the current `handle_new_user` trigger does not copy them into
-         * `public.profiles` — a separate `fix(db)` issue.
+         * Sign up with email + password. The four consent acts ticked on the form
+         * ride `raw_user_meta_data`, where `handle_new_user` turns each into a
+         * version-bound `user_consents` row (and still fills the two legacy
+         * `profiles` timestamps). Metadata rather than a client RPC: with email
+         * confirmation on there is no session yet to call one with.
          */
         override suspend fun signUp(
             email: String,
@@ -169,7 +172,7 @@ class SupabaseService
                 client.auth.signUpWith(Email) {
                     this.email = email
                     this.password = password
-                    this.data = consentMetadata(Instant.now().toString())
+                    this.data = consentMetadata(signupInstant(Instant.now()))
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "signUp failed", e)
@@ -247,14 +250,26 @@ class SupabaseService
             private const val TAG = "auth"
 
             /**
-             * Consent-metadata payload written into user metadata on sign-up. Both
-             * timestamps are the moment of sign-up. Extracted as a pure function so
-             * its shape is unit-tested without a live client.
+             * The sign-up metadata `handle_new_user` reads. Every act is stamped
+             * with the one sign-up instant; terms cite the Terms version and the
+             * other three the privacy policy's (`LegalVersions`).
+             * `signup_surface` is load-bearing: without it the trigger stamps the
+             * rows `web_register`. Pure, so `ConsentMetadataTest` pins its shape.
              */
             fun consentMetadata(nowIso: String): JsonObject =
                 buildJsonObject {
                     put("terms_accepted_at", nowIso)
+                    put("terms_version", LegalVersions.TERMS)
                     put("privacy_accepted_at", nowIso)
+                    put("privacy_version", LegalVersions.PRIVACY)
+                    put("health_data_consent_at", nowIso)
+                    put("health_data_consent_version", LegalVersions.PRIVACY)
+                    put("age_attested_at", nowIso)
+                    put("age_attestation_version", LegalVersions.PRIVACY)
+                    put("signup_surface", "android")
                 }
+
+            /** Whole seconds: the narrowest precision every reader of a cross-surface timestamp accepts. */
+            fun signupInstant(now: Instant): String = now.truncatedTo(ChronoUnit.SECONDS).toString()
         }
     }
