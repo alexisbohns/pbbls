@@ -81,15 +81,16 @@ struct StoneLabView: View {
 
     // MARK: - Grid
 
+    private static let gridSpacing: CGFloat = 10
+
     private var grid: some View {
         GeometryReader { proxy in
-            let rowHeight = min(130, (proxy.size.height - 32) / 3)
-            VStack(spacing: 10) {
+            VStack(spacing: Self.gridSpacing) {
                 ForEach(ValenceSizeGroup.allCases) { size in
-                    HStack(spacing: 10) {
+                    HStack(spacing: Self.gridSpacing) {
                         ForEach(ValencePolarity.allCases, id: \.self) { polarity in
                             let valence = Valence.allCases.first { $0.sizeGroup == size && $0.polarity == polarity }!
-                            stone(valence, height: rowHeight)
+                            stone(valence, height: Self.rowHeight(for: size, in: proxy.size))
                                 .frame(maxWidth: .infinity)
                                 .onLongPressGesture { detailValence = valence }
                         }
@@ -101,6 +102,20 @@ struct StoneLabView: View {
             .gesture(lightDrag(center: CGPoint(x: proxy.size.width / 2, y: proxy.size.height / 2)))
         }
         .padding(.horizontal, 16)
+    }
+
+    /// A row's stone height. The three rows share the grid height in the
+    /// fan's own proportions (`ValenceFanLayout.stoneHeight`), so the size
+    /// axis reads the same here as on the record step; each row is then
+    /// capped so its stone, at its silhouette's aspect ratio, never grows
+    /// wider than its third of the width.
+    private static func rowHeight(for size: ValenceSizeGroup, in grid: CGSize) -> CGFloat {
+        let fanTotal = ValenceSizeGroup.allCases.reduce(CGFloat(0)) { $0 + ValenceFanLayout.stoneHeight(for: $1) }
+        let available = max(0, grid.height - 2 * gridSpacing)
+        let fitsHeight = available * ValenceFanLayout.stoneHeight(for: size) / fanTotal
+        let columnWidth = max(0, (grid.width - 2 * gridSpacing) / 3)
+        let fitsWidth = columnWidth / CGFloat(PebbleOutlineGeometry.aspectRatio(for: size))
+        return max(0, min(fitsHeight, fitsWidth))
     }
 
     private func stone(_ valence: Valence, height: CGFloat) -> some View {
