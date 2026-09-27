@@ -30,13 +30,37 @@ object RecentAuth {
         accessToken: String?,
         now: Instant = Instant.now(),
     ): Boolean {
-        val amr = accessToken?.let(::payloadOf)?.get("amr") as? JsonArray ?: return false
-        val cutoff = now.minus(WINDOW).epochSecond.toDouble()
-        return amr.any { entry ->
-            val stamp = (entry as? JsonObject)?.get("timestamp") as? JsonPrimitive
-            val seconds = stamp?.takeUnless { it.isString }?.doubleOrNull
-            seconds != null && seconds >= cutoff
-        }
+        val newest = newestStamp(accessToken) ?: return false
+        return newest >= now.minus(WINDOW).epochSecond.toDouble()
+    }
+
+    /**
+     * The newest numeric `amr` timestamp (epoch seconds), or null when there is
+     * none. "Any stamp within the window" is "the newest one is", so this is
+     * also how a caller tells a NEW sign-in from a token that was already
+     * fresh: the newest stamp moved forward.
+     */
+    fun newestStamp(accessToken: String?): Double? {
+        val amr = accessToken?.let(::payloadOf)?.get("amr") as? JsonArray ?: return null
+        return amr
+            .mapNotNull { entry ->
+                val stamp = (entry as? JsonObject)?.get("timestamp") as? JsonPrimitive
+                stamp?.takeUnless { it.isString }?.doubleOrNull
+            }.maxOrNull()
+    }
+
+    /**
+     * True when [accessToken] is fresh AND proves a sign-in newer than
+     * [previousStamp] (the [newestStamp] of the token held before a re-auth
+     * started; null when that token had none).
+     */
+    fun isNewSignIn(
+        accessToken: String?,
+        previousStamp: Double?,
+        now: Instant = Instant.now(),
+    ): Boolean {
+        val newest = newestStamp(accessToken) ?: return false
+        return isFresh(accessToken, now) && (previousStamp == null || newest > previousStamp)
     }
 
     private fun payloadOf(token: String): JsonObject? {

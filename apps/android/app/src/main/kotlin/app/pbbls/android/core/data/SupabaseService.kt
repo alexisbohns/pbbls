@@ -67,7 +67,7 @@ interface SupabaseServicing {
 
     /**
      * Re-runs Google OAuth for the current user and suspends until a session
-     * with a fresh `amr` stamp arrives. If it comes back as a different user,
+     * with a fresh, NEWER `amr` stamp arrives. If it comes back as a different user,
      * that session is signed out and [ReauthAccountMismatchException] thrown.
      * Suspends until then — cancel the caller to abandon.
      */
@@ -232,9 +232,15 @@ class SupabaseService
          * Collecting `sessionStatus` here is a second, short-lived collector,
          * not [start]'s. The no-re-entry rule is about calling supabase-kt from
          * INSIDE a collector; the sign-out below runs after `first` returned.
+         *
+         * It waits for a NEW sign-in (the newest `amr` stamp moved forward), not
+         * merely a fresh token: `sessionStatus` replays the current session, and
+         * after a server `reauth_required` that session can still look fresh to
+         * this clock, which would return before the Custom Tab was ever used.
          */
         override suspend fun reauthenticateWithGoogle() {
             val before = session?.user ?: error("reauthenticateWithGoogle: not authenticated")
+            val stampBefore = RecentAuth.newestStamp(session?.accessToken)
             try {
                 client.auth.signInWith(Google) {
                     // Steer Google to the same account; a different one is caught below.
@@ -249,7 +255,7 @@ class SupabaseService
                 client.auth.sessionStatus
                     .filterIsInstance<SessionStatus.Authenticated>()
                     .map { it.session }
-                    .first { RecentAuth.isFresh(it.accessToken) }
+                    .first { RecentAuth.isNewSignIn(it.accessToken, stampBefore) }
             if (returned.user?.id != before.id) {
                 Log.e(TAG, "reauthenticateWithGoogle: came back as a different user")
                 signOut()

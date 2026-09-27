@@ -86,6 +86,21 @@ class RecentAuthTest {
         ).forEach { assertFalse(it.toString(), RecentAuth.isFresh(it, now)) }
     }
 
+    /**
+     * The Google re-auth waits on this: `sessionStatus` replays the current
+     * session, which can already look fresh after a server `reauth_required`.
+     */
+    @Test
+    fun `a new sign-in needs a newer stamp than the one held before`() {
+        val held = tokenAt(60)
+        val before = RecentAuth.newestStamp(held)
+        assertFalse(RecentAuth.isNewSignIn(held, before, now))
+        assertTrue(RecentAuth.isNewSignIn(tokenAt(5), before, now))
+        assertTrue(RecentAuth.isNewSignIn(tokenAt(5), null, now))
+        assertFalse(RecentAuth.isNewSignIn(tokenAt(5), RecentAuth.newestStamp(tokenAt(1)), now))
+        assertFalse(RecentAuth.isNewSignIn(tokenAt(660), RecentAuth.newestStamp(tokenAt(7200)), now))
+    }
+
     @Test
     fun `reauth_required from PostgREST and from the edge function are both recognized`() {
         assertTrue(postgrestException("reauth_required").isReauthRequired())
