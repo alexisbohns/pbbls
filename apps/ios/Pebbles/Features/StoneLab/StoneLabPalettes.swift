@@ -14,7 +14,7 @@ struct StoneLabPalette: Identifiable, Hashable {
 
     var id: String { slug }
 
-    enum Slot: String, CaseIterable, Identifiable {
+    enum Slot: String, CaseIterable, Identifiable, Codable {
         case primary, secondary, light, surface, dark, shaded
         var id: String { rawValue }
     }

@@ -8,14 +8,10 @@ import SwiftUI
 struct StoneLabView: View {
     @Environment(\.dismiss) private var dismiss
 
-    @State private var paletteIndex = 2 // joy: the warmest, easiest to judge
+    // The knobs live in `StoneLabSettings`, restored from the device on
+    // open and saved on every change, so a restart does not lose a pick.
+    @State private var settings = StoneLabSettings.load()
     @State private var light: StoneLight = .rest
-    @State private var materials: [ValencePolarity: StoneMaterial] = Dictionary(
-        uniqueKeysWithValues: ValencePolarity.allCases.map { ($0, StoneMaterial.starting(for: $0)) }
-    )
-    @State private var tones: [ValencePolarity: StoneTones] = Dictionary(
-        uniqueKeysWithValues: ValencePolarity.allCases.map { ($0, StoneTones.starting(for: $0)) }
-    )
     @State private var knobPolarity: ValencePolarity = .neutral
     @State private var isFlat = false
     @State private var isLowPower = ProcessInfo.processInfo.isLowPowerModeEnabled
@@ -25,7 +21,10 @@ struct StoneLabView: View {
     /// first open never wobbles them on the main thread.
     @State private var isArtReady = false
 
-    private var palette: StoneLabPalette { StoneLabPalettes.all[paletteIndex] }
+    private var palette: StoneLabPalette {
+        StoneLabPalettes.all[min(max(settings.paletteIndex, 0), StoneLabPalettes.all.count - 1)]
+    }
+    private var paletteIndex: Int { settings.paletteIndex }
     private var flat: Bool { isFlat || isLowPower }
 
     var body: some View {
@@ -51,6 +50,7 @@ struct StoneLabView: View {
             .sheet(item: $detailValence) { valence in
                 detail(valence)
             }
+            .onChange(of: settings) { _, new in new.save() }
         }
         .task(priority: .userInitiated) {
             // The nine carvings cost about a second of wobbling; off the main
@@ -67,7 +67,7 @@ struct StoneLabView: View {
             HStack(spacing: 8) {
                 ForEach(Array(StoneLabPalettes.all.enumerated()), id: \.element.id) { index, palette in
                     Button {
-                        paletteIndex = index
+                        settings.paletteIndex = index
                     } label: {
                         Text(verbatim: palette.slug.capitalized)
                             .font(.footnote.weight(.medium))
@@ -141,8 +141,8 @@ struct StoneLabView: View {
         StoneView(
             valence: valence,
             palette: palette,
-            material: materials[valence.polarity] ?? .starting(for: valence.polarity),
-            tones: tones[valence.polarity] ?? .starting(for: valence.polarity),
+            material: settings.material(for: valence.polarity),
+            tones: settings.tones(for: valence.polarity),
             light: light,
             height: height,
             isFlat: flat
@@ -175,10 +175,12 @@ struct StoneLabView: View {
                 Spacer()
                 Button { isKnobsOpen.toggle() } label: { Text(verbatim: isKnobsOpen ? "Hide knobs" : "Knobs") }
                 Button {
-                    for polarity in ValencePolarity.allCases {
-                        materials[polarity] = .starting(for: polarity)
-                        tones[polarity] = .starting(for: polarity)
-                    }
+                    UIPasteboard.general.string = settings.summary
+                } label: {
+                    Text(verbatim: "Copy")
+                }
+                Button {
+                    settings = StoneLabSettings()
                     light = .rest
                 } label: {
                     Text(verbatim: "Reset")
@@ -213,15 +215,15 @@ struct StoneLabView: View {
 
     private var materialBinding: Binding<StoneMaterial> {
         Binding(
-            get: { materials[knobPolarity] ?? .starting(for: knobPolarity) },
-            set: { materials[knobPolarity] = $0 }
+            get: { settings.material(for: knobPolarity) },
+            set: { settings.materials[knobPolarity.rawValue] = $0 }
         )
     }
 
     private var tonesBinding: Binding<StoneTones> {
         Binding(
-            get: { tones[knobPolarity] ?? .starting(for: knobPolarity) },
-            set: { tones[knobPolarity] = $0 }
+            get: { settings.tones(for: knobPolarity) },
+            set: { settings.tones[knobPolarity.rawValue] = $0 }
         )
     }
 
@@ -242,7 +244,7 @@ struct StoneLabView: View {
         knob("Lip opacity", m.lipOpacity, 0...1)
         switch m.wrappedValue.kind {
         case .lava:
-            knob("Crack", m.crack, 0...0.3)
+            knob("Pits", m.pits, 0...1)
         case .river:
             knob("Banding", m.banding, 0...1)
         case .gem:

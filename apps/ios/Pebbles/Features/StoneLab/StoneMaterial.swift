@@ -4,13 +4,13 @@ import Foundation
 /// The knobs of one surface. Every field is a shader uniform; `uniforms`
 /// fixes their order so `StoneShaders` and `stone.metal` agree by test rather
 /// than by eye.
-struct StoneMaterial: Equatable {
-    enum Kind: Int, CaseIterable, Identifiable {
+struct StoneMaterial: Equatable, Codable {
+    enum Kind: Int, CaseIterable, Identifiable, Codable {
         case lava, river, gem
         var id: Int { rawValue }
         var label: String {
             switch self {
-            case .lava: return "Lava"
+            case .lava: return "Blackstone"
             case .river: return "River"
             case .gem: return "Gem"
             }
@@ -30,8 +30,8 @@ struct StoneMaterial: Equatable {
     var facetDensity: Double
     /// Gem: glitter point density, 0..1.
     var glitter: Double
-    /// Lava: crack width threshold on the cell edge distance, 0..0.3.
-    var crack: Double
+    /// Blackstone: vesicle (pit) density, 0..1.
+    var pits: Double
     /// River: sediment anisotropy, 0..1.
     var banding: Double
     /// Carving lip width in points.
@@ -41,25 +41,27 @@ struct StoneMaterial: Equatable {
 
     /// Material uniforms in the order `stone.metal` declares them after the
     /// light, the tones and the lip-light opacity: kind, scale, relief, contrast, sheen,
-    /// facetDensity, glitter, crack, banding.
+    /// facetDensity, glitter, pits, banding.
     var uniforms: [Float] {
         [Float(kind.rawValue), Float(scale), Float(relief), Float(contrast), Float(sheen),
-         Float(facetDensity), Float(glitter), Float(crack), Float(banding)]
+         Float(facetDensity), Float(glitter), Float(pits), Float(banding)]
     }
 
     static func starting(for polarity: ValencePolarity) -> StoneMaterial {
         switch polarity {
         case .lowlight:
-            return StoneMaterial(kind: .lava, scale: 0.045, relief: 1.6, contrast: 0.55, sheen: 0.05,
-                                 facetDensity: 1, glitter: 0, crack: 0.06, banding: 0,
-                                 lipWidth: 1.5, lipOpacity: 0.8)
+            // The maintainer's pick on the phone (2026-09-27): river grain, deep
+            // relief, full contrast, almost no sheen, a hairline lip.
+            return StoneMaterial(kind: .river, scale: 0.13, relief: 3, contrast: 1, sheen: 0.01,
+                                 facetDensity: 1, glitter: 0, pits: 0.4, banding: 0,
+                                 lipWidth: 0.5, lipOpacity: 0.84)
         case .neutral:
             return StoneMaterial(kind: .river, scale: 0.35, relief: 0.6, contrast: 0.22, sheen: 0.18,
-                                 facetDensity: 1, glitter: 0, crack: 0, banding: 0.5,
+                                 facetDensity: 1, glitter: 0, pits: 0, banding: 0.5,
                                  lipWidth: 1.2, lipOpacity: 0.7)
         case .highlight:
             return StoneMaterial(kind: .gem, scale: 0.06, relief: 1.2, contrast: 0.45, sheen: 0.35,
-                                 facetDensity: 1, glitter: 0.35, crack: 0, banding: 0,
+                                 facetDensity: 1, glitter: 0.35, pits: 0, banding: 0,
                                  lipWidth: 1.2, lipOpacity: 0.9)
         }
     }

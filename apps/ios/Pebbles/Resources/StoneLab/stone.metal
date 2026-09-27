@@ -102,7 +102,7 @@ static float3 normalFromHeight(float h, float hx, float hy, float step, float re
                              float3 body, float3 ink, float3 lipLight, float3 lipShadow,
                              float lipLightOpacity,
                              float kind, float scale, float relief, float contrast, float sheen,
-                             float facetDensity, float glitter, float crack, float banding) {
+                             float facetDensity, float glitter, float pits, float banding) {
     if (color.a <= 0.002h) { return color; }
     float2 p = position / max(unit, 0.0001);
     uint seed = uint(seedValue);
@@ -111,20 +111,22 @@ static float3 normalFromHeight(float h, float hx, float hy, float step, float re
     int m = int(kind);
 
     if (m == 0) {
-        // Lava: crust plates (Worley cells) with dark cracks between, each
-        // plate tilted by its own random normal, fine grain over the top.
-        float d1, d2;
-        float id = worley(p * scale, seed, d1, d2);
-        float edge = d2 - d1;
-        float plate = smoothstep(crack, crack + 0.05, edge);
-        float2 tilt = (float2(hash21(int2(id * 4096.0, 1), seed), hash21(int2(1, id * 4096.0), seed)) - 0.5) * relief * 0.7;
-        float g = fractal(p, scale * 8.0, 2, seed + 3u) - 0.5;
-        float3 n = normalize(float3(tilt.x + g * relief * 0.6, tilt.y + g * relief * 0.6, 1.0));
-        Lit l = lit(n, L, 6.0);
-        float shade = 0.45 + 0.85 * l.diffuse;
+        // Blackstone: matte basalt. A three-octave grain gives the micro
+        // normal; a higher-frequency field thresholded by `pits` punches
+        // small dark vesicles into it; the specular is broad and faint.
+        float stepB = 0.5;
+        float h = fractal(p, scale, 3, seed);
+        float hx = fractal(p + float2(stepB, 0.0), scale, 3, seed);
+        float hy = fractal(p + float2(0.0, stepB), scale, 3, seed);
+        float3 n = normalFromHeight(h, hx, hy, stepB, relief);
+        Lit l = lit(n, L, 4.0);
+        float shade = 0.5 + 0.7 * l.diffuse;
         col = body * mix(1.0, shade, contrast);
-        col = mix(ink, col, plate);
-        col += sheen * l.spec * lipLight * lipLightOpacity;
+        float pitField = fractal(p, scale * 5.0, 1, seed + 5u);
+        float pitThreshold = 0.5 + (1.0 - pits) * 0.35;
+        float pit = smoothstep(pitThreshold, pitThreshold + 0.04, pitField);
+        col = mix(col, ink * 0.6, pit);
+        col += sheen * l.spec * lipLight * lipLightOpacity * 0.5;
     } else if (m == 1) {
         // River: continuous fine grain, one axis stretched into sediment
         // banding, a soft broad specular.
