@@ -98,7 +98,11 @@ try {
   const cases: Array<[string, unknown, boolean]> = [
     ["fresh password stamp", [{ method: "password", timestamp: nowS() }], true],
     ["fresh oauth stamp", [{ method: "oauth", timestamp: nowS() - 60 }], true],
-    ["11-minute-old stamp", [{ method: "password", timestamp: nowS() - 660 }], false],
+    // Far past the window: the runner's clock is compared with the server's.
+    ["30-minute-old stamp", [{ method: "password", timestamp: nowS() - 1800 }], false],
+    // Out of timestamp range: compared in epoch space, so it answers instead of
+    // raising. (A future stamp cannot be forged — the claim is signed.)
+    ["out-of-range stamp does not raise", [{ method: "password", timestamp: 1e20 }], true],
     ["old + fresh mixed", [{ method: "password", timestamp: nowS() - 7200 }, { method: "oauth", timestamp: nowS() }], true],
     ["empty array", [], false],
     ["null", null, false],

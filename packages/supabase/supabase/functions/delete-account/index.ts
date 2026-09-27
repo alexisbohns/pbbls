@@ -66,7 +66,7 @@ serve(async (req: Request) => {
   // Recent sign-in gate — before anything irreversible (see header).
   const { error: recentAuthError } = await authClient.rpc("assert_recent_auth");
   if (recentAuthError) {
-    if (recentAuthError.message === "reauth_required") {
+    if (recentAuthError.code === "P0001" && recentAuthError.message === "reauth_required") {
       return json({ error: "reauth_required" }, 428);
     }
     console.error("delete-account: assert_recent_auth failed:", recentAuthError);

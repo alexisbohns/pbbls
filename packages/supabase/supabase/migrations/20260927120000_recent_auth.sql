@@ -31,8 +31,11 @@
 -- 1. The evaluator. Pure over its arguments (it reads now(), hence STABLE).
 --
 -- True when any element carries a numeric `timestamp` no older than p_max_age.
--- CASE, not AND, guards jsonb_array_elements: Postgres does not promise to
--- short-circuit AND, and jsonb_array_elements raises on a non-array.
+-- CASE, not AND, guards jsonb_array_elements and the numeric cast: Postgres
+-- orders AND quals by cost, not as written, and both raise on the wrong type.
+-- The comparison stays in epoch space (numeric), so an absurd stamp compares
+-- false instead of raising `timestamp out of range`. `->` on a non-object
+-- element yields NULL, so no object check is needed.
 -- ---------------------------------------------------------------------------
 create function public.recent_auth_ok(p_amr jsonb, p_max_age interval)
 returns boolean
@@ -44,21 +47,24 @@ as $$
     when jsonb_typeof(p_amr) = 'array' then exists (
       select 1
       from jsonb_array_elements(p_amr) as e
-      where jsonb_typeof(e) = 'object'
-        and jsonb_typeof(e -> 'timestamp') = 'number'
-        and to_timestamp((e ->> 'timestamp')::double precision) >= now() - p_max_age
+      where case
+        when jsonb_typeof(e -> 'timestamp') = 'number'
+          then (e ->> 'timestamp')::numeric >= extract(epoch from now() - p_max_age)
+        else false
+      end
     )
     else false
   end;
 $$;
 
 -- ---------------------------------------------------------------------------
--- 2. The rollout switch. #977 re-emits this returning true.
+-- 2. The rollout switch. #977 re-emits this returning true. STABLE, not
+-- IMMUTABLE: its whole point is to change, and nothing may index on it.
 -- ---------------------------------------------------------------------------
 create function public.recent_auth_enforced()
 returns boolean
 language sql
-immutable
+stable
 set search_path = public
 as $$
   select false;

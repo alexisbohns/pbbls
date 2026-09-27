@@ -58,7 +58,8 @@ The database is the contract between four clients, and these Deno scripts are th
 | `npm run db:verify:public-profile` | `verify-public-profile.ts` | `get_public_profile` jsonb allowlist | anon |
 | `npm run db:verify:guard` | `verify-profiles-privileged-guard.ts` | `profiles_privileged_guard` (#739) | anon |
 | `npm run db:verify:reference` | `verify-reference-data.ts` | the committed emotion reference data still matches the project (#796) | anon, **read-only** |
-| `npm run db:verify` | the five above, in order | — | anon |
+| `npm run db:verify:recent-auth` | `verify-recent-auth.ts` | recent sign-in check (#976): `amr` evaluator, no over-blocking of fresh sessions | anon |
+| `npm run db:verify` | the anon harnesses above (plus reports and glyph), in order | — | anon |
 | `npm run db:verify:purge` | `verify-account-purge.ts` | `purge_account` contract | anon + **service role** |
 
 Credentials come from the environment (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, and `SUPABASE_SERVICE_ROLE_KEY` for the purge harness); the repo root `.env` carries all three: `set -a; . ./.env; set +a`.
@@ -69,7 +70,7 @@ A new harness added to `scripts/` gains a `db:verify:*` script and a workflow st
 
 **`db:verify:purge` is deliberately NOT in CI and must be run by hand** after any batch touching `purge_account`. It is the one harness needing `SUPABASE_SERVICE_ROLE_KEY`, this repo is public, and a leaked service-role key is total database access. Do not "fix" its absence by adding that secret without deciding it as such.
 
-**Orphans.** A run killed between signup and cleanup leaves a throwaway account behind. They are greppable in `auth.users` by their prefixes — `drafts-verify-`, `grades-verify-`, `public-verify-`, `guard-verify-`, all `@example.test`. There is no automated sweep (deleting them needs the service role).
+**Orphans.** A run killed between signup and cleanup leaves a throwaway account behind. They are greppable in `auth.users` by their prefixes — `drafts-verify-`, `grades-verify-`, `public-verify-`, `guard-verify-`, `recent-auth-verify-`, all `@example.test`. There is no automated sweep (deleting them needs the service role).
 
 ## What CI runs on `packages/supabase/**`
 
