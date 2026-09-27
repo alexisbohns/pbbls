@@ -1,8 +1,9 @@
 import SwiftUI
 
 /// The six tones a stone is coloured from. The picker builds one from the
-/// brand accent, the lab from an emotion's hex sextet; a `StoneTones` value
-/// then says which slot each role (body, ink, lips) takes.
+/// brand accent, the Path from an emotion's palette, the lab from a hex
+/// sextet; a `StoneTones` value then says which slot each role (body, ink,
+/// lips) takes. `dark` is the darkest tone and `shaded` the mid one.
 struct StonePalette: Equatable {
     enum Slot: String, CaseIterable, Identifiable, Codable {
         case primary, secondary, light, surface, dark, shaded
@@ -16,22 +17,20 @@ struct StonePalette: Equatable {
     let dark: Color
     let shaded: Color
 
-    /// The brand accent. Its tier names run the other way from the emotion
-    /// palettes the stone tables were tuned on: the emotion `shaded` is the
-    /// darkest tone and `dark` the mid one, while the brand's `AccentDark`
-    /// (#341B1B) is the darkest and `AccentShaded` (#8C4949) the mid. The two
-    /// are swapped here so a `StoneTones` slot means the same depth on both.
+    /// The brand accent: `AccentDark` (#341B1B) is the darkest tone and
+    /// `AccentShaded` (#8C4949) the mid one, the same convention as the
+    /// `emotion_categories` columns.
     static let brand = StonePalette(
         primary: Color.accent.primary,
         secondary: Color.accent.secondary,
         light: Color.accent.light,
         surface: Color.accent.surface,
-        dark: Color.accent.shaded,
-        shaded: Color.accent.dark
+        dark: Color.accent.dark,
+        shaded: Color.accent.shaded
     )
 
-    /// An emotion's palette: same six slots, same convention (`shaded` is the
-    /// darkest tone, `dark` the mid one), so the tables apply unchanged.
+    /// An emotion's palette: same six slots, same convention (`dark` is the
+    /// darkest tone, `shaded` the mid one), so the tables apply unchanged.
     init(emotion: EmotionPalette) {
         self.init(primary: emotion.primary, secondary: emotion.secondary, light: emotion.light,
                   surface: emotion.surface, dark: emotion.dark, shaded: emotion.shaded)

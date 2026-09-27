@@ -55,6 +55,6 @@ struct StoneLabSettingsTests {
         #expect(text.contains("[neutral] river"))
         #expect(text.contains("[highlight] gem"))
         #expect(text.contains("scale 0.05 relief 3.00 contrast 1.00 sheen 0.05"))
-        #expect(text.contains("body shaded@1.00 ink shaded@1.00 lipLight secondary@1.00"))
+        #expect(text.contains("body dark@1.00 ink dark@1.00 lipLight secondary@1.00"))
     }
 }

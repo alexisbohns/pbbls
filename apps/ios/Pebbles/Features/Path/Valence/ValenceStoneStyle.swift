@@ -67,16 +67,15 @@ struct ValenceStoneStyle {
     }
 
     /// Fill for the headline word naming the picked valence. Since #974 the
-    /// stones are lit brand-coloured stone (`StoneTones.starting`: shaded,
-    /// dark and primary bodies), so the word takes the brand tone its stone
+    /// stones are lit brand-coloured stone (`StoneTones.starting`: dark,
+    /// shaded and primary bodies), so the word takes the brand tone its stone
     /// wears rather than the old peach mesh. Lowlight stays the system
     /// foreground: at headline size the near-black `shaded` reads as disabled
     /// in light mode and vanishes in dark mode.
     static func headlineInk(for polarity: ValencePolarity) -> AnyShapeStyle {
         switch polarity {
         case .lowlight:  return AnyShapeStyle(Color.system.foreground)
-        // The neutral stone's body is the emotion-convention `dark`, which on
-        // the brand accent is `AccentShaded` (see `StonePalette.brand`).
+        // The neutral stone's body is the mid `shaded` tone.
         case .neutral:   return AnyShapeStyle(Color.accent.shaded)
         case .highlight: return AnyShapeStyle(Color.accent.primary)
         }

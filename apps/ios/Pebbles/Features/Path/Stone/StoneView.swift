@@ -135,9 +135,14 @@ struct StoneView: View {
     private var shadowLayer: some View {
         if let art = WobbleRenderer.backdropArt(size: size, polarity: valence.polarity) {
             let push = light.lipOffset(width: -Double(height) * 0.03)
+            // On a light page a black shadow at the lab's strength reads as
+            // soot; the palette's darkest tone at a third of it sits the stone
+            // down without dirtying the page. Dark mode keeps black.
+            let tint = scheme == .dark ? Color.black : palette.color(.dark)
+            let strength = look.shadowStrength * (scheme == .dark ? 1 : 0.35)
             WobbledBackdropShape(art: art)
-                .fill(Color.black.opacity(look.shadowStrength), style: FillStyle(eoFill: art.usesEvenOddFill))
-                .blur(radius: height * 0.03)
+                .fill(tint.opacity(strength), style: FillStyle(eoFill: art.usesEvenOddFill))
+                .blur(radius: height * (scheme == .dark ? 0.03 : 0.04))
                 .offset(x: push.width, y: push.height)
         }
     }

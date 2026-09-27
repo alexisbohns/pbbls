@@ -20,7 +20,8 @@ struct StoneLabPalettesTests {
     func matchesMigration(palette: StoneLabPalette) throws {
         let line = try #require(Self.migrationLines().first { $0.contains("'\(palette.slug)', '") })
         let hexes = line.split(separator: "'").map(String.init).filter { $0.hasPrefix("#") }
-        #expect(hexes == [palette.primary, palette.secondary, palette.light, palette.surface, palette.dark, palette.shaded])
+        // The migration's column order is …, surface_color, shaded_color, dark_color.
+        #expect(hexes == [palette.primary, palette.secondary, palette.light, palette.surface, palette.shaded, palette.dark])
     }
 
     @Test("all seven groups, in the default category order")
