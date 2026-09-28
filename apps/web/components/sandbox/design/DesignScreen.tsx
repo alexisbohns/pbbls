@@ -8,6 +8,7 @@ import { FixtureProviders } from "./FixtureProviders"
 import { useDesignTheme } from "./useDesignTheme"
 import { FoundationsSection } from "./foundations/FoundationsSection"
 import { PrimitivesSection } from "./primitives/PrimitivesSection"
+import { ComponentsSection } from "./ComponentsSection"
 
 // Seed the palette cache at module scope, before any consumer mounts (the
 // /sandbox/path precedent): pebbles render tinted without a Supabase call.
@@ -60,6 +61,7 @@ export function DesignScreen() {
         >
           <FoundationsSection theme={theme} themeKey={themeKey} />
           <PrimitivesSection />
+          <ComponentsSection />
         </main>
       </FixtureProviders>
     </div>
