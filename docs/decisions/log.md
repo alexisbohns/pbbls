@@ -849,3 +849,18 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - Until #977 lands, the server check is wired and tested for over-blocking only. The stale-token refusal harness case comes with the switch.
 - **Supersedes / Superseded-by:** None.
 - **Refs:** #976, #977, `docs/superpowers/specs/2026-09-27-recent-auth-step-up-design.md`, `packages/supabase/supabase/migrations/20260927120000_recent_auth.sql`, `packages/supabase/supabase/functions/delete-account/index.ts`, `apps/android/app/src/main/kotlin/app/pbbls/android/core/data/RecentAuth.kt`.
+
+## 2026-09-28 — The web follows Android's M3-evo theme; colour is generated from ColorSchemes.kt (#986)
+
+- **Status:** taken
+- **Scope:** web, ui
+- **Context:** Android adopted the M3-evo Material 3 Expressive theme (2026-09-24, #853) and stock M3 chrome (#854). The web still renders the iOS-derived color worlds through shadcn tokens. Before any default changes, the maintainer wants to see M3 on every web component and tune them one at a time.
+- **Decision:** The web's M3 colour roles are **generated** from `apps/android/.../core/designsystem/ColorSchemes.kt` into `apps/web/app/m3-theme.css` (`npm run generate:m3 --workspace=apps/web`), scoped under `.m3` with `.dark` and `.m3-contrast-medium|high` for the six schemes. A hand-written bridge in `globals.css` points every shadcn token at an M3 role, so untuned components render M3 as-is. Tuning a component means adding explicit `m3:` role classes (`bg-card m3:bg-m3-surface-container-low`) so the Current theme is unaffected. Type follows `Typography.kt` (Ysabeau for display/headline/title, Inclusive Sans for body/label) as `m3-type-*` utilities; shapes follow `Shapes.kt` as `rounded-m3-*`. Only `/sandbox/design` applies `.m3`.
+- **Why:** A hand-copied palette drifts the first time Android re-exports. A Vitest drift gate on every PR makes the Kotlin file the single source for both surfaces. The bridge shows the whole app in M3 on day one, and `m3:` variants let tuning land incrementally without touching what real users see.
+- **Consequences:**
+  - Re-exporting the Android palette now means running `generate:m3` in the same PR, or `web.yml` fails.
+  - The design page is where the migration's progress is tracked (`bridged` / `tuned` per specimen).
+  - Flipping the web's default to M3, retiring the color worlds, and iOS (#921) are separate decisions.
+  - `--font-sans` is now `var(--app-font-sans)`. Change the app font there, not in `@theme`.
+- **Supersedes / Superseded-by:** None.
+- **Refs:** #986, #853, #854, #921, `docs/superpowers/specs/2026-09-28-web-m3-design-page-design.md`, `apps/web/lib/theme/m3-schemes.ts`, `apps/web/app/m3-theme.css`.
