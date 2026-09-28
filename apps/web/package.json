@@ -9,7 +9,8 @@
     "lint": "eslint",
     "test": "vitest run",
     "test:week-roll": "tsx scripts/test-week-roll.ts",
-    "generate:splash": "tsx scripts/generate-splash-screens.ts"
+    "generate:splash": "tsx scripts/generate-splash-screens.ts",
+    "generate:m3": "tsx scripts/generate-m3-theme.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
