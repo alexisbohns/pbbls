@@ -8,8 +8,8 @@ import androidx.compose.ui.graphics.toArgb
 import java.util.Locale
 
 // GENERATED from the M3-evo Material Theme Builder export (seed #CE7E8A,
-// Material Theme Builder export 2026-09-24 12:15:20) for #853. Regenerate with the script in
-// docs/superpowers/plans/2026-09-24-android-m3-expressive-theme.md (Task 1.3);
+// export v2 2026-09-28, generated with material-color-utilities (#990)) for #853. Regenerate with
+// apps/android/scripts/generate-color-schemes.py (#990);
 // do not hand-edit a value. This file is the only place a Color(0x…) literal
 // may live outside tests — ThemeLiteralsTest enforces it from Part 7.
 
@@ -28,10 +28,10 @@ internal val LightScheme: ColorScheme =
         onTertiary = Color(0xFFFFFFFF),
         tertiaryContainer = Color(0xFFACF2C8),
         onTertiaryContainer = Color(0xFF025233),
-        error = Color(0xFF7F560F),
+        error = Color(0xFF9B4500),
         onError = Color(0xFFFFFFFF),
-        errorContainer = Color(0xFFFFDDB2),
-        onErrorContainer = Color(0xFF624000),
+        errorContainer = Color(0xFFFFDBCA),
+        onErrorContainer = Color(0xFF763300),
         background = Color(0xFFFFF8F7),
         onBackground = Color(0xFF22191A),
         surface = Color(0xFFFFF8F7),
@@ -80,9 +80,9 @@ internal val LightMediumContrastScheme: ColorScheme =
         onTertiary = Color(0xFFFFFFFF),
         tertiaryContainer = Color(0xFF377957),
         onTertiaryContainer = Color(0xFFFFFFFF),
-        error = Color(0xFF4C3100),
+        error = Color(0xFF5C2600),
         onError = Color(0xFFFFFFFF),
-        errorContainer = Color(0xFF90651E),
+        errorContainer = Color(0xFFB25000),
         onErrorContainer = Color(0xFFFFFFFF),
         background = Color(0xFFFFF8F7),
         onBackground = Color(0xFF22191A),
@@ -132,9 +132,9 @@ internal val LightHighContrastScheme: ColorScheme =
         onTertiary = Color(0xFFFFFFFF),
         tertiaryContainer = Color(0xFF075435),
         onTertiaryContainer = Color(0xFFFFFFFF),
-        error = Color(0xFF3F2700),
+        error = Color(0xFF4D1E00),
         onError = Color(0xFFFFFFFF),
-        errorContainer = Color(0xFF654200),
+        errorContainer = Color(0xFF7A3500),
         onErrorContainer = Color(0xFFFFFFFF),
         background = Color(0xFFFFF8F7),
         onBackground = Color(0xFF22191A),
@@ -184,10 +184,10 @@ internal val DarkScheme: ColorScheme =
         onTertiary = Color(0xFF003822),
         tertiaryContainer = Color(0xFF025233),
         onTertiaryContainer = Color(0xFFACF2C8),
-        error = Color(0xFFF3BD6E),
-        onError = Color(0xFF442B00),
-        errorContainer = Color(0xFF624000),
-        onErrorContainer = Color(0xFFFFDDB2),
+        error = Color(0xFFFFB68E),
+        onError = Color(0xFF532200),
+        errorContainer = Color(0xFF763300),
+        onErrorContainer = Color(0xFFFFDBCA),
         background = Color(0xFF1A1112),
         onBackground = Color(0xFFF0DEDF),
         surface = Color(0xFF1A1112),
@@ -236,9 +236,9 @@ internal val DarkMediumContrastScheme: ColorScheme =
         onTertiary = Color(0xFF002C1A),
         tertiaryContainer = Color(0xFF5C9E79),
         onTertiaryContainer = Color(0xFF000000),
-        error = Color(0xFFFFD69E),
-        onError = Color(0xFF362100),
-        errorContainer = Color(0xFFB8883F),
+        error = Color(0xFFFFD3BD),
+        onError = Color(0xFF431A00),
+        errorContainer = Color(0xFFEA6B00),
         onErrorContainer = Color(0xFF000000),
         background = Color(0xFF1A1112),
         onBackground = Color(0xFFF0DEDF),
@@ -288,10 +288,10 @@ internal val DarkHighContrastScheme: ColorScheme =
         onTertiary = Color(0xFF000000),
         tertiaryContainer = Color(0xFF8DD1A9),
         onTertiaryContainer = Color(0xFF000E06),
-        error = Color(0xFFFFEDD9),
+        error = Color(0xFFFFECE4),
         onError = Color(0xFF000000),
-        errorContainer = Color(0xFFEFB96B),
-        onErrorContainer = Color(0xFF130900),
+        errorContainer = Color(0xFFFFB185),
+        onErrorContainer = Color(0xFF190600),
         background = Color(0xFF1A1112),
         onBackground = Color(0xFFF0DEDF),
         surface = Color(0xFF1A1112),
@@ -325,6 +325,60 @@ internal val DarkHighContrastScheme: ColorScheme =
         surfaceContainerHighest = Color(0xFF4F4445),
     )
 
+/** Sand (custom colour, not harmonized) for [LightScheme]. */
+internal val LightSand: ColorFamily =
+    ColorFamily(
+        color = Color(0xFF7F560F),
+        onColor = Color(0xFFFFFFFF),
+        colorContainer = Color(0xFFFFDDB2),
+        onColorContainer = Color(0xFF624000),
+    )
+
+/** Sand (custom colour, not harmonized) for [LightMediumContrastScheme]. */
+internal val LightMediumContrastSand: ColorFamily =
+    ColorFamily(
+        color = Color(0xFF4C3100),
+        onColor = Color(0xFFFFFFFF),
+        colorContainer = Color(0xFF90651E),
+        onColorContainer = Color(0xFFFFFFFF),
+    )
+
+/** Sand (custom colour, not harmonized) for [LightHighContrastScheme]. */
+internal val LightHighContrastSand: ColorFamily =
+    ColorFamily(
+        color = Color(0xFF3F2700),
+        onColor = Color(0xFFFFFFFF),
+        colorContainer = Color(0xFF654200),
+        onColorContainer = Color(0xFFFFFFFF),
+    )
+
+/** Sand (custom colour, not harmonized) for [DarkScheme]. */
+internal val DarkSand: ColorFamily =
+    ColorFamily(
+        color = Color(0xFFF3BD6E),
+        onColor = Color(0xFF442B00),
+        colorContainer = Color(0xFF624000),
+        onColorContainer = Color(0xFFFFDDB2),
+    )
+
+/** Sand (custom colour, not harmonized) for [DarkMediumContrastScheme]. */
+internal val DarkMediumContrastSand: ColorFamily =
+    ColorFamily(
+        color = Color(0xFFFFD69E),
+        onColor = Color(0xFF362100),
+        colorContainer = Color(0xFFB8883F),
+        onColorContainer = Color(0xFF000000),
+    )
+
+/** Sand (custom colour, not harmonized) for [DarkHighContrastScheme]. */
+internal val DarkHighContrastSand: ColorFamily =
+    ColorFamily(
+        color = Color(0xFFFFEDD9),
+        onColor = Color(0xFF000000),
+        colorContainer = Color(0xFFEFB96B),
+        onColorContainer = Color(0xFF130900),
+    )
+
 /**
  * Ink for the Google sign-in capsule, which is a pinned white surface under
  * Google's branding rules and must not follow the theme (the old iOS
@@ -341,6 +395,17 @@ internal fun pebblesColorScheme(
         ContrastLevel.STANDARD -> if (dark) DarkScheme else LightScheme
         ContrastLevel.MEDIUM -> if (dark) DarkMediumContrastScheme else LightMediumContrastScheme
         ContrastLevel.HIGH -> if (dark) DarkHighContrastScheme else LightHighContrastScheme
+    }
+
+/** Sand for one of the six static schemes. Wallpaper colour keeps it too. */
+internal fun pebblesSand(
+    dark: Boolean,
+    contrast: ContrastLevel,
+): ColorFamily =
+    when (contrast) {
+        ContrastLevel.STANDARD -> if (dark) DarkSand else LightSand
+        ContrastLevel.MEDIUM -> if (dark) DarkMediumContrastSand else LightMediumContrastSand
+        ContrastLevel.HIGH -> if (dark) DarkHighContrastSand else LightHighContrastSand
     }
 
 // Hand-written, not from the export: the generator script emits this block

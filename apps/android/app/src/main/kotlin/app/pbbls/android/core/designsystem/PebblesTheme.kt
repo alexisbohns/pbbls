@@ -18,11 +18,15 @@ val LocalHandTypography = staticCompositionLocalOf { PebblesHandTypography }
 /**
  * Pebbles' own tokens beside Material's (#853). Colour, type and shape are
  * `MaterialTheme.*`; this object keeps only what M3 has no slot for —
- * [spacing] and the handwritten faces ([hand]).
+ * [spacing], the custom colours ([colors], #990) and the handwritten faces
+ * ([hand]).
  */
 object PebblesTheme {
     val spacing: Spacing
         @Composable get() = LocalSpacing.current
+
+    val colors: ExtendedColors
+        @Composable get() = LocalExtendedColors.current
 
     val hand: PebblesHandTypography
         @Composable get() = LocalHandTypography.current
@@ -37,7 +41,8 @@ object PebblesTheme {
  * supports it; the OS applies its own contrast level to those), otherwise the
  * export's scheme for the system contrast level. [dynamicColor] defaults to
  * false so previews and screenshot references render the brand scheme; only
- * `MainActivity` passes the user's setting.
+ * `MainActivity` passes the user's setting. Either way the error roles and the
+ * custom colours stay the brand's (#990): a wallpaper scheme's error is red.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -48,14 +53,17 @@ fun PebblesTheme(
     val dark = isSystemInDarkTheme()
     val contrast = rememberContrastLevel()
     val context = LocalContext.current
+    val brand = pebblesColorScheme(dark, contrast)
     val scheme =
         when {
-            dynamicColor -> if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-            else -> pebblesColorScheme(dark, contrast)
+            dynamicColor ->
+                (if (dark) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)).withErrorFrom(brand)
+            else -> brand
         }
     CompositionLocalProvider(
         LocalSpacing provides Spacing,
         LocalHandTypography provides PebblesHandTypography,
+        LocalExtendedColors provides pebblesExtendedColors(dark, contrast),
     ) {
         MaterialExpressiveTheme(
             colorScheme = scheme,
