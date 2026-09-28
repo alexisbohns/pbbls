@@ -6,7 +6,8 @@ const GROUPS: { title: string; pairs: Pair[] }[] = [
   { title: "Primary", pairs: [["primary", "on-primary"], ["primary-container", "on-primary-container"], ["inverse-primary"]] },
   { title: "Secondary", pairs: [["secondary", "on-secondary"], ["secondary-container", "on-secondary-container"]] },
   { title: "Tertiary", pairs: [["tertiary", "on-tertiary"], ["tertiary-container", "on-tertiary-container"]] },
-  { title: "Error (amber)", pairs: [["error", "on-error"], ["error-container", "on-error-container"]] },
+  { title: "Error (orange)", pairs: [["error", "on-error"], ["error-container", "on-error-container"]] },
+  { title: "Sand (custom colour)", pairs: [["sand", "on-sand"], ["sand-container", "on-sand-container"]] },
   {
     title: "Surface",
     pairs: [
