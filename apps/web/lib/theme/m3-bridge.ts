@@ -1,0 +1,41 @@
+/**
+ * The shadcn token → M3 role bridge, as data for the design page's bridge
+ * table. The CSS in globals.css (`:root.m3`) is what actually applies it;
+ * m3-bridge.test.ts fails if the two ever disagree.
+ */
+export const M3_BRIDGE: readonly (readonly [token: string, role: string])[] = [
+  ["background", "surface"],
+  ["foreground", "on-surface"],
+  ["surface", "surface-container"],
+  ["surface-alt", "surface-container-high"],
+  ["card", "surface-container-low"],
+  ["card-foreground", "on-surface"],
+  ["popover", "surface-container"],
+  ["popover-foreground", "on-surface"],
+  ["primary", "primary"],
+  ["primary-foreground", "on-primary"],
+  ["secondary", "secondary-container"],
+  ["secondary-foreground", "on-secondary-container"],
+  ["muted", "surface-container-high"],
+  ["muted-foreground", "on-surface-variant"],
+  ["accent", "surface-container-highest"],
+  ["accent-foreground", "on-surface"],
+  ["destructive", "error"],
+  ["destructive-foreground", "on-error"],
+  ["border", "outline-variant"],
+  ["input", "outline"],
+  ["ring", "primary"],
+  ["chart-1", "primary"],
+  ["chart-2", "tertiary"],
+  ["chart-3", "secondary"],
+  ["chart-4", "error"],
+  ["chart-5", "outline"],
+  ["sidebar", "surface-container"],
+  ["sidebar-foreground", "on-surface"],
+  ["sidebar-primary", "primary"],
+  ["sidebar-primary-foreground", "on-primary"],
+  ["sidebar-accent", "secondary-container"],
+  ["sidebar-accent-foreground", "on-secondary-container"],
+  ["sidebar-border", "outline-variant"],
+  ["sidebar-ring", "primary"],
+]
