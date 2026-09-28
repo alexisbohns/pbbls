@@ -880,7 +880,7 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - The export now lives in the repo; re-exporting from Theme Builder means replacing that file and adding `extendedSchemes` for Sand by hand, as v2 does.
   - Error-coloured screenshot references change, so re-baseline them through CI.
   - Nothing reads `sand` yet.
-  - The web's current (non-M3) theme still has a red `destructive`; that goes with the web migration.
+  - The web follows everywhere (#991). The generator writes the standard error roles unscoped (`--pbbls-error`), and every colour world points `--destructive` at them, so the current web theme turns orange too, not only `.m3`.
   - iOS keeps its old palette (#921).
 - **Supersedes / Superseded-by:** Supersedes the "error colour is amber" part of **2026-09-24 — Android adopts the M3-evo Material 3 Expressive theme** (#853).
 - **Refs:** #990, #991, #853, #921, `apps/android/design/pbbls-m3_evo-theme.json`, `apps/android/scripts/generate-color-schemes.py`, `apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/ExtendedColors.kt`.
