@@ -20,7 +20,7 @@ import { LabCard } from "@/components/profile/LabCard"
 import { LogoutButton } from "@/components/profile/LogoutButton"
 import { PageLayout } from "@/components/layout/PageLayout"
 import { PageHeader } from "@/components/layout/PageHeader"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 
 export default function ProfilePage() {
   const { user, profile, isAuthenticated, isLoading, logout } = useAuth()
@@ -39,14 +39,13 @@ export default function ProfilePage() {
   }
 
   const settingsButton = (
-    <Button
-      variant="outline"
-      size="icon"
+    <Link
+      href="/settings"
       aria-label={t("settingsAria")}
-      render={<Link href="/settings" />}
+      className={buttonVariants({ variant: "outline", size: "icon" })}
     >
       <Settings />
-    </Button>
+    </Link>
   )
 
   if (isLoading) {

@@ -5,7 +5,7 @@ import { useParams } from "next/navigation"
 import { ChevronLeft } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { LocaleToggle } from "@/components/docs/LocaleToggle"
 import { useDocsLocale } from "@/lib/hooks/useDocsLocale"
 import type { DocsPageMeta } from "@/lib/docs/types"
@@ -28,10 +28,10 @@ export function DocsSidebar({ pages }: DocsSidebarProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <Button variant="outline" className="hidden md:flex self-end" render={<Link href="/path" />}>
+      <Link href="/path" className={buttonVariants({ variant: "outline", className: "hidden md:flex self-end" })}>
         <ChevronLeft />
         {t("back")}
-      </Button>
+      </Link>
 
       <LocaleToggle />
 

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation"
 import { Clock, Sparkles, Route } from "lucide-react"
 import { useTranslations } from "next-intl"
 import { useAuth } from "@/lib/data/auth-context"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { SEED_PEBBLES } from "@/lib/seed/seed-data"
 import { EMOTIONS, type Emotion } from "@/lib/config/emotions"
 import { useEmotionLocalized } from "@/lib/i18n"
@@ -104,9 +104,9 @@ export function LandingPage() {
       </ul>
 
       <div className="mt-10 flex flex-col items-center gap-3">
-        <Button size="lg" render={<Link href="/register" />}>
+        <Link href="/register" className={buttonVariants({ size: "lg" })}>
           {t("getStarted")}
-        </Button>
+        </Link>
         <p className="text-sm text-muted-foreground">
           {t("haveAccount")}{" "}
           <Link
