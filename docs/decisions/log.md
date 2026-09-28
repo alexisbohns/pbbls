@@ -864,3 +864,25 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - `--font-sans` is now `var(--app-font-sans)`. Change the app font there, not in `@theme`.
 - **Supersedes / Superseded-by:** None.
 - **Refs:** #986, #853, #854, #921, `docs/superpowers/specs/2026-09-28-web-m3-design-page-design.md`, `apps/web/lib/theme/m3-schemes.ts`, `apps/web/app/m3-theme.css`.
+
+## 2026-09-28 — The error colour is orange, never red; the amber becomes the Sand custom colour (#990)
+
+- **Status:** taken
+- **Scope:** android, web, ui
+- **Context:** #853 made the error colour amber (key `#D3911A`, HCT hue 75, chroma 36). The maintainer likes that palette but finds it too quiet for errors, and rules out red. Material 3 fixes the error role's tone (40 light, 80 dark), so a louder error can only come from hue and chroma, never from brightness. Separately, `PebblesTheme` hands wallpaper-colour users (the default) the OS dynamic scheme, whose error is Material's red, so most Android users already saw red errors.
+- **Decision:**
+  - **Error key `#EA6B00`** (hue 48, the most chroma sRGB allows there). Light `#9B4500` / container `#FFDBCA`, dark `#FFB68E` / container `#763300`, in all six schemes. It sits 39° from the primary rose and 27° from the sand. Vermilion (40°) leaned red and tangerine (55°) blurred with the sand.
+  - **The amber becomes a custom colour, `sand`** (`sand` / `onSand` / `sandContainer` / `onSandContainer`), with v1's values kept verbatim (not harmonized). On Android it is `PebblesTheme.colors.sand`, a `ColorFamily` shaped like the Theme Builder's Jetpack export.
+  - **A wallpaper scheme keeps the brand's error roles** (`withErrorFrom`), at the matching contrast level.
+  - **The export is generated, by the maintainer's choice.** `apps/android/design/pbbls-m3_evo-theme.json` is v1 with the error roles recomputed by material-color-utilities 0.3.0 (Tonal Spot on seed `#CE7E8A`; the same recipe reproduces all 24 of v1's amber roles to within 1/255 per channel) and Sand added. `apps/android/scripts/generate-color-schemes.py` turns it into `ColorSchemes.kt`; it reproduces v1's file byte for byte.
+- **Why:** Material's own error chroma at an orange hue makes errors about twice as vivid at identical contrast (6.2:1 light, 10.9:1 dark), without red. Keeping the sand as a named role preserves a palette the maintainer likes and frees it from meaning "error". Pinning the error over wallpaper colour is the only way the no-red rule holds for everyone.
+- **Consequences:**
+  - The export now lives in the repo; re-exporting from Theme Builder means replacing that file and adding `extendedSchemes` for Sand by hand, as v2 does.
+  - Error-coloured screenshot references change, so re-baseline them through CI.
+  - Nothing reads `sand` yet.
+  - The web's current (non-M3) theme still has a red `destructive`; that goes with the web migration.
+  - iOS keeps its old palette (#921).
+- **Supersedes / Superseded-by:** Supersedes the "error colour is amber" part of **2026-09-24 — Android adopts the M3-evo Material 3 Expressive theme** (#853).
+- **Refs:** #990, #991, #853, #921, `apps/android/design/pbbls-m3_evo-theme.json`, `apps/android/scripts/generate-color-schemes.py`, `apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/ExtendedColors.kt`.
+
+---

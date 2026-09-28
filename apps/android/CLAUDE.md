@@ -23,7 +23,7 @@ and none crosses a data contract:
 | Architecture: Hilt, a ViewModel per screen, Navigation 3 (M38 D4 and D5 superseded) | #848, #849, #852 |
 | Four-tab navigation bar; iOS has a Profile hub (#903 asks whether iOS follows) | #852 |
 | `core/` vs `features/` package split; iOS groups by feature all the way down | #851 |
-| M3-evo Material 3 Expressive theme: palette, amber error, type (#921 asks whether iOS follows) | #853 |
+| M3-evo Material 3 Expressive theme: palette, orange error (was amber, now `sand`), type (#921 asks whether iOS follows) | #853, #990 |
 | Stock Material 3 controls instead of ports of the iOS ones | #854 |
 | Large screens: readable column, navigation rail, list-detail panes | #855, #940 |
 | No Rive runtime; the Welcome logo is a static vector | #856 |
@@ -370,15 +370,22 @@ ceremony. The trigger to revisit is a **second regular contributor** or a
   valence mesh and Joy's surface hex (`ValenceMesh.JOY_SURFACE_HEX`). Don't map
   them onto `primary`/`tertiary` because they look close.
 - **`PebblesTheme` holds only what M3 has no slot for:** `.spacing` (the M3
-  4 dp grid) and `.hand` (Caveat and Reenie Beanie: name input, valence word,
-  soul names).
-- **Error is amber**, not red. This is a product decision (decision log
-  2026-09-24).
+  4 dp grid), `.colors` (custom colours: `sand`, a `ColorFamily` with
+  `color`/`onColor`/`colorContainer`/`onColorContainer`) and `.hand` (Caveat
+  and Reenie Beanie: name input, valence word, soul names).
+- **Error is orange, never red** (key `#EA6B00`). This is a product decision
+  (decision log 2026-09-28, superseding the amber of 2026-09-24). The old amber
+  lives on as `PebblesTheme.colors.sand`.
 - **Scheme choice:** wallpaper colour when the user's Settings switch is on
   (the default; `AppearancePreferences`), else the export's scheme for the
-  system contrast level, live on Android 14+. `PebblesTheme(dynamicColor =
-  false)` is the default so every preview renders the brand scheme; only
-  `MainActivity` passes the setting.
+  system contrast level, live on Android 14+. A wallpaper scheme keeps the
+  brand's error roles (`withErrorFrom`), because the OS derives its error from
+  Material's red. `PebblesTheme(dynamicColor = false)` is the default so every
+  preview renders the brand scheme; only `MainActivity` passes the setting.
+- **Colours are generated:** `design/pbbls-m3_evo-theme.json` →
+  `python3 scripts/generate-color-schemes.py` → `ColorSchemes.kt` →
+  `npm run generate:m3 --workspace=apps/web` → `apps/web/app/m3-theme.css`.
+  Regenerate both in the same PR, or web CI's drift gate fails.
 - **material3 is pinned to `1.5.0-alpha27`** in `libs.versions.toml` for the
   Expressive API. Drop the pin when 1.5.0 stable is in the BOM, and do not
   move to an alpha that drags Compose ui/foundation off the BOM's stable line.
