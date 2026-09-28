@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Settings } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { PageLayout } from "@/components/layout/PageLayout"
 import { AchievementsShelf } from "@/components/profile/AchievementsShelf"
@@ -38,9 +38,9 @@ export function ProfileView() {
           title={t("title")}
           backHref="/path"
           rightSlot={
-            <Button variant="outline" size="icon" aria-label={t("settingsAria")} render={<Link href="/settings" />}>
+            <Link href="/settings" aria-label={t("settingsAria")} className={buttonVariants({ variant: "outline", size: "icon" })}>
               <Settings />
-            </Button>
+            </Link>
           }
         />
         <div className="flex flex-col gap-6">
