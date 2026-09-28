@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef } from "react"
-import { usePathname, useRouter, useSearchParams } from "next/navigation"
+import { usePathname, useSearchParams } from "next/navigation"
 import { useTheme } from "next-themes"
 import { useColorWorld } from "@/components/layout/ColorWorldProvider"
 import {
@@ -10,14 +10,24 @@ import {
   designClassesFor,
   parseDesignTheme,
   serializeDesignTheme,
+  type DesignMode,
   type DesignTheme,
 } from "@/lib/theme/design-theme"
 
-function applyClasses(target: readonly string[]) {
+type HtmlTheme = { classes: readonly string[]; mode: DesignMode }
+
+/**
+ * Paints `theme` on <html>: the classes, plus the `color-scheme` next-themes
+ * would set, so native controls (select popups, scrollbars) follow the mode.
+ * Mutates nothing when nothing differs, which is what lets the observer below
+ * call it on every mutation without looping.
+ */
+function applyHtmlTheme({ classes, mode }: HtmlTheme) {
   const root = document.documentElement
-  const { remove, add } = classDiff(Array.from(root.classList), target)
+  const { remove, add } = classDiff(Array.from(root.classList), classes)
   if (remove.length > 0) root.classList.remove(...remove)
   if (add.length > 0) root.classList.add(...add)
+  if (root.style.colorScheme !== mode) root.style.colorScheme = mode
 }
 
 /**
@@ -33,41 +43,45 @@ export function useDesignTheme(): {
   setTheme: (patch: Partial<DesignTheme>) => void
 } {
   const params = useSearchParams()
-  const router = useRouter()
   const pathname = usePathname()
   const theme = useMemo(() => parseDesignTheme(params), [params])
   const themeKey = serializeDesignTheme(theme)
 
   const { resolvedTheme } = useTheme()
   const { colorWorld } = useColorWorld()
-  const appClassesRef = useRef<string[]>([])
+  const appThemeRef = useRef<HtmlTheme>({ classes: [], mode: "light" })
   useEffect(() => {
-    appClassesRef.current = appClassesFor(resolvedTheme === "dark" ? "dark" : "light", colorWorld)
+    const mode = resolvedTheme === "dark" ? "dark" : "light"
+    appThemeRef.current = { classes: appClassesFor(mode, colorWorld), mode }
   }, [resolvedTheme, colorWorld])
 
   useEffect(() => {
-    const target = designClassesFor(parseDesignTheme(new URLSearchParams(themeKey)))
-    applyClasses(target)
-    // ColorWorldProvider and next-themes write <html> classes too, and on mount
-    // their effects run after this one (parents after children). Re-apply
-    // whenever someone else changes the list. applyClasses mutates nothing when
-    // nothing differs, so the observer cannot loop.
-    const observer = new MutationObserver(() => applyClasses(target))
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] })
+    const design = parseDesignTheme(new URLSearchParams(themeKey))
+    const target: HtmlTheme = { classes: designClassesFor(design), mode: design.mode }
+    applyHtmlTheme(target)
+    // ColorWorldProvider and next-themes write <html> classes and color-scheme
+    // too, and on mount their effects run after this one (parents after
+    // children). Re-apply whenever someone else changes them.
+    const observer = new MutationObserver(() => applyHtmlTheme(target))
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "style"] })
     return () => observer.disconnect()
   }, [themeKey])
 
   // Declared after the effect above on purpose: React runs cleanups in
   // declaration order, so the observer is disconnected before this restores
-  // the app's classes (otherwise it would put the design classes straight back).
-  useEffect(() => () => applyClasses(appClassesRef.current), [])
+  // the app's theme (otherwise it would put the design theme straight back).
+  useEffect(() => () => applyHtmlTheme(appThemeRef.current), [])
 
   const setTheme = useCallback(
     (patch: Partial<DesignTheme>) => {
-      const next = serializeDesignTheme({ ...parseDesignTheme(new URLSearchParams(themeKey)), ...patch })
-      router.replace(`${pathname}?${next}`, { scroll: false })
+      // Read the live URL, not the rendered params: two quick presses of T must
+      // flip twice even before the first update has re-rendered. The native
+      // history API keeps the #section hash and is synced with useSearchParams.
+      const current = parseDesignTheme(new URLSearchParams(window.location.search))
+      const next = serializeDesignTheme({ ...current, ...patch })
+      window.history.replaceState(null, "", `${pathname}?${next}${window.location.hash}`)
     },
-    [pathname, router, themeKey],
+    [pathname],
   )
 
   return { theme, themeKey, setTheme }

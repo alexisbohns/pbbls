@@ -15,7 +15,7 @@ export function ViewsSection() {
     >
       <Specimen
         id="view-path"
-        note="Tapping a pebble opens the peek; its emotion and domain tiles share the Pebble detail limitation below."
+        note="Tapping a pebble opens the peek; its emotion and domain tiles share the Pebble detail limitation below, and its Edit button navigates to the real (empty) edit route rather than through a link."
       >
         <DeviceFrame>
           <PathView />
