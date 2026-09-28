@@ -56,6 +56,18 @@
   --color-m3-surface-container: var(--m3-surface-container);
   --color-m3-surface-container-high: var(--m3-surface-container-high);
   --color-m3-surface-container-highest: var(--m3-surface-container-highest);
+  --color-m3-sand: var(--m3-sand);
+  --color-m3-on-sand: var(--m3-on-sand);
+  --color-m3-sand-container: var(--m3-sand-container);
+  --color-m3-on-sand-container: var(--m3-on-sand-container);
+}
+:root {
+  --pbbls-error: #9B4500;
+  --pbbls-on-error: #FFFFFF;
+}
+.dark {
+  --pbbls-error: #FFB68E;
+  --pbbls-on-error: #532200;
 }
 .m3 {
   --m3-primary: #8E4955;
@@ -106,6 +118,10 @@
   --m3-surface-container: #FBEAEB;
   --m3-surface-container-high: #F6E4E5;
   --m3-surface-container-highest: #F0DEDF;
+  --m3-sand: #7F560F;
+  --m3-on-sand: #FFFFFF;
+  --m3-sand-container: #FFDDB2;
+  --m3-on-sand-container: #624000;
 }
 .m3.m3-contrast-medium {
   --m3-primary: #5D222E;
@@ -156,6 +172,10 @@
   --m3-surface-container: #F6E4E5;
   --m3-surface-container-high: #EAD9DA;
   --m3-surface-container-highest: #DECECF;
+  --m3-sand: #4C3100;
+  --m3-on-sand: #FFFFFF;
+  --m3-sand-container: #90651E;
+  --m3-on-sand-container: #FFFFFF;
 }
 .m3.m3-contrast-high {
   --m3-primary: #501824;
@@ -206,6 +226,10 @@
   --m3-surface-container: #F0DEDF;
   --m3-surface-container-high: #E1D0D1;
   --m3-surface-container-highest: #D3C3C4;
+  --m3-sand: #3F2700;
+  --m3-on-sand: #FFFFFF;
+  --m3-sand-container: #654200;
+  --m3-on-sand-container: #FFFFFF;
 }
 .m3.dark {
   --m3-primary: #FFB2BC;
@@ -256,6 +280,10 @@
   --m3-surface-container: #261D1E;
   --m3-surface-container-high: #312829;
   --m3-surface-container-highest: #3D3233;
+  --m3-sand: #F3BD6E;
+  --m3-on-sand: #442B00;
+  --m3-sand-container: #624000;
+  --m3-on-sand-container: #FFDDB2;
 }
 .m3.dark.m3-contrast-medium {
   --m3-primary: #FFD1D6;
@@ -306,6 +334,10 @@
   --m3-surface-container: #2F2526;
   --m3-surface-container-high: #3A3031;
   --m3-surface-container-highest: #463B3C;
+  --m3-sand: #FFD69E;
+  --m3-on-sand: #362100;
+  --m3-sand-container: #B8883F;
+  --m3-on-sand-container: #000000;
 }
 .m3.dark.m3-contrast-high {
   --m3-primary: #FFEBED;
@@ -356,4 +388,8 @@
   --m3-surface-container: #382E2F;
   --m3-surface-container-high: #43393A;
   --m3-surface-container-highest: #4F4445;
+  --m3-sand: #FFEDD9;
+  --m3-on-sand: #000000;
+  --m3-sand-container: #EFB96B;
+  --m3-on-sand-container: #130900;
 }

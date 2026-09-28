@@ -101,6 +101,38 @@ describe("parseColorSchemes", () => {
   })
 })
 
+// Custom colours (#991): `internal val <Light|Dark><MediumContrast|HighContrast?><Name>: ColorFamily`.
+function family(prefix: string, color: string): string {
+  return `internal val ${prefix}Sand: ColorFamily =
+    ColorFamily(
+        color = Color(0xFF${color}),
+        onColor = Color(0xFFFFFFFF),
+        colorContainer = Color(0xFFFFDDB2),
+        onColorContainer = Color(0xFF624000),
+    )
+`
+}
+const SAND_PREFIXES = ["Light", "LightMediumContrast", "LightHighContrast", "Dark", "DarkMediumContrast", "DarkHighContrast"]
+
+describe("parseColorSchemes with custom colours", () => {
+  it("appends each family's four roles to its own scheme", () => {
+    const withSand = kotlin() + SAND_PREFIXES.map((p, i) => family(p, `7F560${i}`)).join("\n")
+    const schemes = parseColorSchemes(withSand)
+    expect(schemes[0].roles.slice(-4)).toEqual([
+      ["sand", "#7F5600"],
+      ["on-sand", "#FFFFFF"],
+      ["sand-container", "#FFDDB2"],
+      ["on-sand-container", "#624000"],
+    ])
+    expect(schemes[5].roles.find(([r]) => r === "sand")).toEqual(["sand", "#7F5605"])
+  })
+
+  it("fails when one scheme lacks a family the others have", () => {
+    const partial = kotlin() + SAND_PREFIXES.slice(1).map((p) => family(p, "7F560F")).join("\n")
+    expect(() => parseColorSchemes(partial)).toThrow(/sand/)
+  })
+})
+
 describe("schemeSelector", () => {
   it("gives each scheme a unique, contrast-and-mode-specific selector", () => {
     expect(schemeSelector("light", "standard")).toBe(".m3")
@@ -131,6 +163,7 @@ describe("renderM3ThemeCss", () => {
   it("ends with a single newline", () => {
     expect(css.endsWith("}\n")).toBe(true)
   })
+
 })
 
 // The drift gate: the committed CSS must be exactly what the generator writes
@@ -139,10 +172,17 @@ describe("app/m3-theme.css", () => {
   const webRoot = fileURLToPath(new URL("../..", import.meta.url))
   const kotlinSource = readFileSync(path.join(webRoot, ANDROID_SCHEMES_FROM_WEB), "utf8")
 
-  it("parses the real ColorSchemes.kt into six schemes of 48 roles", () => {
+  // Every colour world's --destructive reads these, so the app is never red (#990, #991).
+  it("shares the standard error roles outside .m3, light on :root and dark on .dark", () => {
+    const css = renderM3ThemeCss(parseColorSchemes(kotlinSource))
+    expect(css).toContain(":root {\n  --pbbls-error: #9B4500;\n  --pbbls-on-error: #FFFFFF;\n}")
+    expect(css).toContain(".dark {\n  --pbbls-error: #FFB68E;\n  --pbbls-on-error: #532200;\n}")
+  })
+
+  it("parses the real ColorSchemes.kt into six schemes of 52 roles (48 M3 + sand)", () => {
     const schemes = parseColorSchemes(kotlinSource)
     expect(schemes).toHaveLength(6)
-    for (const scheme of schemes) expect(scheme.roles).toHaveLength(48)
+    for (const scheme of schemes) expect(scheme.roles).toHaveLength(52)
   })
 
   it("matches the generator output (run `npm run generate:m3 --workspace=apps/web`)", () => {
