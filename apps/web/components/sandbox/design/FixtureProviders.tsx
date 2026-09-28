@@ -1,11 +1,12 @@
 "use client"
 
-import { useMemo, useState, type ReactNode } from "react"
+import { useMemo, useState, useSyncExternalStore, type ReactNode } from "react"
 import { AuthContext, type AuthContextValue } from "@/lib/data/auth-context"
 import { DataContext, type DataContextValue } from "@/lib/data/provider-context"
 import { DESIGN_ACCOUNT, DESIGN_PROFILE, designStore } from "@/lib/seed/design-fixtures"
 
 const noop = async () => {}
+const subscribeNever = () => () => {}
 
 // Every write resolves without effect: the design page must never reach Supabase.
 const FIXTURE_AUTH: AuthContextValue = {
@@ -30,13 +31,19 @@ const FIXTURE_AUTH: AuthContextValue = {
  * page renders. `provider: null` makes the data hooks read the fixture store;
  * their provider-backed reads (achievements, ripple, draft count) fall back to
  * their empty values.
+ *
+ * Renders nothing on the server: the fixtures are dated from `now` and the
+ * components format them in the viewer's stored locale, so a server render
+ * could never match the client's and hydration would fail.
  */
 export function FixtureProviders({ children }: { children: ReactNode }) {
+  const isClient = useSyncExternalStore(subscribeNever, () => true, () => false)
   const [store, setStore] = useState(() => designStore(new Date()))
   const data = useMemo<DataContextValue>(
     () => ({ provider: null, store, setStore, loading: false, error: null, refreshStore: () => {} }),
     [store],
   )
+  if (!isClient) return null
   return (
     <AuthContext.Provider value={FIXTURE_AUTH}>
       <DataContext.Provider value={data}>{children}</DataContext.Provider>
