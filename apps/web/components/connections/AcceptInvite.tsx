@@ -10,7 +10,7 @@ import { useConnections } from "@/lib/data/useConnections"
 import { usePendingInvite } from "@/lib/hooks/usePendingInvite"
 import type { ConnectionInvitePreview } from "@/lib/data/invite-api"
 import { PeerGlyphIcon } from "@/components/connections/PeerGlyphIcon"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 
 type AcceptInviteProps = {
   preview: ConnectionInvitePreview
@@ -105,9 +105,9 @@ export function AcceptInvite({ preview, token }: AcceptInviteProps) {
       <section className="flex flex-col items-center justify-center gap-3 px-6 py-24 text-center">
         <h1 className="text-2xl font-semibold tracking-tight">{t("ownInviteTitle")}</h1>
         <p className="max-w-sm text-sm text-muted-foreground">{t("ownInviteBody")}</p>
-        <Button variant="outline" className="mt-3" render={<Link href="/connections" />}>
+        <Link href="/connections" className={buttonVariants({ variant: "outline", className: "mt-3" })}>
           {t("title")}
-        </Button>
+        </Link>
       </section>
     )
   }
@@ -141,19 +141,18 @@ export function AcceptInvite({ preview, token }: AcceptInviteProps) {
       ) : (
         <div className="mt-8 flex w-full max-w-xs flex-col gap-3">
           <p className="text-sm text-muted-foreground">{t("signInPrompt")}</p>
-          <Button
-            size="lg"
-            render={<Link href={`/register?next=${encodeURIComponent(`/invite/${token}`)}`} />}
+          <Link
+            href={`/register?next=${encodeURIComponent(`/invite/${token}`)}`}
+            className={buttonVariants({ size: "lg" })}
           >
             {t("signUp")}
-          </Button>
-          <Button
-            variant="outline"
-            size="lg"
-            render={<Link href={`/login?next=${encodeURIComponent(`/invite/${token}`)}`} />}
+          </Link>
+          <Link
+            href={`/login?next=${encodeURIComponent(`/invite/${token}`)}`}
+            className={buttonVariants({ variant: "outline", size: "lg" })}
           >
             {t("logIn")}
-          </Button>
+          </Link>
         </div>
       )}
     </section>

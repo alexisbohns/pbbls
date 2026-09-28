@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { CirclePlus } from "lucide-react"
 import { useTranslations } from "next-intl"
-import { Button } from "@/components/ui/button"
+import { buttonVariants } from "@/components/ui/button"
 import { EmptyState } from "@/components/layout/EmptyState"
 
 export function PathEmptyState() {
@@ -13,10 +13,10 @@ export function PathEmptyState() {
       title={t("title")}
       description={t("description")}
       action={
-        <Button render={<Link href="/record" />}>
+        <Link href="/record" className={buttonVariants()}>
           <CirclePlus className="size-4" data-icon="inline-start" />
           {t("cta")}
-        </Button>
+        </Link>
       }
     />
   )
