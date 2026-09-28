@@ -7,6 +7,7 @@ import { DesignToolbar } from "./DesignToolbar"
 import { FixtureProviders } from "./FixtureProviders"
 import { useDesignTheme } from "./useDesignTheme"
 import { FoundationsSection } from "./foundations/FoundationsSection"
+import { PrimitivesSection } from "./primitives/PrimitivesSection"
 
 // Seed the palette cache at module scope, before any consumer mounts (the
 // /sandbox/path precedent): pebbles render tinted without a Supabase call.
@@ -58,6 +59,7 @@ export function DesignScreen() {
           className="mx-auto flex max-w-6xl flex-col gap-20 px-4 py-10"
         >
           <FoundationsSection theme={theme} themeKey={themeKey} />
+          <PrimitivesSection />
         </main>
       </FixtureProviders>
     </div>
