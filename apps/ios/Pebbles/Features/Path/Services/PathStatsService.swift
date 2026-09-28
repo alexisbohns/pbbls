@@ -16,6 +16,8 @@ final class PathStatsService {
 
     private var isLoading = false
     private(set) var hasLoaded = false
+    /// Bumped by `reset()`, so a fetch that outlives its session is dropped.
+    private var generation = 0
 
     private let supabase: SupabaseService
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "path-stats")
@@ -38,9 +40,25 @@ final class PathStatsService {
         await performLoad()
     }
 
+    /// Forget the signed-out user's stats. Without this `hasLoaded` stays true
+    /// and the next account's Path and Profile show the previous one's karma.
+    func reset() {
+        generation += 1
+        karma = nil
+        ripple = nil
+        pebbles = nil
+        daysPracticed = nil
+        assiduity = nil
+        hasLoaded = false
+        // A fetch still in flight belongs to the ended session. Releasing the
+        // guard lets the next user's first `load()` start instead of no-oping.
+        isLoading = false
+    }
+
     private func performLoad() async {
         isLoading = true
-        defer { isLoading = false }
+        let started = generation
+        defer { if generation == started { isLoading = false } }
 
         async let karmaResult: KarmaSummary = supabase.client
             .from("v_karma_summary").select("total_karma, pebbles_count")
@@ -52,8 +70,11 @@ final class PathStatsService {
             .rpc("get_profile_engagement", params: ["p_tz": TimeZone.current.identifier])
             .execute().value
 
+        // Each write re-checks the generation: a sign-out can land between any
+        // two of these awaits.
         do {
             let summary = try await karmaResult
+            guard generation == started else { return }
             self.karma   = summary.totalKarma
             self.pebbles = summary.pebblesCount
         } catch {
@@ -61,13 +82,17 @@ final class PathStatsService {
         }
 
         do {
-            self.ripple = try await rippleResult
+            let ripple = try await rippleResult
+            guard generation == started else { return }
+            self.ripple = ripple
         } catch {
             logger.error("ripple fetch failed: \(error.localizedDescription, privacy: .private)")
         }
 
         do {
-            if let row = try await engagementResult.first {
+            let row = try await engagementResult.first
+            guard generation == started else { return }
+            if let row {
                 self.daysPracticed = row.daysPracticed
                 self.assiduity     = row.assiduity
             }
@@ -75,6 +100,7 @@ final class PathStatsService {
             logger.error("engagement fetch failed: \(error.localizedDescription, privacy: .private)")
         }
 
+        guard generation == started else { return }
         hasLoaded = true
     }
 }
