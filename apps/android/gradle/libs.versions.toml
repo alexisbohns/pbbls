@@ -17,7 +17,7 @@ composeBom = "2026.09.00"
 # Held on alpha27 on purpose (see above), so lint's "newer version" finding for
 # it is expected until the pin is dropped.
 #noinspection GradleDependency
-material3 = "1.5.0-alpha27"
+material3 = "1.5.0-alpha29"
 # Large screens (#855). The adaptive info (window size class) that the
 # navigation suite and the glyph toolbar read. navigation-suite has no version
 # of its own: it ships in lockstep with material3 and must stay on its pin.
