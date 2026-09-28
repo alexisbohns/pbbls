@@ -65,6 +65,11 @@ final class PebbleDraftsService {
         self.client = client
     }
 
+    /// Forget the signed-out user's draft count.
+    func reset() {
+        count = 0
+    }
+
     /// Most recently saved first — `updated_at` is trigger-maintained server-side,
     /// so this ordering does not depend on client clocks.
     func list() async throws -> [PebbleDraftRecord] {

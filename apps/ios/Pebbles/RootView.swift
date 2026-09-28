@@ -20,6 +20,9 @@ struct RootView: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(ReferenceDataService.self) private var refs
+    @Environment(PathStatsService.self) private var stats
+    @Environment(PebbleDraftsService.self) private var drafts
+    @Environment(ComposerSnapshotStore.self) private var snapshots
     @Environment(SnapURLCache.self) private var snapURLs
     @Environment(ConnectionsService.self) private var connections
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
@@ -79,6 +82,13 @@ struct RootView: View {
         supabase.session == nil && canProceed
     }
 
+    /// Auth has resolved and nobody is signed in. Distinct from
+    /// `session == nil`, which is also true while the persisted session is
+    /// still being read on every cold start.
+    private var isResolvedSignedOut: Bool {
+        !supabase.isInitializing && supabase.session == nil
+    }
+
     var body: some View {
         ZStack {
             if canShowAuthedTabs {
@@ -132,7 +142,9 @@ struct RootView: View {
             loaderCeilingReached = true
         }
         .task { await palettes.load() }
-        .task { await refs.load() }
+        // Keyed on the user: souls and collections are theirs, so each sign-in
+        // loads its own lists instead of keeping whatever the launch fetched.
+        .task(id: supabase.session?.user.id) { await refs.load() }
         // Relies on supabase.start() being kicked off in .task above.
         // session?.user.id is nil when this observer is registered, so the
         // first authStateChanges event delivers a real nil→id transition
@@ -160,10 +172,20 @@ struct RootView: View {
         }
         .onChange(of: supabase.session == nil) { wasSignedOut, isSignedOut in
             if !wasSignedOut && isSignedOut {
-                snapURLs.invalidateAll()
                 // Re-arm the home-feed loader cover for the next sign-in.
                 pathFeedLoaded = false
             }
+        }
+        .onChange(of: isResolvedSignedOut) { _, signedOut in
+            guard signedOut else { return }
+            SignedOutPurge(
+                snapshots: snapshots,
+                refs: refs,
+                stats: stats,
+                drafts: drafts,
+                snapURLs: snapURLs,
+                urlCache: .shared
+            ).run()
         }
     }
 }
@@ -174,6 +196,9 @@ struct RootView: View {
         .environment(supabase)
         .environment(EmotionPaletteService(client: supabase.client))
         .environment(ReferenceDataService(client: supabase.client))
+        .environment(PathStatsService(supabase: supabase))
+        .environment(PebbleDraftsService(client: supabase.client))
+        .environment(ComposerSnapshotStore())
         .environment(SnapURLCache(client: supabase.client))
         .environment(KarmaNotificationService())
         .environment(ConnectionsService(supabase: supabase))

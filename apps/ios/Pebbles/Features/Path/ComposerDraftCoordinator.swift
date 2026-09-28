@@ -51,13 +51,22 @@ final class ComposerDraftCoordinator {
     private let drafts: PebbleDraftsService
     private let snapshots: ComposerSnapshotStore
     private let autosave: ComposerAutosave
+    private let ownerId: () -> UUID?
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "composer-drafts")
 
-    init(client: SupabaseClient, drafts: PebbleDraftsService, snapshots: ComposerSnapshotStore) {
+    /// `ownerId` is the signed-in user, read at use. The local snapshot is only
+    /// ever offered to, and written for, that user.
+    init(
+        client: SupabaseClient,
+        drafts: PebbleDraftsService,
+        snapshots: ComposerSnapshotStore,
+        ownerId: @escaping () -> UUID?
+    ) {
         self.client = client
         self.drafts = drafts
         self.snapshots = snapshots
-        self.autosave = ComposerAutosave(store: snapshots)
+        self.ownerId = ownerId
+        self.autosave = ComposerAutosave(store: snapshots, ownerId: ownerId)
     }
 
     // MARK: - Hydration
@@ -86,8 +95,9 @@ final class ComposerDraftCoordinator {
     /// can drive it from both `.task` and an `onChange(of: refs.hasLoaded)`.
     func hydrate(resuming: PebbleDraftRecord?, refsLoaded: Bool) -> Hydration? {
         guard !hasChecked else { return nil }
+        let snapshot = ownerId().flatMap { snapshots.load(ownerId: $0) }
         guard let decision = Self.hydration(
-            resuming: resuming, refsLoaded: refsLoaded, snapshot: snapshots.load()
+            resuming: resuming, refsLoaded: refsLoaded, snapshot: snapshot
         ) else { return nil }
 
         hasChecked = true

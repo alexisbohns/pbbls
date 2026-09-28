@@ -98,7 +98,10 @@ struct RecordFlowView: View {
             }
             if drafts == nil {
                 drafts = ComposerDraftCoordinator(
-                    client: supabase.client, drafts: draftsService, snapshots: snapshots
+                    client: supabase.client,
+                    drafts: draftsService,
+                    snapshots: snapshots,
+                    ownerId: { [supabase] in supabase.session?.user.id }
                 )
             }
             hydrateOrOfferRestore()
