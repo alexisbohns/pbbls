@@ -163,6 +163,7 @@ describe("renderM3ThemeCss", () => {
   it("ends with a single newline", () => {
     expect(css.endsWith("}\n")).toBe(true)
   })
+
 })
 
 // The drift gate: the committed CSS must be exactly what the generator writes
@@ -170,6 +171,13 @@ describe("renderM3ThemeCss", () => {
 describe("app/m3-theme.css", () => {
   const webRoot = fileURLToPath(new URL("../..", import.meta.url))
   const kotlinSource = readFileSync(path.join(webRoot, ANDROID_SCHEMES_FROM_WEB), "utf8")
+
+  // Every colour world's --destructive reads these, so the app is never red (#990, #991).
+  it("shares the standard error roles outside .m3, light on :root and dark on .dark", () => {
+    const css = renderM3ThemeCss(parseColorSchemes(kotlinSource))
+    expect(css).toContain(":root {\n  --pbbls-error: #9B4500;\n  --pbbls-on-error: #FFFFFF;\n}")
+    expect(css).toContain(".dark {\n  --pbbls-error: #FFB68E;\n  --pbbls-on-error: #532200;\n}")
+  })
 
   it("parses the real ColorSchemes.kt into six schemes of 52 roles (48 M3 + sand)", () => {
     const schemes = parseColorSchemes(kotlinSource)

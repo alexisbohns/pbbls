@@ -132,5 +132,22 @@ export function renderM3ThemeCss(schemes: M3Scheme[]): string {
       "}",
     ].join("\n"),
   )
-  return `${[HEADER, theme, ...blocks].join("\n")}\n`
+  return `${[HEADER, theme, ...sharedErrorBlocks(schemes), ...blocks].join("\n")}\n`
+}
+
+/**
+ * The standard-contrast error roles, unscoped (#990, #991): every colour world
+ * points its --destructive here, so the whole app follows the Android error
+ * colour (orange, never red), not only `.m3`. Skipped when a scheme set has no
+ * error roles (the unit-test fixtures); the drift test pins the real values.
+ */
+function sharedErrorBlocks(schemes: M3Scheme[]): string[] {
+  return (["light", "dark"] as const).flatMap((mode) => {
+    const scheme = schemes.find((s) => s.mode === mode && s.contrast === "standard")
+    const role = (name: string) => scheme?.roles.find(([r]) => r === name)?.[1]
+    const error = role("error")
+    const onError = role("on-error")
+    if (!error || !onError) return []
+    return [`${mode === "dark" ? ".dark" : ":root"} {\n  --pbbls-error: ${error};\n  --pbbls-on-error: ${onError};\n}`]
+  })
 }

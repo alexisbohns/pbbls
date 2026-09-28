@@ -99,8 +99,8 @@
   --muted-foreground: #7A5E64;
   --accent: #E8D8DA;
   --accent-foreground: #2E2024;
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: #FAF0F0;
+  --destructive: var(--pbbls-error);
+  --destructive-foreground: var(--pbbls-on-error);
   --border: #F0E4E4;
   --input: #E0D0D2;
   --ring: #C07A7A;
@@ -140,8 +140,8 @@
   --muted-foreground: oklch(0.58 0.025 10);
   --accent: oklch(0.28 0.03 10);
   --accent-foreground: oklch(0.85 0.015 10);
-  --destructive: oklch(0.55 0.15 25);
-  --destructive-foreground: oklch(0.95 0.01 25);
+  --destructive: var(--pbbls-error);
+  --destructive-foreground: var(--pbbls-on-error);
   --border: oklch(0.27 0.02 10);
   --input: oklch(0.25 0.02 10);
   --ring: oklch(0.68 0.10 10);
@@ -181,8 +181,8 @@
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.985 0 0);
+  --destructive: var(--pbbls-error);
+  --destructive-foreground: var(--pbbls-on-error);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
@@ -221,8 +221,8 @@
   --muted-foreground: oklch(0.708 0 0);
   --accent: oklch(0.269 0 0);
   --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --destructive-foreground: oklch(0.985 0 0);
+  --destructive: var(--pbbls-error);
+  --destructive-foreground: var(--pbbls-on-error);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
@@ -262,8 +262,8 @@
   --muted-foreground: #6B5D4F;
   --accent: #E8DFD0;
   --accent-foreground: #2C2418;
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: #FAF0E8;
+  --destructive: var(--pbbls-error);
+  --destructive-foreground: var(--pbbls-on-error);
   --border: #DED6C8;
   --input: #DED6C8;
   --ring: #C4723A;
@@ -302,8 +302,8 @@
   --muted-foreground: oklch(0.60 0.02 70);
   --accent: oklch(0.30 0.025 65);
   --accent-foreground: oklch(0.85 0.015 70);
-  --destructive: oklch(0.55 0.15 25);
-  --destructive-foreground: oklch(0.95 0.01 25);
+  --destructive: var(--pbbls-error);
+  --destructive-foreground: var(--pbbls-on-error);
   --border: oklch(0.28 0.018 65);
   --input: oklch(0.26 0.015 65);
   --ring: oklch(0.68 0.12 55);
@@ -343,8 +343,8 @@
   --muted-foreground: #5A5A66;
   --accent: #DCD8DE;
   --accent-foreground: #1E1E24;
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: #F0EEF0;
+  --destructive: var(--pbbls-error);
+  --destructive-foreground: var(--pbbls-on-error);
   --border: #D2CED6;
   --input: #D2CED6;
   --ring: #7A6AA0;
@@ -383,8 +383,8 @@
   --muted-foreground: oklch(0.58 0.02 280);
   --accent: oklch(0.27 0.025 280);
   --accent-foreground: oklch(0.85 0.01 280);
-  --destructive: oklch(0.55 0.15 25);
-  --destructive-foreground: oklch(0.95 0.01 25);
+  --destructive: var(--pbbls-error);
+  --destructive-foreground: var(--pbbls-on-error);
   --border: oklch(0.26 0.018 280);
   --input: oklch(0.24 0.015 280);
   --ring: oklch(0.65 0.10 285);
@@ -424,8 +424,8 @@
   --muted-foreground: #4E6A5C;
   --accent: #D6E4DC;
   --accent-foreground: #1A2822;
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: #F0FAF5;
+  --destructive: var(--pbbls-error);
+  --destructive-foreground: var(--pbbls-on-error);
   --border: #CEDCD4;
   --input: #CEDCD4;
   --ring: #5A9A80;
@@ -464,8 +464,8 @@
   --muted-foreground: oklch(0.58 0.025 165);
   --accent: oklch(0.27 0.03 165);
   --accent-foreground: oklch(0.85 0.015 165);
-  --destructive: oklch(0.55 0.15 25);
-  --destructive-foreground: oklch(0.95 0.01 25);
+  --destructive: var(--pbbls-error);
+  --destructive-foreground: var(--pbbls-on-error);
   --border: oklch(0.26 0.02 165);
   --input: oklch(0.24 0.02 165);
   --ring: oklch(0.68 0.10 165);
@@ -499,7 +499,7 @@
    secondary / -foreground   → secondary-container / on-secondary-container
    muted / -foreground       → surface-container-high / on-surface-variant
    accent / -foreground      → surface-container-highest / on-surface
-   destructive / -foreground → error / on-error   (amber, not red: #853)
+   destructive / -foreground → error / on-error   (orange, never red: #990)
    border / input / ring     → outline-variant / outline / primary
    surface / surface-alt     → surface-container / surface-container-high
    chart-1…5                 → primary, tertiary, secondary, error, outline

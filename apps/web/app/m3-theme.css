@@ -61,6 +61,14 @@
   --color-m3-sand-container: var(--m3-sand-container);
   --color-m3-on-sand-container: var(--m3-on-sand-container);
 }
+:root {
+  --pbbls-error: #9B4500;
+  --pbbls-on-error: #FFFFFF;
+}
+.dark {
+  --pbbls-error: #FFB68E;
+  --pbbls-on-error: #532200;
+}
 .m3 {
   --m3-primary: #8E4955;
   --m3-surface-tint: #8E4955;
