@@ -1,5 +1,15 @@
+import { readFileSync } from "node:fs"
+import path from "node:path"
+import { fileURLToPath } from "node:url"
 import { describe, expect, it } from "vitest"
-import { parseColorSchemes, toKebab } from "./m3-schemes"
+import {
+  ANDROID_SCHEMES_FROM_WEB,
+  M3_CSS_FROM_WEB,
+  parseColorSchemes,
+  renderM3ThemeCss,
+  schemeSelector,
+  toKebab,
+} from "./m3-schemes"
 
 // Minimal stand-in for ColorSchemes.kt: same shape as the generated Kotlin,
 // two roles per scheme, plus a non-scheme literal the parser must ignore.
@@ -88,5 +98,55 @@ describe("parseColorSchemes", () => {
     )
 `
     expect(() => parseColorSchemes(kotlin({ DarkScheme: wrongFn }))).toThrow(/DarkScheme/)
+  })
+})
+
+describe("schemeSelector", () => {
+  it("gives each scheme a unique, contrast-and-mode-specific selector", () => {
+    expect(schemeSelector("light", "standard")).toBe(".m3")
+    expect(schemeSelector("light", "medium")).toBe(".m3.m3-contrast-medium")
+    expect(schemeSelector("dark", "standard")).toBe(".m3.dark")
+    expect(schemeSelector("dark", "high")).toBe(".m3.dark.m3-contrast-high")
+  })
+})
+
+describe("renderM3ThemeCss", () => {
+  const css = renderM3ThemeCss(parseColorSchemes(kotlin()))
+
+  it("starts with the do-not-edit header", () => {
+    expect(css.startsWith("/* GENERATED")).toBe(true)
+  })
+
+  it("exposes every role as a Tailwind colour", () => {
+    expect(css).toContain("@theme inline {")
+    expect(css).toContain("  --color-m3-primary: var(--m3-primary);")
+    expect(css).toContain("  --color-m3-surface-container-lowest: var(--m3-surface-container-lowest);")
+  })
+
+  it("writes each scheme's values under its selector", () => {
+    expect(css).toContain(".m3 {\n  --m3-primary: #8E4955;")
+    expect(css).toContain(".m3.dark.m3-contrast-high {\n  --m3-primary: #FFEBED;")
+  })
+
+  it("ends with a single newline", () => {
+    expect(css.endsWith("}\n")).toBe(true)
+  })
+})
+
+// The drift gate: the committed CSS must be exactly what the generator writes
+// from the committed Kotlin. Fails when Android re-exports without a web regen.
+describe("app/m3-theme.css", () => {
+  const webRoot = fileURLToPath(new URL("../..", import.meta.url))
+  const kotlinSource = readFileSync(path.join(webRoot, ANDROID_SCHEMES_FROM_WEB), "utf8")
+
+  it("parses the real ColorSchemes.kt into six schemes of 48 roles", () => {
+    const schemes = parseColorSchemes(kotlinSource)
+    expect(schemes).toHaveLength(6)
+    for (const scheme of schemes) expect(scheme.roles).toHaveLength(48)
+  })
+
+  it("matches the generator output (run `npm run generate:m3 --workspace=apps/web`)", () => {
+    const committed = readFileSync(path.join(webRoot, M3_CSS_FROM_WEB), "utf8")
+    expect(committed).toBe(renderM3ThemeCss(parseColorSchemes(kotlinSource)))
   })
 })

@@ -77,3 +77,34 @@ export function parseColorSchemes(kotlin: string): M3Scheme[] {
   }
   return schemes
 }
+
+export function schemeSelector(mode: M3Mode, contrast: M3Contrast): string {
+  return `.m3${mode === "dark" ? ".dark" : ""}${contrast === "standard" ? "" : `.m3-contrast-${contrast}`}`
+}
+
+const HEADER = `/* GENERATED from apps/android/.../core/designsystem/ColorSchemes.kt by
+   \`npm run generate:m3 --workspace=apps/web\`. Do not edit: change the Android
+   export and regenerate. lib/theme/m3-schemes.test.ts fails when this file and
+   the Kotlin disagree.
+
+   Each scheme's selector is one class more specific than the last axis it adds,
+   so exactly one block wins for any combination of .m3 / .dark / .m3-contrast-*.
+   The bridge that points shadcn tokens at these roles lives in globals.css. */
+`
+
+export function renderM3ThemeCss(schemes: M3Scheme[]): string {
+  const roles = schemes[0].roles.map(([r]) => r)
+  const theme = [
+    "@theme inline {",
+    ...roles.map((r) => `  --color-m3-${r}: var(--m3-${r});`),
+    "}",
+  ].join("\n")
+  const blocks = schemes.map((s) =>
+    [
+      `${schemeSelector(s.mode, s.contrast)} {`,
+      ...s.roles.map(([r, hex]) => `  --m3-${r}: ${hex};`),
+      "}",
+    ].join("\n"),
+  )
+  return `${[HEADER, theme, ...blocks].join("\n")}\n`
+}
