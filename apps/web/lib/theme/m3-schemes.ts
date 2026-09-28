@@ -31,6 +31,15 @@ const EXPECTED: Record<string, { mode: M3Mode; contrast: M3Contrast }> = {
 
 const SCHEME_BLOCK = /internal val (\w+): ColorScheme =\s*(light|dark)ColorScheme\(([\s\S]*?)\n\s*\)/g
 const ROLE_LINE = /(\w+) = Color\(0x([0-9A-Fa-f]{2})([0-9A-Fa-f]{6})\)/g
+// Custom colours (#991), one ColorFamily per scheme: `LightMediumContrastSand` → LightMediumContrastScheme, "sand".
+const FAMILY_BLOCK =
+  /internal val (Light|Dark)((?:Medium|High)Contrast)?([A-Z]\w*): ColorFamily =\s*ColorFamily\(([\s\S]*?)\n\s*\)/g
+const FAMILY_ROLES: Record<string, (family: string) => string> = {
+  color: (f) => f,
+  onColor: (f) => `on-${f}`,
+  colorContainer: (f) => `${f}-container`,
+  onColorContainer: (f) => `on-${f}-container`,
+}
 
 export function toKebab(role: string): string {
   return role.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`)
@@ -58,6 +67,23 @@ export function parseColorSchemes(kotlin: string): M3Scheme[] {
   const missing = Object.keys(EXPECTED).filter((n) => !found.has(n))
   if (missing.length > 0) {
     throw new Error(`ColorSchemes.kt is missing scheme(s): ${missing.join(", ")}`)
+  }
+
+  // Each custom colour joins its scheme's roles, so the role-set check below
+  // also proves every scheme carries every custom colour.
+  for (const [, mode, contrast = "", name, body] of kotlin.matchAll(FAMILY_BLOCK)) {
+    const schemeName = `${mode}${contrast}Scheme`
+    const scheme = found.get(schemeName)
+    if (!scheme) throw new Error(`${mode}${contrast}${name} has no ${schemeName} to join`)
+    const family = toKebab(name.charAt(0).toLowerCase() + name.slice(1))
+    for (const [, role, alpha, rgb] of body.matchAll(ROLE_LINE)) {
+      const toRole = FAMILY_ROLES[role]
+      if (!toRole) throw new Error(`${mode}${contrast}${name}.${role} is not a ColorFamily role`)
+      if (alpha.toUpperCase() !== "FF") {
+        throw new Error(`${mode}${contrast}${name}.${role} has alpha 0x${alpha}; M3 roles must be opaque`)
+      }
+      scheme.roles.push([toRole(family), `#${rgb.toUpperCase()}`])
+    }
   }
 
   const schemes = Object.keys(EXPECTED).flatMap((n) => {
