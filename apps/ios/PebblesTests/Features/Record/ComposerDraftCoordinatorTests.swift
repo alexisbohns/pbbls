@@ -64,3 +64,60 @@ struct ComposerDraftHydrationTests {
         #expect(decision == .fresh)
     }
 }
+
+/// A shared or handed-over device: the next account signing in must never be
+/// prompted to restore the previous one's half-written pebble.
+@Suite("ComposerDraftCoordinator — snapshot ownership")
+@MainActor
+struct ComposerDraftOwnershipTests {
+
+    private func makeStore() -> (ComposerSnapshotStore, URL) {
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("composer-ownership-test-\(UUID().uuidString).json")
+        return (ComposerSnapshotStore(fileURL: url), url)
+    }
+
+    private func makeCoordinator(store: ComposerSnapshotStore, signedIn: UUID?) -> ComposerDraftCoordinator {
+        let supabase = SupabaseService()
+        return ComposerDraftCoordinator(
+            client: supabase.client,
+            drafts: PebbleDraftsService(client: supabase.client),
+            snapshots: store,
+            ownerId: { signedIn }
+        )
+    }
+
+    private func payload(name: String) -> PebbleDraftPayload {
+        var payload = PebbleDraftPayload()
+        payload.name = name
+        return payload
+    }
+
+    @Test("the user who wrote the snapshot is offered it")
+    func ownerIsOfferedRestore() {
+        let owner = UUID()
+        let (store, url) = makeStore()
+        defer { try? FileManager.default.removeItem(at: url) }
+        store.save(payload(name: "half-typed"), ownerId: owner)
+        let coordinator = makeCoordinator(store: store, signedIn: owner)
+
+        let decision = coordinator.hydrate(resuming: nil, refsLoaded: true)
+
+        #expect(decision == .offerRestore(payload(name: "half-typed")))
+        #expect(coordinator.isRestorePromptPresented)
+    }
+
+    @Test("another account starts fresh and the snapshot is gone")
+    func otherAccountStartsFresh() {
+        let (store, url) = makeStore()
+        defer { try? FileManager.default.removeItem(at: url) }
+        store.save(payload(name: "someone else's evening"), ownerId: UUID())
+        let coordinator = makeCoordinator(store: store, signedIn: UUID())
+
+        let decision = coordinator.hydrate(resuming: nil, refsLoaded: true)
+
+        #expect(decision == .fresh)
+        #expect(!coordinator.isRestorePromptPresented)
+        #expect(!FileManager.default.fileExists(atPath: url.path))
+    }
+}
