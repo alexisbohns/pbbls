@@ -11,10 +11,14 @@
 --
 -- Four changes, one transaction:
 --
---   1. public.is_blocked_with(p_other) — a definer helper, because the
+--   1. private.is_blocked_with(p_other) — a definer helper, because the
 --      blocked user's own RLS on connection_blocks is blocker-only (D5): an
 --      inline subquery inside pebbles_select would see only the rows where
---      the viewer is the blocker, and miss the direction that matters.
+--      the viewer is the blocker, and miss the direction that matters. It
+--      lives in a new `private` schema that PostgREST does not expose
+--      (config.toml [api] schemas = public, graphql_public), so it is NOT an
+--      RPC: in `public` it would hand a blocked user a direct yes/no "has
+--      this person blocked me" call, the very oracle this migration closes.
 --   2. pebbles_select — the two cross-user arms gain the both-directions
 --      block predicate. The owner arm stays ungated.
 --   3. get_public_profile — the `target` CTE gains the same predicate, so the
@@ -37,11 +41,6 @@
 --     can read anonymously is not possible.
 --   - get_shared_pebble, the share-by-link path, is unchanged (it answers
 --     anon and signed-in callers alike).
---   - is_blocked_with is callable through PostgREST by any signed-in user,
---     scoped to the caller: it can only answer "is there a block between ME
---     and p_other", never about a third pair. A caller who already holds the
---     other party's user_id learns what the anon/signed-in comparison above
---     already tells them. No cross-user projection returns a user_id.
 --   - report_content's pebble gate mirrors pebbles_select by design
 --     (20260916090000) and is NOT changed here. Whether it follows is an open
 --     decision on #834.
@@ -54,10 +53,22 @@
 -- =============================================================================
 
 -- ---------------------------------------------------------------------------
--- 1. The helper. Both directions, keyed on the caller. connection_blocks' pk
--- (blocker_id, blocked_id) serves both equality lookups.
+-- 1. The helper, in a schema PostgREST does not serve. Both directions, keyed
+-- on the caller. connection_blocks' pk (blocker_id, blocked_id) serves both
+-- equality lookups.
+--
+-- pebbles_select runs as the viewer, so `authenticated` needs usage on the
+-- schema and execute on the function for the policy to evaluate. That is not
+-- an API path: PostgREST only routes /rpc/<fn> into its exposed schemas, and
+-- `private` must never be added to them (dashboard: API settings, Exposed
+-- schemas). Any helper put here inherits that rule.
 -- ---------------------------------------------------------------------------
-create function public.is_blocked_with(p_other uuid)
+create schema if not exists private;
+
+revoke all on schema private from public, anon;
+grant usage on schema private to authenticated;
+
+create function private.is_blocked_with(p_other uuid)
 returns boolean
 language sql
 stable
@@ -74,8 +85,8 @@ $$;
 
 -- pebbles_select is `to authenticated`, and the definer functions below run
 -- as the owner, so anon never needs it.
-revoke all on function public.is_blocked_with(uuid) from public, anon;
-grant execute on function public.is_blocked_with(uuid) to authenticated;
+revoke all on function private.is_blocked_with(uuid) from public, anon;
+grant execute on function private.is_blocked_with(uuid) to authenticated;
 
 -- ---------------------------------------------------------------------------
 -- 2. pebbles_select. Base: 20260916100000 §3, with the block predicate added
@@ -102,8 +113,11 @@ create policy "pebbles_select" on public.pebbles
           )
         )
       )
-      -- a block in either direction severs every cross-user read (#834)
-      and not public.is_blocked_with(pebbles.user_id)
+      -- a block in either direction severs every cross-user read (#834).
+      -- A definer SQL function is not inlined, so this is one pk probe per
+      -- cross-user candidate row; if wide public-feed scans grow, move it to
+      -- a set-based `not exists` over a definer-provided set.
+      and not private.is_blocked_with(pebbles.user_id)
     )
   );
 
@@ -127,7 +141,7 @@ as $$
        and p.public_profile = true
        and p.hidden_at is null
        -- a block in either direction: null to the other party (#834)
-       and not public.is_blocked_with(p.user_id)
+       and not private.is_blocked_with(p.user_id)
   ),
   utc_today as (
     select (now() at time zone 'UTC')::date as d

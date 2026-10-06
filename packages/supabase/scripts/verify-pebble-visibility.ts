@@ -25,7 +25,9 @@
  *      (both directions), a stranger still does, and the invite preview of
  *      the blocker's token goes dark for the blocked user only: 'expired',
  *      the same shape as a real expiry, while the reverse direction, a
- *      stranger and an anonymous visitor still see the live card.
+ *      stranger and an anonymous visitor still see the live card. Accept is
+ *      refused as invite_expired in both directions, and the helper behind
+ *      the predicate is not callable as an RPC.
  *
  * Run:
  *   SUPABASE_URL=... SUPABASE_ANON_KEY=... \
@@ -281,8 +283,19 @@ try {
   const { data: blockerRows } = await o.from("pebbles").select("id");
   check("the blocker no longer reads the blocked user's public pebble (both directions)",
     !gradeOf(blockerRows, friendPublicId), JSON.stringify(blockerRows));
+  // Membership, not a row count: the public arm returns every other user's
+  // public rows too, so a count breaks on real content or a parallel run.
   check("…and still reads all three of their own",
-    blockerRows?.length === 3, `${blockerRows?.length}`);
+    [secretId, privateId, publicId].every((id) => gradeOf(blockerRows, id)),
+    JSON.stringify(blockerRows));
+
+  // The helper behind the predicate lives in a schema PostgREST does not
+  // serve. Exposed, it would answer "has this person blocked me" directly.
+  const { data: oracle, error: oracleErr } = await f.rpc("is_blocked_with", {
+    p_other: owner.id,
+  });
+  check("the block predicate is not callable as an RPC (no direct oracle)",
+    !!oracleErr && oracle === null, oracleErr?.message ?? JSON.stringify(oracle));
 
   const { data: strangerAfter } = await s.from("pebbles").select("id");
   check("a stranger still reads both public pebbles (the block is pairwise)",
@@ -319,6 +332,12 @@ try {
   });
   check("the blocker's preview of the blocked user's token stays valid (no reverse oracle)",
     (reversePreview as Preview | null)?.status === "valid", JSON.stringify(reversePreview));
+  const { error: blockerAcceptErr } = await o.rpc("accept_connection_invite", {
+    p_token: friendToken,
+  });
+  check("…while the blocker's accept of it is still refused as invite_expired",
+    !!blockerAcceptErr?.message.includes("invite_expired"),
+    blockerAcceptErr?.message ?? "accepted");
 } catch (err) {
   failed += 1;
   console.error(`✗ aborted: ${err instanceof Error ? err.message : String(err)}`);

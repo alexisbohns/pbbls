@@ -2594,7 +2594,6 @@ export type Database = {
         }
       }
       is_admin: { Args: { p_user_id: string }; Returns: boolean }
-      is_blocked_with: { Args: { p_other: string }; Returns: boolean }
       path_pebbles: {
         Args: never
         Returns: {
