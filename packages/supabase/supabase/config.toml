@@ -370,6 +370,13 @@ deno_version = 2
 # [edge_runtime.secrets]
 # secret_key = "env(SECRET_VALUE)"
 
+# Ops-only, called by .github/workflows/orphan-snap-sweep.yml with
+# ORPHAN_SWEEP_TOKEN, which is not a JWT, so the gateway's JWT check would
+# refuse it before the function ran. The function's own bearer check (service
+# role key or ORPHAN_SWEEP_TOKEN, fail-closed) is the gate instead (#322).
+[functions.sweep-orphan-snaps]
+verify_jwt = false
+
 [analytics]
 enabled = true
 port = 54327
