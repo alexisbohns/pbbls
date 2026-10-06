@@ -87,6 +87,9 @@ fun DraftsContent(
     onDelete: (PebbleDraftRecord) -> Unit,
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
+    // Injected so the screenshot fixture can pin it; a wall-clock default here
+    // makes the "saved N ago" labels drift and the baseline rot on its own.
+    now: OffsetDateTime = OffsetDateTime.now(),
 ) {
     val colors = MaterialTheme.colorScheme
 
@@ -155,6 +158,7 @@ fun DraftsContent(
                         items(uiState.drafts, key = { it.id }) { record ->
                             DraftRow(
                                 record = record,
+                                now = now,
                                 onClick = { onResume(record) },
                                 onDelete = { onDelete(record) },
                             )
@@ -172,6 +176,7 @@ fun DraftsContent(
 @Composable
 private fun DraftRow(
     record: PebbleDraftRecord,
+    now: OffsetDateTime,
     onClick: () -> Unit,
     onDelete: () -> Unit,
 ) {
@@ -201,7 +206,7 @@ private fun DraftRow(
                 maxLines = 1,
             )
             Text(
-                text = stringResource(R.string.drafts_saved_ago, relativeAgo(record.updatedAt)),
+                text = stringResource(R.string.drafts_saved_ago, relativeAgo(record.updatedAt, now)),
                 style = MaterialTheme.typography.labelSmall,
                 color = colors.onSurfaceVariant,
                 maxLines = 1,
