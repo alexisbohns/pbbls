@@ -1,10 +1,12 @@
 "use client"
 
 import { useState, useEffect, useCallback, useRef } from "react"
+import { FunctionsHttpError } from "@supabase/supabase-js"
 import { createClient } from "@/lib/supabase/client"
 import { withTimeout } from "@/lib/utils/with-timeout"
 import { isSafeRelativePath } from "@/lib/utils/safe-relative-path"
 import { CONSENT_DOCUMENT_VERSION } from "@/lib/config/consent"
+import { isRecentSignIn, REAUTH_REQUIRED } from "@/lib/auth/recent-auth"
 
 import type {
   Account,
@@ -213,6 +215,12 @@ export function useSupabaseAuth(): AuthContextValue {
       30000,
       "account deletion",
     )
+    // A sign-in older than the window is a 428 (#976), not a failure: the
+    // caller re-authenticates and retries. invoke() hides the body of a
+    // non-2xx behind `error.context`, so the status is the signal.
+    if (error instanceof FunctionsHttpError && error.context instanceof Response && error.context.status === 428) {
+      throw new Error(REAUTH_REQUIRED)
+    }
     if (error || !data?.ok) {
       console.error("[auth] delete-account failed:", error ?? data?.error)
       throw new Error(data?.error ?? error?.message ?? "delete-account failed")
@@ -256,8 +264,52 @@ export function useSupabaseAuth(): AuthContextValue {
     const supabase = getSupabase()
     if (!supabase) throw new Error("Supabase client not available")
     const { error } = await supabase.auth.updateUser({ password })
+    // `secure_password_change` (#977) refuses a session older than a day.
+    // Same remedy as the server check, so the same code.
+    if (error?.code === "reauthentication_needed") throw new Error(REAUTH_REQUIRED)
     if (error) throw new Error(error.message)
   }, [])
+
+  const isSignInRecent = useCallback(async (): Promise<boolean> => {
+    const supabase = getSupabase()
+    if (!supabase) return false
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+    return isRecentSignIn(session?.access_token)
+  }, [])
+
+  const reauthenticate = useCallback(
+    async (password: string) => {
+      const supabase = getSupabase()
+      if (!supabase) throw new Error("Supabase client not available")
+      if (!user?.email) throw new Error("Not authenticated")
+      // The email is fixed from the session, so this can only ever re-issue a
+      // session for the same person, with a fresh `amr` stamp.
+      const { error } = await supabase.auth.signInWithPassword({ email: user.email, password })
+      if (error) throw new Error(error.code === "invalid_credentials" ? "invalid_credentials" : error.message)
+    },
+    [user],
+  )
+
+  const reauthenticateWithProvider = useCallback(
+    async (provider: "google" | "apple", next: string) => {
+      const supabase = getSupabase()
+      if (!supabase) throw new Error("Supabase client not available")
+      // Steer Google to the same account. A different account is caught on
+      // return by comparing user ids against the pending-reauth stash.
+      const queryParams: Record<string, string> | undefined =
+        provider === "google"
+          ? { prompt: "select_account", ...(user?.email ? { login_hint: user.email } : {}) }
+          : undefined
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: buildCallbackUrl(next), queryParams },
+      })
+      if (error) throw new Error(error.message)
+    },
+    [user],
+  )
 
   const updateProfile = useCallback(
     async (input: UpdateProfileInput): Promise<Profile> => {
@@ -316,5 +368,8 @@ export function useSupabaseAuth(): AuthContextValue {
     setHandle,
     updatePassword,
     deleteAccount,
+    isSignInRecent,
+    reauthenticate,
+    reauthenticateWithProvider,
   }
 }

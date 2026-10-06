@@ -9,6 +9,9 @@ import { SectionLabel } from "@/components/ui/SectionLabel"
 import { SettingsGroup } from "@/components/settings/SettingsGroup"
 import { SettingsRow } from "@/components/settings/SettingsRow"
 import { Button } from "@/components/ui/button"
+import { ReauthDialog } from "@/components/settings/ReauthDialog"
+import { isReauthRequired } from "@/lib/auth/recent-auth"
+import { stashPendingReauth } from "@/lib/auth/pending-reauth"
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -22,6 +25,10 @@ import {
 type DeleteAccountSectionProps = {
   /** Called after the account is deleted and the local session is cleared. */
   onDeleted: () => void
+  /** Back from a provider re-auth that was started here: reopen the confirmation. */
+  resumeAfterReauth?: boolean
+  /** Where a provider re-auth comes back to. */
+  reauthReturnTo: string
 }
 
 /**
@@ -32,25 +39,50 @@ type DeleteAccountSectionProps = {
  * Built on the AlertDialog primitives rather than ConfirmDialog: the dialog
  * must stay open in a busy state while the delete-account edge function runs,
  * and ConfirmDialog's AlertDialogAction closes the dialog on click.
+ *
+ * Deletion needs a recent sign-in (#976, #977): a stale session goes through
+ * "Confirm it's you" between the confirmation and the call, and a server 428
+ * (clock skew, or a sign-in that aged while the dialog was up) goes back there.
  */
-export function DeleteAccountSection({ onDeleted }: DeleteAccountSectionProps) {
-  const { deleteAccount } = useAuth()
+export function DeleteAccountSection({ onDeleted, resumeAfterReauth = false, reauthReturnTo }: DeleteAccountSectionProps) {
+  const { user, deleteAccount, isSignInRecent } = useAuth()
   const t = useTranslations("settings")
   const tCommon = useTranslations("common")
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(resumeAfterReauth)
   const [deleting, setDeleting] = useState(false)
+  const [reauthOpen, setReauthOpen] = useState(false)
 
-  const handleConfirm = async () => {
+  const askToReauth = () => {
+    setDeleting(false)
+    setOpen(false)
+    setReauthOpen(true)
+  }
+
+  const runDelete = async () => {
+    setOpen(true)
     setDeleting(true)
     try {
       await deleteAccount()
       onDeleted()
     } catch (err) {
+      if (isReauthRequired(err)) {
+        askToReauth()
+        return
+      }
       console.error("[settings] account deletion failed:", err)
       toast.error(t("deleteAccountError"))
       setDeleting(false)
       setOpen(false)
     }
+  }
+
+  const handleConfirm = async () => {
+    setDeleting(true)
+    if (!(await isSignInRecent())) {
+      askToReauth()
+      return
+    }
+    await runDelete()
   }
 
   return (
@@ -79,6 +111,19 @@ export function DeleteAccountSection({ onDeleted }: DeleteAccountSectionProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ReauthDialog
+        open={reauthOpen}
+        returnTo={reauthReturnTo}
+        onBeforeRedirect={() => {
+          if (user) stashPendingReauth({ purpose: "delete", userId: user.id, savedAt: Date.now() })
+        }}
+        onCancel={() => setReauthOpen(false)}
+        onConfirmed={() => {
+          setReauthOpen(false)
+          void runDelete()
+        }}
+      />
     </section>
   )
 }

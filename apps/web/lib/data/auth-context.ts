@@ -61,6 +61,22 @@ export type AuthContextValue = {
    * local session. Irreversible; safe to retry on failure.
    */
   deleteAccount(): Promise<void>
+  /**
+   * True when the session's newest sign-in is inside the recent sign-in window
+   * (#976). Decides whether to show "Confirm it's you" before a gated action;
+   * the server stays the authority.
+   */
+  isSignInRecent(): Promise<boolean>
+  /**
+   * Re-sign in as the current user with their password, refreshing the
+   * `amr` stamp. A wrong password throws `invalid_credentials`.
+   */
+  reauthenticate(password: string): Promise<void>
+  /**
+   * Re-run the account's OAuth provider. A full-page redirect: the callback
+   * lands on `next`, so the caller stashes its pending action first.
+   */
+  reauthenticateWithProvider(provider: "google" | "apple", next: string): Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)

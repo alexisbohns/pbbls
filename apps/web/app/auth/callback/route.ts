@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { isSafeRelativePath } from "@/lib/utils/safe-relative-path"
 import { CONSENT_DOCUMENT_VERSION } from "@/lib/config/consent"
+import { REAUTH_RETURN_PARAM } from "@/lib/auth/pending-reauth"
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
@@ -106,6 +107,12 @@ export async function GET(request: Request) {
 
   // `next` applies to onboarded users only: an un-onboarded user always goes
   // to /onboarding first, and the pending-invite mechanism brings them back.
-  const destination = profile?.onboarding_completed ? next ?? "/path" : "/onboarding"
+  //
+  // Except a re-auth return (#977): the provider can come back as a different,
+  // even brand-new, account, and the settings page is where that mismatch is
+  // caught and signed out. Sending it to onboarding would skip the check.
+  const isReauthReturn = next !== null && new URL(next, origin).searchParams.has(REAUTH_RETURN_PARAM)
+  const destination =
+    profile?.onboarding_completed || isReauthReturn ? next ?? "/path" : "/onboarding"
   return NextResponse.redirect(`${origin}${destination}`)
 }

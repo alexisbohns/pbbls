@@ -59,7 +59,7 @@ export function SettingsView() {
           <PasswordSection value={password} onChange={setPassword} />
           <LegalSection />
           <ConsentSection consent={DESIGN_CONSENT} onGrant={async () => {}} onWithdrawn={() => {}} />
-          <DeleteAccountSection onDeleted={() => {}} />
+          <DeleteAccountSection onDeleted={() => {}} reauthReturnTo="/sandbox/design" />
         </div>
       </section>
     </PageLayout>
