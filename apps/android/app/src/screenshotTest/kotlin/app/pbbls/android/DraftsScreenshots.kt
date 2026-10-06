@@ -17,7 +17,8 @@ import java.time.ZoneOffset
  * reviews these as the `ui-screenshots` CI artifact. Drives the stateless
  * [DraftsContent], never the service-reading `DraftsScreen`.
  *
- * A fixed `now` keeps the "saved N ago" labels stable across runs.
+ * A fixed `now`, passed to [DraftsContent], keeps the "saved N ago" labels
+ * stable across runs.
  */
 private val NOW: OffsetDateTime = OffsetDateTime.of(2026, 7, 30, 12, 0, 0, 0, ZoneOffset.UTC)
 
@@ -53,6 +54,7 @@ fun DraftsListLight() {
             onResume = {},
             onDelete = {},
             onDismiss = {},
+            now = NOW,
         )
     }
 }
@@ -68,6 +70,7 @@ fun DraftsListDark() {
             onResume = {},
             onDelete = {},
             onDismiss = {},
+            now = NOW,
         )
     }
 }
@@ -83,6 +86,7 @@ fun DraftsEmptyLight() {
             onResume = {},
             onDelete = {},
             onDismiss = {},
+            now = NOW,
         )
     }
 }
@@ -98,6 +102,7 @@ fun DraftsLoadErrorDark() {
             onResume = {},
             onDelete = {},
             onDismiss = {},
+            now = NOW,
         )
     }
 }
