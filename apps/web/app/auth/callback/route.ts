@@ -2,6 +2,8 @@ import { NextResponse } from "next/server"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { isSafeRelativePath } from "@/lib/utils/safe-relative-path"
 import { CONSENT_DOCUMENT_VERSION } from "@/lib/config/consent"
+import { recordOAuthConsents } from "@/lib/auth/oauth-consents"
+import { parseActiveConsents } from "@/lib/auth/consent-gate"
 import { REAUTH_RETURN_PARAM } from "@/lib/auth/pending-reauth"
 
 export async function GET(request: Request) {
@@ -35,53 +37,47 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/login?error=auth_callback_failed`)
   }
 
-  // Art. 9 consent from the OAuth path. The register page put the policy
-  // version on the callback URL because no signup metadata survives an OAuth
-  // round trip; recording it here rather than client-side means it survives
-  // whatever the tab does after the redirect.
+  // The four /register acts from the OAuth path (terms, privacy, Art. 9 health
+  // data, 16+). The register page put the policy version on the callback URL
+  // because no signup metadata survives an OAuth round trip; recording it here
+  // rather than client-side means it survives whatever the tab does after the
+  // redirect. oauthConsentActs validates the param against the known-good
+  // version and says why a mismatch records nothing.
   //
-  // record_consent is idempotent, so a replayed callback is a no-op. A failure
-  // must never block the sign-in — it is logged loudly instead, because a
-  // silently missing consent record is the exact defect this change fixes.
-  //
-  // The only legitimate caller is our own buildCallbackUrl, which always sends
-  // the current CONSENT_DOCUMENT_VERSION — there is no flow where an older or
-  // different version is a valid value here (unlike a ledger row itself, which
-  // may legitimately cite an older version recorded at the time). Anything
-  // else is either a stale client bundle or a crafted parameter, and the
-  // ledger is an accountability record: a garbage document_version is worse
-  // than a missing row, since a missing row is at least visibly absent. So we
-  // validate against the known-good value rather than trusting it verbatim.
-  const consentVersion = searchParams.get("consent")
-  if (consentVersion) {
-    if (consentVersion !== CONSENT_DOCUMENT_VERSION) {
-      console.error(
-        `[auth/callback] ignoring consent param with unexpected version: ${consentVersion}`,
-      )
-    } else {
-      const { error: consentError } = await supabase.rpc("record_consent", {
-        p_kind: "health_data",
-        p_document_version: consentVersion,
-        p_source: "web_oauth",
-      })
-      if (consentError) {
-        console.error("[auth/callback] record_consent failed:", consentError.message)
-      }
-
-      // The 16+ attestation from the same round trip. Both acts ride the same
-      // validated `consent` param because the same checkbox set gated the OAuth
-      // button before the redirect: ticking age is what let this callback
-      // happen at all, so the version that carried one carries the other.
-      const { error: ageError } = await supabase.rpc("record_consent", {
-        p_kind: "age_assurance",
-        p_document_version: consentVersion,
-        p_source: "web_oauth",
-      })
-      if (ageError) {
-        console.error("[auth/callback] record_consent (age_assurance) failed:", ageError.message)
-      }
-    }
+  // The same buttons also sign in an existing account, so recordOAuthConsents
+  // first reads the live grants and skips any act already held at the same or
+  // a newer version: record_consent would otherwise supersede, say, a newer
+  // acceptance recorded on Android with this deploy's older one. If that read
+  // fails it records nothing. A replayed callback is a no-op. No failure here
+  // blocks the sign-in — each is logged loudly, and the post-auth consent gate
+  // asks for whatever is still missing.
+  const consentParam = searchParams.get("consent")
+  if (consentParam && consentParam !== CONSENT_DOCUMENT_VERSION) {
+    console.error(
+      `[auth/callback] ignoring consent param with unexpected version: ${consentParam}`,
+    )
   }
+  await recordOAuthConsents(
+    consentParam,
+    async () => {
+      // Owner select, RLS-scoped to the caller; the same read as the gate's.
+      const { data, error: readError } = await supabase
+        .from("user_consents")
+        .select("kind, document_version")
+        .is("withdrawn_at", null)
+        .is("superseded_at", null)
+      if (readError) throw new Error(readError.message)
+      return parseActiveConsents(data)
+    },
+    async (act) => {
+      const { error: consentError } = await supabase.rpc("record_consent", {
+        p_kind: act.kind,
+        p_document_version: act.version,
+        p_source: "web_oauth",
+      })
+      if (consentError) throw new Error(consentError.message)
+    },
+  )
 
   const { data: profile } = await supabase
     .from("profiles")
