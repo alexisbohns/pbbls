@@ -76,9 +76,13 @@ enum ImagePipeline {
             kCGImageSourceShouldCacheImmediately:         true,
             kCGImageSourceThumbnailMaxPixelSize:          maxEdge
         ]
-        guard let cgImage = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary) else {
+        guard let thumbnail = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary) else {
             throw ImagePipelineError.decodeFailed
         }
+        // JPEG cannot store alpha. Handing ImageIO an RGBA image makes it log
+        // a warning per encode and strip the channel itself, so drop it once
+        // here, before the quality-step loop re-encodes the same pixels.
+        let cgImage = makeOpaque(thumbnail)
 
         var quality = startQuality
         for _ in 0...qualitySteps {
@@ -90,6 +94,46 @@ enum ImagePipeline {
             if quality <= 0.1 { break }
         }
         throw ImagePipelineError.tooLargeAfterResize
+    }
+
+    /// Redraws `image` into an opaque 8-bit RGB bitmap (`.noneSkipLast`), or
+    /// returns it unchanged when it already carries no alpha.
+    ///
+    /// `CGImageSourceCreateThumbnailAtIndex` hands back `.premultipliedLast`
+    /// even for an opaque photo. Non-RGB sources (grayscale, indexed) are
+    /// drawn into sRGB, since an 8-bit `.noneSkipLast` context needs an RGB
+    /// colour space. Falls back to the input if the context cannot be built,
+    /// which leaves the encode exactly as it was before this step existed.
+    static func makeOpaque(_ image: CGImage) -> CGImage {
+        switch image.alphaInfo {
+        case .none, .noneSkipLast, .noneSkipFirst:
+            return image
+        default:
+            break
+        }
+
+        let colorSpace: CGColorSpace
+        if let source = image.colorSpace, source.model == .rgb {
+            colorSpace = source
+        } else if let srgb = CGColorSpace(name: CGColorSpace.sRGB) {
+            colorSpace = srgb
+        } else {
+            return image
+        }
+
+        guard let context = CGContext(
+            data: nil,
+            width: image.width,
+            height: image.height,
+            bitsPerComponent: 8,
+            bytesPerRow: 0,
+            space: colorSpace,
+            bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue
+        ) else {
+            return image
+        }
+        context.draw(image, in: CGRect(x: 0, y: 0, width: image.width, height: image.height))
+        return context.makeImage() ?? image
     }
 
     private static func encodeJPEG(_ image: CGImage, quality: CGFloat) throws -> Data {
