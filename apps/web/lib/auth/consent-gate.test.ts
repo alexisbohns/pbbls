@@ -178,18 +178,45 @@ describe("submitConsentGate", () => {
     expect(verdict).toEqual({ status: "satisfied" })
   })
 
-  it("reports a failed record without re-reading", async () => {
+  it("re-reads after a failed record, so a retry asks only for what is still missing", async () => {
     vi.spyOn(console, "error").mockImplementation(() => {})
-    const load = vi.fn(async () => current())
+    // terms records, then privacy fails: the ledger now holds terms.
+    const ledger: ActiveConsent[] = [
+      { kind: "health_data", document_version: CONSENT_DOCUMENT_VERSION },
+      { kind: "age_assurance", document_version: CONSENT_DOCUMENT_VERSION },
+    ]
+    const record = vi.fn(async (kind: string, version: string) => {
+      if (kind === "privacy") throw new Error("network")
+      ledger.push({ kind, document_version: version })
+    })
+    const verdict = await submitConsentGate(["terms", "privacy"], record, async () => ledger)
+    expect(verdict).toEqual({ status: "record-failed", missing: ["privacy"] })
+  })
+
+  it("keeps the original list when the re-read after a failed record fails too", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {})
     const verdict = await submitConsentGate(
-      ["terms"],
+      ["terms", "privacy"],
       async () => {
         throw new Error("invalid_kind")
       },
-      load,
+      async () => {
+        throw new Error("network")
+      },
     )
-    expect(verdict).toEqual({ status: "record-failed" })
-    expect(load).not.toHaveBeenCalled()
+    expect(verdict).toEqual({ status: "record-failed", missing: ["terms", "privacy"] })
+  })
+
+  it("passes when a record reports failure but the re-read shows everything on record", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {})
+    const verdict = await submitConsentGate(
+      ["terms"],
+      async () => {
+        throw new Error("timeout")
+      },
+      async () => current(),
+    )
+    expect(verdict).toEqual({ status: "satisfied" })
   })
 
   it("fails closed when the re-read after recording fails", async () => {

@@ -121,21 +121,30 @@ export async function checkConsentGate(
  * act, as the OAuth callback does: the acts are independent, so a partial
  * failure leaves the gate asking only for what is still missing.
  *
- * `record-failed` keeps the user on the same screen with an error. A record
- * that succeeded followed by a failed re-read is `failed`, like any read.
+ * `record-failed` keeps the user on the same screen with an error. It still
+ * re-reads, so its `missing` drops the acts recorded before the failure and a
+ * retry does not ask for them again. If that re-read fails too, `missing`
+ * stays as it was (re-recording an act at the same version is a no-op). A
+ * record that succeeded followed by a failed re-read is `failed`, like any
+ * read.
  */
 export async function submitConsentGate(
   missing: readonly GateKind[],
   record: (kind: GateKind, version: string) => Promise<void>,
   loadActive: () => Promise<ActiveConsent[]>,
-): Promise<GateVerdict | { status: "record-failed" }> {
+): Promise<GateVerdict | { status: "record-failed"; missing: GateKind[] }> {
   try {
     for (const kind of missing) {
       await record(kind, documentVersionFor(kind))
     }
   } catch (err) {
     console.error("[consent-gate] record consent failed:", err)
-    return { status: "record-failed" }
+    const verdict = await checkConsentGate(loadActive)
+    if (verdict.status === "satisfied") return verdict
+    return {
+      status: "record-failed",
+      missing: verdict.status === "required" ? verdict.missing : [...missing],
+    }
   }
   return checkConsentGate(loadActive)
 }

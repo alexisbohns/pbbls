@@ -148,10 +148,13 @@ export function useConsentGate(
     setSubmitting(true)
     setRecordFailed(false)
     const verdict = await submitConsentGate(missing, recordConsent, loadActiveConsents)
-    if (currentUser.current !== uid) return
     setSubmitting(false)
+    if (currentUser.current !== uid) return
     if (verdict.status === "record-failed") {
+      // Stay on the screen with the error, asking only for what the re-read
+      // says is still missing.
       setRecordFailed(true)
+      setResult({ userId: uid, verdict: { status: "required", missing: verdict.missing } })
       return
     }
     if (verdict.status === "satisfied") writeCache(uid)
