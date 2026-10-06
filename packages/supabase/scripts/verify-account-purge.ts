@@ -53,6 +53,9 @@
  * service role does both — so this is where "target_user_id is resolved
  * correctly", "a LISTED glyph is reportable" and the takedown dispatch of
  * resolve_content_report are actually proven.
+ *
+ * It also carries the record_consent contention and downgrade cases (#1018),
+ * on the buyer: it is the one harness that drives record_consent at all.
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -483,6 +486,87 @@ try {
     .insert({ user_id: buyerId, name: `purge-test buyer soul ${runId}`, glyph_id: soldGlyph.id })
     .select("id").single();
   if (buyerSoulErr || !buyerSoul) throw new Error(`buyer soul: ${buyerSoulErr?.message}`);
+
+  // ---------------------------------------------------------------------------
+  // record_consent under contention and downgrade (#1018,
+  // 20261007120000_record_consent_serialised.sql). Run on the BUYER, not the
+  // seller, so the seller's seeded count of 5 and the purge's own accounting
+  // stay exact. The buyer's rows go when the buyer deletes their account in §7.
+  // Every read is through `admin`, so it is ground truth rather than RLS.
+  // ---------------------------------------------------------------------------
+  const consentRows = async (kind: string) => {
+    const { data, error } = await admin
+      .from("user_consents")
+      .select("document_version, superseded_at, withdrawn_at")
+      .eq("user_id", buyerId)
+      .eq("kind", kind);
+    if (error) throw new Error(`read buyer ${kind} consents: ${error.message}`);
+    const rows = data ?? [];
+    const active = rows.filter((r) => r.superseded_at === null && r.withdrawn_at === null);
+    return { total: rows.length, active: active.map((r) => r.document_version) };
+  };
+  // x.y.z compared per component as numbers, as the function does.
+  const isNewer = (a: string, b: string) => {
+    const [pa, pb] = [a, b].map((v) => v.split(".").map(Number));
+    const i = pa.findIndex((n, k) => n !== pb[k]);
+    return i !== -1 && pa[i] > pb[i];
+  };
+
+  // A downgrade is a no-op that keeps the newer grant and reports success. The
+  // caller is a stale bundle or the OAuth callback citing the server's current
+  // version, and failing it would turn a user's sign-in into an error.
+  const { error: newerPrivacyErr } = await buyer.rpc("record_consent", {
+    p_kind: "privacy", p_document_version: "1.3.0", p_source: "android_settings",
+  });
+  if (newerPrivacyErr) throw new Error(`record_consent privacy 1.3.0: ${newerPrivacyErr.message}`);
+  const { error: downgradeErr } = await buyer.rpc("record_consent", {
+    p_kind: "privacy", p_document_version: "1.2.0", p_source: "web_oauth",
+  });
+  check("record_consent: a downgrade reports success", downgradeErr === null,
+    downgradeErr?.message);
+  const afterDowngrade = await consentRows("privacy");
+  check("…and keeps the newer grant active, writing nothing",
+    afterDowngrade.total === 1 && afterDowngrade.active.join() === "1.3.0",
+    JSON.stringify(afterDowngrade));
+
+  // Concurrent calls at DIFFERENT versions: both succeed and the higher version
+  // ends up active, whichever commits first. The old body's `on conflict do
+  // nothing` dropped one call silently and could leave the lower version
+  // active. Several rounds, each pair fired without awaiting in between, and
+  // with the higher version sent first and second in turn. Overlap is likely
+  // but not certain over HTTP, so a pass is evidence, not proof. The
+  // deterministic proof is a two-session replay on a local Postgres (#1018).
+  const rounds: Array<[string, string]> = [
+    ["1.1.0", "1.2.0"], // first grant, no active row yet
+    ["1.4.0", "1.3.0"],
+    ["1.5.0", "1.6.0"],
+    ["1.10.0", "1.9.0"], // numeric per component: 1.10.0 is the newer one
+  ];
+  for (const [first, second] of rounds) {
+    const [a, b] = await Promise.all([
+      buyer.rpc("record_consent", { p_kind: "terms", p_document_version: first, p_source: "android_settings" }),
+      buyer.rpc("record_consent", { p_kind: "terms", p_document_version: second, p_source: "web_settings" }),
+    ]);
+    const after = await consentRows("terms");
+    const expected = isNewer(first, second) ? first : second;
+    check(`record_consent: concurrent ${first} / ${second} both succeed`,
+      a.error === null && b.error === null,
+      `${a.error?.message ?? "ok"} / ${b.error?.message ?? "ok"}`);
+    check(`…and exactly one grant, ${expected}, is active`,
+      after.active.length === 1 && after.active[0] === expected,
+      JSON.stringify(after));
+  }
+
+  // A concurrent replay at the SAME version stays idempotent: both succeed, one row.
+  const [replayA, replayB] = await Promise.all([
+    buyer.rpc("record_consent", { p_kind: "age_assurance", p_document_version: "1.0.0", p_source: "android_settings" }),
+    buyer.rpc("record_consent", { p_kind: "age_assurance", p_document_version: "1.0.0", p_source: "web_settings" }),
+  ]);
+  const afterReplay = await consentRows("age_assurance");
+  check("record_consent: a concurrent same-version replay succeeds once",
+    replayA.error === null && replayB.error === null &&
+      afterReplay.total === 1 && afterReplay.active.join() === "1.0.0",
+    `${replayA.error?.message ?? "ok"} / ${replayB.error?.message ?? "ok"} ${JSON.stringify(afterReplay)}`);
 
   console.log(`Seeded: pebble ${pebbleId}, sold glyph ${soldGlyph.id}, unsold glyph ${unsoldGlyph.id}\n`);
 
