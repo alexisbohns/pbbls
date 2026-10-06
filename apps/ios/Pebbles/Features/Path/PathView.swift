@@ -240,9 +240,7 @@ struct PathView: View {
             // First load (or after a deletion that removed the focused week):
             // pick the current-week entry if present, else the closest entry.
             if !entries.contains(where: { $0.weekStart == focusedWeekStart }) {
-                let currentWeekStart = WeekRollBuilder.build(
-                    pebbles: [], calendar: isoCalendar, today: today
-                ).first?.weekStart ?? today
+                let currentWeekStart = WeekRollBuilder.weekStart(for: today, calendar: isoCalendar)
                 if let cur = entries.first(where: { $0.weekStart == currentWeekStart }) {
                     focusedWeekStart = cur.weekStart
                 } else if let closest = entries.min(by: {
