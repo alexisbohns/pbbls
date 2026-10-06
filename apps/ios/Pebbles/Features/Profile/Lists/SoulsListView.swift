@@ -45,6 +45,7 @@ struct SoulsListView: View {
                 presenting: pendingDeletion
             ) { soul in
                 Button("Delete", role: .destructive) {
+                    TapHaptics.play(.warning)
                     Task { await delete(soul) }
                 }
                 Button("Cancel", role: .cancel) {

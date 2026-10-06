@@ -118,6 +118,7 @@ struct PathView: View {
             presenting: pendingDeletion
         ) { pebble in
             Button("Delete", role: .destructive) {
+                TapHaptics.play(.warning)
                 Task { await delete(pebble) }
             }
             Button("Cancel", role: .cancel) {
