@@ -140,6 +140,66 @@ final class SupabaseService {
         }
     }
 
+    // MARK: - Recent sign-in (#976, #977)
+
+    /// Signs in again as the current user with their password, refreshing the
+    /// `amr` stamp. The email is fixed from the session, so this can only ever
+    /// re-issue a session for the same person. A wrong password throws GoTrue's
+    /// `invalid_credentials` (see `RecentAuth.isWrongPassword`).
+    func reauthenticate(password: String) async throws {
+        guard let email = session?.user.email else { throw AuthError.sessionMissing }
+        try await signIn(email: email, password: password)
+    }
+
+    /// Re-runs Google OAuth, steered to the same account. Throws
+    /// `CancellationError` when the person closes the sheet, and
+    /// `ReauthAccountMismatchError` (after signing that session out) when
+    /// Google came back as someone else: the SDK has already switched to it.
+    func reauthenticateWithGoogle() async throws {
+        guard let before = session?.user else { throw AuthError.sessionMissing }
+        let returned: Session
+        do {
+            returned = try await client.auth.signInWithOAuth(
+                provider: .google,
+                redirectTo: URL(string: "pebbles://auth-callback"),
+                queryParams: [("login_hint", before.email), ("prompt", "select_account")]
+            )
+        } catch let error as ASWebAuthenticationSessionError where error.code == .canceledLogin {
+            throw CancellationError()
+        } catch {
+            logger.error("reauthenticateWithGoogle failed: \(error.localizedDescription, privacy: .private)")
+            throw error
+        }
+        try await requireSameUser(returned.user.id, as: before.id)
+    }
+
+    /// Re-runs Sign in with Apple. Same cancel and mismatch contract as
+    /// `reauthenticateWithGoogle`. Apple answers with the device's Apple ID,
+    /// so an account created under another Apple ID ends in a mismatch.
+    func reauthenticateWithApple() async throws {
+        guard let before = session?.user else { throw AuthError.sessionMissing }
+        let returned: Session
+        do {
+            let result = try await AppleSignInService.authorize()
+            returned = try await client.auth.signInWithIdToken(
+                credentials: .init(provider: .apple, idToken: result.idToken, nonce: result.rawNonce)
+            )
+        } catch AppleSignInService.Failure.canceled {
+            throw CancellationError()
+        } catch {
+            logger.error("reauthenticateWithApple failed: \(error.localizedDescription, privacy: .private)")
+            throw error
+        }
+        try await requireSameUser(returned.user.id, as: before.id)
+    }
+
+    private func requireSameUser(_ returned: UUID, as expected: UUID) async throws {
+        guard returned != expected else { return }
+        logger.error("re-auth came back as a different user; signing out")
+        await signOut()
+        throw ReauthAccountMismatchError()
+    }
+
     private func formatted(_ name: PersonNameComponents?) -> String? {
         guard let name else { return nil }
         let formatter = PersonNameComponentsFormatter()
