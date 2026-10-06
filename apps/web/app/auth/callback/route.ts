@@ -2,7 +2,8 @@ import { NextResponse } from "next/server"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { isSafeRelativePath } from "@/lib/utils/safe-relative-path"
 import { CONSENT_DOCUMENT_VERSION } from "@/lib/config/consent"
-import { oauthConsentActs } from "@/lib/auth/oauth-consents"
+import { recordOAuthConsents } from "@/lib/auth/oauth-consents"
+import { parseActiveConsents } from "@/lib/auth/consent-gate"
 import { REAUTH_RETURN_PARAM } from "@/lib/auth/pending-reauth"
 
 export async function GET(request: Request) {
@@ -43,25 +44,40 @@ export async function GET(request: Request) {
   // redirect. oauthConsentActs validates the param against the known-good
   // version and says why a mismatch records nothing.
   //
-  // record_consent is idempotent, so a replayed callback is a no-op. A failure
-  // must never block the sign-in — it is logged loudly instead, and the
-  // post-auth consent gate asks for whatever is still missing.
+  // The same buttons also sign in an existing account, so recordOAuthConsents
+  // first reads the live grants and skips any act already held at the same or
+  // a newer version: record_consent would otherwise supersede, say, a newer
+  // acceptance recorded on Android with this deploy's older one. If that read
+  // fails it records nothing. A replayed callback is a no-op. No failure here
+  // blocks the sign-in — each is logged loudly, and the post-auth consent gate
+  // asks for whatever is still missing.
   const consentParam = searchParams.get("consent")
   if (consentParam && consentParam !== CONSENT_DOCUMENT_VERSION) {
     console.error(
       `[auth/callback] ignoring consent param with unexpected version: ${consentParam}`,
     )
   }
-  for (const act of oauthConsentActs(consentParam)) {
-    const { error: consentError } = await supabase.rpc("record_consent", {
-      p_kind: act.kind,
-      p_document_version: act.version,
-      p_source: "web_oauth",
-    })
-    if (consentError) {
-      console.error(`[auth/callback] record_consent (${act.kind}) failed:`, consentError.message)
-    }
-  }
+  await recordOAuthConsents(
+    consentParam,
+    async () => {
+      // Owner select, RLS-scoped to the caller; the same read as the gate's.
+      const { data, error: readError } = await supabase
+        .from("user_consents")
+        .select("kind, document_version")
+        .is("withdrawn_at", null)
+        .is("superseded_at", null)
+      if (readError) throw new Error(readError.message)
+      return parseActiveConsents(data)
+    },
+    async (act) => {
+      const { error: consentError } = await supabase.rpc("record_consent", {
+        p_kind: act.kind,
+        p_document_version: act.version,
+        p_source: "web_oauth",
+      })
+      if (consentError) throw new Error(consentError.message)
+    },
+  )
 
   const { data: profile } = await supabase
     .from("profiles")
