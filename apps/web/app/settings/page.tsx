@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useTranslations } from "next-intl"
@@ -8,6 +8,12 @@ import { useAuth } from "@/lib/data/auth-context"
 import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
 import { useConsents } from "@/lib/data/useConsents"
 import type { UpdateProfileInput } from "@/lib/types"
+import { isReauthRequired } from "@/lib/auth/recent-auth"
+import {
+  REAUTH_RETURN_PARAM,
+  stashPendingReauth,
+  takePendingReauth,
+} from "@/lib/auth/pending-reauth"
 import { PageLayout } from "@/components/layout/PageLayout"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { Button } from "@/components/ui/button"
@@ -23,9 +29,23 @@ import { LegalSection } from "@/components/settings/LegalSection"
 import { ConsentSection } from "@/components/settings/ConsentSection"
 import { AppearanceSection } from "@/components/settings/AppearanceSection"
 import { DeleteAccountSection } from "@/components/settings/DeleteAccountSection"
+import { ReauthDialog } from "@/components/settings/ReauthDialog"
+
+/** Where a provider re-auth comes back to (the callback's validated `next`). */
+const REAUTH_RETURN_TO = `/settings?${REAUTH_RETURN_PARAM}=1`
 
 export default function SettingsPage() {
-  const { user, profile, isAuthenticated, isLoading, updateProfile, setHandle, updatePassword } = useAuth()
+  const {
+    user,
+    profile,
+    isAuthenticated,
+    isLoading,
+    updateProfile,
+    setHandle,
+    updatePassword,
+    isSignInRecent,
+    logout,
+  } = useAuth()
   const router = useRouter()
   const { glyphs } = useUsableGlyphs()
   // Deliberately outside the staged-save model every other control on this
@@ -51,6 +71,40 @@ export default function SettingsPage() {
   const [stagedPublic, setStagedPublic] = useState<boolean | null>(null)
   const [handleError, setHandleError] = useState<HandleErrorCode | null>(null)
   const [saving, setSaving] = useState(false)
+  const [reauthOpen, setReauthOpen] = useState(false)
+  const [resumeDelete, setResumeDelete] = useState(false)
+
+  // Back from a provider re-auth (#977): restore what was staged and reopen
+  // the step, never run it. Runs once, as soon as the account is known. The
+  // stash is always taken, so one left by an abandoned redirect is discarded.
+  const resumeChecked = useRef(false)
+  useEffect(() => {
+    if (resumeChecked.current || !user || !profile) return
+    resumeChecked.current = true
+    const returning = new URLSearchParams(window.location.search).has(REAUTH_RETURN_PARAM)
+    const pending = takePendingReauth()
+    if (!returning) return
+    router.replace("/settings")
+    if (!pending) return
+    if (pending.userId !== user.id) {
+      // The provider came back as someone else, and the callback already
+      // switched the session to them. Never act on that account.
+      console.error("[settings] re-auth returned a different account; signing out")
+      toast.error(t("reauthMismatch"))
+      void logout().catch((err) => console.error("[settings] sign-out after mismatch failed:", err))
+      return
+    }
+    if (pending.purpose === "delete") {
+      setResumeDelete(true)
+      return
+    }
+    const { form } = pending
+    setNameInput(form.name)
+    setStagedGlyphId(form.glyphId.unchanged ? undefined : form.glyphId.value)
+    setHandleInput(form.handle)
+    setStagedPublic(form.isPublic)
+    toast(t("reauthResumeSave"))
+  }, [user, profile, router, logout, t])
 
   if (isLoading) {
     return (
@@ -93,8 +147,22 @@ export default function SettingsPage() {
   const handleChanged = normalizedHandle !== (savedHandle ?? "")
   const publicChanged = isPublic !== profile.public_profile
   const dirty = nameChanged || glyphChanged || passwordChanged || handleChanged || publicChanged
+  // A password change and going public need a recent sign-in (#976). Every
+  // other edit saves without a prompt.
+  const saveNeedsRecentAuth = passwordChanged || (publicChanged && isPublic)
 
   const handleSave = async () => {
+    if (saving || reauthOpen) return
+    setSaving(true)
+    if (saveNeedsRecentAuth && !(await isSignInRecent())) {
+      setSaving(false)
+      setReauthOpen(true)
+      return
+    }
+    await runSave()
+  }
+
+  const runSave = async () => {
     setSaving(true)
     try {
       // Handle first: a same-save "claim + go public" needs the handle stored
@@ -175,6 +243,13 @@ export default function SettingsPage() {
       setHandleError(null)
       toast.success(t("saved"))
     } catch (err) {
+      if (isReauthRequired(err)) {
+        // The server's clock disagrees with ours. Whatever already landed (a
+        // handle, a consent row) is idempotent to resend, and the password is
+        // written last, so re-running the whole save after the re-auth is safe.
+        setReauthOpen(true)
+        return
+      }
       console.error("[settings] save failed:", err instanceof Error ? err.message : err)
       toast.error(t("saveError"))
     } finally {
@@ -229,8 +304,39 @@ export default function SettingsPage() {
             onWithdrawn={() => router.push("/")}
           />
           <AppearanceSection />
-          <DeleteAccountSection onDeleted={() => router.push("/")} />
+          <DeleteAccountSection
+            key={resumeDelete ? "resume" : "idle"}
+            onDeleted={() => router.push("/")}
+            resumeAfterReauth={resumeDelete}
+            reauthReturnTo={REAUTH_RETURN_TO}
+          />
         </div>
+        <ReauthDialog
+          open={reauthOpen}
+          returnTo={REAUTH_RETURN_TO}
+          onBeforeRedirect={() =>
+            stashPendingReauth({
+              purpose: "save",
+              userId: user.id,
+              savedAt: Date.now(),
+              // No password: provider-only accounts have no password field.
+              form: {
+                name: nameInput,
+                glyphId:
+                  stagedGlyphId === undefined
+                    ? { unchanged: true }
+                    : { unchanged: false, value: stagedGlyphId },
+                handle: handleInput,
+                isPublic: stagedPublic,
+              },
+            })
+          }
+          onCancel={() => setReauthOpen(false)}
+          onConfirmed={() => {
+            setReauthOpen(false)
+            void runSave()
+          }}
+        />
       </section>
     </PageLayout>
   )

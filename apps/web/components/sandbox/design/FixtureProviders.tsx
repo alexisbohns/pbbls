@@ -24,6 +24,9 @@ const FIXTURE_AUTH: AuthContextValue = {
   setHandle: async (handle) => handle,
   updatePassword: noop,
   deleteAccount: noop,
+  isSignInRecent: async () => true,
+  reauthenticate: noop,
+  reauthenticateWithProvider: noop,
 }
 
 /**
