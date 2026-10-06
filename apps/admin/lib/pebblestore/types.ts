@@ -16,9 +16,10 @@ export type AdminSubmission = {
   created_at: string
   reviewed_at: string | null
   submitter_id: string
-  submitter_email: string | null
+  /** Opt-in profiles.handle; null for most accounts. No email: see #766. */
+  submitter_handle: string | null
   owner_id: string | null // the glyph's current owner (creator); payouts route here
-  owner_email: string | null
+  owner_handle: string | null
   name: string | null
   strokes: GlyphStroke[]
   view_box: string

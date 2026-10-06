@@ -52,9 +52,9 @@ export type TargetLive = TargetSnapshot & {
 /**
  * A row from admin_list_content_reports.
  *
- * Note there is deliberately NO reporter email: admin_list_glyph_submissions
- * joins auth.users for the submitter address and #766 is open against exactly
- * that. A moderator judges the content, not the person who flagged it.
+ * Note there is deliberately NO reporter email, the same rule
+ * admin_list_glyph_submissions follows since #766. A moderator judges the
+ * content, not the person who flagged it.
  */
 export type ContentReport = {
   id: string
