@@ -199,6 +199,8 @@ export type GateStateInput = {
   /** The signed-in user; null when signed out AND while the session loads. */
   userId: string | null
   applies: GateApplies
+  /** The route is one a signed-out visitor can read (`isGatePublicPath`). */
+  publicRoute: boolean
   /** A pass for this user at these versions is cached on the device. */
   cached: boolean
   /** The latest verdict, with the user it was reached for. */
@@ -210,17 +212,22 @@ export type GateStateInput = {
 /**
  * What the gate renders. Only `open` renders the route.
  *
- * A null user is `open` only once `applies` is `skip`, i.e. once the session
- * check has finished and found nobody. While it runs, `applies` is `pending`
- * and the answer is `checking`. A pass (cached, or reached this session) keeps
- * the gate open through later `pending` flips, so a token refresh never
- * unmounts the app. Every verdict carries the user it was reached for, so a
- * stale verdict never lets a different user through.
+ * While the session check runs there is no user yet (`applies` is `pending`,
+ * `userId` null). On a route that needs sign-in, that is `checking`: "no user
+ * yet" must not pass for "signed out". On a public route it is `open`, so the
+ * server-rendered HTML is the real page: holding a page that signed-out
+ * visitors can read protects nothing. Either way, once a signed-in user is
+ * known, the gate decides for them as on any route.
+ *
+ * A pass (cached, or reached this session) keeps the gate open through later
+ * `pending` flips, so a token refresh never unmounts the app. Every verdict
+ * carries the user it was reached for, so a stale verdict never lets a
+ * different user through.
  */
 export function resolveGateState(input: GateStateInput): ConsentGateState {
   const { userId, applies, cached, result } = input
   if (applies === "skip") return { status: "open" }
-  if (userId === null) return { status: "checking" }
+  if (userId === null) return input.publicRoute ? { status: "open" } : { status: "checking" }
   const verdict = result !== null && result.userId === userId ? result.verdict : null
   if (cached || verdict?.status === "satisfied") return { status: "open" }
   // No verdict for this user yet (the profile may still be loading). An
@@ -242,4 +249,34 @@ export function resolveGateState(input: GateStateInput): ConsentGateState {
  */
 export function isGateExemptPath(pathname: string): boolean {
   return pathname === "/docs" || pathname.startsWith("/docs/")
+}
+
+/**
+ * Routes a signed-out visitor can read, each with its subpaths. The landing
+ * page `/` is matched exactly, in `isGatePublicPath`.
+ */
+const PUBLIC_ROUTES: readonly string[] = [
+  "/login",
+  "/register",
+  "/u", // public profiles
+  "/p", // shared pebbles
+  "/invite", // invite previews: sign-up-first for signed-out visitors (M49, D12)
+  "/lab", // published logs, readable by anyone (logs_select RLS)
+  "/offline", // service-worker fallback
+  "/sandbox", // design sandboxes on seed data
+]
+
+/**
+ * Whether a signed-out visitor can read this route, so the gate need not hold
+ * it while the session check runs (`resolveGateState`). The gate still covers
+ * a signed-in user here once one is known.
+ *
+ * An allowlist, so a new route is held by default. It is every app/ route
+ * outside AuthGate's PROTECTED_PREFIXES that renders without an account.
+ * Unprotected routes that only make sense signed in (/settings, /onboarding,
+ * /achievements, /drafts, /wallet) are deliberately not listed.
+ */
+export function isGatePublicPath(pathname: string): boolean {
+  if (pathname === "/") return true
+  return PUBLIC_ROUTES.some((route) => pathname === route || pathname.startsWith(route + "/"))
 }

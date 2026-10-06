@@ -8,6 +8,7 @@ import {
   gateFingerprint,
   isAtLeast,
   isGateExemptPath,
+  isGatePublicPath,
   missingConsents,
   parseActiveConsents,
   resolveGateState,
@@ -263,18 +264,27 @@ describe("resolveGateState", () => {
   /** What ReconsentGate computes for one render: gateApplies, then the state. */
   const decide = (
     auth: GateAuthInput & { userId: string | null },
-    rest: Partial<Omit<GateStateInput, "userId" | "applies">> = {},
+    rest: Partial<Omit<GateStateInput, "userId" | "applies" | "publicRoute">> = {},
+    pathname = "/path",
   ) =>
     resolveGateState({
       userId: auth.userId,
-      applies: gateApplies(auth),
+      applies: isGateExemptPath(pathname) ? "skip" : gateApplies(auth),
+      publicRoute: isGatePublicPath(pathname),
       cached: false,
       result: null,
       submitting: false,
       recordFailed: false,
       ...rest,
     })
-  const loading = { isLoading: true, isAuthenticated: false, isProfileLoading: true, profile: null }
+  const loading = {
+    isLoading: true,
+    isAuthenticated: false,
+    isProfileLoading: true,
+    profile: null,
+    userId: null,
+  }
+  const signedOut = { ...loading, isLoading: false, isProfileLoading: false }
   const signedIn = {
     isLoading: false,
     isAuthenticated: true,
@@ -282,17 +292,42 @@ describe("resolveGateState", () => {
     profile: { onboarding_completed: true },
     userId: "u1",
   }
+  const required = {
+    result: { userId: "u1", verdict: { status: "required" as const, missing: ["terms" as const] } },
+  }
 
-  it("holds the route while sign-in loads, so no page renders before the decision", () => {
-    expect(decide({ ...loading, userId: null })).toEqual({ status: "checking" })
+  it("holds a route that needs sign-in while sign-in loads", () => {
+    for (const path of ["/path", "/pebble/abc", "/settings", "/onboarding", "/wallet"]) {
+      expect(decide(loading, {}, path)).toEqual({ status: "checking" })
+    }
     // A cached pass cannot be read without a user, so it does not open early.
-    expect(decide({ ...loading, userId: null }, { cached: true })).toEqual({ status: "checking" })
+    expect(decide(loading, { cached: true })).toEqual({ status: "checking" })
+  })
+
+  it("renders a public route while sign-in loads, so its server HTML is the page", () => {
+    for (const path of ["/", "/u/alexis", "/p/abc", "/invite/tok", "/lab", "/login", "/register"]) {
+      expect(decide(loading, {}, path)).toEqual({ status: "open" })
+    }
+  })
+
+  it("still holds a public route for a signed-in user who owes consent, once loaded", () => {
+    expect(decide(signedIn, {}, "/u/alexis")).toEqual({ status: "checking" })
+    expect(decide(signedIn, required, "/")).toEqual({
+      status: "required",
+      missing: ["terms"],
+      submitting: false,
+      recordFailed: false,
+    })
   })
 
   it("renders the page for a signed-out visitor once auth has finished", () => {
-    expect(
-      decide({ isLoading: false, isAuthenticated: false, isProfileLoading: false, profile: null, userId: null }),
-    ).toEqual({ status: "open" })
+    expect(decide(signedOut, {}, "/u/alexis")).toEqual({ status: "open" })
+    expect(decide(signedOut, {}, "/path")).toEqual({ status: "open" })
+  })
+
+  it("never covers the legal documents", () => {
+    expect(decide(loading, {}, "/docs/terms")).toEqual({ status: "open" })
+    expect(decide(signedIn, required, "/docs/privacy")).toEqual({ status: "open" })
   })
 
   it("holds a signed-in user whose check is pending", () => {
@@ -350,5 +385,50 @@ describe("gate cache and routes", () => {
     expect(isGateExemptPath("/docsx")).toBe(false)
     expect(isGateExemptPath("/path")).toBe(false)
     expect(isGateExemptPath("/onboarding")).toBe(false)
+  })
+
+  it("lists the routes a signed-out visitor can read as public", () => {
+    for (const path of [
+      "/",
+      "/login",
+      "/register",
+      "/u/alexis",
+      "/p/6f1c2a0e",
+      "/invite/abc",
+      "/lab",
+      "/lab/changelog",
+      "/lab/announcements/1",
+      "/offline",
+      "/sandbox/design",
+    ]) {
+      expect(isGatePublicPath(path), path).toBe(true)
+    }
+  })
+
+  it("treats protected and signed-in-only routes as not public", () => {
+    // AuthGate's PROTECTED_PREFIXES, then the unprotected signed-in screens.
+    for (const path of [
+      "/path",
+      "/record",
+      "/pebble/abc",
+      "/collections",
+      "/souls/1",
+      "/glyphs",
+      "/carve",
+      "/profile",
+      "/connections/1",
+      "/settings",
+      "/onboarding",
+      "/achievements",
+      "/drafts",
+      "/wallet",
+      // Prefix lookalikes and unknown routes are held by default.
+      "/users",
+      "/pebbles",
+      "/labx",
+      "/something-new",
+    ]) {
+      expect(isGatePublicPath(path), path).toBe(false)
+    }
   })
 })

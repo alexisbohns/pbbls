@@ -98,6 +98,8 @@ type Result = { userId: string; verdict: GateVerdict }
 export function useConsentGate(
   userId: string | null,
   applies: GateApplies,
+  /** `isGatePublicPath` for the current route; see `resolveGateState`. */
+  publicRoute: boolean,
 ) {
   const [result, setResult] = useState<Result | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -161,7 +163,15 @@ export function useConsentGate(
     setResult({ userId: uid, verdict })
   }, [])
 
-  const state = resolveGateState({ userId, applies, cached, result, submitting, recordFailed })
+  const state = resolveGateState({
+    userId,
+    applies,
+    publicRoute,
+    cached,
+    result,
+    submitting,
+    recordFailed,
+  })
 
   return { state, submit, retry }
 }
