@@ -69,12 +69,8 @@ struct CreateSoulSheet: View {
                 GlyphPickerSheet(
                     currentGlyphId: draft.glyphId,
                     onSelected: { selected in
-                        // Picker hands us the full Glyph; we still refetch via
-                        // `loadGlyph` so the row's thumbnail re-renders from
-                        // shared state. Eliminating the refetch is tracked
-                        // separately.
                         draft.glyphId = selected.id
-                        Task { await loadGlyph(id: selected.id) }
+                        draft.currentGlyph = selected
                     }
                 )
             }
@@ -98,6 +94,9 @@ struct CreateSoulSheet: View {
                 .single()
                 .execute()
                 .value
+            // A pick made while the default was in flight wins: don't paint
+            // the default's strokes over the glyph the user just chose.
+            guard draft.glyphId == fetched.id else { return }
             draft.currentGlyph = fetched
         } catch {
             logger.error("create soul: load glyph failed: \(error.localizedDescription, privacy: .private)")
