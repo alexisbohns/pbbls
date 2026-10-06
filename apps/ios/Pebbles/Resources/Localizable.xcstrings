@@ -7157,53 +7157,53 @@
         }
       }
     },
-    "This moment impacted my day and will be wrapped in my weekly Cairn" : {
+    "This moment impacted my day" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This moment impacted my day and will be wrapped in my weekly Cairn"
+            "value" : "This moment impacted my day"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ce moment a marqué ma journée et sera intégré dans mon Cairn hebdomadaire"
+            "value" : "Ce moment a marqué ma journée"
           }
         }
       }
     },
-    "This moment impacted my whole month and will be wrapped in my yearly Cairn" : {
+    "This moment impacted my whole month" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This moment impacted my whole month and will be wrapped in my yearly Cairn"
+            "value" : "This moment impacted my whole month"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ce moment a marqué mon mois et sera intégré dans mon Cairn annuel"
+            "value" : "Ce moment a marqué tout mon mois"
           }
         }
       }
     },
-    "This moment impacted my whole week and will be wrapped in my monthly Cairn" : {
+    "This moment impacted my whole week" : {
       "extractionState" : "manual",
       "localizations" : {
         "en" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "This moment impacted my whole week and will be wrapped in my monthly Cairn"
+            "value" : "This moment impacted my whole week"
           }
         },
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Ce moment a marqué ma semaine et sera intégré dans mon Cairn mensuel"
+            "value" : "Ce moment a marqué toute ma semaine"
           }
         }
       }

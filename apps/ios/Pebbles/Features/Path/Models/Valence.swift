@@ -85,11 +85,11 @@ enum ValenceSizeGroup: String, CaseIterable, Identifiable {
     var description: LocalizedStringResource {
         switch self {
         case .small:
-            return "This moment impacted my day and will be wrapped in my weekly Cairn"
+            return "This moment impacted my day"
         case .medium:
-            return "This moment impacted my whole week and will be wrapped in my monthly Cairn"
+            return "This moment impacted my whole week"
         case .large:
-            return "This moment impacted my whole month and will be wrapped in my yearly Cairn"
+            return "This moment impacted my whole month"
         }
     }
 }

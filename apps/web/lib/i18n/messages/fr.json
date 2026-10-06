@@ -936,15 +936,15 @@
       "lowlight": "Creux",
       "small": {
         "name": "Évènement du jour",
-        "description": "Ce moment a marqué ma journée et sera réuni dans mon Cairn hebdomadaire."
+        "description": "Ce moment a marqué ma journée."
       },
       "medium": {
         "name": "Évènement de la semaine",
-        "description": "Ce moment a marqué toute ma semaine et sera réuni dans mon Cairn mensuel."
+        "description": "Ce moment a marqué toute ma semaine."
       },
       "large": {
         "name": "Évènement du mois",
-        "description": "Ce moment a marqué tout mon mois et sera réuni dans mon Cairn annuel."
+        "description": "Ce moment a marqué tout mon mois."
       }
     },
     "valenceFan": {

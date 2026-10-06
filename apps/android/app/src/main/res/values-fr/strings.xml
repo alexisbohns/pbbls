@@ -341,9 +341,9 @@
     <string name="valence_group_small_name">Évènement du jour</string>
     <string name="valence_group_medium_name">Évènement de la semaine</string>
     <string name="valence_group_large_name">Évènement du mois</string>
-    <string name="valence_group_small_desc">Ce moment a marqué ma journée et sera réuni dans mon Cairn hebdomadaire</string>
-    <string name="valence_group_medium_desc">Ce moment a marqué toute ma semaine et sera réuni dans mon Cairn mensuel</string>
-    <string name="valence_group_large_desc">Ce moment a marqué tout mon mois et sera réuni dans mon Cairn annuel</string>
+    <string name="valence_group_small_desc">Ce moment a marqué ma journée</string>
+    <string name="valence_group_medium_desc">Ce moment a marqué toute ma semaine</string>
+    <string name="valence_group_large_desc">Ce moment a marqué tout mon mois</string>
     <string name="valence_headline_neutral">Moment</string>
     <string name="valence_span_day">DE MA JOURNÉE</string>
     <string name="valence_span_week">DE MA SEMAINE</string>
