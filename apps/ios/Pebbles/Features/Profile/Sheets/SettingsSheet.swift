@@ -20,6 +20,7 @@ struct SettingsSheet: View {
 
     @State private var displayName: String
     @State private var pickedGlyph: Glyph?
+    /// The "Confirm it's you" password (#977). Never persisted, cleared after every attempt.
     @State private var currentPassword: String = ""
     @State private var newPassword: String = ""
     @State private var handle: String
@@ -35,9 +36,15 @@ struct SettingsSheet: View {
     #endif
     @State private var isDeleting = false
     @State private var deleteError: String?
+    /// The action waiting on a recent sign-in, or nil.
+    @State private var reauthPurpose: ReauthPurpose?
+    @State private var isPresentingReauth = false
+    /// Set after a failed attempt; the alert re-presents with it.
+    @State private var reauthError: String?
     @FocusState private var focusedField: Field?
 
     private enum Field: Hashable { case displayName, newPassword, handle }
+    private enum ReauthPurpose { case save, delete }
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "settings-sheet")
 
@@ -78,6 +85,20 @@ struct SettingsSheet: View {
 
     private var publicProfileChanged: Bool {
         isPublicProfile != initialPublicProfile
+    }
+
+    /// A password change and going public need a recent sign-in (#976). Every
+    /// other edit saves without a prompt.
+    private var saveNeedsRecentAuth: Bool {
+        !newPassword.isEmpty || (publicProfileChanged && isPublicProfile)
+    }
+
+    private var isSignInFresh: Bool {
+        RecentAuth.isFresh(accessToken: supabase.session?.accessToken)
+    }
+
+    private var reauthMethod: ReauthMethod {
+        ReauthMethod(providers: (supabase.session?.user.identities ?? []).map(\.provider))
     }
 
     private var isDirty: Bool {
@@ -169,7 +190,7 @@ struct SettingsSheet: View {
                 titleVisibility: .visible
             ) {
                 Button("Delete forever", role: .destructive) {
-                    Task { await deleteAccount() }
+                    Task { await confirmDelete() }
                 }
                 Button("Cancel", role: .cancel) {}
             } message: {
@@ -186,6 +207,30 @@ struct SettingsSheet: View {
                 Button("OK", role: .cancel) { deleteError = nil }
             } message: { message in
                 Text(message)
+            }
+            .alert("Confirm it's you", isPresented: $isPresentingReauth) {
+                switch reauthMethod {
+                case .password:
+                    SecureField("Password", text: $currentPassword)
+                        .textContentType(.password)
+                    Button("Confirm") { Task { await submitReauth() } }
+                        .disabled(currentPassword.isEmpty)
+                case .google:
+                    Button("Continue with Google") { Task { await submitReauth() } }
+                case .apple:
+                    Button("Continue with Apple") { Task { await submitReauth() } }
+                }
+                Button("Cancel", role: .cancel) { cancelReauth() }
+            } message: {
+                if let reauthError {
+                    Text(reauthError)
+                } else {
+                    switch reauthMethod {
+                    case .password: Text("Enter your password to continue.")
+                    case .google: Text("Continue with Google to confirm it's you.")
+                    case .apple: Text("Continue with Apple to confirm it's you.")
+                    }
+                }
             }
         }
     }
@@ -434,6 +479,17 @@ struct SettingsSheet: View {
         }
     }
 
+    /// Deletion needs a recent sign-in (#976): a stale session goes through
+    /// "Confirm it's you" between the confirmation and the call.
+    private func confirmDelete() async {
+        guard !isDeleting, reauthPurpose == nil else { return }
+        guard isSignInFresh else {
+            requestReauth(for: .delete)
+            return
+        }
+        await deleteAccount()
+    }
+
     /// Full erasure via the delete-account edge function (purge + storage +
     /// auth user), then a local sign-out: the server session is already gone,
     /// and the session stream flipping to signed-out swaps RootView to Welcome.
@@ -444,6 +500,11 @@ struct SettingsSheet: View {
             try await supabase.client.functions.invoke("delete-account")
             await supabase.signOut()
             dismiss()
+        } catch let error where RecentAuth.isReauthRequired(error) {
+            // The server's clock disagrees with ours (a 428): confirm, then retry.
+            logger.info("delete-account wants a recent sign-in")
+            isDeleting = false
+            requestReauth(for: .delete)
         } catch {
             logger.error("account deletion failed: \(error.localizedDescription, privacy: .private)")
             deleteError = String(localized: "We couldn't delete your account. Nothing was removed. Please try again.")
@@ -469,8 +530,87 @@ struct SettingsSheet: View {
         return nil
     }
 
+    // MARK: - Recent sign-in (#976, #977)
+
+    private func requestReauth(for purpose: ReauthPurpose) {
+        reauthPurpose = purpose
+        reauthError = nil
+        currentPassword = ""
+        isPresentingReauth = true
+    }
+
+    private func cancelReauth() {
+        reauthPurpose = nil
+        reauthError = nil
+        currentPassword = ""
+    }
+
+    /// Password: signs in again as the same user. Google and Apple: re-run the
+    /// provider sheet. On success the pending action runs at once; a failure
+    /// re-presents the alert with the reason.
+    private func submitReauth() async {
+        guard let purpose = reauthPurpose else { return }
+        let method = reauthMethod
+        if method == .password && currentPassword.isEmpty {
+            cancelReauth()
+            return
+        }
+        // The row and toolbar spinners double as the alert's working state.
+        switch purpose {
+        case .save: isSaving = true
+        case .delete: isDeleting = true
+        }
+        do {
+            try await reauthenticate(with: method)
+        } catch {
+            isSaving = false
+            isDeleting = false
+            reauthFailed(with: error)
+            return
+        }
+        cancelReauth()
+        isSaving = false
+        isDeleting = false
+        switch purpose {
+        case .save: await performSave()
+        case .delete: await deleteAccount()
+        }
+    }
+
+    private func reauthenticate(with method: ReauthMethod) async throws {
+        switch method {
+        case .password: try await supabase.reauthenticate(password: currentPassword)
+        case .google: try await supabase.reauthenticateWithGoogle()
+        case .apple: try await supabase.reauthenticateWithApple()
+        }
+    }
+
+    private func reauthFailed(with error: Error) {
+        currentPassword = ""
+        // Closing the provider sheet abandons the action. A mismatch already
+        // signed that other account out, and RootView swaps to Welcome.
+        if error is CancellationError || error is ReauthAccountMismatchError {
+            cancelReauth()
+            return
+        }
+        logger.error("re-auth failed: \(error.localizedDescription, privacy: .private)")
+        reauthError = RecentAuth.isWrongPassword(error)
+            ? String(localized: "That password doesn't match. Try again.")
+            : String(localized: "We couldn't confirm it's you. Please try again.")
+        isPresentingReauth = true
+    }
+
     private func save() async {
-        guard isDirty, !isSaving else { return }
+        guard isDirty, !isSaving, reauthPurpose == nil else { return }
+        if saveNeedsRecentAuth && !isSignInFresh {
+            requestReauth(for: .save)
+            return
+        }
+        await performSave()
+    }
+
+    private func performSave() async {
+        guard !isSaving else { return }
         isSaving = true
         saveError = nil
         handleError = nil
@@ -542,6 +682,13 @@ struct SettingsSheet: View {
                 savedHandle == nil ? false : isPublicProfile
             )
             dismiss()
+        } catch let error where RecentAuth.isReauthRequired(error) {
+            // The server's clock disagrees with ours. A stored handle is a
+            // no-op to resend, and the password is written last, so re-running
+            // the whole save after the re-auth is safe.
+            logger.info("settings save wants a recent sign-in")
+            isSaving = false
+            requestReauth(for: .save)
         } catch {
             logger.error("settings save failed: \(error.localizedDescription, privacy: .private)")
             saveError = String(localized: "Couldn't save your changes. Please try again.")
