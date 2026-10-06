@@ -885,4 +885,26 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Supersedes / Superseded-by:** Supersedes the "error colour is amber" part of **2026-09-24 — Android adopts the M3-evo Material 3 Expressive theme** (#853).
 - **Refs:** #990, #991, #853, #921, `apps/android/design/pbbls-m3_evo-theme.json`, `apps/android/scripts/generate-color-schemes.py`, `apps/android/app/src/main/kotlin/app/pbbls/android/core/designsystem/ExtendedColors.kt`.
 
+## 2026-10-06 — The recent sign-in check is enforced; web resumes a provider re-auth from a stash, and Apple-only accounts re-run Apple (#977)
+
+- **Status:** taken
+- **Scope:** supabase, web, ios
+- **Context:** The 2026-09-27 entry shipped the server check with enforcement off until web and iOS prompt too.
+- **Decision:** Both clients now ask "Confirm it's you" before account deletion, a password change and going public. `recent_auth_enforced()` returns true (`20261006120000`). GoTrue's `secure_password_change` and the password-changed email are on.
+  - **Proof per account.** An email identity always re-enters its password. A provider-only account re-runs its provider: Google (`login_hint` + `prompt=select_account`), or Apple, which the 2026-09-27 design did not cover. A different user coming back is signed out, never acted on.
+  - **Web provider re-auth is a full-page redirect.** Before redirecting, the settings page stashes the pending action and its staged edits (never a password) in sessionStorage (`lib/auth/pending-reauth.ts`). On return (`/settings?reauth=1`) it restores them and reopens the step: the delete confirmation, or the form ready to save. It never runs the action by itself.
+  - **The callback honours a re-auth `next` even for an un-onboarded account,** so a provider that came back as a brand-new account reaches the mismatch check instead of onboarding.
+  - **iOS uses a system alert** (SecureField, or a provider button) re-presented with the reason after a failure.
+- **Why:**
+  - A popup would have avoided the stash, but popup blockers, a second callback path and cross-window session sync cost more than restoring a few staged fields.
+  - Auto-running a restored deletion after a redirect is too easy to trigger by accident.
+- **Consequences:**
+  - **Merge the enforcement migration only once the iOS release carrying the prompt is live.** Older iOS builds show a generic error for deletion and going public until they update.
+  - The hosted project needs the same two Auth toggles set by hand (dashboard). `config.toml` only covers the local stack.
+  - The 10-minute window now lives in four places: the migration, Android `RecentAuth.WINDOW`, web `RECENT_AUTH_WINDOW_SECONDS` and iOS `RecentAuth.window`.
+  - The nightly harness run waits past the window and asserts both refusals (`RECENT_AUTH_STALE_CASE=1`). PR runs skip the wait.
+  - A provider re-auth that comes back as a brand-new account still leaves that new auth user behind (as on Android). Signing it out does not delete it.
+- **Supersedes / Superseded-by:** Supersedes the "enforcement ships off" part of **2026-09-27 — High-harm account actions need a recent sign-in** (#976).
+- **Refs:** #977, #976, `packages/supabase/supabase/migrations/20261006120000_recent_auth_enforced.sql`, `apps/web/lib/auth/recent-auth.ts`, `apps/web/lib/auth/pending-reauth.ts`, `apps/ios/Pebbles/Services/RecentAuth.swift`.
+
 ---

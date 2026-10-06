@@ -152,11 +152,15 @@ jobs:
         if: '!cancelled()'
         run: .github/scripts/verify-harness.sh "reports" db:verify:reports
 
-      # The recent sign-in check (#976). Anon-only: it proves the evaluator and
-      # that neither gate over-blocks a fresh session. The stale-token refusal
-      # needs enforcement on and lands with #977.
-      - name: Recent sign-in check (#976)
+      # The recent sign-in check (#976, #977). Anon-only: it proves the
+      # evaluator and that neither gate over-blocks a fresh session. The
+      # nightly run also waits past the 10-minute window and proves both gates
+      # refuse the stale token. Nightly only, because the wait would add over
+      # ten minutes to every PR.
+      - name: Recent sign-in check (#976, #977)
         if: '!cancelled()'
+        env:
+          RECENT_AUTH_STALE_CASE: ${{ github.event_name == 'schedule' && '1' || '' }}
         run: .github/scripts/verify-harness.sh "recent-auth" db:verify:recent-auth
 
       # One writer for the whole table. `always()` so it still reports when a

@@ -13,13 +13,14 @@
  *      accepts (the real GoTrue shape, printed for cross-surface tests).
  *   3. Neither gate over-blocks a fresh session: the public flip round-trips
  *      and delete-account succeeds (it is also the cleanup).
- *
- * The stale-token REFUSAL cannot be asserted while `recent_auth_enforced()` is
- * false (#976 ships it off). #977 adds a nightly-only case that waits past
- * the window and expects `reauth_required` from both gates.
+ *   4. Nightly only (RECENT_AUTH_STALE_CASE=1): enforcement is on (#977).
+ *      It waits past the 10-minute window with the same token, then expects
+ *      `reauth_required` from both gates: the public flip is refused and left
+ *      off, and delete-account answers 428. Gated because the wait would add
+ *      over ten minutes to every PR run.
  *
  * Run:
- *   SUPABASE_URL=... SUPABASE_ANON_KEY=... \
+ *   SUPABASE_URL=... SUPABASE_ANON_KEY=... [RECENT_AUTH_STALE_CASE=1] \
  *     deno run --allow-env --allow-net packages/supabase/scripts/verify-recent-auth.ts
  *
  * Needs NO service-role key: it signs up a throwaway user and deletes it
@@ -29,6 +30,9 @@
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
 const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY");
+const STALE_CASE = Deno.env.get("RECENT_AUTH_STALE_CASE") === "1";
+/** Past the 10-minute window, with margin for clock skew between runner and server. */
+const STALE_WAIT_MS = 10.5 * 60 * 1000;
 
 if (!SUPABASE_URL || !ANON_KEY) {
   console.error("SUPABASE_URL and SUPABASE_ANON_KEY must be set");
@@ -55,9 +59,10 @@ const handle = `rav${runId}`;
 
 type TestUser = { client: SupabaseClient; id: string; token: string };
 
+const email = `recent-auth-verify-${runId}@example.test`;
+
 async function signUp(): Promise<TestUser> {
   const client = createClient(SUPABASE_URL!, ANON_KEY!, { auth: { persistSession: false } });
-  const email = `recent-auth-verify-${runId}@example.test`;
   const { data, error } = await client.auth.signUp({ email, password });
   if (error || !data.session || !data.user) {
     throw new Error(`signUp: ${error?.message ?? "no session (email confirmations on?)"}`);
@@ -84,6 +89,14 @@ function jwtPayload(token: string): Record<string, unknown> {
 }
 
 const nowS = () => Math.floor(Date.now() / 1000);
+
+/** Re-sign in as the throwaway user: a fresh `amr` stamp, as the clients' re-auth does. */
+async function freshToken(): Promise<string> {
+  const client = createClient(SUPABASE_URL!, ANON_KEY!, { auth: { persistSession: false } });
+  const { data, error } = await client.auth.signInWithPassword({ email, password });
+  if (error || !data.session) throw new Error(`re-sign-in: ${error?.message ?? "no session"}`);
+  return data.session.access_token;
+}
 
 let user: TestUser | null = null;
 let deleted = false;
@@ -147,7 +160,53 @@ try {
   check("turning it off is never gated", !offErr && offRow?.public_profile === false, offErr?.message);
 
   // -------------------------------------------------------------------------
-  // 4. delete-account passes the gate for a fresh session (this is cleanup).
+  // 4. Nightly only: the same token, past the window, is refused by both gates.
+  // -------------------------------------------------------------------------
+  if (STALE_CASE) {
+    const { data: enforced, error: enforcedErr } = await c.rpc("recent_auth_enforced");
+    check("enforcement is on", !enforcedErr && enforced === true, enforcedErr?.message ?? String(enforced));
+
+    console.log(`… waiting ${STALE_WAIT_MS / 60000} minutes for the sign-in to go stale`);
+    await new Promise((resolve) => setTimeout(resolve, STALE_WAIT_MS));
+
+    // A token client, not `c`: it must present exactly the token signed in
+    // eleven minutes ago (a refresh would keep the same stamp anyway).
+    const stale = createClient(SUPABASE_URL!, ANON_KEY!, {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { Authorization: `Bearer ${user.token}` } },
+    });
+
+    const { data: staleOk } = await stale.rpc("recent_auth_ok", { p_amr: payload.amr, p_max_age: "10 minutes" });
+    check("the same amr is stale past the window", staleOk === false, String(staleOk));
+
+    const { error: staleAssert } = await stale.rpc("assert_recent_auth");
+    check("assert_recent_auth refuses a stale session", staleAssert?.message === "reauth_required", staleAssert?.message);
+
+    const { error: staleFlip } = await stale.from("profiles").update({ public_profile: true }).eq("user_id", user.id);
+    const { data: staleRow } = await stale.from("profiles").select("public_profile").eq("user_id", user.id).single();
+    check(
+      "a stale session cannot turn the public profile on",
+      staleFlip?.message === "reauth_required" && staleRow?.public_profile === false,
+      `${staleFlip?.message} / stored ${staleRow?.public_profile}`,
+    );
+
+    const { error: staleOff } = await stale.from("profiles").update({ public_profile: false }).eq("user_id", user.id);
+    check("a stale session can still turn it off", !staleOff, staleOff?.message);
+
+    const staleDelete = await deleteAccount(user.token);
+    const staleBody = await staleDelete.text();
+    check(
+      "delete-account answers 428 reauth_required to a stale session",
+      staleDelete.status === 428 && staleBody.includes("reauth_required"),
+      `status ${staleDelete.status}: ${staleBody}`,
+    );
+
+    // Confirm it's you, as every client does: sign in again for a fresh stamp.
+    user.token = await freshToken();
+  }
+
+  // -------------------------------------------------------------------------
+  // 5. delete-account passes the gate for a fresh session (this is cleanup).
   // -------------------------------------------------------------------------
   const res = await deleteAccount(user.token);
   deleted = res.status === 200;
@@ -157,7 +216,9 @@ try {
   console.error(`✗ aborted: ${err instanceof Error ? err.message : String(err)}`);
 } finally {
   if (user && !deleted) {
-    const res = await deleteAccount(user.token).catch(() => null);
+    // With enforcement on, the sign-up token may be stale by now: sign in again.
+    const token = await freshToken().catch(() => user!.token);
+    const res = await deleteAccount(token).catch(() => null);
     console.log(`… cleanup: ${res ? res.status : "FAILED — remove recent-auth-verify-* manually"}`);
   }
 }
