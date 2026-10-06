@@ -1,0 +1,89 @@
+name: Orphan snap sweep
+
+# Nightly removal of pebbles-media files nothing references any more (#322):
+# photos of deleted pebbles (the `snaps` cascade cannot reach Storage) and of
+# composes abandoned after upload. The schedule lives here, in the repo, so a
+# fresh project reproduces it; the pg_cron job that used to run the SQL sweep
+# existed only in production and failed every night, because Supabase refuses a
+# SQL delete on storage.objects.
+#
+# This workflow only calls the `sweep-orphan-snaps` edge function. What counts
+# as an orphan is decided in SQL (`public.list_orphan_snap_files`: no snaps row,
+# no draft reference, older than 24 hours) and the function deletes through the
+# Storage API.
+#
+# DRY RUN BY DEFAULT. A scheduled run deletes only when the repository variable
+# ORPHAN_SWEEP_LIVE is `true` (Settings → Secrets and variables → Actions →
+# Variables). Until a maintainer sets it, every night reports what it would
+# delete and removes nothing. A manual run chooses for itself.
+#
+# Credentials: SUPABASE_URL (already set for the contract harnesses) and
+# ORPHAN_SWEEP_TOKEN, a dedicated secret the function also holds. It is NOT the
+# service role key: this repo is public, and packages/supabase/CLAUDE.md keeps
+# the service role out of CI on purpose. A leaked sweep token can only trigger
+# a sweep: across every account it is the deletion this job runs anyway, at the
+# 24-hour floor the function enforces, and below that floor only one named
+# account's unreferenced files are reachable.
+on:
+  schedule:
+    # 03:23 UTC: near the old pg_cron slot (03:00), off the hour, and clear of
+    # the contract harnesses at 04:17.
+    - cron: '23 3 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Only report what would be deleted'
+        type: boolean
+        default: true
+
+concurrency:
+  group: orphan-snap-sweep
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  sweep:
+    name: sweep pebbles-media orphans
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+      ORPHAN_SWEEP_TOKEN: ${{ secrets.ORPHAN_SWEEP_TOKEN }}
+      # Manual runs take the input; scheduled runs are live only once the
+      # variable says so.
+      # format() makes a manual `false` a non-empty string, so it does not
+      # fall through the `||` to the variable.
+      DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && format('{0}', inputs.dry_run) || vars.ORPHAN_SWEEP_LIVE != 'true' }}
+    steps:
+      - name: Call sweep-orphan-snaps
+        run: |
+          set -euo pipefail
+          if [ -z "$SUPABASE_URL" ] || [ -z "$ORPHAN_SWEEP_TOKEN" ]; then
+            # Not an error until the function is deployed and the secret is
+            # created: a red run every night before then would only be noise.
+            echo "::warning::SUPABASE_URL / ORPHAN_SWEEP_TOKEN are not set; skipping the sweep."
+            exit 0
+          fi
+          if [ "$DRY_RUN" = "true" ]; then body='{"dry_run":true}'; else body='{"dry_run":false}'; fi
+          status=$(curl -sS -o "$RUNNER_TEMP/sweep.json" -w '%{http_code}' \
+            -X POST "$SUPABASE_URL/functions/v1/sweep-orphan-snaps" \
+            -H "Authorization: Bearer $ORPHAN_SWEEP_TOKEN" \
+            -H 'Content-Type: application/json' \
+            --data "$body")
+          {
+            echo "### Orphan snap sweep — $(date -u '+%Y-%m-%d %H:%M UTC')"
+            echo
+            echo "HTTP $status, dry run: $DRY_RUN"
+            echo
+            echo '```json'
+            cat "$RUNNER_TEMP/sweep.json"
+            echo
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          cat "$RUNNER_TEMP/sweep.json"; echo
+          if [ "$status" != "200" ]; then
+            echo "::error::sweep-orphan-snaps answered HTTP $status"
+            exit 1
+          fi
