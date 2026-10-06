@@ -2594,6 +2594,14 @@ export type Database = {
         }
       }
       is_admin: { Args: { p_user_id: string }; Returns: boolean }
+      list_orphan_snap_files: {
+        Args: { p_min_age_seconds?: number; p_owner?: string }
+        Returns: {
+          created_at: string
+          name: string
+          size: number
+        }[]
+      }
       path_pebbles: {
         Args: never
         Returns: {
@@ -2667,13 +2675,6 @@ export type Database = {
         Returns: string
       }
       submit_glyph: { Args: { p_glyph_id: string }; Returns: Json }
-      sweep_orphan_snap_files: {
-        Args: never
-        Returns: {
-          bytes_freed: number
-          deleted_count: number
-        }[]
-      }
       sync_achievement_catalog: { Args: never; Returns: undefined }
       update_pebble: {
         Args: { p_pebble_id: string; payload: Json }
