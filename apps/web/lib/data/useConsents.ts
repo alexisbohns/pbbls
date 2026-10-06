@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/client"
 import { withTimeout } from "@/lib/utils/with-timeout"
 import { activeConsent, type ConsentRow } from "@/lib/data/consent"
 import {
-  CONSENT_DOCUMENT_VERSION,
+  documentVersionFor,
   type ConsentKind,
   type ConsentSource,
   type WithdrawableConsentKind,
@@ -79,7 +79,7 @@ export function useConsents() {
       const { error: rpcError } = await withTimeout(
         supabase.rpc("record_consent", {
           p_kind: kind,
-          p_document_version: CONSENT_DOCUMENT_VERSION,
+          p_document_version: documentVersionFor(kind),
           p_source: source,
         }),
         10000,
