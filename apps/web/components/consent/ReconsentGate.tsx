@@ -17,8 +17,9 @@ type ReconsentGateProps = {
  * required act at a current (or newer) version, renders the consent screen
  * INSTEAD of the route. Replacing rather than overlaying means nothing behind
  * it is mounted to be reached: no deep link, bookmark, restored tab or parked
- * invite gets around it. It fails closed: while deciding, and when the ledger
- * cannot be read, the route is not rendered either.
+ * invite gets around it. It fails closed: while deciding (sign-in still
+ * loading included), and when the ledger cannot be read, the route is not
+ * rendered either.
  *
  * Only the legal documents stay reachable, so the Terms and Privacy links on
  * the screen can open them. Accounts mid-onboarding are left to onboarding's
@@ -26,11 +27,15 @@ type ReconsentGateProps = {
  */
 export function ReconsentGate({ children }: ReconsentGateProps) {
   const pathname = usePathname()
-  const { user, profile, isAuthenticated, isProfileLoading } = useAuth()
+  const { user, profile, isLoading, isAuthenticated, isProfileLoading } = useAuth()
   const exempt = isGateExemptPath(pathname)
+  // While the session check runs there is no user yet, which is not the same
+  // as signed out: the gate holds its loading state on every route it wraps
+  // (protected or not) until auth knows. A signed-out visitor sees the page
+  // as soon as it does.
   const applies = exempt
     ? "skip"
-    : gateApplies({ isAuthenticated, isProfileLoading, profile })
+    : gateApplies({ isLoading, isAuthenticated, isProfileLoading, profile })
   const { state, submit, retry } = useConsentGate(user?.id ?? null, applies)
 
   if (state.status === "open") return <>{children}</>

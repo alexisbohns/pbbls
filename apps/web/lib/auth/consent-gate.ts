@@ -140,8 +140,13 @@ export async function submitConsentGate(
   return checkConsentGate(loadActive)
 }
 
+/** Whether the gate covers this session; see `gateApplies`. */
+export type GateApplies = "skip" | "pending" | "applies"
+
 /** What the auth context knows, reduced to what the gate needs. */
 export type GateAuthInput = {
+  /** The session check has not finished, so `isAuthenticated` means nothing yet. */
+  isLoading: boolean
   isAuthenticated: boolean
   isProfileLoading: boolean
   /** null when there is no profile row OR when it could not be read (#784). */
@@ -151,6 +156,10 @@ export type GateAuthInput = {
 /**
  * Whether the gate applies to this session.
  *
+ * - `pending` while the session check is still running. Until it finishes
+ *   there is no user to read, and "no user yet" must not pass for "signed
+ *   out": outside AuthGate's protected routes the page would render before
+ *   the gate decides.
  * - `skip` for a signed-out visitor, and for an account the profile PROVES is
  *   mid-onboarding: onboarding's own `ConsentGate` covers Art. 9 there, and the
  *   gate takes over once onboarding completes.
@@ -160,11 +169,62 @@ export type GateAuthInput = {
  *   closed: asking a new account for all four acts up front is a smaller harm
  *   than letting an established one through with nothing on record.
  */
-export function gateApplies(auth: GateAuthInput): "skip" | "pending" | "applies" {
+export function gateApplies(auth: GateAuthInput): GateApplies {
+  if (auth.isLoading) return "pending"
   if (!auth.isAuthenticated) return "skip"
   if (auth.isProfileLoading) return "pending"
   if (auth.profile && auth.profile.onboarding_completed === false) return "skip"
   return "applies"
+}
+
+export type ConsentGateState =
+  /** Not gating: a signed-out visitor, a pass, or a session the gate skips. */
+  | { status: "open" }
+  /** Deciding. Blocks, because the gate fails closed. */
+  | { status: "checking" }
+  | { status: "required"; missing: GateKind[]; submitting: boolean; recordFailed: boolean }
+  | { status: "failed" }
+
+/** Everything the gate's render decision reads. */
+export type GateStateInput = {
+  /** The signed-in user; null when signed out AND while the session loads. */
+  userId: string | null
+  applies: GateApplies
+  /** A pass for this user at these versions is cached on the device. */
+  cached: boolean
+  /** The latest verdict, with the user it was reached for. */
+  result: { userId: string; verdict: GateVerdict } | null
+  submitting: boolean
+  recordFailed: boolean
+}
+
+/**
+ * What the gate renders. Only `open` renders the route.
+ *
+ * A null user is `open` only once `applies` is `skip`, i.e. once the session
+ * check has finished and found nobody. While it runs, `applies` is `pending`
+ * and the answer is `checking`. A pass (cached, or reached this session) keeps
+ * the gate open through later `pending` flips, so a token refresh never
+ * unmounts the app. Every verdict carries the user it was reached for, so a
+ * stale verdict never lets a different user through.
+ */
+export function resolveGateState(input: GateStateInput): ConsentGateState {
+  const { userId, applies, cached, result } = input
+  if (applies === "skip") return { status: "open" }
+  if (userId === null) return { status: "checking" }
+  const verdict = result !== null && result.userId === userId ? result.verdict : null
+  if (cached || verdict?.status === "satisfied") return { status: "open" }
+  // No verdict for this user yet (the profile may still be loading). An
+  // earlier verdict stays on screen while a re-check runs, so boxes the user
+  // already ticked are not thrown away.
+  if (verdict === null) return { status: "checking" }
+  if (verdict.status === "failed") return { status: "failed" }
+  return {
+    status: "required",
+    missing: verdict.missing,
+    submitting: input.submitting,
+    recordFailed: input.recordFailed,
+  }
 }
 
 /**

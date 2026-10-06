@@ -10,8 +10,11 @@ import {
   isGateExemptPath,
   missingConsents,
   parseActiveConsents,
+  resolveGateState,
   submitConsentGate,
   type ActiveConsent,
+  type GateAuthInput,
+  type GateStateInput,
 } from "./consent-gate"
 
 const current = (): ActiveConsent[] => [
@@ -199,7 +202,13 @@ describe("submitConsentGate", () => {
 })
 
 describe("gateApplies", () => {
-  const base = { isAuthenticated: true, isProfileLoading: false }
+  const base = { isLoading: false, isAuthenticated: true, isProfileLoading: false }
+
+  it("waits while the session check runs, when there is no user yet", () => {
+    expect(
+      gateApplies({ isLoading: true, isAuthenticated: false, isProfileLoading: true, profile: null }),
+    ).toBe("pending")
+  })
 
   it("skips a signed-out visitor", () => {
     expect(gateApplies({ ...base, isAuthenticated: false, profile: null })).toBe("skip")
@@ -220,6 +229,76 @@ describe("gateApplies", () => {
   /** #784: a null profile may be a failed read of an onboarded account. */
   it("applies when the profile could not be read", () => {
     expect(gateApplies({ ...base, profile: null })).toBe("applies")
+  })
+})
+
+describe("resolveGateState", () => {
+  /** What ReconsentGate computes for one render: gateApplies, then the state. */
+  const decide = (
+    auth: GateAuthInput & { userId: string | null },
+    rest: Partial<Omit<GateStateInput, "userId" | "applies">> = {},
+  ) =>
+    resolveGateState({
+      userId: auth.userId,
+      applies: gateApplies(auth),
+      cached: false,
+      result: null,
+      submitting: false,
+      recordFailed: false,
+      ...rest,
+    })
+  const loading = { isLoading: true, isAuthenticated: false, isProfileLoading: true, profile: null }
+  const signedIn = {
+    isLoading: false,
+    isAuthenticated: true,
+    isProfileLoading: false,
+    profile: { onboarding_completed: true },
+    userId: "u1",
+  }
+
+  it("holds the route while sign-in loads, so no page renders before the decision", () => {
+    expect(decide({ ...loading, userId: null })).toEqual({ status: "checking" })
+    // A cached pass cannot be read without a user, so it does not open early.
+    expect(decide({ ...loading, userId: null }, { cached: true })).toEqual({ status: "checking" })
+  })
+
+  it("renders the page for a signed-out visitor once auth has finished", () => {
+    expect(
+      decide({ isLoading: false, isAuthenticated: false, isProfileLoading: false, profile: null, userId: null }),
+    ).toEqual({ status: "open" })
+  })
+
+  it("holds a signed-in user whose check is pending", () => {
+    expect(decide({ ...signedIn, isProfileLoading: true, profile: null })).toEqual({ status: "checking" })
+    expect(decide(signedIn)).toEqual({ status: "checking" })
+  })
+
+  it("asks a signed-in user for what is missing", () => {
+    expect(
+      decide(signedIn, {
+        result: { userId: "u1", verdict: { status: "required", missing: ["terms"] } },
+        recordFailed: true,
+      }),
+    ).toEqual({ status: "required", missing: ["terms"], submitting: false, recordFailed: true })
+  })
+
+  it("opens for a signed-in user who passed, through a later profile re-fetch", () => {
+    const passed = { result: { userId: "u1", verdict: { status: "satisfied" as const } } }
+    expect(decide(signedIn, passed)).toEqual({ status: "open" })
+    expect(decide({ ...signedIn, isProfileLoading: true }, passed)).toEqual({ status: "open" })
+    expect(decide(signedIn, { cached: true })).toEqual({ status: "open" })
+  })
+
+  it("never lets a verdict reached for another user through", () => {
+    expect(
+      decide({ ...signedIn, userId: "u2" }, { result: { userId: "u1", verdict: { status: "satisfied" } } }),
+    ).toEqual({ status: "checking" })
+  })
+
+  it("fails closed on a failed read", () => {
+    expect(decide(signedIn, { result: { userId: "u1", verdict: { status: "failed" } } })).toEqual({
+      status: "failed",
+    })
   })
 })
 

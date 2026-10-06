@@ -8,7 +8,10 @@ import {
   gateCacheValue,
   parseActiveConsents,
   submitConsentGate,
+  resolveGateState,
   type ActiveConsent,
+  type ConsentGateState,
+  type GateApplies,
   type GateKind,
   type GateVerdict,
 } from "@/lib/auth/consent-gate"
@@ -79,13 +82,7 @@ async function recordConsent(kind: GateKind, version: string): Promise<void> {
   if (error) throw new Error(error.message)
 }
 
-export type ConsentGateState =
-  /** Not gating: no user, a cached pass, or a session the gate skips. */
-  | { status: "open" }
-  /** Deciding. Blocks, because the gate fails closed. */
-  | { status: "checking" }
-  | { status: "required"; missing: GateKind[]; submitting: boolean; recordFailed: boolean }
-  | { status: "failed" }
+export type { ConsentGateState }
 
 type Result = { userId: string; verdict: GateVerdict }
 
@@ -100,7 +97,7 @@ type Result = { userId: string; verdict: GateVerdict }
  */
 export function useConsentGate(
   userId: string | null,
-  applies: "skip" | "pending" | "applies",
+  applies: GateApplies,
 ) {
   const [result, setResult] = useState<Result | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -161,19 +158,7 @@ export function useConsentGate(
     setResult({ userId: uid, verdict })
   }, [])
 
-  let state: ConsentGateState
-  if (userId === null || cached || satisfied || applies === "skip") {
-    state = { status: "open" }
-  } else if (result === null || result.userId !== userId || result.verdict.status === "satisfied") {
-    // No verdict for this user yet (the profile may still be loading). An
-    // earlier verdict stays on screen while a re-check runs, so boxes the user
-    // already ticked are not thrown away.
-    state = { status: "checking" }
-  } else if (result.verdict.status === "failed") {
-    state = { status: "failed" }
-  } else {
-    state = { status: "required", missing: result.verdict.missing, submitting, recordFailed }
-  }
+  const state = resolveGateState({ userId, applies, cached, result, submitting, recordFailed })
 
   return { state, submit, retry }
 }
