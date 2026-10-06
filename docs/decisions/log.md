@@ -907,4 +907,19 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Supersedes / Superseded-by:** Supersedes the "enforcement ships off" part of **2026-09-27 — High-harm account actions need a recent sign-in** (#976).
 - **Refs:** #977, #976, `packages/supabase/supabase/migrations/20261006120000_recent_auth_enforced.sql`, `apps/web/lib/auth/recent-auth.ts`, `apps/web/lib/auth/pending-reauth.ts`, `apps/ios/Pebbles/Services/RecentAuth.swift`.
 
+## 2026-10-07 — Web records versioned terms and privacy, and gates on the same complete, current consent record as Android (#788, #971)
+
+- **Status:** taken
+- **Scope:** web
+- **Context:** Web sent no `terms_version` / `privacy_version`, so no web account had terms or privacy ledger rows. Accounts created before the Art. 9 and 16+ stacks had no `health_data` or `age_assurance` row, and nothing asked anyone to re-accept after a policy version bump.
+- **Decision:** Email signup sends the full key set Android sends, stamped at whole seconds. The `/register` OAuth callback records all four acts. A post-auth gate mirrors Android's: it asks only for missing or older-version kinds, a same-or-newer version satisfies, it fails closed with Retry and Log out, and it caches a pass per `userId|fingerprint`. Web-specific choices:
+  - The gate **replaces** the route's content inside `MainContent` rather than overlaying it, so nothing behind it is mounted. Only `/docs/*` is exempt, so the legal links stay readable.
+  - It skips an account only when the profile **proves** it is mid-onboarding (`onboarding_completed = false`). A null profile (no row, or an unreadable one, #784) gets the gate.
+  - It records every act as `web_settings`, as #788 specifies, including for OAuth accounts. Android uses `android_oauth` for Google accounts.
+  - Once a session passes, it stays open across profile re-fetches (token refresh), so the gate never unmounts the app mid-use.
+- **Why:** Replacing content is the web equivalent of Android's overlay above `NavDisplay`, and it is simpler for assistive technology: there is nothing behind it to hide. A null profile cannot tell a new account from a failed read, and asking a new account for four acts up front costs less than letting an established account through with nothing on record.
+- **Consequences:** Bump `TERMS_DOCUMENT_VERSION` with the Terms frontmatter (`consent.test.ts` enforces it), as for `CONSENT_DOCUMENT_VERSION`. Any bump re-prompts every web user for the bumped kinds only. Accounts created through the `/login` OAuth buttons get Art. 9 from onboarding's `ConsentGate` and the other three from this gate once onboarding completes.
+- **Supersedes / Superseded-by:** None. Extends **2026-09-27 — Terms and privacy are ledger kinds, and Android gates on a complete, current consent record (#966, #967)** to web.
+- **Refs:** #788, #971, #967, #784, `apps/web/lib/auth/consent-gate.ts`, `apps/web/lib/auth/signup-metadata.ts`, `apps/web/components/consent/ReconsentGate.tsx`.
+
 ---
