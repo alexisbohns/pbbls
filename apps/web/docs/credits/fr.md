@@ -2,8 +2,8 @@
 title: Crédits
 locale: en
 slug: credits
-version: 1.0.0
-last_updated: 2026-04-09
+version: 1.1.0
+last_updated: 2026-10-07
 ---
 
 # Credits
@@ -29,13 +29,6 @@ https://github.com/supabase/supabase
 
 ---
 
-## Intelligence artificielle
-
-**Google Gemma** par Google DeepMind — le modele de langage qui alimente les fonctionnalites d'analyse de Pebbles, avec des donnees anonymisees avant transmission.
-https://ai.google.dev/gemma
-
----
-
 ## Inspirations intellectuelles
 
 Pebbles n'existerait pas sans les travaux des personnes suivantes, qui ont profondement influence la conception du produit :
@@ -53,8 +46,6 @@ Pebbles n'existerait pas sans les travaux des personnes suivantes, qui ont profo
 ---
 
 ## Normes et standards
-
-**Apple HealthKit** — le modele de donnees d'humeurs et d'emotions de Pebbles est compatible avec les standards `HKStateOfMind` d'Apple, permettant une interoperabilite future avec l'ecosysteme de sante.
 
 **RGPD et CNIL** — les pratiques de confidentialite de Pebbles suivent le Reglement General sur la Protection des Donnees et les lignes directrices de la Commission Nationale de l'Informatique et des Libertes.
 

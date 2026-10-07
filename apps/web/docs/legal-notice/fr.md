@@ -2,9 +2,9 @@
 title: Mentions légales
 locale: fr
 slug: legal-notice
-version: 1.1.0
-effective_date: 2026-09-04
-last_updated: 2026-09-04
+version: 1.2.0
+effective_date: 2026-10-07
+last_updated: 2026-10-07
 ---
 
 # Mentions Légales
@@ -13,8 +13,8 @@ last_updated: 2026-09-04
 
 * Pebbles
 * Responsable de la publication : Alexis Bohn
-* Adresse : [adresse]
-* Téléphone : [téléphone]
+* Adresse : 104 rue de la Convention, 75015 Paris, France
+* Téléphone : +33 6 29 52 45 60
 * Email : hello@bohns.design
 
 ## Directeur de la publication
@@ -42,7 +42,7 @@ Serveurs situés en : Paris, France (région EU)
 
 ## Propriété intellectuelle
 
-Pebbles est un projet open-source disponible sur GitHub à l'adresse https://github.com/alexisbohns/pbbls, sous licence [LICENSE].
+Pebbles est un projet au code source ouvert à la consultation, publié sur GitHub à l'adresse https://github.com/alexisbohns/pbbls, sous licence [PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0). Cette licence vous permet de consulter, copier et modifier le code source à des fins non commerciales uniquement. Tous les autres droits sont réservés.
 
 Pour plus d'informations sur l'utilisation du code source, veuillez consulter le dépôt GitHub.
 
@@ -58,4 +58,4 @@ Pour toute question ou réclamation, vous pouvez nous contacter à :
 
 ---
 
-*Dernière mise à jour : 9 avril 2026*
+*Dernière mise à jour : 7 octobre 2026*
