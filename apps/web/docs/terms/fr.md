@@ -253,15 +253,15 @@ Les modifications matérielles seront communiquées via :
 
 ### 9.4 Absence de garantie en cas de perte de données
 
-Pebbles fait des efforts raisonnables pour sauvegarder vos données, mais ne peut pas garantir l'absence complète de perte en cas de sinistre technique, cyber-attaque ou force majeure. **Nous encourageons vivement l'export régulier de vos données** (voir section 10).
+Pebbles fait des efforts raisonnables pour sauvegarder vos données, mais ne peut pas garantir l'absence complète de perte en cas de sinistre technique, cyber-attaque ou force majeure. Vous pouvez demander une copie de vos données à tout moment (voir section 10.1).
 
 ---
 
 ## 10. Portabilité des données et suppression de compte
 
-### 10.1 Droit à l'export des données
+### 10.1 Droit à la portabilité des données
 
-Vous avez le droit d'exporter toutes vos données personnelles à tout moment via la fonction Exporter dans les paramètres. Les données seront fournies dans un format structuré lisible (JSON) conformément à l'article 20 du RGPD.
+Vous avez le droit de recevoir vos données personnelles dans un format structuré, couramment utilisé et lisible par machine (JSON), conformément à l'article 20 du RGPD. Pebbles ne propose pas encore d'export en libre-service : adressez votre demande à hello@bohns.design et nous y répondrons dans un délai d'un mois.
 
 ### 10.2 Suppression de compte
 
@@ -341,25 +341,13 @@ Voir section 10 pour les effets de la suppression de compte sur vos données.
 
 Les présentes CGU sont régies par la loi française, indépendamment des principes de conflits de lois.
 
-### 14.2 Médiation obligatoire en cas de litige B2C
+### 14.2 Résolution amiable
 
-Selon l'article L.612-1 du Code de la Consommation français, tout différend entre Pebbles et un Collecteur (consommateur) doit d'abord faire l'objet d'une tentative de médiation. Le médiateur désigné est :
-
-**[médiateur]**
-
-Pour initier une médiation :
-1. Adresser une demande écrite à hello@bohns.design avec description du litige
-2. Pebbles répondra dans les 30 jours
-3. Si non-résolution, présenter la demande au médiateur
+Pebbles est un service gratuit et non commercial. Avant toute action en justice, merci d'adresser une description écrite du litige à hello@bohns.design. Pebbles vous répondra dans les 30 jours et recherchera avec vous une solution amiable.
 
 ### 14.3 Juridiction compétente
 
-Les tribunaux compétents sont situés à **[juridiction]**, France.
-
-### 14.4 Résolution des litiges en ligne (UE)
-
-Les consommateurs de l'UE peuvent également utiliser la plateforme de résolution des litiges en ligne de la Commission Européenne :
-https://ec.europa.eu/consumers/odr
+Tout litige qui n'a pu être résolu à l'amiable relève de la compétence du **Tribunal judiciaire de Paris**, France, sans préjudice des règles impératives permettant au consommateur de saisir la juridiction de son lieu de résidence.
 
 ---
 
@@ -383,7 +371,7 @@ Le défaut de Pebbles à exiger le respect d'une clause ne constitue pas une ren
 |---------|---------------|--------------------------------|
 | 1.0.0   | 2026-04-09    | Première version               |
 | 1.1.0   | 2026-09-13    | Âge minimum porté à 16 ans     |
-| 1.2.0   | 2026-10-07    | Retrait de l'accès thérapeute, de HealthKit et des fonctionnalités d'IA ; suppression de compte immédiate ; coordonnées de l'éditeur ajoutées |
+| 1.2.0   | 2026-10-07    | Retrait de l'accès thérapeute, de HealthKit et des fonctionnalités d'IA ; suppression de compte immédiate ; coordonnées de l'éditeur ajoutées ; portabilité des données sur demande ; règlement des litiges clarifié |
 
 ---
 

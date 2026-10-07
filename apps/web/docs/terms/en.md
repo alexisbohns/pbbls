@@ -257,15 +257,15 @@ Material changes will be communicated via:
 
 ### 9.4 No Guarantee Against Data Loss
 
-Pebbles makes reasonable efforts to back up your data but cannot guarantee complete protection against loss due to technical failure, cyber-attack, or force majeure. **We strongly encourage regular export of your data** (see Section 10).
+Pebbles makes reasonable efforts to back up your data but cannot guarantee complete protection against loss due to technical failure, cyber-attack, or force majeure. You can request a copy of your data at any time (see Section 10.1).
 
 ---
 
 ## 10. Data Portability and Account Deletion
 
-### 10.1 Right to Export Data
+### 10.1 Right to Data Portability
 
-You have the right to export all your personal data at any time via the Export feature in Settings. Data will be provided in a structured, machine-readable format (JSON) in accordance with Article 20 of the GDPR.
+You have the right to receive your personal data in a structured, commonly used and machine-readable format (JSON), in accordance with Article 20 of the GDPR. Pebbles does not yet offer a self-service export: send your request to hello@bohns.design and we will respond within one month.
 
 ### 10.2 Account Deletion
 
@@ -345,25 +345,13 @@ See Section 10 for the effects of account deletion on your data.
 
 These Terms are governed by French law, regardless of conflicts of law principles.
 
-### 14.2 Mandatory Mediation for B2C Disputes
+### 14.2 Amicable Resolution
 
-Under Article L.612-1 of the French Consumer Code, any dispute between Pebbles and a Collector (consumer) must first be submitted to mediation. The designated mediator is:
-
-**[médiateur]**
-
-To initiate mediation:
-1. Submit a written request to hello@bohns.design describing the dispute
-2. Pebbles will respond within 30 days
-3. If unresolved, submit the request to the mediator
+Pebbles is a free, non-commercial service. Before taking any legal action, please send a written description of the dispute to hello@bohns.design. Pebbles will respond within 30 days and will look for an amicable solution with you.
 
 ### 14.3 Competent Courts
 
-The competent courts are located in **[juridiction]**, France.
-
-### 14.4 Online Dispute Resolution (EU)
-
-EU consumers may also use the European Commission's online dispute resolution platform:
-https://ec.europa.eu/consumers/odr
+Any dispute that cannot be resolved amicably falls within the jurisdiction of the **Tribunal judiciaire de Paris**, France, without prejudice to the mandatory rules that allow a consumer to bring proceedings before the court of their place of residence.
 
 ---
 
@@ -387,7 +375,7 @@ Pebbles' failure to enforce any provision does not constitute a waiver of that p
 |---------|---------------|--------------------------------|
 | 1.0.0   | 2026-04-09    | Initial version                |
 | 1.1.0   | 2026-09-13    | Minimum age raised to 16       |
-| 1.2.0   | 2026-10-07    | Therapist access, HealthKit and AI features removed; account deletion is immediate; publisher contact details added |
+| 1.2.0   | 2026-10-07    | Therapist access, HealthKit and AI features removed; account deletion is immediate; publisher contact details added; data portability by request; dispute resolution clarified |
 
 ---
 
