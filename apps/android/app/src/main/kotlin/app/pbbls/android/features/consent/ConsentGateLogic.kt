@@ -3,9 +3,6 @@ package app.pbbls.android.features.consent
 import app.pbbls.android.core.model.ActiveConsent
 import app.pbbls.android.core.model.ConsentKind
 import app.pbbls.android.core.model.LegalVersions
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.jsonPrimitive
 
 /**
  * What the consent gate asks for, and whether a ledger already answers it.
@@ -55,15 +52,15 @@ object ConsentGateLogic {
     fun fingerprint(): String = REQUIRED.joinToString(",") { "${it.wire}@${versionFor(it)}" }
 
     /**
-     * `user_consents.source` for an act collected by the gate. Google accounts
-     * reach the gate straight from the OAuth round trip; any other account is
-     * re-consenting outside signup, recorded as `*_settings` like web's
-     * re-consent path (age spec §8).
+     * `user_consents.source` for every act the gate collects, whatever the
+     * account type. `source` records where consent was given, not how the
+     * account signed up (#1032), so a Google account consenting here is
+     * `android_settings` too. `android_register` stays with the acts
+     * `handle_new_user` copies from signup metadata, which really were given
+     * at signup. Web's gate records `web_settings` and iOS's `ios_settings` by
+     * the same rule.
      */
-    fun source(appMetadata: JsonObject?): String {
-        val provider = appMetadata?.get("provider")?.jsonPrimitive?.contentOrNull
-        return if (provider == "google") "android_oauth" else "android_settings"
-    }
+    const val SOURCE = "android_settings"
 
     private fun parse(version: String): List<Int>? =
         version

@@ -9,7 +9,6 @@ import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.ConsentPreferences
 import app.pbbls.android.core.data.ConsentServicing
 import app.pbbls.android.core.data.DataError
-import app.pbbls.android.core.data.SupabaseServicing
 import app.pbbls.android.core.data.toDataError
 import app.pbbls.android.core.model.ConsentKind
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -62,7 +61,6 @@ class ConsentGateViewModel
     constructor(
         private val consents: ConsentServicing,
         private val cache: ConsentPreferences,
-        private val supabase: SupabaseServicing,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow<ConsentGateUiState>(ConsentGateUiState.Idle)
         val uiState: StateFlow<ConsentGateUiState> = _uiState.asStateFlow()
@@ -104,7 +102,6 @@ class ConsentGateViewModel
             val uid = userId ?: return
             if (!state.canContinue) return
             _uiState.value = state.copy(isSubmitting = true, errorRes = null)
-            val source = ConsentGateLogic.source(supabase.session?.user?.appMetadata)
 
             viewModelScope.launch {
                 // One idempotent record_consent per act, as web's OAuth callback
@@ -112,7 +109,7 @@ class ConsentGateViewModel
                 // invariant for a batch RPC to protect; if one fails, the
                 // re-read below shows only what is still missing.
                 runCatchingCancellable {
-                    state.missing.forEach { consents.record(it, ConsentGateLogic.versionFor(it), source) }
+                    state.missing.forEach { consents.record(it, ConsentGateLogic.versionFor(it), ConsentGateLogic.SOURCE) }
                     consents.active()
                 }.onSuccess { active ->
                     if (uid != userId) return@onSuccess

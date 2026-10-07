@@ -4,16 +4,10 @@ import app.pbbls.android.R
 import app.pbbls.android.core.data.ConsentPreferences
 import app.pbbls.android.core.model.ConsentKind
 import app.pbbls.android.testing.FakeConsentService
-import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.InMemoryPrefs
 import app.pbbls.android.testing.MainDispatcherRule
-import app.pbbls.android.testing.testSession
-import io.github.jan.supabase.auth.user.UserInfo
-import io.github.jan.supabase.auth.user.UserSession
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Rule
@@ -26,15 +20,7 @@ class ConsentGateViewModelTest {
 
     private val cache = ConsentPreferences(InMemoryPrefs())
 
-    private fun viewModel(
-        consents: FakeConsentService = FakeConsentService(),
-        session: UserSession? = testSession(),
-    ) = ConsentGateViewModel(consents, cache, FakeSupabaseService(session = session, isInitializing = false))
-
-    private fun googleSession() =
-        testSession().copy(
-            user = UserInfo(id = "user-1", aud = "authenticated", appMetadata = buildJsonObject { put("provider", "google") }),
-        )
+    private fun viewModel(consents: FakeConsentService = FakeConsentService()) = ConsentGateViewModel(consents, cache)
 
     @Test
     fun `no user is Idle and never checks`() =
@@ -96,19 +82,6 @@ class ConsentGateViewModelTest {
             assertEquals(ConsentGateLogic.REQUIRED, consents.recordCalls.map { it.first })
             assertTrue(consents.recordCalls.all { it.third == "android_settings" })
             assertEquals("1.2.0", consents.recordCalls.first { it.first == ConsentKind.TERMS }.second)
-        }
-
-    @Test
-    fun `a google account records as android_oauth`() =
-        runTest {
-            val consents = FakeConsentService(rows = mutableListOf())
-            val vm = viewModel(consents, session = googleSession())
-            vm.start("user-1")
-            advanceUntilIdle()
-            ConsentGateLogic.REQUIRED.forEach { vm.onToggle(it, true) }
-            vm.onContinue()
-            advanceUntilIdle()
-            assertTrue(consents.recordCalls.all { it.third == "android_oauth" })
         }
 
     @Test
