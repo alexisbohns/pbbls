@@ -341,6 +341,17 @@ try {
   check("baseline: the published profile resolves via get_public_profile",
     !livePublicErr && !!livePublic, livePublicErr?.message ?? JSON.stringify(livePublic));
 
+  // The invite link is the other path that projects this profile to
+  // strangers (#834 owns that re-emission). The owner's token from step 0 is
+  // still live: invites are multi-use.
+  type Preview = { status?: string; inviter?: unknown };
+  const { data: livePreview } = await anon
+    .rpc("preview_connection_invite", { p_token: inviteToken });
+  check("baseline: the invite preview carries the inviter's card",
+    (livePreview as Preview | null)?.status === "valid" &&
+      (livePreview as Preview | null)?.inviter != null,
+    JSON.stringify(livePreview));
+
   const { error: hideProfileErr } = await m.rpc("admin_set_content_hidden", {
     p_target_kind: "profile",
     p_target_id: owner.id,
@@ -354,6 +365,13 @@ try {
   check("a hidden profile resolves null from get_public_profile",
     !darkProfileErr && darkProfile === null,
     darkProfileErr?.message ?? JSON.stringify(darkProfile));
+
+  const { data: darkPreview } = await anon
+    .rpc("preview_connection_invite", { p_token: inviteToken });
+  check("a hidden inviter's invite preview carries no card (inviter null)",
+    (darkPreview as Preview | null)?.status === "valid" &&
+      (darkPreview as Preview | null)?.inviter === null,
+    JSON.stringify(darkPreview));
 
   // The guard on the profiles side, again against a genuinely hidden row.
   const { error: ownerProfileUnhideErr } = await o

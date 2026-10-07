@@ -942,3 +942,24 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Refs:** #322, #386, #797, #799, `packages/supabase/supabase/migrations/20261007131500_list_orphan_snap_files.sql`, `packages/supabase/supabase/functions/sweep-orphan-snaps/`, `.github/workflows/orphan-snap-sweep.yml`, `packages/supabase/scripts/verify-orphan-snap-sweep.ts`.
 
 ---
+
+## 2026-10-07 — A block severs signed-in cross-user reads in both directions, and the invite preview goes dark for the blocked side only (#834)
+
+- **Status:** taken
+- **Scope:** supabase
+- **Context:** M49 made a block gate connections and invites only. A blocked user who stayed signed in could still read the blocker's public pebbles and public profile, assiduity grid included. `preview_connection_invite` ignored blocks, so a blocked peer saw the blocker's live card and then got `invite_expired` on accept: comparing the two confirmed the block.
+- **Decision:**
+  - **`private.is_blocked_with(p_other)`**, a `security definer` helper keyed on `auth.uid()`, answers "is there a block either way between me and `p_other`". A helper is required because `connection_blocks` RLS is blocker-only, so an inline subquery in a policy cannot see the direction where the viewer is the blocked one. It lives in a new `private` schema that PostgREST does not expose, with `usage` and `execute` granted to `authenticated` so the policy can evaluate. In `public` it would be a direct yes/no RPC for "has this person blocked me", answerable by anyone holding the blocker's `user_id` (pebble rows read while connected carry it), even when the blocker has no public content.
+  - **`pebbles_select`** applies it to both cross-user arms. **`get_public_profile`** applies it in its `target` CTE. Both directions: the blocker stops reading the blocked user too.
+  - **`preview_connection_invite`** returns `{"status": "expired"}` when the inviter blocked the caller. The reverse direction stays live, because the caller placed that block and already knows about it.
+  - **The anonymous paths are unchanged.** `auth.uid()` is null there, so every predicate is false. `get_shared_pebble` is unchanged.
+- **Why:** The anon comparison means perfect severance is impossible, but the signed-in app paths no longer give the block away. Keying the helper on the caller means it can never answer about a third pair, and keeping it out of the API means the block can only be inferred through the anon comparison, which needs the other party to have public content.
+- **Consequences:**
+  - **Every new cross-user read path applies `private.is_blocked_with` (or the same both-directions predicate)** on its authenticated branch. A new path that skips it reopens the oracle this closes.
+  - **`private` is the home for definer helpers that RLS policies call and clients must not.** It must never be added to the API's exposed schemas. A definer predicate placed in `public` is an RPC.
+  - `report_content`'s pebble gate mirrors `pebbles_select` and is not changed here. Whether it follows is an open decision, raised on the #834 PR.
+  - A hidden inviter (#833) now previews as `valid` with a null `inviter`, decided in the same re-emission.
+- **Supersedes / Superseded-by:** Supersedes the "preview is block-unaware by design (D4)" residual in **M49 mutual connections** and in `accept_connection_invite`'s comment (`20260730070347`).
+- **Refs:** #834, #833, #836, `packages/supabase/supabase/migrations/20261007140000_block_severs_public_reads.sql`, `packages/supabase/scripts/verify-pebble-visibility.ts`, `packages/supabase/scripts/verify-public-profile.ts`.
+
+---

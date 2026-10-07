@@ -20,6 +20,14 @@
  *   6. get_shared_pebble — anon gets the projection for 'public' (no user_id,
  *      whole-second UTC happened_at, composed render_svg); 'secret',
  *      'private' and unknown ids are all indistinguishably null.
+ *   7. Block severance (#834) — once the owner removes the friend with a
+ *      block, neither party reads the other's public pebbles while signed in
+ *      (both directions), a stranger still does, and the invite preview of
+ *      the blocker's token goes dark for the blocked user only: 'expired',
+ *      the same shape as a real expiry, while the reverse direction, a
+ *      stranger and an anonymous visitor still see the live card. Accept is
+ *      refused as invite_expired in both directions, and the helper behind
+ *      the predicate is not callable as an RPC.
  *
  * Run:
  *   SUPABASE_URL=... SUPABASE_ANON_KEY=... \
@@ -238,6 +246,98 @@ try {
 
   const { data: authShared } = await f.rpc("get_shared_pebble", { p_pebble_id: publicId });
   check("the link also resolves for signed-in visitors", !!authShared);
+
+  // ---------------------------------------------------------------------------
+  // 6. Block severance (#834). The friend publishes a pebble of their own so
+  //    the reverse direction has something to lose, then the owner removes the
+  //    friend WITH a block through the real path. Blocks are directed rows
+  //    (owner → friend); the read paths honour them in both directions.
+  // ---------------------------------------------------------------------------
+  const { data: friendPublicId, error: friendPubErr } = await f.rpc("create_pebble", {
+    payload: { ...base, name: `friend public ${runId}`, visibility: "public" },
+  });
+  if (friendPubErr || !friendPublicId) {
+    throw new Error(`create_pebble (friend public): ${friendPubErr?.message}`);
+  }
+  const { data: ownerBefore } = await o.from("pebbles").select("id");
+  check("before the block, the owner reads the friend's public pebble",
+    gradeOf(ownerBefore, friendPublicId), JSON.stringify(ownerBefore));
+
+  const { data: connections, error: connErr } = await o.rpc("get_connections");
+  const connectionId = (connections as { connection_id?: string }[] | null)?.[0]?.connection_id;
+  if (connErr || !connectionId) throw new Error(`get_connections: ${connErr?.message}`);
+  const { error: blockErr } = await o.rpc("remove_connection", {
+    p_connection_id: connectionId,
+    p_block: true,
+  });
+  if (blockErr) throw new Error(`remove_connection(p_block): ${blockErr.message}`);
+
+  const { data: blockedRows } = await f.from("pebbles").select("id");
+  check("the blocked user no longer reads the blocker's public pebble",
+    !gradeOf(blockedRows, publicId), JSON.stringify(blockedRows));
+  check("…nor the private one",
+    !gradeOf(blockedRows, privateId), JSON.stringify(blockedRows));
+  check("…and still reads their own",
+    gradeOf(blockedRows, friendPublicId), JSON.stringify(blockedRows));
+
+  const { data: blockerRows } = await o.from("pebbles").select("id");
+  check("the blocker no longer reads the blocked user's public pebble (both directions)",
+    !gradeOf(blockerRows, friendPublicId), JSON.stringify(blockerRows));
+  // Membership, not a row count: the public arm returns every other user's
+  // public rows too, so a count breaks on real content or a parallel run.
+  check("…and still reads all three of their own",
+    [secretId, privateId, publicId].every((id) => gradeOf(blockerRows, id)),
+    JSON.stringify(blockerRows));
+
+  // The helper behind the predicate lives in a schema PostgREST does not
+  // serve. Exposed, it would answer "has this person blocked me" directly.
+  const { data: oracle, error: oracleErr } = await f.rpc("is_blocked_with", {
+    p_other: owner.id,
+  });
+  check("the block predicate is not callable as an RPC (no direct oracle)",
+    !!oracleErr && oracle === null, oracleErr?.message ?? JSON.stringify(oracle));
+
+  const { data: strangerAfter } = await s.from("pebbles").select("id");
+  check("a stranger still reads both public pebbles (the block is pairwise)",
+    gradeOf(strangerAfter, publicId) && gradeOf(strangerAfter, friendPublicId),
+    JSON.stringify(strangerAfter));
+
+  // The owner's invite token from step 0 is still live (multi-use).
+  type Preview = { status?: string; inviter?: unknown };
+  const { data: blockedPreview } = await f.rpc("preview_connection_invite", { p_token: token });
+  const bp = blockedPreview as Preview | null;
+  check("the blocked user's preview of the blocker's token reads 'expired'",
+    bp?.status === "expired", JSON.stringify(bp));
+  check("…with exactly the expiry shape (no inviter key)",
+    bp !== null && JSON.stringify(Object.keys(bp)) === JSON.stringify(["status"]),
+    JSON.stringify(bp));
+  const { error: blockedAcceptErr } = await f.rpc("accept_connection_invite", { p_token: token });
+  check("…and accept agrees: invite_expired, never a distinct block error",
+    !!blockedAcceptErr?.message.includes("invite_expired"), blockedAcceptErr?.message ?? "accepted");
+
+  const { data: strangerPreview } = await s.rpc("preview_connection_invite", { p_token: token });
+  check("a stranger's preview of the same token stays valid",
+    (strangerPreview as Preview | null)?.status === "valid", JSON.stringify(strangerPreview));
+  const { data: anonPreview } = await anon.rpc("preview_connection_invite", { p_token: token });
+  check("an anonymous preview stays valid (anon is unchanged)",
+    (anonPreview as Preview | null)?.status === "valid", JSON.stringify(anonPreview));
+
+  const { data: friendInvite, error: friendInviteErr } = await f.rpc("create_connection_invite");
+  const friendToken = (friendInvite as { token?: string } | null)?.token;
+  if (friendInviteErr || !friendToken) {
+    throw new Error(`create_connection_invite (friend): ${friendInviteErr?.message}`);
+  }
+  const { data: reversePreview } = await o.rpc("preview_connection_invite", {
+    p_token: friendToken,
+  });
+  check("the blocker's preview of the blocked user's token stays valid (no reverse oracle)",
+    (reversePreview as Preview | null)?.status === "valid", JSON.stringify(reversePreview));
+  const { error: blockerAcceptErr } = await o.rpc("accept_connection_invite", {
+    p_token: friendToken,
+  });
+  check("…while the blocker's accept of it is still refused as invite_expired",
+    !!blockerAcceptErr?.message.includes("invite_expired"),
+    blockerAcceptErr?.message ?? "accepted");
 } catch (err) {
   failed += 1;
   console.error(`✗ aborted: ${err instanceof Error ? err.message : String(err)}`);
