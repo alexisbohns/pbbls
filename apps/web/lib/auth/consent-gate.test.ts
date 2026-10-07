@@ -34,14 +34,25 @@ const current = (): ActiveConsent[] => [
  * is asked for terms and privacy.
  */
 const ANDROID_SIGNUP_ROWS: unknown = JSON.parse(
+  '[{"kind":"health_data","document_version":"1.4.0"},' +
+    '{"kind":"age_assurance","document_version":"1.4.0"},' +
+    '{"kind":"terms","document_version":"1.2.0"},' +
+    '{"kind":"privacy","document_version":"1.4.0"}]',
+)
+const IOS_SIGNUP_ROWS: unknown = JSON.parse(
+  '[{"kind":"health_data","document_version":"1.4.0"},' +
+    '{"kind":"age_assurance","document_version":"1.4.0"}]',
+)
+/**
+ * The same Android signup, recorded against the documents before #779/#781
+ * (Terms 1.1.0, privacy 1.3.0). Every kind cites one of the two bumped
+ * documents, so such an account is asked for all four again.
+ */
+const ANDROID_SIGNUP_ROWS_PREVIOUS_DOCUMENTS: unknown = JSON.parse(
   '[{"kind":"health_data","document_version":"1.3.0"},' +
     '{"kind":"age_assurance","document_version":"1.3.0"},' +
     '{"kind":"terms","document_version":"1.1.0"},' +
     '{"kind":"privacy","document_version":"1.3.0"}]',
-)
-const IOS_SIGNUP_ROWS: unknown = JSON.parse(
-  '[{"kind":"health_data","document_version":"1.3.0"},' +
-    '{"kind":"age_assurance","document_version":"1.3.0"}]',
 )
 /**
  * A full user_consents row as PostgREST serialises it: microsecond
@@ -107,6 +118,15 @@ describe("missingConsents", () => {
 
   it("is satisfied by an Android-created account", () => {
     expect(missingConsents(parseActiveConsents(ANDROID_SIGNUP_ROWS))).toEqual([])
+  })
+
+  it("asks an account that accepted the previous documents for all four again", () => {
+    expect(missingConsents(parseActiveConsents(ANDROID_SIGNUP_ROWS_PREVIOUS_DOCUMENTS))).toEqual([
+      "terms",
+      "privacy",
+      "health_data",
+      "age_assurance",
+    ])
   })
 
   it("asks an iOS-created account for terms and privacy only", () => {
