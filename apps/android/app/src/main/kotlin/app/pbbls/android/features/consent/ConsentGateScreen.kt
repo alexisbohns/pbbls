@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -24,13 +25,20 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.dp
 import androidx.navigationevent.NavigationEventInfo
 import androidx.navigationevent.compose.NavigationBackHandler
 import androidx.navigationevent.compose.rememberNavigationEventState
 import app.pbbls.android.R
+import app.pbbls.android.core.data.AccountDeletionUi
+import app.pbbls.android.core.data.DeletionState
+import app.pbbls.android.core.data.ReauthMethod
+import app.pbbls.android.core.designsystem.ConfirmDeleteDialog
+import app.pbbls.android.core.designsystem.DeleteErrorDialog
 import app.pbbls.android.core.designsystem.LegalDoc
 import app.pbbls.android.core.designsystem.PebblesCheckbox
 import app.pbbls.android.core.designsystem.PebblesPrimaryButton
+import app.pbbls.android.core.designsystem.ReauthDialog
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.designsystem.openLegalDoc
 import app.pbbls.android.core.designsystem.readableWidth
@@ -44,14 +52,26 @@ import app.pbbls.android.core.model.ConsentKind
  * traps Back is worse than one that leaves, and leaving grants nothing. The
  * handler outranks `NavDisplay`'s because it registers later, the same
  * arrangement `AchievementMomentOverlay` relies on.
+ *
+ * "Delete my account" (#1030) opens the same confirm, recent sign-in and
+ * failure dialogs as Settings, driven by [deletion]. On success the session
+ * drops, `RootScreen` stops gating, and the user lands on Welcome.
  */
 @Composable
 fun ConsentGateScreen(
     uiState: ConsentGateUiState,
+    deletion: AccountDeletionUi,
     onToggle: (ConsentKind, Boolean) -> Unit,
     onContinue: () -> Unit,
     onRetry: () -> Unit,
     onSignOut: () -> Unit,
+    onDeleteAccount: () -> Unit,
+    onConfirmDelete: () -> Unit,
+    onCancelDelete: () -> Unit,
+    onDismissDeleteError: () -> Unit,
+    onReauthPasswordChange: (String) -> Unit,
+    onSubmitReauth: () -> Unit,
+    onCancelReauth: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val activity = LocalActivity.current
@@ -65,8 +85,38 @@ fun ConsentGateScreen(
         onContinue = onContinue,
         onRetry = onRetry,
         onSignOut = onSignOut,
+        onDeleteAccount = onDeleteAccount,
+        isDeleting = deletion.deletion == DeletionState.DELETING,
+        canDelete = deletion.deletion == DeletionState.IDLE,
         modifier = modifier,
     )
+
+    if (deletion.deletion == DeletionState.CONFIRMING) {
+        ConfirmDeleteDialog(
+            title = stringResource(R.string.consent_gate_delete_title),
+            message = stringResource(R.string.consent_gate_delete_message),
+            confirmText = stringResource(R.string.settings_delete_account_confirm),
+            onConfirm = onConfirmDelete,
+            onDismiss = onCancelDelete,
+        )
+    }
+    if (deletion.deletion == DeletionState.FAILED) {
+        DeleteErrorDialog(
+            message = stringResource(R.string.consent_gate_delete_error),
+            onDismiss = onDismissDeleteError,
+        )
+    }
+    deletion.reauth?.let { reauth ->
+        ReauthDialog(
+            usesPassword = reauth.method == ReauthMethod.PASSWORD,
+            password = reauth.password,
+            onPasswordChange = onReauthPasswordChange,
+            isWorking = reauth.isWorking,
+            errorText = reauth.errorRes?.let { stringResource(it) },
+            onConfirm = onSubmitReauth,
+            onDismiss = onCancelReauth,
+        )
+    }
 }
 
 /** Stateless content layer, what the screenshots render. */
@@ -78,7 +128,10 @@ fun ConsentGateContent(
     onContinue: () -> Unit,
     onRetry: () -> Unit,
     onSignOut: () -> Unit,
+    onDeleteAccount: () -> Unit,
     modifier: Modifier = Modifier,
+    isDeleting: Boolean = false,
+    canDelete: Boolean = true,
 ) {
     Surface(modifier = modifier.fillMaxSize(), color = MaterialTheme.colorScheme.surface) {
         when (uiState) {
@@ -96,6 +149,7 @@ fun ConsentGateContent(
                     Text(stringResource(uiState.messageRes), style = MaterialTheme.typography.bodyLarge)
                     PebblesPrimaryButton(text = stringResource(R.string.consent_gate_retry), onClick = onRetry)
                     SignOutButton(onSignOut)
+                    DeleteAccountButton(onDeleteAccount, isDeleting = isDeleting, enabled = canDelete)
                 }
 
             is ConsentGateUiState.Required ->
@@ -126,6 +180,7 @@ fun ConsentGateContent(
                         modifier = Modifier.testTag(CONSENT_GATE_CONTINUE),
                     )
                     SignOutButton(onSignOut)
+                    DeleteAccountButton(onDeleteAccount, isDeleting = isDeleting, enabled = canDelete)
                 }
         }
     }
@@ -195,6 +250,32 @@ private fun SignOutButton(onSignOut: () -> Unit) {
         Text(stringResource(R.string.consent_gate_sign_out))
     }
 }
+
+/**
+ * Always offered, in error colour (orange in this theme): it is the one
+ * irreversible action on the gate, and its dialog says so before anything runs.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun DeleteAccountButton(
+    onClick: () -> Unit,
+    isDeleting: Boolean,
+    enabled: Boolean,
+) {
+    TextButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier.fillMaxWidth().testTag(CONSENT_GATE_DELETE),
+    ) {
+        if (isDeleting) {
+            LoadingIndicator(color = MaterialTheme.colorScheme.error, modifier = Modifier.size(24.dp))
+        } else {
+            Text(stringResource(R.string.consent_gate_delete_account), color = MaterialTheme.colorScheme.error)
+        }
+    }
+}
+
+internal const val CONSENT_GATE_DELETE = "consent_gate_delete"
 
 internal const val CONSENT_GATE_CONTINUE = "consent_gate_continue"
 

@@ -6,9 +6,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
 import app.pbbls.android.core.common.runCatchingCancellable
+import app.pbbls.android.core.data.AccountDeletionFlow
+import app.pbbls.android.core.data.AccountDeletionUi
 import app.pbbls.android.core.data.ConsentPreferences
 import app.pbbls.android.core.data.ConsentServicing
 import app.pbbls.android.core.data.DataError
+import app.pbbls.android.core.data.ProfileServicing
+import app.pbbls.android.core.data.SupabaseServicing
 import app.pbbls.android.core.data.toDataError
 import app.pbbls.android.core.model.ConsentKind
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -54,6 +58,11 @@ sealed interface ConsentGateUiState {
  * Owned by `RootScreen`, not by a back-stack entry: the gate is an overlay
  * above `NavDisplay` (design D9), so nothing that navigates can route around
  * it. `RootScreen` calls [start] whenever the session's user id changes.
+ *
+ * Someone who declines can still delete their account from here (#1030):
+ * erasure must not depend on first agreeing to the processing. That runs the
+ * same [AccountDeletionFlow] as Settings, recent sign-in included, and never
+ * calls `record_consent`. The gate stays fail-closed for everything else.
  */
 @HiltViewModel
 class ConsentGateViewModel
@@ -61,9 +70,27 @@ class ConsentGateViewModel
     constructor(
         private val consents: ConsentServicing,
         private val cache: ConsentPreferences,
+        profileService: ProfileServicing,
+        supabase: SupabaseServicing,
     ) : ViewModel() {
         private val _uiState = MutableStateFlow<ConsentGateUiState>(ConsentGateUiState.Idle)
         val uiState: StateFlow<ConsentGateUiState> = _uiState.asStateFlow()
+
+        /**
+         * Kept beside [uiState], not inside it: a re-check replaces the gate's
+         * state wholesale, and must not close a deletion dialog mid-flow.
+         */
+        private val _deletion = MutableStateFlow(AccountDeletionUi())
+        val deletion: StateFlow<AccountDeletionUi> = _deletion.asStateFlow()
+
+        private val account =
+            AccountDeletionFlow(
+                scope = viewModelScope,
+                profileService = profileService,
+                supabase = supabase,
+                read = { _deletion.value },
+                write = { change -> _deletion.update(change) },
+            )
 
         private var userId: String? = null
 
@@ -74,6 +101,9 @@ class ConsentGateViewModel
          */
         fun start(userId: String?) {
             if (userId == this.userId && _uiState.value != ConsentGateUiState.Idle) return
+            // This ViewModel outlives a sign-out: a dialog left open for the
+            // previous user must never greet the next one.
+            if (userId != this.userId) account.reset()
             this.userId = userId
             when {
                 userId == null -> _uiState.value = ConsentGateUiState.Idle
@@ -125,6 +155,22 @@ class ConsentGateViewModel
                 }
             }
         }
+
+        // MARK: - Deletion (#1030)
+
+        fun requestDelete() = account.request()
+
+        fun cancelDelete() = account.cancel()
+
+        fun dismissDeleteError() = account.dismissError()
+
+        fun confirmDelete() = account.confirm()
+
+        fun onReauthPasswordChange(value: String) = account.onReauthPasswordChange(value)
+
+        fun submitReauth() = account.submitReauth()
+
+        fun cancelReauth() = account.cancelReauth()
 
         private fun check(uid: String) {
             _uiState.value = ConsentGateUiState.Checking

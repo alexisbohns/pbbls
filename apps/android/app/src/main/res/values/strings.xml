@@ -52,6 +52,10 @@
     <string name="consent_gate_sign_out">Log out</string>
     <string name="consent_gate_retry">Try again</string>
     <string name="consent_gate_error">We couldn\'t save that. Please try again.</string>
+    <string name="consent_gate_delete_account">Delete my account</string>
+    <string name="consent_gate_delete_title">Delete your account?</string>
+    <string name="consent_gate_delete_message">You don\'t have to accept anything above to do this. It permanently deletes your account and everything in it: pebbles, snaps, souls, collections, glyphs and karma. Glyphs other pebblers bought stay available to them, without your name attached. This cannot be undone.</string>
+    <string name="consent_gate_delete_error">We couldn\'t delete your account. Nothing was removed. Please try again.</string>
     <string name="auth_submit_login">Connect</string>
     <string name="auth_submit_signup">Create an account</string>
 

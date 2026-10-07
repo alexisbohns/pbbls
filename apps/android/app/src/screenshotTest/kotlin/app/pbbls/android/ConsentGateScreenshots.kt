@@ -27,6 +27,7 @@ fun ConsentGateAllFour() {
             onContinue = {},
             onRetry = {},
             onSignOut = {},
+            onDeleteAccount = {},
         )
     }
 }
@@ -42,6 +43,7 @@ fun ConsentGateOneOutdated() {
             onContinue = {},
             onRetry = {},
             onSignOut = {},
+            onDeleteAccount = {},
         )
     }
 }
@@ -57,6 +59,7 @@ fun ConsentGateFailed() {
             onContinue = {},
             onRetry = {},
             onSignOut = {},
+            onDeleteAccount = {},
         )
     }
 }

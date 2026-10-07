@@ -6,8 +6,11 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStore
 import app.pbbls.android.R
 import app.pbbls.android.core.data.AppearancePreferences
+import app.pbbls.android.core.data.DeletionState
 import app.pbbls.android.core.data.ProfileRow
 import app.pbbls.android.core.data.ReauthAccountMismatchException
+import app.pbbls.android.core.data.ReauthMethod
+import app.pbbls.android.core.data.ReauthPurpose
 import app.pbbls.android.core.data.ReauthRequiredException
 import app.pbbls.android.core.model.HealthDataConsent
 import app.pbbls.android.testing.FakeConsentService
