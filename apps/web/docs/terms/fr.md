@@ -2,9 +2,9 @@
 title: Conditions générales d'utilisation
 locale: fr
 slug: terms
-version: 1.1.0
-effective_date: 2026-04-09
-last_updated: 2026-09-13
+version: 1.2.0
+effective_date: 2026-10-07
+last_updated: 2026-10-07
 ---
 
 # Conditions Générales d'Utilisation - Pebbles
@@ -16,8 +16,6 @@ Les présentes Conditions Générales d'Utilisation (« CGU ») régissent l'acc
 **Éditeur de la plateforme :**
 - Nom : Pebbles
 - Responsable : Alexis Bohn
-- Adresse : [adresse]
-- Téléphone : [téléphone]
 - Email : hello@bohns.design
 - Statut : Projet personnel / Éditeur indépendant
 
@@ -48,7 +46,7 @@ Les CGU s'appliquent à toutes les versions et tous les appareils. L'utilisation
 
 - **Bounce / Karma** : Un système d'engagement mesurant la régularité des visites et interactions avec Pebbles, sans constituer une « streak » ou chaîne contractuelle.
 
-- **Cairn** : Une synthèse hebdomadaire ou mensuelle regroupant plusieurs Pebbles en un résumé personnel.
+- **Cairn** : Une synthèse hebdomadaire des Pebbles d'un Collecteur, calculée par l'application sur son appareil à chaque affichage et jamais stockée.
 
 - **Collection** : Un ensemble curé de Pebbles regroupés autour d'un thème, d'une période ou d'une intention.
 
@@ -113,19 +111,11 @@ Pebbles offre les fonctionnalités suivantes :
 - **Âmes** : Créer des profils de personnes importantes dans votre vie et les lier aux Pebbles
 - **Collections** : Grouper des Pebbles thématiquement ou chronologiquement
 - **Bounce / Karma** : Suivre votre engagement régulier avec Pebbles
-- **Cairns** : Générer des synthèses hebdomadaires ou mensuelles de vos Pebbles
+- **Cairns** : Consulter une synthèse hebdomadaire de vos Pebbles
 - **Réalisations** : Débloquer des jalons personnels basés sur votre utilisation
 - **Domaines de vie** : Catégoriser vos souvenirs par domaine de vie (santé, relations, etc.)
 
-### 4.2 Analyse assistée par IA
-
-Pebbles peut proposer une analyse assistée par intelligence artificielle utilisant le modèle de langage Google Gemma. Ces analyses :
-- Sont optionnelles et activables par l'utilisateur
-- Sont traitées avec des données anonymisées conformément à la Politique de Confidentialité
-- Sont des suggestions, non des diagnostics médicaux ou thérapeutiques
-- Ne remplacent pas l'avis d'un professionnel de santé ou de thérapie
-
-### 4.3 Partage social (opt-in)
+### 4.2 Partage social (opt-in)
 
 Le partage de Pebbles est strictement optionnel et soumis à trois niveaux de confidentialité :
 - **Public** : visible pour tous les utilisateurs de Pebbles
@@ -133,10 +123,6 @@ Le partage de Pebbles est strictement optionnel et soumis à trois niveaux de co
 - **Secret** : visible uniquement pour le Collecteur
 
 Aucun Pebble n'est partagé sans consentement explicite du Collecteur.
-
-### 4.4 Accès des thérapeutes
-
-Un Collecteur peut autoriser un thérapeute agréé à accéder à ses Pebbles pour soutenir un suivi thérapeutique. L'accès est contrôlé par le Collecteur et peut être révoqué à tout moment. (Voir section 7 pour les conditions spécifiques aux thérapeutes.)
 
 ---
 
@@ -164,13 +150,8 @@ Vous n'êtes pas autorisé à :
 Vous êtes entièrement responsable du Contenu utilisateur que vous créez, y compris :
 - Les données personnelles concernant les Âmes (noms, contextes, informations personnelles)
 - Les informations sensibles partagées avec Pebbles
-- Les données envoyées à des fonctionnalités alimentées par IA
 
 Vous confirmez que vous avez le droit de partager les informations personnelles d'autrui (y compris les noms des Âmes) ou que vous avez obtenu le consentement nécessaire.
-
-### 5.4 Responsabilité en cas de partage via IA
-
-Tout contenu envoyé à des fonctionnalités alimentées par IA est traité conformément à la Politique de Confidentialité. Vous reconnaissez que même si les données sont anonymisées, vous devez prendre soin de ne pas envoyer des informations extrêmement sensibles ou identifiantes.
 
 ---
 
@@ -183,14 +164,14 @@ Vous conservez la **propriété complète** de tout Contenu utilisateur que vous
 En utilisant Pebbles, vous accordez à la plateforme une **licence limitée** pour :
 - Héberger et stocker votre contenu
 - Afficher votre contenu conformément à vos paramètres de confidentialité
-- Traiter votre contenu pour fournir les services (y compris l'analyse IA si activée)
+- Traiter votre contenu pour fournir les services
 - Générer des statistiques anonymisées et des insights
 
 Cette licence est **révocable** : elle prend fin immédiatement lors de la suppression de votre compte, excepté pour les copies techniques nécessaires aux sauvegardes régulières (supprimées selon la politique de rétention).
 
 ### 6.2 Propriété intellectuelle de Pebbles
 
-Le design, l'interface utilisateur, le branding, la disposition et la structure de Pebbles sont la propriété intellectuelle exclusive de Pebbles. Le code source est disponible sous open-source conformément à la licence du dépôt GitHub (alexisbohns/pbbls). Vous acceptez de ne pas reproduire, modifier ou distribuer ces éléments sans consentement, sauf tel que permit par la licence open-source applicable.
+Le design, l'interface utilisateur, le branding, la disposition et la structure de Pebbles sont la propriété intellectuelle exclusive de Pebbles. Le code source est publié sur GitHub (alexisbohns/pbbls) et ouvert à la consultation sous licence [PolyForm Noncommercial 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0). Vous acceptez de ne pas reproduire, modifier ou distribuer ces éléments sans consentement, sauf dans la mesure permise par cette licence.
 
 ### 6.3 Contenu partagé
 
@@ -202,59 +183,27 @@ Pebbles utilise des composants et des bibliothèques open-source gouvernés par 
 
 ---
 
-## 7. Conditions spécifiques aux thérapeutes
+## 7. Fonctionnalités sociales et partage
 
-### 7.1 Activation du rôle de thérapeute
-
-Un utilisateur peut demander l'activation du rôle de thérapeute. Cette activation nécessite l'approbation de Pebbles et la vérification des qualifications professionnelles.
-
-### 7.2 Obligations éthiques et confidentialité
-
-Un thérapeute utilisant Pebbles accepte de :
-- Respecter les normes éthiques et professionnelles de sa profession
-- Maintenir la confidentialité des données des patients conformément à la loi et aux codes déontologiques applicables
-- Ne pas utiliser les données à des fins autres que le soutien thérapeutique du patient
-- Obtenir le consentement explicite du patient pour accéder à ses Pebbles
-
-### 7.3 Contrôleur de données indépendant
-
-Un thérapeute est considéré comme un contrôleur de données indépendant pour ses activités thérapeutiques. Pebbles n'est pas responsable de la conformité du thérapeute à la loi sur la protection des données ou aux codes déontologiques.
-
-### 7.4 Octroi et révocation d'accès
-
-Un Collecteur reste maître du contrôle d'accès. Il peut à tout moment :
-- Accorder l'accès à un thérapeute spécifique à ses Pebbles
-- Révoquer l'accès sans motif et sans préavis
-
-Une fois l'accès révoqué, le thérapeute ne peut plus consulter les Pebbles.
-
-### 7.5 Avertissement médical critique
-
-**Pebbles n'est pas un dispositif médical** et n'offre ni suivi médical, ni conseil thérapeutique, ni diagnostic. L'utilisation de Pebbles ne remplace pas une consultation avec un professionnel de santé ou de thérapie qualifié. Pebbles est un outil de collecte et revisitation personnelle, pas un traitement ou une intervention médicale.
-
----
-
-## 8. Fonctionnalités sociales et partage
-
-### 8.1 Partage toujours optionnel
+### 7.1 Partage toujours optionnel
 
 Aucun Pebble n'est partagé sans votre consentement explicite. Le partage est géré au niveau de chaque Pebble individuel.
 
-### 8.2 Trois niveaux de confidentialité
+### 7.2 Trois niveaux de confidentialité
 
 - **Public** : Visible pour tous les utilisateurs de Pebbles. Vous comprenez que le contenu public n'offre aucune garantie de confidentialité.
 - **Privé** : Visible uniquement pour les contacts que vous sélectionnez explicitement.
 - **Secret** : Visible uniquement pour vous. Ce contenu n'est pas partagé, même entre comptes liés.
 
-### 8.3 Aucune garantie de confidentialité pour le contenu public
+### 7.3 Aucune garantie de confidentialité pour le contenu public
 
 Le contenu marqué comme public peut être vu, cité ou discuté par d'autres utilisateurs. Pebbles ne contrôle pas l'utilisation secondaire de contenu public une fois partagé.
 
-### 8.4 Signalement de contenu inapproprié
+### 7.4 Signalement de contenu inapproprié
 
 Vous pouvez signaler tout contenu public qui viole ces CGU. Pebbles examinera les signalements et pourra retirer le contenu ou suspendre le compte de l'utilisateur en violation.
 
-### 8.5 Modération
+### 7.5 Modération
 
 Pebbles se réserve le droit de :
 - Retirer tout contenu violant les CGU
@@ -263,29 +212,29 @@ Pebbles se réserve le droit de :
 
 ---
 
-## 9. Gamification et engagement
+## 8. Gamification et engagement
 
-### 9.1 Outils d'engagement, non obligations contractuelles
+### 8.1 Outils d'engagement, non obligations contractuelles
 
 Bounce, Karma, Cairns et Réalisations sont des outils optionnels pour encourager un engagement régulier avec Pebbles. Ils ne constituent pas des obligations contractuelles, des droits acquis ou des garanties.
 
-### 9.2 Droit de modification des mécaniques
+### 8.2 Droit de modification des mécaniques
 
 Pebbles se réserve le droit de modifier, mettre à jour ou supprimer tout élément de gamification à tout moment, avec une notification préalable autant que possible.
 
-### 9.3 Aucune valeur monétaire
+### 8.3 Aucune valeur monétaire
 
 Bounce, Karma, les Réalisations et autres points d'engagement n'ont aucune valeur monétaire ou marchande. Ils ne peuvent pas être vendus, échangés ou convertis en devises réelles ou virtuelles.
 
 ---
 
-## 10. Disponibilité du service et modifications
+## 9. Disponibilité du service et modifications
 
-### 10.1 Disponibilité en best-effort
+### 9.1 Disponibilité en best-effort
 
 Pebbles fournit le service selon un modèle « tel quel, autant que possible ». Bien que nous nous efforçons de maintenir une disponibilité élevée, **aucun accord de niveau de service (SLA) n'est garanti**.
 
-### 10.2 Droit de modification, suspension ou discontinuation
+### 9.2 Droit de modification, suspension ou discontinuation
 
 Pebbles se réserve le droit de :
 - Modifier les fonctionnalités, l'interface ou l'architecture technique à tout moment
@@ -293,93 +242,84 @@ Pebbles se réserve le droit de :
 - Cesser de supporter les anciennes versions de l'application
 - Retirer les plateformes (web, iOS, Android) si nécessaire
 
-### 10.3 Notification des modifications matérielles
+### 9.3 Notification des modifications matérielles
 
 Les modifications matérielles seront communiquées via :
 - Notifications in-app
 - Email à l'adresse associée au compte
 - Annonces sur le site web de Pebbles
 
-### 10.4 Absence de garantie en cas de perte de données
+### 9.4 Absence de garantie en cas de perte de données
 
-Pebbles fait des efforts raisonnables pour sauvegarder vos données, mais ne peut pas garantir l'absence complète de perte en cas de sinistre technique, cyber-attaque ou force majeure. **Nous encourageons vivement l'export régulier de vos données** (voir section 11).
+Pebbles fait des efforts raisonnables pour sauvegarder vos données, mais ne peut pas garantir l'absence complète de perte en cas de sinistre technique, cyber-attaque ou force majeure. Vous pouvez demander une copie de vos données à tout moment (voir section 10.1).
 
 ---
 
-## 11. Portabilité des données et suppression de compte
+## 10. Portabilité des données et suppression de compte
 
-### 11.1 Droit à l'export des données
+### 10.1 Droit à la portabilité des données
 
-Vous avez le droit d'exporter toutes vos données personnelles à tout moment via la fonction Exporter dans les paramètres. Les données seront fournies dans un format structuré lisible (JSON) conformément à l'article 20 du RGPD.
+Vous avez le droit de recevoir vos données personnelles dans un format structuré, couramment utilisé et lisible par machine (JSON), conformément à l'article 20 du RGPD. Pebbles ne propose pas encore d'export en libre-service : adressez votre demande à hello@bohns.design et nous y répondrons dans un délai d'un mois.
 
-### 11.2 Suppression de compte
+### 10.2 Suppression de compte
 
-Vous pouvez supprimer votre compte à tout moment via la section Paramètres de Pebbles. La suppression sera traitée dans les **30 jours calendaires**.
+Vous pouvez supprimer votre compte à tout moment via la section Paramètres de Pebbles. La suppression est **immédiate** : votre compte et ses données sont effacés définitivement en une seule opération, sans délai de grâce, si bien qu'un compte supprimé ne peut pas être restauré. Les copies présentes dans les sauvegardes expirent comme indiqué dans la Politique de Confidentialité.
 
-### 11.3 Effet de la suppression sur le contenu partagé
+### 10.3 Effet de la suppression sur le contenu partagé
 
 Lors de la suppression du compte :
 - Tous les Pebbles privés et secrets sont supprimés
 - Les Pebbles publics partagés sont révoqués (les utilisateurs ayant accès à des pebbles publics perdront cet accès)
 - Les profils d'Âmes liés à votre compte sont supprimés
-- Les données de thérapeute accédant à vos Pebbles perdent cet accès
 
 ---
 
-## 12. Limitation de responsabilité
+## 11. Limitation de responsabilité
 
-### 12.1 Non-responsabilité pour usage thérapeutique
+### 11.1 Non-responsabilité pour usage thérapeutique
 
 Pebbles **N'EST PAS un substitut** à une consultation professionnelle. Vous reconnaissez que Pebbles ne fournit pas de conseil thérapeutique, médical, psychiatrique ou psychologique, et ne doit pas être utilisé comme tel.
 
-### 12.2 Aucune responsabilité pour détresse émotionnelle
+### 11.2 Aucune responsabilité pour détresse émotionnelle
 
 Pebbles ne sera pas responsable de :
 - Toute détresse émotionnelle, anxiété, dépression ou autre état mental négatif résultant de l'utilisation de la plateforme
 - Toute réaction émotionnelle déclenchée par la revisitation de souvenirs personnels
 - Toute utilisation abusive de la plateforme par un tiers accédant à votre compte
 
-### 12.3 Plafonnement de la responsabilité
+### 11.3 Plafonnement de la responsabilité
 
 Excepté en cas de responsabilité obligatoire non-dérogeables en droit français (décès, blessure corporelle, données personnelles), la responsabilité totale de Pebbles est **plafonnée à zéro euro** (service gratuit). Pebbles ne sera pas responsable des dommages indirects, pertes de profits ou dommages punitifs.
 
-### 12.4 Force majeure
+### 11.4 Force majeure
 
 Pebbles ne sera pas responsable de défaillances dues à des circonstances hors de son contrôle : catastrophes naturelles, guerres, cyber-attaques majeures, défaillances de l'hébergeur, interruptions Internet généralisées.
 
 ---
 
-## 13. Clauses de non-responsabilité
+## 12. Clauses de non-responsabilité
 
-### 13.1 Non un dispositif médical
+### 12.1 Non un dispositif médical
 
-Pebbles n'est pas un dispositif médical, un outil de diagnostic ou un traitement médical. Elle ne diagnostic, traite, atténue, ne prévient ou ne cure aucune maladie ou condition médicale.
+Pebbles n'est pas un dispositif médical, un outil de diagnostic ou un traitement médical. Elle ne diagnostic, traite, atténue, ne prévient ou ne cure aucune maladie ou condition médicale. L'utilisation de Pebbles ne remplace pas une consultation avec un professionnel de santé ou de thérapie qualifié.
 
-### 13.2 Non un outil thérapeutique
+### 12.2 Non un outil thérapeutique
 
 Pebbles n'offre pas de psychothérapie, de conseil ou d'intervention thérapeutique, même si elle peut être utilisée de manière complémentaire avec un suivi professionnel.
 
-### 13.3 HealthKit et données biométriques
+### 12.3 Code source fourni « tel quel »
 
-Si Pebbles intègre des fonctionnalités de suivi des données biométriques (HealthKit iOS), ces données sont traitées **uniquement à titre personnel** et ne sont jamais partagées sans votre consentement explicite.
-
-### 13.4 Outputs d'IA
-
-Tout contenu généré par les fonctionnalités d'IA de Pebbles (suggestions, insights, analyses) sont des suggestions à titre informatif. **Ce ne sont pas des conseils professionnels** et ne doivent pas être considérés comme tels.
-
-### 13.5 Code open-source fourni "tel quel"
-
-Le code source de Pebbles disponible sur GitHub est fourni sous la licence applicable du dépôt, « tel quel », sans garantie d'aucune sorte.
+Le code source de Pebbles disponible sur GitHub est fourni sous licence PolyForm Noncommercial 1.0.0, « tel quel », sans garantie d'aucune sorte.
 
 ---
 
-## 14. Résiliation
+## 13. Résiliation
 
-### 14.1 Résiliation par l'utilisateur
+### 13.1 Résiliation par l'utilisateur
 
 Vous pouvez supprimer votre compte et résilier votre utilisation de Pebbles à tout moment sans motif et sans préavis, en supprimant votre compte via les paramètres.
 
-### 14.2 Résiliation par Pebbles
+### 13.2 Résiliation par Pebbles
 
 Pebbles peut suspendre ou résilier votre accès si :
 - Vous violez les CGU ou la Politique de Confidentialité
@@ -387,63 +327,53 @@ Pebbles peut suspendre ou résilier votre accès si :
 - Vous harcelez, menacez ou nuisez à d'autres utilisateurs
 - Pebbles cesse d'opérer le service (avec préavis autant que possible)
 
-### 14.3 Effet de la résiliation sur les données
+### 13.3 Effet de la résiliation sur les données
 
-Voir section 11 pour les effets de la suppression de compte sur vos données.
+Voir section 10 pour les effets de la suppression de compte sur vos données.
 
 ---
 
-## 15. Droit applicable et règlement des litiges
+## 14. Droit applicable et règlement des litiges
 
-### 15.1 Droit applicable
+### 14.1 Droit applicable
 
 Les présentes CGU sont régies par la loi française, indépendamment des principes de conflits de lois.
 
-### 15.2 Médiation obligatoire en cas de litige B2C
+### 14.2 Résolution amiable
 
-Selon l'article L.612-1 du Code de la Consommation français, tout différend entre Pebbles et un Collecteur (consommateur) doit d'abord faire l'objet d'une tentative de médiation. Le médiateur désigné est :
+Pebbles est un service gratuit et non commercial. Avant toute action en justice, merci d'adresser une description écrite du litige à hello@bohns.design. Pebbles vous répondra dans les 30 jours et recherchera avec vous une solution amiable.
 
-**[médiateur]**
+### 14.3 Juridiction compétente
 
-Pour initier une médiation :
-1. Adresser une demande écrite à hello@bohns.design avec description du litige
-2. Pebbles répondra dans les 30 jours
-3. Si non-résolution, présenter la demande au médiateur
-
-### 15.3 Juridiction compétente
-
-Les tribunaux compétents sont situés à **[juridiction]**, France.
-
-### 15.4 Résolution des litiges en ligne (UE)
-
-Les consommateurs de l'UE peuvent également utiliser la plateforme de résolution des litiges en ligne de la Commission Européenne :
-https://ec.europa.eu/consumers/odr
+Tout litige qui n'a pu être résolu à l'amiable relève de la compétence du **Tribunal judiciaire de Paris**, France, sans préjudice des règles impératives permettant au consommateur de saisir la juridiction de son lieu de résidence.
 
 ---
 
-## 16. Dispositions diverses
+## 15. Dispositions diverses
 
-### 16.1 Intégralité de l'accord
+### 15.1 Intégralité de l'accord
 
 Les présentes CGU, ainsi que la Politique de Confidentialité, constituent l'intégralité de l'accord entre vous et Pebbles concernant l'utilisation de la plateforme.
 
-### 16.2 Divisibilité
+### 15.2 Divisibilité
 
 Si une clause des CGU est jugée invalide ou inapplicable, les autres clauses restent en vigueur dans la mesure du possible.
 
-### 16.3 Absence de renonciation
+### 15.3 Absence de renonciation
 
 Le défaut de Pebbles à exiger le respect d'une clause ne constitue pas une renonciation à cette clause.
 
-### 16.4 Historique des versions
+### 15.4 Historique des versions
 
 | Version | Date          | Description                    |
 |---------|---------------|--------------------------------|
 | 1.0.0   | 2026-04-09    | Première version               |
+| 1.1.0   | 2026-09-13    | Âge minimum porté à 16 ans     |
+| 1.2.0   | 2026-10-07    | Retrait de l'accès thérapeute, de HealthKit et des fonctionnalités d'IA ; suppression de compte immédiate ; identification de l'éditeur précisée (éditeur non professionnel, LCEN) ; portabilité des données sur demande ; règlement des litiges clarifié |
 
 ---
 
-**Dernière mise à jour : 9 avril 2026**
+**Dernière mise à jour : 7 octobre 2026**
 
 Ces Conditions Générales d'Utilisation s'appliquent à compter de la date d'entrée en vigueur indiquée ci-dessus. En utilisant Pebbles après cette date, vous acceptez les termes.
 

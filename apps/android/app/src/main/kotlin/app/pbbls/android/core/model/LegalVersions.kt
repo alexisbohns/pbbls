@@ -10,6 +10,6 @@ package app.pbbls.android.core.model
  * (`CONSENT_DOCUMENT_VERSION`): both statements live in the privacy policy.
  */
 object LegalVersions {
-    const val TERMS = "1.1.0"
-    const val PRIVACY = "1.3.0"
+    const val TERMS = "1.2.0"
+    const val PRIVACY = "1.4.0"
 }

@@ -2,8 +2,8 @@
 title: Credits
 locale: en
 slug: credits
-version: 1.0.0
-last_updated: 2026-04-09
+version: 1.1.0
+last_updated: 2026-10-07
 ---
 
 # Credits
@@ -29,13 +29,6 @@ https://github.com/supabase/supabase
 
 ---
 
-## Artificial intelligence
-
-**Google Gemma** by Google DeepMind — the language model powering Pebbles' analysis features, with data anonymized before transmission.
-https://ai.google.dev/gemma
-
----
-
 ## Intellectual inspirations
 
 Pebbles would not exist without the work of the following people, who have deeply influenced the product's design:
@@ -53,8 +46,6 @@ Pebbles would not exist without the work of the following people, who have deepl
 ---
 
 ## Standards
-
-**Apple HealthKit** — Pebbles' mood and emotion data model is compatible with Apple's `HKStateOfMind` standards, enabling future interoperability with the health ecosystem.
 
 **GDPR and CNIL** — Pebbles' privacy practices follow the General Data Protection Regulation and the guidelines of the French Data Protection Authority.
 

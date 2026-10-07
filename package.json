@@ -1,6 +1,7 @@
 {
   "name": "pbbls",
   "private": true,
+  "license": "PolyForm-Noncommercial-1.0.0",
   "packageManager": "npm@10.9.7",
   "workspaces": [
     "apps/*",

@@ -95,7 +95,7 @@ class ConsentGateViewModelTest {
             assertEquals(ConsentGateUiState.Satisfied("user-1"), vm.uiState.value)
             assertEquals(ConsentGateLogic.REQUIRED, consents.recordCalls.map { it.first })
             assertTrue(consents.recordCalls.all { it.third == "android_settings" })
-            assertEquals("1.1.0", consents.recordCalls.first { it.first == ConsentKind.TERMS }.second)
+            assertEquals("1.2.0", consents.recordCalls.first { it.first == ConsentKind.TERMS }.second)
         }
 
     @Test
