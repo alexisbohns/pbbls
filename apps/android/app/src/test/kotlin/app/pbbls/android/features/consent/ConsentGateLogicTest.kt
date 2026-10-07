@@ -3,8 +3,6 @@ package app.pbbls.android.features.consent
 import app.pbbls.android.core.model.ActiveConsent
 import app.pbbls.android.core.model.ConsentKind
 import app.pbbls.android.core.model.LegalVersions
-import kotlinx.serialization.json.buildJsonObject
-import kotlinx.serialization.json.put
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -68,9 +66,7 @@ class ConsentGateLogicTest {
     }
 
     @Test
-    fun `google accounts record as android_oauth, everyone else as android_settings`() {
-        assertEquals("android_oauth", ConsentGateLogic.source(buildJsonObject { put("provider", "google") }))
-        assertEquals("android_settings", ConsentGateLogic.source(buildJsonObject { put("provider", "email") }))
-        assertEquals("android_settings", ConsentGateLogic.source(null))
+    fun `the gate records where consent was given, not how the account signed up`() {
+        assertEquals("android_settings", ConsentGateLogic.SOURCE)
     }
 }

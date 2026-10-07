@@ -1016,3 +1016,16 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Refs:** #779, #781, #754, #774, #746, `docs/compliance/dpia.md` (Q2, Q3, Q6), `LICENSE`, `apps/web/docs/{privacy,terms,credits,legal-notice}/{en,fr}.md`, `apps/web/lib/config/consent.ts`, `apps/android/app/src/main/kotlin/app/pbbls/android/core/model/LegalVersions.kt`.
 
 ---
+
+## 2026-10-07 — `user_consents.source` records where consent was given, not how the account signed up (#1032)
+
+- **Status:** taken
+- **Scope:** android, web, ios
+- **Context:** Android's consent gate recorded `android_oauth` for Google accounts and `android_settings` for the rest, while web's gate (#1017) records `web_settings` for everyone.
+- **Decision:** `source` names the place the act was collected. A consent gate always records `<surface>_settings` (`android_settings`, `web_settings`, `ios_settings`), whatever the account type; `*_register` and `*_oauth` are only for acts collected at signup or in the OAuth round trip.
+- **Why:** The ledger is accountability evidence: a reader needs to know which screen the person saw when they agreed, and the account's provider is already on the auth user.
+- **Consequences:** iOS's gate (#821) records `ios_settings`. Android no longer writes `android_oauth` anywhere; the value stays in the CHECK for the rows already written.
+- **Supersedes / Superseded-by:** —
+- **Refs:** #1032, #1017, #821, `apps/android/app/src/main/kotlin/app/pbbls/android/features/consent/ConsentGateLogic.kt`.
+
+---
