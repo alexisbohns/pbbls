@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -67,7 +68,6 @@ import app.pbbls.android.core.ui.GlyphViewCase
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-import java.util.Locale
 
 private const val TAG = "settings"
 
@@ -520,7 +520,7 @@ internal fun HealthConsentRow(
     canWithdraw: Boolean,
     onWithdraw: () -> Unit,
 ) {
-    val locale = Locale.getDefault()
+    val locale = LocalConfiguration.current.locales[0]
     val supporting =
         when (status) {
             HealthConsentStatus.Loading -> null
