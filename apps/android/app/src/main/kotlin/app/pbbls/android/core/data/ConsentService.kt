@@ -2,18 +2,23 @@ package app.pbbls.android.core.data
 
 import app.pbbls.android.core.model.ActiveConsent
 import app.pbbls.android.core.model.ConsentKind
+import app.pbbls.android.core.model.HealthDataConsent
 import io.github.jan.supabase.postgrest.from
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Columns
+import io.github.jan.supabase.postgrest.query.Order
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/** The consent-ledger seam `ConsentGateViewModel` is tested against. */
+/** The consent-ledger seam `ConsentGateViewModel` and `SettingsViewModel` are tested against. */
 interface ConsentServicing {
     /** The signed-in user's active rows (neither withdrawn nor superseded). */
     suspend fun active(): List<ActiveConsent>
+
+    /** The signed-in user's active `health_data` grant, or null when there is none. */
+    suspend fun healthData(): HealthDataConsent?
 
     /** One consent act through `record_consent`, idempotent server-side. */
     suspend fun record(
@@ -44,6 +49,22 @@ class ConsentService
                         exact("superseded_at", null)
                     }
                 }.decodeList()
+
+        override suspend fun healthData(): HealthDataConsent? =
+            supabase.client
+                .from("user_consents")
+                .select(Columns.list("document_version", "granted_at")) {
+                    filter {
+                        eq("kind", ConsentKind.HEALTH_DATA.wire)
+                        exact("withdrawn_at", null)
+                        exact("superseded_at", null)
+                    }
+                    // A partial unique index allows one active row per kind;
+                    // the order only makes that assumption explicit.
+                    order("granted_at", Order.DESCENDING)
+                    limit(1)
+                }.decodeList<HealthDataConsent>()
+                .firstOrNull()
 
         override suspend fun record(
             kind: ConsentKind,

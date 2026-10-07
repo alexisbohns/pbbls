@@ -24,11 +24,15 @@ import app.pbbls.android.core.designsystem.PebblesSectionHeader
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
+import app.pbbls.android.core.model.HealthDataConsent
 import app.pbbls.android.core.ui.GlyphView
 import app.pbbls.android.core.ui.GlyphViewCase
+import app.pbbls.android.features.profile.HealthConsentRow
+import app.pbbls.android.features.profile.HealthConsentStatus
 import app.pbbls.android.features.profile.SettingsNavRow
 import app.pbbls.android.features.profile.settingsRowColors
 import com.android.tools.screenshot.PreviewTest
+import java.time.OffsetDateTime
 
 /**
  * Settings previews (#847). `SettingsScreen` itself reads `LocalProfileService`
@@ -201,4 +205,43 @@ fun SettingsSectionsLight() {
 @Composable
 fun SettingsSectionsDark() {
     PebblesTheme { SettingsSections() }
+}
+
+/**
+ * The Consent section (#972), every state of its one row, on its own so the
+ * whole-form previews above keep their references. Noon UTC keeps the
+ * localized date the same in any zone the job runs in.
+ */
+@Composable
+private fun SettingsConsentSection() {
+    val given =
+        HealthConsentStatus.Given(HealthDataConsent("1.4.0", OffsetDateTime.parse("2026-10-01T12:00:00Z")))
+    Column(modifier = Modifier.padding(16.dp)) {
+        PebblesListSection(
+            header = stringResource(R.string.settings_consent_header),
+            rowPadding = PebblesListDefaults.ListItemRowPadding,
+            rows =
+                listOf(
+                    { HealthConsentRow(status = given, canWithdraw = true, onWithdraw = {}) },
+                    { HealthConsentRow(status = HealthConsentStatus.NotRecorded, canWithdraw = true, onWithdraw = {}) },
+                    { HealthConsentRow(status = HealthConsentStatus.Unavailable, canWithdraw = true, onWithdraw = {}) },
+                ),
+        )
+    }
+}
+
+@PreviewTest
+@Preview(showBackground = true)
+@Preview(name = "fs2", showBackground = true, fontScale = 2f)
+@Preview(name = "fr", showBackground = true, locale = "fr")
+@Composable
+fun SettingsConsentSectionLight() {
+    PebblesTheme { SettingsConsentSection() }
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun SettingsConsentSectionDark() {
+    PebblesTheme { SettingsConsentSection() }
 }

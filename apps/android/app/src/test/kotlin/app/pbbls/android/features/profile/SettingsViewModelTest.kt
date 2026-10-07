@@ -9,6 +9,8 @@ import app.pbbls.android.core.data.AppearancePreferences
 import app.pbbls.android.core.data.ProfileRow
 import app.pbbls.android.core.data.ReauthAccountMismatchException
 import app.pbbls.android.core.data.ReauthRequiredException
+import app.pbbls.android.core.model.HealthDataConsent
+import app.pbbls.android.testing.FakeConsentService
 import app.pbbls.android.testing.FakeProfileService
 import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.InMemoryPrefs
@@ -103,7 +105,8 @@ class SettingsViewModelTest {
         supabase: FakeSupabaseService = FakeSupabaseService(),
         savedState: SavedStateHandle = SavedStateHandle(),
         appearance: AppearancePreferences = AppearancePreferences(InMemoryPrefs()),
-    ) = SettingsViewModel(savedState, profile, supabase, appearance)
+        consents: FakeConsentService = FakeConsentService(),
+    ) = SettingsViewModel(savedState, profile, supabase, appearance, consents)
 
     // MARK: - Appearance (#853)
 
@@ -789,5 +792,96 @@ class SettingsViewModelTest {
 
             assertEquals(DeletionState.IDLE, viewModel.uiState.value.deletion)
             assertEquals(0, profile.deleteAccountCount)
+        }
+
+    // MARK: - Health-data consent (#972)
+
+    private val grant = HealthDataConsent("1.4.0", OffsetDateTime.parse("2026-10-01T09:30:00Z"))
+
+    @Test
+    fun `the consent row shows the live health-data grant`() =
+        runTest {
+            val consents = FakeConsentService().apply { healthData = grant }
+            val viewModel = viewModel(consents = consents)
+            advanceUntilIdle()
+
+            assertEquals(HealthConsentStatus.Given(grant), viewModel.uiState.value.healthConsent)
+        }
+
+    @Test
+    fun `no grant on file reads as not recorded`() =
+        runTest {
+            val viewModel = viewModel()
+            advanceUntilIdle()
+
+            assertEquals(HealthConsentStatus.NotRecorded, viewModel.uiState.value.healthConsent)
+        }
+
+    @Test
+    fun `a failed consent read leaves the rest of settings usable`() =
+        runTest {
+            val consents = FakeConsentService().apply { healthDataFailure = IOException("offline") }
+            val viewModel = viewModel(consents = consents)
+            advanceUntilIdle()
+
+            assertEquals(HealthConsentStatus.Unavailable, viewModel.uiState.value.healthConsent)
+            assertFalse(viewModel.uiState.value.isLoading)
+            assertNull(viewModel.uiState.value.loadErrorRes)
+        }
+
+    @Test
+    fun `withdrawing asks first, then deletes the account and signs out`() =
+        runTest {
+            val profile = FakeProfileService(profile = profileRow())
+            val supabase = FakeSupabaseService(session = session())
+            val viewModel = viewModel(profile, supabase, consents = FakeConsentService().apply { healthData = grant })
+            advanceUntilIdle()
+
+            viewModel.requestWithdrawConsent()
+            assertEquals(DeletionState.CONFIRMING_WITHDRAWAL, viewModel.uiState.value.deletion)
+            assertEquals(0, profile.deleteAccountCount)
+
+            viewModel.confirmDelete()
+            advanceUntilIdle()
+
+            assertEquals(1, profile.deleteAccountCount)
+            assertEquals(1, supabase.signOutCount)
+        }
+
+    @Test
+    fun `cancelling the withdrawal deletes nothing`() =
+        runTest {
+            val profile = FakeProfileService(profile = profileRow())
+            val viewModel = viewModel(profile, consents = FakeConsentService().apply { healthData = grant })
+            advanceUntilIdle()
+
+            viewModel.requestWithdrawConsent()
+            viewModel.cancelDelete()
+            advanceUntilIdle()
+
+            assertEquals(DeletionState.IDLE, viewModel.uiState.value.deletion)
+            assertEquals(0, profile.deleteAccountCount)
+        }
+
+    @Test
+    fun `withdrawing with a stale sign-in re-auths before deleting`() =
+        runTest {
+            val profile = FakeProfileService(profile = profileRow())
+            val supabase = FakeSupabaseService(session = session(providers = listOf("email"), fresh = false))
+            val viewModel = viewModel(profile, supabase, consents = FakeConsentService().apply { healthData = grant })
+            advanceUntilIdle()
+
+            viewModel.requestWithdrawConsent()
+            viewModel.confirmDelete()
+            advanceUntilIdle()
+            assertEquals(DeletionState.REAUTHENTICATING, viewModel.uiState.value.deletion)
+            assertEquals(0, profile.deleteAccountCount)
+
+            viewModel.onReauthPasswordChange("hunter2")
+            viewModel.submitReauth()
+            advanceUntilIdle()
+
+            assertEquals(1, profile.deleteAccountCount)
+            assertEquals(1, supabase.signOutCount)
         }
 }
