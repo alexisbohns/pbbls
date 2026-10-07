@@ -961,6 +961,19 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - A hidden inviter (#833) now previews as `valid` with a null `inviter`, decided in the same re-emission.
 - **Supersedes / Superseded-by:** Supersedes the "preview is block-unaware by design (D4)" residual in **M49 mutual connections** and in `accept_connection_invite`'s comment (`20260730070347`).
 - **Refs:** #834, #833, #836, `packages/supabase/supabase/migrations/20261007140000_block_severs_public_reads.sql`, `packages/supabase/scripts/verify-pebble-visibility.ts`, `packages/supabase/scripts/verify-public-profile.ts`.
+## 2026-10-07 — Malformed signup consent metadata is dropped as "not on record", never fatal and never granted (#823)
+
+- **Status:** taken
+- **Scope:** db
+- **Context:** `handle_new_user` cast four client-controlled consent timestamps in its `declare` block and copied four version strings into `user_consents`. An unreadable timestamp, an out-of-range one or an off-shape version aborted the `after insert on auth.users` trigger, so GoTrue answered with its generic 500 and no account existed. The issue asked for a deliberate choice between failing loudly and degrading.
+- **Decision:** We degrade. Each malformed act is pre-tested (parse under a `data_exception` guard, then the `granted_at_range` and `document_version_shape` bounds) and dropped: no ledger row, a nulled timestamp in the legacy `profiles` columns, and a `WARNING` that names the key and the user id (never the value). Absent keys stay silent. The account is always created.
+- **Why:** "Loud" does not exist here. GoTrue turns every trigger exception into the same opaque 500, which the user cannot fix and no client can explain. An absent ledger row already means "not granted" to every reader, so dropping an act never grants it, and a client gate can ask again. Guessing a value (`now()`, a default version) would forge evidence.
+- **Consequences:**
+  - The function's checks mirror the two `user_consents` CHECKs. A migration that changes either CHECK must change the mirror too: a narrower CHECK brings the 500 back, a wider one drops valid acts.
+  - Android's consent gate (#967) re-asks a dropped act. Web re-asks only `health_data` (onboarding gate) until #788. iOS records no versioned acts until #821.
+  - #821 and #835 must re-emit `handle_new_user` from `20261007101500`.
+- **Supersedes / Superseded-by:** —
+- **Refs:** #823, #967, #788, #821, #835, `packages/supabase/supabase/migrations/20261007101500_handle_new_user_metadata_guard.sql`.
 ## 2026-10-07 — record_consent serialises grants per (user, kind), and a downgrade is a successful no-op (#1018)
 
 - **Status:** taken
