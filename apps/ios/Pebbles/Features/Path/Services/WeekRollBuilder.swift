@@ -43,7 +43,7 @@ enum WeekRollBuilder {
     }
 
     /// ISO Monday 00:00:00 of the week containing `date`.
-    private static func weekStart(for date: Date, calendar: Calendar) -> Date {
+    static func weekStart(for date: Date, calendar: Calendar) -> Date {
         let comps = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
         var monday = DateComponents()
         monday.yearForWeekOfYear = comps.yearForWeekOfYear

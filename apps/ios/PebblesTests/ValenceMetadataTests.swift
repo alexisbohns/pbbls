@@ -20,11 +20,11 @@ struct ValenceSizeGroupTests {
     @Test("description copy matches the spec")
     func descriptionCopy() {
         #expect(String(localized: ValenceSizeGroup.small.description) ==
-            "This moment impacted my day and will be wrapped in my weekly Cairn")
+            "This moment impacted my day")
         #expect(String(localized: ValenceSizeGroup.medium.description) ==
-            "This moment impacted my whole week and will be wrapped in my monthly Cairn")
+            "This moment impacted my whole week")
         #expect(String(localized: ValenceSizeGroup.large.description) ==
-            "This moment impacted my whole month and will be wrapped in my yearly Cairn")
+            "This moment impacted my whole month")
     }
 
     @Test("id matches rawValue")

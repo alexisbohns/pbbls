@@ -484,6 +484,18 @@
       "consentRequiredHint": "Tick all four boxes above to continue."
     }
   },
+  "consentGate": {
+    "title": "Before you continue",
+    "body": "Pebbles keeps a journal of how you feel, so we need your agreement on each point below. Tick them all to carry on.",
+    "continue": "Continue",
+    "saving": "Saving…",
+    "logOut": "Log out",
+    "retry": "Try again",
+    "checking": "Checking what you have agreed to…",
+    "recordError": "We couldn't save that. Please try again.",
+    "loadError": "We couldn't check what you have agreed to. Check your connection and try again.",
+    "logOutError": "Could not log out. Please try again."
+  },
   "onboarding": {
     "consent": {
       "title": "One thing before we start",
@@ -936,15 +948,15 @@
       "lowlight": "Lowlight",
       "small": {
         "name": "Day event",
-        "description": "This moment impacted my day and will be wrapped in my weekly Cairn."
+        "description": "This moment impacted my day."
       },
       "medium": {
         "name": "Week event",
-        "description": "This moment impacted my whole week and will be wrapped in my monthly Cairn."
+        "description": "This moment impacted my whole week."
       },
       "large": {
         "name": "Month event",
-        "description": "This moment impacted my whole month and will be wrapped in my yearly Cairn."
+        "description": "This moment impacted my whole month."
       }
     },
     "valenceFan": {

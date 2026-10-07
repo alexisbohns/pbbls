@@ -81,25 +81,10 @@ struct EditSoulSheet: View {
                     currentGlyphId: draft.glyphId,
                     onSelected: { selected in
                         draft.glyphId = selected.id
-                        Task { await loadGlyph(id: selected.id) }
+                        draft.currentGlyph = selected
                     }
                 )
             }
-        }
-    }
-
-    private func loadGlyph(id: UUID) async {
-        do {
-            let fetched: Glyph = try await supabase.client
-                .from("glyphs")
-                .select("id, name, strokes, view_box")
-                .eq("id", value: id)
-                .single()
-                .execute()
-                .value
-            draft.currentGlyph = fetched
-        } catch {
-            logger.error("edit soul: load glyph failed: \(error.localizedDescription, privacy: .private)")
         }
     }
 

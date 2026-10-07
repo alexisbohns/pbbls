@@ -98,7 +98,7 @@ export function SubmissionCard({ submission }: { submission: AdminSubmission }) 
         />
         <div className="text-xs text-muted-foreground">{submission.price} karma</div>
         <div className="text-xs text-muted-foreground">
-          Creator: {submission.owner_email ?? submission.owner_id ?? "—"}
+          Creator: {submission.owner_handle ? `@${submission.owner_handle}` : (submission.owner_id ?? "—")}
         </div>
         {submission.status === "rejected" && submission.review_note ? (
           <p className="text-xs text-muted-foreground">Reason: {submission.review_note}</p>

@@ -20,6 +20,10 @@ struct WeekRollView: View {
     /// brief "scrolled to leading edge" frame before the centering snap.
     @State private var hasCenteredInitial = false
 
+    /// Width of the strip as laid out, fed by `onGeometryChange`. Drives the
+    /// centring margin instead of the deprecated `UIScreen.main`.
+    @State private var containerWidth: CGFloat = 0
+
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView(.horizontal, showsIndicators: false) {
@@ -44,7 +48,16 @@ struct WeekRollView: View {
                 .scrollTargetLayout()
             }
             .scrollTargetBehavior(.viewAligned)
-            .contentMargins(.horizontal, scrollMargin, for: .scrollContent)
+            .contentMargins(
+                .horizontal,
+                Self.centeringMargin(containerWidth: containerWidth),
+                for: .scrollContent
+            )
+            .onGeometryChange(for: CGFloat.self) { proxy in
+                proxy.size.width
+            } action: { width in
+                containerWidth = width
+            }
             .frame(height: 96)
             .opacity(hasCenteredInitial ? 1 : 0)
             // The roll follows focusedWeekStart but doesn't drive it:
@@ -71,10 +84,9 @@ struct WeekRollView: View {
         }
     }
 
-    /// Half the screen width minus half the cell width, so the focused
-    /// cell rests centered. Approximation works on all current iPhone widths.
-    private var scrollMargin: CGFloat {
-        let screenWidth = UIScreen.main.bounds.width
-        return max(0, (screenWidth - Self.cellWidth) / 2)
+    /// Half the strip's width minus half the cell width, so the focused
+    /// cell rests centered. Clamped at zero for a not-yet-measured strip.
+    static func centeringMargin(containerWidth: CGFloat) -> CGFloat {
+        max(0, (containerWidth - cellWidth) / 2)
     }
 }

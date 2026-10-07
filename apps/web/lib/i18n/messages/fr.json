@@ -484,6 +484,18 @@
       "consentRequiredHint": "Cochez les quatre cases ci-dessus pour continuer."
     }
   },
+  "consentGate": {
+    "title": "Avant de continuer",
+    "body": "Pebbles tient le journal de ce que vous ressentez, nous avons donc besoin de votre accord sur chaque point ci-dessous. Cochez-les tous pour continuer.",
+    "continue": "Continuer",
+    "saving": "Enregistrement…",
+    "logOut": "Me déconnecter",
+    "retry": "Réessayer",
+    "checking": "Vérification de vos accords…",
+    "recordError": "Impossible d'enregistrer votre réponse. Veuillez réessayer.",
+    "loadError": "Impossible de vérifier vos accords. Vérifiez votre connexion et réessayez.",
+    "logOutError": "Impossible de vous déconnecter. Veuillez réessayer."
+  },
   "onboarding": {
     "consent": {
       "title": "Une chose avant de commencer",
@@ -936,15 +948,15 @@
       "lowlight": "Creux",
       "small": {
         "name": "Évènement du jour",
-        "description": "Ce moment a marqué ma journée et sera réuni dans mon Cairn hebdomadaire."
+        "description": "Ce moment a marqué ma journée."
       },
       "medium": {
         "name": "Évènement de la semaine",
-        "description": "Ce moment a marqué toute ma semaine et sera réuni dans mon Cairn mensuel."
+        "description": "Ce moment a marqué toute ma semaine."
       },
       "large": {
         "name": "Évènement du mois",
-        "description": "Ce moment a marqué tout mon mois et sera réuni dans mon Cairn annuel."
+        "description": "Ce moment a marqué tout mon mois."
       }
     },
     "valenceFan": {

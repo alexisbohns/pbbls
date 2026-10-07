@@ -137,3 +137,42 @@ struct WeekRollBuilderTests {
         #expect(WeekRollBuilder.next(of: week17Start, in: entries)?.weekStart == week19Start)
     }
 }
+
+@Suite("WeekRollBuilder.weekStart")
+struct WeekRollBuilderWeekStartTests {
+
+    private var calendar: Calendar {
+        var iso = Calendar(identifier: .iso8601)
+        iso.timeZone = TimeZone(identifier: "UTC")!
+        return iso
+    }
+
+    private func date(_ iso: String) -> Date {
+        ISO8601DateFormatter().date(from: iso)!
+    }
+
+    @Test("a Sunday maps back to the Monday that opens its ISO week")
+    func sundayMapsToMonday() {
+        let sunday = date("2026-05-10T12:00:00Z")
+        #expect(WeekRollBuilder.weekStart(for: sunday, calendar: calendar) == date("2026-05-04T00:00:00Z"))
+    }
+
+    @Test("Monday 00:00 is its own week start")
+    func mondayIsItsOwnStart() {
+        let monday = date("2026-05-04T00:00:00Z")
+        #expect(WeekRollBuilder.weekStart(for: monday, calendar: calendar) == monday)
+    }
+
+    @Test("year boundary: 2026-01-01 starts on Mon 2025-12-29")
+    func yearBoundary() {
+        let newYear = date("2026-01-01T09:00:00Z")
+        #expect(WeekRollBuilder.weekStart(for: newYear, calendar: calendar) == date("2025-12-29T00:00:00Z"))
+    }
+
+    @Test("matches the current-week entry build() creates for an empty roll")
+    func matchesBuildCurrentWeek() {
+        let today = date("2026-05-10T12:00:00Z")
+        let built = WeekRollBuilder.build(pebbles: [], calendar: calendar, today: today)
+        #expect(built.first?.weekStart == WeekRollBuilder.weekStart(for: today, calendar: calendar))
+    }
+}
