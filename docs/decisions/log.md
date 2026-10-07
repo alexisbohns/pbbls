@@ -974,5 +974,22 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - #821 and #835 must re-emit `handle_new_user` from `20261007101500`.
 - **Supersedes / Superseded-by:** —
 - **Refs:** #823, #967, #788, #821, #835, `packages/supabase/supabase/migrations/20261007101500_handle_new_user_metadata_guard.sql`.
+## 2026-10-07 — record_consent serialises grants per (user, kind), and a downgrade is a successful no-op (#1018)
+
+- **Status:** taken
+- **Scope:** supabase
+- **Context:** `record_consent` resolved a contended insert with `on conflict … do nothing`, so two concurrent calls at different versions dropped one act and reported success (the accepted residual of `docs/superpowers/specs/2026-09-11-art9-consent-gate-design.md` §9). It also superseded an active grant at any other version, so an older caller could replace a newer acceptance. The consent gates (#967, #1017, #821) make version bumps routine, often from two surfaces at once.
+- **Decision:** `20261007120000` re-emits the function with no change to its signature or its errors:
+  - It takes `pg_advisory_xact_lock` on (user, kind) before reading the active grant, so concurrent calls run one after the other, each against what the previous one committed.
+  - Same version: no-op. Active grant newer (numeric per x.y.z component): no-op, success, nothing written. Otherwise it supersedes and inserts. Two concurrent versions therefore always end with the higher one active.
+  - The insert lost its `on conflict do nothing`: under the lock it cannot conflict, and a write that bypasses the lock should fail loudly (23505), never silently.
+- **Why:** The issue offered a `consent_conflict` error the clients retry on, or a retry in the function, plus a downgrade error slug. Every contended outcome is already a correct answer once the calls are serialised, so an error would only make three clients call again. A refused downgrade would turn a stale bundle's or the OAuth callback's sign-in into an error, even though the user already holds a newer acceptance.
+- **Consequences:**
+  - The clients' same-or-newer checks (Android `ConsentGateLogic.isAtLeast`, web `missingConsents`) are now a second line of defence, not the only one. Keep them, since they also decide whether to show the gate.
+  - An older act sent after a newer one leaves no row at all. The ledger records what was in force.
+  - Any future writer of active `user_consents` rows outside `handle_new_user` must take the same lock key (`'record_consent:' || user_id || ':' || kind`), or it is the bypass the plain insert reports.
+  - `withdraw_consent` takes no lock. A race with a grant resolves loudly through the row lock (`no_active_consent`).
+- **Supersedes / Superseded-by:** Supersedes the "accepted residual" row of the 2026-09-11 art. 9 design spec §9. That spec has no entry here.
+- **Refs:** #1018, #788, #1017, `packages/supabase/supabase/migrations/20261007120000_record_consent_serialised.sql`, `packages/supabase/scripts/verify-account-purge.ts`.
 
 ---
