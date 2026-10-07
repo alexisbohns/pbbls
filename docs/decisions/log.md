@@ -922,4 +922,23 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Supersedes / Superseded-by:** None. Extends **2026-09-27 — Terms and privacy are ledger kinds, and Android gates on a complete, current consent record (#966, #967)** to web.
 - **Refs:** #788, #971, #967, #784, `apps/web/lib/auth/consent-gate.ts`, `apps/web/lib/auth/signup-metadata.ts`, `apps/web/components/consent/ReconsentGate.tsx`.
 
+## 2026-10-07 — Storage sweeps go through the Storage API, and server drafts are a live reference (#322)
+
+- **Status:** taken
+- **Scope:** db, infra
+- **Context:** `sweep_orphan_snap_files()` deleted orphaned `pebbles-media` objects with a SQL `delete from storage.objects`. Supabase refuses that statement, so the production pg_cron job that ran it failed on all 149 nights from 2026-05-11 to 2026-10-06 (unscheduled by hand on 2026-10-06). It also keyed only on `public.snaps`, but server drafts keep their uploaded snaps in `pebble_drafts.payload->'snaps'` with no `snaps` row until publish, so a working sweep would have deleted every open draft's photos.
+- **Decision:**
+  - **SQL lists, the Storage API deletes.** `public.list_orphan_snap_files(p_min_age_seconds = 86400, p_owner = null)` (`20261007131500`) is read-only, `security definer`, service-role only. The `sweep-orphan-snaps` edge function calls it and removes through `storage.from('pebbles-media').remove()` in batches of 100. Never delete from `storage.*` tables in SQL; the old function is dropped.
+  - **An object is referenced** when its snap id has a `snaps` row, a `snaps.storage_path` covers it, or any `pebble_drafts.payload->'snaps'` element names its id (case-insensitive) or its `storage_path`. Anything younger than 24 hours is never a candidate. A shorter grace period is accepted only when the sweep is scoped to one account (`owner`), which is what the harness uses.
+  - **The schedule lives in the repo** as `.github/workflows/orphan-snap-sweep.yml` (nightly, 03:23 UTC), not as pg_cron. A fresh project reproduces it, and the `schema` CI job does not have to create `pg_cron` / `pg_net`.
+  - **Dry run is the default everywhere.** The function deletes only on an explicit `dry_run: false`, and the nightly sends that only once the repo variable `ORPHAN_SWEEP_LIVE` is `true`.
+  - **The scheduled caller uses a dedicated `ORPHAN_SWEEP_TOKEN`, not the service role key.** The function accepts either. `verify_jwt` is off for it because the token is not a JWT.
+- **Why:** The storage schema blocks SQL deletes because they would orphan the bytes. A GitHub Actions schedule is visible next to the nightly harnesses and needs no extension in the replayed chain. A dedicated token keeps the service role out of CI (packages/supabase/CLAUDE.md) and can reach no more than the sweep itself.
+- **Consequences:**
+  - Anything that later stores a reference to a `pebbles-media` path outside `snaps` (a new draft shape, a new table) must be added to `list_orphan_snap_files`, or the sweep will delete those files after 24 hours.
+  - `verify-orphan-snap-sweep.ts` needs the service role, so like the purge harness it is a manual run (`db:verify:sweep`), not a CI step.
+  - One listing is capped by PostgREST `max_rows` (1000). A live sweep re-lists until empty, up to 20 passes.
+- **Supersedes / Superseded-by:** — (replaces the unrecorded pg_cron design from closed PR #386, recovered in `20260912130000` / `20260912140000`).
+- **Refs:** #322, #386, #797, #799, `packages/supabase/supabase/migrations/20261007131500_list_orphan_snap_files.sql`, `packages/supabase/supabase/functions/sweep-orphan-snaps/`, `.github/workflows/orphan-snap-sweep.yml`, `packages/supabase/scripts/verify-orphan-snap-sweep.ts`.
+
 ---
