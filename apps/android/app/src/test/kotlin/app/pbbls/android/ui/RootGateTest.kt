@@ -9,10 +9,12 @@ import androidx.compose.ui.test.performScrollTo
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.features.consent.CONSENT_GATE_CONTINUE
+import app.pbbls.android.features.consent.CONSENT_GATE_DELETE
 import app.pbbls.android.features.consent.ConsentGateLogic
 import app.pbbls.android.features.consent.consentRowTag
 import app.pbbls.android.testing.AppUiTest
 import app.pbbls.android.testing.FakeConsentService
+import app.pbbls.android.testing.FakeProfileService
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -29,6 +31,8 @@ import javax.inject.Inject
 @HiltAndroidTest
 class RootGateTest : AppUiTest() {
     @Inject lateinit var consents: FakeConsentService
+
+    @Inject lateinit var profile: FakeProfileService
 
     @Test
     fun `signed out lands on Welcome`() {
@@ -201,6 +205,27 @@ class RootGateTest : AppUiTest() {
         onText(R.string.consent_gate_sign_out).performClick()
 
         assertEquals(1, supabase.signOutCount)
+        onText(R.string.welcome_log_in).assertIsDisplayed()
+    }
+
+    @Test
+    fun `deleting from the gate signs out to Welcome without recording consent`() {
+        consents.rows.clear()
+        skipOnboarding()
+        launch()
+        signIn()
+
+        compose.onNodeWithTag(CONSENT_GATE_DELETE).performScrollTo().performClick()
+        onText(R.string.settings_delete_account_confirm).performClick()
+        // The test session's token carries no sign-in stamp, so the recent
+        // sign-in step comes first, as it would for a stale real session.
+        onText(R.string.reauth_continue_google).performClick()
+        compose.waitForIdle()
+
+        assertEquals(1, supabase.googleReauthCount)
+        assertEquals(1, profile.deleteAccountCount)
+        assertEquals(1, supabase.signOutCount)
+        assertEquals(0, consents.recordCalls.size)
         onText(R.string.welcome_log_in).assertIsDisplayed()
     }
 

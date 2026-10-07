@@ -44,6 +44,10 @@
     <string name="consent_gate_sign_out">Me déconnecter</string>
     <string name="consent_gate_retry">Réessayer</string>
     <string name="consent_gate_error">Impossible d\'enregistrer ta réponse. Réessaie.</string>
+    <string name="consent_gate_delete_account">Supprimer mon compte</string>
+    <string name="consent_gate_delete_title">Supprimer ton compte ?</string>
+    <string name="consent_gate_delete_message">Tu n\'as rien à accepter ci-dessus pour le faire. Ton compte et tout ce qu\'il contient seront supprimés définitivement : galets, photos, âmes, collections, glyphes et karma. Les glyphes achetés par d\'autres personnes restent disponibles pour elles, sans ton nom. Cette action est irréversible.</string>
+    <string name="consent_gate_delete_error">Impossible de supprimer ton compte. Rien n\'a été supprimé. Réessaie.</string>
     <string name="auth_submit_login">Se connecter</string>
     <string name="auth_submit_signup">Créer un compte</string>
 

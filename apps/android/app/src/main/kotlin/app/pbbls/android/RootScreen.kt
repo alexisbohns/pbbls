@@ -94,6 +94,7 @@ fun RootScreen() {
     // above NavDisplay, not a back-stack entry (design D9).
     val consentViewModel: ConsentGateViewModel = hiltViewModel()
     val consent by consentViewModel.uiState.collectAsStateWithLifecycle()
+    val consentDeletion by consentViewModel.deletion.collectAsStateWithLifecycle()
 
     var hasSeenOnboarding by rememberSaveable { mutableStateOf(OnboardingPreferences.hasSeenOnboarding(context)) }
 
@@ -232,10 +233,18 @@ fun RootScreen() {
             if (isConsentGated) {
                 ConsentGateScreen(
                     uiState = consent,
+                    deletion = consentDeletion,
                     onToggle = consentViewModel::onToggle,
                     onContinue = consentViewModel::onContinue,
                     onRetry = consentViewModel::retry,
                     onSignOut = viewModel::onSignOut,
+                    onDeleteAccount = consentViewModel::requestDelete,
+                    onConfirmDelete = consentViewModel::confirmDelete,
+                    onCancelDelete = consentViewModel::cancelDelete,
+                    onDismissDeleteError = consentViewModel::dismissDeleteError,
+                    onReauthPasswordChange = consentViewModel::onReauthPasswordChange,
+                    onSubmitReauth = consentViewModel::submitReauth,
+                    onCancelReauth = consentViewModel::cancelReauth,
                 )
             }
         }
