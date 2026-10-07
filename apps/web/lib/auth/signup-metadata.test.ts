@@ -28,13 +28,13 @@ const TRIGGER_KEYS = [
  */
 const ANDROID_PAYLOAD = {
   terms_accepted_at: "2026-07-11T12:00:00Z",
-  terms_version: "1.1.0",
+  terms_version: "1.2.0",
   privacy_accepted_at: "2026-07-11T12:00:00Z",
-  privacy_version: "1.3.0",
+  privacy_version: "1.4.0",
   health_data_consent_at: "2026-07-11T12:00:00Z",
-  health_data_consent_version: "1.3.0",
+  health_data_consent_version: "1.4.0",
   age_attested_at: "2026-07-11T12:00:00Z",
-  age_attestation_version: "1.3.0",
+  age_attestation_version: "1.4.0",
   signup_surface: "android",
 }
 

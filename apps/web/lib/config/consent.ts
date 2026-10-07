@@ -6,14 +6,14 @@
  * document the person actually read, so an older row citing an older version is
  * correct, not stale.
  */
-export const CONSENT_DOCUMENT_VERSION = "1.3.0"
+export const CONSENT_DOCUMENT_VERSION = "1.4.0"
 
 /**
  * The Terms of Service version a `terms` act is recorded against. Pinned to the
  * `docs/terms/*.md` frontmatter by `consent.test.ts`, as the privacy version is.
  * Android carries the same value as `LegalVersions.TERMS`.
  */
-export const TERMS_DOCUMENT_VERSION = "1.1.0"
+export const TERMS_DOCUMENT_VERSION = "1.2.0"
 
 /** The consent kinds `user_consents.kind` accepts. */
 export const CONSENT_KINDS = [

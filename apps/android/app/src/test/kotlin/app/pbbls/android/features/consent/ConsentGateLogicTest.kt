@@ -64,7 +64,7 @@ class ConsentGateLogicTest {
 
     @Test
     fun `the fingerprint changes when any version changes`() {
-        assertEquals("terms@1.1.0,privacy@1.3.0,health_data@1.3.0,age_assurance@1.3.0", ConsentGateLogic.fingerprint())
+        assertEquals("terms@1.2.0,privacy@1.4.0,health_data@1.4.0,age_assurance@1.4.0", ConsentGateLogic.fingerprint())
     }
 
     @Test

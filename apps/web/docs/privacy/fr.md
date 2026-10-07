@@ -2,9 +2,9 @@
 title: Politique de confidentialité
 locale: fr
 slug: privacy
-version: 1.3.0
-effective_date: 2026-09-12
-last_updated: 2026-09-13
+version: 1.4.0
+effective_date: 2026-10-07
+last_updated: 2026-10-07
 ---
 
 # Politique de Confidentialité de Pebbles
@@ -22,8 +22,8 @@ Cette politique de confidentialité est conforme au Règlement Général sur la 
 - **Responsable du traitement :** Alexis Bohn, fondatrice et développeuse de Pebbles
 - **Localisation :** France
 - **Email :** hello@bohns.design
-- **Adresse postale :** [adresse]
-- **Téléphone :** [téléphone]
+- **Adresse postale :** 104 rue de la Convention, 75015 Paris, France
+- **Téléphone :** +33 6 29 52 45 60
 
 Alexis Bohn agit en tant que responsable du traitement au sens de l'article 4(7) du RGPD et est responsable du respect de cette politique.
 
@@ -36,9 +36,7 @@ Lors de votre inscription et utilisation de Pebbles, vous nous fournissez volont
 - **Données de compte :** Votre nom complet, votre adresse email et votre avatar (photo de profil).
 - **Événements :** Vos réponses en texte libre à des questions structurées (situation, émotions, pensées, réactions, apprentissages, retours) inspirées de la thérapie cognitive-comportementale (TCC).
 - **Humeurs (moods) :** Le type d'humeur enregistrée (humeur quotidienne ou émotion momentanée), votre évaluation sur une échelle de 7 points, jusqu'à 38 étiquettes d'émotions, jusqu'à 18 associations aux domaines de vie, et les scores d'intensité et d'impact.
-- **Décisions :** Vos évaluations de l'impact émotionnel et des associations (notées de -3 à +3).
 - **Souls :** Les prénoms ou noms des personnes auxquelles vous associez vos événements (données de tiers entrées par vos soins).
-- **Relation thérapeute :** Si applicable, vos permissions d'accès accordées à votre thérapeute.
 
 ### 2.2 Données Générées par Votre Utilisation
 
@@ -46,7 +44,7 @@ Lors de l'utilisation de Pebbles, nous générons automatiquement :
 
 - **Bounce karma :** Un indicateur de régularité de votre engagement avec l'application.
 - **Achievements et progression :** Les badges et étapes que vous déverrouillez.
-- **Cairns :** Des agrégations hebdomadaires et mensuelles de vos données.
+- **Cairns :** Une synthèse hebdomadaire de vos galets, calculée par l'application sur votre appareil à chaque affichage. Elle n'est jamais stockée.
 
 ### 2.3 Données Techniques
 
@@ -58,7 +56,6 @@ Pour fonctionner et assurer votre sécurité, nous traitons :
 
 ### 2.4 Traitement par Tiers
 
-- **Google Gemma :** Nous utilisons Google Gemma (un modèle de langage) pour enrichir certaines fonctionnalités. Seules les données d'événements anonymisées sont envoyées à Google. Aucun identifiant personnel (nom, email, noms de "souls") n'est transmis.
 - **Polices de caractères :** Nous utilisons des polices auto-hébergées (Ysabeau OFL et system-ui). Aucune requête externe n'est faite à des CDN de polices.
 
 ### 2.5 Données Personnelles de Tiers
@@ -82,7 +79,6 @@ Les données suivantes constituent des données à caractère personnel sensible
 - Humeurs et étiquettes d'émotions (qualifiées de données de santé)
 - Réflexions TCC et analyse personnelle
 - Partage social (si activé)
-- Accès thérapeute (si applicable)
 
 Vous accordez le consentement portant sur vos humeurs, vos émotions et vos réflexions lors de la création de votre compte. Si votre compte a été créé avant la mise en place de cette étape, vous pouvez l'accorder à tout moment depuis les Réglages. La publication de votre profil public est une autorisation distincte, que vous accordez dans les Réglages au moment de l'activer.
 
@@ -108,8 +104,8 @@ Les humeurs, émotions et réflexions TCC que vous enregistrez dans Pebbles peuv
 
 Ces données ne sont traitées que :
 - Sur la base de votre consentement explicite, obtenu lors de la création de votre compte ;
-- Avec votre contrôle total sur qui y accède (vous seul, sauf si vous accordez l'accès à un thérapeute) ;
-- Uniquement à des fins d'amélioration personnelle, de collecte de souvenirs et, si applicable, de soutien thérapeutique.
+- Avec votre contrôle total sur qui y accède ;
+- Uniquement à des fins d'amélioration personnelle et de collecte de souvenirs.
 
 ### 4.3 Droit de Retrait
 
@@ -119,134 +115,100 @@ Pebbles ne peut pas fonctionner sans l'autorisation d'enregistrer ce que vous re
 
 L'autorisation de publier votre profil public est distincte. Vous pouvez la désactiver à tout moment depuis les Réglages sans fermer votre compte, et votre profil redevient immédiatement privé.
 
-### 4.4 HealthKit (si applicable)
-
-Si vous autorisez Pebbles à accéder aux données de santé via HealthKit (Apple) :
-- Ces données ne seront jamais utilisées à des fins publicitaires.
-- Elles ne seront jamais partagées avec des tiers sans votre consentement.
-- Vous pouvez révoquer l'accès à tout moment dans les paramètres d'Apple.
-
-## 5. Accès Thérapeute et Données Partagées
-
-### 5.1 Contrôle d'Accès
-
-Si vous travaillez avec un thérapeute, vous pouvez partager votre compte Pebbles via des permissions granulaires :
-- `can_view_general` : Accès aux statistiques générales et tendances.
-- `can_view_events` : Accès à vos événements, humeurs et réflexions détaillées.
-
-### 5.2 Vous Restez Responsable
-
-- Vous accordez, modifiez et révoquez ces permissions à tout moment via votre profil.
-- Votre thérapeute est un responsable du traitement indépendant pour ses pratiques thérapeutiques. Pebbles n'est pas responsable de la façon dont votre thérapeute utilise vos données.
-- Le partage est entièrement optionnel.
-
-### 5.3 Droit de Retrait
-
-Vous pouvez révoquer l'accès thérapeute à tout moment sans affecter votre compte Pebbles.
-
-## 6. Sous-Traitants et Partenaires
+## 5. Sous-Traitants et Partenaires
 
 Conformément à l'article 28 du RGPD, nous travaillons avec les sous-traitants suivants :
 
-### 6.1 Supabase Inc.
+### 5.1 Supabase Inc.
 
 - **Fonction :** Hébergement, authentification, base de données.
 - **Localisation :** Serveurs en Paris, France (Union Européenne).
 - **Traitement :** Stockage chiffré de toutes vos données, authentification sécurisée, journaux d'audit.
 - **Contrat :** Supabase est lié par un contrat de traitement des données conforme au RGPD.
 
-### 6.2 Vercel Inc.
+### 5.2 Vercel Inc.
 
 - **Fonction :** Hébergement et distribution de l'application web et du back-office.
 - **Localisation :** Les fonctions serveur sont fixées sur la région de Paris, France (`cdg1`). Les requêtes sont acheminées et déchiffrées (terminaison TLS) par le réseau edge mondial de Vercel, exploité depuis les États-Unis.
 - **Traitement :** Rendu des pages et traitement des requêtes côté serveur. Transitent à ce titre votre adresse IP, l'adresse de la page demandée, votre cookie de session et les données affichées sur la page.
 - **Encadrement du transfert :** Vercel Inc. est certifiée au titre du Data Privacy Framework UE-États-Unis.
 
-### 6.3 Google (Gemma LLM) — non activé à ce jour
+## 6. Transferts Internationaux de Données
 
-- **Fonction :** Traitement de langage anonymisé pour enrichir vos événements (si vous activez les fonctionnalités IA). **Cette intégration n'est pas active aujourd'hui ; l'entrée est conservée car la fonctionnalité est prévue.**
-- **Localisation :** Google Cloud (États-Unis, au titre du Data Privacy Framework UE-États-Unis).
-- **Données transmises :** Seules les données d'événements anonymisées (sans identifiants personnels comme votre nom, email ou noms de souls).
-- **Engagement :** Google ne conserve pas vos données à long terme.
-
-## 7. Transferts Internationaux de Données
-
-### 7.1 Stockage et traitement dans l'Union Européenne
+### 6.1 Stockage et traitement dans l'Union Européenne
 
 Vos données sont stockées par Supabase sur des serveurs situés à Paris (France, UE), et le code serveur qui les lit s'exécute dans la région parisienne de Vercel (`cdg1`). Le stockage et le traitement principaux restent donc dans l'Union Européenne.
 
-### 7.2 Transferts vers les États-Unis
+### 6.2 Transferts vers les États-Unis
 
-Deux traitements peuvent impliquer les États-Unis.
+Un traitement implique les États-Unis.
 
 **Distribution de l'application.** Chaque requête vers Pebbles est acheminée par le réseau edge mondial de Vercel, qui en assure la terminaison TLS, avant d'atteindre la région parisienne. Votre adresse IP, l'adresse de la page demandée et votre cookie de session transitent donc par une infrastructure exploitée depuis les États-Unis. Nous nous appuyons sur la certification de Vercel Inc. au titre du Data Privacy Framework UE-États-Unis.
 
-**Fonctionnalités IA, si vous les activez.** Vos données anonymisées peuvent être transférées vers les serveurs de Google aux États-Unis. Nous nous appuyons sur le Data Privacy Framework UE-États-Unis et sur l'anonymisation des données pour réduire les risques. Cette fonctionnalité n'est pas active à ce jour.
+### 6.3 Polices de Caractères et Ressources Statiques
 
-### 7.3 Polices de Caractères et Ressources Statiques
+Nos polices de caractères sont auto-hébergées : aucune requête n'est adressée à Google Fonts ou à un service de polices tiers équivalent. Elles sont servies, comme le reste de l'application, via le réseau edge de Vercel décrit au 6.2.
 
-Nos polices de caractères sont auto-hébergées : aucune requête n'est adressée à Google Fonts ou à un service de polices tiers équivalent. Elles sont servies, comme le reste de l'application, via le réseau edge de Vercel décrit au 7.2.
+## 7. Durée de Conservation des Données
 
-## 8. Durée de Conservation des Données
+### 7.1 Données de Compte
 
-### 8.1 Données de Compte
+- Conservées jusqu'à la suppression de votre compte.
+- Effacées immédiatement et définitivement lors de cette suppression. Il n'existe aucun délai de grâce : un compte supprimé ne peut pas être restauré.
 
-- Tant que votre compte reste actif.
-- 30 jours après suppression de votre compte, avant effacement définitif.
+### 7.2 Événements, Humeurs et Réponses
 
-### 8.2 Événements, Humeurs et Réponses
+- Conservées jusqu'à ce que vous supprimiez le galet concerné ou votre compte, selon ce qui intervient en premier. Rien ne les supprime automatiquement avec le temps.
+- Effacées immédiatement lorsque vous les supprimez.
 
-- Conservées tant que votre compte reste actif.
-- Supprimées lors de la suppression de votre compte.
-
-### 8.3 Journaux d'Authentification
+### 7.3 Journaux d'Authentification
 
 - Conservés pendant 12 mois pour les raisons de sécurité et de conformité.
 - Supprimés après 12 mois.
 
-### 8.4 Agrégats Anonymisés (Cairns)
+### 7.4 Cairns
 
-- Conservés indéfiniment pour l'amélioration du produit.
-- Impossible de vous identifier à partir de ces données.
+- Calculés sur votre appareil, à partir de vos galets, à chaque affichage.
+- Jamais stockés : il n'y a donc rien à conserver ni à supprimer.
 
-### 8.5 Sauvegardes
+### 7.5 Sauvegardes
 
 - Les données supprimées peuvent persister dans nos sauvegardes pour 90 jours.
 - Après 90 jours, aucune trace ne subsiste.
 
-## 9. Vos Droits et Comment les Exercer
+## 8. Vos Droits et Comment les Exercer
 
 Conformément aux articles 15 à 22 du RGPD, vous disposez des droits suivants :
 
-### 9.1 Droit d'Accès (Art. 15)
+### 8.1 Droit d'Accès (Art. 15)
 
 Vous pouvez demander une copie de toutes les données personnelles que nous détenons à votre sujet.
 
-### 9.2 Droit de Rectification (Art. 16)
+### 8.2 Droit de Rectification (Art. 16)
 
 Vous pouvez demander la correction de données inexactes ou incomplètes.
 
-### 9.3 Droit à l'Effacement (Art. 17)
+### 8.3 Droit à l'Effacement (Art. 17)
 
-Vous pouvez demander la suppression de vos données personnelles. Nous procéderons à l'effacement complet dans les 30 jours.
+Vous pouvez demander la suppression de vos données personnelles. La suppression de votre compte depuis les Réglages efface vos données immédiatement et définitivement, sans délai de grâce : un compte supprimé ne peut pas être récupéré. Les copies présentes dans nos sauvegardes expirent comme indiqué à la section 7.5.
 
-### 9.4 Droit à la Limitation du Traitement (Art. 18)
+### 8.4 Droit à la Limitation du Traitement (Art. 18)
 
 Vous pouvez demander que nous limitions le traitement de vos données dans certaines circonstances.
 
-### 9.5 Droit à la Portabilité des Données (Art. 20)
+### 8.5 Droit à la Portabilité des Données (Art. 20)
 
 Vous pouvez demander une copie de vos données dans un format structuré et interopérable.
 
-### 9.6 Droit d'Opposition (Art. 21)
+### 8.6 Droit d'Opposition (Art. 21)
 
 Vous pouvez vous opposer au traitement de vos données sur la base de l'intérêt légitime.
 
-### 9.7 Droit de Retrait du Consentement (Art. 7(3))
+### 8.7 Droit de Retrait du Consentement (Art. 7(3))
 
 Vous pouvez retirer votre consentement à tout moment. Le traitement de vos humeurs, de vos émotions et de vos réflexions constituant le service lui-même, le retrait de ce consentement ferme votre compte et efface vos données. La section 4.3 détaille précisément ce qui se passe, et traite de l'autorisation distincte relative à votre profil public, que vous pouvez retirer séparément.
 
-### 9.8 Comment Exercer Vos Droits
+### 8.8 Comment Exercer Vos Droits
 
 Pour exercer l'un de ces droits, envoyez une demande à :
 
@@ -254,7 +216,7 @@ Pour exercer l'un de ces droits, envoyez une demande à :
 
 Nous traiterons votre demande dans les 30 jours. Si votre demande est complexe, nous pouvons demander une prolongation de 2 mois supplémentaires.
 
-### 9.9 Plainte auprès de l'Autorité de Contrôle
+### 8.9 Plainte auprès de l'Autorité de Contrôle
 
 Si vous estimez que nous violons vos droits, vous pouvez déposer une plainte auprès de la CNIL :
 
@@ -262,74 +224,51 @@ Si vous estimez que nous violons vos droits, vous pouvez déposer une plainte au
 - **Adresse :** 3 Place de Fontenoy, 75007 Paris, France
 - **Site web :** https://www.cnil.fr
 
-## 10. Utilisateurs Mineurs
+## 9. Utilisateurs Mineurs
 
-### 10.1 Âge Minimum
+### 9.1 Âge Minimum
 
 Pebbles s'adresse aux personnes âgées de 16 ans ou plus. Nous ne collectons pas sciemment de données concernant une personne de moins de 16 ans. Seize ans est l'âge du consentement pour les services de la société de l'information au sens de l'article 8 du RGPD, et nous l'appliquons uniformément plutôt que de le faire varier selon les pays.
 
-### 10.2 Comment Nous l'Appliquons
+### 9.2 Comment Nous l'Appliquons
 
 Nous ne demandons pas votre date de naissance et nous n'en conservons aucune. Lorsque nous vous demandons de confirmer votre âge, nous conservons une trace de cette confirmation et rien de plus.
 
-### 10.3 Si Nous Apprenons le Contraire
+### 9.3 Si Nous Apprenons le Contraire
 
 Si nous apprenons qu'un compte appartient à une personne de moins de 16 ans, nous le fermons et effaçons les données. Un parent ou représentant légal qui pense que son enfant détient un compte peut nous l'indiquer à hello@bohns.design et nous ferons de même.
 
-## 11. Sécurité des Données
+## 10. Sécurité des Données
 
-### 11.1 Mesures Techniques
+### 10.1 Mesures Techniques
 
 - **Row-Level Security (RLS) :** Chaque utilisateur ne peut accéder qu'à ses propres données via des politiques de sécurité Supabase.
 - **Authentification :** Authentification sécurisée via Supabase Auth avec email et mot de passe.
 - **Chiffrement en Transit :** Toutes les connexions utilisent HTTPS.
 - **Chiffrement au Repos :** Les données sont chiffrées au repos via l'infrastructure Supabase.
 
-### 11.2 Mesures Organisationnelles
+### 10.2 Mesures Organisationnelles
 
 - Pebbles est gérée par une seule développeuse, Alexis Bohn, qui suit les meilleures pratiques de sécurité.
 - Accès limité aux données : seul le responsable du traitement a accès aux systèmes.
 - Aucun audit ou enregistrement permanent des données utilisateurs n'est stocké sans besoin.
 
-### 11.3 Responsabilité Utilisateur
+### 10.3 Responsabilité Utilisateur
 
 Vous êtes responsable de la confidentialité de votre mot de passe. Ne partagez jamais vos identifiants de connexion. Si vous pensez que votre compte est compromis, contactez immédiatement hello@bohns.design.
 
-## 12. Fonctionnalités IA et Données Anonymisées
+## 11. Cookies et Suivi
 
-### 12.1 Utilisation de Google Gemma
-
-Si vous activez les fonctionnalités d'IA, Pebbles traite vos événements avec Google Gemma pour générer des suggestions ou analyses.
-
-### 12.2 Anonymisation
-
-Avant transmission à Google Gemma, les données suivantes sont supprimées ou anonymisées :
-- Votre nom, email et identifiants de compte.
-- Les noms des "souls" (personnes associées).
-- Tout métadonnée qui pourrait vous identifier.
-
-Seul le texte de l'événement et les émotions associées sont traités.
-
-### 12.3 Votre Responsabilité
-
-Si vous incluez des informations personnelles directement dans le texte de vos événements (noms de personnes, lieux précis, identifiants), vous acceptez que ces informations peuvent être transmises à Google Gemma. Nous vous recommandons d'utiliser vos "souls" pour les prénoms plutôt que de les écrire en clair.
-
-### 12.4 Désactivation
-
-Les fonctionnalités IA sont entièrement optionnelles. Vous pouvez les désactiver à tout moment via vos paramètres.
-
-## 13. Cookies et Suivi
-
-### 13.1 Cookies Strictement Nécessaires
+### 11.1 Cookies Strictement Nécessaires
 
 Pebbles utilise uniquement des cookies strictement nécessaires au fonctionnement de l'application :
 - **Tokens de session Supabase :** Pour maintenir votre connexion.
 
-### 13.2 Exemption du Consentement
+### 11.2 Exemption du Consentement
 
 En vertu de la directive ePrivacy (Art. 5(3)) et des lignes directrices CNIL, les cookies strictement nécessaires ne nécessitent pas de consentement préalable et ne nécessitent pas de banneau de cookies.
 
-### 13.3 Pas d'Analytics, Pas de Publicité
+### 11.3 Pas d'Analytics, Pas de Publicité
 
 Pebbles n'utilise :
 - Aucun outil d'analytics (pas de Google Analytics, Matomo, ou similaire).
@@ -337,49 +276,49 @@ Pebbles n'utilise :
 - Aucun cookie de publicité ou de ciblage.
 - Aucun cookie tiers.
 
-## 14. Communications et Notifications
+## 12. Communications et Notifications
 
-### 14.1 Emails Transactionnels
+### 12.1 Emails Transactionnels
 
 Nous vous envoyons uniquement des emails nécessaires à l'utilisation de Pebbles :
 - Confirmation d'inscription.
 - Réinitialisation de mot de passe.
 - Notifications critiques de compte.
 
-### 14.2 Emails Marketing
+### 12.2 Emails Marketing
 
 Nous ne vous envoyons pas d'emails marketing ou de newsletters sans votre consentement explicite. Si vous en recevez, vous pouvez vous désabonner à tout moment.
 
-### 14.3 Notifications Push (si applicable)
+### 12.3 Notifications Push (si applicable)
 
 Les notifications push sur mobile sont envoyées pour maintenir votre engagement quotidien, uniquement si vous les avez activées. Vous pouvez les désactiver dans vos paramètres ou dans les paramètres de votre appareil.
 
-## 15. Modifications de Cette Politique
+## 13. Modifications de Cette Politique
 
 Nous pouvons mettre à jour cette politique de confidentialité de temps en temps pour refléter les changements dans nos pratiques, la technologie, la législation ou d'autres facteurs. Nous vous notifierons de tout changement matériel en vous envoyant un email ou en affichant une notification sur Pebbles.
 
 Votre utilisation continue de Pebbles après une telle notification constitue votre acceptation des modifications.
 
-## 16. Documents Connexes
+## 14. Documents Connexes
 
 Veuillez consulter également :
 - [Mentions Légales](./mentions-legales.md) : informations légales sur l'éditeur et l'hébergement.
 - [Conditions Générales d'Utilisation](./conditions-generales-utilisation.md) : conditions d'utilisation de Pebbles.
 
-## 17. Contact et Support
+## 15. Contact et Support
 
 Pour toute question, demande ou préoccupation concernant cette politique de confidentialité ou vos données personnelles :
 
 - **Alexis Bohn**
 - **Email :** hello@bohns.design
-- **Adresse postale :** [adresse]
-- **Téléphone :** [téléphone]
+- **Adresse postale :** 104 rue de la Convention, 75015 Paris, France
+- **Téléphone :** +33 6 29 52 45 60
 
 ---
 
-- **Version :** 1.0.0
-- **Date d'entrée en vigueur :** 9 avril 2026
-- **Dernière mise à jour :** 9 avril 2026
+- **Version :** 1.4.0
+- **Date d'entrée en vigueur :** 7 octobre 2026
+- **Dernière mise à jour :** 7 octobre 2026
 
 ---
 
