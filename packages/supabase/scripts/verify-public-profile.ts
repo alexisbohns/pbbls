@@ -15,6 +15,9 @@
  *   2. The projection returns NOTHING else. The privacy contract is a key
  *      allowlist, so the assertion is on the exact key set, at both levels —
  *      a widening shows up as a new key long before it shows up as a bug.
+ *   3. A block severs it (#834): once one user blocks the other, each one's
+ *      profile resolves null to the other while signed in, in both
+ *      directions, and stays visible to an anonymous visitor.
  *
  * Run:
  *   SUPABASE_URL=... SUPABASE_ANON_KEY=... \
@@ -344,7 +347,52 @@ try {
   check("glyphs RLS is not widened either", (anonGlyphs ?? []).length === 0);
 
   // ---------------------------------------------------------------------------
-  // 7. Opting back out hides everything again, badges included.
+  // 7. A block severs the signed-in read, both directions (#834). Bob opts in
+  //    too so the reverse direction has a profile to lose. They connect
+  //    through the real invite path, then Alice removes Bob WITH a block.
+  //    The anonymous visitor is the control: anon is deliberately unchanged.
+  // ---------------------------------------------------------------------------
+  const b = bob.client;
+  const bobHandle = `pbw${runId}`;
+  const fetchAs = async (client: SupabaseClient, h: string) => {
+    const { data, error } = await client.rpc("get_public_profile", { p_handle: h });
+    if (error) throw new Error(`get_public_profile(${h}): ${error.message}`);
+    return data as Projection | null;
+  };
+
+  const { error: bobHandleErr } = await b.rpc("set_handle", { p_handle: bobHandle });
+  if (bobHandleErr) throw new Error(`set_handle (bob): ${bobHandleErr.message}`);
+  const { error: bobPubErr } = await b
+    .from("profiles").update({ public_profile: true }).eq("user_id", bob.id);
+  if (bobPubErr) throw new Error(`bob opt-in: ${bobPubErr.message}`);
+
+  check("before the block, a signed-in user reads the other's profile",
+    (await fetchAs(b, handle)) !== null && (await fetchAs(a, bobHandle)) !== null);
+
+  const { data: invite, error: inviteErr } = await a.rpc("create_connection_invite");
+  const inviteToken = (invite as { token?: string } | null)?.token;
+  if (inviteErr || !inviteToken) throw new Error(`create_connection_invite: ${inviteErr?.message}`);
+  const { data: accepted, error: acceptErr } = await b.rpc("accept_connection_invite", {
+    p_token: inviteToken,
+  });
+  const connectionId = (accepted as { connection_id?: string } | null)?.connection_id;
+  if (acceptErr || !connectionId) throw new Error(`accept_connection_invite: ${acceptErr?.message}`);
+  const { error: blockErr } = await a.rpc("remove_connection", {
+    p_connection_id: connectionId,
+    p_block: true,
+  });
+  if (blockErr) throw new Error(`remove_connection(p_block): ${blockErr.message}`);
+
+  check("the blocked user gets null for the blocker's profile",
+    (await fetchAs(b, handle)) === null);
+  check("the blocker gets null for the blocked user's profile (both directions)",
+    (await fetchAs(a, bobHandle)) === null);
+  check("an anonymous visitor still sees the blocker's profile (anon is unchanged)",
+    (await fetchPublic(handle)) !== null);
+  check("…and the blocked user's", (await fetchPublic(bobHandle)) !== null);
+
+  // ---------------------------------------------------------------------------
+  // 8. Opting back out hides everything again, badges included.
   // ---------------------------------------------------------------------------
   await a.from("profiles").update({ public_profile: false }).eq("user_id", alice.id);
   check("opting out returns the profile to null", (await fetchPublic(handle)) === null);

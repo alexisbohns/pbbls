@@ -7,6 +7,7 @@ import { AuthGate } from "@/components/auth/AuthGate"
 import { StoreGate } from "@/components/layout/StoreGate"
 import { OnboardingGate } from "@/components/onboarding/OnboardingGate"
 import { PendingInviteRedirect } from "@/components/connections/PendingInviteRedirect"
+import { ReconsentGate } from "@/components/consent/ReconsentGate"
 
 interface MainContentProps {
   children: React.ReactNode
@@ -53,7 +54,11 @@ export function MainContent({ children }: MainContentProps) {
       {!isLanding && !isAuth && !isDocs && !isPublicProfile && <OnboardingGate />}
       {!isLanding && !isAuth && !isDocs && !isPublicProfile && <PendingInviteRedirect />}
       <AuthGate>
-        <StoreGate>{children}</StoreGate>
+        {/* Above the store shell and every route: while it blocks, nothing
+            below is mounted, so no navigation reaches around it. */}
+        <ReconsentGate>
+          <StoreGate>{children}</StoreGate>
+        </ReconsentGate>
       </AuthGate>
     </main>
   )

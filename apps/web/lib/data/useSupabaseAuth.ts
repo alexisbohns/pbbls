@@ -5,7 +5,7 @@ import { FunctionsHttpError } from "@supabase/supabase-js"
 import { createClient } from "@/lib/supabase/client"
 import { withTimeout } from "@/lib/utils/with-timeout"
 import { isSafeRelativePath } from "@/lib/utils/safe-relative-path"
-import { CONSENT_DOCUMENT_VERSION } from "@/lib/config/consent"
+import { signupConsentMetadata } from "@/lib/auth/signup-metadata"
 import { isRecentSignIn, REAUTH_REQUIRED } from "@/lib/auth/recent-auth"
 
 import type {
@@ -159,22 +159,11 @@ export function useSupabaseAuth(): AuthContextValue {
       email: input.email,
       password: input.password,
       options: {
-        data: {
-          terms_accepted_at: input.terms_accepted ? new Date().toISOString() : null,
-          privacy_accepted_at: input.privacy_accepted ? new Date().toISOString() : null,
-          // handle_new_user turns these two into the user_consents row. Sent as
-          // metadata rather than a post-signup RPC because there is no session
-          // yet when email confirmations are on, so a client call would be lost.
-          health_data_consent_at: input.health_data_consent ? new Date().toISOString() : null,
-          health_data_consent_version: input.health_data_consent ? CONSENT_DOCUMENT_VERSION : null,
-          age_attested_at: input.age_attested ? new Date().toISOString() : null,
-          age_attestation_version: input.age_attested ? CONSENT_DOCUMENT_VERSION : null,
-          // Provenance for the trigger's `source` mapping. Sent explicitly so
-          // 'web_register' is a stated fact rather than the fallback branch:
-          // handle_new_user maps this through a closed `case` whose default is
-          // web, so a client that omits it is silently stamped as web.
-          signup_surface: "web",
-        },
+        // handle_new_user turns each timestamp + version pair into a
+        // user_consents row (terms, privacy, health_data, age_assurance). The
+        // shape is pinned in signup-metadata.test.ts against the trigger and
+        // Android's payload.
+        data: signupConsentMetadata(input, new Date()),
       },
     })
     if (error) throw new Error(error.message)

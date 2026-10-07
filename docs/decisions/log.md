@@ -907,6 +907,60 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Supersedes / Superseded-by:** Supersedes the "enforcement ships off" part of **2026-09-27 — High-harm account actions need a recent sign-in** (#976).
 - **Refs:** #977, #976, `packages/supabase/supabase/migrations/20261006120000_recent_auth_enforced.sql`, `apps/web/lib/auth/recent-auth.ts`, `apps/web/lib/auth/pending-reauth.ts`, `apps/ios/Pebbles/Services/RecentAuth.swift`.
 
+## 2026-10-07 — Web records versioned terms and privacy, and gates on the same complete, current consent record as Android (#788, #971)
+
+- **Status:** taken
+- **Scope:** web
+- **Context:** Web sent no `terms_version` / `privacy_version`, so no web account had terms or privacy ledger rows. Accounts created before the Art. 9 and 16+ stacks had no `health_data` or `age_assurance` row, and nothing asked anyone to re-accept after a policy version bump.
+- **Decision:** Email signup sends the full key set Android sends, stamped at whole seconds. The `/register` OAuth callback records all four acts. A post-auth gate mirrors Android's: it asks only for missing or older-version kinds, a same-or-newer version satisfies, it fails closed with Retry and Log out, and it caches a pass per `userId|fingerprint`. Web-specific choices:
+  - The gate **replaces** the route's content inside `MainContent` rather than overlaying it, so nothing behind it is mounted. Only `/docs/*` is exempt, so the legal links stay readable.
+  - It skips an account only when the profile **proves** it is mid-onboarding (`onboarding_completed = false`). A null profile (no row, or an unreadable one, #784) gets the gate.
+  - It records every act as `web_settings`, as #788 specifies, including for OAuth accounts. Android uses `android_oauth` for Google accounts.
+  - Once a session passes, it stays open across profile re-fetches (token refresh), so the gate never unmounts the app mid-use.
+- **Why:** Replacing content is the web equivalent of Android's overlay above `NavDisplay`, and it is simpler for assistive technology: there is nothing behind it to hide. A null profile cannot tell a new account from a failed read, and asking a new account for four acts up front costs less than letting an established account through with nothing on record.
+- **Consequences:** Bump `TERMS_DOCUMENT_VERSION` with the Terms frontmatter (`consent.test.ts` enforces it), as for `CONSENT_DOCUMENT_VERSION`. Any bump re-prompts every web user for the bumped kinds only. Accounts created through the `/login` OAuth buttons get Art. 9 from onboarding's `ConsentGate` and the other three from this gate once onboarding completes.
+- **Supersedes / Superseded-by:** None. Extends **2026-09-27 — Terms and privacy are ledger kinds, and Android gates on a complete, current consent record (#966, #967)** to web.
+- **Refs:** #788, #971, #967, #784, `apps/web/lib/auth/consent-gate.ts`, `apps/web/lib/auth/signup-metadata.ts`, `apps/web/components/consent/ReconsentGate.tsx`.
+
+## 2026-10-07 — Storage sweeps go through the Storage API, and server drafts are a live reference (#322)
+
+- **Status:** taken
+- **Scope:** db, infra
+- **Context:** `sweep_orphan_snap_files()` deleted orphaned `pebbles-media` objects with a SQL `delete from storage.objects`. Supabase refuses that statement, so the production pg_cron job that ran it failed on all 149 nights from 2026-05-11 to 2026-10-06 (unscheduled by hand on 2026-10-06). It also keyed only on `public.snaps`, but server drafts keep their uploaded snaps in `pebble_drafts.payload->'snaps'` with no `snaps` row until publish, so a working sweep would have deleted every open draft's photos.
+- **Decision:**
+  - **SQL lists, the Storage API deletes.** `public.list_orphan_snap_files(p_min_age_seconds = 86400, p_owner = null)` (`20261007131500`) is read-only, `security definer`, service-role only. The `sweep-orphan-snaps` edge function calls it and removes through `storage.from('pebbles-media').remove()` in batches of 100. Never delete from `storage.*` tables in SQL; the old function is dropped.
+  - **An object is referenced** when its snap id has a `snaps` row, a `snaps.storage_path` covers it, or any `pebble_drafts.payload->'snaps'` element names its id (case-insensitive) or its `storage_path`. Anything younger than 24 hours is never a candidate. A shorter grace period is accepted only when the sweep is scoped to one account (`owner`), which is what the harness uses.
+  - **The schedule lives in the repo** as `.github/workflows/orphan-snap-sweep.yml` (nightly, 03:23 UTC), not as pg_cron. A fresh project reproduces it, and the `schema` CI job does not have to create `pg_cron` / `pg_net`.
+  - **Dry run is the default everywhere.** The function deletes only on an explicit `dry_run: false`, and the nightly sends that only once the repo variable `ORPHAN_SWEEP_LIVE` is `true`.
+  - **The scheduled caller uses a dedicated `ORPHAN_SWEEP_TOKEN`, not the service role key.** The function accepts either. `verify_jwt` is off for it because the token is not a JWT.
+- **Why:** The storage schema blocks SQL deletes because they would orphan the bytes. A GitHub Actions schedule is visible next to the nightly harnesses and needs no extension in the replayed chain. A dedicated token keeps the service role out of CI (packages/supabase/CLAUDE.md) and can reach no more than the sweep itself.
+- **Consequences:**
+  - Anything that later stores a reference to a `pebbles-media` path outside `snaps` (a new draft shape, a new table) must be added to `list_orphan_snap_files`, or the sweep will delete those files after 24 hours.
+  - `verify-orphan-snap-sweep.ts` needs the service role, so like the purge harness it is a manual run (`db:verify:sweep`), not a CI step.
+  - One listing is capped by PostgREST `max_rows` (1000). A live sweep re-lists until empty, up to 20 passes.
+- **Supersedes / Superseded-by:** — (replaces the unrecorded pg_cron design from closed PR #386, recovered in `20260912130000` / `20260912140000`).
+- **Refs:** #322, #386, #797, #799, `packages/supabase/supabase/migrations/20261007131500_list_orphan_snap_files.sql`, `packages/supabase/supabase/functions/sweep-orphan-snaps/`, `.github/workflows/orphan-snap-sweep.yml`, `packages/supabase/scripts/verify-orphan-snap-sweep.ts`.
+
+---
+
+## 2026-10-07 — A block severs signed-in cross-user reads in both directions, and the invite preview goes dark for the blocked side only (#834)
+
+- **Status:** taken
+- **Scope:** supabase
+- **Context:** M49 made a block gate connections and invites only. A blocked user who stayed signed in could still read the blocker's public pebbles and public profile, assiduity grid included. `preview_connection_invite` ignored blocks, so a blocked peer saw the blocker's live card and then got `invite_expired` on accept: comparing the two confirmed the block.
+- **Decision:**
+  - **`private.is_blocked_with(p_other)`**, a `security definer` helper keyed on `auth.uid()`, answers "is there a block either way between me and `p_other`". A helper is required because `connection_blocks` RLS is blocker-only, so an inline subquery in a policy cannot see the direction where the viewer is the blocked one. It lives in a new `private` schema that PostgREST does not expose, with `usage` and `execute` granted to `authenticated` so the policy can evaluate. In `public` it would be a direct yes/no RPC for "has this person blocked me", answerable by anyone holding the blocker's `user_id` (pebble rows read while connected carry it), even when the blocker has no public content.
+  - **`pebbles_select`** applies it to both cross-user arms. **`get_public_profile`** applies it in its `target` CTE. Both directions: the blocker stops reading the blocked user too.
+  - **`preview_connection_invite`** returns `{"status": "expired"}` when the inviter blocked the caller. The reverse direction stays live, because the caller placed that block and already knows about it.
+  - **The anonymous paths are unchanged.** `auth.uid()` is null there, so every predicate is false. `get_shared_pebble` is unchanged.
+- **Why:** The anon comparison means perfect severance is impossible, but the signed-in app paths no longer give the block away. Keying the helper on the caller means it can never answer about a third pair, and keeping it out of the API means the block can only be inferred through the anon comparison, which needs the other party to have public content.
+- **Consequences:**
+  - **Every new cross-user read path applies `private.is_blocked_with` (or the same both-directions predicate)** on its authenticated branch. A new path that skips it reopens the oracle this closes.
+  - **`private` is the home for definer helpers that RLS policies call and clients must not.** It must never be added to the API's exposed schemas. A definer predicate placed in `public` is an RPC.
+  - `report_content`'s pebble gate mirrors `pebbles_select` and is not changed here. Whether it follows is an open decision, raised on the #834 PR.
+  - A hidden inviter (#833) now previews as `valid` with a null `inviter`, decided in the same re-emission.
+- **Supersedes / Superseded-by:** Supersedes the "preview is block-unaware by design (D4)" residual in **M49 mutual connections** and in `accept_connection_invite`'s comment (`20260730070347`).
+- **Refs:** #834, #833, #836, `packages/supabase/supabase/migrations/20261007140000_block_severs_public_reads.sql`, `packages/supabase/scripts/verify-pebble-visibility.ts`, `packages/supabase/scripts/verify-public-profile.ts`.
 ## 2026-10-07 — record_consent serialises grants per (user, kind), and a downgrade is a successful no-op (#1018)
 
 - **Status:** taken

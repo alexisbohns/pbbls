@@ -45,6 +45,7 @@ struct CollectionsListView: View {
                 presenting: pendingDeletion
             ) { collection in
                 Button("Delete", role: .destructive) {
+                    TapHaptics.play(.warning)
                     Task { await delete(collection) }
                 }
                 Button("Cancel", role: .cancel) {
