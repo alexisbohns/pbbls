@@ -87,7 +87,7 @@ hiltNavigationCompose = "1.4.0"
 # one coordinated release and mixing versions across the group is the classic
 # NoSuchMethodError.
 navigation3 = "1.2.0"
-navigationEvent = "1.1.2"
+navigationEvent = "1.2.0"
 
 # Konsist (#851) — the architecture boundary test. A plain JVM unit test that
 # parses the Kotlin sources and asserts the core/features split, so it runs in
