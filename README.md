@@ -123,7 +123,7 @@ The native Android app ships to **Google Play internal testing** from CI: merges
 
 ## License
 
-Private — not open source yet.
+[PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0) — see [`LICENSE`](LICENSE). The code is source-available for noncommercial use only.
 
 ## Engineering Paradigm
 
