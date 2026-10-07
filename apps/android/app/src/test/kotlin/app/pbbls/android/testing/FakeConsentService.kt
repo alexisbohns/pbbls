@@ -3,6 +3,7 @@ package app.pbbls.android.testing
 import app.pbbls.android.core.data.ConsentServicing
 import app.pbbls.android.core.model.ActiveConsent
 import app.pbbls.android.core.model.ConsentKind
+import app.pbbls.android.core.model.HealthDataConsent
 import app.pbbls.android.features.consent.ConsentGateLogic
 
 /**
@@ -28,10 +29,21 @@ class FakeConsentService(
     /** Thrown by every [record] call until cleared. */
     var recordFailure: Exception? = null
 
+    /** What [healthData] returns: the Settings row's grant, independent of [rows]. */
+    var healthData: HealthDataConsent? = null
+
+    /** Thrown by every [healthData] call until cleared. */
+    var healthDataFailure: Exception? = null
+
     override suspend fun active(): List<ActiveConsent> {
         activeCalls += 1
         activeFailure?.let { throw it }
         return rows.toList()
+    }
+
+    override suspend fun healthData(): HealthDataConsent? {
+        healthDataFailure?.let { throw it }
+        return healthData
     }
 
     override suspend fun record(

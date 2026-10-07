@@ -9,6 +9,7 @@ import app.pbbls.android.R
 import app.pbbls.android.core.common.UiEffects
 import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.AppearancePreferences
+import app.pbbls.android.core.data.ConsentServicing
 import app.pbbls.android.core.data.DataError
 import app.pbbls.android.core.data.ProfileRow
 import app.pbbls.android.core.data.ProfileServicing
@@ -19,6 +20,7 @@ import app.pbbls.android.core.data.isReauthRequired
 import app.pbbls.android.core.data.toDataError
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphStroke
+import app.pbbls.android.core.model.HealthDataConsent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
@@ -64,7 +66,32 @@ data class SettingsForm(
  * `showDeleteError`) — eight combinations of which four are real, and
  * "confirming while deleting" was reachable.
  */
-enum class DeletionState { IDLE, CONFIRMING, REAUTHENTICATING, DELETING, FAILED }
+enum class DeletionState {
+    IDLE,
+    CONFIRMING,
+
+    /** Withdrawing the health-data consent (#972): its own dialog, then the same deletion. */
+    CONFIRMING_WITHDRAWAL,
+    REAUTHENTICATING,
+    DELETING,
+    FAILED,
+}
+
+/**
+ * The health-data consent row (#972). Its load failing is not the screen's
+ * failure, so it has a state of its own rather than riding on `loadErrorRes`.
+ */
+sealed interface HealthConsentStatus {
+    data object Loading : HealthConsentStatus
+
+    data class Given(
+        val consent: HealthDataConsent,
+    ) : HealthConsentStatus
+
+    data object NotRecorded : HealthConsentStatus
+
+    data object Unavailable : HealthConsentStatus
+}
 
 /** How the user proves it is them again (#976). */
 enum class ReauthMethod { PASSWORD, GOOGLE }
@@ -95,6 +122,7 @@ data class SettingsUiState(
     val didSaveFail: Boolean = false,
     val isPresentingGlyphPicker: Boolean = false,
     val deletion: DeletionState = DeletionState.IDLE,
+    val healthConsent: HealthConsentStatus = HealthConsentStatus.Loading,
     val signOutEverywhere: SignOutEverywhereState = SignOutEverywhereState.IDLE,
     val reauth: ReauthUi? = null,
     /** True while the ViewModel fetches its own profile — see the class KDoc. */
@@ -203,6 +231,7 @@ class SettingsViewModel
         private val profileService: ProfileServicing,
         private val supabase: SupabaseServicing,
         private val appearance: AppearancePreferences,
+        private val consents: ConsentServicing,
     ) : ViewModel() {
         private val effectsOut = UiEffects<SettingsEffect>(viewModelScope)
         val effects: Flow<SettingsEffect> = effectsOut.flow
@@ -223,6 +252,7 @@ class SettingsViewModel
 
         init {
             load()
+            loadHealthConsent()
         }
 
         /**
@@ -246,6 +276,25 @@ class SettingsViewModel
                             }
                         },
                     )
+            }
+        }
+
+        /**
+         * The live health-data grant, for the Consent row (#972). Separate from
+         * [load]: a failed ledger read leaves the rest of Settings usable, and
+         * account deletion is still reachable from the Account section.
+         */
+        private fun loadHealthConsent() {
+            viewModelScope.launch {
+                val status =
+                    runCatchingCancellable { consents.healthData() }.fold(
+                        onSuccess = { it?.let(HealthConsentStatus::Given) ?: HealthConsentStatus.NotRecorded },
+                        onFailure = {
+                            Log.e(TAG, "health consent load failed", it)
+                            HealthConsentStatus.Unavailable
+                        },
+                    )
+                _uiState.update { it.copy(healthConsent = status) }
             }
         }
 
@@ -481,6 +530,16 @@ class SettingsViewModel
         // MARK: - Deletion
 
         fun requestDelete() = _uiState.update { it.copy(deletion = DeletionState.CONFIRMING) }
+
+        /**
+         * Withdrawing the health-data consent is deleting the account (#972,
+         * mirrors web's `ConsentSection`): the consent is the lawful basis for
+         * the journal itself, so there is no Pebbles that keeps it and stops
+         * processing it. Only the dialog differs; [confirmDelete] runs the same
+         * recent sign-in check and the same erasure. `withdraw_consent` is not
+         * called first, since the purge removes the ledger row with the account.
+         */
+        fun requestWithdrawConsent() = _uiState.update { it.copy(deletion = DeletionState.CONFIRMING_WITHDRAWAL) }
 
         fun cancelDelete() = _uiState.update { it.copy(deletion = DeletionState.IDLE) }
 

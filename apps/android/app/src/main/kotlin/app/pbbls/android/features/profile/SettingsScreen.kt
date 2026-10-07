@@ -25,8 +25,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -62,6 +64,10 @@ import app.pbbls.android.core.ui.GlyphPickerSheet
 import app.pbbls.android.core.ui.GlyphPickerSlot
 import app.pbbls.android.core.ui.GlyphView
 import app.pbbls.android.core.ui.GlyphViewCase
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
+import java.util.Locale
 
 private const val TAG = "settings"
 
@@ -347,6 +353,24 @@ fun SettingsScreen(
                     ),
             )
 
+            // Art. 9 consent and the Art. 7(3) right to take it back (#972).
+            // Health data only: terms, privacy and age assurance cannot be
+            // withdrawn, so they never appear here as controls.
+            PebblesListSection(
+                header = stringResource(R.string.settings_consent_header),
+                rowPadding = PebblesListDefaults.ListItemRowPadding,
+                rows =
+                    listOf(
+                        {
+                            HealthConsentRow(
+                                status = uiState.healthConsent,
+                                canWithdraw = uiState.deletion == DeletionState.IDLE,
+                                onWithdraw = viewModel::requestWithdrawConsent,
+                            )
+                        },
+                    ),
+            )
+
             // Store-mandated account deletion entry (Play hard blocker;
             // parity with iOS Settings → Account).
             PebblesListSection(
@@ -400,6 +424,15 @@ fun SettingsScreen(
             onConfirm = {
                 viewModel.confirmDelete()
             },
+            onDismiss = viewModel::cancelDelete,
+        )
+    }
+    if (uiState.deletion == DeletionState.CONFIRMING_WITHDRAWAL) {
+        ConfirmDeleteDialog(
+            title = stringResource(R.string.settings_consent_withdraw_title),
+            message = stringResource(R.string.settings_consent_withdraw_message),
+            confirmText = stringResource(R.string.settings_consent_withdraw_confirm),
+            onConfirm = viewModel::confirmDelete,
             onDismiss = viewModel::cancelDelete,
         )
     }
@@ -471,6 +504,51 @@ internal fun SettingsNavRow(
             )
         },
         modifier = Modifier.clickable(onClick = onClick),
+        colors = settingsRowColors(),
+    )
+}
+
+/**
+ * The health-data consent row (#972, mirrors web's `ConsentSection`): what was
+ * given, when, and against which policy version, with Withdraw as the one
+ * action. Withdraw opens the deletion dialog, never a toggle: the consent is
+ * the lawful basis for the journal, so taking it back closes the account.
+ */
+@Composable
+internal fun HealthConsentRow(
+    status: HealthConsentStatus,
+    canWithdraw: Boolean,
+    onWithdraw: () -> Unit,
+) {
+    val locale = Locale.getDefault()
+    val supporting =
+        when (status) {
+            HealthConsentStatus.Loading -> null
+            is HealthConsentStatus.Given -> {
+                val date =
+                    remember(status.consent.grantedAt, locale) {
+                        status.consent.grantedAt
+                            .atZoneSameInstant(ZoneId.systemDefault())
+                            .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM).withLocale(locale))
+                    }
+                stringResource(R.string.settings_consent_given_on, date, status.consent.documentVersion)
+            }
+            HealthConsentStatus.NotRecorded -> stringResource(R.string.settings_consent_not_recorded)
+            HealthConsentStatus.Unavailable -> stringResource(R.string.settings_consent_unavailable)
+        }
+    ListItem(
+        headlineContent = { Text(stringResource(R.string.settings_consent_health_data)) },
+        supportingContent = supporting?.let { { Text(it) } },
+        trailingContent =
+            if (status is HealthConsentStatus.Given) {
+                {
+                    TextButton(onClick = onWithdraw, enabled = canWithdraw) {
+                        Text(stringResource(R.string.settings_consent_withdraw))
+                    }
+                }
+            } else {
+                null
+            },
         colors = settingsRowColors(),
     )
 }

@@ -131,6 +131,15 @@
     <string name="settings_legal_header">Legal</string>
     <string name="settings_save_error">Couldn\'t save your changes. Please try again.</string>
     <string name="settings_load_error">Couldn\'t load your settings. Please try again.</string>
+    <string name="settings_consent_header">Consent</string>
+    <string name="settings_consent_health_data">Recording how you feel</string>
+    <string name="settings_consent_given_on">Given on %1$s (policy version %2$s)</string>
+    <string name="settings_consent_not_recorded">No record on file</string>
+    <string name="settings_consent_unavailable">We couldn\'t load your consent record.</string>
+    <string name="settings_consent_withdraw">Withdraw</string>
+    <string name="settings_consent_withdraw_title">Withdraw your consent?</string>
+    <string name="settings_consent_withdraw_message">Pebbles cannot work without permission to record how you feel, so withdrawing closes your account. That permanently deletes everything in it: pebbles, snaps, souls, collections, glyphs and karma. Glyphs other pebblers bought stay available to them, without your name attached. Everything processed until now stays lawful. This cannot be undone.</string>
+    <string name="settings_consent_withdraw_confirm">Withdraw and delete</string>
     <string name="settings_account_header">Account</string>
     <string name="settings_delete_account">Delete account</string>
     <string name="settings_delete_account_title">Delete your account?</string>
