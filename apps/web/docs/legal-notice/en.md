@@ -44,7 +44,7 @@ Servers located in: Paris, France (EU region)
 
 ## Intellectual Property
 
-Pebbles is a source-available project published on GitHub at https://github.com/alexisbohns/pbbls, under the [PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0). This licence lets you read, copy and modify the source code for noncommercial purposes only. All other rights are reserved.
+Pebbles is a source-available project published on GitHub at https://github.com/alexisbohns/pbbls, under the [PolyForm Noncommercial License 1.0.0](https://polyformproject.org/licenses/noncommercial/1.0.0). This licence lets you use, copy, modify and distribute the source code for any noncommercial purpose, and lets noncommercial organisations such as charities, schools and public bodies use it too. It does not permit commercial use. The full terms are in the [licence file](https://github.com/alexisbohns/pbbls/blob/main/LICENSE) of the repository.
 
 For more information on the use of source code, please consult the GitHub repository.
 
