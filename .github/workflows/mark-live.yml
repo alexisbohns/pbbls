@@ -1,0 +1,33 @@
+# Marks the acceptances a production web deploy carried `live` in the hosted
+# arkaik project (docs/arkaik/arkaik.json), via arkaik's reusable workflow.
+# Vercel emits a deployment_status for every deploy; only a successful
+# production one for the web app counts. `apps/web` scopes bare `AC-x`
+# mentions: a pull request that forgot `@ios` does not mark web live.
+#
+# The permissions block is required — a called workflow can only use what the
+# caller grants, and the default token grants neither deployments nor pull
+# requests. The `||` fallbacks let a hand-run workflow_dispatch work too.
+# Setup: an arkaik `release:append` token as the ARKAIK_RELEASE_TOKEN secret.
+name: mark-live
+
+on:
+  deployment_status:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  deployments: read
+  pull-requests: read
+
+jobs:
+  web:
+    if: github.event_name == 'workflow_dispatch' || (github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production – pbbls')
+    uses: alexisbohns/arkaik/.github/workflows/mark-live.yml@main
+    with:
+      platform: web
+      paths: apps/web
+      sha: ${{ github.event.deployment.sha || github.sha }}
+      environment: ${{ github.event.deployment.environment || 'Production – pbbls' }}
+      detail: ${{ github.event.deployment_status.environment_url || '' }}
+    secrets:
+      ARKAIK_RELEASE_TOKEN: ${{ secrets.ARKAIK_RELEASE_TOKEN }}
