@@ -9,6 +9,10 @@ export type EmotionPalette = {
   secondary_color: string
   light_color: string
   surface_color: string
+  // The deep end of the ramp: the Spine's lowlight seal, carving lip and card
+  // edge read these (#1052).
+  shaded_color: string
+  dark_color: string
 }
 
 type PaletteMap = Map<string, EmotionPalette>
@@ -19,6 +23,8 @@ type PaletteRow = {
   secondary_color: string | null
   light_color: string | null
   surface_color: string | null
+  shaded_color: string | null
+  dark_color: string | null
 }
 
 // Module-level cache. Reference data is read-only and user-agnostic, so a
@@ -32,7 +38,9 @@ async function fetchPalettes(): Promise<PaletteMap> {
   const { data, error } = await withTimeout(
     supabase
       .from("v_emotions_with_palette")
-      .select("id, primary_color, secondary_color, light_color, surface_color"),
+      .select(
+        "id, primary_color, secondary_color, light_color, surface_color, shaded_color, dark_color",
+      ),
     8000,
     "fetch v_emotions_with_palette",
   )
@@ -49,13 +57,17 @@ async function fetchPalettes(): Promise<PaletteMap> {
       row.primary_color &&
       row.secondary_color &&
       row.light_color &&
-      row.surface_color
+      row.surface_color &&
+      row.shaded_color &&
+      row.dark_color
     ) {
       map.set(row.id, {
         primary_color: row.primary_color,
         secondary_color: row.secondary_color,
         light_color: row.light_color,
         surface_color: row.surface_color,
+        shaded_color: row.shaded_color,
+        dark_color: row.dark_color,
       })
     }
   }
