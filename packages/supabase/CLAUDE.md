@@ -24,7 +24,7 @@ The database is the contract between four clients, and these Deno scripts are th
 
 | Command | Harness | Proves | Needs |
 |---|---|---|---|
-| `npm run db:verify:drafts` | `verify-pebble-drafts.ts` | M47 draft lifecycle | anon |
+| `npm run db:verify:moments` | `verify-moments.ts` | the moments / pebbles split contract (save_moment, complete_pebble, derived glyph, v_moments_full / path_moments RLS, web compat wrappers, deletes) | anon |
 | `npm run db:verify:visibility` | `verify-pebble-visibility.ts` | grade RLS on pebbles | anon |
 | `npm run db:verify:public-profile` | `verify-public-profile.ts` | `get_public_profile` jsonb allowlist | anon |
 | `npm run db:verify:guard` | `verify-profiles-privileged-guard.ts` | `profiles_privileged_guard` (#739) | anon |
@@ -41,7 +41,7 @@ A new harness added to `scripts/` gains a `db:verify:*` script and a workflow st
 
 **`db:verify:purge` is deliberately NOT in CI and must be run by hand** after any batch touching `purge_account`. It is the one harness needing `SUPABASE_SERVICE_ROLE_KEY`, this repo is public, and a leaked service-role key is total database access. Do not "fix" its absence by adding that secret without deciding it as such.
 
-**Orphans.** A run killed between signup and cleanup leaves a throwaway account behind. They are greppable in `auth.users` by their prefixes — `drafts-verify-`, `grades-verify-`, `public-verify-`, `guard-verify-`, `recent-auth-verify-`, all `@example.test`. There is no automated sweep (deleting them needs the service role).
+**Orphans.** A run killed between signup and cleanup leaves a throwaway account behind. They are greppable in `auth.users` by their prefixes — `moments-verify-`, `grades-verify-`, `public-verify-`, `guard-verify-`, `recent-auth-verify-`, all `@example.test`. There is no automated sweep (deleting them needs the service role).
 
 ## What CI runs on `packages/supabase/**`
 
