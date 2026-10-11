@@ -2,10 +2,11 @@
 /**
  * Acceptance test for account deletion (M46) — runs against the REMOTE project.
  *
- * Seeds a throwaway SELLER with every entity type (profile, soul, collection,
- * pebble + cards/domains/soul-link/collection-link/snap, storage files, a SOLD
- * glyph bought by a throwaway BUYER, an unsold glyph, favourites, karma,
- * achievement unlocks), then
+ * Seeds a throwaway SELLER with every entity type (profile, soul, collection
+ * wearing a glyph, a moment + its snap completed into a pebble +
+ * cards/domains/soul-link/collection-link, a bare uncompleted moment, storage
+ * files, a SOLD glyph bought by a throwaway BUYER, an unsold glyph,
+ * favourites, karma, achievement unlocks), then
  * deletes the seller through the real delete-account edge function and asserts
  * the roadmap §6 bar: every seller row gone, the buyer's glyph still renders
  * AND stays paid (user_id = null, is_system false, is_custom true,
@@ -56,6 +57,16 @@
  *
  * It also carries the record_consent contention and downgrade cases (#1018),
  * on the buyer: it is the one harness that drives record_consent at all.
+ *
+ * Since the moments split (20261012090000–20261012090400), the content the
+ * purge removes is MOMENTS: deleting one cascades its pebbles and snaps, so
+ * the purge's counts read moments = <seeded> and pebbles = snaps = 0, and the
+ * zero-row checks are what prove those tables emptied. pebble_drafts is gone.
+ * A glyph now reaches a pebble through its collections, so collections.glyph_id
+ * is an arm of the purge's `v_kept` predicate: the buyer's collection wears the
+ * sold glyph beside their soul and profile mark. Seeds go through save_moment
+ * + complete_pebble, not the deprecated create_pebble / update_pebble wrappers,
+ * so this harness outlives #1050.
  */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -81,6 +92,14 @@ function check(name: string, ok: boolean, detail?: string) {
     failed += 1;
     console.log(`✗ ${name}${detail ? ` — ${detail}` : ""}`);
   }
+}
+
+/** A founding write: abort the run with a clear message rather than assert on a missing seed. */
+function must<T>(label: string, r: { data: T | null; error: { message: string } | null }): T {
+  if (r.error || r.data === null || r.data === undefined) {
+    throw new Error(`${label}: ${r.error?.message ?? "no data"}`);
+  }
+  return r.data;
 }
 
 async function countRows(table: string, column: string, value: string): Promise<number> {
@@ -274,36 +293,47 @@ try {
   });
   if (sellerSignIn || !sellerSession?.session) throw new Error(`seller sign-in: ${sellerSignIn?.message}`);
 
-  const { data: pebbleId, error: pebErr } = await seller.rpc("create_pebble", {
+  // The seller's collection wears the UNSOLD glyph. The purge deletes that
+  // glyph, and collections.glyph_id is NO ACTION, so this only passes if the
+  // purge removes the collection first. set_collection_glyph is the client
+  // path, so collections_glyph_usable is in play.
+  const { error: sellerColGlyphErr } = await seller.rpc("set_collection_glyph", {
+    p_collection_id: collection.id, p_glyph_id: unsoldGlyph.id,
+  });
+  if (sellerColGlyphErr) throw new Error(`set_collection_glyph (seller): ${sellerColGlyphErr.message}`);
+
+  // The moment carries the date, text and snap row; the pebble completes it.
+  const pebbleMomentId = must<string>("save_moment", await seller.rpc("save_moment", {
     payload: {
       name: `purge-test pebble ${runId}`,
       description: "Seeded by verify-account-purge",
       happened_at: new Date().toISOString(),
+      snaps: [{ id: snapId, storage_path: `${sellerId}/${snapId}`, sort_order: 0 }],
+    },
+  }));
+  const pebbleId = must<string>("complete_pebble", await seller.rpc("complete_pebble", {
+    payload: {
+      moment_id: pebbleMomentId,
       intensity: 2,
       positiveness: 1,
       visibility: "private",
       emotion_id: emotion.id,
-      glyph_id: soldGlyph.id,
       soul_ids: [soul.id],
       collection_ids: [collection.id],
       domain_ids: [domain.id],
       cards: [{ species_id: cardType.id, value: "purge-test card", sort_order: 0 }],
-      snaps: [{ id: snapId, storage_path: `${sellerId}/${snapId}`, sort_order: 0 }],
     },
-  });
-  if (pebErr || !pebbleId) throw new Error(`create_pebble: ${pebErr?.message}`);
+  }));
 
   const { error: favSellerErr } = await admin
     .from("glyph_favourites").insert({ user_id: sellerId, glyph_id: soldGlyph.id });
   if (favSellerErr) throw new Error(`seller favourite: ${favSellerErr.message}`);
 
-  // An unpublished draft (M47). Inserted as the signed-in seller so the
-  // owner-only pebble_drafts_all policy is exercised, not bypassed.
-  const { error: draftErr } = await seller.from("pebble_drafts").insert({
-    user_id: sellerId,
-    payload: { name: `purge-test draft ${runId}`, emotion_id: emotion.id },
-  });
-  if (draftErr) throw new Error(`insert draft: ${draftErr.message}`);
+  // A bare moment: named, never completed into a pebble. It is what replaced
+  // the M47 server draft, and the purge has to take it too.
+  const bareMomentId = must<string>("save_moment (bare)", await seller.rpc("save_moment", {
+    payload: { name: `purge-test bare moment ${runId}`, happened_at: "2026-09-02T08:00:00Z" },
+  }));
 
   // Connections rows (M49): a seller↔buyer connection, the seller's live
   // invite, and blocks in BOTH directions. Seeded via the service-role client:
@@ -487,6 +517,20 @@ try {
     .select("id").single();
   if (buyerSoulErr || !buyerSoul) throw new Error(`buyer soul: ${buyerSoulErr?.message}`);
 
+  // …and on a COLLECTION, the moments-split arm of `v_kept`: a pebble's glyph
+  // is derived from its collections, so another user's collection wearing the
+  // seller's glyph keeps it. collections.glyph_id is NO ACTION, so "the
+  // collection keeps its glyph" is also the proof the purge anonymized rather
+  // than deleted it. Set through set_collection_glyph, the client path.
+  const buyerCollection = must<{ id: string }>("buyer collection", await buyer
+    .from("collections")
+    .insert({ user_id: buyerId, name: `purge-test buyer collection ${runId}` })
+    .select("id").single());
+  const { error: buyerColGlyphErr } = await buyer.rpc("set_collection_glyph", {
+    p_collection_id: buyerCollection.id, p_glyph_id: soldGlyph.id,
+  });
+  if (buyerColGlyphErr) throw new Error(`set_collection_glyph (buyer): ${buyerColGlyphErr.message}`);
+
   // ---------------------------------------------------------------------------
   // record_consent under contention and downgrade (#1018,
   // 20261007120000_record_consent_serialised.sql). Run on the BUYER, not the
@@ -568,7 +612,8 @@ try {
       afterReplay.total === 1 && afterReplay.active.join() === "1.0.0",
     `${replayA.error?.message ?? "ok"} / ${replayB.error?.message ?? "ok"} ${JSON.stringify(afterReplay)}`);
 
-  console.log(`Seeded: pebble ${pebbleId}, sold glyph ${soldGlyph.id}, unsold glyph ${unsoldGlyph.id}\n`);
+  console.log(`Seeded: pebble ${pebbleId} on moment ${pebbleMomentId}, bare moment ${bareMomentId}, ` +
+    `sold glyph ${soldGlyph.id}, unsold glyph ${unsoldGlyph.id}\n`);
 
   // ---------------------------------------------------------------------------
   // content_reports (#831). Four seeds, covering both purge directions and the
@@ -576,19 +621,26 @@ try {
   // ---------------------------------------------------------------------------
 
   // (a) The buyer reports the seller's PUBLIC pebble. This is the row that
-  //     must be DELETED when the seller goes.
-  const { data: pubPebbleId, error: pubPebbleErr } = await seller.rpc("create_pebble", {
+  //     must be DELETED when the seller goes. Filed through the 'pebble'
+  //     alias with the PEBBLE id, the way not-yet-migrated clients do; the
+  //     stored row names the canonical kind and the moment.
+  const pubMomentId = must<string>("save_moment (public)", await seller.rpc("save_moment", {
     payload: {
+      name: "reportable public",
+      description: "original text",
       happened_at: "2026-09-01T12:00:00Z",
+    },
+  }));
+  const pubPebbleId = must<string>("complete_pebble (public)", await seller.rpc("complete_pebble", {
+    payload: {
+      moment_id: pubMomentId,
       intensity: 2,
       positiveness: 1,
       emotion_id: emotion.id,
-      name: "reportable public",
-      description: "original text",
+      domain_ids: [domain.id],
       visibility: "public",
     },
-  });
-  if (pubPebbleErr || !pubPebbleId) throw new Error(`public pebble: ${pubPebbleErr?.message}`);
+  }));
 
   const { data: pebbleReport, error: pebbleReportErr } = await buyer.rpc("report_content", {
     p_target_kind: "pebble",
@@ -602,8 +654,11 @@ try {
   // The correctness assertion the anon harness cannot make: the owner was
   // resolved server-side, and the snapshot captured the text at file time.
   const { data: storedReport } = await admin
-    .from("content_reports").select("target_user_id, target_snapshot, status")
+    .from("content_reports").select("target_kind, target_id, target_user_id, target_snapshot, status")
     .eq("id", (pebbleReport as { id: string }).id).maybeSingle();
+  check("a 'pebble' report is stored against the moment (kind 'moment', the moment id)",
+    storedReport?.target_kind === "moment" && storedReport?.target_id === pubMomentId,
+    `got ${storedReport?.target_kind} ${storedReport?.target_id}, want moment ${pubMomentId}`);
   check("report resolved target_user_id server-side",
     storedReport?.target_user_id === sellerId,
     `got ${storedReport?.target_user_id}, want ${sellerId}`);
@@ -611,20 +666,16 @@ try {
     (storedReport?.target_snapshot as { description?: string } | null)?.description === "original text",
     JSON.stringify(storedReport?.target_snapshot));
 
-  // Editing after the fact must NOT rewrite the evidence.
-  // update_pebble takes the pebble id as its own arg (p_pebble_id), separate
-  // from the payload jsonb (packages/supabase/types/database.ts) — the plan's
-  // draft nested `id` inside `payload`, which the RPC never reads, so the edit
-  // would silently no-op and both snapshot checks below would pass vacuously.
-  const { error: updateErr } = await seller.rpc("update_pebble", {
-    p_pebble_id: pubPebbleId,
-    payload: { description: "innocent now" },
+  // Editing after the fact must NOT rewrite the evidence. The text lives on
+  // the moment, so the edit is save_moment with the moment id.
+  const { error: updateErr } = await seller.rpc("save_moment", {
+    payload: { id: pubMomentId, description: "innocent now" },
   });
-  if (updateErr) throw new Error(`update_pebble: ${updateErr.message}`);
+  if (updateErr) throw new Error(`save_moment (edit): ${updateErr.message}`);
   const { data: afterEdit } = await admin
     .from("content_reports").select("target_snapshot")
     .eq("id", (pebbleReport as { id: string }).id).maybeSingle();
-  check("editing the pebble does not rewrite the snapshot",
+  check("editing the moment does not rewrite the snapshot",
     (afterEdit?.target_snapshot as { description?: string } | null)?.description === "original text",
     JSON.stringify(afterEdit?.target_snapshot));
 
@@ -687,6 +738,12 @@ try {
   check("queue shows live content beside the snapshot",
     (queuedPebble?.target_live as { description?: string } | null)?.description === "innocent now",
     JSON.stringify(queuedPebble?.target_live));
+  // A moment has no visibility of its own: the queue reports the widest of its
+  // pebbles' and the moderation flag, which is what a moderator decides on.
+  check("queue's live moment carries hidden=false and the widest pebble visibility",
+    (queuedPebble?.target_live as { hidden?: boolean; visibility?: string } | null)?.hidden === false &&
+      (queuedPebble?.target_live as { visibility?: string } | null)?.visibility === "public",
+    JSON.stringify(queuedPebble?.target_live));
   check("queue counts open reports per target",
     Number(queuedPebble?.open_reports_against_target) === 1,
     String(queuedPebble?.open_reports_against_target));
@@ -700,15 +757,18 @@ try {
     p_outcome: "actioned",
     p_note: "harness takedown",
   });
+  const { data: takenMoment } = await admin
+    .from("moments").select("hidden_at").eq("id", pubMomentId).maybeSingle();
   const { data: takenPebble } = await admin
-    .from("pebbles").select("visibility, hidden_at").eq("id", pubPebbleId).maybeSingle();
-  // #833 replaced the destructive takedown: actioning now sets hidden_at and
-  // leaves the user's own visibility setting alone. Both halves are asserted —
-  // "it is hidden" without "and visibility was not overwritten" would pass just
-  // as well against the old destructive behaviour this change exists to remove.
-  check("actioning a pebble report hides it",
-    !takePebbleErr && takenPebble?.hidden_at !== null,
-    takePebbleErr ? takePebbleErr.message : `hidden_at=${takenPebble?.hidden_at}`);
+    .from("pebbles").select("visibility").eq("id", pubPebbleId).maybeSingle();
+  // #833 replaced the destructive takedown: actioning now sets hidden_at (on
+  // the moment, since the split) and leaves the user's own visibility setting
+  // alone. Both halves are asserted — "it is hidden" without "and visibility
+  // was not overwritten" would pass just as well against the old destructive
+  // behaviour this change exists to remove.
+  check("actioning a moment report hides the moment",
+    !takePebbleErr && !!takenMoment && takenMoment.hidden_at !== null,
+    takePebbleErr ? takePebbleErr.message : `hidden_at=${takenMoment?.hidden_at}`);
   check("actioning leaves the owner's visibility setting untouched",
     takenPebble?.visibility === "public",
     `visibility=${takenPebble?.visibility}`);
@@ -743,10 +803,16 @@ try {
   // cascade from auth.users, so by the time the zero-row checks below run
   // (after deleteUser) the cascade would empty them even if a purge delete
   // line were dropped. Only the RPC's counts can catch that, so pin the
-  // M47/M49 rows to what §2 seeded.
+  // moments/M49 rows to what §2 seeded. moments.user_id does not cascade from
+  // auth.users at all, so a dropped moments delete would fail the purge outright;
+  // pebbles and snaps read 0 because the moments delete cascaded them first
+  // (they count only rows on OTHER users' moments), and the zero-row checks
+  // below prove they emptied.
   const purgedCounts = (body?.purged?.counts ?? {}) as Record<string, number>;
   const expectedPurged: Array<[string, number]> = [
-    ["pebble_drafts", 1], // the M47 draft
+    ["moments", 3], // the pebble's moment, the bare moment, the reported public moment
+    ["pebbles", 0], // cascaded by the moments delete
+    ["snaps", 0], // cascaded by the moments delete
     ["connections", 1], // the seller↔buyer row
     ["connection_invites", 1], // the seller's live invite
     ["connection_blocks", 2], // both directions
@@ -764,6 +830,7 @@ try {
     ["profiles", "user_id"],
     ["souls", "user_id"],
     ["glyphs", "user_id"],
+    ["moments", "user_id"],
     ["pebbles", "user_id"],
     ["collections", "user_id"],
     ["snaps", "user_id"],
@@ -775,7 +842,6 @@ try {
     ["wallet_balances", "user_id"],
     ["bounces", "user_id"],
     ["log_reactions", "user_id"],
-    ["pebble_drafts", "user_id"],
     ["connection_invites", "inviter_id"],
     ["achievement_unlocks", "user_id"],
     ["user_consents", "user_id"],
@@ -804,7 +870,7 @@ try {
   const buyerBlocks = await countRows("connection_blocks", "blocker_id", buyerId);
   check("buyer's block row purged with the seller", buyerBlocks === 0, `found ${buyerBlocks}`);
   for (const table of ["pebble_cards", "pebble_souls", "pebble_domains", "collection_pebbles"]) {
-    const n = await countRows(table, "pebble_id", pebbleId as string);
+    const n = await countRows(table, "pebble_id", pebbleId);
     check(`pebble cascade emptied ${table}`, n === 0, `found ${n}`);
   }
 
@@ -849,22 +915,20 @@ try {
     !strangerMayErr && strangerMay === false,
     strangerMayErr ? strangerMayErr.message : String(strangerMay));
 
-  // The RPC is the helper; this is the path a real client takes.
-  const { error: strangerPebbleErr } = await stranger.rpc("create_pebble", {
-    payload: {
-      name: `purge-test stranger steal ${runId}`,
-      happened_at: new Date().toISOString(),
-      intensity: 2,
-      positiveness: 1,
-      visibility: "private",
-      emotion_id: emotion.id,
-      glyph_id: soldGlyph.id,
-    },
+  // The RPC is the helper; this is the path a real client takes. Since the
+  // split a glyph reaches a pebble through a collection, so the attach is
+  // set_collection_glyph on the stranger's own collection.
+  const strangerCollection = must<{ id: string }>("stranger collection", await stranger
+    .from("collections")
+    .insert({ user_id: strangerUserId, name: `purge-test stranger steal ${runId}` })
+    .select("id").single());
+  const { error: strangerGlyphErr } = await stranger.rpc("set_collection_glyph", {
+    p_collection_id: strangerCollection.id, p_glyph_id: soldGlyph.id,
   });
-  check("create_pebble rejects the stranger attaching it",
-    strangerPebbleErr !== null &&
-      strangerPebbleErr.message.includes("Glyph not usable by user"),
-    strangerPebbleErr?.message ?? "the pebble was created");
+  check("set_collection_glyph rejects the stranger attaching it",
+    strangerGlyphErr !== null &&
+      strangerGlyphErr.message.includes("Glyph not usable by user"),
+    strangerGlyphErr?.message ?? "the collection glyph was set");
 
   // …and the entitlement still MEANS something: the buyer keeps their access.
   const { data: buyerMay, error: buyerMayErr } = await buyer
@@ -909,6 +973,11 @@ try {
     .from("souls").select("glyph_id").eq("id", buyerSoul.id).maybeSingle();
   check("buyer's soul glyph survives the seller's purge",
     buyerSoulAfter?.glyph_id === soldGlyph.id, JSON.stringify(buyerSoulAfter?.glyph_id));
+
+  const { data: buyerCollectionAfter } = await admin
+    .from("collections").select("glyph_id").eq("id", buyerCollection.id).maybeSingle();
+  check("buyer's collection glyph survives the seller's purge",
+    buyerCollectionAfter?.glyph_id === soldGlyph.id, JSON.stringify(buyerCollectionAfter?.glyph_id));
 
   const { error: buyerSoulRenameErr } = await buyer
     .from("souls")
