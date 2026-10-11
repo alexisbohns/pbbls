@@ -602,6 +602,7 @@
   --spine-halo: #E6E2D8;
   --spine-photo-filter: none;
   --spine-stone-filter: none;
+  --spine-lava-filter: none;
   --spine-shadow-rgb: 52, 40, 26;
   --spine-shadow-a: .3;
   --spine-tint-k: 9%;
@@ -640,6 +641,8 @@
   --spine-halo: #19191B;
   --spine-photo-filter: brightness(.9) contrast(1.02);
   --spine-stone-filter: brightness(.92) saturate(.96);
+  /* Lava is lifted at Night so it does not sink into the ground. */
+  --spine-lava-filter: brightness(1.2) saturate(1.05);
   --spine-shadow-rgb: 0, 0, 0;
   --spine-shadow-a: .62;
   --spine-tint-k: 13%;
