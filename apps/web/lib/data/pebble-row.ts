@@ -1,8 +1,29 @@
-import type { MarkStroke, Pebble, PebbleGlyph, PebbleSnap } from "@/lib/types"
+import type { MarkStroke, Pebble, PebbleCover, PebbleGlyph, PebbleSnap } from "@/lib/types"
 
 /** Snap files live at `{storage_path}/original.jpg`; this is the signing key. */
 export function snapOriginalPath(snap: PebbleSnap): string {
   return `${snap.storage_path}/original.jpg`
+}
+
+/** The snap's thumbnail, same ratio as the original; the Spine probes it. */
+export function snapThumbPath(snap: PebbleSnap): string {
+  return `${snap.storage_path}/thumb.jpg`
+}
+
+/** The snaps in the order the pebble shows them. */
+export function sortedSnaps(raw: unknown): PebbleSnap[] {
+  return ((raw as PebbleSnap[] | undefined) ?? []).slice().sort((a, b) => a.sort_order - b.sort_order)
+}
+
+/** The first snap, with whatever of its two files signed. */
+export function pebbleCover(snaps: readonly PebbleSnap[], signedUrlByPath: ReadonlyMap<string, string>): PebbleCover | null {
+  const first = snaps[0]
+  if (!first) return null
+  return {
+    snapId: first.id,
+    url: signedUrlByPath.get(snapOriginalPath(first)) ?? null,
+    thumbUrl: signedUrlByPath.get(snapThumbPath(first)) ?? null,
+  }
 }
 
 /**
@@ -49,9 +70,7 @@ export function pebbleFromViewRow(
   render: { render_svg: string | null; render_version: string | null },
   signedUrlByPath: ReadonlyMap<string, string>,
 ): Pebble {
-  const snaps = ((row.snaps as PebbleSnap[] | undefined) ?? [])
-    .slice()
-    .sort((a, b) => a.sort_order - b.sort_order)
+  const snaps = sortedSnaps(row.snaps)
   const instants = snaps
     .map((s) => signedUrlByPath.get(snapOriginalPath(s)))
     .filter((url): url is string => typeof url === "string")
@@ -77,6 +96,7 @@ export function pebbleFromViewRow(
     render_svg: render.render_svg,
     render_version: render.render_version,
     glyph: pebbleGlyphFromRow(row.glyph),
+    cover: pebbleCover(snaps, signedUrlByPath),
     created_at: row.created_at as string,
     updated_at: row.updated_at as string,
   }

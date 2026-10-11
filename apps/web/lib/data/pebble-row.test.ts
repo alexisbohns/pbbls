@@ -86,6 +86,30 @@ describe("pebbleFromViewRow", () => {
     expect(new Date(pebble.happened_at).toISOString()).toBe("2026-10-06T17:42:09.123Z")
   })
 
+  it("takes the first snap by sort_order as the cover, with its thumb", () => {
+    const signed = new Map([
+      ["11111111-2222-3333-4444-555555555555/s1/original.jpg", "https://signed/s1"],
+      ["11111111-2222-3333-4444-555555555555/s1/thumb.jpg", "https://signed/s1-thumb"],
+    ])
+    expect(pebbleFromViewRow(MOMENT_ROW, NO_RENDER, signed).cover).toEqual({
+      snapId: "s1",
+      url: "https://signed/s1",
+      thumbUrl: "https://signed/s1-thumb",
+    })
+  })
+
+  it("keeps a cover whose files failed to sign, so the card holds its place", () => {
+    expect(pebbleFromViewRow(MOMENT_ROW, NO_RENDER, new Map()).cover).toEqual({
+      snapId: "s1",
+      url: null,
+      thumbUrl: null,
+    })
+  })
+
+  it("has no cover without a snap", () => {
+    expect(pebbleFromViewRow(PEBBLE_ROW, NO_RENDER, new Map()).cover).toBeNull()
+  })
+
   it("drops a snap whose URL failed to sign rather than leaving a hole", () => {
     const signed = new Map([["11111111-2222-3333-4444-555555555555/s2/original.jpg", "https://signed/s2"]])
     expect(pebbleFromViewRow(MOMENT_ROW, NO_RENDER, signed).instants).toEqual(["https://signed/s2"])

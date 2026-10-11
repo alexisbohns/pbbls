@@ -20,6 +20,7 @@ function pebble(id: string, intensity: 1 | 2 | 3): Pebble {
     render_svg: null,
     render_version: null,
     glyph: null,
+    cover: null,
     created_at: "2026-08-22T10:00:00Z",
     updated_at: "2026-08-22T10:00:00Z",
   }

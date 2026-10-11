@@ -118,6 +118,7 @@ function build(specs: Spec[], scenario: string): Pebble[] {
       render_svg: null,
       render_version: null,
       glyph: null,
+      cover: null,
       created_at: iso,
       updated_at: iso,
     }

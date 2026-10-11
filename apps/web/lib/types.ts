@@ -22,6 +22,16 @@ export type PebbleSnap = {
   sort_order: number
 }
 
+// A pebble's first snap as the Spine shows it. The thumb has the original's
+// ratio at a fraction of its bytes, so the card probes it for the ratio before
+// the photo loads. Either URL is null when it failed to sign: the card still
+// holds its place and says the photo is unavailable.
+export type PebbleCover = {
+  snapId: string
+  url: string | null
+  thumbUrl: string | null
+}
+
 /**
  * Privacy grade (M51): `secret` = owner-only, `private` = owner + mutual
  * connections, `public` = any signed-in user, plus share-by-link via /p/[id].
@@ -52,6 +62,9 @@ export type Pebble = {
   // The pebble's glyph strokes, from `v_pebbles_full.glyph`. The Spine carves
   // these into the lit stone; null when the pebble has no glyph.
   glyph: PebbleGlyph | null
+  // The first snap (sort_order 0), the one the Spine's card shows. Null when the
+  // pebble has no snap.
+  cover: PebbleCover | null
   created_at: string
   updated_at: string
 }
