@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:week-roll": "tsx scripts/test-week-roll.ts",
     "generate:splash": "tsx scripts/generate-splash-screens.ts",
-    "generate:m3": "tsx scripts/generate-m3-theme.ts"
+    "generate:m3": "tsx scripts/generate-m3-theme.ts",
+    "generate:stone-carvings": "tsx scripts/generate-stone-carvings.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
