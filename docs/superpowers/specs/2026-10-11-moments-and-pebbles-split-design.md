@@ -104,8 +104,10 @@ Create or update, keyed on `moment_id` + caller. Keys: `moment_id`,
 non-empty, else `pebble_needs_domain`), `soul_ids`, `new_souls`,
 `collection_ids`, `new_collections`, `cards`. Caller must own the moment (later:
 be a participant). First insert for the (moment, user) writes the
-`pebble_created` karma event and runs `check_achievements`; updates rewrite the
-join tables as `update_pebble` does today. Collection ownership and soul
+`pebble_created` karma event; updates rewrite the join tables as
+`update_pebble` does today and write `pebble_enriched` deltas. Clients keep
+calling `check_achievements` after a completion, as they do after a publish
+today, so the unlock celebration contract does not move server-side. Collection ownership and soul
 ownership checks are kept verbatim.
 
 ### `compute_karma_delta`
@@ -181,9 +183,18 @@ migration comment:
 - `create_pebble` / `update_pebble` wrappers calling `save_moment` then
   `complete_pebble`, ignoring glyph keys. Behaviour as today: one call, one
   complete pebble.
+- The `compose-pebble` and `compose-pebble-update` edge functions, which are
+  what all three clients call today (not the RPCs), keep their request and
+  response shapes, call the wrappers, and return `render_svg` and
+  `render_version` as null. The render engine, `compose-and-write` and
+  `backfill-pebble-render` are deleted.
 
 Proven by running the current web app against the migrated local database
 before Part 1 merges. Removed when the web composer ships.
+
+**Installed iOS and Android builds break at the push.** They read `pebbles`
+directly with embedded selects on the dropped columns. Pre-launch this is
+accepted; Parts 2 and 3 ship the fix. The PR body says so.
 
 ## 6. Clients
 
