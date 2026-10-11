@@ -3,7 +3,10 @@
  * Acceptance test for the glyph usability guard — runs against the REMOTE project.
  *
  * `can_use_glyph` (20260712000000) decides whether a glyph may be attached to a
- * pebble or a soul: authored by the actor, a system default, or entitled. Until
+ * collection, a soul or a profile: authored by the actor, a system default, or
+ * entitled. (Before the moments split it guarded pebbles.glyph_id; a pebble's
+ * glyph is now derived from its collections, so the collection is where the
+ * guard bites — and create_pebble's compat wrapper drops glyph_id.) Until
  * #872 "system default" meant `glyphs.user_id is null` — which is also what
  * `purge_account` leaves behind when it anonymizes a SOLD glyph whose creator
  * deleted their account. A stranger could then attach artwork other people paid
@@ -15,13 +18,15 @@
  * What this proves, and why a same-surface unit test cannot:
  *
  *   1. A glyph authored by someone else, never bought, cannot be attached —
- *      through create_pebble, through the direct souls write, AND onto the
- *      profile mark (three different enforcement mechanisms: the RPC guard, the
- *      souls_glyph_usable trigger, and the profiles_glyph_usable trigger #875).
+ *      through set_collection_glyph, through the direct souls write, AND onto
+ *      the profile mark (three enforcement points: the collections_glyph_usable
+ *      trigger, refusing with 42501, the souls_glyph_usable trigger, and the
+ *      profiles_glyph_usable trigger #875).
  *      The profile is the one that was unguarded until #875, and it is the most
  *      visible glyph a user has — it renders on their public profile.
  *   2. The guard did not over-block: a system glyph and the caller's own carve
- *      both still attach, and — for the soul and the profile alike — naming
+ *      both still attach, and — for the collection, the soul and the profile
+ *      alike — naming
  *      glyph_id in an UPDATE without changing it still succeeds, which is what
  *      keeps a plain rename working for the two clients that always name the
  *      column (`update_profile` for the profile; the direct souls write on iOS
@@ -130,25 +135,20 @@ async function carve(user: TestUser, name: string): Promise<string> {
   return data.id as string;
 }
 
-/** Attempt a pebble with `glyphId`; returns the error message, or null on success. */
-async function attachToPebble(
+/**
+ * Attempt to put `glyphId` on `collectionId` through set_collection_glyph, the
+ * client path. Returns the error (message + SQLSTATE), or null on success.
+ */
+async function attachToCollection(
   user: TestUser,
+  collectionId: string,
   glyphId: string,
-  emotionId: string,
-  label: string,
-): Promise<string | null> {
-  const { error } = await user.client.rpc("create_pebble", {
-    payload: {
-      name: `glyph-verify ${label} ${runId}`,
-      happened_at: new Date().toISOString(),
-      intensity: 2,
-      positiveness: 1,
-      visibility: "private",
-      emotion_id: emotionId,
-      glyph_id: glyphId,
-    },
+): Promise<{ message: string; code: string } | null> {
+  const { error } = await user.client.rpc("set_collection_glyph", {
+    p_collection_id: collectionId,
+    p_glyph_id: glyphId,
   });
-  return error?.message ?? null;
+  return error ? { message: error.message, code: error.code } : null;
 }
 
 let alice: TestUser | null = null;
@@ -159,13 +159,19 @@ try {
   bob = await signUp("bob");
   console.log(`Created alice ${alice.id} and bob ${bob.id}\n`);
 
-  const { data: emotion, error: emotionErr } = await alice.client
-    .from("emotions").select("id").limit(1).single();
-  if (emotionErr || !emotion) throw new Error(`emotions read: ${emotionErr?.message}`);
-  const emotionId = emotion.id as string;
-
   const aliceGlyph = await carve(alice, `glyph-verify alice ${runId}`);
   const bobGlyph = await carve(bob, `glyph-verify bob ${runId}`);
+
+  // Bob's collection, the target of every collection-glyph case below.
+  // Single-table insert, the path every client uses.
+  const { data: bobCollection, error: bobCollectionErr } = await bob.client
+    .from("collections")
+    .insert({ user_id: bob.id, name: `glyph-verify collection ${runId}` })
+    .select("id").single();
+  if (bobCollectionErr || !bobCollection) {
+    throw new Error(`collection: ${bobCollectionErr?.message ?? "no row"}`);
+  }
+  const collectionId = bobCollection.id as string;
 
   // ---------------------------------------------------------------------------
   // 1. The seeds are system; a user's carve is not.
@@ -184,12 +190,13 @@ try {
     JSON.stringify(carvedRow));
 
   // ---------------------------------------------------------------------------
-  // 2. Bob cannot attach Alice's glyph — the RPC guard and the souls trigger.
+  // 2. Bob cannot attach Alice's glyph — the collections and souls triggers.
   // ---------------------------------------------------------------------------
-  const pebbleErr = await attachToPebble(bob, aliceGlyph, emotionId, "steal");
-  check("create_pebble rejects another user's unsold glyph",
-    pebbleErr !== null && pebbleErr.includes("Glyph not usable by user"),
-    pebbleErr ?? "the pebble was created");
+  const collectionErr = await attachToCollection(bob, collectionId, aliceGlyph);
+  check("set_collection_glyph rejects another user's unlisted custom glyph (42501)",
+    collectionErr !== null && collectionErr.code === "42501" &&
+      collectionErr.message.includes("Glyph not usable by user"),
+    collectionErr ? `${collectionErr.code} ${collectionErr.message}` : "the collection glyph was set");
 
   const { error: soulErr } = await bob.client
     .from("souls").insert({ user_id: bob.id, name: `glyph-verify soul ${runId}`, glyph_id: aliceGlyph });
@@ -200,10 +207,30 @@ try {
   // ---------------------------------------------------------------------------
   // 3. The guard did not over-block.
   // ---------------------------------------------------------------------------
-  check("create_pebble accepts the system glyph",
-    (await attachToPebble(bob, SYSTEM_GLYPH_ID, emotionId, "system")) === null);
-  check("create_pebble accepts the caller's own carve",
-    (await attachToPebble(bob, bobGlyph, emotionId, "own")) === null);
+  const systemAttachErr = await attachToCollection(bob, collectionId, SYSTEM_GLYPH_ID);
+  check("set_collection_glyph accepts the system glyph", systemAttachErr === null,
+    systemAttachErr?.message);
+  const ownAttachErr = await attachToCollection(bob, collectionId, bobGlyph);
+  check("set_collection_glyph accepts the caller's own carve", ownAttachErr === null,
+    ownAttachErr?.message);
+
+  // The change-only half of the collections guard (standing rule #875/#879
+  // below): naming glyph_id in an UPDATE without moving it is not an
+  // attachment. A regression guard here, as for the soul: the glyph is still
+  // usable, so a state-checking guard would pass too.
+  const collectionRenamed = `glyph-verify collection renamed ${runId}`;
+  const { error: collectionRenameErr } = await bob.client
+    .from("collections")
+    .update({ name: collectionRenamed, glyph_id: bobGlyph })
+    .eq("id", collectionId);
+  check("a collection rename still works with glyph_id named but unchanged",
+    collectionRenameErr === null, collectionRenameErr?.message);
+
+  const { data: renamedCollection } = await bob.client
+    .from("collections").select("name, glyph_id").eq("id", collectionId).maybeSingle();
+  check("…and the rename left the collection's glyph in place",
+    renamedCollection?.name === collectionRenamed && renamedCollection?.glyph_id === bobGlyph,
+    JSON.stringify(renamedCollection));
 
   const { data: ownSoul, error: ownSoulErr } = await bob.client
     .from("souls")
@@ -250,8 +277,8 @@ try {
   // ---------------------------------------------------------------------------
   // 4. The profile mark — the surface #875 found unguarded.
   //
-  // Neither write path goes through create_pebble, so neither is covered by the
-  // RPC guard above: the web client PATCHes `profiles` directly, iOS and
+  // Neither write path touches collections, so neither is covered by the
+  // collections trigger above: the web client PATCHes `profiles` directly, iOS and
   // Android call `update_profile` (security INVOKER). `profiles_update` only
   // asks that the row be yours, so before the profiles_glyph_usable trigger a
   // user could wear ANY glyph `glyphs_select` let them read — which, for an
