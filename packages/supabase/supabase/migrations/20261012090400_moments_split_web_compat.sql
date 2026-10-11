@@ -35,12 +35,20 @@
 --     invalid_payload (were sentences).
 --   * the first edit of an old glyph-bearing pebble may post a negative karma
 --     delta: the glyph bonus is gone from compute_karma_delta.
+--   * v_pebbles_full.updated_at is greatest(pebble, moment), so a name /
+--     description / date / snaps edit still moves it.
+--
+-- Seven harnesses under packages/supabase/scripts/ call create_pebble or read
+-- v_pebbles_full; they must be migrated to save_moment / complete_pebble /
+-- v_moments_full or retargeted before #1050 removes these objects.
 --
 -- Grants: v_pebbles_full repeats the 20260729000000 policy (revoke public +
 -- anon, select to authenticated). path_pebbles keeps its 20260519141000
 -- signature, so `create or replace` carries its authenticated grant.
 -- create_pebble / update_pebble never had an explicit grant (default
--- privileges); `create or replace` keeps what they have, nothing is widened.
+-- privileges); they now get the batch's policy — revoke public + anon, execute
+-- to authenticated. The edge functions forward the caller's JWT, so nothing
+-- else changes.
 --
 -- STANDING-RULE CHECK: no emotion or domain inserts, so
 -- sync_achievement_catalog() is deliberately NOT re-run.
@@ -64,9 +72,10 @@ select
   p.positiveness,
   p.visibility,
   p.emotion_id,
-  (public.resolve_pebble_glyph(p.id)->>'id')::uuid as glyph_id,
+  (g.glyph->>'id')::uuid as glyph_id,
   p.created_at,
-  p.updated_at,
+  -- A name/description/date/snaps edit lives on the moment: keep updated_at moving.
+  greatest(p.updated_at, m.updated_at) as updated_at,
 
   -- emotion (1:1, always present)
   jsonb_build_object(
@@ -77,7 +86,7 @@ select
   ) as emotion,
 
   -- glyph (derived, optional): id, name, strokes, view_box, source
-  public.resolve_pebble_glyph(p.id) as glyph,
+  g.glyph as glyph,
 
   -- cards (1:N)
   coalesce(
@@ -155,7 +164,9 @@ select
 
 from public.pebbles p
 join public.moments m on m.id = p.moment_id
-join public.emotions e on e.id = p.emotion_id;
+join public.emotions e on e.id = p.emotion_id
+-- resolved once per row, shared by glyph_id and glyph
+cross join lateral (select public.resolve_pebble_glyph(p.id) as glyph) g;
 
 -- Defense in depth (20260729000000): anon has no legitimate read on the view.
 revoke all on public.v_pebbles_full from public, anon;
@@ -237,6 +248,8 @@ begin
     || jsonb_build_object('moment_id', v_moment));
 end;
 $$;
+revoke all on function public.create_pebble(jsonb) from public, anon;
+grant execute on function public.create_pebble(jsonb) to authenticated;
 comment on function public.create_pebble(jsonb) is
   'DEPRECATED compat wrapper over save_moment + complete_pebble; glyph keys are ignored. Web only. Removed with the web composer (#1050).';
 
@@ -287,5 +300,7 @@ begin
   perform public.complete_pebble(v_pebble_part || jsonb_build_object('moment_id', v_moment));
 end;
 $$;
+revoke all on function public.update_pebble(uuid, jsonb) from public, anon;
+grant execute on function public.update_pebble(uuid, jsonb) to authenticated;
 comment on function public.update_pebble(uuid, jsonb) is
   'DEPRECATED compat wrapper over save_moment + complete_pebble; glyph keys are ignored, an empty domain_ids is dropped. Web only. Removed with the web composer (#1050).';
