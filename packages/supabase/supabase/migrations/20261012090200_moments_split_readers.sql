@@ -7,9 +7,12 @@
 -- =============================================================================
 
 -- D5: oldest collection carrying a glyph, else first domain default, else null.
--- Definer so every viewer carves the same stone: collection_pebbles is owner-
--- readable, and a connection would otherwise see a different glyph.
-create function public.resolve_pebble_glyph(p_pebble_id uuid)
+-- Two layers. private.resolve_pebble_glyph is the definer resolution: every
+-- viewer carves the same stone, because collection_pebbles is owner-readable
+-- and a connection would otherwise see a different glyph. `private` is never
+-- served by PostgREST, so it is not an API; the authenticated grant is for the
+-- invoker wrapper below.
+create function private.resolve_pebble_glyph(p_pebble_id uuid)
 returns jsonb
 language sql
 security definer
@@ -34,6 +37,23 @@ as $$
     'id', g.id, 'name', g.name, 'strokes', g.strokes, 'view_box', g.view_box, 'source', pick.source
   )
   from pick join public.glyphs g on g.id = pick.glyph_id;
+$$;
+revoke all on function private.resolve_pebble_glyph(uuid) from public, anon;
+grant execute on function private.resolve_pebble_glyph(uuid) to authenticated;
+
+-- public.resolve_pebble_glyph is the API: invoker, gated by pebble readability.
+-- The exists runs under the caller's pebbles_select, so a pebble the caller
+-- cannot read yields null — the same answer as an unknown id, which closes the
+-- by-uuid oracle a bare definer would open on a secret pebble's custom glyph.
+create function public.resolve_pebble_glyph(p_pebble_id uuid)
+returns jsonb
+language sql
+security invoker
+stable
+set search_path = public
+as $$
+  select private.resolve_pebble_glyph(p_pebble_id)
+   where exists (select 1 from public.pebbles p where p.id = p_pebble_id);
 $$;
 revoke all on function public.resolve_pebble_glyph(uuid) from public, anon;
 grant execute on function public.resolve_pebble_glyph(uuid) to authenticated;
@@ -107,6 +127,8 @@ grant execute on function public.path_moments() to authenticated;
 -- Base: 20260916100000 §4. `create or replace` keeps the anon + authenticated
 -- grant from 20260817130000. Null for unknown, non-public and hidden alike.
 -- render_svg stays as an explicit null until the web share page reads glyph.
+-- Definer serving anon, so it calls the private layer directly: its own where
+-- clause (public + not hidden) is the readability gate.
 create or replace function public.get_shared_pebble(p_pebble_id uuid)
 returns jsonb
 language sql
@@ -122,7 +144,7 @@ as $$
     'intensity', p.intensity,
     'positiveness', p.positiveness,
     'render_svg', null::text,
-    'glyph', public.resolve_pebble_glyph(p.id),
+    'glyph', private.resolve_pebble_glyph(p.id),
     'emotion', jsonb_build_object(
       'id', e.id, 'slug', e.slug, 'name', e.name, 'color', e.color,
       'primary_color', c.primary_color, 'secondary_color', c.secondary_color)
