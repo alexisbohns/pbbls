@@ -27,6 +27,14 @@
 --     pebble_needs_domain). The wrapper drops an empty domain_ids and keeps the
 --     pebble's domains instead of failing the whole edit. On create the
 --     empty set still raises pebble_needs_domain: a pebble needs a domain.
+--   Behaviour differences web will observe (new RPC semantics, accepted):
+--   * `description: ''` stores null (was '').
+--   * a blank name with no snaps raises moment_empty (D3).
+--   * happened_at is truncated to whole seconds.
+--   * enrichment errors are slugs: collection_not_owned, soul_not_owned,
+--     invalid_payload (were sentences).
+--   * the first edit of an old glyph-bearing pebble may post a negative karma
+--     delta: the glyph bonus is gone from compute_karma_delta.
 --
 -- Grants: v_pebbles_full repeats the 20260729000000 policy (revoke public +
 -- anon, select to authenticated). path_pebbles keeps its 20260519141000
@@ -258,9 +266,11 @@ begin
     'name',        payload->'name',
     'happened_at', payload->'happened_at',
     'snaps',       payload->'snaps'));
+  -- `->>` yields SQL NULL for a JSON null (`->` would yield a jsonb null and
+  -- never fall through the coalesce).
   if payload ? 'description' then
     v_moment_part := v_moment_part
-      || jsonb_build_object('description', coalesce(payload->'description', to_jsonb(''::text)));
+      || jsonb_build_object('description', to_jsonb(coalesce(payload->>'description', '')));
   end if;
   if v_moment_part <> '{}'::jsonb then
     perform public.save_moment(v_moment_part || jsonb_build_object('id', v_moment));
