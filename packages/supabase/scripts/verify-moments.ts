@@ -10,11 +10,14 @@
  *      v_moments_full nests only the caller's pebble; a second user reads
  *      nothing until the pebble is public, and never the sharer's pebble body.
  *   5. Compat: create_pebble + v_pebbles_full + path_pebbles still answer.
- *   6. Whole-second timestamps on every write.
+ *   6. happened_at is truncated to whole seconds by save_moment (direct and via create_pebble).
  *   7. delete_pebble keeps the moment; delete_moment removes all and reverses karma.
  *
  * Run: set -a; . ./.env; set +a; npm run db:verify:moments --workspace=packages/supabase
- * Expected: `Summary: passed=30 failed=0` (30 `check(` calls — recount if you add one).
+ * Expected: `Summary: passed=33 failed=0` (33 `check(` calls — recount if you add one).
+ * A founding write that fails (first save_moment, first complete_pebble, the
+ * collection insert) aborts the run with one `✗ aborted:` line instead of a
+ * cascade of dependent reds.
  * Needs NO service-role key: it signs up throwaway users (moments-verify-*@example.test)
  * and deletes them through the real `delete-account` edge function, even on failure.
  */
@@ -62,6 +65,15 @@ async function deleteAccount(token: string): Promise<Response> {
   });
 }
 
+/** A write the rest of the run stands on: fail loudly once rather than ~30 times. */
+function must<T>(label: string, r: { data: T | null; error: { message: string } | null }): T {
+  if (r.error || r.data === null || r.data === undefined) {
+    throw new Error(`${label}: ${r.error?.message ?? "no data"}`);
+  }
+  return r.data;
+}
+
+// RLS scopes karma_events to the caller (karma_events_select), and a fresh user starts at 0.
 async function karmaSum(client: SupabaseClient): Promise<number> {
   const { data } = await client.from("karma_events").select("delta");
   return (data ?? []).reduce((acc: number, r: { delta: number }) => acc + r.delta, 0);
@@ -89,7 +101,7 @@ try {
 
   const saved = await a.rpc("save_moment", { payload: { name: `coffee ${runId}`, happened_at: "2026-10-11T10:00:00.123Z" } });
   check("a name alone saves a moment", !saved.error && typeof saved.data === "string", saved.error?.message);
-  const momentId = saved.data as string;
+  const momentId = must<string>("save_moment", saved);
   check("saving a moment grants no karma", (await karmaSum(a)) === 0);
 
   const { data: m1 } = await a.from("moments").select("happened_at").eq("id", momentId).single();
@@ -111,7 +123,7 @@ try {
     payload: { moment_id: momentId, emotion_id: emotion.id, intensity: 2, positiveness: 1, domain_ids: [domain.id] },
   });
   check("emotion + valence + domain completes the pebble", !done.error && typeof done.data === "string", done.error?.message);
-  const pebbleId = done.data as string;
+  const pebbleId = must<string>("complete_pebble", done);
 
   const { data: events1 } = await a.from("karma_events").select("reason, delta").eq("ref_id", pebbleId);
   check("the first completion writes exactly one pebble_created event",
@@ -130,12 +142,15 @@ try {
     full1?.pebble?.glyph?.source === "domain" && full1?.pebble?.glyph?.id === domain.default_glyph_id,
     JSON.stringify(full1?.pebble?.glyph));
 
-  const { data: coll } = await a.from("collections").insert({ user_id: alice.id, name: `trip ${runId}` }).select("id").single();
+  const coll = must<{ id: string }>(
+    "collections insert",
+    await a.from("collections").insert({ user_id: alice.id, name: `trip ${runId}` }).select("id").single(),
+  );
   // The domain default is a system glyph, so can_use_glyph accepts it for any user.
-  const setGlyph = await a.rpc("set_collection_glyph", { p_collection_id: coll!.id, p_glyph_id: domain.default_glyph_id });
+  const setGlyph = await a.rpc("set_collection_glyph", { p_collection_id: coll.id, p_glyph_id: domain.default_glyph_id });
   check("a collection can carry a usable glyph", !setGlyph.error, setGlyph.error?.message);
   // An update: only moment_id + collection_ids, so no domain / emotion / valence rule fires.
-  const addColl = await a.rpc("complete_pebble", { payload: { moment_id: momentId, collection_ids: [coll!.id] } });
+  const addColl = await a.rpc("complete_pebble", { payload: { moment_id: momentId, collection_ids: [coll.id] } });
   const { data: full2 } = await a.from("v_moments_full").select("pebble").eq("id", momentId).single();
   check("a collection glyph wins over the domain",
     !addColl.error && full2?.pebble?.glyph?.source === "collection",
@@ -151,7 +166,8 @@ try {
   const { data: bobSees1 } = await b.from("v_moments_full").select("id").eq("id", momentId);
   check("a secret pebble's moment is invisible to another user", (bobSees1 ?? []).length === 0);
 
-  await a.rpc("complete_pebble", { payload: { moment_id: momentId, visibility: "public" } });
+  const toPublic = await a.rpc("complete_pebble", { payload: { moment_id: momentId, visibility: "public" } });
+  check("making the pebble public succeeds", !toPublic.error, toPublic.error?.message);
   const { data: bobSees2 } = await b.from("v_moments_full").select("id, name, pebble").eq("id", momentId);
   check("a public pebble opens its moment to another user",
     (bobSees2 ?? []).length === 1 && bobSees2![0].name === `coffee ${runId}`, JSON.stringify(bobSees2));
@@ -187,12 +203,20 @@ try {
   const { data: vpf } = await a.from("v_pebbles_full").select("id, name, glyph_id, happened_at").eq("id", compatId).single();
   check("v_pebbles_full compat row carries name and resolved glyph_id",
     vpf?.name === `compat ${runId}` && vpf?.glyph_id === domain.default_glyph_id, JSON.stringify(vpf));
+  check("the compat row's happened_at is at whole seconds",
+    !!vpf?.happened_at && new Date(vpf.happened_at).getMilliseconds() === 0, vpf?.happened_at);
   const { data: pp } = await a.rpc("path_pebbles");
   check("path_pebbles compat answers with render_svg null",
     Array.isArray(pp) && pp.length >= 2 && pp.every((r: { render_svg: unknown }) => r.render_svg === null),
     JSON.stringify(pp));
   const { data: compatPebble } = await a.from("pebbles").select("moment_id").eq("id", compatId).single();
-  await a.rpc("delete_moment", { p_moment_id: compatPebble!.moment_id });
+  // A broken compat layer must not abort the delete section below.
+  if (compatPebble?.moment_id) {
+    const delCompat = await a.rpc("delete_moment", { p_moment_id: compatPebble.moment_id });
+    check("delete_moment removes the compat moment", !delCompat.error, delCompat.error?.message);
+  } else {
+    check("delete_moment removes the compat moment", false, "no compat pebble row to delete");
+  }
 
   // 6/7. deletes ---------------------------------------------------------------------
   const delP = await a.rpc("delete_pebble", { p_pebble_id: pebbleId });
