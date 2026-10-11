@@ -18,6 +18,11 @@
  *   3. A block severs it (#834): once one user blocks the other, each one's
  *      profile resolves null to the other while signed in, in both
  *      directions, and stays visible to an anonymous visitor.
+ *   4. Since the moments split, bounce counts distinct MOMENT dates
+ *      (moments.happened_at), while the assiduity grid and ripple still key on
+ *      pebbles.created_at. Seeds spread their moments over past days while
+ *      every pebble is created today, so only a bounce that reads the moment
+ *      can reach the asserted level.
  *
  * Run:
  *   SUPABASE_URL=... SUPABASE_ANON_KEY=... \
@@ -27,6 +32,10 @@
  * deletes them through the real `delete-account` edge function, so it is
  * runnable by anyone who can run the app. Cleanup runs even on failure.
  * Exits non-zero if any assertion fails.
+ *
+ * Seeds go through save_moment + complete_pebble, not the deprecated
+ * create_pebble wrapper, so this harness outlives #1050. A pebble no longer
+ * carries an inline glyph, so the first-glyph badge is earned by a plain carve.
  *
  * STANDING RULE: when the projection gains or loses a key, update
  * `PROFILE_KEYS` / `BADGE_KEYS` below in the same change. They are the
@@ -147,6 +156,22 @@ async function fetchPublic(h: string): Promise<Projection | null> {
   return data as Projection | null;
 }
 
+/**
+ * One complete pebble, the way every client writes one: save_moment, then
+ * complete_pebble. Returns the first error message, or null on success.
+ */
+async function seedPebble(
+  client: SupabaseClient,
+  moment: Record<string, unknown>,
+  pebble: Record<string, unknown>,
+): Promise<string | null> {
+  const saved = await client.rpc("save_moment", { payload: moment });
+  if (saved.error || typeof saved.data !== "string") return `save_moment: ${saved.error?.message ?? "no id"}`;
+  const done = await client.rpc("complete_pebble", { payload: { ...pebble, moment_id: saved.data } });
+  if (done.error || typeof done.data !== "string") return `complete_pebble: ${done.error?.message ?? "no id"}`;
+  return null;
+}
+
 let alice: TestUser | null = null;
 let bob: TestUser | null = null;
 
@@ -196,33 +221,42 @@ try {
   check("achievements_count is 0", empty?.achievements_count === 0);
 
   // ---------------------------------------------------------------------------
-  // 2. Seed a shelf. One create_pebble call carries the inline glyph, soul and
-  //    collection, so a single pebble qualifies for five families at once; the
-  //    second pebble adds a second emotion_first. Seven badges against a cap of
-  //    six is the point — the slice has to actually cut something.
+  // 2. Seed a shelf. One pebble carries the inline soul, collection and
+  //    domain, beside a carved glyph, so a single seed qualifies for five
+  //    families at once; the second pebble adds a second emotion_first. Seven
+  //    badges against a cap of six is the point — the slice has to actually
+  //    cut something.
   // ---------------------------------------------------------------------------
+  const now = () => new Date().toISOString();
   const basePebble = {
-    happened_at: new Date().toISOString(),
     intensity: 2,
     positiveness: 1,
+    domain_ids: [domain.id],
   };
-  const { error: p1Err } = await a.rpc("create_pebble", {
-    payload: {
+  const { error: carveErr } = await a.from("glyphs").insert({
+    user_id: alice.id,
+    name: `g ${runId}`,
+    strokes: [{ d: "M20,20 L80,80", width: 6 }],
+    view_box: "0 0 100 100",
+  });
+  const p1Err = carveErr ? `carve: ${carveErr.message}` : await seedPebble(
+    a,
+    { name: `verify one ${runId}`, happened_at: now() },
+    {
       ...basePebble,
-      name: `verify one ${runId}`,
       emotion_id: emotions[0].id,
-      domain_ids: [domain.id],
-      new_glyph: { name: `g ${runId}`, strokes: [], view_box: "0 0 100 100" },
       new_souls: [{ name: `s ${runId}` }],
       new_collections: [{ name: `c ${runId}` }],
     },
-  });
-  check("seed pebble 1 (glyph + soul + collection + domain)", !p1Err, p1Err?.message);
+  );
+  check("seed pebble 1 (glyph + soul + collection + domain)", p1Err === null, p1Err ?? undefined);
 
-  const { error: p2Err } = await a.rpc("create_pebble", {
-    payload: { ...basePebble, name: `verify two ${runId}`, emotion_id: emotions[1].id },
-  });
-  check("seed pebble 2 (a second emotion)", !p2Err, p2Err?.message);
+  const p2Err = await seedPebble(
+    a,
+    { name: `verify two ${runId}`, happened_at: now() },
+    { ...basePebble, emotion_id: emotions[1].id },
+  );
+  check("seed pebble 2 (a second emotion)", p2Err === null, p2Err ?? undefined);
 
   const { data: batch1, error: ackErr } = await a.rpc("check_achievements");
   check("the retroactive grant unlocks the whole history in one call", !ackErr, ackErr?.message);
@@ -290,11 +324,18 @@ try {
   //    displace older ones regardless of its sort_order — pebble-count-10 sorts
   //    at 110, behind almost everything in batch 1, and must still come first.
   // ---------------------------------------------------------------------------
+  // Pebbles 3–8 sit on moments that happened 3–8 days ago, so the moment
+  // dates span seven distinct days (today + six) while every pebble is created
+  // today; the bounce assertion below depends on it.
+  const DAY_MS = 24 * 60 * 60 * 1000;
   for (let i = 3; i <= 10; i += 1) {
-    const { error } = await a.rpc("create_pebble", {
-      payload: { ...basePebble, name: `verify ${i} ${runId}`, emotion_id: emotions[0].id },
-    });
-    if (error) throw new Error(`seed pebble ${i}: ${error.message}`);
+    const happenedAt = i <= 8 ? new Date(Date.now() - i * DAY_MS).toISOString() : now();
+    const error = await seedPebble(
+      a,
+      { name: `verify ${i} ${runId}`, happened_at: happenedAt },
+      { ...basePebble, emotion_id: emotions[0].id },
+    );
+    if (error) throw new Error(`seed pebble ${i}: ${error}`);
   }
   const { data: batch2 } = await a.rpc("check_achievements");
   check(
@@ -311,6 +352,15 @@ try {
   );
   check("the total grows with it", recent.achievements_count === 8);
   check("the array stays capped", recent.achievements.length === 6);
+
+  // Bounce reads the MOMENT's date: seven distinct happened_at days in the
+  // window is level 2 (6–9 days). A bounce still keyed on pebbles.created_at
+  // would see one day (two across a UTC midnight) and answer level 1.
+  check(
+    "bounce_level counts distinct moment dates (7 days → level 2)",
+    recent.bounce_level === 2,
+    `got ${String(recent.bounce_level)}`,
+  );
 
   // ---------------------------------------------------------------------------
   // 5. The privacy contract. The key allowlist is the whole mechanism, so it is
