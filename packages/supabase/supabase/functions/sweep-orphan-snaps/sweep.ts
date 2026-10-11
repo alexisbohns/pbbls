@@ -3,8 +3,8 @@
  * drive it with a mocked client and fixed secrets (no network, no env).
  *
  * Which objects are orphans is decided in SQL by
- * `public.list_orphan_snap_files` (20261007131500): no `public.snaps` row, no
- * draft reference, older than the grace period. This file only authenticates
+ * `public.list_orphan_snap_files` (20261007131500): no `public.snaps` row naming
+ * the file, older than the grace period. This file only authenticates
  * the caller, asks that function, and removes what it returns through the
  * Storage API. A SQL `delete from storage.objects` is refused by Supabase's
  * storage schema, which is why the old `sweep_orphan_snap_files()` never

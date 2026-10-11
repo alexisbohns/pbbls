@@ -2,7 +2,7 @@
  * Edge function: sweep-orphan-snaps
  *
  * Ops-only (#322). Deletes `pebbles-media` objects that nothing references any
- * more — no `public.snaps` row, no server draft naming them, older than 24
+ * more — no `public.snaps` row naming them, older than 24
  * hours — and reports `deleted_count` / `bytes_freed`. The orphans come from
  * deleted pebbles (the `snaps` cascade cannot reach Storage) and from composes
  * abandoned after upload (client cleanup is best-effort on every surface).
