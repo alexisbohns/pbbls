@@ -801,6 +801,8 @@ Push as Part 2 of the stack.
 
 ## Task 5: Migration 3 — readers
 
+> **Shape note (post-review):** the resolver is two layers, `private.resolve_pebble_glyph` (definer) and `public.resolve_pebble_glyph` (invoker, gated on `exists (select 1 from public.pebbles where id = $1)` under the caller's RLS). `get_shared_pebble` calls the private layer. See spec §4 as amended. The SQL below predates that amendment; the committed file is the reference.
+
 **Files:**
 - Create: `packages/supabase/supabase/migrations/20261012090200_moments_split_readers.sql`
 
@@ -1702,6 +1704,10 @@ try {
   check("a collection glyph wins over the domain", full2?.pebble?.glyph?.source === "collection", JSON.stringify(full2?.pebble?.glyph));
 
   // 4. readers and RLS ------------------------------------------------------------
+  const probeSecret = await b.rpc("resolve_pebble_glyph", { p_pebble_id: pebbleId });
+  check("a secret pebble's glyph is null to another user", !probeSecret.error && probeSecret.data === null, probeSecret.error?.message);
+  const probeUnknown = await b.rpc("resolve_pebble_glyph", { p_pebble_id: crypto.randomUUID() });
+  check("an unknown pebble id answers null", !probeUnknown.error && probeUnknown.data === null, probeUnknown.error?.message);
   const { data: bobSees1 } = await b.from("v_moments_full").select("id").eq("id", momentId);
   check("a secret pebble's moment is invisible to another user", (bobSees1 ?? []).length === 0);
   await a.rpc("complete_pebble", { payload: { moment_id: momentId, visibility: "public" } });
@@ -1711,6 +1717,11 @@ try {
   const { data: bobPebbles } = await b.from("pebbles").select("id").eq("moment_id", momentId);
   check("pebbles_select still shows the public pebble row", (bobPebbles ?? []).length === 1);
 
+  const probePublic = await b.rpc("resolve_pebble_glyph", { p_pebble_id: pebbleId });
+  check("a public pebble's glyph resolves for another user", probePublic.data?.id === domain.default_glyph_id, JSON.stringify(probePublic.data));
+  const anonClient = createClient(SUPABASE_URL!, ANON_KEY!, { auth: { persistSession: false } });
+  const sharedAnon = await anonClient.rpc("get_shared_pebble", { p_pebble_id: pebbleId });
+  check("get_shared_pebble answers anon with a glyph", !sharedAnon.error && !!sharedAnon.data?.glyph?.id, sharedAnon.error?.message);
   const shared = await b.rpc("get_shared_pebble", { p_pebble_id: pebbleId });
   check("get_shared_pebble carries the moment name and a glyph", !shared.error && shared.data?.name === `coffee ${runId}` && shared.data?.glyph?.id, shared.error?.message);
 
@@ -1766,7 +1777,7 @@ Deno.exit(failed === 0 ? 0 : 1);
 - [ ] **Step 3: Run it**
 
 Run: `set -a; . ./.env; set +a; npm run db:verify:moments --workspace=packages/supabase`
-Expected: `Summary: passed=26 failed=0` (count the `check(` calls if you changed any).
+Expected: `Summary: passed=30 failed=0` (count the `check(` calls if you changed any).
 
 - [ ] **Step 4: Commit**
 
