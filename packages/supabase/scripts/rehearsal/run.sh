@@ -45,7 +45,7 @@ copy_table storage.objects "id, bucket_id, name, metadata, created_at"
 # 2. The public schema and its rows.
 "$PGBIN/pg_dump" "$SUPABASE_DB_URL" --no-owner --no-privileges --no-publications --no-subscriptions \
   --schema=public > "$SCRATCH/dump.sql"
-$PSQL -f "$SCRATCH/dump.sql" 2> "$SCRATCH/restore.err" || { echo "restore failed, see $SCRATCH/restore.err"; head -n 5 "$SCRATCH/restore.err"; exit 1; }
+$PSQL -f "$SCRATCH/dump.sql" 2> "$SCRATCH/restore.err" || { echo "restore failed; first lines of restore.err below (re-run with REHEARSAL_KEEP=1 to keep the full file)"; head -n 20 "$SCRATCH/restore.err"; exit 1; }
 
 # 3. Only the new migrations.
 shopt -s nullglob

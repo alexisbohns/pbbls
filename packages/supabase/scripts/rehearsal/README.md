@@ -26,7 +26,7 @@ The cluster listens on 127.0.0.1:55432 and is stopped on exit unless
 makes `-n` have no effect. So the restore is two steps:
 
 1. `bootstrap.sql` creates minimal shells of `auth.users`, `storage.buckets` and
-   `storage.objects` (only the columns the rehearsal needs; buckets are copied too), and `run.sh` copies
+   `storage.objects` (only the columns the rehearsal needs), and `run.sh` copies
    those columns from the live tables with `\copy`. The live tables carry many
    more columns and platform-owned types, so a real `--schema-only` dump of them
    would not restore on a bare Postgres.
