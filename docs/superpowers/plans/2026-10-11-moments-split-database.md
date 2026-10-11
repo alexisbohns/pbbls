@@ -8,13 +8,13 @@
 
 **Tech Stack:** Postgres 15 (Supabase), plpgsql, Supabase CLI (`db push`, `functions deploy`, `gen types --linked`), Deno harnesses, Homebrew `postgresql@16` for the local rehearsal.
 
-**Spec:** `docs/superpowers/specs/2026-10-11-moments-and-pebbles-split-design.md` · **Issue:** the backend issue of the milestone (create it first: `[Feat] Split moments from pebbles in the database`, labels `feat` `db` `supabase`; its number is `NNN` below)
+**Spec:** `docs/superpowers/specs/2026-10-11-moments-and-pebbles-split-design.md` · **Issue:** the backend issue of the milestone (create it first: `[Feat] Split moments from pebbles in the database`, labels `feat` `db` `supabase`; its number is `1046` below)
 
 ---
 
 ## Ground rules for every task
 
-- Work from a worktree created from updated `origin/main` (`git fetch && git worktree add .claude/worktrees/moments-db -b feat/NNN-db-moments-schema origin/main`). Copy `packages/supabase/supabase/.temp` from the main checkout or `db push` cannot find the project.
+- Work from a worktree created from updated `origin/main` (`git fetch && git worktree add .claude/worktrees/moments-db -b feat/1046-db-moments-schema origin/main`). Copy `packages/supabase/supabase/.temp` from the main checkout or `db push` cannot find the project.
 - Supabase commands: `cd packages/supabase && npx supabase <cmd>`. Credentials for harnesses: `set -a; . ./.env; set +a` from the repo root.
 - **No Docker.** Migrations are rehearsed on the native Postgres (Task 1) and then pushed to the linked project. Types come from `npm run db:types:remote --workspace=packages/supabase`, never `db:types`.
 - Migration file names: `packages/supabase/supabase/migrations/2026101209NN00_<slug>.sql`, versions strictly increasing and unique (CI checks).
@@ -26,11 +26,11 @@
 
 | Part | Branch | PR title | Tasks |
 |---|---|---|---|
-| 1 | `feat/NNN-db-moments-schema` | `feat(db): add moments and move the moment half of pebbles into them` | 1–3 |
-| 2 | `feat/NNN-db-moments-writers` | `feat(db): save_moment and complete_pebble replace create_pebble` | 4 |
-| 3 | `feat/NNN-db-moments-readers` | `feat(db): read moments with the caller's pebble and a derived glyph` | 5–6 |
-| 4 | `feat/NNN-db-moments-compat` | `feat(db): keep the web contract alive over the moments schema` | 7–8 |
-| 5 | `feat/NNN-db-moments-harnesses` | `test(db): prove the moments contract and retire the drafts harness` | 9–12 |
+| 1 | `feat/1046-db-moments-schema` | `feat(db): add moments and move the moment half of pebbles into them` | 1–3 |
+| 2 | `feat/1046-db-moments-writers` | `feat(db): save_moment and complete_pebble replace create_pebble` | 4 |
+| 3 | `feat/1046-db-moments-readers` | `feat(db): read moments with the caller's pebble and a derived glyph` | 5–6 |
+| 4 | `feat/1046-db-moments-compat` | `feat(db): keep the web contract alive over the moments schema` | 7–8 |
+| 5 | `feat/1046-db-moments-harnesses` | `test(db): prove the moments contract and retire the drafts harness` | 9–12 |
 
 Each part lints (`npm run lint --workspace=packages/supabase`) and typechecks (`npm run build --workspace=packages/supabase`) alone. The push to the linked project happens once, from Part 5, after the whole stack reviews green on the rehearsal cluster. Read the `gh-stack` skill before creating the stack.
 
@@ -428,7 +428,7 @@ git commit -m "feat(db): add moments and move the moment half of pebbles into th
 ## Task 3: Part 1 PR
 
 - [ ] **Step 1: Lint and typecheck** — `npm run lint --workspace=packages/supabase && npm run build --workspace=packages/supabase`. Expected: clean (the migration is not typechecked; this proves nothing else broke).
-- [ ] **Step 2: Create the stack** per the `gh-stack` skill, push Part 1, open the PR with body `Resolves #NNN` only on the **last** part; Parts 1–4 bodies say `Part N of #NNN`. Labels `feat` `db` `supabase`, the milestone. Add `no-lab-note` (database part, nothing user-visible yet).
+- [ ] **Step 2: Create the stack** per the `gh-stack` skill, push Part 1, open the PR with body `Resolves #1046` only on the **last** part; Parts 1–4 bodies say `Part N of #1046`. Labels `feat` `db` `supabase`, the milestone. Add `no-lab-note` (database part, nothing user-visible yet).
 
 ---
 
@@ -1802,7 +1802,7 @@ Each harness builds pebbles through `compose-pebble` or `create_pebble` and then
 - [ ] **Step 1: Decision log** — append to `docs/decisions/log.md`:
 
 ```markdown
-## 2026-10-12 — A moment is what happened, a pebble is what it meant to one person; a pebble exists only when complete; its glyph is derived (#NNN)
+## 2026-10-12 — A moment is what happened, a pebble is what it meant to one person; a pebble exists only when complete; its glyph is derived (#1046)
 
 - **Status:** taken
 - **Scope:** db, api
@@ -1811,7 +1811,7 @@ Each harness builds pebbles through `compose-pebble` or `create_pebble` and then
 - **Why:** One identity through the migration keeps snap paths, share links and report targets valid. Splitting now avoids a second identity migration when participants arrive. Deriving the glyph removes a step and a render pipeline.
 - **Consequences:** `create_pebble`, `update_pebble`, `v_pebbles_full` and `path_pebbles` are deprecated compat objects for web only and die with the web composer. `moments_select` and `pebbles_select` reference each other only through `private.moment_is_hidden`; a new cross-user read path on either table must keep that shape or it recurses. Participants later widen `moments_select` only. Installed iOS/Android builds broke at this push until their composers shipped (accepted pre-launch).
 - **Supersedes / Superseded-by:** Supersedes the M47 drafts design (`2026-07-29-drafts-and-autosave-design.md`) for server drafts; local autosave stands.
-- **Refs:** #NNN, `docs/superpowers/specs/2026-10-11-moments-and-pebbles-split-design.md`, migrations `20261012090000`–`20261012090400`, `packages/supabase/scripts/verify-moments.ts`.
+- **Refs:** #1046, `docs/superpowers/specs/2026-10-11-moments-and-pebbles-split-design.md`, migrations `20261012090000`–`20261012090400`, `packages/supabase/scripts/verify-moments.ts`.
 ```
 
 - [ ] **Step 2: Arkaik** (hosted, `arkaik-mcp` with `ARKAIK_TOKEN`; if the tools are unavailable say so and stop): `create_node` data model **Moment**; `update_node` **Pebble** (fields moved, moment reference), **Collection** (glyph); `create_node` endpoints `save_moment`, `complete_pebble`, `delete_moment`, `path_moments`, `v_moments_full`; mark `create_pebble`, `update_pebble`, `path_pebbles`, `v_pebbles_full` deprecated and the drafts endpoints retired; edges Moment→Pebble, Pebble→Collection. Move the backend acceptance to `development`.
@@ -1823,7 +1823,7 @@ git add docs/decisions/log.md
 git commit -m "docs(core): record the moments and pebbles split decision"
 ```
 
-Part 5 PR body: `Resolves #NNN`, the five migration files, the harness results table, the admin type fixes from Task 9 if any, the compat objects list and the statement that mobile builds are broken until Parts 2 and 3 of the milestone. Labels `feat` `db` `supabase`, `no-lab-note`, the milestone.
+Part 5 PR body: `Resolves #1046`, the five migration files, the harness results table, the admin type fixes from Task 9 if any, the compat objects list and the statement that mobile builds are broken until Parts 2 and 3 of the milestone. Labels `feat` `db` `supabase`, `no-lab-note`, the milestone.
 
 ---
 
