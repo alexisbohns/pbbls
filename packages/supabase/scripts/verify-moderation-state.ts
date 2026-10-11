@@ -11,6 +11,15 @@
  * link — so it is proven here against the real RLS policies, triggers and
  * RPCs.
  *
+ * Since the moments split, hidden_at / hidden_by live on the MOMENT and the
+ * canonical target kind is 'moment'; pebbles_select probes the moment's flag
+ * (private.moment_is_hidden) and moments_select carries its own hidden arm,
+ * so the matrix is read through BOTH the pebbles table and v_moments_full.
+ * The 'pebble' alias of admin_set_content_hidden is exercised once (it
+ * resolves a pebble id to its moment and answers the canonical kind). Seeds
+ * go through save_moment + complete_pebble, not the deprecated create_pebble
+ * wrapper, so this harness outlives #1050.
+ *
  * Why this one needs the SERVICE ROLE (and therefore is NOT in the CI gate):
  * setting `hidden_at` requires an admin, and `profiles_privileged_guard` pins
  * `is_admin` against every client write. Only postgres / service_role / a
@@ -117,6 +126,25 @@ async function forceCleanup(user: TestUser | null) {
   console.log(`… cleanup ${user.label}: ${after?.user ? "STILL PRESENT — remove manually" : "gone"}`);
 }
 
+type Seeded = { momentId: string; pebbleId: string };
+
+/** save_moment then complete_pebble: one complete pebble, the way every client writes one. */
+async function createPebble(
+  client: SupabaseClient,
+  moment: Record<string, unknown>,
+  pebble: Record<string, unknown>,
+): Promise<Seeded> {
+  const saved = await client.rpc("save_moment", { payload: moment });
+  if (saved.error || typeof saved.data !== "string") {
+    throw new Error(`save_moment(${String(moment.name)}): ${saved.error?.message ?? "no id"}`);
+  }
+  const done = await client.rpc("complete_pebble", { payload: { ...pebble, moment_id: saved.data } });
+  if (done.error || typeof done.data !== "string") {
+    throw new Error(`complete_pebble(${String(moment.name)}): ${done.error?.message ?? "no id"}`);
+  }
+  return { momentId: saved.data, pebbleId: done.data };
+}
+
 let owner: TestUser | null = null;
 let connection: TestUser | null = null;
 let stranger: TestUser | null = null;
@@ -138,7 +166,8 @@ try {
   const anon = createClient(SUPABASE_URL!, ANON_KEY!, { auth: { persistSession: false } });
 
   const { data: emotion } = await o.from("emotions").select("id").limit(1).single();
-  if (!emotion) throw new Error("reference data missing (emotion)");
+  const { data: domain } = await o.from("domains").select("id").limit(1).single();
+  if (!emotion || !domain) throw new Error("reference data missing (emotion / domain)");
 
   // ---------------------------------------------------------------------------
   // 0. owner ↔ connection become mutual through the real M49 path, so the
@@ -154,27 +183,26 @@ try {
   // 1. Seed: a public pebble, a private pebble, a second public pebble for the
   //    report path, and a published profile.
   // ---------------------------------------------------------------------------
+  const happenedAt = "2026-09-01T12:00:00Z";
   const base = {
-    happened_at: "2026-09-01T12:00:00Z",
     intensity: 2,
     positiveness: 1,
     emotion_id: emotion.id,
+    domain_ids: [domain.id],
   };
 
-  const { data: publicId, error: publicErr } = await o.rpc("create_pebble", {
-    payload: { ...base, name: `moderation public ${runId}`, visibility: "public" },
-  });
-  if (publicErr || !publicId) throw new Error(`create public pebble: ${publicErr?.message}`);
-
-  const { data: privateId, error: privateErr } = await o.rpc("create_pebble", {
-    payload: { ...base, name: `moderation private ${runId}`, visibility: "private" },
-  });
-  if (privateErr || !privateId) throw new Error(`create private pebble: ${privateErr?.message}`);
-
-  const { data: reportedId, error: reportedErr } = await o.rpc("create_pebble", {
-    payload: { ...base, name: `moderation reported ${runId}`, visibility: "public" },
-  });
-  if (reportedErr || !reportedId) throw new Error(`create reported pebble: ${reportedErr?.message}`);
+  const pub = await createPebble(
+    o, { name: `moderation public ${runId}`, happened_at: happenedAt }, { ...base, visibility: "public" },
+  );
+  const priv = await createPebble(
+    o, { name: `moderation private ${runId}`, happened_at: happenedAt }, { ...base, visibility: "private" },
+  );
+  const reported = await createPebble(
+    o, { name: `moderation reported ${runId}`, happened_at: happenedAt }, { ...base, visibility: "public" },
+  );
+  const publicId = pub.pebbleId;
+  const privateId = priv.pebbleId;
+  const reportedId = reported.pebbleId;
 
   const handle = `modverify${runId}`;
   const { error: handleErr } = await o.rpc("set_handle", { p_handle: handle });
@@ -189,8 +217,10 @@ try {
     const { data } = await client.from("pebbles").select("id").eq("id", id).maybeSingle();
     return !!data;
   };
-  const seesInFullView = async (client: SupabaseClient, id: string) => {
-    const { data } = await client.from("v_pebbles_full").select("id").eq("id", id).maybeSingle();
+  // The split's reader, keyed by MOMENT id: moments_select has its own hidden
+  // arm, independent of the probe pebbles_select runs.
+  const seesMoment = async (client: SupabaseClient, momentId: string) => {
+    const { data } = await client.from("v_moments_full").select("id").eq("id", momentId).maybeSingle();
     return !!data;
   };
   const sharedByLink = async (id: string) => {
@@ -203,31 +233,31 @@ try {
   // 2. Baseline. Without this, "hidden" below could be proven by a seed that
   //    was never visible in the first place.
   // ---------------------------------------------------------------------------
-  check("baseline: owner sees their public pebble", await seesPebble(o, publicId as string));
-  check("baseline: stranger sees the public pebble", await seesPebble(s, publicId as string));
-  check("baseline: connection sees the public pebble", await seesPebble(c, publicId as string));
-  check("baseline: connection sees the private pebble", await seesPebble(c, privateId as string));
-  check("baseline: the public pebble is in v_pebbles_full for the stranger",
-    await seesInFullView(s, publicId as string));
+  check("baseline: owner sees their public pebble", await seesPebble(o, publicId));
+  check("baseline: stranger sees the public pebble", await seesPebble(s, publicId));
+  check("baseline: connection sees the public pebble", await seesPebble(c, publicId));
+  check("baseline: connection sees the private pebble", await seesPebble(c, privateId));
+  check("baseline: the public pebble's moment is in v_moments_full for the stranger",
+    await seesMoment(s, pub.momentId));
   check("baseline: anon resolves the public pebble by link",
-    (await sharedByLink(publicId as string)) !== null);
+    (await sharedByLink(publicId)) !== null);
 
   // ---------------------------------------------------------------------------
-  // 3. Hide the public pebble through the admin RPC (the moderator's OWN
-  //    session — admin_set_content_hidden reads auth.uid()).
+  // 3. Hide the public pebble's MOMENT through the admin RPC (the moderator's
+  //    OWN session — admin_set_content_hidden reads auth.uid()).
   // ---------------------------------------------------------------------------
   const { error: hideErr } = await m.rpc("admin_set_content_hidden", {
-    p_target_kind: "pebble",
-    p_target_id: publicId,
+    p_target_kind: "moment",
+    p_target_id: pub.momentId,
     p_hidden: true,
     p_note: "moderation harness",
   });
-  check("admin_set_content_hidden hides a pebble", !hideErr, hideErr?.message);
+  check("admin_set_content_hidden hides a moment", !hideErr, hideErr?.message);
 
   const { data: hiddenRow } = await admin
-    .from("pebbles").select("hidden_at, hidden_by, visibility").eq("id", publicId as string)
+    .from("moments").select("hidden_at, hidden_by").eq("id", pub.momentId)
     .maybeSingle();
-  check("hidden_at is stamped and attributed to the moderator",
+  check("hidden_at is stamped on the moment and attributed to the moderator",
     !!hiddenRow?.hidden_at && hiddenRow?.hidden_by === moderator.id,
     JSON.stringify(hiddenRow));
 
@@ -248,15 +278,15 @@ try {
   // subject and the whole feature is theatre.
   // ---------------------------------------------------------------------------
   const { error: ownerUnhideErr } = await o
-    .from("pebbles").update({ hidden_at: null }).eq("id", publicId as string);
-  check("the owner CANNOT clear hidden_at on their own hidden pebble",
-    ownerUnhideErr?.message?.includes("pebbles_moderation_column") === true,
-    `expected pebbles_moderation_column, got: ${ownerUnhideErr?.message ?? "no error at all"}` +
+    .from("moments").update({ hidden_at: null }).eq("id", pub.momentId);
+  check("the owner CANNOT clear hidden_at on their own hidden moment",
+    ownerUnhideErr?.message?.includes("moments_moderation_column") === true,
+    `expected moments_moderation_column, got: ${ownerUnhideErr?.message ?? "no error at all"}` +
       ` (code=${ownerUnhideErr?.code ?? "none"})`);
 
   const { data: stillHidden } = await admin
-    .from("pebbles").select("hidden_at").eq("id", publicId as string).maybeSingle();
-  check("…and the refused update left the pebble hidden", !!stillHidden?.hidden_at,
+    .from("moments").select("hidden_at").eq("id", pub.momentId).maybeSingle();
+  check("…and the refused update left the moment hidden", !!stillHidden?.hidden_at,
     JSON.stringify(stillHidden));
 
   // ---------------------------------------------------------------------------
@@ -266,71 +296,75 @@ try {
   // present as the app eating their entry. Suspending someone's public reach
   // and deleting their journal must not look the same from inside the app.
   check("the owner STILL sees their own hidden pebble (table)",
-    await seesPebble(o, publicId as string),
+    await seesPebble(o, publicId),
     "the owner arm of pebbles_select was gated — this presents as data loss");
-  check("the owner STILL sees their own hidden pebble (v_pebbles_full)",
-    await seesInFullView(o, publicId as string),
-    "the owner arm of pebbles_select was gated — this presents as data loss");
+  check("the owner STILL sees their own hidden moment (v_moments_full)",
+    await seesMoment(o, pub.momentId),
+    "the owner arm of moments_select was gated — this presents as data loss");
 
   check("a stranger does not see the hidden pebble (public arm)",
-    !(await seesPebble(s, publicId as string)));
+    !(await seesPebble(s, publicId)));
   check("a mutual connection does not see the hidden pebble",
-    !(await seesPebble(c, publicId as string)));
+    !(await seesPebble(c, publicId)));
   check("anon get_shared_pebble returns null for the hidden pebble",
-    (await sharedByLink(publicId as string)) === null);
-  // Proves the view inherits the policy rather than assuming it: v_pebbles_full
-  // is security_invoker, so pebbles_select applies through it. A view created
-  // without that option would still pass every table assertion above while
-  // leaking the row here.
-  check("the hidden pebble is absent from v_pebbles_full for the stranger",
-    !(await seesInFullView(s, publicId as string)),
-    "v_pebbles_full did not inherit pebbles_select (security_invoker?)");
+    (await sharedByLink(publicId)) === null);
+  // Proves the view inherits the policy rather than assuming it: v_moments_full
+  // is security_invoker, so moments_select — and its own `hidden_at is null`
+  // arm — applies through it. A view created without that option would still
+  // pass every table assertion above while leaking the row here.
+  check("the hidden moment is absent from v_moments_full for the stranger",
+    !(await seesMoment(s, pub.momentId)),
+    "v_moments_full did not inherit moments_select (security_invoker?)");
 
   // The private arm has its own predicate; a hidden PUBLIC pebble never
   // reaches it. Hide the private one too so the arm a connection reads through
-  // is proven dark as well.
-  const { error: hidePrivateErr } = await m.rpc("admin_set_content_hidden", {
+  // is proven dark as well — through the 'pebble' ALIAS this time: a pebble id
+  // resolves to its moment, and the response names the canonical kind and id.
+  const { data: hidePrivate, error: hidePrivateErr } = await m.rpc("admin_set_content_hidden", {
     p_target_kind: "pebble",
     p_target_id: privateId,
     p_hidden: true,
   });
-  check("admin_set_content_hidden hides the private pebble", !hidePrivateErr,
-    hidePrivateErr?.message);
+  const hidePrivateRow = hidePrivate as { target_kind?: string; target_id?: string } | null;
+  check("admin_set_content_hidden('pebble') hides the private pebble's moment via the alias",
+    !hidePrivateErr && hidePrivateRow?.target_kind === "moment" &&
+      hidePrivateRow?.target_id === priv.momentId,
+    hidePrivateErr?.message ?? JSON.stringify(hidePrivate));
   check("a mutual connection loses a hidden PRIVATE pebble (private arm)",
-    !(await seesPebble(c, privateId as string)));
+    !(await seesPebble(c, privateId)));
   check("the owner still sees their own hidden private pebble",
-    await seesPebble(o, privateId as string));
+    await seesPebble(o, privateId));
 
   // ---------------------------------------------------------------------------
   // 5. The APPEAL PATH — un-hiding restores every path. This is what #832's
   //    destructive takedown made impossible.
   // ---------------------------------------------------------------------------
-  for (const [label, id] of [["public", publicId], ["private", privateId]] as const) {
+  for (const [label, id] of [["public", pub.momentId], ["private", priv.momentId]] as const) {
     const { error } = await m.rpc("admin_set_content_hidden", {
-      p_target_kind: "pebble",
+      p_target_kind: "moment",
       p_target_id: id,
       p_hidden: false,
       p_note: "appeal upheld",
     });
-    check(`admin_set_content_hidden un-hides the ${label} pebble`, !error, error?.message);
+    check(`admin_set_content_hidden un-hides the ${label} moment`, !error, error?.message);
   }
 
   const { data: clearedRow } = await admin
-    .from("pebbles").select("hidden_at, hidden_by").eq("id", publicId as string).maybeSingle();
+    .from("moments").select("hidden_at, hidden_by").eq("id", pub.momentId).maybeSingle();
   check("un-hiding clears both moderation columns",
     clearedRow?.hidden_at === null && clearedRow?.hidden_by === null,
     JSON.stringify(clearedRow));
 
   check("restored: the stranger sees the public pebble again",
-    await seesPebble(s, publicId as string));
+    await seesPebble(s, publicId));
   check("restored: the connection sees the public pebble again",
-    await seesPebble(c, publicId as string));
+    await seesPebble(c, publicId));
   check("restored: the connection sees the private pebble again",
-    await seesPebble(c, privateId as string));
-  check("restored: the public pebble is back in v_pebbles_full for the stranger",
-    await seesInFullView(s, publicId as string));
+    await seesPebble(c, privateId));
+  check("restored: the public pebble's moment is back in v_moments_full for the stranger",
+    await seesMoment(s, pub.momentId));
   check("restored: anon resolves the public pebble by link again",
-    (await sharedByLink(publicId as string)) !== null);
+    (await sharedByLink(publicId)) !== null);
 
   // ---------------------------------------------------------------------------
   // 6. Hidden PROFILE: the public projection goes dark, the handle does not
@@ -422,16 +456,17 @@ try {
   // THE assertion that proves #833 actually replaced #832's destructive
   // behaviour: the previous emission overwrote pebbles.visibility with
   // 'secret', destroying a setting the user owns and making the takedown
-  // unappealable. hidden_at must be stamped and visibility must be untouched.
+  // unappealable. hidden_at must be stamped (on the moment) and the pebble's
+  // visibility must be untouched.
   // ---------------------------------------------------------------------------
   const { data: report, error: reportErr } = await s.rpc("report_content", {
-    p_target_kind: "pebble",
-    p_target_id: reportedId,
+    p_target_kind: "moment",
+    p_target_id: reported.momentId,
     p_reason: "harassment",
     p_detail: "moderation harness",
   });
   const reportId = (report as { id?: string } | null)?.id;
-  check("a stranger can report the owner's public pebble", !reportErr && !!reportId,
+  check("a stranger can report the moment of the owner's public pebble", !reportErr && !!reportId,
     reportErr?.message);
 
   const { error: resolveErr } = await m.rpc("resolve_content_report", {
@@ -442,19 +477,20 @@ try {
   check("resolve_content_report('actioned') succeeds", !resolveErr, resolveErr?.message);
 
   const { data: actioned } = await admin
-    .from("pebbles").select("hidden_at, hidden_by, visibility").eq("id", reportedId as string)
-    .maybeSingle();
-  check("actioning a pebble report SETS hidden_at", !!actioned?.hidden_at,
+    .from("moments").select("hidden_at, hidden_by").eq("id", reported.momentId).maybeSingle();
+  const { data: actionedPebble } = await admin
+    .from("pebbles").select("visibility").eq("id", reportedId).maybeSingle();
+  check("actioning a moment report SETS hidden_at on the moment", !!actioned?.hidden_at,
     JSON.stringify(actioned));
-  check("actioning a pebble report leaves visibility UNCHANGED at 'public'",
-    actioned?.visibility === "public",
-    `visibility is '${actioned?.visibility}' — the destructive takedown is back`);
+  check("actioning a moment report leaves the pebble's visibility UNCHANGED at 'public'",
+    actionedPebble?.visibility === "public",
+    `visibility is '${actionedPebble?.visibility}' — the destructive takedown is back`);
   check("the actioned takedown is attributed to the moderator",
     actioned?.hidden_by === moderator.id, String(actioned?.hidden_by));
   check("the actioned pebble is dark to a stranger",
-    !(await seesPebble(s, reportedId as string)));
+    !(await seesPebble(s, reportedId)));
   check("the owner still sees their actioned pebble",
-    await seesPebble(o, reportedId as string));
+    await seesPebble(o, reportedId));
 } catch (err) {
   failed += 1;
   console.error(`✗ aborted: ${err instanceof Error ? err.message : String(err)}`);
