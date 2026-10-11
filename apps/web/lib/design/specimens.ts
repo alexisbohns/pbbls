@@ -46,6 +46,8 @@ export const SPECIMENS = [
   { id: "path-empty-state", name: "PathEmptyState", source: "components/path/PathEmptyState.tsx", section: "components", m3: "bridged" },
   { id: "gamification-block", name: "GamificationBlock", source: "components/path/GamificationBlock.tsx", section: "components", m3: "bridged" },
   { id: "pebble-visual", name: "PebbleVisual", source: "components/pebble/PebbleVisual.tsx", section: "components", m3: "bridged" },
+  { id: "lit-stone", name: "LitStone", source: "components/pebble/stone/LitStone.tsx", section: "components", m3: "bridged" },
+  { id: "stone-seal", name: "StoneSeal", source: "components/pebble/stone/StoneSeal.tsx", section: "components", m3: "bridged" },
   { id: "pebble-indicators", name: "IntensityDots · PositivenessIndicator", source: "components/pebble/PebbleIndicators.tsx", section: "components", m3: "bridged" },
   { id: "soul-card", name: "SoulCard", source: "components/souls/SoulCard.tsx", section: "components", m3: "bridged" },
   { id: "souls-empty-state", name: "SoulsEmptyState", source: "components/souls/SoulsEmptyState.tsx", section: "components", m3: "bridged" },

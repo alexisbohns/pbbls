@@ -11,7 +11,7 @@ import { EMOTIONS } from "@/lib/config/emotions"
  */
 // `shaded_color` for six categories is the value the Spine mock (#1052) carries;
 // shame is absent there and uses the same rule the others follow (primary × 0.7).
-const CATEGORY_PALETTES: Record<string, EmotionPalette> = {
+export const CATEGORY_PALETTES: Record<string, EmotionPalette> = {
   fear:    { primary_color: "#7B5E99FF", secondary_color: "#AE91CCFF", light_color: "#F2EFF5FF", surface_color: "#7B5E991A", shaded_color: "#56426BFF", dark_color: "#19131FFF" },
   sadness: { primary_color: "#59658AFF", secondary_color: "#8C98BDFF", light_color: "#EEF0F3FF", surface_color: "#59658A1A", shaded_color: "#3E4761FF", dark_color: "#12141CFF" },
   pride:   { primary_color: "#A9478AFF", secondary_color: "#EA91CEFF", light_color: "#F6EDF3FF", surface_color: "#A9478A1A", shaded_color: "#763261FF", dark_color: "#220E1CFF" },
