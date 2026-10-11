@@ -42,7 +42,9 @@ Known gaps:
 - `auth.uid()` is a stub reading `request.jwt.claim.sub`; `storage.foldername`
   is a faithful reimplementation. `auth.jwt()` is genuinely missing.
 - Policies are restored, but nothing runs as `authenticated` unless you
-  `set role authenticated; set request.jwt.claim.sub = '<uuid>'`.
+  `set role authenticated; set request.jwt.claim.sub = '<uuid>'`. That works
+  out of the box: `bootstrap.sql` grants `usage on schema auth` to the three
+  API roles so `auth.uid()` resolves under `set role`.
 - The `extensions` schema is absent, so `extensions.gen_random_bytes` and
   friends fail at runtime, not at restore.
 - Migrations run as a superuser here; `db push` runs as Supabase's

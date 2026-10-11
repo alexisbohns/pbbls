@@ -4,7 +4,13 @@
 --
 -- NOT safe to push alone: 20261012090000–20261012090400 ship together.
 -- v_pebbles_full and path_pebbles come back in compat form in 20261012090400.
+-- Supersedes 20260817130000's exclusion of raw glyph geometry from the share
+-- payload: with render_svg gone (D6), the strokes are the visual.
 -- =============================================================================
+
+-- The resolver and the view probe collection_pebbles by pebble per row; the
+-- primary key leads on collection_id, so nothing indexes that probe today.
+create index collection_pebbles_pebble_id_idx on public.collection_pebbles (pebble_id);
 
 -- D5: oldest collection carrying a glyph, else first domain default, else null.
 -- Two layers. private.resolve_pebble_glyph is the definer resolution: every
@@ -57,6 +63,8 @@ as $$
 $$;
 revoke all on function public.resolve_pebble_glyph(uuid) from public, anon;
 grant execute on function public.resolve_pebble_glyph(uuid) to authenticated;
+comment on function public.resolve_pebble_glyph(uuid) is
+  'The pebble''s derived glyph (D5): oldest collection with a glyph, else first domain default, else null. Gated by pebble readability: a pebble the caller cannot read answers null, the same as an unknown id.';
 
 -- v_moments_full: one row per readable moment, the caller's own pebble nested.
 create view public.v_moments_full
@@ -89,11 +97,13 @@ select
     )
     from public.pebbles p
     join public.emotions e on e.id = p.emotion_id
-    where p.moment_id = m.id and p.user_id = auth.uid()
+    where p.moment_id = m.id and p.user_id = (select auth.uid())
   ) as pebble
 from public.moments m;
 revoke all on public.v_moments_full from public, anon;
 grant select on public.v_moments_full to authenticated;
+comment on view public.v_moments_full is
+  'One row per readable moment. pebble is the CALLER''s pebble on that moment: null means uncompleted on the caller''s own moments and not yours on a connection''s moment. snaps is empty on cross-user rows because snaps_select is owner-only (v1 policy, 20260411000001).';
 
 -- path_moments: the timeline. A null pebble is an uncompleted moment.
 create function public.path_moments()
@@ -115,13 +125,15 @@ as $$
         'emotion', case when e.id is null then null else jsonb_build_object('id', e.id, 'slug', e.slug, 'name', e.name) end,
         'glyph', public.resolve_pebble_glyph(p.id))
        from public.pebbles p left join public.emotions e on e.id = p.emotion_id
-      where p.moment_id = m.id and p.user_id = auth.uid()) as pebble
+      where p.moment_id = m.id and p.user_id = (select auth.uid())) as pebble
   from public.moments m
-  where m.user_id = auth.uid()
+  where m.user_id = (select auth.uid())
   order by m.happened_at desc;
 $$;
 revoke all on function public.path_moments() from public, anon;
 grant execute on function public.path_moments() to authenticated;
+comment on function public.path_moments() is
+  'The caller''s timeline, newest happened_at first. A null pebble is an uncompleted moment.';
 
 -- get_shared_pebble: same name and argument; moment fields + the sharer's pebble.
 -- Base: 20260916100000 §4. `create or replace` keeps the anon + authenticated
