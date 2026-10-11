@@ -37,6 +37,7 @@ import type {
 import { toConnectionPeer } from "@/lib/data/invite-api"
 import { peerIdOf } from "@/lib/data/connection-peer"
 import { DEFAULT_GLYPH_ID } from "@/lib/config/glyphs"
+import { pebbleFromViewRow, snapOriginalPath } from "@/lib/data/pebble-row"
 import { processPebbleImage } from "@/lib/utils/process-pebble-image"
 
 const PEBBLE_MEDIA_BUCKET = "pebbles-media"
@@ -123,7 +124,7 @@ export class SupabaseProvider implements DataProvider {
 
     const originalPaths: string[] = []
     for (const snaps of rawSnapsByPebble.values()) {
-      for (const s of snaps) originalPaths.push(`${s.storage_path}/original.jpg`)
+      for (const s of snaps) originalPaths.push(snapOriginalPath(s))
     }
 
     const signedUrlByPath = new Map<string, string>()
@@ -142,43 +143,13 @@ export class SupabaseProvider implements DataProvider {
       }
     }
 
-    const pebbles: Pebble[] = (pebblesRes.data ?? []).map((row: Record<string, unknown>) => {
-      const id = row.id as string
-      const render = renderById.get(id) ?? {
-        render_svg: null,
-        render_version: null,
-      }
-      const snaps = (rawSnapsByPebble.get(id) ?? [])
-        .slice()
-        .sort((a, b) => a.sort_order - b.sort_order)
-      const instants = snaps
-        .map((s) => signedUrlByPath.get(`${s.storage_path}/original.jpg`))
-        .filter((url): url is string => typeof url === "string")
-      return {
-        id,
-        name: row.name as string,
-        description: (row.description as string) ?? undefined,
-        happened_at: row.happened_at as string,
-        intensity: row.intensity as 1 | 2 | 3,
-        positiveness: row.positiveness as -1 | 0 | 1,
-        visibility: (row.visibility as string) as Pebble["visibility"],
-        emotion_id: row.emotion_id as string,
-        soul_ids: ((row.souls as Array<{ id: string }>) ?? []).map((s) => s.id),
-        domain_ids: ((row.domains as Array<{ id: string }>) ?? []).map((d) => d.id),
-        collection_ids: ((row.collections as Array<{ id: string }>) ?? []).map((c) => c.id),
-        mark_id: (row.glyph_id as string) ?? undefined,
-        instants,
-        snaps,
-        cards: ((row.cards as Array<{ species_id: string; value: string }>) ?? []).map((c) => ({
-          species_id: c.species_id,
-          value: c.value,
-        })),
-        render_svg: render.render_svg,
-        render_version: render.render_version,
-        created_at: row.created_at as string,
-        updated_at: row.updated_at as string,
-      }
-    })
+    const pebbles: Pebble[] = (pebblesRes.data ?? []).map((row: Record<string, unknown>) =>
+      pebbleFromViewRow(
+        row,
+        renderById.get(row.id as string) ?? { render_svg: null, render_version: null },
+        signedUrlByPath,
+      ),
+    )
 
     const souls: Soul[] = (soulsRes.data ?? []).map((row: Record<string, unknown>) => ({
       id: row.id as string,
