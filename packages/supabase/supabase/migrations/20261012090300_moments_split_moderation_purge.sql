@@ -2,7 +2,8 @@
 -- Moments and pebbles split — moderation, reports, purge, analytics, orphans
 -- (spec §4 "Moderation and reports", "Purge")
 --
--- NOT safe to push alone: 20261012090000–20261012090400 ship together.
+-- NOT safe to push alone: 20261012090000–20261012090400 ship together
+-- (20261012090400 is Part 4 of the stack, not yet on this branch).
 --
 -- Every function below is re-emitted from its NEWEST emission (named in each
 -- header) with only the edits the header lists; the check is the pairwise diff
@@ -19,9 +20,11 @@
 
 -- ---------------------------------------------------------------------------
 -- 1. admin_set_content_hidden. Base 20260916100000 §5. 'moment' is the kind;
--- 'pebble' stays accepted as an alias (same id space: every pre-split pebble
--- id is its moment id) until the admin app (Part 5) sends 'moment'. The
--- response always names the canonical kind.
+-- 'pebble' stays accepted as an alias until the admin app (Part 5) sends
+-- 'moment', and dies with that issue. A pebble id resolves to its moment; an
+-- id with no pebble row is taken as a moment id itself (legacy ids: every
+-- pre-split pebble id is its moment id). The response always names the
+-- canonical kind.
 -- ---------------------------------------------------------------------------
 create or replace function public.admin_set_content_hidden(
   p_target_kind text,
@@ -39,14 +42,22 @@ declare
   v_when  timestamptz := case when p_hidden then now() else null end;
   v_who   uuid := case when p_hidden then v_admin else null end;
   v_rows  integer;
+  v_target uuid := p_target_id;
 begin
   if not public.is_admin(v_admin) then
     raise exception 'not_admin' using errcode = '42501';
   end if;
 
+  if p_target_kind = 'pebble' then
+    -- The alias: a pebble id becomes its moment id; no pebble row means the
+    -- caller already holds a moment id.
+    select coalesce((select p.moment_id from public.pebbles p where p.id = p_target_id), p_target_id)
+      into v_target;
+  end if;
+
   if p_target_kind in ('moment', 'pebble') then
     update public.moments set hidden_at = v_when, hidden_by = v_who
-     where id = p_target_id;
+     where id = v_target;
   elsif p_target_kind = 'profile' then
     update public.profiles set hidden_at = v_when, hidden_by = v_who
      where user_id = p_target_id;
@@ -61,7 +72,7 @@ begin
 
   return jsonb_build_object(
     'target_kind', case when p_target_kind = 'pebble' then 'moment' else p_target_kind end,
-    'target_id', p_target_id,
+    'target_id', v_target,
     'hidden', p_hidden,
     'note', nullif(btrim(p_note), '')
   );
@@ -108,25 +119,41 @@ begin
     raise exception 'invalid_reason';
   end if;
 
-  -- The alias: a pebble id becomes its moment id. An unknown pebble leaves
+  -- The alias, for callers not yet migrated; removed with the web composer.
+  -- A pebble id becomes its moment id, but only through a pebble the reporter
+  -- may read: once participants exist, a secret sibling pebble's uuid must not
+  -- be a way to learn its moment. An unknown or unreadable pebble leaves
   -- v_target null, which falls through to the single not_found below.
   if v_kind = 'pebble' then
     v_kind := 'moment';
-    select p.moment_id into v_target from public.pebbles p where p.id = p_target_id;
+    select p.moment_id into v_target
+      from public.pebbles p
+     where p.id = p_target_id
+       and (
+            p.visibility = 'public'
+         or (p.visibility = 'private' and exists (
+               select 1
+                 from public.connections c
+                where c.user_a = least(v_user, p.user_id)
+                  and c.user_b = greatest(v_user, p.user_id)))
+       );
   end if;
 
   -- The visibility gate, mirroring each kind's live read rule. A miss leaves
   -- v_owner null and falls through to the single not_found below.
   if v_kind = 'moment' then
-    -- Mirrors pebbles_select minus the owner arm: owners are caught by
-    -- cannot_report_own, not by the gate. The connections pair is canonical
-    -- (user_a < user_b), so least/greatest lands on the unique (user_a,
-    -- user_b) index.
+    -- Mirrors pebbles_select's visibility arms and the hidden probe: taken-down
+    -- content is not re-reportable, and success-vs-not_found must not reveal
+    -- that a hidden moment still exists. Deliberately omits the owner arm
+    -- (cannot_report_own) and the block predicate (open decision on #834, log
+    -- 2026-10-07). The connections pair is canonical (user_a < user_b), so
+    -- least/greatest lands on the unique (user_a, user_b) index.
     select m.user_id,
            jsonb_build_object('name', m.name, 'description', m.description)
       into v_owner, v_snapshot
       from public.moments m
      where m.id = v_target
+       and m.hidden_at is null
        and exists (
          select 1
            from public.pebbles p
@@ -272,8 +299,12 @@ begin
          when 'moment' then (select jsonb_build_object(
                                'name', m.name, 'description', m.description,
                                'hidden', m.hidden_at is not null,
-                               'visibility', (select max(p.visibility) from public.pebbles p
-                                               where p.moment_id = m.id))
+                               'visibility', (select p.visibility from public.pebbles p
+                                               where p.moment_id = m.id
+                                               order by case p.visibility when 'public' then 0
+                                                                          when 'private' then 1
+                                                                          else 2 end
+                                               limit 1))
                                from public.moments m where m.id = r.target_id)
          when 'profile' then (select jsonb_build_object(
                                'handle', pr.handle, 'display_name', pr.display_name,
@@ -394,8 +425,12 @@ begin
   -- and each pebble cascades pebble_cards / pebble_domains / pebble_souls /
   -- collection_pebbles. The pebbles delete then takes this user's pebbles on
   -- OTHER users' moments (participants, later); the snaps delete is
-  -- belt-and-braces. Souls before glyphs (souls.glyph_id RESTRICT);
-  -- collections before glyphs (collections.glyph_id NO ACTION).
+  -- belt-and-braces. So counts.moments is the user's moments, while
+  -- counts.pebbles / counts.snaps count only rows NOT cascaded by that delete
+  -- and read 0 until participants ship; the harness pins moments = <seeded>
+  -- and pebbles = snaps = 0, and proves deletion with the zero-row table
+  -- checks. Souls before glyphs (souls.glyph_id RESTRICT); collections before
+  -- glyphs (collections.glyph_id NO ACTION).
   -- -------------------------------------------------------------------------
   delete from public.moments where user_id = p_user_id;
   get diagnostics v_n = row_count;
