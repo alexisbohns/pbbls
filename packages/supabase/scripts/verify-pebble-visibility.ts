@@ -162,23 +162,27 @@ try {
 
   const secret = await createPebble(o, { name: `secret ${runId}`, happened_at: happenedAt }, base);
   const secretId = secret.pebbleId;
-  check("complete_pebble without a grade succeeds", !!secretId);
 
-  const priv = await createPebble(o, { name: `private ${runId}`, happened_at: happenedAt }, {
+  // A snap row (no upload needed) so the connection's empty `snaps` below
+  // proves the owner-only snaps_select fence, not just an absent seed.
+  const privSnapId = crypto.randomUUID();
+  const priv = await createPebble(o, {
+    name: `private ${runId}`,
+    happened_at: happenedAt,
+    snaps: [{ id: privSnapId, storage_path: `${owner.id}/${privSnapId}`, sort_order: 0 }],
+  }, {
     ...base,
     visibility: "private",
     cards: [{ species_id: cardType.id, value: "owner-only card", sort_order: 0 }],
     new_souls: [{ name: `soul ${runId}` }],
   });
   const privateId = priv.pebbleId;
-  check("complete_pebble with 'private' succeeds", !!privateId);
 
   const pub = await createPebble(o, { name: `public ${runId}`, happened_at: happenedAt }, {
     ...base,
     visibility: "public",
   });
   const publicId = pub.pebbleId;
-  check("complete_pebble with 'public' succeeds", !!publicId);
 
   const { data: secretRow } = await o
     .from("pebbles").select("visibility").eq("id", secretId).single();

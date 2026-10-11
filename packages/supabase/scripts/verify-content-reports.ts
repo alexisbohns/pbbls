@@ -247,7 +247,7 @@ try {
     ghostErr?.message);
 
   check("invisible and nonexistent are indistinguishable (no existence oracle)",
-    secretErr?.message === ghostErr?.message && secretAliasErr?.message === ghostErr?.message,
+    !!ghostErr && secretErr?.message === ghostErr?.message && secretAliasErr?.message === ghostErr?.message,
     `secret="${secretErr?.message}" alias="${secretAliasErr?.message}" ghost="${ghostErr?.message}"`);
 
   const { error: unlistedErr } = await r.rpc("report_content", {

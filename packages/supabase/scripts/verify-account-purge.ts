@@ -804,7 +804,9 @@ try {
   // (after deleteUser) the cascade would empty them even if a purge delete
   // line were dropped. Only the RPC's counts can catch that, so pin the
   // moments/M49 rows to what §2 seeded. moments.user_id does not cascade from
-  // auth.users at all, so a dropped moments delete would fail the purge outright;
+  // auth.users at all. purge_account itself would succeed without the moments
+  // delete; the following auth.admin.deleteUser hits the non-cascading
+  // moments.user_id FK, so delete-account answers non-200;
   // pebbles and snaps read 0 because the moments delete cascaded them first
   // (they count only rows on OTHER users' moments), and the zero-row checks
   // below prove they emptied.
@@ -1049,7 +1051,10 @@ try {
   // section 5 asserts survives the purge. The profile arm runs first, then the
   // soul arm, so each ends with its glyph moved to the system one — which also
   // releases the `on delete restrict` the buyer's soul holds on the sold glyph
-  // before the fixture cleanup in `finally` tries to remove it.
+  // before the fixture cleanup in `finally` tries to remove it. The buyer's
+  // collection also pins the sold glyph (NO ACTION) and is released only by the
+  // buyer's purge, so the `finally` must keep purging the buyer before deleting
+  // the sold glyph.
   // -------------------------------------------------------------------------
   const { error: revokeErr } = await admin
     .from("glyph_entitlements").delete().eq("user_id", buyerId).eq("glyph_id", soldGlyph.id);

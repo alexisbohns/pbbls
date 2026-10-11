@@ -14,7 +14,7 @@
  *   7. delete_pebble keeps the moment; delete_moment removes all and reverses karma.
  *
  * Run: set -a; . ./.env; set +a; npm run db:verify:moments --workspace=packages/supabase
- * Expected: `Summary: passed=35 failed=0` (35 `check(` calls — recount if you add one).
+ * Expected: `Summary: passed=35 failed=0` (35 executed checks, each if/else pair counting once — recount if you add one).
  * A founding write that fails (first save_moment, first complete_pebble, the
  * collection insert) aborts the run with one `✗ aborted:` line instead of a
  * cascade of dependent reds.
@@ -194,7 +194,7 @@ try {
   // 5. compat (web, until #1050) ----------------------------------------------------
   const compat = await a.rpc("create_pebble", {
     payload: {
-      name: `compat ${runId}`, happened_at: "2026-10-11T11:00:00Z",
+      name: `compat ${runId}`, happened_at: "2026-10-11T11:00:00.456Z",
       emotion_id: emotion.id, intensity: 1, positiveness: 0, domain_ids: [domain.id], glyph_id: null,
     },
   });
@@ -204,7 +204,8 @@ try {
   check("v_pebbles_full compat row carries name and resolved glyph_id",
     vpf?.name === `compat ${runId}` && vpf?.glyph_id === domain.default_glyph_id, JSON.stringify(vpf));
   check("the compat row's happened_at is at whole seconds",
-    !!vpf?.happened_at && new Date(vpf.happened_at).getMilliseconds() === 0, vpf?.happened_at);
+    !!vpf?.happened_at && new Date(vpf.happened_at).getMilliseconds() === 0 &&
+      new Date(vpf.happened_at).toISOString().startsWith("2026-10-11T11:00:00"), vpf?.happened_at);
   const { data: pp } = await a.rpc("path_pebbles");
   check("path_pebbles compat answers with render_svg null",
     Array.isArray(pp) && pp.length >= 2 && pp.every((r: { render_svg: unknown }) => r.render_svg === null),
@@ -221,11 +222,12 @@ try {
     }),
   });
   const composed = await composeRes.json().catch(() => null) as
-    | { pebble_id?: string; render_svg?: unknown; render_version?: unknown; error?: string }
+    | { pebble_id?: string; render_svg?: unknown; render_version?: unknown; karma_delta?: unknown; error?: string }
     | null;
   check("compose-pebble answers 200 with a pebble id and null render keys",
     composeRes.status === 200 && typeof composed?.pebble_id === "string" &&
-      composed?.render_svg === null && composed?.render_version === null,
+      composed?.render_svg === null && composed?.render_version === null &&
+      typeof composed?.karma_delta === "number",
     `status=${composeRes.status} ${JSON.stringify(composed)}`);
   if (composed?.pebble_id) {
     const { data: composedPebble } = await a.from("pebbles").select("moment_id").eq("id", composed.pebble_id).single();

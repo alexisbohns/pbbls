@@ -26,11 +26,11 @@
  *      visible glyph a user has — it renders on their public profile.
  *   2. The guard did not over-block: a system glyph and the caller's own carve
  *      both still attach, and — for the collection, the soul and the profile
- *      alike — naming
- *      glyph_id in an UPDATE without changing it still succeeds, which is what
- *      keeps a plain rename working for the two clients that always name the
- *      column (`update_profile` for the profile; the direct souls write on iOS
- *      and Android, whose payloads carry name and glyphId together).
+ *      alike — naming glyph_id in an UPDATE without changing it still
+ *      succeeds, which is what keeps a plain rename working for the two
+ *      clients that always name the column (`update_profile` for the profile;
+ *      the direct souls write on iOS and Android, whose payloads carry name and
+ *      glyphId together).
  *   3. `is_system` is not self-settable. Every negative assertion checks the
  *      error AND re-reads the stored value — a 0-row RLS filter would also leave
  *      the value unchanged while proving nothing (the lesson
