@@ -40,6 +40,7 @@ import {
   stoneClipId,
   stoneRingId,
 } from "@/lib/utils/spine/stone-ids"
+import { STONE_WIDTH_CLASS } from "@/lib/utils/spine/stone-box"
 import { cn } from "@/lib/utils"
 import { StoneGlyph } from "./StoneGlyph"
 
@@ -54,13 +55,9 @@ type LitStoneProps = {
   glyph: PebbleGlyph | null
   /** `hashUUID(pebble.id)`: the same pebble always draws the same stone. */
   seed: number
+  /** A press under reduced motion: the rings darken and a still sheen holds. */
+  touched?: boolean
   className?: string
-}
-
-const WIDTH_CLASS: Record<Size, string> = {
-  small: "w-[34px] spread:w-[40px]",
-  medium: "w-[44px] spread:w-[52px]",
-  large: "w-[54px] spread:w-[58px]",
 }
 
 /**
@@ -75,7 +72,7 @@ const WIDTH_CLASS: Record<Size, string> = {
  * Needs `StoneSprite` once on the page. Decorative: the pressable wrapper
  * carries the label.
  */
-export function LitStone({ size, polarity: cut, palette, glyph, seed, className }: LitStoneProps) {
+export function LitStone({ size, polarity: cut, palette, glyph, seed, touched = false, className }: LitStoneProps) {
   const gradientId = useId()
   const blank = palette === null
   const polarity: Polarity = blank ? "neutral" : cut
@@ -99,7 +96,7 @@ export function LitStone({ size, polarity: cut, palette, glyph, seed, className 
   } as CSSProperties
 
   return (
-    <span className={cn("relative block", WIDTH_CLASS[size], className)} style={style} data-polarity={polarity}>
+    <span className={cn("relative block", STONE_WIDTH_CLASS[size], className)} style={style} data-polarity={polarity}>
       <svg
         aria-hidden
         focusable="false"
@@ -115,9 +112,9 @@ export function LitStone({ size, polarity: cut, palette, glyph, seed, className 
             href={raked}
             transform={matrix}
             fill="none"
-            stroke="var(--spine-ring)"
+            stroke={touched ? "var(--spine-ink-2)" : "var(--spine-ring)"}
             strokeWidth="1px"
-            className="transition-[stroke] duration-200"
+            className="transition-[stroke] duration-200 motion-reduce:transition-none"
             data-stone-ring=""
           />
         ))}
@@ -249,7 +246,8 @@ export function LitStone({ size, polarity: cut, palette, glyph, seed, className 
                 ry={glint.sheen.ry}
                 transform={`rotate(${glint.sheen.rotate} ${glint.sheen.cx} ${glint.sheen.cy})`}
                 fill={`url(#${STONE_GLINT_SHEEN_ID})`}
-                opacity={0}
+                opacity={touched ? glint.sheen.opacity : 0}
+                className="transition-opacity duration-250 motion-reduce:transition-none"
                 data-stone-sheen=""
               />
               <g transform={`rotate(${glint.sweep.rotate} ${glint.sweep.cx} ${glint.sweep.cy})`}>
