@@ -136,10 +136,29 @@ RPCs, the `new_glyph` and `glyph_id` payload keys.
 
 ### `resolve_pebble_glyph(p_pebble_id uuid) → jsonb`
 
-`{id, name, strokes, view_box}` or null. Order: the pebble's collection with a
-glyph and the oldest `collections.created_at`; else the pebble's domain with a
-`default_glyph_id` and the lowest domain order; else null. `stable`,
-`security invoker`. Every reader calls this one function.
+`{id, name, strokes, view_box, source}` or null, `source` being `collection` or
+`domain`. Order: the pebble's collection with a glyph and the oldest
+`collections.created_at`; else the pebble's domain with a `default_glyph_id`
+and the lowest slug (domains carry no order column); else null.
+
+Two layers, both `stable`, `set search_path = public`:
+
+- `private.resolve_pebble_glyph` is `security definer` and does the resolution.
+  `collection_pebbles` is owner-readable, so an invoker would carve a different
+  stone for a connection than for the owner; the definer makes every viewer
+  see the same glyph. `private` is never served by PostgREST, so this is not an
+  API; `authenticated` holds execute only so the wrapper can call it.
+- `public.resolve_pebble_glyph` is `security invoker` and is the API: it
+  returns the private result only `where exists (select 1 from pebbles where
+  id = p_pebble_id)`. That exists runs under the caller's `pebbles_select`, so
+  a pebble the caller cannot read answers null, the same as an unknown id. A
+  bare definer in `public` would have let any authenticated user probe a
+  secret pebble's custom glyph by uuid; this closes that oracle.
+
+`v_moments_full` and `path_moments` (both invoker) call the public layer; the
+owner always passes the gate. `get_shared_pebble` is definer and serves anon,
+so it calls the private layer directly: its own `public` + not-hidden where
+clause is the readability gate there.
 
 ### `v_moments_full` (replaces `v_pebbles_full`)
 
