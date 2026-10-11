@@ -22,14 +22,10 @@ Turborepo + npm workspaces at the root. Web and admin deploy to Vercel (root dir
 
 | Command | Description |
 |---|---|
-| `npm run dev` / `build` / `lint` | Turborepo, all workspaces (the only root tasks — there is no root `test`) |
-| `npm run lint --workspace=apps/web` | Workspace-scoped lint — the default for small/medium changes |
-| `npm run test --workspace=apps/web` | Vitest (`apps/web/**/*.test.ts`) |
-| `npm run build --workspace=@pbbls/ios` | `xcodegen generate` + `xcodebuild`; `test` runs Swift Testing, `lint` runs SwiftLint |
 | `npm run build --workspace=@pbbls/android` | Gradle via `scripts/gradle-if-sdk.sh` (no-ops without an SDK); `lint` = ktlint, `test` = unit tests |
 | `npm run db:* --workspace=packages/supabase` | Supabase CLI: `db:start`, `db:reset`, `db:types`, `db:push`, `db:migration:new`, … |
 
-Tests: Vitest on web, Swift Testing on iOS (never XCTest), JUnit + screenshot previews on Android. Database contract harnesses live in `packages/supabase/scripts/` (`npm run db:verify --workspace=packages/supabase`) and run against the linked project — they are the proof for anything crossing a surface boundary. The four anon-only ones are a CI gate; `verify-account-purge.ts` needs the service role and stays a manual run.
+There is no root `test` task. Tests: Vitest on web, Swift Testing on iOS (never XCTest), JUnit + screenshot previews on Android. Database contract harnesses live in `packages/supabase/scripts/` (`npm run db:verify --workspace=packages/supabase`) and run against the linked project — they are the proof for anything crossing a surface boundary. The four anon-only ones are a CI gate; `verify-account-purge.ts` needs the service role and stays a manual run.
 
 ## Before you start
 
@@ -72,47 +68,9 @@ CI gates worth knowing about: `arkaik.yml` validates the legacy bundle + journal
 
 ## The map is hosted — never edit `docs/arkaik/bundle.json`
 
-`docs/arkaik/arkaik.json` is present, so this project's Arkaik map lives in an
-**account**, not in this repo. The `arkaik` skill's hosted rule is binding:
+`docs/arkaik/arkaik.json` is present, so the Arkaik map lives in a **hosted account** and is changed only through the `arkaik-mcp` tools (`create_node`, `update_node`, `create_edge`, …). `docs/arkaik/bundle.json` and `journal.jsonl` are a frozen pre-hosted snapshot kept for `arkaik.yml`: **never create or edit them** (an `arkaik restore` from them has already wiped this project's federation feed and PR-promotion policy). **If the `arkaik-mcp` tools are not available, say so and stop.** Never fall back to the file.
 
-> **Do not create or edit `docs/arkaik/bundle.json` for a hosted map.** Nothing
-> reads it, the account never sees the change, and the next person to look finds
-> two maps disagreeing.
-
-| | Where | How you change it |
-|---|---|---|
-| The map | the hosted project, over HTTP | the `arkaik-mcp` tools (`create_node`, `update_node`, `create_edge`, …) |
-| History | derived server-side | nothing to write — every mutation emits its own journal events |
-
-`docs/arkaik/bundle.json` and `journal.jsonl` are a **frozen snapshot of the
-pre-hosted era**. They are kept for the record and for `arkaik.yml`; they are not
-the map, they are not current, and reading them as truth is how you ship a change
-against a stale graph. Editing them is worse: the only way they ever reach the
-account is `arkaik restore`, which replaces the hosted project wholesale — that
-command has already silently deleted this project's federation feed and its
-PR-promotion policy ([arkaik#423](https://github.com/alexisbohns/arkaik/issues/423)).
-
-**If the `arkaik-mcp` tools are not available, say so and stop.** Do not fall
-back to the file. A silent fallback is the failure nobody notices, and it is the
-one this note exists to prevent. In a cloud container the usual cause is a
-missing `ARKAIK_TOKEN`: `.mcp.json` sources this machine's `.env`, which is
-gitignored and therefore absent — the token has to be in the environment
-instead.
-
-### Status is part of the change
-
-The map records where each promise stands, per platform. Two halves:
-
-- **You** move an acceptance or a view to `development` when you start work on
-  it (`update_node` over MCP). Do it when you pick the work up, not at the end.
-- **The Arkaik GitHub App** does the rest from the pull request: opening one
-  marks `development`, merging marks `releasing`, on the platform of the app
-  folder the PR touched. Nothing to write, nothing to remember.
-
-`live` is **not** a merge. It means shipped to people: the web deploy is out, or
-a store accepted the build. Nothing moves a status there automatically yet
-([arkaik#424](https://github.com/alexisbohns/arkaik/issues/424)), so leave
-acceptances at `releasing` rather than claiming a release that has not happened.
+Status is part of the change: move an acceptance or view to `development` (`update_node`) when you pick the work up. The Arkaik GitHub App marks `development` at PR-open and `releasing` at merge; a production web deploy marks the web acceptances its PRs named `live` (`mark-live.yml`), and nothing does that for iOS or Android yet, so never set `live` yourself — leave it at `releasing`. Full rules and rationale: the `arkaik` skill, "Hosted map rules for pbbls".
 
 ## Standing cross-surface rules
 
@@ -144,8 +102,6 @@ Cadence: promote during the periodic monorepo-audit grooming pass at **milestone
 - Hooks: camelCase prefixed with `use` (`usePebbles.ts`).
 - Config / utility files: kebab-case (`card-types.ts`).
 - Keep business logic out of components — put it in hooks or pure utility functions.
-- Comment non-obvious code with intent and reasoning. Skip comments that restate the code.
-- Always consider edge cases and error handling, even if it's just logging for now.
 - Follow established patterns. New patterns require discussion first.
 
 ## Git & PR workflow
@@ -165,32 +121,7 @@ Cadence: promote during the periodic monorepo-audit grooming pass at **milestone
 
 ### Shipping larger work — parts, tasks, and stacked PRs
 
-Anything bigger than a single focused change is planned as **parts**, each part
-broken into **tasks**. One part is one branch is one PR, and the branches are
-chained into a **GitHub Stack** (`gh stack`, see the `gh-stack` skill) so each
-PR's diff shows only its own layer. The extension is a one-time install:
-`gh extension install github/gh-stack`.
-
-- **A part is a reviewable unit, not a milestone.** It should stand on its own:
-  a reviewer who reads only that PR should be able to say yes or no to it. If a
-  part can't be described without referring forward to the next one, the split
-  is in the wrong place.
-- **Order parts by dependency, never by convenience.** Shared types and domain
-  models go lowest, then persistence, then the API, then the UI that consumes
-  it. If code in one layer needs code from another, the dependency belongs in
-  the same part or a lower one.
-- **Separate a move from a rewrite.** When work both relocates existing code and
-  changes it, make the relocation its own part. A pure-move diff is read in
-  seconds; the same change tangled with a redesign hides the redesign.
-- **Fix a lower layer in the layer that owns it.** Discovering mid-stack that a
-  lower part needs a change means navigating down (`gh stack down`), committing
-  there, and running `gh stack rebase --upstack` — not patching around it at the
-  top. Otherwise the fix lands in the wrong PR.
-- **Each part is independently verifiable.** It must pass
-  the lint and typecheck on its own, without the parts above
-  it. A part that only compiles once a later part lands is not a part.
-- **One stack tells one story.** Unrelated work — a different feature, a drive-by
-  fix — starts its own stack rather than riding along.
+Anything bigger than a single focused change is planned as **parts** (one part = one branch = one PR), chained with `gh stack`. The splitting rules (a part is a reviewable unit; order by dependency, never convenience; separate a move from a rewrite; fix a lower layer in the layer that owns it; each part lints and typechecks alone; one stack tells one story) live in the `gh-stack` skill. Read it before planning a stack.
 
 ### Issues & labels
 
@@ -214,42 +145,5 @@ PR's diff shows only its own layer. The extension is a one-time install:
 
 ### Lab Note requirement — read before opening a PR
 
-**When you open a PR that ships something a user would notice, you MUST include a Lab Note in the PR body.** This section is self-sufficient: you can author a valid note from it alone. The repo-local `lab-note` skill (`.claude/skills/lab-note/`) is the source of truth for full tone guidance and examples, and **takes precedence over the `lab-note@ariko` plugin skill** if both are present.
+**The gate.** The PR has the `feat` label, **or** it touches a user-visible Arkaik view node → the PR body MUST carry one `## Lab Note (EN/FR)` section. Invoke the repo-local `lab-note` skill (`.claude/skills/lab-note/`) to author it; it takes precedence over the `lab-note@ariko` plugin skill and holds the schema, the quoting rules and the tone guide. Chore, refactor, infra, or docs-only → **no note**: delete the section from the PR body and add the `no-lab-note` label if the advisory reminder still comments. Never write to Supabase / `logs` from the dev loop.
 
-**The gate.** The PR has the `feat` label, **or** it touches a user-visible Arkaik view node → write a note. Chore, refactor, infra, or docs-only → **no note**: delete the section from the PR body (if the advisory `lab-note-reminder` still comments, add the **`no-lab-note`** label to silence it).
-
-**The contract.** One `## Lab Note (EN/FR)` section holding exactly one ` ```yaml ` fence. Both languages are mandatory (`en.title`, `en.summary`, `fr.title`, `fr.summary`) — French is a real adaptation using the informal "Tu", never a literal translation. **No em dashes** in either language; use parentheses or a new sentence. **Always double-quote every title and summary**, as the skeleton below does: a colon is the natural way to write a sentence ("Heads up: it moved", "ton compte : ceux que...") and it is exactly what an unquoted YAML value cannot hold, so the parser reads `key: value` and the whole note fails. Quoting removes the failure mode outright, apostrophes included; slug-ish values need no quotes. PR-time defaults: `status: in_progress`, `published: false`, omit `release-date` (the maintainer's release-time switches).
-
-```yaml
-species: feature          # announcement | feature — a user-facing fix is a `feature`
-platform: ios             # all | webapp | ios | android | project | infra
-status: in_progress       # backlog | planned | in_progress | shipped
-published: false
-en:
-  title: "Short, benefit-first title"
-  summary: "One or two sentences, user-facing."
-fr:
-  title: "Titre court, orienté bénéfice"
-  summary: "Une ou deux phrases, adaptées, pas traduites littéralement."
-nodes: [V-pebble-record, F-record-pebble-flow]   # optional; read only by Arkaik
-suggested:                # optional; read only by the Ariko vault
-  molecule: pbbls         # THIS repo's molecule slug
-  type: feature           # feature | improvement | fix | announcement
-  tags: [changelog]
-  # atom: <slug>          # ONLY when you know the slug exists — never guess
-```
-
-**`nodes:` is what makes the Arkaik changelog entry readable.** The entry
-renders a **Touched** list of graph nodes, and Arkaik can only work out the
-*acceptances* on its own (from an `AC-…` id in the PR title or body) — views,
-flows, endpoints and data models have to be named. List the ids your change
-actually touched, most important first, reading them off the hosted map
-(`list_nodes` / `get_node`) rather than reconstructing them; if you moved nodes
-on the map in this PR, those are exactly the ids. An id that matches nothing is left off the entry and
-reported in the App's delivery response. Omit the key when nothing was touched.
-Note `platform:` is **not** what fills the entry's platform chip — Arkaik works
-that out from the folders the PR touched.
-
-**Tone.** Lead with the benefit, not the mechanism. Short, warm, a little playful, never corporate. No engineering jargon, ticket numbers, or internal names.
-
-**One block, three destinations.** On merge, the Arkaik GitHub App webhook appends the note to this project's arkaik journal as a `deliverable.shipped` event (idempotent per PR; the Ariko federation reads it from the pollen feed) — a malformed note is reported in the delivery response, and the advisory `lab-note-reminder` surfaces the same problems at PR-open time, so fix it by editing the PR body. At release time a human pastes the same YAML into the Pebbles Lab admin ("New log" prefills from the clipboard). Never write to Supabase / `logs` from the dev loop.

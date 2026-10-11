@@ -292,27 +292,10 @@ happens in a separate coroutine, not inline in the collector.
 
 ## Folder layout (#851)
 
-```
-app/src/main/kotlin/app/pbbls/android/
-  PebblesApp.kt          Application: Hilt root, Coil image loader, no launch work
-  MainActivity.kt        Single activity: splash, deep links, the three ambient locals
-  RootScreen.kt          The one NavDisplay, the navigation suite, overlay hosts
-  RootViewModel.kt       Session and invite state → RootDestination
-  AppEnvironment.kt      BuildConfig secrets, validated (read only by di/SupabaseModule)
-  DebugTokenPreviewScreen.kt  Design-system gallery, rendered only by screenshot tests
-  core/model/            Pebble, Domain, Glyph, Collection, EmotionPalette, … (@Serializable, no UI)
-  core/data/             Services, DataError, preferences, the snap pipeline
-  core/designsystem/     PebblesTheme, ColorSchemes, Typography, Shapes, Spacing,
-                          PebblesScreen (Scaffold + top app bar), PebblesPrimaryButton,
-                          ReadableWidth, PebblesLogo, … (thin defaults over stock M3)
-  core/ui/               Shared UI that knows the domain: GlyphView, SoulItem, PebbleRow,
-                          RippleBadge, karma/achievement overlays, ReferenceSlugs/Strings,
-                          and core/ui/render/ (PebbleSvg, GlyphImage, the wobble stack)
-  core/common/           runCatchingCancellable, UiEffects, JourneyTags (no UI of its own)
-  di/                    Hilt modules and qualifiers
-  navigation/            Keys, entry provider, Navigator, stacks, Scenes, navigation suite
-  features/<feature>/    welcome, auth, onboarding, path, profile, glyph, lab, connections
-```
+Under `app/src/main/kotlin/app/pbbls/android/`: the root files (`PebblesApp`,
+`MainActivity`, `RootScreen`, `RootViewModel`, `AppEnvironment`), `core/{model,data,designsystem,ui,common}`,
+`di/`, `navigation/` and `features/<feature>/`. `ls` it for the inventory; the
+rules below are what matters.
 
 **The `core/` ↔ `features/` split is a test, not a convention.**
 `ArchitectureBoundaryTest` (Konsist, a plain JVM unit test) fails the build on
@@ -564,85 +547,36 @@ Do not bring it back for a single asset.
 
 ### Screenshot validation gate (#847)
 
-**Compose Preview Screenshot Testing** (`com.android.compose.screenshot`) renders
-the `@PreviewTest` composables in `src/screenshotTest/` to PNGs on the JVM (no
-device, no Robolectric). It is a **regression gate**: the reference PNGs are
-committed under `app/src/screenshotTestDebug/reference/`, and `android.yml` runs
-`validateDebugScreenshotTest` on every PR. A render that moves past the threshold
-fails the PR and uploads the reference/actual/diff triptych as
-`ui-screenshot-diffs`.
+**Compose Preview Screenshot Testing** renders the `@PreviewTest` composables in
+`src/screenshotTest/` to PNGs on the JVM. The reference PNGs committed under
+`app/src/screenshotTestDebug/reference/` are a **regression gate** that
+`android.yml` runs on every PR. The mechanics (re-baseline workflow, approving
+held runs, the threshold, preview variants) are in the `android-screenshot-gate`
+skill. The rules that never bend:
 
-- **Previews render a screen's stateless content layer**, fed a UiState and the
-  harness's fakes, so they cover the screen's own chrome and error branch. Add
-  a preview per screen and state as UI lands.
-- **Changing UI turns the check red. That is the gate working, not a bug.** The
-  fix is to re-baseline, never to weaken the threshold or re-ignore the
-  references.
-- **Re-baseline is one step: add the `rebaseline-screenshots` label to the PR.**
-  `android-screenshots.yml` re-renders and commits the new PNGs to the branch. The
-  same workflow runs from the Actions tab on any ref; dispatched on `main` it opens
-  a branch instead of writing to it.
-- **After a re-baseline the Android check is still red, and it needs a hand.** The
-  push is attributed to `github-actions[bot]`, so the runs queued against the new
-  commit are held at `action_required`: approve them from the PR's Checks tab (or
-  `gh api --method POST repos/<owner>/<repo>/actions/runs/<id>/approve`), or push
-  any further commit yourself. Do **not** re-run the failed run: a re-run replays
-  the commit it was created for, which is the tree from before the re-baseline.
-  The workflow's own step summary says all of this at the moment you need it.
-- **Never commit references rendered on your own machine.** `./gradlew
-  updateDebugScreenshotTest` locally is the right way to *look* at a change, but
-  CI is the authority. macOS and the CI runner disagree on every render that
-  draws vector art (pebble silhouettes come out one colour level apart, which
-  byte-exact comparison counts as every filled pixel), and dozens of renders
-  fail locally on `main` too. Render locally, review, then let the
-  `rebaseline-screenshots` label regenerate the committed set on the runner.
-  `./gradlew validateDebugScreenshotTest` locally still tells you *which*
-  previews moved; judge a local run by diffing against `main`'s local run.
-- **The threshold lives in `app/build.gradle.kts`**, set on the validation task
-  because alpha16 exposes no DSL for it. It is calibrated (0.05% of pixels)
-  against a measured real change, and the comment there carries the numbers. Do
-  not widen it to paper over a host-platform difference.
-  `libs.versions.toml` pins the plugin with `strictly` for the same reason: any
-  layoutlib movement re-baselines every reference at once, so that has to be a
-  deliberate commit that re-runs the re-baseline job, not a Dependabot drive-by.
-- **Variants are multipreview annotations in `PreviewVariants.kt`.** Stack
-  `@PreviewLargeFont` / `@PreviewLargeFontTall` (font scale 2.0, the
-  accessibility ceiling), `@PreviewFrench` (`values-fr`) or `@PreviewWide` /
-  `@PreviewWideTall` (840 dp and 1024 dp) on an existing `@PreviewTest` function
-  to add a render without touching its body. The original reference's file
-  name is unaffected, so adding a variant never re-baselines what was already
-  there.
+- **Changing UI turns the check red. That is the gate working, not a bug.**
+  Re-baseline; never weaken the threshold or re-ignore the references.
+- **Re-baseline by adding the `rebaseline-screenshots` label to the PR**, then
+  approve the held `action_required` runs or push a further commit. Do **not**
+  re-run the failed run: it replays the tree from before the re-baseline.
+- **Never commit references rendered on your own machine.** macOS and the CI
+  runner disagree on every vector render; CI is the authority. Judge a local
+  run by diffing against `main`'s local run.
+- **Never widen the threshold in `app/build.gradle.kts`** to paper over a
+  host-platform difference, and keep the plugin's `strictly` pin.
 
 ## Baseline profile (#856)
 
-- **The release build ships a baseline profile and a startup profile**,
-  committed under `app/src/release/generated/baselineProfiles/`
-  (`baseline-prof.txt`, `startup-prof.txt`). `profileinstaller` hands the
-  baseline profile to ART on install, so the first launches after an install or
-  update run pre-compiled code; R8 uses the startup profile to put what a cold
-  start touches in the primary dex. Every `bundleRelease` packs the committed
-  files; nothing re-generates them in CI (`automaticGenerationDuringBuild =
-  false`), because generation needs a device and a signed-in test account.
-- **Regenerate by hand when startup or Path changes shape** (a new launch-time
-  dependency, a new screen on the cold path, a big Path rework):
-  `ANDROID_SERIAL=<device> ./gradlew :app:generateBaselineProfile`, then commit
-  both files. Set `ANDROID_SERIAL` whenever more than one device is attached,
-  or the task runs on all of them. The journey (`:baselineprofile`,
-  `PebblesJourney.kt`) signs in with `BENCHMARK_EMAIL` / `BENCHMARK_PASSWORD`
-  from `secrets.properties`: a throwaway account with pebbles on its Path,
-  never a real one. Without them it profiles Welcome and Auth only; check the
-  diff's size before committing a regeneration.
-- **The journey finds the UI by `testTag`** (`core/common/JourneyTags.kt`,
-  exposed as resource ids by `MainActivity`). `:baselineprofile` is a separate
-  APK and repeats the strings, so renaming a tag fails nothing; it silently
-  shortens the profiled journey.
-- **Measure with** `./gradlew :baselineprofile:connectedBenchmarkReleaseAndroidTest
-  -P android.testInstrumentationRunnerArguments.class=app.pbbls.android.baselineprofile.StartupBenchmark`
-  (cold start, no profile vs the committed one; results in the task's
-  `benchmarkData.json`). A phone is the authority. An emulator on a loaded host
-  swings by seconds; only its paired `None` vs `BaselineProfile` rows compare.
+The release build ships a committed baseline profile and startup profile
+(`app/src/release/generated/baselineProfiles/`); nothing regenerates them in CI.
+Regenerate by hand when startup or Path changes shape. The commands, the
+`ANDROID_SERIAL` and `BENCHMARK_*` requirements and how to measure are in the
+`android-baseline-profile` skill.
+
 - **Anything added to `PebblesApp.onCreate` runs before the first frame of
   every launch.** It is empty on purpose.
+- Renaming a `JourneyTags` tag fails nothing and silently shortens the
+  profiled journey; `:baselineprofile` repeats the strings.
 
 ## Release & distribution (Play internal testing)
 
