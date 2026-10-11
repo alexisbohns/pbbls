@@ -233,3 +233,45 @@ fr:
 
 The admin importer is tolerant: it also accepts the older list-of-dashes style
 (`- species: feature`), so a snippet copied from any past PR still prefills.
+
+## The PR-body contract (moved here from the root CLAUDE.md on 2026-10-06)
+
+**When you open a PR that ships something a user would notice, you MUST include a Lab Note in the PR body.** This section is self-sufficient: you can author a valid note from it alone. The repo-local `lab-note` skill (`.claude/skills/lab-note/`) is the source of truth for full tone guidance and examples, and **takes precedence over the `lab-note@ariko` plugin skill** if both are present.
+
+**The gate.** The PR has the `feat` label, **or** it touches a user-visible Arkaik view node → write a note. Chore, refactor, infra, or docs-only → **no note**: delete the section from the PR body (if the advisory `lab-note-reminder` still comments, add the **`no-lab-note`** label to silence it).
+
+**The contract.** One `## Lab Note (EN/FR)` section holding exactly one ` ```yaml ` fence. Both languages are mandatory (`en.title`, `en.summary`, `fr.title`, `fr.summary`) — French is a real adaptation using the informal "Tu", never a literal translation. **No em dashes** in either language; use parentheses or a new sentence. **Always double-quote every title and summary**, as the skeleton below does: a colon is the natural way to write a sentence ("Heads up: it moved", "ton compte : ceux que...") and it is exactly what an unquoted YAML value cannot hold, so the parser reads `key: value` and the whole note fails. Quoting removes the failure mode outright, apostrophes included; slug-ish values need no quotes. PR-time defaults: `status: in_progress`, `published: false`, omit `release-date` (the maintainer's release-time switches).
+
+```yaml
+species: feature          # announcement | feature — a user-facing fix is a `feature`
+platform: ios             # all | webapp | ios | android | project | infra
+status: in_progress       # backlog | planned | in_progress | shipped
+published: false
+en:
+  title: "Short, benefit-first title"
+  summary: "One or two sentences, user-facing."
+fr:
+  title: "Titre court, orienté bénéfice"
+  summary: "Une ou deux phrases, adaptées, pas traduites littéralement."
+nodes: [V-pebble-record, F-record-pebble-flow]   # optional; read only by Arkaik
+suggested:                # optional; read only by the Ariko vault
+  molecule: pbbls         # THIS repo's molecule slug
+  type: feature           # feature | improvement | fix | announcement
+  tags: [changelog]
+  # atom: <slug>          # ONLY when you know the slug exists — never guess
+```
+
+**`nodes:` is what makes the Arkaik changelog entry readable.** The entry
+renders a **Touched** list of graph nodes, and Arkaik can only work out the
+*acceptances* on its own (from an `AC-…` id in the PR title or body) — views,
+flows, endpoints and data models have to be named. List the ids your change
+actually touched, most important first, reading them off the hosted map
+(`list_nodes` / `get_node`) rather than reconstructing them; if you moved nodes
+on the map in this PR, those are exactly the ids. An id that matches nothing is left off the entry and
+reported in the App's delivery response. Omit the key when nothing was touched.
+Note `platform:` is **not** what fills the entry's platform chip — Arkaik works
+that out from the folders the PR touched.
+
+**Tone.** Lead with the benefit, not the mechanism. Short, warm, a little playful, never corporate. No engineering jargon, ticket numbers, or internal names.
+
+**One block, three destinations.** On merge, the Arkaik GitHub App webhook appends the note to this project's arkaik journal as a `deliverable.shipped` event (idempotent per PR; the Ariko federation reads it from the pollen feed) — a malformed note is reported in the delivery response, and the advisory `lab-note-reminder` surfaces the same problems at PR-open time, so fix it by editing the PR body. At release time a human pastes the same YAML into the Pebbles Lab admin ("New log" prefills from the clipboard). Never write to Supabase / `logs` from the dev loop.

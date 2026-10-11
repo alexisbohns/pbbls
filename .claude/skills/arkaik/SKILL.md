@@ -440,3 +440,47 @@ If the project doesn't have a map yet and the user asks you to create one:
 Full generation — via this section or the bootstrap method — is the **only**
 sanctioned non-surgical case. For every subsequent change, use a surgical patch
 paired with an appended event.
+
+## Hosted map rules for pbbls (moved here from the root CLAUDE.md on 2026-10-06)
+
+`docs/arkaik/arkaik.json` is present, so this project's Arkaik map lives in an
+**account**, not in this repo. The `arkaik` skill's hosted rule is binding:
+
+> **Do not create or edit `docs/arkaik/bundle.json` for a hosted map.** Nothing
+> reads it, the account never sees the change, and the next person to look finds
+> two maps disagreeing.
+
+| | Where | How you change it |
+|---|---|---|
+| The map | the hosted project, over HTTP | the `arkaik-mcp` tools (`create_node`, `update_node`, `create_edge`, …) |
+| History | derived server-side | nothing to write — every mutation emits its own journal events |
+
+`docs/arkaik/bundle.json` and `journal.jsonl` are a **frozen snapshot of the
+pre-hosted era**. They are kept for the record and for `arkaik.yml`; they are not
+the map, they are not current, and reading them as truth is how you ship a change
+against a stale graph. Editing them is worse: the only way they ever reach the
+account is `arkaik restore`, which replaces the hosted project wholesale — that
+command has already silently deleted this project's federation feed and its
+PR-promotion policy ([arkaik#423](https://github.com/alexisbohns/arkaik/issues/423)).
+
+**If the `arkaik-mcp` tools are not available, say so and stop.** Do not fall
+back to the file. A silent fallback is the failure nobody notices, and it is the
+one this note exists to prevent. In a cloud container the usual cause is a
+missing `ARKAIK_TOKEN`: `.mcp.json` sources this machine's `.env`, which is
+gitignored and therefore absent — the token has to be in the environment
+instead.
+
+### Status is part of the change
+
+The map records where each promise stands, per platform. Two halves:
+
+- **You** move an acceptance or a view to `development` when you start work on
+  it (`update_node` over MCP). Do it when you pick the work up, not at the end.
+- **The Arkaik GitHub App** does the rest from the pull request: opening one
+  marks `development`, merging marks `releasing`, on the platform of the app
+  folder the PR touched. Nothing to write, nothing to remember.
+
+`live` is **not** a merge. It means shipped to people: the web deploy is out, or
+a store accepted the build. Nothing moves a status there automatically yet
+([arkaik#424](https://github.com/alexisbohns/arkaik/issues/424)), so leave
+acceptances at `releasing` rather than claiming a release that has not happened.
