@@ -1,6 +1,6 @@
 /**
- * Supabase client factories used by the compose-pebble and
- * backfill-pebble-render edge functions.
+ * Supabase client factories used by the compose-pebble, compose-pebble-update,
+ * delete-account and sweep-orphan-snaps edge functions.
  */
 
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
