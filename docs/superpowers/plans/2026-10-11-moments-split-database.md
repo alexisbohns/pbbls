@@ -1789,10 +1789,12 @@ git commit -m "test(db): prove the moments contract and retire the drafts harnes
 
 ---
 
-## Task 11: Update the five harnesses that touch the moved columns
+## Task 11: Update the seven harnesses that touch the moved columns or call the compat wrappers
 
 **Files:**
-- Modify: `packages/supabase/scripts/verify-pebble-visibility.ts`, `verify-content-reports.ts`, `verify-moderation-state.ts`, `verify-orphan-snap-sweep.ts`, `verify-account-purge.ts`
+- Modify: `packages/supabase/scripts/verify-pebble-visibility.ts`, `verify-content-reports.ts`, `verify-moderation-state.ts`, `verify-orphan-snap-sweep.ts`, `verify-account-purge.ts`, `verify-public-profile.ts`, `verify-glyph-usability.ts`
+
+Every one of them creates pebbles through `create_pebble` (now a compat wrapper). Two rules for all seven: every `create_pebble` payload must carry a non-empty `domain_ids` (else `pebble_needs_domain`), and new seeds should prefer `save_moment` + `complete_pebble` so the harness outlives the wrappers. `verify-glyph-usability.ts` loses its subject on this path: the wrapper drops `glyph_id`, so retarget its pebble cases at the collection glyph (`set_collection_glyph` must refuse an unusable glyph with 42501 and accept a usable one, mirroring the souls cases) and delete the pebble-glyph cases.
 
 Each harness builds pebbles through `compose-pebble` or `create_pebble` and then asserts on columns. Apply the contract mapping below, run the harness, and fix every assertion the mapping explains. An assertion the mapping does **not** explain is a bug in the migrations, not in the harness: stop and fix the migration.
 
