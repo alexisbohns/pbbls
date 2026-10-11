@@ -481,6 +481,11 @@ The map records where each promise stands, per platform. Two halves:
   folder the PR touched. Nothing to write, nothing to remember.
 
 `live` is **not** a merge. It means shipped to people: the web deploy is out, or
-a store accepted the build. Nothing moves a status there automatically yet
-([arkaik#424](https://github.com/alexisbohns/arkaik/issues/424)), so leave
-acceptances at `releasing` rather than claiming a release that has not happened.
+a store accepted the build. On **web**, `mark-live.yml` does it: a successful
+`Production – pbbls` deploy marks `live` the acceptances named (`AC-x@web`, or
+a bare `AC-x` in a PR touching `apps/web`) in the pull requests merged since the
+previous deploy. Name the acceptance in the PR body, or the deploy can't find it.
+Nothing does it for **iOS or Android** yet
+([arkaik#424](https://github.com/alexisbohns/arkaik/issues/424)). Either way,
+leave acceptances at `releasing` rather than claiming a release that has not
+happened.

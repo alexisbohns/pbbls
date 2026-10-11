@@ -70,7 +70,7 @@ CI gates worth knowing about: `arkaik.yml` validates the legacy bundle + journal
 
 `docs/arkaik/arkaik.json` is present, so the Arkaik map lives in a **hosted account** and is changed only through the `arkaik-mcp` tools (`create_node`, `update_node`, `create_edge`, …). `docs/arkaik/bundle.json` and `journal.jsonl` are a frozen pre-hosted snapshot kept for `arkaik.yml`: **never create or edit them** (an `arkaik restore` from them has already wiped this project's federation feed and PR-promotion policy). **If the `arkaik-mcp` tools are not available, say so and stop.** Never fall back to the file.
 
-Status is part of the change: move an acceptance or view to `development` (`update_node`) when you pick the work up. The Arkaik GitHub App marks `development` at PR-open and `releasing` at merge; nothing moves a status to `live`, so leave it at `releasing`. Full rules and rationale: the `arkaik` skill, "Hosted map rules for pbbls".
+Status is part of the change: move an acceptance or view to `development` (`update_node`) when you pick the work up. The Arkaik GitHub App marks `development` at PR-open and `releasing` at merge; a production web deploy marks the web acceptances its PRs named `live` (`mark-live.yml`), and nothing does that for iOS or Android yet, so never set `live` yourself — leave it at `releasing`. Full rules and rationale: the `arkaik` skill, "Hosted map rules for pbbls".
 
 ## Standing cross-surface rules
 
