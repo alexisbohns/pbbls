@@ -107,8 +107,11 @@ be a participant). First insert for the (moment, user) writes the
 `pebble_created` karma event; updates rewrite the join tables as
 `update_pebble` does today and write `pebble_enriched` deltas. Clients keep
 calling `check_achievements` after a completion, as they do after a publish
-today, so the unlock celebration contract does not move server-side. Collection ownership and soul
-ownership checks are kept verbatim.
+today, so the unlock celebration contract does not move server-side. Collection
+and soul ownership are both checked (`collection_not_owned`, `soul_not_owned`,
+42501); the old RPCs only checked collections. In both writers an explicit JSON
+null means "absent" (Kotlin and Swift encoders emit explicit nulls) and array
+keys are type-checked (`invalid_payload`, 22023).
 
 ### `compute_karma_delta`
 
