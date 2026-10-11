@@ -1029,3 +1029,21 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
 - **Refs:** #1032, #1017, #821, `apps/android/app/src/main/kotlin/app/pbbls/android/features/consent/ConsentGateLogic.kt`.
 
 ---
+
+## 2026-10-12 — A moment is what happened, a pebble is what it meant to one person; a pebble exists only when complete; its glyph is derived (#1046)
+
+- **Status:** taken
+- **Scope:** db, api
+- **Context:** Capture was eleven steps and dissuasive. Glyphs were pebble-specific and server-rendered into `render_svg`. The strategy audit's north star is one moment shared by a few people, each with their own reading of it, which a single `pebbles` row cannot hold.
+- **Decision:** `moments` (date, name, description, snaps, moderation) and `pebbles` (emotion, valence, domains, souls, collections, cards, grade), joined by `pebbles.moment_id`, unique per (moment, user). A pebble row is inserted only by `complete_pebble`, which refuses a missing emotion, valence or domain, so karma and achievements keep counting `pebbles` rows unchanged. The glyph is derived: `private.resolve_pebble_glyph` (definer) picks the oldest collection carrying a glyph, else the first domain default by slug; `public.resolve_pebble_glyph` is an invoker wrapper gated on the caller being able to read the pebble, so a uuid alone reveals nothing. `pebbles.glyph_id`, `render_svg`, `render_version`, `pebble_drafts` and the render engine are gone. Legacy pebble ids were reused as moment ids, so snap paths, share links and report targets kept their ids. Explicit JSON `null` in an RPC payload means "absent"; array keys are type-checked (`invalid_payload`).
+- **Why:** One identity through the migration keeps every existing reference valid. Splitting now avoids a second identity migration when participants arrive. Deriving the glyph removes a composer step and the whole render pipeline, and the stone is drawn client-side already on iOS.
+- **Consequences:**
+  - `create_pebble`, `update_pebble`, `v_pebbles_full`, `path_pebbles` and the two compose edge functions' null render keys are deprecated compat for web only and die with the web composer (#1050). Seven harnesses call `create_pebble` and must move off it first.
+  - `moments_select` and `pebbles_select` reference each other only through `private.moment_is_hidden`; a new cross-user read path on either table keeps that shape or it recurses. Participants later widen `moments_select` only.
+  - `complete_pebble` serialises per (moment, user) with the `record_consent` advisory-lock pattern; the unique index is the loud backstop.
+  - Purging a user deletes their moments, which will cascade other participants' pebbles and snaps on those moments once participants exist. Decided now so the participants design inherits it. `counts.pebbles` / `counts.snaps` in `purge_account` read 0 for own content (cascaded by the moments delete).
+  - `achievements.glyph_id` (NO ACTION) is not in the purge kept-glyph predicate: a carved glyph attached to an achievement blocks the glyphs delete. Pre-existing, tracked as a follow-up issue.
+  - Glyph geometry (strokes) now reaches every viewer of a public pebble, since the strokes are the visual. The #829 stored-XSS property moves to the clients' stroke renderers (notes on #1047, #1048, #1049).
+  - Installed iOS and Android builds broke at this push until #1047 and #1048 shipped (accepted pre-launch).
+- **Supersedes / Superseded-by:** Supersedes the M47 drafts design (`2026-07-29-drafts-and-autosave-design.md`) for server drafts; local autosave stands. Supersedes the 2026-10-07 orphan-sweep sentence "an object is referenced when any `pebble_drafts.payload->'snaps'` element names it". Supersedes the 20260817130000 exclusion of raw glyph geometry from the share payload.
+- **Refs:** #1046, #1047, #1048, #1049, #1050, #1051, `docs/superpowers/specs/2026-10-11-moments-and-pebbles-split-design.md`, migrations `20261012090000`–`20261012090400`, `packages/supabase/scripts/verify-moments.ts`.
