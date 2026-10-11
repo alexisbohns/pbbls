@@ -8,6 +8,14 @@
 --
 -- Order matters: dependents of the dropped pebble columns (views, the
 -- moderation trigger, pebbles_select) go first, then the columns.
+--
+-- NOT safe to push alone. 20261012090100–20261012090400 re-emit the writers,
+-- readers, purge, reports, analytics and orphan list this file breaks:
+-- purge_account, list_orphan_snap_files, get_public_profile, get_shared_pebble,
+-- report_content, admin_list_content_reports, admin_set_content_hidden,
+-- create_pebble, update_pebble, path_pebbles, get_pebble_volume_series,
+-- get_pebble_enrichment. Unnamed server drafts are discarded, so any files they
+-- uploaded become orphans for the sweep (list_orphan_snap_files) by design.
 -- =============================================================================
 
 -- 1. moments ------------------------------------------------------------------
@@ -24,6 +32,10 @@ create table public.moments (
 );
 comment on table public.moments is
   'What happened: date, name, description, snaps. Shared later via participants. A pebble is one user''s completion of a moment.';
+comment on column public.moments.hidden_at is
+  'Set by moderation (admin_set_content_hidden). Null = not hidden. The owner still sees the moment and its pebbles; every cross-user and anon path is dark.';
+comment on column public.moments.hidden_by is
+  'The admin who set hidden_at (auth.users). Set by moderation only; null when not hidden or the admin account is gone.';
 create index moments_user_happened_idx on public.moments (user_id, happened_at desc);
 create index moments_hidden on public.moments (id) where hidden_at is not null;
 create trigger moments_updated_at
@@ -37,7 +49,10 @@ from public.pebbles;
 
 alter table public.pebbles
   add column moment_id uuid references public.moments(id) on delete cascade;
+-- The backfill is not an edit: keep pebbles.updated_at as it was.
+alter table public.pebbles disable trigger pebbles_updated_at;
 update public.pebbles set moment_id = id;
+alter table public.pebbles enable trigger pebbles_updated_at;
 alter table public.pebbles alter column moment_id set not null;
 create unique index pebbles_moment_user_key on public.pebbles (moment_id, user_id);
 
@@ -68,7 +83,7 @@ begin
       v_when := null;
     end;
     insert into public.moments (user_id, name, description, happened_at, created_at, updated_at)
-    values (d.user_id, btrim(d.payload->>'name'), nullif(d.payload->>'description', ''),
+    values (d.user_id, btrim(d.payload->>'name'), nullif(btrim(coalesce(d.payload->>'description', '')), ''),
             coalesce(v_when, d.created_at), d.created_at, d.updated_at)
     returning id into v_id;
 
@@ -76,10 +91,15 @@ begin
                case when jsonb_typeof(d.payload->'snaps') = 'array' then d.payload->'snaps' else '[]'::jsonb end)
     loop
       if jsonb_typeof(s.value) = 'object' and nullif(s.value->>'storage_path', '') is not null then
-        insert into public.snaps (id, moment_id, user_id, storage_path, sort_order)
-        values (coalesce(nullif(s.value->>'id', '')::uuid, gen_random_uuid()), v_id, d.user_id,
-                s.value->>'storage_path', coalesce((s.value->>'sort_order')::smallint, 0))
-        on conflict (id) do nothing;
+        -- One malformed element (bad id or sort_order) skips that snap, not the push.
+        begin
+          insert into public.snaps (id, moment_id, user_id, storage_path, sort_order)
+          values (coalesce(nullif(s.value->>'id', '')::uuid, gen_random_uuid()), v_id, d.user_id,
+                  s.value->>'storage_path', coalesce((s.value->>'sort_order')::smallint, 0))
+          on conflict (id) do nothing;
+        exception when others then
+          raise notice 'draft % snap skipped: %', d.id, sqlerrm;
+        end;
       end if;
     end loop;
   end loop;
@@ -131,6 +151,8 @@ alter table public.pebbles
 -- 7. collections carry a glyph ------------------------------------------------------
 alter table public.collections
   add column glyph_id uuid references public.glyphs(id);
+-- Definer and no current_user exemption, same shape and reasons as
+-- enforce_soul_glyph_usable (20260919160000) and the header of 20260919140000.
 create or replace function public.enforce_collection_glyph_usable()
 returns trigger
 language plpgsql
@@ -199,6 +221,7 @@ create policy "moments_select" on public.moments
     user_id = auth.uid()
     or (
       hidden_at is null
+      -- Deliberate defence in depth: pebbles_select already applies to this subquery.
       and exists (
         select 1 from public.pebbles p
          where p.moment_id = moments.id
@@ -219,7 +242,8 @@ create policy "moments_select" on public.moments
     )
   );
 create policy "moments_insert" on public.moments for insert to authenticated with check (user_id = auth.uid());
-create policy "moments_update" on public.moments for update to authenticated using (user_id = auth.uid());
+create policy "moments_update" on public.moments for update to authenticated
+  using (user_id = auth.uid()) with check (user_id = auth.uid());
 create policy "moments_delete" on public.moments for delete to authenticated using (user_id = auth.uid());
 
 -- 10. moderation guard moves to moments -----------------------------------------------------
