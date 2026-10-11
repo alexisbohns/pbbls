@@ -3,7 +3,41 @@
 -- save_moment / complete_pebble / delete_moment / delete_pebble /
 -- compute_karma_delta / set_collection_glyph. create_pebble and update_pebble
 -- are re-emitted as compat wrappers in 20261012090400.
+--
+-- NOT safe to push alone: 20261012090000–20261012090400 ship together. This
+-- file drops the 6-arg compute_karma_delta and delete_pebble_media that the
+-- not-yet-wrapped create_pebble / update_pebble and the clients still name.
+--
+-- Payload conventions (cross-surface): an explicit JSON null means "absent"
+-- (Kotlin and Swift encoders emit explicit nulls), read through
+-- private.jsonb_has; array keys are type-checked (invalid_payload, 22023).
 -- =============================================================================
+
+-- private.jsonb_has: key present AND not JSON null. Lives in `private`, which
+-- PostgREST never serves; the definer functions run as owner anyway.
+create or replace function private.jsonb_has(p jsonb, k text)
+returns boolean
+language sql
+immutable
+as $$ select p ? k and jsonb_typeof(p->k) <> 'null' $$;
+revoke all on function private.jsonb_has(jsonb, text) from public, anon;
+grant execute on function private.jsonb_has(jsonb, text) to authenticated;
+
+-- private.assert_jsonb_array: a present key that is not an array is a client
+-- bug; name it instead of letting jsonb_array_length throw.
+create or replace function private.assert_jsonb_array(p jsonb, k text)
+returns void
+language plpgsql
+immutable
+as $$
+begin
+  if private.jsonb_has(p, k) and jsonb_typeof(p->k) <> 'array' then
+    raise exception 'invalid_payload' using errcode = '22023', detail = k || ' must be an array';
+  end if;
+end;
+$$;
+revoke all on function private.assert_jsonb_array(jsonb, text) from public, anon;
+grant execute on function private.assert_jsonb_array(jsonb, text) to authenticated;
 
 -- karma: the glyph bonus is gone, the description bonus reads the moment.
 -- search_path pin and role revoke kept from 20260411000005.
@@ -47,6 +81,7 @@ begin
   if v_user is null then
     raise exception 'not_authenticated' using errcode = '42501';
   end if;
+  perform private.assert_jsonb_array(payload, 'snaps');
 
   if v_id is null then
     insert into public.moments (user_id, name, description, happened_at)
@@ -54,8 +89,8 @@ begin
     returning id into v_id;
   else
     update public.moments set
-      name        = case when payload ? 'name' then v_name else name end,
-      description = case when payload ? 'description' then nullif(payload->>'description', '') else description end,
+      name        = case when private.jsonb_has(payload, 'name') then v_name else name end,
+      description = case when private.jsonb_has(payload, 'description') then nullif(payload->>'description', '') else description end,
       happened_at = coalesce(v_when, happened_at)
     where id = v_id and user_id = v_user;
     if not found then
@@ -65,7 +100,7 @@ begin
 
   -- snaps: whole-set replace, per-moment quota (the profile column keeps its
   -- historical name). auth.uid() matches profiles.user_id, not profiles.id (#618).
-  if payload ? 'snaps' then
+  if private.jsonb_has(payload, 'snaps') then
     select coalesce(max_media_per_pebble, 1) into v_max_media
       from public.profiles where user_id = v_user;
     if jsonb_array_length(payload->'snaps') > coalesce(v_max_media, 1) then
@@ -73,6 +108,9 @@ begin
     end if;
     delete from public.snaps where moment_id = v_id;
     for v_snap in select * from jsonb_array_elements(payload->'snaps') loop
+      if nullif(v_snap.value->>'storage_path', '') is null then
+        raise exception 'invalid_snap' using errcode = '22023', detail = 'storage_path is required';
+      end if;
       insert into public.snaps (id, moment_id, user_id, storage_path, sort_order)
       values (
         coalesce(nullif(v_snap.value->>'id', '')::uuid, gen_random_uuid()),
@@ -110,6 +148,7 @@ declare
   v_new_id        uuid;
   v_card          record;
   v_bad_collection uuid;
+  v_bad_soul      uuid;
   v_has_desc      boolean;
   v_cards         int;
   v_souls         int;
@@ -125,14 +164,26 @@ begin
   if not exists (select 1 from public.moments m where m.id = v_moment_id and m.user_id = v_user) then
     raise exception 'moment_not_found' using errcode = 'P0002';
   end if;
+  perform private.assert_jsonb_array(payload, 'domain_ids');
+  perform private.assert_jsonb_array(payload, 'soul_ids');
+  perform private.assert_jsonb_array(payload, 'new_souls');
+  perform private.assert_jsonb_array(payload, 'collection_ids');
+  perform private.assert_jsonb_array(payload, 'new_collections');
+  perform private.assert_jsonb_array(payload, 'cards');
+
+  -- Serialise completions of one (moment, user): closes the double-insert and
+  -- the stale karma-sum races. Taken after validation so a rejected call never
+  -- waits; the unique index stays as the loud backstop (house pattern:
+  -- 20261007120000 record_consent).
+  perform pg_advisory_xact_lock(hashtextextended('complete_pebble:' || v_moment_id::text || ':' || v_user::text, 0));
 
   select id into v_pebble_id from public.pebbles where moment_id = v_moment_id and user_id = v_user;
   v_is_new := v_pebble_id is null;
 
   -- D2: a pebble needs at least one domain. Required on insert; on update the
-  -- key may be absent (keep) but never empty.
-  if (v_is_new or payload ? 'domain_ids')
-     and coalesce(jsonb_array_length(payload->'domain_ids'), 0) = 0 then
+  -- key may be absent or null (keep) but never empty.
+  if (v_is_new or private.jsonb_has(payload, 'domain_ids'))
+     and (case when private.jsonb_has(payload, 'domain_ids') then jsonb_array_length(payload->'domain_ids') else 0 end) = 0 then
     raise exception 'pebble_needs_domain' using errcode = 'P0001';
   end if;
   if v_is_new and (payload->>'emotion_id') is null then
@@ -143,30 +194,36 @@ begin
   end if;
 
   -- souls: existing ids ∪ inline creations
-  if payload ? 'soul_ids' or payload ? 'new_souls' then
+  if private.jsonb_has(payload, 'soul_ids') or private.jsonb_has(payload, 'new_souls') then
     select array_agg(val::uuid) into v_soul_ids
-      from jsonb_array_elements_text(coalesce(payload->'soul_ids', '[]'::jsonb)) val;
+      from jsonb_array_elements_text(case when private.jsonb_has(payload, 'soul_ids') then payload->'soul_ids' else '[]'::jsonb end) val;
     v_soul_ids := coalesce(v_soul_ids, '{}');
-    for v_new in select * from jsonb_array_elements(coalesce(payload->'new_souls', '[]'::jsonb)) loop
+    -- Ownership of the existing ids first, before any write.
+    select s_id into v_bad_soul from unnest(v_soul_ids) s_id
+     where not exists (select 1 from public.souls where id = s_id and user_id = v_user) limit 1;
+    if v_bad_soul is not null then
+      raise exception 'soul_not_owned' using errcode = '42501', detail = v_bad_soul::text;
+    end if;
+    for v_new in select * from jsonb_array_elements(case when private.jsonb_has(payload, 'new_souls') then payload->'new_souls' else '[]'::jsonb end) loop
       insert into public.souls (user_id, name) values (v_user, v_new.value->>'name') returning id into v_new_id;
       v_soul_ids := array_append(v_soul_ids, v_new_id);
     end loop;
   end if;
 
   -- collections: existing ids ∪ inline creations, then ownership
-  if payload ? 'collection_ids' or payload ? 'new_collections' then
+  if private.jsonb_has(payload, 'collection_ids') or private.jsonb_has(payload, 'new_collections') then
     select array_agg(val::uuid) into v_collection_ids
-      from jsonb_array_elements_text(coalesce(payload->'collection_ids', '[]'::jsonb)) val;
+      from jsonb_array_elements_text(case when private.jsonb_has(payload, 'collection_ids') then payload->'collection_ids' else '[]'::jsonb end) val;
     v_collection_ids := coalesce(v_collection_ids, '{}');
-    for v_new in select * from jsonb_array_elements(coalesce(payload->'new_collections', '[]'::jsonb)) loop
-      insert into public.collections (user_id, name) values (v_user, v_new.value->>'name') returning id into v_new_id;
-      v_collection_ids := array_append(v_collection_ids, v_new_id);
-    end loop;
     select c_id into v_bad_collection from unnest(v_collection_ids) c_id
      where not exists (select 1 from public.collections where id = c_id and user_id = v_user) limit 1;
     if v_bad_collection is not null then
-      raise exception 'Collection not owned by user: %', v_bad_collection;
+      raise exception 'collection_not_owned' using errcode = '42501', detail = v_bad_collection::text;
     end if;
+    for v_new in select * from jsonb_array_elements(case when private.jsonb_has(payload, 'new_collections') then payload->'new_collections' else '[]'::jsonb end) loop
+      insert into public.collections (user_id, name) values (v_user, v_new.value->>'name') returning id into v_new_id;
+      v_collection_ids := array_append(v_collection_ids, v_new_id);
+    end loop;
   end if;
 
   if v_is_new then
@@ -188,7 +245,7 @@ begin
     where id = v_pebble_id;
   end if;
 
-  if payload ? 'cards' then
+  if private.jsonb_has(payload, 'cards') then
     delete from public.pebble_cards where pebble_id = v_pebble_id;
     for v_card in select * from jsonb_array_elements(payload->'cards') loop
       insert into public.pebble_cards (pebble_id, species_id, value, sort_order)
@@ -200,7 +257,7 @@ begin
     delete from public.pebble_souls where pebble_id = v_pebble_id;
     insert into public.pebble_souls (pebble_id, soul_id) select v_pebble_id, unnest(v_soul_ids);
   end if;
-  if payload ? 'domain_ids' then
+  if private.jsonb_has(payload, 'domain_ids') then
     delete from public.pebble_domains where pebble_id = v_pebble_id;
     insert into public.pebble_domains (pebble_id, domain_id)
     select v_pebble_id, (val::text)::uuid from jsonb_array_elements_text(payload->'domain_ids') val;
@@ -246,6 +303,7 @@ declare
   v_total int;
 begin
   if not exists (select 1 from public.pebbles where id = p_pebble_id and user_id = v_user) then
+    -- Historical sentence kept for compatibility: existing clients match on it.
     raise exception 'Pebble not found or access denied';
   end if;
   select coalesce(sum(delta), 0) into v_total from public.karma_events where ref_id = p_pebble_id and user_id = v_user;
@@ -272,10 +330,12 @@ begin
   if not exists (select 1 from public.moments where id = p_moment_id and user_id = v_user) then
     raise exception 'moment_not_found' using errcode = 'P0002';
   end if;
-  for v_p in select id from public.pebbles where moment_id = p_moment_id and user_id = v_user loop
-    select coalesce(sum(delta), 0) into v_total from public.karma_events where ref_id = v_p.id and user_id = v_user;
+  -- Every pebble on the moment, not only the caller's: forward-compatible with
+  -- participants, whose pebbles go with the moment and whose karma must follow.
+  for v_p in select id, user_id from public.pebbles where moment_id = p_moment_id loop
+    select coalesce(sum(delta), 0) into v_total from public.karma_events where ref_id = v_p.id and user_id = v_p.user_id;
     if v_total > 0 then
-      insert into public.karma_events (user_id, delta, reason, ref_id) values (v_user, -v_total, 'pebble_deleted', v_p.id);
+      insert into public.karma_events (user_id, delta, reason, ref_id) values (v_p.user_id, -v_total, 'pebble_deleted', v_p.id);
     end if;
   end loop;
   select coalesce(array_agg(storage_path), '{}') into v_paths from public.snaps where moment_id = p_moment_id;
@@ -297,7 +357,7 @@ declare
   v_path text;
 begin
   delete from public.snaps where id = p_snap_id and user_id = v_user returning storage_path into v_path;
-  if v_path is null then raise exception 'Snap not found or access denied'; end if;
+  if v_path is null then raise exception 'snap_not_found' using errcode = 'P0002'; end if;
   return v_path;
 end;
 $$;
