@@ -27,7 +27,7 @@ the north star.
 | Column | Type | Notes |
 |---|---|---|
 | `id` | uuid pk | For backfilled rows, equals the former pebble id |
-| `user_id` | uuid → auth.users on delete cascade | Owner. Participants come with pairs, later |
+| `user_id` | uuid → auth.users (no cascade, like `pebbles.user_id`; purge deletes explicitly) | Owner. Participants come with pairs, later |
 | `name` | text null | |
 | `description` | text null | |
 | `happened_at` | timestamptz not null default now() | Whole-second precision on every write |
