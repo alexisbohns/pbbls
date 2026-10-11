@@ -959,7 +959,7 @@ git commit -m "feat(db): read moments with the caller's pebble and a derived gly
 **Files:**
 - Create: `packages/supabase/supabase/migrations/20261012090300_moments_split_moderation_purge.sql`
 
-Before writing, diff the bases you re-emit against their newest emission (`purge_account` → `20260916090100`, `report_content` and `admin_list_content_reports` → `20260916090000`, `admin_set_content_hidden` → `20260916100000`, `list_orphan_snap_files` → `20261007131500`, the two analytics views and two admin functions → `20260919120000` / `20260501000006`). Only the edits listed in each header below may differ.
+Before writing, diff the bases you re-emit against their newest emission (`purge_account` → `20260916090100`, `get_public_profile` → `20261007140000`, `report_content` and `admin_list_content_reports` → `20260916090000`, `admin_set_content_hidden` → `20260916100000`, `list_orphan_snap_files` → `20261007131500`, the two analytics views and two admin functions → `20260919120000` / `20260501000006`). Only the edits listed in each header below may differ.
 
 - [ ] **Step 1: Write the migration**
 
@@ -1327,6 +1327,12 @@ grant select on public.v_analytics_pebble_volume_daily, public.v_analytics_pebbl
 --   p.description                           -> m.description, with `join public.moments m on m.id = p.moment_id`
 --   g.id = p.glyph_id and g.is_custom       -> the collection-glyph exists() used in the views above
 -- (paste the two re-emitted functions here)
+
+-- get_public_profile: base 20261007140000. It reads `pb.happened_at` for the
+-- active_days count. Copy the body verbatim and change only that CTE:
+--   from public.pebbles pb                      -> from public.pebbles pb join public.moments m on m.id = pb.moment_id
+--   date(pb.happened_at) / pb.happened_at >=    -> date(m.happened_at) / m.happened_at >=
+-- (paste the re-emitted function here)
 
 -- list_orphan_snap_files: the draft_snaps CTE is gone with the table. Base 20261007131500.
 create or replace function public.list_orphan_snap_files(p_min_age_seconds integer default 86400, p_owner uuid default null)
