@@ -17,6 +17,8 @@
     "@fontsource-variable/caveat": "^5.3.0",
     "@fontsource-variable/inclusive-sans": "^5.3.0",
     "@fontsource-variable/ysabeau": "^5.3.0",
+    "@fontsource-variable/ysabeau-office": "^5.3.0",
+    "@fontsource-variable/ysabeau-sc": "^5.3.0",
     "@fontsource/reenie-beanie": "^5.3.0",
     "@rive-app/react-canvas": "^4.36.0",
     "@serwist/turbopack": "^9.5.7",

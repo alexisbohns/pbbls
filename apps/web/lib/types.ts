@@ -49,6 +49,9 @@ export type Pebble = {
   // edge functions; null for legacy rows or anonymous (LocalProvider) pebbles.
   render_svg: string | null
   render_version: string | null
+  // The pebble's glyph strokes, from `v_pebbles_full.glyph`. The Spine carves
+  // these into the lit stone; null when the pebble has no glyph.
+  glyph: PebbleGlyph | null
   created_at: string
   updated_at: string
 }
@@ -183,6 +186,9 @@ export type Mark = {
   created_at: string
   updated_at: string
 }
+
+// A glyph as `v_pebbles_full.glyph` embeds it: geometry only, no timestamps.
+export type PebbleGlyph = Pick<Mark, "id" | "name" | "strokes" | "viewBox">
 
 export type GlyphSubmissionStatus = "pending" | "approved" | "rejected"
 

@@ -8,6 +8,12 @@ import { defineConfig } from "vitest/config"
 // The `@/` alias is resolved here rather than via a plugin, because the modules
 // under test import sibling `lib/` code through it (path-layout → pebble-geometry)
 // and Vitest does not read tsconfig paths on its own.
+// One timezone for every run, set here on the main thread before the workers
+// start (a worker cannot change it: assigning `process.env.TZ` there is
+// ignored). Paris has a DST change, which the Spine's day bucketing is tested
+// across; CI's UTC would make those cases pass vacuously.
+process.env.TZ = "Europe/Paris"
+
 export default defineConfig({
   resolve: {
     alias: {
