@@ -801,6 +801,8 @@ Push as Part 2 of the stack.
 
 ## Task 5: Migration 3 — readers
 
+> **Shape note (post-review):** the resolver is two layers, `private.resolve_pebble_glyph` (definer) and `public.resolve_pebble_glyph` (invoker, gated on `exists (select 1 from public.pebbles where id = $1)` under the caller's RLS). `get_shared_pebble` calls the private layer. See spec §4 as amended. The SQL below predates that amendment; the committed file is the reference.
+
 **Files:**
 - Create: `packages/supabase/supabase/migrations/20261012090200_moments_split_readers.sql`
 
@@ -1539,7 +1541,7 @@ Remove the `createAdminClient` and `composeAndWriteRender` imports. Update the h
 git rm -r packages/supabase/supabase/functions/_shared/compose-and-write.ts packages/supabase/supabase/functions/_shared/engine packages/supabase/supabase/functions/backfill-pebble-render packages/supabase/scripts/backfill-renders.ts packages/supabase/scripts/smoke-test-engine.ts
 ```
 
-In `package.json`, `"test": "deno test supabase/functions/sweep-orphan-snaps/"`.
+In `package.json`, `"test": "deno test supabase/functions/sweep-orphan-snaps/"`. Also fix the two comments in `supabase/functions/sweep-orphan-snaps/index.ts` (line 5) and `sweep.ts` (line 7) that still say server drafts protect a file: drafts no longer exist, only `snaps` rows do.
 
 - [ ] **Step 4: Check**
 
@@ -1702,6 +1704,10 @@ try {
   check("a collection glyph wins over the domain", full2?.pebble?.glyph?.source === "collection", JSON.stringify(full2?.pebble?.glyph));
 
   // 4. readers and RLS ------------------------------------------------------------
+  const probeSecret = await b.rpc("resolve_pebble_glyph", { p_pebble_id: pebbleId });
+  check("a secret pebble's glyph is null to another user", !probeSecret.error && probeSecret.data === null, probeSecret.error?.message);
+  const probeUnknown = await b.rpc("resolve_pebble_glyph", { p_pebble_id: crypto.randomUUID() });
+  check("an unknown pebble id answers null", !probeUnknown.error && probeUnknown.data === null, probeUnknown.error?.message);
   const { data: bobSees1 } = await b.from("v_moments_full").select("id").eq("id", momentId);
   check("a secret pebble's moment is invisible to another user", (bobSees1 ?? []).length === 0);
   await a.rpc("complete_pebble", { payload: { moment_id: momentId, visibility: "public" } });
@@ -1711,6 +1717,11 @@ try {
   const { data: bobPebbles } = await b.from("pebbles").select("id").eq("moment_id", momentId);
   check("pebbles_select still shows the public pebble row", (bobPebbles ?? []).length === 1);
 
+  const probePublic = await b.rpc("resolve_pebble_glyph", { p_pebble_id: pebbleId });
+  check("a public pebble's glyph resolves for another user", probePublic.data?.id === domain.default_glyph_id, JSON.stringify(probePublic.data));
+  const anonClient = createClient(SUPABASE_URL!, ANON_KEY!, { auth: { persistSession: false } });
+  const sharedAnon = await anonClient.rpc("get_shared_pebble", { p_pebble_id: pebbleId });
+  check("get_shared_pebble answers anon with a glyph", !sharedAnon.error && !!sharedAnon.data?.glyph?.id, sharedAnon.error?.message);
   const shared = await b.rpc("get_shared_pebble", { p_pebble_id: pebbleId });
   check("get_shared_pebble carries the moment name and a glyph", !shared.error && shared.data?.name === `coffee ${runId}` && shared.data?.glyph?.id, shared.error?.message);
 
@@ -1766,7 +1777,7 @@ Deno.exit(failed === 0 ? 0 : 1);
 - [ ] **Step 3: Run it**
 
 Run: `set -a; . ./.env; set +a; npm run db:verify:moments --workspace=packages/supabase`
-Expected: `Summary: passed=26 failed=0` (count the `check(` calls if you changed any).
+Expected: `Summary: passed=30 failed=0` (count the `check(` calls if you changed any).
 
 - [ ] **Step 4: Commit**
 
@@ -1796,6 +1807,9 @@ Each harness builds pebbles through `compose-pebble` or `create_pebble` and then
 | `get_shared_pebble(...).render_svg` | `null`; assert `glyph.id` instead |
 | `delete_pebble_media` | `delete_moment_media` |
 | `collections` glyph in purge kept-glyph logic | a glyph on another user's collection keeps the glyph (anonymised), mirror of the souls case |
+| purge `counts` | `moments` = seeded moments; `pebbles` and `snaps` read **0** (cascaded by the moments delete, they count only rows on other users' moments); prove deletion with the zero-row table checks |
+| `verify-orphan-snap-sweep.ts` "draft-only kept" case | deleted, not renamed: there is no draft arm any more |
+| `admin_list_content_reports` `target_live` for moments | gains `hidden`; `visibility` is the widest pebble visibility |
 
 - [ ] **Step 1–5:** one harness at a time: edit, run (`npm run db:verify:<name> --workspace=packages/supabase`; purge needs `SUPABASE_SERVICE_ROLE_KEY`), expect `failed=0`, commit `test(db): <harness> follows the moments split`.
 
@@ -1817,6 +1831,9 @@ Each harness builds pebbles through `compose-pebble` or `create_pebble` and then
 - **Why:** One identity through the migration keeps snap paths, share links and report targets valid. Splitting now avoids a second identity migration when participants arrive. Deriving the glyph removes a step and a render pipeline.
 - **Consequences:** `create_pebble`, `update_pebble`, `v_pebbles_full` and `path_pebbles` are deprecated compat objects for web only and die with the web composer. `moments_select` and `pebbles_select` reference each other only through `private.moment_is_hidden`; a new cross-user read path on either table must keep that shape or it recurses. Participants later widen `moments_select` only. Installed iOS/Android builds broke at this push until their composers shipped (accepted pre-launch).
 - **Supersedes / Superseded-by:** Supersedes the M47 drafts design (`2026-07-29-drafts-and-autosave-design.md`) for server drafts; local autosave stands.
+  - Purging a user deletes their moments, which will cascade OTHER participants' pebbles and snaps on those moments once participants exist. Decided now so the participants design inherits it.
+  - `achievements.glyph_id` (NO ACTION) is not in the purge kept-glyph predicate: a carved glyph attached to an achievement blocks the glyphs delete. Pre-existing, tracked as a follow-up issue.
+- **Supersedes / Superseded-by (addendum):** also supersedes the 2026-10-07 orphan-sweep sentence "an object is referenced when any `pebble_drafts.payload->'snaps'` element names it" — drafts no longer exist.
 - **Refs:** #1046, `docs/superpowers/specs/2026-10-11-moments-and-pebbles-split-design.md`, migrations `20261012090000`–`20261012090400`, `packages/supabase/scripts/verify-moments.ts`.
 ```
 

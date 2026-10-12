@@ -16,6 +16,7 @@ $$;
 create or replace function auth.role() returns text language sql stable as $$
   select coalesce(nullif(current_setting('request.jwt.claim.role', true), ''), 'anon')
 $$;
+grant usage on schema auth to anon, authenticated, service_role;
 -- storage.foldername, used by list_orphan_snap_files
 create schema if not exists storage;
 create or replace function storage.foldername(name text) returns text[] language plpgsql immutable as $$
