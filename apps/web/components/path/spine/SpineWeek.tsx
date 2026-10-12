@@ -11,6 +11,7 @@ import { spineWeek } from "@/lib/utils/spine/spine-week"
 import { weekWords } from "@/lib/utils/spine/week-opening"
 import { isoWeekKey, type WeekRollEntry } from "@/lib/utils/week-roll-entries"
 import { cn } from "@/lib/utils"
+import { PathEmptyState } from "@/components/path/PathEmptyState"
 import { PersonsOfWeek } from "./PersonsOfWeek"
 import { SpineFeed } from "./SpineFeed"
 import { WeekContents } from "./WeekContents"
@@ -140,14 +141,22 @@ export function SpineWeek({
           <PersonsOfWeek persons={persons} weekStart={entry.weekStart} markMap={markMap} readingDay={readingDay} />
           <WeekContents week={week} readingDay={readingDay} onGo={go} />
         </aside>
-        <SpineFeed
-          week={week}
-          order={order}
-          soulMap={soulMap}
-          markMap={markMap}
-          onOpen={onOpen}
-          footer={<WeekMouth words={words} current={current} onNextWeek={onNextWeek} />}
-        />
+        {entry.pebbles.length === 0 ? (
+          // Only the current week can be empty (the roll lists weeks with
+          // pebbles, plus this one): the recto is the fresh-week invitation.
+          <section className="spread:pt-[34px]">
+            <PathEmptyState />
+          </section>
+        ) : (
+          <SpineFeed
+            week={week}
+            order={order}
+            soulMap={soulMap}
+            markMap={markMap}
+            onOpen={onOpen}
+            footer={<WeekMouth words={words} current={current} onNextWeek={onNextWeek} />}
+          />
+        )}
       </article>
     </SpinePressContext>
   )

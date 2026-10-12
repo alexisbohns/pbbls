@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react"
 import { Loader2 } from "lucide-react"
 import { useTranslations } from "next-intl"
 import type { Pebble, Soul } from "@/lib/types"
+import { StoneSprite } from "@/components/pebble/stone/StoneSprite"
 import { WeekRoll } from "@/components/path/WeekRoll"
 import { WeekPager } from "@/components/path/WeekPager"
 import { PathBottomDock } from "@/components/path/PathBottomDock"
@@ -117,11 +118,14 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
         <WeekPager
           entries={entries}
           focused={focusedWeekStart}
+          today={today}
           souls={souls}
           onFocusChange={setFocusedFromDate}
           onSelectPebble={setSelectedPebbleId}
         />
       </div>
+      {/* The stones' shared shapes and filters, once for every week the pager holds. */}
+      <StoneSprite />
       <PathBottomDock className="spread:right-auto spread:left-(--spine-verso-x) spread:w-(--spine-verso-w)" />
       <PebblePeek
         pebbleId={selectedPebbleId}

@@ -1,9 +1,12 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { motion, useReducedMotion, type PanInfo } from "framer-motion"
+import { SpineWeek } from "@/components/path/spine/SpineWeek"
+import { useLookupMaps } from "@/lib/data/useLookupMaps"
+import { useMarks } from "@/lib/data/useMarks"
 import { useMediaQuery } from "@/lib/hooks/useMediaQuery"
 import type { Soul } from "@/lib/types"
-import { WeekPath } from "@/components/path/WeekPath"
 import {
   weekIndex,
   type WeekRollEntry,
@@ -12,6 +15,8 @@ import {
 type WeekPagerProps = {
   entries: WeekRollEntry[]
   focused: Date
+  /** Frozen at the Path's mount: which week is current, which days are still to come. */
+  today: Date
   souls: Soul[]
   onFocusChange: (weekStart: Date) => void
   onSelectPebble: (id: string) => void
@@ -20,11 +25,26 @@ type WeekPagerProps = {
 export function WeekPager({
   entries,
   focused,
+  today,
   souls,
   onFocusChange,
   onSelectPebble,
 }: WeekPagerProps) {
   const focusedIndex = weekIndex(entries, focused)
+  const { marks } = useMarks()
+  const { soulMap, markMap } = useLookupMaps(souls, marks)
+  // The neighbours (±1, kept for paging) render once the focused week has
+  // painted and the main thread is idle (spec §Performance).
+  const [neighbours, setNeighbours] = useState(false)
+  useEffect(() => {
+    if (typeof window.requestIdleCallback === "function") {
+      const handle = window.requestIdleCallback(() => setNeighbours(true), { timeout: 1500 })
+      return () => window.cancelIdleCallback(handle)
+    }
+    // Safari has no requestIdleCallback.
+    const timer = setTimeout(() => setNeighbours(true), 300)
+    return () => clearTimeout(timer)
+  }, [])
   const prefersReducedMotion = useReducedMotion()
   const isTouch = useMediaQuery("(pointer: coarse)")
 
@@ -68,22 +88,31 @@ export function WeekPager({
         dragElastic={0.2}
         onDragEnd={handleDragEnd}
       >
-        {entries.map((entry, i) => (
-          <div key={entry.weekStartIso} className="h-full w-full shrink-0">
-            {Math.abs(i - focusedIndex) <= 1 ? (
-              // Until the Spine replaces it (#1052 Part 6), the wall keeps its
-              // phone column, set in the recto of the spread from 900 px.
-              <div className="mx-auto h-full w-full max-w-md spread:mr-auto spread:ml-[calc(var(--spine-verso-x)+var(--spine-verso-w))] spread-wide:ml-[calc(var(--spine-verso-x)+var(--spine-verso-w)+24px)]">
-                <WeekPath
+        {entries.map((entry, i) => {
+          const distance = Math.abs(i - focusedIndex)
+          const previous = entries[i - 1]
+          const next = entries[i + 1]
+          return (
+            // Each week is its own vertical scroll: the spread's verso sticks
+            // to the top of it, as tall as the page.
+            <div
+              key={entry.weekStartIso}
+              className="h-full w-full shrink-0 overflow-x-hidden overflow-y-auto overscroll-y-contain [container-type:size] [--spine-page-h:100cqh]"
+            >
+              {distance === 0 || (distance === 1 && neighbours) ? (
+                <SpineWeek
                   entry={entry}
-                  souls={souls}
-                  isFocused={i === focusedIndex}
-                  onSelectPebble={onSelectPebble}
+                  today={today}
+                  soulMap={soulMap}
+                  markMap={markMap}
+                  onOpen={onSelectPebble}
+                  onPreviousWeek={previous ? () => onFocusChange(previous.weekStart) : undefined}
+                  onNextWeek={next ? () => onFocusChange(next.weekStart) : undefined}
                 />
-              </div>
-            ) : null}
-          </div>
-        ))}
+              ) : null}
+            </div>
+          )
+        })}
       </motion.div>
     </div>
   )
