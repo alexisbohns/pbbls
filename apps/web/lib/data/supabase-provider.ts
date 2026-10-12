@@ -12,7 +12,6 @@ import {
   type CreateMarkInput,
   type UpdateMarkInput,
   type WalletHistoryPage,
-  type PebbleDraftPayload,
   type PebbleDraftRecord,
   type ConnectionInvite,
   type AcceptConnectionInviteResult,
@@ -42,26 +41,6 @@ import { processPebbleImage } from "@/lib/utils/process-pebble-image"
 
 const PEBBLE_MEDIA_BUCKET = "pebbles-media"
 const SNAP_URL_TTL_SECONDS = 3600
-
-/**
- * `pebble_drafts.payload` is `Json` to the generated types — deliberately
- * unvalidated in SQL (a draft is partial by definition and `create_pebble`
- * stays the validation authority at publish time). Narrow it once here rather
- * than asserting at every call site; a non-object payload is treated as empty.
- */
-function toDraftRecord(row: Record<string, unknown>): PebbleDraftRecord {
-  const raw = row.payload
-  const payload =
-    raw !== null && typeof raw === "object" && !Array.isArray(raw)
-      ? (raw as PebbleDraftPayload)
-      : {}
-  return {
-    id: row.id as string,
-    payload,
-    created_at: row.created_at as string,
-    updated_at: row.updated_at as string,
-  }
-}
 
 export class SupabaseProvider implements DataProvider {
   private store: Store
@@ -95,14 +74,11 @@ export class SupabaseProvider implements DataProvider {
   // ---------------------------------------------------------------------------
 
   async loadFromSupabase(): Promise<Store> {
-    // The render columns (render_svg / render_version) are
-    // not exposed by `v_pebbles_full`, so we fetch them in parallel from the
-    // base `pebbles` table and merge them in by id. This mirrors the iOS read
-    // pattern (it queries `pebbles` directly with explicit columns) and avoids
-    // having to extend the view.
+    // The server no longer renders pebbles (#1046): `render_svg` and
+    // `render_version` were dropped from `pebbles`, so every pebble carries a
+    // null render until the client draws the derived glyph (#1049).
     const [
       pebblesRes,
-      pebblesRenderRes,
       soulsRes,
       collectionsRes,
       collectionPebblesRes,
@@ -112,10 +88,6 @@ export class SupabaseProvider implements DataProvider {
       bounceRes,
     ] = await Promise.all([
       this.supabase.from("v_pebbles_full").select("*").eq("user_id", this.userId),
-      this.supabase
-        .from("pebbles")
-        .select("id, render_svg, render_version")
-        .eq("user_id", this.userId),
       this.supabase.from("souls").select("*").eq("user_id", this.userId),
       this.supabase.from("collections").select("*").eq("user_id", this.userId),
       this.supabase.from("collection_pebbles").select("*, collections!inner(user_id)").eq("collections.user_id", this.userId),
@@ -126,7 +98,6 @@ export class SupabaseProvider implements DataProvider {
     ])
 
     if (pebblesRes.error) throw new Error(`Failed to load pebbles: ${pebblesRes.error.message}`)
-    if (pebblesRenderRes.error) throw new Error(`Failed to load pebble renders: ${pebblesRenderRes.error.message}`)
     if (soulsRes.error) throw new Error(`Failed to load souls: ${soulsRes.error.message}`)
     if (collectionsRes.error) throw new Error(`Failed to load collections: ${collectionsRes.error.message}`)
     if (glyphsRes.error) throw new Error(`Failed to load glyphs: ${glyphsRes.error.message}`)
@@ -136,13 +107,6 @@ export class SupabaseProvider implements DataProvider {
       string,
       { render_svg: string | null; render_version: string | null }
     >()
-    for (const row of pebblesRenderRes.data ?? []) {
-      const r = row as Record<string, unknown>
-      renderById.set(r.id as string, {
-        render_svg: (r.render_svg as string | null) ?? null,
-        render_version: (r.render_version as string | null) ?? null,
-      })
-    }
 
     // Snaps are stored in the private `pebbles-media` bucket as
     // `{storage_path}/original.jpg` (+ `…/thumb.jpg`); the view only carries
@@ -538,10 +502,10 @@ export class SupabaseProvider implements DataProvider {
     // The RPC deletes the DB row and returns the snap's `storage_path` as
     // text; we then remove the two files. Mirrors iOS
     // EditPebbleSheet.removeExistingSnap.
-    const { data, error } = await this.supabase.rpc("delete_pebble_media", {
+    const { data, error } = await this.supabase.rpc("delete_moment_media", {
       p_snap_id: snapId,
     })
-    if (error) throw new Error(`delete_pebble_media failed: ${error.message}`)
+    if (error) throw new Error(`delete_moment_media failed: ${error.message}`)
     const prefix = typeof data === "string" ? data : null
     if (prefix) {
       const { error: removeError } = await this.supabase.storage
@@ -560,52 +524,28 @@ export class SupabaseProvider implements DataProvider {
   // draft must never reach `create_pebble`, the schema's only karma emitter.
   // ---------------------------------------------------------------------------
 
+  // `pebble_drafts` was retired by #1046: a quick capture is now a moment
+  // (`save_moment`), which the web composer adopts in #1050. Until then the
+  // drafts surface is empty and saving a draft explains why, instead of every
+  // call failing on a missing table.
   async listPebbleDrafts(): Promise<PebbleDraftRecord[]> {
-    const { data, error } = await this.supabase
-      .from("pebble_drafts")
-      .select("id, payload, created_at, updated_at")
-      .order("updated_at", { ascending: false })
-    if (error) throw new Error(error.message)
-    return (data ?? []).map(toDraftRecord)
+    return []
   }
 
   async countPebbleDrafts(): Promise<number> {
-    // `head: true` sends no rows at all — the badge needs the number, and /path
-    // is the app's home screen, so pulling every draft's payload for it is waste.
-    const { count, error } = await this.supabase
-      .from("pebble_drafts")
-      .select("id", { count: "exact", head: true })
-    if (error) throw new Error(error.message)
-    return count ?? 0
+    return 0
   }
 
-  async getPebbleDraft(id: string): Promise<PebbleDraftRecord | undefined> {
-    const { data, error } = await this.supabase
-      .from("pebble_drafts")
-      .select("id, payload, created_at, updated_at")
-      .eq("id", id)
-      .maybeSingle()
-    if (error) throw new Error(error.message)
-    return data ? toDraftRecord(data) : undefined
+  async getPebbleDraft(): Promise<PebbleDraftRecord | undefined> {
+    return undefined
   }
 
-  async savePebbleDraft(payload: PebbleDraftPayload, id?: string): Promise<PebbleDraftRecord> {
-    // `user_id` is explicit because the RLS `with check` compares it to
-    // auth.uid(). The payload is replaced wholesale, which is the whole point
-    // of the jsonb column — `update_pebble`'s coalesce could not clear a field.
-    const row = { ...(id ? { id } : {}), user_id: this.userId, payload }
-    const { data, error } = await this.supabase
-      .from("pebble_drafts")
-      .upsert(row, { onConflict: "id" })
-      .select("id, payload, created_at, updated_at")
-      .single()
-    if (error) throw new Error(error.message)
-    return toDraftRecord(data)
+  async savePebbleDraft(): Promise<PebbleDraftRecord> {
+    throw new Error("Drafts are retired. Record the pebble now, or keep it open: your progress is saved on this device.")
   }
 
-  async deletePebbleDraft(id: string): Promise<void> {
-    const { error } = await this.supabase.from("pebble_drafts").delete().eq("id", id)
-    if (error) throw new Error(error.message)
+  async deletePebbleDraft(): Promise<void> {
+    return
   }
 
   async getDraftSnapUrl(storagePath: string): Promise<string | undefined> {
@@ -658,9 +598,11 @@ export class SupabaseProvider implements DataProvider {
     // The widened pebbles_select (M51) trims this to 'private' + 'public'
     // rows; emotions is reference data (RLS `using (true)`), so the embed
     // cannot blank rows.
+    // name and happened_at moved to `moments` (#1046); the compat view joins
+    // them back under the same pebbles_select / moments_select rules.
     const { data, error } = await this.supabase
-      .from("pebbles")
-      .select("id, name, happened_at, visibility, render_svg, emotions(id, slug, name, color)")
+      .from("v_pebbles_full")
+      .select("id, name, happened_at, visibility, emotion")
       .eq("user_id", peerId)
       .order("happened_at", { ascending: false })
     if (error) throw new Error(`shared pebbles fetch failed: ${error.message}`)
@@ -668,7 +610,7 @@ export class SupabaseProvider implements DataProvider {
     return (data ?? []).flatMap((row: Record<string, unknown>) => {
       // PostgREST returns a to-one FK embed as an object; drop rows with a
       // broken embed rather than rendering an empty emotion.
-      const emotion = row.emotions as Record<string, unknown> | null
+      const emotion = row.emotion as Record<string, unknown> | null
       if (
         !emotion ||
         typeof emotion.id !== "string" ||
@@ -691,7 +633,7 @@ export class SupabaseProvider implements DataProvider {
             name: emotion.name,
             color: emotion.color,
           },
-          render_svg: (row.render_svg as string | null) ?? null,
+          render_svg: null,
         },
       ]
     })
