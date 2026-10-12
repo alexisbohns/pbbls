@@ -1,6 +1,6 @@
 /**
- * Supabase client factories used by the compose-pebble and
- * backfill-pebble-render edge functions.
+ * Supabase client factories used by the compose-pebble, compose-pebble-update,
+ * delete-account and sweep-orphan-snaps edge functions.
  */
 
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -27,7 +27,8 @@ export function createAuthForwardedClient(req: Request): SupabaseClient {
 
 /**
  * Builds a service-role supabase-js client that bypasses RLS.
- * Use this for server-owned writes (render columns) and backfill.
+ * Use this for server-owned operations that must bypass RLS (account
+ * deletion, the orphan-snap sweep).
  */
 export function createAdminClient(): SupabaseClient {
   return createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {

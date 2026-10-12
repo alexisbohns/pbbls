@@ -1,21 +1,21 @@
 /**
  * Edge function: compose-pebble
  *
- * Client-facing. Wraps the existing create_pebble RPC:
+ * Client-facing. Wraps the deprecated create_pebble compat RPC:
  * 1. Auth-forwards the caller's JWT so the RPC runs as the end user
- * 2. Calls create_pebble(payload) → returns pebble_id
- * 3. Calls compose-and-write → writes render columns + returns composed output
- * 4. Responds with { pebble_id, karma_delta, render_svg, render_version }
+ * 2. Calls create_pebble(payload) -> returns pebble_id
+ * 3. Responds with { pebble_id, karma_delta, render_svg: null, render_version: null }
  *
- * On RPC failure: 4xx with the RPC error.
- * On compose failure after successful insert: 500 with pebble_id in the body
- * so the iOS client can advance to the detail sheet (soft-success path).
+ * The render keys stay in the response, as null, so unmigrated clients still
+ * decode it; the database no longer stores a rendered pebble.
+ *
+ * On RPC failure: 400 with the RPC error. There is no soft-success path any
+ * more: no second step can fail after the insert.
  */
 
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
-import { createAuthForwardedClient, createAdminClient } from "../_shared/supabase-client.ts";
-import { composeAndWriteRender } from "../_shared/compose-and-write.ts";
+import { createAuthForwardedClient } from "../_shared/supabase-client.ts";
 import { readKarmaDelta } from "../_shared/karma-delta.ts";
 
 interface RequestBody {
@@ -50,7 +50,7 @@ serve(async (req: Request) => {
     return json({ error: "invalid body: missing payload" }, 400);
   }
 
-  // Step 1: call create_pebble RPC with auth-forwarded client
+  // Call create_pebble RPC with auth-forwarded client
   const authClient = createAuthForwardedClient(req);
   const { data: pebbleId, error: rpcError } = await authClient.rpc("create_pebble", {
     payload: body.payload,
@@ -61,24 +61,11 @@ serve(async (req: Request) => {
     return json({ error: rpcError?.message ?? "create_pebble returned no id" }, 400);
   }
 
-  // Step 2: compose + write-back
-  const admin = createAdminClient();
-  try {
-    const rendered = await composeAndWriteRender(admin, pebbleId as string);
-    const karmaDelta = await readKarmaDelta(authClient, pebbleId as string, "pebble_created");
-    return json({ pebble_id: pebbleId, karma_delta: karmaDelta, ...rendered }, 200);
-  } catch (err) {
-    console.error("compose-pebble: composeAndWrite failed:", err);
-    // Soft-success: pebble exists, render failed. Return 500 with pebble_id
-    // so iOS can advance to the detail sheet with text-only fallback.
-    return json(
-      {
-        error: `compose failed: ${err instanceof Error ? err.message : String(err)}`,
-        pebble_id: pebbleId,
-      },
-      500,
-    );
-  }
+  const karmaDelta = await readKarmaDelta(authClient, pebbleId as string, "pebble_created");
+  return json(
+    { pebble_id: pebbleId, karma_delta: karmaDelta, render_svg: null, render_version: null },
+    200,
+  );
 });
 
 // deno-lint-ignore no-explicit-any
@@ -88,4 +75,3 @@ function json(body: any, status: number): Response {
     headers: { "Content-Type": "application/json", ...CORS },
   });
 }
-// redeploy 2026-04-30 — drop render_manifest writeback (post-#333)

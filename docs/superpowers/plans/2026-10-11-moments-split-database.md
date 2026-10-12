@@ -1566,7 +1566,7 @@ This is the irreversible step. Do it only after Parts 1–4 are reviewed and the
 - [ ] **Step 1: Push the five migrations** — `cd packages/supabase && npx supabase db push`. Expected: five files applied.
 - [ ] **Step 2: Deploy the edge functions** — `npx supabase functions deploy compose-pebble && npx supabase functions deploy compose-pebble-update && npx supabase functions delete backfill-pebble-render`.
 - [ ] **Step 3: Types** — `npm run db:types:remote --workspace=packages/supabase`; `git diff --stat packages/supabase/types/database.ts` must show `moments`, `v_moments_full`, `save_moment`, `complete_pebble`, `path_moments`, no `pebble_drafts`, no `render_svg` on `pebbles`. If the file shrank to a few lines the generation failed: restore it and re-run.
-- [ ] **Step 4: Typecheck web and admin against the new types** — `npm run build --workspace=apps/web && npm run build --workspace=apps/admin`. Expected: web compiles (it reads `v_pebbles_full`, `path_pebbles`, `create_pebble` via the edge function — all kept). Admin may fail on `pebble_drafts` or `render_svg` references: fix only type errors, with minimal edits, and list them in the PR body for Part 5 of the milestone.
+- [ ] **Step 4: Typecheck web and admin against the new types** — `npm run build --workspace=apps/web && npm run build --workspace=apps/admin`. Expected: web compiles against the view and RPC types. It will NOT compile where it selects `render_svg, render_version` straight from `pebbles` (`supabase-provider.ts`, the render query near line 114 and the shared read near line 663): remove those selects as the minimal fix here and leave the glyph-drawing change to #1049 (see the comment on that issue). Admin may fail on `pebble_drafts` or `render_svg` references: fix only type errors, with minimal edits, and list them in the PR body for Part 5 of the milestone.
 - [ ] **Step 5: Commit**
 
 ```bash
@@ -1789,10 +1789,12 @@ git commit -m "test(db): prove the moments contract and retire the drafts harnes
 
 ---
 
-## Task 11: Update the five harnesses that touch the moved columns
+## Task 11: Update the seven harnesses that touch the moved columns or call the compat wrappers
 
 **Files:**
-- Modify: `packages/supabase/scripts/verify-pebble-visibility.ts`, `verify-content-reports.ts`, `verify-moderation-state.ts`, `verify-orphan-snap-sweep.ts`, `verify-account-purge.ts`
+- Modify: `packages/supabase/scripts/verify-pebble-visibility.ts`, `verify-content-reports.ts`, `verify-moderation-state.ts`, `verify-orphan-snap-sweep.ts`, `verify-account-purge.ts`, `verify-public-profile.ts`, `verify-glyph-usability.ts`
+
+Every one of them creates pebbles through `create_pebble` (now a compat wrapper). Two rules for all seven: every `create_pebble` payload must carry a non-empty `domain_ids` (else `pebble_needs_domain`), and new seeds should prefer `save_moment` + `complete_pebble` so the harness outlives the wrappers. `verify-glyph-usability.ts` loses its subject on this path: the wrapper drops `glyph_id`, so retarget its pebble cases at the collection glyph (`set_collection_glyph` must refuse an unusable glyph with 42501 and accept a usable one, mirroring the souls cases) and delete the pebble-glyph cases.
 
 Each harness builds pebbles through `compose-pebble` or `create_pebble` and then asserts on columns. Apply the contract mapping below, run the harness, and fix every assertion the mapping explains. An assertion the mapping does **not** explain is a bug in the migrations, not in the harness: stop and fix the migration.
 
