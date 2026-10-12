@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react"
 import { useTranslations } from "next-intl"
 import { WeekRollCairn } from "@/components/path/WeekRollCairn"
+import { cn } from "@/lib/utils"
 import {
   isoWeekKey,
   type WeekRollEntry,
@@ -12,9 +13,14 @@ type WeekRollProps = {
   entries: WeekRollEntry[]
   focused: Date
   onFocus: (weekStart: Date) => void
+  className?: string
 }
 
-export function WeekRoll({ entries, focused, onFocus }: WeekRollProps) {
+/**
+ * The weeks as a line of numerals on the paper (#1052): the only way back
+ * months. The focused week is centred, in ink, underlined.
+ */
+export function WeekRoll({ entries, focused, onFocus, className }: WeekRollProps) {
   const t = useTranslations("path")
   const focusedIso = isoWeekKey(focused)
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -60,7 +66,10 @@ export function WeekRoll({ entries, focused, onFocus }: WeekRollProps) {
     <div
       ref={scrollRef}
       aria-label={t("weekRoll.label")}
-      className="overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] border-b pt-2"
+      className={cn(
+        "overflow-x-auto border-b border-(--spine-rule) pt-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+        className,
+      )}
       style={{
         maskImage: "linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)",
         WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)",
@@ -69,7 +78,7 @@ export function WeekRoll({ entries, focused, onFocus }: WeekRollProps) {
       {/* paddingInline 50% lets scrollIntoView center the first or last item;
           arbitrary % via Tailwind sometimes drops the rule, so inline. */}
       <ul
-        className="flex items-center gap-3"
+        className="flex items-center gap-1"
         style={{ paddingInline: "50%" }}
       >
         {entries.map((entry) => (

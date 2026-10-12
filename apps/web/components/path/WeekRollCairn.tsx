@@ -25,10 +25,11 @@ export function WeekRollCairn({ entry, isFocused, onClick }: WeekRollCairnProps)
           count: entry.pebbles.length,
         })}
         className={cn(
-          "flex w-[72px] shrink-0 flex-col items-center gap-1 rounded-t-lg py-2 text-sm font-semibold",
+          "flex w-12 shrink-0 cursor-pointer flex-col items-center py-2.5 font-spine-sc text-[13px] font-semibold tracking-[.12em] [font-variant-numeric:lining-nums_tabular-nums]",
+          "transition-colors duration-200 motion-reduce:transition-none",
           isFocused
-            ? "border-b-2 border-primary bg-surface text-primary"
-            : "text-muted-foreground",
+            ? "text-(--spine-ink) underline decoration-1 underline-offset-[6px]"
+            : "text-(--spine-ink-3) hover:text-(--spine-ink-2)",
         )}
       >
         <span>{entry.isoWeek}</span>
