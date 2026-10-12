@@ -21,8 +21,9 @@ import { parsePath } from "@/lib/wobble/path-parser"
 import { flatten } from "@/lib/wobble/flatten"
 
 // ── Glyph zones ─────────────────────────────────────────────
-// Copied from packages/supabase/supabase/functions/_shared/engine/layout.ts;
-// `stone-geometry.test.ts` fails when they drift. Seed units, top-left origin.
+// The render engine's layout, which left the server with the moments split
+// (#1046). iOS carries the same tables (`StoneCarvingArt`); `stone-geometry.test.ts`
+// fails when web and iOS drift. Seed units, top-left origin.
 
 export const GLYPH_SIZE: Record<Size, number> = {
   small: 140,

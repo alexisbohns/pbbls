@@ -13,43 +13,66 @@ import {
   unitsPerPx,
 } from "./stone-geometry"
 
-const ENGINE_LAYOUT = fileURLToPath(
-  new URL("../../../../packages/supabase/supabase/functions/_shared/engine/layout.ts", import.meta.url),
+// The render engine left the server with the moments split (#1046), so the
+// zones are checked against the surfaces that still draw them: iOS's carving
+// tables (spec D3, web follows iOS geometry) and the shape seeds' canvases.
+const IOS_CARVING = fileURLToPath(
+  new URL("../../../ios/Pebbles/Features/Path/Stone/StoneCarvingArt.swift", import.meta.url),
 )
-const layout = readFileSync(ENGINE_LAYOUT, "utf8")
+const ios = readFileSync(IOS_CARVING, "utf8")
 
-/** The object literal assigned to `const NAME` in the engine file, as JSON. */
-function engineConst(name: string): unknown {
-  const start = layout.indexOf(`const ${name}`)
-  const open = layout.indexOf("= {", start) + 2
+/** The body of `static let NAME … = [ … ]` in the iOS file. */
+function iosTable(name: string): string {
+  const start = ios.indexOf(`static let ${name}`)
+  const open = ios.indexOf("= [", start) + 2
   let depth = 0
   let end = open
-  for (; end < layout.length; end++) {
-    if (layout[end] === "{") depth++
-    if (layout[end] === "}" && --depth === 0) break
+  for (; end < ios.length; end++) {
+    if (ios[end] === "[") depth++
+    if (ios[end] === "]" && --depth === 0) break
   }
-  const literal = layout
-    .slice(open, end + 1)
-    .replace(/\/\/.*$/gm, "")
-    .replace(/(\w+)\s*:/g, '"$1":')
-    .replace(/,(\s*})/g, "$1")
-  return JSON.parse(literal)
+  return ios.slice(open, end + 1)
+}
+
+function iosGlyphSize(): Record<string, number> {
+  return Object.fromEntries([...iosTable("glyphSize").matchAll(/\.(\w+):\s*([\d.]+)/g)].map(([, k, v]) => [k, Number(v)]))
+}
+
+function iosGlyphPosition(): Record<string, Record<string, { x: number; y: number }>> {
+  const table: Record<string, Record<string, { x: number; y: number }>> = {}
+  for (const [, size, row] of iosTable("glyphPosition").matchAll(/\.(\w+):\s*\[([^\]]*)\]/g)) {
+    table[size] = Object.fromEntries(
+      [...row.matchAll(/\.(\w+):\s*CGPoint\(x:\s*([\d.]+),\s*y:\s*([\d.]+)\)/g)].map(([, polarity, x, y]) => [
+        polarity,
+        { x: Number(x), y: Number(y) },
+      ]),
+    )
+  }
+  return table
+}
+
+function seedCanvas(size: string, polarity: string): { width: number; height: number } {
+  const svg = readFileSync(fileURLToPath(new URL(`../../../../docs/seeds/shape-seeds/${size}-${polarity}.svg`, import.meta.url)), "utf8")
+  const [, , , width, height] = /viewBox="([\d.]+) ([\d.]+) ([\d.]+) ([\d.]+)"/.exec(svg) ?? []
+  return { width: Number(width), height: Number(height) }
 }
 
 const SIZES = ["small", "medium", "large"] as const
 const POLARITIES = ["lowlight", "neutral", "highlight"] as const
 
 describe("glyph zones", () => {
-  it("equal the engine's GLYPH_SIZE", () => {
-    expect(GLYPH_SIZE).toEqual(engineConst("GLYPH_SIZE"))
+  it("equal iOS's glyph slot sizes", () => {
+    expect(GLYPH_SIZE).toEqual(iosGlyphSize())
   })
 
-  it("equal the engine's GLYPH_POSITION", () => {
-    expect(GLYPH_POSITION).toEqual(engineConst("GLYPH_POSITION"))
+  it("equal iOS's glyph positions", () => {
+    expect(GLYPH_POSITION).toEqual(iosGlyphPosition())
   })
 
-  it("equal the engine's canvas sizes", () => {
-    expect(SEED_CANVAS).toEqual(engineConst("CANVAS"))
+  it("use the shape seeds' canvases", () => {
+    for (const size of SIZES) {
+      for (const polarity of POLARITIES) expect(SEED_CANVAS[size]).toEqual(seedCanvas(size, polarity))
+    }
   })
 })
 
