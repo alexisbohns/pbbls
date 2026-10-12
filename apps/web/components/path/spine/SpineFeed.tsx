@@ -1,6 +1,6 @@
 "use client"
 
-import { useId } from "react"
+import { useId, type ReactNode } from "react"
 import { useTranslations } from "next-intl"
 import { useEmotionPalettes } from "@/lib/data/useEmotionPalettes"
 import { useLocale } from "@/lib/i18n"
@@ -18,6 +18,8 @@ type SpineFeedProps = {
   soulMap: ReadonlyMap<string, Soul>
   markMap: ReadonlyMap<string, Mark>
   onOpen: (id: string) => void
+  /** Set after the last day, on the line and the ground: the week's mouth. */
+  footer?: ReactNode
   className?: string
 }
 
@@ -26,7 +28,7 @@ type SpineFeedProps = {
  * each day opened by its seam, oldest first. Needs `StoneSprite` once on the
  * page (the Path renders it, not each week, so the pager's neighbours share it).
  */
-export function SpineFeed({ week, order, soulMap, markMap, onOpen, className }: SpineFeedProps) {
+export function SpineFeed({ week, order, soulMap, markMap, onOpen, footer, className }: SpineFeedProps) {
   const t = useTranslations("path.spine")
   const { locale } = useLocale()
   const first = week.days[0]?.date ?? week.weekStart
@@ -45,6 +47,7 @@ export function SpineFeed({ week, order, soulMap, markMap, onOpen, className }: 
           onOpen={onOpen}
         />
       ))}
+      {footer}
     </section>
   )
 }

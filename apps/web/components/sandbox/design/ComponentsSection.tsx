@@ -29,7 +29,7 @@ import { DESIGN_ASSIDUITY, DESIGN_PROFILE, DESIGN_RIPPLE } from "@/lib/seed/desi
 import { SANDBOX_MARK_MAP, SANDBOX_SOULS } from "@/lib/seed/sandbox-pebbles"
 import { DesignSection } from "./DesignSection"
 import { Specimen } from "./Specimen"
-import { SpineFeedSpecimen } from "./SpineFeedSpecimen"
+import { SpineWeekSpecimen } from "./SpineWeekSpecimen"
 import { StoneSpecimens } from "./StoneSpecimens"
 
 function markOf(id: string | undefined | null) {
@@ -104,7 +104,7 @@ export function ComponentsSection() {
 
       <StoneSpecimens />
 
-      <SpineFeedSpecimen />
+      <SpineWeekSpecimen />
 
       <Specimen id="pebble-indicators">
         {([1, 2, 3] as const).map((intensity) => (
