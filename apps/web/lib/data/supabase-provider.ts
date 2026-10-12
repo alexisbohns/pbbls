@@ -37,7 +37,7 @@ import type {
 import { toConnectionPeer } from "@/lib/data/invite-api"
 import { peerIdOf } from "@/lib/data/connection-peer"
 import { DEFAULT_GLYPH_ID } from "@/lib/config/glyphs"
-import { pebbleFromViewRow, snapOriginalPath } from "@/lib/data/pebble-row"
+import { pebbleFromViewRow, snapOriginalPath, snapThumbPath, sortedSnaps } from "@/lib/data/pebble-row"
 import { processPebbleImage } from "@/lib/utils/process-pebble-image"
 
 const PEBBLE_MEDIA_BUCKET = "pebbles-media"
@@ -122,16 +122,20 @@ export class SupabaseProvider implements DataProvider {
       if (snaps.length > 0) rawSnapsByPebble.set(r.id as string, snaps)
     }
 
-    const originalPaths: string[] = []
+    // Every original, plus the first snap's thumb: the Spine's card probes the
+    // thumb for the photo's ratio. One batch either way.
+    const signPaths: string[] = []
     for (const snaps of rawSnapsByPebble.values()) {
-      for (const s of snaps) originalPaths.push(snapOriginalPath(s))
+      for (const s of snaps) signPaths.push(snapOriginalPath(s))
+      const first = sortedSnaps(snaps)[0]
+      if (first) signPaths.push(snapThumbPath(first))
     }
 
     const signedUrlByPath = new Map<string, string>()
-    if (originalPaths.length > 0) {
+    if (signPaths.length > 0) {
       const { data, error } = await this.supabase.storage
         .from(PEBBLE_MEDIA_BUCKET)
-        .createSignedUrls(originalPaths, SNAP_URL_TTL_SECONDS)
+        .createSignedUrls(signPaths, SNAP_URL_TTL_SECONDS)
       if (error) {
         console.warn("[pebbles] failed to sign snap URLs", error)
       } else {

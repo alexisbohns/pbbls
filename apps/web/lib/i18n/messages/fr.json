@@ -685,6 +685,22 @@
     "stats": {
       "bounce": "ricochet",
       "karma": "karma"
+    },
+    "spine": {
+      "feedAria": "La semaine, {range}",
+      "with": "avec",
+      "others": "& {words} {count, plural, one {autre} other {autres}}",
+      "still": "calme",
+      "untitled": "sans titre",
+      "photoUnavailable": "photo indisponible",
+      "withNames": "Avec {names}.",
+      "stoneAria": "{name}. {date}, {time}. {stone}, {emotion}. {with} Ouvre le galet.",
+      "cardAria": "{name}. {date}, {time}. {stone}, {emotion}. {with} Ouvre le galet.",
+      "stone": {
+        "small": { "lowlight": "Petite pierre de lave", "neutral": "Petit galet de rivière", "highlight": "Petite gemme" },
+        "medium": { "lowlight": "Pierre de lave moyenne", "neutral": "Galet de rivière moyen", "highlight": "Gemme moyenne" },
+        "large": { "lowlight": "Grande pierre de lave", "neutral": "Grand galet de rivière", "highlight": "Grande gemme" }
+      }
     }
   },
   "card": {

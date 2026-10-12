@@ -685,6 +685,22 @@
     "stats": {
       "bounce": "bounce",
       "karma": "karma"
+    },
+    "spine": {
+      "feedAria": "The week, {range}",
+      "with": "with",
+      "others": "& {words} {count, plural, one {other} other {others}}",
+      "still": "still",
+      "untitled": "untitled",
+      "photoUnavailable": "photo unavailable",
+      "withNames": "With {names}.",
+      "stoneAria": "{name}. {date}, {time}. {stone}, {emotion}. {with} Opens the pebble.",
+      "cardAria": "{name}. {date}, {time}. {stone}, {emotion}. {with} Opens the pebble.",
+      "stone": {
+        "small": { "lowlight": "Small lava stone", "neutral": "Small river pebble", "highlight": "Small gem" },
+        "medium": { "lowlight": "Medium lava stone", "neutral": "Medium river pebble", "highlight": "Medium gem" },
+        "large": { "lowlight": "Large lava stone", "neutral": "Large river pebble", "highlight": "Large gem" }
+      }
     }
   },
   "card": {

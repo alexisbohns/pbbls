@@ -64,6 +64,7 @@ type ServerOwnedPebbleFields =
   | "instants"
   // The resolved glyph geometry is a read projection; writes set `mark_id`.
   | "glyph"
+  | "cover"
 
 export type CreatePebbleInput = Omit<Pebble, ServerOwnedPebbleFields>
 export type UpdatePebbleInput = Partial<Omit<Pebble, ServerOwnedPebbleFields>>
