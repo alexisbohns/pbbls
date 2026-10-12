@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/layout/PageHeader"
 import { EmptyState } from "@/components/layout/EmptyState"
 import { PebbleCard } from "@/components/path/PebbleCard"
-import { PathPebbleRow } from "@/components/path/PathPebbleRow"
 import { PathEmptyState } from "@/components/path/PathEmptyState"
 import { GamificationBlock } from "@/components/path/GamificationBlock"
 import { PebbleVisual } from "@/components/pebble/PebbleVisual"
@@ -61,14 +60,6 @@ export function ComponentsSection() {
             />
           </div>
         ))}
-      </Specimen>
-
-      <Specimen id="path-pebble-row">
-        <div className="flex w-full max-w-md flex-col">
-          {pebbles.slice(0, 3).map((pebble, i) => (
-            <PathPebbleRow key={pebble.id} pebble={pebble} mark={markOf(pebble.mark_id)} positionIndex={i} />
-          ))}
-        </div>
       </Specimen>
 
       <Specimen id="path-empty-state">

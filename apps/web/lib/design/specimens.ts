@@ -42,7 +42,6 @@ export const SPECIMENS = [
   { id: "tag-list", name: "TagList", source: "components/ui/TagList.tsx", section: "primitives", m3: "bridged" },
   // components: curated feature components that render from props or the fixture store
   { id: "pebble-card", name: "PebbleCard", source: "components/path/PebbleCard.tsx", section: "components", m3: "bridged" },
-  { id: "path-pebble-row", name: "PathPebbleRow", source: "components/path/PathPebbleRow.tsx", section: "components", m3: "bridged" },
   { id: "path-empty-state", name: "PathEmptyState", source: "components/path/PathEmptyState.tsx", section: "components", m3: "bridged" },
   { id: "gamification-block", name: "GamificationBlock", source: "components/path/GamificationBlock.tsx", section: "components", m3: "bridged" },
   { id: "pebble-visual", name: "PebbleVisual", source: "components/pebble/PebbleVisual.tsx", section: "components", m3: "bridged" },

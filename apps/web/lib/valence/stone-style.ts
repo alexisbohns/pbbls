@@ -27,9 +27,8 @@ export type StonePaint = {
   /**
    * Set only when the two colour schemes need different materials, which is
    * highlight's resting wash and nothing else. The stone draws both and lets
-   * the `.dark` cascade pick, rather than reading the theme in JS — the same
-   * rule `PathStone` follows, and for the same reason (a JS-read theme desyncs
-   * between the server and client render).
+   * the `.dark` cascade pick, rather than reading the theme in JS, because a
+   * JS-read theme desyncs between the server and client render.
    */
   backdropDark?: Fill
   /** Tints the pebble artwork drawn inside the backdrop. */

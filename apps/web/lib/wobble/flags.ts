@@ -11,7 +11,7 @@
 // Kept as a constant rather than deleted, so the look is still switchable in
 // one place — the same posture iOS's `WobbleFlags` takes. Turning it off is
 // this line; deleting the experiment is removing `lib/wobble/` and reverting
-// the flag-gated call sites (`PebbleVisual`, `PathStone`, `StrokeRenderer`,
+// the flag-gated call sites (`PebbleVisual`, `StrokeRenderer`,
 // `PebbleOutlineBackdrop`, `lib/valence/stone-art`).
 //
 // A build-time constant, so the value is identical on the server and the client

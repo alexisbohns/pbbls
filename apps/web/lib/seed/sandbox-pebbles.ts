@@ -3,7 +3,7 @@ import { GLYPH_VIEWBOX } from "@/lib/config/glyphs"
 import { emotionId } from "./sandbox-palettes"
 
 // ---------------------------------------------------------------------------
-// Fixture content for /sandbox/path.
+// Fixture content for /sandbox/design (first written for the retired /sandbox/path).
 //
 // Self-contained on purpose: no Supabase, no auth, no Storage. Every pebble
 // carries `render_svg: null` so PebbleVisual falls through to the client engine
