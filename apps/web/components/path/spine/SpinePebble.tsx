@@ -10,6 +10,7 @@ import { OPEN_DELAY_MS } from "@/lib/config/stone-motion"
 import { BLANK_PALETTE, stonePaletteVars, type StonePalette } from "@/lib/config/stone-tones"
 import { hashUUID } from "@/lib/engine/seed"
 import { useEmotionLocalized, useFormatTime, useLocale } from "@/lib/i18n"
+import { useRegisterSpinePress } from "@/lib/hooks/useSpinePresses"
 import { useStonePress } from "@/lib/hooks/useStonePress"
 import type { Mark, Pebble, Soul } from "@/lib/types"
 import { entryType } from "@/lib/utils/spine/entry-type"
@@ -50,6 +51,7 @@ export function SpinePebble({ pebble, palette, order, soulMap, markMap, onOpen }
   const emotion = useEmotionLocalized(EMOTIONS.find((e) => e.id === pebble.emotion_id) ?? NO_EMOTION).name
   const titleId = useId()
   const { hostRef, press, ripple, endRipple, touched } = useStonePress()
+  useRegisterSpinePress(pebble.id, press)
   const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   useEffect(
     () => () => {
@@ -138,6 +140,7 @@ export function SpinePebble({ pebble, palette, order, soulMap, markMap, onOpen }
       )}
       <button
         type="button"
+        data-spine-stone
         onClick={pressStone}
         aria-label={openLabel}
         className={cn(
