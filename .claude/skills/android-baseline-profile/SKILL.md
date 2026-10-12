@@ -1,6 +1,6 @@
 ---
 name: android-baseline-profile
-description: Use when regenerating or measuring the Android release baseline profile and startup profile (apps/android, :baselineprofile module) after a startup or Path change: the gradle commands, ANDROID_SERIAL, the BENCHMARK_EMAIL/BENCHMARK_PASSWORD throwaway account, and the StartupBenchmark. Loaded on demand.
+description: "Use when regenerating or measuring the Android release baseline profile and startup profile (apps/android, :baselineprofile module) after a startup or Path change: the gradle commands, ANDROID_SERIAL, the BENCHMARK_EMAIL/BENCHMARK_PASSWORD throwaway account, and the StartupBenchmark. Loaded on demand."
 ---
 
 # Android baseline profile (#856)
