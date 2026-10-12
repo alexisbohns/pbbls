@@ -121,8 +121,8 @@ jobs:
       # `!cancelled()` so one failure still reports the other three — each cleans
       # up after itself in a `finally`, so a failed run leaves nothing behind.
       # The wrapper adds the summary row and preserves the harness's exit code.
-      - name: Pebble drafts (M47 draft lifecycle)
-        run: .github/scripts/verify-harness.sh "drafts" db:verify:drafts
+      - name: Moments and pebbles (split contract)
+        run: .github/scripts/verify-harness.sh "moments" db:verify:moments
 
       - name: Pebble visibility (grade RLS)
         if: '!cancelled()'

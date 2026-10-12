@@ -295,6 +295,7 @@ export type Database = {
       collections: {
         Row: {
           created_at: string
+          glyph_id: string | null
           id: string
           mode: string | null
           name: string
@@ -303,6 +304,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          glyph_id?: string | null
           id?: string
           mode?: string | null
           name: string
@@ -311,6 +313,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          glyph_id?: string | null
           id?: string
           mode?: string | null
           name?: string
@@ -318,6 +321,20 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "collections_glyph_id_fkey"
+            columns: ["glyph_id"]
+            isOneToOne: false
+            referencedRelation: "glyphs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collections_glyph_id_fkey"
+            columns: ["glyph_id"]
+            isOneToOne: false
+            referencedRelation: "v_glyph_market"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "collections_user_id_fkey"
             columns: ["user_id"]
@@ -1188,6 +1205,85 @@ export type Database = {
         }
         Relationships: []
       }
+      moments: {
+        Row: {
+          created_at: string
+          description: string | null
+          happened_at: string
+          hidden_at: string | null
+          hidden_by: string | null
+          id: string
+          name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          happened_at?: string
+          hidden_at?: string | null
+          hidden_by?: string | null
+          id?: string
+          name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          happened_at?: string
+          hidden_at?: string | null
+          hidden_by?: string | null
+          id?: string
+          name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moments_hidden_by_fkey"
+            columns: ["hidden_by"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "moments_hidden_by_fkey"
+            columns: ["hidden_by"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "moments_hidden_by_fkey"
+            columns: ["hidden_by"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "moments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "moments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "moments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       pebble_cards: {
         Row: {
           id: string
@@ -1285,52 +1381,6 @@ export type Database = {
           },
         ]
       }
-      pebble_drafts: {
-        Row: {
-          created_at: string
-          id: string
-          payload: Json
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          payload?: Json
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          payload?: Json
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pebble_drafts_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "pebble_drafts_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "pebble_drafts_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
-          },
-        ]
-      }
       pebble_souls: {
         Row: {
           pebble_id: string
@@ -1371,54 +1421,33 @@ export type Database = {
       pebbles: {
         Row: {
           created_at: string
-          description: string | null
           emotion_id: string
-          glyph_id: string | null
-          happened_at: string
-          hidden_at: string | null
-          hidden_by: string | null
           id: string
           intensity: number
-          name: string
+          moment_id: string
           positiveness: number
-          render_svg: string | null
-          render_version: string | null
           updated_at: string
           user_id: string
           visibility: string
         }
         Insert: {
           created_at?: string
-          description?: string | null
           emotion_id: string
-          glyph_id?: string | null
-          happened_at: string
-          hidden_at?: string | null
-          hidden_by?: string | null
           id?: string
           intensity: number
-          name: string
+          moment_id: string
           positiveness: number
-          render_svg?: string | null
-          render_version?: string | null
           updated_at?: string
           user_id: string
           visibility?: string
         }
         Update: {
           created_at?: string
-          description?: string | null
           emotion_id?: string
-          glyph_id?: string | null
-          happened_at?: string
-          hidden_at?: string | null
-          hidden_by?: string | null
           id?: string
           intensity?: number
-          name?: string
+          moment_id?: string
           positiveness?: number
-          render_svg?: string | null
-          render_version?: string | null
           updated_at?: string
           user_id?: string
           visibility?: string
@@ -1446,39 +1475,18 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "pebbles_glyph_id_fkey"
-            columns: ["glyph_id"]
+            foreignKeyName: "pebbles_moment_id_fkey"
+            columns: ["moment_id"]
             isOneToOne: false
-            referencedRelation: "glyphs"
+            referencedRelation: "moments"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "pebbles_glyph_id_fkey"
-            columns: ["glyph_id"]
+            foreignKeyName: "pebbles_moment_id_fkey"
+            columns: ["moment_id"]
             isOneToOne: false
-            referencedRelation: "v_glyph_market"
+            referencedRelation: "v_moments_full"
             referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pebbles_hidden_by_fkey"
-            columns: ["hidden_by"]
-            isOneToOne: false
-            referencedRelation: "v_bounce"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "pebbles_hidden_by_fkey"
-            columns: ["hidden_by"]
-            isOneToOne: false
-            referencedRelation: "v_karma_summary"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "pebbles_hidden_by_fkey"
-            columns: ["hidden_by"]
-            isOneToOne: false
-            referencedRelation: "v_ripple"
-            referencedColumns: ["user_id"]
           },
           {
             foreignKeyName: "pebbles_user_id_fkey"
@@ -1633,7 +1641,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          pebble_id: string
+          moment_id: string
           sort_order: number
           storage_path: string
           user_id: string
@@ -1641,7 +1649,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
-          pebble_id: string
+          moment_id: string
           sort_order?: number
           storage_path: string
           user_id: string
@@ -1649,24 +1657,24 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
-          pebble_id?: string
+          moment_id?: string
           sort_order?: number
           storage_path?: string
           user_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "snaps_pebble_id_fkey"
-            columns: ["pebble_id"]
+            foreignKeyName: "snaps_moment_id_fkey"
+            columns: ["moment_id"]
             isOneToOne: false
-            referencedRelation: "pebbles"
+            referencedRelation: "moments"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "snaps_pebble_id_fkey"
-            columns: ["pebble_id"]
+            foreignKeyName: "snaps_moment_id_fkey"
+            columns: ["moment_id"]
             isOneToOne: false
-            referencedRelation: "v_pebbles_full"
+            referencedRelation: "v_moments_full"
             referencedColumns: ["id"]
           },
           {
@@ -2104,6 +2112,67 @@ export type Database = {
         }
         Relationships: []
       }
+      v_moments_full: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          happened_at: string | null
+          hidden_at: string | null
+          id: string | null
+          name: string | null
+          pebble: Json | null
+          snaps: Json | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          happened_at?: string | null
+          hidden_at?: string | null
+          id?: string | null
+          name?: string | null
+          pebble?: never
+          snaps?: never
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          happened_at?: string | null
+          hidden_at?: string | null
+          id?: string | null
+          name?: string | null
+          pebble?: never
+          snaps?: never
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_bounce"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "moments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_karma_summary"
+            referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "moments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "v_ripple"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
       v_pebbles_full: {
         Row: {
           cards: Json | null
@@ -2146,20 +2215,6 @@ export type Database = {
             columns: ["emotion_id"]
             isOneToOne: false
             referencedRelation: "v_emotions_with_palette"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pebbles_glyph_id_fkey"
-            columns: ["glyph_id"]
-            isOneToOne: false
-            referencedRelation: "glyphs"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "pebbles_glyph_id_fkey"
-            columns: ["glyph_id"]
-            isOneToOne: false
-            referencedRelation: "v_glyph_market"
             referencedColumns: ["id"]
           },
           {
@@ -2404,12 +2459,12 @@ export type Database = {
           slug: string
         }[]
       }
+      complete_pebble: { Args: { payload: Json }; Returns: string }
       compute_karma_delta: {
         Args: {
           p_cards_count: number
-          p_description: string
           p_domains_count: number
-          p_has_glyph: boolean
+          p_has_description: boolean
           p_snaps_count: number
           p_souls_count: number
         }
@@ -2417,8 +2472,9 @@ export type Database = {
       }
       create_connection_invite: { Args: { p_rotate?: boolean }; Returns: Json }
       create_pebble: { Args: { payload: Json }; Returns: string }
+      delete_moment: { Args: { p_moment_id: string }; Returns: Json }
+      delete_moment_media: { Args: { p_snap_id: string }; Returns: string }
       delete_pebble: { Args: { p_pebble_id: string }; Returns: undefined }
-      delete_pebble_media: { Args: { p_snap_id: string }; Returns: string }
       get_active_users_series: {
         Args: { p_end: string; p_start: string }
         Returns: {
@@ -2602,6 +2658,17 @@ export type Database = {
           size: number
         }[]
       }
+      path_moments: {
+        Args: never
+        Returns: {
+          created_at: string
+          first_snap_path: string
+          happened_at: string
+          id: string
+          name: string
+          pebble: Json
+        }[]
+      }
       path_pebbles: {
         Args: never
         Returns: {
@@ -2660,6 +2727,12 @@ export type Database = {
       resolve_content_report: {
         Args: { p_note?: string; p_outcome: string; p_report_id: string }
         Returns: Json
+      }
+      resolve_pebble_glyph: { Args: { p_pebble_id: string }; Returns: Json }
+      save_moment: { Args: { payload: Json }; Returns: string }
+      set_collection_glyph: {
+        Args: { p_collection_id: string; p_glyph_id: string }
+        Returns: undefined
       }
       set_glyph_listed: {
         Args: { p_listed: boolean; p_submission_id: string }

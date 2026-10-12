@@ -659,7 +659,7 @@ file named. They are stated as facts about the code, not as aspirations.
 | **Execution and storage pinned to the EU** | Supabase database, auth and storage in Paris (`legal-notice/en.md`); Vercel server-side functions pinned to `cdg1` by PR #765 (`f3acd11e`). The remaining US touchpoint is Vercel's edge network, disclosed in policy §7.2 by PR #767 (`889e0de8`) |
 | **Media is private and bounded** | `pebbles-media` is a non-public bucket, 1.5 MB per object, `image/jpeg` only (`20260426000001_pebbles_pictures.sql`) |
 | **Privileged profile columns cannot be written by a client** | `20260902090000_profiles_privileged_guard.sql` |
-| **Database contract is tested in CI** | `supabase.yml` runs four anon-only harnesses on every change under `packages/supabase/**` and nightly: `verify-pebble-drafts`, `verify-pebble-visibility`, `verify-profiles-privileged-guard`, `verify-public-profile` |
+| **Database contract is tested in CI** | `supabase.yml` runs four anon-only harnesses on every change under `packages/supabase/**` and nightly: `verify-moments`, `verify-pebble-visibility`, `verify-profiles-privileged-guard`, `verify-public-profile` |
 | **Transport and storage encryption** | HTTPS throughout; encryption at rest by Supabase (policy §11.1). Provider-level, not independently verified here |
 
 ### 4.2 Planned

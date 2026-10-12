@@ -8,14 +8,19 @@
  * refuses targets the reporter cannot see. Three things need proving end to
  * end, and none can be proven from inside a single client's test suite:
  *
- *   1. The visibility gate holds — a secret pebble, an unlisted glyph and a
- *      nonexistent uuid are all equally unreportable.
+ *   1. The visibility gate holds — a moment whose only pebble is secret, an
+ *      unlisted glyph and a nonexistent uuid are all equally unreportable.
  *   2. Invisible and nonexistent are INDISTINGUISHABLE. Without that, the RPC
- *      is an existence oracle: feed it uuids, learn which secret pebbles
+ *      is an existence oracle: feed it uuids, learn which secret moments
  *      exist. This is the same choice get_shared_pebble makes.
  *   3. content_reports is opaque. RLS is enabled with NO policies, so the
  *      reporter who just filed cannot read their own report back — a readable
  *      table is a map of who reported whom.
+ *   4. Since the moments split the target kind is 'moment' (the moment carries
+ *      name, description and hidden_at). The 'pebble' alias is still accepted
+ *      for callers not yet migrated: it resolves a READABLE pebble to its
+ *      moment and lands on the same standing report, and an unreadable pebble
+ *      id answers the same not_found as everything else.
  *
  * Run:
  *   SUPABASE_URL=... SUPABASE_ANON_KEY=... \
@@ -25,6 +30,8 @@
  * deletes them through the real `delete-account` edge function, so it is
  * runnable by anyone who can run the app, and it can sit in the CI gate.
  * Cleanup runs even on failure. Exits non-zero if any assertion fails.
+ * Seeds go through save_moment + complete_pebble, not the deprecated
+ * create_pebble wrapper, so this harness outlives #1050.
  *
  * WHAT THIS HARNESS STRUCTURALLY CANNOT PROVE (covered in
  * verify-account-purge.ts, which holds the service role):
@@ -85,6 +92,25 @@ async function deleteAccount(token: string): Promise<Response> {
   });
 }
 
+type Seeded = { momentId: string; pebbleId: string };
+
+/** save_moment then complete_pebble: one complete pebble, the way every client writes one. */
+async function createPebble(
+  client: SupabaseClient,
+  moment: Record<string, unknown>,
+  pebble: Record<string, unknown>,
+): Promise<Seeded> {
+  const saved = await client.rpc("save_moment", { payload: moment });
+  if (saved.error || typeof saved.data !== "string") {
+    throw new Error(`save_moment(${String(moment.name)}): ${saved.error?.message ?? "no id"}`);
+  }
+  const done = await client.rpc("complete_pebble", { payload: { ...pebble, moment_id: saved.data } });
+  if (done.error || typeof done.data !== "string") {
+    throw new Error(`complete_pebble(${String(moment.name)}): ${done.error?.message ?? "no id"}`);
+  }
+  return { momentId: saved.data, pebbleId: done.data };
+}
+
 let owner: TestUser | null = null;
 let reporter: TestUser | null = null;
 
@@ -96,27 +122,28 @@ try {
   const r = reporter.client;
 
   const { data: emotion } = await o.from("emotions").select("id").limit(1).single();
-  if (!emotion) throw new Error("reference data missing (emotion)");
+  const { data: domain } = await o.from("domains").select("id").limit(1).single();
+  if (!emotion || !domain) throw new Error("reference data missing (emotion / domain)");
 
+  const happenedAt = "2026-09-01T12:00:00Z";
   const base = {
-    happened_at: "2026-09-01T12:00:00Z",
     intensity: 2,
     positiveness: 1,
     emotion_id: emotion.id,
+    domain_ids: [domain.id],
   };
 
   // ---------------------------------------------------------------------------
   // 0. Seed the owner's reportable and unreportable surfaces.
   // ---------------------------------------------------------------------------
-  const { data: publicPebbleId, error: pubErr } = await o.rpc("create_pebble", {
-    payload: { ...base, name: `public ${runId}`, description: "reportable", visibility: "public" },
-  });
-  if (pubErr || !publicPebbleId) throw new Error(`create public pebble: ${pubErr?.message}`);
-
-  const { data: secretPebbleId, error: secErr } = await o.rpc("create_pebble", {
-    payload: { ...base, name: `secret ${runId}`, visibility: "secret" },
-  });
-  if (secErr || !secretPebbleId) throw new Error(`create secret pebble: ${secErr?.message}`);
+  const pub = await createPebble(
+    o,
+    { name: `public ${runId}`, description: "reportable", happened_at: happenedAt },
+    { ...base, visibility: "public" },
+  );
+  const secret = await createPebble(
+    o, { name: `secret ${runId}`, happened_at: happenedAt }, { ...base, visibility: "secret" },
+  );
 
   const handle = `rep${runId}`;
   const { error: handleErr } = await o.rpc("set_handle", { p_handle: handle });
@@ -138,16 +165,16 @@ try {
   if (subErr) throw new Error(`submit_glyph: ${subErr.message}`);
 
   // ---------------------------------------------------------------------------
-  // 1. The happy path: a stranger reports a public pebble and a public profile.
+  // 1. The happy path: a stranger reports a public moment and a public profile.
   // ---------------------------------------------------------------------------
   const { data: filed, error: fileErr } = await r.rpc("report_content", {
-    p_target_kind: "pebble",
-    p_target_id: publicPebbleId,
+    p_target_kind: "moment",
+    p_target_id: pub.momentId,
     p_reason: "harassment",
     p_detail: "verify run",
   });
   const filedRow = filed as { id?: string; status?: string; created_at?: string } | null;
-  check("report_content on a public pebble succeeds",
+  check("report_content on a moment with a public pebble succeeds",
     !fileErr && !!filedRow?.id && filedRow?.status === "open", fileErr?.message);
   check("report_content emits whole-second UTC created_at",
     /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(filedRow?.created_at ?? ""),
@@ -166,14 +193,26 @@ try {
   //    and not an error slug the client would have to special-case.
   // ---------------------------------------------------------------------------
   const { data: refiled, error: refileErr } = await r.rpc("report_content", {
-    p_target_kind: "pebble",
-    p_target_id: publicPebbleId,
+    p_target_kind: "moment",
+    p_target_id: pub.momentId,
     p_reason: "spam",
     p_detail: "second attempt",
   });
   check("a second file returns the standing report, not an error",
     !refileErr && (refiled as { id?: string } | null)?.id === filedRow?.id,
     refileErr ? refileErr.message : JSON.stringify(refiled));
+
+  // The compat alias: 'pebble' + a readable pebble id is normalised to that
+  // pebble's moment, so it lands on the SAME standing report rather than
+  // opening a second one keyed on the pebble id.
+  const { data: aliased, error: aliasErr } = await r.rpc("report_content", {
+    p_target_kind: "pebble",
+    p_target_id: pub.pebbleId,
+    p_reason: "spam",
+  });
+  check("the 'pebble' alias resolves to the moment's standing report",
+    !aliasErr && (aliased as { id?: string } | null)?.id === filedRow?.id,
+    aliasErr ? aliasErr.message : JSON.stringify(aliased));
 
   // ---------------------------------------------------------------------------
   // 3. The table is opaque — RLS enabled with no policies.
@@ -184,24 +223,32 @@ try {
     peekErr ? peekErr.message : `rows=${peek?.length}`);
 
   // ---------------------------------------------------------------------------
-  // 4. The visibility gate, and the enumeration-resistance property: a secret
-  //    pebble, an unlisted glyph and a random uuid all fail IDENTICALLY.
+  // 4. The visibility gate, and the enumeration-resistance property: a moment
+  //    whose only pebble is secret, the same through the 'pebble' alias, an
+  //    unlisted glyph and a random uuid all fail IDENTICALLY.
   // ---------------------------------------------------------------------------
   const { error: secretErr } = await r.rpc("report_content", {
-    p_target_kind: "pebble", p_target_id: secretPebbleId, p_reason: "spam",
+    p_target_kind: "moment", p_target_id: secret.momentId, p_reason: "spam",
   });
-  check("a secret pebble is not reportable", !!secretErr && secretErr.message.includes("not_found"),
-    secretErr?.message);
+  check("a moment with only a secret pebble is not reportable",
+    !!secretErr && secretErr.message.includes("not_found"), secretErr?.message);
+
+  // The alias gate: a secret pebble's uuid must not be a way to learn its moment.
+  const { error: secretAliasErr } = await r.rpc("report_content", {
+    p_target_kind: "pebble", p_target_id: secret.pebbleId, p_reason: "spam",
+  });
+  check("a secret pebble id through the alias is not reportable either",
+    !!secretAliasErr && secretAliasErr.message.includes("not_found"), secretAliasErr?.message);
 
   const { error: ghostErr } = await r.rpc("report_content", {
-    p_target_kind: "pebble", p_target_id: crypto.randomUUID(), p_reason: "spam",
+    p_target_kind: "moment", p_target_id: crypto.randomUUID(), p_reason: "spam",
   });
-  check("a nonexistent pebble is not reportable", !!ghostErr && ghostErr.message.includes("not_found"),
+  check("a nonexistent moment is not reportable", !!ghostErr && ghostErr.message.includes("not_found"),
     ghostErr?.message);
 
   check("invisible and nonexistent are indistinguishable (no existence oracle)",
-    secretErr?.message === ghostErr?.message,
-    `secret="${secretErr?.message}" ghost="${ghostErr?.message}"`);
+    !!ghostErr && secretErr?.message === ghostErr?.message && secretAliasErr?.message === ghostErr?.message,
+    `secret="${secretErr?.message}" alias="${secretAliasErr?.message}" ghost="${ghostErr?.message}"`);
 
   const { error: unlistedErr } = await r.rpc("report_content", {
     p_target_kind: "glyph", p_target_id: glyph.id, p_reason: "sexual",
@@ -213,19 +260,19 @@ try {
   // 5. Own content, and the input domain.
   // ---------------------------------------------------------------------------
   const { error: ownErr } = await o.rpc("report_content", {
-    p_target_kind: "pebble", p_target_id: publicPebbleId, p_reason: "spam",
+    p_target_kind: "moment", p_target_id: pub.momentId, p_reason: "spam",
   });
   check("reporting your own content is refused",
     !!ownErr && ownErr.message.includes("cannot_report_own"), ownErr?.message);
 
   const { error: kindErr } = await r.rpc("report_content", {
-    p_target_kind: "soul", p_target_id: publicPebbleId, p_reason: "spam",
+    p_target_kind: "soul", p_target_id: pub.momentId, p_reason: "spam",
   });
   check("an unknown target kind is refused",
     !!kindErr && kindErr.message.includes("invalid_kind"), kindErr?.message);
 
   const { error: reasonErr } = await r.rpc("report_content", {
-    p_target_kind: "pebble", p_target_id: publicPebbleId, p_reason: "vibes",
+    p_target_kind: "moment", p_target_id: pub.momentId, p_reason: "vibes",
   });
   check("an unknown reason is refused",
     !!reasonErr && reasonErr.message.includes("invalid_reason"), reasonErr?.message);
@@ -240,19 +287,22 @@ try {
   // ---------------------------------------------------------------------------
   // 5b. Moderation columns are pinned against their own subject (#833 D7).
   //
-  // pebbles_update and profiles_update are owner-scoped with NO column
+  // moments_update and profiles_update are owner-scoped with NO column
   // restriction, and Postgres grants UPDATE on the whole table to
   // authenticated. Without the guard triggers, a hidden user clears hidden_at
   // and un-hides themselves — the moderation state would be revocable by
-  // exactly the person it is applied to.
+  // exactly the person it is applied to. hidden_at lives on the MOMENT since
+  // the split; the guard moved with it (moments_moderation_guard).
   //
   // SETTING is guarded too, not just clearing: a user who can set hidden_at
-  // could hide a pebble and later claim it was moderated.
+  // could hide a moment and later claim it was moderated. Match the guard's
+  // own exception name: a renamed column errors too, and proves nothing.
   // ---------------------------------------------------------------------------
-  const { error: selfHideErr } = await o.from("pebbles")
-    .update({ hidden_at: new Date().toISOString() }).eq("id", publicPebbleId);
-  check("an owner cannot SET hidden_at on their own pebble",
-    !!selfHideErr, "the pebbles moderation guard did not fire");
+  const { error: selfHideErr } = await o.from("moments")
+    .update({ hidden_at: new Date().toISOString() }).eq("id", pub.momentId);
+  check("an owner cannot SET hidden_at on their own moment",
+    selfHideErr?.message?.includes("moments_moderation_column") === true,
+    `expected moments_moderation_column, got: ${selfHideErr?.message ?? "no error at all"}`);
 
   // The CLEAR case — the dangerous one — is NOT asserted here, and cannot be.
   // Both guards fire on `new.hidden_at is distinct from old.hidden_at`, and

@@ -8,18 +8,21 @@
  * this exercises it against the real database and edge functions:
  *
  *   1. Defaults — a payload without a grade lands 'secret' (column default and
- *      the create_pebble coalesce both flipped from 'private').
+ *      the complete_pebble coalesce both flipped from 'private').
  *   2. CHECK — an invalid grade is unrepresentable.
  *   3. Read matrix — owner sees all grades; a mutual connection sees
  *      'private' + 'public' but never 'secret'; a stranger sees 'public'
  *      only; anon sees nothing through the table.
- *   4. Enrichment fence — v_pebbles_full shows a connection the shared row
- *      with EMPTY cards/souls/snaps (enrichment RLS stays owner-only).
+ *   4. Enrichment fence — v_pebbles_full (compat) shows a connection the
+ *      shared row with EMPTY cards/souls/snaps (enrichment RLS stays
+ *      owner-only), and v_moments_full shows them the moment with NO pebble
+ *      body (only the caller's own pebble is ever nested).
  *   5. Writes stay owner-only — a viewer cannot re-grade someone else's
  *      pebble.
  *   6. get_shared_pebble — anon gets the projection for 'public' (no user_id,
- *      whole-second UTC happened_at, composed render_svg); 'secret',
- *      'private' and unknown ids are all indistinguishably null.
+ *      whole-second UTC happened_at, the derived glyph with render_svg null
+ *      since the moments split, D6); 'secret', 'private' and unknown ids are
+ *      all indistinguishably null.
  *   7. Block severance (#834) — once the owner removes the friend with a
  *      block, neither party reads the other's public pebbles while signed in
  *      (both directions), a stranger still does, and the invite preview of
@@ -37,6 +40,9 @@
  * deletes them through the real `delete-account` edge function, so it is
  * runnable by anyone who can run the app. Cleanup runs even on failure.
  * Exits non-zero if any assertion fails.
+ *
+ * Seeds go through save_moment + complete_pebble (the split's two writes),
+ * not the deprecated create_pebble wrapper, so this harness outlives #1050.
  */
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
@@ -88,6 +94,25 @@ async function deleteAccount(token: string): Promise<Response> {
   });
 }
 
+type Seeded = { momentId: string; pebbleId: string };
+
+/** save_moment then complete_pebble: one complete pebble, the way every client writes one. */
+async function createPebble(
+  client: SupabaseClient,
+  moment: Record<string, unknown>,
+  pebble: Record<string, unknown>,
+): Promise<Seeded> {
+  const saved = await client.rpc("save_moment", { payload: moment });
+  if (saved.error || typeof saved.data !== "string") {
+    throw new Error(`save_moment(${String(moment.name)}): ${saved.error?.message ?? "no id"}`);
+  }
+  const done = await client.rpc("complete_pebble", { payload: { ...pebble, moment_id: saved.data } });
+  if (done.error || typeof done.data !== "string") {
+    throw new Error(`complete_pebble(${String(moment.name)}): ${done.error?.message ?? "no id"}`);
+  }
+  return { momentId: saved.data, pebbleId: done.data };
+}
+
 let owner: TestUser | null = null;
 let friend: TestUser | null = null;
 let stranger: TestUser | null = null;
@@ -105,7 +130,13 @@ try {
 
   const { data: emotion } = await o.from("emotions").select("id").limit(1).single();
   const { data: cardType } = await o.from("card_types").select("id").limit(1).single();
-  if (!emotion || !cardType) throw new Error("reference data missing (emotion / card type)");
+  // A pebble needs a domain (D2); one with a default glyph gives the share
+  // projection a glyph to resolve (D5).
+  const { data: domain } = await o
+    .from("domains").select("id, default_glyph_id").not("default_glyph_id", "is", null).limit(1).single();
+  if (!emotion || !cardType || !domain) {
+    throw new Error("reference data missing (emotion / card type / domain with a default glyph)");
+  }
 
   // ---------------------------------------------------------------------------
   // 0. owner↔friend become a mutual connection through the real M49 path.
@@ -118,54 +149,61 @@ try {
 
   // ---------------------------------------------------------------------------
   // 1. Three pebbles, one per grade. The 'secret' one sends NO visibility key
-  //    (that is the default under test); the 'public' one goes through
-  //    compose-pebble so render_svg is really composed. The 'private' one
-  //    carries a card + a soul so the enrichment fence has something to hide.
+  //    (that is the default under test). The 'private' one carries a card + a
+  //    soul so the enrichment fence has something to hide.
   // ---------------------------------------------------------------------------
+  const happenedAt = "2026-08-01T12:00:00Z";
   const base = {
-    happened_at: "2026-08-01T12:00:00Z",
     intensity: 2,
     positiveness: 1,
     emotion_id: emotion.id,
+    domain_ids: [domain.id],
   };
 
-  const { data: secretId, error: secretErr } = await o.rpc("create_pebble", {
-    payload: { ...base, name: `secret ${runId}` },
-  });
-  check("create_pebble without a grade succeeds", !secretErr && !!secretId, secretErr?.message);
+  const secret = await createPebble(o, { name: `secret ${runId}`, happened_at: happenedAt }, base);
+  const secretId = secret.pebbleId;
 
-  const { data: privateId, error: privateErr } = await o.rpc("create_pebble", {
-    payload: {
-      ...base,
-      name: `private ${runId}`,
-      visibility: "private",
-      cards: [{ species_id: cardType.id, value: "owner-only card", sort_order: 0 }],
-      new_souls: [{ name: `soul ${runId}` }],
-    },
+  // A snap row (no upload needed) so the connection's empty `snaps` below
+  // proves the owner-only snaps_select fence, not just an absent seed.
+  const privSnapId = crypto.randomUUID();
+  const priv = await createPebble(o, {
+    name: `private ${runId}`,
+    happened_at: happenedAt,
+    snaps: [{ id: privSnapId, storage_path: `${owner.id}/${privSnapId}`, sort_order: 0 }],
+  }, {
+    ...base,
+    visibility: "private",
+    cards: [{ species_id: cardType.id, value: "owner-only card", sort_order: 0 }],
+    new_souls: [{ name: `soul ${runId}` }],
   });
-  check("create_pebble with 'private' succeeds", !privateErr && !!privateId, privateErr?.message);
+  const privateId = priv.pebbleId;
 
-  const { data: composed, error: composeErr } = await o.functions.invoke("compose-pebble", {
-    body: { payload: { ...base, name: `public ${runId}`, visibility: "public" } },
+  const pub = await createPebble(o, { name: `public ${runId}`, happened_at: happenedAt }, {
+    ...base,
+    visibility: "public",
   });
-  const publicId = (composed as { pebble_id?: string })?.pebble_id;
-  check("compose-pebble with 'public' succeeds", !composeErr && !!publicId,
-    composeErr ? composeErr.message : JSON.stringify(composed));
+  const publicId = pub.pebbleId;
 
   const { data: secretRow } = await o
-    .from("pebbles").select("visibility").eq("id", secretId as string).single();
+    .from("pebbles").select("visibility").eq("id", secretId).single();
   check("a grade-less payload lands 'secret' (default flipped)",
     secretRow?.visibility === "secret", secretRow?.visibility);
 
-  const { error: badGradeErr } = await o.rpc("create_pebble", {
-    payload: { ...base, name: `bad ${runId}`, visibility: "friends" },
+  // An update on the secret pebble's moment: the CHECK rolls the whole call
+  // back, so the stored grade must be untouched as well.
+  const { error: badGradeErr } = await o.rpc("complete_pebble", {
+    payload: { moment_id: secret.momentId, visibility: "friends" },
   });
-  check("an invalid grade is rejected by the CHECK", !!badGradeErr, "insert succeeded");
+  const { data: afterBadGrade } = await o
+    .from("pebbles").select("visibility").eq("id", secretId).single();
+  check("an invalid grade is rejected by the CHECK",
+    !!badGradeErr && afterBadGrade?.visibility === "secret",
+    badGradeErr ? `stored=${afterBadGrade?.visibility}` : "update succeeded");
 
   // ---------------------------------------------------------------------------
   // 2. The read matrix over the pebbles table.
   // ---------------------------------------------------------------------------
-  const gradeOf = (rows: { id: string }[] | null, id: unknown) =>
+  const gradeOf = (rows: { id: string }[] | null, id: string) =>
     (rows ?? []).some((r) => r.id === id);
 
   const { data: ownRows } = await o.from("pebbles").select("id");
@@ -193,7 +231,7 @@ try {
   // ---------------------------------------------------------------------------
   const { data: fullRow } = await f
     .from("v_pebbles_full").select("id, name, cards, souls, snaps")
-    .eq("id", privateId as string).maybeSingle();
+    .eq("id", privateId).maybeSingle();
   check("v_pebbles_full returns the shared row to a connection", !!fullRow, "row missing");
   check("…with empty enrichments (cards/souls/snaps RLS stays owner-only)",
     (fullRow?.cards as unknown[])?.length === 0 &&
@@ -201,13 +239,24 @@ try {
     (fullRow?.snaps as unknown[])?.length === 0,
     JSON.stringify({ cards: fullRow?.cards, souls: fullRow?.souls, snaps: fullRow?.snaps }));
 
+  // The split's reader: the moment opens to the connection (moments_select
+  // follows the readable pebble), but `pebble` is the CALLER's pebble on it —
+  // the sharer's cards, souls and grade never ride along.
+  const { data: momentRow } = await f
+    .from("v_moments_full").select("id, name, pebble, snaps")
+    .eq("id", priv.momentId).maybeSingle();
+  check("v_moments_full shows the connection the moment with no pebble body and no snaps",
+    momentRow?.name === `private ${runId}` && momentRow?.pebble === null &&
+      (momentRow?.snaps as unknown[])?.length === 0,
+    JSON.stringify(momentRow));
+
   // ---------------------------------------------------------------------------
   // 4. Reading is not writing: a viewer cannot re-grade someone else's pebble.
   // ---------------------------------------------------------------------------
-  await f.from("pebbles").update({ visibility: "public" }).eq("id", secretId as string);
-  await s.from("pebbles").update({ visibility: "secret" }).eq("id", publicId as string);
+  await f.from("pebbles").update({ visibility: "public" }).eq("id", secretId);
+  await s.from("pebbles").update({ visibility: "secret" }).eq("id", publicId);
   const { data: afterWrites } = await o
-    .from("pebbles").select("id, visibility").in("id", [secretId, publicId] as string[]);
+    .from("pebbles").select("id, visibility").in("id", [secretId, publicId]);
   check("non-owner updates affect zero rows",
     afterWrites?.find((r) => r.id === secretId)?.visibility === "secret" &&
     afterWrites?.find((r) => r.id === publicId)?.visibility === "public",
@@ -226,11 +275,15 @@ try {
     typeof (sharedObj?.emotion as Record<string, unknown>)?.color === "string" &&
     typeof (sharedObj?.emotion as Record<string, unknown>)?.primary_color === "string",
     JSON.stringify(sharedObj));
-  check("projection carries the composed render_svg",
-    typeof sharedObj?.render_svg === "string" && (sharedObj.render_svg as string).length > 0);
+  // D5/D6: the glyph is derived (here from the domain default) and render_svg
+  // is an explicit null until the web share page reads glyph.
+  check("projection carries the derived glyph and a null render_svg",
+    (sharedObj?.glyph as Record<string, unknown> | null)?.id === domain.default_glyph_id &&
+      sharedObj?.render_svg === null,
+    JSON.stringify({ glyph: sharedObj?.glyph, render_svg: sharedObj?.render_svg }));
   check("projection never leaks user_id", sharedObj !== null && !("user_id" in sharedObj));
   check("happened_at is whole-second UTC (standing timestamp rule)",
-    sharedObj?.happened_at === "2026-08-01T12:00:00Z", `${sharedObj?.happened_at}`);
+    sharedObj?.happened_at === happenedAt, `${sharedObj?.happened_at}`);
 
   for (const [label, id] of [
     ["secret", secretId],
@@ -253,12 +306,9 @@ try {
   //    friend WITH a block through the real path. Blocks are directed rows
   //    (owner → friend); the read paths honour them in both directions.
   // ---------------------------------------------------------------------------
-  const { data: friendPublicId, error: friendPubErr } = await f.rpc("create_pebble", {
-    payload: { ...base, name: `friend public ${runId}`, visibility: "public" },
-  });
-  if (friendPubErr || !friendPublicId) {
-    throw new Error(`create_pebble (friend public): ${friendPubErr?.message}`);
-  }
+  const { pebbleId: friendPublicId } = await createPebble(
+    f, { name: `friend public ${runId}`, happened_at: happenedAt }, { ...base, visibility: "public" },
+  );
   const { data: ownerBefore } = await o.from("pebbles").select("id");
   check("before the block, the owner reads the friend's public pebble",
     gradeOf(ownerBefore, friendPublicId), JSON.stringify(ownerBefore));

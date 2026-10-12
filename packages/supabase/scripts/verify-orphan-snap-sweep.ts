@@ -3,13 +3,19 @@
  * Acceptance test for the orphan snap sweep (#322) — runs against the REMOTE
  * project.
  *
- * Seeds one throwaway user with the four cases from #322's plan, each a
+ * Seeds one throwaway user with the three cases from #322's plan, each a
  * `{user_id}/{snap_id}/` folder holding `original.jpg` + `thumb.jpg`:
  *
- *   published    a snap row exists (create_pebble)           → kept
- *   draft-only   named only in pebble_drafts.payload->snaps  → kept
- *   aged orphan  no reference, older than the grace period   → deleted
- *   fresh orphan no reference, younger than the grace period → kept
+ *   published    a snap row exists on a moment (save_moment) → kept
+ *   aged orphan  no reference, older than the grace period    → deleted
+ *   fresh orphan no reference, younger than the grace period  → kept
+ *
+ * Since the moments split, a snap hangs off the MOMENT (snaps.moment_id) and
+ * the lister's protection is the public.snaps row alone. #322's fourth case,
+ * a snap named only in a server draft, is gone with pebble_drafts: named
+ * drafts became moments with real snap rows, unnamed drafts' uploads are
+ * orphans by design. Seeds go through save_moment + complete_pebble, not the
+ * deprecated create_pebble wrapper, so this harness outlives #1050.
  *
  * then proves `list_orphan_snap_files` returns exactly the aged orphan, that
  * the `sweep-orphan-snaps` edge function's dry run deletes nothing, and that a
@@ -65,6 +71,14 @@ function check(name: string, ok: boolean, detail?: string) {
   }
 }
 
+/** A founding write: abort the run with a clear message rather than assert on a missing seed. */
+function must<T>(label: string, r: { data: T | null; error: { message: string } | null }): T {
+  if (r.error || r.data === null || r.data === undefined) {
+    throw new Error(`${label}: ${r.error?.message ?? "no data"}`);
+  }
+  return r.data;
+}
+
 function sameSet(a: string[], b: string[]): boolean {
   return a.length === b.length && [...a].sort().every((x, i) => x === [...b].sort()[i]);
 }
@@ -115,7 +129,6 @@ try {
 
   const snap = {
     published: crypto.randomUUID(),
-    draft: crypto.randomUUID(),
     aged: crypto.randomUUID(),
     fresh: crypto.randomUUID(),
   };
@@ -130,33 +143,38 @@ try {
   }
 
   await upload(snap.published);
-  await upload(snap.draft);
   await upload(snap.aged);
 
   const { data: emotion } = await admin.from("emotions").select("id").limit(1).single();
-  if (!emotion) throw new Error("reference data missing (emotion)");
-  const { data: pebbleId, error: pebErr } = await user.rpc("create_pebble", {
+  const { data: domain } = await admin.from("domains").select("id").limit(1).single();
+  if (!emotion || !domain) throw new Error("reference data missing (emotion / domain)");
+
+  // The published snap the way every client writes it: the moment carries the
+  // snap row, then the pebble completes it.
+  const saved = await user.rpc("save_moment", {
     payload: {
       name: `sweep-verify ${runId}`,
       happened_at: "2026-10-07T12:00:00Z",
-      intensity: 2,
-      positiveness: 1,
-      emotion_id: emotion.id,
       snaps: [{ id: snap.published, storage_path: folder(snap.published), sort_order: 0 }],
     },
   });
-  if (pebErr || !pebbleId) throw new Error(`create_pebble: ${pebErr?.message}`);
-
-  // The draft carries the snap the way every client writes it: {id,
-  // storage_path, sort_order} and no public.snaps row until publish.
-  const { error: draftErr } = await user.from("pebble_drafts").insert({
-    user_id: owner,
+  const momentId = must<string>("save_moment", saved);
+  must<string>("complete_pebble", await user.rpc("complete_pebble", {
     payload: {
-      name: `sweep-verify draft ${runId}`,
-      snaps: [{ id: snap.draft, storage_path: folder(snap.draft), sort_order: 0 }],
+      moment_id: momentId,
+      intensity: 2,
+      positiveness: 1,
+      emotion_id: emotion.id,
+      domain_ids: [domain.id],
     },
-  });
-  if (draftErr) throw new Error(`insert draft: ${draftErr.message}`);
+  }));
+
+  // The lister's protection keys on this row: if it does not hang off the
+  // moment, "published is kept" below would prove nothing.
+  const { data: snapRow } = await admin
+    .from("snaps").select("moment_id").eq("id", snap.published).maybeSingle();
+  check("the published snap row hangs off its moment (snaps.moment_id)",
+    snapRow?.moment_id === momentId, JSON.stringify(snapRow));
 
   await new Promise((r) => setTimeout(r, (GRACE_SECONDS + 2) * 1000));
   await upload(snap.fresh);
@@ -178,7 +196,7 @@ try {
     p_owner: owner,
   });
   const listedAllNames = ((listedAll ?? []) as { name: string }[]).map((r) => r.name);
-  check("with no grace period it adds the fresh orphan, still not the published or draft snap",
+  check("with no grace period it adds the fresh orphan, still not the published snap",
     !listAllErr && sameSet(listedAllNames, [...filesOf(snap.aged), ...filesOf(snap.fresh)]),
     listAllErr ? listAllErr.message : JSON.stringify(listedAllNames));
 
@@ -208,7 +226,7 @@ try {
       dry.body.deleted_count === 0,
     `status=${dry.status} body=${JSON.stringify(dry.body)}`);
   const afterDry = await listStorageFiles(owner);
-  check("the dry run deleted nothing", afterDry.length === 8, `found ${afterDry.length} files`);
+  check("the dry run deleted nothing", afterDry.length === 6, `found ${afterDry.length} files`);
 
   const live = await invokeSweep(SERVICE_ROLE, { ...scoped, dry_run: false });
   check("the live run deletes the two aged-orphan files and reports their bytes",
@@ -216,8 +234,8 @@ try {
     `status=${live.status} body=${JSON.stringify(live.body)}`);
 
   const remaining = await listStorageFiles(owner);
-  check("only the aged orphan is gone (published, draft-only and fresh survive)",
-    sameSet(remaining, [...filesOf(snap.published), ...filesOf(snap.draft), ...filesOf(snap.fresh)]),
+  check("only the aged orphan is gone (published and fresh survive)",
+    sameSet(remaining, [...filesOf(snap.published), ...filesOf(snap.fresh)]),
     JSON.stringify(remaining));
 
   const again = await invokeSweep(SERVICE_ROLE, { ...scoped, dry_run: false });
