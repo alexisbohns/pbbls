@@ -30,10 +30,9 @@ export function MainContent({ children }: MainContentProps) {
   const isCarve = pathname.startsWith("/carve")
   const isImmersive = isRecord || isCarve
 
-  // Body bg is normally --background (brand-light); /path needs it white in
-  // light mode so the brand-tinted "New pebble" pill stands out on a clean
-  // surface. Toggle a route-aware class on <body> so the bg fills the whole
-  // viewport (including safe-area insets and the gradient under the dock).
+  // Body bg is normally --background (brand-light); /path is set on the
+  // Spine's paper. Toggle a route-aware class on <body> so the ground fills
+  // the whole viewport (including safe-area insets and under the dock).
   useEffect(() => {
     if (typeof document === "undefined") return
     document.body.classList.toggle("path-route", isPath)

@@ -758,13 +758,10 @@
   body {
     @apply bg-background text-foreground;
   }
-  /* /path uses a white surface in light mode (the brand-tinted "New pebble"
-     pill needs a neutral body to stand out); dark mode keeps the brand bg. */
+  /* /path is set on the Spine's paper (#1052), in every colour world, so the
+     safe-area insets and overscroll match the sheet. */
   body.path-route {
-    @apply bg-white;
-  }
-  .dark body.path-route {
-    @apply bg-background;
+    background-color: var(--spine-ground);
   }
   html {
     @apply font-sans;
