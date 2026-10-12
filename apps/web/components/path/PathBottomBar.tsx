@@ -8,6 +8,7 @@ import { useBounce } from "@/lib/data/useBounce"
 import { useKarma } from "@/lib/data/useKarma"
 import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
 import { GlyphPreview } from "@/components/glyphs/GlyphPreview"
+import { cn } from "@/lib/utils"
 
 function Stat({
   icon: Icon,
@@ -19,15 +20,18 @@ function Stat({
   label: string
 }) {
   return (
-    <span className="flex items-center gap-1.5">
-      <Icon className="size-4 text-primary" aria-hidden />
-      <span className="text-sm font-semibold text-foreground dark:text-primary">{value}</span>
-      <span className="text-xs text-muted-foreground">{label}</span>
+    <span className="flex items-baseline gap-1.5">
+      <Icon className="size-3.5 self-center text-(--spine-ink-2)" aria-hidden />
+      <span className="font-spine text-[15px] font-semibold text-(--spine-ink) [font-variant-numeric:lining-nums_tabular-nums]">
+        {value}
+      </span>
+      <span className="font-spine-sc text-[11px] font-semibold tracking-[.14em] text-(--spine-ink-2)">{label}</span>
     </span>
   )
 }
 
-export function PathBottomBar() {
+/** Profile, bounce and karma on a translucent pill of card stock (#1052). */
+export function PathBottomBar({ className }: { className?: string }) {
   const t = useTranslations("path")
   const { profile } = useAuth()
   const { glyphs } = useUsableGlyphs()
@@ -41,23 +45,26 @@ export function PathBottomBar() {
   return (
     <nav
       aria-label={t("bottomBar.label")}
-      className="flex items-center justify-between gap-3 px-4 py-3 pb-[calc(0.75rem+var(--safe-area-bottom))]"
+      className={cn(
+        "flex items-center gap-3 rounded-full border border-(--spine-rule) bg-[color-mix(in_oklab,var(--spine-stock)_88%,transparent)] py-0.5 pr-4 pl-1 backdrop-blur-[8px]",
+        className,
+      )}
     >
       <Link
         href="/profile"
         aria-label={t("bottomBar.profileAria")}
-        className="inline-flex size-10 items-center justify-center text-primary"
+        className="inline-flex size-10 items-center justify-center rounded-full text-(--spine-ink)"
       >
         {glyph && glyph.strokes.length > 0 ? (
-          <GlyphPreview mark={glyph} className="size-7" />
+          <GlyphPreview mark={glyph} className="size-6" strokeClassName="text-(--spine-ink)" />
         ) : (
-          <CircleUser className="size-7" />
+          <CircleUser className="size-6" />
         )}
       </Link>
       <Link
         href="/wallet"
         aria-label={t("bottomBar.walletAria")}
-        className="flex items-center gap-4"
+        className="flex min-h-10 items-center gap-4"
       >
         <Stat icon={CirclePile} value={bounceLoading ? "—" : bounce} label={t("stats.bounce")} />
         <Stat icon={Sparkle} value={karmaLoading ? "—" : karma} label={t("stats.karma")} />

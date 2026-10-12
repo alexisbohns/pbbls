@@ -9,9 +9,11 @@ import { WeekPager } from "@/components/path/WeekPager"
 import { PathBottomDock } from "@/components/path/PathBottomDock"
 import { PebblePeek } from "@/components/path/PebblePeek"
 import { DraftsEntry } from "@/components/drafts/DraftsEntry"
+import { cn } from "@/lib/utils"
 import {
   buildWeekRollEntries,
   isoWeekKey,
+  isoWeekNumber,
   isoWeekStart,
   type WeekRollEntry,
 } from "@/lib/utils/week-roll-entries"
@@ -91,15 +93,26 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
   }
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-md flex-col overflow-x-hidden pt-[var(--safe-area-top)]">
+    <div
+      className={cn(
+        "spine-paper relative flex h-full w-full flex-col overflow-x-hidden pt-[var(--safe-area-top)] text-(--spine-ink)",
+        // From 900 px the roll and the dock sit over the verso; the week
+        // reserves their room (SpineWeek reads these).
+        "spread:[--spine-verso-top:46px] spread:[--spine-verso-foot:calc(64px+var(--safe-area-bottom))]",
+      )}
+    >
       <WeekRoll
         entries={entries}
         focused={focusedWeekStart}
         onFocus={setFocusedFromDate}
+        className="shrink-0 spread:spine-paper spread:absolute spread:top-(--safe-area-top) spread:left-(--spine-verso-x) spread:z-20 spread:w-(--spine-verso-w) spread:pr-12 spread:pl-9"
       />
       <div className="flex justify-center px-4 pt-2 empty:hidden">
         <DraftsEntry />
       </div>
+      <p aria-live="polite" className="sr-only">
+        {t("weekLabel", { week: focusedEntry?.isoWeek ?? isoWeekNumber(focusedWeekStart) })}
+      </p>
       <div className="min-h-0 flex-1">
         <WeekPager
           entries={entries}
@@ -109,7 +122,7 @@ export function PathScreen({ pebbles, souls, loading }: PathScreenProps) {
           onSelectPebble={setSelectedPebbleId}
         />
       </div>
-      <PathBottomDock />
+      <PathBottomDock className="spread:right-auto spread:left-(--spine-verso-x) spread:w-(--spine-verso-w)" />
       <PebblePeek
         pebbleId={selectedPebbleId}
         onClose={handleClosePeek}

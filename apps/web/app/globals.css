@@ -622,6 +622,18 @@
     --spine-x: 62px;
     --spine-col-x: 116px;
     --spine-pad-r: 48px;
+    /* The spread's verso column (see spine-spread): its width, and its x in a
+       full-width container. The verso fills to its maximum at any width the
+       spread applies; the recto takes min(740px, the rest), centred. */
+    --spine-verso-w: 380px;
+    --spine-verso-x: max(0px, calc((100% - 1120px) / 2));
+  }
+}
+
+@media (width >= 1240px) {
+  :root {
+    --spine-verso-w: 400px;
+    --spine-verso-x: max(0px, calc((100% - 1184px) / 2));
   }
 }
 
@@ -691,6 +703,25 @@
     repeating-linear-gradient(90deg, transparent 0 4px, var(--spine-teeth) 4px 5px, transparent 5px 19px) 0 1px / 100% 6.5px no-repeat;
 }
 
+/* The spread (≥ 900 px): the verso (opening, persons, contents) beside the
+   recto (the line), centred; wider and with a gutter from 1240 px. Below
+   900 px it is not a grid: the verso sits above the recto. */
+@utility spine-spread {
+  @media (width >= 900px) {
+    display: grid;
+    grid-template-columns: minmax(320px, 380px) minmax(0, 740px);
+    justify-content: center;
+    align-items: start;
+    max-width: 1200px;
+    margin-inline: auto;
+  }
+  @media (width >= 1240px) {
+    /* minmax, so a container narrower than the window (a frame, insets) still fits. */
+    grid-template-columns: minmax(320px, 400px) minmax(0, 760px);
+    column-gap: 24px;
+  }
+}
+
 /* The spot ink a pebble prints with, resolved from its inline palette:
    primary on Paper, secondary on Night. Set it on the pebble; the field,
    seal and rail inherit it. */
@@ -727,13 +758,10 @@
   body {
     @apply bg-background text-foreground;
   }
-  /* /path uses a white surface in light mode (the brand-tinted "New pebble"
-     pill needs a neutral body to stand out); dark mode keeps the brand bg. */
+  /* /path is set on the Spine's paper (#1052), in every colour world, so the
+     safe-area insets and overscroll match the sheet. */
   body.path-route {
-    @apply bg-white;
-  }
-  .dark body.path-route {
-    @apply bg-background;
+    background-color: var(--spine-ground);
   }
   html {
     @apply font-sans;

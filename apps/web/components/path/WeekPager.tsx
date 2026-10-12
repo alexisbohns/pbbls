@@ -71,12 +71,16 @@ export function WeekPager({
         {entries.map((entry, i) => (
           <div key={entry.weekStartIso} className="h-full w-full shrink-0">
             {Math.abs(i - focusedIndex) <= 1 ? (
-              <WeekPath
-                entry={entry}
-                souls={souls}
-                isFocused={i === focusedIndex}
-                onSelectPebble={onSelectPebble}
-              />
+              // Until the Spine replaces it (#1052 Part 6), the wall keeps its
+              // phone column, set in the recto of the spread from 900 px.
+              <div className="mx-auto h-full w-full max-w-md spread:mr-auto spread:ml-[calc(var(--spine-verso-x)+var(--spine-verso-w))] spread-wide:ml-[calc(var(--spine-verso-x)+var(--spine-verso-w)+24px)]">
+                <WeekPath
+                  entry={entry}
+                  souls={souls}
+                  isFocused={i === focusedIndex}
+                  onSelectPebble={onSelectPebble}
+                />
+              </div>
             ) : null}
           </div>
         ))}
