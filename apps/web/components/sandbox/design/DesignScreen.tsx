@@ -25,8 +25,9 @@ function isTyping(target: EventTarget | null): boolean {
 // Specimens contain real links (cards, tiles, headers). Capture-phase
 // preventDefault stops the browser; stopPropagation stops next/link's handler.
 // React events follow the React tree, so this covers portaled overlays too.
+// A fragment link never leaves the page (the Spine's contents), so it passes.
 function blockLinkNavigation(e: MouseEvent) {
-  if (e.target instanceof Element && e.target.closest("a[href]")) {
+  if (e.target instanceof Element && e.target.closest("a[href]:not([href^='#'])")) {
     e.preventDefault()
     e.stopPropagation()
   }
