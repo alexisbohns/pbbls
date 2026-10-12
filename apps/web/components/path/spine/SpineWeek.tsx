@@ -49,8 +49,10 @@ function layoutTop(el: HTMLElement): number {
 /**
  * One week of the Path as a book (#1052): the verso (the opening, the persons
  * of the week and the contents), then the recto (the line with every pebble
- * of the week, oldest first) and the mouth. Phone geometry; the spread at
- * ≥ 900 px lays the same two parts side by side.
+ * of the week, oldest first) and the mouth. From 900 px the two sit side by
+ * side as a spread (`spine-spread`): the verso sticks while the recto scrolls.
+ * Whoever lays chrome over the verso (the Path's roll and dock) reserves its
+ * room with `--spine-verso-top` and `--spine-verso-foot`.
  *
  * The persons and the contents follow the reading: the day crossing a line
  * 35% down the screen turns ink in both. A contents link scrolls to its stone,
@@ -112,8 +114,22 @@ export function SpineWeek({
 
   return (
     <SpinePressContext value={presses}>
-      <article ref={hostRef} aria-labelledby={titleId} className={cn("font-spine text-base leading-[1.4] text-(--spine-ink)", className)}>
-        <aside aria-label={t("glanceAria")} className="px-5 pt-[max(18px,env(safe-area-inset-top))] pb-2">
+      <article
+        ref={hostRef}
+        aria-labelledby={titleId}
+        className={cn("spine-spread font-spine text-base leading-[1.4] text-(--spine-ink)", className)}
+      >
+        <aside
+          aria-label={t("glanceAria")}
+          className={cn(
+            "px-5 pt-[max(18px,env(safe-area-inset-top))] pb-2",
+            // The verso stays put while the recto scrolls, and scrolls itself
+            // without a bar when the contents outgrow it. A Path that lays its
+            // roll and dock over this column says how much room they take.
+            "spread:sticky spread:top-0 spread:max-h-(--spine-page-h,100dvh) spread:overflow-y-auto spread:[scrollbar-width:none] spread:[&::-webkit-scrollbar]:hidden",
+            "spread:pt-[calc(34px+var(--spine-verso-top,0px))] spread:pr-12 spread:pb-[calc(40px+var(--spine-verso-foot,0px))] spread:pl-9",
+          )}
+        >
           <WeekOpening
             words={words}
             titleId={titleId}

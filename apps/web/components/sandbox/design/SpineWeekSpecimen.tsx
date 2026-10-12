@@ -39,7 +39,7 @@ export function SpineWeekSpecimen() {
   return (
     <Specimen
       id="spine-week"
-      note="The brief's week of 5–11 October, plus a still Friday, an uncarved stone, a fourteen-person picnic and an untitled photo. The persons and the contents follow the day being read; a contents link ripples its stone without opening it. Phone geometry; the spread comes with Part 5."
+      note="The brief's week of 5–11 October, plus a still Friday, an uncarved stone, a fourteen-person picnic and an untitled photo. The persons and the contents follow the day being read; a contents link ripples its stone without opening it. Below 900 px the verso sits above the recto; from 900 px they form a spread with a sticky verso (wider from 1240 px)."
       className="block p-0"
     >
       <div className="flex gap-2 p-3">
@@ -50,7 +50,7 @@ export function SpineWeekSpecimen() {
           The current week
         </Button>
       </div>
-      <div className="spine-paper w-full max-w-[740px] overflow-hidden rounded-xl">
+      <div className="spine-paper w-full rounded-xl">
         <SpineWeek
           entry={entry}
           today={today}
