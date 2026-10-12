@@ -1047,3 +1047,25 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - Installed iOS and Android builds broke at this push until #1047 and #1048 shipped (accepted pre-launch).
 - **Supersedes / Superseded-by:** Supersedes the M47 drafts design (`2026-07-29-drafts-and-autosave-design.md`) for server drafts; local autosave stands. Supersedes the 2026-10-07 orphan-sweep sentence "an object is referenced when any `pebble_drafts.payload->'snaps'` element names it". Supersedes the 20260817130000 exclusion of raw glyph geometry from the share payload.
 - **Refs:** #1046, #1047, #1048, #1049, #1050, #1051, `docs/superpowers/specs/2026-10-11-moments-and-pebbles-split-design.md`, migrations `20261012090000`–`20261012090400`, `packages/supabase/scripts/verify-moments.ts`.
+
+## 2026-10-13 — The web Path becomes the Spine: lit SVG stones over iOS geometry, the polaroid wall and list retired (#1052)
+
+- **Status:** taken
+- **Scope:** ui, webapp
+- **Context:** The maintainer judged the polaroid wall cheap ("between interface and skeuomorphic") and the web pebbles ugly next to iOS. Two rounds of hosted mocks ended on the Spine: each week a book, opened by its title in words, the persons of the week with a seven-dot day strip, and a contents list; one line down the margin with a lit stone per pebble; a Deck card for a photo, set type for none; a spread from 900 px.
+- **Decision:**
+  - The Spine replaces both `PathWall` (polaroids) and the `list` display. `WeekPager` renders `SpineWeek`, one vertical scroll per week.
+  - Stone **geometry follows iOS** (backdrop silhouette as the body, the engine seed scaled by `pebbleScale × 1.22` as the carving); stone **tones follow the final mock** for now, re-derived as colour-mixes over five palette slots.
+  - The stone is **SVG, not WebGL**: one shared sprite per page and a per-stone gradient. It is lit only where it can be pressed (the line); printed places use the flat seal.
+  - Days read **oldest first in every week**, the current one included; a past empty day is a seam marked *still*; the current week's future days are not drawn.
+  - A card never crops its photo: it starts square and eases to the ratio probed from the signed thumb (session-cached), until snaps store their dimensions.
+  - The Path paper (`--spine-*`) is neutral and does not follow the colour worlds.
+- **Why:** The polaroid wall's chronology needed round-robin layout tricks; a single line makes reading order the layout. iOS already draws the stone, so web sharing its geometry keeps one stone across surfaces. SVG is cheap, still, themeable in CSS and has no context limit; on a Pixel 7 emulator scrolling holds 60 fps and a press stays at 60 fps on GPU rendering.
+- **Consequences:**
+  - The three clients diverge visually until iOS and Android adopt the rule set in the spec (rows remain there). The spec's §Rule set is written as the shared spec for those issues.
+  - `render_svg` is never read on web; the Spine draws the resolved glyph's strokes.
+  - Until `snaps.width/height` exist, a card's ratio costs one thumb probe per photo per session, and a card settles once on first view.
+  - The glyph-zone drift test now reads iOS's `StoneCarvingArt.swift` tables and the shape seeds, since the server engine is gone (#1059).
+  - Deleted: `PathWall`, `PathPolaroid`, `PathStone`, `WeekPath`, `PathPebbleRow`, `path-layout` (and its round-robin test, succeeded by `spine-week.test.ts`), `polaroid-chaos` and the `/sandbox/path` route. The fixture week lives on `/sandbox/design`.
+- **Supersedes / Superseded-by:** Supersedes 2026-08-23 "Path becomes a polaroid wall on web; masonry is dealt round-robin, never height-balanced" (#720).
+- **Refs:** #1052, PRs #1057, #1062, #1064, #1067, #1068 and this one, `docs/superpowers/specs/2026-10-11-web-path-spine-design.md`, `apps/web/components/path/spine/`, `apps/web/components/pebble/stone/`.
