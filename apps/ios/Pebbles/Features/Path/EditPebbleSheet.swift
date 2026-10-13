@@ -5,28 +5,26 @@ import os
 /// Sheet for editing an existing pebble.
 ///
 /// Flow:
-/// 1. `.task` loads the pebble detail + the four reference lists concurrently.
-/// 2. On load success, `draft` is prefilled via `PebbleDraft(from: detail)` and
-///    `PebbleFormView` renders the form.
+/// 1. `.task` loads the moment from `v_moments_full`.
+/// 2. On load success, `draft` is prefilled via `PebbleDraft(from: detail)` (the
+///    caller's pebble on the moment) and `PebbleFormView` renders the form.
 /// 3. Save calls the `compose-pebble-update` edge function which updates the row
 ///    (via `update_pebble` RPC internally) and returns a fresh `render_svg`.
 /// 4. `onSaved()` notifies the parent (`PathView`) so it can refetch the list.
 struct EditPebbleSheet: View {
-    let pebbleId: UUID
+    let momentId: UUID
     let onSaved: () -> Void
 
     @Environment(SupabaseService.self) private var supabase
-    @Environment(EmotionPaletteService.self) private var palettes
     @Environment(ReferenceDataService.self) private var refs
     @Environment(KarmaNotificationService.self) private var karma
     @Environment(AchievementsService.self) private var achievements
-    @Environment(\.colorScheme) private var colorScheme
     @Environment(\.dismiss) private var dismiss
 
     @State private var draft = PebbleDraft()
-    @State private var renderSvg: String?
-    @State private var strokeColor: String?
-    @State private var sizeGroup: ValenceSizeGroup = .medium
+    /// The caller's pebble on the moment, set by `load()`. Differs from
+    /// `momentId` for every post-split pebble.
+    @State private var pebbleId: UUID?
     @State private var selectedGlyph: Glyph?
 
     @State private var isLoading = true
@@ -108,9 +106,6 @@ struct EditPebbleSheet: View {
                 souls: refs.souls,
                 collections: refs.collections,
                 saveError: saveError,
-                renderSvg: renderSvg,
-                strokeColor: strokeColor,
-                renderHeight: sizeGroup.renderHeight,
                 selectedGlyph: selectedGlyph,
                 onGlyphPicked: { picked in selectedGlyph = picked },
                 showsPhotoSection: true,
@@ -148,29 +143,15 @@ struct EditPebbleSheet: View {
         isLoading = true
         loadError = nil
         do {
-            let detail: PebbleDetail = try await supabase.client
-                .from("pebbles")
-                .select("""
-                    id, name, description, happened_at, intensity, positiveness, visibility,
-                    render_svg, render_version, glyph_id,
-                    glyph:glyphs(id, name, strokes, view_box),
-                    emotion:emotions(id, slug, name),
-                    pebble_domains(domain:domains(id, slug, name)),
-                    pebble_souls(soul:souls(id, name, glyph_id, glyphs(id, name, strokes, view_box))),
-                    collection_pebbles(collection:collections(id, name)),
-                    snaps(id, storage_path, sort_order)
-                """)
-                .eq("id", value: pebbleId)
-                .single()
-                .execute()
-                .value
-
-            self.draft = PebbleDraft(from: detail)
-            self.selectedGlyph = detail.glyph
-            self.renderSvg = detail.renderSvg
-            self.strokeColor = palettes.palette(for: detail.emotion.id)?
-                .strokeHex(for: colorScheme) ?? Color.accent.primaryHex
-            self.sizeGroup = detail.valence.sizeGroup
+            let detail = try await MomentsService(client: supabase.client).moment(id: momentId)
+            guard let pebble = detail.pebble, let draft = PebbleDraft(from: detail) else {
+                logger.error("edit pebble: moment has no pebble")
+                self.loadError = String(localized: "Couldn't load this pebble.")
+                self.isLoading = false
+                return
+            }
+            self.pebbleId = pebble.id
+            self.draft = draft
             if let existing = detail.snaps.first {
                 snaps?.seedExisting(.existing(id: existing.id, storagePath: existing.storagePath))
             }
@@ -184,7 +165,7 @@ struct EditPebbleSheet: View {
 
     // swiftlint:disable:next function_body_length
     private func save() async {
-        guard draft.isValid else { return }
+        guard draft.isValid, let pebbleId else { return }
 
         if snaps?.isUploading == true {
             logger.notice("save blocked: snap still uploading")
@@ -218,7 +199,6 @@ struct EditPebbleSheet: View {
                     options: FunctionInvokeOptions(body: requestBody),
                     decoder: decoder
                 )
-            self.renderSvg = response.renderSvg ?? self.renderSvg
             karma.notifyEarned(amount: response.karmaDelta ?? 0, reason: .pebbleEnriched)
             // An edit can change the pebble's emotion, newly qualifying an
             // emotion_first badge.
@@ -276,7 +256,7 @@ private struct ComposePebbleUpdateRequest: Encodable {
 
 #Preview {
     let supabase = SupabaseService()
-    return EditPebbleSheet(pebbleId: UUID(), onSaved: {})
+    return EditPebbleSheet(momentId: UUID(), onSaved: {})
         .environment(supabase)
         .environment(ReferenceDataService(client: supabase.client))
         .environment(KarmaNotificationService())

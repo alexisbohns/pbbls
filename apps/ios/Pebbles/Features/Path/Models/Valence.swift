@@ -50,8 +50,8 @@ extension Valence {
     /// outside the 3×3 grid so a malformed draft leaves the picker unset rather
     /// than silently claiming a value the user never chose.
     ///
-    /// Note: `PebbleDetail.valence` carries the same mapping inline for the
-    /// non-optional read path; worth collapsing into this one day.
+    /// Note: `Valence.resolved` wraps this for the non-optional read path,
+    /// logging and falling back to `.neutralMedium` on a malformed pair.
     static func from(positiveness: Int, intensity: Int) -> Valence? {
         switch (positiveness, intensity) {
         case (-1, 1): return .lowlightSmall
