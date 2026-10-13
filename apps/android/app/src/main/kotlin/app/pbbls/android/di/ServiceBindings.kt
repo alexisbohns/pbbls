@@ -14,6 +14,8 @@ import app.pbbls.android.core.data.GlyphService
 import app.pbbls.android.core.data.GlyphServicing
 import app.pbbls.android.core.data.LogsService
 import app.pbbls.android.core.data.LogsServicing
+import app.pbbls.android.core.data.MomentReadService
+import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.PathService
 import app.pbbls.android.core.data.PathServicing
 import app.pbbls.android.core.data.PathStatsService
@@ -60,6 +62,10 @@ interface ServiceBindings {
     @Binds
     @Singleton
     fun bindPathServicing(impl: PathService): PathServicing
+
+    @Binds
+    @Singleton
+    fun bindMomentReadServicing(impl: MomentReadService): MomentReadServicing
 
     @Binds
     @Singleton
