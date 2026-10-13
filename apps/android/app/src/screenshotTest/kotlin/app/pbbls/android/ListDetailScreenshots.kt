@@ -5,19 +5,21 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.model.Collection
 import app.pbbls.android.core.model.CollectionMode
 import app.pbbls.android.core.model.EmotionPalette
-import app.pbbls.android.core.model.EmotionRef
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphGridItem
 import app.pbbls.android.core.model.GlyphStroke
-import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.SoulWithGlyph
+import app.pbbls.android.core.model.Valence
 import app.pbbls.android.features.glyph.store.GlyphDetailDrawerContent
 import app.pbbls.android.features.glyph.store.GlyphDetailSurface
 import app.pbbls.android.features.glyph.store.GlyphTab
@@ -107,32 +109,24 @@ private val previewSouls =
         soulFixture("s4", "Wren", listOf(peakStroke), pebblesCount = 1),
     )
 
-private fun pebbleFixture(
+private fun momentFixture(
     id: String,
     name: String,
     daysAgo: Long,
-    intensity: Int,
-    positiveness: Int,
-    renderSvg: String?,
-): Pebble {
-    val happenedAt = OffsetDateTime.parse("2026-07-08T14:23:00+00:00").minusDays(daysAgo)
-    return Pebble(
+    valence: Valence,
+): PathMoment =
+    MomentPreviewFixtures.pathMoment(
         id = id,
         name = name,
-        happenedAt = happenedAt,
-        createdAt = happenedAt,
-        intensity = intensity,
-        positiveness = positiveness,
-        renderSvg = renderSvg,
-        emotion = EmotionRef(id = "e1", slug = "joyful", name = "Joyful"),
+        happenedAt = OffsetDateTime.parse("2026-07-08T14:23:00+00:00").minusDays(daysAgo),
+        pebble = MomentPreviewFixtures.pathPebble(valence = valence),
     )
-}
 
 private val soulPebbles =
     listOf(
-        pebbleFixture("p1", "Morning walk", daysAgo = 0, intensity = 2, positiveness = 0, PebbleSvgFixtures.mediumNeutral),
-        pebbleFixture("p2", "Studio session", daysAgo = 3, intensity = 3, positiveness = 1, PebbleSvgFixtures.largeHighlight),
-        pebbleFixture("p3", "Quiet afternoon", daysAgo = 7, intensity = 1, positiveness = 1, null),
+        momentFixture("p1", "Morning walk", daysAgo = 0, Valence.NEUTRAL_MEDIUM),
+        momentFixture("p2", "Studio session", daysAgo = 3, Valence.HIGHLIGHT_LARGE),
+        momentFixture("p3", "Quiet afternoon", daysAgo = 7, Valence.HIGHLIGHT_SMALL),
     )
 
 private val previewCollections =
@@ -144,8 +138,8 @@ private val previewCollections =
 
 private val collectionPebbles =
     listOf(
-        pebbleFixture("p4", "Beach sunset", daysAgo = 1, intensity = 3, positiveness = 1, PebbleSvgFixtures.largeHighlight),
-        pebbleFixture("p5", "New job offer", daysAgo = 40, intensity = 2, positiveness = 1, PebbleSvgFixtures.mediumNeutral),
+        momentFixture("p4", "Beach sunset", daysAgo = 1, Valence.HIGHLIGHT_LARGE),
+        momentFixture("p5", "New job offer", daysAgo = 40, Valence.HIGHLIGHT_MEDIUM),
     )
 
 private val previewZone: ZoneId = ZoneId.of("UTC")
@@ -196,11 +190,11 @@ fun SoulsListDetailOpen() {
             },
             detail = {
                 SoulDetailContent(
-                    uiState = SoulDetailUiState.Content(soul = previewSouls.first(), pebbles = soulPebbles),
+                    uiState = SoulDetailUiState.Content(soul = previewSouls.first(), moments = soulPebbles),
                     onBack = {},
                     onEditSoul = {},
                     onRetry = {},
-                    onOpenPebble = {},
+                    onOpenMoment = {},
                     onDeletePebble = {},
                     paletteFor = { previewPalette },
                     showBack = false,
@@ -229,11 +223,11 @@ fun SoulsListDetailOpenDark() {
             },
             detail = {
                 SoulDetailContent(
-                    uiState = SoulDetailUiState.Content(soul = previewSouls.first(), pebbles = soulPebbles),
+                    uiState = SoulDetailUiState.Content(soul = previewSouls.first(), moments = soulPebbles),
                     onBack = {},
                     onEditSoul = {},
                     onRetry = {},
-                    onOpenPebble = {},
+                    onOpenMoment = {},
                     onDeletePebble = {},
                     paletteFor = { previewPalette },
                     showBack = false,
@@ -294,13 +288,13 @@ fun CollectionsListDetailOpen() {
                     uiState =
                         CollectionDetailUiState.Content(
                             collection = previewCollections.first(),
-                            pebbles = collectionPebbles,
+                            moments = collectionPebbles,
                             zone = previewZone,
                         ),
                     onBack = {},
                     onEditCollection = {},
                     onRetry = {},
-                    onOpenPebble = {},
+                    onOpenMoment = {},
                     onDeletePebble = {},
                     paletteFor = { previewPalette },
                     showBack = false,
@@ -333,13 +327,13 @@ fun CollectionsListDetailOpenDark() {
                     uiState =
                         CollectionDetailUiState.Content(
                             collection = previewCollections.first(),
-                            pebbles = collectionPebbles,
+                            moments = collectionPebbles,
                             zone = previewZone,
                         ),
                     onBack = {},
                     onEditCollection = {},
                     onRetry = {},
-                    onOpenPebble = {},
+                    onOpenMoment = {},
                     onDeletePebble = {},
                     paletteFor = { previewPalette },
                     showBack = false,
@@ -371,13 +365,16 @@ private fun PathPebblePair() {
             )
         },
         detail = {
-            PebbleDetailContent(
-                uiState = PebbleDetailUiState.Content(fullDetail),
-                palette = previewPalette,
-                onEdit = {},
-                onShare = null,
-                onRetry = {},
-            )
+            CompositionLocalProvider(LocalReferenceDataService provides detailPreviewRefs) {
+                PebbleDetailContent(
+                    uiState = PebbleDetailUiState.Content(fullDetail),
+                    palette = previewPalette,
+                    onEditMoment = {},
+                    onEditPebble = {},
+                    onShare = null,
+                    onRetry = {},
+                )
+            }
         },
     )
 }

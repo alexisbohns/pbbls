@@ -12,17 +12,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.EmotionPalette
-import app.pbbls.android.core.model.EmotionRef
-import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.PathMoment
+import app.pbbls.android.core.model.Valence
 import app.pbbls.android.features.path.components.PathPebbleRow
 import com.android.tools.screenshot.PreviewTest
-import java.time.OffsetDateTime
 
 /**
- * Row-level previews for the read-only Path timeline (#531): every intensity
- * against the outline backdrop + authentic composed render, the no-render
- * pebble (silhouette only), and the missing-palette accent fallback — light
- * and dark. Fed by the same engine-composed fixtures as the fidelity grid.
+ * Row-level previews for the Path timeline (#531, #1048): every intensity on
+ * its outline backdrop (the glyph drawn from strokes returns in the next part
+ * of #1048), the missing-palette accent fallback, and a photo-only moment
+ * with no name and no pebble yet (R3) — light and dark.
  */
 private val previewPalette: EmotionPalette =
     requireNotNull(
@@ -36,22 +35,10 @@ private val previewPalette: EmotionPalette =
         ),
     )
 
-private fun pebble(
+private fun moment(
     name: String,
-    intensity: Int,
-    positiveness: Int,
-    renderSvg: String?,
-): Pebble =
-    Pebble(
-        id = name,
-        name = name,
-        happenedAt = OffsetDateTime.parse("2026-07-06T15:42:00+00:00"),
-        createdAt = OffsetDateTime.parse("2026-07-06T15:45:00+00:00"),
-        intensity = intensity,
-        positiveness = positiveness,
-        renderSvg = renderSvg,
-        emotion = EmotionRef(id = "e1", slug = "joyful", name = "Joyful"),
-    )
+    valence: Valence,
+): PathMoment = MomentPreviewFixtures.pathMoment(id = name, name = name, pebble = MomentPreviewFixtures.pathPebble(valence = valence))
 
 @Composable
 private fun RowGallery() {
@@ -62,31 +49,31 @@ private fun RowGallery() {
                 .padding(24.dp),
     ) {
         PathPebbleRow(
-            pebble = pebble("Small lowlight", 1, -1, PebbleSvgFixtures.smallLowlight),
+            moment = moment("Small lowlight", Valence.LOWLIGHT_SMALL),
             positionIndex = 0,
             palette = previewPalette,
             modifier = Modifier.fillMaxWidth(),
         )
         PathPebbleRow(
-            pebble = pebble("Medium neutral", 2, 0, PebbleSvgFixtures.mediumNeutral),
+            moment = moment("Medium neutral", Valence.NEUTRAL_MEDIUM),
             positionIndex = 1,
             palette = previewPalette,
             modifier = Modifier.fillMaxWidth(),
         )
         PathPebbleRow(
-            pebble = pebble("Large highlight", 3, 1, PebbleSvgFixtures.largeHighlight),
+            moment = moment("Large highlight", Valence.HIGHLIGHT_LARGE),
             positionIndex = 2,
             palette = previewPalette,
             modifier = Modifier.fillMaxWidth(),
         )
         PathPebbleRow(
-            pebble = pebble("No render yet", 2, 0, renderSvg = null),
+            moment = moment("Medium highlight", Valence.HIGHLIGHT_MEDIUM),
             positionIndex = 3,
             palette = previewPalette,
             modifier = Modifier.fillMaxWidth(),
         )
         PathPebbleRow(
-            pebble = pebble("No palette (accent fallback)", 2, 1, PebbleSvgFixtures.mediumHighlight),
+            moment = moment("No palette (accent fallback)", Valence.HIGHLIGHT_MEDIUM),
             positionIndex = 4,
             palette = null,
             modifier = Modifier.fillMaxWidth(),
@@ -107,4 +94,37 @@ fun PathRowsLight() {
 @Composable
 fun PathRowsDark() {
     PebblesTheme { RowGallery() }
+}
+
+/** A photo-only capture: no name ("Untitled", italic, R3), no pebble, a photo. */
+@Composable
+private fun UntitledPhotoOnlyRow() {
+    Column(
+        modifier =
+            Modifier
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(24.dp),
+    ) {
+        PathPebbleRow(
+            moment = MomentPreviewFixtures.pathMoment(name = null, pebble = null, firstSnapPath = "user-1/snap-1"),
+            positionIndex = 0,
+            palette = null,
+            modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+@PreviewTest
+@Preview(showBackground = true)
+@PreviewFrench
+@Composable
+fun PathRow_UntitledPhotoOnly() {
+    PebblesTheme { UntitledPhotoOnlyRow() }
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun PathRow_UntitledPhotoOnlyDark() {
+    PebblesTheme { UntitledPhotoOnlyRow() }
 }

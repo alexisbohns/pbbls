@@ -12,17 +12,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.EmotionPalette
-import app.pbbls.android.core.model.EmotionRef
-import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.PathMoment
+import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.ui.PebbleRow
 import com.android.tools.screenshot.PreviewTest
-import java.time.OffsetDateTime
 
 /**
  * Shared-list-row previews (#565): the `Components/PebbleRow.swift` port the
- * souls/collections detail lists will consume — composed render, silhouette
- * fallback (no render), and the missing-palette accent fallback — light and
- * dark. Fed by the same engine-composed fixtures as the Path row gallery.
+ * souls/collections detail lists consume — the outline silhouette per
+ * valence, an untitled moment (R3), and the missing-palette accent fallback —
+ * light and dark.
  */
 private val previewPalette: EmotionPalette =
     requireNotNull(
@@ -36,22 +35,11 @@ private val previewPalette: EmotionPalette =
         ),
     )
 
-private fun pebble(
-    name: String,
-    intensity: Int,
-    positiveness: Int,
-    renderSvg: String?,
-): Pebble =
-    Pebble(
-        id = name,
-        name = name,
-        happenedAt = OffsetDateTime.parse("2026-07-06T15:42:00+00:00"),
-        createdAt = OffsetDateTime.parse("2026-07-06T15:45:00+00:00"),
-        intensity = intensity,
-        positiveness = positiveness,
-        renderSvg = renderSvg,
-        emotion = EmotionRef(id = "e1", slug = "joyful", name = "Joyful"),
-    )
+private fun moment(
+    name: String?,
+    valence: Valence,
+): PathMoment =
+    MomentPreviewFixtures.pathMoment(id = name ?: "untitled", name = name, pebble = MomentPreviewFixtures.pathPebble(valence = valence))
 
 @Composable
 private fun PebbleRowGallery() {
@@ -62,28 +50,28 @@ private fun PebbleRowGallery() {
                 .padding(24.dp),
     ) {
         PebbleRow(
-            pebble = pebble("Medium neutral", 2, 0, PebbleSvgFixtures.mediumNeutral),
+            moment = moment("Medium neutral", Valence.NEUTRAL_MEDIUM),
             palette = previewPalette,
             onTap = {},
             onDelete = {},
             modifier = Modifier.fillMaxWidth(),
         )
         PebbleRow(
-            pebble = pebble("Large highlight", 3, 1, PebbleSvgFixtures.largeHighlight),
+            moment = moment("Large highlight", Valence.HIGHLIGHT_LARGE),
             palette = previewPalette,
             onTap = {},
             onDelete = {},
             modifier = Modifier.fillMaxWidth(),
         )
         PebbleRow(
-            pebble = pebble("No render yet", 2, 0, renderSvg = null),
+            moment = moment(null, Valence.NEUTRAL_MEDIUM),
             palette = previewPalette,
             onTap = {},
             onDelete = {},
             modifier = Modifier.fillMaxWidth(),
         )
         PebbleRow(
-            pebble = pebble("No palette (accent fallback)", 1, -1, PebbleSvgFixtures.smallLowlight),
+            moment = moment("No palette (accent fallback)", Valence.LOWLIGHT_SMALL),
             palette = null,
             onTap = {},
             onDelete = {},

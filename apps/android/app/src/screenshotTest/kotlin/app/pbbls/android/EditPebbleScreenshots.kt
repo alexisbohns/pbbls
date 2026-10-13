@@ -1,14 +1,13 @@
 package app.pbbls.android
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
-import androidx.compose.foundation.background
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
+import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionPalette
@@ -19,17 +18,19 @@ import app.pbbls.android.core.model.PebbleCollection
 import app.pbbls.android.core.model.PebbleDraft
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.Valence
-import app.pbbls.android.features.path.create.PebbleForm
+import app.pbbls.android.features.path.EditMomentContent
+import app.pbbls.android.features.path.EditMomentUiState
+import app.pbbls.android.features.path.EditPebbleContent
+import app.pbbls.android.features.path.EditPebbleUiState
 import com.android.tools.screenshot.PreviewTest
 import java.time.OffsetDateTime
 
 /**
- * Previews for the edit surface (#542): the pure [PebbleForm] (C) driven with a
- * populated [renderSvg] header at all three `sizeGroup` heights (small 180 /
- * medium 220 / large 260 dp) — the design's required pre-wire proof of the render
- * header at every height (risk 2). Driven with fixtures so no services are
- * needed; the service-backed [app.pbbls.android.features.path.EditPebbleScreen]
- * is deliberately not previewed. A non-null [strokeColor] makes the header render.
+ * Previews for the two edit screens (#542, #1048 R5): Edit pebble's stateless
+ * [EditPebbleContent] with its stone header at all three `sizeGroup` heights
+ * (small 180 / medium 220 / large 260 dp) and its error, and Edit moment's
+ * [EditMomentContent] with and without content. Driven with fixtures and a
+ * fixed reference-data cache, so no services are needed.
  */
 private fun palette(
     primary: String,
@@ -52,10 +53,6 @@ private fun palette(
 
 private val joyPalette = palette("#7B5E99FF", "#AE91CCFF", "#F2EFF5FF", "#7B5E991A")
 
-// Any 6-digit hex renders the header stroke in preview (iOS parity uses the
-// palette strokeHex; the light value is fine for both preview themes).
-private val strokeColor = joyPalette.strokeHex(false)
-
 // In-range (0..200) stroke so the glyph cell carves a distinct mark.
 private val waveStroke = GlyphStroke(d = "M 20 120 Q 100 40 180 120", width = 6.0)
 
@@ -64,8 +61,6 @@ private fun glyphOf(
     name: String?,
     strokes: List<GlyphStroke>,
 ): Glyph = Glyph(id = id, name = name, strokes = strokes, viewBox = "0 0 200 200")
-
-private val sampleGlyph = glyphOf("glyph-1", "Spiral", listOf(waveStroke))
 
 private fun soul(
     id: String,
@@ -116,39 +111,33 @@ private fun draftWith(valence: Valence): PebbleDraft =
     PebbleDraft(
         happenedAt = fixedWhen,
         name = "Shipped the Android edit flow",
-        description = "Prefilled from the loaded pebble detail.",
+        description = "Prefilled from the loaded moment.",
         emotionId = "e-joy",
         domainId = "d-work",
         valence = valence,
         soulIds = listOf("s1", "s2"),
         collectionId = "c-wins",
-        glyphId = "glyph-1",
     )
 
+private val editRefs = PreviewReferenceData(domains = domains, souls = souls, collections = collections)
+
 @Composable
-private fun EditFormPreview(
+private fun EditPebblePreview(
     draft: PebbleDraft,
-    renderSvg: String,
-    renderHeight: Dp,
-    saveError: String? = null,
+    @StringRes saveErrorRes: Int? = null,
 ) {
-    PebbleForm(
-        draft = draft,
-        onDraftChange = {},
-        domains = domains,
-        souls = souls,
-        collections = collections,
-        selectedEmotion = joyEmotion,
-        selectedGlyph = sampleGlyph,
-        onGlyphPicked = {},
-        saveError = saveError,
-        // The picker sheet is closed in every capture.
-        glyphPicker = { _, _, _, _ -> },
-        renderSvg = renderSvg,
-        strokeColor = strokeColor,
-        renderHeight = renderHeight,
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface),
-    )
+    CompositionLocalProvider(LocalReferenceDataService provides editRefs) {
+        EditPebbleContent(
+            uiState = EditPebbleUiState.Content(draft = draft, saveErrorRes = saveErrorRes),
+            palette = joyPalette,
+            selectedEmotion = joyEmotion,
+            onDraftChange = {},
+            onCancel = {},
+            onSave = {},
+            onRetry = {},
+            modifier = Modifier.fillMaxSize(),
+        )
+    }
 }
 
 @PreviewTest
@@ -156,36 +145,28 @@ private fun EditFormPreview(
 @PreviewLargeFont
 @Composable
 fun EditFormSmallLight() {
-    PebblesTheme {
-        EditFormPreview(draftWith(Valence.LOWLIGHT_SMALL), PebbleSvgFixtures.smallLowlight, 180.dp)
-    }
+    PebblesTheme { EditPebblePreview(draftWith(Valence.LOWLIGHT_SMALL)) }
 }
 
 @PreviewTest
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun EditFormSmallDark() {
-    PebblesTheme {
-        EditFormPreview(draftWith(Valence.LOWLIGHT_SMALL), PebbleSvgFixtures.smallLowlight, 180.dp)
-    }
+    PebblesTheme { EditPebblePreview(draftWith(Valence.LOWLIGHT_SMALL)) }
 }
 
 @PreviewTest
 @Preview(showBackground = true)
 @Composable
 fun EditFormMediumLight() {
-    PebblesTheme {
-        EditFormPreview(draftWith(Valence.NEUTRAL_MEDIUM), PebbleSvgFixtures.mediumNeutral, 220.dp)
-    }
+    PebblesTheme { EditPebblePreview(draftWith(Valence.NEUTRAL_MEDIUM)) }
 }
 
 @PreviewTest
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun EditFormMediumDark() {
-    PebblesTheme {
-        EditFormPreview(draftWith(Valence.NEUTRAL_MEDIUM), PebbleSvgFixtures.mediumNeutral, 220.dp)
-    }
+    PebblesTheme { EditPebblePreview(draftWith(Valence.NEUTRAL_MEDIUM)) }
 }
 
 @PreviewTest
@@ -193,18 +174,14 @@ fun EditFormMediumDark() {
 @PreviewLargeFont
 @Composable
 fun EditFormLargeLight() {
-    PebblesTheme {
-        EditFormPreview(draftWith(Valence.HIGHLIGHT_LARGE), PebbleSvgFixtures.largeHighlight, 260.dp)
-    }
+    PebblesTheme { EditPebblePreview(draftWith(Valence.HIGHLIGHT_LARGE)) }
 }
 
 @PreviewTest
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun EditFormLargeDark() {
-    PebblesTheme {
-        EditFormPreview(draftWith(Valence.HIGHLIGHT_LARGE), PebbleSvgFixtures.largeHighlight, 260.dp)
-    }
+    PebblesTheme { EditPebblePreview(draftWith(Valence.HIGHLIGHT_LARGE)) }
 }
 
 @PreviewTest
@@ -212,26 +189,57 @@ fun EditFormLargeDark() {
 @PreviewLargeFont
 @Composable
 fun EditFormErrorLight() {
-    PebblesTheme {
-        EditFormPreview(
-            draftWith(Valence.NEUTRAL_MEDIUM),
-            PebbleSvgFixtures.mediumNeutral,
-            220.dp,
-            "Couldn't save your pebble. Please try again.",
-        )
-    }
+    PebblesTheme { EditPebblePreview(draftWith(Valence.NEUTRAL_MEDIUM), R.string.moment_save_error_generic) }
 }
 
 @PreviewTest
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun EditFormErrorDark() {
+    PebblesTheme { EditPebblePreview(draftWith(Valence.NEUTRAL_MEDIUM), R.string.moment_save_error_generic) }
+}
+
+/** Edit pebble (R5): the stone, then mood, souls and the optional section; no moment fields, no photo. */
+@PreviewTest
+@Preview(showBackground = true)
+@PreviewFrench
+@Composable
+fun EditPebble_Content() {
+    PebblesTheme { EditPebblePreview(draftWith(Valence.HIGHLIGHT_MEDIUM)) }
+}
+
+/** Edit moment (R5): when, name, description and the photo section only. */
+@PreviewTest
+@Preview(showBackground = true)
+@PreviewFrench
+@Composable
+fun EditMoment_Content() {
     PebblesTheme {
-        EditFormPreview(
-            draftWith(Valence.NEUTRAL_MEDIUM),
-            PebbleSvgFixtures.mediumNeutral,
-            220.dp,
-            "Couldn't save your pebble. Please try again.",
+        EditMomentContent(
+            uiState = EditMomentUiState.Content(draft = draftWith(Valence.HIGHLIGHT_MEDIUM)),
+            onDraftChange = {},
+            onCancel = {},
+            onSave = {},
+            onRetry = {},
+            modifier = Modifier.fillMaxSize(),
+        )
+    }
+}
+
+/** A blank name and no photo: Save disabled, the hint shown (R6). */
+@PreviewTest
+@Preview(showBackground = true)
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun EditMoment_NeedsContent() {
+    PebblesTheme {
+        EditMomentContent(
+            uiState = EditMomentUiState.Content(draft = draftWith(Valence.HIGHLIGHT_MEDIUM).copy(name = "")),
+            onDraftChange = {},
+            onCancel = {},
+            onSave = {},
+            onRetry = {},
+            modifier = Modifier.fillMaxSize(),
         )
     }
 }
