@@ -419,6 +419,9 @@
     <string name="delete_moment">Delete moment</string>
     <string name="complete_cta">Make it a pebble</string>
     <string name="capture_name_subtitle">A name, a photo, or both.</string>
+    <string name="capture_save">Save moment</string>
+    <string name="capture_make_pebble_now">Make it a pebble now</string>
+    <string name="capture_close_title">Keep this moment?</string>
 
     <!-- ==== Glyph carve studio (M43 · Android Glyph Studio &amp; Store) ==== -->
     <string name="carve_title">New glyph</string>

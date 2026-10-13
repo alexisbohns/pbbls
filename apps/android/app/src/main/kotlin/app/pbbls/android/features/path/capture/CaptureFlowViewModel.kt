@@ -185,7 +185,9 @@ class CaptureFlowViewModel
                                 snaps.reset()
                                 // Path shows the moment's week when it is next on screen (R14).
                                 focusRequests.request(momentId)
-                                effectsOut.emit(if (thenComplete) CaptureFlowEffect.SavedThenComplete(momentId) else CaptureFlowEffect.Saved)
+                                effectsOut.emit(
+                                    if (thenComplete) CaptureFlowEffect.SavedThenComplete(momentId) else CaptureFlowEffect.Saved,
+                                )
                             },
                             onFailure = {
                                 Log.e(TAG, "save_moment failed", it)

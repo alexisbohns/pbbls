@@ -38,6 +38,13 @@ sealed interface RecordStepAction {
         val isLoading: Boolean,
         val onClick: () -> Unit,
     ) : RecordStepAction
+
+    /** Capture's name step: the primary save, and the save-then-complete text button beneath it. */
+    data class PrimaryWithSecondary(
+        val primary: Primary,
+        val secondaryLabel: String,
+        val onSecondary: () -> Unit,
+    ) : RecordStepAction
 }
 
 /**
@@ -120,18 +127,40 @@ fun RecordStepScaffold(
                         color = colors.onSurfaceVariant,
                     )
                 }
-            is RecordStepAction.Primary ->
-                PebblesPrimaryButton(
-                    text = action.label,
-                    onClick = action.onClick,
-                    enabled = action.enabled && !action.isLoading,
-                    isLoading = action.isLoading,
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = Spacing.lg)
-                            .padding(bottom = Spacing.sm),
-                )
+            is RecordStepAction.Primary -> PrimaryAction(action)
+            is RecordStepAction.PrimaryWithSecondary -> {
+                PrimaryAction(action.primary)
+                val secondaryEnabled = action.primary.enabled && !action.primary.isLoading
+                TextButton(
+                    onClick = action.onSecondary,
+                    enabled = secondaryEnabled,
+                    modifier = Modifier.padding(bottom = Spacing.sm),
+                ) {
+                    Text(
+                        text = action.secondaryLabel,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = if (secondaryEnabled) colors.primary else colors.onSurface.copy(alpha = DISABLED_ALPHA),
+                    )
+                }
+            }
         }
     }
+}
+
+/** M3's disabled content opacity; an explicit text colour does not pick it up from the button. */
+private const val DISABLED_ALPHA = 0.38f
+
+@Composable
+private fun PrimaryAction(action: RecordStepAction.Primary) {
+    PebblesPrimaryButton(
+        text = action.label,
+        onClick = action.onClick,
+        enabled = action.enabled && !action.isLoading,
+        isLoading = action.isLoading,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = Spacing.lg)
+                .padding(bottom = Spacing.sm),
+    )
 }
