@@ -140,7 +140,7 @@ class CaptureFlowViewModel
         fun machine(): CaptureFlowModel = model
 
         fun onPhotoPicked(uri: Uri) {
-            if (model.isSaving) return
+            if (model.isFrozen) return
             val id = userId ?: return
             viewModelScope.launch {
                 runCatchingCancellable {
@@ -154,18 +154,19 @@ class CaptureFlowViewModel
         }
 
         fun onRetryPhoto() {
+            if (model.isFrozen) return
             val id = userId ?: return
             viewModelScope.launch { snaps.retryCurrent(id) }
         }
 
         fun onRemovePhoto() {
-            if (model.isSaving) return
+            if (model.isFrozen) return
             val id = userId ?: return
             viewModelScope.launch { snaps.removePending(id) }
         }
 
         fun save(thenComplete: Boolean) {
-            if (model.isSaving) return
+            if (model.isFrozen) return
             val id = userId
             if (id == null) {
                 Log.e(TAG, "save: no current user")
@@ -219,7 +220,7 @@ class CaptureFlowViewModel
          * Discard and Keep going.
          */
         fun onCloseRequested() {
-            if (model.isSaving) return
+            if (model.isFrozen) return
             val state = model.state.value
             if (state.hasInput) {
                 val offersSave = state.canSave && blockedBySnap() == null
@@ -251,7 +252,7 @@ class CaptureFlowViewModel
         /** Back walks the steps; on the photo step it is ✕ (R2). */
         fun onSystemBack() {
             when {
-                model.isSaving -> Unit
+                model.isFrozen -> Unit
                 model.step.previous != null -> model.back()
                 else -> onCloseRequested()
             }

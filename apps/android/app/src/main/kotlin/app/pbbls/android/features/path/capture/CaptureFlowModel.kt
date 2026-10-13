@@ -17,13 +17,14 @@ class CaptureFlowModel(
 
     val draft: CaptureDraft get() = _state.value.draft
     val step: CaptureStep get() = _state.value.step
-    val isSaving: Boolean get() = _state.value.isSaving
+    val isFrozen: Boolean get() = _state.value.isFrozen
 
     var hasSnap: Boolean
         get() = _state.value.hasSnap
         set(value) = _state.update { it.copy(hasSnap = value) }
 
     fun advance() {
+        if (isFrozen) return
         if (!_state.value.isAnswered) {
             haptic(TapHaptic.WARNING)
             return
@@ -33,7 +34,9 @@ class CaptureFlowModel(
         _state.update { it.copy(step = next) }
     }
 
+    /** The chrome's back arrow calls this directly, so the save guard lives here. */
     fun back() {
+        if (isFrozen) return
         val previous = step.previous ?: return
         haptic(TapHaptic.ADVANCE)
         _state.update { it.copy(step = previous) }
@@ -54,7 +57,8 @@ class CaptureFlowModel(
 
     fun saved() {
         haptic(TapHaptic.SUCCESS)
-        _state.update { it.copy(isSaving = false) }
+        // Stays frozen: navigation happens one hop later, through the effect channel.
+        _state.update { it.copy(isSaving = false, isSaved = true) }
     }
 
     /**

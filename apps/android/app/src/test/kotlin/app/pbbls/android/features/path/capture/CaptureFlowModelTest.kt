@@ -71,6 +71,23 @@ class CaptureFlowModelTest {
     }
 
     @Test
+    fun `the steps hold still while saving and once saved`() {
+        model.goTo(CaptureStep.WHEN)
+        model.setName("Swim")
+        model.beginSave()
+        model.back()
+        model.advance()
+        assertEquals(CaptureStep.WHEN, model.step)
+        assertFalse(model.state.value.canSave)
+        model.saved()
+        model.back()
+        model.advance()
+        assertEquals(CaptureStep.WHEN, model.step)
+        assertFalse(model.state.value.canSave)
+        assertEquals(listOf(TapHaptic.SUCCESS), haptics)
+    }
+
+    @Test
     fun `back walks to the previous step and stops at the photo`() {
         model.goTo(CaptureStep.NAME)
         model.back()

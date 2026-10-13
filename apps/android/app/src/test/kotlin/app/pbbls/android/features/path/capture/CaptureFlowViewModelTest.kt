@@ -342,6 +342,34 @@ class CaptureFlowViewModelTest {
         }
 
     @Test
+    fun `a saved capture takes no second save, close, back or photo`() =
+        runTest {
+            val h = Harness()
+            val effects = recordEffects(h.viewModel.effects)
+            h.viewModel.machine().goTo(CaptureStep.NAME)
+            h.viewModel.machine().setName("Walk")
+            h.viewModel.save(thenComplete = false)
+            advanceUntilIdle()
+            assertFalse(h.viewModel.uiState.value.canSaveNow)
+
+            h.viewModel.save(thenComplete = false)
+            h.viewModel.save(thenComplete = true)
+            h.viewModel.onCloseRequested()
+            h.viewModel.onSystemBack()
+            h.viewModel.machine().back()
+            h.viewModel.onPhotoPicked(pick)
+            advanceUntilIdle()
+            settle()
+
+            assertEquals(1, h.writes.saved.size)
+            assertEquals(listOf(CaptureFlowEffect.Saved), effects.values.filterNot { it is CaptureFlowEffect.Haptic })
+            assertFalse(h.viewModel.uiState.value.isCloseConfirmPresented)
+            assertEquals(CaptureStep.NAME, h.viewModel.uiState.value.flow.step)
+            assertTrue(h.snapRepo.uploaded.isEmpty())
+            effects.stop()
+        }
+
+    @Test
     fun `name, date and step survive process death`() =
         runTest {
             val handle = SavedStateHandle()
