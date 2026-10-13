@@ -280,6 +280,39 @@ class CaptureFlowViewModelTest {
         }
 
     @Test
+    fun `a photo-only capture can be saved only once its photo is up`() =
+        runTest {
+            val h = Harness()
+            val gate = CompletableDeferred<Unit>()
+            h.snapRepo.uploadGate = gate
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            h.viewModel.machine().goTo(CaptureStep.NAME)
+            settle()
+            assertFalse(h.viewModel.uiState.value.canSaveNow)
+            gate.complete(Unit)
+            settle()
+            assertTrue(h.viewModel.uiState.value.canSaveNow)
+        }
+
+    @Test
+    fun `a photo that failed to upload does not make a nameless capture savable`() =
+        runTest {
+            val h = Harness()
+            h.snapRepo.failNext = IllegalStateException("upload refused")
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            // The coordinator retries once after a pause; that one fails too.
+            h.snapRepo.failNext = IllegalStateException("upload refused again")
+            advanceUntilIdle()
+            settle()
+            h.viewModel.machine().goTo(CaptureStep.NAME)
+            settle()
+            assertEquals(R.string.pebble_save_error_photo_failed, h.viewModel.uiState.value.snapBlockedMessageRes)
+            assertFalse(h.viewModel.uiState.value.canSaveNow)
+        }
+
+    @Test
     fun `name, date and step survive process death`() =
         runTest {
             val handle = SavedStateHandle()

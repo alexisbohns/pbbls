@@ -64,7 +64,13 @@ data class CaptureFlowUiState(
     val isCloseConfirmPresented: Boolean = false,
     /** The close dialog offers Save moment only when the moment is savable now (R2). */
     val closeOffersSave: Boolean = false,
-)
+) {
+    /**
+     * The name step's two saves (A-1): a trimmed name or an uploaded photo, and
+     * nothing blocking. A photo still uploading, or failed, does not count.
+     */
+    val canSaveNow: Boolean get() = flow.canSave && snapBlockedMessageRes == null
+}
 
 /**
  * Capture: a moment in three steps, saved with `save_moment` (A-2). Nothing

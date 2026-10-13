@@ -169,7 +169,7 @@ fun CaptureFlowContent(
             RecordStepScaffold(
                 title = stringResource(step.titleRes),
                 subtitle = step.subtitleRes?.let { stringResource(it) },
-                action = actionFor(flow.copy(step = step), model, labels, onSave, onSaveThenComplete),
+                action = actionFor(flow.copy(step = step), uiState.canSaveNow, model, labels, onSave, onSaveThenComplete),
             ) {
                 when (step) {
                     CaptureStep.PHOTO ->
@@ -275,6 +275,7 @@ private fun CaptureCloseDialog(
  */
 private fun actionFor(
     state: CaptureFlowState,
+    canSaveNow: Boolean,
     model: CaptureFlowModel,
     labels: CaptureLabels,
     onSave: () -> Unit,
@@ -298,7 +299,7 @@ private fun actionFor(
                 primary =
                     RecordStepAction.Primary(
                         label = labels.save,
-                        enabled = state.canSave,
+                        enabled = canSaveNow,
                         isLoading = state.isSaving,
                         onClick = onSave,
                     ),
