@@ -16,6 +16,9 @@ struct CaptureFlowView: View {
     @State private var model = CaptureFlowModel()
     @State private var snaps: SnapUploadCoordinator?
     @State private var pickedPhoto: PhotosPickerItem?
+    /// The latest pick's load-and-upload, cancelled on Discard so it cannot
+    /// land after the cover closed.
+    @State private var pickTask: Task<Void, Never>?
     @State private var isCloseConfirmPresented = false
     /// Drives the step transition direction so back slides back.
     @State private var isMovingBack = false
@@ -33,7 +36,7 @@ struct CaptureFlowView: View {
     private var currentUserId: UUID? { supabase.session?.user.id }
 
     /// Non-nil while the attached photo blocks saving: a snap must be neither
-    /// in flight nor failed.
+    /// in flight nor failed. A pick still being read counts as uploading.
     private var snapBlockedMessage: String? {
         if snaps?.isUploading == true { return String(localized: "Photo is still uploading.") }
         if snaps?.hasFailed == true { return String(localized: "Photo upload failed. Retry or remove it.") }
@@ -86,10 +89,13 @@ struct CaptureFlowView: View {
         .onChange(of: model.step) { old, new in
             isMovingBack = new.rawValue < old.rawValue
         }
-        .onChange(of: snaps?.formSnap != nil) { _, hasSnap in model.hasSnap = hasSnap }
+        // A pick being read already counts: `Done`, not `Skip`.
+        .onChange(of: snaps?.formSnap != nil || snaps?.isProcessingPick == true) { _, hasSnap in
+            model.hasSnap = hasSnap
+        }
         .onChange(of: pickedPhoto) { _, picked in
             guard let picked, let userId = currentUserId, let snaps else { return }
-            Task {
+            pickTask = Task {
                 await snaps.handlePicked(picked, userId: userId)
                 // Seed the when step from the photo before the user gets there.
                 model.applyCaptureDate(snaps.pickedCaptureDate)
@@ -213,6 +219,7 @@ struct CaptureFlowView: View {
 
     /// The only path that deletes the uploaded photo's files (A2).
     private func discard() async {
+        pickTask?.cancel()
         if let userId = currentUserId, let snaps {
             await snaps.cancelAndCleanup(userId: userId)
         }
@@ -236,6 +243,8 @@ struct CaptureFlowView: View {
         let payload = SaveMomentPayload(capture: model.draft, formSnap: snaps?.formSnap, userId: userId)
         do {
             let momentId = try await MomentsService(client: supabase.client).saveMoment(payload)
+            // The photo is the saved moment's now; a late pick must not touch it.
+            snaps?.markCommitted()
             model.succeed()
             onMomentChanged(momentId)
             if thenComplete {

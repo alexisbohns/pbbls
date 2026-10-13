@@ -28,9 +28,13 @@ struct SnapUploadCoordinatorTests {
 
         // Stubs — set before invoking the method under test.
         var uploadResults: [Result<Void, Error>] = []
+        /// Runs inside the upload, before it returns: lets a test close or
+        /// commit the form while a pick is still uploading.
+        var duringUpload: (() async -> Void)?
 
         func uploadProcessed(_ processed: ProcessedImage, snapId: UUID, userId: UUID) async throws {
             calls.append(.upload(snapId: snapId, userId: userId))
+            await duringUpload?()
             guard !uploadResults.isEmpty else { return }
             switch uploadResults.removeFirst() {
             case .success: return
