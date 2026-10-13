@@ -62,6 +62,15 @@ class CaptureFlowModelTest {
     }
 
     @Test
+    fun `a failed save shows on the name step from any step`() {
+        model.goTo(CaptureStep.WHEN)
+        model.beginSave()
+        model.fail(R.string.moment_error_empty)
+        assertEquals(CaptureStep.NAME, model.step)
+        assertEquals(R.string.moment_error_empty, model.state.value.errorRes)
+    }
+
+    @Test
     fun `back walks to the previous step and stops at the photo`() {
         model.goTo(CaptureStep.NAME)
         model.back()

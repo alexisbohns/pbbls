@@ -57,9 +57,13 @@ class CaptureFlowModel(
         _state.update { it.copy(isSaving = false) }
     }
 
+    /**
+     * A save can start from the close dialog on any step, and its error shows
+     * only on the name step, so a failure lands there to be seen (iOS `failSave`).
+     */
     fun fail(messageRes: Int) {
         haptic(TapHaptic.WARNING)
-        _state.update { it.copy(isSaving = false, errorRes = messageRes) }
+        _state.update { it.copy(step = CaptureStep.NAME, isSaving = false, errorRes = messageRes) }
     }
 
     companion object {

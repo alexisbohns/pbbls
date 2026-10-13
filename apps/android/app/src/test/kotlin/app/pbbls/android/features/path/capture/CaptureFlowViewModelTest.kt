@@ -313,6 +313,35 @@ class CaptureFlowViewModelTest {
         }
 
     @Test
+    fun `a save from the close dialog that fails lands on the name step to be seen`() =
+        runTest {
+            val h = Harness()
+            h.writes.failNext = postgrestException("moment_empty")
+            h.viewModel.machine().setName("Walk")
+            h.viewModel.onCloseRequested()
+            h.viewModel.onSaveFromClose()
+            advanceUntilIdle()
+            val flow = h.viewModel.uiState.value.flow
+            assertEquals(CaptureStep.NAME, flow.step)
+            assertEquals(R.string.moment_error_empty, flow.errorRes)
+        }
+
+    @Test
+    fun `a save refused before the write still lands on the name step`() =
+        runTest {
+            val h = Harness()
+            h.snapRepo.uploadGate = CompletableDeferred()
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            h.viewModel.machine().goTo(CaptureStep.WHEN)
+            h.viewModel.save(thenComplete = false)
+            runCurrent()
+            val flow = h.viewModel.uiState.value.flow
+            assertEquals(CaptureStep.NAME, flow.step)
+            assertEquals(R.string.pebble_save_error_photo_uploading, flow.errorRes)
+        }
+
+    @Test
     fun `name, date and step survive process death`() =
         runTest {
             val handle = SavedStateHandle()
