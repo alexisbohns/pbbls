@@ -244,6 +244,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             onEditMoment = { navigator.navigate(PebblesKey.EditMoment(key.momentId)) },
             onEditPebble = { navigator.navigate(PebblesKey.EditPebble(key.momentId)) },
             onMomentDeleted = { navigator.closeDetail(PebblesKey.PebbleDetail(key.momentId)) },
+            onCompleteRequested = { navigator.navigate(PebblesKey.CompletePebble(key.momentId)) },
         )
     }
 
