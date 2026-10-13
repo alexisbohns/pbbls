@@ -24,6 +24,7 @@ struct PebbleDetailSheet: View {
     @State private var detail: MomentDetail?
     @State private var isLoading = true
     @State private var loadError: String?
+    @State private var isPresentingEditMoment = false
     @State private var isPresentingEdit = false
     @State private var isPresentingComplete = false
     @State private var pendingDeletion: MomentDeleteTarget?
@@ -55,9 +56,12 @@ struct PebbleDetailSheet: View {
                                 ))
                             }
                             Menu {
+                                Button { isPresentingEditMoment = true } label: {
+                                    Label("Edit moment", systemImage: "pencil")
+                                }
                                 if detail?.pebble != nil {
                                     Button { isPresentingEdit = true } label: {
-                                        Label("Edit pebble", systemImage: "pencil")
+                                        Label("Edit pebble", systemImage: "circle.hexagongrid")
                                     }
                                 }
                                 Button(role: .destructive) {
@@ -83,6 +87,14 @@ struct PebbleDetailSheet: View {
                 Task { await load(showsSpinner: false) }
                 onPebbleUpdated?()
             })
+        }
+        .sheet(isPresented: $isPresentingEditMoment) {
+            if let detail {
+                EditMomentSheet(detail: detail, onSaved: {
+                    Task { await load(showsSpinner: false) }
+                    onPebbleUpdated?()
+                })
+            }
         }
         .fullScreenCover(isPresented: $isPresentingComplete) {
             CompleteFlowView(

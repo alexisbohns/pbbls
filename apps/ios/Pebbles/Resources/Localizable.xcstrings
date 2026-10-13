@@ -672,6 +672,23 @@
         }
       }
     },
+    "A moment needs a name or a photo." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A moment needs a name or a photo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un moment a besoin d'un nom ou d'une photo."
+          }
+        }
+      }
+    },
     "A name, a photo, or both." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3520,6 +3537,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Modifier la collection"
+          }
+        }
+      }
+    },
+    "Edit moment" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Edit moment"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modifier le moment"
           }
         }
       }

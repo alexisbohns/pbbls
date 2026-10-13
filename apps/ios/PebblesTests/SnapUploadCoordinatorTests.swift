@@ -318,4 +318,23 @@ struct SnapUploadCoordinatorTests {
         #expect(coordinator.detachedStoragePaths.isEmpty)
         #expect(repo.calls.isEmpty)
     }
+
+    @Test("purgeDetached still deletes after the save committed (Edit moment's order)")
+    func purgeAfterCommit() async {
+        let repo = FakeRepo()
+        let coordinator = SnapUploadCoordinator(
+            repo: repo,
+            initialSnap: .existing(id: UUID(), storagePath: "uid/sid"),
+            retryDelay: .milliseconds(1)
+        )
+        coordinator.detachExisting()
+        let atSave = coordinator.detachedStoragePaths
+        coordinator.beginCommit()
+        coordinator.markCommitted()
+
+        await coordinator.purgeDetached(atSave)
+
+        #expect(repo.calls == [.deleteFilesByPrefix(prefix: "uid/sid")])
+        #expect(coordinator.detachedStoragePaths.isEmpty)
+    }
 }
