@@ -58,7 +58,9 @@ type ServerOwnedPebbleFields =
   | "created_at"
   | "updated_at"
   | "instants"
-  // The resolved glyph geometry is a read projection; writes set `mark_id`.
+  // The glyph is derived from a collection or a domain (#1046 D5): `glyph` and
+  // its id `mark_id` are read projections, never written.
+  | "mark_id"
   | "glyph"
   | "cover"
 
@@ -97,10 +99,10 @@ export type AchievementUnlockResult = {
 // ---------------------------------------------------------------------------
 // Drafts (M47) — a draft is a PARTIAL compose-pebble wire payload, stored as
 // jsonb in `pebble_drafts.payload`. Deliberately keyed like the wire and not
-// like `CreatePebbleInput` (note `glyph_id`, not `mark_id`, and `snaps` shaped
-// as the payload wants them): publishing is then a pass-through, and the same
-// shape is what iOS/Android persist. Unset keys are OMITTED, never nulled —
-// `description` and `glyph_id` are the only keys where `null` is meaningful.
+// like `CreatePebbleInput` (note `snaps` shaped as the payload wants them):
+// publishing is then a pass-through, and the same shape is what iOS/Android
+// persist. Unset keys are OMITTED, never nulled — `description` is the only key
+// where `null` is meaningful. No glyph: it is derived since #1046 (D5).
 // See docs/superpowers/specs/2026-07-29-drafts-and-autosave-design.md (D2).
 // ---------------------------------------------------------------------------
 
@@ -121,7 +123,6 @@ export type PebbleDraftPayload = {
   domain_ids?: string[]
   soul_ids?: string[]
   collection_ids?: string[]
-  glyph_id?: string | null
   snaps?: DraftSnapPayload[]
 }
 

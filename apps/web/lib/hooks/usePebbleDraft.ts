@@ -21,7 +21,6 @@ export type PebbleDraft = {
   intensity: Pebble["intensity"]
   positiveness: Pebble["positiveness"]
   emotion_id: string
-  mark_id: string | null
   domain_ids: string[]
   collection_ids: string[]
   soul_ids: string[]
@@ -52,7 +51,6 @@ function snapshotFromPebble(pebble: Pebble): PebbleDraft {
     intensity: pebble.intensity,
     positiveness: pebble.positiveness,
     emotion_id: pebble.emotion_id,
-    mark_id: pebble.mark_id ?? null,
     domain_ids: [...pebble.domain_ids],
     collection_ids: [...pebble.collection_ids],
     soul_ids: [...pebble.soul_ids],
@@ -80,7 +78,6 @@ function diffFields(original: PebbleDraft, draft: PebbleDraft): Set<keyof Pebble
   if (original.intensity !== draft.intensity) dirty.add("intensity")
   if (original.positiveness !== draft.positiveness) dirty.add("positiveness")
   if (original.emotion_id !== draft.emotion_id) dirty.add("emotion_id")
-  if (original.mark_id !== draft.mark_id) dirty.add("mark_id")
   if (!sameStringArray(original.domain_ids, draft.domain_ids)) dirty.add("domain_ids")
   if (!sameStringArray(original.collection_ids, draft.collection_ids)) dirty.add("collection_ids")
   if (!sameStringArray(original.soul_ids, draft.soul_ids)) dirty.add("soul_ids")
@@ -131,12 +128,6 @@ export function usePebbleDraft(pebble: Pebble): UsePebbleDraftResult {
     if (dirtyFields.has("intensity")) payload.intensity = draft.intensity
     if (dirtyFields.has("positiveness")) payload.positiveness = draft.positiveness
     if (dirtyFields.has("emotion_id")) payload.emotion_id = draft.emotion_id
-    // The provider maps `mark_id` to `glyph_id` and treats `null` as a clear;
-    // `Pebble.mark_id` types as `string | undefined`, so cast for the
-    // explicit-null clear path.
-    if (dirtyFields.has("mark_id")) {
-      ;(payload as Record<string, unknown>).mark_id = draft.mark_id
-    }
     if (dirtyFields.has("domain_ids")) payload.domain_ids = draft.domain_ids
     if (dirtyFields.has("collection_ids")) payload.collection_ids = draft.collection_ids
     if (dirtyFields.has("soul_ids")) payload.soul_ids = draft.soul_ids

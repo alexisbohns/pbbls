@@ -28,7 +28,7 @@ type RecordStepScaffoldProps = {
  * Steps supply content and a button role and never their own layout, so the
  * title baseline and the button position do not drift between screens as the
  * user moves through the flow — which is the whole reason the flow reads as one
- * motion rather than eleven pages.
+ * motion rather than ten pages.
  */
 export function RecordStepScaffold({
   title,

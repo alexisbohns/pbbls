@@ -834,8 +834,6 @@
         "domainTitle": "Quel pan de ta vie ?",
         "soulsTitle": "Quelqu'un dans ce moment ?",
         "collectionTitle": "Dans une collection ?",
-        "glyphTitle": "Donne-lui un glyphe",
-        "glyphSubtitle": "Une petite marque, rien que pour lui.",
         "privacyTitle": "Qui peut le voir ?",
         "successTitle": "Ton caillou"
       },
@@ -871,6 +869,7 @@
       "save": "Garder pour plus tard",
       "saveFailed": "Impossible de garder ce brouillon. Réessaie.",
       "publishFailed": "Impossible d'enregistrer ce caillou. Réessaie.",
+      "needsDomain": "Un caillou a besoin d'un pan de ta vie. Choisis-en un, puis réessaie.",
       "restoreTitle": "On reprend où tu t'étais arrêté ?",
       "restoreDescription": "Ce que tu écrivais est resté sur cet appareil. La photo n'en fait pas partie, pense à la remettre.",
       "restoreConfirm": "Reprendre",

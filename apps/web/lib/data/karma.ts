@@ -18,9 +18,11 @@ import type { Pebble } from "@/lib/types"
  * +1 per card with non-empty value, capped at 4
  * +1 if at least one soul attached
  * +1 if at least one domain attached
- * +1 if a glyph is attached
  * +1 if at least one snap is attached
  * total capped at 10
+ *
+ * No glyph bonus since the moments split (20261012090100): a pebble's glyph is
+ * derived from its collection or domain, not chosen.
  */
 export function computeKarmaDelta(pebble: CreatePebbleInput | Pebble): number {
   let delta = 1
@@ -29,7 +31,6 @@ export function computeKarmaDelta(pebble: CreatePebbleInput | Pebble): number {
   if (pebble.cards?.length) delta += Math.min(pebble.cards.filter((c) => c.value.trim()).length, 4)
   if (pebble.soul_ids.length > 0) delta += 1
   if (pebble.domain_ids.length > 0) delta += 1
-  if (pebble.mark_id) delta += 1
   if (pebble.snaps.length > 0) delta += 1
 
   return Math.min(delta, 10)

@@ -4,7 +4,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import {
   CalendarDays,
   Check,
-  Fingerprint,
   Image,
   Users,
 } from "lucide-react"
@@ -19,8 +18,10 @@ import { useDataProvider } from "@/lib/data/provider-context"
 import { useComposerDrafts } from "@/lib/hooks/useComposerDrafts"
 import {
   applyDraftPayload,
+  hasPublishMinimum,
   type ComposerState,
 } from "@/components/record/draft-payload"
+import { publishErrorMessageKey } from "@/lib/data/compose-error"
 import type { PebbleDraftPayload } from "@/lib/data/data-provider"
 import { Button } from "@/components/ui/button"
 import {
@@ -43,9 +44,7 @@ import {
 import { CollectionSheet } from "@/components/record/CollectionSheet"
 import { VisibilityPicker } from "@/components/record/VisibilityPicker"
 import { DatePickerDialog } from "@/components/record/DatePickerDialog"
-import { GlyphPickerDialog } from "@/components/record/GlyphPickerDialog"
 import { SoulsSheet } from "@/components/record/SoulsSheet"
-import { GlyphPreview } from "@/components/glyphs/GlyphPreview"
 import { cn } from "@/lib/utils"
 
 type Intensity = 1 | 2 | 3
@@ -81,7 +80,6 @@ export function QuickPebbleEditor({
   const { provider, loading: storeLoading } = useDataProvider()
   const t = useTranslations("record")
   const tDraft = useTranslations("record.draft")
-  const tGlyph = useTranslations("record.glyph")
   const tPhoto = useTranslations("record.photo")
   const tSouls = useTranslations("record.souls")
   const tEmotion = useTranslations("record.emotion")
@@ -98,7 +96,6 @@ export function QuickPebbleEditor({
   const [emotionId, setEmotionId] = useState("")
   const [domainIds, setDomainIds] = useState<string[]>([])
   const [soulIds, setSoulIds] = useState<string[]>([])
-  const [markId, setMarkId] = useState<string | undefined>(undefined)
   const [collectionIds, setCollectionIds] = useState<string[]>([])
   // Snap upload state: `pendingSnap` is the uploaded descriptor we'll send in
   // the create payload; `snapPreview` is an object URL for in-form preview
@@ -118,14 +115,12 @@ export function QuickPebbleEditor({
 
   // Dialog/sheet state
   const [dateOpen, setDateOpen] = useState(false)
-  const [glyphOpen, setGlyphOpen] = useState(false)
   const [soulsOpen, setSoulsOpen] = useState(false)
   const [emotionPickerOpen, setEmotionPickerOpen] = useState(false)
 
   // File input ref
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const selectedMark = marks.find((m) => m.id === markId)
   const selectedEmotion = useSelectedEmotionDisplay(emotionId || undefined)
 
   const resetForm = useCallback(() => {
@@ -137,7 +132,6 @@ export function QuickPebbleEditor({
     setEmotionId("")
     setDomainIds([])
     setSoulIds([])
-    setMarkId(undefined)
     setCollectionIds([])
     setPendingSnap(undefined)
     setSnapPreview((prev) => {
@@ -169,26 +163,25 @@ export function QuickPebbleEditor({
       emotionId,
       domainIds,
       soulIds,
-      markId,
       collectionIds,
       visibility,
       pendingSnap,
     }),
     [
       name, description, happenedAt, intensity, valence, emotionId,
-      domainIds, soulIds, markId, collectionIds, visibility, pendingSnap,
+      domainIds, soulIds, collectionIds, visibility, pendingSnap,
     ],
   )
+  const publishable = hasPublishMinimum(state)
 
   const applyPayload = useCallback(
     (payload: PebbleDraftPayload) => {
       // Sanitize against what the user actually still owns (D7): a soul or
-      // glyph deleted behind the draft's back costs a chip, not an opaque FK
-      // error at publish time.
+      // collection deleted behind the draft's back costs a chip, not an opaque
+      // FK error at publish time.
       const next = applyDraftPayload(payload, {
         soulIds: new Set(souls.map((s) => s.id)),
         collectionIds: new Set(collections.map((c) => c.id)),
-        markIds: new Set(marks.map((m) => m.id)),
       })
       setName(next.name)
       setDescription(next.description)
@@ -198,12 +191,11 @@ export function QuickPebbleEditor({
       setEmotionId(next.emotionId)
       setDomainIds(next.domainIds)
       setSoulIds(next.soulIds)
-      setMarkId(next.markId)
       setCollectionIds(next.collectionIds)
       setVisibility(next.visibility)
       setPendingSnap(next.pendingSnap)
     },
-    [souls, collections, marks],
+    [souls, collections],
   )
 
   // A restored draft's photo is already in Storage but has no `blob:` preview —
@@ -255,7 +247,7 @@ export function QuickPebbleEditor({
   ])
 
   const handleSubmit = useCallback(async () => {
-    if (!name.trim() || !emotionId || saving || snapUploading) return
+    if (!publishable || saving || snapUploading) return
     setSaving(true)
     setSubmitError(null)
 
@@ -275,15 +267,13 @@ export function QuickPebbleEditor({
         soul_ids: soulIds,
         domain_ids: domainIds,
         collection_ids: collectionIds,
-        mark_id: markId,
         snaps: pendingSnap ? [pendingSnap] : [],
         cards: [],
       }
 
       const pebble = await addPebble(input)
 
-      // The pebble exists (`addPebble` resolves on soft-success too, keyed off
-      // pebble_id), so the draft has served its purpose.
+      // The pebble exists, so the draft has served its purpose.
       await consumeAfterPublish()
 
       resetForm()
@@ -293,13 +283,13 @@ export function QuickPebbleEditor({
       // Before M47 this was swallowed entirely: no catch, no toast, form left
       // as-is with no explanation.
       console.error("[quick-pebble-editor] create failed", err)
-      setSubmitError(tDraft("publishFailed"))
+      setSubmitError(tDraft(publishErrorMessageKey(err)))
     } finally {
       setSaving(false)
     }
   }, [
-    name, description, happenedAt, intensity, valence, visibility,
-    emotionId, soulIds, domainIds, markId, collectionIds, pendingSnap,
+    name, description, happenedAt, intensity, valence, visibility, publishable,
+    emotionId, soulIds, domainIds, collectionIds, pendingSnap,
     saving, snapUploading, addPebble, resetForm, onPebbleCreated,
     consumeAfterPublish, tDraft,
   ])
@@ -433,15 +423,7 @@ export function QuickPebbleEditor({
         />
 
         {/* Customization tiles */}
-        <div className="mb-4 grid grid-cols-4 gap-2">
-          <CustomizationTile
-            icon={Fingerprint}
-            filled={!!selectedMark}
-            onClick={() => setGlyphOpen(true)}
-            ariaLabel={selectedMark ? tGlyph("changeAria") : tGlyph("addAria")}
-          >
-            {selectedMark && <GlyphPreview mark={selectedMark} className="size-full p-2" />}
-          </CustomizationTile>
+        <div className="mb-4 grid grid-cols-3 gap-2">
           <CollectionSheet
             value={collectionIds}
             onChange={setCollectionIds}
@@ -502,8 +484,8 @@ export function QuickPebbleEditor({
         <div className="flex items-center justify-between">
           <VisibilityPicker value={visibility} onChange={setVisibility} />
           <div className="flex items-center gap-2">
-            {/* Quick capture: ungated, unlike publishing (D5). "Just a name" —
-                or just a glyph — is a valid draft. */}
+            {/* Quick capture: ungated, unlike publishing (D5). "Just a name"
+                is a valid draft. */}
             <Button
               variant="ghost"
               size="sm"
@@ -516,7 +498,7 @@ export function QuickPebbleEditor({
             <Button
               variant="default"
               size="icon"
-              disabled={!name.trim() || !emotionId || saving || snapUploading}
+              disabled={!publishable || saving || snapUploading}
               onClick={() => void handleSubmit()}
               aria-label={t("save")}
               className="size-9 rounded-full"
@@ -552,12 +534,6 @@ export function QuickPebbleEditor({
         onOpenChange={setDateOpen}
         initialDate={new Date(happenedAt)}
         onSave={(date) => setHappenedAt(date.toISOString())}
-      />
-      <GlyphPickerDialog
-        open={glyphOpen}
-        onOpenChange={setGlyphOpen}
-        selectedMarkId={markId}
-        onSave={setMarkId}
       />
       <SoulsSheet
         open={soulsOpen}

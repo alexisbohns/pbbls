@@ -46,6 +46,7 @@ import {
   sortedSnaps,
 } from "@/lib/data/pebble-row"
 import { processPebbleImage } from "@/lib/utils/process-pebble-image"
+import { ComposeError, readEdgeErrorBody } from "@/lib/data/compose-error"
 
 const PEBBLE_MEDIA_BUCKET = "pebbles-media"
 const SNAP_URL_TTL_SECONDS = 3600
@@ -390,7 +391,6 @@ export class SupabaseProvider implements DataProvider {
       positiveness: input.positiveness,
       visibility: input.visibility,
       emotion_id: input.emotion_id,
-      glyph_id: input.mark_id ?? null,
       soul_ids: input.soul_ids,
       domain_ids: input.domain_ids,
       collection_ids: input.collection_ids,
@@ -421,8 +421,8 @@ export class SupabaseProvider implements DataProvider {
       ...(input.positiveness !== undefined && { positiveness: input.positiveness }),
       ...(input.visibility !== undefined && { visibility: input.visibility }),
       ...(input.emotion_id !== undefined && { emotion_id: input.emotion_id }),
-      // `mark_id: undefined` leaves the column alone; `null` clears it.
-      ...("mark_id" in input && { glyph_id: input.mark_id ?? null }),
+      // An empty `domain_ids` is dropped by the compat wrapper, which keeps the
+      // pebble's domains: removing the last one is impossible until #1050.
       ...(input.soul_ids !== undefined && { soul_ids: input.soul_ids }),
       ...(input.domain_ids !== undefined && { domain_ids: input.domain_ids }),
       ...(input.collection_ids !== undefined && { collection_ids: input.collection_ids }),
@@ -646,36 +646,26 @@ export class SupabaseProvider implements DataProvider {
 
   /**
    * Invoke the compose-pebble or compose-pebble-update edge function and
-   * return the resulting pebble id. Mirrors iOS soft-success handling
-   * (`apps/ios/Pebbles/Features/Path/CreatePebbleSheet.swift:139` and
-   * `EditPebbleSheet.swift:180`): if the function returns 5xx but the body
-   * still carries a `pebble_id`, the row was inserted/updated successfully
-   * and only the render write-back failed — we keep going and let the next
-   * `loadFromSupabase` reflect the missing render.
+   * return the resulting pebble id. A failure is a failure: since the moments
+   * split (#1046) nothing runs after the write that could fail on its own, so
+   * there is no soft success. A refusal throws a `ComposeError` carrying the
+   * server's slug (`pebble_needs_domain`, …) for the composer to explain.
    */
   private async invokeCompose(
     name: "compose-pebble" | "compose-pebble-update",
     body: Record<string, unknown>,
   ): Promise<string> {
-    const { data, error } = await this.supabase.functions.invoke<{
-      pebble_id?: string
-      error?: string
-    }>(name, { body })
-
-    const pebbleId = data?.pebble_id
+    const { data, error } = await this.supabase.functions.invoke<{ pebble_id?: string }>(name, {
+      body,
+    })
 
     if (error) {
-      if (pebbleId) {
-        console.warn(
-          `[${name}] edge function returned an error but pebble_id is set — soft-success`,
-          { error, pebbleId },
-        )
-        return pebbleId
-      }
-      console.error(`[${name}] edge function failed`, error)
-      throw new Error(error.message ?? `${name} failed`)
+      const slug = await readEdgeErrorBody((error as { context?: unknown }).context)
+      console.error(`[${name}] edge function failed`, slug ?? error)
+      throw new ComposeError(name, slug ?? error.message ?? "unknown")
     }
 
+    const pebbleId = data?.pebble_id
     if (!pebbleId) {
       console.error(`[${name}] edge function returned no pebble_id`, data)
       throw new Error(`${name} returned no pebble_id`)

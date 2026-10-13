@@ -13,7 +13,7 @@ type RecordSuccessStepProps = {
 }
 
 /**
- * Step 10 — the pebble, drawn on.
+ * Step 9 — the pebble, drawn on.
  *
  * Reuses `PebbleFramed` with its animate-in, the same composition the detail
  * view uses: the outline silhouette behind the composed render, which already

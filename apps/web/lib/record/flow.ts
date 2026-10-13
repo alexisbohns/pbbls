@@ -68,7 +68,6 @@ export type RecordFlowAction =
   | { type: "selectDomain"; id: string }
   | { type: "toggleSoul"; id: string }
   | { type: "toggleCollection"; id: string }
-  | { type: "selectGlyph"; id: string | undefined }
   | { type: "selectVisibility"; value: Visibility }
   | { type: "hydrate"; draft: ComposerState }
   | { type: "published" }
@@ -103,8 +102,6 @@ export function hasAnswer(step: RecordStep, state: RecordFlowState): boolean {
       return state.draft.soulIds.length > 0
     case "collection":
       return state.draft.collectionIds.length > 0
-    case "glyph":
-      return state.draft.markId !== undefined
   }
 }
 
@@ -247,9 +244,6 @@ export function recordFlowReducer(
         : [...state.draft.collectionIds, action.id]
       return { ...state, draft: { ...state.draft, collectionIds } }
     }
-
-    case "selectGlyph":
-      return commitAndAdvance(state, { ...state.draft, markId: action.id })
 
     // Privacy selects without advancing: Publish is the step's action, and
     // silently publishing on a grade tap would be a trap.
