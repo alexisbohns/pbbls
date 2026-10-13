@@ -30,7 +30,7 @@ interface MomentWriteServicing {
     /** `delete_pebble`: the pebble only, the moment stays. Takes a PEBBLE id. */
     suspend fun deletePebble(pebbleId: String)
 
-    /** `delete_moment`, then a best-effort delete of the returned snap files. */
+    /** `delete_moment`, then a best-effort delete of the returned snap files; clears the moment's Complete autosave. */
     suspend fun deleteMoment(momentId: String)
 
     /**
@@ -53,6 +53,7 @@ class MomentWriteService
     constructor(
         private val supabase: SupabaseService,
         private val snapFiles: SnapWriteRepositing,
+        private val completeSnapshots: CompleteSnapshotStoring,
     ) : MomentWriteServicing {
         override suspend fun saveMoment(payload: MomentSavePayload): String =
             supabase.client.postgrest
@@ -77,6 +78,8 @@ class MomentWriteService
                 supabase.client.postgrest
                     .rpc("delete_moment", buildJsonObject { put("p_moment_id", momentId) })
                     .decodeAs<DeleteMomentResult>()
+            // A half-finished completion of a deleted moment can never be resumed (A-5).
+            completeSnapshots.clear(momentId)
             // The rows are gone server-side; the files must follow even if the
             // caller leaves. Best-effort: the orphan sweep is the backstop.
             withContext(NonCancellable) {

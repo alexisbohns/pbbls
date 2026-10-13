@@ -2,6 +2,7 @@ package app.pbbls.android.testing
 
 import app.pbbls.android.core.data.AchievementsServicing
 import app.pbbls.android.core.data.CollectionsServicing
+import app.pbbls.android.core.data.CompleteSnapshotStoring
 import app.pbbls.android.core.data.ComposerSnapshotStoring
 import app.pbbls.android.core.data.ConnectionsServicing
 import app.pbbls.android.core.data.ConsentServicing
@@ -165,6 +166,9 @@ object FakeServicesModule {
     fun fakeSnapshotStore() = FakeComposerSnapshotStore()
 
     @Provides @Singleton
+    fun fakeCompleteSnapshotStore() = FakeCompleteSnapshotStore()
+
+    @Provides @Singleton
     fun fakeSnapWrite() = FakeSnapWriteRepository()
 
     // ---- The seams, bound to the same instances ----
@@ -222,6 +226,9 @@ object FakeServicesModule {
 
     @Provides
     fun snapshotStore(fake: FakeComposerSnapshotStore): ComposerSnapshotStoring = fake
+
+    @Provides
+    fun completeSnapshotStore(fake: FakeCompleteSnapshotStore): CompleteSnapshotStoring = fake
 
     @Provides
     fun snapWrite(fake: FakeSnapWriteRepository): SnapWriteRepositing = fake
