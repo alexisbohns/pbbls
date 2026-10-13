@@ -5,8 +5,9 @@ import type { PebbleSnap, Visibility } from "@/lib/types"
  * Projection between the composer's flat state and the draft payload (M47).
  *
  * The payload is keyed like the `compose-pebble` wire payload, not like the
- * composer — note `glyph_id` where the composer says `markId`. That is what
- * makes publishing a pass-through and keeps the three surfaces in agreement.
+ * composer. That is what makes publishing a pass-through and keeps the three
+ * surfaces in agreement. It carries no glyph: since the moments split (#1046,
+ * D5) a pebble's glyph is derived from its collection or domain.
  * See docs/superpowers/specs/2026-07-29-drafts-and-autosave-design.md (D2).
  *
  * Pure by design: no React, no provider, so both the server-draft path and the
@@ -22,7 +23,6 @@ export type ComposerState = {
   emotionId: string
   domainIds: string[]
   soulIds: string[]
-  markId: string | undefined
   collectionIds: string[]
   visibility: Visibility
   pendingSnap: PebbleSnap | undefined
@@ -39,7 +39,6 @@ export function composerDefaults(): ComposerState {
     emotionId: "",
     domainIds: [],
     soulIds: [],
-    markId: undefined,
     collectionIds: [],
     // 'secret' (owner-only) since M51 — matching the DB default. 'private'
     // now means connections-visible and must be an explicit choice.
@@ -70,7 +69,6 @@ export function buildDraftPayload(state: ComposerState): PebbleDraftPayload {
     ...(state.domainIds.length > 0 && { domain_ids: state.domainIds }),
     ...(state.soulIds.length > 0 && { soul_ids: state.soulIds }),
     ...(state.collectionIds.length > 0 && { collection_ids: state.collectionIds }),
-    ...(state.markId && { glyph_id: state.markId }),
     ...(state.pendingSnap && {
       snaps: [
         {
@@ -81,6 +79,16 @@ export function buildDraftPayload(state: ComposerState): PebbleDraftPayload {
       ],
     }),
   }
+}
+
+/**
+ * Whether the composer holds enough to publish: a name, an emotion and at
+ * least one domain. The domain is required since the moments split: a pebble
+ * exists only when complete, and the server refuses one without a domain
+ * (`pebble_needs_domain`, #1046 D2). A partial draft may still lack any of them.
+ */
+export function hasPublishMinimum(state: ComposerState): boolean {
+  return state.name.trim().length > 0 && state.emotionId !== "" && state.domainIds.length > 0
 }
 
 /**
@@ -104,7 +112,6 @@ export function isDraftEmpty(payload: PebbleDraftPayload): boolean {
     !payload.name &&
     !payload.description &&
     !payload.emotion_id &&
-    !payload.glyph_id &&
     !payload.domain_ids?.length &&
     !payload.soul_ids?.length &&
     !payload.collection_ids?.length &&
@@ -113,7 +120,7 @@ export function isDraftEmpty(payload: PebbleDraftPayload): boolean {
 }
 
 /**
- * Ids the composer can verify. Souls, collections and glyphs are user-owned and
+ * Ids the composer can verify. Souls and collections are user-owned and
  * deletable, so a draft can outlive them; emotions and domains are seeded
  * reference rows and are passed through untouched (a missing emotion already
  * renders as the composer's "no emotion yet" state).
@@ -121,7 +128,6 @@ export function isDraftEmpty(payload: PebbleDraftPayload): boolean {
 export type KnownIds = {
   soulIds: ReadonlySet<string>
   collectionIds: ReadonlySet<string>
-  markIds: ReadonlySet<string>
 }
 
 /**
@@ -134,8 +140,6 @@ export function applyDraftPayload(
   known: KnownIds,
 ): ComposerState {
   const defaults = composerDefaults()
-  const markId =
-    payload.glyph_id && known.markIds.has(payload.glyph_id) ? payload.glyph_id : undefined
   const snap = payload.snaps?.[0]
   return {
     name: payload.name ?? defaults.name,
@@ -151,7 +155,6 @@ export function applyDraftPayload(
     collectionIds: (payload.collection_ids ?? []).filter((id) =>
       known.collectionIds.has(id),
     ),
-    markId,
     visibility: payload.visibility ?? defaults.visibility,
     pendingSnap: snap
       ? { id: snap.id, storage_path: snap.storage_path, sort_order: 0 }

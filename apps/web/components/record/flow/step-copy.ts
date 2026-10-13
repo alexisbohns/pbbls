@@ -8,7 +8,7 @@ export type RecordStepCopy = { title: string; subtitle?: string }
 /**
  * The flow's per-step copy.
  *
- * An exhaustive switch over an eleven-case union is a dispatch table, not
+ * An exhaustive switch over a ten-case union is a dispatch table, not
  * branching logic. Written out rather than looked up by a template-literal key
  * so the message catalog stays typed and a step whose copy was never written
  * fails the build.
@@ -33,8 +33,6 @@ export function useRecordStepCopy(step: RecordStep): RecordStepCopy {
       return { title: t("soulsTitle") }
     case "collection":
       return { title: t("collectionTitle") }
-    case "glyph":
-      return { title: t("glyphTitle"), subtitle: t("glyphSubtitle") }
     case "privacy":
       return { title: t("privacyTitle") }
     case "success":

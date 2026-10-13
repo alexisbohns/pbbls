@@ -14,7 +14,7 @@ type RecordPrivacyStepProps = {
 }
 
 /**
- * Step 9 — who gets to see it, and the publish button.
+ * Step 8 — who gets to see it, and the publish button.
  *
  * The grade is the decision most coupled to "am I ready for other people to see
  * this", which is why it sits against publish rather than in a toolbar chip

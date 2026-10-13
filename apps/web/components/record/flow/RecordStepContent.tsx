@@ -10,7 +10,6 @@ import { RecordEmotionStep } from "./steps/RecordEmotionStep"
 import { RecordDomainStep } from "./steps/RecordDomainStep"
 import { RecordSoulsStep } from "./steps/RecordSoulsStep"
 import { RecordCollectionStep } from "./steps/RecordCollectionStep"
-import { RecordGlyphStep } from "./steps/RecordGlyphStep"
 import { RecordPrivacyStep } from "./steps/RecordPrivacyStep"
 
 type RecordStepContentProps = {
@@ -29,7 +28,6 @@ type RecordStepContentProps = {
   onSelectDomain: (id: string) => void
   onToggleSoul: (id: string) => void
   onToggleCollection: (id: string) => void
-  onSelectGlyph: (id: string | undefined) => void
   onSelectVisibility: (value: Visibility) => void
 }
 
@@ -103,8 +101,6 @@ export function RecordStepContent(props: RecordStepContentProps) {
           onToggle={props.onToggleCollection}
         />
       )
-    case "glyph":
-      return <RecordGlyphStep selected={draft.markId} onSelect={props.onSelectGlyph} />
     case "privacy":
       return (
         <RecordPrivacyStep

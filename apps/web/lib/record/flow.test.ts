@@ -38,10 +38,10 @@ function answered(overrides: Partial<ComposerState> = {}): ComposerState {
 }
 
 describe("record steps", () => {
-  it("keeps the eleven steps in the order the flow depends on", () => {
+  it("keeps the ten steps in the order the flow depends on, with no glyph step", () => {
     expect(RECORD_STEPS).toEqual([
       "photo", "when", "name", "valence", "emotion", "domain",
-      "souls", "collection", "glyph", "privacy", "success",
+      "souls", "collection", "privacy", "success",
     ])
   })
 
@@ -52,17 +52,19 @@ describe("record steps", () => {
     expect(RECORD_STEPS.indexOf("valence")).toBeLessThan(RECORD_STEPS.indexOf("emotion"))
   })
 
-  it("marks exactly the four skippable steps optional", () => {
+  it("marks exactly the three skippable steps optional, and never the domain", () => {
     const optional = RECORD_STEPS.filter(isOptionalStep)
-    expect(optional).toEqual(["photo", "souls", "collection", "glyph"])
+    expect(optional).toEqual(["photo", "souls", "collection"])
+    // A pebble needs a domain (pebble_needs_domain, #1046 D2).
+    expect(isOptionalStep("domain")).toBe(false)
   })
 
-  it("counts ten dots and leaves success uncounted", () => {
-    expect(COUNTED_STEPS).toHaveLength(10)
+  it("counts nine dots and leaves success uncounted", () => {
+    expect(COUNTED_STEPS).toHaveLength(9)
     expect(COUNTED_STEPS).not.toContain("success")
     expect(dotIndex("success")).toBeNull()
     expect(dotIndex("photo")).toBe(0)
-    expect(dotIndex("privacy")).toBe(9)
+    expect(dotIndex("privacy")).toBe(8)
   })
 
   it("has no step before photo and none after success", () => {
@@ -277,8 +279,8 @@ describe("resuming a draft", () => {
   })
 
   it("does not treat a skipped optional step as a gap", () => {
-    // A draft with every mandatory answer but no photo, souls, collection or
-    // glyph is complete: re-asking would undo the user's decision to skip.
+    // A draft with every mandatory answer but no photo, souls or collection
+    // is complete: re-asking would undo the user's decision to skip.
     const state = run(initialFlowState(), { type: "hydrate", draft: answered() })
     expect(state.step).toBe("privacy")
     expect(firstGap(state)).toBe("privacy")

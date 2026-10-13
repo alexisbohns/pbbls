@@ -1,5 +1,5 @@
 /**
- * The eleven screens of the record flow, in order.
+ * The ten screens of the record flow, in order.
  *
  * Ported from `apps/ios/Pebbles/Features/Record/RecordStep.swift` (M58, #724).
  * The order carries three deliberate dependencies, and they are the reason the
@@ -15,6 +15,9 @@
  *   decision most coupled to "am I ready for other people to see this".
  *
  * `success` is terminal: no dot, no back, no close — only the exit button.
+ *
+ * There is no glyph step: since the moments split (#1046, D5) a pebble's glyph
+ * is derived from its collection, else its domain, and is never chosen.
  */
 export const RECORD_STEPS = [
   "photo",
@@ -25,7 +28,6 @@ export const RECORD_STEPS = [
   "domain",
   "souls",
   "collection",
-  "glyph",
   "privacy",
   "success",
 ] as const
@@ -47,7 +49,6 @@ const OPTIONAL_STEPS: ReadonlySet<RecordStep> = new Set<RecordStep>([
   "photo",
   "souls",
   "collection",
-  "glyph",
 ])
 
 export function isOptionalStep(step: RecordStep): boolean {

@@ -8,11 +8,11 @@ import { useDataProvider } from "@/lib/data/provider-context"
 import { usePebbles } from "@/lib/data/usePebbles"
 import { useSouls } from "@/lib/data/useSouls"
 import { useCollections } from "@/lib/data/useCollections"
-import { useUsableGlyphs } from "@/lib/data/useUsableGlyphs"
+import { publishErrorMessageKey } from "@/lib/data/compose-error"
 import { useComposerDrafts } from "@/lib/hooks/useComposerDrafts"
 import { useRecordFlowHistory } from "@/lib/hooks/useRecordFlowHistory"
 import { prewarmValenceArt } from "@/lib/valence/stone-art"
-import { applyDraftPayload } from "@/components/record/draft-payload"
+import { applyDraftPayload, hasPublishMinimum } from "@/components/record/draft-payload"
 import {
   initialFlowState,
   isAnswered,
@@ -74,7 +74,6 @@ export function RecordFlow({ draftId, initialPayload, onExit, onDraftSaved }: Re
   const { addPebble, uploadSnap } = usePebbles()
   const { souls } = useSouls()
   const { collections } = useCollections()
-  const { glyphs: marks } = useUsableGlyphs()
 
   const [flow, dispatch] = useReducer(recordFlowReducer, undefined, () => initialFlowState())
 
@@ -118,19 +117,18 @@ export function RecordFlow({ draftId, initialPayload, onExit, onDraftSaved }: Re
 
   const applyPayload = useCallback(
     (payload: PebbleDraftPayload) => {
-      // Sanitize against what the user actually still owns: a soul or glyph
-      // deleted behind the draft's back costs a chip, not an opaque FK error at
-      // publish time.
+      // Sanitize against what the user actually still owns: a soul or
+      // collection deleted behind the draft's back costs a chip, not an opaque
+      // FK error at publish time.
       dispatch({
         type: "hydrate",
         draft: applyDraftPayload(payload, {
           soulIds: new Set(souls.map((s) => s.id)),
           collectionIds: new Set(collections.map((c) => c.id)),
-          markIds: new Set(marks.map((m) => m.id)),
         }),
       })
     },
-    [souls, collections, marks],
+    [souls, collections],
   )
 
   const {
@@ -252,10 +250,7 @@ export function RecordFlow({ draftId, initialPayload, onExit, onDraftSaved }: Re
   // Publish
   // ---------------------------------------------------------------------------
 
-  const canPublish =
-    blockedMessage === null &&
-    flow.draft.name.trim().length > 0 &&
-    flow.draft.emotionId !== ""
+  const canPublish = blockedMessage === null && hasPublishMinimum(flow.draft)
 
   const handlePublish = useCallback(async () => {
     if (publishing || !canPublish) return
@@ -277,7 +272,6 @@ export function RecordFlow({ draftId, initialPayload, onExit, onDraftSaved }: Re
           soul_ids: draft.soulIds,
           domain_ids: draft.domainIds,
           collection_ids: draft.collectionIds,
-          mark_id: draft.markId,
           snaps: draft.pendingSnap ? [draft.pendingSnap] : [],
           cards: [],
         },
@@ -285,8 +279,7 @@ export function RecordFlow({ draftId, initialPayload, onExit, onDraftSaved }: Re
         { onKarmaEarned: (delta) => { karmaDelta = delta } },
       )
 
-      // The pebble exists (`addPebble` resolves on soft-success too, keyed off
-      // pebble_id), so the draft has served its purpose.
+      // The pebble exists, so the draft has served its purpose.
       await consumeAfterPublish()
 
       setPublished({
@@ -298,7 +291,7 @@ export function RecordFlow({ draftId, initialPayload, onExit, onDraftSaved }: Re
       // A hard failure never reaches the success step: the flow stays put, so
       // the draft — and the way out via ✕ → Save as draft — is untouched.
       console.error("[record-flow] publish failed", err)
-      setPublishError(tDraft("publishFailed"))
+      setPublishError(tDraft(publishErrorMessageKey(err)))
     } finally {
       setPublishing(false)
     }
@@ -382,7 +375,6 @@ export function RecordFlow({ draftId, initialPayload, onExit, onDraftSaved }: Re
       case "photo":
       case "souls":
       case "collection":
-      case "glyph":
         return {
           kind: "text",
           label: optionalButtonIsSkip(flow) ? t("skip") : t("done"),
@@ -427,7 +419,6 @@ export function RecordFlow({ draftId, initialPayload, onExit, onDraftSaved }: Re
               onSelectDomain={(id) => dispatch({ type: "selectDomain", id })}
               onToggleSoul={(id) => dispatch({ type: "toggleSoul", id })}
               onToggleCollection={(id) => dispatch({ type: "toggleCollection", id })}
-              onSelectGlyph={(id) => dispatch({ type: "selectGlyph", id })}
               onSelectVisibility={(value: Visibility) =>
                 dispatch({ type: "selectVisibility", value })
               }

@@ -63,25 +63,28 @@ describe("computeKarmaDelta", () => {
     expect(computeKarmaDelta(makePebble({ cards: [{ species_id: "c", value: "   " }] }))).toBe(1)
   })
 
-  it("adds 1 for at least one soul, domain, glyph, or snap", () => {
+  it("adds 1 for at least one soul, domain, or snap", () => {
     expect(computeKarmaDelta(makePebble({ soul_ids: ["s1"] }))).toBe(2)
     expect(computeKarmaDelta(makePebble({ domain_ids: ["d1"] }))).toBe(2)
-    expect(computeKarmaDelta(makePebble({ mark_id: "glyph-1" }))).toBe(2)
     expect(computeKarmaDelta(makePebble({ snaps: [{ id: "snap-1", storage_path: "u/snap-1", sort_order: 0 }] }))).toBe(
       2,
     )
   })
 
-  it("caps the total delta at 10 for maximal enrichment (6 cards + everything)", () => {
+  it("sums every bonus for maximal enrichment (6 cards + everything)", () => {
     const pebble = makePebble({
       description: "a memory",
       cards: cards(6),
       soul_ids: ["s1"],
       domain_ids: ["d1"],
-      mark_id: "glyph-1",
       snaps: [{ id: "snap-1", storage_path: "u/snap-1", sort_order: 0 }],
     })
-    // Uncapped: 1 base + 1 description + 6 cards + 1 soul + 1 domain + 1 glyph + 1 snap = 12
-    expect(computeKarmaDelta(pebble)).toBe(10)
+    // 1 base + 1 description + 4 cards (capped) + 1 soul + 1 domain + 1 snap = 9.
+    // Without the glyph bonus the 10 cap is no longer reachable.
+    expect(computeKarmaDelta(pebble)).toBe(9)
+  })
+
+  it("gives no glyph bonus: the glyph is derived, not chosen (#1046)", () => {
+    expect(computeKarmaDelta(makePebble({ mark_id: "glyph-1" }))).toBe(1)
   })
 })

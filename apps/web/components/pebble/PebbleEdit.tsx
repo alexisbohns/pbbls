@@ -161,13 +161,13 @@ export function PebbleEdit({
   }
 
   // Build a synthetic pebble for the visual so it reflects staged changes
-  // (intensity/positiveness/emotion/glyph) before save.
+  // (intensity/positiveness/emotion) before save. The glyph is the server's
+  // resolution and follows a domain or collection change once saved.
   const draftPebble: Pebble = {
     ...pebble,
     intensity: draft.intensity,
     positiveness: draft.positiveness,
     emotion_id: draft.emotion_id,
-    mark_id: draft.mark_id ?? undefined,
   }
 
   return (
