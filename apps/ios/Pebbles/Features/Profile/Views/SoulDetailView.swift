@@ -22,6 +22,8 @@ struct SoulDetailView: View {
     @State private var isPresentingEdit = false
     @State private var pendingDeletion: MomentDeleteTarget?
     @State private var deleteError: String?
+    /// Ignores a second delete confirmed while the first is still running.
+    @State private var isDeleting = false
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.soul.detail")
 
@@ -159,13 +161,16 @@ struct SoulDetailView: View {
     /// Either delete drops the row: the list only carries moments with a
     /// pebble tagged here, so a reload after `delete_pebble` leaves it out.
     private func delete(_ option: MomentDeleteOption, on target: MomentDeleteTarget) async {
+        guard !isDeleting else { return }
+        isDeleting = true
+        defer { isDeleting = false }
         do {
             try await MomentDeletion.perform(option, on: target, client: supabase.client)
             await load()
             onChanged()
         } catch {
             logger.error("delete failed: \(error.localizedDescription, privacy: .private)")
-            deleteError = "Something went wrong. Please try again."
+            deleteError = String(localized: "Something went wrong. Please try again.")
         }
     }
 }

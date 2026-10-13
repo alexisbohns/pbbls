@@ -26,6 +26,7 @@ struct PebbleDetailSheet: View {
     @State private var isPresentingEdit = false
     @State private var pendingDeletion: MomentDeleteTarget?
     @State private var deleteError: String?
+    @State private var isDeleting = false
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "pebble-detail")
 
@@ -65,7 +66,7 @@ struct PebbleDetailSheet: View {
                             } label: {
                                 Image(systemName: "ellipsis.circle")
                             }
-                            .disabled(detail == nil)
+                            .disabled(detail == nil || isDeleting || isLoading)
                             .accessibilityLabel(Text("More"))
                         }
                     }
@@ -73,10 +74,11 @@ struct PebbleDetailSheet: View {
                 .pebblesScreen()
                 .toolbarBackground(.hidden, for: .navigationBar)
         }
+        .interactiveDismissDisabled(isDeleting)
         .task { await load() }
         .sheet(isPresented: $isPresentingEdit) {
             EditPebbleSheet(momentId: momentId, onSaved: {
-                Task { await load() }
+                Task { await load(showsSpinner: false) }
                 onPebbleUpdated?()
             })
         }
@@ -98,13 +100,18 @@ struct PebbleDetailSheet: View {
     }
 
     private func delete(_ option: MomentDeleteOption, on target: MomentDeleteTarget) async {
+        guard !isDeleting else { return }
+        isDeleting = true
+        defer { isDeleting = false }
         do {
             try await MomentDeletion.perform(option, on: target, client: supabase.client)
             onPebbleUpdated?()
             if target.closesReadPage(after: option) {
                 dismiss()
             } else {
-                await load()
+                // In place: the page keeps showing until the fresh detail
+                // lands, and the menu stays disabled until then.
+                await load(showsSpinner: false)
             }
         } catch {
             logger.error("delete failed: \(error.localizedDescription, privacy: .private)")
@@ -128,8 +135,10 @@ struct PebbleDetailSheet: View {
         }
     }
 
-    private func load() async {
-        isLoading = true
+    /// `showsSpinner: false` refreshes `detail` in place after an edit or a
+    /// delete, so the page is not swapped for a spinner and back.
+    private func load(showsSpinner: Bool = true) async {
+        if showsSpinner { isLoading = true }
         loadError = nil
         do {
             self.detail = try await MomentsService(client: supabase.client).moment(id: momentId)

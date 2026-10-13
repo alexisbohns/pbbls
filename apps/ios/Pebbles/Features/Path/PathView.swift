@@ -28,6 +28,8 @@ struct PathView: View {
     @State private var selectedMomentId: UUID?
     @State private var pendingDeletion: MomentDeleteTarget?
     @State private var deleteError: String?
+    /// Ignores a second delete confirmed while the first is still running.
+    @State private var isDeleting = false
     @State private var isLoading = true
     @State private var loadError: String?
 
@@ -249,6 +251,9 @@ struct PathView: View {
     }
 
     private func delete(_ option: MomentDeleteOption, on target: MomentDeleteTarget) async {
+        guard !isDeleting else { return }
+        isDeleting = true
+        defer { isDeleting = false }
         do {
             try await MomentDeletion.perform(option, on: target, client: supabase.client)
             async let timeline: Void = load()
