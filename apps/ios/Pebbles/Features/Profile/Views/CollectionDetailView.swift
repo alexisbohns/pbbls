@@ -14,6 +14,7 @@ struct CollectionDetailView: View {
     let onChanged: () -> Void
 
     @Environment(SupabaseService.self) private var supabase
+    @Environment(CompleteDraftStore.self) private var completeDrafts
 
     @State private var collection: Collection
     @State private var moments: [MomentSummary] = []
@@ -164,7 +165,9 @@ struct CollectionDetailView: View {
         isDeleting = true
         defer { isDeleting = false }
         do {
-            try await MomentDeletion.perform(option, on: target, client: supabase.client)
+            try await MomentDeletion.perform(
+                option, on: target, client: supabase.client, drafts: completeDrafts
+            )
             await load()
             onChanged()
         } catch {

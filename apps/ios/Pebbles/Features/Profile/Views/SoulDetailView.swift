@@ -13,6 +13,7 @@ struct SoulDetailView: View {
     let onChanged: () -> Void
 
     @Environment(SupabaseService.self) private var supabase
+    @Environment(CompleteDraftStore.self) private var completeDrafts
 
     @State private var soulWithGlyph: SoulWithGlyph
     @State private var moments: [MomentSummary] = []
@@ -165,7 +166,9 @@ struct SoulDetailView: View {
         isDeleting = true
         defer { isDeleting = false }
         do {
-            try await MomentDeletion.perform(option, on: target, client: supabase.client)
+            try await MomentDeletion.perform(
+                option, on: target, client: supabase.client, drafts: completeDrafts
+            )
             await load()
             onChanged()
         } catch {
@@ -194,5 +197,6 @@ struct SoulDetailView: View {
             onChanged: {}
         )
         .environment(SupabaseService())
+        .environment(CompleteDraftStore())
     }
 }

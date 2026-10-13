@@ -6,11 +6,12 @@ import SwiftUI
 /// competing with the dots, and "Save as draft" lives in the close
 /// confirmation rather than taking permanent residence here (D9).
 struct RecordFlowChrome: View {
-    let step: RecordStep
+    let dotCount: Int
+    /// 0-based; nil on an uncounted step.
+    let dotIndex: Int?
+    let canGoBack: Bool
     let onBack: () -> Void
     let onClose: () -> Void
-
-    private var canGoBack: Bool { step.previous != nil }
 
     var body: some View {
         HStack {
@@ -48,9 +49,9 @@ struct RecordFlowChrome: View {
     /// and ten unlabeled dots is not.
     private var dots: some View {
         HStack(spacing: Spacing.xs + 2) {
-            ForEach(RecordStep.counted) { candidate in
+            ForEach(0..<dotCount, id: \.self) { index in
                 Circle()
-                    .fill(fill(for: candidate))
+                    .fill(fill(for: index))
                     .frame(width: 6, height: 6)
             }
         }
@@ -58,15 +59,12 @@ struct RecordFlowChrome: View {
         .accessibilityLabel(stepAnnouncement)
     }
 
-    private func fill(for candidate: RecordStep) -> Color {
-        guard let current = step.dotIndex, let index = candidate.dotIndex else {
-            return Color.system.muted
-        }
-        return index <= current ? Color.accent.primary : Color.system.muted
+    private func fill(for index: Int) -> Color {
+        index <= (dotIndex ?? -1) ? Color.accent.primary : Color.system.muted
     }
 
     private var stepAnnouncement: Text {
-        guard let index = step.dotIndex else { return Text("Done") }
-        return Text("Step \(index + 1) of \(RecordStep.counted.count)")
+        guard let dotIndex else { return Text("Done") }
+        return Text("Step \(dotIndex + 1) of \(dotCount)")
     }
 }

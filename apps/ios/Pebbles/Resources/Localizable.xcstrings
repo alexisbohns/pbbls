@@ -5155,6 +5155,23 @@
         }
       }
     },
+    "Make it a pebble" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make it a pebble"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En faire un galet"
+          }
+        }
+      }
+    },
     "Make my profile public" : {
       "extractionState" : "manual",
       "localizations" : {

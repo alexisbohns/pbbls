@@ -18,6 +18,8 @@ import os
 @MainActor
 struct SignedOutPurge {
     let snapshots: ComposerSnapshotStore
+    /// Half-finished Complete flows, one file per moment (A3).
+    let completeDrafts: CompleteDraftStore
     let refs: ReferenceDataService
     let stats: PathStatsService
     let drafts: PebbleDraftsService
@@ -30,6 +32,7 @@ struct SignedOutPurge {
 
     func run() {
         snapshots.clear()
+        completeDrafts.clearAll()
         refs.reset()
         stats.reset()
         drafts.reset()

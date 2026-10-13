@@ -23,6 +23,7 @@ struct RootView: View {
     @Environment(PathStatsService.self) private var stats
     @Environment(PebbleDraftsService.self) private var drafts
     @Environment(ComposerSnapshotStore.self) private var snapshots
+    @Environment(CompleteDraftStore.self) private var completeDrafts
     @Environment(SnapURLCache.self) private var snapURLs
     @Environment(ConnectionsService.self) private var connections
     @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
@@ -180,6 +181,7 @@ struct RootView: View {
             guard signedOut else { return }
             SignedOutPurge(
                 snapshots: snapshots,
+                completeDrafts: completeDrafts,
                 refs: refs,
                 stats: stats,
                 drafts: drafts,
@@ -199,6 +201,7 @@ struct RootView: View {
         .environment(PathStatsService(supabase: supabase))
         .environment(PebbleDraftsService(client: supabase.client))
         .environment(ComposerSnapshotStore())
+        .environment(CompleteDraftStore())
         .environment(SnapURLCache(client: supabase.client))
         .environment(KarmaNotificationService())
         .environment(ConnectionsService(supabase: supabase))

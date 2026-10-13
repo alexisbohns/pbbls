@@ -15,6 +15,7 @@ struct PathView: View {
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(PathStatsService.self) private var stats
     @Environment(PebbleDraftsService.self) private var draftsService
+    @Environment(CompleteDraftStore.self) private var completeDrafts
 
     @State private var moments: [MomentSummary] = []
     @State private var entries: [WeekRollEntry] = []
@@ -255,7 +256,9 @@ struct PathView: View {
         isDeleting = true
         defer { isDeleting = false }
         do {
-            try await MomentDeletion.perform(option, on: target, client: supabase.client)
+            try await MomentDeletion.perform(
+                option, on: target, client: supabase.client, drafts: completeDrafts
+            )
             async let timeline: Void = load()
             async let statsReload: Void = stats.refresh()
             _ = await (timeline, statsReload)
@@ -269,4 +272,5 @@ struct PathView: View {
 #Preview {
     PathView()
         .environment(SupabaseService())
+        .environment(CompleteDraftStore())
 }

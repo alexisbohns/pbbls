@@ -14,6 +14,8 @@ import SwiftUI
 struct PebbleReadView: View {
     let detail: MomentDetail
     let palette: EmotionPalette?
+    /// Offered on a bare moment: opens the Complete flow.
+    var onComplete: (() -> Void)? = nil
 
     @Environment(\.colorScheme) private var colorScheme
     @Environment(ReferenceDataService.self) private var refs
@@ -48,6 +50,12 @@ struct PebbleReadView: View {
                         .font(.system(size: 17, weight: .regular, design: .serif))
                         .foregroundStyle(pageColors?.description ?? Color.system.foreground)
                         .frame(maxWidth: .infinity, alignment: .leading)
+                }
+
+                if detail.pebble == nil, let onComplete {
+                    Button("Make it a pebble", action: onComplete)
+                        .buttonStyle(PebblesPrimaryButtonStyle())
+                        .padding(.top, Spacing.sm)
                 }
 
                 if let pebble = detail.pebble, !pebble.souls.isEmpty {

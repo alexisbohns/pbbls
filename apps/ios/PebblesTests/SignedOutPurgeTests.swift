@@ -13,6 +13,8 @@ struct SignedOutPurgeTests {
         let purge: SignedOutPurge
         let snapshots: ComposerSnapshotStore
         let snapshotURL: URL
+        let completeDrafts: CompleteDraftStore
+        let completeDraftsDirectory: URL
         let refs: ReferenceDataService
         let stats: PathStatsService
         let urlCache: URLCache
@@ -25,12 +27,16 @@ struct SignedOutPurgeTests {
         let snapshotURL = FileManager.default.temporaryDirectory
             .appendingPathComponent("signed-out-purge-test-\(UUID().uuidString).json")
         let snapshots = ComposerSnapshotStore(fileURL: snapshotURL)
+        let completeDraftsDirectory = FileManager.default.temporaryDirectory
+            .appendingPathComponent("signed-out-purge-drafts-\(UUID().uuidString)")
+        let completeDrafts = CompleteDraftStore(directory: completeDraftsDirectory)
         let refs = ReferenceDataService(client: supabase.client)
         let stats = PathStatsService(supabase: supabase)
         // Memory-only, so the test never touches the app's real disk cache.
         let urlCache = URLCache(memoryCapacity: 1_000_000, diskCapacity: 0)
         let purge = SignedOutPurge(
             snapshots: snapshots,
+            completeDrafts: completeDrafts,
             refs: refs,
             stats: stats,
             drafts: PebbleDraftsService(client: supabase.client),
@@ -39,6 +45,7 @@ struct SignedOutPurgeTests {
         )
         return Fixture(
             purge: purge, snapshots: snapshots, snapshotURL: snapshotURL,
+            completeDrafts: completeDrafts, completeDraftsDirectory: completeDraftsDirectory,
             refs: refs, stats: stats, urlCache: urlCache
         )
     }
@@ -55,6 +62,23 @@ struct SignedOutPurgeTests {
 
         #expect(!FileManager.default.fileExists(atPath: fixture.snapshotURL.path))
         #expect(fixture.snapshots.load(ownerId: owner) == nil)
+    }
+
+    @Test("Half-finished Complete flows are deleted from disk")
+    func clearsCompleteDrafts() {
+        let fixture = makeFixture()
+        defer { try? FileManager.default.removeItem(at: fixture.completeDraftsDirectory) }
+        let moment = UUID()
+        var draft = CompleteDraft()
+        draft.valence = .highlightSmall
+        draft.emotionId = UUID()
+        fixture.completeDrafts.save(draft, momentId: moment, ownerId: owner)
+        #expect(fixture.completeDrafts.load(momentId: moment, ownerId: owner) == draft)
+
+        fixture.purge.run()
+
+        #expect(fixture.completeDrafts.load(momentId: moment, ownerId: owner) == nil)
+        #expect(!FileManager.default.fileExists(atPath: fixture.completeDraftsDirectory.path))
     }
 
     @Test("Souls and collections are forgotten, shared domains are kept")
