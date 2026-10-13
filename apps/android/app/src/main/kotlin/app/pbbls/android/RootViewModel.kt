@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.core.data.AchievementMoment
 import app.pbbls.android.core.data.AchievementNotificationService
+import app.pbbls.android.core.data.CompleteSnapshotStoring
 import app.pbbls.android.core.data.ComposerSnapshotStoring
 import app.pbbls.android.core.data.KarmaEarnedContent
 import app.pbbls.android.core.data.KarmaNotificationService
@@ -86,6 +87,7 @@ class RootViewModel
         private val karma: KarmaNotificationService,
         private val achievementNotify: AchievementNotificationService,
         private val snapshots: ComposerSnapshotStoring,
+        private val completeSnapshots: CompleteSnapshotStoring,
         private val savedStateHandle: SavedStateHandle,
     ) : ViewModel() {
         private val _uiState =
@@ -162,7 +164,11 @@ class RootViewModel
             // entitled to it. Account deletion reaches here through its own
             // `signOut()`. The store's owner check covers a session that swaps
             // without passing through signed-out.
-            if (!isInitializing && userId == null) snapshots.clear()
+            // The Complete flow's per-moment autosave goes with it (A-5).
+            if (!isInitializing && userId == null) {
+                snapshots.clear()
+                completeSnapshots.clearAll()
+            }
             // Only a resolved status updates hasHadSession — Unresolved must
             // never be mistaken for a session, real or absent.
             if (!isInitializing) hasHadSession = userId != null

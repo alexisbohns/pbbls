@@ -269,6 +269,7 @@ fun PebbleDetailNoDomainDark() {
 private fun SheetPreview(
     detail: MomentDetail = fullDetail,
     initialMenuOpen: Boolean = false,
+    onComplete: (() -> Unit)? = null,
 ) {
     Surface(
         modifier = Modifier.fillMaxSize().padding(top = 24.dp),
@@ -286,6 +287,7 @@ private fun SheetPreview(
                     onDelete = {},
                     onShare = null,
                     onRetry = {},
+                    onComplete = onComplete,
                     initialMenuOpen = initialMenuOpen,
                 )
             }
@@ -320,6 +322,22 @@ fun PebbleDetail_BareMoment() {
 @Composable
 fun PebbleDetail_BareMomentDark() {
     PebblesTheme { SheetPreview(detail = bareMoment) }
+}
+
+/** A bare moment's one call to action, "Make it a pebble", under its title (A-8). */
+@PreviewTest
+@Preview(showBackground = true)
+@PreviewFrench
+@Composable
+fun PebbleDetail_BareMomentWithCta() {
+    PebblesTheme { SheetPreview(detail = bareMoment, onComplete = {}) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun PebbleDetail_BareMomentWithCtaDark() {
+    PebblesTheme { SheetPreview(detail = bareMoment, onComplete = {}) }
 }
 
 /** The ⋮ menu (R7): Edit moment, Edit pebble because this moment has one, and Delete. */

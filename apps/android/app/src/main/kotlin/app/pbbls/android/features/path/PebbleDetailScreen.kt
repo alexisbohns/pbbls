@@ -59,6 +59,9 @@ import app.pbbls.android.features.path.read.PebbleReadView
  * picked up by [PebbleDetailViewModel.onResumed] rather than a callback. Its
  * last item, Delete, asks what to delete (R8): the moment closes the page
  * ([onMomentDeleted]), only the pebble leaves it open as a bare moment.
+ *
+ * A bare moment offers "Make it a pebble" under its title
+ * ([onCompleteRequested], A-8); the resume refresh shows the pebble on return.
  */
 @Composable
 fun PebbleDetailScreen(
@@ -67,6 +70,7 @@ fun PebbleDetailScreen(
     onEditMoment: () -> Unit = {},
     onEditPebble: () -> Unit = {},
     onMomentDeleted: () -> Unit = {},
+    onCompleteRequested: () -> Unit = {},
     viewModel: PebbleDetailViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -121,6 +125,7 @@ fun PebbleDetailScreen(
         onShare = onShare,
         onRetry = viewModel::retry,
         modifier = modifier,
+        onComplete = onCompleteRequested,
     )
 
     if (pendingDelete && detail != null) {
@@ -156,6 +161,8 @@ fun PebbleDetailContent(
     onShare: (() -> Unit)?,
     onRetry: () -> Unit,
     modifier: Modifier = Modifier,
+    /** "Make it a pebble" on a bare moment; null offers no call to action. */
+    onComplete: (() -> Unit)? = null,
     /** Opens the ⋮ menu on first composition; for previews of the open menu only. */
     initialMenuOpen: Boolean = false,
 ) {
@@ -189,6 +196,7 @@ fun PebbleDetailContent(
                     detail = state.detail,
                     palette = palette,
                     modifier = Modifier.fillMaxSize(),
+                    onComplete = onComplete,
                 )
         }
     }

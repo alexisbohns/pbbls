@@ -75,6 +75,8 @@ abstract class AppUiTest {
 
     @After
     fun closeActivity() {
+        // Process-global; cleared here so no test can leak a canned body into the next.
+        FakeServicesModule.cannedResponses.clear()
         controller
             ?.takeUnless { it.get().isDestroyed }
             ?.pause()

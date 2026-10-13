@@ -103,7 +103,13 @@ private fun StepPreview(
             .background(MaterialTheme.colorScheme.surface)
             .readableWidth(),
     ) {
-        RecordFlowChrome(step = step, onBack = {}, onClose = {})
+        RecordFlowChrome(
+            position = (step.dotIndex ?: 0) + 1,
+            total = RecordStep.counted.size,
+            canGoBack = step.previous != null,
+            onBack = {},
+            onClose = {},
+        )
         RecordStepScaffold(
             title = stringResource(step.titleRes),
             subtitle = step.subtitleRes?.let { stringResource(it) },
@@ -202,7 +208,13 @@ fun RecordChromeStepsLight() {
     PebblesTheme {
         Column(Modifier.background(MaterialTheme.colorScheme.surface)) {
             RecordStep.counted.forEach { step ->
-                RecordFlowChrome(step = step, onBack = {}, onClose = {})
+                RecordFlowChrome(
+                    position = (step.dotIndex ?: 0) + 1,
+                    total = RecordStep.counted.size,
+                    canGoBack = step.previous != null,
+                    onBack = {},
+                    onClose = {},
+                )
                 Spacer(Modifier.height(4.dp))
             }
         }

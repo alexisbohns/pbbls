@@ -4,6 +4,8 @@ import app.pbbls.android.core.data.AchievementsService
 import app.pbbls.android.core.data.AchievementsServicing
 import app.pbbls.android.core.data.CollectionsService
 import app.pbbls.android.core.data.CollectionsServicing
+import app.pbbls.android.core.data.CompleteSnapshotStore
+import app.pbbls.android.core.data.CompleteSnapshotStoring
 import app.pbbls.android.core.data.ConnectionsService
 import app.pbbls.android.core.data.ConnectionsServicing
 import app.pbbls.android.core.data.ConsentService
@@ -88,6 +90,10 @@ interface ServiceBindings {
     @Binds
     @Singleton
     fun bindPebbleDraftsServicing(impl: PebbleDraftsService): PebbleDraftsServicing
+
+    @Binds
+    @Singleton
+    fun bindCompleteSnapshotStoring(impl: CompleteSnapshotStore): CompleteSnapshotStoring
 
     @Binds
     @Singleton

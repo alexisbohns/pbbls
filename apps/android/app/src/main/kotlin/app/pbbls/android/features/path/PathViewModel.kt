@@ -125,6 +125,7 @@ class PathViewModel
         private val stats: PathStatsServicing,
         private val drafts: PebbleDraftsServicing,
         private val writes: MomentWriteServicing,
+        private val focusRequests: PathFocusRequests,
     ) : ViewModel() {
         private val today = LocalDate.now()
 
@@ -219,7 +220,12 @@ class PathViewModel
             }.fold(
                 onSuccess = { built ->
                     entries = built
-                    focusedWeekStart = refocusedWeekStart(built, focusedWeekStart, today)
+                    // A flow that just wrote a moment wins over the kept focus (R14).
+                    val requested =
+                        focusRequests.consume()?.let { id ->
+                            built.firstOrNull { entry -> entry.moments.any { it.id.equals(id, ignoreCase = true) } }?.weekStart
+                        }
+                    focusedWeekStart = requested ?: refocusedWeekStart(built, focusedWeekStart, today)
                     hasFailed = false
                     isLoaded = true
                 },

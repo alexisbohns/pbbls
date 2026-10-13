@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.data.LocalReferenceDataService
+import app.pbbls.android.core.designsystem.PebblesPrimaryButton
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.SurfaceTile
 import app.pbbls.android.core.model.EmotionPalette
@@ -42,7 +43,9 @@ import app.pbbls.android.core.ui.render.GlyphImage
  * Takes a [MomentDetail] plus its [palette] so it previews with no services:
  * banner, title, meta tiles, optional description, and a souls grid, stacked in
  * a scrolling column. The meta tiles and souls are the pebble's, so a moment
- * without your pebble shows only the banner, title and description. The souls grid is chunked [Row]s, never a lazy grid — a
+ * without your pebble shows only the banner, title, description and, when
+ * [onComplete] is given, its one call to action, "Make it a pebble" (A-8).
+ * The souls grid is chunked [Row]s, never a lazy grid — a
  * lazy grid inside a `verticalScroll` [Column] throws "infinite height".
  *
  * The read page uses theme roles; only the pebble visual ([PebbleReadBanner])
@@ -55,6 +58,7 @@ fun PebbleReadView(
     detail: MomentDetail,
     palette: EmotionPalette?,
     modifier: Modifier = Modifier,
+    onComplete: (() -> Unit)? = null,
 ) {
     val colors = MaterialTheme.colorScheme
     val pebble = detail.pebble
@@ -81,6 +85,13 @@ fun PebbleReadView(
             name = detail.name,
             happenedAt = detail.happenedAt,
         )
+        if (pebble == null && onComplete != null) {
+            PebblesPrimaryButton(
+                text = stringResource(R.string.complete_cta),
+                onClick = onComplete,
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
         if (pebble != null) PebbleReadMeta(pebble = pebble)
         val desc = detail.description
         if (!desc.isNullOrEmpty()) {

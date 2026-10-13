@@ -20,6 +20,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,6 +44,7 @@ import app.pbbls.android.features.path.components.NewPebbleFab
 import app.pbbls.android.features.path.components.WeekHeader
 import app.pbbls.android.features.path.components.WeekPebbleList
 import app.pbbls.android.features.path.components.WeekRoll
+import kotlinx.coroutines.flow.drop
 import java.time.LocalDate
 import kotlin.math.abs
 
@@ -211,17 +213,32 @@ fun PathContent(
         entries.indexOfFirst { it.weekStart == initialWeekStart }.coerceAtLeast(0)
     val pagerState = rememberPagerState(initialPage = initialIndex) { entries.size }
 
-    // Swipe → focus. Keyed on entries so a (future) reload re-subscribes.
+    // Programmatic scrolls in flight. A counter, not a flag: a new focus
+    // cancels the running scroll, whose cleanup can land after the next one
+    // has started. Not snapshot state: only the collector below reads it.
+    val steering = remember { intArrayOf(0) }
+
+    // Swipe → focus. Keyed on entries so a reload re-subscribes; the page in
+    // place at (re)subscription is dropped, because a reload is not a page
+    // change and reporting it would overwrite a requested focus (R14). Pages
+    // the pager passes while it is being steered are skipped too, or a jump
+    // several weeks away would re-steer itself to the first week in between.
     LaunchedEffect(pagerState, entries) {
-        snapshotFlow { pagerState.currentPage }.collect { page ->
+        snapshotFlow { pagerState.currentPage }.drop(1).collect { page ->
+            if (steering[0] > 0) return@collect
             entries.getOrNull(page)?.let { onFocusChange(it.weekStart) }
         }
     }
-    // Focus (chevron / cairn tap) → pager.
+    // Focus (chevron / cairn tap, R14 request) → pager.
     LaunchedEffect(focusedWeekStart) {
         val index = entries.indexOfFirst { it.weekStart == focusedWeekStart }
         if (index >= 0 && index != pagerState.currentPage) {
-            pagerState.animateScrollToPage(index)
+            steering[0] += 1
+            try {
+                pagerState.animateScrollToPage(index)
+            } finally {
+                steering[0] -= 1
+            }
         }
     }
 

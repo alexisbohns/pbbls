@@ -2,6 +2,7 @@ package app.pbbls.android.testing
 
 import app.pbbls.android.core.data.AchievementsServicing
 import app.pbbls.android.core.data.CollectionsServicing
+import app.pbbls.android.core.data.CompleteSnapshotStoring
 import app.pbbls.android.core.data.ComposerSnapshotStoring
 import app.pbbls.android.core.data.ConnectionsServicing
 import app.pbbls.android.core.data.ConsentServicing
@@ -46,6 +47,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import kotlinx.coroutines.CoroutineScope
 import java.util.Collections
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Singleton
 
 /**
@@ -78,6 +80,14 @@ object FakeServicesModule {
     /** Every URL a concrete (unfaked) service requested, in order. Cleared per process, not per test. */
     val unexpectedRequests: MutableList<String> = Collections.synchronizedList(mutableListOf())
 
+    /**
+     * Response bodies by request path suffix (`/rest/v1/v_emotions_with_palette`),
+     * for a journey that needs data from a concrete service. Anything not listed
+     * answers `[]`. Per process like [unexpectedRequests]: a test that arms it
+     * clears it in its own `@After`.
+     */
+    val cannedResponses: MutableMap<String, String> = ConcurrentHashMap()
+
     // ---- The client, for the services that have no seam yet ----
 
     @OptIn(SupabaseInternal::class)
@@ -91,8 +101,9 @@ object FakeServicesModule {
             httpEngine =
                 MockEngine { request ->
                     unexpectedRequests += request.url.toString()
+                    val path = request.url.encodedPath
                     respond(
-                        content = "[]",
+                        content = cannedResponses.entries.firstOrNull { path.endsWith(it.key) }?.value ?: "[]",
                         status = HttpStatusCode.OK,
                         headers = headersOf(HttpHeaders.ContentType, "application/json"),
                     )
@@ -165,6 +176,9 @@ object FakeServicesModule {
     fun fakeSnapshotStore() = FakeComposerSnapshotStore()
 
     @Provides @Singleton
+    fun fakeCompleteSnapshotStore() = FakeCompleteSnapshotStore()
+
+    @Provides @Singleton
     fun fakeSnapWrite() = FakeSnapWriteRepository()
 
     // ---- The seams, bound to the same instances ----
@@ -222,6 +236,9 @@ object FakeServicesModule {
 
     @Provides
     fun snapshotStore(fake: FakeComposerSnapshotStore): ComposerSnapshotStoring = fake
+
+    @Provides
+    fun completeSnapshotStore(fake: FakeCompleteSnapshotStore): CompleteSnapshotStoring = fake
 
     @Provides
     fun snapWrite(fake: FakeSnapWriteRepository): SnapWriteRepositing = fake

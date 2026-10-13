@@ -398,6 +398,7 @@
     <string name="delete_pebble_keep_moment">Supprimer le galet, garder le moment</string>
     <string name="delete_moment_too">Supprimer aussi le moment</string>
     <string name="delete_moment">Supprimer le moment</string>
+    <string name="complete_cta">En faire un galet</string>
 
     <!-- ==== Atelier de glyphes (M43 · Android Glyph Studio &amp; Store) ==== -->
     <string name="carve_title">Nouveau glyphe</string>
