@@ -26,7 +26,7 @@ struct PathView: View {
     @State private var isPresentingCreate = false
     @State private var isPresentingDrafts = false
     @State private var selectedMomentId: UUID?
-    @State private var pendingDeletion: MomentSummary?
+    @State private var pendingDeletion: MomentDeleteTarget?
     @State private var deleteError: String?
     @State private var isLoading = true
     @State private var loadError: String?
@@ -116,24 +116,8 @@ struct PathView: View {
                 }
             })
         }
-        .confirmationDialog(
-            pendingDeletion.map { "Delete \(MomentName.display($0.name) ?? String(localized: "Untitled"))?" } ?? "",
-            isPresented: Binding(
-                get: { pendingDeletion != nil },
-                set: { if !$0 { pendingDeletion = nil } }
-            ),
-            titleVisibility: .visible,
-            presenting: pendingDeletion
-        ) { moment in
-            Button("Delete", role: .destructive) {
-                TapHaptics.play(.warning)
-                Task { await delete(moment) }
-            }
-            Button("Cancel", role: .cancel) {
-                pendingDeletion = nil
-            }
-        } message: { _ in
-            Text("This can't be undone.")
+        .momentDeleteDialog(target: $pendingDeletion) { target, option in
+            Task { await delete(option, on: target) }
         }
         .alert(
             "Couldn't delete",
@@ -181,7 +165,7 @@ struct PathView: View {
                         WeekPathView(
                             entry: entry,
                             onTap: { moment in selectedMomentId = moment.id },
-                            onDelete: { moment in pendingDeletion = moment },
+                            onDelete: { moment in pendingDeletion = MomentDeleteTarget(summary: moment) },
                             onCreate: { isPresentingFlow = true }
                         )
                         .tag(entry.weekStart)
@@ -264,15 +248,14 @@ struct PathView: View {
         }
     }
 
-    private func delete(_ moment: MomentSummary) async {
-        pendingDeletion = nil
+    private func delete(_ option: MomentDeleteOption, on target: MomentDeleteTarget) async {
         do {
-            try await MomentDeletion.deleteMoment(moment.id, client: supabase.client)
+            try await MomentDeletion.perform(option, on: target, client: supabase.client)
             async let timeline: Void = load()
             async let statsReload: Void = stats.refresh()
             _ = await (timeline, statsReload)
         } catch {
-            logger.error("delete moment failed: \(error.localizedDescription, privacy: .private)")
+            logger.error("delete failed: \(error.localizedDescription, privacy: .private)")
             deleteError = String(localized: "Something went wrong. Please try again.")
         }
     }

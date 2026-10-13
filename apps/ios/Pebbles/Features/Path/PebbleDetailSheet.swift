@@ -2,9 +2,12 @@ import SwiftUI
 import os
 
 /// Read-view sheet for a single moment. Loads the `MomentDetail` from
-/// `v_moments_full` and renders `PebbleReadView` with a privacy badge + Edit button
-/// in the navigation bar. Tapping Edit stacks `EditPebbleSheet` on top; on
-/// save the read view reloads in place and notifies the parent.
+/// `v_moments_full` and renders `PebbleReadView` with a privacy badge and a
+/// `…` menu in the navigation bar (R7). **Edit pebble** stacks
+/// `EditPebbleSheet` on top; on save the read view reloads in place and
+/// notifies the parent. **Delete** opens the shared confirmation (R8): deleting
+/// the moment closes the page, deleting only the pebble reloads it as a bare
+/// moment.
 ///
 /// Used as the destination for both:
 /// - Path-list tap of an existing pebble.
@@ -21,6 +24,8 @@ struct PebbleDetailSheet: View {
     @State private var isLoading = true
     @State private var loadError: String?
     @State private var isPresentingEdit = false
+    @State private var pendingDeletion: MomentDeleteTarget?
+    @State private var deleteError: String?
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "pebble-detail")
 
@@ -46,10 +51,22 @@ struct PebbleDetailSheet: View {
                                     comment: "Accessibility label for the public pebble share button"
                                 ))
                             }
-                            PebbleToolbarButton("Edit") {
-                                isPresentingEdit = true
+                            Menu {
+                                if detail?.pebble != nil {
+                                    Button { isPresentingEdit = true } label: {
+                                        Label("Edit pebble", systemImage: "pencil")
+                                    }
+                                }
+                                Button(role: .destructive) {
+                                    if let detail { pendingDeletion = MomentDeleteTarget(detail: detail) }
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            } label: {
+                                Image(systemName: "ellipsis.circle")
                             }
-                            .disabled(detail?.pebble == nil)
+                            .disabled(detail == nil)
+                            .accessibilityLabel(Text("More"))
                         }
                     }
                 }
@@ -62,6 +79,36 @@ struct PebbleDetailSheet: View {
                 Task { await load() }
                 onPebbleUpdated?()
             })
+        }
+        .momentDeleteDialog(target: $pendingDeletion) { target, option in
+            Task { await delete(option, on: target) }
+        }
+        .alert(
+            "Couldn't delete",
+            isPresented: Binding(
+                get: { deleteError != nil },
+                set: { if !$0 { deleteError = nil } }
+            ),
+            presenting: deleteError
+        ) { _ in
+            Button("OK", role: .cancel) { deleteError = nil }
+        } message: { message in
+            Text(message)
+        }
+    }
+
+    private func delete(_ option: MomentDeleteOption, on target: MomentDeleteTarget) async {
+        do {
+            try await MomentDeletion.perform(option, on: target, client: supabase.client)
+            onPebbleUpdated?()
+            if target.closesReadPage(after: option) {
+                dismiss()
+            } else {
+                await load()
+            }
+        } catch {
+            logger.error("delete failed: \(error.localizedDescription, privacy: .private)")
+            deleteError = String(localized: "Something went wrong. Please try again.")
         }
     }
 

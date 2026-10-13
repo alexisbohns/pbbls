@@ -20,7 +20,7 @@ struct SoulDetailView: View {
     @State private var loadError: String?
     @State private var selectedMomentId: UUID?
     @State private var isPresentingEdit = false
-    @State private var pendingDeletion: MomentSummary?
+    @State private var pendingDeletion: MomentDeleteTarget?
     @State private var deleteError: String?
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.soul.detail")
@@ -47,29 +47,15 @@ struct SoulDetailView: View {
                     onChanged()
                 })
             }
+            // R9: a row opens the moment's read page, not the edit form.
             .sheet(item: $selectedMomentId) { id in
-                EditPebbleSheet(momentId: id, onSaved: {
+                PebbleDetailSheet(momentId: id, onPebbleUpdated: {
                     Task { await load() }
+                    onChanged()
                 })
             }
-            .confirmationDialog(
-                pendingDeletion.map { "Delete \(MomentName.display($0.name) ?? String(localized: "Untitled"))?" } ?? "",
-                isPresented: Binding(
-                    get: { pendingDeletion != nil },
-                    set: { if !$0 { pendingDeletion = nil } }
-                ),
-                titleVisibility: .visible,
-                presenting: pendingDeletion
-            ) { moment in
-                Button("Delete", role: .destructive) {
-                    TapHaptics.play(.warning)
-                    Task { await delete(moment) }
-                }
-                Button("Cancel", role: .cancel) {
-                    pendingDeletion = nil
-                }
-            } message: { _ in
-                Text("This can't be undone.")
+            .momentDeleteDialog(target: $pendingDeletion) { target, option in
+                Task { await delete(option, on: target) }
             }
             .alert(
                 "Couldn't delete",
@@ -130,7 +116,7 @@ struct SoulDetailView: View {
                             PebbleRow(
                                 moment: moment,
                                 onTap: { selectedMomentId = moment.id },
-                                onDelete: { pendingDeletion = moment }
+                                onDelete: { pendingDeletion = MomentDeleteTarget(summary: moment) }
                             )
                             .pebblesListRow(position: pebblesRowPosition(index: index, count: moments.count))
                         }
@@ -170,13 +156,15 @@ struct SoulDetailView: View {
         self.isLoading = false
     }
 
-    private func delete(_ moment: MomentSummary) async {
-        pendingDeletion = nil
+    /// Either delete drops the row: the list only carries moments with a
+    /// pebble tagged here, so a reload after `delete_pebble` leaves it out.
+    private func delete(_ option: MomentDeleteOption, on target: MomentDeleteTarget) async {
         do {
-            try await MomentDeletion.deleteMoment(moment.id, client: supabase.client)
+            try await MomentDeletion.perform(option, on: target, client: supabase.client)
             await load()
+            onChanged()
         } catch {
-            logger.error("delete moment failed: \(error.localizedDescription, privacy: .private)")
+            logger.error("delete failed: \(error.localizedDescription, privacy: .private)")
             deleteError = "Something went wrong. Please try again."
         }
     }
