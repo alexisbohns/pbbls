@@ -22,7 +22,7 @@ import { TargetDiff } from "./TargetDiff"
 type Mode = "action" | "dismiss" | "unhide" | "release" | null
 
 const KIND_LABELS: Record<ContentReport["target_kind"], string> = {
-  pebble: "Pebble",
+  moment: "Moment",
   profile: "Profile",
   glyph: "Glyph",
 }
@@ -59,7 +59,7 @@ export function ReportCard({ report }: { report: ContentReport }) {
   }
 
   const open = report.status === "open"
-  const hidden = report.target_live?.hidden_at != null
+  const hidden = report.target_live?.hidden === true
   // Releasing a handle only makes sense for a profile that still holds one.
   const canRelease =
     report.target_kind === "profile" && !report.target_missing && !!report.target_live?.handle

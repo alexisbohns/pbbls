@@ -3,7 +3,7 @@ import type { ContentReport } from "@/lib/moderation/types"
 
 /** The free-text fields worth comparing, per target kind. */
 const FIELDS: Record<ContentReport["target_kind"], { key: string; label: string }[]> = {
-  pebble: [
+  moment: [
     { key: "name", label: "Title" },
     { key: "description", label: "Description" },
   ],

@@ -45,19 +45,33 @@ export interface PebbleVolumeRow {
   pebbles: number | null
   pebbles_with_picture: number | null
   pebbles_in_collection: number | null
+  /**
+   * Pebbles in at least one collection whose glyph is user-carved
+   * (`glyphs.is_custom`). Since the moments/pebbles split a pebble has no glyph
+   * of its own: it inherits one from its oldest glyph-carrying collection.
+   */
   pebbles_with_custom_glyph: number | null
   active_users: number | null
 }
 
 export interface PebbleEnrichmentRow {
+  /** Pebbles created in the window. 0 when the window holds only bare moments. */
   total_pebbles: number | null
   /** 0–100 percent values. Null when total_pebbles = 0. */
   pct_with_picture: number | null
   pct_in_collection: number | null
+  /** In at least one collection carrying a user-carved glyph (see PebbleVolumeRow). */
   pct_with_custom_glyph: number | null
   pct_with_thought: number | null
   pct_with_soul: number | null
   pct_with_intensity: number | null
+  /** Moments recorded (created) in the window, completed or not. */
+  total_moments: number | null
+  /**
+   * 0–100 share of the window's moments that carry a pebble, whenever it was
+   * completed. Null when total_moments = 0.
+   */
+  pct_moments_completed: number | null
 }
 
 export interface EmotionShareWeeklyRow {
