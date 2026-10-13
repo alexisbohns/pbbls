@@ -4,8 +4,8 @@ import os
 /// Pushed detail view for a single soul.
 ///
 /// - Compact header: 56pt glyph thumbnail + name + pebble count.
-/// - Below the header: pebbles tagged with this soul (filtered via
-///   `pebble_souls` inner join).
+/// - Below the header: moments whose pebble carries this soul
+///   (`MomentsService.moments(taggedWithSoul:)`).
 /// - Edit toolbar action presents `EditSoulSheet`. The sheet receives the
 ///   already-fetched `SoulWithGlyph` so its glyph row renders immediately
 ///   without a second fetch.
@@ -15,12 +15,12 @@ struct SoulDetailView: View {
     @Environment(SupabaseService.self) private var supabase
 
     @State private var soulWithGlyph: SoulWithGlyph
-    @State private var pebbles: [Pebble] = []
+    @State private var moments: [MomentSummary] = []
     @State private var isLoading = true
     @State private var loadError: String?
-    @State private var selectedPebbleId: UUID?
+    @State private var selectedMomentId: UUID?
     @State private var isPresentingEdit = false
-    @State private var pendingDeletion: Pebble?
+    @State private var pendingDeletion: MomentSummary?
     @State private var deleteError: String?
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.soul.detail")
@@ -47,23 +47,23 @@ struct SoulDetailView: View {
                     onChanged()
                 })
             }
-            .sheet(item: $selectedPebbleId) { id in
-                EditPebbleSheet(pebbleId: id, onSaved: {
+            .sheet(item: $selectedMomentId) { id in
+                EditPebbleSheet(momentId: id, onSaved: {
                     Task { await load() }
                 })
             }
             .confirmationDialog(
-                pendingDeletion.map { "Delete \($0.name)?" } ?? "",
+                pendingDeletion.map { "Delete \(MomentName.display($0.name) ?? String(localized: "Untitled"))?" } ?? "",
                 isPresented: Binding(
                     get: { pendingDeletion != nil },
                     set: { if !$0 { pendingDeletion = nil } }
                 ),
                 titleVisibility: .visible,
                 presenting: pendingDeletion
-            ) { pebble in
+            ) { moment in
                 Button("Delete", role: .destructive) {
                     TapHaptics.play(.warning)
-                    Task { await delete(pebble) }
+                    Task { await delete(moment) }
                 }
                 Button("Cancel", role: .cancel) {
                     pendingDeletion = nil
@@ -93,7 +93,7 @@ struct SoulDetailView: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(soulWithGlyph.name)
                     .pebblesFont(.bodyLeadHand)
-                Text("^[\(pebbles.count) pebbles](inflect: true)")
+                Text("^[\(moments.count) pebbles](inflect: true)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -117,7 +117,7 @@ struct SoulDetailView: View {
         } else {
             VStack(spacing: 0) {
                 header
-                if pebbles.isEmpty {
+                if moments.isEmpty {
                     ContentUnavailableView(
                         "No pebbles yet",
                         systemImage: "circle.grid.2x1",
@@ -126,13 +126,13 @@ struct SoulDetailView: View {
                     .frame(maxHeight: .infinity)
                 } else {
                     List {
-                        ForEach(Array(pebbles.enumerated()), id: \.element.id) { index, pebble in
+                        ForEach(Array(moments.enumerated()), id: \.element.id) { index, moment in
                             PebbleRow(
-                                pebble: pebble,
-                                onTap: { selectedPebbleId = pebble.id },
-                                onDelete: { pendingDeletion = pebble }
+                                moment: moment,
+                                onTap: { selectedMomentId = moment.id },
+                                onDelete: { pendingDeletion = moment }
                             )
-                            .pebblesListRow(position: pebblesRowPosition(index: index, count: pebbles.count))
+                            .pebblesListRow(position: pebblesRowPosition(index: index, count: moments.count))
                         }
                     }
                     .pebblesList()
@@ -161,33 +161,22 @@ struct SoulDetailView: View {
         isLoading = true
         loadError = nil
         do {
-            let columns = "id, name, happened_at, created_at, intensity, positiveness, render_svg"
-                + ", emotion:emotions(id, slug, name)"
-                + ", pebble_souls!inner(soul_id)"
-            let result: [Pebble] = try await supabase.client
-                .from("pebbles")
-                .select(columns)
-                .eq("pebble_souls.soul_id", value: soulWithGlyph.id)
-                .order("happened_at", ascending: false)
-                .execute()
-                .value
-            self.pebbles = result
+            self.moments = try await MomentsService(client: supabase.client)
+                .moments(taggedWithSoul: soulWithGlyph.id)
         } catch {
-            logger.error("soul pebbles fetch failed: \(error.localizedDescription, privacy: .private)")
+            logger.error("soul moments fetch failed: \(error.localizedDescription, privacy: .private)")
             self.loadError = "Something went wrong. Please try again."
         }
         self.isLoading = false
     }
 
-    private func delete(_ pebble: Pebble) async {
+    private func delete(_ moment: MomentSummary) async {
         pendingDeletion = nil
         do {
-            try await supabase.client
-                .rpc("delete_pebble", params: ["p_pebble_id": pebble.id.uuidString])
-                .execute()
+            try await MomentDeletion.deleteMoment(moment.id, client: supabase.client)
             await load()
         } catch {
-            logger.error("delete pebble failed: \(error.localizedDescription, privacy: .private)")
+            logger.error("delete moment failed: \(error.localizedDescription, privacy: .private)")
             deleteError = "Something went wrong. Please try again."
         }
     }
