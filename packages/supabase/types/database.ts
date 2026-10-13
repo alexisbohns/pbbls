@@ -2570,11 +2570,13 @@ export type Database = {
         Args: { p_end: string; p_start: string }
         Returns: {
           pct_in_collection: number
+          pct_moments_completed: number
           pct_with_custom_glyph: number
           pct_with_intensity: number
           pct_with_picture: number
           pct_with_soul: number
           pct_with_thought: number
+          total_moments: number
           total_pebbles: number
         }[]
       }
