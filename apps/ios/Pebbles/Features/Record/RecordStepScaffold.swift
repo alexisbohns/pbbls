@@ -12,6 +12,14 @@ enum RecordStepAction {
     case primary(LocalizedStringResource, enabled: Bool, loading: Bool, () -> Void)
 }
 
+/// A quieter text button under the primary one. Capture's name step uses it
+/// for "Make it a pebble now" (A1).
+struct RecordStepSecondaryAction {
+    let label: LocalizedStringResource
+    let enabled: Bool
+    let perform: () -> Void
+}
+
 /// Shared geometry for every step: a title, a content slot, and one optional
 /// button beneath it.
 ///
@@ -29,6 +37,9 @@ struct RecordStepScaffold<Content: View>: View {
     /// steps whose action is always enabled should, since a disabled pill is
     /// an outline and would not read over a photo.
     var contentFillsHeight: Bool = false
+    /// Shown under the primary action. Ignored when `contentFillsHeight`,
+    /// whose floating pill has no room beneath it.
+    var secondaryAction: RecordStepSecondaryAction?
     @ViewBuilder let content: () -> Content
 
     var body: some View {
@@ -64,9 +75,22 @@ struct RecordStepScaffold<Content: View>: View {
                 .scrollBounceBehavior(.basedOnSize)
 
                 if let action {
-                    actionView(action)
-                        .padding(.horizontal, Spacing.lg)
-                        .padding(.bottom, Spacing.sm)
+                    VStack(spacing: Spacing.xs) {
+                        actionView(action)
+                        if let secondaryAction {
+                            Button(action: secondaryAction.perform) {
+                                Text(secondaryAction.label)
+                                    .pebblesFont(.bodyEmphasized)
+                                    .foregroundStyle(Color.accent.primary)
+                                    .frame(maxWidth: .infinity, minHeight: 44)
+                            }
+                            .buttonStyle(.plain)
+                            .disabled(!secondaryAction.enabled)
+                            .opacity(secondaryAction.enabled ? 1 : 0.4)
+                        }
+                    }
+                    .padding(.horizontal, Spacing.lg)
+                    .padding(.bottom, Spacing.sm)
                 }
             }
         }
