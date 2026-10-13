@@ -40,3 +40,20 @@ struct CompletePebblePayload: Encodable, Equatable {
         try container.encodeIfPresent(lower(collectionIds), forKey: .collectionIds)
     }
 }
+
+extension CompletePebblePayload {
+    /// A full completion from the flow or Edit pebble (A2). Nil until the
+    /// draft is complete, so a caller cannot send a half pebble.
+    init?(momentId: UUID, draft: CompleteDraft) {
+        guard draft.isComplete, let valence = draft.valence,
+              let emotionId = draft.emotionId, let domainId = draft.domainId else { return nil }
+        self.init(momentId: momentId)
+        self.emotionId = emotionId
+        self.intensity = valence.intensity
+        self.positiveness = valence.positiveness
+        self.visibility = draft.visibility
+        self.domainIds = [domainId]
+        self.soulIds = draft.soulIds
+        self.collectionIds = draft.collectionId.map { [$0] } ?? []
+    }
+}
