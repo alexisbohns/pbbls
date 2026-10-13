@@ -13,6 +13,8 @@ struct EditCollectionSheet: View {
     @State private var name: String
     @State private var mode: CollectionMode?
     @State private var glyph: Glyph?
+    /// The joined glyph can be absent while `glyph_id` is set; only a user change may rewrite the column.
+    @State private var glyphTouched = false
     @State private var isSaving = false
     @State private var saveError: String?
 
@@ -33,7 +35,7 @@ struct EditCollectionSheet: View {
     private var canSave: Bool {
         guard !trimmedName.isEmpty else { return false }
         return trimmedName != collection.name || mode != collection.mode
-            || glyph?.id != collection.glyphId
+            || (glyphTouched && glyph?.id != collection.glyphId)
     }
 
     var body: some View {
@@ -48,6 +50,7 @@ struct EditCollectionSheet: View {
                     Text("Name").pebblesSectionHeader()
                 }
                 CollectionGlyphSection(glyph: $glyph)
+                    .onChange(of: glyph?.id) { glyphTouched = true }
                 Section {
                     Picker("Mode", selection: $mode) {
                         Text("None").tag(CollectionMode?.none)
@@ -95,7 +98,7 @@ struct EditCollectionSheet: View {
         isSaving = true
         saveError = nil
         do {
-            let payload = CollectionUpdatePayload(name: trimmedName, mode: mode?.rawValue, glyphId: glyph?.id)
+            let payload = CollectionUpdatePayload(name: trimmedName, mode: mode?.rawValue, glyphId: glyphTouched ? glyph?.id : collection.glyphId)
             try await supabase.client
                 .from("collections")
                 .update(payload)

@@ -115,4 +115,18 @@ struct CollectionDecodingTests {
         #expect(try JSONDecoder().decode(Collection.self, from: explicit).glyph == nil)
         #expect(try JSONDecoder().decode(Collection.self, from: missing).glyphId == nil)
     }
+
+    @Test("decodes a joined system glyph with null user_id and null name")
+    func systemGlyph() throws {
+        let json = Data("""
+        {"id":"55555555-5555-4555-8555-555555555555","name":"A","mode":null,
+         "glyph_id":"66666666-6666-4666-8666-666666666666",
+         "glyph":{"id":"66666666-6666-4666-8666-666666666666","name":null,
+                  "strokes":[{"d":"M 20,100 Q 100,20 180,100","width":6}],
+                  "view_box":"0 0 200 200","user_id":null}}
+        """.utf8)
+        let collection = try JSONDecoder().decode(Collection.self, from: json)
+        #expect(collection.glyph?.id == UUID(uuidString: "66666666-6666-4666-8666-666666666666"))
+        #expect(collection.glyph?.name == nil)
+    }
 }

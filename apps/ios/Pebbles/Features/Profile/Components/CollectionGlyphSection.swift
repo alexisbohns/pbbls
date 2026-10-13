@@ -19,13 +19,18 @@ struct CollectionGlyphSection: View {
                             .strokeBorder(style: StrokeStyle(lineWidth: 1, dash: [3]))
                             .frame(width: 32, height: 32)
                             .foregroundStyle(.secondary)
+                            .accessibilityHidden(true)
                     }
                     Text("Tap to choose").foregroundStyle(.primary)
                     Spacer()
                     Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
+                        .accessibilityHidden(true)
                 }
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(Text("Glyph"))
+            .accessibilityValue(glyph == nil ? Text("None") : Text(verbatim: glyph?.name ?? ""))
+            .accessibilityHint(Text("Tap to choose"))
             .pebblesListRow(position: glyph == nil ? .only : .top)
             if glyph != nil {
                 Button("Remove glyph", role: .destructive) { glyph = nil }
