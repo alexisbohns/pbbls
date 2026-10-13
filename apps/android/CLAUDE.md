@@ -128,7 +128,7 @@ next preference added is where the migration happens. Route it then.
   - `ServiceBindings`: `@Binds` from each `…Servicing` interface to its
     implementation. It grows one line per interface, and an interface exists
     only once a test needs a fake of it.
-  - `ServiceModule`: three services assembled by hand, each for a reason written
+  - `ServiceModule`: two services assembled by hand, each for a reason written
     in its KDoc. Do not grow it. Needing a qualifier is not a reason; qualifiers
     on constructor parameters are inferred.
   - `DispatchersModule`: `@IoDispatcher`, `@DefaultDispatcher`, `@MainDispatcher`
@@ -464,15 +464,15 @@ Do not bring it back for a single asset.
 
 ## Behavior that mirrors iOS on purpose
 
-- **Two composers coexist (M58, #725).** The eleven-step record flow
-  (`features/path/record/`) is the default: tapping "New pebble" opens it,
-  **long-pressing it opens `CreatePebbleScreen`**, and resuming a draft enters
-  the flow at its first unanswered mandatory step. Neither is dead code, and
-  `EditPebbleScreen` needs `PebbleForm` regardless. Every record-flow
-  interaction goes through its ViewModel so the haptic-on-every-tap rule is
-  structural. The step order carries three dependencies (photo→when for EXIF,
-  valence→emotion for category ordering, privacy last against publish), so
-  reordering keeps the cost and drops the reason.
+- **Capture and Complete (#1048).** New pebble opens Capture (photo · when ·
+  name → `save_moment`); Complete (valence · emotion · domain · souls ·
+  collection · privacy → `complete_pebble`) opens from the read page of an
+  uncompleted moment or from Capture's "Make it a pebble now". Editing is two
+  screens with one write each, both from the read page's ⋮ menu:
+  `EditMomentScreen` (`save_moment`) and `EditPebbleScreen` (`complete_pebble`).
+  Every flow interaction goes through its state machine, so the
+  haptic-on-every-tap rule stays structural. Spec:
+  `docs/superpowers/specs/2026-10-11-moments-and-pebbles-split-design.md` §6.
 - **Onboarding illustrations are a placeholder** (`OnboardingImage.Placeholder`)
   until the iOS artwork is exported to Android drawables.
 
@@ -524,7 +524,7 @@ Do not bring it back for a single asset.
      `testing/FakeServicesModule`: every `…Servicing` seam bound to its fake,
      and a `SupabaseClient` on a Ktor `MockEngine` for the services with no
      seam, so nothing reaches a network or `BuildConfig`. Inject the fake
-     (`FakePathService`), arm it, *then* `launch()`. Find nodes by string
+     (`FakeMomentReadService`), arm it, *then* `launch()`. Find nodes by string
      resource (`onText(R.string.…)`) and fall back to `JourneyTags` only for
      what has no text. A bar the navigation suite hides stays composed
      off-screen: assert `assertIsNotDisplayed()`, not `assertDoesNotExist()`.

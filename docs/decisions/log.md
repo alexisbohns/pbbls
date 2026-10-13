@@ -1069,3 +1069,21 @@ Append-only ledger of **significant** product/engineering decisions. One terse e
   - Deleted: `PathWall`, `PathPolaroid`, `PathStone`, `WeekPath`, `PathPebbleRow`, `path-layout` (and its round-robin test, succeeded by `spine-week.test.ts`), `polaroid-chaos` and the `/sandbox/path` route. The fixture week lives on `/sandbox/design`.
 - **Supersedes / Superseded-by:** Supersedes 2026-08-23 "Path becomes a polaroid wall on web; masonry is dealt round-robin, never height-balanced" (#720).
 - **Refs:** #1052, PRs #1057, #1062, #1064, #1067, #1068 and this one, `docs/superpowers/specs/2026-10-11-web-path-spine-design.md`, `apps/web/components/path/spine/`, `apps/web/components/pebble/stone/`.
+
+## 2026-10-13 — Mobile composers on the moments split: photo removal rides save_moment, collection glyph is a column write, delete asks pebble-or-moment (#1047, #1048)
+
+- **Status:** taken
+- **Scope:** ios, android, api
+- **Context:** After the split (#1046) both apps replaced the eleven-step composer with Capture (`save_moment`) and Complete (`complete_pebble`). The edit form, photo removal, deletion and the collection glyph each had a tempting shortcut that the two plans first answered differently; the reconciliation (R1–R15 in `docs/superpowers/plans/2026-10-13-android-moments-composer.md`) settled them for both.
+- **Decision:**
+  - **R5 — editing is two screens, one write each.** Edit moment (when, name, description, photo) calls only `save_moment`; Edit pebble (emotion, domain, valence, souls, collection, privacy) calls only `complete_pebble`. Never two writes behind one Save.
+  - **R6 — photo removal rides `save_moment`.** Removing the photo detaches it in the form; Save sends the whole `snaps` set (`[]` when removed), and old files are deleted best-effort after a successful save. Neither app calls `delete_moment_media`.
+  - **R8 — delete asks what the user means.** A bare moment offers Delete moment (`delete_moment`). A moment carrying your pebble offers "Delete the pebble, keep the moment" (`delete_pebble`) and "Delete the moment too" (`delete_moment`).
+  - **R11 — the collection glyph is a column write.** The create and edit forms send `glyph_id` in the same insert/update as name and mode (explicit JSON null clears it); `set_collection_glyph` is not called. The `collections_glyph_usable` trigger guards both writes.
+- **Why:** Two writes behind one Save can half-succeed with no transaction around them, leaving a saved moment and a lost pebble edit. Sending the whole snap set lets the server enforce "a name or a photo" (`moment_empty`) in the same write that removes the photo; an eager `delete_moment_media` could strand a moment with neither. A single delete that always takes the moment destroys what other participants will share, and one that only takes the pebble strands moments the user meant to remove. The collection glyph is one more column of a single-row RLS-scoped write, so an extra RPC round trip adds a second, non-atomic write for nothing.
+- **Consequences:**
+  - Do not merge Edit moment and Edit pebble back into one form, re-add `delete_moment_media` to the edit path, or route the collection glyph through `set_collection_glyph`: each reintroduces the failure above.
+  - Android also deleted its long-press all-at-once composer, its drafts list and `PebbleWriteService` (`compose-pebble`); its `PebblesKey.RecordFlow`, `CreatePebble` and `Drafts` keys are gone. New pebble opens Capture; there is no long press.
+  - The retired composer's device snapshot (`composerSnapshot` in `pebbles_prefs`) is removed by the sign-out sweep that clears the Complete autosaves.
+- **Supersedes / Superseded-by:** Supersedes, for Android, the "two composers coexist" rule (M58, #725) in `apps/android/CLAUDE.md`.
+- **Refs:** #1047, #1048, `docs/superpowers/plans/2026-10-13-android-moments-composer.md` (Parity decisions), `docs/superpowers/specs/2026-10-11-moments-and-pebbles-split-design.md` §6.
