@@ -14,6 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.DashedPlaceholder
@@ -30,6 +33,10 @@ import app.pbbls.android.core.ui.GlyphViewCase
  * `CollectionGlyphSection`: the soul form's "tap to choose" row, **Remove
  * glyph** when one is set, and the line saying what the glyph does (its
  * pebbles inherit it). `internal` for screenshots.
+ *
+ * TalkBack reads the choose row as iOS VoiceOver does: labelled "Glyph",
+ * valued with the glyph's name, or "None" when there is no glyph. A set glyph
+ * without a name (a system glyph) gets no value rather than a blank one.
  */
 @Composable
 internal fun CollectionGlyphSection(
@@ -38,6 +45,8 @@ internal fun CollectionGlyphSection(
     onRemove: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val rowLabel = stringResource(R.string.create_glyph_header)
+    val rowValue = if (glyph == null) stringResource(R.string.collection_mode_none) else glyph.name?.takeIf { it.isNotBlank() }
     val rows =
         buildList<@Composable () -> Unit> {
             add {
@@ -62,7 +71,11 @@ internal fun CollectionGlyphSection(
                             modifier = Modifier.size(PebblesIconToken.MEDIUM.size),
                         )
                     },
-                    modifier = Modifier.clickable(onClick = onChoose),
+                    modifier =
+                        Modifier.clickable(onClick = onChoose).semantics {
+                            contentDescription = rowLabel
+                            if (rowValue != null) stateDescription = rowValue
+                        },
                     colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 )
             }
