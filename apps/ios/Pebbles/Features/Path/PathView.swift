@@ -26,6 +26,10 @@ struct PathView: View {
     @State private var isPresentingDrafts = false
     @State private var selectedMomentId: UUID?
     @State private var pendingDeletion: MomentDeleteTarget?
+    /// The latest reload Capture asked for. Capture can fire twice (after the
+    /// save, after a chained completion); the newer one cancels the older so a
+    /// slow first fetch cannot land after the second.
+    @State private var reloadTask: Task<Void, Never>?
     @State private var deleteError: String?
     /// Ignores a second delete confirmed while the first is still running.
     @State private var isDeleting = false
@@ -71,10 +75,13 @@ struct PathView: View {
         .fullScreenCover(isPresented: $isPresentingCapture) {
             // Fired after the save and again after a chained completion (A5).
             CaptureFlowView(onMomentChanged: { momentId in
-                Task {
-                    async let timeline: Void = load()
-                    async let statsReload: Void = stats.refresh()
-                    _ = await (timeline, statsReload)
+                // Not cancelled with the path reload: `refresh()` no-ops while
+                // one is running, so a cancelled refresh would drop the next.
+                Task { await stats.refresh() }
+                reloadTask?.cancel()
+                reloadTask = Task {
+                    await load()
+                    guard !Task.isCancelled else { return }
                     focusWeek(containing: momentId)
                 }
             })
@@ -206,6 +213,8 @@ struct PathView: View {
     private func load() async {
         do {
             let result = try await MomentsService(client: supabase.client).pathMoments()
+            // A newer reload replaced this one: its result is already stale.
+            guard !Task.isCancelled else { return }
             self.moments = result
             self.entries = WeekRollBuilder.build(
                 moments: result, calendar: isoCalendar, today: today
@@ -225,6 +234,8 @@ struct PathView: View {
             }
             self.isLoading = false
         } catch {
+            // Cancelled for a newer reload, not failed.
+            guard !Task.isCancelled else { return }
             logger.error("path fetch failed: \(error.localizedDescription, privacy: .private)")
             self.loadError = "Couldn't load your pebbles."
             self.isLoading = false
