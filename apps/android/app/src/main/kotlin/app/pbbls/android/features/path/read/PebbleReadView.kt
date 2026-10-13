@@ -33,7 +33,6 @@ import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.MomentDetail
 import app.pbbls.android.core.model.MomentPebble
 import app.pbbls.android.core.model.SoulRef
-import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.ui.ReferenceStrings
 import app.pbbls.android.core.ui.ReferenceType
 import app.pbbls.android.core.ui.render.GlyphImage
@@ -73,7 +72,7 @@ fun PebbleReadView(
     ) {
         PebbleReadBanner(
             glyph = pebble?.glyph,
-            valence = pebble?.valence ?: Valence.NEUTRAL_MEDIUM,
+            valence = pebble?.valence,
             palette = palette,
             modifier = Modifier.fillMaxWidth(),
             snapStoragePath = detail.sortedSnaps.firstOrNull()?.storagePath,

@@ -6,10 +6,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import app.pbbls.android.core.designsystem.toRgbHex
+import app.pbbls.android.core.model.BlankPalette
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.PebbleFrameColors
 import app.pbbls.android.core.model.PebbleGlyph
 import app.pbbls.android.core.model.Valence
+import app.pbbls.android.core.model.ValenceSizeGroup
+import app.pbbls.android.core.ui.render.BlankStone
 import app.pbbls.android.core.ui.render.PebbleOutlineGeometry
 import app.pbbls.android.core.ui.render.PebbleStone
 
@@ -25,20 +28,31 @@ import app.pbbls.android.core.ui.render.PebbleStone
  * Sized by the caller's [modifier]: the heading treatment gives it a large
  * square slot, the snap overlay a smaller one. A missing [palette] (cache cold,
  * unknown or absent emotion) falls back to the theme's `primary`, mirroring
- * `PebbleThumbnail`. [palette] and the valence data arrive as parameters so
- * screenshot previews drive it without a live client.
+ * `PebbleThumbnail`. A null [valence] is a moment without a pebble: the
+ * [BlankStone] in the fixed blank greys (R4). [palette] and the valence data
+ * arrive as parameters so screenshot previews drive it without a live client.
  */
 @Composable
 fun PebbleReadPetroglyph(
-    valence: Valence,
+    valence: Valence?,
     glyph: PebbleGlyph?,
     palette: EmotionPalette?,
     modifier: Modifier = Modifier,
 ) {
+    val isDark = isSystemInDarkTheme()
+    if (valence == null) {
+        // The fixed blank ramp through the read page's own mapping (R4).
+        val blank = petroglyphColors(BlankPalette, ValenceSizeGroup.MEDIUM, isDark)
+        BlankStone(
+            modifier = modifier,
+            colors = PebbleFrameColors(blank.strokeHex, blank.fillHex, blank.fillOpacity),
+        )
+        return
+    }
     val primary = MaterialTheme.colorScheme.primary
     val accentHex = remember(primary) { primary.toRgbHex() }
     val colors =
-        palette?.let { petroglyphColors(it, valence.sizeGroup, isSystemInDarkTheme()) }
+        palette?.let { petroglyphColors(it, valence.sizeGroup, isDark) }
             ?: PetroglyphColors(strokeHex = accentHex, fillHex = accentHex, fillOpacity = 1f)
     PebbleStone(
         valence = valence,

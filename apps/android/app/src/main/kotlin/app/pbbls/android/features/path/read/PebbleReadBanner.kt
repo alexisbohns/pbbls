@@ -51,11 +51,14 @@ private data class BannerPhoto(
  * outright, so there is no mask/slide. A failed load simply stays on the
  * Petroglyph heading — no error UI — and the pebble render is static on Android,
  * so nothing gates the swap but the decode itself.
+ *
+ * A null [valence] is a moment without a pebble: the blank stone stands in for
+ * the Petroglyph, alone or over the photo (A-8).
  */
 @Composable
 fun PebbleReadBanner(
     glyph: PebbleGlyph?,
-    valence: Valence,
+    valence: Valence?,
     palette: EmotionPalette?,
     modifier: Modifier = Modifier,
     snapStoragePath: String? = null,

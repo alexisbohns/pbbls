@@ -42,7 +42,7 @@ fun PebbleSnapFrame(
     photo: Painter,
     aspect: BannerAspect,
     glyph: PebbleGlyph?,
-    valence: Valence,
+    valence: Valence?,
     palette: EmotionPalette?,
     modifier: Modifier = Modifier,
 ) {

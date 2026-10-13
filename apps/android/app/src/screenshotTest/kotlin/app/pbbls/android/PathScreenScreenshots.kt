@@ -21,7 +21,8 @@ import java.time.OffsetDateTime
 /**
  * Full-screen previews of the read-only Path timeline (#531): the populated
  * current week (roll + header + rows + temporary sign-out) and the fresh-week
- * empty state — light and dark. Driven through the stateless [PathContent]
+ * empty state, and a week mixing completed and uncompleted moments — light and
+ * dark. Driven through the stateless [PathContent]
  * with fixture data (no services).
  */
 private val screenPalette: EmotionPalette =
@@ -76,7 +77,10 @@ private val emptyWeekEntries: List<WeekRollEntry> =
     listOf(WeekRollEntry(weekStart = LocalDate.of(2026, 7, 6), moments = emptyList()))
 
 @Composable
-private fun ScreenPreview(entries: List<WeekRollEntry>) {
+private fun ScreenPreview(
+    entries: List<WeekRollEntry>,
+    paletteFor: (PathMoment) -> EmotionPalette? = { screenPalette },
+) {
     val focused = LocalDate.of(2026, 7, 6)
     PathContent(
         entries = entries,
@@ -84,7 +88,7 @@ private fun ScreenPreview(entries: List<WeekRollEntry>) {
         focusedWeekStart = focused,
         today = pathPreviewToday,
         onFocusChange = {},
-        paletteFor = { screenPalette },
+        paletteFor = paletteFor,
         // Mirrors PathScreen: the timeline is the readable column (#855), a
         // no-op at phone widths.
         modifier =
@@ -118,4 +122,41 @@ fun PathScreenPopulatedDark() {
 @Composable
 fun PathScreenFreshWeekLight() {
     PebblesTheme { ScreenPreview(emptyWeekEntries) }
+}
+
+/**
+ * A week mixing a completed pebble, a photo-only capture ("Untitled", R3) and a
+ * named moment without its pebble: both uncompleted ones draw the blank stone
+ * (R4), with no palette, as `PathScreen` resolves it.
+ */
+private val mixedWeekEntries: List<WeekRollEntry> =
+    listOf(
+        WeekRollEntry(
+            weekStart = LocalDate.of(2026, 7, 6),
+            moments =
+                listOf(
+                    moment("Concert with Lea", "2026-07-10T21:30:00+00:00", Valence.HIGHLIGHT_LARGE),
+                    MomentPreviewFixtures.pathMoment(
+                        id = "photo-only",
+                        name = null,
+                        happenedAt = OffsetDateTime.parse("2026-07-09T12:05:00+00:00"),
+                        firstSnapPath = "user-1/snap-1",
+                        pebble = null,
+                    ),
+                    MomentPreviewFixtures.pathMoment(
+                        id = "named-bare",
+                        name = "Bus stop sunset",
+                        happenedAt = OffsetDateTime.parse("2026-07-07T19:40:00+00:00"),
+                        pebble = null,
+                    ),
+                ),
+        ),
+    )
+
+@PreviewTest
+@Preview(showBackground = true)
+@PreviewFrench
+@Composable
+fun PathScreen_MixedWeek() {
+    PebblesTheme { ScreenPreview(mixedWeekEntries, paletteFor = { if (it.isCompleted) screenPalette else null }) }
 }

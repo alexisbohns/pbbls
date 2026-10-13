@@ -175,7 +175,7 @@ private val noDomainDetail: MomentDetail =
         valence = Valence.LOWLIGHT_MEDIUM,
     )
 
-/** A capture without its pebble yet: no tiles, no souls, no privacy badge, no share (A-8). */
+/** A capture without its pebble yet: the blank stone heading, no tiles, no souls, no privacy badge, no share (A-8). */
 private val bareMoment: MomentDetail =
     MomentPreviewFixtures.momentDetail(
         name = null,
@@ -362,7 +362,7 @@ private val previewSnap = ColorPainter(Color(0xFF6B7A8F))
 @Composable
 private fun SnapFramePreview(
     aspect: BannerAspect,
-    valence: Valence,
+    valence: Valence?,
 ) {
     PebbleSnapFrame(
         photo = previewSnap,
@@ -411,4 +411,12 @@ fun PebbleSnapPortraitLargeLight() {
 @Composable
 fun PebbleSnapPortraitLargeDark() {
     PebblesTheme { SnapFramePreview(BannerAspect.THREE_FOUR, Valence.HIGHLIGHT_LARGE) }
+}
+
+/** A moment without its pebble over its photo: the blank stone pokes out of the corner (A-8). */
+@PreviewTest
+@Preview(showBackground = true)
+@Composable
+fun PebbleSnap_BlankStone() {
+    PebblesTheme { SnapFramePreview(BannerAspect.FOUR_THREE, valence = null) }
 }
