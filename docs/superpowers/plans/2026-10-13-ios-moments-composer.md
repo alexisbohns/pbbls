@@ -1723,9 +1723,10 @@ enum MomentDeletion {
             retryDelay: .milliseconds(1)
         )
         coordinator.detachExisting()
+        let detached = coordinator.detachedStoragePaths
 
-        await coordinator.purgeDetached()
-        await coordinator.purgeDetached()
+        await coordinator.purgeDetached(detached)
+        await coordinator.purgeDetached(detached)
 
         #expect(repo.calls == [.deleteFilesByPrefix(prefix: "uid/sid")])
         #expect(coordinator.detachedStoragePaths.isEmpty)
@@ -4906,10 +4907,12 @@ struct EditMomentSheet: View {
         isSaving = true
         saveError = nil
         let payload = SaveMomentPayload(edit: draft, momentId: detail.id, formSnap: snaps?.formSnap, userId: userId)
+        let detachedAtSave = snaps?.detachedStoragePaths ?? []
         do {
             _ = try await MomentsService(client: supabase.client).saveMoment(payload)
-            // R6: the rows are gone; now the detached (or replaced) files.
-            await snaps?.purgeDetached()
+            // R6: the rows are gone; now the files detached when the payload
+            // was built, best-effort and without holding the sheet open.
+            if let snaps { Task { await snaps.purgeDetached(detachedAtSave) } }
             onSaved()
             dismiss()
         } catch {
@@ -5146,6 +5149,6 @@ If the `arkaik-mcp` tools are not available, say so and stop. Never edit `docs/a
 ## Self-review (run once the plan was written)
 
 - **Spec coverage.** §6 Capture flow, Part 5. Complete flow, Part 4. Path blank stone, Parts 2–3. Read page CTA, Part 4. Collection glyph picker, Part 7. Glyph library pebble tab, Part 7 (none on iOS). Per-moment autosave, Part 4. Drafts list and service removed, Part 6. Decoder tests with null pebble, explicit null name, photo-only, whole-second and fractional timestamps, Part 1 fixtures. Brief: every compat object removed (Inventory 1, final gate in Part 7); `check_achievements` after completion (A4, Parts 4 and 6); delete UX decided (R8, Part 3); edit split (R5, Part 6). Reconciliation R1–R13 with the Android plan: copy (R1, R3, R10, copy catalog), capture close (R2, Part 5), blank stone outline + label (R4, Part 2), photo removal through `save_moment` with no `delete_moment_media` (R6, Tasks 1.8 and 6.2), read page overflow menu (R7, Parts 3 and 6), detail rows open the read page (R9, Part 3), collection glyph on create and edit (R11, Part 7), success screen (R12, Part 4), karma delta (R13, Parts 4 and 6).
-- **Type consistency.** `MomentSummary` / `.PebbleSummary`, `MomentDetail` / `.Pebble` / `.Snap` / `.SoulRef` / `.CollectionRef`, `PebbleGlyph`, `SaveMomentPayload` (+ `capture:`, `edit:`), `CompletePebblePayload` (+ `init?(momentId:draft:)`), `MomentsService`, `MomentDeletion` (`deleteMoment`, `deletePebble`, `perform`, with `drafts:` from Part 4), `MomentDeleteTarget`, `MomentDeleteOption`, `StoneCarving`, `StoneCarvingArt.art(for:glyph:)` / `.blankArt(for:)` / `.placedGlyphInk(strokes:viewBoxSide:size:polarity:)`, `StonePalette.blank`, `SnapUploadCoordinator.detachExisting()` / `.purgeDetached()` / `.detachedStoragePaths` (Task 1.8), `CollectionGlyphSection`, `CollectionInsertPayload.glyphId`, `CollectionUpdatePayload.glyphId`, `PebbleStoneView(valence:glyph:palette:followsTilt:)` and `.blank(followsTilt:)`, `CompleteStep`, `CompleteDraft`, `CompleteDraftStore`, `CompleteAutosave`, `CompleteDraftSnapshot`, `CompleteFlowModel`, `CompletionResult`, `CompleteFlowView(momentId:momentName:onCompleted:)`, `CaptureStep`, `CaptureDraft`, `CaptureFlowModel`, `CaptureFlowView(onMomentChanged:)`, `RecordFlowChrome(dotCount:dotIndex:canGoBack:onBack:onClose:)`, `RecordStepSecondaryAction`, `EditMomentDraft`, `EditMomentSheet(detail:onSaved:)`, `EditPebbleSheet(momentId:pebble:onSaved:)`, `MomentNameText`, `MomentName.display`. Each one is introduced in an earlier task than its first use.
+- **Type consistency.** `MomentSummary` / `.PebbleSummary`, `MomentDetail` / `.Pebble` / `.Snap` / `.SoulRef` / `.CollectionRef`, `PebbleGlyph`, `SaveMomentPayload` (+ `capture:`, `edit:`), `CompletePebblePayload` (+ `init?(momentId:draft:)`), `MomentsService`, `MomentDeletion` (`deleteMoment`, `deletePebble`, `perform`, with `drafts:` from Part 4), `MomentDeleteTarget`, `MomentDeleteOption`, `StoneCarving`, `StoneCarvingArt.art(for:glyph:)` / `.blankArt(for:)` / `.placedGlyphInk(strokes:viewBoxSide:size:polarity:)`, `StonePalette.blank`, `SnapUploadCoordinator.detachExisting()` / `.purgeDetached(_:)` / `.detachedStoragePaths` (Task 1.8), `CollectionGlyphSection`, `CollectionInsertPayload.glyphId`, `CollectionUpdatePayload.glyphId`, `PebbleStoneView(valence:glyph:palette:followsTilt:)` and `.blank(followsTilt:)`, `CompleteStep`, `CompleteDraft`, `CompleteDraftStore`, `CompleteAutosave`, `CompleteDraftSnapshot`, `CompleteFlowModel`, `CompletionResult`, `CompleteFlowView(momentId:momentName:onCompleted:)`, `CaptureStep`, `CaptureDraft`, `CaptureFlowModel`, `CaptureFlowView(onMomentChanged:)`, `RecordFlowChrome(dotCount:dotIndex:canGoBack:onBack:onClose:)`, `RecordStepSecondaryAction`, `EditMomentDraft`, `EditMomentSheet(detail:onSaved:)`, `EditPebbleSheet(momentId:pebble:onSaved:)`, `MomentNameText`, `MomentName.display`. Each one is introduced in an earlier task than its first use.
 - **Existing types relied on (checked on main):** `ISO8601Flexible`, `Valence.from(positiveness:intensity:)`, `Visibility`, `GlyphStroke`, `Glyph`, `SoulWithGlyph.glyph`, `FormSnap`, `AttachedSnap.storagePrefix(userId:)`, `SnapUploadCoordinator` (`handlePicked`, `retryCurrent`, `removePending`, `cancelAndCleanup`, `seedExisting`, `isUploading`, `hasFailed`, `isBlocking`, `pickedCaptureDate`, `formSnap`), `PebbleSnapRepository.deleteFiles(storagePrefix:)`, `TapHaptic` / `TapHaptics`, `RecordStepScaffold`, `RecordStepAction.primary`, `RecordPhotoStep` / `RecordWhenStep` / `RecordNameStep`, `ValencePickerContent`, `EmotionPickerContent`, `DomainPickerContent`, `SoulPickerContent`, `CreateSoulSheet`, `GlyphPickerSheet`, `GlyphView`, `PhotoPickerView`, `ExistingSnapRow`, `AttachedPhotoView`, `SelectedSoulsRow`, `VisibilityChip`, `KarmaNotificationService.notifyEarned(amount:reason:presentsCapsule:)`, `AchievementsService.fireCheck()`, `ReferenceDataService` (`souls`, `collections`, `domains`, `hasLoaded`, `refreshSouls`), `EmotionPaletteService.palette(for:)`, `StoneCarvingArt.glyphTransform`, `WobbleRenderer.glyphInk(d:width:)`, `PebblesPrimaryButtonStyle`, `SharedPebbleLink.url(for:)`.
 - **Known risk to watch in review.** `PebbleRow`'s palette expression and `PathPebbleRow`'s preview need a hand-built `MomentSummary`. `MomentSummary.PebbleSummary` has a synthesized memberwise init because it declares no custom one; `MomentDetail.Pebble` does not, which is why no test constructs it by hand.
