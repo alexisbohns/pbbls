@@ -91,4 +91,42 @@ struct CollectionDecodingTests {
             #expect(collection.mode?.rawValue == raw)
         }
     }
+
+    @Test("decodes the collection's glyph when the select embeds it")
+    func decodesGlyph() throws {
+        let json = Data("""
+        {"id":"55555555-5555-4555-8555-555555555555","name":"Autumn","mode":null,
+         "glyph_id":"66666666-6666-4666-8666-666666666666",
+         "glyph":{"id":"66666666-6666-4666-8666-666666666666","name":"Leaf",
+                  "strokes":[{"d":"M 20,100 Q 100,20 180,100","width":6}],
+                  "view_box":"0 0 200 200","user_id":"5f0e1d2c-3b4a-4958-8776-655443322110"},
+         "pebble_count":[{"count":3}]}
+        """.utf8)
+        let collection = try JSONDecoder().decode(Collection.self, from: json)
+        #expect(collection.glyphId == UUID(uuidString: "66666666-6666-4666-8666-666666666666"))
+        #expect(collection.glyph?.name == "Leaf")
+        #expect(collection.pebbleCount == 3)
+    }
+
+    @Test("an explicit null glyph and a missing one both decode to nil")
+    func nullGlyph() throws {
+        let explicit = Data(#"{"id":"55555555-5555-4555-8555-555555555555","name":"A","mode":"stack","glyph_id":null,"glyph":null}"#.utf8)
+        let missing = Data(#"{"id":"55555555-5555-4555-8555-555555555555","name":"A","mode":"stack"}"#.utf8)
+        #expect(try JSONDecoder().decode(Collection.self, from: explicit).glyph == nil)
+        #expect(try JSONDecoder().decode(Collection.self, from: missing).glyphId == nil)
+    }
+
+    @Test("decodes a joined system glyph with null user_id and null name")
+    func systemGlyph() throws {
+        let json = Data("""
+        {"id":"55555555-5555-4555-8555-555555555555","name":"A","mode":null,
+         "glyph_id":"66666666-6666-4666-8666-666666666666",
+         "glyph":{"id":"66666666-6666-4666-8666-666666666666","name":null,
+                  "strokes":[{"d":"M 20,100 Q 100,20 180,100","width":6}],
+                  "view_box":"0 0 200 200","user_id":null}}
+        """.utf8)
+        let collection = try JSONDecoder().decode(Collection.self, from: json)
+        #expect(collection.glyph?.id == UUID(uuidString: "66666666-6666-4666-8666-666666666666"))
+        #expect(collection.glyph?.name == nil)
+    }
 }

@@ -180,7 +180,7 @@ struct CollectionDetailView: View {
         do {
             let refreshed: Collection = try await supabase.client
                 .from("collections")
-                .select("id, name, mode, pebble_count:collection_pebbles(count)")
+                .select("id, name, mode, glyph_id, glyph:glyphs(id, name, strokes, view_box, user_id), pebble_count:collection_pebbles(count)")
                 .eq("id", value: collection.id)
                 .single()
                 .execute()

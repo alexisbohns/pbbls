@@ -17,10 +17,13 @@ struct Collection: Identifiable, Decodable, Hashable {
     let id: UUID
     let name: String
     let mode: CollectionMode?
+    let glyphId: UUID?
+    let glyph: Glyph?
     let pebbleCount: Int
 
     enum CodingKeys: String, CodingKey {
-        case id, name, mode
+        case id, name, mode, glyph
+        case glyphId = "glyph_id"
         case pebbleCount = "pebble_count"
     }
 
@@ -31,6 +34,8 @@ struct Collection: Identifiable, Decodable, Hashable {
         self.id = try container.decode(UUID.self, forKey: .id)
         self.name = try container.decode(String.self, forKey: .name)
         self.mode = try container.decodeIfPresent(CollectionMode.self, forKey: .mode)
+        self.glyphId = try container.decodeIfPresent(UUID.self, forKey: .glyphId)
+        self.glyph = try container.decodeIfPresent(Glyph.self, forKey: .glyph)
 
         if let wrappers = try? container.decode([CountWrapper].self, forKey: .pebbleCount) {
             self.pebbleCount = wrappers.first?.count ?? 0

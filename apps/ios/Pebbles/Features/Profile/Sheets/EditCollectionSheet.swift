@@ -12,6 +12,9 @@ struct EditCollectionSheet: View {
 
     @State private var name: String
     @State private var mode: CollectionMode?
+    @State private var glyph: Glyph?
+    /// The joined glyph can be absent while `glyph_id` is set; only a user change may rewrite the column.
+    @State private var glyphTouched = false
     @State private var isSaving = false
     @State private var saveError: String?
 
@@ -22,6 +25,7 @@ struct EditCollectionSheet: View {
         self.onSaved = onSaved
         self._name = State(initialValue: collection.name)
         self._mode = State(initialValue: collection.mode)
+        self._glyph = State(initialValue: collection.glyph)
     }
 
     private var trimmedName: String {
@@ -31,6 +35,7 @@ struct EditCollectionSheet: View {
     private var canSave: Bool {
         guard !trimmedName.isEmpty else { return false }
         return trimmedName != collection.name || mode != collection.mode
+            || (glyphTouched && glyph?.id != collection.glyphId)
     }
 
     var body: some View {
@@ -44,6 +49,8 @@ struct EditCollectionSheet: View {
                 } header: {
                     Text("Name").pebblesSectionHeader()
                 }
+                CollectionGlyphSection(glyph: $glyph)
+                    .onChange(of: glyph?.id) { glyphTouched = true }
                 Section {
                     Picker("Mode", selection: $mode) {
                         Text("None").tag(CollectionMode?.none)
@@ -91,7 +98,7 @@ struct EditCollectionSheet: View {
         isSaving = true
         saveError = nil
         do {
-            let payload = CollectionUpdatePayload(name: trimmedName, mode: mode?.rawValue)
+            let payload = CollectionUpdatePayload(name: trimmedName, mode: mode?.rawValue, glyphId: glyphTouched ? glyph?.id : collection.glyphId)
             try await supabase.client
                 .from("collections")
                 .update(payload)
@@ -112,15 +119,18 @@ struct EditCollectionSheet: View {
 struct CollectionUpdatePayload: Encodable {
     let name: String
     let mode: String?
+    let glyphId: UUID?
 
     enum CodingKeys: String, CodingKey {
         case name
         case mode
+        case glyphId = "glyph_id"
     }
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(name, forKey: .name)
         try container.encode(mode, forKey: .mode) // encodes nil as JSON null
+        try container.encode(glyphId?.uuidString.lowercased(), forKey: .glyphId) // null clears (R11)
     }
 }
