@@ -2292,8 +2292,8 @@ enum StoneCarving: Hashable {
     /// valence, plus its derived glyph's strokes, wobbled and placed in the
     /// engine's slot exactly as the sample glyph is. Nil glyph → veins only.
     /// Strokes that do not wobble are skipped and logged. Cached per
-    /// (valence, glyph id): a glyph's strokes never change after carving
-    /// (`GlyphService` only renames).
+    /// (valence, glyph id) and validated against the glyph's content: an admin
+    /// domain redraw keeps the id while rewriting the strokes.
     static func art(for valence: Valence, glyph: PebbleGlyph?) -> Art? {
         guard let seed = art(for: valence) else { return nil }
         guard let glyph else {
