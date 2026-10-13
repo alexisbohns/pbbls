@@ -3,8 +3,13 @@ package app.pbbls.android.ui
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeRight
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
+import app.pbbls.android.features.path.PathFocusRequests
+import app.pbbls.android.features.path.WeekHeaderFormatting
+import app.pbbls.android.features.path.WeekRollBuilder
 import app.pbbls.android.testing.AppUiTest
 import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.UiFixtures
@@ -12,7 +17,10 @@ import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.io.IOException
+import java.time.LocalDate
 import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.util.Locale
 import javax.inject.Inject
 
 /**
@@ -25,6 +33,8 @@ import javax.inject.Inject
 @HiltAndroidTest
 class PathScreenTest : AppUiTest() {
     @Inject lateinit var path: FakeMomentReadService
+
+    @Inject lateinit var focusRequests: PathFocusRequests
 
     private fun signedIn() {
         skipOnboarding()
@@ -86,5 +96,53 @@ class PathScreenTest : AppUiTest() {
 
         compose.onNodeWithText("Coffee with Mo").assertIsDisplayed()
         onText(R.string.path_load_error).assertDoesNotExist()
+    }
+
+    /**
+     * R14 on a reload that brings new weeks: the requested moment's week wins.
+     * The pager's swipe → focus reporter re-subscribes when the entries change,
+     * and used to report the page it was still on, overwriting the request.
+     */
+    @Test
+    fun `a focus request pages the path to that moment's week on the next load`() {
+        val thisWeek = UiFixtures.pathMoment(id = "moment-now", name = "Coffee with Mo", happenedAt = OffsetDateTime.now())
+        path.path = listOf(thisWeek)
+        signedIn()
+        compose.onNodeWithText("Coffee with Mo").assertIsDisplayed()
+
+        val threeWeeksBack =
+            UiFixtures.pathMoment(id = "moment-old", name = "Lake swim", happenedAt = OffsetDateTime.now().minusWeeks(3))
+        path.path = listOf(threeWeeksBack, thisWeek)
+        focusRequests.request(threeWeeksBack.id)
+        backgroundAndReturn()
+
+        compose.onNodeWithText(weekHeader(threeWeeksBack.happenedAt)).assertIsDisplayed()
+        compose.onNodeWithText("Lake swim").assertIsDisplayed()
+        compose.onNodeWithText("Coffee with Mo").assertDoesNotExist()
+    }
+
+    /** The reload guard above must not swallow a real page change: a swipe still moves the focus. */
+    @Test
+    fun `swiping the pager back moves the focus to the previous week`() {
+        val lastWeek =
+            UiFixtures.pathMoment(id = "moment-old", name = "Lake swim", happenedAt = OffsetDateTime.now().minusWeeks(1))
+        val thisWeek = UiFixtures.pathMoment(id = "moment-now", name = "Coffee with Mo", happenedAt = OffsetDateTime.now())
+        path.path = listOf(lastWeek, thisWeek)
+        signedIn()
+        compose.onNodeWithText(weekHeader(thisWeek.happenedAt)).assertIsDisplayed()
+
+        compose.onNodeWithTag(JourneyTags.PATH_WEEK_PAGER).performTouchInput { swipeRight() }
+        compose.waitForIdle()
+
+        compose.onNodeWithText(weekHeader(lastWeek.happenedAt)).assertIsDisplayed()
+        compose.onNodeWithText("Lake swim").assertIsDisplayed()
+    }
+
+    private fun weekHeader(happenedAt: OffsetDateTime): String {
+        val locale = Locale.getDefault()
+        val day = happenedAt.atZoneSameInstant(ZoneId.systemDefault()).toLocalDate()
+        return WeekHeaderFormatting
+            .formatRange(WeekRollBuilder.weekStart(day), LocalDate.now(), locale)
+            .uppercase(locale)
     }
 }

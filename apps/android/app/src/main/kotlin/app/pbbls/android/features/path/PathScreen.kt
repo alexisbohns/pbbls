@@ -43,6 +43,7 @@ import app.pbbls.android.features.path.components.NewPebbleFab
 import app.pbbls.android.features.path.components.WeekHeader
 import app.pbbls.android.features.path.components.WeekPebbleList
 import app.pbbls.android.features.path.components.WeekRoll
+import kotlinx.coroutines.flow.drop
 import java.time.LocalDate
 import kotlin.math.abs
 
@@ -211,9 +212,11 @@ fun PathContent(
         entries.indexOfFirst { it.weekStart == initialWeekStart }.coerceAtLeast(0)
     val pagerState = rememberPagerState(initialPage = initialIndex) { entries.size }
 
-    // Swipe → focus. Keyed on entries so a (future) reload re-subscribes.
+    // Swipe → focus. Keyed on entries so a reload re-subscribes; the page in
+    // place at (re)subscription is dropped, because a reload is not a page
+    // change and reporting it would overwrite a requested focus (R14).
     LaunchedEffect(pagerState, entries) {
-        snapshotFlow { pagerState.currentPage }.collect { page ->
+        snapshotFlow { pagerState.currentPage }.drop(1).collect { page ->
             entries.getOrNull(page)?.let { onFocusChange(it.weekStart) }
         }
     }
