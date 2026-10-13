@@ -9,8 +9,8 @@ import app.pbbls.android.core.model.PebbleCompletePayload
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.testing.FakeAchievementsService
-import app.pbbls.android.testing.FakeComposerMedia
 import app.pbbls.android.testing.FakeCompleteSnapshotStore
+import app.pbbls.android.testing.FakeComposerMedia
 import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.FakeMomentWriteService
 import app.pbbls.android.testing.FakeReferenceDataService
@@ -136,7 +136,12 @@ class CompleteFlowViewModelTest {
             val flow = h.viewModel.uiState.value.flow
             assertEquals(CompleteStep.PRIVACY, flow.step)
             assertEquals(R.string.pebble_error_collection_gone, flow.errorRes)
-            assertEquals("e-1", h.snapshots.stored["m-1"]?.second?.emotionId)
+            assertEquals(
+                "e-1",
+                h.snapshots.stored["m-1"]
+                    ?.second
+                    ?.emotionId,
+            )
             assertEquals(0, h.achievements.fireCheckCount)
         }
 
@@ -162,7 +167,9 @@ class CompleteFlowViewModelTest {
             h.snapshots.save(
                 "m-1",
                 "user-1",
-                CompleteSnapshot.from(PebbleAnswers(valence = Valence.HIGHLIGHT_SMALL, emotionId = "e-1", soulIds = listOf("s-1", "s-gone"))),
+                CompleteSnapshot.from(
+                    PebbleAnswers(valence = Valence.HIGHLIGHT_SMALL, emotionId = "e-1", soulIds = listOf("s-1", "s-gone")),
+                ),
             )
             h.viewModel.start("m-1")
             advanceUntilIdle()
@@ -182,7 +189,12 @@ class CompleteFlowViewModelTest {
             h.viewModel.machine().selectEmotion("e-1")
             h.viewModel.onClose()
             advanceUntilIdle()
-            assertEquals("e-1", h.snapshots.stored["m-1"]?.second?.emotionId)
+            assertEquals(
+                "e-1",
+                h.snapshots.stored["m-1"]
+                    ?.second
+                    ?.emotionId,
+            )
             assertTrue(CompleteFlowEffect.Dismiss in effects.values)
             effects.stop()
         }

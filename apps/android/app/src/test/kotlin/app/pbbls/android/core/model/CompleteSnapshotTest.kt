@@ -59,6 +59,9 @@ class CompleteSnapshotTest {
 
     @Test
     fun `keys are per moment and lowercase`() {
-        assertEquals("completeSnapshot.7d1f6a2e-0c4b-4e8a-9b51-2f3c4d5e6f70", CompleteSnapshotStore.key("7D1F6A2E-0C4B-4E8A-9B51-2F3C4D5E6F70"))
+        assertEquals(
+            "completeSnapshot.7d1f6a2e-0c4b-4e8a-9b51-2f3c4d5e6f70",
+            CompleteSnapshotStore.key("7D1F6A2E-0C4B-4E8A-9B51-2F3C4D5E6F70"),
+        )
     }
 }
