@@ -399,6 +399,7 @@
     <string name="delete_moment_too">Supprimer aussi le moment</string>
     <string name="delete_moment">Supprimer le moment</string>
     <string name="complete_cta">En faire un galet</string>
+    <string name="capture_name_subtitle">Un nom, une photo, ou les deux.</string>
 
     <!-- ==== Atelier de glyphes (M43 · Android Glyph Studio &amp; Store) ==== -->
     <string name="carve_title">Nouveau glyphe</string>
