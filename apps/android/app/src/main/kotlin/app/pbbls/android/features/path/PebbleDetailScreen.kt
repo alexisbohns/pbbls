@@ -196,7 +196,8 @@ private fun DetailTopBar(
                     )
                 }
             }
-            var menuOpen by remember { mutableStateOf(initialMenuOpen) }
+            // Keyed on menuEnabled: a retry flipping to Loading closes the menu, and it stays closed after.
+            var menuOpen by remember(menuEnabled) { mutableStateOf(initialMenuOpen) }
             Box {
                 IconButton(onClick = { menuOpen = true }, enabled = menuEnabled) {
                     Icon(
@@ -204,7 +205,7 @@ private fun DetailTopBar(
                         contentDescription = stringResource(R.string.more_actions_a11y),
                     )
                 }
-                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                DropdownMenu(expanded = menuOpen && menuEnabled, onDismissRequest = { menuOpen = false }) {
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.edit_moment)) },
                         onClick = {

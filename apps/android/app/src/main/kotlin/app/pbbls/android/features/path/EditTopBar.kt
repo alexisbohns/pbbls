@@ -53,11 +53,11 @@ internal fun EditTopBar(
                 )
             }
         } else {
+            // No explicit colour: TextButton's content colour is primary, and dims when disabled.
             TextButton(onClick = onSave, enabled = saveEnabled) {
                 Text(
                     stringResource(R.string.action_save),
                     style = MaterialTheme.typography.labelLarge,
-                    color = colors.primary,
                 )
             }
         }
