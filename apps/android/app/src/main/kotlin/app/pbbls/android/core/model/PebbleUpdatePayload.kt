@@ -5,19 +5,6 @@ import kotlinx.serialization.Serializable
 import java.time.OffsetDateTime
 
 /**
- * One snap link in an update payload — `{id, storage_path, sort_order}`.
- * Mirrors the nested `SnapPayload` in iOS `PebbleUpdatePayload.swift`.
- */
-@Serializable
-data class PebbleSnapPayload(
-    val id: String,
-    @SerialName("storage_path")
-    val storagePath: String,
-    @SerialName("sort_order")
-    val sortOrder: Int,
-)
-
-/**
  * Payload for the `update_pebble` RPC (via compose-pebble-update). We always send
  * every scalar and every array — `update_pebble` (20260426000002) uses
  * `coalesce(...)` for scalars and `case when payload ? 'key'` for `description` /
