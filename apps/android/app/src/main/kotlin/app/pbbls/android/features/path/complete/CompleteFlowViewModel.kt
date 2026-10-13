@@ -212,6 +212,9 @@ class CompleteFlowViewModel
                             onFailure = {
                                 Log.e(TAG, "complete_pebble failed", it)
                                 model.fail(momentWriteErrorRes(it.toDataError()))
+                                // The debounce skipped saves while completing; keep the last
+                                // answers on the device in case the app dies on this error.
+                                flushNow()
                             },
                         )
                 }

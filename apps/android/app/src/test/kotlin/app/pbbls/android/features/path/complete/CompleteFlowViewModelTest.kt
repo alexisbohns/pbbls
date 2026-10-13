@@ -22,6 +22,7 @@ import app.pbbls.android.testing.postgrestException
 import app.pbbls.android.testing.recordEffects
 import app.pbbls.android.testing.testSession
 import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -171,6 +172,36 @@ class CompleteFlowViewModelTest {
                     ?.emotionId,
             )
             assertEquals(0, h.achievements.fireCheckCount)
+        }
+
+    @Test
+    fun `a refusal right after the last pick still keeps that pick on the device`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.viewModel.start("m-1")
+            advanceUntilIdle()
+            h.answerEverything()
+            // The write outlasts the debounce, which skips while completing, so
+            // the privacy pick is only in memory when the write fails.
+            val gate = CompletableDeferred<Unit>()
+            h.write.gate = gate
+            h.write.failOnComplete = postgrestException("collection_not_owned", sqlState = "42501", status = HttpStatusCode.Forbidden)
+            h.viewModel.complete()
+            advanceTimeBy(AUTOSAVE_DEBOUNCE_MS + 1)
+            assertEquals(
+                null,
+                h.snapshots.stored["m-1"]
+                    ?.second
+                    ?.visibility,
+            )
+            gate.complete(Unit)
+            advanceUntilIdle()
+            assertEquals(
+                Visibility.PRIVATE,
+                h.snapshots.stored["m-1"]
+                    ?.second
+                    ?.visibility,
+            )
         }
 
     @Test
