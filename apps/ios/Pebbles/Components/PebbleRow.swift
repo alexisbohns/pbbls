@@ -23,7 +23,7 @@ struct PebbleRow: View {
             HStack(spacing: 12) {
                 thumbnail
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(verbatim: MomentName.display(moment.name) ?? String(localized: "Untitled"))
+                    MomentNameText(name: moment.name)
                         .font(.body)
                     Text(moment.happenedAt, style: .date)
                         .font(.caption)

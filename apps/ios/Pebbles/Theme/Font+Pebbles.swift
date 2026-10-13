@@ -1,5 +1,14 @@
+import os
 import SwiftUI
 import UIKit
+
+/// Logs a missing bundled face once per launch, not once per render.
+private enum FontLoadLog {
+    static let missingYsabeauItalic: Void = {
+        Logger(subsystem: "app.pbbls.ios", category: "fonts")
+            .error("Ysabeau-BoldItalic failed to load; falling back to upright SemiBold")
+    }()
+}
 
 // MARK: - Token catalog
 
@@ -176,6 +185,33 @@ extension Font {
                     [UIFontDescriptor.FeatureKey.type: 21, UIFontDescriptor.FeatureKey.selector: 1],
                 ],
             ])
+        return Font(UIFont(descriptor: descriptor, size: size))
+    }
+
+    /// Ysabeau's true italic at weight 600, so it sits beside
+    /// `ysabeauSemibold` at the same colour. The bundled italic is a variable
+    /// TTF (`Resources/Ysabeau Italic.ttf`, registered in Info.plist
+    /// `UIAppFonts`) whose default instance is Bold (`Ysabeau-BoldItalic`,
+    /// wght 700), so the weight axis is set explicitly. Same figure features
+    /// as the upright face. Falls back to the upright SemiBold with
+    /// `.italic()` (which renders upright, since that face has no italic) if
+    /// the file is missing from the build.
+    static func ysabeauSemiboldItalic(_ size: CGFloat) -> Font {
+        // 'wght' as a four-char code (see kCTFontVariationAxisIdentifierKey).
+        let weightAxis = 0x77_67_68_74
+        guard let base = UIFont(name: "Ysabeau-BoldItalic", size: size) else {
+            _ = FontLoadLog.missingYsabeauItalic
+            return ysabeauSemibold(size).italic()
+        }
+        let descriptor = base.fontDescriptor.addingAttributes([
+            UIFontDescriptor.AttributeName(rawValue: kCTFontVariationAttribute as String): [
+                weightAxis: 600
+            ],
+            .featureSettings: [
+                [UIFontDescriptor.FeatureKey.type: 6,  UIFontDescriptor.FeatureKey.selector: 1],
+                [UIFontDescriptor.FeatureKey.type: 21, UIFontDescriptor.FeatureKey.selector: 1],
+            ],
+        ])
         return Font(UIFont(descriptor: descriptor, size: size))
     }
 
