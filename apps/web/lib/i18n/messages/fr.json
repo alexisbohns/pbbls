@@ -792,21 +792,6 @@
       "uploadFailed": "Échec de l'envoi de la photo. Réessayez."
     }
   },
-  "drafts": {
-    "title": "Brouillons",
-    "back": "Retour au Chemin",
-    "entry": "{count, plural, one {# brouillon} other {# brouillons}}",
-    "untitled": "Encore sans nom",
-    "savedAgo": "Gardé {ago}",
-    "empty": "Aucun brouillon. Tout ce que tu commences à garder apparaît ici.",
-    "loading": "Chargement des brouillons",
-    "loadError": "Impossible de charger tes brouillons. Réessaie.",
-    "deleteAria": "Supprimer le brouillon",
-    "deleteTitle": "Supprimer ce brouillon ?",
-    "deleteDescription": "Il n'est gardé nulle part ailleurs.",
-    "deleteConfirm": "Supprimer",
-    "deleteCancel": "Le garder"
-  },
   "record": {
     "flow": {
       "aria": "Capturer un caillou, une question à la fois",
@@ -819,8 +804,8 @@
       "publish": "Publier",
       "skip": "Passer",
       "done": "Terminé",
-      "keepTitle": "Tu gardes ce caillou ?",
-      "keepDescription": "Garde-le en brouillon et termine-le quand tu veux.",
+      "leaveTitle": "Tu quittes ce caillou ?",
+      "leaveDescription": "Il n'est pas encore enregistré. Abandonne-le, ou continue pour le terminer.",
       "keepGoing": "Je continue",
       "discard": "Abandonner",
       "step": {
@@ -866,8 +851,6 @@
       }
     },
     "draft": {
-      "save": "Garder pour plus tard",
-      "saveFailed": "Impossible de garder ce brouillon. Réessaie.",
       "publishFailed": "Impossible d'enregistrer ce caillou. Réessaie.",
       "needsDomain": "Un caillou a besoin d'un pan de ta vie. Choisis-en un, puis réessaie.",
       "restoreTitle": "On reprend où tu t'étais arrêté ?",

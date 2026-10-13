@@ -52,14 +52,6 @@ type Valence = -1 | 0 | 1
 
 type QuickPebbleEditorProps = {
   onPebbleCreated?: (pebble: Pebble) => void
-  /**
-   * Resume a server draft (M47). `draftId` is deleted once the pebble
-   * publishes; `initialPayload` hydrates the form. Both come from /drafts.
-   */
-  draftId?: string
-  initialPayload?: PebbleDraftPayload
-  /** Fired after an intentional "save as draft" (the route navigates away). */
-  onDraftSaved?: () => void
 }
 
 function isNow(dateStr: string): boolean {
@@ -67,17 +59,12 @@ function isNow(dateStr: string): boolean {
   return diff < 60_000
 }
 
-export function QuickPebbleEditor({
-  onPebbleCreated,
-  draftId,
-  initialPayload,
-  onDraftSaved,
-}: QuickPebbleEditorProps) {
+export function QuickPebbleEditor({ onPebbleCreated }: QuickPebbleEditorProps) {
   const { addPebble, uploadSnap } = usePebbles()
   const { souls, addSoul } = useSouls()
   const { collections } = useCollections()
   const { glyphs: marks } = useUsableGlyphs()
-  const { provider, loading: storeLoading } = useDataProvider()
+  const { loading: storeLoading } = useDataProvider()
   const t = useTranslations("record")
   const tDraft = useTranslations("record.draft")
   const tPhoto = useTranslations("record.photo")
@@ -111,7 +98,6 @@ export function QuickPebbleEditor({
   // "delete the draft once it published" unimplementable. Surfaced inline, per
   // the PebbleEdit precedent.
   const [submitError, setSubmitError] = useState<string | null>(null)
-  const [savingDraft, setSavingDraft] = useState(false)
 
   // Dialog/sheet state
   const [dateOpen, setDateOpen] = useState(false)
@@ -149,8 +135,8 @@ export function QuickPebbleEditor({
   }, [snapPreview])
 
   // -------------------------------------------------------------------------
-  // Drafts (M47). `state` is the single projection of the flat form state; the
-  // server-draft path and the localStorage snapshot both derive from it.
+  // Local autosave (M47). `state` is the single projection of the flat form
+  // state; the localStorage snapshot derives from it.
   // -------------------------------------------------------------------------
 
   const state = useMemo<ComposerState>(
@@ -198,53 +184,17 @@ export function QuickPebbleEditor({
     [souls, collections],
   )
 
-  // A restored draft's photo is already in Storage but has no `blob:` preview —
-  // mint a signed URL so the photo tile shows it (mirrors the edit screen).
-  useEffect(() => {
-    if (!provider || !pendingSnap || snapPreview) return
-    let cancelled = false
-    void (async () => {
-      const url = await provider.getDraftSnapUrl(pendingSnap.storage_path)
-      if (!cancelled && url) setSnapPreview(url)
-    })()
-    return () => {
-      cancelled = true
-    }
-  }, [provider, pendingSnap, snapPreview])
-
   const {
-    isEmpty,
     restorePromptOpen,
     setRestorePromptOpen,
     restore: handleRestore,
     discardSnapshot: handleDiscardSnapshot,
-    saveAsDraft,
     consumeAfterPublish,
   } = useComposerDrafts({
-    draftId,
-    initialPayload,
     state,
     applyPayload,
     ready: !storeLoading,
   })
-
-  /** Intentional "save as draft" — ungated, unlike publishing (D5). */
-  const handleSaveDraft = useCallback(async () => {
-    if (isEmpty || savingDraft || saving || snapUploading) return
-    setSavingDraft(true)
-    setSubmitError(null)
-    if (await saveAsDraft()) {
-      resetForm()
-      titleInputRef.current?.blur()
-      onDraftSaved?.()
-    } else {
-      setSubmitError(tDraft("saveFailed"))
-    }
-    setSavingDraft(false)
-  }, [
-    isEmpty, savingDraft, saving, snapUploading,
-    saveAsDraft, resetForm, onDraftSaved, tDraft,
-  ])
 
   const handleSubmit = useCallback(async () => {
     if (!publishable || saving || snapUploading) return
@@ -484,17 +434,6 @@ export function QuickPebbleEditor({
         <div className="flex items-center justify-between">
           <VisibilityPicker value={visibility} onChange={setVisibility} />
           <div className="flex items-center gap-2">
-            {/* Quick capture: ungated, unlike publishing (D5). "Just a name"
-                is a valid draft. */}
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={isEmpty || saving || savingDraft || snapUploading}
-              onClick={() => void handleSaveDraft()}
-              className="text-muted-foreground"
-            >
-              {tDraft("save")}
-            </Button>
             <Button
               variant="default"
               size="icon"
@@ -509,8 +448,7 @@ export function QuickPebbleEditor({
         </div>
       </section>
 
-      {/* Crash-insurance restore. Only offered when not already resuming a
-          server draft, and only once per mount. */}
+      {/* Crash-insurance restore, offered once per mount. */}
       <AlertDialog open={restorePromptOpen} onOpenChange={setRestorePromptOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>

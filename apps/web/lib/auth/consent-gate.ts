@@ -274,7 +274,7 @@ const PUBLIC_ROUTES: readonly string[] = [
  * An allowlist, so a new route is held by default. It is every app/ route
  * outside AuthGate's PROTECTED_PREFIXES that renders without an account.
  * Unprotected routes that only make sense signed in (/settings, /onboarding,
- * /achievements, /drafts, /wallet) are deliberately not listed.
+ * /achievements, /wallet) are deliberately not listed.
  */
 export function isGatePublicPath(pathname: string): boolean {
   if (pathname === "/") return true

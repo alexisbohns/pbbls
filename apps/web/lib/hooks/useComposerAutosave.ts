@@ -47,8 +47,9 @@ function parse(raw: string | null): PebbleDraftPayload | null {
  * no cross-device sync. This is deliberately NOT offline support: see the
  * 2026-07-29 "Offline is a non-goal on every surface" decision-log entry.
  *
- * The server `pebble_drafts` table is the intentional "save as draft"; this is
- * only for the reload/crash you did not choose. Media is excluded (D3).
+ * It is the only draft left: server drafts (`pebble_drafts`) were retired by
+ * the moments split (#1046, D7), and a deliberate quick capture becomes a
+ * moment once web adopts `save_moment` (#1050). Media is excluded (D3).
  *
  * Lives in `lib/hooks/` rather than `lib/data/`: it is UI state, not
  * provider-backed data, and components must never touch `localStorage`

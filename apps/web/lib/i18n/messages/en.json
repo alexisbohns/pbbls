@@ -792,21 +792,6 @@
       "uploadFailed": "Picture upload failed. Try again."
     }
   },
-  "drafts": {
-    "title": "Drafts",
-    "back": "Back to Path",
-    "entry": "{count, plural, one {# draft} other {# drafts}}",
-    "untitled": "No name yet",
-    "savedAgo": "Saved {ago}",
-    "empty": "No drafts yet. Anything you start keeping shows up here.",
-    "loading": "Loading drafts",
-    "loadError": "Couldn't load your drafts. Please try again.",
-    "deleteAria": "Delete draft",
-    "deleteTitle": "Delete this draft?",
-    "deleteDescription": "It won't be kept anywhere else.",
-    "deleteConfirm": "Delete",
-    "deleteCancel": "Keep it"
-  },
   "record": {
     "flow": {
       "aria": "Record a pebble, one question at a time",
@@ -819,8 +804,8 @@
       "publish": "Publish",
       "skip": "Skip",
       "done": "Done",
-      "keepTitle": "Keep this pebble?",
-      "keepDescription": "Save it as a draft and finish it whenever you like.",
+      "leaveTitle": "Leave this pebble?",
+      "leaveDescription": "It isn't recorded yet. Discard it, or keep going to finish it.",
       "keepGoing": "Keep going",
       "discard": "Discard",
       "step": {
@@ -866,8 +851,6 @@
       }
     },
     "draft": {
-      "save": "Save as draft",
-      "saveFailed": "Couldn't save that draft. Please try again.",
       "publishFailed": "Couldn't save that pebble. Please try again.",
       "needsDomain": "A pebble needs a part of life. Pick one, then try again.",
       "restoreTitle": "Pick up where you left off?",

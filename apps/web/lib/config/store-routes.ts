@@ -5,7 +5,7 @@
  *
  * Deliberately NOT derived from AuthGate's PROTECTED_PREFIXES: that list answers
  * "does this route require a session", which is a different question with a
- * currently different membership (/wallet, /achievements, /drafts and /settings
+ * currently different membership (/wallet, /achievements and /settings
  * reach the store through components rather than through app/*\/page.tsx).
  */
 export const STORE_BACKED_PREFIXES = [
@@ -20,7 +20,6 @@ export const STORE_BACKED_PREFIXES = [
   "/connections",
   "/wallet",
   "/achievements",
-  "/drafts",
   "/settings",
 ] as const
 
