@@ -1,29 +1,21 @@
 package app.pbbls.android.features.path
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -38,53 +30,37 @@ import app.pbbls.android.core.common.ObserveUiEffects
 import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.designsystem.readableWidth
-import app.pbbls.android.core.designsystem.toRgbHex
+import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.EmotionWithPalette
+import app.pbbls.android.core.model.PebbleDraft
+import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.renderHeightDp
-import app.pbbls.android.core.ui.GlyphPickerSlot
+import app.pbbls.android.core.ui.render.PebbleThumbnail
 import app.pbbls.android.features.path.create.PebbleForm
 import app.pbbls.android.features.path.create.VisibilityChip
 
 /**
- * Full-screen surface for editing an existing pebble — ports EditPebbleSheet.swift
- * (minus the photo flow, a milestone non-goal). Loads the PebbleDetail via B's
- * fetch, prefills the shared PebbleForm via PebbleDraft.from(detail), renders the
- * current render_svg at the top at the valence-derived height with the palette
- * stroke color, and saves through PebbleWriteService.update (D2/D3). Soft-success
- * (any 5xx) advances; the pebbleEnriched flash fires only when karma_delta > 0
- * (D10, guarded inside KarmaNotificationService).
+ * Edit pebble (R5): the pebble half of a moment — emotion, domain, valence,
+ * souls, collection and privacy — under its stone, saved with
+ * `complete_pebble` and nothing else. The moment's own fields and its photo
+ * are Edit moment's, so there is no photo picker and no upload to clean up.
  *
- * A pushed entry now (#852). Keeps a `NavigationBackHandler` (converted from
- * the legacy `BackHandler` in the same PR), unlike its detail/drafts
- * siblings — deliberately: `viewModel.dismiss()` runs snap cleanup
- * (`cancelAndCleanup`) that a bare `Navigator.goBack()` would skip, so system
- * back has to route through it rather than through `NavDisplay`'s default. The
- * handler is now unconditionally **enabled** rather than
- * `enabled = content?.isSaving != true` (D9): a *disabled* handler
- * declines the event instead of blocking it, so it fell through and popped
- * this screen anyway while saving, skipping the cleanup the disabled state was
- * trying to preserve. `dismiss()` already no-ops while `isSaving`, so always
- * calling it gets both cases right.
+ * A pushed entry (#852). Keeps a `NavigationBackHandler`, always enabled
+ * (D9): `dismiss()` already no-ops while saving, and a *disabled* handler
+ * would let back fall through and pop the screen mid-save.
  */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun EditPebbleScreen(
-    pebbleId: String,
+    momentId: String,
     onDismiss: () -> Unit,
     onSaved: () -> Unit,
-    glyphPicker: GlyphPickerSlot,
     modifier: Modifier = Modifier,
     viewModel: EditPebbleViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val referenceData = LocalReferenceDataService.current
     val palettes = LocalEmotionPaletteService.current
-    val isDark = isSystemInDarkTheme()
-    val colors = MaterialTheme.colorScheme
-    // SVG stroke fallback when the pebble has no emotion palette: the theme's
-    // primary, formatted once per scheme for injection into the render.
-    val fallbackStrokeHex = remember(colors.primary) { colors.primary.toRgbHex() }
 
-    LaunchedEffect(pebbleId) { viewModel.start(pebbleId) }
+    LaunchedEffect(momentId) { viewModel.start(momentId) }
 
     ObserveUiEffects(viewModel.effects) { effect ->
         when (effect) {
@@ -93,14 +69,44 @@ fun EditPebbleScreen(
         }
     }
 
-    val photoPicker =
-        rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-            uri?.let(viewModel::onPhotoPicked)
-        }
-
-    val content = uiState as? EditPebbleUiState.Content
     val backState = rememberNavigationEventState(currentInfo = NavigationEventInfo.None)
     NavigationBackHandler(state = backState) { viewModel.dismiss() }
+
+    val emotionId = (uiState as? EditPebbleUiState.Content)?.draft?.emotionId
+    EditPebbleContent(
+        uiState = uiState,
+        palette = emotionId?.let(palettes::palette),
+        selectedEmotion = emotionId?.let { palettes.byEmotionId[it] },
+        onDraftChange = viewModel::onDraftChange,
+        onCancel = viewModel::dismiss,
+        onSave = viewModel::save,
+        onRetry = viewModel::retry,
+        onAchievementCheck = viewModel::onAchievementCheck,
+        modifier = modifier,
+    )
+}
+
+/**
+ * Edit pebble without its ViewModel: the bar, the stone and the three states.
+ * [EditPebbleScreen] wires it; screenshots drive it. [palette] and
+ * [selectedEmotion] are the draft emotion's, resolved by the caller.
+ */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun EditPebbleContent(
+    uiState: EditPebbleUiState,
+    palette: EmotionPalette?,
+    selectedEmotion: EmotionWithPalette?,
+    onDraftChange: (PebbleDraft) -> Unit,
+    onCancel: () -> Unit,
+    onSave: () -> Unit,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier,
+    onAchievementCheck: () -> Unit = {},
+) {
+    val referenceData = LocalReferenceDataService.current
+    val colors = MaterialTheme.colorScheme
+    val content = uiState as? EditPebbleUiState.Content
 
     Column(
         modifier
@@ -110,10 +116,11 @@ fun EditPebbleScreen(
             .readableWidth(),
     ) {
         EditTopBar(
+            title = stringResource(R.string.edit_pebble_title),
             isSaving = content?.isSaving == true,
-            saveEnabled = content?.draft?.isValid == true,
-            onCancel = viewModel::dismiss,
-            onSave = viewModel::save,
+            saveEnabled = content?.canSave == true,
+            onCancel = onCancel,
+            onSave = onSave,
         )
         // Exhaustive with no `else`: a new EditPebbleUiState case must render.
         when (val state = uiState) {
@@ -122,43 +129,29 @@ fun EditPebbleScreen(
                     LoadingIndicator()
                 }
             EditPebbleUiState.Error ->
-                EditLoadError(onRetry = viewModel::retry)
-            is EditPebbleUiState.Content -> {
-                // The stroke colour depends on the active colour scheme, so it
-                // is resolved here rather than in the load (iOS parity:
-                // EditPebbleSheet uses strokeHex(colorScheme), NOT the
-                // intensity-based pebbleFrameColors the read banner uses).
-                val strokeColor =
-                    state.emotionId?.let { palettes.palette(it)?.strokeHex(isDark) } ?: fallbackStrokeHex
-                val selectedEmotion = state.draft.emotionId?.let { palettes.byEmotionId[it] }
-                val saveError = state.saveErrorRes?.let { stringResource(it) }
+                EditLoadError(onRetry = onRetry)
+            is EditPebbleUiState.Content ->
                 Column(Modifier.fillMaxSize()) {
                     PebbleForm(
                         draft = state.draft,
-                        onDraftChange = viewModel::onDraftChange,
+                        onDraftChange = onDraftChange,
                         domains = referenceData.domains,
                         souls = referenceData.souls,
                         collections = referenceData.collections,
                         selectedEmotion = selectedEmotion,
-                        selectedGlyph = state.selectedGlyph,
-                        onGlyphPicked = viewModel::onGlyphPicked,
-                        saveError = saveError,
-                        glyphPicker = glyphPicker,
-                        renderSvg = state.renderSvg,
-                        strokeColor = strokeColor,
-                        renderHeight = state.renderHeightDp.dp,
-                        modifier = Modifier.weight(1f),
-                        formSnap = state.snap,
-                        onAddPhoto = {
-                            photoPicker.launch(
-                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly),
+                        saveError = state.saveErrorRes?.let { stringResource(it) },
+                        header = {
+                            val valence = state.draft.valence ?: Valence.NEUTRAL_MEDIUM
+                            PebbleThumbnail(
+                                valence = valence,
+                                palette = palette,
+                                modifier = Modifier.fillMaxWidth().height(valence.sizeGroup.renderHeightDp.dp),
                             )
                         },
-                        onRetryPending = viewModel::onRetryPhoto,
-                        onRemovePending = viewModel::onRemovePhoto,
-                        isRemovingExistingSnap = state.isRemovingExistingSnap,
-                        onRemoveExistingSnap = viewModel::onRemoveExistingSnap,
-                        onAchievementCheck = viewModel::onAchievementCheck,
+                        showMomentFields = false,
+                        showPebbleFields = true,
+                        modifier = Modifier.weight(1f),
+                        onAchievementCheck = onAchievementCheck,
                     )
                     // Grade chip (M51) — mirrors iOS EditPebbleSheet's bottomBar
                     // ToolbarItemGroup, matching CreatePebbleScreen's row treatment.
@@ -171,80 +164,11 @@ fun EditPebbleScreen(
                     ) {
                         VisibilityChip(
                             value = state.draft.visibility,
-                            onChange = { viewModel.onDraftChange(state.draft.copy(visibility = it)) },
+                            onChange = { onDraftChange(state.draft.copy(visibility = it)) },
                         )
                         Spacer(Modifier.weight(1f))
                     }
                 }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun EditTopBar(
-    isSaving: Boolean,
-    saveEnabled: Boolean,
-    onCancel: () -> Unit,
-    onSave: () -> Unit,
-) {
-    val colors = MaterialTheme.colorScheme
-    Row(
-        modifier = Modifier.padding(horizontal = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        TextButton(onClick = onCancel) {
-            Text(
-                stringResource(R.string.action_cancel),
-                style = MaterialTheme.typography.labelLarge,
-                color = colors.primary,
-            )
-        }
-        Spacer(Modifier.weight(1f))
-        Text(
-            stringResource(R.string.edit_pebble_title),
-            style = MaterialTheme.typography.labelLarge,
-            color = colors.onSurface,
-        )
-        Spacer(Modifier.weight(1f))
-        if (isSaving) {
-            Box(Modifier.size(48.dp), Alignment.Center) {
-                LoadingIndicator(
-                    modifier = Modifier.size(24.dp),
-                )
-            }
-        } else {
-            TextButton(onClick = onSave, enabled = saveEnabled) {
-                Text(
-                    stringResource(R.string.action_save),
-                    style = MaterialTheme.typography.labelLarge,
-                    color = colors.primary,
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun EditLoadError(onRetry: () -> Unit) {
-    val colors = MaterialTheme.colorScheme
-    Column(
-        modifier = Modifier.fillMaxSize().padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center,
-    ) {
-        Text(
-            stringResource(R.string.pebble_detail_load_error),
-            style = MaterialTheme.typography.bodyLarge,
-            color = colors.onSurfaceVariant,
-        )
-        TextButton(onClick = onRetry) {
-            Text(
-                stringResource(R.string.pebble_detail_retry),
-                style = MaterialTheme.typography.labelLarge,
-                color = colors.primary,
-            )
         }
     }
 }

@@ -11,11 +11,11 @@ import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.data.AchievementMomentCard
 import app.pbbls.android.core.data.AchievementNotificationService
 import app.pbbls.android.testing.AppUiTest
-import app.pbbls.android.testing.FakePathService
-import app.pbbls.android.testing.FakePebbleDetailService
+import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.UiFixtures
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Test
+import java.time.OffsetDateTime
 import javax.inject.Inject
 
 /**
@@ -27,9 +27,7 @@ import javax.inject.Inject
  */
 @HiltAndroidTest
 class BackTest : AppUiTest() {
-    @Inject lateinit var path: FakePathService
-
-    @Inject lateinit var pebbleDetail: FakePebbleDetailService
+    @Inject lateinit var moments: FakeMomentReadService
 
     @Inject lateinit var achievements: AchievementNotificationService
 
@@ -99,17 +97,18 @@ class BackTest : AppUiTest() {
 
     @Test
     fun `back on the edit cover dismisses it to the detail beneath`() {
-        path.pebbles = listOf(UiFixtures.pebble())
-        pebbleDetail.detail = UiFixtures.pebbleDetail()
+        moments.path = listOf(UiFixtures.pathMoment(happenedAt = OffsetDateTime.now()))
+        moments.moments = mapOf("moment-1" to UiFixtures.momentDetail())
         onPath()
         compose.onNodeWithTag(JourneyTags.PATH_PEBBLE_ROW).performClick()
-        onText(R.string.pebble_detail_edit).performClick()
+        compose.onNodeWithContentDescription(string(R.string.more_actions_a11y)).performClick()
+        onText(R.string.edit_pebble_title).performClick()
         onText(R.string.edit_pebble_title).assertIsDisplayed()
 
         pressBack()
 
         onText(R.string.edit_pebble_title).assertDoesNotExist()
-        onText(R.string.pebble_detail_edit).assertIsDisplayed()
+        compose.onNodeWithContentDescription(string(R.string.more_actions_a11y)).assertIsDisplayed()
     }
 
     @Test

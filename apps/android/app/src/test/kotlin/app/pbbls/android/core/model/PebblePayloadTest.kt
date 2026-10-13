@@ -15,9 +15,9 @@ import java.time.OffsetDateTime
 
 /**
  * The Android half of the cross-surface wire contract (D3). Encodes the payloads
- * built by [PebbleCreatePayload.from] / [PebbleUpdatePayload.from] through the same
+ * built by [PebbleCreatePayload.from] through the same
  * `explicitNulls = true` Json the write service uses, then inspects the tree: the
- * exact snake_case key set, `snaps` present only on update, explicit-null encoding
+ * exact snake_case key set, `snaps` present only with a photo, explicit-null encoding
  * of a cleared `description` / `glyph_id`, `happened_at` as an ISO-8601 **string**
  * (a `timestamptz` cast rejects epoch numbers), and the trimmed scalar mappings.
  */
@@ -47,8 +47,6 @@ class PebblePayloadTest {
 
     private fun encode(payload: PebbleCreatePayload): JsonObject = json.parseToJsonElement(json.encodeToString(payload)).jsonObject
 
-    private fun encode(payload: PebbleUpdatePayload): JsonObject = json.parseToJsonElement(json.encodeToString(payload)).jsonObject
-
     @Test
     fun `create payload emits exactly the eleven keys and no snaps`() {
         val obj = encode(PebbleCreatePayload.from(validDraft()))
@@ -70,37 +68,6 @@ class PebblePayloadTest {
             obj.keys,
         )
         assertFalse("snaps" in obj.keys)
-    }
-
-    @Test
-    fun `update payload adds snaps to the same twelve-key set`() {
-        val snaps = listOf(PebbleSnapPayload(id = "snap-1", storagePath = "user/snap", sortOrder = 0))
-        val obj = encode(PebbleUpdatePayload.from(validDraft(), snaps))
-
-        assertEquals(
-            setOf(
-                "name",
-                "description",
-                "happened_at",
-                "intensity",
-                "positiveness",
-                "visibility",
-                "emotion_id",
-                "domain_ids",
-                "soul_ids",
-                "collection_ids",
-                "glyph_id",
-                "snaps",
-            ),
-            obj.keys,
-        )
-
-        val snapsArray = obj.getValue("snaps").jsonArray
-        val snap = snapsArray.single().jsonObject
-        assertEquals(setOf("id", "storage_path", "sort_order"), snap.keys)
-        assertEquals("snap-1", snap.getValue("id").jsonPrimitive.content)
-        assertEquals("user/snap", snap.getValue("storage_path").jsonPrimitive.content)
-        assertFalse(snap.getValue("sort_order").jsonPrimitive.isString)
     }
 
     @Test

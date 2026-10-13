@@ -17,17 +17,9 @@ import kotlinx.coroutines.CompletableDeferred
 class FakePebbleWriteService(
     /** What [create] returns. A [ComposeResult.Failure] is the reachable error path. */
     var createResult: ComposeResult = ComposeResult.Success(ComposePebbleResponse(pebbleId = "pebble-1")),
-    /** What [update] returns. */
-    var updateResult: ComposeResult = ComposeResult.Success(ComposePebbleResponse(pebbleId = "pebble-1")),
 ) : PebbleWriteServicing {
     /** Arguments of every [create] call, oldest first. */
     val createCalls = mutableListOf<Pair<PebbleDraft, List<PebbleSnapPayload>?>>()
-
-    /** Arguments of every [update] call, oldest first. */
-    val updateCalls = mutableListOf<Triple<String, PebbleDraft, List<PebbleSnapPayload>>>()
-
-    /** Every pebble id passed to [delete], oldest first. */
-    val deletedPebbleIds = mutableListOf<String>()
 
     /**
      * Awaited by [create] when set, so a test can hold a publish in flight and
@@ -39,9 +31,8 @@ class FakePebbleWriteService(
     private val armed = ArmedFailure()
 
     /**
-     * Thrown by the next call, then cleared. Only [delete] throws in production;
-     * `create`/`update` report failure through [ComposeResult.Failure], so prefer
-     * [createResult] / [updateResult] there.
+     * Thrown by the next call, then cleared. `create` reports failure through
+     * [ComposeResult.Failure] in production, so prefer [createResult].
      */
     var failNext: Exception?
         get() = armed.next
@@ -57,20 +48,5 @@ class FakePebbleWriteService(
         createGate?.await()
         armed.fire()
         return createResult
-    }
-
-    override suspend fun update(
-        pebbleId: String,
-        draft: PebbleDraft,
-        snaps: List<PebbleSnapPayload>,
-    ): ComposeResult {
-        updateCalls += Triple(pebbleId, draft, snaps)
-        armed.fire()
-        return updateResult
-    }
-
-    override suspend fun delete(pebbleId: String) {
-        deletedPebbleIds += pebbleId
-        armed.fire()
     }
 }
