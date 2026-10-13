@@ -44,7 +44,7 @@ enum StoneCarvingArt {
 
     private static let lock = NSLock()
     private static var cache: [Valence: Art] = [:]
-    /// Carvings for real pebbles, keyed by their composed SVG. An `NSCache`
+    /// Carvings for real pebbles, keyed by valence and glyph id. An `NSCache`
     /// so a long Path does not pin every pebble's paths forever.
     private static let pebbleCache = NSCache<NSString, Art>()
 
@@ -83,6 +83,42 @@ enum StoneCarvingArt {
                         outline: seed.outline, fossil: seed.fossil)
         pebbleCache.setObject(built, forKey: key)
         return built
+    }
+
+    /// The carving of a real pebble: the seed's veins and fossil for its
+    /// valence, plus its derived glyph's strokes, wobbled and placed in the
+    /// engine's slot exactly as the sample glyph is. Nil glyph → veins only.
+    /// Strokes that do not wobble are skipped and logged. Cached per
+    /// (valence, glyph id): a glyph's strokes never change after carving
+    /// (`GlyphService` only renames).
+    static func art(for valence: Valence, glyph: PebbleGlyph?) -> Art? {
+        guard let seed = art(for: valence) else { return nil }
+        guard let glyph else {
+            return Art(viewBox: seed.viewBox, ink: seed.veins, veins: seed.veins,
+                       outline: seed.outline, fossil: seed.fossil)
+        }
+        let key = "\(valence.rawValue)|\(glyph.id.uuidString)" as NSString
+        if let cached = pebbleCache.object(forKey: key) { return cached }
+        let ink = CGMutablePath()
+        ink.addPath(seed.veins)
+        if let placed = placedGlyphInk(
+            strokes: glyph.strokes, viewBoxSide: glyph.viewBoxSide,
+            size: valence.sizeGroup, polarity: valence.polarity
+        ) {
+            ink.addPath(placed)
+        }
+        let built = Art(viewBox: seed.viewBox, ink: ink.copy() ?? ink, veins: seed.veins,
+                        outline: seed.outline, fossil: seed.fossil)
+        pebbleCache.setObject(built, forKey: key)
+        return built
+    }
+
+    /// An uncompleted moment (R4): the seed's engine outline as the only ink.
+    /// No veins, no fossil, no glyph. Built from the cached seed, so it is free.
+    static func blankArt(for valence: Valence) -> Art? {
+        guard let seed = art(for: valence) else { return nil }
+        return Art(viewBox: seed.viewBox, ink: seed.outline, veins: CGMutablePath(),
+                   outline: seed.outline, fossil: nil)
     }
 
     static func prewarm() {
@@ -161,14 +197,28 @@ enum StoneCarvingArt {
                    outline: outline.copy() ?? outline, fossil: fossil)
     }
 
-    /// The sample glyph's strokes, wobbled and placed in the engine's slot
-    /// for this size and polarity, merged into one ink path. Nil when the
-    /// glyph file is missing or no stroke wobbled.
+    /// The sample glyph's strokes, placed as `placedGlyphInk(strokes:…)`
+    /// places any glyph. Nil when the glyph file is missing or no stroke wobbled.
     static func placedGlyphInk(size: ValenceSizeGroup, polarity: ValencePolarity) -> CGPath? {
         guard let glyph else { return nil }
-        var transform = glyphTransform(size: size, polarity: polarity, glyphViewBox: glyph.viewBox)
+        return placedGlyphInk(
+            strokes: glyph.strokes.map { GlyphStroke(d: $0.d, width: $0.width) },
+            viewBoxSide: glyph.viewBox, size: size, polarity: polarity
+        )
+    }
+
+    /// `strokes` drawn in a `viewBoxSide` square, wobbled and placed in the
+    /// engine's slot for this size and polarity, merged into one ink path.
+    /// Nil when no stroke wobbled.
+    static func placedGlyphInk(
+        strokes: [GlyphStroke],
+        viewBoxSide: Double,
+        size: ValenceSizeGroup,
+        polarity: ValencePolarity
+    ) -> CGPath? {
+        var transform = glyphTransform(size: size, polarity: polarity, glyphViewBox: viewBoxSide)
         let placed = CGMutablePath()
-        for (index, stroke) in glyph.strokes.enumerated() {
+        for (index, stroke) in strokes.enumerated() {
             guard let path = WobbleRenderer.glyphInk(d: stroke.d, width: stroke.width),
                   let moved = path.copy(using: &transform) else {
                 logger.error("stone: glyph stroke \(index, privacy: .public) did not wobble")
