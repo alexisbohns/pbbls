@@ -78,7 +78,7 @@ struct ProfileCollectionsCard: View {
         do {
             let rows: [Collection] = try await supabase.client
                 .from("collections")
-                .select("id, name, mode, pebble_count:collection_pebbles(count)")
+                .select("id, name, mode, glyph_id, glyph:glyphs(id, name, strokes, view_box, user_id), pebble_count:collection_pebbles(count)")
                 .order("created_at", ascending: false)
                 .execute().value
             self.collections = rows

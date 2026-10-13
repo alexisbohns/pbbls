@@ -91,7 +91,7 @@ struct EditCollectionSheet: View {
         isSaving = true
         saveError = nil
         do {
-            let payload = CollectionUpdatePayload(name: trimmedName, mode: mode?.rawValue)
+            let payload = CollectionUpdatePayload(name: trimmedName, mode: mode?.rawValue, glyphId: collection.glyphId)
             try await supabase.client
                 .from("collections")
                 .update(payload)
@@ -112,15 +112,18 @@ struct EditCollectionSheet: View {
 struct CollectionUpdatePayload: Encodable {
     let name: String
     let mode: String?
+    let glyphId: UUID?
 
     enum CodingKeys: String, CodingKey {
         case name
         case mode
+        case glyphId = "glyph_id"
     }
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(name, forKey: .name)
         try container.encode(mode, forKey: .mode) // encodes nil as JSON null
+        try container.encode(glyphId?.uuidString.lowercased(), forKey: .glyphId) // null clears (R11)
     }
 }
