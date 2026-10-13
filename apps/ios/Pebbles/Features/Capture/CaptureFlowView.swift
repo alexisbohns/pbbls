@@ -95,12 +95,11 @@ struct CaptureFlowView: View {
         }
         .onChange(of: pickedPhoto) { _, picked in
             guard let picked, let userId = currentUserId, let snaps else { return }
-            pickTask = Task {
-                await snaps.handlePicked(picked, userId: userId)
-                // Seed the when step from the photo before the user gets there.
-                model.applyCaptureDate(snaps.pickedCaptureDate)
-            }
+            pickTask = Task { await snaps.handlePicked(picked, userId: userId) }
         }
+        // Seed the when step as soon as the photo's date is read, before its
+        // upload finishes; the model keeps a date the user set.
+        .onChange(of: snaps?.pickedCaptureDate) { _, date in model.applyCaptureDate(date) }
         .confirmationDialog(
             "Keep this moment?",
             isPresented: $isCloseConfirmPresented,
@@ -160,9 +159,10 @@ struct CaptureFlowView: View {
             RecordWhenStep(
                 happenedAt: Binding(
                     get: { model.draft.happenedAt },
-                    set: { model.draft.happenedAt = $0 }
+                    set: { model.setHappenedAt($0) }
                 ),
-                seededFromPhoto: snaps?.pickedCaptureDate != nil
+                // Only while the date on screen is still the photo's.
+                seededFromPhoto: snaps?.pickedCaptureDate != nil && !model.hasEditedDate
             )
         case .name:
             VStack(spacing: Spacing.md) {

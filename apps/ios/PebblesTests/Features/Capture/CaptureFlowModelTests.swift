@@ -57,6 +57,16 @@ struct CaptureFlowModelTests {
         #expect(model.draft.happenedAt == exif)
     }
 
+    @Test("a date the user set is never overridden by the photo's")
+    func editedDateWins() {
+        let (model, _) = model()
+        let edited = Date(timeIntervalSince1970: 1_600_000_000)
+        model.setHappenedAt(edited)
+        #expect(model.hasEditedDate)
+        model.applyCaptureDate(Date(timeIntervalSince1970: 1_700_000_000))
+        #expect(model.draft.happenedAt == edited)
+    }
+
     @Test("save outcomes: success haptic, failure keeps the error and stays")
     func outcomes() {
         let (model, recorder) = model()

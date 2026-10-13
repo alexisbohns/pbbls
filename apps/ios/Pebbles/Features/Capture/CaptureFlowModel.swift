@@ -16,6 +16,9 @@ final class CaptureFlowModel {
     var hasSnap = false
     private(set) var isSaving = false
     private(set) var saveError: String?
+    /// Set once the user changes the when step themselves: a photo's capture
+    /// date then never overrides their choice.
+    private(set) var hasEditedDate = false
 
     private let haptic: @MainActor (TapHaptic) -> Void
 
@@ -49,8 +52,16 @@ final class CaptureFlowModel {
         draft.name = String(raw.prefix(Self.nameLimit))
     }
 
+    /// The user's own edit on the when step.
+    func setHappenedAt(_ date: Date) {
+        hasEditedDate = true
+        draft.happenedAt = date
+    }
+
+    /// Seeds when from the picked photo's EXIF date, unless the user already
+    /// set it.
     func applyCaptureDate(_ date: Date?) {
-        guard let date else { return }
+        guard let date, !hasEditedDate else { return }
         draft.happenedAt = date
     }
 
