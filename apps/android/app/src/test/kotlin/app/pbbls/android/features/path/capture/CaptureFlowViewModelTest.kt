@@ -216,7 +216,12 @@ class CaptureFlowViewModelTest {
             assertTrue(h.viewModel.uiState.value.closeOffersSave)
             h.viewModel.onSaveFromClose()
             advanceUntilIdle()
-            assertEquals("Walk", h.writes.saved.single().name)
+            assertEquals(
+                "Walk",
+                h.writes.saved
+                    .single()
+                    .name,
+            )
             assertTrue(CaptureFlowEffect.Saved in effects.values)
             effects.stop()
         }

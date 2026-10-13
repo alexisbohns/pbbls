@@ -1,8 +1,7 @@
 package app.pbbls.android.features.path.components
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -22,15 +21,13 @@ import app.pbbls.android.R
  * The Path tab's create affordance, now a Path-only FAB (#852, D3) — the bar
  * now occupies the space the pinned "New pebble" pill
  * ([NewPebbleButton]) used to sit in, so the affordance moved up and became
- * circular. The tap/long-press pair is preserved verbatim (M58 D1): a tap
- * opens the step-by-step record flow, a long press opens the all-at-once
- * composer instead. The `primary` fill carries its `onPrimary` icon.
+ * circular. A tap opens Capture (#1048); the long press to the all-at-once
+ * composer is gone with it (A-12). The `primary` fill carries its
+ * `onPrimary` icon.
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NewPebbleFab(
     onClick: () -> Unit,
-    onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
@@ -42,7 +39,7 @@ fun NewPebbleFab(
                 .shadow(elevation = 6.dp, shape = CircleShape)
                 .clip(CircleShape)
                 .background(colors.primary)
-                .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+                .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Icon(

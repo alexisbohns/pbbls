@@ -61,6 +61,7 @@ class PebblesKeysTest {
                 PebblesKey.Lab,
                 PebblesKey.LabAnnouncement("log-1"),
                 PebblesKey.LabLogList("announcements"),
+                PebblesKey.Capture,
                 PebblesKey.RecordFlow(resumeDraftId = null),
                 PebblesKey.RecordFlow(resumeDraftId = "draft-1"),
                 PebblesKey.CreatePebble(resumeDraftId = null),
@@ -110,6 +111,7 @@ class PebblesKeysTest {
     fun `modal keys are not BarKeys`() {
         val modals: List<PebblesKey> =
             listOf(
+                PebblesKey.Capture,
                 PebblesKey.RecordFlow(null),
                 PebblesKey.CreatePebble(null),
                 PebblesKey.Drafts,
