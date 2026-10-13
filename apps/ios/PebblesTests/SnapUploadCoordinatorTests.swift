@@ -42,8 +42,14 @@ struct SnapUploadCoordinatorTests {
             }
         }
 
+        /// Snap ids whose delete ran inside a cancelled task. The live repo's
+        /// URLSession request throws there before it is sent, so a cleanup
+        /// recorded here would have deleted nothing.
+        var deletesInCancelledTask: [UUID] = []
+
         func deleteFiles(snapId: UUID, userId: UUID) async {
             calls.append(.deleteFilesBySnapId(snapId: snapId, userId: userId))
+            if Task.isCancelled { deletesInCancelledTask.append(snapId) }
         }
 
         func deleteFiles(storagePrefix: String) async {

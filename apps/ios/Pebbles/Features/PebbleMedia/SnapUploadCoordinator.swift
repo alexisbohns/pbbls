@@ -35,12 +35,21 @@ final class SnapUploadCoordinator {
     /// that read only `formSnap` would save or discard around the new one.
     private var picksInFlight = 0
 
-    /// Where the form stands. Once it is closed (`cancelAndCleanup`) or its
-    /// save committed (`markCommitted`), a pick that lands late must leave
-    /// `formSnap` alone and take its own uploaded files with it.
+    /// Bumped by every pick at its tap. A pick applies only while it is still
+    /// the latest one, so a first pick that loads slower than a second never
+    /// lands over it.
+    private var pickGeneration = 0
+
+    /// Where the form stands. While its save is in flight (`beginCommit`),
+    /// once that save committed (`markCommitted`) or once the form closed
+    /// (`cancelAndCleanup`), a pick that lands late must leave `formSnap`
+    /// alone and take its own uploaded files with it.
     private var lifecycle: Lifecycle = .open
 
-    private enum Lifecycle { case open, closed, committed }
+    private enum Lifecycle { case open, committing, committed, closed }
+
+    /// The pending snap a save sent. No late-upload cleanup ever deletes it.
+    private var committedSnapId: UUID?
 
     // MARK: - Derived state
 
@@ -165,19 +174,33 @@ final class SnapUploadCoordinator {
     func processPick(userId: UUID, load: () async -> (data: Data, uti: String)?) async {
         picksInFlight += 1
         defer { picksInFlight -= 1 }
+        // Taken at the tap, so a later tap supersedes this pick even when its
+        // bytes arrive first.
+        let generation = nextPickGeneration()
         guard let loaded = await load() else { return }
-        await ingest(loaded.data, uti: loaded.uti, userId: userId)
+        await ingest(loaded.data, uti: loaded.uti, userId: userId, generation: generation)
+    }
+
+    /// A pick whose bytes are already in hand; it supersedes any earlier one.
+    /// `uti` has already passed `ImageFormatValidator`.
+    func ingest(_ data: Data, uti: String, userId: UUID) async {
+        await ingest(data, uti: uti, userId: userId, generation: nextPickGeneration())
+    }
+
+    private func nextPickGeneration() -> Int {
+        pickGeneration += 1
+        return pickGeneration
     }
 
     /// Shared pick path: capture date → re-encode → replace → upload.
-    /// `uti` has already passed `ImageFormatValidator`.
-    func ingest(_ data: Data, uti: String, userId: UUID) async {
+    private func ingest(_ data: Data, uti: String, userId: UUID, generation: Int) async {
         picksInFlight += 1
         defer { picksInFlight -= 1 }
-        guard isAcceptingPicks else { return }
+        guard accepts(generation) else { return }
 
-        // Read the capture date before the pipeline strips metadata (D7).
-        pickedCaptureDate = ExifCaptureDate.from(data)
+        // Read the capture date before the pipeline strips metadata (D7); the
+        // form only sees it once this pick is accepted.
+        let captureDate = ExifCaptureDate.from(data)
 
         let processed: ProcessedImage
         do {
@@ -189,9 +212,9 @@ final class SnapUploadCoordinator {
             return
         }
 
-        // The form closed, saved, or dropped this pick while it was being
-        // read: nothing is attached, replaced or deleted.
-        guard isAcceptingPicks else { return }
+        // The form closed or is saving, or a later pick superseded this one,
+        // while it was being read: nothing is attached, replaced or deleted.
+        guard accepts(generation) else { return }
 
         // A saved photo replaced by a new pick: its row goes with the next
         // save's whole-set `snaps`, its files after that save (R6).
@@ -201,9 +224,9 @@ final class SnapUploadCoordinator {
 
         // The inline picker makes "actually, that one" a single tap, so the
         // snap being replaced has to take its Storage bytes with it. An upload
-        // still in flight for that id is left to finish — a narrow window, and
-        // the id guard in `applyStateIfSnapMatches` keeps its result off the
-        // new snap.
+        // still in flight for that id is left to finish: the id guard in
+        // `applyStateIfSnapMatches` keeps its result off the new snap, and its
+        // own pick deletes the files once they land.
         if case .pending(let replaced) = formSnap {
             Self.logger.notice("replacing pending snap \(replaced.id.uuidString, privacy: .public)")
             Task { await self.repo.deleteFiles(snapId: replaced.id, userId: userId) }
@@ -212,35 +235,50 @@ final class SnapUploadCoordinator {
         let snapId = UUID()
         formSnap = .pending(AttachedSnap(id: snapId, localThumb: processed.thumb, state: .uploading))
         processedForRetry = processed
+        pickedCaptureDate = captureDate
 
         await performUpload(processed: processed, snapId: snapId, userId: userId)
 
-        // Closed or committed while uploading: these files belong to no saved
-        // moment, so they go, and the form never shows them again.
-        if lifecycle != .open {
-            let state = String(describing: lifecycle)
-            let id = snapId.uuidString
-            Self.logger.notice("late upload (\(state, privacy: .public)): deleting \(id, privacy: .public)")
-            if case .pending(let snap) = formSnap, snap.id == snapId {
-                formSnap = nil
-                processedForRetry = nil
-            }
-            await repo.deleteFiles(snapId: snapId, userId: userId)
+        // Removed, replaced, superseded or closed while uploading: the form no
+        // longer holds these files, so they go. A delete issued before the
+        // upload landed may have found nothing yet. The snap a save sent is
+        // never touched.
+        if pendingSnapId != snapId, snapId != committedSnapId {
+            Self.logger.notice("late upload: deleting orphaned \(snapId.uuidString, privacy: .public)")
+            await deleteFilesUncancelled(snapId: snapId, userId: userId)
         }
     }
 
-    /// False once the form closed or committed, or when the pick's task was
-    /// cancelled (the view drops it on Discard).
-    private var isAcceptingPicks: Bool {
+    /// False once the form is saving, committed or closed, or when a later
+    /// pick superseded this one.
+    private func accepts(_ generation: Int) -> Bool {
         if lifecycle != .open {
             Self.logger.notice("pick ignored: form is \(String(describing: self.lifecycle), privacy: .public)")
             return false
         }
-        if Task.isCancelled {
-            Self.logger.notice("pick ignored: its task was cancelled")
+        if generation != pickGeneration {
+            Self.logger.notice("pick ignored: superseded by a later pick")
             return false
         }
         return true
+    }
+
+    /// The id of the `.pending` snap the form holds, if any.
+    private var pendingSnapId: UUID? {
+        if case .pending(let snap) = formSnap { return snap.id }
+        return nil
+    }
+
+    /// True while a save is in flight or done: the photo it sent can be
+    /// neither removed nor detached.
+    private var isCommitLocked: Bool { lifecycle == .committing || lifecycle == .committed }
+
+    /// A cleanup delete that must run even when its caller's task was
+    /// cancelled: the unstructured task keeps the main actor but not the
+    /// cancellation, which would make the Storage request throw before it is
+    /// ever sent and orphan the files.
+    private func deleteFilesUncancelled(snapId: UUID, userId: UUID) async {
+        await Task { await self.repo.deleteFiles(snapId: snapId, userId: userId) }.value
     }
 
     /// Re-run the upload after a user tap on the chip's retry button. Only
@@ -257,7 +295,7 @@ final class SnapUploadCoordinator {
     /// delete. Safe to call when the snap is in any state. No-op when the
     /// current `formSnap` is not `.pending`.
     func removePending(userId: UUID) async {
-        guard case .pending(let snap) = formSnap else { return }
+        guard !isCommitLocked, case .pending(let snap) = formSnap else { return }
         let snapId = snap.id
         formSnap = nil
         processedForRetry = nil
@@ -272,9 +310,10 @@ final class SnapUploadCoordinator {
 
     /// Remove the current `.existing` photo from the form. No RPC: the next
     /// `save_moment` sends `snaps: []` and the server enforces "a name or a
-    /// photo" in that same write. No-op unless the current snap is `.existing`.
+    /// photo" in that same write. No-op unless the current snap is `.existing`,
+    /// and while a save is in flight or done.
     func detachExisting() {
-        guard case .existing(_, let storagePath) = formSnap else { return }
+        guard !isCommitLocked, case .existing(_, let storagePath) = formSnap else { return }
         detachedStoragePaths.append(storagePath)
         formSnap = nil
     }
@@ -316,11 +355,29 @@ final class SnapUploadCoordinator {
         await repo.deleteFiles(snapId: snapId, userId: userId)
     }
 
+    /// Called by the form right before its save RPC. Until `markCommitted`
+    /// or `abortCommit`, new picks are rejected and the attached photo can be
+    /// neither removed nor replaced, so the save sends exactly what it read.
+    func beginCommit() {
+        guard lifecycle == .open else { return }
+        lifecycle = .committing
+        committedSnapId = pendingSnapId
+    }
+
     /// Called by the form after its save succeeded: the attached photo now
     /// belongs to a saved moment, so a pick that lands late must neither
     /// replace it nor delete its files.
     func markCommitted() {
+        if lifecycle != .committing { committedSnapId = pendingSnapId }
         lifecycle = .committed
+    }
+
+    /// Called by the form when its save failed: the form is open again and
+    /// keeps its photo for a retry (A2).
+    func abortCommit() {
+        guard lifecycle == .committing else { return }
+        lifecycle = .open
+        committedSnapId = nil
     }
 
     /// Called by the sheet after a save (compose-pebble / compose-pebble-update)

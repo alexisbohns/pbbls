@@ -16,9 +16,6 @@ struct CaptureFlowView: View {
     @State private var model = CaptureFlowModel()
     @State private var snaps: SnapUploadCoordinator?
     @State private var pickedPhoto: PhotosPickerItem?
-    /// The latest pick's load-and-upload, cancelled on Discard so it cannot
-    /// land after the cover closed.
-    @State private var pickTask: Task<Void, Never>?
     @State private var isCloseConfirmPresented = false
     /// Drives the step transition direction so back slides back.
     @State private var isMovingBack = false
@@ -97,7 +94,9 @@ struct CaptureFlowView: View {
         }
         .onChange(of: pickedPhoto) { _, picked in
             guard let picked, let userId = currentUserId, let snaps else { return }
-            pickTask = Task { await snaps.handlePicked(picked, userId: userId) }
+            // Never cancelled: once the cover closes or saves, the coordinator
+            // rejects the pick and deletes whatever it already uploaded.
+            Task { await snaps.handlePicked(picked, userId: userId) }
         }
         // Seed the when step as soon as the photo's date is read, before its
         // upload finishes; the model keeps a date the user set.
@@ -161,6 +160,9 @@ struct CaptureFlowView: View {
                     }
                 }
             )
+            // A save started from the close dialog sends the photo on screen;
+            // neither a new pick nor Remove may change it under the save.
+            .disabled(model.isSaving)
         case .when:
             RecordWhenStep(
                 happenedAt: Binding(
@@ -225,7 +227,6 @@ struct CaptureFlowView: View {
 
     /// The only path that deletes the uploaded photo's files (A2).
     private func discard() async {
-        pickTask?.cancel()
         if let userId = currentUserId, let snaps {
             await snaps.cancelAndCleanup(userId: userId)
         }
@@ -247,6 +248,9 @@ struct CaptureFlowView: View {
         }
         savingThenComplete = thenComplete
         model.beginSaving()
+        // From here until the save settles, no pick or Remove can change the
+        // photo the payload sends.
+        snaps?.beginCommit()
         let payload = SaveMomentPayload(capture: model.draft, formSnap: snaps?.formSnap, userId: userId)
         do {
             let momentId = try await MomentsService(client: supabase.client).saveMoment(payload)
@@ -262,6 +266,7 @@ struct CaptureFlowView: View {
         } catch {
             // A2: the uploaded photo stays so a retry can use it.
             logger.error("save_moment failed: \(error.localizedDescription, privacy: .private)")
+            snaps?.abortCommit()
             failSave(userMessageForMomentWriteError(error))
         }
     }

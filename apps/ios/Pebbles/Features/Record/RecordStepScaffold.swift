@@ -108,6 +108,8 @@ struct RecordStepScaffold<Content: View>: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        // The spinner replaces the label on screen, not for VoiceOver.
+        .accessibilityLabel(Text(secondary.label))
         .disabled(!secondary.enabled || secondary.isLoading)
         .opacity(secondary.enabled || secondary.isLoading ? 1 : 0.4)
     }
