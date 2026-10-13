@@ -72,7 +72,7 @@ fun PebbleReadView(
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         PebbleReadBanner(
-            renderSvg = null,
+            glyph = pebble?.glyph,
             valence = pebble?.valence ?: Valence.NEUTRAL_MEDIUM,
             palette = palette,
             modifier = Modifier.fillMaxWidth(),

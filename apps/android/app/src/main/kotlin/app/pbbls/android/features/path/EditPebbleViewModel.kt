@@ -14,6 +14,7 @@ import app.pbbls.android.core.data.toDataError
 import app.pbbls.android.core.model.KarmaReason
 import app.pbbls.android.core.model.PebbleCompletePayload
 import app.pbbls.android.core.model.PebbleDraft
+import app.pbbls.android.core.model.PebbleGlyph
 import app.pbbls.android.core.ui.momentWriteErrorRes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.NonCancellable
@@ -37,6 +38,8 @@ sealed interface EditPebbleUiState {
     data class Content(
         /** Only the pebble half is read here; the moment half is Edit moment's. */
         val draft: PebbleDraft,
+        /** The derived glyph the header stone draws; it follows the saved pebble, not the draft. */
+        val glyph: PebbleGlyph?,
         val isSaving: Boolean = false,
         @StringRes val saveErrorRes: Int? = null,
     ) : EditPebbleUiState {
@@ -103,7 +106,7 @@ class EditPebbleViewModel
                                     EditPebbleUiState.Error
                                 } else {
                                     loadedPebbleId = detail.pebble.id
-                                    EditPebbleUiState.Content(draft = PebbleDraft.from(detail))
+                                    EditPebbleUiState.Content(draft = PebbleDraft.from(detail), glyph = detail.pebble.glyph)
                                 }
                         },
                         onFailure = {

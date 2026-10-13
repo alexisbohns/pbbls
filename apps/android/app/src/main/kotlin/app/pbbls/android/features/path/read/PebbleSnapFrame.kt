@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.PebbleGlyph
 import app.pbbls.android.core.model.Valence
 
 /**
@@ -40,7 +41,7 @@ import app.pbbls.android.core.model.Valence
 fun PebbleSnapFrame(
     photo: Painter,
     aspect: BannerAspect,
-    renderSvg: String?,
+    glyph: PebbleGlyph?,
     valence: Valence,
     palette: EmotionPalette?,
     modifier: Modifier = Modifier,
@@ -69,7 +70,7 @@ fun PebbleSnapFrame(
                         .clip(MaterialTheme.shapes.largeIncreased),
             )
             PebbleReadPetroglyph(
-                renderSvg = renderSvg,
+                glyph = glyph,
                 valence = valence,
                 palette = palette,
                 modifier =

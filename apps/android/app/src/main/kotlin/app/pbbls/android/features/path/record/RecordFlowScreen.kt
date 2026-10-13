@@ -186,7 +186,8 @@ fun RecordFlowScreen(
             if (step == RecordStep.SUCCESS && response != null) {
                 RecordSuccessStep(
                     name = flow.draft.name,
-                    renderSvg = response.renderSvg,
+                    // compose-pebble returns no glyph; this flow is retired in Part 7.
+                    glyph = null,
                     karmaDelta = response.karmaDelta,
                     valence = flow.draft.valence ?: Valence.NEUTRAL_MEDIUM,
                     palette = flow.draft.emotionId?.let { palettes.palette(it) },

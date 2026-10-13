@@ -113,6 +113,7 @@ fun PathPebbleRow(
         ) {
             PebbleThumbnail(
                 valence = valence,
+                glyph = moment.pebble?.glyph,
                 palette = palette,
                 modifier = Modifier.size(if (isLarge) 96.dp else 56.dp),
             )

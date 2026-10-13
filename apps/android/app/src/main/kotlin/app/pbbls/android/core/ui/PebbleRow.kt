@@ -80,6 +80,7 @@ fun PebbleRow(
         ) {
             PebbleThumbnail(
                 valence = moment.valence,
+                glyph = moment.pebble?.glyph,
                 palette = palette,
                 modifier = Modifier.size(40.dp),
             )

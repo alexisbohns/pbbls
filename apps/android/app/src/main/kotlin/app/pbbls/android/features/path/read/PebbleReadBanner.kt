@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.core.data.LocalSnapURLCache
 import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.PebbleGlyph
 import app.pbbls.android.core.model.Valence
 import coil3.SingletonImageLoader
 import coil3.request.ImageRequest
@@ -53,7 +54,7 @@ private data class BannerPhoto(
  */
 @Composable
 fun PebbleReadBanner(
-    renderSvg: String?,
+    glyph: PebbleGlyph?,
     valence: Valence,
     palette: EmotionPalette?,
     modifier: Modifier = Modifier,
@@ -88,7 +89,7 @@ fun PebbleReadBanner(
     if (loaded == null) {
         Box(modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
             PebbleReadPetroglyph(
-                renderSvg = renderSvg,
+                glyph = glyph,
                 valence = valence,
                 palette = palette,
                 modifier = Modifier.size(HEADING_PETROGLYPH),
@@ -98,7 +99,7 @@ fun PebbleReadBanner(
         PebbleSnapFrame(
             photo = remember(loaded.bitmap) { BitmapPainter(loaded.bitmap) },
             aspect = loaded.aspect,
-            renderSvg = renderSvg,
+            glyph = glyph,
             valence = valence,
             palette = palette,
             modifier = modifier,

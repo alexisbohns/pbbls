@@ -1,29 +1,26 @@
 package app.pbbls.android.features.path.read
 
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import app.pbbls.android.core.designsystem.toRgbHex
 import app.pbbls.android.core.model.EmotionPalette
+import app.pbbls.android.core.model.PebbleFrameColors
+import app.pbbls.android.core.model.PebbleGlyph
 import app.pbbls.android.core.model.Valence
-import app.pbbls.android.core.ui.render.PebbleOutlineBackdrop
 import app.pbbls.android.core.ui.render.PebbleOutlineGeometry
-import app.pbbls.android.core.ui.render.PebbleStaticRender
+import app.pbbls.android.core.ui.render.PebbleStone
 
 /**
  * The read-view "Petroglyph" (issue #599): the outline silhouette backfill with
- * the server-composed render (outline + glyph) traced on top, down-scaled per
- * [PebbleOutlineGeometry] to sit inside the silhouette. Same composite the Path
- * rows draw via `PebbleThumbnail`, but coloured through [petroglyphColors] so
- * the read page follows #599's per-size, per-theme table instead of the shared
- * theme-neutral `pebbleFrameColors`.
+ * the composed stone (shape seed + derived glyph) traced on top, down-scaled per
+ * [PebbleOutlineGeometry] to sit inside the silhouette. Same [PebbleStone] the
+ * Path rows draw via `PebbleThumbnail`, but coloured through [petroglyphColors]
+ * so the read page follows #599's per-size, per-theme table instead of the
+ * shared theme-neutral `pebbleFrameColors`. A null [glyph] draws the stone
+ * without one.
  *
  * Sized by the caller's [modifier]: the heading treatment gives it a large
  * square slot, the snap overlay a smaller one. A missing [palette] (cache cold,
@@ -33,40 +30,20 @@ import app.pbbls.android.core.ui.render.PebbleStaticRender
  */
 @Composable
 fun PebbleReadPetroglyph(
-    renderSvg: String?,
     valence: Valence,
+    glyph: PebbleGlyph?,
     palette: EmotionPalette?,
     modifier: Modifier = Modifier,
 ) {
     val primary = MaterialTheme.colorScheme.primary
     val accentHex = remember(primary) { primary.toRgbHex() }
-    val sizeGroup = valence.sizeGroup
     val colors =
-        palette?.let { petroglyphColors(it, sizeGroup, isSystemInDarkTheme()) }
+        palette?.let { petroglyphColors(it, valence.sizeGroup, isSystemInDarkTheme()) }
             ?: PetroglyphColors(strokeHex = accentHex, fillHex = accentHex, fillOpacity = 1f)
-
-    Box(modifier, contentAlignment = Alignment.Center) {
-        Box(
-            modifier = Modifier.aspectRatio(PebbleOutlineGeometry.aspectRatio(sizeGroup)),
-            contentAlignment = Alignment.Center,
-        ) {
-            PebbleOutlineBackdrop(
-                sizeGroup = sizeGroup,
-                polarity = valence.polarity,
-                fillHex = colors.fillHex,
-                fillOpacity = colors.fillOpacity,
-                modifier = Modifier.fillMaxSize(),
-            )
-            if (renderSvg != null) {
-                PebbleStaticRender(
-                    svg = renderSvg,
-                    strokeHex = colors.strokeHex,
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .scale(PebbleOutlineGeometry.pebbleScale(sizeGroup)),
-                )
-            }
-        }
-    }
+    PebbleStone(
+        valence = valence,
+        glyph = glyph,
+        colors = PebbleFrameColors(colors.strokeHex, colors.fillHex, colors.fillOpacity),
+        modifier = modifier,
+    )
 }

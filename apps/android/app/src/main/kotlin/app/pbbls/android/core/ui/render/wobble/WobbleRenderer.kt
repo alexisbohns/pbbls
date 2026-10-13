@@ -43,9 +43,9 @@ internal object WobbleRenderer {
     /** One noise field for the whole app: the static look is seed 3 (§1). */
     private val noise = SVGTurbulence(WobbleParams.SEED)
 
-    // Keys are content strings: collision-proof, and a few KB per key is
-    // negligible next to the cached geometry. Count-bounded LRU — the NSCache
-    // analog minus the memory-pressure hook.
+    // Pebble keys are `StoneComposer.cacheKey`s (size, polarity, glyph id);
+    // glyph keys are content strings. Count-bounded LRU — the NSCache analog
+    // minus the memory-pressure hook.
     private val pebbleCache = LruCache<WobblePebbleArt>(maxSize = 128)
     private val glyphCache = LruCache<WobbleArt>(maxSize = 512)
     private val backdropCache = LruCache<WobbleBackdropArt>(maxSize = 16) // 9 assets exist
@@ -53,10 +53,10 @@ internal object WobbleRenderer {
     // ── Pebble render (layer:shape / layer:fossil / layer:glyph) ──
 
     fun pebbleArt(
-        svg: String,
+        key: String,
         model: PebbleSvgModel,
     ): WobblePebbleArt {
-        pebbleCache.get(svg)?.let { return it }
+        pebbleCache.get(key)?.let { return it }
         val canvasParams = WobbleParams.scaled(model.viewBox.width.toDouble(), model.viewBox.height.toDouble())
         val layers =
             model.layers.map { layer ->
@@ -84,7 +84,7 @@ internal object WobbleRenderer {
                 WobbleOutlineBuilder.art(polylines, halfWidth, params, noise)
             }
         val art = WobblePebbleArt(layers)
-        pebbleCache.put(svg, art)
+        pebbleCache.put(key, art)
         return art
     }
 
