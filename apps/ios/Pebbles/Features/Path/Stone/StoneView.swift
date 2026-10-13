@@ -84,7 +84,7 @@ struct StoneView: View {
 
     @ViewBuilder
     private var carvingLayer: some View {
-        if let art = carvingArt {
+        if let art = carvingArt, !(art.ink.isEmpty && art.fossil == nil && !look.showOutline) {
             let ink = ZStack {
                 if let fossil = art.fossil {
                     WobbledPathShape(path: fossil.path, layerTransform: .identity, viewBox: art.viewBox)

@@ -85,11 +85,14 @@ enum StoneCarvingArt {
         return built
     }
 
-    /// An uncompleted moment (R4): the seed's engine outline as the only ink.
-    /// No veins, no fossil, no glyph. Built from the cached seed, so it is free.
+    /// An uncompleted moment (R4): nothing is carved. The outline R4 names is the
+    /// stone's own silhouette edge, which `StoneView` already draws, so ink, veins
+    /// and fossil are empty (matches the web `LitStone` blank branch). The seed's
+    /// viewBox and outline are kept for anything that needs the geometry. Built
+    /// from the cached seed, so it is free.
     static func blankArt(for valence: Valence) -> Art? {
         guard let seed = art(for: valence) else { return nil }
-        return Art(viewBox: seed.viewBox, ink: seed.outline, veins: CGMutablePath(),
+        return Art(viewBox: seed.viewBox, ink: CGMutablePath(), veins: CGMutablePath(),
                    outline: seed.outline, fossil: nil)
     }
 

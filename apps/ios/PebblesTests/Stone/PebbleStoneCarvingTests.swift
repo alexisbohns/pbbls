@@ -67,11 +67,12 @@ struct PebbleStoneCarvingTests {
         #expect(first === second)
     }
 
-    @Test("the blank stone: the engine outline only, nothing carved inside (R4)")
+    @Test("the blank stone: nothing carved, the outline is the stone's own edge (R4)")
     func blank() throws {
         let seed = try #require(StoneCarvingArt.art(for: .neutralMedium))
         let blank = try #require(StoneCarvingArt.blankArt(for: .neutralMedium))
-        #expect(blank.ink.boundingBoxOfPath == seed.outline.boundingBoxOfPath)
+        #expect(blank.ink.isEmpty)
+        #expect(blank.outline.boundingBoxOfPath == seed.outline.boundingBoxOfPath)
         #expect(blank.veins.isEmpty)
         #expect(blank.fossil == nil)
     }
