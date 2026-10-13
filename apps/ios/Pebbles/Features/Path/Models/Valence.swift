@@ -235,12 +235,14 @@ extension Valence {
 }
 
 extension Valence {
+    private static let logger = Logger(subsystem: "app.pbbls.ios", category: "valence")
+
     /// `from(positiveness:intensity:)` for read paths that must render
     /// something: logs and falls back to `.neutralMedium` on a pair the DB
     /// CHECKs forbid (reachable only through decode drift).
     static func resolved(positiveness: Int, intensity: Int) -> Valence {
         if let valence = from(positiveness: positiveness, intensity: intensity) { return valence }
-        Logger(subsystem: "app.pbbls.ios", category: "valence").error(
+        logger.error(
             """
             unexpected (positiveness, intensity) pair: \
             (\(positiveness, privacy: .public), \(intensity, privacy: .public)) — neutralMedium

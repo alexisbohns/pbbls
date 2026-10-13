@@ -1,9 +1,10 @@
 import Foundation
 @testable import Pebbles
 
-/// Verbatim payloads from the moments split readers (#1047). Shared by every
-/// decoder suite so a contract change is edited in one place. The Android
-/// plan (#1048) decodes the same strings.
+/// Hand-written payloads shaped from the SQL of the moments split readers
+/// (#1047); the live captures live in `MomentFixtures.Captured`. Shared by
+/// every decoder suite so a contract change is edited in one place. The
+/// Android plan (#1048) decodes the same strings.
 enum MomentFixtures {
 
     static let ownerId = "5f0e1d2c-3b4a-4958-8776-655443322110"
@@ -13,7 +14,9 @@ enum MomentFixtures {
     static let collectionId = "55555555-5555-4555-8555-555555555555"
     static let glyphId = "4759c37c-68a6-46a6-b4fc-046bd0316752"
 
-    /// `rpc("path_moments")` — four rows, newest first.
+    /// `rpc("path_moments")` — four rows, newest first. The fourth row (legacy
+    /// pebble with `"emotion": null`) is a tolerance probe, not a real payload:
+    /// `pebbles.emotion_id` is NOT NULL.
     static let pathMoments = Data("""
     [
       {

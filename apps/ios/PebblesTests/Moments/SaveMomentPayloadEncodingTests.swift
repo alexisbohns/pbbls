@@ -62,5 +62,9 @@ struct SaveMomentPayloadEncodingTests {
         #expect(SaveMomentPayload.snaps(for: nil, userId: userId).isEmpty)
         let existing = SaveMomentPayload.snaps(for: .existing(id: snapId, storagePath: "a/b"), userId: userId)
         #expect(existing == [.init(id: snapId, storagePath: "a/b", sortOrder: 0)])
+        let pending = AttachedSnap(id: snapId, localThumb: Data([0xFF]), state: .uploaded)
+        let fromPending = SaveMomentPayload.snaps(for: .pending(pending), userId: userId)
+        let path = "5f0e1d2c-3b4a-4958-8776-655443322110/\(snapId.uuidString.lowercased())"
+        #expect(fromPending == [.init(id: snapId, storagePath: path, sortOrder: 0)])
     }
 }

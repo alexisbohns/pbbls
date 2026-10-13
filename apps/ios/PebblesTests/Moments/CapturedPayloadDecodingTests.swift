@@ -20,6 +20,11 @@ struct CapturedPayloadDecodingTests {
         let row = rows[0]
         #expect(row.name == "Coffee")
         #expect(row.isCompleted)
+        // Both precisions the server sent: whole seconds, and microseconds.
+        #expect(row.happenedAt == Date(timeIntervalSince1970: 1_791_793_800))
+        let wholeSecondCreated = Date(timeIntervalSince1970: 1_791_850_361)
+        #expect(abs(row.createdAt.timeIntervalSince(wholeSecondCreated)) < 1)
+        #expect(row.createdAt != wholeSecondCreated)
         let pebble = try #require(row.pebble)
         #expect(pebble.emotion?.slug == "disgusted")
         let glyph = try #require(pebble.glyph)
