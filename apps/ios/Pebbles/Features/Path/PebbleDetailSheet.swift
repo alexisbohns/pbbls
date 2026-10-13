@@ -77,7 +77,7 @@ struct PebbleDetailSheet: View {
                 .toolbarBackground(.hidden, for: .navigationBar)
         }
         .interactiveDismissDisabled(isDeleting)
-        .task { await load() }
+        .task { await load(showsSpinner: detail == nil) }
         .sheet(isPresented: $isPresentingEdit) {
             EditPebbleSheet(momentId: momentId, onSaved: {
                 Task { await load(showsSpinner: false) }

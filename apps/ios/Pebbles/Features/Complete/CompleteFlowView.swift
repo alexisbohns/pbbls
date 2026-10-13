@@ -33,7 +33,7 @@ struct CompleteFlowView: View {
                 RecordFlowChrome(
                     dotCount: CompleteStep.counted.count,
                     dotIndex: model.step.dotIndex,
-                    canGoBack: model.step.previous != nil,
+                    canGoBack: model.step.previous != nil && !model.isCompleting,
                     onBack: { model.back() },
                     onClose: close
                 )
@@ -150,19 +150,24 @@ struct CompleteFlowView: View {
     // MARK: - Complete
 
     private func complete() async {
+        guard !model.isCompleting else { return }
         guard let payload = CompletePebblePayload(momentId: momentId, draft: model.draft) else {
+            logger.fault("complete pressed with an incomplete draft")
             model.fail(MomentWriteError.pebbleNeedsDomain.userMessage)
             return
         }
         model.beginCompleting()
         let service = MomentsService(client: supabase.client)
+        // Karma already earned by a pebble that exists on the moment (a stale
+        // read, a retried chain): `complete_pebble` updates it in place, so
+        // the delta is sum-after minus sum-before (R13). Nil = unknown.
+        let karmaBefore = await karmaBeforeWrite(service)
         do {
             let pebbleId = try await service.completePebble(payload)
-            // A first completion: no events existed for this pebble id, so
-            // the total after the write is its delta (R13).
-            async let glyph = try? service.resolveGlyph(pebbleId: pebbleId)
-            async let earned = try? service.karmaTotal(refId: pebbleId)
-            let (resolved, karmaDelta) = await (glyph, earned)
+            let resolved = await resolveGlyph(service, pebbleId: pebbleId)
+            let karmaAfter = await karmaTotal(service, refId: pebbleId)
+            var karmaDelta: Int?
+            if let karmaBefore, let karmaAfter { karmaDelta = karmaAfter - karmaBefore }
             // The success screen shows `+N`, so no capsule (A4).
             karma.notifyEarned(amount: karmaDelta ?? 0, reason: .pebbleCreated, presentsCapsule: false)
             achievements.fireCheck()
@@ -172,6 +177,36 @@ struct CompleteFlowView: View {
         } catch {
             logger.error("complete_pebble failed: \(error.localizedDescription, privacy: .private)")
             model.fail(userMessageForMomentWriteError(error))
+        }
+    }
+
+    /// Karma total of the moment's existing pebble, 0 when there is none, nil
+    /// when it can't be read (R13: show nothing rather than a wrong number).
+    private func karmaBeforeWrite(_ service: MomentsService) async -> Int? {
+        do {
+            guard let existing = try await service.moment(id: momentId).pebble?.id else { return 0 }
+            return await karmaTotal(service, refId: existing)
+        } catch {
+            logger.warning("pre-completion moment read failed: \(error.localizedDescription, privacy: .private)")
+            return nil
+        }
+    }
+
+    private func resolveGlyph(_ service: MomentsService, pebbleId: UUID) async -> PebbleGlyph? {
+        do {
+            return try await service.resolveGlyph(pebbleId: pebbleId)
+        } catch {
+            logger.warning("glyph read failed: \(error.localizedDescription, privacy: .private)")
+            return nil
+        }
+    }
+
+    private func karmaTotal(_ service: MomentsService, refId: UUID) async -> Int? {
+        do {
+            return try await service.karmaTotal(refId: refId)
+        } catch {
+            logger.warning("karma read failed: \(error.localizedDescription, privacy: .private)")
+            return nil
         }
     }
 }
