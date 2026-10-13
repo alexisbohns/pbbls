@@ -3,6 +3,7 @@ package app.pbbls.android.navigation
 import androidx.navigation3.runtime.NavKey
 import app.pbbls.android.core.model.AuthMode
 import app.pbbls.android.core.model.GlyphGridItem
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -90,7 +91,9 @@ sealed interface PebblesKey : NavKey {
      */
     @Serializable
     data class PebbleDetail(
-        val pebbleId: String,
+        /** A moment id. Serialized under its pre-split name so a restored back stack still decodes. */
+        @SerialName("pebbleId")
+        val momentId: String,
     ) : PebblesKey,
         BarKey
 
@@ -109,9 +112,18 @@ sealed interface PebblesKey : NavKey {
     @Serializable
     data object Drafts : PebblesKey
 
+    /** Edit pebble: the pebble fields of [momentId]'s pebble, written with `complete_pebble` (R5). */
     @Serializable
     data class EditPebble(
-        val pebbleId: String,
+        /** A moment id; see [PebbleDetail]. */
+        @SerialName("pebbleId")
+        val momentId: String,
+    ) : PebblesKey
+
+    /** Edit moment: when, name, description, photo, written with `save_moment` (R5). */
+    @Serializable
+    data class EditMoment(
+        val momentId: String,
     ) : PebblesKey
 
     @Serializable

@@ -3,14 +3,15 @@ package app.pbbls.android.features.path
 import androidx.compose.runtime.snapshots.Snapshot
 import app.pbbls.android.R
 import app.pbbls.android.core.data.PebbleDraftRecord
-import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.PebbleDraftPayload
 import app.pbbls.android.core.model.RippleSummary
-import app.pbbls.android.testing.FakePathService
+import app.pbbls.android.testing.FakeMomentReadService
+import app.pbbls.android.testing.FakeMomentWriteService
 import app.pbbls.android.testing.FakePathStatsService
 import app.pbbls.android.testing.FakePebbleDraftsService
-import app.pbbls.android.testing.FakePebbleWriteService
 import app.pbbls.android.testing.MainDispatcherRule
+import app.pbbls.android.testing.UiFixtures
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -34,26 +35,19 @@ class PathViewModelTest {
 
     private val now: OffsetDateTime = OffsetDateTime.now()
 
-    private fun pebble(
+    /** Dated now: the pager opens on the current week. `createdAt` equals `happenedAt`. */
+    private fun moment(
         id: String,
         happenedAt: OffsetDateTime = now,
-        createdAt: OffsetDateTime = now,
-    ) = Pebble(
-        id = id,
-        name = "Pebble $id",
-        happenedAt = happenedAt,
-        createdAt = createdAt,
-        intensity = 2,
-        positiveness = 1,
-    )
+    ): PathMoment = UiFixtures.pathMoment(id = id, name = "Moment $id", happenedAt = happenedAt)
 
     private fun draftRecord(id: String) = PebbleDraftRecord(id = id, payload = PebbleDraftPayload(), updatedAt = now)
 
     private fun viewModel(
-        path: FakePathService = FakePathService(),
+        path: FakeMomentReadService = FakeMomentReadService(),
         stats: FakePathStatsService = FakePathStatsService(),
         drafts: FakePebbleDraftsService = FakePebbleDraftsService(),
-        writes: FakePebbleWriteService = FakePebbleWriteService(),
+        writes: FakeMomentWriteService = FakeMomentWriteService(),
     ) = PathViewModel(path, stats, drafts, writes)
 
     // MARK: - Returning from a pushed screen
@@ -69,20 +63,20 @@ class PathViewModelTest {
     @Test
     fun `returning to the timeline re-reads it`() =
         runTest {
-            val path = FakePathService(pebbles = listOf(pebble("p1")))
+            val path = FakeMomentReadService(path = listOf(moment("p1")))
             val viewModel = viewModel(path = path)
             advanceUntilIdle()
-            val loadsAfterInit = path.loadCount
+            val loadsAfterInit = path.loadPathCount
 
             // First resume: the screen just opened, `init` already loaded.
             viewModel.onResumed()
             advanceUntilIdle()
-            assertEquals(loadsAfterInit, path.loadCount)
+            assertEquals(loadsAfterInit, path.loadPathCount)
 
             // Second: back from Profile.
             viewModel.onResumed()
             advanceUntilIdle()
-            assertEquals(loadsAfterInit + 1, path.loadCount)
+            assertEquals(loadsAfterInit + 1, path.loadPathCount)
         }
 
     /**
@@ -112,7 +106,7 @@ class PathViewModelTest {
     @Test
     fun `returning does not flash the spinner`() =
         runTest {
-            val viewModel = viewModel(path = FakePathService(pebbles = listOf(pebble("p1"))))
+            val viewModel = viewModel(path = FakeMomentReadService(path = listOf(moment("p1"))))
             advanceUntilIdle()
             viewModel.onResumed()
 
@@ -125,19 +119,19 @@ class PathViewModelTest {
     @Test
     fun `starts Loading and resolves to Content`() =
         runTest {
-            val viewModel = viewModel(FakePathService(pebbles = listOf(pebble("a"))))
+            val viewModel = viewModel(FakeMomentReadService(path = listOf(moment("a"))))
             assertEquals(PathUiState.Loading, viewModel.uiState.value)
 
             advanceUntilIdle()
 
             val state = viewModel.uiState.value as PathUiState.Content
-            assertTrue(state.entries.any { entry -> entry.pebbles.any { it.id == "a" } })
+            assertTrue(state.entries.any { entry -> entry.moments.any { it.id == "a" } })
         }
 
     @Test
     fun `a failed first load becomes Error`() =
         runTest {
-            val path = FakePathService()
+            val path = FakeMomentReadService()
             path.failNext = IOException("offline")
             val viewModel = viewModel(path)
             advanceUntilIdle()
@@ -148,7 +142,7 @@ class PathViewModelTest {
     @Test
     fun `retry recovers from a failed first load`() =
         runTest {
-            val path = FakePathService(pebbles = listOf(pebble("a")))
+            val path = FakeMomentReadService(path = listOf(moment("a")))
             path.failNext = IOException("offline")
             val viewModel = viewModel(path)
             advanceUntilIdle()
@@ -169,7 +163,7 @@ class PathViewModelTest {
     @Test
     fun `a failed reload keeps the timeline that is already up`() =
         runTest {
-            val path = FakePathService(pebbles = listOf(pebble("a")))
+            val path = FakeMomentReadService(path = listOf(moment("a")))
             val viewModel = viewModel(path)
             advanceUntilIdle()
             assertTrue(viewModel.uiState.value is PathUiState.Content)
@@ -179,20 +173,20 @@ class PathViewModelTest {
             advanceUntilIdle()
 
             val state = viewModel.uiState.value as PathUiState.Content
-            assertTrue(state.entries.any { entry -> entry.pebbles.any { it.id == "a" } })
+            assertTrue(state.entries.any { entry -> entry.moments.any { it.id == "a" } })
         }
 
     /** Rotation, as far as a JVM test carries it: no refetch on re-read. */
     @Test
     fun `reading the state again does not refetch`() =
         runTest {
-            val path = FakePathService(pebbles = listOf(pebble("a")))
+            val path = FakeMomentReadService(path = listOf(moment("a")))
             val viewModel = viewModel(path)
             advanceUntilIdle()
 
             repeat(5) { viewModel.uiState.value }
 
-            assertEquals(1, path.loadCount)
+            assertEquals(1, path.loadPathCount)
         }
 
     // MARK: - Stats and the local active-today override
@@ -218,7 +212,7 @@ class PathViewModelTest {
                 FakePathStatsService(
                     ripple = RippleSummary(rippleLevel = 3, pebbles28d = 7, activeToday = true),
                 )
-            val path = FakePathService(pebbles = listOf(pebble("old", createdAt = now.minusDays(3))))
+            val path = FakeMomentReadService(path = listOf(moment("old", happenedAt = now.minusDays(3))))
             val viewModel = viewModel(path, stats)
             advanceUntilIdle()
 
@@ -233,7 +227,7 @@ class PathViewModelTest {
                 FakePathStatsService(
                     ripple = RippleSummary(rippleLevel = 3, pebbles28d = 7, activeToday = false),
                 )
-            val viewModel = viewModel(FakePathService(pebbles = listOf(pebble("today"))), stats)
+            val viewModel = viewModel(FakeMomentReadService(path = listOf(moment("today"))), stats)
             advanceUntilIdle()
 
             val state = viewModel.uiState.value as PathUiState.Content
@@ -274,6 +268,32 @@ class PathViewModelTest {
             assertNull((viewModel.uiState.value as PathUiState.Content).ripple)
         }
 
+    @Test
+    fun `an uncompleted moment is on the timeline`() =
+        runTest {
+            val path =
+                FakeMomentReadService(
+                    path = listOf(UiFixtures.pathMoment(id = "bare", name = null, happenedAt = now, pebble = null, firstSnapPath = "u/s")),
+                )
+            val viewModel = viewModel(path)
+            advanceUntilIdle()
+
+            val content = viewModel.uiState.value as PathUiState.Content
+            assertEquals(listOf("bare"), content.entries.flatMap { it.moments }.map { it.id })
+        }
+
+    /** A moment captured today without its pebble is not activity yet (A-13). */
+    @Test
+    fun `ripple counts today only for a completed moment created today`() =
+        runTest {
+            val stats = FakePathStatsService(ripple = RippleSummary(rippleLevel = 1, pebbles28d = 1, activeToday = true))
+            val path = FakeMomentReadService(path = listOf(UiFixtures.pathMoment(happenedAt = now, pebble = null)))
+            val viewModel = viewModel(path, stats)
+            advanceUntilIdle()
+
+            assertEquals(false, (viewModel.uiState.value as PathUiState.Content).ripple?.activeToday)
+        }
+
     // MARK: - Draft count
 
     @Test
@@ -302,39 +322,39 @@ class PathViewModelTest {
     // MARK: - Delete
 
     @Test
-    fun `confirming a delete removes the pebble and reloads`() =
+    fun `confirming a delete removes the moment and reloads`() =
         runTest {
-            val path = FakePathService(pebbles = listOf(pebble("a")))
-            val writes = FakePebbleWriteService()
+            val path = FakeMomentReadService(path = listOf(moment("a")))
+            val writes = FakeMomentWriteService()
             val viewModel = viewModel(path, writes = writes)
             advanceUntilIdle()
 
-            viewModel.requestDelete(pebble("a"))
+            viewModel.requestDelete(moment("a"))
             assertEquals(
                 "a",
                 viewModel.covers.value.pendingDeletion
                     ?.id,
             )
 
-            path.pebbles = emptyList()
+            path.path = emptyList()
             viewModel.confirmDelete()
             advanceUntilIdle()
 
-            assertEquals(listOf("a"), writes.deletedPebbleIds)
+            assertEquals(listOf("a"), writes.deletedMoments)
             assertNull(viewModel.covers.value.pendingDeletion)
             val state = viewModel.uiState.value as PathUiState.Content
-            assertTrue(state.entries.all { it.pebbles.isEmpty() })
+            assertTrue(state.entries.all { it.moments.isEmpty() })
         }
 
     @Test
     fun `a failed delete surfaces the error dialog`() =
         runTest {
-            val writes = FakePebbleWriteService()
+            val writes = FakeMomentWriteService()
             writes.failNext = IOException("offline")
             val viewModel = viewModel(writes = writes)
             advanceUntilIdle()
 
-            viewModel.requestDelete(pebble("a"))
+            viewModel.requestDelete(moment("a"))
             viewModel.confirmDelete()
             advanceUntilIdle()
 
@@ -347,15 +367,15 @@ class PathViewModelTest {
     @Test
     fun `cancelling a delete writes nothing`() =
         runTest {
-            val writes = FakePebbleWriteService()
+            val writes = FakeMomentWriteService()
             val viewModel = viewModel(writes = writes)
             advanceUntilIdle()
 
-            viewModel.requestDelete(pebble("a"))
+            viewModel.requestDelete(moment("a"))
             viewModel.cancelDelete()
             advanceUntilIdle()
 
-            assertTrue(writes.deletedPebbleIds.isEmpty())
+            assertTrue(writes.deletedMoments.isEmpty())
             assertNull(viewModel.covers.value.pendingDeletion)
         }
 }

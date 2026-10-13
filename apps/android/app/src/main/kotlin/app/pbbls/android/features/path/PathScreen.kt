@@ -35,7 +35,7 @@ import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.model.EmotionPalette
-import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.WeekRollEntry
 import app.pbbls.android.features.path.components.NewPebbleFab
 import app.pbbls.android.features.path.components.WeekHeader
@@ -46,7 +46,7 @@ import kotlin.math.abs
 
 /**
  * The Path timeline — the authenticated landing surface (`PathView.swift`
- * analog). Loads every pebble once via `path_pebbles()`, groups by ISO week,
+ * analog). Loads every moment once via `path_moments()`, groups by ISO week,
  * pages the body by week, and shows the karma/Ripples status above the roll.
  * Sign-out lives on the Profile screen, which is the `You` tab (#852).
  *
@@ -59,7 +59,7 @@ import kotlin.math.abs
  * [onCreatePebbleLongPress] are how this screen reaches them; only the caller
  * (`PebblesEntryProvider`) ever touches a `Navigator`.
  *
- * @param onDeleteConfirmed Called with the deleted pebble's id once the user
+ * @param onDeleteConfirmed Called with the deleted moment's id once the user
  *   confirms, so a detail open beside Path can close (#940). It runs on
  *   confirm, not on success: if the delete fails, the error dialog says so and
  *   the pebble can be reopened.
@@ -72,7 +72,7 @@ fun PathScreen(
     onCreatePebble: () -> Unit,
     onCreatePebbleLongPress: () -> Unit,
     modifier: Modifier = Modifier,
-    onDeleteConfirmed: (pebbleId: String) -> Unit = {},
+    onDeleteConfirmed: (momentId: String) -> Unit = {},
     viewModel: PathViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -124,8 +124,8 @@ fun PathScreen(
                         focusedWeekStart = content.focusedWeekStart,
                         today = content.today,
                         onFocusChange = viewModel::onFocusWeek,
-                        paletteFor = { pebble -> pebble.emotion?.let { palettes.palette(it.id) } },
-                        onPebbleTap = { pebble -> onOpenDetail(pebble.id) },
+                        paletteFor = { moment -> moment.pebble?.emotion?.let { palettes.palette(it.id) } },
+                        onPebbleTap = { moment -> onOpenDetail(moment.id) },
                         onPebbleDelete = viewModel::requestDelete,
                         onCreatePebble = onCreatePebble,
                         onOpenDrafts = onOpenDrafts,
@@ -164,7 +164,7 @@ fun PathScreen(
 
         covers.pendingDeletion?.let { target ->
             DeleteConfirmDialog(
-                pebbleName = target.name,
+                pebbleName = target.name ?: stringResource(R.string.moment_untitled),
                 onConfirm = {
                     // `target` was captured before confirmDelete clears it.
                     viewModel.confirmDelete()
@@ -194,9 +194,9 @@ fun PathContent(
     focusedWeekStart: LocalDate,
     today: LocalDate,
     onFocusChange: (LocalDate) -> Unit,
-    paletteFor: (Pebble) -> EmotionPalette?,
-    onPebbleTap: (Pebble) -> Unit = {},
-    onPebbleDelete: (Pebble) -> Unit = {},
+    paletteFor: (PathMoment) -> EmotionPalette?,
+    onPebbleTap: (PathMoment) -> Unit = {},
+    onPebbleDelete: (PathMoment) -> Unit = {},
     onCreatePebble: () -> Unit = {},
     onOpenDrafts: () -> Unit = {},
     draftCount: Int = 0,
@@ -346,7 +346,7 @@ internal fun DeleteConfirmDialog(
     )
 }
 
-/** Delete-failure notice — a single-action AlertDialog dismissing back to the timeline. */
+/** Delete-failure notice — a single-action AlertDialog dismissing back to the timeline. Copy shared with iOS (R15). */
 @Composable
 private fun DeleteErrorDialog(onDismiss: () -> Unit) {
     val colors = MaterialTheme.colorScheme
@@ -355,7 +355,7 @@ private fun DeleteErrorDialog(onDismiss: () -> Unit) {
         containerColor = colors.surfaceContainerHigh,
         text = {
             Text(
-                text = stringResource(R.string.pebble_delete_error),
+                text = stringResource(R.string.moment_delete_error),
                 style = MaterialTheme.typography.bodyLarge,
                 color = colors.onSurfaceVariant,
             )

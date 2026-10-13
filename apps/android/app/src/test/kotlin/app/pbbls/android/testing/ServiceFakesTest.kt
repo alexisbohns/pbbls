@@ -1,12 +1,11 @@
 package app.pbbls.android.testing
 
-import app.pbbls.android.core.data.PathService
+import app.pbbls.android.core.data.MomentReadService
 import app.pbbls.android.core.data.PebbleWriteService
 import app.pbbls.android.core.data.ProfileService
 import app.pbbls.android.core.data.ReferenceDataService
 import app.pbbls.android.core.data.SupabaseService
 import app.pbbls.android.core.model.MomentSavePayload
-import app.pbbls.android.core.model.Pebble
 import io.github.jan.supabase.annotations.SupabaseInternal
 import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.MemoryCodeVerifierCache
@@ -40,18 +39,10 @@ import java.time.OffsetDateTime
  * without producing a client at all.
  */
 class ServiceFakesTest {
-    private fun pebble(
+    private fun moment(
         id: String,
         name: String,
-    ): Pebble =
-        Pebble(
-            id = id,
-            name = name,
-            happenedAt = OffsetDateTime.parse("2026-09-19T12:00:00Z"),
-            createdAt = OffsetDateTime.parse("2026-09-19T12:00:00Z"),
-            intensity = 2,
-            positiveness = 1,
-        )
+    ) = UiFixtures.pathMoment(id = id, name = name)
 
     /**
      * The regression this whole stack exists to prevent.
@@ -111,7 +102,7 @@ class ServiceFakesTest {
         val supabase = SupabaseService(client, TestScope())
 
         // Each of these used to be unconstructible in a JVM test.
-        PathService(supabase)
+        MomentReadService(supabase)
         ProfileService(supabase)
         PebbleWriteService(supabase)
         ReferenceDataService(supabase)
@@ -120,26 +111,26 @@ class ServiceFakesTest {
     @Test
     fun `a named seam drives the success path`() =
         runTest {
-            val fixture = listOf(pebble("p1", "First light"), pebble("p2", "Second wind"))
-            val graph = FakeServices(pathService = FakePathService(pebbles = fixture))
+            val fixture = listOf(moment("p1", "First light"), moment("p2", "Second wind"))
+            val graph = FakeServices(momentRead = FakeMomentReadService(path = fixture))
 
-            val loaded = graph.pathService.loadPathPebbles()
+            val loaded = graph.momentRead.loadPath()
 
             assertEquals(fixture, loaded)
             assertEquals(listOf("First light", "Second wind"), loaded.map { it.name })
-            assertEquals(1, (graph.pathService as FakePathService).loadCount)
+            assertEquals(1, (graph.momentRead as FakeMomentReadService).loadPathCount)
         }
 
     @Test
     fun `an armed failure throws once, then clears so the retry succeeds`() =
         runTest {
-            val pathService = FakePathService(pebbles = listOf(pebble("p1", "First light")))
-            val graph = FakeServices(pathService = pathService)
-            pathService.failNext = IOException("network down")
+            val momentRead = FakeMomentReadService(path = listOf(moment("p1", "First light")))
+            val graph = FakeServices(momentRead = momentRead)
+            momentRead.failNext = IOException("network down")
 
             val thrown =
                 try {
-                    graph.pathService.loadPathPebbles()
+                    graph.momentRead.loadPath()
                     null
                 } catch (e: IOException) {
                     e
@@ -148,12 +139,12 @@ class ServiceFakesTest {
             assertEquals("network down", thrown?.message)
             // Cleared by the throw — this is what lets a test drive retry
             // without rebuilding the fake.
-            assertEquals(null, pathService.failNext)
+            assertEquals(null, momentRead.failNext)
 
-            val retried = graph.pathService.loadPathPebbles()
+            val retried = graph.momentRead.loadPath()
 
             assertEquals(listOf("First light"), retried.map { it.name })
-            assertEquals(2, pathService.loadCount)
+            assertEquals(2, momentRead.loadPathCount)
         }
 
     @Test

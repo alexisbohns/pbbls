@@ -7,7 +7,7 @@ import app.pbbls.android.core.data.EmotionPaletteService
 import app.pbbls.android.core.data.LocalEmotionPaletteService
 import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.data.LocalSnapURLCache
-import app.pbbls.android.core.data.PathServicing
+import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.PathStatsServicing
 import app.pbbls.android.core.data.PebbleDraftsServicing
 import app.pbbls.android.core.data.PebbleWriteServicing
@@ -32,7 +32,7 @@ import kotlinx.coroutines.test.TestScope
  * a test names only the seam it cares about:
  *
  * ```
- * val graph = FakeServices(pathService = FakePathService(pebbles = fixture))
+ * val graph = FakeServices(momentRead = FakeMomentReadService(path = fixture))
  * ```
  *
  * Only the extracted seams are here — the five from #848 plus one per screen
@@ -52,7 +52,7 @@ import kotlinx.coroutines.test.TestScope
  */
 class FakeServices(
     val supabase: SupabaseServicing = FakeSupabaseService(),
-    val pathService: PathServicing = FakePathService(),
+    val momentRead: MomentReadServicing = FakeMomentReadService(),
     val profileService: ProfileServicing = FakeProfileService(),
     val pebbleWrite: PebbleWriteServicing = FakePebbleWriteService(),
     val referenceData: ReferenceDataServicing = FakeReferenceDataService(),

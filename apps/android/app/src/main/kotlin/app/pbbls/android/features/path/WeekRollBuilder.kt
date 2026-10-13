@@ -1,6 +1,6 @@
 package app.pbbls.android.features.path
 
-import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.WeekRollEntry
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -30,20 +30,20 @@ object WeekRollBuilder {
     fun isoWeekNumber(weekStart: LocalDate): Int = weekStart.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
 
     fun build(
-        pebbles: List<Pebble>,
+        moments: List<PathMoment>,
         zone: ZoneId,
         today: LocalDate,
     ): List<WeekRollEntry> {
         val currentStart = weekStart(today)
 
-        // Bucket pebbles by their week's Monday, in the device zone (the
+        // Bucket moments by their week's Monday, in the device zone (the
         // iOS Calendar analog — grouping follows the user's wall clock).
         val grouped =
-            pebbles.groupBy { pebble ->
-                weekStart(pebble.happenedAt.atZoneSameInstant(zone).toLocalDate())
+            moments.groupBy { moment ->
+                weekStart(moment.happenedAt.atZoneSameInstant(zone).toLocalDate())
             }
 
-        // Union: every week with pebbles, plus current. No empty future weeks.
+        // Union: every week with moments, plus current. No empty future weeks.
         val weekStarts = grouped.keys + currentStart
 
         return weekStarts
@@ -56,7 +56,7 @@ object WeekRollBuilder {
                     } else {
                         raw.sortedByDescending { it.happenedAt.toInstant() }
                     }
-                WeekRollEntry(weekStart = ws, pebbles = sorted)
+                WeekRollEntry(weekStart = ws, moments = sorted)
             }
     }
 

@@ -16,9 +16,7 @@ import app.pbbls.android.core.model.MomentPebble
 import app.pbbls.android.core.model.MomentSnap
 import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.PathPebble
-import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.core.model.PebbleCollection
-import app.pbbls.android.core.model.PebbleDetail
 import app.pbbls.android.core.model.PebbleGlyph
 import app.pbbls.android.core.model.SoulRef
 import app.pbbls.android.core.model.SoulWithGlyph
@@ -30,38 +28,13 @@ import java.time.OffsetDateTime
  * Minimal, valid domain values for the Robolectric UI tests (#857). Each takes
  * only what a test asserts on; the rest is the least a screen needs to render.
  *
- * Pebbles default to NOW, not a fixed date: Path's pager opens on the current
- * week, and a pebble outside it is not on screen to tap.
+ * The moment builders default to a fixed date for the decoder and ViewModel
+ * tests; a Robolectric Path journey passes `happenedAt = OffsetDateTime.now()`,
+ * because the pager opens on the current week and a moment outside it is not
+ * on screen to tap.
  */
 object UiFixtures {
     val joy = EmotionRef(id = "emotion-joy", slug = "joy", name = "Joy")
-
-    fun pebble(
-        id: String = "pebble-1",
-        name: String = "Coffee with Mo",
-        happenedAt: OffsetDateTime = OffsetDateTime.now(),
-    ) = Pebble(
-        id = id,
-        name = name,
-        happenedAt = happenedAt,
-        createdAt = happenedAt,
-        intensity = 2,
-        positiveness = 1,
-        emotion = joy,
-    )
-
-    fun pebbleDetail(
-        id: String = "pebble-1",
-        name: String = "Coffee with Mo",
-    ) = PebbleDetail(
-        id = id,
-        name = name,
-        happenedAt = OffsetDateTime.now(),
-        intensity = 2,
-        positiveness = 1,
-        visibility = Visibility.PRIVATE,
-        emotion = joy,
-    )
 
     fun glyph(
         id: String = "glyph-1",

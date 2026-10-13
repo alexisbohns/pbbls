@@ -13,7 +13,7 @@ import app.pbbls.android.core.model.ComposePebbleResponse
 import app.pbbls.android.core.model.PebbleDraftPayload
 import app.pbbls.android.testing.AppUiTest
 import app.pbbls.android.testing.FakeComposerSnapshotStore
-import app.pbbls.android.testing.FakePathService
+import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.FakePebbleDraftsService
 import app.pbbls.android.testing.FakePebbleWriteService
 import app.pbbls.android.testing.UiFixtures
@@ -43,7 +43,7 @@ class RecordFlowPublishTest : AppUiTest() {
 
     @Inject lateinit var snapshots: FakeComposerSnapshotStore
 
-    @Inject lateinit var path: FakePathService
+    @Inject lateinit var path: FakeMomentReadService
 
     private fun onPrivacyWithACompleteDraft() {
         drafts.records +=
@@ -78,7 +78,7 @@ class RecordFlowPublishTest : AppUiTest() {
     fun `publishing shows the success step with the karma earned, and consumes the draft`() {
         writes.createResult = ComposeResult.Success(ComposePebbleResponse(pebbleId = "pebble-9", karmaDelta = 3))
         onPrivacyWithACompleteDraft()
-        val pathLoadsBefore = path.loadCount
+        val pathLoadsBefore = path.loadPathCount
 
         onText(R.string.record_action_publish).performClick()
 
@@ -94,7 +94,7 @@ class RecordFlowPublishTest : AppUiTest() {
 
         onText(R.string.record_success_exit).performClick()
         compose.onNodeWithTag(JourneyTags.NEW_PEBBLE).assertIsDisplayed()
-        assertTrue("Path reloads once the flow is gone", path.loadCount > pathLoadsBefore)
+        assertTrue("Path reloads once the flow is gone", path.loadPathCount > pathLoadsBefore)
     }
 
     @Test
