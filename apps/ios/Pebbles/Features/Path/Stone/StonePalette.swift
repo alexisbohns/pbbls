@@ -29,6 +29,18 @@ struct StonePalette: Equatable {
         shaded: Color.accent.shaded
     )
 
+    /// An uncompleted moment's stone (R4): the web `BLANK_PALETTE` grey ramp
+    /// (`apps/web/lib/config/stone-tones.ts`), the same in both schemes.
+    /// `surface` is the primary at 10% alpha, the rule the emotion palettes follow.
+    static let blank = StonePalette(
+        primary: Color(.sRGB, red: 134 / 255, green: 134 / 255, blue: 134 / 255),
+        secondary: Color(.sRGB, red: 185 / 255, green: 185 / 255, blue: 185 / 255),
+        light: Color(.sRGB, red: 243 / 255, green: 243 / 255, blue: 243 / 255),
+        surface: Color(.sRGB, red: 134 / 255, green: 134 / 255, blue: 134 / 255, opacity: 0.1),
+        dark: Color(.sRGB, red: 27 / 255, green: 27 / 255, blue: 27 / 255),
+        shaded: Color(.sRGB, red: 94 / 255, green: 94 / 255, blue: 94 / 255)
+    )
+
     /// An emotion's palette: same six slots, same convention (`dark` is the
     /// darkest tone, `shaded` the mid one), so the tables apply unchanged.
     init(emotion: EmotionPalette) {
