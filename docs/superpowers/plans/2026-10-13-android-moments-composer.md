@@ -34,9 +34,9 @@ export ANDROID_HOME=$HOME/Library/Android/sdk
 | # | Branch | Part | One line |
 |---|---|---|---|
 | 1 | `feat/1048-android-moments-data` | Moment models and services | New read/write seams, models, payloads, whole-second timestamps, error mapping, verbatim decoder tests. Additive only. |
-| 2 | `feat/1048-android-moments-readers` | Readers and editor on moments | Path, read page, soul/collection detail, edit, delete and share move onto the new seams; the installed app's reads are unbroken. |
+| 2 | `feat/1048-android-moments-readers` | Readers and editors on moments | Path, read page (with its ⋮ menu), soul/collection detail, delete and share move onto the new seams; editing splits into Edit moment (`save_moment`) and Edit pebble (`complete_pebble`); the installed app's reads are unbroken. |
 | 3 | `feat/1048-android-moments-stone` | The glyph drawn from strokes | Stone composed from shape seeds plus `glyph.strokes`; every `render_svg` surface switches; blank-stone renderer. |
-| 4 | `feat/1048-android-moments-path` | Bare moments on Path and the read page | Blank stones for uncompleted moments, the bare-moment read page, the two-choice delete UX. |
+| 4 | `feat/1048-android-moments-path` | Bare moments on Path and the read page | Blank stones for uncompleted moments, the bare-moment read page, the two-choice delete UX behind the ⋮ menu. |
 | 5 | `feat/1048-android-moments-complete` | Complete flow | Six-step Complete flow, per-moment autosave, success screen, the read page's call to action. |
 | 6 | `feat/1048-android-moments-capture` | Capture flow | Three-step Capture flow, the "make it a pebble now" chain, New pebble opens Capture. |
 | 7 | `feat/1048-android-moments-retire` | Collection glyph and retirement | Collection glyph picker; the eleven-step flow, the all-at-once composer, drafts and `compose-pebble` removed; docs and Arkaik. |
@@ -66,17 +66,17 @@ Paths are relative to `app/src/main/kotlin/app/pbbls/android/`. "P2" means "chan
 | 7 | `core/data/CollectionsService.kt:81-89` | same shape with `collection_pebbles!inner` | `MomentReadService.loadMomentsInCollection(id)` → `pebble=cs.{"collections":[{"id":…}]}` (P1); `loadPebbles` deleted P2 |
 | 8 | `core/data/PebbleWriteService.kt:135` | `rpc("delete_pebble")` with the row id (a moment id since the backfill; deletes only the pebble and strands the moment) | P2: Path, soul and collection rows call `MomentWriteService.deleteMoment` (`rpc("delete_moment")` + Storage cleanup of the returned paths). P4: the "keep the moment" choice calls `MomentWriteService.deletePebble(pebble.id)`. |
 | 9 | `core/data/PebbleWriteService.kt:159` (`compose-pebble`) | create through the deprecated edge function | P5/P6: `complete_pebble` (Complete) and `save_moment` (Capture). The old composers keep calling it until P6 unhooks them and P7 deletes `PebbleWriteService`. |
-| 10 | `core/data/PebbleWriteService.kt:159` (`compose-pebble-update`) | edit through the deprecated edge function | P2: `MomentWriteService.saveMoment`, then `completePebble` when the moment has your pebble |
+| 10 | `core/data/PebbleWriteService.kt:159` (`compose-pebble-update`) | edit through the deprecated edge function | P2: two screens, one write each (R5): Edit moment → `MomentWriteService.saveMoment`; Edit pebble → `MomentWriteService.completePebble` |
 | 11 | `core/data/PebbleWriteService.kt:179` + `core/model/ComposePebbleResponse.kt:17-24` | `pebble_id`, `render_svg`, `render_version`, `karma_delta` from the edge function | karma: `MomentWriteService.karmaDelta(pebbleId, reason)` → `from("karma_events").select("delta")`, latest row by `ref_id` + `reason` (P1, mirrors `functions/_shared/karma-delta.ts`); glyph: `MomentReadService.resolveGlyph(pebbleId)` → `rpc("resolve_pebble_glyph")` (P1). `ComposePebbleResponse` deleted P7. |
 | 12 | `core/model/PebbleCreatePayload.kt:25,39` | `happened_at`, `glyph_id` keys | `MomentSavePayload` + `PebbleCompletePayload` (P1); file deleted P7 |
-| 13 | `core/model/PebbleUpdatePayload.kt:32,46` | `happened_at`, `glyph_id` keys | same; class deleted P2 (edit is its only user) |
+| 13 | `core/model/PebbleUpdatePayload.kt:32,46` | `happened_at`, `glyph_id` keys | same; class deleted P2 (the edit form is its only user) |
 | 14 | `core/model/PebbleUpdatePayload.kt:12-18` | `PebbleSnapPayload` `{id, storage_path, sort_order}` | moved unchanged to `core/model/PebbleSnapPayload.kt` (P1); it is exactly `save_moment`'s `snaps[]` element |
 | 15 | `core/data/PebbleDraftsService.kt:80,87,109,116,129` | `from("pebble_drafts")` list/load/upsert/delete/count (table dropped) | deleted P7, with Path's draft badge and the drafts list |
 | 16 | `core/data/PebbleDraftsService.kt:146` | `rpc("can_use_glyph")` for a resumed draft's glyph | deleted P7 (pebbles carry no glyph) |
 | 17 | `core/model/PebbleDraftPayload.kt:31,45` | `pebble_drafts.payload` keys incl. `happened_at`, `glyph_id` | deleted P7 |
-| 18 | `core/data/PebbleSnapRepository.kt:113` | `rpc("delete_pebble_media")` (dropped) | removed P2. Photo removal rides `save_moment`'s whole-set `snaps`; `delete_moment_media` is not called (PD-15). |
+| 18 | `core/data/PebbleSnapRepository.kt:113` | `rpc("delete_pebble_media")` (dropped) | removed P2. Photo removal rides `save_moment`'s whole-set `snaps`; `delete_moment_media` is not called (R6). |
 | 19 | `core/data/SnapUploadCoordinator.kt:136` | `removeExisting()` → `deletePebbleMedia` | `detachExisting()` clears the form and returns the snap; the caller deletes its files after a successful save (P2) |
-| 20 | `features/path/EditPebbleViewModel.kt:142,200-252` | `PebbleDraft.from(PebbleDetail)`, eager `delete_pebble_media`, update payload | rewritten on `MomentDetail` + `saveMoment`/`completePebble` (P2) |
+| 20 | `features/path/EditPebbleViewModel.kt:142,200-252` | `PebbleDraft.from(PebbleDetail)`, eager `delete_pebble_media`, update payload | split in P2: `EditMomentViewModel` (new, `saveMoment` only) and `EditPebbleViewModel` (`completePebble` only), both loading `MomentDetail` |
 | 21 | `features/path/record/RecordFlowViewModel.kt:362,467,520` | `PebbleDraftPayload`, `drafts.saveAsDraft`, create payload | deleted P7 |
 | 22 | `features/path/create/CreatePebbleViewModel.kt:242,284,316` | same | deleted P7 |
 | 23 | `features/path/DraftsViewModel.kt`, `DraftsScreen.kt` | `pebble_drafts` list | deleted P7 |
@@ -111,7 +111,7 @@ Paths are relative to `app/src/main/kotlin/app/pbbls/android/`. "P2" means "chan
 | 47 | `core/data/PathStatsService.kt:133` | `v_ripple` | same |
 | 48 | `core/data/PathStatsService.kt:142` | `get_profile_engagement` | its body reads only `pebbles.created_at` (`20260516104231`) |
 | 49 | `core/data/AchievementsService.kt:128,136` | `achievements`, `achievement_unlocks` | untouched |
-| 50 | `core/data/AchievementsService.kt:146` | `check_achievements` | kept; fired after `complete_pebble` (PD-9) |
+| 50 | `core/data/AchievementsService.kt:146` | `check_achievements` | kept; fired after `complete_pebble` (A-7) |
 | 51 | `core/data/GlyphService.kt:66,78,101,120` | `glyphs`, `glyph_entitlements` | untouched |
 | 52 | `core/data/GlyphMarketService.kt:87,110,136,165` | `glyphs`, `glyph_entitlements`, `v_glyph_market`, swap RPC | untouched |
 | 53 | `core/data/EmotionPaletteService.kt:46` | `v_emotions_with_palette` | untouched |
@@ -134,7 +134,7 @@ Paths are relative to `app/src/main/kotlin/app/pbbls/android/`. "P2" means "chan
 | `rpc("delete_pebble", {p_pebble_id})`, pebble id only | `MomentWriteService.deletePebble` | P1 |
 | `from("karma_events").select("delta")` | `MomentWriteService.karmaDelta` | P1 |
 
-Deliberately **not** called: `path_pebbles`, `v_pebbles_full`, `create_pebble`, `update_pebble`, `compose-pebble`, `compose-pebble-update` (all after P6), `delete_moment_media` (PD-15), `set_collection_glyph` (PD-19), `get_shared_pebble` (Android only builds the `/p/` URL; the web page reads it), `report_content` (Android has no report UI: `grep -rn report_content app/src` is empty).
+Deliberately **not** called: `path_pebbles`, `v_pebbles_full`, `create_pebble`, `update_pebble`, `compose-pebble`, `compose-pebble-update` (all after P6), `delete_moment_media` (R6), `set_collection_glyph` (R11), `get_shared_pebble` (Android only builds the `/p/` URL; the web page reads it), `report_content` (Android has no report UI: `grep -rn report_content app/src` is empty).
 
 **Count:** 32 touchpoints change, 26 verified unchanged, 8 new. Nothing is unmapped.
 
@@ -155,7 +155,7 @@ Every server-SVG path goes through `PebbleStaticRender` (fallback `PebbleSvg`). 
 
 ### 1e. Stone port scope
 
-Draw the derived glyph on the existing stone surfaces, nothing more. The Android stone today is the outline silhouette (`res/raw/outline_*`) filled with the palette, plus the server's composed SVG (the engine's shape strokes and the glyph in a slot) traced at one weight by `PebbleStaticRender`. The engine is deleted, so Part 3 ports exactly its composition, natively: the nine shape seeds in `docs/seeds/shape-seeds/` (byte-identical to the deleted `functions/_shared/engine/shapes/*.ts`, checked with `cmp`) are copied to `res/raw/shape_*`, and the glyph slot table from the deleted `functions/_shared/engine/layout.ts` (readable at git `13b5ae3b^`) becomes a Kotlin table. The result is a `PebbleSvgModel`, the type `PebbleStaticRender` already traces, so the wobble experiment, the uniform stroke weight and the fit logic are reused unchanged. **The iOS lit-stone material port (PR #975's tone tables and shading) is out of scope:** it is a new rendering technique with its own lab, not part of moving off `render_svg`, and the brief limits this issue to drawing the derived glyph. It stays the follow-up the spec names. One deliberate difference from the engine: no bounding-box normalization of the glyph (the engine's `createGlyphArtwork` re-centred strokes to fill 80 % of the box); the glyph's own `view_box` maps into the slot, which is how every other Android glyph surface (`GlyphView`, `GlyphImage`) already draws a glyph (PD-20).
+Draw the derived glyph on the existing stone surfaces, nothing more. The Android stone today is the outline silhouette (`res/raw/outline_*`) filled with the palette, plus the server's composed SVG (the engine's shape strokes and the glyph in a slot) traced at one weight by `PebbleStaticRender`. The engine is deleted, so Part 3 ports exactly its composition, natively: the nine shape seeds in `docs/seeds/shape-seeds/` (byte-identical to the deleted `functions/_shared/engine/shapes/*.ts`, checked with `cmp`) are copied to `res/raw/shape_*`, and the glyph slot table from the deleted `functions/_shared/engine/layout.ts` (readable at git `13b5ae3b^`) becomes a Kotlin table. The result is a `PebbleSvgModel`, the type `PebbleStaticRender` already traces, so the wobble experiment, the uniform stroke weight and the fit logic are reused unchanged. **The iOS lit-stone material port (PR #975's tone tables and shading) is out of scope:** it is a new rendering technique with its own lab, not part of moving off `render_svg`, and the brief limits this issue to drawing the derived glyph. It stays the follow-up the spec names. One deliberate difference from the engine: no bounding-box normalization of the glyph (the engine's `createGlyphArtwork` re-centred strokes to fill 80 % of the box); the glyph's own `view_box` maps into the slot, which is how every other Android glyph surface (`GlyphView`, `GlyphImage`) already draws a glyph (A-10).
 
 ---
 
@@ -181,7 +181,7 @@ Draw the derived glyph on the existing stone surfaces, nothing more. The Android
 | Modify | `core/data/DataError.kt` | `P0002` → `NotFound`; `soul_not_owned`/`collection_not_owned` keep their name |
 | Create | `core/ui/MomentErrorMessage.kt` | `DataError` → `@StringRes` for moment and pebble writes |
 | Modify | `di/ServiceBindings.kt` | `@Binds` for the two new seams |
-| Modify | `app/src/main/res/values/strings.xml`, `values-fr/strings.xml` | four error strings |
+| Modify | `app/src/main/res/values/strings.xml`, `values-fr/strings.xml` | the shared error-copy table (R10) |
 | Create | `app/src/test/.../testing/FakeMomentReadService.kt`, `FakeMomentWriteService.kt` | fakes |
 | Modify | `app/src/test/.../testing/FakeServicesModule.kt`, `UiFixtures.kt` | bind fakes, moment fixtures |
 | Create | tests listed per task | |
@@ -598,7 +598,7 @@ data class PathMoment(
 ) {
     val isCompleted: Boolean get() = pebble != null
 
-    /** The stone's shape. An uncompleted moment uses the neutral medium stone (PD-11). */
+    /** The stone's shape. An uncompleted moment uses the neutral medium stone (R4). */
     val valence: Valence get() = pebble?.valence ?: Valence.NEUTRAL_MEDIUM
 }
 
@@ -691,7 +691,7 @@ data class MomentPebble(
     val valence: Valence get() = Valence.fromOrDefault(positiveness, intensity)
 }
 
-/** The view projects souls as `{id, name}`; glyphs come from the souls cache (PD-26). */
+/** The view projects souls as `{id, name}`; glyphs come from the souls cache (A-15). */
 @Serializable
 data class SoulRef(
     val id: String,
@@ -822,7 +822,7 @@ import java.time.OffsetDateTime
 
 /**
  * The encoder for both writers. Absent optional keys are left out rather than
- * sent as JSON null (PD-27): the RPCs read null as absent anyway
+ * sent as JSON null (A-16): the RPCs read null as absent anyway
  * (`private.jsonb_has`), and leaving them out matches what Swift's synthesized
  * encoder sends, so the two surfaces put identical bytes on the wire.
  */
@@ -855,7 +855,7 @@ data class MomentSavePayload(
         /**
          * Edit sends every moment key so the row ends up exactly as the form
          * shows it: `""` clears a text field (null would mean "keep"), and
-         * `snaps` is the whole set, `[]` when the photo was removed (PD-14, PD-15).
+         * `snaps` is the whole set, `[]` when the photo was removed (R5, R6).
          */
         fun edit(
             id: String,
@@ -878,7 +878,7 @@ data class MomentSavePayload(
  * `complete_pebble(payload)`: inserts or updates the caller's one pebble on
  * [momentId]. Every key is always sent, so an update rewrites the join tables
  * to exactly the answers (an empty list clears). `new_souls`,
- * `new_collections` and `cards` are never sent (PD-8).
+ * `new_collections` and `cards` are never sent (A-6).
  */
 @Serializable
 data class PebbleCompletePayload(
@@ -978,20 +978,30 @@ internal fun dataErrorOf(
 
 **Files:** Create `core/ui/MomentErrorMessage.kt`; Modify `res/values/strings.xml`, `res/values-fr/strings.xml` (append after `pebble_save_error_photo_failed`); Test `app/src/test/.../core/ui/MomentErrorMessageTest.kt`.
 
-Strings (EN / FR), in both files:
+The copy is the iOS table (R10), verbatim. `not_authenticated` keeps the existing `record_signed_out_error` ("You must be signed in to save." / "Tu dois être connecté pour enregistrer.", already identical to the table), and the image-pipeline strings (`pebble_save_error_photo_uploading`, `pebble_save_error_photo_failed`) stay as they are. Strings (EN / FR), in both files:
 
 ```xml
-<string name="moment_save_error_generic">Couldn\'t save this moment. Please try again.</string>
-<string name="moment_error_empty">A moment needs a name or a photo.</string>
+<string name="moment_save_error_generic">Couldn\'t save. Please try again.</string>
+<string name="moment_error_empty">Add a name or a photo first.</string>
+<string name="moment_error_media_quota">Photo limit reached on this moment.</string>
 <string name="moment_error_not_found">This moment no longer exists.</string>
-<string name="pebble_error_reference_gone">A soul or collection you picked no longer exists.</string>
+<string name="pebble_error_needs_emotion">Pick an emotion first.</string>
+<string name="pebble_error_needs_valence">Pick how it landed first.</string>
+<string name="pebble_error_needs_domain">Pick a part of life first.</string>
+<string name="pebble_error_soul_gone">One of those souls is gone. Remove it and try again.</string>
+<string name="pebble_error_collection_gone">That collection is gone. Pick another one.</string>
 ```
 
 ```xml
-<string name="moment_save_error_generic">Impossible d\'enregistrer ce moment. Réessaie.</string>
-<string name="moment_error_empty">Un moment a besoin d\'un nom ou d\'une photo.</string>
+<string name="moment_save_error_generic">Impossible d\'enregistrer. Réessaie.</string>
+<string name="moment_error_empty">Ajoute d\'abord un nom ou une photo.</string>
+<string name="moment_error_media_quota">Limite de photos atteinte pour ce moment.</string>
 <string name="moment_error_not_found">Ce moment n\'existe plus.</string>
-<string name="pebble_error_reference_gone">Une âme ou une collection choisie n\'existe plus.</string>
+<string name="pebble_error_needs_emotion">Choisis d\'abord une émotion.</string>
+<string name="pebble_error_needs_valence">Choisis d\'abord ce que ça t\'a fait.</string>
+<string name="pebble_error_needs_domain">Choisis d\'abord un domaine de ta vie.</string>
+<string name="pebble_error_soul_gone">Une de ces âmes n\'existe plus. Retire-la et réessaie.</string>
+<string name="pebble_error_collection_gone">Cette collection n\'existe plus. Choisis-en une autre.</string>
 ```
 
 - [ ] **Step 1: Write the failing test**
@@ -1005,31 +1015,35 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class MomentErrorMessageTest {
-    private val fallback = R.string.moment_save_error_generic
-
     @Test
-    fun `named conditions map to their copy`() {
-        assertEquals(R.string.moment_error_empty, momentWriteErrorRes(DataError.Conflict("moment_empty"), fallback))
-        assertEquals(R.string.moment_error_not_found, momentWriteErrorRes(DataError.Conflict("moment_not_found"), fallback))
-        assertEquals(R.string.moment_error_not_found, momentWriteErrorRes(DataError.NotFound, fallback))
-        assertEquals(R.string.pebble_error_reference_gone, momentWriteErrorRes(DataError.Conflict("soul_not_owned"), fallback))
-        assertEquals(R.string.pebble_error_reference_gone, momentWriteErrorRes(DataError.Conflict("collection_not_owned"), fallback))
-        assertEquals(R.string.pebble_save_error_media_quota, momentWriteErrorRes(DataError.Quota, fallback))
-        assertEquals(R.string.record_signed_out_error, momentWriteErrorRes(DataError.Unauthorized, fallback))
+    fun `every slug in the shared table maps to its copy`() {
+        mapOf(
+            "moment_empty" to R.string.moment_error_empty,
+            "moment_not_found" to R.string.moment_error_not_found,
+            "pebble_needs_emotion" to R.string.pebble_error_needs_emotion,
+            "pebble_needs_valence" to R.string.pebble_error_needs_valence,
+            "pebble_needs_domain" to R.string.pebble_error_needs_domain,
+            "soul_not_owned" to R.string.pebble_error_soul_gone,
+            "collection_not_owned" to R.string.pebble_error_collection_gone,
+        ).forEach { (slug, res) -> assertEquals(slug, res, momentWriteErrorRes(DataError.Conflict(slug))) }
     }
 
     @Test
-    fun `everything else is the caller's generic line`() {
+    fun `classified failures map to their copy`() {
+        assertEquals(R.string.moment_error_media_quota, momentWriteErrorRes(DataError.Quota))
+        assertEquals(R.string.moment_error_not_found, momentWriteErrorRes(DataError.NotFound))
+        assertEquals(R.string.record_signed_out_error, momentWriteErrorRes(DataError.Unauthorized))
+    }
+
+    @Test
+    fun `everything else is the generic line`() {
         listOf(
-            DataError.Conflict("pebble_needs_domain"),
             DataError.Conflict("invalid_payload"),
+            DataError.Conflict("invalid_snap"),
+            DataError.Conflict("something_new"),
             DataError.Network,
             DataError.Unknown(null),
-        ).forEach { assertEquals(it.toString(), fallback, momentWriteErrorRes(it, fallback)) }
-        assertEquals(
-            R.string.pebble_save_error_generic,
-            momentWriteErrorRes(DataError.Network, R.string.pebble_save_error_generic),
-        )
+        ).forEach { assertEquals(it.toString(), R.string.moment_save_error_generic, momentWriteErrorRes(it)) }
     }
 }
 ```
@@ -1045,31 +1059,33 @@ import app.pbbls.android.R
 import app.pbbls.android.core.data.DataError
 
 /**
- * The one mapping from a moment or pebble write failure to copy (PD-18), shared
- * by Capture, Complete, the edit form and the delete paths. [fallback] is the
- * caller's generic line: `moment_save_error_generic` for `save_moment`,
- * `pebble_save_error_generic` for `complete_pebble`. Conditions the client
- * prevents before calling (`pebble_needs_*`, `invalid_*`) fall back too.
+ * The one mapping from a `save_moment` or `complete_pebble` failure to copy,
+ * shared with iOS slug for slug (R10) and used by Capture, Complete, Edit
+ * moment and Edit pebble. P0002 arrives as [DataError.NotFound] (Task 1.5),
+ * which is `moment_not_found` on these writers.
  */
 @StringRes
-fun momentWriteErrorRes(
-    error: DataError,
-    @StringRes fallback: Int,
-): Int =
+fun momentWriteErrorRes(error: DataError): Int =
     when (error) {
-        DataError.Quota -> R.string.pebble_save_error_media_quota
+        DataError.Quota -> R.string.moment_error_media_quota
         DataError.Unauthorized -> R.string.record_signed_out_error
         DataError.NotFound -> R.string.moment_error_not_found
         is DataError.Conflict ->
             when (error.code) {
                 "moment_empty" -> R.string.moment_error_empty
                 "moment_not_found" -> R.string.moment_error_not_found
-                "soul_not_owned", "collection_not_owned" -> R.string.pebble_error_reference_gone
-                else -> fallback
+                "pebble_needs_emotion" -> R.string.pebble_error_needs_emotion
+                "pebble_needs_valence" -> R.string.pebble_error_needs_valence
+                "pebble_needs_domain" -> R.string.pebble_error_needs_domain
+                "soul_not_owned" -> R.string.pebble_error_soul_gone
+                "collection_not_owned" -> R.string.pebble_error_collection_gone
+                else -> R.string.moment_save_error_generic
             }
-        DataError.Network, is DataError.Unknown -> fallback
+        DataError.Network, is DataError.Unknown -> R.string.moment_save_error_generic
     }
 ```
+
+Delete failures keep the existing `pebble_delete_error` dialog (R10).
 
 - [ ] **Step 4:** Run `MomentErrorMessageTest` and `LocalizationParityTest` → PASS.
 - [ ] **Step 5:** Commit `feat(android): map moment write failures to copy`.
@@ -1288,7 +1304,7 @@ interface MomentWriteServicing {
     /** `save_moment`; returns the moment id. */
     suspend fun saveMoment(payload: MomentSavePayload): String
 
-    /** `complete_pebble`; returns the pebble id. Does not check achievements (PD-9). */
+    /** `complete_pebble`; returns the pebble id. Does not check achievements (A-7). */
     suspend fun completePebble(payload: PebbleCompletePayload): String
 
     /** `delete_pebble`: the pebble only, the moment stays. Takes a PEBBLE id. */
@@ -1616,16 +1632,17 @@ class FakeMomentWriteService : MomentWriteServicing {
 
 ---
 
-## Part 2 — Readers and editor on moments (`feat/1048-android-moments-readers`)
+## Part 2 — Readers and editors on moments (`feat/1048-android-moments-readers`)
 
-**Story:** every screen that reads or edits a pebble moves onto the Part 1 seams, so the installed build stops reading dropped columns. Behaviour is unchanged except what the split forces: a row's "Delete" deletes the moment (as it did before the split), photo-only moments show "Untitled moment", the edit form loses its glyph row, share uses the pebble id. The old composers (eleven-step flow, long-press composer) still create through `compose-pebble` and are untouched apart from compile fixes.
+**Story:** every screen that reads or edits a pebble moves onto the Part 1 seams, so the installed build stops reading dropped columns. What the split forces changes with it: a row's "Delete" deletes the moment (as it did before the split; Part 4 adds the choice), a null name reads "Untitled" in italic, share uses the pebble id, soul and collection rows open the read page (R9), and editing becomes two screens with one write each (R5): **Edit moment** (`save_moment`) and **Edit pebble** (`complete_pebble`), both reached from the read page's ⋮ menu (R7). The old composers (eleven-step flow, long-press composer) still create through `compose-pebble` and only get compile fixes.
 
 **File map** (paths under `app/src/main/kotlin/app/pbbls/android/` unless noted)
 
 | Action | Path | What changes |
 |---|---|---|
-| Modify | `navigation/PebblesKeys.kt:92-95,113-115` | `PebbleDetail` and `EditPebble` carry `momentId`, serialized as `pebbleId` |
-| Modify | `navigation/PebblesEntryProvider.kt:62-71,112-134,233-254,273-287` | pass moment ids; `CreatePebble.onCreated` only pops; `EditPebble` loses `glyphPicker` |
+| Modify | `navigation/PebblesKeys.kt:92-95,113-115` | `PebbleDetail` and `EditPebble` carry `momentId`, serialized as `pebbleId`; new modal `EditMoment(momentId)` |
+| Modify | `navigation/PebblesEntryProvider.kt:62-71,112-134,233-254,273-287` | moment ids; the read page's two edit callbacks; soul/collection rows open the read page; `CreatePebble.onCreated` only pops; `EditMoment` entry; `EditPebble` loses `glyphPicker` |
+| Create | `core/ui/MomentNameText.kt` | a moment's name, or "Untitled" in italic secondary colour (R3) |
 | Modify | `core/model/WeekRollEntry.kt` | `moments: List<PathMoment>` |
 | Modify | `features/path/WeekRollBuilder.kt:32-60` | builds from `PathMoment` |
 | Modify | `features/path/PathViewModel.kt` | `MomentReadServicing` + `MomentWriteServicing`; delete = `deleteMoment` |
@@ -1635,22 +1652,43 @@ class FakeMomentWriteService : MomentWriteServicing {
 | Modify | `core/ui/PebbleRow.kt` | renders a `PathMoment` |
 | Modify | `features/profile/SoulDetailViewModel.kt`, `SoulDetailScreen.kt`, `CollectionDetailViewModel.kt`, `CollectionDetailScreen.kt`, `GroupPebblesByMonth.kt` | lists of `PathMoment`; delete = `deleteMoment` |
 | Modify | `core/data/SoulsService.kt:80-97`, `core/data/CollectionsService.kt:73-90` | drop `loadPebbles` |
-| Modify | `features/path/PebbleDetailViewModel.kt`, `PebbleDetailScreen.kt` | `MomentDetail`; share from the pebble id |
-| Modify | `features/path/read/PebbleReadView.kt` | `MomentDetail`; pebble sections only when a pebble exists; soul glyphs from the souls cache |
+| Modify | `features/path/PebbleDetailViewModel.kt`, `PebbleDetailScreen.kt` | `MomentDetail`; ⋮ menu with Edit moment / Edit pebble; share from the pebble id |
+| Modify | `features/path/read/PebbleReadView.kt`, `PebbleReadTitle.kt` | `MomentDetail`; pebble sections only with a pebble; nullable name; soul glyphs from the souls cache |
+| Create | `app/src/main/res/drawable/ic_more_vert.xml` | the ⋮ icon |
 | Modify | `core/model/PebbleDraft.kt` | `from(MomentDetail)`, `answers` |
 | Modify | `core/data/SnapUploadCoordinator.kt:129-140`, `core/data/PebbleSnapRepository.kt:20-39,111-116` | `detachExisting()`; `deletePebbleMedia` removed |
-| Modify | `features/path/EditPebbleViewModel.kt`, `EditPebbleScreen.kt` | `save_moment` then `complete_pebble` |
-| Modify | `features/path/create/PebbleForm.kt` | glyph row removed; `header` slot; `showPebbleFields` |
+| Create | `features/path/EditTopBar.kt` | the Cancel / title / Save bar, moved out of `EditPebbleScreen.kt` and given a `title` |
+| Create | `features/path/EditMomentViewModel.kt`, `EditMomentScreen.kt` | when, name, description, photo → `save_moment` only |
+| Modify | `features/path/EditPebbleViewModel.kt`, `EditPebbleScreen.kt` | emotion, domain, valence, souls, collection, privacy → `complete_pebble` only |
+| Modify | `features/path/create/PebbleForm.kt` | glyph row removed; `header` slot; `showMomentFields` / `showPebbleFields` |
 | Modify | `features/path/create/CreatePebbleScreen.kt` | compile against the new `PebbleForm` |
 | Modify | `core/data/PebbleWriteService.kt` | drop `update` and `delete` (create stays until Part 7) |
 | Delete | `core/data/PathService.kt`, `core/data/PebbleDetailService.kt`, `core/model/Pebble.kt`, `core/model/PebbleDetail.kt`, `core/model/PebbleUpdatePayload.kt` | replaced |
 | Modify | `di/ServiceBindings.kt` | drop `PathServicing`, `PebbleDetailServicing` bindings |
-| Modify | `res/values/strings.xml`, `values-fr/strings.xml` | `moment_untitled`; strings lint reports unused |
-| Tests | see Task 2.9 | |
+| Modify | `res/values/strings.xml`, `values-fr/strings.xml` | `moment_untitled`, `edit_moment`, `edit_moment_needs_content`, `more_actions_a11y`; strings lint reports unused |
+| Tests | see Task 2.10 | |
+
+Strings added in this part (EN / FR):
+
+```xml
+<string name="moment_untitled">Untitled</string>
+<string name="edit_moment">Edit moment</string>
+<string name="edit_moment_needs_content">A moment needs a name or a photo.</string>
+<string name="more_actions_a11y">More actions</string>
+```
+
+```xml
+<string name="moment_untitled">Sans titre</string>
+<string name="edit_moment">Modifier le moment</string>
+<string name="edit_moment_needs_content">Un moment a besoin d\'un nom ou d\'une photo.</string>
+<string name="more_actions_a11y">Plus d\'actions</string>
+```
+
+"Edit pebble" reuses the existing `edit_pebble_title` ("Edit pebble" / its FR).
 
 ### Task 2.1: Keys carry moment ids
 
-- [ ] **Step 1:** In `PebblesKeysTest.kt`, change the fixtures to `PebblesKey.PebbleDetail(momentId = "m-1")` and `PebblesKey.EditPebble(momentId = "m-1")`, and add:
+- [ ] **Step 1:** In `PebblesKeysTest.kt`, change the fixtures to `PebblesKey.PebbleDetail(momentId = "m-1")` and `PebblesKey.EditPebble(momentId = "m-1")`, add `PebblesKey.EditMoment(momentId = "m-1")` to the round-trip and modal lists, and add:
 
 ```kotlin
     @Test
@@ -1675,20 +1713,27 @@ class FakeMomentWriteService : MomentWriteServicing {
     ) : PebblesKey,
         BarKey
 
+    /** Edit pebble: the pebble fields of [momentId]'s pebble, written with `complete_pebble` (R5). */
     @Serializable
     data class EditPebble(
         /** A moment id; see [PebbleDetail]. */
         @SerialName("pebbleId")
         val momentId: String,
     ) : PebblesKey
+
+    /** Edit moment: when, name, description, photo, written with `save_moment` (R5). */
+    @Serializable
+    data class EditMoment(
+        val momentId: String,
+    ) : PebblesKey
 ```
 
 Update every `key.pebbleId` in `PebblesEntryProvider.kt` to `key.momentId`.
-- [ ] **Step 4:** Run `PebblesKeysTest` → PASS. Commit with the rest of Task 2.2 (the provider does not compile alone).
+- [ ] **Step 4:** Run `PebblesKeysTest` → PASS. Commit with Task 2.2 (the provider does not compile alone).
 
 ### Task 2.2: Path on `path_moments`
 
-**Files:** `core/model/WeekRollEntry.kt`, `features/path/WeekRollBuilder.kt`, `features/path/PathViewModel.kt`, `features/path/PathScreen.kt`, `features/path/components/WeekPebbleList.kt`, `features/path/components/PathPebbleRow.kt`, `core/ui/render/PebbleThumbnail.kt`; strings.
+**Files:** `core/ui/MomentNameText.kt`, `core/model/WeekRollEntry.kt`, `features/path/WeekRollBuilder.kt`, `features/path/PathViewModel.kt`, `features/path/PathScreen.kt`, `features/path/components/WeekPebbleList.kt`, `features/path/components/PathPebbleRow.kt`, `core/ui/render/PebbleThumbnail.kt`; strings.
 
 - [ ] **Step 1: Update the failing tests first.** In `PathViewModelTest.kt` replace `FakePathService` with `FakeMomentReadService` (`read.path = listOf(UiFixtures.pathMoment(...))`) and `FakePebbleWriteService` with `FakeMomentWriteService`. Change the delete test to assert `write.deletedMoments == listOf("moment-1")`, and add:
 
@@ -1721,6 +1766,54 @@ Update every `key.pebbleId` in `PebblesEntryProvider.kt` to `key.momentId`.
 
 - [ ] **Step 2:** Run `PathViewModelTest`, `WeekRollBuilderTest` → FAIL (compile).
 - [ ] **Step 3: Implement.**
+
+`core/ui/MomentNameText.kt` (R3; every place a moment name shows goes through it):
+
+```kotlin
+package app.pbbls.android.core.ui
+
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import app.pbbls.android.R
+
+/**
+ * A moment's name. A photo-only moment has none (spec D3): it reads "Untitled"
+ * in italic, in the secondary text colour, wherever a name would show (R3).
+ */
+@Composable
+fun MomentNameText(
+    name: String?,
+    style: TextStyle,
+    color: Color,
+    modifier: Modifier = Modifier,
+    maxLines: Int = Int.MAX_VALUE,
+    textAlign: TextAlign? = null,
+) {
+    if (name != null) {
+        Text(name, style = style, color = color, modifier = modifier, maxLines = maxLines, overflow = TextOverflow.Ellipsis, textAlign = textAlign)
+    } else {
+        Text(
+            text = stringResource(R.string.moment_untitled),
+            style = style.copy(fontStyle = FontStyle.Italic),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = modifier,
+            maxLines = maxLines,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = textAlign,
+        )
+    }
+}
+```
+
+(`ThemeLiteralsTest` forbids `.copy(… fontSize …)` only; a font-style copy is allowed.)
 
 `core/model/WeekRollEntry.kt`: `data class WeekRollEntry(val weekStart: LocalDate, val moments: List<PathMoment>)`.
 
@@ -1767,13 +1860,11 @@ fun PebbleThumbnail(
 }
 ```
 
-`PathPebbleRow(moment: PathMoment, positionIndex: Int, palette: EmotionPalette?, …)`: `isLarge = moment.valence.intensity >= 3`; `hasPhoto = moment.firstSnapPath != null`; the title is `moment.name ?: stringResource(R.string.moment_untitled)`; `metaLine` reads `moment.pebble?.emotion`; `PebbleThumbnail(valence = moment.valence, palette = palette, …)`; `PathPebbleRowMetrics.rowHeightDp(moment.valence.intensity, hasPhoto, positionIndex)`.
+`PathPebbleRow(moment: PathMoment, positionIndex: Int, palette: EmotionPalette?, …)`: `isLarge = moment.valence.intensity >= 3`; `hasPhoto = moment.firstSnapPath != null`; the title is `MomentNameText(name = moment.name, style = MaterialTheme.typography.labelLarge, color = nameColor, maxLines = 1)`; `metaLine` reads `moment.pebble?.emotion`; `PebbleThumbnail(valence = moment.valence, palette = palette, …)`; `PathPebbleRowMetrics.rowHeightDp(moment.valence.intensity, hasPhoto, positionIndex)`.
 
 `WeekPebbleList`: iterate `entry.moments`; the palette is `moment.pebble?.emotion?.id?.let { palettes.palette(it) }`.
 
-`PathScreen`: `DeleteConfirmDialog(pebbleName = target.name ?: stringResource(R.string.moment_untitled), …)`.
-
-Strings: `<string name="moment_untitled">Untitled moment</string>` / `<string name="moment_untitled">Moment sans nom</string>`.
+`PathScreen`: `DeleteConfirmDialog(pebbleName = target.name ?: stringResource(R.string.moment_untitled), …)` (the dialog is replaced by the R8 dialog in Part 4).
 
 - [ ] **Step 4:** Run both test classes → PASS.
 
@@ -1781,10 +1872,12 @@ Strings: `<string name="moment_untitled">Untitled moment</string>` / `<string na
 
 - [ ] **Step 1:** In `SoulDetailViewModelTest.kt` and `CollectionDetailViewModelTest.kt`, feed `FakeMomentReadService.withSoul` / `.inCollection` with `UiFixtures.momentDetail(...)`, assert the content list is `fixtures.map { it.toPathMoment() }`, and assert delete records `FakeMomentWriteService.deletedMoments`. Update `GroupPebblesByMonthTest` to `PathMoment` fixtures.
 - [ ] **Step 2:** Run → FAIL.
-- [ ] **Step 3:** Both ViewModels take `moments: MomentReadServicing` and `writes: MomentWriteServicing` in place of `writeService: PebbleWriteServicing`; their list field and `pendingDeletion` become `PathMoment`; `fetch` reads `soulsService.loadSoul(id) to moments.loadMomentsWithSoul(id).map { it.toPathMoment() }` (collections: `loadMomentsInCollection`); `confirmDelete` calls `writes.deleteMoment(target.id)`. Delete `loadPebbles` from `SoulsServicing`/`SoulsService`, `CollectionsServicing`/`CollectionsService` and their fakes. `GroupPebblesByMonth` takes `List<PathMoment>`. `PebbleRow(moment: PathMoment, palette, onTap, onDelete)` renders `moment.name ?: stringResource(R.string.moment_untitled)` and `PebbleThumbnail(valence = moment.valence, palette = palette, modifier = Modifier.size(40.dp))`. The screens' delete dialogs show the same fallback name.
+- [ ] **Step 3:** Both ViewModels take `moments: MomentReadServicing` and `writes: MomentWriteServicing` in place of `writeService: PebbleWriteServicing`; their list field and `pendingDeletion` become `PathMoment`; `fetch` reads `soulsService.loadSoul(id) to moments.loadMomentsWithSoul(id).map { it.toPathMoment() }` (collections: `loadMomentsInCollection`); `confirmDelete` calls `writes.deleteMoment(target.id)`. Delete `loadPebbles` from `SoulsServicing`/`SoulsService`, `CollectionsServicing`/`CollectionsService` and their fakes. `GroupPebblesByMonth` takes `List<PathMoment>`. `PebbleRow(moment: PathMoment, palette, onTap, onDelete)` renders `MomentNameText(moment.name, MaterialTheme.typography.bodyLarge, colors.onSurface, maxLines = 1)` and `PebbleThumbnail(valence = moment.valence, palette = palette, modifier = Modifier.size(40.dp))`. The screens' delete dialogs show `target.name ?: stringResource(R.string.moment_untitled)` until Part 4 replaces them.
+
+**Rows open the read page (R9).** In `PebblesEntryProvider`, the SoulDetail and CollectionDetail entries change `onOpenPebble = { navigator.navigate(PebblesKey.EditPebble(it)) }` to `onOpenPebble = { navigator.navigate(PebblesKey.PebbleDetail(it)) }` (rename the screens' parameter `onOpenPebble` → `onOpenMoment` and update their KDoc, which says the tap opens the edit form). On a phone the read page is a docked sheet over the soul or collection; check it on a large-screen AVD as well, where `PebbleDetail` pairs with Path in `PanePairs`: if it renders as a pane beside the wrong list, give the soul and collection details the same pane pairing in `PanePairs.metadataFor` rather than special-casing the navigation call.
 - [ ] **Step 4:** Run → PASS.
 
-### Task 2.4: The read page on `MomentDetail`
+### Task 2.4: The read page on `MomentDetail`, with its ⋮ menu
 
 - [ ] **Step 1:** In `PebbleDetailViewModelTest.kt` swap `FakePebbleDetailService` for `FakeMomentReadService` (`moments = mapOf("moment-1" to UiFixtures.momentDetail())`), assert `Content.detail` is that `MomentDetail`, and add a case loading `momentDetail(pebble = null, name = null)`.
 - [ ] **Step 2:** Run → FAIL.
@@ -1792,7 +1885,62 @@ Strings: `<string name="moment_untitled">Untitled moment</string>` / `<string na
 
 `PebbleDetailViewModel`: constructor `private val moments: MomentReadServicing`; `PebbleDetailUiState.Content(val detail: MomentDetail)`; `fetch(id)` calls `moments.loadMoment(id)`; the log says `"moment load failed"`.
 
-`PebbleDetailScreen(momentId: String, …)`: `val pebble = detail?.pebble`; `palette = pebble?.emotion?.id?.let(palettes::palette)`; share only `if (pebble?.visibility == Visibility.PUBLIC)` with `SharedPebbleLink.url(pebble.id)` (PD-17); `DetailTopBar(visibility = pebble?.visibility, …)`.
+`app/src/main/res/drawable/ic_more_vert.xml` (standard Material path data, tinted at the call site like `ic_trash.xml`):
+
+```xml
+<!--
+  Overflow menu (⋮). Standard Material path data; tinted at the call site by
+  Icon, so fillColor is a placeholder. Used by the moment read page's top bar.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#000000"
+        android:pathData="M12,8c1.1,0 2,-0.9 2,-2s-0.9,-2 -2,-2 -2,0.9 -2,2 0.9,2 2,2zM12,10c-1.1,0 -2,0.9 -2,2s0.9,2 2,2 2,-0.9 2,-2 -0.9,-2 -2,-2zM12,16c-1.1,0 -2,0.9 -2,2s0.9,2 2,2 2,-0.9 2,-2 -0.9,-2 -2,-2z" />
+</vector>
+```
+
+`PebbleDetailScreen(momentId: String, modifier, onEditMoment: () -> Unit = {}, onEditPebble: () -> Unit = {}, viewModel)`: `val pebble = detail?.pebble`; `palette = pebble?.emotion?.id?.let(palettes::palette)`; share only `if (pebble?.visibility == Visibility.PUBLIC)` with `SharedPebbleLink.url(pebble.id)`. `DetailTopBar(visibility = pebble?.visibility, menuEnabled = detail != null, hasPebble = pebble != null, onEditMoment, onEditPebble, onShare)` replaces the Edit `TextButton` with the overflow menu (R7):
+
+```kotlin
+            if (onShare != null) {
+                IconButton(onClick = onShare) {
+                    Icon(painter = painterResource(R.drawable.ic_share), contentDescription = stringResource(R.string.pebble_share_a11y))
+                }
+            }
+            var menuOpen by remember { mutableStateOf(false) }
+            Box {
+                IconButton(onClick = { menuOpen = true }, enabled = menuEnabled) {
+                    Icon(painter = painterResource(R.drawable.ic_more_vert), contentDescription = stringResource(R.string.more_actions_a11y))
+                }
+                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.edit_moment)) },
+                        onClick = {
+                            menuOpen = false
+                            onEditMoment()
+                        },
+                    )
+                    if (hasPebble) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.edit_pebble_title)) },
+                            onClick = {
+                                menuOpen = false
+                                onEditPebble()
+                            },
+                        )
+                    }
+                    // Part 4 adds Delete here.
+                }
+            }
+```
+
+`PebbleDetailContent` passes the two callbacks through.
+
+`PebbleReadTitle(name: String?, happenedAt)` renders `MomentNameText(name, MaterialTheme.typography.<the role it uses today>, colors.onSurface)`.
 
 `PebbleReadView(detail: MomentDetail, palette: EmotionPalette?, modifier)`:
 
@@ -1806,10 +1954,7 @@ Strings: `<string name="moment_untitled">Untitled moment</string>` / `<string na
             modifier = Modifier.fillMaxWidth(),
             snapStoragePath = detail.sortedSnaps.firstOrNull()?.storagePath,
         )
-        PebbleReadTitle(
-            name = detail.name ?: stringResource(R.string.moment_untitled),
-            happenedAt = detail.happenedAt,
-        )
+        PebbleReadTitle(name = detail.name, happenedAt = detail.happenedAt)
         if (pebble != null) PebbleReadMeta(pebble = pebble)
         detail.description?.takeIf { it.isNotEmpty() }?.let { desc ->
             Text(desc, style = MaterialTheme.typography.bodyLarge, color = colors.onSurface, modifier = Modifier.fillMaxWidth())
@@ -1817,7 +1962,7 @@ Strings: `<string name="moment_untitled">Untitled moment</string>` / `<string na
         if (pebble != null && pebble.souls.isNotEmpty()) PebbleReadSouls(souls = pebble.souls)
 ```
 
-`PebbleReadMeta(pebble: MomentPebble)` reads `pebble.emotion`, `pebble.domains`, `pebble.collections` exactly as it read the old detail. `PebbleReadSouls(souls: List<SoulRef>)` resolves glyphs from the ambient cache (PD-26), a leaf reading reference data where it renders:
+`PebbleReadMeta(pebble: MomentPebble)` reads `pebble.emotion`, `pebble.domains`, `pebble.collections` exactly as it read the old detail. `PebbleReadSouls(souls: List<SoulRef>)` resolves glyphs from the ambient cache (A-15), a leaf reading reference data where it renders:
 
 ```kotlin
 @Composable
@@ -1846,7 +1991,7 @@ private fun DetailSoulCell(
 }
 ```
 
-(Check `SoulWithGlyph.glyph`'s exact type in `core/model/SoulWithGlyph.kt` and adapt the two property reads; if it is non-null, `cached[soul.id]?.glyph` is already nullable.)
+(`SoulWithGlyph.glyph` is non-null in `core/model/SoulWithGlyph.kt`; `cached[soul.id]?.glyph` is the nullable lookup.)
 
 - [ ] **Step 4:** Run `PebbleDetailViewModelTest` → PASS.
 
@@ -1877,10 +2022,10 @@ private fun DetailSoulCell(
 
 ```kotlin
     /**
-     * Detach the saved photo from the form. Nothing is written here: the
-     * edit's `save_moment` drops the row through its whole-set `snaps`, which
+     * Detach the saved photo from the form. Nothing is written here: Edit
+     * moment's `save_moment` drops the row through its whole-set `snaps`, which
      * is also where "a moment needs a name or a photo" is enforced, and the
-     * caller deletes the returned snap's files once that save succeeds (PD-15).
+     * caller deletes the returned snap's files once that save succeeds (R6).
      */
     fun detachExisting(): FormSnap.Existing? {
         val existing = formSnap as? FormSnap.Existing ?: return null
@@ -1889,127 +2034,12 @@ private fun DetailSoulCell(
     }
 ```
 
-Remove `deletePebbleMedia` from `SnapWriteRepositing`, `PebbleSnapRepository` and `FakeSnapWriteRepository`. Fix the KDoc of `FormSnap.Existing` ("triggers the eager `delete_pebble_media` RPC" → "detached in the form; the save drops it").
+Remove `deletePebbleMedia` from `SnapWriteRepositing`, `PebbleSnapRepository` and `FakeSnapWriteRepository`. Fix the KDoc of `FormSnap.Existing` ("triggers the eager `delete_pebble_media` RPC" → "detached in the form; Edit moment's save drops it").
 - [ ] **Step 4:** Run → PASS.
 
-### Task 2.6: The edit form on two writers
+### Task 2.6: The shared form and bar
 
-- [ ] **Step 1: Rewrite the failing tests** in `EditPebbleViewModelTest.kt`. `Harness` takes `read: FakeMomentReadService`, `writes: FakeMomentWriteService`, keeps the others, and builds `EditPebbleViewModel(moments = read, writes = writes, karma = KarmaNotificationService(scope), achievements, supabase, snapRepo, media)`. Fixtures from `UiFixtures.momentDetail` (which has a domain, so no `makeValid` workaround). Cases:
-
-```kotlin
-    @Test
-    fun `saving a completed moment writes the moment, then the pebble, then checks achievements`() =
-        runTest {
-            val h = Harness(backgroundScope)
-            h.supabase.session = testSession("user-1")
-            h.read.moments = mapOf("moment-1" to UiFixtures.momentDetail(description = "Old"))
-            h.viewModel.start("moment-1")
-            advanceUntilIdle()
-            val state = h.viewModel.uiState.value as EditPebbleUiState.Content
-            h.viewModel.onDraftChange(state.draft.copy(description = ""))
-            h.viewModel.save()
-            advanceUntilIdle()
-
-            assertEquals(
-                MomentSavePayload(
-                    id = "moment-1",
-                    name = "Morning walk",
-                    description = "",
-                    happenedAt = OffsetDateTime.parse("2026-10-12T06:40:00Z"),
-                    snaps = emptyList(),
-                ),
-                h.writes.saved.single(),
-            )
-            assertEquals("moment-1", h.writes.completed.single().momentId)
-            assertEquals(listOf("domain-1"), h.writes.completed.single().domainIds)
-            assertEquals(listOf("pebble-new" to KarmaReason.PEBBLE_ENRICHED), h.writes.karmaReads)
-            assertEquals(1, h.achievements.fireCheckCount)
-        }
-
-    @Test
-    fun `an uncompleted moment saves the moment only`() =
-        runTest {
-            val h = Harness(backgroundScope)
-            h.read.moments = mapOf("moment-1" to UiFixtures.momentDetail(pebble = null))
-            h.viewModel.start("moment-1")
-            advanceUntilIdle()
-            assertFalse((h.viewModel.uiState.value as EditPebbleUiState.Content).hasPebble)
-            h.viewModel.save()
-            advanceUntilIdle()
-            assertEquals(1, h.writes.saved.size)
-            assertTrue(h.writes.completed.isEmpty())
-            assertEquals(0, h.achievements.fireCheckCount)
-        }
-
-    @Test
-    fun `a blank name without a photo cannot be saved`() =
-        runTest {
-            val h = Harness(backgroundScope)
-            h.read.moments = mapOf("moment-1" to UiFixtures.momentDetail(pebble = null))
-            h.viewModel.start("moment-1")
-            advanceUntilIdle()
-            val state = h.viewModel.uiState.value as EditPebbleUiState.Content
-            h.viewModel.onDraftChange(state.draft.copy(name = "  "))
-            assertFalse((h.viewModel.uiState.value as EditPebbleUiState.Content).canSave)
-            h.viewModel.save()
-            advanceUntilIdle()
-            assertTrue(h.writes.saved.isEmpty())
-        }
-
-    @Test
-    fun `removing the saved photo sends an empty snap set and deletes the files only after the save`() =
-        runTest {
-            val h = Harness(backgroundScope)
-            h.supabase.session = testSession("user-1")
-            h.read.moments =
-                mapOf("moment-1" to UiFixtures.momentDetail(snaps = listOf(MomentSnap("snap-1", "user-1/snap-1", 0))))
-            h.viewModel.start("moment-1")
-            advanceUntilIdle()
-            h.viewModel.onRemoveExistingSnap()
-            assertTrue(h.snapRepo.deletedPrefixes.isEmpty())
-            h.viewModel.save()
-            advanceUntilIdle()
-            assertEquals(emptyList<PebbleSnapPayload>(), h.writes.saved.single().snaps)
-            assertEquals(listOf("user-1/snap-1"), h.snapRepo.deletedPrefixes)
-        }
-
-    @Test
-    fun `a moment_empty refusal shows its copy and keeps the files`() =
-        runTest {
-            val h = Harness(backgroundScope)
-            h.read.moments =
-                mapOf("moment-1" to UiFixtures.momentDetail(name = "x", snaps = listOf(MomentSnap("snap-1", "user-1/snap-1", 0))))
-            h.viewModel.start("moment-1")
-            advanceUntilIdle()
-            h.viewModel.onRemoveExistingSnap()
-            h.writes.failNext = postgrestException("moment_empty")
-            h.viewModel.save()
-            advanceUntilIdle()
-            val state = h.viewModel.uiState.value as EditPebbleUiState.Content
-            assertEquals(R.string.moment_error_empty, state.saveErrorRes)
-            assertFalse(state.isSaving)
-            assertTrue(h.snapRepo.deletedPrefixes.isEmpty())
-        }
-
-    @Test
-    fun `a pebble refusal after the moment saved shows the pebble copy`() =
-        runTest {
-            val h = Harness(backgroundScope)
-            h.read.moments = mapOf("moment-1" to UiFixtures.momentDetail())
-            h.viewModel.start("moment-1")
-            advanceUntilIdle()
-            h.writes.failOnComplete = postgrestException("soul_not_owned", sqlState = "42501", status = HttpStatusCode.Forbidden)
-            h.viewModel.save()
-            advanceUntilIdle()
-            assertEquals(1, h.writes.saved.size)
-            assertEquals(R.string.pebble_error_reference_gone, (h.viewModel.uiState.value as EditPebbleUiState.Content).saveErrorRes)
-        }
-```
-
-- [ ] **Step 2:** Run → FAIL.
-- [ ] **Step 3: Implement.**
-
-`PebbleDraft` gains:
+- [ ] **Step 1:** `PebbleDraft` gains the moment loader and the pebble half (and loses `from(detail: PebbleDetail)`):
 
 ```kotlin
     /** The pebble half, for `complete_pebble`. */
@@ -2034,29 +2064,258 @@ Remove `deletePebbleMedia` from `SnapWriteRepositing`, `PebbleSnapRepository` an
     }
 ```
 
-(and delete `from(detail: PebbleDetail)`).
-
-`EditPebbleUiState.Content`:
+(Editing a pebble with several domains or collections keeps the first of each, as before the split.) Add a `PebbleDraftTest` case for `from(UiFixtures.momentDetail(pebble = null))` (pebble fields null, name kept).
+- [ ] **Step 2:** `PebbleForm`: delete the `GlyphRow` composable, `PickerKind.GLYPH`, the `GlyphPickerSheet` branch, and the parameters `selectedGlyph`, `onGlyphPicked`, `glyphPicker`, `renderSvg`, `strokeColor`, `renderHeight`, `isRemovingExistingSnap`; add
 
 ```kotlin
+    /** Above the fields: Edit pebble's stone. */
+    header: (@Composable () -> Unit)? = null,
+    /** When, name, description and the photo section: Edit moment (R5). */
+    showMomentFields: Boolean = true,
+    /** Mood, souls and the optional section: Edit pebble (R5). */
+    showPebbleFields: Boolean = true,
+```
+
+render `header?.invoke()` where the `PebbleStaticRender` was, wrap `WhenRow`, the name and description fields and the photo section in `if (showMomentFields) { … }`, and the mood, souls and optional sections in `if (showPebbleFields) { … }`. `ExistingSnapRow(isRemoving = false, …)`. `CreatePebbleScreen` keeps both flags at their defaults and drops the removed arguments (its `glyphPicker` parameter and `selectedGlyph` state go; the compat `create_pebble` ignores glyph keys anyway).
+- [ ] **Step 3:** Move the private `EditTopBar` out of `EditPebbleScreen.kt` into `features/path/EditTopBar.kt` as `internal fun EditTopBar(title: String, isSaving: Boolean, saveEnabled: Boolean, onCancel: () -> Unit, onSave: () -> Unit)`, rendering `title` where it rendered `stringResource(R.string.edit_pebble_title)`. Pure move plus the parameter.
+
+### Task 2.7: Edit moment (`save_moment` only)
+
+- [ ] **Step 1: Write the failing tests** `app/src/test/.../features/path/EditMomentViewModelTest.kt`. Harness: `read: FakeMomentReadService`, `writes: FakeMomentWriteService`, `supabase: FakeSupabaseService(session = testSession("user-1"))`, `snapRepo: FakeSnapWriteRepository`, `media: FakeComposerMedia`, building `EditMomentViewModel(moments = read, writes = writes, supabase = supabase, snapFiles = snapRepo, media = media)`.
+
+```kotlin
+    @Test
+    fun `saving writes the moment only, with every moment key`() =
+        runTest {
+            val h = Harness()
+            h.read.moments = mapOf("moment-1" to UiFixtures.momentDetail(description = "Old"))
+            h.viewModel.start("moment-1")
+            advanceUntilIdle()
+            val state = h.viewModel.uiState.value as EditMomentUiState.Content
+            h.viewModel.onDraftChange(state.draft.copy(description = ""))
+            h.viewModel.save()
+            advanceUntilIdle()
+            assertEquals(
+                MomentSavePayload(
+                    id = "moment-1",
+                    name = "Morning walk",
+                    description = "",
+                    happenedAt = OffsetDateTime.parse("2026-10-12T06:40:00Z"),
+                    snaps = emptyList(),
+                ),
+                h.writes.saved.single(),
+            )
+            assertTrue(h.writes.completed.isEmpty())
+            assertTrue(h.writes.karmaReads.isEmpty())
+        }
+
+    @Test
+    fun `a blank name without a photo cannot be saved`() =
+        runTest {
+            val h = Harness()
+            h.read.moments = mapOf("moment-1" to UiFixtures.momentDetail(pebble = null))
+            h.viewModel.start("moment-1")
+            advanceUntilIdle()
+            val state = h.viewModel.uiState.value as EditMomentUiState.Content
+            h.viewModel.onDraftChange(state.draft.copy(name = "  "))
+            assertFalse((h.viewModel.uiState.value as EditMomentUiState.Content).canSave)
+            h.viewModel.save()
+            advanceUntilIdle()
+            assertTrue(h.writes.saved.isEmpty())
+        }
+
+    @Test
+    fun `removing the saved photo sends an empty snap set and deletes the files only after the save`() =
+        runTest {
+            val h = Harness()
+            h.read.moments =
+                mapOf("moment-1" to UiFixtures.momentDetail(snaps = listOf(MomentSnap("snap-1", "user-1/snap-1", 0))))
+            h.viewModel.start("moment-1")
+            advanceUntilIdle()
+            h.viewModel.onRemoveExistingSnap()
+            assertTrue(h.snapRepo.deletedPrefixes.isEmpty())
+            h.viewModel.save()
+            advanceUntilIdle()
+            assertEquals(emptyList<PebbleSnapPayload>(), h.writes.saved.single().snaps)
+            assertEquals(listOf("user-1/snap-1"), h.snapRepo.deletedPrefixes)
+        }
+
+    @Test
+    fun `a moment_empty refusal shows its copy and keeps the files`() =
+        runTest {
+            val h = Harness()
+            h.read.moments =
+                mapOf("moment-1" to UiFixtures.momentDetail(name = "x", snaps = listOf(MomentSnap("snap-1", "user-1/snap-1", 0))))
+            h.viewModel.start("moment-1")
+            advanceUntilIdle()
+            h.viewModel.onRemoveExistingSnap()
+            h.writes.failNext = postgrestException("moment_empty")
+            h.viewModel.save()
+            advanceUntilIdle()
+            val state = h.viewModel.uiState.value as EditMomentUiState.Content
+            assertEquals(R.string.moment_error_empty, state.saveErrorRes)
+            assertFalse(state.isSaving)
+            assertTrue(h.snapRepo.deletedPrefixes.isEmpty())
+        }
+```
+
+- [ ] **Step 2:** Run → FAIL.
+- [ ] **Step 3: Implement** `features/path/EditMomentViewModel.kt`:
+
+```kotlin
+package app.pbbls.android.features.path
+
+import android.net.Uri
+import android.util.Log
+import androidx.annotation.StringRes
+import androidx.compose.runtime.snapshotFlow
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import app.pbbls.android.R
+import app.pbbls.android.core.common.UiEffects
+import app.pbbls.android.core.common.runCatchingCancellable
+import app.pbbls.android.core.data.MomentReadServicing
+import app.pbbls.android.core.data.MomentWriteServicing
+import app.pbbls.android.core.data.SnapUploadCoordinator
+import app.pbbls.android.core.data.SnapWriteRepositing
+import app.pbbls.android.core.data.SupabaseServicing
+import app.pbbls.android.core.data.toDataError
+import app.pbbls.android.core.model.FormSnap
+import app.pbbls.android.core.model.MomentSavePayload
+import app.pbbls.android.core.model.PebbleDraft
+import app.pbbls.android.core.model.PebbleSnapPayload
+import app.pbbls.android.core.ui.momentWriteErrorRes
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
+
+private const val TAG = "edit-moment"
+
+sealed interface EditMomentUiState {
+    data object Loading : EditMomentUiState
+
+    data object Error : EditMomentUiState
+
     data class Content(
+        /** Only when, name and description are read here; the pebble half is Edit pebble's. */
         val draft: PebbleDraft,
-        /** Whether the moment has your pebble: the pebble section and `complete_pebble` depend on it. */
-        val hasPebble: Boolean,
         val snap: FormSnap? = null,
         val isSaving: Boolean = false,
         @StringRes val saveErrorRes: Int? = null,
-    ) : EditPebbleUiState {
-        /** A name or a photo (D3), and a complete pebble when there is one (D2). */
-        val canSave: Boolean by lazy {
-            !isSaving && (draft.name.isNotBlank() || snap != null) && (!hasPebble || draft.answers.isComplete)
-        }
+    ) : EditMomentUiState {
+        /** A name or a photo (D3); the screen shows `edit_moment_needs_content` while false (R6). */
+        val hasContent: Boolean by lazy { draft.name.isNotBlank() || snap != null }
+        val canSave: Boolean by lazy { !isSaving && hasContent }
     }
-```
+}
 
-`EditPebbleViewModel`: constructor `moments: MomentReadServicing, writes: MomentWriteServicing, karma, achievements, supabase, private val snapFiles: SnapWriteRepositing, media`; `loadedMomentId`; `private var detachedSnap: FormSnap.Existing? = null`; `load` builds `Content(draft = PebbleDraft.from(detail), hasPebble = detail.pebble != null)` and seeds the first sorted snap as today; `onRemoveExistingSnap()` becomes `detachedSnap = snaps.detachExisting() ?: detachedSnap`; `onDraftChange` drops the glyph bookkeeping; `onGlyphPicked` is deleted; `save()` becomes:
+sealed interface EditMomentEffect {
+    data object Saved : EditMomentEffect
 
-```kotlin
+    data object Dismissed : EditMomentEffect
+}
+
+/** Edit moment (R5): when, name, description and photo, written with `save_moment` and nothing else. */
+@HiltViewModel
+class EditMomentViewModel
+    @Inject
+    constructor(
+        private val moments: MomentReadServicing,
+        private val writes: MomentWriteServicing,
+        private val supabase: SupabaseServicing,
+        private val snapFiles: SnapWriteRepositing,
+        private val media: ComposerMedia,
+    ) : ViewModel() {
+        private val effectsOut = UiEffects<EditMomentEffect>(viewModelScope)
+        val effects: Flow<EditMomentEffect> = effectsOut.flow
+
+        private val snaps = SnapUploadCoordinator(repo = snapFiles)
+        private val _uiState = MutableStateFlow<EditMomentUiState>(EditMomentUiState.Loading)
+        val uiState: StateFlow<EditMomentUiState> = _uiState.asStateFlow()
+
+        private var loadedMomentId: String? = null
+        private var detachedSnap: FormSnap.Existing? = null
+
+        private val userId: String?
+            get() = supabase.session?.user?.id
+
+        private val content: EditMomentUiState.Content?
+            get() = _uiState.value as? EditMomentUiState.Content
+
+        init {
+            viewModelScope.launch {
+                snapshotFlow { snaps.formSnap }.collect { snap -> updateContent { it.copy(snap = snap) } }
+            }
+        }
+
+        /** Guarded: a rotation re-runs the screen's `LaunchedEffect` and must not discard edits. */
+        fun start(momentId: String) {
+            if (loadedMomentId == momentId) return
+            loadedMomentId = momentId
+            snaps.reset()
+            load(momentId)
+        }
+
+        fun retry() = loadedMomentId?.let { load(it) }
+
+        private fun load(momentId: String) {
+            _uiState.value = EditMomentUiState.Loading
+            viewModelScope.launch {
+                runCatchingCancellable { moments.loadMoment(momentId) }
+                    .fold(
+                        onSuccess = { detail ->
+                            _uiState.value = EditMomentUiState.Content(draft = PebbleDraft.from(detail))
+                            // At most one photo (M42 D1).
+                            snaps.seedExisting(detail.sortedSnaps.firstOrNull()?.let { FormSnap.Existing(it.id, it.storagePath) })
+                        },
+                        onFailure = {
+                            Log.e(TAG, "edit moment load failed", it)
+                            _uiState.value = EditMomentUiState.Error
+                        },
+                    )
+            }
+        }
+
+        fun onDraftChange(draft: PebbleDraft) = updateContent { it.copy(draft = draft.copy(name = draft.name.take(NAME_LIMIT)), saveErrorRes = null) }
+
+        fun onPhotoPicked(uri: Uri) {
+            val id = userId ?: return
+            viewModelScope.launch {
+                runCatchingCancellable { snaps.attach(media.process(uri), id) }
+                    .onFailure { Log.e(TAG, "photo pick processing failed", it) }
+            }
+        }
+
+        fun onRetryPhoto() {
+            val id = userId ?: return
+            viewModelScope.launch { snaps.retryCurrent(id) }
+        }
+
+        fun onRemovePhoto() {
+            val id = userId ?: return
+            viewModelScope.launch { snaps.removePending(id) }
+        }
+
+        /** Detaches only; the save removes the row and then the files (R6). */
+        fun onRemoveExistingSnap() {
+            detachedSnap = snaps.detachExisting() ?: detachedSnap
+        }
+
+        fun dismiss() {
+            if (content?.isSaving == true) return
+            viewModelScope.launch {
+                userId?.let { snaps.cancelAndCleanup(it) }
+                effectsOut.emit(EditMomentEffect.Dismissed)
+            }
+        }
+
         fun save() {
             val state = content ?: return
             if (!state.canSave) return
@@ -2072,7 +2331,7 @@ Remove `deletePebbleMedia` from `SnapWriteRepositing`, `PebbleSnapRepository` an
             updateContent { it.copy(isSaving = true, saveErrorRes = null) }
             viewModelScope.launch {
                 val id = userId
-                // Always echo the whole set: existing verbatim, a fresh upload as its pair, [] when removed.
+                // The whole set: existing echoed, a fresh upload as its pair, [] when removed.
                 val snapPayload =
                     when (val formSnap = snaps.formSnap) {
                         is FormSnap.Existing -> listOf(PebbleSnapPayload(formSnap.id, formSnap.storagePath, 0))
@@ -2082,39 +2341,137 @@ Remove `deletePebbleMedia` from `SnapWriteRepositing`, `PebbleSnapRepository` an
                             } ?: emptyList()
                         null -> emptyList()
                     }
-                // Inside NonCancellable as before (#852): popping the entry must not abort an accepted write.
+                // Popping the entry must not abort a write the server may have accepted (#852).
                 withContext(NonCancellable) {
-                    val moment =
-                        runCatchingCancellable {
-                            writes.saveMoment(
-                                MomentSavePayload.edit(momentId, state.draft.name, state.draft.description, state.draft.happenedAt, snapPayload),
-                            )
-                        }
-                    moment.exceptionOrNull()?.let { failure ->
-                        Log.e(TAG, "save_moment failed", failure)
-                        updateContent {
-                            it.copy(isSaving = false, saveErrorRes = momentWriteErrorRes(failure.toDataError(), R.string.moment_save_error_generic))
-                        }
-                        return@withContext
-                    }
-                    detachedSnap?.let { snapFiles.deleteFiles(storagePrefix = it.storagePath) }
-                    detachedSnap = null
-                    if (!state.hasPebble) {
-                        effectsOut.emit(EditPebbleEffect.Saved)
-                        return@withContext
-                    }
+                    runCatchingCancellable {
+                        writes.saveMoment(
+                            MomentSavePayload.edit(momentId, state.draft.name, state.draft.description, state.draft.happenedAt, snapPayload),
+                        )
+                    }.fold(
+                        onSuccess = {
+                            detachedSnap?.let { snapFiles.deleteFiles(storagePrefix = it.storagePath) }
+                            detachedSnap = null
+                            effectsOut.emit(EditMomentEffect.Saved)
+                        },
+                        onFailure = { failure ->
+                            Log.e(TAG, "save_moment failed", failure)
+                            // Uploaded files stay for the retry; dismiss is the cleanup (A-3).
+                            updateContent { it.copy(isSaving = false, saveErrorRes = momentWriteErrorRes(failure.toDataError())) }
+                        },
+                    )
+                }
+            }
+        }
+
+        private inline fun updateContent(crossinline block: (EditMomentUiState.Content) -> EditMomentUiState.Content) =
+            _uiState.update { if (it is EditMomentUiState.Content) block(it) else it }
+
+        private companion object {
+            /** The same front-end clamp as Capture (M58 D3). */
+            const val NAME_LIMIT = 40
+        }
+    }
+```
+
+`features/path/EditMomentScreen.kt` (`EditMomentScreen(momentId: String, onDismiss: () -> Unit, onSaved: () -> Unit, modifier, viewModel = hiltViewModel())`) is `EditPebbleScreen`'s current shell with: `EditTopBar(title = stringResource(R.string.edit_moment), isSaving, saveEnabled = content?.canSave == true, onCancel = viewModel::dismiss, onSave = viewModel::save)`; `PebbleForm(showMomentFields = true, showPebbleFields = false, header = null, formSnap = state.snap, onAddPhoto = …, onRetryPending = viewModel::onRetryPhoto, onRemovePending = viewModel::onRemovePhoto, onRemoveExistingSnap = viewModel::onRemoveExistingSnap, saveError = state.saveErrorRes?.let { stringResource(it) }, …)`; and beneath the form, while `!state.hasContent`, the hint `Text(stringResource(R.string.edit_moment_needs_content), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)`. The `NavigationBackHandler` calls `viewModel.dismiss()`; effects `Saved` → `onSaved()`, `Dismissed` → `onDismiss()`. Bind it in `PebblesEntryProvider`:
+
+```kotlin
+    entry<PebblesKey.EditMoment>(metadata = NavTransitions.forKey(PebblesKey.EditMoment(""))) { key ->
+        // The read page under it reloads on resume.
+        EditMomentScreen(momentId = key.momentId, onDismiss = navigator::goBack, onSaved = navigator::goBack)
+    }
+```
+
+- [ ] **Step 4:** Run `EditMomentViewModelTest` → PASS. Commit `feat(android): edit a moment through save_moment`.
+
+### Task 2.8: Edit pebble (`complete_pebble` only)
+
+- [ ] **Step 1: Rewrite the failing tests** in `EditPebbleViewModelTest.kt`. Harness: `read: FakeMomentReadService`, `writes: FakeMomentWriteService`, `achievements: FakeAchievementsService`, building `EditPebbleViewModel(moments = read, writes = writes, karma = KarmaNotificationService(scope), achievements = achievements)`.
+
+```kotlin
+    @Test
+    fun `saving writes the pebble only, reads the enrichment karma and checks achievements once`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.read.moments = mapOf("moment-1" to UiFixtures.momentDetail())
+            h.viewModel.start("moment-1")
+            advanceUntilIdle()
+            val state = h.viewModel.uiState.value as EditPebbleUiState.Content
+            h.viewModel.onDraftChange(state.draft.copy(visibility = Visibility.PUBLIC))
+            h.viewModel.save()
+            advanceUntilIdle()
+            assertEquals(
+                PebbleCompletePayload("moment-1", "emotion-joy", 2, 1, Visibility.PUBLIC, listOf("domain-1"), emptyList(), emptyList()),
+                h.writes.completed.single(),
+            )
+            assertTrue(h.writes.saved.isEmpty())
+            assertEquals(listOf("pebble-new" to KarmaReason.PEBBLE_ENRICHED), h.writes.karmaReads)
+            assertEquals(1, h.achievements.fireCheckCount)
+        }
+
+    @Test
+    fun `a moment without your pebble has no pebble to edit`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.read.moments = mapOf("moment-1" to UiFixtures.momentDetail(pebble = null))
+            h.viewModel.start("moment-1")
+            advanceUntilIdle()
+            assertEquals(EditPebbleUiState.Error, h.viewModel.uiState.value)
+        }
+
+    @Test
+    fun `a refusal shows the shared copy and checks nothing`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.read.moments = mapOf("moment-1" to UiFixtures.momentDetail())
+            h.viewModel.start("moment-1")
+            advanceUntilIdle()
+            h.writes.failOnComplete = postgrestException("soul_not_owned", sqlState = "42501", status = HttpStatusCode.Forbidden)
+            h.viewModel.save()
+            advanceUntilIdle()
+            val state = h.viewModel.uiState.value as EditPebbleUiState.Content
+            assertEquals(R.string.pebble_error_soul_gone, state.saveErrorRes)
+            assertEquals(0, h.achievements.fireCheckCount)
+        }
+```
+
+(The emotion id comes from `UiFixtures.joy`; use its actual id in the expected payload.)
+
+- [ ] **Step 2:** Run → FAIL.
+- [ ] **Step 3: Implement.** `EditPebbleUiState.Content`:
+
+```kotlin
+    data class Content(
+        val draft: PebbleDraft,
+        val isSaving: Boolean = false,
+        @StringRes val saveErrorRes: Int? = null,
+    ) : EditPebbleUiState {
+        /** A complete pebble (D2): valence, emotion, one domain. */
+        val canSave: Boolean by lazy { !isSaving && draft.answers.isComplete }
+    }
+```
+
+`EditPebbleViewModel(moments: MomentReadServicing, writes: MomentWriteServicing, karma: KarmaNotificationService, achievements: AchievementsServicing)`: the snap coordinator, media, Supabase and all photo methods leave this class (they are Edit moment's). `load` sets `Error` when `detail.pebble == null` (a stale menu or key; the read page offers Edit pebble only with a pebble), else `Content(draft = PebbleDraft.from(detail))`. `onDraftChange` drops the glyph bookkeeping; `onGlyphPicked` is deleted; `save()`:
+
+```kotlin
+        fun save() {
+            val state = content ?: return
+            if (!state.canSave) return
+            val momentId = loadedMomentId ?: return
+            updateContent { it.copy(isSaving = true, saveErrorRes = null) }
+            viewModelScope.launch {
+                withContext(NonCancellable) {
                     runCatchingCancellable { writes.completePebble(PebbleCompletePayload.from(momentId, state.draft.answers)) }
                         .fold(
                             onSuccess = { pebbleId ->
                                 karma.notifyEarned(writes.karmaDelta(pebbleId, KarmaReason.PEBBLE_ENRICHED) ?: 0, KarmaReason.PEBBLE_ENRICHED)
+                                // An edit can newly qualify an emotion_first badge; once per complete_pebble (A-7).
                                 achievements.fireCheck()
                                 effectsOut.emit(EditPebbleEffect.Saved)
                             },
                             onFailure = { failure ->
                                 Log.e(TAG, "complete_pebble failed", failure)
-                                updateContent {
-                                    it.copy(isSaving = false, saveErrorRes = momentWriteErrorRes(failure.toDataError(), R.string.pebble_save_error_generic))
-                                }
+                                updateContent { it.copy(isSaving = false, saveErrorRes = momentWriteErrorRes(failure.toDataError())) }
                             },
                         )
                 }
@@ -2122,22 +2479,19 @@ Remove `deletePebbleMedia` from `SnapWriteRepositing`, `PebbleSnapRepository` an
         }
 ```
 
-A failed save no longer calls `snaps.handleSaveFailure`: the uploaded files stay so a retry can reference them, and leaving the form (`dismiss` → `cancelAndCleanup`) is the cleanup (PD-5).
+`dismiss()` emits `Dismissed` (no snap cleanup: Edit pebble has no photo).
 
-`PebbleForm`: delete the `GlyphRow` composable, `PickerKind.GLYPH`, the `GlyphPickerSheet` branch, and the parameters `selectedGlyph`, `onGlyphPicked`, `glyphPicker`, `renderSvg`, `strokeColor`, `renderHeight`, `isRemovingExistingSnap`; add
-
-```kotlin
-    /** Above the fields: the edit form's stone. */
-    header: (@Composable () -> Unit)? = null,
-    /** False on a moment without your pebble: only photo, when, name and description show. */
-    showPebbleFields: Boolean = true,
-```
-
-render `header?.invoke()` where the `PebbleStaticRender` was, and wrap the mood, souls and optional sections in `if (showPebbleFields) { … }`. `ExistingSnapRow(isRemoving = false, …)`.
-
-`EditPebbleScreen(momentId: String, onDismiss, onSaved, …)` (no `glyphPicker`): `saveEnabled = content?.canSave == true`; the form gets
+`EditPebbleScreen(momentId: String, onDismiss, onSaved, …)` (no `glyphPicker`, no photo picker): `EditTopBar(title = stringResource(R.string.edit_pebble_title), saveEnabled = content?.canSave == true, …)`; the form is
 
 ```kotlin
+                    PebbleForm(
+                        draft = state.draft,
+                        onDraftChange = viewModel::onDraftChange,
+                        domains = referenceData.domains,
+                        souls = referenceData.souls,
+                        collections = referenceData.collections,
+                        selectedEmotion = state.draft.emotionId?.let { palettes.byEmotionId[it] },
+                        saveError = state.saveErrorRes?.let { stringResource(it) },
                         header = {
                             val valence = state.draft.valence ?: Valence.NEUTRAL_MEDIUM
                             PebbleThumbnail(
@@ -2146,38 +2500,36 @@ render `header?.invoke()` where the `PebbleStaticRender` was, and wrap the mood,
                                 modifier = Modifier.fillMaxWidth().height(valence.sizeGroup.renderHeightDp.dp),
                             )
                         },
-                        showPebbleFields = state.hasPebble,
+                        showMomentFields = false,
+                        showPebbleFields = true,
+                        modifier = Modifier.weight(1f),
+                        onAchievementCheck = viewModel::onAchievementCheck,
+                    )
 ```
 
-and the `VisibilityChip` row renders only `if (state.hasPebble)`.
+followed by the existing `VisibilityChip` row. `CreatePebbleScreen` is unaffected beyond Task 2.6. `PebbleWriteServicing` keeps `create` only; delete `update`, `delete`, `UpdateRequest`, `FUNCTION_UPDATE`, and `PebbleUpdatePayload`.
 
-`CreatePebbleScreen`: drop the removed arguments (its `glyphPicker` parameter and the `selectedGlyph` state go; the compat `create_pebble` ignores glyph keys anyway). `PebbleWriteServicing` keeps `create` only; delete `update`, `delete`, `UpdateRequest`, `FUNCTION_UPDATE`, and `PebbleUpdatePayload`.
+- [ ] **Step 4:** Run `EditPebbleViewModelTest`, `SnapUploadCoordinatorTest`, `PebbleDraftTest` → PASS. Commit `feat(android): edit a pebble through complete_pebble`.
 
-- [ ] **Step 4:** Run `EditPebbleViewModelTest`, `SnapUploadCoordinatorTest`, `PebbleDraftTest` → PASS.
+### Task 2.9: Wiring and deletions
 
-### Task 2.7: Wiring and deletions
-
-- [ ] **Step 1:** `PebblesEntryProvider`: `PebbleDetailScreen(momentId = key.momentId, onEditRequested = { navigator.navigate(PebblesKey.EditPebble(key.momentId)) })`; `EditPebbleScreen(momentId = key.momentId, onDismiss = navigator::goBack, onSaved = navigator::goBack)`; `CreatePebbleScreen(onCreated = { navigator.goBack() }, …)` with a comment that the compat wrapper returns a pebble id, not the moment id the detail key needs.
+- [ ] **Step 1:** `PebblesEntryProvider`: `PebbleDetailScreen(momentId = key.momentId, onEditMoment = { navigator.navigate(PebblesKey.EditMoment(key.momentId)) }, onEditPebble = { navigator.navigate(PebblesKey.EditPebble(key.momentId)) })`; `EditPebbleScreen(momentId = key.momentId, onDismiss = navigator::goBack, onSaved = navigator::goBack)`; the `EditMoment` entry from Task 2.7; soul and collection detail rows from Task 2.3; `CreatePebbleScreen(onCreated = { navigator.goBack() }, …)` with a comment that the compat wrapper returns a pebble id, not the moment id the detail key needs.
 - [ ] **Step 2:** Delete `core/data/PathService.kt`, `core/data/PebbleDetailService.kt`, `core/model/Pebble.kt`, `core/model/PebbleDetail.kt`, `core/model/PebbleUpdatePayload.kt`, `testing/FakePathService.kt`, `testing/FakePebbleDetailService.kt`, `core/model/PebbleDecodingTest.kt`, `core/model/PebbleDetailDecodingTest.kt`; drop their bindings from `ServiceBindings` and `FakeServicesModule`, the `update`/`delete` overrides from `FakePebbleWriteService`, and the update-payload cases from `PebblePayloadTest`.
 - [ ] **Step 3:** `git grep -nE '"path_pebbles"|"pebbles"\)|render_svg|delete_pebble_media|compose-pebble-update' app/src/main` → only comments, `PebbleWriteService` (create) and `ComposePebbleResponse`.
-- [ ] **Step 4:** `./gradlew lint`; delete every string it reports as `UnusedResources` from **both** `values/strings.xml` and `values-fr/strings.xml` (expected: `create_glyph_header`, `photo_remove_error`; delete exactly what the report lists).
+- [ ] **Step 4:** `./gradlew lint`; delete every string it reports as `UnusedResources` from **both** `values/strings.xml` and `values-fr/strings.xml` (expected: `create_glyph_header`, `photo_remove_error`, `pebble_detail_edit`; delete exactly what the report lists).
 
-### Task 2.8: Previews
+### Task 2.10: Previews, journeys and gate
 
-`app/src/screenshotTest/kotlin/app/pbbls/android/`: screenshot sources cannot see `src/test`, so create `MomentPreviewFixtures.kt` with the same `pathMoment`, `pathPebble`, `momentDetail`, `momentPebble`, `pebbleGlyph` builders as `UiFixtures` (Task 1.9 Step 3). Then:
+`app/src/screenshotTest/kotlin/app/pbbls/android/`: screenshot sources cannot see `src/test`, so create `MomentPreviewFixtures.kt` with the same `pathMoment`, `pathPebble`, `momentDetail`, `momentPebble`, `pebbleGlyph` builders as `UiFixtures` (Task 1.9 Step 3).
 
-- [ ] Port `PathRowScreenshots`, `PebbleRowScreenshots`, `PathScreenScreenshots`, `ListDetailScreenshots`, `PebbleDetailScreenshots`, `EditPebbleScreenshots` from `Pebble`/`PebbleDetail`/`render_svg` fixtures to `MomentPreviewFixtures` (keep every existing preview name so the diff shows changed references, not churn).
-- [ ] Add `@PreviewTest` previews: `PathRow_UntitledPhotoOnly` (name null, photo, no pebble), `PebbleDetail_BareMoment` (no tiles, no souls, no badge), `EditPebble_BareMoment` (moment fields only).
-- [ ] `./gradlew compileDebugScreenshotTestKotlin` → BUILD SUCCESSFUL. Do not run `updateDebugScreenshotTest`.
+- [ ] **Step 1:** Port `PathRowScreenshots`, `PebbleRowScreenshots`, `PathScreenScreenshots`, `ListDetailScreenshots`, `PebbleDetailScreenshots`, `EditPebbleScreenshots` from `Pebble`/`PebbleDetail`/`render_svg` fixtures to `MomentPreviewFixtures` (keep every existing preview name so the diff shows changed references, not churn).
+- [ ] **Step 2:** Add `@PreviewTest` previews: `PathRow_UntitledPhotoOnly` (name null → italic "Untitled", photo, no pebble), `PebbleDetail_BareMoment` (no tiles, no souls, no badge), `PebbleDetail_MenuOpen` (Edit moment, Edit pebble), `EditMoment_Content`, `EditMoment_NeedsContent` (blank name, no photo: Save disabled, hint shown), `EditPebble_Content`.
+- [ ] **Step 3:** `./gradlew compileDebugScreenshotTestKotlin` → BUILD SUCCESSFUL. Do not run `updateDebugScreenshotTest`.
+- [ ] **Step 4:** Robolectric. `ui/PebbleDeleteTest`: arm `FakeMomentReadService.path`, assert `FakeMomentWriteService.deletedMoments` after confirming, and that a failed delete (armed `failNext`) shows `R.string.pebble_delete_error` with the row still there. `ui/PathScreenTest`: arm `FakeMomentReadService`. `ui/NavigationTest`: rename "Path opens a pebble's detail, and the detail opens its edit form" to "Path opens a moment, and its menu opens Edit moment and Edit pebble" (tap the row, tap `R.string.more_actions_a11y`, tap `R.string.edit_moment`, assert the Edit moment bar title; back; reopen the menu, tap `R.string.edit_pebble_title`); add "a soul's moment row opens the read page" (arm `FakeMomentReadService.withSoul` and `.moments`) and the same for a collection.
+- [ ] **Step 5:** `./gradlew ktlintCheck testDebugUnitTest assembleDebug lint` → BUILD SUCCESSFUL.
+- [ ] **Step 6:** Commits, in order: `feat(android): read the path from path_moments`, `feat(android): read moments from v_moments_full`, the two edit commits above, `test(android): port the path, detail and edit previews to moments`. Open the PR with the `rebaseline-screenshots` label (row titles, the edit screens and the detail all change); approve the held runs.
 
-### Task 2.9: Robolectric journeys and gate
-
-- [ ] **Step 1:** `ui/PebbleDeleteTest`: arm `FakeMomentReadService.path`, assert `FakeMomentWriteService.deletedMoments` after confirming, and that a failed delete (armed `failNext`) shows `R.string.pebble_delete_error` with the row still there. `ui/PathScreenTest`: arm `FakeMomentReadService`. `ui/NavigationTest` "Path opens a pebble's detail, and the detail opens its edit form": arm `FakeMomentReadService.moments`.
-- [ ] **Step 2:** `./gradlew ktlintCheck testDebugUnitTest assembleDebug lint` → BUILD SUCCESSFUL.
-- [ ] **Step 3:** Commits, in order: `feat(android): read the path from path_moments`, `feat(android): read moments from v_moments_full`, `feat(android): edit moments through save_moment and complete_pebble`, `test(android): port the path, detail and edit previews to moments`.
-- [ ] **Step 4:** Open the PR with the `rebaseline-screenshots` label (row titles, the edit header and the detail all change); approve the held runs.
-
-**Manual check on the `oxymore-eclipse` AVD (or the maintainer's device, asking before writes on the real account):** Path loads; a backfilled draft (photo or named, no pebble) shows as a row; the read page opens; edit saves name and description; removing the only photo of an untitled moment shows "A moment needs a name or a photo."
+**Manual check on the `oxymore-eclipse` AVD (or the maintainer's device, asking before writes on the real account):** Path loads; a backfilled draft (photo or named, no pebble) shows as a row; the read page opens from Path and from a soul's list; Edit moment saves name and description; removing the only photo of an untitled moment disables Save and shows "A moment needs a name or a photo."; Edit pebble saves a new grade.
 
 ---
 
@@ -2190,8 +2542,9 @@ and the `VisibilityChip` row renders only `if (state.hasPebble)`.
 | Action | Path | Responsibility |
 |---|---|---|
 | Create | `res/raw/shape_{small,medium,large}_{lowlight,neutral,highlight}.svg` (9) | byte-identical copies of `docs/seeds/shape-seeds/{size}-{polarity}.svg` |
-| Create | `kotlin/.../core/ui/render/StoneComposer.kt` | slot table, shape-seed parse, composition into a `PebbleSvgModel` |
+| Create | `kotlin/.../core/ui/render/StoneComposer.kt` | slot table, shape-seed parse, composition into a `PebbleSvgModel`, the outline-only blank stone |
 | Create | `kotlin/.../core/ui/render/StoneShapes.kt` | (size, polarity) → `R.raw.shape_*`; `rememberStoneModel` |
+| Create | `kotlin/.../core/model/BlankPalette.kt` | the fixed web `BLANK_PALETTE` ramp as an `EmotionPalette` (R4) |
 | Create | `kotlin/.../core/ui/render/PebbleStone.kt` | `PebbleStone` (backdrop + traced stone) and `BlankStone` |
 | Modify | `kotlin/.../core/ui/render/PebbleStaticRender.kt` | traces a model, keyed by a cache key; no SVG string |
 | Modify | `kotlin/.../core/ui/render/PebbleSvgModel.kt:220` | `parseViewBox` becomes `internal` |
@@ -2200,6 +2553,7 @@ and the `VisibilityChip` row renders only `if (state.hasPebble)`.
 | Modify | `kotlin/.../features/path/read/PebbleReadPetroglyph.kt`, `PebbleReadBanner.kt`, `PebbleSnapFrame.kt`, `PebbleReadView.kt` | `renderSvg: String?` → `glyph: PebbleGlyph?` |
 | Modify | `kotlin/.../features/path/record/steps/RecordSuccessStep.kt`, `RecordFlowScreen.kt` | `glyph: PebbleGlyph?`; the stone always draws |
 | Modify | `kotlin/.../features/path/components/PathPebbleRow.kt`, `core/ui/PebbleRow.kt`, `features/path/EditPebbleScreen.kt`, `EditPebbleViewModel.kt` | pass the glyph |
+| Test | `app/src/test/.../core/model/BlankPaletteTest.kt` | the ramp parses and maps to the row colours |
 | Modify | `res/values/strings.xml`, `values-fr/strings.xml` | `moment_blank_a11y` |
 | Delete | `app/src/screenshotTest/.../PebbleSvgFixtures.kt`, `PebbleSvgScreenshots.kt`, `apps/android/scripts/gen-pebble-svg-fixtures.ts` | server-SVG fixtures; the generator imports the deleted engine |
 | Create | `app/src/screenshotTest/.../StoneScreenshots.kt` | 9 valences × glyph/no glyph, blank stone, dark |
@@ -2235,6 +2589,7 @@ import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
 
@@ -2332,6 +2687,15 @@ class StoneComposerTest {
         val a = StoneComposer.cacheKey(ValenceSizeGroup.SMALL, ValencePolarity.LOWLIGHT, glyph())
         val b = StoneComposer.cacheKey(ValenceSizeGroup.SMALL, ValencePolarity.LOWLIGHT, null)
         assertNotEquals(a, b)
+        assertNotEquals(StoneComposer.BLANK_CACHE_KEY, StoneComposer.cacheKey(ValenceSizeGroup.MEDIUM, ValencePolarity.NEUTRAL, null))
+    }
+
+    @Test
+    fun `the blank stone keeps only the closed silhouette outline`() {
+        val shape = StoneComposer.shapeModel(seed(ValenceSizeGroup.MEDIUM, ValencePolarity.NEUTRAL).readText())!!
+        val paths = StoneComposer.outlineOnly(shape).layers.single().paths
+        assertEquals(1, paths.size)
+        assertTrue(paths.single().d.trimEnd().endsWith("Z"))
     }
 }
 ```
@@ -2360,7 +2724,7 @@ internal data class GlyphSlot(
  * `13b5ae3b^`): the shape seed's stroked paths as `layer:shape`, then the
  * glyph's strokes as `layer:glyph`, its view box fitted into the slot.
  *
- * One deliberate departure (PD-20): no bounding-box normalization of the
+ * One deliberate departure (A-10): no bounding-box normalization of the
  * strokes. The glyph's own view box maps into the slot, which is how every
  * other glyph surface on Android draws a glyph.
  */
@@ -2414,6 +2778,16 @@ internal object StoneComposer {
         polarity: ValencePolarity,
         glyph: PebbleGlyph?,
     ): String = "stone:${size.key}:${polarity.key}:${glyph?.id ?: "-"}"
+
+    const val BLANK_CACHE_KEY = "stone:blank"
+
+    /**
+     * The blank stone (R4): the silhouette's outline only, nothing carved
+     * inside. A seed's first stroked path is its closed outline; the rest are
+     * the detail strokes the blank stone must not draw.
+     */
+    fun outlineOnly(shape: PebbleSvgModel): PebbleSvgModel =
+        shape.copy(layers = shape.layers.map { layer -> layer.copy(paths = layer.paths.take(1)) })
 
     private fun glyphLayer(
         glyph: PebbleGlyph,
@@ -2486,6 +2860,8 @@ private val parsedShapes = ConcurrentHashMap<Int, PebbleSvgModel>()
 internal fun rememberStoneModel(
     valence: Valence,
     glyph: PebbleGlyph?,
+    /** The blank stone: the silhouette outline only (R4). */
+    outlineOnly: Boolean = false,
 ): PebbleSvgModel? {
     val context = LocalContext.current
     val resId = StoneShapeAssets.resId(valence.sizeGroup, valence.polarity)
@@ -2500,14 +2876,58 @@ internal fun rememberStoneModel(
                     ?.also { parsedShapes[resId] = it }
                     .also { if (it == null) Log.e("stone", "shape seed $resId did not parse") }
         }
-    return remember(shape, glyph, valence) {
-        shape?.let { StoneComposer.compose(it, valence.sizeGroup, valence.polarity, glyph) }
+    return remember(shape, glyph, valence, outlineOnly) {
+        shape?.let {
+            if (outlineOnly) StoneComposer.outlineOnly(it) else StoneComposer.compose(it, valence.sizeGroup, valence.polarity, glyph)
+        }
     }
 }
 ```
 
 - [ ] **Step 2:** `PebbleStaticRender` becomes `internal fun PebbleStaticRender(model: PebbleSvgModel, cacheKey: String, strokeHex: String, modifier: Modifier = Modifier)`: delete the `svg` parameter, the `parsePebbleSvg` call and the `PebbleSvg` fallback; an unreadable `strokeHex` logs and draws nothing; `buildWobbleLayers(cacheKey, model)` calls `WobbleRenderer.pebbleArt(cacheKey, model)` (rename that parameter from `svg` to `key`; its KDoc already says it is a content key). Update the KDoc: "Traces a composed stone (`StoneComposer`)…".
-- [ ] **Step 3:** `PebbleStone.kt`:
+- [ ] **Step 3:** The blank ramp (R4). `core/model/BlankPalette.kt`:
+
+```kotlin
+package app.pbbls.android.core.model
+
+/**
+ * An uncompleted moment's stone colours (R4): the web `BLANK_PALETTE` ramp,
+ * fixed greys shared by every surface, never theme roles or an emotion palette.
+ * Surface is the primary at 10 % alpha, the rule the emotion palettes follow.
+ */
+val BlankPalette: EmotionPalette =
+    requireNotNull(
+        EmotionPalette.fromHex(
+            primaryHex = "#868686FF",
+            secondaryHex = "#B9B9B9FF",
+            lightHex = "#F3F3F3FF",
+            surfaceHex = "#8686861A",
+            darkHex = "#1B1B1BFF",
+            shadedHex = "#5E5E5EFF",
+        ),
+    ) { "BLANK_PALETTE hexes must parse" }
+```
+
+`app/src/test/.../core/model/BlankPaletteTest.kt`:
+
+```kotlin
+package app.pbbls.android.core.model
+
+import org.junit.Assert.assertEquals
+import org.junit.Test
+
+class BlankPaletteTest {
+    @Test
+    fun `a Path row's blank stone is a grey wash with a pale outline`() {
+        val frame = BlankPalette.pebbleFrameColors(2)
+        assertEquals("#B9B9B9", frame.strokeHex.uppercase())
+        assertEquals("#868686", frame.fillHex.uppercase())
+        assertEquals(0x1A / 255f, frame.fillOpacity, 0.002f)
+    }
+}
+```
+
+`PebbleStone.kt`:
 
 ```kotlin
 package app.pbbls.android.core.ui.render
@@ -2515,9 +2935,7 @@ package app.pbbls.android.core.ui.render
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -2525,7 +2943,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import app.pbbls.android.R
-import app.pbbls.android.core.designsystem.toRgbHex
+import app.pbbls.android.core.model.BlankPalette
 import app.pbbls.android.core.model.PebbleFrameColors
 import app.pbbls.android.core.model.PebbleGlyph
 import app.pbbls.android.core.model.Valence
@@ -2542,8 +2960,44 @@ fun PebbleStone(
     colors: PebbleFrameColors,
     modifier: Modifier = Modifier,
 ) {
+    StoneLayers(
+        valence = valence,
+        model = rememberStoneModel(valence, glyph),
+        cacheKey = StoneComposer.cacheKey(valence.sizeGroup, valence.polarity, glyph),
+        colors = colors,
+        modifier = modifier,
+    )
+}
+
+/**
+ * An uncompleted moment (R4): the medium neutral silhouette and its outline,
+ * nothing carved inside, in the fixed blank greys. [colors] defaults to the
+ * Path-row mapping; the read page passes its Petroglyph mapping of the same ramp.
+ */
+@Composable
+fun BlankStone(
+    modifier: Modifier = Modifier,
+    colors: PebbleFrameColors = BlankPalette.pebbleFrameColors(intensity = 2),
+) {
+    val label = stringResource(R.string.moment_blank_a11y)
+    StoneLayers(
+        valence = Valence.NEUTRAL_MEDIUM,
+        model = rememberStoneModel(Valence.NEUTRAL_MEDIUM, glyph = null, outlineOnly = true),
+        cacheKey = StoneComposer.BLANK_CACHE_KEY,
+        colors = colors,
+        modifier = modifier.semantics { contentDescription = label },
+    )
+}
+
+@Composable
+private fun StoneLayers(
+    valence: Valence,
+    model: PebbleSvgModel?,
+    cacheKey: String,
+    colors: PebbleFrameColors,
+    modifier: Modifier,
+) {
     val sizeGroup = valence.sizeGroup
-    val model = rememberStoneModel(valence, glyph)
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Box(
             modifier = Modifier.aspectRatio(PebbleOutlineGeometry.aspectRatio(sizeGroup)),
@@ -2559,33 +3013,13 @@ fun PebbleStone(
             if (model != null) {
                 PebbleStaticRender(
                     model = model,
-                    cacheKey = StoneComposer.cacheKey(sizeGroup, valence.polarity, glyph),
+                    cacheKey = cacheKey,
                     strokeHex = colors.strokeHex,
                     modifier = Modifier.fillMaxSize().scale(PebbleOutlineGeometry.pebbleScale(sizeGroup)),
                 )
             }
         }
     }
-}
-
-/**
- * An uncompleted moment (PD-11): the medium neutral stone with its shape
- * strokes and no glyph, in theme roles rather than an emotion palette.
- */
-@Composable
-fun BlankStone(modifier: Modifier = Modifier) {
-    val scheme = MaterialTheme.colorScheme
-    val colors =
-        remember(scheme.surfaceVariant, scheme.outline) {
-            PebbleFrameColors(strokeHex = scheme.outline.toRgbHex(), fillHex = scheme.surfaceVariant.toRgbHex(), fillOpacity = 1f)
-        }
-    val label = stringResource(R.string.moment_blank_a11y)
-    PebbleStone(
-        valence = Valence.NEUTRAL_MEDIUM,
-        glyph = null,
-        colors = colors,
-        modifier = modifier.semantics { contentDescription = label },
-    )
 }
 ```
 
@@ -2613,7 +3047,7 @@ Strings: `<string name="moment_blank_a11y">Not a pebble yet</string>` / `<string
 
 ## Part 4 — Bare moments on Path and the read page (`feat/1048-android-moments-path`)
 
-**Story:** an uncompleted moment looks like one: a blank stone with its photo on Path, and a read page without pebble sections. Deleting from any row or from the read page asks what to delete when a pebble exists (PD-16).
+**Story:** an uncompleted moment looks like one: a blank stone with its photo on Path, and a read page without pebble sections. Deleting from any row or from the read page asks what to delete when a pebble exists (R8); the read page's Delete lives in its ⋮ menu (R7).
 
 **File map** (under `app/src/main/kotlin/app/pbbls/android/`)
 
@@ -2628,7 +3062,7 @@ Strings: `<string name="moment_blank_a11y">Not a pebble yet</string>` / `<string
 | Modify | `features/profile/SoulDetailViewModel.kt`, `SoulDetailScreen.kt`, `CollectionDetailViewModel.kt`, `CollectionDetailScreen.kt` | same |
 | Modify | `features/path/PebbleDetailViewModel.kt`, `PebbleDetailScreen.kt` | delete from the read page |
 | Modify | `navigation/PebblesEntryProvider.kt` | `onMomentDeleted = { navigator.closeDetail(…) }` |
-| Modify | strings | three delete strings |
+| Modify | strings | the R8 delete strings |
 
 ### Task 4.1: Blank stones
 
@@ -2643,7 +3077,7 @@ Strings: `<string name="moment_blank_a11y">Not a pebble yet</string>` / `<string
             }
 ```
 
-`PebbleReadPetroglyph(valence: Valence?, glyph, palette, modifier)`: `if (valence == null) { BlankStone(modifier); return }`. `PebbleReadBanner`, `PebbleSnapFrame` take `valence: Valence?`; `PebbleReadView` passes `valence = pebble?.valence`. `EditPebbleScreen`'s header shows `BlankStone` when `!state.hasPebble`.
+`PebbleReadPetroglyph(valence: Valence?, glyph, palette, modifier)`: when `valence == null`, draw `BlankStone(modifier, colors = petroglyphColors(BlankPalette, ValenceSizeGroup.MEDIUM, isSystemInDarkTheme()).let { PebbleFrameColors(it.strokeHex, it.fillHex, it.fillOpacity) })` and return: the same fixed ramp through the read page's own mapping (R4). `PebbleReadBanner`, `PebbleSnapFrame` take `valence: Valence?`; `PebbleReadView` passes `valence = pebble?.valence`. (Edit pebble only exists for a moment with a pebble, so its header never needs the blank stone.)
 - [ ] **Step 2:** Previews: add `PathRow_BlankStoneNoPhoto`, `PathRow_BlankStoneWithPhoto`, `PathScreen_MixedWeek` (completed, photo-only, named bare), and change `PebbleDetail_BareMoment` (Part 2) to show the blank stone. `./gradlew compileDebugScreenshotTestKotlin` → BUILD SUCCESSFUL.
 - [ ] **Step 3:** Commit `feat(android): draw uncompleted moments as blank stones`.
 
@@ -2729,7 +3163,7 @@ Mirror both cases in `SoulDetailViewModelTest` and `CollectionDetailViewModelTes
 ```kotlin
 package app.pbbls.android.core.model
 
-/** What a delete removes (PD-16). Only offered as a choice when the moment has your pebble. */
+/** What a delete removes (R8). Only offered as a choice when the moment has your pebble. */
 enum class MomentDeleteChoice { PEBBLE_ONLY, MOMENT }
 ```
 
@@ -2767,14 +3201,14 @@ import app.pbbls.android.R
 import app.pbbls.android.core.model.MomentDeleteChoice
 
 /**
- * The delete confirmation for a moment (PD-16). Without your pebble it is the
- * plain "Delete <name>? This can't be undone." With one, it asks which: the
- * pebble (the moment stays, uncompleted) or the whole moment.
+ * The delete confirmation for a moment (R8, shared copy with iOS). Without your
+ * pebble: "Delete this moment?", "This can't be undone.", Delete moment. With
+ * one: "Delete this pebble?", and a choice between the pebble only (the moment
+ * stays, as a blank stone) and the moment too.
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MomentDeleteDialog(
-    name: String,
     hasPebble: Boolean,
     onConfirm: (MomentDeleteChoice) -> Unit,
     onDismiss: () -> Unit,
@@ -2785,14 +3219,14 @@ fun MomentDeleteDialog(
         containerColor = colors.surfaceContainerHigh,
         title = {
             Text(
-                text = stringResource(R.string.pebble_delete_confirm_title, name),
+                text = stringResource(if (hasPebble) R.string.delete_pebble_title else R.string.delete_moment_title),
                 style = MaterialTheme.typography.titleMediumEmphasized,
                 color = colors.onSurface,
             )
         },
         text = {
             Text(
-                text = stringResource(if (hasPebble) R.string.moment_delete_choice_message else R.string.pebble_delete_confirm_message),
+                text = stringResource(if (hasPebble) R.string.delete_pebble_message else R.string.pebble_delete_confirm_message),
                 style = MaterialTheme.typography.bodyLarge,
                 color = colors.onSurfaceVariant,
             )
@@ -2801,12 +3235,12 @@ fun MomentDeleteDialog(
             Column(horizontalAlignment = Alignment.End) {
                 if (hasPebble) {
                     TextButton(onClick = { onConfirm(MomentDeleteChoice.PEBBLE_ONLY) }) {
-                        Text(stringResource(R.string.moment_delete_pebble_only), style = MaterialTheme.typography.labelLarge, color = colors.error)
+                        Text(stringResource(R.string.delete_pebble_keep_moment), style = MaterialTheme.typography.labelLarge, color = colors.error)
                     }
                 }
                 TextButton(onClick = { onConfirm(MomentDeleteChoice.MOMENT) }) {
                     Text(
-                        stringResource(if (hasPebble) R.string.moment_delete_moment else R.string.pebble_delete),
+                        stringResource(if (hasPebble) R.string.delete_moment_too else R.string.delete_moment),
                         style = MaterialTheme.typography.labelLarge,
                         color = colors.error,
                     )
@@ -2825,23 +3259,31 @@ fun MomentDeleteDialog(
 Strings (EN / FR):
 
 ```xml
-<string name="moment_delete_choice_message">Deleting the moment also deletes its pebble and its photo.</string>
-<string name="moment_delete_pebble_only">Delete the pebble, keep the moment</string>
-<string name="moment_delete_moment">Delete the moment</string>
+<string name="delete_moment_title">Delete this moment?</string>
+<string name="delete_pebble_title">Delete this pebble?</string>
+<string name="delete_pebble_message">Keeping the moment leaves it on your path as a blank stone. Deleting the moment removes its photo too. This can\'t be undone.</string>
+<string name="delete_pebble_keep_moment">Delete the pebble, keep the moment</string>
+<string name="delete_moment_too">Delete the moment too</string>
+<string name="delete_moment">Delete moment</string>
 ```
 
 ```xml
-<string name="moment_delete_choice_message">Supprimer le moment supprime aussi son galet et sa photo.</string>
-<string name="moment_delete_pebble_only">Supprimer le galet, garder le moment</string>
-<string name="moment_delete_moment">Supprimer le moment</string>
+<string name="delete_moment_title">Supprimer ce moment ?</string>
+<string name="delete_pebble_title">Supprimer ce galet ?</string>
+<string name="delete_pebble_message">Garder le moment le laisse sur ton chemin comme une pierre vierge. Supprimer le moment retire aussi sa photo. Cette action est irréversible.</string>
+<string name="delete_pebble_keep_moment">Supprimer le galet, garder le moment</string>
+<string name="delete_moment_too">Supprimer aussi le moment</string>
+<string name="delete_moment">Supprimer le moment</string>
 ```
 
-`PathViewModel.confirmDelete(choice: MomentDeleteChoice)` runs `writes.delete(target.id, target.pebble?.id, choice)` then `reload()`; failure sets `didDeleteFail` as today. `PathScreen` shows `MomentDeleteDialog(name = target.name ?: stringResource(R.string.moment_untitled), hasPebble = target.isCompleted, onConfirm = { choice -> viewModel.confirmDelete(choice); if (choice == MomentDeleteChoice.MOMENT) onDeleteConfirmed(target.id) }, onDismiss = viewModel::cancelDelete)`; delete `DeleteConfirmDialog` and switch the two `PebbleDetailScreenshots` previews that used it to `MomentDeleteDialog` (one per `hasPebble`). `SoulDetail*` and `CollectionDetail*` use the same dialog and `confirmDelete(choice)`; their rows always carry a pebble.
+"This can't be undone." is the existing `pebble_delete_confirm_message`; Cancel is `action_cancel`.
 
-`PebbleDetailViewModel` gains `UiEffects<PebbleDetailEffect>` (`data object MomentDeleted`), a `pendingDelete: StateFlow<Boolean>`, `requestDelete()`, `cancelDelete()`, `confirmDelete(choice)` (`MOMENT` → emit `MomentDeleted`; `PEBBLE_ONLY` → `reload()`), and a `didDeleteFail` flag shown with `DeleteErrorDialog`. Its constructor becomes `(moments: MomentReadServicing, writes: MomentWriteServicing)`. `DetailTopBar` gets a trash `IconButton` (`R.drawable.ic_trash`, `contentDescription = stringResource(R.string.action_delete)`) before Edit, enabled once loaded. `PebbleDetailScreen` takes `onMomentDeleted: () -> Unit`; the entry provider passes `{ navigator.closeDetail(PebblesKey.PebbleDetail(key.momentId)) }`.
+`PathViewModel.confirmDelete(choice: MomentDeleteChoice)` runs `writes.delete(target.id, target.pebble?.id, choice)` then `reload()`; failure sets `didDeleteFail` as today. `PathScreen` shows `MomentDeleteDialog(hasPebble = target.isCompleted, onConfirm = { choice -> viewModel.confirmDelete(choice); if (choice == MomentDeleteChoice.MOMENT) onDeleteConfirmed(target.id) }, onDismiss = viewModel::cancelDelete)`; delete `DeleteConfirmDialog` and switch the two `PebbleDetailScreenshots` previews that used it to `MomentDeleteDialog` (one per `hasPebble`). `SoulDetail*` and `CollectionDetail*` use the same dialog and `confirmDelete(choice)`; their rows always carry a pebble.
 
-- [ ] **Step 4:** Run the four ViewModel tests → PASS. `ui/PebbleDeleteTest`: add `a completed row offers both choices, and keeping the moment deletes only the pebble` (tap `R.string.moment_delete_pebble_only`, assert `FakeMomentWriteService.deletedPebbles`).
-- [ ] **Step 5:** `./gradlew ktlintCheck testDebugUnitTest assembleDebug lint` → BUILD SUCCESSFUL. Commit `feat(android): choose between deleting the pebble and the moment`. Previews: `MomentDeleteDialog_WithPebble`, `MomentDeleteDialog_BareMoment`, `PebbleDetail_TopBarWithDelete`. PR with `rebaseline-screenshots`.
+`PebbleDetailViewModel` gains `UiEffects<PebbleDetailEffect>` (`data object MomentDeleted`), a `pendingDelete: StateFlow<Boolean>`, `requestDelete()`, `cancelDelete()`, `confirmDelete(choice)` (`MOMENT` → emit `MomentDeleted`; `PEBBLE_ONLY` → `reload()`), and a `didDeleteFail` flag shown with `DeleteErrorDialog`. Its constructor becomes `(moments: MomentReadServicing, writes: MomentWriteServicing)`. The ⋮ menu from Part 2 gains its last item, `DropdownMenuItem(text = { Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) }, onClick = { menuOpen = false; onDelete() })`, after Edit moment and Edit pebble; there is no standalone trash button (R7). `PebbleDetailScreen` shows `MomentDeleteDialog(hasPebble = detail.pebble != null, onConfirm = viewModel::confirmDelete, onDismiss = viewModel::cancelDelete)` while `pendingDelete` is true. `PebbleDetailScreen` takes `onMomentDeleted: () -> Unit`; the entry provider passes `{ navigator.closeDetail(PebblesKey.PebbleDetail(key.momentId)) }`.
+
+- [ ] **Step 4:** Run the four ViewModel tests → PASS. `ui/PebbleDeleteTest`: add `a completed row offers both choices, and keeping the moment deletes only the pebble` (tap `R.string.delete_pebble_keep_moment`, assert `FakeMomentWriteService.deletedPebbles`), and `the read page's menu deletes the moment and closes the page` (tap `R.string.more_actions_a11y`, `R.string.action_delete`, `R.string.delete_moment_too`).
+- [ ] **Step 5:** `./gradlew ktlintCheck testDebugUnitTest assembleDebug lint` → BUILD SUCCESSFUL. Commit `feat(android): choose between deleting the pebble and the moment`. Previews: `MomentDeleteDialog_WithPebble`, `MomentDeleteDialog_BareMoment`, `PebbleDetail_MenuOpenWithDelete`. PR with `rebaseline-screenshots`.
 
 ---
 
@@ -2868,7 +3310,8 @@ Strings (EN / FR):
 | Modify | `navigation/PebblesKeys.kt`, `PebblesEntryProvider.kt` | `PebblesKey.CompletePebble(momentId)` |
 | Modify | `features/path/read/PebbleReadView.kt`, `PebbleDetailScreen.kt` | "Make it a pebble" on a bare moment |
 | Modify | `di/ServiceBindings.kt` | `@Binds` the snapshot store |
-| Modify | strings | `moment_make_pebble` |
+| Modify | strings | `complete_cta` |
+| Modify | `features/path/record/steps/RecordSuccessStep.kt` | `name: String?` through `MomentNameText` (R3, R12) |
 | Test | `CompleteStepTest`, `CompleteFlowModelTest`, `CompleteSnapshotTest`, `CompleteFlowViewModelTest`, `ui/CompleteFlowTest`; fake `FakeCompleteSnapshotStore` | |
 
 ### Task 5.1: The per-moment autosave
@@ -2955,7 +3398,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * A half-finished Complete flow, kept on the device per moment (PD-7). Not a
+ * A half-finished Complete flow, kept on the device per moment (A-5). Not a
  * wire shape: it never leaves the device, and server drafts are retired (D7).
  */
 @Serializable
@@ -3284,7 +3727,7 @@ class CompleteFlowModelTest {
     fun `success and failure buzz and move as decided`() {
         model.goTo(CompleteStep.PRIVACY)
         model.beginComplete()
-        model.fail(R.string.pebble_error_reference_gone)
+        model.fail(R.string.pebble_error_soul_gone)
         assertEquals(CompleteStep.PRIVACY, model.step)
         assertFalse(model.isCompleting)
         model.beginComplete()
@@ -3604,7 +4047,7 @@ class CompleteFlowViewModelTest {
             advanceUntilIdle()
             val flow = h.viewModel.uiState.value.flow
             assertEquals(CompleteStep.PRIVACY, flow.step)
-            assertEquals(R.string.pebble_error_reference_gone, flow.errorRes)
+            assertEquals(R.string.pebble_error_collection_gone, flow.errorRes)
             assertEquals("e-1", h.snapshots.stored["m-1"]?.second?.emotionId)
             assertEquals(0, h.achievements.fireCheckCount)
         }
@@ -3748,7 +4191,7 @@ data class CompleteFlowUiState(
 
 /**
  * The Complete flow's orchestration: restore, autosave, `complete_pebble`, and
- * what follows a completion (PD-9). Entry-scoped (#852), so it is cleared with
+ * what follows a completion (A-7). Entry-scoped (#852), so it is cleared with
  * its entry. The write and everything after it run in `NonCancellable`:
  * leaving after the request left the device must not skip clearing the
  * autosave, or the next visit would resurrect answers already completed.
@@ -3805,7 +4248,7 @@ class CompleteFlowViewModel
         }
 
         /**
-         * Silent restore (PD-7). Souls and collections are sanitized only once
+         * Silent restore (A-5). Souls and collections are sanitized only once
          * reference data has loaded: sanitizing against empty caches would drop
          * every one of them (#647).
          */
@@ -3843,7 +4286,7 @@ class CompleteFlowViewModel
             if (model.completed == null) snapshots.save(id, owner, CompleteSnapshot.from(model.answers))
         }
 
-        /** ✕ never asks (PD-6): the answers stay on the device and resume next time. */
+        /** ✕ never asks (A-4): the answers stay on the device and resume next time. */
         fun onClose() {
             if (model.isCompleting) return
             flushNow()
@@ -3895,7 +4338,7 @@ class CompleteFlowViewModel
                             },
                             onFailure = {
                                 Log.e(TAG, "complete_pebble failed", it)
-                                model.fail(momentWriteErrorRes(it.toDataError(), R.string.pebble_save_error_generic))
+                                model.fail(momentWriteErrorRes(it.toDataError()))
                             },
                         )
                 }
@@ -3942,7 +4385,7 @@ fun CompleteStepContent(
 }
 ```
 
-- [ ] **Step 3:** `CompleteFlowScreen.kt` follows `RecordFlowScreen`'s shape: `CompleteFlowScreen(momentId, onDismiss, modifier, viewModel = hiltViewModel())` collects `uiState` with `collectAsStateWithLifecycle`, calls `LaunchedEffect(momentId) { viewModel.start(momentId) }`, plays `CompleteFlowEffect.Haptic` through the same `rememberTapHaptics()` the record flow uses and calls `onDismiss` on `Dismiss` (via `ObserveUiEffects`), installs `NavigationBackHandler { viewModel.onSystemBack() }`, applies `safeDrawingPadding()` + `readableWidth()`, and delegates to a stateless `CompleteFlowContent(uiState, model, domains, collections, palette, onClose, onComplete, onExit, onAchievementCheck)` that the previews render. `CompleteFlowContent` draws `RecordFlowChrome(position = (step.dotIndex ?: 0) + 1, total = CompleteStep.counted.size, canGoBack = step.previous != null, onBack = model::back, onClose = onClose)` (hidden on `SUCCESS`), then either `RecordSuccessStep(name = uiState.momentName ?: stringResource(R.string.moment_untitled), glyph = completed.glyph, karmaDelta = completed.karmaDelta, valence = answers.valence ?: Valence.NEUTRAL_MEDIUM, palette = palette, onExit = onExit)` or `RecordStepScaffold(title, subtitle, action, contentScrolls = !step.bringsOwnScroll) { CompleteStepContent(…) }` with the action:
+- [ ] **Step 3:** `CompleteFlowScreen.kt` follows `RecordFlowScreen`'s shape: `CompleteFlowScreen(momentId, onDismiss, modifier, viewModel = hiltViewModel())` collects `uiState` with `collectAsStateWithLifecycle`, calls `LaunchedEffect(momentId) { viewModel.start(momentId) }`, plays `CompleteFlowEffect.Haptic` through the same `rememberTapHaptics()` the record flow uses and calls `onDismiss` on `Dismiss` (via `ObserveUiEffects`), installs `NavigationBackHandler { viewModel.onSystemBack() }`, applies `safeDrawingPadding()` + `readableWidth()`, and delegates to a stateless `CompleteFlowContent(uiState, model, domains, collections, palette, onClose, onComplete, onExit, onAchievementCheck)` that the previews render. `CompleteFlowContent` draws `RecordFlowChrome(position = (step.dotIndex ?: 0) + 1, total = CompleteStep.counted.size, canGoBack = step.previous != null, onBack = model::back, onClose = onClose)` (hidden on `SUCCESS`), then either `RecordSuccessStep(name = uiState.momentName, glyph = completed.glyph, karmaDelta = completed.karmaDelta, valence = answers.valence ?: Valence.NEUTRAL_MEDIUM, palette = palette, onExit = onExit)` or `RecordStepScaffold(title, subtitle, action, contentScrolls = !step.bringsOwnScroll) { CompleteStepContent(…) }` with the action:
 
 ```kotlin
 private fun actionFor(
@@ -3964,9 +4407,9 @@ private fun actionFor(
 private data class CompleteLabels(val continueLabel: String, val skip: String, val done: String, val makePebble: String)
 ```
 
-`labels` come from `record_action_continue`, `record_action_skip`, `action_done`, and the new `moment_make_pebble`; the palette for the success stone is `answers.emotionId?.let(LocalEmotionPaletteService.current::palette)`; domains and collections come from `LocalReferenceDataService.current`.
+`labels` come from `record_action_continue`, `record_action_skip`, `action_done`, and the new `complete_cta`; the palette for the success stone is `answers.emotionId?.let(LocalEmotionPaletteService.current::palette)`; domains and collections come from `LocalReferenceDataService.current`.
 
-Strings: `<string name="moment_make_pebble">Make it a pebble</string>` / `<string name="moment_make_pebble">En faire un galet</string>`.
+Strings: `<string name="complete_cta">Make it a pebble</string>` / `<string name="complete_cta">En faire un galet</string>` (the read page's button and the privacy step's button). `RecordSuccessStep`'s `name` becomes `String?` and renders `MomentNameText(name, MaterialTheme.typography.headlineMedium, colors.onSurface, textAlign = TextAlign.Center)`, so a photo-only moment's success screen reads an italic "Untitled" (R12); `RecordFlowScreen` still passes its non-null name.
 
 - [ ] **Step 4:** Navigation. `PebblesKeys.kt`, in the modal section:
 
@@ -3989,8 +4432,8 @@ Strings: `<string name="moment_make_pebble">Make it a pebble</string>` / `<strin
 
 Add `CompletePebble` to `PebblesKeysTest`'s round-trip and modal lists.
 
-- [ ] **Step 5:** The read page's call to action. `PebbleReadView(detail, palette, modifier, onComplete: (() -> Unit)? = null)`: directly under `PebbleReadTitle`, when `detail.pebble == null && onComplete != null`, render `PebblesPrimaryButton(text = stringResource(R.string.moment_make_pebble), onClick = onComplete, modifier = Modifier.fillMaxWidth())`. `PebbleDetailContent` passes it through; `PebbleDetailScreen` takes `onCompleteRequested: () -> Unit`; the entry provider passes `{ navigator.navigate(PebblesKey.CompletePebble(key.momentId)) }`. The detail's existing `LifecycleResumeEffect` reload shows the completed pebble on return.
-- [ ] **Step 6: Journey test** `app/src/test/.../ui/CompleteFlowTest.kt` (extends `AppUiTest`, `@HiltAndroidTest`): arm `FakeMomentReadService.path` with one bare moment and `.moments` with its detail, launch, open the row, tap `R.string.moment_make_pebble`, `Continue`, an emotion tile, a domain tile, `Skip`, `Skip`, `R.string.moment_make_pebble`; assert `FakeMomentWriteService.completed.single().momentId`, that `"+4 karma"` (`R.string.record_karma`) is displayed, then tap `R.string.record_success_exit` and assert the read page is back. Find emotion and domain tiles the way `RecordFlowPublishTest` does today.
+- [ ] **Step 5:** The read page's call to action. `PebbleReadView(detail, palette, modifier, onComplete: (() -> Unit)? = null)`: directly under `PebbleReadTitle`, when `detail.pebble == null && onComplete != null`, render `PebblesPrimaryButton(text = stringResource(R.string.complete_cta), onClick = onComplete, modifier = Modifier.fillMaxWidth())`. `PebbleDetailContent` passes it through; `PebbleDetailScreen` takes `onCompleteRequested: () -> Unit`; the entry provider passes `{ navigator.navigate(PebblesKey.CompletePebble(key.momentId)) }`. The detail's existing `LifecycleResumeEffect` reload shows the completed pebble on return.
+- [ ] **Step 6: Journey test** `app/src/test/.../ui/CompleteFlowTest.kt` (extends `AppUiTest`, `@HiltAndroidTest`): arm `FakeMomentReadService.path` with one bare moment and `.moments` with its detail, launch, open the row, tap `R.string.complete_cta`, `Continue`, an emotion tile, a domain tile, `Skip`, `Skip`, `R.string.complete_cta`; assert `FakeMomentWriteService.completed.single().momentId`, that `"+4 karma"` (`R.string.record_karma`) is displayed, then tap `R.string.record_success_exit` and assert the read page is back. Find emotion and domain tiles the way `RecordFlowPublishTest` does today.
 - [ ] **Step 7: Previews** `CompleteFlowScreenshots.kt`: one `@PreviewTest` per step through `CompleteFlowContent` (`Complete_Valence`, `Complete_Emotion`, `Complete_Domain`, `Complete_Souls`, `Complete_Collection`, `Complete_Privacy`, `Complete_PrivacyError`, `Complete_Success`, `Complete_SuccessNoKarmaNoGlyph`), plus `PebbleDetail_BareMomentWithCta`. Build the model for previews with a no-op recorder lambda (previews are not interactions), as `RecordFlowScreenshots` does.
 - [ ] **Step 8:** `./gradlew ktlintCheck testDebugUnitTest assembleDebug lint compileDebugScreenshotTestKotlin` → BUILD SUCCESSFUL. Commits: `feat(android): the Complete flow screen`, `feat(android): offer to complete a bare moment from its page`. PR with `rebaseline-screenshots`.
 
@@ -4014,7 +4457,7 @@ Add `CompletePebble` to `PebblesKeysTest`'s round-trip and modal lists.
 | Modify | `features/path/record/RecordStepScaffold.kt` | `RecordStepAction.PrimaryWithSecondary` |
 | Modify | `navigation/PebblesKeys.kt`, `PebblesEntryProvider.kt` | `PebblesKey.Capture`; Path's New opens it; long-press removed |
 | Modify | `features/path/PathScreen.kt`, `features/path/components/NewPebbleButton.kt`, `NewPebbleFab.kt`, `WeekPebbleList.kt` | drop `onLongPress` / `onCreatePebbleLongPress` |
-| Modify | strings | three capture strings |
+| Modify | strings | the four capture strings (R1, R2) |
 | Test | `CaptureStepTest`, `CaptureFlowModelTest`, `CaptureFlowViewModelTest`, `ui/CaptureFlowTest`, `ui/NavigationTest`, `ui/RestorationTest` | |
 
 ### Task 6.1: Steps, state and machine
@@ -4112,7 +4555,7 @@ enum class CaptureStep(
 ) {
     PHOTO(R.string.record_photo_title, R.string.record_photo_subtitle, isOptional = true),
     WHEN(R.string.record_when_title),
-    NAME(R.string.record_name_title),
+    NAME(R.string.record_name_title, R.string.capture_name_subtitle),
     ;
 
     val next: CaptureStep? get() = entries.getOrNull(ordinal + 1)
@@ -4292,7 +4735,7 @@ class CaptureFlowModel(
             h.viewModel.machine().goTo(CaptureStep.NAME)
             h.viewModel.save(thenComplete = false)
             advanceUntilIdle()
-            assertEquals(R.string.pebble_save_error_media_quota, h.viewModel.uiState.value.flow.errorRes)
+            assertEquals(R.string.moment_error_media_quota, h.viewModel.uiState.value.flow.errorRes)
             assertTrue(h.snapRepo.deletedSnapIds.isEmpty())
         }
 
@@ -4305,12 +4748,42 @@ class CaptureFlowModel(
             advanceUntilIdle()
             h.viewModel.onCloseRequested()
             assertTrue(h.viewModel.uiState.value.isCloseConfirmPresented)
+            // A photo alone is savable, so the dialog offers Save moment too (R2).
+            assertTrue(h.viewModel.uiState.value.closeOffersSave)
             h.viewModel.onDiscard()
             advanceUntilIdle()
             assertEquals(1, h.snapRepo.deletedSnapIds.size)
             assertTrue(CaptureFlowEffect.Dismiss in effects.values)
             assertTrue(h.writes.saved.isEmpty())
             effects.stop()
+        }
+
+    @Test
+    fun `saving from the close dialog saves the moment`() =
+        runTest {
+            val h = Harness()
+            val effects = recordEffects(h.viewModel.effects)
+            h.viewModel.machine().goTo(CaptureStep.NAME)
+            h.viewModel.machine().setName("Walk")
+            h.viewModel.onCloseRequested()
+            assertTrue(h.viewModel.uiState.value.closeOffersSave)
+            h.viewModel.onSaveFromClose()
+            advanceUntilIdle()
+            assertEquals("Walk", h.writes.saved.single().name)
+            assertTrue(CaptureFlowEffect.Saved in effects.values)
+            effects.stop()
+        }
+
+    @Test
+    fun `an upload in flight keeps Save moment out of the close dialog`() =
+        runTest {
+            val h = Harness()
+            h.snapRepo.uploadGate = CompletableDeferred()
+            h.viewModel.onPhotoPicked(Uri.EMPTY)
+            runCurrent()
+            h.viewModel.onCloseRequested()
+            assertTrue(h.viewModel.uiState.value.isCloseConfirmPresented)
+            assertFalse(h.viewModel.uiState.value.closeOffersSave)
         }
 
     @Test
@@ -4437,12 +4910,14 @@ data class CaptureFlowUiState(
     val snap: FormSnap? = null,
     val seededFromPhoto: Boolean = false,
     val isCloseConfirmPresented: Boolean = false,
+    /** The close dialog offers Save moment only when the moment is savable now (R2). */
+    val closeOffersSave: Boolean = false,
 )
 
 /**
- * Capture: a moment in three steps, saved with `save_moment` (PD-3). Nothing
+ * Capture: a moment in three steps, saved with `save_moment` (A-2). Nothing
  * is kept across a crash but what `SavedStateHandle` holds (step, name, date):
- * the server has not seen them, and a three-step form needs no autosave (PD-7).
+ * the server has not seen them, and a three-step form needs no autosave (A-5).
  */
 @HiltViewModel
 class CaptureFlowViewModel
@@ -4552,8 +5027,8 @@ class CaptureFlowViewModel
                             },
                             onFailure = {
                                 Log.e(TAG, "save_moment failed", it)
-                                // Files stay for the retry; discarding is the cleanup (PD-5).
-                                model.fail(momentWriteErrorRes(it.toDataError(), R.string.moment_save_error_generic))
+                                // Files stay for the retry; discarding is the cleanup (A-3).
+                                model.fail(momentWriteErrorRes(it.toDataError()))
                             },
                         )
                 }
@@ -4568,17 +5043,27 @@ class CaptureFlowViewModel
                 else -> null
             }
 
-        /** Asks only when there is something to lose (PD-4). */
+        /**
+         * Asks only when there is something to lose (R2): "Keep this moment?"
+         * with Save moment (when savable and the photo is not blocking),
+         * Discard and Keep going.
+         */
         fun onCloseRequested() {
             if (model.isSaving) return
             if (model.state.value.hasInput) {
-                _uiState.update { it.copy(isCloseConfirmPresented = true) }
+                val offersSave = model.state.value.canSave && blockedBySnap() == null
+                _uiState.update { it.copy(isCloseConfirmPresented = true, closeOffersSave = offersSave) }
             } else {
                 discardAndClose()
             }
         }
 
         fun onKeepGoing() = _uiState.update { it.copy(isCloseConfirmPresented = false) }
+
+        fun onSaveFromClose() {
+            _uiState.update { it.copy(isCloseConfirmPresented = false) }
+            save(thenComplete = false)
+        }
 
         fun onDiscard() {
             _uiState.update { it.copy(isCloseConfirmPresented = false) }
@@ -4631,20 +5116,22 @@ and render it as the `Primary` button followed by a `TextButton(onClick = action
         }
 ```
 
-with actions: `PHOTO` → `RecordStepAction.Text(skip or done, model::advance)`; `WHEN` → `Primary(record_action_continue, enabled = true, isLoading = false, model::advance)`; `NAME` → `PrimaryWithSecondary(Primary(capture_save, enabled = state.canSave, isLoading = state.isSaving, onClick = onSave), capture_make_pebble, onSaveThenComplete)`. The close confirmation is an `AlertDialog` titled `capture_close_title` with `record_close_discard` (error colour) and `record_close_keep_going`.
+with actions: `PHOTO` → `RecordStepAction.Text(skip or done, model::advance)`; `WHEN` → `Primary(record_action_continue, enabled = true, isLoading = false, model::advance)`; `NAME` → `PrimaryWithSecondary(Primary(capture_save, enabled = state.canSave, isLoading = state.isSaving, onClick = onSave), capture_make_pebble_now, onSaveThenComplete)`. `CaptureStep.NAME` carries `subtitleRes = R.string.capture_name_subtitle` (R1). The close confirmation (R2) is an `AlertDialog` titled `capture_close_title` whose confirm slot is a `Column` of `TextButton`s: `capture_save` (only when `uiState.closeOffersSave`, calling `viewModel.onSaveFromClose()`), `record_close_discard` (error colour, `onDiscard`), and whose dismiss slot is `record_close_keep_going` (`onKeepGoing`).
 
 Strings (EN / FR):
 
 ```xml
-<string name="capture_save">Save the moment</string>
-<string name="capture_make_pebble">Make it a pebble now</string>
-<string name="capture_close_title">Discard this moment?</string>
+<string name="capture_save">Save moment</string>
+<string name="capture_make_pebble_now">Make it a pebble now</string>
+<string name="capture_name_subtitle">A name, a photo, or both.</string>
+<string name="capture_close_title">Keep this moment?</string>
 ```
 
 ```xml
-<string name="capture_save">Garder ce moment</string>
-<string name="capture_make_pebble">En faire un galet maintenant</string>
-<string name="capture_close_title">Abandonner ce moment ?</string>
+<string name="capture_save">Garder le moment</string>
+<string name="capture_make_pebble_now">En faire un galet maintenant</string>
+<string name="capture_name_subtitle">Un nom, une photo, ou les deux.</string>
+<string name="capture_close_title">Tu gardes ce moment ?</string>
 ```
 
 - [ ] **Step 3:** Navigation. `PebblesKeys.kt`: `@Serializable data object Capture : PebblesKey` (modal). `PebblesEntryProvider.kt`:
@@ -4653,7 +5140,7 @@ Strings (EN / FR):
     entry<PebblesKey.Capture>(metadata = NavTransitions.forKey(PebblesKey.Capture)) {
         CaptureFlowScreen(
             onDismiss = navigator::goBack,
-            // Path's resume refresh shows the new blank stone; no detail is opened (PD-24).
+            // Path's resume refresh shows the new blank stone; no detail is opened (A-14).
             onSaved = navigator::goBack,
             // Replace Capture with Complete rather than stacking it, as Drafts → RecordFlow did.
             onSavedThenComplete = { momentId ->
@@ -4665,11 +5152,11 @@ Strings (EN / FR):
 ```
 
 Path: `onCreatePebble = { navigator.navigate(PebblesKey.Capture) }`; delete `onCreatePebbleLongPress` from `PathScreen`, the entry provider and `NewPebbleFab`, and `onLongPress` from `NewPebbleButton` (and its `combinedClickable` back to `clickable`). Keep `JourneyTags.NEW_PEBBLE` on the button: `:baselineprofile` taps it.
-- [ ] **Step 4:** Journeys. `ui/NavigationTest`: `new pebble opens the capture flow` (asserts `R.string.record_photo_title`); delete `long-pressing new pebble opens the all-at-once composer`. New `ui/CaptureFlowTest`: New pebble → Skip → Continue → type a name → `capture_save` → back on Path, `FakeMomentWriteService.saved.single().name == "Walk"`; and `capture_make_pebble` lands on `R.string.record_valence_title`. `ui/RestorationTest`: replace `a record step survives process death through the restore prompt` with `a capture step survives process death` (type a name on the name step, `restartAfterProcessDeath()`, the name and step are back).
-- [ ] **Step 5: Previews** `CaptureFlowScreenshots.kt`: `Capture_Photo`, `Capture_PhotoUploading`, `Capture_When_FromPhoto`, `Capture_NameEmpty` (both buttons disabled), `Capture_NamePhotoOnly` (enabled without a name), `Capture_NameError`, `Capture_CloseConfirm`.
+- [ ] **Step 4:** Journeys. `ui/NavigationTest`: `new pebble opens the capture flow` (asserts `R.string.record_photo_title`); delete `long-pressing new pebble opens the all-at-once composer`. New `ui/CaptureFlowTest`: New pebble → Skip → Continue → type a name → `capture_save` → back on Path, `FakeMomentWriteService.saved.single().name == "Walk"`; and `capture_make_pebble_now` lands on `R.string.record_valence_title`. `ui/RestorationTest`: replace `a record step survives process death through the restore prompt` with `a capture step survives process death` (type a name on the name step, `restartAfterProcessDeath()`, the name and step are back).
+- [ ] **Step 5: Previews** `CaptureFlowScreenshots.kt`: `Capture_Photo`, `Capture_PhotoUploading`, `Capture_When_FromPhoto`, `Capture_NameEmpty` (both buttons disabled), `Capture_NamePhotoOnly` (enabled without a name), `Capture_NameError`, `Capture_CloseConfirmWithSave`, `Capture_CloseConfirm`.
 - [ ] **Step 6:** `./gradlew ktlintCheck testDebugUnitTest assembleDebug lint compileDebugScreenshotTestKotlin` → BUILD SUCCESSFUL. `git grep -n "compose-pebble" app/src/main` now hits only `PebbleWriteService.kt` and comments, none reachable from a key. Commits: `feat(android): the Capture flow screen`, `feat(android): new pebble opens Capture`. PR with `rebaseline-screenshots`.
 
-**Manual check:** capture photo-only (EXIF date seeded, "Untitled moment" on Path with the photo and a blank stone); capture name-only and chain into Complete; cancel with a photo attached and confirm the upload disappears from Storage (Supabase dashboard).
+**Manual check:** capture photo-only (EXIF date seeded, an italic "Untitled" on Path with the photo and a blank stone); capture name-only and chain into Complete; cancel with a photo attached and confirm the upload disappears from Storage (Supabase dashboard).
 
 ---
 
@@ -4708,22 +5195,22 @@ Path: `onCreatePebble = { navigator.navigate(PebblesKey.Capture) }`; delete `onC
 `CollectionDecodingTest`: a row `{"id":"c-1","name":"Sea days","mode":null,"glyph_id":"g-1","glyphs":{"id":"g-1","name":null,"strokes":[{"d":"M 0 0 L 10 10","width":6}],"view_box":"0 0 200 200"},"pebble_count":[{"count":3}]}` decodes to `Collection(glyphId = "g-1", glyph.id == "g-1", pebbleCount = 3)`, and a row with `"glyph_id":null,"glyphs":null` decodes to null glyph. `CollectionFormViewModelTest`: loading seeds the glyph; picking one and saving passes its id to `FakeCollectionsService.update`; removing it passes null; a create passes the picked id.
 
 - [ ] **Step 2:** Run → FAIL.
-- [ ] **Step 3: Implement.** `Collection` gains `val glyph: Glyph? = null` (last parameter, defaulted so existing builders compile); `CollectionRow` gains `@SerialName("glyph_id") val glyphId: String? = null` and `val glyphs: Glyph? = null`, mapped in `toCollection()` (`glyph = glyphs`). The two `CollectionsService` selects become `"id, name, mode, glyph_id, glyphs(id, name, strokes, view_box), pebble_count:collection_pebbles(count)"` (the `ProfileService` carousel select is left alone). The payload builders take `glyphId: String?` and always `put("glyph_id", glyphId)`; `CollectionsServicing.create(name, mode, glyphId)` and `update(collectionId, name, mode, glyphId)` pass it. The `collections_glyph_usable` trigger guards both writes (42501 → `DataError.Unauthorized` → the form's existing save error). `set_collection_glyph` is not called (PD-19).
+- [ ] **Step 3: Implement.** `Collection` gains `val glyph: Glyph? = null` (last parameter, defaulted so existing builders compile); `CollectionRow` gains `@SerialName("glyph_id") val glyphId: String? = null` and `val glyphs: Glyph? = null`, mapped in `toCollection()` (`glyph = glyphs`). The two `CollectionsService` selects become `"id, name, mode, glyph_id, glyphs(id, name, strokes, view_box), pebble_count:collection_pebbles(count)"` (the `ProfileService` carousel select is left alone). The payload builders take `glyphId: String?` and always `put("glyph_id", glyphId)`; `CollectionsServicing.create(name, mode, glyphId)` and `update(collectionId, name, mode, glyphId)` pass it. The `collections_glyph_usable` trigger guards both writes (42501 → `DataError.Unauthorized` → the form's existing save error). `set_collection_glyph` is not called (R11).
 
-`CollectionFormUiState` gains `val glyph: Glyph? = null` (seeded from `original.glyph`); its dirty check includes `glyph?.id != original?.glyph?.id`; `CollectionFormViewModel.onGlyphPicked(glyph: Glyph?)`. `CollectionFormScreen(collectionId, onDismiss, onSaved, glyphPicker: GlyphPickerSlot, …)` adds, below the mode picker, the same glyph section `SoulFormScreen` uses (read `SoulFormScreen.kt` around its `GlyphPickerSheet` call and mirror it): a tappable `GlyphView(case = if (glyph != null) GlyphViewCase.SELECTED else GlyphViewCase.CREATE, strokes = glyph?.strokes, viewBox = glyph?.viewBox ?: "0 0 200 200", side = 72.dp)`, the hint line, a "Remove glyph" `TextButton` when one is set, and `GlyphPickerSheet(currentGlyphId = glyph?.id, onDismiss, onSelected = { viewModel.onGlyphPicked(it) }, picker = glyphPicker)`. The entry provider passes `glyphPicker` to the CollectionForm entry exactly as it does for SoulForm.
+`CollectionFormUiState` gains `val glyph: Glyph? = null` (seeded from `original.glyph`); its dirty check includes `glyph?.id != original?.glyph?.id`; `CollectionFormViewModel.onGlyphPicked(glyph: Glyph?)`. `CollectionFormScreen(collectionId, onDismiss, onSaved, glyphPicker: GlyphPickerSlot, …)` adds, below the mode picker, the same glyph section `SoulFormScreen` uses (read `SoulFormScreen.kt` around its `GlyphPickerSheet` call and mirror it): a tappable `GlyphView(case = if (glyph != null) GlyphViewCase.SELECTED else GlyphViewCase.CREATE, strokes = glyph?.strokes, viewBox = glyph?.viewBox ?: "0 0 200 200", side = 72.dp)`, the footer `collection_glyph_footer`, a `remove_glyph` `TextButton` when one is set, and `GlyphPickerSheet(currentGlyphId = glyph?.id, onDismiss, onSelected = { viewModel.onGlyphPicked(it) }, picker = glyphPicker)`. The entry provider passes `glyphPicker` to the CollectionForm entry exactly as it does for SoulForm.
 
 Strings (EN / FR):
 
 ```xml
 <string name="collection_form_glyph">Glyph</string>
-<string name="collection_form_glyph_hint">Pebbles in this collection wear its glyph.</string>
-<string name="collection_form_glyph_remove">Remove glyph</string>
+<string name="collection_glyph_footer">Pebbles in this collection carry its glyph.</string>
+<string name="remove_glyph">Remove glyph</string>
 ```
 
 ```xml
 <string name="collection_form_glyph">Glyphe</string>
-<string name="collection_form_glyph_hint">Les galets de cette collection portent son glyphe.</string>
-<string name="collection_form_glyph_remove">Retirer le glyphe</string>
+<string name="collection_glyph_footer">Les galets de cette collection portent son glyphe.</string>
+<string name="remove_glyph">Retirer le glyphe</string>
 ```
 
 - [ ] **Step 4:** Run → PASS. Previews in `CollectionsScreenshots.kt`: `CollectionForm_WithGlyph`, `CollectionForm_NoGlyph`. Commit `feat(android): give a collection the glyph its pebbles wear`.
@@ -4756,13 +5243,13 @@ Expected: no hits in code. Comments that still describe removed behaviour are re
 
 ### Task 7.4: Docs, decision log, Arkaik
 
-- [ ] **Step 1:** `apps/android/CLAUDE.md` § "Behavior that mirrors iOS on purpose": replace the "Two composers coexist (M58, #725)" bullet with: "**Capture and Complete (#1048).** New pebble opens Capture (photo · when · name → `save_moment`); Complete (valence · emotion · domain · souls · collection · privacy → `complete_pebble`) opens from the read page of an uncompleted moment or from Capture's \"Make it a pebble now\". Edits go through `EditPebbleScreen` (`save_moment`, then `complete_pebble` when the moment has your pebble). Every flow interaction goes through its state machine, so the haptic-on-every-tap rule stays structural. Spec: `docs/superpowers/specs/2026-10-11-moments-and-pebbles-split-design.md` §6." In § "Three test layers", replace the `FakePathService` example with `FakeMomentReadService`.
-- [ ] **Step 2:** `docs/decisions/log.md`: append one entry (skip it if the iOS stack for #1047 already appended the same one; then append only what differs) titled "2026-10-xx — Mobile composers on the moments split: photo removal rides save_moment, collection glyph is a column write, delete asks pebble-or-moment", recording PD-15, PD-16 and PD-19 with their reasons, so a future agent does not "fix" them back to `delete_moment_media` or `set_collection_glyph`.
+- [ ] **Step 1:** `apps/android/CLAUDE.md` § "Behavior that mirrors iOS on purpose": replace the "Two composers coexist (M58, #725)" bullet with: "**Capture and Complete (#1048).** New pebble opens Capture (photo · when · name → `save_moment`); Complete (valence · emotion · domain · souls · collection · privacy → `complete_pebble`) opens from the read page of an uncompleted moment or from Capture's \"Make it a pebble now\". Editing is two screens with one write each, both from the read page's ⋮ menu: `EditMomentScreen` (`save_moment`) and `EditPebbleScreen` (`complete_pebble`). Every flow interaction goes through its state machine, so the haptic-on-every-tap rule stays structural. Spec: `docs/superpowers/specs/2026-10-11-moments-and-pebbles-split-design.md` §6." In § "Three test layers", replace the `FakePathService` example with `FakeMomentReadService`.
+- [ ] **Step 2:** `docs/decisions/log.md`: append one entry (skip it if the iOS stack for #1047 already appended the same one; then append only what differs) titled "2026-10-xx — Mobile composers on the moments split: photo removal rides save_moment, collection glyph is a column write, delete asks pebble-or-moment", recording R5, R6, R8 and R11 with their reasons, so a future agent does not "fix" them back to one save behind two writes, `delete_moment_media` or `set_collection_glyph`.
 - [ ] **Step 3: Arkaik**, through the `arkaik-mcp` tools only (never `docs/arkaik/bundle.json`; if the tools are unavailable, say so and stop). At Part 1's pick-up, move the acceptances these flows cover to `development` for android (`list_nodes` with `platform: android` and queries "capture", "complete", "moment", then `update_node`). At Part 7:
-  - **Create** (if the iOS stack has not already): `V-moment-capture` "Capture Moment" and `V-pebble-complete` "Complete Pebble", platforms `ios`, `android`, status `development`.
-  - **Update** descriptions: `V-timeline` (Path: blank stones for uncompleted moments), `V-pebble-detail` (moment read page: "Make it a pebble" CTA, pebble-or-moment delete), `V-pebble-edit` (moment and pebble fields, two writers, no glyph), `V-collection-create` and `V-collection-edit` (glyph picker), `V-pebble-visual` (stone composed from shape seed + derived glyph strokes), `V-record-success` (now Complete's success screen).
+  - **Create** (if the iOS stack has not already): `V-moment-capture` "Capture Moment", `V-pebble-complete` "Complete Pebble" and `V-moment-edit` "Edit Moment", platforms `ios`, `android`, status `development`.
+  - **Update** descriptions: `V-timeline` (Path: blank stones for uncompleted moments), `V-pebble-detail` (moment read page: "Make it a pebble" CTA, ⋮ menu with Edit moment, Edit pebble and Delete, pebble-or-moment delete), `V-pebble-edit` (pebble fields only, `complete_pebble` only, no glyph), `V-collection-create` and `V-collection-edit` (glyph picker), `V-pebble-visual` (stone composed from shape seed + derived glyph strokes), `V-record-success` (now Complete's success screen).
   - **Retire for android** per the `arkaik` skill's hosted-map rules: `V-pebble-record` (eleven-step flow), `V-quick-pebble-editor` (long-press composer), `V-pebble-drafts`; `V-glyph-attach` loses its pebble use (description), it stays for souls, profiles and collections.
-  - **Edges:** `V-timeline` → `V-moment-capture`; `V-moment-capture` → `V-pebble-complete`; `V-pebble-detail` → `V-pebble-complete`; `V-moment-capture` → `API-rpc-save-moment`; `V-pebble-complete` → `API-rpc-complete-pebble`; `V-pebble-detail` → `API-rpc-delete-moment`, `DM-v-moments-full`; `V-timeline` → `API-rpc-path-moments`.
+  - **Edges:** `V-timeline` → `V-moment-capture`; `V-moment-capture` → `V-pebble-complete`; `V-pebble-detail` → `V-pebble-complete`; `V-pebble-detail` → `V-moment-edit`; `V-moment-edit` → `API-rpc-save-moment`; `V-moment-capture` → `API-rpc-save-moment`; `V-pebble-complete` → `API-rpc-complete-pebble`; `V-pebble-detail` → `API-rpc-delete-moment`, `DM-v-moments-full`; `V-timeline` → `API-rpc-path-moments`.
   - Never set `live`: the GitHub App moves to `releasing` at merge.
 - [ ] **Step 4:** Commit `docs(android): describe Capture and Complete`. PR body `Resolves #1048`, labels per the PR checklist, `rebaseline-screenshots`.
 
@@ -4772,36 +5259,109 @@ Expected: no hits in code. Comments that still describe removed behaviour are re
 
 ## Parity decisions
 
-Every choice the iOS plan for #1047 must match. "Copy" gives EN / FR; Android keys in `code`.
+The controller's reconciliation of this plan with the iOS plan for #1047 (`R1`–`R13`, pasted verbatim) wins over everything else in this file. The `A-` lines below are the Android-side decisions that remain, all consistent with R1–R13; the iOS plan already agrees with them (the reconciliation lists them as aligned) unless a line says "Android only".
 
-- **PD-1 Step order.** Capture: photo → when → name. Complete: valence → emotion → domain → souls → collection → privacy → success. The progress indicator counts 3 and 6 steps; success is uncounted, has no back and no close.
-- **PD-2 How each step advances.** Photo: Skip / Done text button, never auto-advances on pick (upload state stays visible). When: Continue, pre-filled from the photo's EXIF capture date or now, "Taken from your photo" note when seeded. Name: primary "Save the moment" plus a text button "Make it a pebble now"; both enabled when the trimmed name is non-empty **or** an uploaded photo is attached; the name is clamped to 40 characters client-side. Valence: arrives seeded at neutral-medium, a pick commits in place, Continue advances. Emotion, domain, collection: a tap commits and advances. Souls: multi-select, Skip / Done. Privacy: a tap selects (default secret); the primary "Make it a pebble" calls `complete_pebble`. One haptic per interaction: selection on picks, advance on step changes, warning on a blocked advance or failure, success on a saved moment and on a completed pebble.
-- **PD-3 Capture save.** `save_moment` with `name` (trimmed, key omitted when blank), `happened_at`, and `snaps: [{id, storage_path, sort_order: 0}]` only when a photo is uploaded. Then a success haptic and back to Path, with no success screen, no karma, no `check_achievements`. "Make it a pebble now" performs the same save, then replaces Capture with Complete for the returned moment id.
-- **PD-4 Capture close.** ✕, or back on the photo step, asks "Discard this moment?" / "Abandonner ce moment ?" with "Discard" / "Abandonner" and "Keep going" / "Continuer l'édition" only when a name is typed or a photo is attached; Discard deletes the uploaded photo files. With nothing entered it closes silently. There is no drafts list and no "save as draft".
-- **PD-5 Save failures keep uploads.** A failed `save_moment` (Capture or edit) keeps the user on the step with the mapped error and does not delete the uploaded photo files, so a retry still references them; leaving (discard/cancel) is the cleanup, the orphan sweep the backstop. This departs from the old composer's delete-on-failure on purpose.
-- **PD-6 Complete close.** ✕ closes at once, without a dialog; back on the valence step does the same. The answers stay in the per-moment autosave.
-- **PD-7 Autosave.** Device-local, one entry per moment, key `completeSnapshot.<moment id lowercased>`, holding valence (intensity + positiveness), emotion id, domain id, soul ids, collection id, visibility, stamped with the owner's user id and restored only for that user. Debounced 800 ms, flushed on ✕. Restored silently (no prompt) when Complete opens for that moment, landing on the first unanswered of valence/emotion/domain, else privacy. Souls and collections that no longer exist are dropped, but only once reference data has loaded. A seeded valence and the default grade alone are not input and are not saved. Cleared on a successful completion, on `delete_moment` of that moment, and every entry on sign-out. Capture has no autosave; only process-death state (step, name, date) is kept.
-- **PD-8 Completion payload.** `complete_pebble` always sends every key: `moment_id`, `emotion_id`, `intensity`, `positiveness`, `visibility`, `domain_ids` (exactly one), `soul_ids`, `collection_ids` (zero or one). Never `new_souls`, `new_collections` or `cards` (souls are still created inline before completion; omitting `cards` keeps existing cards).
-- **PD-9 After `complete_pebble` succeeds**, in order: clear the autosave; read karma (newest `karma_events` row for `ref_id` = pebble id and `reason` = `pebble_created`; null on absence or error) and `resolve_pebble_glyph(pebble id)` in parallel, each best-effort; notify karma without the capsule; call `check_achievements` exactly once (its unlock overlay may present over the success screen); show the success screen. On an edit that has a pebble: the same read with `pebble_enriched`, the karma capsule shown, `check_achievements` once after both writes. A bare-moment edit and a Capture save never call it.
-- **PD-10 Success screen.** The stone with the derived glyph (or the bare stone when none resolves), the moment's name ("Untitled moment" when null), "+N karma" only when N > 0, and "Back to my path" / "Retour à mon chemin". Android's stone is static (no draw-on exists on Android today); iOS keeps its draw-on.
-- **PD-11 Blank stone.** An uncompleted moment is the medium-neutral silhouette with its shape strokes and no glyph, coloured with theme roles (fill = surface-variant, stroke = outline), never an emotion palette. Accessibility label "Not a pebble yet" / "Pas encore un galet". On Path its photo shows exactly as on a completed row; the row uses intensity-2 metrics and a meta line of weekday · time only.
-- **PD-12 Untitled.** A null moment name shows "Untitled moment" / "Moment sans nom" (`moment_untitled`) everywhere a name is shown: Path row, soul/collection rows, read page title, delete dialog, success screen.
-- **PD-13 Bare-moment read page.** Blank stone heading (or the photo frame with the blank stone over it), title, date, description if any, and one primary button "Make it a pebble" / "En faire un galet" (`moment_make_pebble`) under the title that opens Complete. No emotion/domain/collection tiles, no souls, no privacy badge, no share. Edit stays (moment fields only).
-- **PD-14 Edit.** One edit screen. The moment section (photo, when, name, description) always shows; the pebble section (emotion, domain, valence, souls, collection, privacy) only when the moment has your pebble; there is no glyph row. Save = `save_moment` with every moment key (`id`, trimmed `name`, trimmed `description`, `happened_at`, the whole `snaps` set: the existing photo echoed, a new upload as its pair, `[]` when removed; `""` clears a text field), then, if a pebble exists, `complete_pebble` with every key (PD-8). Save is enabled when the name is non-blank or a photo is attached, and the pebble answers are complete when a pebble exists. If the moment saves and the pebble write fails, the pebble error shows and a retry resends both.
-- **PD-15 Photo removal.** Removing a saved photo only detaches it in the form; it is removed by the edit's `save_moment` (whole-set `snaps`), which is also where `moment_empty` is enforced. After a successful save the client deletes the old files best-effort. Neither app calls `delete_moment_media`.
-- **PD-16 Delete.** Entry points: long-press on a Path row, long-press on a soul or collection detail row, and a trash button in the read page's top bar (before Edit). A moment without your pebble: "Delete <name>?" / "Supprimer <name> ?", "This can't be undone." / existing FR, actions Delete / Cancel → `delete_moment`. A moment with your pebble: same title, message "Deleting the moment also deletes its pebble and its photo." / "Supprimer le moment supprime aussi son galet et sa photo.", actions "Delete the pebble, keep the moment" / "Supprimer le galet, garder le moment" → `delete_pebble(pebble id)`, "Delete the moment" / "Supprimer le moment" → `delete_moment(moment id)`, and Cancel. After `delete_moment` the client deletes the returned storage paths best-effort and the read page closes; after `delete_pebble` the read page reloads as a bare moment and soul/collection lists drop the row.
-- **PD-17 Share.** Offered only when your pebble is public; the URL is `https://www.pbbls.app/p/<pebble id>`, never the moment id.
-- **PD-18 Error slug → message.** `moment_empty` → "A moment needs a name or a photo." / "Un moment a besoin d'un nom ou d'une photo."; `moment_not_found` (P0002) → "This moment no longer exists." / "Ce moment n'existe plus."; `soul_not_owned`, `collection_not_owned` (42501) → "A soul or collection you picked no longer exists." / "Une âme ou une collection choisie n'existe plus."; `media_quota_exceeded` → existing "Photo limit reached on this pebble."; `not_authenticated` / 401 / other 42501 → existing "You must be signed in to save."; photo still uploading / failed → existing copy, checked before any call; everything else (`pebble_needs_*`, `invalid_payload`, `invalid_snap`, network) → "Couldn't save this moment. Please try again." / "Impossible d'enregistrer ce moment. Réessaie." for `save_moment`, existing "Couldn't save your pebble. Please try again." for `complete_pebble`; delete failures → existing "Something went wrong. Please try again."
-- **PD-19 Collection glyph.** The collection create and edit forms gain an optional glyph (the shared glyph picker: own ∪ system ∪ entitled) with "Remove glyph"; it is written as `glyph_id` in the same insert/update as name and mode (explicit null clears), atomically, behind the usability trigger. `set_collection_glyph` is not called. Copy: "Glyph" / "Glyphe", "Pebbles in this collection wear its glyph." / "Les galets de cette collection portent son glyphe.", "Remove glyph" / "Retirer le glyphe".
-- **PD-20 Glyph rendering.** The stone = silhouette backdrop + the shape seed's strokes (`docs/seeds/shape-seeds/`) + the derived glyph's strokes, with the glyph's `view_box` fitted into the deleted engine's slot (`translate(slot) · scale(min(slot/w, slot/h)) · translate(-minX, -minY)`; slots: small 140 at (37.5,30)/(25,30)/(30,30), medium 150 at (26,84)/(26,55)/(39,26), large 160 at (50,75)/(26,88)/(26,75) for highlight/neutral/lowlight), every stroke at the outline weight. No bounding-box normalization. A null glyph draws the stone without one.
-- **PD-21 No glyph on pebbles anywhere in the UI.** No glyph step, no glyph row in the edit form, no "use on pebble" affordance. (Android's glyph library never had a pebble tab.)
-- **PD-22 Retired.** The eleven-step flow, the all-at-once long-press composer, the drafts list and server drafts are removed. "New pebble" opens Capture; there is no long-press.
-- **PD-23 Path "active today"** counts a completed moment created today.
-- **PD-24 Navigation.** Capture and Complete are full-screen modals. Saving a capture returns to Path without opening the read page. Complete's exit returns to whatever opened it (read page, or Path after a Capture chain).
-- **PD-25 Soul and collection lists** show only moments carrying your pebble tagged with that soul/collection, read from `v_moments_full` by jsonb containment on `pebble`, newest `happened_at` first. Tapping opens the edit form, as today.
-- **PD-26 Read-page souls.** `v_moments_full` gives `{id, name}`; each soul's glyph comes from the client's souls cache, and a soul missing from it shows its name without a glyph.
-- **PD-27 Wire nulls.** Absent optional keys are omitted, never sent as JSON null; `""` clears a text field on edit.
-- **PD-28 Timestamps.** Emitted as `yyyy-MM-ddTHH:mm:ssZ` in UTC (whole seconds); decoded tolerantly (`Z`, `+00:00`, any fraction).
+### Reconciled (R1–R13, verbatim)
+
+R1. **Capture name step copy.** Primary "Save moment" / "Garder le moment"
+    (`capture_save`). Secondary "Make it a pebble now" / "En faire un galet
+    maintenant" (`capture_make_pebble_now`). Subtitle "A name, a photo, or both." /
+    "Un nom, une photo, ou les deux." (`capture_name_subtitle`).
+
+R2. **Capture close.** ✕ (and Android back on the photo step) with nothing
+    entered closes silently. Otherwise one dialog: title "Keep this moment?" /
+    "Tu gardes ce moment ?" (`capture_close_title`), actions **Save moment** (only
+    when savable and the photo is not uploading/failed), **Discard** (destructive,
+    deletes the uploaded photo files), **Keep going**. (iOS P1 wins.)
+
+R3. **Untitled.** "Untitled" / "Sans titre" (`moment_untitled`), rendered italic
+    in the secondary text colour, everywhere a null name shows: Path row,
+    soul/collection rows, read page title, delete dialog, success screen.
+
+R4. **Blank stone.** Medium size, neutral silhouette, outline stroke only:
+    nothing carved inside (no glyph, no veins, no fossil, no shape detail strokes).
+    Colours fixed, not theme roles: the web `BLANK_PALETTE` ramp (primary
+    `#868686`, secondary `#B9B9B9`, light `#F3F3F3`, shaded `#5E5E5E`, dark
+    `#1B1B1B`, surface `#8686861A`). Accessibility label "Not a pebble yet" /
+    "Pas encore un galet". The photo shows as on a completed row. Android Path row:
+    intensity-2 metrics, meta line weekday · time (iOS matches).
+
+R5. **Editing is two screens, one write each.** **Edit moment** (when, name
+    clamped to 40, description, photo) → `save_moment` only. **Edit pebble**
+    (emotion, domain, valence, souls, collection, privacy) → `complete_pebble` only.
+    Never two writes behind one Save. (iOS P9 wins over Android PD-14.)
+
+R6. **Photo removal goes through `save_moment`.** In Edit moment, removing the
+    photo detaches it in the form; Save sends the whole `snaps` set (`[]` when
+    removed), so the server enforces "a name or a photo" (`moment_empty`) in the
+    same write. Old files are deleted best-effort after a successful save. Neither
+    app calls `delete_moment_media`. Save is enabled when the trimmed name is
+    non-empty or a photo is attached; hint `edit_moment_needs_content` "A moment
+    needs a name or a photo." / "Un moment a besoin d'un nom ou d'une photo."
+    (Android PD-15 wins over iOS's eager delete.)
+
+R7. **Read page actions.** A toolbar overflow menu on both (iOS `…`, Android ⋮):
+    **Edit moment**, **Edit pebble** (only when your pebble exists), **Delete**.
+    No standalone trash button. Share stays as today, public pebbles only, URL with
+    the pebble id.
+
+R8. **Delete dialog.** Bare moment: title "Delete this moment?" / "Supprimer ce
+    moment ?", message "This can't be undone.", action **Delete moment** →
+    `delete_moment`. Moment with your pebble: title "Delete this pebble?" /
+    "Supprimer ce galet ?", message `delete_pebble_message` (iOS text), actions
+    **Delete the pebble, keep the moment** → `delete_pebble` and **Delete the
+    moment too** → `delete_moment`, plus Cancel. Entry points: Path row long-press,
+    soul/collection detail row long-press, read page overflow **Delete**. After
+    `delete_moment`: remove returned storage paths best-effort, close the read page;
+    after `delete_pebble`: the read page stays as a bare moment, lists drop the row.
+    (iOS P5 copy wins.)
+
+R9. **Soul and collection detail rows open the moment read page** (iOS P11), not
+    the edit form. Which query feeds the list is each platform's choice; the
+    behaviour is: moments carrying your pebble tagged with that soul/collection,
+    newest `happened_at` first, drawn like Path rows.
+
+R10. **Error copy** is iOS P3's table, verbatim (EN/FR per slug, generic
+    "Couldn't save. Please try again." / "Impossible d'enregistrer. Réessaie."
+    for everything else). Android maps P0002 → `moment_not_found`. Existing
+    image-pipeline and sign-in copy is kept. Delete failures keep "Couldn't delete".
+
+R11. **Collection glyph.** Edit **and** create forms get the glyph row (shared
+    picker, **Remove glyph**), written as `glyph_id` in the same insert/update as
+    name and mode; `set_collection_glyph` is not called. Footer "Pebbles in this
+    collection carry its glyph." / "Les galets de cette collection portent son
+    glyphe." (Android PD-19 scope, iOS P10 copy.)
+
+R12. **Success screen.** Name or "Untitled", stone with the derived glyph (bare
+    stone when none), "+N karma" only when N > 0, "Back to my path". iOS keeps its
+    draw-on; Android is static (accepted capability gap, not a parity bug).
+
+R13. **Karma read after a write.** Either method is fine (iOS sum-after minus
+    sum-before; Android newest event row for the reason), as long as the shown N is
+    the delta of that write and absence/error shows nothing.
+
+How this plan implements them: R1/R2 in Part 6 (`CaptureFlowViewModel.onCloseRequested`, `closeOffersSave`, `onSaveFromClose`); R3 through `core/ui/MomentNameText.kt` (Part 2) and `RecordSuccessStep` (Part 5); R4 through `BlankPalette` + `StoneComposer.outlineOnly` + `BlankStone` (Part 3) on Path rows and the read page (Part 4); R5/R6 as `EditMomentScreen` and `EditPebbleScreen` (Part 2); R7 as the ⋮ menu (Part 2, Delete added in Part 4); R8 as `MomentDeleteDialog` (Part 4); R9 in Task 2.3; R10 as `momentWriteErrorRes` (Task 1.6), with Android's existing delete-failure dialog (`pebble_delete_error`) kept; R11 in Task 7.1; R12 in Part 5; R13 as `MomentWriteService.karmaDelta` (Task 1.8).
+
+### Android-side decisions consistent with R1–R13
+
+- **A-1 Step order and advancing.** Capture: photo → when → name (3 progress steps, no success screen). Complete: valence → emotion → domain → souls → collection → privacy (6 progress steps) → success (uncounted, no back, no close). Photo: Skip / Done, never auto-advances on pick. When: Continue, EXIF-seeded or now, "Taken from your photo" when seeded. Name: clamped to 40 characters; R1's buttons, enabled when the trimmed name is non-empty or an uploaded photo is attached. Valence: seeded at neutral-medium, commits in place, Continue advances. Emotion, domain, collection: a tap commits and advances. Souls: multi-select, Skip / Done. Privacy: a tap selects (default secret); "Make it a pebble" / "En faire un galet" (`complete_cta`) calls `complete_pebble`. One haptic per interaction: selection on picks, advance on step changes, warning on a blocked advance or failure, success on a saved moment and a completed pebble.
+- **A-2 Capture save.** `save_moment` with `name` (trimmed, omitted when blank), `happened_at`, and `snaps: [{id, storage_path, sort_order: 0}]` only with an uploaded photo; then back to Path with no karma and no `check_achievements`. "Make it a pebble now" performs the same save, then replaces Capture with Complete for the returned moment id.
+- **A-3 Failed saves keep uploads.** A failed `save_moment` (Capture or Edit moment) stays on the step with the R10 copy and does not delete the uploaded photo files; discard/cancel is the cleanup, the orphan sweep the backstop.
+- **A-4 Complete close.** ✕ closes at once without a dialog, and so does back on the valence step; the answers stay in the per-moment autosave.
+- **A-5 Autosave.** Per moment, device-local, debounced 800 ms, flushed on ✕, owner-stamped, restored silently on entering Complete for that moment at the first unanswered of valence/emotion/domain (else privacy), souls and collections that no longer exist dropped once reference data has loaded; a seeded valence and the default grade alone are not input. Cleared on completion, on `delete_moment` of that moment, and every entry on sign-out. Capture has no autosave (process-death state only: step, name, date). Android only: stored in `pebbles_prefs` under `completeSnapshot.<moment id lowercased>` (the storage format is platform-native).
+- **A-6 Completion payload.** `complete_pebble` always sends `moment_id`, `emotion_id`, `intensity`, `positiveness`, `visibility`, `domain_ids` (exactly one), `soul_ids`, `collection_ids` (zero or one); never `new_souls`, `new_collections` or `cards`. Edit pebble keeps the first domain and collection of a pebble that has several, as before the split.
+- **A-7 After a successful `complete_pebble`.** Complete: clear the autosave; read karma (R13, reason `pebble_created`) and `resolve_pebble_glyph(pebble id)` in parallel, best-effort; notify karma without the capsule; call `check_achievements` once; show the success screen (R12). Edit pebble: karma read with `pebble_enriched`, capsule shown, `check_achievements` once. `save_moment` (Capture, Edit moment) and deletes never call it.
+- **A-8 Bare-moment read page.** Blank stone heading (or the photo frame with the blank stone over it), title (R3), date, description if any, one full-width "Make it a pebble" (`complete_cta`) under the title opening Complete; no emotion/domain/collection tiles, no souls, no privacy badge, no share; ⋮ menu with Edit moment and Delete (R7).
+- **A-9 Share.** Public pebbles only; `https://www.pbbls.app/p/<pebble id>`, never the moment id.
+- **A-10 Glyph rendering.** Stone = silhouette backdrop + the shape seed's strokes (`docs/seeds/shape-seeds/`) + the derived glyph's strokes, the glyph's `view_box` fitted into the deleted engine's slot (`translate(slot) · scale(min(slot/w, slot/h)) · translate(-minX, -minY)`; slots small 140 at (37.5,30)/(25,30)/(30,30), medium 150 at (26,84)/(26,55)/(39,26), large 160 at (50,75)/(26,88)/(26,75) for highlight/neutral/lowlight), every stroke at the outline weight, no bounding-box normalization. A null glyph draws the stone without one. Android only (iOS draws its lit stone).
+- **A-11 No glyph on pebbles anywhere in the UI**: no glyph step, no glyph row in Edit pebble, no "use on pebble" affordance (Android's glyph library never had a pebble tab).
+- **A-12 Retired.** The eleven-step flow, the long-press all-at-once composer, the drafts list and server drafts. "New pebble" opens Capture; no long-press.
+- **A-13 Path "active today"** counts a completed moment created today.
+- **A-14 Navigation.** Capture, Complete, Edit moment and Edit pebble are full-screen modals. Saving a capture returns to Path without opening the read page; Complete's exit returns to whatever opened it (the read page, or Path after a Capture chain). Android only and not reconciled: iOS P12 also focuses the Path on the moment's week after a capture or completion; Android keeps its current focus (flagged to the controller).
+- **A-15 Read-page souls.** `v_moments_full` gives `{id, name}`; glyphs come from the souls cache; an unknown soul shows its name with an empty glyph.
+- **A-16 Wire nulls.** Absent optional keys are omitted, never JSON null; `""` clears a text field in Edit moment; UUIDs lowercase.
+- **A-17 Timestamps.** Emitted as `yyyy-MM-ddTHH:mm:ssZ` in UTC (whole seconds); decoded tolerantly (`Z`, `+00:00`, any fraction).
+- **A-18 Soul and collection list query (R9 leaves it to each platform).** Android reads `v_moments_full` filtered by jsonb containment on `pebble` (`{"souls":[{"id":…}]}` / `{"collections":[{"id":…}]}`), newest `happened_at` first.
 
 ---
 
@@ -4815,6 +5375,7 @@ Every choice the iOS plan for #1047 must match. "Copy" gives EN / FR; Android ke
 ## Self-review against the brief
 
 - Every Supabase touchpoint is in §1 (32 changing, 26 unchanged, 8 new); every pebble-rendering composable is in §1d.
+- R1–R13 are implemented where the Parity decisions section says; no screen issues two writes behind one Save (R5): Edit moment calls only `save_moment`, Edit pebble only `complete_pebble`.
 - Part order is dependency order; each part names its gate and builds alone: Part 1 is additive; Part 2 swaps every reader before deleting the old ones; Part 3 changes only rendering; Part 4 only Path/read page/delete; Part 5 adds Complete before Part 6 needs it; Part 7 only removes and adds the collection glyph.
 - Shared shapes are tested against verbatim `path_moments` / `v_moments_full` / RPC payloads with explicit nulls, a photo-only moment, a null pebble, a connection's moment, and whole-second, fractional and `Z` timestamps (Tasks 1.2–1.4, 1.8).
-- Types introduced before use: `PathMoment`, `MomentDetail`, `PebbleGlyph`, `PebbleAnswers`, payloads, both seams and fakes (Part 1); `MomentDeleteChoice` (Part 4); `CompleteSnapshot`, `CompleteSnapshotStoring`, `PebblesKey.CompletePebble` (Part 5) before Capture uses `CompletePebble` (Part 6); `KnownDraftIds` moved in Part 5 before `PebbleDraftPayload` is deleted in Part 7.
+- Types introduced before use: `PathMoment`, `MomentDetail`, `PebbleGlyph`, `PebbleAnswers`, payloads, `momentWriteErrorRes`, both seams and fakes (Part 1); `MomentNameText`, `PebblesKey.EditMoment`, `EditMomentViewModel`/`EditMomentScreen`, `EditTopBar`, `ic_more_vert` (Part 2); `BlankPalette`, `StoneComposer.outlineOnly`, `BlankStone` (Part 3) before Part 4 draws them; `MomentDeleteChoice`, `MomentDeleteDialog` (Part 4); `CompleteSnapshot`, `CompleteSnapshotStoring`, `PebblesKey.CompletePebble` (Part 5) before Capture uses `CompletePebble` (Part 6); `KnownDraftIds` moved in Part 5 before `PebbleDraftPayload` is deleted in Part 7.
