@@ -4,8 +4,9 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * One snap link in an update payload — `{id, storage_path, sort_order}`.
- * Mirrors the nested `SnapPayload` in iOS `PebbleUpdatePayload.swift`.
+ * One snap link in a write payload — `{id, storage_path, sort_order}`, which is
+ * exactly `save_moment`'s `snaps[]` element. Mirrors the nested `SnapPayload`
+ * in iOS `PebbleUpdatePayload.swift`.
  */
 @Serializable
 data class PebbleSnapPayload(

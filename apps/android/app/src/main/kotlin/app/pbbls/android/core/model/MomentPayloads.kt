@@ -10,8 +10,14 @@ import java.time.OffsetDateTime
  * sent as JSON null (A-16): the RPCs read null as absent anyway
  * (`private.jsonb_has`), and leaving them out matches what Swift's synthesized
  * encoder sends, so the two surfaces put identical bytes on the wire.
+ * Non-null defaults are always encoded, so a key that equals its default
+ * still reaches the server.
  */
-internal val MomentWireJson = Json { explicitNulls = false }
+internal val MomentWireJson =
+    Json {
+        explicitNulls = false
+        encodeDefaults = true
+    }
 
 /** `save_moment(payload)`: create without [id], update your own with it. */
 @Serializable
