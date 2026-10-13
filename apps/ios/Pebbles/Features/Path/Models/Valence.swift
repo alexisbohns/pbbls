@@ -1,5 +1,6 @@
 import Foundation
 import CoreGraphics
+import os
 
 /// The 9-option valence picker shown in the create-pebble form.
 /// Maps to the `pebbles.positiveness` and `pebbles.intensity` columns on save.
@@ -230,5 +231,21 @@ extension Valence {
     var polarityAfter: ValencePolarity? {
         polarityIndex < ValencePolarity.allCases.count - 1
             ? ValencePolarity.allCases[polarityIndex + 1] : nil
+    }
+}
+
+extension Valence {
+    /// `from(positiveness:intensity:)` for read paths that must render
+    /// something: logs and falls back to `.neutralMedium` on a pair the DB
+    /// CHECKs forbid (reachable only through decode drift).
+    static func resolved(positiveness: Int, intensity: Int) -> Valence {
+        if let valence = from(positiveness: positiveness, intensity: intensity) { return valence }
+        Logger(subsystem: "app.pbbls.ios", category: "valence").error(
+            """
+            unexpected (positiveness, intensity) pair: \
+            (\(positiveness, privacy: .public), \(intensity, privacy: .public)) — neutralMedium
+            """
+        )
+        return .neutralMedium
     }
 }
