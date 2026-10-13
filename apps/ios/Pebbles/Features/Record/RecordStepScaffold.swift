@@ -2,8 +2,8 @@ import SwiftUI
 
 /// The single action a step may offer beneath its content.
 ///
-/// Top-level rather than nested inside the generic scaffold: `RecordFlowView`
-/// builds these in a `switch` that never names a `Content` type, and
+/// Top-level rather than nested inside the generic scaffold: the Capture and
+/// Complete flows build these in a `switch` that never names a `Content` type, and
 /// `RecordStepScaffold<AnyView>.Action` would be a placeholder standing in for
 /// nothing.
 enum RecordStepAction {

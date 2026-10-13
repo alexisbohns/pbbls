@@ -14,7 +14,6 @@ struct PathView: View {
     @Environment(SupabaseService.self) private var supabase
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(PathStatsService.self) private var stats
-    @Environment(PebbleDraftsService.self) private var draftsService
     @Environment(CompleteDraftStore.self) private var completeDrafts
 
     @State private var moments: [MomentSummary] = []
@@ -23,7 +22,6 @@ struct PathView: View {
     @State private var navPath = NavigationPath()
     /// The Capture flow — what `+` opens.
     @State private var isPresentingCapture = false
-    @State private var isPresentingDrafts = false
     @State private var selectedMomentId: UUID?
     @State private var pendingDeletion: MomentDeleteTarget?
     /// The latest reload Capture asked for. Capture can fire twice (after the
@@ -71,7 +69,6 @@ struct PathView: View {
             onFirstLoad()
         }
         .task { await stats.load() }
-        .task { await draftsService.refreshCount() }
         .fullScreenCover(isPresented: $isPresentingCapture) {
             // Fired after the save and again after a chained completion (A5).
             CaptureFlowView(onMomentChanged: { momentId in
@@ -83,20 +80,6 @@ struct PathView: View {
                     await load()
                     guard !Task.isCancelled else { return }
                     focusWeek(containing: momentId)
-                }
-            })
-        }
-        .sheet(isPresented: $isPresentingDrafts) {
-            DraftsListSheet(onPebbleCreated: { newPebbleId in
-                Task {
-                    async let statsReload: Void = stats.refresh()
-                    await load()
-                    if let match = MomentSummary.first(in: moments, matching: newPebbleId) {
-                        selectedMomentId = match.id
-                    } else {
-                        logger.notice("created pebble \(newPebbleId, privacy: .public) is not on the reloaded path")
-                    }
-                    await statsReload
                 }
             })
         }
@@ -168,21 +151,6 @@ struct PathView: View {
             }
             .safeAreaInset(edge: .bottom) {
                 VStack(spacing: 12) {
-                    if draftsService.count > 0 {
-                        Button {
-                            isPresentingDrafts = true
-                        } label: {
-                            Label {
-                                // Count is verbatim so this needs no plural
-                                // entry in the catalog.
-                                Text("Drafts") + Text(verbatim: " (\(draftsService.count))")
-                            } icon: {
-                                Image(systemName: "square.dashed")
-                            }
-                            .font(.footnote)
-                            .foregroundStyle(.secondary)
-                        }
-                    }
                     NewPebbleButton(onTap: { isPresentingCapture = true })
                     PathBottomBar(
                         karma: stats.karma,
@@ -196,16 +164,16 @@ struct PathView: View {
         }
     }
 
-    /// Focus the week the new pebble landed in, so exiting the flow puts the
-    /// user where their pebble is rather than wherever they happened to be.
+    /// Focus the week the moment landed in, so exiting the flow puts the
+    /// user where their moment is rather than wherever they happened to be.
     ///
-    /// Asks which entry actually holds the pebble rather than recomputing its
+    /// Asks which entry actually holds the moment rather than recomputing its
     /// week: `WeekRollBuilder` owns the bucketing, and a second implementation
     /// here could disagree with it. Silent no-op if the reload has not yet
-    /// surfaced the pebble. `id` may be a moment id or a pebble id.
-    private func focusWeek(containing id: UUID) {
+    /// surfaced the moment.
+    private func focusWeek(containing momentId: UUID) {
         guard let entry = entries.first(where: { entry in
-            entry.moments.contains { $0.matches(id) }
+            entry.moments.contains { $0.id == momentId }
         }) else { return }
         focusedWeekStart = entry.weekStart
     }

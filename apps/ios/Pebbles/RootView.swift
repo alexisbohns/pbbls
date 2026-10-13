@@ -21,8 +21,6 @@ struct RootView: View {
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(ReferenceDataService.self) private var refs
     @Environment(PathStatsService.self) private var stats
-    @Environment(PebbleDraftsService.self) private var drafts
-    @Environment(ComposerSnapshotStore.self) private var snapshots
     @Environment(CompleteDraftStore.self) private var completeDrafts
     @Environment(SnapURLCache.self) private var snapURLs
     @Environment(ConnectionsService.self) private var connections
@@ -180,11 +178,9 @@ struct RootView: View {
         .onChange(of: isResolvedSignedOut) { _, signedOut in
             guard signedOut else { return }
             SignedOutPurge(
-                snapshots: snapshots,
                 completeDrafts: completeDrafts,
                 refs: refs,
                 stats: stats,
-                drafts: drafts,
                 snapURLs: snapURLs,
                 urlCache: .shared
             ).run()
@@ -199,8 +195,6 @@ struct RootView: View {
         .environment(EmotionPaletteService(client: supabase.client))
         .environment(ReferenceDataService(client: supabase.client))
         .environment(PathStatsService(supabase: supabase))
-        .environment(PebbleDraftsService(client: supabase.client))
-        .environment(ComposerSnapshotStore())
         .environment(CompleteDraftStore())
         .environment(SnapURLCache(client: supabase.client))
         .environment(KarmaNotificationService())

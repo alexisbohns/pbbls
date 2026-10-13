@@ -11,8 +11,6 @@ struct SignedOutPurgeTests {
 
     private struct Fixture {
         let purge: SignedOutPurge
-        let snapshots: ComposerSnapshotStore
-        let snapshotURL: URL
         let completeDrafts: CompleteDraftStore
         let completeDraftsDirectory: URL
         let refs: ReferenceDataService
@@ -24,9 +22,6 @@ struct SignedOutPurgeTests {
 
     private func makeFixture() -> Fixture {
         let supabase = SupabaseService()
-        let snapshotURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("signed-out-purge-test-\(UUID().uuidString).json")
-        let snapshots = ComposerSnapshotStore(fileURL: snapshotURL)
         let completeDraftsDirectory = FileManager.default.temporaryDirectory
             .appendingPathComponent("signed-out-purge-drafts-\(UUID().uuidString)")
         let completeDrafts = CompleteDraftStore(directory: completeDraftsDirectory)
@@ -35,33 +30,17 @@ struct SignedOutPurgeTests {
         // Memory-only, so the test never touches the app's real disk cache.
         let urlCache = URLCache(memoryCapacity: 1_000_000, diskCapacity: 0)
         let purge = SignedOutPurge(
-            snapshots: snapshots,
             completeDrafts: completeDrafts,
             refs: refs,
             stats: stats,
-            drafts: PebbleDraftsService(client: supabase.client),
             snapURLs: SnapURLCache(provider: FakeSignedURLProvider(), now: { Date() }),
             urlCache: urlCache
         )
         return Fixture(
-            purge: purge, snapshots: snapshots, snapshotURL: snapshotURL,
+            purge: purge,
             completeDrafts: completeDrafts, completeDraftsDirectory: completeDraftsDirectory,
             refs: refs, stats: stats, urlCache: urlCache
         )
-    }
-
-    @Test("The composer snapshot is deleted from disk")
-    func clearsSnapshot() {
-        let fixture = makeFixture()
-        defer { try? FileManager.default.removeItem(at: fixture.snapshotURL) }
-        var draft = PebbleDraft()
-        draft.name = "A hard conversation with my sister"
-        fixture.snapshots.save(PebbleDraftPayload(from: draft, formSnap: nil, userId: nil), ownerId: owner)
-
-        fixture.purge.run()
-
-        #expect(!FileManager.default.fileExists(atPath: fixture.snapshotURL.path))
-        #expect(fixture.snapshots.load(ownerId: owner) == nil)
     }
 
     @Test("Half-finished Complete flows are deleted from disk")

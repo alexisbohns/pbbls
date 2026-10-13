@@ -4,11 +4,11 @@ import SwiftUI
 import os
 
 /// Single source of truth for the snap (photo) attached to an in-progress
-/// pebble form. Owns `formSnap` (the form-layer state), `processedForRetry`
+/// moment form. Owns `formSnap` (the form-layer state), `processedForRetry`
 /// (re-encoded bytes kept around for a user-tapped retry), and every
 /// transition: pick → upload → retry → cancel → remove.
 ///
-/// Both `CreatePebbleSheet` and `EditPebbleSheet` hold one of these and
+/// `CaptureFlowView` and `EditMomentSheet` each hold one of these and
 /// delegate. All Storage side-effects are explicitly awaited — there is no
 /// sleep-based race in `cancelAndCleanup`.
 @MainActor
@@ -75,15 +75,6 @@ final class SnapUploadCoordinator {
     /// snap is mid-upload, or it failed and needs user action.
     var isBlocking: Bool { isUploading || hasFailed }
 
-    /// Returns the pending `AttachedSnap` only when it has fully uploaded —
-    /// suitable for embedding in a save payload. Returns `nil` for `.none`,
-    /// `.existing` (those are encoded directly from `formSnap`), or any
-    /// in-flight/failed `.pending` state.
-    func pendingSnapForPayload() -> AttachedSnap? {
-        if case .pending(let snap) = formSnap, snap.state == .uploaded { return snap }
-        return nil
-    }
-
     // MARK: - Init
 
     private let repo: PebbleSnapRepositoryProtocol
@@ -100,9 +91,8 @@ final class SnapUploadCoordinator {
         self.retryDelay = retryDelay
     }
 
-    /// Set the initial snap *after* construction. Used by `EditPebbleSheet`
-    /// which has to wait for `load()` to finish before it knows whether the
-    /// pebble has an existing snap.
+    /// Set the initial snap *after* construction, for a form that learns its
+    /// saved photo only once it has loaded.
     func seedExisting(_ snap: FormSnap?) {
         self.formSnap = snap
     }
@@ -119,8 +109,8 @@ final class SnapUploadCoordinator {
 
     // MARK: - User-driven transitions
 
-    /// A pick from the sheet-presented `PHPicker` (`CreatePebbleSheet`,
-    /// `EditPebbleSheet`), which names the representation it hands over.
+    /// A pick from the sheet-presented `PHPicker` (`EditMomentSheet`), which
+    /// names the representation it hands over.
     func handlePicked(_ picked: PhotoPickerView.PickedItem, userId: UUID) async {
         Self.logger.notice("handlePicked: started uti=\(picked.uti, privacy: .public)")
 
@@ -378,18 +368,6 @@ final class SnapUploadCoordinator {
         guard lifecycle == .committing else { return }
         lifecycle = .open
         committedSnapId = nil
-    }
-
-    /// Called by the sheet after a save (compose-pebble / compose-pebble-update)
-    /// failure when a pending snap is attached. Awaits the compensating
-    /// Storage delete. Does *not* clear `formSnap` — the sheet stays open
-    /// and the user can retry. Use `cancelAndCleanup` if you also want to
-    /// dismiss.
-    func handleSaveFailure(userId: UUID) async {
-        guard case .pending(let snap) = formSnap else { return }
-        await repo.deleteFiles(snapId: snap.id, userId: userId)
-        // Intentionally do not clear formSnap — caller (the sheet) keeps the
-        // form open so the user can retry.
     }
 
     // MARK: - Private

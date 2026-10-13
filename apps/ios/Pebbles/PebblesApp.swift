@@ -11,8 +11,6 @@ struct PebblesApp: App {
     @State private var karma: KarmaNotificationService
     @State private var achievementNotify: AchievementNotificationService
     @State private var achievements: AchievementsService
-    @State private var drafts: PebbleDraftsService
-    @State private var snapshots: ComposerSnapshotStore
     @State private var completeDrafts: CompleteDraftStore
     @State private var connections: ConnectionsService
     @State private var karmaOverlay = KarmaOverlayWindowController()
@@ -32,8 +30,6 @@ struct PebblesApp: App {
         self._karma    = State(initialValue: KarmaNotificationService())
         self._achievementNotify = State(initialValue: achievementNotify)
         self._achievements = State(initialValue: achievements)
-        self._drafts   = State(initialValue: PebbleDraftsService(client: supabase.client))
-        self._snapshots = State(initialValue: ComposerSnapshotStore())
         self._completeDrafts = State(initialValue: CompleteDraftStore())
         self._connections = State(initialValue: ConnectionsService(supabase: supabase))
         Self.configureSegmentedControlAppearance()
@@ -51,8 +47,6 @@ struct PebblesApp: App {
                 .environment(karma)
                 .environment(achievementNotify)
                 .environment(achievements)
-                .environment(drafts)
-                .environment(snapshots)
                 .environment(completeDrafts)
                 .environment(connections)
                 .onAppear { karmaOverlay.attachIfNeeded(service: karma, achievements: achievementNotify) }

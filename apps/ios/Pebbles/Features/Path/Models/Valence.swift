@@ -46,9 +46,10 @@ enum Valence: String, CaseIterable, Identifiable, Hashable {
 
 extension Valence {
     /// Rebuild a valence from the decomposed `(positiveness, intensity)` pair the
-    /// wire and `pebble_drafts.payload` store (M47). Returns nil for any pair
-    /// outside the 3×3 grid so a malformed draft leaves the picker unset rather
-    /// than silently claiming a value the user never chose.
+    /// wire and the local Complete draft store (M47 introduced the pair for the
+    /// server drafts table, since dropped). Returns nil for any pair outside the
+    /// 3×3 grid so a malformed draft leaves the picker unset rather than
+    /// silently claiming a value the user never chose.
     ///
     /// Note: `Valence.resolved` wraps this for the non-optional read path,
     /// logging and falling back to `.neutralMedium` on a malformed pair.

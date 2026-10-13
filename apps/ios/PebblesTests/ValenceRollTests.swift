@@ -69,32 +69,3 @@ struct ValenceRollTests {
         #expect(Valence.highlightMedium.polarityAfter == nil)
     }
 }
-
-@Suite("RecordFlowModel — valence seeding")
-@MainActor
-struct RecordFlowValenceSeedTests {
-
-    @Test("seeding parks on neutral-medium and answers the step")
-    func seedParks() {
-        let model = RecordFlowModel()
-        model.go(to: .valence)
-        #expect(model.draft.valence == nil)
-        #expect(model.isAnswered == false)
-
-        model.seedValenceIfNeeded()
-
-        #expect(model.draft.valence == .neutralMedium)
-        #expect(model.isAnswered)
-    }
-
-    @Test("seeding never overwrites an answer the user already gave")
-    func seedRespectsExisting() {
-        let model = RecordFlowModel()
-        model.go(to: .valence)
-        model.select(valence: .highlightLarge)
-
-        model.seedValenceIfNeeded()
-
-        #expect(model.draft.valence == .highlightLarge)
-    }
-}

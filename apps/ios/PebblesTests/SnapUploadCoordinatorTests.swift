@@ -199,24 +199,6 @@ struct SnapUploadCoordinatorTests {
     // live repo logs internally; the fake records the call. No additional test
     // needed beyond `cancelAndCleanupAwaitsDelete`.
 
-    @Test("handleSaveFailure fires compensating delete but keeps formSnap")
-    func handleSaveFailureFiresCleanupAndKeepsState() async throws {
-        let repo = FakeRepo()
-        let snapId = UUID()
-        let userId = UUID()
-        let (coordinator, original) = makeCoordinatorWithUploadedPending(repo: repo, snapId: snapId)
-
-        await coordinator.handleSaveFailure(userId: userId)
-
-        #expect(repo.calls == [.deleteFilesBySnapId(snapId: snapId, userId: userId)])
-        // Caller decides whether to clear state; coordinator preserves it.
-        if case .pending(let snap) = coordinator.formSnap {
-            #expect(snap.id == original.id)
-        } else {
-            Issue.record("expected formSnap to be retained")
-        }
-    }
-
     @Test("detachExisting: clears the photo, calls nothing, remembers its files")
     func detachExistingIsLocal() {
         let repo = FakeRepo()
