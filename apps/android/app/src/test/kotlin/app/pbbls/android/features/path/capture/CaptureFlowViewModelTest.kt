@@ -370,6 +370,67 @@ class CaptureFlowViewModelTest {
         }
 
     @Test
+    fun `discarding during an upload cancels it, so nothing lands after the cleanup`() =
+        runTest {
+            val h = Harness()
+            val effects = recordEffects(h.viewModel.effects)
+            val gate = CompletableDeferred<Unit>()
+            h.snapRepo.uploadGate = gate
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            h.viewModel.onCloseRequested()
+            h.viewModel.onDiscard()
+            advanceUntilIdle()
+            gate.complete(Unit)
+            advanceUntilIdle()
+            settle()
+            assertTrue(h.snapRepo.uploaded.isEmpty())
+            assertEquals(1, h.snapRepo.deletedSnapIds.size)
+            assertNull(h.viewModel.uiState.value.snap)
+            assertTrue(CaptureFlowEffect.Dismiss in effects.values)
+            effects.stop()
+        }
+
+    @Test
+    fun `a pick still being read is something to keep, and discarding drops it`() =
+        runTest {
+            val h = Harness()
+            val effects = recordEffects(h.viewModel.effects)
+            val read = CompletableDeferred<Unit>()
+            h.media.processGate = read
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            h.viewModel.onCloseRequested()
+            assertTrue(h.viewModel.uiState.value.isCloseConfirmPresented)
+            assertFalse(h.viewModel.uiState.value.closeOffersSave)
+            h.viewModel.onDiscard()
+            advanceUntilIdle()
+            read.complete(Unit)
+            advanceUntilIdle()
+            settle()
+            assertTrue(h.snapRepo.uploaded.isEmpty())
+            assertNull(h.viewModel.uiState.value.snap)
+            assertTrue(CaptureFlowEffect.Dismiss in effects.values)
+            effects.stop()
+        }
+
+    @Test
+    fun `a pick still being read blocks the save like an upload`() =
+        runTest {
+            val h = Harness()
+            h.media.processGate = CompletableDeferred()
+            h.viewModel.machine().goTo(CaptureStep.NAME)
+            h.viewModel.machine().setName("Walk")
+            h.viewModel.onPhotoPicked(pick)
+            settle()
+            assertEquals(R.string.pebble_save_error_photo_uploading, h.viewModel.uiState.value.snapBlockedMessageRes)
+            assertFalse(h.viewModel.uiState.value.canSaveNow)
+            h.viewModel.save(thenComplete = false)
+            runCurrent()
+            assertTrue(h.writes.saved.isEmpty())
+        }
+
+    @Test
     fun `name, date and step survive process death`() =
         runTest {
             val handle = SavedStateHandle()

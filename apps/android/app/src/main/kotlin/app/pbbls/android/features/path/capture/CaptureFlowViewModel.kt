@@ -23,7 +23,9 @@ import app.pbbls.android.core.ui.momentWriteErrorRes
 import app.pbbls.android.features.path.ComposerMedia
 import app.pbbls.android.features.path.PathFocusRequests
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.cancelAndJoin
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -119,6 +121,20 @@ class CaptureFlowViewModel
         private val userId: String?
             get() = supabase.session?.user?.id
 
+        /** The pick or retry in flight, held so a discard can stop it before cleaning up. */
+        private var photoJob: Job? = null
+
+        /**
+         * A pick from the moment it is chosen until its upload settles. Before the
+         * coordinator has a snap for it, this is the only sign of it: it counts as
+         * something to keep (R2) and blocks the save like an upload (iOS).
+         */
+        private var isPicking = false
+            set(value) {
+                field = value
+                _uiState.update { it.copy(snapBlockedMessageRes = blockedBySnap()) }
+            }
+
         init {
             viewModelScope.launch {
                 model.state.collect { flow ->
@@ -142,21 +158,29 @@ class CaptureFlowViewModel
         fun onPhotoPicked(uri: Uri) {
             if (model.isFrozen) return
             val id = userId ?: return
-            viewModelScope.launch {
-                runCatchingCancellable {
-                    // EXIF first: the re-encode writes no metadata (M58 D7).
-                    val taken = media.captureDate(uri)
-                    _uiState.update { it.copy(seededFromPhoto = taken != null) }
-                    model.applyCaptureDate(taken)
-                    snaps.attach(media.process(uri), id)
-                }.onFailure { Log.e(TAG, "photo pick processing failed", it) }
-            }
+            val previous = photoJob
+            photoJob =
+                viewModelScope.launch {
+                    previous?.cancelAndJoin()
+                    isPicking = true
+                    try {
+                        runCatchingCancellable {
+                            // EXIF first: the re-encode writes no metadata (M58 D7).
+                            val taken = media.captureDate(uri)
+                            _uiState.update { it.copy(seededFromPhoto = taken != null) }
+                            model.applyCaptureDate(taken)
+                            snaps.attach(media.process(uri), id)
+                        }.onFailure { Log.e(TAG, "photo pick processing failed", it) }
+                    } finally {
+                        isPicking = false
+                    }
+                }
         }
 
         fun onRetryPhoto() {
             if (model.isFrozen) return
             val id = userId ?: return
-            viewModelScope.launch { snaps.retryCurrent(id) }
+            photoJob = viewModelScope.launch { snaps.retryCurrent(id) }
         }
 
         fun onRemovePhoto() {
@@ -209,7 +233,7 @@ class CaptureFlowViewModel
         @StringRes
         private fun blockedBySnap(): Int? =
             when {
-                snaps.isUploading -> R.string.pebble_save_error_photo_uploading
+                isPicking || snaps.isUploading -> R.string.pebble_save_error_photo_uploading
                 snaps.hasFailed -> R.string.pebble_save_error_photo_failed
                 else -> null
             }
@@ -222,7 +246,7 @@ class CaptureFlowViewModel
         fun onCloseRequested() {
             if (model.isFrozen) return
             val state = model.state.value
-            if (state.hasInput) {
+            if (state.hasInput || isPicking) {
                 val offersSave = state.canSave && blockedBySnap() == null
                 _uiState.update { it.copy(isCloseConfirmPresented = true, closeOffersSave = offersSave) }
             } else {
@@ -244,6 +268,8 @@ class CaptureFlowViewModel
 
         private fun discardAndClose() {
             viewModelScope.launch {
+                // An upload finishing after the cleanup would leave its files behind.
+                photoJob?.cancelAndJoin()
                 userId?.let { snaps.cancelAndCleanup(it) }
                 effectsOut.emit(CaptureFlowEffect.Dismiss)
             }
