@@ -82,20 +82,28 @@ struct PathView: View {
         .sheet(isPresented: $isPresentingCreate) {
             CreatePebbleSheet(onCreated: { newPebbleId in
                 Task {
-                    async let timeline: Void = load()
                     async let statsReload: Void = stats.refresh()
-                    _ = await (timeline, statsReload)
-                    selectedMomentId = moment(matching: newPebbleId)?.id
+                    await load()
+                    if let match = MomentSummary.first(in: moments, matching: newPebbleId) {
+                        selectedMomentId = match.id
+                    } else {
+                        logger.notice("created pebble \(newPebbleId, privacy: .public) is not on the reloaded path")
+                    }
+                    await statsReload
                 }
             })
         }
         .sheet(isPresented: $isPresentingDrafts) {
             DraftsListSheet(onPebbleCreated: { newPebbleId in
                 Task {
-                    async let timeline: Void = load()
                     async let statsReload: Void = stats.refresh()
-                    _ = await (timeline, statsReload)
-                    selectedMomentId = moment(matching: newPebbleId)?.id
+                    await load()
+                    if let match = MomentSummary.first(in: moments, matching: newPebbleId) {
+                        selectedMomentId = match.id
+                    } else {
+                        logger.notice("created pebble \(newPebbleId, privacy: .public) is not on the reloaded path")
+                    }
+                    await statsReload
                 }
             })
         }
@@ -223,15 +231,9 @@ struct PathView: View {
     /// surfaced the pebble. `id` may be a moment id or a pebble id.
     private func focusWeek(containing id: UUID) {
         guard let entry = entries.first(where: { entry in
-            entry.moments.contains { $0.id == id || $0.pebble?.id == id }
+            entry.moments.contains { $0.matches(id) }
         }) else { return }
         focusedWeekStart = entry.weekStart
-    }
-
-    /// The moment holding `id`, which may be a moment id or a pebble id
-    /// (the old composers report pebble ids; equal only for pre-split rows).
-    private func moment(matching id: UUID) -> MomentSummary? {
-        moments.first { $0.id == id || $0.pebble?.id == id }
     }
 
     private func load() async {

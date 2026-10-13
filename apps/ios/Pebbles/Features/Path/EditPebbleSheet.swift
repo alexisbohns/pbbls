@@ -158,7 +158,7 @@ struct EditPebbleSheet: View {
             self.isLoading = false
         } catch {
             logger.error("edit pebble load failed: \(error.localizedDescription, privacy: .private)")
-            self.loadError = "Couldn't load this pebble."
+            self.loadError = String(localized: "Couldn't load this pebble.")
             self.isLoading = false
         }
     }

@@ -25,6 +25,18 @@ struct MomentSummary: Identifiable, Decodable, Hashable {
 
     var isCompleted: Bool { pebble != nil }
 
+    /// True when `id` is this moment's id or its pebble's id. The old
+    /// composers report pebble ids, which equal the moment id only for
+    /// pre-split rows.
+    func matches(_ id: UUID) -> Bool {
+        self.id == id || pebble?.id == id
+    }
+
+    /// The first moment in `moments` that `matches(_:)` the given id.
+    static func first(in moments: [MomentSummary], matching id: UUID) -> MomentSummary? {
+        moments.first { $0.matches(id) }
+    }
+
     private enum CodingKeys: String, CodingKey {
         case id, name, pebble
         case happenedAt = "happened_at"
