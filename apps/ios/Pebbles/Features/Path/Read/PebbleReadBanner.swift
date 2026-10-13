@@ -19,7 +19,8 @@ struct PebbleReadBanner: View {
     let snapStoragePath: String?
     let renderSvg: String?
     let renderVersion: String?
-    let emotionId: UUID
+    /// Nil for a bare moment: the banner falls back to the system chrome.
+    let emotionId: UUID?
     let valence: Valence
 
     @Environment(SnapURLCache.self) private var snapURLs
@@ -60,7 +61,7 @@ struct PebbleReadBanner: View {
     }
 
     private var palette: EmotionPalette? {
-        palettes.palette(for: emotionId)
+        emotionId.flatMap { palettes.palette(for: $0) }
     }
 
     private func loadPhotoIfNeeded() async {
@@ -96,7 +97,7 @@ struct PebbleReadBanner: View {
             </svg>
             """,
         renderVersion: "0.1.0",
-        emotionId: UUID(),
+        emotionId: nil,
         valence: .neutralMedium
     )
     .padding()
@@ -116,7 +117,7 @@ struct PebbleReadBanner: View {
             </svg>
             """,
         renderVersion: "0.1.0",
-        emotionId: UUID(),
+        emotionId: nil,
         valence: .highlightLarge
     )
     .padding()
@@ -139,7 +140,7 @@ struct PebbleReadBanner: View {
             </svg>
             """,
         renderVersion: "0.1.0",
-        emotionId: UUID(),
+        emotionId: nil,
         valence: .neutralMedium
     )
     .padding()

@@ -48,7 +48,7 @@ struct WeekRollCairnCell: View {
         .onAppear { configureAutoBind() }
         .onChange(of: isFocused) { _, _ in applyViewModel() }
         .onChange(of: colorScheme) { _, _ in applyViewModel() }
-        .accessibilityLabel("Week \(weekNum), \(entry.pebbles.count) pebbles")
+        .accessibilityLabel("Week \(weekNum), \(entry.moments.count) pebbles")
     }
 
     // MARK: - Computed state

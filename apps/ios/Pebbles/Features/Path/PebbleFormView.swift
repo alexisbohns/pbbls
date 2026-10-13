@@ -34,13 +34,13 @@ struct PebbleFormView: View {
 
     @Binding var photoPickerPresented: Bool
 
-    /// Provided by `EditPebbleSheet` to gate the remove button while the RPC
-    /// is in flight. `CreatePebbleSheet` always passes `false`.
+    /// Gates the remove button while a removal is in flight. Removal is now a
+    /// local detach, so every sheet passes `false`; kept for the row's API.
     let isRemovingExistingSnap: Bool
 
     /// Triggered when the user taps remove on an `.existing` snap row.
-    /// `EditPebbleSheet` runs the eager `delete_pebble_media` RPC + Storage
-    /// cleanup. `CreatePebbleSheet` never sees `.existing`, so it passes a
+    /// `EditPebbleSheet` detaches the photo in the form (no RPC); the save's
+    /// whole snap set deletes the row (R6). `CreatePebbleSheet` never sees `.existing`, so it passes a
     /// no-op closure.
     let onRemoveExistingSnap: () -> Void
 

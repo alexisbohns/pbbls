@@ -16,12 +16,12 @@ struct CollectionDetailView: View {
     @Environment(SupabaseService.self) private var supabase
 
     @State private var collection: Collection
-    @State private var pebbles: [Pebble] = []
+    @State private var moments: [MomentSummary] = []
     @State private var isLoading = true
     @State private var loadError: String?
-    @State private var selectedPebbleId: UUID?
+    @State private var selectedMomentId: UUID?
     @State private var isPresentingEdit = false
-    @State private var pendingDeletion: Pebble?
+    @State private var pendingDeletion: MomentSummary?
     @State private var deleteError: String?
 
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "profile.collection.detail")
@@ -56,23 +56,23 @@ struct CollectionDetailView: View {
                     onChanged()
                 })
             }
-            .sheet(item: $selectedPebbleId) { id in
-                EditPebbleSheet(pebbleId: id, onSaved: {
+            .sheet(item: $selectedMomentId) { id in
+                EditPebbleSheet(momentId: id, onSaved: {
                     Task { await load() }
                 })
             }
             .confirmationDialog(
-                pendingDeletion.map { "Delete \($0.name)?" } ?? "",
+                pendingDeletion.map { "Delete \(MomentName.display($0.name) ?? String(localized: "Untitled"))?" } ?? "",
                 isPresented: Binding(
                     get: { pendingDeletion != nil },
                     set: { if !$0 { pendingDeletion = nil } }
                 ),
                 titleVisibility: .visible,
                 presenting: pendingDeletion
-            ) { pebble in
+            ) { moment in
                 Button("Delete", role: .destructive) {
                     TapHaptics.play(.warning)
-                    Task { await delete(pebble) }
+                    Task { await delete(moment) }
                 }
                 Button("Cancel", role: .cancel) {
                     pendingDeletion = nil
@@ -106,7 +106,7 @@ struct CollectionDetailView: View {
                 systemImage: "exclamationmark.triangle",
                 description: Text(loadError)
             )
-        } else if pebbles.isEmpty {
+        } else if moments.isEmpty {
             ContentUnavailableView(
                 "No pebbles yet",
                 systemImage: "circle.grid.2x1",
@@ -127,11 +127,11 @@ struct CollectionDetailView: View {
 
                 ForEach(groupedPebbles, id: \.key) { group in
                     Section {
-                        ForEach(Array(group.value.enumerated()), id: \.element.id) { index, pebble in
+                        ForEach(Array(group.value.enumerated()), id: \.element.id) { index, moment in
                             PebbleRow(
-                                pebble: pebble,
-                                onTap: { selectedPebbleId = pebble.id },
-                                onDelete: { pendingDeletion = pebble }
+                                moment: moment,
+                                onTap: { selectedMomentId = moment.id },
+                                onDelete: { pendingDeletion = moment }
                             )
                             .pebblesListRow(position: pebblesRowPosition(index: index, count: group.value.count))
                         }
@@ -144,15 +144,15 @@ struct CollectionDetailView: View {
         }
     }
 
-    private var groupedPebbles: [(key: Date, value: [Pebble])] {
-        groupPebblesByMonth(pebbles, calendar: .current)
+    private var groupedPebbles: [(key: Date, value: [MomentSummary])] {
+        groupPebblesByMonth(moments, calendar: .current)
     }
 
     private var pebbleCountLabel: String {
-        switch pebbles.count {
+        switch moments.count {
         case 0: return "No pebbles"
         case 1: return "1 pebble"
-        default: return "\(pebbles.count) pebbles"
+        default: return "\(moments.count) pebbles"
         }
     }
 
@@ -160,35 +160,22 @@ struct CollectionDetailView: View {
         isLoading = true
         loadError = nil
         do {
-            // Inner join on `collection_pebbles` filters parent rows; the extra
-            // key is ignored by Pebble's default decoder.
-            let columns = "id, name, happened_at, created_at, intensity, positiveness, render_svg"
-                + ", emotion:emotions(id, slug, name)"
-                + ", collection_pebbles!inner(collection_id)"
-            let result: [Pebble] = try await supabase.client
-                .from("pebbles")
-                .select(columns)
-                .eq("collection_pebbles.collection_id", value: collection.id)
-                .order("happened_at", ascending: false)
-                .execute()
-                .value
-            self.pebbles = result
+            self.moments = try await MomentsService(client: supabase.client)
+                .moments(inCollection: collection.id)
         } catch {
-            logger.error("collection pebbles fetch failed: \(error.localizedDescription, privacy: .private)")
+            logger.error("collection moments fetch failed: \(error.localizedDescription, privacy: .private)")
             self.loadError = "Something went wrong. Please try again."
         }
         self.isLoading = false
     }
 
-    private func delete(_ pebble: Pebble) async {
+    private func delete(_ moment: MomentSummary) async {
         pendingDeletion = nil
         do {
-            try await supabase.client
-                .rpc("delete_pebble", params: ["p_pebble_id": pebble.id.uuidString])
-                .execute()
+            try await MomentDeletion.deleteMoment(moment.id, client: supabase.client)
             await load()
         } catch {
-            logger.error("delete pebble failed: \(error.localizedDescription, privacy: .private)")
+            logger.error("delete moment failed: \(error.localizedDescription, privacy: .private)")
             deleteError = "Something went wrong. Please try again."
         }
     }

@@ -1,5 +1,6 @@
 import Foundation
 import CoreGraphics
+import os
 
 /// The 9-option valence picker shown in the create-pebble form.
 /// Maps to the `pebbles.positiveness` and `pebbles.intensity` columns on save.
@@ -49,8 +50,8 @@ extension Valence {
     /// outside the 3×3 grid so a malformed draft leaves the picker unset rather
     /// than silently claiming a value the user never chose.
     ///
-    /// Note: `PebbleDetail.valence` carries the same mapping inline for the
-    /// non-optional read path; worth collapsing into this one day.
+    /// Note: `Valence.resolved` wraps this for the non-optional read path,
+    /// logging and falling back to `.neutralMedium` on a malformed pair.
     static func from(positiveness: Int, intensity: Int) -> Valence? {
         switch (positiveness, intensity) {
         case (-1, 1): return .lowlightSmall
@@ -230,5 +231,23 @@ extension Valence {
     var polarityAfter: ValencePolarity? {
         polarityIndex < ValencePolarity.allCases.count - 1
             ? ValencePolarity.allCases[polarityIndex + 1] : nil
+    }
+}
+
+extension Valence {
+    private static let logger = Logger(subsystem: "app.pbbls.ios", category: "valence")
+
+    /// `from(positiveness:intensity:)` for read paths that must render
+    /// something: logs and falls back to `.neutralMedium` on a pair the DB
+    /// CHECKs forbid (reachable only through decode drift).
+    static func resolved(positiveness: Int, intensity: Int) -> Valence {
+        if let valence = from(positiveness: positiveness, intensity: intensity) { return valence }
+        logger.error(
+            """
+            unexpected (positiveness, intensity) pair: \
+            (\(positiveness, privacy: .public), \(intensity, privacy: .public)) — neutralMedium
+            """
+        )
+        return .neutralMedium
     }
 }

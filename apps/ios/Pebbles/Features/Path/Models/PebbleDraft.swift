@@ -25,29 +25,24 @@ struct PebbleDraft {
 }
 
 extension PebbleDraft {
-    /// Build a prefilled draft from a fetched `PebbleDetail`.
-    /// Used by `EditPebbleSheet` to populate the form with the pebble's current values.
+    /// Prefill the old edit form from a moment and the caller's pebble on it.
+    /// Nil for an uncompleted moment. Pebbles carry no glyph since the split
+    /// (D5), so `glyphId` stays nil. Replaced by `CompleteDraft` in Part 6.
     ///
-    /// Notes:
-    /// - `description` defaults to empty string when the detail has no description.
-    /// - `domainId` takes the first (and only expected) domain from `detail.domains`.
-    ///   If `detail.domains` is unexpectedly empty, `domainId` stays nil and
-    ///   `draft.isValid` will return false.
-    /// - `soulIds` is populated from `detail.souls.map(\.id)`; empty when no souls are linked.
-    /// - `collectionId` takes the first element when present, nil otherwise.
-    /// - `valence` is derived from `(positiveness, intensity)` by `PebbleDetail.valence`.
+    /// - `domainId` / `collectionId` take the first element (one expected).
     /// - Snap state is *not* part of the draft; the caller seeds it onto a
     ///   `SnapUploadCoordinator` instead.
-    init(from detail: PebbleDetail) {
+    init?(from detail: MomentDetail) {
+        guard let pebble = detail.pebble else { return nil }
+        self.init()
         self.happenedAt = detail.happenedAt
-        self.name = detail.name
+        self.name = detail.name ?? ""
         self.description = detail.description ?? ""
-        self.emotionId = detail.emotion.id
-        self.domainId = detail.domains.first?.id
-        self.valence = detail.valence
-        self.soulIds = detail.souls.map(\.id)
-        self.collectionId = detail.collections.first?.id
-        self.visibility = detail.visibility
-        self.glyphId = detail.glyphId
+        self.emotionId = pebble.emotion.id
+        self.domainId = pebble.domains.first?.id
+        self.valence = pebble.valence
+        self.soulIds = pebble.souls.map(\.id)
+        self.collectionId = pebble.collections.first?.id
+        self.visibility = pebble.visibility
     }
 }

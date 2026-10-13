@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Body of the pebble read view. Pure UI — receives a fully-loaded
-/// `PebbleDetail` plus its resolved emotion `palette` and lays out the sections
+/// `MomentDetail` plus its resolved emotion `palette` and lays out the sections
 /// per spec `docs/superpowers/specs/2026-04-29-ios-pebble-read-view-polish-design.md`.
 ///
 /// The whole page tints to the pebble's emotion palette (#605) — background plus
@@ -12,10 +12,11 @@ import SwiftUI
 /// `PebbleDetailSheet` wraps this view with the navigation bar (privacy
 /// chip + edit button) and handles loading/error states.
 struct PebbleReadView: View {
-    let detail: PebbleDetail
+    let detail: MomentDetail
     let palette: EmotionPalette?
 
     @Environment(\.colorScheme) private var colorScheme
+    @Environment(ReferenceDataService.self) private var refs
 
     /// #605 page colors for the current scheme, or `nil` on a palette cache
     /// miss — every leaf falls back to its system/accent chrome then.
@@ -28,20 +29,22 @@ struct PebbleReadView: View {
             VStack(alignment: .leading, spacing: 20) {
                 PebbleReadBanner(
                     snapStoragePath: detail.snaps.first?.storagePath,
-                    renderSvg: detail.renderSvg,
-                    renderVersion: detail.renderVersion,
-                    emotionId: detail.emotion.id,
-                    valence: detail.valence
+                    renderSvg: nil,
+                    renderVersion: nil,
+                    emotionId: detail.pebble?.emotion.id,
+                    valence: detail.pebble?.valence ?? .neutralMedium
                 )
 
                 PebbleReadTitle(
-                    name: detail.name,
+                    name: MomentName.display(detail.name) ?? "",
                     happenedAt: detail.happenedAt,
                     nameColor: pageColors?.title,
                     dateColor: pageColors?.date
                 )
 
-                metadataRow
+                if let pebble = detail.pebble {
+                    metadataRow(pebble)
+                }
 
                 if let description = detail.description, !description.isEmpty {
                     Text(description)
@@ -50,8 +53,8 @@ struct PebbleReadView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
 
-                if !detail.souls.isEmpty {
-                    soulsRow
+                if let pebble = detail.pebble, !pebble.souls.isEmpty {
+                    soulsRow(pebble)
                 }
             }
             .padding(.horizontal, 16)
@@ -71,7 +74,7 @@ struct PebbleReadView: View {
     /// The read page tints them to the emotion palette (#605); the muted
     /// "No domain" placeholder keeps its muted icon/label on the tinted surface.
     @ViewBuilder
-    private var metadataRow: some View {
+    private func metadataRow(_ pebble: MomentDetail.Pebble) -> some View {
         HStack(spacing: Spacing.sm) {
             // Emotion — always present.
             SurfaceTile(
@@ -80,11 +83,11 @@ struct PebbleReadView: View {
                 iconTint: pageColors?.tileIcon,
                 labelColor: pageColors?.tileLabel
             ) {
-                Text(LocalizedStringResource(stringLiteral: detail.emotion.localizedName))
+                Text(LocalizedStringResource(stringLiteral: pebble.emotion.localizedName))
             }
 
             // Domain — always rendered. Muted placeholder when unset.
-            if detail.domains.isEmpty {
+            if pebble.domains.isEmpty {
                 SurfaceTile(
                     systemImage: "tag.fill",
                     muted: true,
@@ -100,13 +103,13 @@ struct PebbleReadView: View {
                     labelColor: pageColors?.tileLabel
                 ) {
                     Text(LocalizedStringResource(
-                        stringLiteral: detail.domains.map(\.localizedName).joined(separator: ", ")
+                        stringLiteral: pebble.domains.map(\.localizedName).joined(separator: ", ")
                     ))
                 }
             }
 
             // Collections — only when non-empty.
-            if !detail.collections.isEmpty {
+            if !pebble.collections.isEmpty {
                 SurfaceTile(
                     systemImage: "square.stack.3d.up.fill",
                     backgroundColor: pageColors?.tileBackground,
@@ -114,7 +117,7 @@ struct PebbleReadView: View {
                     labelColor: pageColors?.tileLabel
                 ) {
                     Text(LocalizedStringResource(
-                        stringLiteral: detail.collections.map(\.name).joined(separator: ", ")
+                        stringLiteral: pebble.collections.map(\.name).joined(separator: ", ")
                     ))
                 }
             }
@@ -122,11 +125,14 @@ struct PebbleReadView: View {
     }
 
     @ViewBuilder
-    private var soulsRow: some View {
+    private func soulsRow(_ pebble: MomentDetail.Pebble) -> some View {
         LazyVGrid(columns: SoulPillGrid.columns, spacing: SoulPillGrid.spacing) {
-            ForEach(detail.souls) { soulWithGlyph in
+            ForEach(pebble.souls) { soul in
                 DetailSoulCell(
-                    soul: soulWithGlyph,
+                    name: soul.name,
+                    // v_moments_full carries {id, name}; the glyph comes from
+                    // the cached soul list (A6). Unknown → empty glyph.
+                    strokes: refs.souls.first { $0.id == soul.id }?.glyph.strokes ?? [],
                     glyphColor: pageColors?.soulGlyph,
                     nameColor: pageColors?.soulName
                 )
@@ -143,18 +149,19 @@ struct PebbleReadView: View {
 /// `SoulItem` / `GlyphView`) so the picker's spec-governed state colors stay
 /// untouched — the glyph rides `GlyphThumbnail`, which already takes a color.
 private struct DetailSoulCell: View {
-    let soul: SoulWithGlyph
+    let name: String
+    let strokes: [GlyphStroke]
     var glyphColor: Color? = nil
     var nameColor: Color? = nil
 
     var body: some View {
         VStack(spacing: Spacing.sm) {
             GlyphThumbnail(
-                strokes: soul.glyph.strokes,
+                strokes: strokes,
                 side: 96,
                 strokeColor: glyphColor ?? Color.system.secondary
             )
-            Text(soul.name)
+            Text(name)
                 .pebblesFont(.bodyLeadHand)
                 .foregroundStyle(nameColor ?? Color.system.secondary)
                 .lineLimit(1)
@@ -162,6 +169,6 @@ private struct DetailSoulCell: View {
                 .frame(maxWidth: .infinity)
         }
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(soul.name)
+        .accessibilityLabel(name)
     }
 }

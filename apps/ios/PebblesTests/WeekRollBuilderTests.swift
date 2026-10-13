@@ -17,17 +17,17 @@ struct WeekRollBuilderTests {
         return formatter.date(from: iso)!
     }
 
-    private func pebble(_ happened: String, intensity: Int = 1) -> Pebble {
-        Pebble(
+    private func pebble(_ happened: String, intensity: Int = 1) -> MomentSummary {
+        MomentSummary(
             id: UUID(),
             name: "p",
             happenedAt: date(happened),
             createdAt: date(happened),
-            intensity: intensity,
-            positiveness: 0,
-            renderSvg: nil,
-            emotion: nil,
-            firstSnapPath: nil
+            firstSnapPath: nil,
+            pebble: .init(
+                id: UUID(), intensity: intensity, positiveness: 0,
+                visibility: .secret, emotion: nil, glyph: nil
+            )
         )
     }
 
@@ -36,9 +36,9 @@ struct WeekRollBuilderTests {
 
     @Test("empty pebbles → only currentWeek")
     func emptyInput() {
-        let entries = WeekRollBuilder.build(pebbles: [], calendar: calendar, today: today)
+        let entries = WeekRollBuilder.build(moments: [], calendar: calendar, today: today)
         #expect(entries.count == 1)
-        #expect(entries[0].pebbles.isEmpty)
+        #expect(entries[0].moments.isEmpty)
         // Week 19 (May 4–10) is the current week per the fixed `today`.
         #expect(calendar.component(.weekOfYear, from: entries[0].weekStart) == 19)
     }
@@ -46,25 +46,25 @@ struct WeekRollBuilderTests {
     @Test("single pebble in current week → [current(1)] only")
     func singleCurrent() {
         let friday = pebble("2026-05-08T10:00:00Z") // Friday in week 19
-        let entries = WeekRollBuilder.build(pebbles: [friday], calendar: calendar, today: today)
+        let entries = WeekRollBuilder.build(moments: [friday], calendar: calendar, today: today)
         #expect(entries.count == 1)
-        #expect(entries[0].pebbles.count == 1)
+        #expect(entries[0].moments.count == 1)
     }
 
     @Test("retro pebble in 1990 → roll has 1990 + current, ascending")
     func retroPebble() {
         let retro = pebble("1990-02-01T10:00:00Z") // ISO week 5 of 1990
-        let entries = WeekRollBuilder.build(pebbles: [retro], calendar: calendar, today: today)
+        let entries = WeekRollBuilder.build(moments: [retro], calendar: calendar, today: today)
         #expect(entries.count == 2)
         #expect(entries[0].weekStart < entries[1].weekStart)
-        #expect(entries[0].pebbles.count == 1) // 1990 entry has the retro
+        #expect(entries[0].moments.count == 1) // 1990 entry has the retro
     }
 
     @Test("non-adjacent weeks: 17, 19 (current) — no gap-filling, no next week")
     func nonAdjacentWeeks() {
         let w17 = pebble("2026-04-22T10:00:00Z") // week 17
         let w19 = pebble("2026-05-04T10:00:00Z") // week 19 (current)
-        let entries = WeekRollBuilder.build(pebbles: [w17, w19], calendar: calendar, today: today)
+        let entries = WeekRollBuilder.build(moments: [w17, w19], calendar: calendar, today: today)
         // Expected entries: w17 + current(week 19). Week 18 is NOT filled, no next week.
         #expect(entries.count == 2)
         let weekNumbers = entries.map { calendar.component(.weekOfYear, from: $0.weekStart) }
@@ -81,24 +81,24 @@ struct WeekRollBuilderTests {
         let curLate  = pebble("2026-05-09T20:00:00Z")
 
         let entries = WeekRollBuilder.build(
-            pebbles: [pastLate, pastEarly, curLate, curEarly],
+            moments: [pastLate, pastEarly, curLate, curEarly],
             calendar: calendar, today: today
         )
         // Find past entry (week 17) and current entry (week 19)
         let past    = entries.first { calendar.component(.weekOfYear, from: $0.weekStart) == 17 }!
         let current = entries.first { calendar.component(.weekOfYear, from: $0.weekStart) == 19 }!
-        #expect(past.pebbles.first?.happenedAt == pastEarly.happenedAt)   // ascending
-        #expect(past.pebbles.last?.happenedAt  == pastLate.happenedAt)
-        #expect(current.pebbles.first?.happenedAt == curLate.happenedAt)  // descending
-        #expect(current.pebbles.last?.happenedAt  == curEarly.happenedAt)
+        #expect(past.moments.first?.happenedAt == pastEarly.happenedAt)   // ascending
+        #expect(past.moments.last?.happenedAt  == pastLate.happenedAt)
+        #expect(current.moments.first?.happenedAt == curLate.happenedAt)  // descending
+        #expect(current.moments.last?.happenedAt  == curEarly.happenedAt)
     }
 
     @Test("year-boundary: 2025-12-29 buckets into ISO week 1 of 2026")
     func yearBoundary() {
         // 2026-01-01 is a Thursday → ISO week 1 of 2026 starts Mon 2025-12-29.
         let dec = pebble("2025-12-29T10:00:00Z")
-        let entries = WeekRollBuilder.build(pebbles: [dec], calendar: calendar, today: today)
-        let target = entries.first { $0.pebbles.count == 1 }!
+        let entries = WeekRollBuilder.build(moments: [dec], calendar: calendar, today: today)
+        let target = entries.first { $0.moments.count == 1 }!
         let comps = calendar.dateComponents([.yearForWeekOfYear, .weekOfYear], from: target.weekStart)
         #expect(comps.yearForWeekOfYear == 2026)
         #expect(comps.weekOfYear == 1)
@@ -108,8 +108,8 @@ struct WeekRollBuilderTests {
     func mondayBoundary() {
         // 2026-05-04T00:00:00Z is the start of ISO week 19.
         let mon = pebble("2026-05-04T00:00:00Z")
-        let entries = WeekRollBuilder.build(pebbles: [mon], calendar: calendar, today: today)
-        let target = entries.first { $0.pebbles.count == 1 }!
+        let entries = WeekRollBuilder.build(moments: [mon], calendar: calendar, today: today)
+        let target = entries.first { $0.moments.count == 1 }!
         let weekNum = calendar.component(.weekOfYear, from: target.weekStart)
         #expect(weekNum == 19)
     }
@@ -118,7 +118,7 @@ struct WeekRollBuilderTests {
     func previousLookup() {
         let p17 = pebble("2026-04-22T10:00:00Z")
         let p19 = pebble("2026-05-04T10:00:00Z")
-        let entries = WeekRollBuilder.build(pebbles: [p17, p19], calendar: calendar, today: today)
+        let entries = WeekRollBuilder.build(moments: [p17, p19], calendar: calendar, today: today)
         let week17Start = entries.first { calendar.component(.weekOfYear, from: $0.weekStart) == 17 }!.weekStart
         let week19Start = entries.first { calendar.component(.weekOfYear, from: $0.weekStart) == 19 }!.weekStart
         #expect(WeekRollBuilder.previous(of: week17Start, in: entries) == nil)
@@ -129,7 +129,7 @@ struct WeekRollBuilderTests {
     func nextLookup() {
         let p17 = pebble("2026-04-22T10:00:00Z")
         let p19 = pebble("2026-05-04T10:00:00Z")
-        let entries = WeekRollBuilder.build(pebbles: [p17, p19], calendar: calendar, today: today)
+        let entries = WeekRollBuilder.build(moments: [p17, p19], calendar: calendar, today: today)
         let week17Start = entries.first { calendar.component(.weekOfYear, from: $0.weekStart) == 17 }!.weekStart
         let week19Start = entries.first { calendar.component(.weekOfYear, from: $0.weekStart) == 19 }!.weekStart
         // Week 19 is the tail (no future weeks pre-created); next() returns nil.
@@ -172,7 +172,7 @@ struct WeekRollBuilderWeekStartTests {
     @Test("matches the current-week entry build() creates for an empty roll")
     func matchesBuildCurrentWeek() {
         let today = date("2026-05-10T12:00:00Z")
-        let built = WeekRollBuilder.build(pebbles: [], calendar: calendar, today: today)
+        let built = WeekRollBuilder.build(moments: [], calendar: calendar, today: today)
         #expect(built.first?.weekStart == WeekRollBuilder.weekStart(for: today, calendar: calendar))
     }
 }

@@ -1,8 +1,8 @@
 import SwiftUI
 import os
 
-/// Read-view sheet for a single pebble. Loads the `PebbleDetail` from
-/// Supabase and renders `PebbleReadView` with a privacy badge + Edit button
+/// Read-view sheet for a single moment. Loads the `MomentDetail` from
+/// `v_moments_full` and renders `PebbleReadView` with a privacy badge + Edit button
 /// in the navigation bar. Tapping Edit stacks `EditPebbleSheet` on top; on
 /// save the read view reloads in place and notifies the parent.
 ///
@@ -10,14 +10,14 @@ import os
 /// - Path-list tap of an existing pebble.
 /// - Post-create reveal after `CreatePebbleSheet` completes.
 struct PebbleDetailSheet: View {
-    let pebbleId: UUID
+    let momentId: UUID
     var onPebbleUpdated: (() -> Void)?
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(EmotionPaletteService.self) private var palettes
     @Environment(\.dismiss) private var dismiss
 
-    @State private var detail: PebbleDetail?
+    @State private var detail: MomentDetail?
     @State private var isLoading = true
     @State private var loadError: String?
     @State private var isPresentingEdit = false
@@ -27,17 +27,18 @@ struct PebbleDetailSheet: View {
     var body: some View {
         NavigationStack {
             content
-                .pebblesToolbarTitle(detail?.name ?? "")
+                .pebblesToolbarTitle(MomentName.display(detail?.name) ?? "")
                 .toolbar {
                     ToolbarItem(placement: .topBarLeading) {
-                        if let detail {
-                            PebblePrivacyBadge(visibility: detail.visibility, style: .chip)
+                        if let pebble = detail?.pebble {
+                            PebblePrivacyBadge(visibility: pebble.visibility, style: .chip)
                         }
                     }
                     ToolbarItem(placement: .topBarTrailing) {
                         HStack(spacing: 8) {
-                            if let detail, detail.visibility == .public {
-                                ShareLink(item: SharedPebbleLink.url(for: pebbleId)) {
+                            // Shares the PEBBLE, whose id differs from the moment's.
+                            if let pebble = detail?.pebble, pebble.visibility == .public {
+                                ShareLink(item: SharedPebbleLink.url(for: pebble.id)) {
                                     Image(systemName: "square.and.arrow.up")
                                 }
                                 .accessibilityLabel(Text(
@@ -48,7 +49,7 @@ struct PebbleDetailSheet: View {
                             PebbleToolbarButton("Edit") {
                                 isPresentingEdit = true
                             }
-                            .disabled(detail == nil)
+                            .disabled(detail?.pebble == nil)
                         }
                     }
                 }
@@ -57,7 +58,7 @@ struct PebbleDetailSheet: View {
         }
         .task { await load() }
         .sheet(isPresented: $isPresentingEdit) {
-            EditPebbleSheet(pebbleId: pebbleId, onSaved: {
+            EditPebbleSheet(momentId: momentId, onSaved: {
                 Task { await load() }
                 onPebbleUpdated?()
             })
@@ -76,7 +77,7 @@ struct PebbleDetailSheet: View {
         } else if let detail {
             // Look up the pebble's emotion palette so the whole read page tints
             // to it (#605). A cache miss (nil) leaves the page on system chrome.
-            PebbleReadView(detail: detail, palette: palettes.palette(for: detail.emotion.id))
+            PebbleReadView(detail: detail, palette: detail.pebble.flatMap { palettes.palette(for: $0.emotion.id) })
         }
     }
 
@@ -84,22 +85,7 @@ struct PebbleDetailSheet: View {
         isLoading = true
         loadError = nil
         do {
-            let loaded: PebbleDetail = try await supabase.client
-                .from("pebbles")
-                .select("""
-                    id, name, description, happened_at, intensity, positiveness, visibility,
-                    render_svg, render_version, glyph_id,
-                    emotion:emotions(id, slug, name),
-                    pebble_domains(domain:domains(id, slug, name)),
-                    pebble_souls(soul:souls(id, name, glyph_id, glyphs(id, name, strokes, view_box))),
-                    collection_pebbles(collection:collections(id, name)),
-                    snaps(id, storage_path, sort_order)
-                """)
-                .eq("id", value: pebbleId)
-                .single()
-                .execute()
-                .value
-            self.detail = loaded
+            self.detail = try await MomentsService(client: supabase.client).moment(id: momentId)
             self.isLoading = false
         } catch {
             logger.error("pebble detail load failed: \(error.localizedDescription, privacy: .private)")
@@ -111,8 +97,9 @@ struct PebbleDetailSheet: View {
 
 #Preview {
     let supabase = SupabaseService()
-    return PebbleDetailSheet(pebbleId: UUID())
+    return PebbleDetailSheet(momentId: UUID())
         .environment(supabase)
+        .environment(ReferenceDataService(client: supabase.client))
         .environment(EmotionPaletteService(client: supabase.client))
         .environment(SnapURLCache(client: supabase.client))
 }

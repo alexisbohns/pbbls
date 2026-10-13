@@ -16,7 +16,7 @@ struct PathView: View {
     @Environment(PathStatsService.self) private var stats
     @Environment(PebbleDraftsService.self) private var draftsService
 
-    @State private var pebbles: [Pebble] = []
+    @State private var moments: [MomentSummary] = []
     @State private var entries: [WeekRollEntry] = []
     @State private var focusedWeekStart: Date = Date()
     @State private var navPath = NavigationPath()
@@ -25,8 +25,8 @@ struct PathView: View {
     /// The classic composer, reachable by long-pressing `+` (D1).
     @State private var isPresentingCreate = false
     @State private var isPresentingDrafts = false
-    @State private var selectedPebbleId: UUID?
-    @State private var pendingDeletion: Pebble?
+    @State private var selectedMomentId: UUID?
+    @State private var pendingDeletion: MomentSummary?
     @State private var deleteError: String?
     @State private var isLoading = true
     @State private var loadError: String?
@@ -42,7 +42,7 @@ struct PathView: View {
     /// See M22 follow-up for proper server-side timezone handling.
     private var rippleWithLocalActiveToday: RippleSummary? {
         guard let server = stats.ripple else { return nil }
-        let activeToday = pebbles.contains { Calendar.current.isDateInToday($0.createdAt) }
+        let activeToday = moments.contains { $0.isCompleted && Calendar.current.isDateInToday($0.createdAt) }
         return RippleSummary(
             rippleLevel: server.rippleLevel,
             pebbles28d: server.pebbles28d,
@@ -81,26 +81,34 @@ struct PathView: View {
         }
         .sheet(isPresented: $isPresentingCreate) {
             CreatePebbleSheet(onCreated: { newPebbleId in
-                selectedPebbleId = newPebbleId
                 Task {
-                    async let timeline: Void = load()
                     async let statsReload: Void = stats.refresh()
-                    _ = await (timeline, statsReload)
+                    await load()
+                    if let match = MomentSummary.first(in: moments, matching: newPebbleId) {
+                        selectedMomentId = match.id
+                    } else {
+                        logger.notice("created pebble \(newPebbleId, privacy: .public) is not on the reloaded path")
+                    }
+                    await statsReload
                 }
             })
         }
         .sheet(isPresented: $isPresentingDrafts) {
             DraftsListSheet(onPebbleCreated: { newPebbleId in
-                selectedPebbleId = newPebbleId
                 Task {
-                    async let timeline: Void = load()
                     async let statsReload: Void = stats.refresh()
-                    _ = await (timeline, statsReload)
+                    await load()
+                    if let match = MomentSummary.first(in: moments, matching: newPebbleId) {
+                        selectedMomentId = match.id
+                    } else {
+                        logger.notice("created pebble \(newPebbleId, privacy: .public) is not on the reloaded path")
+                    }
+                    await statsReload
                 }
             })
         }
-        .sheet(item: $selectedPebbleId) { id in
-            PebbleDetailSheet(pebbleId: id, onPebbleUpdated: {
+        .sheet(item: $selectedMomentId) { id in
+            PebbleDetailSheet(momentId: id, onPebbleUpdated: {
                 Task {
                     async let timeline: Void = load()
                     async let statsReload: Void = stats.refresh()
@@ -109,17 +117,17 @@ struct PathView: View {
             })
         }
         .confirmationDialog(
-            pendingDeletion.map { "Delete \($0.name)?" } ?? "",
+            pendingDeletion.map { "Delete \(MomentName.display($0.name) ?? String(localized: "Untitled"))?" } ?? "",
             isPresented: Binding(
                 get: { pendingDeletion != nil },
                 set: { if !$0 { pendingDeletion = nil } }
             ),
             titleVisibility: .visible,
             presenting: pendingDeletion
-        ) { pebble in
+        ) { moment in
             Button("Delete", role: .destructive) {
                 TapHaptics.play(.warning)
-                Task { await delete(pebble) }
+                Task { await delete(moment) }
             }
             Button("Cancel", role: .cancel) {
                 pendingDeletion = nil
@@ -172,8 +180,8 @@ struct PathView: View {
                     ForEach(entries) { entry in
                         WeekPathView(
                             entry: entry,
-                            onTap: { pebble in selectedPebbleId = pebble.id },
-                            onDelete: { pebble in pendingDeletion = pebble },
+                            onTap: { moment in selectedMomentId = moment.id },
+                            onDelete: { moment in pendingDeletion = moment },
                             onCreate: { isPresentingFlow = true }
                         )
                         .tag(entry.weekStart)
@@ -220,23 +228,20 @@ struct PathView: View {
     /// Asks which entry actually holds the pebble rather than recomputing its
     /// week: `WeekRollBuilder` owns the bucketing, and a second implementation
     /// here could disagree with it. Silent no-op if the reload has not yet
-    /// surfaced the pebble.
-    private func focusWeek(containing pebbleId: UUID) {
+    /// surfaced the pebble. `id` may be a moment id or a pebble id.
+    private func focusWeek(containing id: UUID) {
         guard let entry = entries.first(where: { entry in
-            entry.pebbles.contains { $0.id == pebbleId }
+            entry.moments.contains { $0.matches(id) }
         }) else { return }
         focusedWeekStart = entry.weekStart
     }
 
     private func load() async {
         do {
-            let result: [Pebble] = try await supabase.client
-                .rpc("path_pebbles")
-                .execute()
-                .value
-            self.pebbles = result
+            let result = try await MomentsService(client: supabase.client).pathMoments()
+            self.moments = result
             self.entries = WeekRollBuilder.build(
-                pebbles: result, calendar: isoCalendar, today: today
+                moments: result, calendar: isoCalendar, today: today
             )
             // First load (or after a deletion that removed the focused week):
             // pick the current-week entry if present, else the closest entry.
@@ -259,18 +264,16 @@ struct PathView: View {
         }
     }
 
-    private func delete(_ pebble: Pebble) async {
+    private func delete(_ moment: MomentSummary) async {
         pendingDeletion = nil
         do {
-            try await supabase.client
-                .rpc("delete_pebble", params: ["p_pebble_id": pebble.id.uuidString])
-                .execute()
+            try await MomentDeletion.deleteMoment(moment.id, client: supabase.client)
             async let timeline: Void = load()
             async let statsReload: Void = stats.refresh()
             _ = await (timeline, statsReload)
         } catch {
-            logger.error("delete pebble failed: \(error.localizedDescription, privacy: .private)")
-            deleteError = "Something went wrong. Please try again."
+            logger.error("delete moment failed: \(error.localizedDescription, privacy: .private)")
+            deleteError = String(localized: "Something went wrong. Please try again.")
         }
     }
 }

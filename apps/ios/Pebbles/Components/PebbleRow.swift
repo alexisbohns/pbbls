@@ -1,22 +1,18 @@
 import SwiftUI
 
-/// Shared row view for a pebble in a list. Used by `PathView`,
-/// `SoulDetailView`, and `CollectionDetailView` so the thumbnail +
+/// Shared row view for a moment in a list. Used by `SoulDetailView` and
+/// `CollectionDetailView` so the thumbnail +
 /// name + date treatment stays consistent across the app.
 ///
 /// The row owns the long-press contextual menu so any new list that
 /// uses `PebbleRow` automatically gets the Delete affordance. The
 /// parent owns the destructive flow itself: confirmation dialog,
-/// error alert, the `delete_pebble` RPC call, and the reload.
+/// error alert, the delete call, and the reload.
 ///
-/// `pebble` must be loaded with `render_svg` and the
-/// `emotion:emotions(id, slug, name)` join populated for the
-/// thumbnail to render correctly. Colors are sourced from
+/// `moment` is a `path_moments` row. Colors are sourced from
 /// `palette.pebbleFrameColors(forIntensity:)` and are scheme-independent.
-/// When `render_svg` is nil the row falls back to a neutral rounded
-/// rectangle.
 struct PebbleRow: View {
-    let pebble: Pebble
+    let moment: MomentSummary
     let onTap: () -> Void
     let onDelete: () -> Void
 
@@ -27,8 +23,9 @@ struct PebbleRow: View {
             HStack(spacing: 12) {
                 thumbnail
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(pebble.name).font(.body)
-                    Text(pebble.happenedAt, style: .date)
+                    Text(verbatim: MomentName.display(moment.name) ?? String(localized: "Untitled"))
+                        .font(.body)
+                    Text(moment.happenedAt, style: .date)
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -43,25 +40,17 @@ struct PebbleRow: View {
     }
 
     /// The lit stone (#974), at the rest light: the row never animates.
-    @ViewBuilder
     private var thumbnail: some View {
-        if pebble.renderSvg != nil {
-            PebbleStoneView(valence: pebble.valence, renderSvg: pebble.renderSvg, palette: palette)
-                .frame(width: 40, height: 40)
-        } else {
-            RoundedRectangle(cornerRadius: 6)
-                .fill(Color.secondary.opacity(0.15))
-                .frame(width: 40, height: 40)
-        }
+        PebbleStoneView(valence: moment.pebble?.valence ?? .neutralMedium, renderSvg: nil, palette: palette)
+            .frame(width: 40, height: 40)
     }
 
     private var palette: EmotionPalette? {
-        guard let emotionId = pebble.emotion?.id else { return nil }
-        return palettes.palette(for: emotionId)
+        moment.pebble?.emotion.flatMap { palettes.palette(for: $0.id) }
     }
 
     private var frameColors: PebbleFrameColors? {
-        palette?.pebbleFrameColors(forIntensity: pebble.intensity)
+        palette?.pebbleFrameColors(forIntensity: moment.pebble?.intensity ?? 2)
     }
 }
 
@@ -69,16 +58,13 @@ struct PebbleRow: View {
     let supabase = SupabaseService()
     return List {
         PebbleRow(
-            pebble: Pebble(
+            moment: MomentSummary(
                 id: UUID(),
-                name: "Sample pebble",
+                name: "Sample moment",
                 happenedAt: Date(),
                 createdAt: Date(),
-                intensity: 1,
-                positiveness: 0,
-                renderSvg: nil,
-                emotion: nil,
-                firstSnapPath: nil
+                firstSnapPath: nil,
+                pebble: nil
             ),
             onTap: {},
             onDelete: {}

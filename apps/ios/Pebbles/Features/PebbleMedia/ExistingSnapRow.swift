@@ -8,8 +8,8 @@ import os
 /// regardless of whether the snap is `.existing` or `.pending`.
 ///
 /// Stateless besides the lazily-loaded thumb URL. The remove button calls
-/// back into the parent (`EditPebbleSheet`) which owns the eager
-/// `delete_pebble_media` RPC + Storage cleanup.
+/// back into the parent (`EditPebbleSheet`) which detaches the photo in the
+/// form; the save's whole snap set deletes the row (R6).
 struct ExistingSnapRow: View {
     let storagePath: String
     let isRemoving: Bool

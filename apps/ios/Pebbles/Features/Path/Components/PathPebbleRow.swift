@@ -1,7 +1,8 @@
 import SwiftUI
 
-/// Path-specific pebble row, used by `WeekPathView`. Renders three
-/// states based on the pebble's `intensity`:
+/// Path-specific moment row, used by `WeekPathView`. Renders three
+/// states based on the pebble's `intensity` (an uncompleted moment draws
+/// at intensity 2):
 ///   - intensity 1–2 (small/medium): 56pt thumbnail backed by
 ///     `PebbleOutlineBackdropView` with `palette.surface` fill and
 ///     `palette.secondary` glyph stroke; name color follows the scheme
@@ -15,7 +16,7 @@ import SwiftUI
 ///
 /// Colors are sourced from `palette.pebbleFrameColors(forIntensity:)`.
 ///
-/// When `pebble.firstSnapPath` is non-nil, a 64pt photo is rendered to
+/// When `moment.firstSnapPath` is non-nil, a 64pt photo is rendered to
 /// the right with rotation by parity (even = -7°, odd = +4°) and a white
 /// border + drop shadow. Row height grows to fit the rotated photo per
 /// `rowHeight(intensity:hasPhoto:positionIndex:)`.
@@ -23,7 +24,7 @@ import SwiftUI
 /// Long-press surfaces a delete option via `.contextMenu` — the parent
 /// `PathView` owns the confirmation dialog.
 struct PathPebbleRow: View {
-    let pebble: Pebble
+    let moment: MomentSummary
     let positionIndex: Int
     let onTap: () -> Void
     let onDelete: () -> Void
@@ -35,16 +36,17 @@ struct PathPebbleRow: View {
     private static let largeThumbnailSize: CGFloat = 96
     private static let photoSize: CGFloat = 64
 
-    private var isLarge: Bool { pebble.intensity >= 3 }
+    private var intensity: Int { moment.pebble?.intensity ?? 2 }
+    private var isLarge: Bool { intensity >= 3 }
     private var thumbnailSize: CGFloat { isLarge ? Self.largeThumbnailSize : Self.smallThumbnailSize }
-    private var hasPhoto: Bool { pebble.firstSnapPath != nil }
+    private var hasPhoto: Bool { moment.firstSnapPath != nil }
 
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 12) {
                 thumbnail
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(pebble.name)
+                    Text(verbatim: MomentName.display(moment.name) ?? String(localized: "Untitled"))
                         .font(.ysabeauSemibold(17))
                         .foregroundStyle(nameColor)
                     Text(formattedWeekdayTime)
@@ -53,14 +55,14 @@ struct PathPebbleRow: View {
                         .textCase(.uppercase)
                         .foregroundStyle(nameColor.opacity(0.5))
                 }
-                if hasPhoto, let path = pebble.firstSnapPath {
+                if hasPhoto, let path = moment.firstSnapPath {
                     Spacer(minLength: 0)
                     photoView(path: path)
                 }
             }
             .frame(
                 height: PathPebbleRow.rowHeight(
-                    intensity: pebble.intensity,
+                    intensity: intensity,
                     hasPhoto: hasPhoto,
                     positionIndex: positionIndex
                 ),
@@ -77,7 +79,7 @@ struct PathPebbleRow: View {
 
     /// The lit stone (#974), at the rest light: the row never animates.
     private var thumbnail: some View {
-        PebbleStoneView(valence: pebble.valence, renderSvg: pebble.renderSvg, palette: palette)
+        PebbleStoneView(valence: moment.pebble?.valence ?? .neutralMedium, renderSvg: nil, palette: palette)
             .frame(width: thumbnailSize, height: thumbnailSize)
     }
 
@@ -95,12 +97,12 @@ struct PathPebbleRow: View {
     }
 
     private var palette: EmotionPalette? {
-        guard let emotionId = pebble.emotion?.id else { return nil }
+        guard let emotionId = moment.pebble?.emotion?.id else { return nil }
         return palettes.palette(for: emotionId)
     }
 
     private var frameColors: PebbleFrameColors? {
-        palette?.pebbleFrameColors(forIntensity: pebble.intensity)
+        palette?.pebbleFrameColors(forIntensity: intensity)
     }
 
     private var nameColor: Color {
@@ -111,8 +113,8 @@ struct PathPebbleRow: View {
     /// Weekday + time only — the focused week is already known from
     /// `WeekHeaderView`, so day/month would be redundant.
     private var formattedWeekdayTime: String {
-        let weekday = pebble.happenedAt.formatted(.dateTime.weekday(.wide))
-        let time    = pebble.happenedAt.formatted(.dateTime.hour().minute())
+        let weekday = moment.happenedAt.formatted(.dateTime.weekday(.wide))
+        let time    = moment.happenedAt.formatted(.dateTime.hour().minute())
         return "\(weekday) · \(time)"
     }
 }
@@ -122,16 +124,13 @@ struct PathPebbleRow: View {
     return List {
         Section {
             PathPebbleRow(
-                pebble: Pebble(
+                moment: MomentSummary(
                     id: UUID(),
-                    name: "Sample pebble",
+                    name: "Sample moment",
                     happenedAt: Date(),
                     createdAt: Date(),
-                    intensity: 1,
-                    positiveness: 0,
-                    renderSvg: nil,
-                    emotion: nil,
-                    firstSnapPath: nil
+                    firstSnapPath: nil,
+                    pebble: nil
                 ),
                 positionIndex: 0,
                 onTap: {},
