@@ -5,6 +5,7 @@ import app.pbbls.android.core.data.PebbleWriteService
 import app.pbbls.android.core.data.ProfileService
 import app.pbbls.android.core.data.ReferenceDataService
 import app.pbbls.android.core.data.SupabaseService
+import app.pbbls.android.core.model.MomentSavePayload
 import app.pbbls.android.core.model.Pebble
 import io.github.jan.supabase.annotations.SupabaseInternal
 import io.github.jan.supabase.auth.Auth
@@ -153,5 +154,47 @@ class ServiceFakesTest {
 
             assertEquals(listOf("First light"), retried.map { it.name })
             assertEquals(2, pathService.loadCount)
+        }
+
+    @Test
+    fun `an armed moment read failure throws once, then clears so the retry succeeds`() =
+        runTest {
+            val read = FakeMomentReadService(path = listOf(UiFixtures.pathMoment(id = "m1")))
+            read.failNext = IOException("network down")
+
+            val thrown =
+                try {
+                    read.loadPath()
+                    null
+                } catch (e: IOException) {
+                    e
+                }
+
+            assertEquals("network down", thrown?.message)
+            assertEquals(null, read.failNext)
+            assertEquals(listOf("m1"), read.loadPath().map { it.id })
+            assertEquals(2, read.loadPathCount)
+        }
+
+    @Test
+    fun `an armed moment write failure throws once, then clears so the retry succeeds`() =
+        runTest {
+            val write = FakeMomentWriteService()
+            val payload = MomentSavePayload.capture("Walk", OffsetDateTime.parse("2026-10-12T06:40:00Z"), null)
+            write.failNext = IOException("network down")
+
+            val thrown =
+                try {
+                    write.saveMoment(payload)
+                    null
+                } catch (e: IOException) {
+                    e
+                }
+
+            assertEquals("network down", thrown?.message)
+            assertEquals(null, write.failNext)
+            assertEquals(emptyList<MomentSavePayload>(), write.saved)
+            assertEquals("moment-new", write.saveMoment(payload))
+            assertEquals(listOf(payload), write.saved)
         }
 }

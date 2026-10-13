@@ -8,6 +8,8 @@ import app.pbbls.android.core.data.ConsentServicing
 import app.pbbls.android.core.data.GlyphMarketServicing
 import app.pbbls.android.core.data.GlyphServicing
 import app.pbbls.android.core.data.LogsServicing
+import app.pbbls.android.core.data.MomentReadServicing
+import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.PathServicing
 import app.pbbls.android.core.data.PathStatsServicing
 import app.pbbls.android.core.data.PebbleDetailServicing
@@ -117,6 +119,12 @@ object FakeServicesModule {
     fun fakePath() = FakePathService()
 
     @Provides @Singleton
+    fun fakeMomentRead() = FakeMomentReadService()
+
+    @Provides @Singleton
+    fun fakeMomentWrite() = FakeMomentWriteService()
+
+    @Provides @Singleton
     fun fakeProfile() = FakeProfileService()
 
     @Provides @Singleton
@@ -174,6 +182,12 @@ object FakeServicesModule {
 
     @Provides
     fun path(fake: FakePathService): PathServicing = fake
+
+    @Provides
+    fun momentRead(fake: FakeMomentReadService): MomentReadServicing = fake
+
+    @Provides
+    fun momentWrite(fake: FakeMomentWriteService): MomentWriteServicing = fake
 
     @Provides
     fun profile(fake: FakeProfileService): ProfileServicing = fake
