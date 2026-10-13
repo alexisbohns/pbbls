@@ -69,11 +69,16 @@ internal object StoneComposer {
         return shape.copy(layers = shape.layers + layer)
     }
 
+    /**
+     * Keyed on the glyph's content as well as its id: a collection glyph
+     * edited in place keeps its id, and the wobble cache must not serve the
+     * old carving.
+     */
     fun cacheKey(
         size: ValenceSizeGroup,
         polarity: ValencePolarity,
         glyph: PebbleGlyph?,
-    ): String = "stone:${size.key}:${polarity.key}:${glyph?.id ?: "-"}"
+    ): String = "stone:${size.key}:${polarity.key}:${glyph?.let { "${it.id}:${(it.viewBox to it.strokes).hashCode()}" } ?: "-"}"
 
     /**
      * The blank stone (R4): the silhouette's outline only, nothing carved

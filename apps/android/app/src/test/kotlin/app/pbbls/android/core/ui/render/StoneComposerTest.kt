@@ -111,6 +111,8 @@ class StoneComposerTest {
         val a = StoneComposer.cacheKey(ValenceSizeGroup.SMALL, ValencePolarity.LOWLIGHT, glyph())
         val b = StoneComposer.cacheKey(ValenceSizeGroup.SMALL, ValencePolarity.LOWLIGHT, null)
         assertNotEquals(a, b)
+        // Same glyph id, carving edited in place: a new key, so no stale wobble art.
+        assertNotEquals(a, StoneComposer.cacheKey(ValenceSizeGroup.SMALL, ValencePolarity.LOWLIGHT, glyph("0 0 100 100")))
         assertNotEquals(StoneComposer.BLANK_CACHE_KEY, StoneComposer.cacheKey(ValenceSizeGroup.MEDIUM, ValencePolarity.NEUTRAL, null))
     }
 

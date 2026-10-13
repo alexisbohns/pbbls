@@ -132,6 +132,7 @@ private fun buildRenderLayers(model: PebbleSvgModel): List<RenderLayer>? =
         }
     } catch (e: Exception) {
         // A malformed `d` is a data condition, not a crash — draw nothing.
+        Log.w(TAG, "stone path data not traceable", e)
         null
     }
 
