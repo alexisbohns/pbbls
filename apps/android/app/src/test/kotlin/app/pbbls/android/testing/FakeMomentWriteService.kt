@@ -15,6 +15,13 @@ class FakeMomentWriteService : MomentWriteServicing {
     var nextMomentId = "moment-new"
     var nextPebbleId = "pebble-new"
     var karma: Int? = 4
+    val karmaTotalReads = mutableListOf<String>()
+
+    /** The pebble's karma total before any `completePebble` landed; null is a failed read. */
+    var karmaTotalBefore: Int? = 0
+
+    /** The pebble's karma total once a `completePebble` landed; null is a failed read. */
+    var karmaTotalAfter: Int? = 0
 
     /** Holds a write in flight until completed, for back-while-saving tests. */
     var gate: CompletableDeferred<Unit>? = null
@@ -55,6 +62,11 @@ class FakeMomentWriteService : MomentWriteServicing {
     override suspend fun deleteMoment(momentId: String) {
         armed.fire()
         deletedMoments += momentId
+    }
+
+    override suspend fun karmaTotal(pebbleId: String): Int? {
+        karmaTotalReads += pebbleId
+        return if (completed.isEmpty()) karmaTotalBefore else karmaTotalAfter
     }
 
     override suspend fun karmaDelta(

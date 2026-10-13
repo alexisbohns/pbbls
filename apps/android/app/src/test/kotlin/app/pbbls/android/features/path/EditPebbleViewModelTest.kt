@@ -1,6 +1,7 @@
 package app.pbbls.android.features.path
 
 import app.pbbls.android.R
+import app.pbbls.android.core.data.KarmaEarnedContent
 import app.pbbls.android.core.data.KarmaNotificationService
 import app.pbbls.android.core.model.KarmaReason
 import app.pbbls.android.core.model.PebbleCompletePayload
@@ -14,10 +15,12 @@ import app.pbbls.android.testing.postgrestException
 import app.pbbls.android.testing.recordEffects
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -54,7 +57,7 @@ class EditPebbleViewModelTest {
         }
 
     @Test
-    fun `saving writes the pebble only, reads the enrichment karma and checks achievements once`() =
+    fun `saving writes the pebble only, reads the karma total around it and checks achievements once`() =
         runTest {
             val h = Harness(backgroundScope)
             h.read.moments = mapOf("moment-1" to UiFixtures.momentDetail())
@@ -70,7 +73,8 @@ class EditPebbleViewModelTest {
                 h.writes.completed.single(),
             )
             assertTrue(h.writes.saved.isEmpty())
-            assertEquals(listOf("pebble-new" to KarmaReason.PEBBLE_ENRICHED), h.writes.karmaReads)
+            assertEquals(listOf("pebble-1", "pebble-1"), h.writes.karmaTotalReads)
+            assertTrue(h.writes.karmaReads.isEmpty())
             assertEquals(1, h.achievements.fireCheckCount)
             assertTrue(effects.values.contains(EditPebbleEffect.Saved))
             effects.stop()
@@ -102,6 +106,55 @@ class EditPebbleViewModelTest {
             assertEquals(0, h.achievements.fireCheckCount)
             assertTrue(h.writes.karmaReads.isEmpty())
         }
+
+    /** `complete_pebble` records a row only when the total moves (R13): an unchanged total shows nothing. */
+    @Test
+    fun `a save that earns no karma notifies nothing`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.writes.karmaTotalBefore = 7
+            h.writes.karmaTotalAfter = 7
+            savePrivacyChange(h)
+
+            assertNull(h.karma.activeCapsule)
+        }
+
+    @Test
+    fun `a save that earns karma notifies what that save earned`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.writes.karmaTotalBefore = 7
+            h.writes.karmaTotalAfter = 8
+            savePrivacyChange(h)
+
+            assertEquals(KarmaEarnedContent(1, KarmaReason.PEBBLE_ENRICHED), h.karma.activeCapsule)
+        }
+
+    @Test
+    fun `a failed karma read notifies nothing`() =
+        runTest {
+            val before = Harness(backgroundScope)
+            before.writes.karmaTotalBefore = null
+            before.writes.karmaTotalAfter = 8
+            savePrivacyChange(before)
+            assertNull(before.karma.activeCapsule)
+
+            val after = Harness(backgroundScope)
+            after.writes.karmaTotalBefore = 7
+            after.writes.karmaTotalAfter = null
+            savePrivacyChange(after)
+            assertNull(after.karma.activeCapsule)
+        }
+
+    private fun TestScope.savePrivacyChange(h: Harness) {
+        h.read.moments = mapOf("moment-1" to UiFixtures.momentDetail())
+        h.viewModel.start("moment-1")
+        advanceUntilIdle()
+        val state = h.viewModel.uiState.value as EditPebbleUiState.Content
+        h.viewModel.onDraftChange(state.draft.copy(visibility = Visibility.PUBLIC))
+        h.viewModel.save()
+        advanceUntilIdle()
+    }
 
     @Test
     fun `an incomplete pebble cannot be saved`() =

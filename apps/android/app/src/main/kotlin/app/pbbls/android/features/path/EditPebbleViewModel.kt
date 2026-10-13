@@ -76,6 +76,7 @@ class EditPebbleViewModel
         val uiState: StateFlow<EditPebbleUiState> = _uiState.asStateFlow()
 
         private var loadedMomentId: String? = null
+        private var loadedPebbleId: String? = null
 
         private val content: EditPebbleUiState.Content?
             get() = _uiState.value as? EditPebbleUiState.Content
@@ -101,6 +102,7 @@ class EditPebbleViewModel
                                     Log.e(TAG, "moment $momentId has no pebble to edit")
                                     EditPebbleUiState.Error
                                 } else {
+                                    loadedPebbleId = detail.pebble.id
                                     EditPebbleUiState.Content(draft = PebbleDraft.from(detail))
                                 }
                         },
@@ -126,16 +128,20 @@ class EditPebbleViewModel
             val state = content ?: return
             if (!state.canSave) return
             val momentId = loadedMomentId ?: return
+            val pebbleId = loadedPebbleId ?: return
             updateContent { it.copy(isSaving = true, saveErrorRes = null) }
             viewModelScope.launch {
                 withContext(NonCancellable) {
+                    // R13, iOS's method: `complete_pebble` records a row only when the total
+                    // moves, so the newest row may be an older save's. The difference is this one's.
+                    val karmaBefore = writes.karmaTotal(pebbleId)
                     runCatchingCancellable { writes.completePebble(PebbleCompletePayload.from(momentId, state.draft.answers)) }
                         .fold(
-                            onSuccess = { pebbleId ->
-                                karma.notifyEarned(
-                                    writes.karmaDelta(pebbleId, KarmaReason.PEBBLE_ENRICHED) ?: 0,
-                                    KarmaReason.PEBBLE_ENRICHED,
-                                )
+                            onSuccess = {
+                                val karmaAfter = writes.karmaTotal(pebbleId)
+                                if (karmaBefore != null && karmaAfter != null && karmaAfter > karmaBefore) {
+                                    karma.notifyEarned(karmaAfter - karmaBefore, KarmaReason.PEBBLE_ENRICHED)
+                                }
                                 // An edit can newly qualify an emotion_first badge; once per complete_pebble (A-7).
                                 achievements.fireCheck()
                                 effectsOut.emit(EditPebbleEffect.Saved)
