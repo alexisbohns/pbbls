@@ -303,9 +303,6 @@
     <!-- Karma flash reason labels (KarmaReason) — mirror web/iOS verbatim. -->
     <string name="karma_reason_pebble_created">Pebble created</string>
     <string name="karma_reason_pebble_enriched">Pebble enriched</string>
-    <!-- Pebble save-error messages (PebbleWriteService.pebbleSaveErrorMessage, D16). -->
-    <string name="pebble_save_error_generic">Couldn\'t save your pebble. Please try again.</string>
-    <string name="pebble_save_error_media_quota">Photo limit reached on this pebble.</string>
 
     <!-- ==== Pebble detail + delete (sub-project B) ==== -->
     <string name="pebble_delete">Delete</string>
@@ -494,23 +491,9 @@
     <string name="lab_reaction_upvote_a11y">Upvote</string>
     <string name="lab_reaction_remove_a11y">Remove rock</string>
     <string name="lab_reaction_count_a11y">%1$d upvotes</string>
-    <!-- ==== Drafts & composer autosave (M47) ==== -->
+    <!-- ==== Shared actions ==== -->
     <string name="action_retry">Try again</string>
     <string name="action_delete">Delete</string>
-    <string name="draft_save">Save as draft</string>
-    <string name="draft_save_error">Couldn\'t save that draft. Please try again.</string>
-    <!-- The composer resumes a draft by id (#852): shown when that by-id fetch fails or the row is gone. -->
-    <string name="draft_resume_load_error">Couldn\'t load that draft. Please try again.</string>
-    <string name="draft_restore_title">Pick up where you left off?</string>
-    <string name="draft_restore_body">We kept what you were writing here. Add your photo again when you\'re ready.</string>
-    <string name="draft_restore_confirm">Restore it</string>
-    <string name="draft_restore_discard">Start fresh</string>
-    <string name="drafts_title">Drafts</string>
-    <string name="drafts_entry">%1$d saved for later</string>
-    <string name="drafts_untitled">No name yet</string>
-    <string name="drafts_saved_ago">Saved %1$s ago</string>
-    <string name="drafts_empty">No drafts yet. Anything you start keeping shows up here.</string>
-    <string name="drafts_load_error">Couldn\'t load your drafts. Please try again.</string>
     <!-- ==== Connections (M49) ==== -->
     <string name="action_close">Close</string>
     <string name="connections_title">Connections</string>
@@ -597,7 +580,7 @@
     <string name="achievement_capsule_a11y_single">Achievement unlocked: %1$s</string>
     <string name="achievement_capsule_a11y_karma">You earned %1$d karma</string>
 
-    <!-- Step-by-step record flow (M58) — the eleven-screen composer.
+    <!-- Flow step copy (M58): the record flow's steps, shared by Capture and Complete (#1048).
          Ports the iOS `Features/Record` copy; FR keeps the informal "tu". -->
     <string name="record_photo_title">Start with a picture</string>
     <string name="record_photo_subtitle">Or skip it and write from memory.</string>
@@ -609,13 +592,10 @@
     <string name="record_domain_title">What part of life?</string>
     <string name="record_souls_title">Anyone in this one?</string>
     <string name="record_collection_title">Add it to a collection?</string>
-    <string name="record_glyph_title">Give it a glyph</string>
-    <string name="record_glyph_subtitle">A little mark, just for this one.</string>
     <string name="record_privacy_title">Who can see it?</string>
     <string name="record_success_title">Your pebble</string>
     <string name="record_action_skip">Skip</string>
     <string name="record_action_continue">Continue</string>
-    <string name="record_action_publish">Publish</string>
     <string name="record_success_exit">Back to my path</string>
     <string name="record_step_a11y">Step %1$d of %2$d</string>
     <string name="record_back_a11y">Back</string>
@@ -631,7 +611,6 @@
     <string name="record_privacy_secret_explanation">Only you can see this one.</string>
     <string name="record_privacy_private_explanation">Your mutual connections can see it.</string>
     <string name="record_privacy_public_explanation">Anyone with the link can see it.</string>
-    <string name="record_close_title">Keep this pebble?</string>
     <string name="record_close_keep_going">Keep going</string>
     <string name="record_close_discard">Discard</string>
     <string name="record_karma">+%1$d karma</string>
