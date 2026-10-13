@@ -131,6 +131,28 @@ class EditMomentViewModelTest {
             assertEquals(40, (h.viewModel.uiState.value as EditMomentUiState.Content).draft.name.length)
         }
 
+    /** A legacy name past the clamp survives an edit that leaves the name alone. */
+    @Test
+    fun `a long saved name is kept when only another field changes`() =
+        runTest {
+            val h = Harness()
+            val legacy = "y".repeat(60)
+            h.read.moments = mapOf("moment-1" to UiFixtures.momentDetail(name = legacy))
+            h.viewModel.start("moment-1")
+            advanceUntilIdle()
+            val state = h.viewModel.uiState.value as EditMomentUiState.Content
+            h.viewModel.onDraftChange(state.draft.copy(description = "Added later"))
+            h.viewModel.save()
+            advanceUntilIdle()
+
+            assertEquals(
+                legacy,
+                h.writes.saved
+                    .single()
+                    .name,
+            )
+        }
+
     @Test
     fun `removing the saved photo sends an empty snap set and deletes the files only after the save`() =
         runTest {

@@ -127,9 +127,13 @@ class EditMomentViewModel
         private val isSaving: Boolean
             get() = content?.isSaving == true
 
+        /** The name is clamped only when it is the field being edited: a longer legacy name survives a date change. */
         fun onDraftChange(draft: PebbleDraft) {
             if (isSaving) return
-            updateContent { it.copy(draft = draft.copy(name = draft.name.take(NAME_LIMIT)), saveErrorRes = null) }
+            updateContent {
+                val name = if (draft.name == it.draft.name) draft.name else draft.name.take(NAME_LIMIT)
+                it.copy(draft = draft.copy(name = name), saveErrorRes = null)
+            }
         }
 
         fun onPhotoPicked(uri: Uri) {
