@@ -47,7 +47,10 @@ import app.pbbls.android.core.designsystem.rememberReduceMotion
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.ui.GlyphPickerSlot
 import app.pbbls.android.core.ui.rememberGlyphPickerState
-import app.pbbls.android.features.path.record.steps.RecordSuccessStep
+import app.pbbls.android.features.path.flow.RecordFlowChrome
+import app.pbbls.android.features.path.flow.RecordStepAction
+import app.pbbls.android.features.path.flow.RecordStepScaffold
+import app.pbbls.android.features.path.flow.steps.RecordSuccessStep
 
 /** Enough for the slide to read as one motion without holding the user up. */
 private const val STEP_TRANSITION_MS = 280

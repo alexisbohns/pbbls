@@ -23,16 +23,16 @@ import app.pbbls.android.core.model.PebbleGlyph
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.features.path.create.pickers.DomainPickerContent
+import app.pbbls.android.features.path.flow.RecordFlowChrome
+import app.pbbls.android.features.path.flow.RecordStepAction
+import app.pbbls.android.features.path.flow.RecordStepScaffold
+import app.pbbls.android.features.path.flow.steps.RecordCollectionStep
+import app.pbbls.android.features.path.flow.steps.RecordNameStep
+import app.pbbls.android.features.path.flow.steps.RecordPhotoStep
+import app.pbbls.android.features.path.flow.steps.RecordPrivacyStep
+import app.pbbls.android.features.path.flow.steps.RecordSuccessStep
 import app.pbbls.android.features.path.record.CloseConfirmDialog
-import app.pbbls.android.features.path.record.RecordFlowChrome
 import app.pbbls.android.features.path.record.RecordStep
-import app.pbbls.android.features.path.record.RecordStepAction
-import app.pbbls.android.features.path.record.RecordStepScaffold
-import app.pbbls.android.features.path.record.steps.RecordCollectionStep
-import app.pbbls.android.features.path.record.steps.RecordNameStep
-import app.pbbls.android.features.path.record.steps.RecordPhotoStep
-import app.pbbls.android.features.path.record.steps.RecordPrivacyStep
-import app.pbbls.android.features.path.record.steps.RecordSuccessStep
 import com.android.tools.screenshot.PreviewTest
 
 /**

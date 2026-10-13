@@ -5,12 +5,12 @@ import androidx.compose.ui.Modifier
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.PebbleAnswers
 import app.pbbls.android.core.model.PebbleCollection
-import app.pbbls.android.features.path.record.steps.RecordCollectionStep
-import app.pbbls.android.features.path.record.steps.RecordDomainStep
-import app.pbbls.android.features.path.record.steps.RecordEmotionStep
-import app.pbbls.android.features.path.record.steps.RecordPrivacyStep
-import app.pbbls.android.features.path.record.steps.RecordSoulsStep
-import app.pbbls.android.features.path.record.steps.RecordValenceStep
+import app.pbbls.android.features.path.flow.steps.RecordCollectionStep
+import app.pbbls.android.features.path.flow.steps.RecordDomainStep
+import app.pbbls.android.features.path.flow.steps.RecordEmotionStep
+import app.pbbls.android.features.path.flow.steps.RecordPrivacyStep
+import app.pbbls.android.features.path.flow.steps.RecordSoulsStep
+import app.pbbls.android.features.path.flow.steps.RecordValenceStep
 
 /**
  * The body of a Complete step, on the record flow's stateless step bodies.

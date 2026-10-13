@@ -9,16 +9,16 @@ import app.pbbls.android.core.model.PebbleCollection
 import app.pbbls.android.core.model.PebbleDraft
 import app.pbbls.android.core.ui.GlyphPickerSlot
 import app.pbbls.android.core.ui.GlyphPickerState
-import app.pbbls.android.features.path.record.steps.RecordCollectionStep
-import app.pbbls.android.features.path.record.steps.RecordDomainStep
-import app.pbbls.android.features.path.record.steps.RecordEmotionStep
+import app.pbbls.android.features.path.flow.steps.RecordCollectionStep
+import app.pbbls.android.features.path.flow.steps.RecordDomainStep
+import app.pbbls.android.features.path.flow.steps.RecordEmotionStep
+import app.pbbls.android.features.path.flow.steps.RecordNameStep
+import app.pbbls.android.features.path.flow.steps.RecordPhotoStep
+import app.pbbls.android.features.path.flow.steps.RecordPrivacyStep
+import app.pbbls.android.features.path.flow.steps.RecordSoulsStep
+import app.pbbls.android.features.path.flow.steps.RecordValenceStep
+import app.pbbls.android.features.path.flow.steps.RecordWhenStep
 import app.pbbls.android.features.path.record.steps.RecordGlyphStep
-import app.pbbls.android.features.path.record.steps.RecordNameStep
-import app.pbbls.android.features.path.record.steps.RecordPhotoStep
-import app.pbbls.android.features.path.record.steps.RecordPrivacyStep
-import app.pbbls.android.features.path.record.steps.RecordSoulsStep
-import app.pbbls.android.features.path.record.steps.RecordValenceStep
-import app.pbbls.android.features.path.record.steps.RecordWhenStep
 
 /**
  * Renders the body of whichever step the flow is on — ports iOS

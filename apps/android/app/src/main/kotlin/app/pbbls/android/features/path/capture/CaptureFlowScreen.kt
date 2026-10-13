@@ -43,12 +43,12 @@ import app.pbbls.android.core.data.rememberTapHaptics
 import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.designsystem.rememberReduceMotion
-import app.pbbls.android.features.path.record.RecordFlowChrome
-import app.pbbls.android.features.path.record.RecordStepAction
-import app.pbbls.android.features.path.record.RecordStepScaffold
-import app.pbbls.android.features.path.record.steps.RecordNameStep
-import app.pbbls.android.features.path.record.steps.RecordPhotoStep
-import app.pbbls.android.features.path.record.steps.RecordWhenStep
+import app.pbbls.android.features.path.flow.RecordFlowChrome
+import app.pbbls.android.features.path.flow.RecordStepAction
+import app.pbbls.android.features.path.flow.RecordStepScaffold
+import app.pbbls.android.features.path.flow.steps.RecordNameStep
+import app.pbbls.android.features.path.flow.steps.RecordPhotoStep
+import app.pbbls.android.features.path.flow.steps.RecordWhenStep
 
 /** As the record flow: enough for the slide to read as one motion without holding the user up. */
 private const val STEP_TRANSITION_MS = 280

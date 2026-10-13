@@ -1,4 +1,4 @@
-package app.pbbls.android.features.path.record
+package app.pbbls.android.features.path.flow
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

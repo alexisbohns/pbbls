@@ -1,4 +1,4 @@
-package app.pbbls.android.features.path.record.steps
+package app.pbbls.android.features.path.flow.steps
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween

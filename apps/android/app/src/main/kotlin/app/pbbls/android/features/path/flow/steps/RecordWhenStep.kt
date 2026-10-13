@@ -1,4 +1,4 @@
-package app.pbbls.android.features.path.record.steps
+package app.pbbls.android.features.path.flow.steps
 
 import android.text.format.DateFormat
 import androidx.compose.foundation.background
