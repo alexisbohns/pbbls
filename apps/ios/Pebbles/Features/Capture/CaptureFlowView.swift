@@ -25,6 +25,8 @@ struct CaptureFlowView: View {
     /// Set once the moment is saved by "Make it a pebble now": the cover then
     /// shows Complete for it instead of Capture.
     @State private var completing: CompleteTarget?
+    /// Which button started the save in flight, so only that one spins.
+    @State private var savingThenComplete = false
 
     private struct CompleteTarget: Equatable {
         let momentId: UUID
@@ -122,7 +124,11 @@ struct CaptureFlowView: View {
             // The library grid runs to the bottom, `Skip`/`Done` over it.
             contentFillsHeight: model.step == .photo,
             secondaryAction: model.step == .name
-                ? RecordStepSecondaryAction(label: "Make it a pebble now", enabled: canSaveNow) {
+                ? RecordStepSecondaryAction(
+                    label: "Make it a pebble now",
+                    enabled: canSaveNow,
+                    isLoading: model.isSaving && savingThenComplete
+                ) {
                     Task { await save(thenComplete: true) }
                 }
                 : nil
@@ -198,7 +204,7 @@ struct CaptureFlowView: View {
         case .when:
             return .primary("Continue", enabled: true, loading: false) { model.advance() }
         case .name:
-            return .primary("Save moment", enabled: canSaveNow, loading: model.isSaving) {
+            return .primary("Save moment", enabled: canSaveNow, loading: model.isSaving && !savingThenComplete) {
                 Task { await save(thenComplete: false) }
             }
         }
@@ -239,6 +245,7 @@ struct CaptureFlowView: View {
             failSave(blocked)
             return
         }
+        savingThenComplete = thenComplete
         model.beginSaving()
         let payload = SaveMomentPayload(capture: model.draft, formSnap: snaps?.formSnap, userId: userId)
         do {

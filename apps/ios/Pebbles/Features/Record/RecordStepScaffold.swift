@@ -17,6 +17,8 @@ enum RecordStepAction {
 struct RecordStepSecondaryAction {
     let label: LocalizedStringResource
     let enabled: Bool
+    /// Shows a spinner in place of the label while the work it started runs.
+    var isLoading = false
     let perform: () -> Void
 }
 
@@ -78,15 +80,7 @@ struct RecordStepScaffold<Content: View>: View {
                     VStack(spacing: Spacing.xs) {
                         actionView(action)
                         if let secondaryAction {
-                            Button(action: secondaryAction.perform) {
-                                Text(secondaryAction.label)
-                                    .pebblesFont(.bodyEmphasized)
-                                    .foregroundStyle(Color.accent.primary)
-                                    .frame(maxWidth: .infinity, minHeight: 44)
-                            }
-                            .buttonStyle(.plain)
-                            .disabled(!secondaryAction.enabled)
-                            .opacity(secondaryAction.enabled ? 1 : 0.4)
+                            secondaryButton(secondaryAction)
                         }
                     }
                     .padding(.horizontal, Spacing.lg)
@@ -95,6 +89,27 @@ struct RecordStepScaffold<Content: View>: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    /// A plain text button whose whole 44pt row takes the tap, not only the
+    /// glyphs of its label.
+    private func secondaryButton(_ secondary: RecordStepSecondaryAction) -> some View {
+        Button(action: secondary.perform) {
+            Group {
+                if secondary.isLoading {
+                    ProgressView().tint(Color.accent.primary)
+                } else {
+                    Text(secondary.label)
+                        .pebblesFont(.bodyEmphasized)
+                        .foregroundStyle(Color.accent.primary)
+                }
+            }
+            .frame(maxWidth: .infinity, minHeight: 44)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(!secondary.enabled || secondary.isLoading)
+        .opacity(secondary.enabled || secondary.isLoading ? 1 : 0.4)
     }
 
     /// The same pill, laid over the content's bottom edge rather than pushing
