@@ -39,7 +39,9 @@ struct PebbleGlyph: Decodable, Hashable, Identifiable {
     }
 
     /// The square side the strokes are drawn in: the third number of
-    /// `view_box`. iOS carves at 200; imported web glyphs may differ.
+    /// `view_box`. iOS carves at 200; imported web glyphs may differ. The box
+    /// is assumed square at the origin (`0 0 N N`, every known source); minX
+    /// and minY are ignored.
     var viewBoxSide: Double {
         let numbers = viewBox
             .split(whereSeparator: { $0 == " " || $0 == "," })

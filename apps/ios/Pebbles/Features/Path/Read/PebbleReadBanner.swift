@@ -12,9 +12,9 @@ import os
 /// This replaces the previous two-phase reveal (the snap sliding in over the
 /// pebble after the stroke animation, #335 / #582): the page now frames the
 /// picture outright, so there is no mask/slide. A failed load simply stays on
-/// the Petroglyph heading — no error UI. The Petroglyph keeps its own native
-/// draw-on (via `PebbleAnimatedRenderView`); nothing gates the snap swap but
-/// the decode itself.
+/// the Petroglyph heading — no error UI. The Petroglyph is the lit stone (the
+/// derived glyph, or the blank stone for a bare moment) with its light sweep;
+/// nothing gates the snap swap but the decode itself.
 struct PebbleReadBanner: View {
     let snapStoragePath: String?
     /// Nil for a bare moment: the blank stone, and the banner falls back to

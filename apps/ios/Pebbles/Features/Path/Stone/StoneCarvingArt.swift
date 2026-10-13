@@ -44,9 +44,20 @@ enum StoneCarvingArt {
 
     private static let lock = NSLock()
     private static var cache: [Valence: Art] = [:]
+    /// A cached carving with the glyph it was built from, so a hit can be
+    /// validated against the glyph's current content.
+    private final class PebbleCarvingEntry {
+        let glyph: PebbleGlyph
+        let art: Art
+        init(glyph: PebbleGlyph, art: Art) {
+            self.glyph = glyph
+            self.art = art
+        }
+    }
+
     /// Carvings for real pebbles, keyed by valence and glyph id. An `NSCache`
     /// so a long Path does not pin every pebble's paths forever.
-    private static let pebbleCache = NSCache<NSString, Art>()
+    private static let pebbleCache = NSCache<NSString, PebbleCarvingEntry>()
 
     static func art(for valence: Valence) -> Art? {
         lock.lock()
@@ -61,8 +72,9 @@ enum StoneCarvingArt {
     /// valence, plus its derived glyph's strokes, wobbled and placed in the
     /// engine's slot exactly as the sample glyph is. Nil glyph → veins only.
     /// Strokes that do not wobble are skipped and logged. Cached per
-    /// (valence, glyph id): a glyph's strokes never change after carving
-    /// (`GlyphService` only renames).
+    /// (valence, glyph id) and validated against the glyph's content on a hit:
+    /// a glyph can be redrawn under the same id (an admin domain-glyph redraw,
+    /// a web mark edit), so a stale entry is rebuilt and replaced.
     static func art(for valence: Valence, glyph: PebbleGlyph?) -> Art? {
         guard let seed = art(for: valence) else { return nil }
         guard let glyph else {
@@ -70,7 +82,7 @@ enum StoneCarvingArt {
                        outline: seed.outline, fossil: seed.fossil)
         }
         let key = "\(valence.rawValue)|\(glyph.id.uuidString)" as NSString
-        if let cached = pebbleCache.object(forKey: key) { return cached }
+        if let entry = pebbleCache.object(forKey: key), entry.glyph == glyph { return entry.art }
         let ink = CGMutablePath()
         ink.addPath(seed.veins)
         if let placed = placedGlyphInk(
@@ -81,7 +93,7 @@ enum StoneCarvingArt {
         }
         let built = Art(viewBox: seed.viewBox, ink: ink.copy() ?? ink, veins: seed.veins,
                         outline: seed.outline, fossil: seed.fossil)
-        pebbleCache.setObject(built, forKey: key)
+        pebbleCache.setObject(PebbleCarvingEntry(glyph: glyph, art: built), forKey: key)
         return built
     }
 

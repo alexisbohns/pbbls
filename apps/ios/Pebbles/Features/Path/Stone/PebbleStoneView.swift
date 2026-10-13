@@ -66,6 +66,7 @@ struct PebbleStoneView: View {
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(carving == .blank ? Text("Not a pebble yet") : Text(verbatim: ""))
         .accessibilityHidden(carving != .blank)
+        .accessibilityAddTraits(carving == .blank ? .isImage : [])
         .aspectRatio(PebbleOutlineGeometry.aspectRatio(for: valence.sizeGroup), contentMode: .fit)
         .onAppear {
             guard followsTilt else { return }

@@ -67,6 +67,24 @@ struct PebbleStoneCarvingTests {
         #expect(first === second)
     }
 
+    @Test("a glyph redrawn under the same id is recarved, not served stale")
+    func redrawnUnderSameId() throws {
+        let id = UUID()
+        func cross(_ side: Double) -> PebbleGlyph {
+            PebbleGlyph(
+                id: id, name: nil,
+                strokes: [GlyphStroke(d: "M 0,0 L \(side),\(side) M 0,\(side) L \(side),0", width: 6)],
+                viewBox: "0 0 200 200", source: .domain
+            )
+        }
+        let big = try #require(StoneCarvingArt.art(for: .highlightLarge, glyph: cross(200)))
+        let small = try #require(StoneCarvingArt.art(for: .highlightLarge, glyph: cross(100)))
+        #expect(big !== small)
+        #expect(small.ink != big.ink)
+        let again = try #require(StoneCarvingArt.art(for: .highlightLarge, glyph: cross(100)))
+        #expect(again === small)
+    }
+
     @Test("the blank stone: nothing carved, the outline is the stone's own edge (R4)")
     func blank() throws {
         let seed = try #require(StoneCarvingArt.art(for: .neutralMedium))
