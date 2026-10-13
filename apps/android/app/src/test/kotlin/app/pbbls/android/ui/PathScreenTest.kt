@@ -121,6 +121,28 @@ class PathScreenTest : AppUiTest() {
         compose.onNodeWithText("Coffee with Mo").assertDoesNotExist()
     }
 
+    /**
+     * The pager animates through the weeks in between; those passing pages are
+     * not the user's choice and must not re-steer it short of the target.
+     */
+    @Test
+    fun `a focus request pages past the weeks in between`() {
+        val thisWeek = UiFixtures.pathMoment(id = "moment-now", name = "Coffee with Mo", happenedAt = OffsetDateTime.now())
+        val between = UiFixtures.pathMoment(id = "moment-mid", name = "Book club", happenedAt = OffsetDateTime.now().minusWeeks(2))
+        path.path = listOf(between, thisWeek)
+        signedIn()
+        compose.onNodeWithText("Coffee with Mo").assertIsDisplayed()
+
+        val farBack =
+            UiFixtures.pathMoment(id = "moment-far", name = "Lake swim", happenedAt = OffsetDateTime.now().minusWeeks(5))
+        path.path = listOf(farBack, between, thisWeek)
+        focusRequests.request(farBack.id)
+        backgroundAndReturn()
+
+        compose.onNodeWithText(weekHeader(farBack.happenedAt)).assertIsDisplayed()
+        compose.onNodeWithText("Lake swim").assertIsDisplayed()
+    }
+
     /** The reload guard above must not swallow a real page change: a swipe still moves the focus. */
     @Test
     fun `swiping the pager back moves the focus to the previous week`() {
