@@ -3,7 +3,7 @@ package app.pbbls.android.core.ui.render
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import app.pbbls.android.R
 import app.pbbls.android.core.model.PebbleGlyph
 import app.pbbls.android.core.model.Valence
@@ -42,12 +42,12 @@ internal fun rememberStoneModel(
     /** The blank stone: the silhouette outline only (R4). */
     outlineOnly: Boolean = false,
 ): PebbleSvgModel? {
-    val context = LocalContext.current
+    val resources = LocalResources.current
     val resId = StoneShapeAssets.resId(valence.sizeGroup, valence.polarity)
     val shape =
         remember(resId) {
             parsedShapes[resId]
-                ?: context.resources
+                ?: resources
                     .openRawResource(resId)
                     .bufferedReader()
                     .use { it.readText() }
