@@ -17,7 +17,8 @@ struct PebbleReadTitle: View {
             MomentNameText(
                 name: name,
                 color: nameColor ?? Color.system.foreground,
-                untitledColor: dateColor ?? Color.system.secondary
+                untitledColor: dateColor ?? Color.system.secondary,
+                slantsUntitled: true
             )
             .font(.custom("Ysabeau-SemiBold", size: 24))
             .multilineTextAlignment(.center)
