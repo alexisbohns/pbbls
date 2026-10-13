@@ -79,8 +79,19 @@ struct PathPebbleRow: View {
 
     /// The lit stone (#974), at the rest light: the row never animates.
     private var thumbnail: some View {
-        PebbleStoneView(valence: moment.pebble?.valence ?? .neutralMedium, renderSvg: nil, palette: palette)
+        stone
             .frame(width: thumbnailSize, height: thumbnailSize)
+    }
+
+    /// The pebble's derived glyph carved in its stone, or the blank stone
+    /// for an uncompleted moment (R4).
+    @ViewBuilder
+    private var stone: some View {
+        if let pebble = moment.pebble {
+            PebbleStoneView(valence: pebble.valence, glyph: pebble.glyph, palette: palette)
+        } else {
+            PebbleStoneView.blank()
+        }
     }
 
     @ViewBuilder

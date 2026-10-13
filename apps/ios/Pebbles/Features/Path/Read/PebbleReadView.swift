@@ -29,10 +29,7 @@ struct PebbleReadView: View {
             VStack(alignment: .leading, spacing: 20) {
                 PebbleReadBanner(
                     snapStoragePath: detail.snaps.first?.storagePath,
-                    renderSvg: nil,
-                    renderVersion: nil,
-                    emotionId: detail.pebble?.emotion.id,
-                    valence: detail.pebble?.valence ?? .neutralMedium
+                    pebble: detail.pebble
                 )
 
                 PebbleReadTitle(

@@ -156,8 +156,6 @@ struct RecordFlowView: View {
                 RecordSuccessStep(
                     name: model.draft.name,
                     response: response,
-                    valence: model.draft.valence ?? .neutralMedium,
-                    emotionId: model.draft.emotionId,
                     onExit: { dismiss() }
                 )
             } else {

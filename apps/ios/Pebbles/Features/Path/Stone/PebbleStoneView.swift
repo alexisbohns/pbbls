@@ -2,17 +2,18 @@ import SwiftUI
 
 /// A real pebble as lit stone (#974), fitted into whatever frame it is given:
 /// the seed's veins and fossil for its valence, its own glyph carved from its
-/// composed SVG, coloured by its emotion's palette (the brand accent when the
-/// palette is unknown). Used by the Path rows at the rest light, and by the
-/// read page with `followsTilt`, where the light follows the phone in the
-/// hand and sweeps once on appearance.
+/// derived glyph's strokes, coloured by its emotion's palette (the brand
+/// accent when the palette is unknown). An uncompleted moment draws as the
+/// blank stone (`blank(followsTilt:)`, R4). Used by the Path and list rows at
+/// the rest light, and by the read page with `followsTilt`, where the light
+/// follows the phone in the hand and sweeps once on appearance.
 ///
 /// Nothing redraws by itself: the tilt publishes only when the phone moves,
 /// the sweep is finite, and Low Power Mode draws the flat rendering.
 struct PebbleStoneView: View {
     let valence: Valence
-    let renderSvg: String?
-    let palette: EmotionPalette?
+    let carving: StoneCarving
+    let stonePalette: StonePalette
     var followsTilt: Bool = false
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -22,8 +23,26 @@ struct PebbleStoneView: View {
     private static let sweepDuration: TimeInterval = 1.6
     private static let sweepSwing: Double = .pi / 3
 
-    private var stonePalette: StonePalette {
-        palette.map(StonePalette.init(emotion:)) ?? .brand
+    /// A completed pebble: its derived glyph, coloured by its emotion
+    /// (the brand accent when the palette is unknown).
+    init(valence: Valence, glyph: PebbleGlyph?, palette: EmotionPalette?, followsTilt: Bool = false) {
+        self.valence = valence
+        self.carving = .pebble(glyph)
+        self.stonePalette = palette.map(StonePalette.init(emotion:)) ?? .brand
+        self.followsTilt = followsTilt
+    }
+
+    /// An uncompleted moment (R4): neutral-medium silhouette, outline only,
+    /// the fixed grey ramp, labelled "Not a pebble yet" for VoiceOver.
+    static func blank(followsTilt: Bool = false) -> PebbleStoneView {
+        PebbleStoneView(valence: .neutralMedium, carving: .blank, stonePalette: .blank, followsTilt: followsTilt)
+    }
+
+    private init(valence: Valence, carving: StoneCarving, stonePalette: StonePalette, followsTilt: Bool) {
+        self.valence = valence
+        self.carving = carving
+        self.stonePalette = stonePalette
+        self.followsTilt = followsTilt
     }
 
     var body: some View {
@@ -39,11 +58,15 @@ struct PebbleStoneView: View {
                     light: light(at: context.date),
                     height: height,
                     isFlat: ProcessInfo.processInfo.isLowPowerModeEnabled,
-                    pebbleSvg: renderSvg
+                    carving: carving
                 )
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(carving == .blank ? Text("Not a pebble yet") : Text(verbatim: ""))
+        .accessibilityHidden(carving != .blank)
+        .accessibilityAddTraits(carving == .blank ? .isImage : [])
         .aspectRatio(PebbleOutlineGeometry.aspectRatio(for: valence.sizeGroup), contentMode: .fit)
         .onAppear {
             guard followsTilt else { return }

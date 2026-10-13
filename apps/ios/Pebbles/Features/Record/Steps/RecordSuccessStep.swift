@@ -1,37 +1,18 @@
 import SwiftUI
 
-/// Step 10 — the pebble, drawn on.
+/// Step 10 — the pebble's name and karma.
 ///
-/// Reuses `PebbleReadPetroglyph`, the same component the read view uses: it
-/// composites the outline backdrop and traces the composed render with the
-/// native draw-on animation, and it already honors Reduce Motion.
-///
-/// On soft success (`renderSvg` nil) it degrades to name + karma with no
-/// artwork rather than blocking — the pebble exists and the user should be
-/// told so (D10).
+/// The compose response no longer carries a render, so this old flow shows
+/// no artwork (it is deleted in #1047's last part; its replacement draws the
+/// stone from the pebble's derived glyph).
 struct RecordSuccessStep: View {
     let name: String
     let response: ComposePebbleResponse
-    let valence: Valence
-    let emotionId: UUID?
     let onExit: () -> Void
-
-    @Environment(EmotionPaletteService.self) private var palettes
 
     var body: some View {
         VStack(spacing: Spacing.xl) {
             Spacer(minLength: 0)
-
-            if response.renderSvg != nil {
-                PebbleReadPetroglyph(
-                    renderSvg: response.renderSvg,
-                    renderVersion: response.renderVersion,
-                    valence: valence,
-                    palette: emotionId.flatMap { palettes.palette(for: $0) }
-                )
-                .frame(maxWidth: .infinity)
-                .frame(height: 280)
-            }
 
             VStack(spacing: Spacing.sm) {
                 // User-authored, so never localized.
