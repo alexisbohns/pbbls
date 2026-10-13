@@ -1085,7 +1085,7 @@ fun momentWriteErrorRes(error: DataError): Int =
     }
 ```
 
-Delete failures keep the existing `pebble_delete_error` dialog (R10).
+Delete failures are not this table's: they get their own string (R15, added in Task 2.2 where it is first used, so Part 1 stays lint-clean).
 
 - [ ] **Step 4:** Run `MomentErrorMessageTest` and `LocalizationParityTest` → PASS.
 - [ ] **Step 5:** Commit `feat(android): map moment write failures to copy`.
@@ -1866,6 +1866,8 @@ fun PebbleThumbnail(
 
 `PathScreen`: `DeleteConfirmDialog(pebbleName = target.name ?: stringResource(R.string.moment_untitled), …)` (the dialog is replaced by the R8 dialog in Part 4).
 
+Delete-failure copy (R15): add `<string name="moment_delete_error">Couldn\'t delete</string>` / `<string name="moment_delete_error">Impossible de supprimer</string>` (the iOS `Couldn't delete` alert title and its French from `apps/ios/Pebbles/Resources/Localizable.xcstrings`). Every moment or pebble delete failure shows it instead of `pebble_delete_error`: Path's private `DeleteErrorDialog` here, the soul and collection detail screens' `DeleteErrorDialog(message = stringResource(R.string.moment_delete_error), …)` (Task 2.3), and the read page's (Part 4). `pebble_delete_error` stays the shared `DeleteErrorDialog` default for the non-moment deletes (souls, collections, connections, account).
+
 - [ ] **Step 4:** Run both test classes → PASS.
 
 ### Task 2.3: Soul and collection detail on `v_moments_full`
@@ -2525,7 +2527,7 @@ followed by the existing `VisibilityChip` row. `CreatePebbleScreen` is unaffecte
 - [ ] **Step 1:** Port `PathRowScreenshots`, `PebbleRowScreenshots`, `PathScreenScreenshots`, `ListDetailScreenshots`, `PebbleDetailScreenshots`, `EditPebbleScreenshots` from `Pebble`/`PebbleDetail`/`render_svg` fixtures to `MomentPreviewFixtures` (keep every existing preview name so the diff shows changed references, not churn).
 - [ ] **Step 2:** Add `@PreviewTest` previews: `PathRow_UntitledPhotoOnly` (name null → italic "Untitled", photo, no pebble), `PebbleDetail_BareMoment` (no tiles, no souls, no badge), `PebbleDetail_MenuOpen` (Edit moment, Edit pebble), `EditMoment_Content`, `EditMoment_NeedsContent` (blank name, no photo: Save disabled, hint shown), `EditPebble_Content`.
 - [ ] **Step 3:** `./gradlew compileDebugScreenshotTestKotlin` → BUILD SUCCESSFUL. Do not run `updateDebugScreenshotTest`.
-- [ ] **Step 4:** Robolectric. `ui/PebbleDeleteTest`: arm `FakeMomentReadService.path`, assert `FakeMomentWriteService.deletedMoments` after confirming, and that a failed delete (armed `failNext`) shows `R.string.pebble_delete_error` with the row still there. `ui/PathScreenTest`: arm `FakeMomentReadService`. `ui/NavigationTest`: rename "Path opens a pebble's detail, and the detail opens its edit form" to "Path opens a moment, and its menu opens Edit moment and Edit pebble" (tap the row, tap `R.string.more_actions_a11y`, tap `R.string.edit_moment`, assert the Edit moment bar title; back; reopen the menu, tap `R.string.edit_pebble_title`); add "a soul's moment row opens the read page" (arm `FakeMomentReadService.withSoul` and `.moments`) and the same for a collection.
+- [ ] **Step 4:** Robolectric. `ui/PebbleDeleteTest`: arm `FakeMomentReadService.path`, assert `FakeMomentWriteService.deletedMoments` after confirming, and that a failed delete (armed `failNext`) shows `R.string.moment_delete_error` (R15) with the row still there. `ui/PathScreenTest`: arm `FakeMomentReadService`. `ui/NavigationTest`: rename "Path opens a pebble's detail, and the detail opens its edit form" to "Path opens a moment, and its menu opens Edit moment and Edit pebble" (tap the row, tap `R.string.more_actions_a11y`, tap `R.string.edit_moment`, assert the Edit moment bar title; back; reopen the menu, tap `R.string.edit_pebble_title`); add "a soul's moment row opens the read page" (arm `FakeMomentReadService.withSoul` and `.moments`) and the same for a collection.
 - [ ] **Step 5:** `./gradlew ktlintCheck testDebugUnitTest assembleDebug lint` → BUILD SUCCESSFUL.
 - [ ] **Step 6:** Commits, in order: `feat(android): read the path from path_moments`, `feat(android): read moments from v_moments_full`, the two edit commits above, `test(android): port the path, detail and edit previews to moments`. Open the PR with the `rebaseline-screenshots` label (row titles, the edit screens and the detail all change); approve the held runs.
 
@@ -3280,7 +3282,7 @@ Strings (EN / FR):
 
 `PathViewModel.confirmDelete(choice: MomentDeleteChoice)` runs `writes.delete(target.id, target.pebble?.id, choice)` then `reload()`; failure sets `didDeleteFail` as today. `PathScreen` shows `MomentDeleteDialog(hasPebble = target.isCompleted, onConfirm = { choice -> viewModel.confirmDelete(choice); if (choice == MomentDeleteChoice.MOMENT) onDeleteConfirmed(target.id) }, onDismiss = viewModel::cancelDelete)`; delete `DeleteConfirmDialog` and switch the two `PebbleDetailScreenshots` previews that used it to `MomentDeleteDialog` (one per `hasPebble`). `SoulDetail*` and `CollectionDetail*` use the same dialog and `confirmDelete(choice)`; their rows always carry a pebble.
 
-`PebbleDetailViewModel` gains `UiEffects<PebbleDetailEffect>` (`data object MomentDeleted`), a `pendingDelete: StateFlow<Boolean>`, `requestDelete()`, `cancelDelete()`, `confirmDelete(choice)` (`MOMENT` → emit `MomentDeleted`; `PEBBLE_ONLY` → `reload()`), and a `didDeleteFail` flag shown with `DeleteErrorDialog`. Its constructor becomes `(moments: MomentReadServicing, writes: MomentWriteServicing)`. The ⋮ menu from Part 2 gains its last item, `DropdownMenuItem(text = { Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) }, onClick = { menuOpen = false; onDelete() })`, after Edit moment and Edit pebble; there is no standalone trash button (R7). `PebbleDetailScreen` shows `MomentDeleteDialog(hasPebble = detail.pebble != null, onConfirm = viewModel::confirmDelete, onDismiss = viewModel::cancelDelete)` while `pendingDelete` is true. `PebbleDetailScreen` takes `onMomentDeleted: () -> Unit`; the entry provider passes `{ navigator.closeDetail(PebblesKey.PebbleDetail(key.momentId)) }`.
+`PebbleDetailViewModel` gains `UiEffects<PebbleDetailEffect>` (`data object MomentDeleted`), a `pendingDelete: StateFlow<Boolean>`, `requestDelete()`, `cancelDelete()`, `confirmDelete(choice)` (`MOMENT` → emit `MomentDeleted`; `PEBBLE_ONLY` → `reload()`), and a `didDeleteFail` flag shown with `DeleteErrorDialog(message = stringResource(R.string.moment_delete_error), …)` (R15). Its constructor becomes `(moments: MomentReadServicing, writes: MomentWriteServicing)`. The ⋮ menu from Part 2 gains its last item, `DropdownMenuItem(text = { Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error) }, onClick = { menuOpen = false; onDelete() })`, after Edit moment and Edit pebble; there is no standalone trash button (R7). `PebbleDetailScreen` shows `MomentDeleteDialog(hasPebble = detail.pebble != null, onConfirm = viewModel::confirmDelete, onDismiss = viewModel::cancelDelete)` while `pendingDelete` is true. `PebbleDetailScreen` takes `onMomentDeleted: () -> Unit`; the entry provider passes `{ navigator.closeDetail(PebblesKey.PebbleDetail(key.momentId)) }`.
 
 - [ ] **Step 4:** Run the four ViewModel tests → PASS. `ui/PebbleDeleteTest`: add `a completed row offers both choices, and keeping the moment deletes only the pebble` (tap `R.string.delete_pebble_keep_moment`, assert `FakeMomentWriteService.deletedPebbles`), and `the read page's menu deletes the moment and closes the page` (tap `R.string.more_actions_a11y`, `R.string.action_delete`, `R.string.delete_moment_too`).
 - [ ] **Step 5:** `./gradlew ktlintCheck testDebugUnitTest assembleDebug lint` → BUILD SUCCESSFUL. Commit `feat(android): choose between deleting the pebble and the moment`. Previews: `MomentDeleteDialog_WithPebble`, `MomentDeleteDialog_BareMoment`, `PebbleDetail_MenuOpenWithDelete`. PR with `rebaseline-screenshots`.
@@ -4439,6 +4441,43 @@ Add `CompletePebble` to `PebblesKeysTest`'s round-trip and modal lists.
 
 **Manual check:** complete a backfilled bare moment on the AVD; leave on the emotion step with ✕, reopen from the read page and land on domain with the emotion kept; finish and see the karma line and the derived glyph; an achievement unlock (first pebble with an emotion) can present over the success screen.
 
+### Task 5.5: Path focuses the moment's week (R14)
+
+**Files:** Create `features/path/PathFocusRequests.kt`; Modify `features/path/PathViewModel.kt`, `features/path/complete/CompleteFlowViewModel.kt`; Tests `PathViewModelTest.kt`, `CompleteFlowViewModelTest.kt`.
+
+Path already has one source of truth for its focus: `PathViewModel.focusedWeekStart`, which `PathContent` follows by animating the pager (`LaunchedEffect(focusedWeekStart) { pagerState.animateScrollToPage(…) }`, the same path a chevron or cairn tap takes). R14 only has to set it. Capture and Complete are separate back-stack entries with their own ViewModels, and returning to Path already reloads it (`onResumed` → `reload()`), so the request rides a singleton that the reload consumes:
+
+```kotlin
+package app.pbbls.android.features.path
+
+import javax.inject.Inject
+import javax.inject.Singleton
+
+/**
+ * One-shot "show this moment's week" request from a flow that just wrote a
+ * moment (Capture's save, Complete's completion) to the Path, which consumes it
+ * on its next load (R14, iOS P12). By moment id, not date: Path finds the week
+ * in what it just loaded, so the request can never point at a week the
+ * timeline does not have.
+ */
+@Singleton
+class PathFocusRequests
+    @Inject
+    constructor() {
+        @Volatile private var pendingMomentId: String? = null
+
+        fun request(momentId: String) {
+            pendingMomentId = momentId.lowercase()
+        }
+
+        fun consume(): String? = pendingMomentId.also { pendingMomentId = null }
+    }
+```
+
+- [ ] **Step 1: Write the failing tests.** `PathViewModelTest`: `a focus request moves the timeline to that moment's week on the next load` (arm two moments three weeks apart, focus is the current week; `focusRequests.request(old.id)`; `onResumed()` twice; assert `Content.focusedWeekStart` is the older moment's week start); `an unknown focus request keeps the current focus`. `CompleteFlowViewModelTest`: a successful completion calls `request(momentId)`; a failed one does not.
+- [ ] **Step 2:** `PathViewModel` takes `private val focusRequests: PathFocusRequests`; in `fetch()`'s success branch, `focusRequests.consume()?.let { id -> built.firstOrNull { e -> e.moments.any { it.id.equals(id, ignoreCase = true) } }?.weekStart }` wins over `refocusedWeekStart(…)` when non-null. `CompleteFlowViewModel` takes `PathFocusRequests` and calls `request(momentId)` right after a successful `complete_pebble`, before the success screen shows.
+- [ ] **Step 3:** Run both classes → PASS. Commit `feat(android): focus the path on a completed moment's week`.
+
 ---
 
 ## Part 6 — Capture flow (`feat/1048-android-moments-capture`)
@@ -5087,6 +5126,8 @@ class CaptureFlowViewModel
     }
 ```
 
+R14: the constructor also takes `PathFocusRequests` (Task 5.5), and a successful `save_moment` calls `focusRequests.request(id)` with the returned moment id before emitting `Saved` or `SavedThenComplete(id)`; add `a saved capture asks the path to focus its week` to the test (a failed save asks nothing).
+
 - [ ] **Step 4:** Run → PASS. Commit `feat(android): capture a moment through save_moment`.
 
 ### Task 6.3: Screen and wiring
@@ -5259,9 +5300,9 @@ Expected: no hits in code. Comments that still describe removed behaviour are re
 
 ## Parity decisions
 
-The controller's reconciliation of this plan with the iOS plan for #1047 (`R1`–`R13`, pasted verbatim) wins over everything else in this file. The `A-` lines below are the Android-side decisions that remain, all consistent with R1–R13; the iOS plan already agrees with them (the reconciliation lists them as aligned) unless a line says "Android only".
+The controller's reconciliation of this plan with the iOS plan for #1047 (`R1`–`R13`, pasted verbatim, plus the two later rulings `R14`–`R15`) wins over everything else in this file. The `A-` lines below are the Android-side decisions that remain, all consistent with R1–R13; the iOS plan already agrees with them (the reconciliation lists them as aligned) unless a line says "Android only".
 
-### Reconciled (R1–R13, verbatim)
+### Reconciled (R1–R15, verbatim)
 
 R1. **Capture name step copy.** Primary "Save moment" / "Garder le moment"
     (`capture_save`). Secondary "Make it a pebble now" / "En faire un galet
@@ -5340,7 +5381,14 @@ R13. **Karma read after a write.** Either method is fine (iOS sum-after minus
     sum-before; Android newest event row for the reason), as long as the shown N is
     the delta of that write and absence/error shows nothing.
 
-How this plan implements them: R1/R2 in Part 6 (`CaptureFlowViewModel.onCloseRequested`, `closeOffersSave`, `onSaveFromClose`); R3 through `core/ui/MomentNameText.kt` (Part 2) and `RecordSuccessStep` (Part 5); R4 through `BlankPalette` + `StoneComposer.outlineOnly` + `BlankStone` (Part 3) on Path rows and the read page (Part 4); R5/R6 as `EditMomentScreen` and `EditPebbleScreen` (Part 2); R7 as the ⋮ menu (Part 2, Delete added in Part 4); R8 as `MomentDeleteDialog` (Part 4); R9 in Task 2.3; R10 as `momentWriteErrorRes` (Task 1.6), with Android's existing delete-failure dialog (`pebble_delete_error`) kept; R11 in Task 7.1; R12 in Part 5; R13 as `MomentWriteService.karmaDelta` (Task 1.8).
+R14. **Path week focus.** After a successful capture save or a completed pebble,
+     the Path scrolls/pages to the week holding that moment (iOS P12). Android adopts it.
+
+R15. **Delete-failure copy** is identical on both: the iOS "Couldn't delete" string
+     and its French from apps/ios Localizable.xcstrings. Android adds it as a new
+     string rather than reusing "Something went wrong. Please try again."
+
+How this plan implements them: R1/R2 in Part 6 (`CaptureFlowViewModel.onCloseRequested`, `closeOffersSave`, `onSaveFromClose`); R3 through `core/ui/MomentNameText.kt` (Part 2) and `RecordSuccessStep` (Part 5); R4 through `BlankPalette` + `StoneComposer.outlineOnly` + `BlankStone` (Part 3) on Path rows and the read page (Part 4); R5/R6 as `EditMomentScreen` and `EditPebbleScreen` (Part 2); R7 as the ⋮ menu (Part 2, Delete added in Part 4); R8 as `MomentDeleteDialog` (Part 4); R9 in Task 2.3; R10 as `momentWriteErrorRes` (Task 1.6); R15 as `moment_delete_error` on every moment and pebble delete failure (Task 2.2, Part 4); R14 as `PathFocusRequests` (Task 5.5, used by Capture in Task 6.2); R11 in Task 7.1; R12 in Part 5; R13 as `MomentWriteService.karmaDelta` (Task 1.8).
 
 ### Android-side decisions consistent with R1–R13
 
@@ -5357,7 +5405,7 @@ How this plan implements them: R1/R2 in Part 6 (`CaptureFlowViewModel.onCloseReq
 - **A-11 No glyph on pebbles anywhere in the UI**: no glyph step, no glyph row in Edit pebble, no "use on pebble" affordance (Android's glyph library never had a pebble tab).
 - **A-12 Retired.** The eleven-step flow, the long-press all-at-once composer, the drafts list and server drafts. "New pebble" opens Capture; no long-press.
 - **A-13 Path "active today"** counts a completed moment created today.
-- **A-14 Navigation.** Capture, Complete, Edit moment and Edit pebble are full-screen modals. Saving a capture returns to Path without opening the read page; Complete's exit returns to whatever opened it (the read page, or Path after a Capture chain). Android only and not reconciled: iOS P12 also focuses the Path on the moment's week after a capture or completion; Android keeps its current focus (flagged to the controller).
+- **A-14 Navigation.** Capture, Complete, Edit moment and Edit pebble are full-screen modals. Saving a capture returns to Path without opening the read page; Complete's exit returns to whatever opened it (the read page, or Path after a Capture chain). After a successful capture save or completed pebble, Path focuses the week holding that moment (R14).
 - **A-15 Read-page souls.** `v_moments_full` gives `{id, name}`; glyphs come from the souls cache; an unknown soul shows its name with an empty glyph.
 - **A-16 Wire nulls.** Absent optional keys are omitted, never JSON null; `""` clears a text field in Edit moment; UUIDs lowercase.
 - **A-17 Timestamps.** Emitted as `yyyy-MM-ddTHH:mm:ssZ` in UTC (whole seconds); decoded tolerantly (`Z`, `+00:00`, any fraction).
@@ -5375,7 +5423,7 @@ How this plan implements them: R1/R2 in Part 6 (`CaptureFlowViewModel.onCloseReq
 ## Self-review against the brief
 
 - Every Supabase touchpoint is in §1 (32 changing, 26 unchanged, 8 new); every pebble-rendering composable is in §1d.
-- R1–R13 are implemented where the Parity decisions section says; no screen issues two writes behind one Save (R5): Edit moment calls only `save_moment`, Edit pebble only `complete_pebble`.
+- R1–R15 are implemented where the Parity decisions section says; no screen issues two writes behind one Save (R5): Edit moment calls only `save_moment`, Edit pebble only `complete_pebble`.
 - Part order is dependency order; each part names its gate and builds alone: Part 1 is additive; Part 2 swaps every reader before deleting the old ones; Part 3 changes only rendering; Part 4 only Path/read page/delete; Part 5 adds Complete before Part 6 needs it; Part 7 only removes and adds the collection glyph.
 - Shared shapes are tested against verbatim `path_moments` / `v_moments_full` / RPC payloads with explicit nulls, a photo-only moment, a null pebble, a connection's moment, and whole-second, fractional and `Z` timestamps (Tasks 1.2–1.4, 1.8).
 - Types introduced before use: `PathMoment`, `MomentDetail`, `PebbleGlyph`, `PebbleAnswers`, payloads, `momentWriteErrorRes`, both seams and fakes (Part 1); `MomentNameText`, `PebblesKey.EditMoment`, `EditMomentViewModel`/`EditMomentScreen`, `EditTopBar`, `ic_more_vert` (Part 2); `BlankPalette`, `StoneComposer.outlineOnly`, `BlankStone` (Part 3) before Part 4 draws them; `MomentDeleteChoice`, `MomentDeleteDialog` (Part 4); `CompleteSnapshot`, `CompleteSnapshotStoring`, `PebblesKey.CompletePebble` (Part 5) before Capture uses `CompletePebble` (Part 6); `KnownDraftIds` moved in Part 5 before `PebbleDraftPayload` is deleted in Part 7.
