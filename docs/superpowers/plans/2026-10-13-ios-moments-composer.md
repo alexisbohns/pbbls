@@ -1748,7 +1748,7 @@ enum MomentDeletion {
 ```swift
     /// Storage prefixes of saved photos the user removed or replaced in this
     /// form. Their rows go when the save sends the whole `snaps` set (R6);
-    /// their files go in `purgeDetached()`, after that save succeeds.
+    /// their files go in `purgeDetached(_:)`, after that save succeeds.
     private(set) var detachedStoragePaths: [String] = []
 
     /// Remove the current `.existing` photo from the form. No RPC: the next
@@ -1762,7 +1762,7 @@ enum MomentDeletion {
 
     /// Best-effort file cleanup for detached photos. Call only after the save
     /// that dropped their rows has succeeded; the orphan sweep is the backstop.
-    func purgeDetached() async {
+    func purgeDetached(_ paths: [String]) async {
         let paths = detachedStoragePaths
         detachedStoragePaths = []
         for path in paths {
@@ -1782,7 +1782,7 @@ enum MomentDeletion {
 ```
 
   `cancelAndCleanup(userId:)` also sets `detachedStoragePaths = []`: a cancelled form keeps its saved photo.
-- [ ] **Step 5: The interim edit sheet.** In `EditPebbleSheet.swift`, `removeExisting()` becomes `snaps?.detachExisting()`. Drop `isRemovingExistingSnap` and pass `isRemovingExistingSnap: false`. After a successful `compose-pebble-update` (both the 2xx path and the 5xx soft-success path), call `await snaps?.purgeDetached()` before `onSaved()`.
+- [ ] **Step 5: The interim edit sheet.** In `EditPebbleSheet.swift`, `removeExisting()` becomes `snaps?.detachExisting()`. Drop `isRemovingExistingSnap` and pass `isRemovingExistingSnap: false`. Purge only on the 2xx path of `compose-pebble-update`, fire-and-forget, over the paths detached when the payload was built: `Task { await snaps?.purgeDetached(detachedAtSave) }`. `compose-pebble-update` has no soft-success path any more, and a 5xx may mean the save never ran (R6: failed saves keep their files).
 - [ ] **Step 6:** Update the comments that name the old RPC (`ExistingSnapRow.swift:12`, `FormSnap.swift:8`, `PebbleFormView.swift:42`, `PebbleUpdatePayload.swift:16`): removal now detaches, and the save's whole snap set deletes the row.
 - [ ] **Step 7:** Build & test. Expected: `SnapUploadCoordinatorTests` green.
 - [ ] **Step 8:** Commit: `git commit -m "fix(ios): remove a photo by saving the whole snap set"`
