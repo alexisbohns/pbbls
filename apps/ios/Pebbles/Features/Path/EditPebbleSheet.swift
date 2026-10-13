@@ -1,18 +1,15 @@
 import SwiftUI
-import Supabase
 import os
 
-/// Sheet for editing an existing pebble.
+/// Edit pebble (R5): the caller's pebble on a moment — emotion, domain,
+/// valence, souls, collection, privacy — saved through `complete_pebble`
+/// only. The moment's fields edit in `EditMomentSheet`.
 ///
-/// Flow:
-/// 1. `.task` loads the moment from `v_moments_full`.
-/// 2. On load success, `draft` is prefilled via `PebbleDraft(from: detail)` (the
-///    caller's pebble on the moment) and `PebbleFormView` renders the form.
-/// 3. Save calls the `compose-pebble-update` edge function which updates the row
-///    (via `update_pebble` RPC internally) and returns a fresh `render_svg`.
-/// 4. `onSaved()` notifies the parent (`PathView`) so it can refetch the list.
+/// On success it shows what the edit earned (A4: karma after − before, capsule
+/// with `pebbleEnriched`), then runs `check_achievements` once.
 struct EditPebbleSheet: View {
     let momentId: UUID
+    let pebble: MomentDetail.Pebble
     let onSaved: () -> Void
 
     @Environment(SupabaseService.self) private var supabase
@@ -21,247 +18,90 @@ struct EditPebbleSheet: View {
     @Environment(AchievementsService.self) private var achievements
     @Environment(\.dismiss) private var dismiss
 
-    @State private var draft = PebbleDraft()
-    /// The caller's pebble on the moment, set by `load()`. Differs from
-    /// `momentId` for every post-split pebble.
-    @State private var pebbleId: UUID?
-    @State private var selectedGlyph: Glyph?
-
-    @State private var isLoading = true
-    @State private var loadError: String?
+    @State private var draft: CompleteDraft
     @State private var isSaving = false
     @State private var saveError: String?
 
-    @State private var isPhotoPickerPresented = false
-
-    /// Lazily constructed in `.task` so we have access to `supabase.client`.
-    /// Seeded with the loaded snap (if any) after `load()` succeeds.
-    @State private var snaps: SnapUploadCoordinator?
-
     private let logger = Logger(subsystem: "app.pbbls.ios", category: "edit-pebble")
 
-    private var currentUserId: UUID? {
-        supabase.session?.user.id
+    init(momentId: UUID, pebble: MomentDetail.Pebble, onSaved: @escaping () -> Void) {
+        self.momentId = momentId
+        self.pebble = pebble
+        self.onSaved = onSaved
+        self._draft = State(initialValue: CompleteDraft(from: pebble))
     }
 
     var body: some View {
         NavigationStack {
-            content
-                .pebblesToolbarTitle("Edit pebble")
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        PebbleToolbarButton("Cancel") {
-                            Task { await cancelAndCleanup() }
-                        }
-                    }
-                    ToolbarItem(placement: .confirmationAction) {
-                        if isSaving {
-                            ProgressView()
-                        } else {
-                            PebbleToolbarButton("Save") {
-                                Task { await save() }
-                            }
-                            .disabled(!draft.isValid || isLoading)
-                        }
-                    }
-                    ToolbarItemGroup(placement: .bottomBar) {
-                        VisibilityChip(visibility: $draft.visibility)
-                        Spacer()
-                    }
-                }
-                .pebblesScreen()
-        }
-        .task {
-            if snaps == nil {
-                snaps = SnapUploadCoordinator(repo: PebbleSnapRepository(client: supabase.client))
-            }
-            await load()
-        }
-        .sheet(isPresented: $isPhotoPickerPresented) {
-            PhotoPickerView { picked in
-                isPhotoPickerPresented = false
-                if let picked, let userId = currentUserId, let snaps {
-                    Task { await snaps.handlePicked(picked, userId: userId) }
-                }
-            }
-        }
-    }
-
-    @ViewBuilder
-    private var content: some View {
-        if isLoading {
-            ProgressView()
-        } else if let loadError {
-            VStack(spacing: 12) {
-                Text(loadError).foregroundStyle(.secondary)
-                Button("Retry") {
-                    Task { await load() }
-                }
-            }
-            .padding()
-        } else {
             PebbleFormView(
                 draft: $draft,
                 domains: refs.domains,
                 souls: refs.souls,
                 collections: refs.collections,
-                saveError: saveError,
-                selectedGlyph: selectedGlyph,
-                onGlyphPicked: { picked in selectedGlyph = picked },
-                showsPhotoSection: true,
-                photoPickerPresented: $isPhotoPickerPresented,
-                isRemovingExistingSnap: false,
-                onRemoveExistingSnap: {
-                    snaps?.detachExisting()
-                },
-                formSnap: snaps?.formSnap,
-                onRetryPending: {
-                    if let userId = currentUserId, let snaps {
-                        Task { await snaps.retryCurrent(userId: userId) }
-                    }
-                },
-                onRemovePending: {
-                    if let userId = currentUserId, let snaps {
-                        Task { await snaps.removePending(userId: userId) }
+                saveError: saveError
+            )
+            .disabled(isSaving)
+            .pebblesToolbarTitle("Edit pebble")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    PebbleToolbarButton("Cancel") { dismiss() }
+                        .disabled(isSaving)
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    if isSaving {
+                        ProgressView()
+                    } else {
+                        PebbleToolbarButton("Save") { Task { await save() } }
+                            .disabled(!draft.isComplete)
                     }
                 }
-            )
-            .onChange(of: draft.glyphId) { _, newValue in
-                if newValue == nil { selectedGlyph = nil }
+                ToolbarItemGroup(placement: .bottomBar) {
+                    VisibilityChip(visibility: $draft.visibility)
+                        .disabled(isSaving)
+                    Spacer()
+                }
             }
+            .pebblesScreen()
         }
+        .interactiveDismissDisabled(isSaving)
     }
 
-    private func cancelAndCleanup() async {
-        if let userId = currentUserId, let snaps {
-            await snaps.cancelAndCleanup(userId: userId)
-        }
-        dismiss()
-    }
-
-    private func load() async {
-        isLoading = true
-        loadError = nil
-        do {
-            let detail = try await MomentsService(client: supabase.client).moment(id: momentId)
-            guard let pebble = detail.pebble, let draft = PebbleDraft(from: detail) else {
-                logger.error("edit pebble: moment has no pebble")
-                self.loadError = String(localized: "Couldn't load this pebble.")
-                self.isLoading = false
-                return
-            }
-            self.pebbleId = pebble.id
-            self.draft = draft
-            if let existing = detail.snaps.first {
-                snaps?.seedExisting(.existing(id: existing.id, storagePath: existing.storagePath))
-            }
-            self.isLoading = false
-        } catch {
-            logger.error("edit pebble load failed: \(error.localizedDescription, privacy: .private)")
-            self.loadError = String(localized: "Couldn't load this pebble.")
-            self.isLoading = false
-        }
-    }
-
-    // swiftlint:disable:next function_body_length
     private func save() async {
-        guard draft.isValid, let pebbleId else { return }
-
-        if snaps?.isUploading == true {
-            logger.notice("save blocked: snap still uploading")
-            saveError = "Photo is still uploading."
+        guard !isSaving else { return }
+        guard let payload = CompletePebblePayload(momentId: momentId, draft: draft) else {
+            logger.fault("edit pebble saved with an incomplete draft")
             return
         }
-        if snaps?.hasFailed == true {
-            logger.notice("save blocked: snap upload failed")
-            saveError = "Photo upload failed. Retry or remove it."
-            return
-        }
-
         isSaving = true
         saveError = nil
-
-        guard let userId = currentUserId else {
-            logger.error("save: no current user id")
-            self.saveError = "You must be signed in to save."
-            self.isSaving = false
-            return
-        }
-        // Only these are purged on success: a photo detached while the save is
-        // in flight belongs to the next save.
-        let detachedAtSave = snaps?.detachedStoragePaths ?? []
-        let payload = PebbleUpdatePayload(from: draft, formSnap: snaps?.formSnap, userId: userId)
-        let requestBody = ComposePebbleUpdateRequest(pebbleId: pebbleId, payload: payload)
-
+        let service = MomentsService(client: supabase.client)
+        // A4 / R13: what this edit earned = total after − total before. An
+        // unreadable total shows nothing rather than a wrong number.
+        let before = await karmaTotal(service)
         do {
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            let response: ComposePebbleResponse = try await supabase.client.functions
-                .invoke(
-                    "compose-pebble-update",
-                    options: FunctionInvokeOptions(body: requestBody),
-                    decoder: decoder
-                )
-            karma.notifyEarned(amount: response.karmaDelta ?? 0, reason: .pebbleEnriched)
-            // An edit can change the pebble's emotion, newly qualifying an
-            // emotion_first badge.
+            _ = try await service.completePebble(payload)
+            let after = await karmaTotal(service)
+            if let before, let after {
+                karma.notifyEarned(amount: after - before, reason: .pebbleEnriched)
+            }
+            // After the karma read (A4): an edit can change the emotion,
+            // newly qualifying an emotion badge.
             achievements.fireCheck()
-            if let snaps { Task { await snaps.purgeDetached(detachedAtSave) } }
             onSaved()
             dismiss()
-        } catch let functionsError as FunctionsError {
-            // Soft-success: update succeeded but compose failed — the row was
-            // updated, so advance as if saved and rely on the parent's list
-            // refetch to eventually pick up a freshly composed render.
-            if case .httpError(let status, let data) = functionsError, status >= 500 {
-                let bodyString = String(data: data, encoding: .utf8) ?? "<non-utf8 body>"
-                logger.warning("compose-pebble-update returned \(status, privacy: .public) — advancing on soft-success. body=\(bodyString, privacy: .private)")
-                achievements.fireCheck()
-                // No purge: a 5xx may mean the save never ran (R6: failed saves
-                // keep their files); the orphan sweep collects them if it did land.
-                onSaved()
-                dismiss()
-            } else {
-                let bodyString: String
-                if case .httpError(_, let data) = functionsError {
-                    bodyString = String(data: data, encoding: .utf8) ?? "<non-utf8 body>"
-                } else {
-                    bodyString = "<non-http error>"
-                }
-                logger.error("compose-pebble-update failed: \(functionsError.localizedDescription, privacy: .private) body=\(bodyString, privacy: .private)")
-                await handleSaveFailure(functionsError)
-            }
         } catch {
-            logger.error("update pebble failed: \(error.localizedDescription, privacy: .private)")
-            await handleSaveFailure(error)
+            logger.error("complete_pebble (edit) failed: \(error.localizedDescription, privacy: .private)")
+            saveError = userMessageForMomentWriteError(error)
+            isSaving = false
         }
     }
 
-    private func handleSaveFailure(_ error: Error) async {
-        if let userId = currentUserId, let snaps {
-            await snaps.handleSaveFailure(userId: userId)
+    private func karmaTotal(_ service: MomentsService) async -> Int? {
+        do {
+            return try await service.karmaTotal(refId: pebble.id)
+        } catch {
+            logger.warning("karma read failed: \(error.localizedDescription, privacy: .private)")
+            return nil
         }
-        self.saveError = userMessageForPebbleSaveError(error)
-        self.isSaving = false
     }
-}
-
-/// Body for the `compose-pebble-update` edge function.
-/// Shape: `{ "pebble_id": "...", "payload": { ... update_pebble payload ... } }`.
-private struct ComposePebbleUpdateRequest: Encodable {
-    let pebbleId: UUID
-    let payload: PebbleUpdatePayload
-
-    enum CodingKeys: String, CodingKey {
-        case pebbleId = "pebble_id"
-        case payload
-    }
-}
-
-#Preview {
-    let supabase = SupabaseService()
-    return EditPebbleSheet(momentId: UUID(), onSaved: {})
-        .environment(supabase)
-        .environment(ReferenceDataService(client: supabase.client))
-        .environment(KarmaNotificationService())
 }
