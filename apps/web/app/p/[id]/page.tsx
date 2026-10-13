@@ -4,6 +4,7 @@ import { notFound } from "next/navigation"
 import { createServerSupabaseClient } from "@/lib/supabase/server"
 import { SharedPebbleView } from "@/components/shared-pebble/SharedPebbleView"
 import type { SharedPebble } from "@/lib/types"
+import { sharedPebbleFromRpc } from "@/lib/data/pebble-row"
 
 // The public share-by-link page (M51) — pattern: /u/[handle]. Anonymous-
 // friendly by construction: get_shared_pebble is granted to `anon`, so the
@@ -31,7 +32,7 @@ const fetchSharedPebble = cache(
       console.error("[shared-pebble] get_shared_pebble failed:", error.message)
       return null
     }
-    return (data as SharedPebble | null) ?? null
+    return sharedPebbleFromRpc(data)
   },
 )
 

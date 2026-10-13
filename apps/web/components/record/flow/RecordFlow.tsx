@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useReducer, useState } from "react"
 import { useTranslations } from "next-intl"
-import type { Mark, Pebble, PebbleSnap, Visibility } from "@/lib/types"
+import type { Pebble, PebbleSnap, Visibility } from "@/lib/types"
 import type { PebbleDraftPayload } from "@/lib/data/data-provider"
 import { useDataProvider } from "@/lib/data/provider-context"
 import { usePebbles } from "@/lib/data/usePebbles"
@@ -49,7 +49,7 @@ type RecordFlowProps = {
   onDraftSaved: () => void
 }
 
-type PublishedPebble = { pebble: Pebble; mark: Mark | null; karmaDelta: number }
+type PublishedPebble = { pebble: Pebble; karmaDelta: number }
 
 /**
  * The step-by-step pebble composer (M58) — the default way to record a pebble
@@ -291,7 +291,6 @@ export function RecordFlow({ draftId, initialPayload, onExit, onDraftSaved }: Re
 
       setPublished({
         pebble,
-        mark: marks.find((m) => m.id === pebble.mark_id) ?? null,
         karmaDelta,
       })
       dispatch({ type: "published" })
@@ -303,7 +302,7 @@ export function RecordFlow({ draftId, initialPayload, onExit, onDraftSaved }: Re
     } finally {
       setPublishing(false)
     }
-  }, [publishing, canPublish, flow.draft, addPebble, consumeAfterPublish, marks, tDraft])
+  }, [publishing, canPublish, flow.draft, addPebble, consumeAfterPublish, tDraft])
 
   // ---------------------------------------------------------------------------
   // Leaving
@@ -405,7 +404,6 @@ export function RecordFlow({ draftId, initialPayload, onExit, onDraftSaved }: Re
         {flow.step === "success" && published ? (
           <RecordSuccessStep
             pebble={published.pebble}
-            mark={published.mark}
             karmaDelta={published.karmaDelta}
             onExit={onExit}
           />

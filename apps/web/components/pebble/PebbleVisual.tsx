@@ -3,20 +3,18 @@
 import type { CSSProperties } from "react"
 import { useTranslations } from "next-intl"
 
-import type { Mark, Pebble } from "@/lib/types"
-import type { RenderTier } from "@/lib/engine"
+import type { Pebble } from "@/lib/types"
 import { EMOTIONS } from "@/lib/config/emotions"
 import { useEmotionLocalized } from "@/lib/i18n"
 import { useEmotionPalettes } from "@/lib/data/useEmotionPalettes"
 import { usePebbleVisual } from "@/lib/hooks/usePebbleVisual"
-import { WOBBLE_ENABLED, wobblePebbleSvg } from "@/lib/wobble"
-import { safeRenderSvg } from "@/lib/render-svg"
-import { cn } from "@/lib/utils"
+import { PebbleArtwork } from "./PebbleArtwork"
+
+/** Stroke colour when the emotion is unknown to the config. */
+const NEUTRAL_GRAY = "#9CA3AF"
 
 type PebbleVisualProps = {
   pebble: Pebble
-  mark?: Mark | null
-  tier?: RenderTier
   className?: string
   // Force a single stroke color regardless of theme. Used by the snap+pebble
   // bundle in PebbleDetail where the palette-tinted box would otherwise blend
@@ -24,28 +22,12 @@ type PebbleVisualProps = {
   strokeOverride?: string
 }
 
-export function PebbleVisual({
-  pebble,
-  mark = null,
-  tier = "thumbnail",
-  className,
-  strokeOverride,
-}: PebbleVisualProps) {
-  // Prefer the server-composed render written by the compose-pebble edge
-  // function. Fall back to the client engine for legacy rows that pre-date
-  // the remote engine and for unauthenticated previews (e.g. landing page
-  // seed pebbles) where no render exists yet.
-  const fallback = usePebbleVisual(pebble, mark, tier)
-  // `render_svg` is composed from a jsonb column its owner writes directly and
-  // is injected below with `dangerouslySetInnerHTML`, so it is re-validated
-  // against the engine grammar first (#829). A row that fails takes the same
-  // path as a row that has none: the client engine draws it instead.
-  const serverSvg = safeRenderSvg(pebble.render_svg)
-  const isServerRender = serverSvg !== null
-  const rawSvg = serverSvg ?? fallback.svg
-  // Petroglyph wobble (#555): dev-only, content-cached. Rewrites the composed
-  // SVG's stroked paths into leaky filled ink; compiled out in production.
-  const svg = WOBBLE_ENABLED ? wobblePebbleSvg(rawSvg) : rawSvg
+/**
+ * The owner's pebble: the client-drawn body and the glyph the server resolved
+ * for it (`pebble.glyph`, its collection's else its domain's, #1046 D5).
+ */
+export function PebbleVisual({ pebble, className, strokeOverride }: PebbleVisualProps) {
+  const body = usePebbleVisual(pebble)
 
   const t = useTranslations("pebble")
   const tCommon = useTranslations("common")
@@ -53,41 +35,36 @@ export function PebbleVisual({
   const fallbackEmotion = matched ?? { slug: "", name: tCommon("unknown"), label: "" }
   const { name: emotionName } = useEmotionLocalized(fallbackEmotion)
 
-  // Server-composed SVGs use stroke="currentColor" and carry their own
-  // width/height attributes. The wrapper sets two CSS custom properties from
-  // the category palette; globals.css picks --pebble-stroke-light in light
-  // mode and --pebble-stroke-dark in dark mode, so theme switches are
-  // CSS-only (no JS subscription, no hydration mismatch).
-  // The client-engine fallback already inlines the emotion color via
-  // `recolor()`, so leaving wrapperStyle undefined for it is harmless.
+  // The artwork strokes in currentColor. The wrapper sets two CSS custom
+  // properties; globals.css picks --pebble-stroke-light in light mode and
+  // --pebble-stroke-dark in dark mode, so theme switches are CSS-only (no JS
+  // subscription, no hydration mismatch). Without a category palette both
+  // take the flat emotion colour.
   const { paletteByEmotionId } = useEmotionPalettes()
   const palette = paletteByEmotionId.get(pebble.emotion_id)
-  const wrapperStyle: CSSProperties | undefined = !isServerRender
-    ? undefined
-    : strokeOverride
-      ? ({
-          ["--pebble-stroke-light"]: strokeOverride,
-          ["--pebble-stroke-dark"]: strokeOverride,
-        } as CSSProperties)
-      : palette
-        ? ({
-            ["--pebble-stroke-light"]: palette.primary_color,
-            ["--pebble-stroke-dark"]: palette.secondary_color,
-          } as CSSProperties)
-        : undefined
+  const flat = matched?.color ?? NEUTRAL_GRAY
+  const [light, dark] = strokeOverride
+    ? [strokeOverride, strokeOverride]
+    : palette
+      ? [palette.primary_color, palette.secondary_color]
+      : [flat, flat]
+  const wrapperStyle = {
+    ["--pebble-stroke-light"]: light,
+    ["--pebble-stroke-dark"]: dark,
+  } as CSSProperties
 
   return (
-    <div
-      data-slot="pebble-visual"
+    <PebbleArtwork
+      body={body}
+      glyph={pebble.glyph}
       role="img"
       aria-label={t("visualAria", {
         name: pebble.name,
         emotion: emotionName,
         intensity: pebble.intensity,
       })}
-      className={cn("pbbls-visual", className)}
+      className={className}
       style={wrapperStyle}
-      dangerouslySetInnerHTML={{ __html: svg }}
     />
   )
 }

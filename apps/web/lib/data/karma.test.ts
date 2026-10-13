@@ -24,8 +24,6 @@ function makePebble(overrides: Partial<Pebble> = {}): Pebble {
     instants: [],
     snaps: [],
     cards: [],
-    render_svg: null,
-    render_version: null,
     glyph: null,
     cover: null,
     created_at: "2026-07-29T00:00:00Z",

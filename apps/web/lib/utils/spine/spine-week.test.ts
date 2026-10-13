@@ -20,8 +20,6 @@ function pebble(id: string, happened_at: string): Pebble {
     instants: [],
     snaps: [],
     cards: [],
-    render_svg: null,
-    render_version: null,
     glyph: null,
     cover: null,
     created_at: happened_at,

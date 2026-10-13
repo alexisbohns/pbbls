@@ -52,15 +52,11 @@ export const EMPTY_STORE: Store = {
 // Input types — omit server-generated fields so callers never touch them.
 // ---------------------------------------------------------------------------
 
-// Render columns are written by the compose-pebble / compose-pebble-update edge
-// functions, never by the client — keep them out of mutation inputs.
 // `instants` is the read-path projection (signed URLs); writes use `snaps`.
 type ServerOwnedPebbleFields =
   | "id"
   | "created_at"
   | "updated_at"
-  | "render_svg"
-  | "render_version"
   | "instants"
   // The resolved glyph geometry is a read projection; writes set `mark_id`.
   | "glyph"

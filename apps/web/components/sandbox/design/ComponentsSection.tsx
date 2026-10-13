@@ -55,7 +55,6 @@ export function ComponentsSection() {
             <PebbleCard
               pebble={pebble}
               emotion={EMOTIONS.find((e) => e.id === pebble.emotion_id)}
-              mark={markOf(pebble.mark_id)}
               soulNames={soulNames(pebble.soul_ids)}
             />
           </div>
@@ -88,7 +87,7 @@ export function ComponentsSection() {
       <Specimen id="pebble-visual">
         {pebbles.slice(0, 4).map((pebble) => (
           <div key={pebble.id} className="size-24">
-            <PebbleVisual pebble={pebble} mark={markOf(pebble.mark_id)} />
+            <PebbleVisual pebble={pebble} />
           </div>
         ))}
       </Specimen>

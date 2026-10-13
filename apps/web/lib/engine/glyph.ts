@@ -1,58 +1,55 @@
-import type { Rect, Glyph } from "./types"
+import type { Rect } from "./types"
 
 // ── Constants ─────────────────────────────────────────────────────
 
 /** Stroke width matching the pebble outline in SVG coordinate space. */
-const STROKE_WIDTH = 6
+export const GLYPH_OUTLINE_WIDTH = 6
 
 // ── ViewBox parsing ────────────────────────────────────────────────
 
-function parseViewBox(vb: string): { x: number; y: number; w: number; h: number } {
-  const parts = vb.split(/\s+/).map(Number)
-  return { x: parts[0], y: parts[1], w: parts[2], h: parts[3] }
+function parseViewBox(vb: string): { x: number; y: number; w: number; h: number } | null {
+  const parts = vb.trim().split(/[\s,]+/).map(Number)
+  if (parts.length !== 4 || parts.some((n) => !Number.isFinite(n))) return null
+  const [x, y, w, h] = parts
+  if (w <= 0 || h <= 0) return null
+  return { x, y, w, h }
 }
 
 // ── Public API ─────────────────────────────────────────────────────
 
+export type GlyphPlacement = {
+  /** `translate(…) scale(…)` taking glyph space into the template's space. */
+  transform: string
+  /** Uniform scale of `transform`. */
+  scale: number
+  /** The glyph-space stroke width that lands at the outline's 6 after the transform. */
+  strokeWidth: number
+}
+
 /**
- * Scale, centre, and render a user-drawn glyph (mark) within a zone.
+ * Where a glyph sits in a template's glyph zone: uniformly scaled to fit the
+ * zone, aspect ratio preserved, centred. Null for an unreadable viewBox, which
+ * the caller draws as no glyph.
  *
- * The glyph is uniformly scaled to fit the zone while preserving its
- * aspect ratio. The stroke width is pre-divided by the scale factor so
- * it resolves to 6px in SVG coordinates after the transform — matching
- * the pebble outline at every display size. Strokes use `stroke="black"`
- * so the downstream recolor step can apply the emotion colour uniformly.
+ * Geometry only, never markup. The glyph's stroke data is somebody's jsonb, and
+ * since the moments split it reaches other people (a connection's tile, the
+ * anonymous share page), so it is only ever handed to React as a `<path d>`
+ * attribute (`PebbleGlyphStrokes`), never spliced into an SVG string (#829).
  *
  * Pure function — no PRNG, DOM, or React dependencies.
  */
-export function renderGlyphPaths(
-  glyph: Glyph,
-  zone: Rect,
-): string {
-  if (glyph.strokes.length === 0) return ""
+export function placeGlyph(viewBox: string, zone: Rect): GlyphPlacement | null {
+  const vb = parseViewBox(viewBox)
+  if (!vb) return null
 
-  const vb = parseViewBox(glyph.viewBox)
-
-  // Uniform scale preserving aspect ratio
   const scale = Math.min(zone.width / vb.w, zone.height / vb.h)
-
-  // Translation to centre the scaled glyph in the zone
   const offsetX = zone.x + (zone.width - vb.w * scale) / 2 - vb.x * scale
   const offsetY = zone.y + (zone.height - vb.h * scale) / 2 - vb.y * scale
 
-  // Pre-divide so the transform scale yields STROKE_WIDTH in SVG coords
-  const adjustedWidth = STROKE_WIDTH / scale
-
-  const paths = glyph.strokes.map(
-    (stroke) =>
-      `<path d="${stroke.d}" stroke="black" ` +
-      `stroke-width="${adjustedWidth}" fill="none" ` +
-      `stroke-linecap="round" stroke-linejoin="round"/>`,
-  )
-
-  return (
-    `<g transform="translate(${offsetX}, ${offsetY}) scale(${scale})">` +
-    paths.join("") +
-    `</g>`
-  )
+  return {
+    transform: `translate(${offsetX} ${offsetY}) scale(${scale})`,
+    scale,
+    // Pre-divided so the transform scale yields the outline width in SVG coords.
+    strokeWidth: GLYPH_OUTLINE_WIDTH / scale,
+  }
 }

@@ -2,13 +2,12 @@
 
 import { Sparkle } from "lucide-react"
 import { useTranslations } from "next-intl"
-import type { Mark, Pebble } from "@/lib/types"
+import type { Pebble } from "@/lib/types"
 import { Button } from "@/components/ui/button"
 import { PebbleFramed } from "@/components/pebble/PebbleFramed"
 
 type RecordSuccessStepProps = {
   pebble: Pebble
-  mark: Mark | null
   karmaDelta: number
   onExit: () => void
 }
@@ -20,19 +19,15 @@ type RecordSuccessStepProps = {
  * view uses: the outline silhouette behind the composed render, which already
  * honours reduced motion.
  *
- * On soft success (`render_svg` null) the framed pebble falls back to the
- * client engine rather than blocking — the pebble exists and the user should be
- * told so.
- *
  * The karma pill is suppressed on this path (see `RecordFlow`): the amount is
  * already on screen and a capsule over it is redundant.
  */
-export function RecordSuccessStep({ pebble, mark, karmaDelta, onExit }: RecordSuccessStepProps) {
+export function RecordSuccessStep({ pebble, karmaDelta, onExit }: RecordSuccessStepProps) {
   const t = useTranslations("record.flow.success")
 
   return (
     <div className="flex min-h-0 flex-1 flex-col items-center justify-center gap-8 py-8">
-      <PebbleFramed pebble={pebble} mark={mark} tier="detail" animateIn className="w-56" />
+      <PebbleFramed pebble={pebble} animateIn className="w-56" />
 
       <div className="flex flex-col items-center gap-2 text-center">
         {/* User-authored, so never localized. */}

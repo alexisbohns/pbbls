@@ -37,7 +37,14 @@ import type {
 import { toConnectionPeer } from "@/lib/data/invite-api"
 import { peerIdOf } from "@/lib/data/connection-peer"
 import { DEFAULT_GLYPH_ID } from "@/lib/config/glyphs"
-import { pebbleFromViewRow, snapOriginalPath, snapThumbPath, sortedSnaps } from "@/lib/data/pebble-row"
+import {
+  pebbleFromViewRow,
+  pebbleGlyphFromRow,
+  pebbleNameFromRow,
+  snapOriginalPath,
+  snapThumbPath,
+  sortedSnaps,
+} from "@/lib/data/pebble-row"
 import { processPebbleImage } from "@/lib/utils/process-pebble-image"
 
 const PEBBLE_MEDIA_BUCKET = "pebbles-media"
@@ -75,9 +82,6 @@ export class SupabaseProvider implements DataProvider {
   // ---------------------------------------------------------------------------
 
   async loadFromSupabase(): Promise<Store> {
-    // The server no longer renders pebbles (#1046): `render_svg` and
-    // `render_version` were dropped from `pebbles`, so every pebble carries a
-    // null render until the client draws the derived glyph (#1049).
     const [
       pebblesRes,
       soulsRes,
@@ -103,11 +107,6 @@ export class SupabaseProvider implements DataProvider {
     if (collectionsRes.error) throw new Error(`Failed to load collections: ${collectionsRes.error.message}`)
     if (glyphsRes.error) throw new Error(`Failed to load glyphs: ${glyphsRes.error.message}`)
     if (entitledRes.error) throw new Error(`Failed to load entitled glyphs: ${entitledRes.error.message}`)
-
-    const renderById = new Map<
-      string,
-      { render_svg: string | null; render_version: string | null }
-    >()
 
     // Snaps are stored in the private `pebbles-media` bucket as
     // `{storage_path}/original.jpg` (+ `…/thumb.jpg`); the view only carries
@@ -148,11 +147,7 @@ export class SupabaseProvider implements DataProvider {
     }
 
     const pebbles: Pebble[] = (pebblesRes.data ?? []).map((row: Record<string, unknown>) =>
-      pebbleFromViewRow(
-        row,
-        renderById.get(row.id as string) ?? { render_svg: null, render_version: null },
-        signedUrlByPath,
-      ),
+      pebbleFromViewRow(row, signedUrlByPath),
     )
 
     const souls: Soul[] = (soulsRes.data ?? []).map((row: Record<string, unknown>) => ({
@@ -577,7 +572,7 @@ export class SupabaseProvider implements DataProvider {
     // them back under the same pebbles_select / moments_select rules.
     const { data, error } = await this.supabase
       .from("v_pebbles_full")
-      .select("id, name, happened_at, visibility, emotion")
+      .select("id, name, happened_at, visibility, intensity, positiveness, emotion, glyph")
       .eq("user_id", peerId)
       .order("happened_at", { ascending: false })
     if (error) throw new Error(`shared pebbles fetch failed: ${error.message}`)
@@ -599,16 +594,18 @@ export class SupabaseProvider implements DataProvider {
       return [
         {
           id: row.id as string,
-          name: row.name as string,
+          name: pebbleNameFromRow(row.name),
           happened_at: row.happened_at as string,
           visibility: (row.visibility as string) as SharedConnectionPebble["visibility"],
+          intensity: row.intensity as number,
+          positiveness: row.positiveness as number,
           emotion: {
             id: emotion.id,
             slug: emotion.slug,
             name: emotion.name,
             color: emotion.color,
           },
-          render_svg: null,
+          glyph: pebbleGlyphFromRow(row.glyph),
         },
       ]
     })

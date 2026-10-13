@@ -35,7 +35,6 @@ type PebbleDetailProps = {
   souls: Soul[]
   collections: Collection[]
   marks: Mark[]
-  mark: Mark | undefined
   onUpdatePebble: (input: UpdatePebbleInput) => Promise<Pebble>
   onUploadSnap: (file: File) => Promise<PebbleSnap>
   onAddSoul: (name: string) => Promise<void>
@@ -48,7 +47,6 @@ export function PebbleDetail({
   souls,
   collections,
   marks,
-  mark,
   onUpdatePebble,
   onUploadSnap,
   onAddSoul,
@@ -231,8 +229,6 @@ export function PebbleDetail({
                 />
                 <PebbleFramed
                   pebble={pebble}
-                  mark={mark}
-                  tier="detail"
                   className="absolute -right-4 -top-4 size-[100px] rotate-7"
                   animateIn
                 />
@@ -240,8 +236,6 @@ export function PebbleDetail({
             ) : (
               <PebbleFramed
                 pebble={pebble}
-                mark={mark}
-                tier="detail"
                 className="mx-auto size-[100px]"
                 animateIn
               />
