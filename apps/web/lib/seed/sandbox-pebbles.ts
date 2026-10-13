@@ -6,9 +6,8 @@ import { emotionId } from "./sandbox-palettes"
 // Fixture content for /sandbox/design (first written for the retired /sandbox/path).
 //
 // Self-contained on purpose: no Supabase, no auth, no Storage. Every pebble
-// carries `render_svg: null` so PebbleVisual falls through to the client engine
-// — already the documented path for unauthenticated previews like the landing
-// page — and pictures are local files under `public/sandbox/`.
+// carries one of the sandbox marks as its resolved glyph, which PebbleVisual
+// draws like any other, and pictures are local files under `public/sandbox/`.
 // ---------------------------------------------------------------------------
 
 // Real photographs rather than generated gradients: a smooth gradient never tests
@@ -100,6 +99,7 @@ function build(specs: Spec[], scenario: string): Pebble[] {
     const when = new Date(Date.UTC(2026, 7, 17, 8, 0, 0))
     when.setUTCMinutes(when.getUTCMinutes() + minutes)
     const iso = when.toISOString().replace(/\.\d{3}Z$/, "Z")
+    const mark = SANDBOX_MARKS[i % SANDBOX_MARKS.length]
     return {
       id: `${scenario}-${i}`,
       name: spec.name,
@@ -111,13 +111,11 @@ function build(specs: Spec[], scenario: string): Pebble[] {
       soul_ids: spec.souls ?? [],
       domain_ids: [],
       collection_ids: [],
-      mark_id: SANDBOX_MARKS[i % SANDBOX_MARKS.length].id,
+      mark_id: mark.id,
       instants: spec.snap ? [spec.snap] : [],
       snaps: [],
       cards: [],
-      render_svg: null,
-      render_version: null,
-      glyph: null,
+      glyph: { id: mark.id, name: mark.name, strokes: mark.strokes, viewBox: mark.viewBox },
       cover: null,
       created_at: iso,
       updated_at: iso,

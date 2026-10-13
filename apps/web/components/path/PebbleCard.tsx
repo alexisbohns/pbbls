@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from "next-intl"
-import type { Pebble, Emotion, Mark } from "@/lib/types"
+import type { Pebble, Emotion } from "@/lib/types"
 import { useFormatTime } from "@/lib/i18n"
 import { PebbleFramed } from "@/components/pebble/PebbleFramed"
 import { IntensityDots, PositivenessIndicator } from "@/components/pebble/PebbleIndicators"
@@ -10,7 +10,6 @@ import { EmotionBadge } from "@/components/ui/EmotionBadge"
 type PebbleCardProps = {
   pebble: Pebble
   emotion: Emotion | undefined
-  mark?: Mark
   soulNames: string[]
   onSelect?: (id: string) => void
 }
@@ -31,7 +30,7 @@ function MetadataRow({
   )
 }
 
-export function PebbleCard({ pebble, emotion, mark, soulNames, onSelect }: PebbleCardProps) {
+export function PebbleCard({ pebble, emotion, soulNames, onSelect }: PebbleCardProps) {
   const t = useTranslations("pebble")
   const formatTime = useFormatTime()
   const time = formatTime(pebble.happened_at)
@@ -54,8 +53,6 @@ export function PebbleCard({ pebble, emotion, mark, soulNames, onSelect }: Pebbl
           <>
             <PebbleFramed
               pebble={pebble}
-              mark={mark}
-              tier="thumbnail"
               className="size-16 shrink-0"
             />
 
@@ -92,8 +89,6 @@ export function PebbleCard({ pebble, emotion, mark, soulNames, onSelect }: Pebbl
           <>
             <PebbleFramed
               pebble={pebble}
-              mark={mark}
-              tier="thumbnail"
               className="size-10 shrink-0"
             />
 

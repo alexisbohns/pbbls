@@ -1,4 +1,4 @@
-import type { Pebble, MarkStroke } from "@/lib/types"
+import type { Pebble } from "@/lib/types"
 
 // ── Geometry primitives ────────────────────────────────────────────
 
@@ -18,13 +18,6 @@ export type Rect = {
   height: number
 }
 
-// ── Glyph (mark rendering data) ───────────────────────────────────
-
-export type Glyph = {
-  strokes: MarkStroke[]
-  viewBox: string
-}
-
 // ── Render tier ───────────────────────────────────────────────────
 
 export type RenderTier = "thumbnail" | "detail"
@@ -32,8 +25,11 @@ export type RenderTier = "thumbnail" | "detail"
 // ── Render output ─────────────────────────────────────────────────
 
 export type EngineOutput = {
+  /** The body only, glyph zone empty: static templates, safe to inject. */
   svg: string
   viewBox: string
+  /** Where the glyph goes, in `viewBox` units. */
+  glyphZone: Rect
 }
 
 // ── PebbleParams (engine input contract) ──────────────────────────
@@ -43,5 +39,4 @@ export type PebbleParams = {
   positiveness: Pebble["positiveness"]
   emotionColor: string
   retroactive: boolean
-  glyph: Glyph | null
 }

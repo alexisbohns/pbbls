@@ -26,7 +26,6 @@ export default function PebbleDetailPage({
 
   const loading = pebbleLoading || soulsLoading || collectionsLoading || marksLoading
 
-  const mark = pebble ? marks.find((m) => m.id === pebble.mark_id) : undefined
 
   const handleAddSoul = useCallback(
     async (name: string) => {
@@ -49,7 +48,6 @@ export default function PebbleDetailPage({
             souls={souls}
             collections={collections}
             marks={marks}
-            mark={mark}
             onUpdatePebble={updatePebble}
             onUploadSnap={uploadSnap}
             onAddSoul={handleAddSoul}

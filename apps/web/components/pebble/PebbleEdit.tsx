@@ -42,7 +42,6 @@ type PebbleEditProps = {
   souls: Soul[]
   collections: Collection[]
   marks: Mark[]
-  mark: Mark | undefined
   onUpdatePebble: (input: UpdatePebbleInput) => Promise<Pebble>
   onUploadSnap: (file: File) => Promise<PebbleSnap>
   onDeletePebbleMedia: (snapId: string) => Promise<void>
@@ -58,7 +57,6 @@ export function PebbleEdit({
   souls,
   collections,
   marks,
-  mark,
   onUpdatePebble,
   onUploadSnap,
   onDeletePebbleMedia,
@@ -171,9 +169,6 @@ export function PebbleEdit({
     emotion_id: draft.emotion_id,
     mark_id: draft.mark_id ?? undefined,
   }
-  const draftMark = draft.mark_id
-    ? marks.find((m) => m.id === draft.mark_id)
-    : mark
 
   return (
     <article className="mx-auto max-w-md pb-12">
@@ -205,8 +200,6 @@ export function PebbleEdit({
             >
               <PebbleFramed
                 pebble={draftPebble}
-                mark={draftMark}
-                tier="detail"
                 className="size-24 rotate-[7.52deg]"
               />
             </SheetTrigger>

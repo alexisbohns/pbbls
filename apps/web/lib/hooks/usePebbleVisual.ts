@@ -2,39 +2,31 @@
 
 import { useMemo } from "react"
 
-import type { Mark, Pebble } from "@/lib/types"
-import { renderPebble, toPebbleParams } from "@/lib/engine"
-import type { RenderTier } from "@/lib/engine"
+import { renderPebble, toPebbleParams, type EngineOutput } from "@/lib/engine"
+import { WOBBLE_ENABLED, wobblePebbleSvg } from "@/lib/wobble"
 
-type UsePebbleVisualResult = {
-  svg: string
-  viewBox: string
+type PebbleVisualInput = {
+  intensity: number
+  positiveness: number
+  happened_at: string
+  created_at?: string
 }
 
-export function usePebbleVisual(
-  pebble: Pebble,
-  mark: Mark | null,
-  tier: RenderTier,
-): UsePebbleVisualResult {
-  const strokesKey = JSON.stringify(mark?.strokes ?? null)
-
-  // Only visual-relevant scalar properties are listed as deps to avoid
-  // recomputation when non-visual fields (e.g. updated_at, soul_ids) change.
-  /* eslint-disable react-hooks/exhaustive-deps */
+/**
+ * The pebble's body (template, fossil, wobble) as a static SVG string, glyph
+ * zone empty. Only the visual inputs are deps, so a name or soul edit does not
+ * recompute it.
+ */
+export function usePebbleVisual({
+  intensity,
+  positiveness,
+  happened_at,
+  created_at,
+}: PebbleVisualInput): EngineOutput {
   return useMemo(() => {
-    const params = toPebbleParams(pebble, mark)
-    return renderPebble(params)
-  }, [
-    pebble.id,
-    pebble.intensity,
-    pebble.positiveness,
-    pebble.emotion_id,
-    pebble.mark_id,
-    pebble.created_at,
-    pebble.happened_at,
-    mark?.viewBox,
-    strokesKey,
-    tier,
-  ])
-  /* eslint-enable react-hooks/exhaustive-deps */
+    const out = renderPebble(toPebbleParams({ intensity, positiveness, happened_at, created_at }))
+    // Petroglyph wobble (#555): rewrites the body's stroked paths into leaky
+    // filled ink. Content-cached.
+    return WOBBLE_ENABLED ? { ...out, svg: wobblePebbleSvg(out.svg) } : out
+  }, [intensity, positiveness, happened_at, created_at])
 }

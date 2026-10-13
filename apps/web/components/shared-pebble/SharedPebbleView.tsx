@@ -5,7 +5,8 @@ import type { CSSProperties } from "react"
 import { useTranslations } from "next-intl"
 import type { SharedPebble } from "@/lib/types"
 import { useFormatDate, useEmotionLocalized } from "@/lib/i18n"
-import { safeRenderSvg } from "@/lib/render-svg"
+import { usePebbleVisual } from "@/lib/hooks/usePebbleVisual"
+import { PebbleArtwork } from "@/components/pebble/PebbleArtwork"
 
 type SharedPebbleViewProps = {
   pebble: SharedPebble
@@ -13,8 +14,9 @@ type SharedPebbleViewProps = {
 
 /**
  * The /p/[id] public share page body (M51). Anonymous-friendly: renders only
- * the `get_shared_pebble` projection — the server-composed visual, name,
- * emotion and date — plus a "made with Pebbles" CTA back to the landing page.
+ * the `get_shared_pebble` projection — the pebble drawn from its valence and
+ * resolved glyph, name, emotion and date — plus a "made with Pebbles" CTA back
+ * to the landing page.
  * Deliberately owner-less (the projection carries no user identity) and
  * snap-less (excluded from public shares in v1).
  *
@@ -40,11 +42,9 @@ export function SharedPebbleView({ pebble }: SharedPebbleViewProps) {
     ["--pebble-stroke-dark"]: pebble.emotion.secondary_color ?? pebble.emotion.color,
   } as CSSProperties
 
-  // The anonymous share page is the widest-reach sink for a column composed
-  // from user-written jsonb, so the markup is re-validated against the engine
-  // grammar before it is injected (#829). A row that fails takes the same
-  // branch as a legacy row with no render at all.
-  const renderSvg = safeRenderSvg(pebble.render_svg)
+  // The anonymous share page is the widest-reach sink for the sharer's glyph
+  // strokes, so PebbleArtwork hands them to React as attributes only (#829).
+  const body = usePebbleVisual(pebble)
 
   return (
     <div className="mx-auto flex min-h-full w-full max-w-md flex-col px-4 pt-10 md:px-6 md:pt-14">
@@ -53,25 +53,14 @@ export function SharedPebbleView({ pebble }: SharedPebbleViewProps) {
           {t("overline")}
         </span>
 
-        {renderSvg ? (
-          <div
-            data-slot="pebble-visual"
-            role="img"
-            aria-label={t("visualAria", { name: pebble.name, emotion: emotionName })}
-            className="pbbls-visual size-40"
-            style={wrapperStyle}
-            dangerouslySetInnerHTML={{ __html: renderSvg }}
-          />
-        ) : (
-          // Legacy rows that pre-date the remote engine have no composed SVG;
-          // an emotion-tinted stone outline keeps the page whole.
-          <div
-            role="img"
-            aria-label={t("visualAria", { name: pebble.name, emotion: emotionName })}
-            className="size-40 rounded-full border-[6px]"
-            style={{ borderColor: pebble.emotion.color }}
-          />
-        )}
+        <PebbleArtwork
+          body={body}
+          glyph={pebble.glyph}
+          role="img"
+          aria-label={t("visualAria", { name: pebble.name, emotion: emotionName })}
+          className="size-40"
+          style={wrapperStyle}
+        />
 
         <div className="flex flex-col items-center gap-2">
           <h1 className="font-script text-[41px] leading-none tracking-[-0.05em] text-foreground">

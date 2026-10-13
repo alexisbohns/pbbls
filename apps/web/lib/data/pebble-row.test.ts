@@ -49,11 +49,10 @@ const PEBBLE_ROW = {
       { d: "M60 150 Q100 130 140 150", width: 6 },
     ],
     view_box: "0 0 200 200",
+    source: "collection",
   },
   snaps: [],
 }
-
-const NO_RENDER = { render_svg: null, render_version: null }
 
 describe("pebbleFromViewRow", () => {
   it("maps a nameless, glyphless moment from another surface", () => {
@@ -61,7 +60,7 @@ describe("pebbleFromViewRow", () => {
       ["11111111-2222-3333-4444-555555555555/s1/original.jpg", "https://signed/s1"],
       ["11111111-2222-3333-4444-555555555555/s2/original.jpg", "https://signed/s2"],
     ])
-    const pebble = pebbleFromViewRow(MOMENT_ROW, NO_RENDER, signed)
+    const pebble = pebbleFromViewRow(MOMENT_ROW, signed)
     expect(pebble.name).toBe("")
     expect(pebble.glyph).toBeNull()
     expect(pebble.mark_id).toBeUndefined()
@@ -74,7 +73,7 @@ describe("pebbleFromViewRow", () => {
   })
 
   it("maps a web pebble's glyph strokes and keeps a fractional timestamp readable", () => {
-    const pebble = pebbleFromViewRow(PEBBLE_ROW, NO_RENDER, new Map())
+    const pebble = pebbleFromViewRow(PEBBLE_ROW, new Map())
     expect(pebble.name).toBe("Flag march with Nadia")
     expect(pebble.glyph).toEqual({
       id: "bbbbbbbb-0000-4000-8000-000000000002",
@@ -91,7 +90,7 @@ describe("pebbleFromViewRow", () => {
       ["11111111-2222-3333-4444-555555555555/s1/original.jpg", "https://signed/s1"],
       ["11111111-2222-3333-4444-555555555555/s1/thumb.jpg", "https://signed/s1-thumb"],
     ])
-    expect(pebbleFromViewRow(MOMENT_ROW, NO_RENDER, signed).cover).toEqual({
+    expect(pebbleFromViewRow(MOMENT_ROW, signed).cover).toEqual({
       snapId: "s1",
       url: "https://signed/s1",
       thumbUrl: "https://signed/s1-thumb",
@@ -99,7 +98,7 @@ describe("pebbleFromViewRow", () => {
   })
 
   it("keeps a cover whose files failed to sign, so the card holds its place", () => {
-    expect(pebbleFromViewRow(MOMENT_ROW, NO_RENDER, new Map()).cover).toEqual({
+    expect(pebbleFromViewRow(MOMENT_ROW, new Map()).cover).toEqual({
       snapId: "s1",
       url: null,
       thumbUrl: null,
@@ -107,17 +106,12 @@ describe("pebbleFromViewRow", () => {
   })
 
   it("has no cover without a snap", () => {
-    expect(pebbleFromViewRow(PEBBLE_ROW, NO_RENDER, new Map()).cover).toBeNull()
+    expect(pebbleFromViewRow(PEBBLE_ROW, new Map()).cover).toBeNull()
   })
 
   it("drops a snap whose URL failed to sign rather than leaving a hole", () => {
     const signed = new Map([["11111111-2222-3333-4444-555555555555/s2/original.jpg", "https://signed/s2"]])
-    expect(pebbleFromViewRow(MOMENT_ROW, NO_RENDER, signed).instants).toEqual(["https://signed/s2"])
-  })
-
-  it("carries the render columns it is handed", () => {
-    const pebble = pebbleFromViewRow(PEBBLE_ROW, { render_svg: "<svg/>", render_version: "v3" }, new Map())
-    expect(pebble).toMatchObject({ render_svg: "<svg/>", render_version: "v3" })
+    expect(pebbleFromViewRow(MOMENT_ROW, signed).instants).toEqual(["https://signed/s2"])
   })
 })
 

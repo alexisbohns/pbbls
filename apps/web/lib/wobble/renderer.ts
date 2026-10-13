@@ -142,7 +142,7 @@ export function wobbleBackdrop(path: string, width: number, height: number): str
   return out
 }
 
-// ── Composed pebble SVG (PebbleVisual render_svg) ───────────────────
+// ── Pebble body SVG (PebbleVisual, from the client engine) ──────────
 
 /**
  * Rewrites a composed pebble SVG string, replacing each drawn `<path>` with its

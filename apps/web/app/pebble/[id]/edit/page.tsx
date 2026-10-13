@@ -29,7 +29,6 @@ export default function PebbleEditPage({
   const { glyphs: marks, loading: marksLoading } = useUsableGlyphs()
 
   const loading = pebbleLoading || soulsLoading || collectionsLoading || marksLoading
-  const mark = pebble ? marks.find((m) => m.id === pebble.mark_id) : undefined
 
   return (
     <PageLayout>
@@ -42,7 +41,6 @@ export default function PebbleEditPage({
             souls={souls}
             collections={collections}
             marks={marks}
-            mark={mark}
             onUpdatePebble={(input) => updatePebble(input)}
             onUploadSnap={uploadSnap}
             onDeletePebbleMedia={deletePebbleMedia}

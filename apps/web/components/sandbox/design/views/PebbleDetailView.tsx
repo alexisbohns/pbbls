@@ -24,7 +24,6 @@ export function PebbleDetailView() {
           souls={souls}
           collections={collections}
           marks={marks}
-          mark={marks.find((m) => m.id === pebble.mark_id)}
           onUpdatePebble={async () => pebble}
           onUploadSnap={async () => ({ id: "design-snap", storage_path: "", sort_order: 0 })}
           onAddSoul={async () => {}}

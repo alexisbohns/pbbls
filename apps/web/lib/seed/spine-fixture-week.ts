@@ -191,8 +191,6 @@ function pebble(spec: Spec): Pebble {
     instants: media?.url ? [media.url] : [],
     snaps: media ? [{ id: media.snapId, storage_path: `fixture/${media.snapId}`, sort_order: 0 }] : [],
     cards: [],
-    render_svg: null,
-    render_version: null,
     glyph: mark ? { id: mark.id, name: mark.name, strokes: mark.strokes, viewBox: mark.viewBox } : null,
     cover: media,
     created_at: happened,

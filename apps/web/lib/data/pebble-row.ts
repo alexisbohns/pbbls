@@ -1,4 +1,4 @@
-import type { MarkStroke, Pebble, PebbleCover, PebbleGlyph, PebbleSnap } from "@/lib/types"
+import type { MarkStroke, Pebble, PebbleCover, PebbleGlyph, PebbleSnap, SharedPebble } from "@/lib/types"
 
 /** Snap files live at `{storage_path}/original.jpg`; this is the signing key. */
 export function snapOriginalPath(snap: PebbleSnap): string {
@@ -43,9 +43,12 @@ function isStroke(value: unknown): value is MarkStroke {
 }
 
 /**
- * The `glyph` jsonb of `v_pebbles_full` (`{ id, name, strokes, view_box }`), or
- * null. A malformed embed is treated as no glyph: the stone then draws without
- * a carving rather than failing the whole Path load.
+ * A resolved glyph jsonb (`{ id, name, strokes, view_box, source }`, from
+ * `v_pebbles_full.glyph` or `get_shared_pebble`), or null. A malformed embed is
+ * treated as no glyph: the pebble then draws without one rather than failing
+ * the whole load. Every stroke must carry a string `d` and a numeric `width`;
+ * what the `d` says is not checked here, because it only ever reaches the page
+ * as a React attribute (`PebbleGlyphStrokes`, #829).
  */
 export function pebbleGlyphFromRow(raw: unknown): PebbleGlyph | null {
   if (typeof raw !== "object" || raw === null) return null
@@ -61,13 +64,11 @@ export function pebbleGlyphFromRow(raw: unknown): PebbleGlyph | null {
 }
 
 /**
- * Map one `v_pebbles_full` row to a `Pebble`. The render columns are not in the
- * view and come from the base table; signed snap URLs are minted in one batch by
- * the caller and looked up here by `snapOriginalPath`.
+ * Map one `v_pebbles_full` row to a `Pebble`. Signed snap URLs are minted in one
+ * batch by the caller and looked up here by `snapOriginalPath`.
  */
 export function pebbleFromViewRow(
   row: Record<string, unknown>,
-  render: { render_svg: string | null; render_version: string | null },
   signedUrlByPath: ReadonlyMap<string, string>,
 ): Pebble {
   const snaps = sortedSnaps(row.snaps)
@@ -93,11 +94,31 @@ export function pebbleFromViewRow(
       species_id: c.species_id,
       value: c.value,
     })),
-    render_svg: render.render_svg,
-    render_version: render.render_version,
     glyph: pebbleGlyphFromRow(row.glyph),
     cover: pebbleCover(snaps, signedUrlByPath),
     created_at: row.created_at as string,
     updated_at: row.updated_at as string,
+  }
+}
+
+/**
+ * Map the `get_shared_pebble` jsonb to a `SharedPebble`, or null when it is not
+ * one (the RPC answers null for unknown, non-public and hidden ids alike).
+ * Snake_case fields pass through; a photo-only moment's null name reads as "",
+ * and the glyph is read like the owner's (`pebbleGlyphFromRow`).
+ */
+export function sharedPebbleFromRpc(raw: unknown): SharedPebble | null {
+  if (typeof raw !== "object" || raw === null) return null
+  const r = raw as Record<string, unknown>
+  if (typeof r.id !== "string" || typeof r.emotion !== "object" || r.emotion === null) return null
+  return {
+    id: r.id,
+    name: pebbleNameFromRow(r.name),
+    description: typeof r.description === "string" ? r.description : null,
+    happened_at: r.happened_at as string,
+    intensity: r.intensity as number,
+    positiveness: r.positiveness as number,
+    glyph: pebbleGlyphFromRow(r.glyph),
+    emotion: r.emotion as SharedPebble["emotion"],
   }
 }

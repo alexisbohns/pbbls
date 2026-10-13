@@ -3,8 +3,7 @@
 import type { CSSProperties } from "react"
 import { motion, useReducedMotion } from "framer-motion"
 
-import type { Mark, Pebble } from "@/lib/types"
-import type { RenderTier } from "@/lib/engine"
+import type { Pebble } from "@/lib/types"
 import { useEmotionPalettes } from "@/lib/data/useEmotionPalettes"
 import {
   SIZE_BY_INTENSITY,
@@ -19,8 +18,6 @@ import { cn } from "@/lib/utils"
 
 type PebbleFramedProps = {
   pebble: Pebble
-  mark?: Mark | null
-  tier?: RenderTier
   className?: string
   // When true, the backdrop springs in and the pebble fades on top (used by the
   // detail view). Respects prefers-reduced-motion. Defaults off (static rows).
@@ -39,8 +36,6 @@ type PebbleFramedProps = {
  */
 export function PebbleFramed({
   pebble,
-  mark = null,
-  tier = "thumbnail",
   className,
   animateIn = false,
 }: PebbleFramedProps) {
@@ -51,7 +46,7 @@ export function PebbleFramed({
   // No palette (unauthenticated previews, legacy rows) → render the bare
   // pebble, matching PebbleVisual's existing fallback behaviour.
   if (!palette) {
-    return <PebbleVisual pebble={pebble} mark={mark} tier={tier} className={className} />
+    return <PebbleVisual pebble={pebble} className={className} />
   }
 
   const size = SIZE_BY_INTENSITY[pebble.intensity]
@@ -100,8 +95,6 @@ export function PebbleFramed({
           <div className="size-full" style={scaleStyle}>
             <PebbleVisual
               pebble={pebble}
-              mark={mark}
-              tier={tier}
               strokeOverride={strokeColor}
               className="size-full"
             />

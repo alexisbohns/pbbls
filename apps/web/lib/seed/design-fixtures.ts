@@ -5,7 +5,7 @@ import { SANDBOX_MARKS, SANDBOX_SCENARIOS, SANDBOX_SOULS } from "./sandbox-pebbl
 
 // ---------------------------------------------------------------------------
 // Fixture content for /sandbox/design (#986). Builds on the /sandbox/path seed
-// so it stays network-free: `render_svg: null` pebbles, local pictures, sandbox
+// so it stays network-free: fixture glyphs, local pictures, sandbox
 // palettes primed by the page.
 // ---------------------------------------------------------------------------
 

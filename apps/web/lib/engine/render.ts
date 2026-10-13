@@ -1,6 +1,5 @@
 import type { PebbleParams, EngineOutput } from "./types"
 import { getTemplate } from "./templates"
-import { renderGlyphPaths } from "./glyph"
 
 // ── Regex patterns ───────────────────────────────────────────────
 
@@ -17,27 +16,24 @@ const FOSSIL_RE = /\s*<path id="fossil"[^>]*\/>/
 // ── Pipeline ─────────────────────────────────────────────────────
 
 /**
- * Render a complete pebble as a self-contained SVG string.
+ * Render a pebble's body as a self-contained SVG string: the hand-drawn
+ * template for its intensity and positiveness, its placeholder glyph emptied,
+ * the fossil toggled, recoloured to `emotionColor`.
  *
- * Composes a doodle pebble by selecting a hand-drawn template based
- * on intensity and positiveness, swapping in the user's glyph,
- * toggling fossil visibility, and recolouring to the emotion colour.
+ * The string holds nothing but the static templates and `emotionColor` (a
+ * config hex or `currentColor`), which is what makes it safe to inject. The
+ * pebble's glyph is NOT in it: since the moments split the glyph is resolved
+ * server-side from a collection or a domain and can be someone else's drawing,
+ * so it is drawn as React children over `glyphZone` instead
+ * (`PebbleGlyphStrokes`, #829).
  *
  * Pure function — no DOM or React dependencies.
  */
-export function renderPebble(
-  params: PebbleParams,
-): EngineOutput {
+export function renderPebble(params: PebbleParams): EngineOutput {
   const template = getTemplate(params.intensity, params.positiveness)
-  let svg = template.svg
 
-  // 1. Replace placeholder glyph with user's mark (or empty it)
-  if (params.glyph && params.glyph.strokes.length > 0) {
-    const glyphContent = renderGlyphPaths(params.glyph, template.glyphZone)
-    svg = svg.replace(GLYPH_RE, `$1${glyphContent}$2`)
-  } else {
-    svg = svg.replace(GLYPH_RE, "$1$2")
-  }
+  // 1. Empty the placeholder glyph: the real one is drawn over the zone.
+  let svg = template.svg.replace(GLYPH_RE, "$1$2")
 
   // 2. Remove fossil region when not retroactive
   if (!params.retroactive) {
@@ -47,7 +43,7 @@ export function renderPebble(
   // 3. Recolour all strokes and fills from black to emotion colour
   svg = recolor(svg, params.emotionColor)
 
-  return { svg, viewBox: template.viewBox }
+  return { svg, viewBox: template.viewBox, glyphZone: template.glyphZone }
 }
 
 // ── Helpers ──────────────────────────────────────────────────────

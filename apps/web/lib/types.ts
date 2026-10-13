@@ -55,12 +55,10 @@ export type Pebble = {
   instants: string[]
   snaps: PebbleSnap[]
   cards: PebbleCard[]
-  // Server-rendered pebble. Populated by the compose-pebble / compose-pebble-update
-  // edge functions; null for legacy rows or anonymous (LocalProvider) pebbles.
-  render_svg: string | null
-  render_version: string | null
-  // The pebble's glyph strokes, from `v_pebbles_full.glyph`. The Spine carves
-  // these into the lit stone; null when the pebble has no glyph.
+  // The pebble's resolved glyph, from `v_pebbles_full.glyph`: its oldest
+  // collection's glyph, else its first domain's default (#1046 D5). The server
+  // no longer renders pebbles (D6), so every surface draws these strokes; null
+  // when neither carries a glyph.
   glyph: PebbleGlyph | null
   // The first snap (sort_order 0), the one the Spine's card shows. Null when the
   // pebble has no snap.
@@ -359,9 +357,9 @@ export type PublicAchievement = {
 
 /**
  * The `get_shared_pebble` projection (M51) — what an anonymous `/p/[id]`
- * visitor sees of a `public`-grade pebble. Snake_case because it comes
- * straight off the jsonb projection, unmapped. Deliberately owner-less:
- * the RPC never returns `user_id`.
+ * visitor sees of a `public`-grade pebble. Snake_case because it comes off the
+ * jsonb projection; only `name` and `glyph` are mapped (`sharedPebbleFromRpc`).
+ * Deliberately owner-less: the RPC never returns `user_id`.
  */
 export type SharedPebble = {
   id: string
@@ -371,8 +369,11 @@ export type SharedPebble = {
   happened_at: string
   intensity: number
   positiveness: number
-  /** Server-composed SVG; null only for legacy rows that pre-date the remote engine. */
-  render_svg: string | null
+  /**
+   * The resolved glyph (the sharer's collection's, else the domain's), drawn
+   * client-side since the server stopped rendering (#1046). Null for none.
+   */
+  glyph: PebbleGlyph | null
   emotion: {
     id: string
     slug: string
@@ -395,8 +396,11 @@ export type SharedConnectionPebble = {
   /** ISO timestamptz as returned by PostgREST. */
   happened_at: string
   visibility: Visibility
+  intensity: number
+  positiveness: number
   emotion: { id: string; slug: string; name: string; color: string }
-  render_svg: string | null
+  /** The resolved glyph, drawn client-side (#1046). Null for none. */
+  glyph: PebbleGlyph | null
 }
 
 export type RegisterInput = {

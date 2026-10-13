@@ -1,4 +1,5 @@
 export { renderPebble } from "./render"
-export { toPebbleParams } from "./params"
+export { toPebbleParams, isRetroactive } from "./params"
+export { placeGlyph, type GlyphPlacement } from "./glyph"
 export { hashUUID } from "./seed"
 export type { PebbleParams, RenderTier, EngineOutput } from "./types"
