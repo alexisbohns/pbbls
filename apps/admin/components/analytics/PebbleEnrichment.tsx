@@ -1,3 +1,8 @@
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import type { PebbleEnrichmentRow } from "@/lib/analytics/types"
 
 type PebbleEnrichmentProps = {
@@ -106,8 +111,96 @@ function RatioRow({ ratio }: { ratio: Ratio }) {
   )
 }
 
+/** "in the last 30 days", "over all time", or "in this period" when unscoped. */
+function periodPhrase(rangeLabel?: string): string {
+  if (!rangeLabel) return "in this period"
+  const lower = rangeLabel.toLowerCase()
+  return lower === "all time" ? "over all time" : `in the last ${lower}`
+}
+
+function plural(n: number, noun: string): string {
+  return `${n.toLocaleString()} ${noun}${n === 1 ? "" : "s"}`
+}
+
+function CountStat({
+  label,
+  value,
+  description,
+}: {
+  label: string
+  value: string
+  description: string
+}) {
+  return (
+    <div className="space-y-1">
+      <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {label}
+      </div>
+      <Tooltip>
+        <TooltipTrigger
+          render={
+            <span
+              className="cursor-help text-xl font-semibold tabular-nums underline decoration-dotted decoration-muted-foreground/50 underline-offset-4"
+              tabIndex={0}
+            >
+              {value}
+            </span>
+          }
+        />
+        <TooltipContent>{description}</TooltipContent>
+      </Tooltip>
+    </div>
+  )
+}
+
+/**
+ * Moments recorded beside pebbles completed, and the share of those moments
+ * that became a pebble. Since the moments/pebbles split a moment can be saved
+ * bare and completed later, so the two counts diverge.
+ */
+function MomentCounts({
+  moments,
+  pebbles,
+  completedPct,
+  rangeLabel,
+}: {
+  moments: number
+  pebbles: number
+  completedPct: number | null
+  rangeLabel?: string
+}) {
+  const period = periodPhrase(rangeLabel)
+  const periodTitle = period.charAt(0).toUpperCase() + period.slice(1)
+  return (
+    <div className="grid grid-cols-3 gap-3">
+      <CountStat
+        label="Moments"
+        value={moments.toLocaleString()}
+        description={`${periodTitle}, ${plural(moments, "moment")} ${moments === 1 ? "was" : "were"} recorded, completed or not.`}
+      />
+      <CountStat
+        label="Pebbles"
+        value={pebbles.toLocaleString()}
+        description={`${periodTitle}, ${plural(pebbles, "pebble")} ${pebbles === 1 ? "was" : "were"} completed, some of them on moments recorded earlier.`}
+      />
+      <CountStat
+        label="Completion"
+        value={completedPct === null ? "—" : `${Math.round(completedPct)}%`}
+        description={
+          completedPct === null
+            ? `No moments were recorded ${period}, so there is no completion rate.`
+            : `Of the ${plural(moments, "moment")} recorded ${period}, ${Math.round(completedPct)}% have become a pebble so far.`
+        }
+      />
+    </div>
+  )
+}
+
 export function PebbleEnrichment({ row, rangeLabel }: PebbleEnrichmentProps) {
-  if (!row || row.total_pebbles === null || row.total_pebbles === 0) {
+  const moments = row?.total_moments ?? 0
+  const pebbles = row?.total_pebbles ?? 0
+
+  if (!row || (pebbles === 0 && moments === 0)) {
     return (
       <p className="text-sm text-muted-foreground">
         No pebbles {rangeLabel ? `in the last ${rangeLabel.toLowerCase()}` : "yet"} — enrichment metrics appear once users start collecting.
@@ -115,9 +208,29 @@ export function PebbleEnrichment({ row, rangeLabel }: PebbleEnrichmentProps) {
     )
   }
 
+  const counts = (
+    <MomentCounts
+      moments={moments}
+      pebbles={pebbles}
+      completedPct={row.pct_moments_completed ?? null}
+      rangeLabel={rangeLabel}
+    />
+  )
+
+  if (pebbles === 0) {
+    return (
+      <div className="space-y-5">
+        {counts}
+        <p className="border-t pt-4 text-sm text-muted-foreground">
+          No moment has been completed {periodPhrase(rangeLabel)} — enrichment metrics appear once pebbles exist.
+        </p>
+      </div>
+    )
+  }
+
   const donuts: Donut[] = [
     { label: "With picture", pct: row.pct_with_picture },
-    { label: "Custom glyph", pct: row.pct_with_custom_glyph },
+    { label: "In carved-glyph collection", pct: row.pct_with_custom_glyph },
     { label: "In collection", pct: row.pct_in_collection },
   ]
 
@@ -133,7 +246,9 @@ export function PebbleEnrichment({ row, rangeLabel }: PebbleEnrichmentProps) {
 
   return (
     <div className="space-y-5">
-      <div className="grid grid-cols-3 gap-3">
+      {counts}
+
+      <div className="grid grid-cols-3 gap-3 border-t pt-4">
         {donuts.map((d) => (
           <DonutTile key={d.label} donut={d} />
         ))}
@@ -146,8 +261,8 @@ export function PebbleEnrichment({ row, rangeLabel }: PebbleEnrichmentProps) {
       </ul>
 
       <p className="text-xs text-muted-foreground">
-        Based on {row.total_pebbles.toLocaleString()} pebble
-        {row.total_pebbles === 1 ? "" : "s"}
+        Based on {pebbles.toLocaleString()} pebble
+        {pebbles === 1 ? "" : "s"}
         {rangeLabel ? ` in the last ${rangeLabel.toLowerCase()}` : ""}.
       </p>
     </div>

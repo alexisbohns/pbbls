@@ -16,6 +16,7 @@ import {
 } from "@/components/analytics/__fixtures__/activeUsers"
 import { kpiFixture } from "@/components/analytics/__fixtures__/kpi"
 import {
+  bareMomentsEnrichmentFixture,
   denseEnrichmentFixture,
   emptyEnrichmentFixture,
   sparseEnrichmentFixture,
@@ -199,6 +200,15 @@ export default function AnalyticsPlaygroundPage() {
         </h2>
         <div className="max-w-sm">
           <PebbleEnrichment row={sparseEnrichmentFixture} />
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-sm font-medium uppercase text-muted-foreground">
+          PebbleEnrichment — bare moments only
+        </h2>
+        <div className="max-w-sm">
+          <PebbleEnrichment row={bareMomentsEnrichmentFixture} />
         </div>
       </section>
 

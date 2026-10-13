@@ -36,7 +36,7 @@ const config: ChartConfig = {
   pebbles_with_picture: { label: "With picture", color: "var(--chart-2)" },
   pebbles_in_collection: { label: "In collection", color: "var(--chart-3)" },
   pebbles_with_custom_glyph: {
-    label: "With custom glyph",
+    label: "In carved-glyph collection",
     color: "var(--chart-4)",
   },
 }
