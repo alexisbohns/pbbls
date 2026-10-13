@@ -5388,6 +5388,13 @@ R15. **Delete-failure copy** is identical on both: the iOS "Couldn't delete" str
      and its French from apps/ios Localizable.xcstrings. Android adds it as a new
      string rather than reusing "Something went wrong. Please try again."
 
+R4 clarified after iOS shipped (2026-10-13): the blank stone is the
+`BLANK_PALETTE` silhouette alone, with no outline stroke on top (an engine
+outline as the only ink rendered as a heavy, offset double contour on iOS, and
+the web `LitStone` blank branch draws none). Android therefore draws
+`BlankStone` as the filled silhouette only; `StoneComposer.outlineOnly` and
+`BLANK_CACHE_KEY` (Task 3.2) are dropped.
+
 How this plan implements them: R1/R2 in Part 6 (`CaptureFlowViewModel.onCloseRequested`, `closeOffersSave`, `onSaveFromClose`); R3 through `core/ui/MomentNameText.kt` (Part 2) and `RecordSuccessStep` (Part 5); R4 through `BlankPalette` + `StoneComposer.outlineOnly` + `BlankStone` (Part 3) on Path rows and the read page (Part 4); R5/R6 as `EditMomentScreen` and `EditPebbleScreen` (Part 2); R7 as the ⋮ menu (Part 2, Delete added in Part 4); R8 as `MomentDeleteDialog` (Part 4); R9 in Task 2.3; R10 as `momentWriteErrorRes` (Task 1.6); R15 as `moment_delete_error` on every moment and pebble delete failure (Task 2.2, Part 4); R14 as `PathFocusRequests` (Task 5.5, used by Capture in Task 6.2); R11 in Task 7.1; R12 in Part 5; R13 as `MomentWriteService.karmaDelta` (Task 1.8).
 
 ### Android-side decisions consistent with R1–R13

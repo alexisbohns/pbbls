@@ -217,7 +217,7 @@ private const val LOAD_EXTERNAL_DTD_FEATURE = "http://apache.org/xml/features/no
 private val ARG_SEPARATOR = Regex("[,\\s]+")
 private val TRANSFORM_OP = Regex("(translate|scale)\\s*\\(([^)]*)\\)")
 
-private fun parseViewBox(raw: String?): PebbleSvgModel.ViewBox? {
+internal fun parseViewBox(raw: String?): PebbleSvgModel.ViewBox? {
     if (raw == null) return null
     val parts = raw.trim().split(ARG_SEPARATOR).mapNotNull { it.toFloatOrNull() }
     if (parts.size != 4) return null

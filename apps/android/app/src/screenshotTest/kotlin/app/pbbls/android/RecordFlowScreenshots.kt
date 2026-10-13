@@ -19,6 +19,7 @@ import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.core.model.PebbleCollection
+import app.pbbls.android.core.model.PebbleGlyph
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.features.path.create.pickers.DomainPickerContent
@@ -88,10 +89,6 @@ private val previewPalette: EmotionPalette? =
         darkHex = "#2A2138FF",
         shadedHex = "#4A3A5CFF",
     )
-
-private const val PREVIEW_RENDER_SVG =
-    """<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">""" +
-        """<path d="M 40 150 L 100 50 L 160 150" stroke="currentColor" stroke-width="6" fill="none"/></svg>"""
 
 /** The scaffold plus chrome, so a step preview shows the screen the user sees. */
 @Composable
@@ -180,7 +177,7 @@ private fun PrivacyStepPreview(publishError: String?) {
 }
 
 @Composable
-private fun SuccessStepPreview(renderSvg: String?) {
+private fun SuccessStepPreview(glyph: PebbleGlyph?) {
     Column(
         Modifier
             .fillMaxSize()
@@ -188,7 +185,7 @@ private fun SuccessStepPreview(renderSvg: String?) {
     ) {
         RecordSuccessStep(
             name = "Shipped the Android record flow",
-            renderSvg = renderSvg,
+            glyph = glyph,
             karmaDelta = 12,
             valence = Valence.HIGHLIGHT_MEDIUM,
             palette = previewPalette,
@@ -313,17 +310,17 @@ fun RecordPrivacyStepErrorLight() {
 @PreviewLargeFontTall
 @Composable
 fun RecordSuccessStepLight() {
-    PebblesTheme { SuccessStepPreview(PREVIEW_RENDER_SVG) }
+    PebblesTheme { SuccessStepPreview(MomentPreviewFixtures.pebbleGlyph()) }
 }
 
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun RecordSuccessStepDark() {
-    PebblesTheme { SuccessStepPreview(PREVIEW_RENDER_SVG) }
+    PebblesTheme { SuccessStepPreview(MomentPreviewFixtures.pebbleGlyph()) }
 }
 
-/** Soft success: the pebble exists but there is no render to draw. */
+/** No derived glyph: the stone still draws, bare (R12). */
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
 @PreviewLargeFontTall

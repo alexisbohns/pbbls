@@ -363,12 +363,11 @@ private val previewSnap = ColorPainter(Color(0xFF6B7A8F))
 private fun SnapFramePreview(
     aspect: BannerAspect,
     valence: Valence,
-    renderSvg: String,
 ) {
     PebbleSnapFrame(
         photo = previewSnap,
         aspect = aspect,
-        renderSvg = renderSvg,
+        glyph = MomentPreviewFixtures.pebbleGlyph(),
         valence = valence,
         palette = previewPalette,
         modifier =
@@ -383,33 +382,33 @@ private fun SnapFramePreview(
 @Preview(showBackground = true)
 @Composable
 fun PebbleSnapSquareLight() {
-    PebblesTheme { SnapFramePreview(BannerAspect.SQUARE, Valence.NEUTRAL_MEDIUM, PebbleSvgFixtures.mediumNeutral) }
+    PebblesTheme { SnapFramePreview(BannerAspect.SQUARE, Valence.NEUTRAL_MEDIUM) }
 }
 
 @PreviewTest
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun PebbleSnapSquareDark() {
-    PebblesTheme { SnapFramePreview(BannerAspect.SQUARE, Valence.NEUTRAL_MEDIUM, PebbleSvgFixtures.mediumNeutral) }
+    PebblesTheme { SnapFramePreview(BannerAspect.SQUARE, Valence.NEUTRAL_MEDIUM) }
 }
 
 @PreviewTest
 @Preview(showBackground = true)
 @Composable
 fun PebbleSnapLandscapeLight() {
-    PebblesTheme { SnapFramePreview(BannerAspect.FOUR_THREE, Valence.NEUTRAL_MEDIUM, PebbleSvgFixtures.mediumNeutral) }
+    PebblesTheme { SnapFramePreview(BannerAspect.FOUR_THREE, Valence.NEUTRAL_MEDIUM) }
 }
 
 @PreviewTest
 @Preview(showBackground = true)
 @Composable
 fun PebbleSnapPortraitLargeLight() {
-    PebblesTheme { SnapFramePreview(BannerAspect.THREE_FOUR, Valence.HIGHLIGHT_LARGE, PebbleSvgFixtures.largeHighlight) }
+    PebblesTheme { SnapFramePreview(BannerAspect.THREE_FOUR, Valence.HIGHLIGHT_LARGE) }
 }
 
 @PreviewTest
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun PebbleSnapPortraitLargeDark() {
-    PebblesTheme { SnapFramePreview(BannerAspect.THREE_FOUR, Valence.HIGHLIGHT_LARGE, PebbleSvgFixtures.largeHighlight) }
+    PebblesTheme { SnapFramePreview(BannerAspect.THREE_FOUR, Valence.HIGHLIGHT_LARGE) }
 }

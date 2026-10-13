@@ -144,6 +144,7 @@ fun EditPebbleContent(
                             val valence = state.draft.valence ?: Valence.NEUTRAL_MEDIUM
                             PebbleThumbnail(
                                 valence = valence,
+                                glyph = state.glyph,
                                 palette = palette,
                                 modifier = Modifier.fillMaxWidth().height(valence.sizeGroup.renderHeightDp.dp),
                             )
