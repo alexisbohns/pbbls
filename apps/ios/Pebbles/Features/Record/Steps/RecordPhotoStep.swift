@@ -16,7 +16,7 @@ import SwiftUI
 /// replaced one's bytes with it.
 struct RecordPhotoStep: View {
     let snap: FormSnap?
-    /// The picker's selection. Owned by `RecordFlowView` so it survives
+    /// The picker's selection. Owned by `CaptureFlowView` so it survives
     /// stepping away and back, and so loading the bytes stays with the
     /// orchestration rather than the view.
     @Binding var selection: PhotosPickerItem?

@@ -3,15 +3,14 @@ import os
 
 /// Read-view sheet for a single moment. Loads the `MomentDetail` from
 /// `v_moments_full` and renders `PebbleReadView` with a privacy badge and a
-/// `…` menu in the navigation bar (R7). **Edit pebble** stacks
-/// `EditPebbleSheet` on top; on save the read view reloads in place and
-/// notifies the parent. **Delete** opens the shared confirmation (R8): deleting
-/// the moment closes the page, deleting only the pebble reloads it as a bare
-/// moment.
+/// `…` menu in the navigation bar (R7). **Edit moment** stacks
+/// `EditMomentSheet` (→ `save_moment`) and **Edit pebble**, shown only when
+/// the caller's pebble exists, stacks `EditPebbleSheet` (→ `complete_pebble`);
+/// on save the read view reloads in place and notifies the parent. **Delete**
+/// opens the shared confirmation (R8): deleting the moment closes the page,
+/// deleting only the pebble reloads it as a bare moment.
 ///
-/// Used as the destination for both:
-/// - Path-list tap of an existing pebble.
-/// - Post-create reveal after `CreatePebbleSheet` completes.
+/// Opened from a Path row and from soul and collection detail rows (R9).
 struct PebbleDetailSheet: View {
     let momentId: UUID
     var onPebbleUpdated: (() -> Void)?
@@ -24,7 +23,8 @@ struct PebbleDetailSheet: View {
     @State private var detail: MomentDetail?
     @State private var isLoading = true
     @State private var loadError: String?
-    @State private var isPresentingEdit = false
+    @State private var isPresentingEditMoment = false
+    @State private var isPresentingEditPebble = false
     @State private var isPresentingComplete = false
     @State private var pendingDeletion: MomentDeleteTarget?
     @State private var deleteError: String?
@@ -55,9 +55,12 @@ struct PebbleDetailSheet: View {
                                 ))
                             }
                             Menu {
+                                Button { isPresentingEditMoment = true } label: {
+                                    Label("Edit moment", systemImage: "pencil")
+                                }
                                 if detail?.pebble != nil {
-                                    Button { isPresentingEdit = true } label: {
-                                        Label("Edit pebble", systemImage: "pencil")
+                                    Button { isPresentingEditPebble = true } label: {
+                                        Label("Edit pebble", systemImage: "circle.hexagongrid")
                                     }
                                 }
                                 Button(role: .destructive) {
@@ -78,11 +81,21 @@ struct PebbleDetailSheet: View {
         }
         .interactiveDismissDisabled(isDeleting)
         .task { await load(showsSpinner: detail == nil) }
-        .sheet(isPresented: $isPresentingEdit) {
-            EditPebbleSheet(momentId: momentId, onSaved: {
-                Task { await load(showsSpinner: false) }
-                onPebbleUpdated?()
-            })
+        .sheet(isPresented: $isPresentingEditPebble) {
+            if let detail, let pebble = detail.pebble {
+                EditPebbleSheet(momentId: detail.id, pebble: pebble, onSaved: {
+                    Task { await load(showsSpinner: false) }
+                    onPebbleUpdated?()
+                })
+            }
+        }
+        .sheet(isPresented: $isPresentingEditMoment) {
+            if let detail {
+                EditMomentSheet(detail: detail, onSaved: {
+                    Task { await load(showsSpinner: false) }
+                    onPebbleUpdated?()
+                })
+            }
         }
         .fullScreenCover(isPresented: $isPresentingComplete) {
             CompleteFlowView(

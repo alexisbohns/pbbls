@@ -32,3 +32,17 @@ struct CompleteDraft: Equatable {
         return copy
     }
 }
+
+extension CompleteDraft {
+    /// Prefill Edit pebble from the caller's pebble (R5). Keeps the first
+    /// domain and the first collection, as the pre-split edit did (A6).
+    init(from pebble: MomentDetail.Pebble) {
+        self.init()
+        valence = pebble.valence
+        emotionId = pebble.emotion.id
+        domainId = pebble.domains.first?.id
+        soulIds = pebble.souls.map(\.id)
+        collectionId = pebble.collections.first?.id
+        visibility = pebble.visibility
+    }
+}

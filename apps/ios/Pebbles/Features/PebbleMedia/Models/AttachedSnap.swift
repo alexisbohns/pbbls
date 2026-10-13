@@ -1,7 +1,7 @@
 import Foundation
 
-/// One photo attached to an in-progress pebble, including upload state.
-/// Held inside `PebbleDraft.attachedSnap`. Value type — immutable updates.
+/// One photo attached to an in-progress moment, including upload state.
+/// Held inside `FormSnap.pending`. Value type — immutable updates.
 struct AttachedSnap: Equatable {
 
     enum UploadState: Equatable {

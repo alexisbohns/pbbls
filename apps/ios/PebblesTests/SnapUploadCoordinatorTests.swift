@@ -181,6 +181,19 @@ struct SnapUploadCoordinatorTests {
         #expect(repo.calls == [.deleteFilesBySnapId(snapId: snapId, userId: userId)])
     }
 
+    @Test("cancelAndCleanup never deletes a committed snap")
+    func cancelAndCleanupSparesCommitted() async throws {
+        let repo = FakeRepo()
+        let snapId = UUID()
+        let (coordinator, _) = makeCoordinatorWithUploadedPending(repo: repo, snapId: snapId)
+        coordinator.beginCommit()
+        coordinator.markCommitted()
+
+        await coordinator.cancelAndCleanup(userId: UUID())
+
+        #expect(repo.calls.isEmpty)
+    }
+
     @Test("cancelAndCleanup with no pending snap is a no-op")
     func cancelAndCleanupNoOpWhenEmpty() async throws {
         let repo = FakeRepo()
@@ -198,24 +211,6 @@ struct SnapUploadCoordinatorTests {
     // so the coordinator structurally cannot fail-fast on a Storage error. The
     // live repo logs internally; the fake records the call. No additional test
     // needed beyond `cancelAndCleanupAwaitsDelete`.
-
-    @Test("handleSaveFailure fires compensating delete but keeps formSnap")
-    func handleSaveFailureFiresCleanupAndKeepsState() async throws {
-        let repo = FakeRepo()
-        let snapId = UUID()
-        let userId = UUID()
-        let (coordinator, original) = makeCoordinatorWithUploadedPending(repo: repo, snapId: snapId)
-
-        await coordinator.handleSaveFailure(userId: userId)
-
-        #expect(repo.calls == [.deleteFilesBySnapId(snapId: snapId, userId: userId)])
-        // Caller decides whether to clear state; coordinator preserves it.
-        if case .pending(let snap) = coordinator.formSnap {
-            #expect(snap.id == original.id)
-        } else {
-            Issue.record("expected formSnap to be retained")
-        }
-    }
 
     @Test("detachExisting: clears the photo, calls nothing, remembers its files")
     func detachExistingIsLocal() {
@@ -317,5 +312,24 @@ struct SnapUploadCoordinatorTests {
 
         #expect(coordinator.detachedStoragePaths.isEmpty)
         #expect(repo.calls.isEmpty)
+    }
+
+    @Test("purgeDetached still deletes after the save committed (Edit moment's order)")
+    func purgeAfterCommit() async {
+        let repo = FakeRepo()
+        let coordinator = SnapUploadCoordinator(
+            repo: repo,
+            initialSnap: .existing(id: UUID(), storagePath: "uid/sid"),
+            retryDelay: .milliseconds(1)
+        )
+        coordinator.detachExisting()
+        let atSave = coordinator.detachedStoragePaths
+        coordinator.beginCommit()
+        coordinator.markCommitted()
+
+        await coordinator.purgeDetached(atSave)
+
+        #expect(repo.calls == [.deleteFilesByPrefix(prefix: "uid/sid")])
+        #expect(coordinator.detachedStoragePaths.isEmpty)
     }
 }

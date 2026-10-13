@@ -3,7 +3,7 @@ import Observation
 import Supabase
 import os
 
-/// Caches the three reference lists used by `CreatePebbleSheet` and
+/// Caches the three reference lists used by the Complete flow and
 /// `EditPebbleSheet` (`domains`, `souls`, `collections`) for the session.
 ///
 /// Loaded once from `RootView.task` alongside `EmotionPaletteService`, during
