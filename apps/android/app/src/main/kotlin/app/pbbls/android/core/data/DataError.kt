@@ -62,6 +62,9 @@ sealed interface DataError {
 /** The one named condition that is a product limit rather than a conflict. */
 private const val MEDIA_QUOTA_EXCEEDED = "media_quota_exceeded"
 
+/** 42501 conditions that name a missing reference, not a dead session (`complete_pebble`). */
+private val OWNERSHIP_CONDITIONS = setOf("soul_not_owned", "collection_not_owned")
+
 /**
  * Classify from the fields a [RestException] carries, without the exception.
  *
@@ -78,8 +81,10 @@ internal fun dataErrorOf(
     sqlState: String?,
 ): DataError =
     when {
+        sqlState == "42501" && error in OWNERSHIP_CONDITIONS -> DataError.Conflict(error)
         statusCode == 401 || statusCode == 403 || sqlState == "42501" -> DataError.Unauthorized
-        statusCode == 404 -> DataError.NotFound
+        // no_data_found: PostgREST answers P0002 with a 5xx, so the code is the only signal.
+        statusCode == 404 || sqlState == "P0002" -> DataError.NotFound
         error == MEDIA_QUOTA_EXCEEDED -> DataError.Quota
         // A raised condition: P0001 is what `raise exception` emits, and the
         // schema's conditions are lower_snake_case single tokens. Anything else
