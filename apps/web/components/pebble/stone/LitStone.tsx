@@ -21,6 +21,7 @@ import {
   EDGE_SHADE,
   FOSSIL_TONES,
   GLINT_STRENGTH,
+  GRAIN_STRENGTH,
   GLYPH_TONES,
   SLOT_COLOR,
   VEIN_TONES,
@@ -210,8 +211,14 @@ export function LitStone({ size, polarity: cut, palette, glyph, seed, touched = 
               </g>
             )}
             {recipe.material !== "gem" && <SoftLight light={recipe.light} transform={canvas} />}
-            {recipe.material === "lava" && (
-              <Grain width={outline.width} height={outline.height} upx={upx} seed={seed} opacity={0.32} />
+            {GRAIN_STRENGTH[polarity] > 0 && (
+              <Grain
+                width={outline.width}
+                height={outline.height}
+                upx={upx}
+                seed={seed}
+                opacity={GRAIN_STRENGTH[polarity]}
+              />
             )}
 
             <use

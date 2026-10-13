@@ -93,7 +93,7 @@ export function StoneSprite() {
         <filter id={STONE_GLOW_ID} x="-60%" y="-60%" width="220%" height="220%">
           <feGaussianBlur stdDeviation={BLUR.glow} />
         </filter>
-        {/* Lava's pitted surface, drawn in screen px: a dark speck where the
+        {/* The stone's grain (lava's pits, the pebble's tooth), in screen px: a dark speck where the
             noise's red runs high, a pale one where its green does. Colourless
             so the stone's own body shows through between them. */}
         <filter id={STONE_GRAIN_ID} x="0" y="0" width="100%" height="100%" colorInterpolationFilters="sRGB">
