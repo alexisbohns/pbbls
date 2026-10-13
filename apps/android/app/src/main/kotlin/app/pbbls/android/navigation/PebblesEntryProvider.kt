@@ -26,6 +26,7 @@ import app.pbbls.android.features.path.EditMomentScreen
 import app.pbbls.android.features.path.EditPebbleScreen
 import app.pbbls.android.features.path.PathScreen
 import app.pbbls.android.features.path.PebbleDetailScreen
+import app.pbbls.android.features.path.complete.CompleteFlowScreen
 import app.pbbls.android.features.path.create.CreatePebbleScreen
 import app.pbbls.android.features.path.record.RecordFlowScreen
 import app.pbbls.android.features.profile.AchievementsScreen
@@ -255,6 +256,11 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
 
     entry<PebblesKey.EditPebble>(metadata = NavTransitions.forKey(PebblesKey.EditPebble(""))) { key ->
         EditPebbleScreen(momentId = key.momentId, onDismiss = navigator::goBack, onSaved = navigator::goBack)
+    }
+
+    entry<PebblesKey.CompletePebble>(metadata = NavTransitions.forKey(PebblesKey.CompletePebble(""))) { key ->
+        // Exit returns to whatever opened it: the read page (which reloads on resume) or Path after a capture (A-14).
+        CompleteFlowScreen(momentId = key.momentId, onDismiss = navigator::goBack)
     }
 
     entry<PebblesKey.RecordFlow>(metadata = NavTransitions.forKey(PebblesKey.RecordFlow())) { key ->

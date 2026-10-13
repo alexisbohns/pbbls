@@ -27,6 +27,7 @@ import app.pbbls.android.core.designsystem.Spacing
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.PebbleGlyph
 import app.pbbls.android.core.model.Valence
+import app.pbbls.android.core.ui.MomentNameText
 import app.pbbls.android.features.path.read.PebbleReadPetroglyph
 
 /**
@@ -42,7 +43,7 @@ import app.pbbls.android.features.path.read.PebbleReadPetroglyph
  */
 @Composable
 fun RecordSuccessStep(
-    name: String,
+    name: String?,
     glyph: PebbleGlyph?,
     karmaDelta: Int?,
     valence: Valence,
@@ -74,9 +75,9 @@ fun RecordSuccessStep(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
-            // User-authored, so never localized.
-            Text(
-                text = name,
+            // User-authored, so never localized; a photo-only moment reads "Untitled" (R3, R12).
+            MomentNameText(
+                name = name,
                 style = MaterialTheme.typography.headlineMedium,
                 color = colors.onSurface,
                 textAlign = TextAlign.Center,

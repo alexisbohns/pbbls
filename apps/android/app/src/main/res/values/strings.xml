@@ -417,6 +417,7 @@
     <string name="delete_pebble_keep_moment">Delete the pebble, keep the moment</string>
     <string name="delete_moment_too">Delete the moment too</string>
     <string name="delete_moment">Delete moment</string>
+    <string name="complete_cta">Make it a pebble</string>
 
     <!-- ==== Glyph carve studio (M43 · Android Glyph Studio &amp; Store) ==== -->
     <string name="carve_title">New glyph</string>

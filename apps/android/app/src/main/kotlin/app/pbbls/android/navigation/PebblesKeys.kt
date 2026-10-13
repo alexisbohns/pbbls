@@ -126,6 +126,12 @@ sealed interface PebblesKey : NavKey {
         val momentId: String,
     ) : PebblesKey
 
+    /** The Complete flow for one moment (#1048). Full-screen, like the edit forms. */
+    @Serializable
+    data class CompletePebble(
+        val momentId: String,
+    ) : PebblesKey
+
     @Serializable
     data object Settings : PebblesKey
 
