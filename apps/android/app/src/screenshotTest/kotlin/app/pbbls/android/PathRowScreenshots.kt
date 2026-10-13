@@ -18,10 +18,10 @@ import app.pbbls.android.features.path.components.PathPebbleRow
 import com.android.tools.screenshot.PreviewTest
 
 /**
- * Row-level previews for the Path timeline (#531, #1048): every intensity on
- * its outline backdrop (the glyph drawn from strokes returns in the next part
- * of #1048), the missing-palette accent fallback, and a photo-only moment
- * with no name and no pebble yet (R3) — light and dark.
+ * Row-level previews for the Path timeline (#531, #1048): every intensity as
+ * its composed stone with the derived glyph, the missing-palette accent
+ * fallback, and a photo-only moment with no name and no pebble yet (R3) —
+ * light and dark.
  */
 private val previewPalette: EmotionPalette =
     requireNotNull(

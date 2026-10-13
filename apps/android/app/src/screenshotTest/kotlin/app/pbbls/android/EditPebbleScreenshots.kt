@@ -128,7 +128,7 @@ private fun EditPebblePreview(
 ) {
     CompositionLocalProvider(LocalReferenceDataService provides editRefs) {
         EditPebbleContent(
-            uiState = EditPebbleUiState.Content(draft = draft, saveErrorRes = saveErrorRes),
+            uiState = EditPebbleUiState.Content(draft = draft, glyph = MomentPreviewFixtures.pebbleGlyph(), saveErrorRes = saveErrorRes),
             palette = joyPalette,
             selectedEmotion = joyEmotion,
             onDraftChange = {},
