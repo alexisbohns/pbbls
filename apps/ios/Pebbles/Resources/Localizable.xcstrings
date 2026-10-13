@@ -672,6 +672,23 @@
         }
       }
     },
+    "A name, a photo, or both." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A name, a photo, or both."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un nom, une photo, ou les deux."
+          }
+        }
+      }
+    },
     "A new link retires this one. Anyone still holding it won't be able to connect." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4854,6 +4871,23 @@
         }
       }
     },
+    "Keep this moment?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keep this moment?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu gardes ce moment ?"
+          }
+        }
+      }
+    },
     "Keep this pebble?" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -5168,6 +5202,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "En faire un galet"
+          }
+        }
+      }
+    },
+    "Make it a pebble now" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Make it a pebble now"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En faire un galet maintenant"
           }
         }
       }
@@ -6812,6 +6863,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Garder pour plus tard"
+          }
+        }
+      }
+    },
+    "Save moment" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Save moment"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garder le moment"
           }
         }
       }
