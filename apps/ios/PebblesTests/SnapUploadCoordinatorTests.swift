@@ -28,9 +28,13 @@ struct SnapUploadCoordinatorTests {
 
         // Stubs — set before invoking the method under test.
         var uploadResults: [Result<Void, Error>] = []
+        /// Runs inside the upload, before it returns: lets a test close or
+        /// commit the form while a pick is still uploading.
+        var duringUpload: (() async -> Void)?
 
         func uploadProcessed(_ processed: ProcessedImage, snapId: UUID, userId: UUID) async throws {
             calls.append(.upload(snapId: snapId, userId: userId))
+            await duringUpload?()
             guard !uploadResults.isEmpty else { return }
             switch uploadResults.removeFirst() {
             case .success: return
@@ -38,8 +42,14 @@ struct SnapUploadCoordinatorTests {
             }
         }
 
+        /// Snap ids whose delete ran inside a cancelled task. The live repo's
+        /// URLSession request throws there before it is sent, so a cleanup
+        /// recorded here would have deleted nothing.
+        var deletesInCancelledTask: [UUID] = []
+
         func deleteFiles(snapId: UUID, userId: UUID) async {
             calls.append(.deleteFilesBySnapId(snapId: snapId, userId: userId))
+            if Task.isCancelled { deletesInCancelledTask.append(snapId) }
         }
 
         func deleteFiles(storagePrefix: String) async {

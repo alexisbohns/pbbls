@@ -62,3 +62,15 @@ struct SaveMomentPayload: Encodable, Equatable {
         }
     }
 }
+
+extension SaveMomentPayload {
+    /// A new moment from Capture (A2): no id, the name only when non-blank,
+    /// no description, the photo only when there is one.
+    init(capture draft: CaptureDraft, formSnap: FormSnap?, userId: UUID) {
+        self.init()
+        name = MomentName.display(draft.name)
+        happenedAt = draft.happenedAt
+        let snaps = Self.snaps(for: formSnap, userId: userId)
+        self.snaps = snaps.isEmpty ? nil : snaps
+    }
+}
