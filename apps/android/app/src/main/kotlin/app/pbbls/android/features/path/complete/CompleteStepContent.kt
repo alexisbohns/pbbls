@@ -13,7 +13,7 @@ import app.pbbls.android.features.path.flow.steps.RecordSoulsStep
 import app.pbbls.android.features.path.flow.steps.RecordValenceStep
 
 /**
- * The body of a Complete step, on the record flow's stateless step bodies.
+ * The body of a Complete step, on the shared stateless step bodies (`flow/steps`).
  * Reads come from [answers]; every write goes through [model] so it buzzes
  * (M58 D4). Exhaustive with no `else`, so a new step cannot render nothing.
  */

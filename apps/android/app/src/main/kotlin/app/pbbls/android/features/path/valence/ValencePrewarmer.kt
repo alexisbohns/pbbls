@@ -11,8 +11,8 @@ import javax.inject.Singleton
  * Wraps [prewarmValenceStones] with an injected dispatcher (#848).
  *
  * Composing the valence step wobbles eighteen assets on the first frame, which
- * is a visible hitch on the main thread, so the record flow kicks this off two
- * steps ahead. Both caches are process-wide and safe to warm twice.
+ * is a visible hitch on the main thread, so Complete kicks this off as it
+ * opens, ahead of its valence step. Both caches are process-wide and safe to warm twice.
  *
  * Lives in this package because [prewarmValenceStones] is `internal` to it.
  */

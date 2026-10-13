@@ -25,16 +25,16 @@ import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.rememberReduceMotion
 
 /**
- * The record flow's top bar: back, progress, close — ports iOS
+ * The step flows' top bar (Capture and Complete): back, progress, close — ports iOS
  * `RecordFlowChrome` onto a stock `CenterAlignedTopAppBar` (#854), with the
  * ten dots replaced by an Expressive `LinearWavyProgressIndicator`.
  *
  * Minimal by design (M58 D2): picking is the advance, so there is no Next
- * button competing with the progress, and "Save as draft" lives in the close
- * confirmation rather than taking permanent residence here (D9). The host
+ * button competing with the progress, and Capture's save-on-close lives in the
+ * close confirmation rather than taking permanent residence here (D9). The host
  * applies the safe-drawing insets, so the bar's own resolve to zero.
  *
- * Counts any flow (the record flow and Complete): [position] is 1-based
+ * Counts any flow: [position] is 1-based
  * within [total] counted steps.
  */
 @OptIn(ExperimentalMaterial3Api::class)

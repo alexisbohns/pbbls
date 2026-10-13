@@ -58,7 +58,7 @@ private const val TAG = "ValenceFan"
  * `ValencePickerContent.swift`.
  *
  * Presentation only (D5). Shared by `ValencePickerSheet`, which stages and
- * commits on Done, and the record flow's valence step, which commits in place
+ * commits on Done, and Complete's valence step, which commits in place
  * and advances on Continue. Same fan, different commit semantics.
  *
  * The day/week/month wording that used to head each row is gone from the screen

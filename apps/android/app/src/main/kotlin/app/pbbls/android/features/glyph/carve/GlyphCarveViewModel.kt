@@ -142,12 +142,12 @@ class GlyphCarveViewModel
          * going through save or discard.
          *
          * `GlyphPickerSheet` does exactly that: its `unwind()` flips `isCarving`
-         * off for a dismiss gesture, a scrim tap or the record flow stepping
-         * back, and never reaches [onCancelRequested]. That host lives under the
-         * Path route, which is the start destination and never pops — so without
-         * this the strokes would sit in the ViewModel for the rest of the
-         * session and surface under someone's next "carve", armed with a
-         * "Discard your glyph?" prompt about work that is not theirs.
+         * off for a dismiss gesture or a scrim tap, and never reaches
+         * [onCancelRequested]. This ViewModel is scoped to the host's entry
+         * (the soul or collection form, Settings), which outlives the sheet
+         * opening and closing on it — so without this the strokes would sit
+         * here and surface under the next "carve" from that host, armed with a
+         * "Discard your glyph?" prompt about work that was abandoned.
          *
          * Idempotent: a save or a discard has already reset, so calling it again
          * costs nothing.

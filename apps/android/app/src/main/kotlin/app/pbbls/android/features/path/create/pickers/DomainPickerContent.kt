@@ -32,8 +32,8 @@ import app.pbbls.android.core.ui.render.GlyphImage
  * localized description — ports iOS `DomainPickerContent`, which itself mirrors
  * the web `DomainSheet` row.
  *
- * Single-select, presentation only. The record flow's domain step is the only
- * caller today — `PebbleForm` keeps its `DropdownMenu`, which needs none of
+ * Single-select, presentation only. The shared domain step
+ * (`flow/steps/RecordDomainStep`, on Complete) is the only caller today — `PebbleForm` keeps its `DropdownMenu`, which needs none of
  * this.
  *
  * A domain with no default glyph (null `strokes`) renders name and description

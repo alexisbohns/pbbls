@@ -307,8 +307,8 @@ either violation:
   frozen list #851 left). "Profile needs this bit of path" means moving the bit
   to `core/`, not adding an import. "Profile hosts path's screen" means either
   navigating to its entry (the soul and collection details open
-  `PebblesKey.EditPebble`) or taking the screen as a slot the entry provider
-  fills: the glyph picker is glyph's, and its path and profile hosts take a
+  `PebblesKey.PebbleDetail`) or taking the screen as a slot the entry provider
+  fills: the glyph picker is glyph's, and its profile hosts take a
   `GlyphPickerSlot` (`core/ui/GlyphPickerSheet.kt`).
 
 Which `core` package: `model` if it is data, `data` if Hilt constructs it,

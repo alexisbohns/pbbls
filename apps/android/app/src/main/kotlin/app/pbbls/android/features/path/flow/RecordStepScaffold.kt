@@ -29,8 +29,9 @@ sealed interface RecordStepAction {
     ) : RecordStepAction
 
     /**
-     * Full-width prominent button — Continue on `when` / `name`, Publish on
-     * `privacy`.
+     * Full-width prominent button — Continue on Capture's `when` and
+     * Complete's `valence`, Save on Capture's `name` (under
+     * [PrimaryWithSecondary]), Make a pebble on Complete's `privacy`.
      */
     data class Primary(
         val label: String,

@@ -33,9 +33,9 @@ interface ComposerMedia {
 
     /**
      * Warm the valence fan's eighteen wobbled assets. Process-wide caches, so a
-     * second flow pays nothing. Only the record flow draws the fan; the other
-     * composers inherit the method and never call it, which is cheaper than a
-     * second interface for one method.
+     * second flow pays nothing. Only Complete draws the fan; Capture inherits
+     * the method and never calls it, which is cheaper than a second interface
+     * for one method.
      */
     suspend fun prewarmValence()
 }
