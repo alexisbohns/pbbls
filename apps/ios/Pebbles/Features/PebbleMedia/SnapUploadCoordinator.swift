@@ -202,7 +202,7 @@ final class SnapUploadCoordinator {
 
     /// Storage prefixes of saved photos the user removed or replaced in this
     /// form. Their rows go when the save sends the whole `snaps` set (R6);
-    /// their files go in `purgeDetached()`, after that save succeeds.
+    /// their files go in `purgeDetached(_:)`, after that save succeeds.
     private(set) var detachedStoragePaths: [String] = []
 
     /// Remove the current `.existing` photo from the form. No RPC: the next
@@ -214,11 +214,13 @@ final class SnapUploadCoordinator {
         formSnap = nil
     }
 
-    /// Best-effort file cleanup for detached photos. Call only after the save
-    /// that dropped their rows has succeeded; the orphan sweep is the backstop.
-    func purgeDetached() async {
-        let paths = detachedStoragePaths
-        detachedStoragePaths = []
+    /// Best-effort file cleanup for the detached photos a save sent (the paths
+    /// snapshotted when its payload was built). Removes exactly those paths from
+    /// the list, so a photo detached while the save was in flight survives for
+    /// the next one. Call only after the save that dropped their rows succeeded;
+    /// the orphan sweep is the backstop.
+    func purgeDetached(_ paths: [String]) async {
+        detachedStoragePaths.removeAll { paths.contains($0) }
         for path in paths {
             await repo.deleteFiles(storagePrefix: path)
         }

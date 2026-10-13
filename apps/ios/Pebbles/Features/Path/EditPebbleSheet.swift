@@ -187,6 +187,9 @@ struct EditPebbleSheet: View {
             self.isSaving = false
             return
         }
+        // Only these are purged on success: a photo detached while the save is
+        // in flight belongs to the next save.
+        let detachedAtSave = snaps?.detachedStoragePaths ?? []
         let payload = PebbleUpdatePayload(from: draft, formSnap: snaps?.formSnap, userId: userId)
         let requestBody = ComposePebbleUpdateRequest(pebbleId: pebbleId, payload: payload)
 
@@ -203,7 +206,7 @@ struct EditPebbleSheet: View {
             // An edit can change the pebble's emotion, newly qualifying an
             // emotion_first badge.
             achievements.fireCheck()
-            await snaps?.purgeDetached()
+            if let snaps { Task { await snaps.purgeDetached(detachedAtSave) } }
             onSaved()
             dismiss()
         } catch let functionsError as FunctionsError {
@@ -214,7 +217,8 @@ struct EditPebbleSheet: View {
                 let bodyString = String(data: data, encoding: .utf8) ?? "<non-utf8 body>"
                 logger.warning("compose-pebble-update returned \(status, privacy: .public) — advancing on soft-success. body=\(bodyString, privacy: .private)")
                 achievements.fireCheck()
-                await snaps?.purgeDetached()
+                // No purge: a 5xx may mean the save never ran (R6: failed saves
+                // keep their files); the orphan sweep collects them if it did land.
                 onSaved()
                 dismiss()
             } else {
