@@ -50,9 +50,9 @@ kotlinxSerializationJson = "1.11.0"
 # Custom Tabs — the in-app-browser analog of iOS SFSafariViewController, used
 # for the legal document links (D15).
 browser = "1.10.0"
-# render_svg rendering (D10, sub-project D) — parses the server-composed pebble
-# SVG strings straight from the RPC rows (the iOS SVGView analog). The -aar
-# artifact is the maintained one; the plain jar is legacy.
+# SVG rendering (D10, sub-project D) — the bundled outline silhouettes, the
+# valence art and glyph markup (the iOS SVGView analog). The -aar artifact is
+# the maintained one; the plain jar is legacy.
 androidsvg = "1.4"
 # Snap thumbnails (sub-project D) — Coil 3 loads the signed storage URLs; the
 # okhttp fetcher reuses the OkHttp already on the classpath via ktor-client-okhttp
@@ -170,9 +170,7 @@ coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp"
 zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
 supabase-storage = { group = "io.github.jan-tennert.supabase", name = "storage-kt" }
 
-# Pebble write path (M39 sub-project A). The Functions plugin registers the
-# compose-pebble / compose-pebble-update edge-function surface; PebbleWriteService
-# posts via raw Ktor to read the 5xx soft-success body (D2).
+# The Functions plugin serves the `delete-account` edge function (ProfileService).
 supabase-functions = { group = "io.github.jan-tennert.supabase", name = "functions-kt" }
 
 # Branded cold-start splash (#846).

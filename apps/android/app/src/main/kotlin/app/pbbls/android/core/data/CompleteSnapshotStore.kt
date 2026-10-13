@@ -93,7 +93,11 @@ class CompleteSnapshotStore
         override fun clearAll() {
             val prefs = prefs()
             val keys = prefs.all.keys.filter { it.startsWith(PREFIX) }
-            prefs.edit { keys.forEach { remove(it) } }
+            prefs.edit {
+                keys.forEach { remove(it) }
+                // The retired composer's snapshot must not outlive the sign-out it was scoped to.
+                remove(LEGACY_COMPOSER_SNAPSHOT_KEY)
+            }
         }
 
         private fun prefs() = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -102,6 +106,7 @@ class CompleteSnapshotStore
             private const val TAG = "complete-snapshot"
             private const val PREFS_NAME = "pebbles_prefs"
             private const val PREFIX = "completeSnapshot."
+            private const val LEGACY_COMPOSER_SNAPSHOT_KEY = "composerSnapshot"
 
             fun key(momentId: String): String = PREFIX + momentId.lowercase()
         }

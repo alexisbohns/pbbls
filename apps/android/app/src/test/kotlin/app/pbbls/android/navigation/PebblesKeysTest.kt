@@ -62,11 +62,6 @@ class PebblesKeysTest {
                 PebblesKey.LabAnnouncement("log-1"),
                 PebblesKey.LabLogList("announcements"),
                 PebblesKey.Capture,
-                PebblesKey.RecordFlow(resumeDraftId = null),
-                PebblesKey.RecordFlow(resumeDraftId = "draft-1"),
-                PebblesKey.CreatePebble(resumeDraftId = null),
-                PebblesKey.CreatePebble(resumeDraftId = "draft-1"),
-                PebblesKey.Drafts,
                 PebblesKey.PebbleDetail(momentId = "m-1"),
                 PebblesKey.GlyphDetail(sampleItem),
                 PebblesKey.GlyphDetail(ownedItem),
@@ -112,9 +107,6 @@ class PebblesKeysTest {
         val modals: List<PebblesKey> =
             listOf(
                 PebblesKey.Capture,
-                PebblesKey.RecordFlow(null),
-                PebblesKey.CreatePebble(null),
-                PebblesKey.Drafts,
                 PebblesKey.EditPebble(momentId = "m-1"),
                 PebblesKey.EditMoment(momentId = "m-1"),
                 PebblesKey.CompletePebble(momentId = "m-1"),

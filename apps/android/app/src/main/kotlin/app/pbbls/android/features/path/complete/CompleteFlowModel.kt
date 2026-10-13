@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.update
 
 /**
  * The Complete flow's state machine. Every public mutator buzzes except the
- * silent seed, restore and [goTo]. [haptic] has no default, as in
- * `RecordFlowModel` (M58 D4).
+ * silent seed, restore and [goTo]. [haptic] has no default, so no caller can
+ * forget it (M58 D4).
  */
 class CompleteFlowModel(
     private val haptic: (TapHaptic) -> Unit,

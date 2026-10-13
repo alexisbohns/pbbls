@@ -4,6 +4,8 @@ import androidx.lifecycle.SavedStateHandle
 import app.pbbls.android.R
 import app.pbbls.android.core.model.Collection
 import app.pbbls.android.core.model.CollectionMode
+import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.GlyphStroke
 import app.pbbls.android.testing.FakeAchievementsService
 import app.pbbls.android.testing.FakeCollectionsService
 import app.pbbls.android.testing.FakeReferenceDataService
@@ -38,7 +40,11 @@ class CollectionFormViewModelTest {
         id: String,
         name: String = "Trips",
         mode: CollectionMode? = CollectionMode.STACK,
-    ) = Collection(id = id, name = name, mode = mode, pebbleCount = 0)
+        glyph: Glyph? = null,
+        glyphId: String? = glyph?.id,
+    ) = Collection(id = id, name = name, mode = mode, pebbleCount = 0, glyph = glyph, glyphId = glyphId)
+
+    private fun glyph(id: String) = Glyph(id = id, strokes = listOf(GlyphStroke(d = "M 0 0 L 10 10", width = 6.0)), viewBox = "0 0 200 200")
 
     private fun viewModel(
         collections: FakeCollectionsService = FakeCollectionsService(),
@@ -193,7 +199,7 @@ class CollectionFormViewModelTest {
             viewModel.save()
             advanceUntilIdle()
 
-            assertEquals(listOf("Trips" to CollectionMode.TRACK), service.createCalls)
+            assertEquals(listOf(FakeCollectionsService.CreateCall("Trips", CollectionMode.TRACK, null)), service.createCalls)
             assertEquals(1, refs.refreshCollectionsCount)
             assertEquals(1, achievements.fireCheckCount)
             assertEquals(listOf(CollectionFormEffect.Saved), effects.values)
@@ -217,7 +223,7 @@ class CollectionFormViewModelTest {
             viewModel.save()
             advanceUntilIdle()
 
-            assertEquals(listOf(Triple("a", "Trips", null)), service.updateCalls)
+            assertEquals(listOf(FakeCollectionsService.UpdateCall("a", "Trips", null, null)), service.updateCalls)
             assertTrue(service.createCalls.isEmpty())
             assertEquals(0, achievements.fireCheckCount)
         }
@@ -281,6 +287,149 @@ class CollectionFormViewModelTest {
             advanceUntilIdle()
             assertEquals(listOf(CollectionFormEffect.Saved), effects.values)
             effects.stop()
+        }
+
+    // MARK: - Glyph (R11)
+
+    @Test
+    fun `loading seeds the collection's glyph`() =
+        runTest {
+            val service = FakeCollectionsService()
+            service.collection = collection("a", glyph = glyph("g-1"))
+            val viewModel = viewModel(collections = service)
+
+            viewModel.start("a")
+            advanceUntilIdle()
+
+            assertEquals(
+                "g-1",
+                viewModel.uiState.value.glyph
+                    ?.id,
+            )
+            assertFalse(viewModel.uiState.value.canSave)
+        }
+
+    @Test
+    fun `picking a glyph on edit saves its id with the name and mode`() =
+        runTest {
+            val service = FakeCollectionsService()
+            service.collection = collection("a")
+            val viewModel = viewModel(collections = service)
+            viewModel.start("a")
+            advanceUntilIdle()
+
+            viewModel.openPicker()
+            viewModel.onGlyphPicked(glyph("g-2"))
+            assertFalse(viewModel.uiState.value.isPresentingPicker)
+            assertTrue(viewModel.uiState.value.canSave)
+            viewModel.save()
+            advanceUntilIdle()
+
+            assertEquals(
+                listOf(FakeCollectionsService.UpdateCall("a", "Trips", CollectionMode.STACK, "g-2")),
+                service.updateCalls,
+            )
+        }
+
+    @Test
+    fun `removing the glyph on edit saves an explicit null`() =
+        runTest {
+            val service = FakeCollectionsService()
+            service.collection = collection("a", glyph = glyph("g-1"))
+            val viewModel = viewModel(collections = service)
+            viewModel.start("a")
+            advanceUntilIdle()
+
+            viewModel.onGlyphPicked(null)
+            assertTrue(viewModel.uiState.value.canSave)
+            viewModel.save()
+            advanceUntilIdle()
+
+            assertEquals(
+                listOf(FakeCollectionsService.UpdateCall("a", "Trips", CollectionMode.STACK, null)),
+                service.updateCalls,
+            )
+        }
+
+    /**
+     * `glyph_id` can be set while the `glyphs` embed comes back null — the glyph
+     * is no longer visible under the glyphs RLS (a revoked entitlement). The
+     * form must not read the missing embed as "no glyph" and clear the column
+     * on a plain rename (the iOS `glyphTouched` fix, c2f2d547).
+     */
+    @Test
+    fun `a rename keeps a glyph id whose embed did not load`() =
+        runTest {
+            val service = FakeCollectionsService()
+            service.collection = collection("a", glyph = null, glyphId = "g-hidden")
+            val viewModel = viewModel(collections = service)
+            viewModel.start("a")
+            advanceUntilIdle()
+            assertFalse(viewModel.uiState.value.canSave)
+
+            viewModel.onNameChange("Journeys")
+            viewModel.save()
+            advanceUntilIdle()
+
+            assertEquals(
+                listOf(FakeCollectionsService.UpdateCall("a", "Journeys", CollectionMode.STACK, "g-hidden")),
+                service.updateCalls,
+            )
+        }
+
+    @Test
+    fun `removing a glyph whose embed did not load still sends null`() =
+        runTest {
+            val service = FakeCollectionsService()
+            service.collection = collection("a", glyph = null, glyphId = "g-hidden")
+            val viewModel = viewModel(collections = service)
+            viewModel.start("a")
+            advanceUntilIdle()
+
+            viewModel.onGlyphPicked(null)
+            assertTrue(viewModel.uiState.value.canSave)
+            viewModel.save()
+            advanceUntilIdle()
+
+            assertEquals(
+                listOf(FakeCollectionsService.UpdateCall("a", "Trips", CollectionMode.STACK, null)),
+                service.updateCalls,
+            )
+        }
+
+    @Test
+    fun `picking over a glyph whose embed did not load sends the new id`() =
+        runTest {
+            val service = FakeCollectionsService()
+            service.collection = collection("a", glyph = null, glyphId = "g-hidden")
+            val viewModel = viewModel(collections = service)
+            viewModel.start("a")
+            advanceUntilIdle()
+
+            viewModel.onGlyphPicked(glyph("g-2"))
+            viewModel.save()
+            advanceUntilIdle()
+
+            assertEquals(
+                listOf(FakeCollectionsService.UpdateCall("a", "Trips", CollectionMode.STACK, "g-2")),
+                service.updateCalls,
+            )
+        }
+
+    @Test
+    fun `a create carries the picked glyph`() =
+        runTest {
+            val service = FakeCollectionsService()
+            val viewModel = viewModel(collections = service)
+            viewModel.start(null)
+            advanceUntilIdle()
+
+            viewModel.onNameChange("Sea days")
+            viewModel.onGlyphPicked(glyph("g-3"))
+            viewModel.save()
+            advanceUntilIdle()
+
+            assertEquals(listOf(FakeCollectionsService.CreateCall("Sea days", null, "g-3")), service.createCalls)
         }
 
     // MARK: - Reset

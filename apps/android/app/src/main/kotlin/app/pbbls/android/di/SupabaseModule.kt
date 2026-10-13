@@ -47,10 +47,7 @@ object SupabaseModule {
             install(Postgrest)
             // Storage signs the private pebbles-media snap URLs (sub-project D).
             install(Storage)
-            // Functions registers the compose-pebble / compose-pebble-update
-            // edge-function surface (M39 sub-project A). PebbleWriteService posts
-            // via raw Ktor to read the 5xx soft-success body (D2), but the plugin
-            // is installed so the standard functions surface is available.
+            // Functions serves the `delete-account` edge function (ProfileService).
             install(Functions)
         }
 }

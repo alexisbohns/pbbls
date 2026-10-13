@@ -21,15 +21,12 @@ import app.pbbls.android.features.lab.LogListMode
 import app.pbbls.android.features.lab.LogListScreen
 import app.pbbls.android.features.onboarding.OnboardingScreen
 import app.pbbls.android.features.onboarding.OnboardingSteps
-import app.pbbls.android.features.path.DraftsScreen
 import app.pbbls.android.features.path.EditMomentScreen
 import app.pbbls.android.features.path.EditPebbleScreen
 import app.pbbls.android.features.path.PathScreen
 import app.pbbls.android.features.path.PebbleDetailScreen
 import app.pbbls.android.features.path.capture.CaptureFlowScreen
 import app.pbbls.android.features.path.complete.CompleteFlowScreen
-import app.pbbls.android.features.path.create.CreatePebbleScreen
-import app.pbbls.android.features.path.record.RecordFlowScreen
 import app.pbbls.android.features.profile.AchievementsScreen
 import app.pbbls.android.features.profile.CollectionDetailScreen
 import app.pbbls.android.features.profile.CollectionFormScreen
@@ -67,7 +64,6 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     ) {
         PathScreen(
             onOpenDetail = { momentId -> navigator.navigateToDetail(PebblesKey.PebbleDetail(momentId)) },
-            onOpenDrafts = { navigator.navigate(PebblesKey.Drafts) },
             onCreatePebble = { navigator.navigate(PebblesKey.Capture) },
             onDeleteConfirmed = { navigator.closeDetail(PebblesKey.PebbleDetail(it)) },
         )
@@ -198,6 +194,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             collectionId = key.collectionId,
             onDismiss = navigator::goBack,
             onSaved = navigator::goBack,
+            glyphPicker = glyphPicker,
         )
     }
 
@@ -275,48 +272,6 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     entry<PebblesKey.CompletePebble>(metadata = NavTransitions.forKey(PebblesKey.CompletePebble(""))) { key ->
         // Exit returns to whatever opened it: the read page (which reloads on resume) or Path after a capture (A-14).
         CompleteFlowScreen(momentId = key.momentId, onDismiss = navigator::goBack)
-    }
-
-    entry<PebblesKey.RecordFlow>(metadata = NavTransitions.forKey(PebblesKey.RecordFlow())) { key ->
-        RecordFlowScreen(
-            resumeDraftId = key.resumeDraftId,
-            // The flow deliberately does NOT reveal the pebble through the
-            // detail entry: the user has just spent ten screens on it and the
-            // success step shows it (M58 D10). So publishing must NOT pop — the
-            // success step is still to come, and its exit button is what
-            // dismisses (`onDismiss`). Popping here skipped the success step
-            // outright (#857 caught it). Path's own resume refresh picks up the
-            // new pebble once the flow is gone, which is what the old
-            // `onPublished` reload used to do.
-            onPublished = {},
-            onDismiss = navigator::goBack,
-            glyphPicker = glyphPicker,
-        )
-    }
-
-    entry<PebblesKey.CreatePebble>(metadata = NavTransitions.forKey(PebblesKey.CreatePebble())) { key ->
-        CreatePebbleScreen(
-            resumeDraftId = key.resumeDraftId,
-            // Pops only. The read page's key carries a moment id, and the
-            // compose-pebble compat wrapper returns a pebble id, so opening the
-            // detail on it would load the wrong row (#1048). Path's resume
-            // refresh shows the new moment.
-            onCreated = { navigator.goBack() },
-            onCancel = navigator::goBack,
-        )
-    }
-
-    entry<PebblesKey.Drafts>(metadata = NavTransitions.forKey(PebblesKey.Drafts)) {
-        DraftsScreen(
-            // Resuming a draft leaves the drafts list rather than stacking the
-            // flow over it (#852 supersedes the cover-stacking of M47/M58): pop
-            // Drafts, then enter the flow already seeded with this draft's id.
-            onResume = { record ->
-                navigator.goBack()
-                navigator.navigate(PebblesKey.RecordFlow(resumeDraftId = record.id))
-            },
-            onDismiss = navigator::goBack,
-        )
     }
 
     // ---- The unauthenticated funnel promoted to entries (#852) ----

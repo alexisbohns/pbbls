@@ -81,7 +81,7 @@ fun GlyphPickerContent(
 
     // The carve surface owns its strokes in a ViewModel now (#849), and this
     // picker closes that surface by flipping `isCarving` — through `unwind()`
-    // for a dismiss gesture, a scrim tap or the record flow stepping back —
+    // for a dismiss gesture or a scrim tap —
     // without ever reaching the screen's own cancel path. This is the same
     // instance `GlyphCarveScreen` resolves, so releasing it here is what keeps
     // an abandoned drawing from surfacing under the next carve. Idempotent

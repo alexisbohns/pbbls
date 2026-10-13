@@ -167,6 +167,8 @@
     <string name="soul_detail_load_error">Impossible de charger les pebbles.</string>
     <string name="soul_edit_title">Modifier l\'âme</string>
     <string name="soul_form_glyph_choose">Touchez pour choisir</string>
+    <string name="collection_glyph_footer">Les galets de cette collection portent son glyphe.</string>
+    <string name="remove_glyph">Retirer le glyphe</string>
     <string name="soul_save_error">Impossible d\'enregistrer l\'âme. Veuillez réessayer.</string>
     <string name="soul_form_load_error">Impossible de charger cette âme. Veuillez réessayer.</string>
 
@@ -286,9 +288,6 @@
     <!-- Karma flash reason labels — web/iOS verbatim ("Caillou créé" / "Caillou enrichi"). -->
     <string name="karma_reason_pebble_created">Caillou créé</string>
     <string name="karma_reason_pebble_enriched">Caillou enrichi</string>
-    <!-- Pebble save-error messages (PebbleWriteService.pebbleSaveErrorMessage, D16). -->
-    <string name="pebble_save_error_generic">Impossible d\'enregistrer votre caillou. Veuillez réessayer.</string>
-    <string name="pebble_save_error_media_quota">Limite de photos atteinte pour ce caillou.</string>
 
     <!-- ==== Pebble detail + delete (sub-project B) ==== -->
     <string name="pebble_delete">Supprimer</string>
@@ -473,22 +472,9 @@
     <string name="lab_reaction_upvote_a11y">Voter</string>
     <string name="lab_reaction_remove_a11y">Ôter mon vote</string>
     <string name="lab_reaction_count_a11y">%1$d rocks</string>
-    <!-- ==== Brouillons et sauvegarde auto (M47) ==== -->
+    <!-- ==== Shared actions ==== -->
     <string name="action_retry">Réessayer</string>
     <string name="action_delete">Supprimer</string>
-    <string name="draft_save">Garder pour plus tard</string>
-    <string name="draft_save_error">Impossible de garder ce brouillon. Réessaie.</string>
-    <string name="draft_resume_load_error">Impossible de charger ce brouillon. Réessaie.</string>
-    <string name="draft_restore_title">On reprend où tu t\'étais arrêté ?</string>
-    <string name="draft_restore_body">On a gardé ce que tu écrivais ici. Remets ta photo quand tu veux.</string>
-    <string name="draft_restore_confirm">Reprendre</string>
-    <string name="draft_restore_discard">Repartir de zéro</string>
-    <string name="drafts_title">Brouillons</string>
-    <string name="drafts_entry">%1$d gardés pour plus tard</string>
-    <string name="drafts_untitled">Encore sans nom</string>
-    <string name="drafts_saved_ago">Gardé il y a %1$s</string>
-    <string name="drafts_empty">Aucun brouillon. Tout ce que tu commences à garder apparaît ici.</string>
-    <string name="drafts_load_error">Impossible de charger tes brouillons. Réessaie.</string>
     <!-- ==== Connexions (M49) ==== -->
     <string name="action_close">Fermer</string>
     <string name="connections_title">Connexions</string>
@@ -575,7 +561,7 @@
     <string name="achievement_capsule_a11y_single">Succès débloqué : %1$s</string>
     <string name="achievement_capsule_a11y_karma">Tu as gagné %1$d karma</string>
 
-    <!-- Step-by-step record flow (M58) — the eleven-screen composer.
+    <!-- Flow step copy (M58): the record flow's steps, shared by Capture and Complete (#1048).
          Ports the iOS `Features/Record` copy; FR keeps the informal "tu". -->
     <string name="record_photo_title">Commence par une photo</string>
     <string name="record_photo_subtitle">Ou passe et écris de mémoire.</string>
@@ -587,13 +573,10 @@
     <string name="record_domain_title">Quel domaine de ta vie ?</string>
     <string name="record_souls_title">Il y avait quelqu\'un ?</string>
     <string name="record_collection_title">Dans une collection ?</string>
-    <string name="record_glyph_title">Donne-lui un glyphe</string>
-    <string name="record_glyph_subtitle">Une petite marque, rien que pour lui.</string>
     <string name="record_privacy_title">Qui peut le voir ?</string>
     <string name="record_success_title">Ton galet</string>
     <string name="record_action_skip">Ignorer</string>
     <string name="record_action_continue">Continuer</string>
-    <string name="record_action_publish">Publier</string>
     <string name="record_success_exit">Retour à mon chemin</string>
     <string name="record_step_a11y">Étape %1$d sur %2$d</string>
     <string name="record_back_a11y">Retour</string>
@@ -609,7 +592,6 @@
     <string name="record_privacy_secret_explanation">Toi seul peux voir celui-ci.</string>
     <string name="record_privacy_private_explanation">Tes connexions mutuelles peuvent le voir.</string>
     <string name="record_privacy_public_explanation">Toute personne avec le lien peut le voir.</string>
-    <string name="record_close_title">Tu gardes ce galet ?</string>
     <string name="record_close_keep_going">Continuer l\'édition</string>
     <string name="record_close_discard">Abandonner</string>
     <string name="record_karma">+%1$d karma</string>

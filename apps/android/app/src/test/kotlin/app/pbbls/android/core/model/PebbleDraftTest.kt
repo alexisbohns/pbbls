@@ -2,63 +2,16 @@ package app.pbbls.android.core.model
 
 import app.pbbls.android.testing.UiFixtures
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Covers [PebbleDraft.isValid] (the Save-button gate), the [PebbleDraft.from]
- * edit-prefill factory over a [MomentDetail] — every field maps across, a
- * missing domain leaves the draft invalid, a moment without a pebble keeps
- * only its moment half — and the [PebbleDraft.answers] projection.
+ * Covers the [PebbleDraft.from] edit-prefill factory over a [MomentDetail] —
+ * every field maps across, a moment without a pebble keeps only its moment
+ * half — and the [PebbleDraft.answers] projection.
  */
 class PebbleDraftTest {
-    @Test
-    fun `a fresh draft is invalid`() {
-        assertFalse(PebbleDraft().isValid)
-    }
-
-    @Test
-    fun `a draft with name, emotion, domain and valence is valid`() {
-        val draft =
-            PebbleDraft(
-                name = "Test",
-                emotionId = "emotion-1",
-                domainId = "domain-1",
-                valence = Valence.HIGHLIGHT_LARGE,
-            )
-        assertTrue(draft.isValid)
-    }
-
-    @Test
-    fun `each missing mandatory field invalidates the draft`() {
-        val base =
-            PebbleDraft(
-                name = "Test",
-                emotionId = "emotion-1",
-                domainId = "domain-1",
-                valence = Valence.HIGHLIGHT_LARGE,
-            )
-        assertFalse(base.copy(name = "   ").isValid)
-        assertFalse(base.copy(emotionId = null).isValid)
-        assertFalse(base.copy(domainId = null).isValid)
-        assertFalse(base.copy(valence = null).isValid)
-    }
-
-    @Test
-    fun `optional fields do not affect validity`() {
-        val minimal =
-            PebbleDraft(
-                name = "Test",
-                emotionId = "emotion-1",
-                domainId = "domain-1",
-                valence = Valence.NEUTRAL_SMALL,
-            )
-        assertTrue(minimal.isValid)
-        assertTrue(minimal.copy(description = "", soulIds = emptyList(), collectionId = null, glyphId = null).isValid)
-    }
-
     @Test
     fun `from a moment populates every field of a fully-populated pebble`() {
         val source =
@@ -84,7 +37,6 @@ class PebbleDraftTest {
         assertEquals("collection-1", draft.collectionId)
         assertEquals(Valence.HIGHLIGHT_LARGE, draft.valence)
         assertEquals(Visibility.PUBLIC, draft.visibility)
-        assertTrue(draft.isValid)
     }
 
     @Test

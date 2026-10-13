@@ -103,19 +103,6 @@ sealed interface PebblesKey : NavKey {
     @Serializable
     data object Capture : PebblesKey
 
-    @Serializable
-    data class RecordFlow(
-        val resumeDraftId: String? = null,
-    ) : PebblesKey
-
-    @Serializable
-    data class CreatePebble(
-        val resumeDraftId: String? = null,
-    ) : PebblesKey
-
-    @Serializable
-    data object Drafts : PebblesKey
-
     /** Edit pebble: the pebble fields of [momentId]'s pebble, written with `complete_pebble` (R5). */
     @Serializable
     data class EditPebble(

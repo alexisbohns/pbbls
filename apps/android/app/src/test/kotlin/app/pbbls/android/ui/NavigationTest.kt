@@ -14,15 +14,12 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
-import app.pbbls.android.core.data.PebbleDraftRecord
 import app.pbbls.android.core.model.LogSpecies
-import app.pbbls.android.core.model.PebbleDraftPayload
 import app.pbbls.android.testing.AppUiTest
 import app.pbbls.android.testing.FakeCollectionsService
 import app.pbbls.android.testing.FakeGlyphMarketService
 import app.pbbls.android.testing.FakeLogsService
 import app.pbbls.android.testing.FakeMomentReadService
-import app.pbbls.android.testing.FakePebbleDraftsService
 import app.pbbls.android.testing.FakeProfileService
 import app.pbbls.android.testing.FakeSoulsService
 import app.pbbls.android.testing.UiFixtures
@@ -47,8 +44,6 @@ import javax.inject.Inject
 @HiltAndroidTest
 class NavigationTest : AppUiTest() {
     @Inject lateinit var moments: FakeMomentReadService
-
-    @Inject lateinit var drafts: FakePebbleDraftsService
 
     @Inject lateinit var profile: FakeProfileService
 
@@ -126,17 +121,6 @@ class NavigationTest : AppUiTest() {
 
         onText(R.string.record_photo_title).assertIsDisplayed()
         onText(R.string.record_valence_title).assertDoesNotExist()
-    }
-
-    @Test
-    fun `the drafts entry opens Drafts`() {
-        drafts.records +=
-            PebbleDraftRecord(id = "draft-1", payload = PebbleDraftPayload(name = "Half a thought"), updatedAt = OffsetDateTime.now())
-        signedIn()
-
-        onText(R.string.drafts_entry, 1).performClick()
-
-        onText(R.string.drafts_title).assertIsDisplayed()
     }
 
     // ---- You ----

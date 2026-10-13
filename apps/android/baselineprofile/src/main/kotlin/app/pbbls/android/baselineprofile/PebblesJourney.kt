@@ -110,9 +110,9 @@ internal fun MacrobenchmarkScope.ensureSignedIn(account: TestAccount?): Boolean 
 
 /**
  * The Path loop a returning user repeats: scroll the week, swipe to the week
- * before and back, open a pebble, open the record flow. Every step is optional
- * so an account with an empty week still runs; the record flow is left on its
- * first step, where closing it discards without asking and writes no draft.
+ * before and back, open a pebble, open Capture. Every step is optional so an
+ * account with an empty week still runs; Capture is left on its photo step,
+ * where back with nothing entered closes it without asking and writes nothing.
  */
 internal fun MacrobenchmarkScope.browsePath() {
     device.wait(Until.findObject(By.res(PATH_WEEK_LIST)), UI_TIMEOUT_MS)?.let { list ->

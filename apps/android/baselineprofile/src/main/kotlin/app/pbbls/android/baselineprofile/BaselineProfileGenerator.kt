@@ -30,7 +30,7 @@ class BaselineProfileGenerator {
             ensureSignedIn(testAccount())
         }
 
-    /** What happens after the first frame: scrolling Path, detail, the record flow. */
+    /** What happens after the first frame: scrolling Path, detail, Capture. */
     @Test
     fun path() =
         rule.collect(packageName = PACKAGE_NAME) {

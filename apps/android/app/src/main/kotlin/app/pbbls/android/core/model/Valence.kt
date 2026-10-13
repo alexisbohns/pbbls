@@ -85,10 +85,10 @@ enum class Valence(
                 ?: NEUTRAL_MEDIUM
 
         /**
-         * Null-returning variant for drafts (M47), where the pair may be absent
-         * entirely. Deliberately does NOT fall back to [NEUTRAL_MEDIUM]: a draft
-         * with no valence picked yet must hydrate the picker as unset rather than
-         * claim a value the user never chose.
+         * Null-returning variant for a restored [CompleteSnapshot], where the
+         * pair may be absent entirely. Deliberately does NOT fall back to
+         * [NEUTRAL_MEDIUM]: a snapshot with no valence picked yet must hydrate
+         * the picker as unset rather than claim a value the user never chose.
          */
         fun orNull(
             positiveness: Int?,

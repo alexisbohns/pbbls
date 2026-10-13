@@ -81,9 +81,9 @@ private enum class RollAxis { POLARITY, SIZE }
  * reads the same for all three polarities, so sliding it would be motion that
  * says nothing.
  *
- * **The roll plays no haptic of its own.** iOS's does, and its record step
+ * **The roll plays no haptic of its own.** iOS's does, and its valence step
  * buzzes again through the model; here the flow's rule that every interaction
- * goes through `RecordFlowModel` (and that every method there buzzes) already
+ * goes through `CompleteFlowModel` (and that every method there buzzes) already
  * covers the detent, so a second buzz in the view would read as a stutter. The
  * hosts that do not go through the model — the edit sheet — buzz in their own
  * `onChange`.

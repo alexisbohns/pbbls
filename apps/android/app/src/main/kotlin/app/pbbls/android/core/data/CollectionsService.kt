@@ -11,6 +11,9 @@ import io.github.jan.supabase.postgrest.query.Order
 import javax.inject.Inject
 import javax.inject.Singleton
 
+private const val COLLECTION_COLUMNS =
+    "id, name, mode, glyph_id, glyphs(id, name, strokes, view_box), pebble_count:collection_pebbles(count)"
+
 /**
  * The collections seam (#849) — what [CollectionsListViewModel],
  * [CollectionDetailViewModel] and [CollectionFormViewModel] are tested against.
@@ -25,12 +28,14 @@ interface CollectionsServicing {
     suspend fun create(
         name: String,
         mode: CollectionMode?,
+        glyphId: String?,
     )
 
     suspend fun update(
         collectionId: String,
         name: String,
         mode: CollectionMode?,
+        glyphId: String?,
     )
 
     suspend fun delete(collectionId: String)
@@ -54,7 +59,7 @@ class CollectionsService
         override suspend fun list(): List<Collection> =
             supabase.client
                 .from("collections")
-                .select(Columns.raw("id, name, mode, pebble_count:collection_pebbles(count)")) {
+                .select(Columns.raw(COLLECTION_COLUMNS)) {
                     order("name", Order.ASCENDING)
                 }.decodeList<CollectionRow>()
                 .map { it.toCollection() }
@@ -63,33 +68,35 @@ class CollectionsService
         override suspend fun loadCollection(collectionId: String): Collection =
             supabase.client
                 .from("collections")
-                .select(Columns.raw("id, name, mode, pebble_count:collection_pebbles(count)")) {
+                .select(Columns.raw(COLLECTION_COLUMNS)) {
                     filter { eq("id", collectionId) }
                 }.decodeSingle<CollectionRow>()
                 .toCollection()
 
-        /** Create with optional mode — no select-back; callers reload (iOS parity). */
+        /** Create with optional mode and glyph — no select-back; callers reload (iOS parity). */
         override suspend fun create(
             name: String,
             mode: CollectionMode?,
+            glyphId: String?,
         ) {
             val userId =
                 supabase.session?.user?.id
                     ?: throw IllegalStateException("createCollection: no session")
             supabase.client
                 .from("collections")
-                .insert(collectionInsertPayload(userId = userId, name = name, mode = mode))
+                .insert(collectionInsertPayload(userId = userId, name = name, mode = mode, glyphId = glyphId))
         }
 
-        /** Update name + mode — explicit JSON-null mode clears the column. */
+        /** Update name, mode and glyph — an explicit JSON null clears either column. */
         override suspend fun update(
             collectionId: String,
             name: String,
             mode: CollectionMode?,
+            glyphId: String?,
         ) {
             supabase.client
                 .from("collections")
-                .update(collectionUpdatePayload(name = name, mode = mode)) {
+                .update(collectionUpdatePayload(name = name, mode = mode, glyphId = glyphId)) {
                     filter { eq("id", collectionId) }
                 }
         }

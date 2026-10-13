@@ -1,10 +1,8 @@
 package app.pbbls.android.features.path
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -58,8 +56,8 @@ import kotlin.math.abs
  * [PathViewModel] (#849), so a rotation no longer re-fetches the timeline or
  * loses the focused week.
  *
- * Detail, edit, Capture and drafts are `PebblesEntryProvider` entries
- * now (#852) — [onOpenDetail], [onOpenDrafts] and [onCreatePebble] are how
+ * Detail, edit and Capture are `PebblesEntryProvider` entries
+ * now (#852) — [onOpenDetail] and [onCreatePebble] are how
  * this screen reaches them; only the caller (`PebblesEntryProvider`) ever
  * touches a `Navigator`.
  *
@@ -73,7 +71,6 @@ import kotlin.math.abs
 @Composable
 fun PathScreen(
     onOpenDetail: (String) -> Unit,
-    onOpenDrafts: () -> Unit,
     onCreatePebble: () -> Unit,
     modifier: Modifier = Modifier,
     onDeleteConfirmed: (momentId: String) -> Unit = {},
@@ -84,8 +81,8 @@ fun PathScreen(
 
     // Coming back from a pushed screen must re-read the timeline: the ViewModel is
     // scoped to the back stack entry, which survives that round trip. This is also
-    // how a published pebble, a saved edit or a delete made on the detail/edit/
-    // drafts entries reaches the timeline now — see PathViewModel.onResumed.
+    // how a captured moment, a completed pebble, a saved edit or a delete made on
+    // the other entries reaches the timeline now — see PathViewModel.onResumed.
     LifecycleResumeEffect(viewModel) {
         viewModel.onResumed()
         onPauseOrDispose {}
@@ -132,8 +129,6 @@ fun PathScreen(
                         onPebbleTap = { moment -> onOpenDetail(moment.id) },
                         onPebbleDelete = viewModel::requestDelete,
                         onCreatePebble = onCreatePebble,
-                        onOpenDrafts = onOpenDrafts,
-                        draftCount = content.draftCount,
                         // The timeline alone is capped (#855): the FAB below
                         // stays anchored to the window's bottom-end corner.
                         modifier = Modifier.readableWidth(),
@@ -202,8 +197,6 @@ fun PathContent(
     onPebbleTap: (PathMoment) -> Unit = {},
     onPebbleDelete: (PathMoment) -> Unit = {},
     onCreatePebble: () -> Unit = {},
-    onOpenDrafts: () -> Unit = {},
-    draftCount: Int = 0,
     modifier: Modifier = Modifier,
 ) {
     val initialIndex =
@@ -275,22 +268,6 @@ fun PathContent(
                 onCreatePebble = onCreatePebble,
                 modifier = Modifier.fillMaxSize(),
             )
-        }
-        // Drafts entry (M47), above the create button so it reads as "unfinished
-        // business first". Hidden at zero so it is never dead chrome.
-        if (draftCount > 0) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.Center,
-            ) {
-                TextButton(onClick = onOpenDrafts) {
-                    Text(
-                        text = stringResource(R.string.drafts_entry, draftCount),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-            }
         }
     }
 }

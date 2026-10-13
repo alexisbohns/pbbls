@@ -153,17 +153,6 @@ class SnapUploadCoordinator(
     }
 
     /**
-     * Save (compose-pebble) failed with a pending snap attached: await the
-     * compensating Storage delete but KEEP [formSnap] — the form stays open
-     * so the user can retry. Use [cancelAndCleanup] to also dismiss.
-     * (Verbatim iOS semantics — design D3.)
-     */
-    suspend fun handleSaveFailure(userId: String) {
-        val pending = formSnap as? FormSnap.Pending ?: return
-        repo.deleteFiles(snapId = pending.snap.id, userId = userId)
-    }
-
-    /**
      * Single upload path for [attach] and [retryCurrent]: on first failure,
      * wait [retryDelayMillis] and retry once; on second failure transition to
      * FAILED (bytes retained). State writes guard on snap-id match so a

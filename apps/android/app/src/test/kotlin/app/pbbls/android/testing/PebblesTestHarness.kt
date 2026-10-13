@@ -9,8 +9,6 @@ import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.data.LocalSnapURLCache
 import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.PathStatsServicing
-import app.pbbls.android.core.data.PebbleDraftsServicing
-import app.pbbls.android.core.data.PebbleWriteServicing
 import app.pbbls.android.core.data.ProfileServicing
 import app.pbbls.android.core.data.ReferenceDataServicing
 import app.pbbls.android.core.data.SignedUrlProviding
@@ -54,11 +52,9 @@ class FakeServices(
     val supabase: SupabaseServicing = FakeSupabaseService(),
     val momentRead: MomentReadServicing = FakeMomentReadService(),
     val profileService: ProfileServicing = FakeProfileService(),
-    val pebbleWrite: PebbleWriteServicing = FakePebbleWriteService(),
     val referenceData: ReferenceDataServicing = FakeReferenceDataService(),
     val achievements: AchievementsServicing = FakeAchievementsService(),
     val pathStats: PathStatsServicing = FakePathStatsService(),
-    val drafts: PebbleDraftsServicing = FakePebbleDraftsService(),
 )
 
 /**

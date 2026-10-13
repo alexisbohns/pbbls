@@ -38,10 +38,10 @@ import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionPalette
 import app.pbbls.android.core.model.PebbleCollection
 import app.pbbls.android.core.model.Valence
-import app.pbbls.android.features.path.record.RecordFlowChrome
-import app.pbbls.android.features.path.record.RecordStepAction
-import app.pbbls.android.features.path.record.RecordStepScaffold
-import app.pbbls.android.features.path.record.steps.RecordSuccessStep
+import app.pbbls.android.features.path.flow.RecordFlowChrome
+import app.pbbls.android.features.path.flow.RecordStepAction
+import app.pbbls.android.features.path.flow.RecordStepScaffold
+import app.pbbls.android.features.path.flow.steps.RecordSuccessStep
 
 /** As the record flow: enough for the slide to read as one motion without holding the user up. */
 private const val STEP_TRANSITION_MS = 280

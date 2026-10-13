@@ -4,8 +4,8 @@ package app.pbbls.android.core.ui.render
  * Pure string substitutions applied to SVG markup *before* parsing — the
  * Android analog of iOS `PebbleRenderView.coloredSvg` and
  * `PebbleOutlineBackdropView`. Both operate on raw markup because the color
- * arrives per-pebble at render time while the SVG text comes from the server
- * (`render_svg`) or a bundled asset (the outline silhouettes).
+ * arrives per-pebble at render time while the SVG text comes from a glyph's
+ * strokes or a bundled asset (the outline silhouettes, the valence art).
  *
  * Injected hex values must be 6-digit `#RRGGBB` — SVG engines misparse the
  * 8-digit `#RRGGBBAA` form stored on `emotion_categories`, which is why

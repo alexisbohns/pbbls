@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
  * [strokes] and [viewBox] come from the `v_domains_with_glyph` view, which
  * flattens each domain's default glyph into the row. Both default to `null` so
  * a projection that omits them (or a domain with no default glyph) still
- * decodes — the record flow's domain step leaves the glyph slot empty rather
+ * decodes — the Complete flow's domain step leaves the glyph slot empty rather
  * than substituting a placeholder mark, which would read as data.
  *
  * [label] is the English description straight from the column; render it

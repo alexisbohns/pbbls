@@ -38,7 +38,7 @@ class AppearancePreferences internal constructor(
     }
 
     private companion object {
-        /** Shared with OnboardingPreferences and ComposerSnapshotStore: one prefs file for the app. */
+        /** Shared with OnboardingPreferences and CompleteSnapshotStore: one prefs file for the app. */
         const val PREFS_NAME = "pebbles_prefs"
         const val KEY_USE_WALLPAPER_COLORS = "useWallpaperColors"
     }

@@ -147,17 +147,6 @@ class SnapUploadCoordinatorTest {
         }
 
     @Test
-    fun `handleSaveFailure deletes files but keeps the form snap`() =
-        runTest {
-            val repo = FakeRepo()
-            val coordinator = coordinator(repo)
-            coordinator.attach(processed, userId)
-            coordinator.handleSaveFailure(userId)
-            assertNotNull(coordinator.formSnap)
-            assertEquals(1, repo.deletedSnapIds.size)
-        }
-
-    @Test
     fun `detaching a saved photo writes nothing and hands the snap back`() =
         runTest {
             val repo = FakeSnapWriteRepository()

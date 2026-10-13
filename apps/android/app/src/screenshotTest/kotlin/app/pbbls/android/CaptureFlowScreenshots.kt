@@ -104,6 +104,7 @@ fun Capture_When_FromPhoto() {
 @PreviewTest
 @Preview(showBackground = true, heightDp = 720)
 @Preview(name = "fr", showBackground = true, heightDp = 720, locale = "fr")
+@PreviewWideTall
 @PreviewLargeFontTall
 @Composable
 fun Capture_NameEmpty() {

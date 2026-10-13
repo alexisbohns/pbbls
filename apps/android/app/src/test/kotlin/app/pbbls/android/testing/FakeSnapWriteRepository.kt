@@ -7,10 +7,10 @@ import kotlinx.coroutines.CompletableDeferred
 /**
  * In-memory [SnapWriteRepositing] (#849).
  *
- * Only the record flow's *empty* photo path is exercised by
- * `RecordFlowViewModelTest`: attaching needs a `Uri`, which cannot be built off
- * device. This exists so the coordinator can be constructed, and so a test that
- * did reach an upload would see it rather than a null.
+ * Attaching needs a `Uri`, which cannot be built off device, so most flow
+ * tests never reach an upload. This exists so the coordinator can be
+ * constructed, and so a test that did reach an upload would see it rather than
+ * a null.
  */
 class FakeSnapWriteRepository : SnapWriteRepositing {
     val uploaded = mutableListOf<String>()
