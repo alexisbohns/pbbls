@@ -36,7 +36,8 @@ fun PebbleSvg(
  * replay the recorded picture scaled uniformly to fit the composable's bounds
  * and centered — the `.aspectRatio(contentMode: .fit)` analog. Callers control
  * sizing entirely through [modifier]. Shared by [PebbleSvg] (stroke-injected
- * `render_svg`) and [PebbleOutlineBackdrop] (fill-injected outline assets).
+ * glyph markup), [ValenceGlyph] and [PebbleOutlineBackdrop] (fill-injected
+ * outline assets).
  */
 @Composable
 internal fun SvgCanvas(
@@ -66,7 +67,7 @@ internal fun SvgCanvas(
 }
 
 /**
- * Parse failures are runtime data conditions (a bad `render_svg` row), not
+ * Parse failures are runtime data conditions (a malformed glyph path), not
  * setup bugs — log and degrade, never crash. The broad catch is deliberate:
  * AndroidSVG can throw beyond `SVGParseException` (e.g. on unresolvable
  * internal references at render time), and every failure mode has the same

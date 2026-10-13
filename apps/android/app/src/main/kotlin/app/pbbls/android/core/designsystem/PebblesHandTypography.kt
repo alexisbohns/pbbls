@@ -69,8 +69,8 @@ object PebblesHandTypography {
     val largeTitleHand = reenieBeanie(size = 41.sp, tracking = (-0.049f).em)
 
     /**
-     * Handwritten (Caveat) input face, 36sp. The pebble name field in the
-     * record flow — the one place the user writes on a bare page.
+     * Handwritten (Caveat) input face, 36sp. The moment name field in the
+     * Capture flow — the one place the user writes on a bare page.
      */
     val nameInputHand = caveat(size = 36.sp)
 

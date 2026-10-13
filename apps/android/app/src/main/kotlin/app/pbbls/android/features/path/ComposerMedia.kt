@@ -16,8 +16,8 @@ import javax.inject.Singleton
  * Every method here needs a `Context`, and a `Context` in a `ViewModel` is what
  * makes it untestable on the JVM — not because holding one leaks (the
  * application context does not), but because a test cannot produce one. Pushing
- * the three calls behind this seam is what lets `RecordFlowViewModelTest` drive
- * publish, resume and the draft lifecycle with no device at all.
+ * the calls behind this seam is what lets the edit and flow ViewModel tests run
+ * with no device at all.
  *
  * The photo methods stay untested even so: they take a `Uri`, which cannot be
  * constructed off device either. They are covered when Robolectric lands (#857);

@@ -155,7 +155,7 @@ fun EditPebbleContent(
                         onAchievementCheck = onAchievementCheck,
                     )
                     // Grade chip (M51) — mirrors iOS EditPebbleSheet's bottomBar
-                    // ToolbarItemGroup, matching CreatePebbleScreen's row treatment.
+                    // ToolbarItemGroup.
                     Row(
                         modifier =
                             Modifier

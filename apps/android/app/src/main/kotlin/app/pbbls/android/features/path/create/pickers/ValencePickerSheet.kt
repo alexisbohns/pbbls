@@ -31,12 +31,12 @@ import app.pbbls.android.features.path.valence.ValenceFan
  * close on the first swipe. Done is what closes it now, matching the souls and
  * emotion sheets' toolbar.
  *
- * Buzzes on its own, unlike the record flow's valence step: that step's picks
- * go through `RecordFlowModel`, which buzzes for every interaction, and this
+ * Buzzes on its own, unlike the Complete flow's valence step: that step's picks
+ * go through `CompleteFlowModel`, which buzzes for every interaction, and this
  * sheet has no model behind it. Either way exactly one selection tick per
  * detent — see `ValenceRoll`.
  *
- * The record flow's valence step renders the same fan inline instead (D5).
+ * The Complete flow's valence step renders the same fan inline instead (D5).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

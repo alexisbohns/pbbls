@@ -133,7 +133,7 @@ class ReferenceDataService
         }
 
         /**
-         * Reads `v_domains_with_glyph`, not the `domains` table: the record flow's
+         * Reads `v_domains_with_glyph`, not the `domains` table: the Complete flow's
          * domain step renders each domain's default glyph alongside its name and
          * description, and the view is where `strokes` / `view_box` are already
          * flattened onto the row (`security_invoker = true`, granted to

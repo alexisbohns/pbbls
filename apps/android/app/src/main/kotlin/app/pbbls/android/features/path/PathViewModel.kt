@@ -10,7 +10,6 @@ import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.PathStatsServicing
-import app.pbbls.android.core.data.PebbleDraftsServicing
 import app.pbbls.android.core.data.delete
 import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.core.model.PathMoment
@@ -51,7 +50,6 @@ sealed interface PathUiState {
         val today: LocalDate,
         val karma: Int?,
         val serverRipple: RippleSummary?,
-        val draftCount: Int,
     ) : PathUiState {
         /**
          * The server's `active_today` compares against UTC `current_date`, so a
@@ -123,7 +121,6 @@ class PathViewModel
     constructor(
         private val moments: MomentReadServicing,
         private val stats: PathStatsServicing,
-        private val drafts: PebbleDraftsServicing,
         private val writes: MomentWriteServicing,
         private val focusRequests: PathFocusRequests,
     ) : ViewModel() {
@@ -131,7 +128,6 @@ class PathViewModel
 
         private var entries: List<WeekRollEntry> = emptyList()
         private var focusedWeekStart: LocalDate? = null
-        private var draftCount: Int = 0
         private var hasFailed = false
         private var isLoaded = false
 
@@ -156,7 +152,6 @@ class PathViewModel
             viewModelScope.launch {
                 snapshotFlow { stats.karma to stats.ripple }.collect { publish() }
             }
-            refreshDraftCount()
         }
 
         /**
@@ -170,13 +165,13 @@ class PathViewModel
          * timeline showing what it showed before, until a write of its own
          * happened to reload it.
          *
-         * **This is also what replaced the three write-completion mechanisms
-         * (#852):** `detailReloadKey`, `draftsReloadKey` and the
-         * `onFlowPublished`/`onFormCreated` callbacks all existed to notify this
-         * ViewModel that a child cover had written something. Now that detail,
-         * edit, both composers and drafts are entries on the same back stack,
-         * *returning* to Path is itself the signal — publishing, editing and
-         * deleting all reload the same way, through this one path.
+         * **This is also what replaced the write-completion mechanisms
+         * (#852):** reload keys and `onPublished`-style callbacks all existed to
+         * notify this ViewModel that a child cover had written something. Now
+         * that detail, edit, Capture and Complete are entries on the same back
+         * stack, *returning* to Path is itself the signal — capturing,
+         * completing, editing and deleting all reload the same way, through
+         * this one path.
          *
          * The first resume is skipped (`init` has already loaded); every later
          * one refreshes without the spinner. Deferred from PR #896, where the
@@ -184,10 +179,7 @@ class PathViewModel
          */
         fun onResumed() {
             resumeCount += 1
-            if (resumeCount > 1) {
-                reload()
-                refreshDraftCount()
-            }
+            if (resumeCount > 1) reload()
         }
 
         // MARK: - Loading
@@ -240,23 +232,6 @@ class PathViewModel
             publish()
         }
 
-        /**
-         * Drafts count for the entry-point badge. Its own coroutine for the same
-         * reason stats has one, and its failure is not the timeline's failure —
-         * a badge that cannot be read is a zero, not an error screen.
-         */
-        fun refreshDraftCount() {
-            viewModelScope.launch {
-                draftCount =
-                    runCatchingCancellable { drafts.count() }
-                        .getOrElse {
-                            Log.e(TAG, "draft count failed", it)
-                            0
-                        }
-                publish()
-            }
-        }
-
         /** Rebuilds the exposed state from the pieces above. */
         private fun publish() {
             val focused = focusedWeekStart
@@ -278,7 +253,6 @@ class PathViewModel
                             today = today,
                             karma = stats.karma,
                             serverRipple = stats.ripple,
-                            draftCount = draftCount,
                         )
                 }
         }

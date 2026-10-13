@@ -2,15 +2,12 @@ package app.pbbls.android.features.path
 
 import androidx.compose.runtime.snapshots.Snapshot
 import app.pbbls.android.R
-import app.pbbls.android.core.data.PebbleDraftRecord
 import app.pbbls.android.core.model.MomentDeleteChoice
 import app.pbbls.android.core.model.PathMoment
-import app.pbbls.android.core.model.PebbleDraftPayload
 import app.pbbls.android.core.model.RippleSummary
 import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.FakeMomentWriteService
 import app.pbbls.android.testing.FakePathStatsService
-import app.pbbls.android.testing.FakePebbleDraftsService
 import app.pbbls.android.testing.MainDispatcherRule
 import app.pbbls.android.testing.UiFixtures
 import kotlinx.coroutines.test.advanceUntilIdle
@@ -42,15 +39,12 @@ class PathViewModelTest {
         happenedAt: OffsetDateTime = now,
     ): PathMoment = UiFixtures.pathMoment(id = id, name = "Moment $id", happenedAt = happenedAt)
 
-    private fun draftRecord(id: String) = PebbleDraftRecord(id = id, payload = PebbleDraftPayload(), updatedAt = now)
-
     private fun viewModel(
         path: FakeMomentReadService = FakeMomentReadService(),
         stats: FakePathStatsService = FakePathStatsService(),
-        drafts: FakePebbleDraftsService = FakePebbleDraftsService(),
         writes: FakeMomentWriteService = FakeMomentWriteService(),
         focusRequests: PathFocusRequests = PathFocusRequests(),
-    ) = PathViewModel(path, stats, drafts, writes, focusRequests)
+    ) = PathViewModel(path, stats, writes, focusRequests)
 
     // MARK: - Focus requests (R14)
 
@@ -121,29 +115,6 @@ class PathViewModelTest {
             viewModel.onResumed()
             advanceUntilIdle()
             assertEquals(loadsAfterInit + 1, path.loadPathCount)
-        }
-
-    /**
-     * The resume hook is also what replaced `detailReloadKey`, `draftsReloadKey`
-     * and the `onFlowPublished`/`onFormCreated` callbacks (#852): every entry that
-     * writes something — publish, edit, drafts — pops back to Path, and a resume
-     * refreshes both the timeline and the drafts badge in one place.
-     */
-    @Test
-    fun `returning to the timeline also refreshes the draft count`() =
-        runTest {
-            val drafts = FakePebbleDraftsService()
-            val viewModel = viewModel(drafts = drafts)
-            advanceUntilIdle()
-            val countsAfterInit = drafts.countCallCount
-
-            viewModel.onResumed()
-            advanceUntilIdle()
-            assertEquals(countsAfterInit, drafts.countCallCount)
-
-            viewModel.onResumed()
-            advanceUntilIdle()
-            assertEquals(countsAfterInit + 1, drafts.countCallCount)
         }
 
     /** The refresh is silent — it must not blank the timeline to a spinner. */
@@ -336,31 +307,6 @@ class PathViewModelTest {
             advanceUntilIdle()
 
             assertEquals(false, (viewModel.uiState.value as PathUiState.Content).ripple?.activeToday)
-        }
-
-    // MARK: - Draft count
-
-    @Test
-    fun `reads the draft count for the entry-point badge`() =
-        runTest {
-            val drafts = FakePebbleDraftsService(mutableListOf(draftRecord("d1"), draftRecord("d2")))
-            val viewModel = viewModel(drafts = drafts)
-            advanceUntilIdle()
-
-            assertEquals(2, (viewModel.uiState.value as PathUiState.Content).draftCount)
-        }
-
-    /** A badge that cannot be read is a zero, never an error screen. */
-    @Test
-    fun `a failed draft count does not fail the timeline`() =
-        runTest {
-            val drafts = FakePebbleDraftsService()
-            drafts.failNext = IOException("offline")
-            val viewModel = viewModel(drafts = drafts)
-            advanceUntilIdle()
-
-            val state = viewModel.uiState.value as PathUiState.Content
-            assertEquals(0, state.draftCount)
         }
 
     // MARK: - Delete

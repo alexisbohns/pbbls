@@ -7,7 +7,6 @@ import androidx.lifecycle.viewModelScope
 import app.pbbls.android.core.data.AchievementMoment
 import app.pbbls.android.core.data.AchievementNotificationService
 import app.pbbls.android.core.data.CompleteSnapshotStoring
-import app.pbbls.android.core.data.ComposerSnapshotStoring
 import app.pbbls.android.core.data.KarmaEarnedContent
 import app.pbbls.android.core.data.KarmaNotificationService
 import app.pbbls.android.core.data.SupabaseServicing
@@ -86,7 +85,6 @@ class RootViewModel
         private val supabase: SupabaseServicing,
         private val karma: KarmaNotificationService,
         private val achievementNotify: AchievementNotificationService,
-        private val snapshots: ComposerSnapshotStoring,
         private val completeSnapshots: CompleteSnapshotStoring,
         private val savedStateHandle: SavedStateHandle,
     ) : ViewModel() {
@@ -157,16 +155,14 @@ class RootViewModel
             if (!isInitializing && userId == null && hasHadSession) {
                 clearPendingInvite()
             }
-            // Every resolved signed-out state drops the composer crash snapshot
-            // (GDP-07) — not only a real sign-out: a cold start that resolves
-            // signed-out (session expired, account deleted elsewhere) is the
-            // same device holding someone's unpublished draft with nobody
-            // entitled to it. Account deletion reaches here through its own
-            // `signOut()`. The store's owner check covers a session that swaps
-            // without passing through signed-out.
-            // The Complete flow's per-moment autosave goes with it (A-5).
+            // Every resolved signed-out state drops the Complete flow's
+            // per-moment autosave (A-5, GDP-07) — not only a real sign-out: a
+            // cold start that resolves signed-out (session expired, account
+            // deleted elsewhere) is the same device holding someone's
+            // unfinished answers with nobody entitled to them. Account deletion
+            // reaches here through its own `signOut()`. The store's owner check
+            // covers a session that swaps without passing through signed-out.
             if (!isInitializing && userId == null) {
-                snapshots.clear()
                 completeSnapshots.clearAll()
             }
             // Only a resolved status updates hasHadSession — Unresolved must

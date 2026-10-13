@@ -5,9 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.pbbls.android.core.data.AchievementMomentCard
 import app.pbbls.android.core.data.AchievementNotificationService
 import app.pbbls.android.core.data.KarmaNotificationService
-import app.pbbls.android.core.model.PebbleDraftPayload
 import app.pbbls.android.testing.FakeCompleteSnapshotStore
-import app.pbbls.android.testing.FakeComposerSnapshotStore
 import app.pbbls.android.testing.FakeSupabaseService
 import app.pbbls.android.testing.MainDispatcherRule
 import io.github.jan.supabase.auth.user.UserInfo
@@ -63,7 +61,6 @@ class RootViewModelTest {
                     supabase,
                     karma(),
                     achievements(),
-                    FakeComposerSnapshotStore(),
                     FakeCompleteSnapshotStore(),
                     SavedStateHandle(),
                 )
@@ -83,7 +80,6 @@ class RootViewModelTest {
                     supabase,
                     karma(),
                     achievements(),
-                    FakeComposerSnapshotStore(),
                     FakeCompleteSnapshotStore(),
                     SavedStateHandle(),
                 )
@@ -103,7 +99,6 @@ class RootViewModelTest {
                     supabase,
                     karma(),
                     achievements(),
-                    FakeComposerSnapshotStore(),
                     FakeCompleteSnapshotStore(),
                     SavedStateHandle(),
                 )
@@ -119,51 +114,47 @@ class RootViewModelTest {
         }
 
     @Test
-    fun `signing out drops the composer crash snapshot and every completion autosave`() =
+    fun `signing out drops every completion autosave`() =
         runTest(rule.dispatcher) {
             val supabase = FakeSupabaseService()
-            val snapshots = FakeComposerSnapshotStore()
             val completeSnapshots = FakeCompleteSnapshotStore()
-            RootViewModel(supabase, karma(), achievements(), snapshots, completeSnapshots, SavedStateHandle())
+            RootViewModel(supabase, karma(), achievements(), completeSnapshots, SavedStateHandle())
 
             supabase.emitResolved(session = session(userId = "u1"))
             advanceUntilIdle()
-            snapshots.save(PebbleDraftPayload(name = "unpublished"), ownerId = "u1")
             assertEquals(0, completeSnapshots.clearAllCount)
 
             supabase.emitResolved(session = null)
             advanceUntilIdle()
 
-            assertNull(snapshots.snapshot)
             assertEquals(1, completeSnapshots.clearAllCount)
         }
 
     @Test
-    fun `a cold start that resolves signed-out drops a leftover snapshot`() =
+    fun `a cold start that resolves signed-out drops leftover autosaves`() =
         runTest(rule.dispatcher) {
             val supabase = FakeSupabaseService()
-            val snapshots = FakeComposerSnapshotStore(PebbleDraftPayload(name = "expired session"), ownerId = "u1")
-            RootViewModel(supabase, karma(), achievements(), snapshots, FakeCompleteSnapshotStore(), SavedStateHandle())
+            val completeSnapshots = FakeCompleteSnapshotStore()
+            RootViewModel(supabase, karma(), achievements(), completeSnapshots, SavedStateHandle())
 
             supabase.emitResolved(session = null)
             advanceUntilIdle()
 
-            assertNull(snapshots.snapshot)
+            assertEquals(1, completeSnapshots.clearAllCount)
         }
 
     @Test
-    fun `neither an unresolved nor a signed-in session touches the snapshot`() =
+    fun `neither an unresolved nor a signed-in session touches the autosaves`() =
         runTest(rule.dispatcher) {
             val supabase = FakeSupabaseService()
-            val snapshots = FakeComposerSnapshotStore(PebbleDraftPayload(name = "crashed halfway"), ownerId = "u1")
-            RootViewModel(supabase, karma(), achievements(), snapshots, FakeCompleteSnapshotStore(), SavedStateHandle())
+            val completeSnapshots = FakeCompleteSnapshotStore()
+            RootViewModel(supabase, karma(), achievements(), completeSnapshots, SavedStateHandle())
 
             advanceUntilIdle()
             supabase.emitResolved(session = session(userId = "u1"))
             advanceUntilIdle()
 
-            assertEquals(0, snapshots.clearCount)
-            assertEquals("crashed halfway", snapshots.snapshot?.name)
+            assertEquals(0, completeSnapshots.clearAllCount)
         }
 
     @Test
@@ -174,7 +165,6 @@ class RootViewModelTest {
                     FakeSupabaseService(),
                     karma(),
                     achievements(),
-                    FakeComposerSnapshotStore(),
                     FakeCompleteSnapshotStore(),
                     SavedStateHandle(),
                 )
@@ -193,7 +183,6 @@ class RootViewModelTest {
                     FakeSupabaseService(),
                     karma(),
                     achievements(),
-                    FakeComposerSnapshotStore(),
                     FakeCompleteSnapshotStore(),
                     handle,
                 )
@@ -206,7 +195,6 @@ class RootViewModelTest {
                     FakeSupabaseService(),
                     karma(),
                     achievements(),
-                    FakeComposerSnapshotStore(),
                     FakeCompleteSnapshotStore(),
                     handle,
                 )
@@ -221,7 +209,6 @@ class RootViewModelTest {
                     FakeSupabaseService(),
                     karma(),
                     achievements(),
-                    FakeComposerSnapshotStore(),
                     FakeCompleteSnapshotStore(),
                     SavedStateHandle(),
                 )
@@ -243,7 +230,6 @@ class RootViewModelTest {
                     supabase,
                     karma(),
                     achievements(),
-                    FakeComposerSnapshotStore(),
                     FakeCompleteSnapshotStore(),
                     SavedStateHandle(),
                 )
@@ -268,7 +254,6 @@ class RootViewModelTest {
                     supabase,
                     karma(),
                     achievements(),
-                    FakeComposerSnapshotStore(),
                     FakeCompleteSnapshotStore(),
                     SavedStateHandle(),
                 )
@@ -295,7 +280,6 @@ class RootViewModelTest {
                     FakeSupabaseService(),
                     karma(),
                     achievementNotify,
-                    FakeComposerSnapshotStore(),
                     FakeCompleteSnapshotStore(),
                     SavedStateHandle(),
                 )
@@ -320,7 +304,6 @@ class RootViewModelTest {
                     FakeSupabaseService(),
                     karma(),
                     achievementNotify,
-                    FakeComposerSnapshotStore(),
                     FakeCompleteSnapshotStore(),
                     SavedStateHandle(),
                 )
@@ -348,7 +331,6 @@ class RootViewModelTest {
                     FakeSupabaseService(),
                     karma(),
                     achievementNotify,
-                    FakeComposerSnapshotStore(),
                     FakeCompleteSnapshotStore(),
                     SavedStateHandle(),
                 )

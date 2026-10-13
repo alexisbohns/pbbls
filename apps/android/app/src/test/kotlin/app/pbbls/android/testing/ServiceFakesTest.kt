@@ -1,7 +1,6 @@
 package app.pbbls.android.testing
 
 import app.pbbls.android.core.data.MomentReadService
-import app.pbbls.android.core.data.PebbleWriteService
 import app.pbbls.android.core.data.ProfileService
 import app.pbbls.android.core.data.ReferenceDataService
 import app.pbbls.android.core.data.SupabaseService
@@ -104,7 +103,6 @@ class ServiceFakesTest {
         // Each of these used to be unconstructible in a JVM test.
         MomentReadService(supabase)
         ProfileService(supabase)
-        PebbleWriteService(supabase)
         ReferenceDataService(supabase)
     }
 

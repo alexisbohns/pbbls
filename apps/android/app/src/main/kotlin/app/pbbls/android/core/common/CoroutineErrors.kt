@@ -15,8 +15,8 @@ import kotlin.coroutines.cancellation.CancellationException
  *
  * Rethrowing first is one line, which is exactly why it goes missing. Putting it
  * in a function makes it structural rather than a discipline — the same reasoning
- * that routes every record-flow tap through `RecordFlowModel` so the haptic
- * cannot be forgotten.
+ * that routes every Capture and Complete tap through its flow model so the
+ * haptic cannot be forgotten.
  *
  * ```
  * val state = runCatchingCancellable { pathService.loadPathPebbles() }

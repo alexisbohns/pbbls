@@ -40,7 +40,7 @@ class KarmaNotificationService
         /**
          * Only positive credits celebrate; clawbacks/deletes stay silent (D10).
          *
-         * [presentsCapsule] exists for the record flow's success screen (M58 D10),
+         * [presentsCapsule] exists for the Complete flow's success screen (M58 D10),
          * which already shows the amount — a capsule over it would be redundant.
          * The sound and haptic are not suppressed: they are the celebration, and
          * they ride on the capsule's composable, so a caller passing `false` gets a

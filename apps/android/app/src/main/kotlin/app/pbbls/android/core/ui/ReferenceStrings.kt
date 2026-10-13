@@ -98,7 +98,7 @@ object ReferenceStrings {
 
     /**
      * Slug → localized *description* (the `domains.label` column). Separate from
-     * [domainNames] because only the record flow's domain step renders it: the
+     * [domainNames] because only the Complete flow's domain step renders it: the
      * form's menu picker and every read path want the bare name.
      */
     private val domainLabels: Map<String, Int> =

@@ -1,8 +1,5 @@
 package app.pbbls.android.di
 
-import android.content.Context
-import app.pbbls.android.core.data.ComposerSnapshotStore
-import app.pbbls.android.core.data.ComposerSnapshotStoring
 import app.pbbls.android.core.data.PebbleSnapRepository
 import app.pbbls.android.core.data.SnapURLCache
 import app.pbbls.android.core.data.SnapWriteRepositing
@@ -10,26 +7,23 @@ import app.pbbls.android.core.data.SupabaseService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import javax.inject.Singleton
 
 /**
- * The three of this app's own service classes that do not carry an `@Inject`
+ * The two of this app's own service classes that do not carry an `@Inject`
  * constructor (#848). Everything else is `@Singleton class X @Inject
  * constructor(…)`; if you are adding a service, prefer that and do not grow
  * this file.
  *
- * None of these is here because Dagger *cannot* infer it — all three *could* be
+ * Neither is here because Dagger *cannot* infer it — both *could* be
  * wired through the graph and deliberately are not. That distinction matters, because
  * "needs a qualifier" is NOT a reason to add a provider: a qualifier annotation
  * on a constructor parameter is inferred like any other binding, which is how
  * `SupabaseService`, `KarmaNotificationService` and `AchievementsService` take
  * their `@ApplicationScope` scope with no provider at all.
  *
- * - [ComposerSnapshotStore] keeps the `@ApplicationContext` qualifier out of a
- *   service class that is otherwise framework-free.
  * - [PebbleSnapRepository] is assembled here because three screens used to
  *   `new` one from a `SupabaseService` they read off a CompositionLocal. Once
  *   that local carries `SupabaseServicing` (#848) they cannot, and they should
@@ -60,21 +54,9 @@ object ServiceModule {
             nowMillis = System::currentTimeMillis,
         )
 
-    @Provides
-    @Singleton
-    fun provideComposerSnapshotStore(
-        @ApplicationContext context: Context,
-    ): ComposerSnapshotStore = ComposerSnapshotStore(context)
-
-    // The two seams #849 needed for `RecordFlowViewModel`'s test. They are
-    // @Provides rather than @Binds in ServiceBindings because both
-    // implementations are themselves assembled here by @Provides, so there is no
+    // A @Provides rather than a @Binds in ServiceBindings because the
+    // implementation is itself assembled here by @Provides, so there is no
     // @Inject constructor for @Binds to point at.
-
-    @Provides
-    @Singleton
-    fun provideComposerSnapshotStoring(impl: ComposerSnapshotStore): ComposerSnapshotStoring = impl
-
     @Provides
     @Singleton
     fun provideSnapWriteRepositing(impl: PebbleSnapRepository): SnapWriteRepositing = impl

@@ -22,10 +22,6 @@ import app.pbbls.android.core.data.MomentWriteService
 import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.PathStatsService
 import app.pbbls.android.core.data.PathStatsServicing
-import app.pbbls.android.core.data.PebbleDraftsService
-import app.pbbls.android.core.data.PebbleDraftsServicing
-import app.pbbls.android.core.data.PebbleWriteService
-import app.pbbls.android.core.data.PebbleWriteServicing
 import app.pbbls.android.core.data.ProfileService
 import app.pbbls.android.core.data.ProfileServicing
 import app.pbbls.android.core.data.ReferenceDataService
@@ -73,10 +69,6 @@ interface ServiceBindings {
 
     @Binds
     @Singleton
-    fun bindPebbleWriteServicing(impl: PebbleWriteService): PebbleWriteServicing
-
-    @Binds
-    @Singleton
     fun bindReferenceDataServicing(impl: ReferenceDataService): ReferenceDataServicing
 
     @Binds
@@ -86,10 +78,6 @@ interface ServiceBindings {
     @Binds
     @Singleton
     fun bindPathStatsServicing(impl: PathStatsService): PathStatsServicing
-
-    @Binds
-    @Singleton
-    fun bindPebbleDraftsServicing(impl: PebbleDraftsService): PebbleDraftsServicing
 
     @Binds
     @Singleton

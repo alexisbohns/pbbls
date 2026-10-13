@@ -7,7 +7,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalView
 
 /**
- * The four tap flavors the record flow uses — mirrors iOS `TapHaptic`.
+ * The four tap flavors the Capture and Complete flows use — mirrors iOS `TapHaptic`.
  *
  * A closed set rather than a raw [HapticFeedbackConstants] int at each call
  * site: the flow's rule is "a haptic on every tap", and naming the *reason*
@@ -30,7 +30,7 @@ enum class TapHaptic {
 
 /**
  * Thin wrapper over the platform view-level feedback constants, used for every
- * tap in the record flow.
+ * tap in the Capture and Complete flows.
  *
  * Deliberately not the Compose `LocalHapticFeedback` API: `HapticFeedbackType`
  * exposes a narrower set than the platform constants, and the flow wants four
@@ -68,8 +68,8 @@ object TapHaptics {
 }
 
 /**
- * A `(TapHaptic) -> Unit` bound to the current view, for injecting into
- * `RecordFlowModel`.
+ * A `(TapHaptic) -> Unit` bound to the current view, for injecting into the
+ * Capture and Complete flow models.
  *
  * Remembered on the view so the model — constructed once per flow — keeps a
  * stable closure rather than one that captures a stale composition.

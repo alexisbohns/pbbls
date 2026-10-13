@@ -119,7 +119,7 @@ abstract class AppUiTest {
      *
      * The Hilt singletons are the one thing that survives, which a real process
      * death would not. Here they stand in for the server and the disk — the
-     * fakes hold what Supabase and `ComposerSnapshotStore` would still hold — so
+     * fakes hold what Supabase and `CompleteSnapshotStore` would still hold — so
      * that is the faithful half. The auth stream is reset to unresolved, as it
      * is in a fresh process; the test resolves it again with [signIn].
      */

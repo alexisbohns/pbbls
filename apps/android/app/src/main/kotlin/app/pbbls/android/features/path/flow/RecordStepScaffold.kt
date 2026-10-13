@@ -67,7 +67,7 @@ fun RecordStepScaffold(
     action: RecordStepAction? = null,
     /**
      * Whether the content slot scrolls. Pass `false` for content that is already
-     * scrollable — see `RecordStep.bringsOwnScroll`; nesting two vertical
+     * scrollable — see `CompleteStep.bringsOwnScroll`; nesting two vertical
      * scrolls throws at measure time.
      */
     contentScrolls: Boolean = true,

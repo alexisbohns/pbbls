@@ -3,7 +3,6 @@ package app.pbbls.android.testing
 import app.pbbls.android.core.data.AchievementsServicing
 import app.pbbls.android.core.data.CollectionsServicing
 import app.pbbls.android.core.data.CompleteSnapshotStoring
-import app.pbbls.android.core.data.ComposerSnapshotStoring
 import app.pbbls.android.core.data.ConnectionsServicing
 import app.pbbls.android.core.data.ConsentServicing
 import app.pbbls.android.core.data.GlyphMarketServicing
@@ -12,8 +11,6 @@ import app.pbbls.android.core.data.LogsServicing
 import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.PathStatsServicing
-import app.pbbls.android.core.data.PebbleDraftsServicing
-import app.pbbls.android.core.data.PebbleWriteServicing
 import app.pbbls.android.core.data.ProfileServicing
 import app.pbbls.android.core.data.ReferenceDataServicing
 import app.pbbls.android.core.data.SignedUrlProviding
@@ -134,9 +131,6 @@ object FakeServicesModule {
     fun fakeProfile() = FakeProfileService()
 
     @Provides @Singleton
-    fun fakePebbleWrite() = FakePebbleWriteService()
-
-    @Provides @Singleton
     fun fakeReferenceData() = FakeReferenceDataService()
 
     @Provides @Singleton
@@ -144,9 +138,6 @@ object FakeServicesModule {
 
     @Provides @Singleton
     fun fakePathStats() = FakePathStatsService()
-
-    @Provides @Singleton
-    fun fakeDrafts() = FakePebbleDraftsService()
 
     @Provides @Singleton
     fun fakeComposerMedia() = FakeComposerMedia()
@@ -173,9 +164,6 @@ object FakeServicesModule {
     fun fakeLogs() = FakeLogsService()
 
     @Provides @Singleton
-    fun fakeSnapshotStore() = FakeComposerSnapshotStore()
-
-    @Provides @Singleton
     fun fakeCompleteSnapshotStore() = FakeCompleteSnapshotStore()
 
     @Provides @Singleton
@@ -196,9 +184,6 @@ object FakeServicesModule {
     fun profile(fake: FakeProfileService): ProfileServicing = fake
 
     @Provides
-    fun pebbleWrite(fake: FakePebbleWriteService): PebbleWriteServicing = fake
-
-    @Provides
     fun referenceData(fake: FakeReferenceDataService): ReferenceDataServicing = fake
 
     @Provides
@@ -206,9 +191,6 @@ object FakeServicesModule {
 
     @Provides
     fun pathStats(fake: FakePathStatsService): PathStatsServicing = fake
-
-    @Provides
-    fun drafts(fake: FakePebbleDraftsService): PebbleDraftsServicing = fake
 
     @Provides
     fun composerMedia(fake: FakeComposerMedia): ComposerMedia = fake
@@ -233,9 +215,6 @@ object FakeServicesModule {
 
     @Provides
     fun logs(fake: FakeLogsService): LogsServicing = fake
-
-    @Provides
-    fun snapshotStore(fake: FakeComposerSnapshotStore): ComposerSnapshotStoring = fake
 
     @Provides
     fun completeSnapshotStore(fake: FakeCompleteSnapshotStore): CompleteSnapshotStoring = fake
