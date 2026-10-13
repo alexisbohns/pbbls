@@ -78,6 +78,23 @@ class PebblesSceneChainTest {
         assertNull(resolve(2, entries))
     }
 
+    /**
+     * Soul and collection rows open the read page (R9). Its pane pair is Path's,
+     * so beside a soul it must not pose as that soul's detail pane: on either
+     * width it is the docked sheet over the soul.
+     */
+    @Test
+    fun `a moment opened from a soul is a sheet over the soul on either width`() {
+        val entries = listOf(PebblesKey.People, PebblesKey.SoulDetail("s1"), PebblesKey.PebbleDetail("m1")).map(::entry)
+
+        for (partitions in listOf(1, 2)) {
+            val scene = resolve(partitions, entries)
+            assertTrue("partitions=$partitions", scene is OverlayScene<*>)
+            assertEquals(entries.takeLast(1), scene!!.entries)
+            assertEquals(entries.take(2), (scene as OverlayScene<NavKey>).overlaidEntries)
+        }
+    }
+
     @Test
     fun `an open glyph on one pane is a sheet over the store`() {
         val entries = listOf(PebblesKey.You, PebblesKey.Glyphs, glyph).map(::entry)

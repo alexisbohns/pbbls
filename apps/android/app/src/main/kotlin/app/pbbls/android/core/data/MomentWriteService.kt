@@ -33,6 +33,13 @@ interface MomentWriteServicing {
     /** `delete_moment`, then a best-effort delete of the returned snap files. */
     suspend fun deleteMoment(momentId: String)
 
+    /**
+     * The sum of every `karma_events.delta` for [pebbleId] (all reasons), or null
+     * when the read fails. Never throws. Edit pebble reads it either side of
+     * `complete_pebble`: the difference is what that save earned (R13).
+     */
+    suspend fun karmaTotal(pebbleId: String): Int?
+
     /** The delta the last write recorded for [pebbleId], or null. Never throws. */
     suspend fun karmaDelta(
         pebbleId: String,
@@ -76,6 +83,17 @@ class MomentWriteService
                 result.storagePaths.forEach { snapFiles.deleteFiles(storagePrefix = it) }
             }
         }
+
+        override suspend fun karmaTotal(pebbleId: String): Int? =
+            runCatchingCancellable {
+                supabase.client
+                    .from("karma_events")
+                    .select(Columns.raw("delta")) {
+                        filter { eq("ref_id", pebbleId) }
+                    }.decodeList<KarmaDeltaRow>()
+                    .sumOf { it.delta }
+            }.onFailure { Log.w(TAG, "karma total read failed for $pebbleId", it) }
+                .getOrNull()
 
         /** Mirrors `functions/_shared/karma-delta.ts`: newest row for (ref_id, reason). */
         override suspend fun karmaDelta(

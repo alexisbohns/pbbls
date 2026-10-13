@@ -7,11 +7,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
 import app.pbbls.android.core.common.runCatchingCancellable
-import app.pbbls.android.core.data.PathServicing
+import app.pbbls.android.core.data.MomentReadServicing
+import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.PathStatsServicing
 import app.pbbls.android.core.data.PebbleDraftsServicing
-import app.pbbls.android.core.data.PebbleWriteServicing
-import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.RippleSummary
 import app.pbbls.android.core.model.WeekRollEntry
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -60,14 +60,16 @@ sealed interface PathUiState {
          *
          * A getter, not a constructor field: the screen used to recompute this
          * on every recomposition, scanning every pebble of every week each time.
+         *
+         * Only a completed moment counts: a capture without its pebble is not
+         * activity yet (A-13).
          */
         val ripple: RippleSummary? by lazy {
             serverRipple?.let { server ->
+                val zone = ZoneId.systemDefault()
                 val activeToday =
                     entries.any { entry ->
-                        entry.pebbles.any {
-                            it.createdAt.atZoneSameInstant(ZoneId.systemDefault()).toLocalDate() == today
-                        }
+                        entry.moments.any { it.isCompleted && it.createdAt.atZoneSameInstant(zone).toLocalDate() == today }
                     }
                 server.copy(activeToday = activeToday)
             }
@@ -90,7 +92,7 @@ sealed interface PathUiState {
  * state this class can even express.
  */
 data class PathCovers(
-    val pendingDeletion: Pebble? = null,
+    val pendingDeletion: PathMoment? = null,
     val didDeleteFail: Boolean = false,
 )
 
@@ -99,7 +101,7 @@ data class PathCovers(
  *
  * What it fixes, beyond moving code:
  *
- * - **Rotation.** `PathScreen` re-fetched `path_pebbles()` on every
+ * - **Rotation.** `PathScreen` re-fetched the timeline on every
  *   configuration change, dropped the focused week and closed any open cover.
  *   All three now live here and outlive the rotation.
  * - **The delete write.** It ran in `rememberCoroutineScope`, so leaving the
@@ -117,10 +119,10 @@ data class PathCovers(
 class PathViewModel
     @Inject
     constructor(
-        private val pathService: PathServicing,
+        private val moments: MomentReadServicing,
         private val stats: PathStatsServicing,
         private val drafts: PebbleDraftsServicing,
-        private val writeService: PebbleWriteServicing,
+        private val writes: MomentWriteServicing,
     ) : ViewModel() {
         private val today = LocalDate.now()
 
@@ -211,7 +213,7 @@ class PathViewModel
 
         private suspend fun fetch() {
             runCatchingCancellable {
-                WeekRollBuilder.build(pathService.loadPathPebbles(), ZoneId.systemDefault(), today)
+                WeekRollBuilder.build(moments.loadPath(), ZoneId.systemDefault(), today)
             }.fold(
                 onSuccess = { built ->
                     entries = built
@@ -220,7 +222,7 @@ class PathViewModel
                     isLoaded = true
                 },
                 onFailure = {
-                    Log.e(TAG, "path_pebbles load failed", it)
+                    Log.e(TAG, "path_moments load failed", it)
                     // A failed *refresh* keeps the timeline that is already up:
                     // replacing real pebbles with an error because a background
                     // reload lost the network would be a regression.
@@ -281,14 +283,15 @@ class PathViewModel
 
         // MARK: - Delete
 
-        fun requestDelete(pebble: Pebble) = _covers.update { it.copy(pendingDeletion = pebble) }
+        fun requestDelete(moment: PathMoment) = _covers.update { it.copy(pendingDeletion = moment) }
 
         fun cancelDelete() = _covers.update { it.copy(pendingDeletion = null) }
 
         fun dismissDeleteError() = _covers.update { it.copy(didDeleteFail = false) }
 
         /**
-         * Confirmed delete. In `viewModelScope`, not the composition's: the row is
+         * Confirmed delete of the whole moment (`delete_moment`, its pebble with
+         * it; Part 4 adds the keep-the-moment choice). In `viewModelScope`, not the composition's: the row is
          * gone server-side the moment the request lands, and a cancelled coroutine
          * would skip the reload and leave it on screen.
          */
@@ -296,11 +299,11 @@ class PathViewModel
             val target = _covers.value.pendingDeletion ?: return
             _covers.update { it.copy(pendingDeletion = null) }
             viewModelScope.launch {
-                runCatchingCancellable { writeService.delete(target.id) }
+                runCatchingCancellable { writes.deleteMoment(target.id) }
                     .fold(
                         onSuccess = { reload() },
                         onFailure = {
-                            Log.e(TAG, "delete pebble failed", it)
+                            Log.e(TAG, "delete moment failed", it)
                             _covers.update { covers -> covers.copy(didDeleteFail = true) }
                         },
                     )

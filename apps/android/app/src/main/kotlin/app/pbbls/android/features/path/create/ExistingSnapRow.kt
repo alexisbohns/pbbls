@@ -35,8 +35,8 @@ private const val TAG = "existing-snap-row"
  * ports iOS `ExistingSnapRow.swift`. Layout matches [AttachedPhotoView]
  * (56dp thumbnail + label + trailing control) so the section feels consistent
  * regardless of `.existing` vs `.pending`. The remove button calls back into
- * the parent, which owns the eager `delete_pebble_media` flow; while
- * [isRemoving] the button is replaced by a spinner.
+ * the parent, which detaches the photo until Edit moment's save drops it
+ * (R6); while [isRemoving] the button is replaced by a spinner.
  *
  * The thumb URL signs lazily via [LocalSnapURLCache] (nullable by design —
  * previews render the placeholder); failures log and keep the placeholder,

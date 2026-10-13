@@ -10,8 +10,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.readableWidth
 import app.pbbls.android.core.model.EmotionPalette
-import app.pbbls.android.core.model.EmotionRef
-import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.PathMoment
+import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.WeekRollEntry
 import app.pbbls.android.features.path.PathContent
 import com.android.tools.screenshot.PreviewTest
@@ -36,22 +36,16 @@ private val screenPalette: EmotionPalette =
         ),
     )
 
-private fun pebble(
+private fun moment(
     name: String,
     happenedAt: String,
-    intensity: Int,
-    positiveness: Int,
-    renderSvg: String?,
-): Pebble =
-    Pebble(
+    valence: Valence,
+): PathMoment =
+    MomentPreviewFixtures.pathMoment(
         id = name,
         name = name,
         happenedAt = OffsetDateTime.parse(happenedAt),
-        createdAt = OffsetDateTime.parse(happenedAt),
-        intensity = intensity,
-        positiveness = positiveness,
-        renderSvg = renderSvg,
-        emotion = EmotionRef(id = "e1", slug = "joyful", name = "Joyful"),
+        pebble = MomentPreviewFixtures.pathPebble(valence = valence),
     )
 
 // Focused week Monday 2026-07-06; "today" Saturday 2026-07-11. Both internal
@@ -62,24 +56,24 @@ internal val populatedEntries: List<WeekRollEntry> =
     listOf(
         WeekRollEntry(
             weekStart = LocalDate.of(2026, 6, 22),
-            pebbles =
+            moments =
                 listOf(
-                    pebble("Long walk", "2026-06-23T09:10:00+00:00", 1, 0, PebbleSvgFixtures.smallNeutral),
+                    moment("Long walk", "2026-06-23T09:10:00+00:00", Valence.NEUTRAL_SMALL),
                 ),
         ),
         WeekRollEntry(
             weekStart = LocalDate.of(2026, 7, 6),
-            pebbles =
+            moments =
                 listOf(
-                    pebble("Concert with Lea", "2026-07-10T21:30:00+00:00", 3, 1, PebbleSvgFixtures.largeHighlight),
-                    pebble("Hard conversation", "2026-07-08T18:00:00+00:00", 2, -1, PebbleSvgFixtures.mediumLowlight),
-                    pebble("Morning coffee", "2026-07-06T08:15:00+00:00", 1, 1, PebbleSvgFixtures.smallHighlight),
+                    moment("Concert with Lea", "2026-07-10T21:30:00+00:00", Valence.HIGHLIGHT_LARGE),
+                    moment("Hard conversation", "2026-07-08T18:00:00+00:00", Valence.LOWLIGHT_MEDIUM),
+                    moment("Morning coffee", "2026-07-06T08:15:00+00:00", Valence.HIGHLIGHT_SMALL),
                 ),
         ),
     )
 
 private val emptyWeekEntries: List<WeekRollEntry> =
-    listOf(WeekRollEntry(weekStart = LocalDate.of(2026, 7, 6), pebbles = emptyList()))
+    listOf(WeekRollEntry(weekStart = LocalDate.of(2026, 7, 6), moments = emptyList()))
 
 @Composable
 private fun ScreenPreview(entries: List<WeekRollEntry>) {

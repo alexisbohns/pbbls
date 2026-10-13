@@ -25,21 +25,25 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
+import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.SurfaceTile
 import app.pbbls.android.core.model.EmotionPalette
-import app.pbbls.android.core.model.PebbleDetail
-import app.pbbls.android.core.model.SoulWithGlyph
+import app.pbbls.android.core.model.Glyph
+import app.pbbls.android.core.model.MomentDetail
+import app.pbbls.android.core.model.MomentPebble
+import app.pbbls.android.core.model.SoulRef
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.ui.ReferenceStrings
 import app.pbbls.android.core.ui.ReferenceType
 import app.pbbls.android.core.ui.render.GlyphImage
 
 /**
- * Pure read body of the pebble detail sheet — ports iOS `PebbleReadView.swift`.
- * Takes a [PebbleDetail] plus its [palette] so it previews with no services:
+ * Pure read body of the moment read page — ports iOS `PebbleReadView.swift`.
+ * Takes a [MomentDetail] plus its [palette] so it previews with no services:
  * banner, title, meta tiles, optional description, and a souls grid, stacked in
- * a scrolling column. The souls grid is chunked [Row]s, never a lazy grid — a
+ * a scrolling column. The meta tiles and souls are the pebble's, so a moment
+ * without your pebble shows only the banner, title and description. The souls grid is chunked [Row]s, never a lazy grid — a
  * lazy grid inside a `verticalScroll` [Column] throws "infinite height".
  *
  * The read page uses theme roles; only the pebble visual ([PebbleReadBanner])
@@ -49,11 +53,12 @@ import app.pbbls.android.core.ui.render.GlyphImage
  */
 @Composable
 fun PebbleReadView(
-    detail: PebbleDetail,
+    detail: MomentDetail,
     palette: EmotionPalette?,
     modifier: Modifier = Modifier,
 ) {
     val colors = MaterialTheme.colorScheme
+    val pebble = detail.pebble
     Column(
         modifier
             .fillMaxSize()
@@ -67,8 +72,8 @@ fun PebbleReadView(
         verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         PebbleReadBanner(
-            renderSvg = detail.renderSvg,
-            valence = Valence.fromOrDefault(detail.positiveness, detail.intensity),
+            renderSvg = null,
+            valence = pebble?.valence ?: Valence.NEUTRAL_MEDIUM,
             palette = palette,
             modifier = Modifier.fillMaxWidth(),
             snapStoragePath = detail.sortedSnaps.firstOrNull()?.storagePath,
@@ -77,7 +82,7 @@ fun PebbleReadView(
             name = detail.name,
             happenedAt = detail.happenedAt,
         )
-        PebbleReadMeta(detail = detail)
+        if (pebble != null) PebbleReadMeta(pebble = pebble)
         val desc = detail.description
         if (!desc.isNullOrEmpty()) {
             Text(
@@ -87,8 +92,8 @@ fun PebbleReadView(
                 modifier = Modifier.fillMaxWidth(),
             )
         }
-        if (detail.souls.isNotEmpty()) {
-            PebbleReadSouls(souls = detail.souls)
+        if (pebble != null && pebble.souls.isNotEmpty()) {
+            PebbleReadSouls(souls = pebble.souls)
         }
     }
 }
@@ -102,11 +107,11 @@ fun PebbleReadView(
  * inside a non-inline `joinToString` transform lambda.
  */
 @Composable
-private fun PebbleReadMeta(detail: PebbleDetail) {
+private fun PebbleReadMeta(pebble: MomentPebble) {
     val spacing = PebblesTheme.spacing
-    val emotionLabel = ReferenceStrings.referenceName(ReferenceType.EMOTION, detail.emotion.slug, detail.emotion.name)
+    val emotionLabel = ReferenceStrings.referenceName(ReferenceType.EMOTION, pebble.emotion.slug, pebble.emotion.name)
     val domainNames = mutableListOf<String>()
-    for (domain in detail.domains) {
+    for (domain in pebble.domains) {
         domainNames.add(ReferenceStrings.referenceName(ReferenceType.DOMAIN, domain.slug, domain.name))
     }
     Row(
@@ -132,10 +137,10 @@ private fun PebbleReadMeta(detail: PebbleDetail) {
                 modifier = Modifier.weight(1f),
             )
         }
-        if (detail.collections.isNotEmpty()) {
+        if (pebble.collections.isNotEmpty()) {
             SurfaceTile(
                 iconPainter = painterResource(R.drawable.ic_pebble_collection),
-                label = detail.collections.joinToString(", ") { it.name },
+                label = pebble.collections.joinToString(", ") { it.name },
                 modifier = Modifier.weight(1f),
             )
         }
@@ -146,9 +151,14 @@ private fun PebbleReadMeta(detail: PebbleDetail) {
  * 3-column souls grid via chunked [Row]s (never `LazyVerticalGrid` inside a
  * `verticalScroll`). The trailing row is padded with weighted [Spacer]s so cells
  * keep a stable third-of-width regardless of count.
+ *
+ * The view projects souls as `{id, name}`; each glyph comes from the ambient
+ * souls cache, and a soul the cache does not know yet shows an empty glyph
+ * (A-15).
  */
 @Composable
-private fun PebbleReadSouls(souls: List<SoulWithGlyph>) {
+private fun PebbleReadSouls(souls: List<SoulRef>) {
+    val cached = LocalReferenceDataService.current.souls.associateBy { it.id }
     Column(
         Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -160,7 +170,8 @@ private fun PebbleReadSouls(souls: List<SoulWithGlyph>) {
             ) {
                 rowSouls.forEach { soul ->
                     DetailSoulCell(
-                        soul = soul,
+                        name = soul.name,
+                        glyph = cached[soul.id]?.glyph,
                         modifier = Modifier.weight(1f),
                     )
                 }
@@ -176,7 +187,8 @@ private fun PebbleReadSouls(souls: List<SoulWithGlyph>) {
  */
 @Composable
 private fun DetailSoulCell(
-    soul: SoulWithGlyph,
+    name: String,
+    glyph: Glyph?,
     modifier: Modifier = Modifier,
 ) {
     val onSurfaceVariant = MaterialTheme.colorScheme.onSurfaceVariant
@@ -186,13 +198,13 @@ private fun DetailSoulCell(
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         GlyphImage(
-            strokes = soul.glyph.strokes,
-            viewBox = soul.glyph.viewBox,
+            strokes = glyph?.strokes.orEmpty(),
+            viewBox = glyph?.viewBox ?: "0 0 200 200",
             strokeColor = onSurfaceVariant,
             modifier = Modifier.size(72.dp),
         )
         Text(
-            soul.name,
+            name,
             style = PebblesTheme.hand.bodyLeadHand,
             color = onSurfaceVariant,
             maxLines = 1,

@@ -5,8 +5,8 @@ package app.pbbls.android.core.model
  * pebble being created or edited — ports iOS `FormSnap.swift`.
  *
  * - [Existing] — already saved in the DB. The form renders the thumbnail from
- *   [Existing.storagePath] and exposes a remove affordance that triggers the
- *   eager `delete_pebble_media` RPC.
+ *   [Existing.storagePath] and exposes a remove affordance: detached in the
+ *   form; Edit moment's save drops it (R6).
  * - [Pending] — an in-flight or just-uploaded local pick (no DB row yet).
  */
 sealed interface FormSnap {

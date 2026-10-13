@@ -132,8 +132,6 @@ private val joyEmotion =
         palette = joyPalette,
     )
 
-private val sampleGlyph = glyphOf("glyph-1", "Spiral", listOf(sampleStroke))
-
 private val fixedWhen: OffsetDateTime = OffsetDateTime.parse("2026-07-08T14:23:00Z")
 
 private val emptyDraft = PebbleDraft(happenedAt = fixedWhen)
@@ -208,7 +206,6 @@ private val emotionGroups =
 private fun FormPreview(
     draft: PebbleDraft,
     selectedEmotion: EmotionWithPalette?,
-    selectedGlyph: Glyph?,
     saveError: String?,
 ) {
     PebbleForm(
@@ -218,11 +215,7 @@ private fun FormPreview(
         souls = souls,
         collections = collections,
         selectedEmotion = selectedEmotion,
-        selectedGlyph = selectedGlyph,
-        onGlyphPicked = {},
         saveError = saveError,
-        // The picker sheet is closed in every capture.
-        glyphPicker = { _, _, _, _ -> },
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface),
     )
 }
@@ -288,14 +281,14 @@ private fun KarmaCapsulePreview(content: KarmaEarnedContent) {
 @PreviewLargeFont
 @Composable
 fun CreateFormEmptyLight() {
-    PebblesTheme { FormPreview(emptyDraft, null, null, null) }
+    PebblesTheme { FormPreview(emptyDraft, null, null) }
 }
 
 @PreviewTest
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun CreateFormEmptyDark() {
-    PebblesTheme { FormPreview(emptyDraft, null, null, null) }
+    PebblesTheme { FormPreview(emptyDraft, null, null) }
 }
 
 @PreviewTest
@@ -303,14 +296,14 @@ fun CreateFormEmptyDark() {
 @PreviewLargeFont
 @Composable
 fun CreateFormFilledLight() {
-    PebblesTheme { FormPreview(filledDraft, joyEmotion, sampleGlyph, null) }
+    PebblesTheme { FormPreview(filledDraft, joyEmotion, null) }
 }
 
 @PreviewTest
 @Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
 @Composable
 fun CreateFormFilledDark() {
-    PebblesTheme { FormPreview(filledDraft, joyEmotion, sampleGlyph, null) }
+    PebblesTheme { FormPreview(filledDraft, joyEmotion, null) }
 }
 
 @PreviewTest
@@ -319,7 +312,7 @@ fun CreateFormFilledDark() {
 @Composable
 fun CreateFormErrorLight() {
     PebblesTheme {
-        FormPreview(filledDraft, joyEmotion, sampleGlyph, "Couldn't save your pebble. Please try again.")
+        FormPreview(filledDraft, joyEmotion, "Couldn't save your pebble. Please try again.")
     }
 }
 
@@ -328,7 +321,7 @@ fun CreateFormErrorLight() {
 @Composable
 fun CreateFormErrorDark() {
     PebblesTheme {
-        FormPreview(filledDraft, joyEmotion, sampleGlyph, "Couldn't save your pebble. Please try again.")
+        FormPreview(filledDraft, joyEmotion, "Couldn't save your pebble. Please try again.")
     }
 }
 

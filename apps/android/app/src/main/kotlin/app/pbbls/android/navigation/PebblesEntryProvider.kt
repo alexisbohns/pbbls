@@ -22,6 +22,7 @@ import app.pbbls.android.features.lab.LogListScreen
 import app.pbbls.android.features.onboarding.OnboardingScreen
 import app.pbbls.android.features.onboarding.OnboardingSteps
 import app.pbbls.android.features.path.DraftsScreen
+import app.pbbls.android.features.path.EditMomentScreen
 import app.pbbls.android.features.path.EditPebbleScreen
 import app.pbbls.android.features.path.PathScreen
 import app.pbbls.android.features.path.PebbleDetailScreen
@@ -63,7 +64,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         metadata = NavTransitions.forKey(PebblesKey.Path) + PanePairs.metadataFor(PebblesKey.Path),
     ) {
         PathScreen(
-            onOpenDetail = { pebbleId -> navigator.navigateToDetail(PebblesKey.PebbleDetail(pebbleId)) },
+            onOpenDetail = { momentId -> navigator.navigateToDetail(PebblesKey.PebbleDetail(momentId)) },
             onOpenDrafts = { navigator.navigate(PebblesKey.Drafts) },
             onCreatePebble = { navigator.navigate(PebblesKey.RecordFlow()) },
             onCreatePebbleLongPress = { navigator.navigate(PebblesKey.CreatePebble()) },
@@ -116,7 +117,8 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             soulId = key.soulId,
             onBack = navigator::goBack,
             onEditSoul = { navigator.navigate(PebblesKey.SoulForm(key.soulId)) },
-            onOpenPebble = { navigator.navigate(PebblesKey.EditPebble(it)) },
+            // The moment's read page, not the edit form (R9).
+            onOpenMoment = { navigator.navigate(PebblesKey.PebbleDetail(it)) },
             showBack = !isInListDetailPane(),
         )
     }
@@ -128,7 +130,8 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             collectionId = key.collectionId,
             onBack = navigator::goBack,
             onEditCollection = { navigator.navigate(PebblesKey.CollectionForm(key.collectionId)) },
-            onOpenPebble = { navigator.navigate(PebblesKey.EditPebble(it)) },
+            // The moment's read page, not the edit form (R9).
+            onOpenMoment = { navigator.navigate(PebblesKey.PebbleDetail(it)) },
             showBack = !isInListDetailPane(),
         )
     }
@@ -236,21 +239,21 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         metadata = NavTransitions.split + PanePairs.metadataFor<PebblesKey.PebbleDetail>(),
     ) { key ->
         PebbleDetailScreen(
-            pebbleId = key.pebbleId,
-            onEditRequested = { navigator.navigate(PebblesKey.EditPebble(key.pebbleId)) },
+            momentId = key.momentId,
+            onEditMoment = { navigator.navigate(PebblesKey.EditMoment(key.momentId)) },
+            onEditPebble = { navigator.navigate(PebblesKey.EditPebble(key.momentId)) },
         )
     }
 
+    // Edit moment and Edit pebble (R5): popping back to the still-open read
+    // page is the reveal — its own resume refresh (mirroring
+    // PathViewModel.onResumed) is what re-reads the moment (M58 D5, #852).
+    entry<PebblesKey.EditMoment>(metadata = NavTransitions.forKey(PebblesKey.EditMoment(""))) { key ->
+        EditMomentScreen(momentId = key.momentId, onDismiss = navigator::goBack, onSaved = navigator::goBack)
+    }
+
     entry<PebblesKey.EditPebble>(metadata = NavTransitions.forKey(PebblesKey.EditPebble(""))) { key ->
-        EditPebbleScreen(
-            pebbleId = key.pebbleId,
-            onDismiss = navigator::goBack,
-            // Popping back to the still-open detail entry is the reveal — its
-            // own resume refresh (mirroring PathViewModel.onResumed) is what
-            // re-reads the pebble (M58 D5, #852).
-            onSaved = navigator::goBack,
-            glyphPicker = glyphPicker,
-        )
+        EditPebbleScreen(momentId = key.momentId, onDismiss = navigator::goBack, onSaved = navigator::goBack)
     }
 
     entry<PebblesKey.RecordFlow>(metadata = NavTransitions.forKey(PebblesKey.RecordFlow())) { key ->
@@ -273,16 +276,12 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
     entry<PebblesKey.CreatePebble>(metadata = NavTransitions.forKey(PebblesKey.CreatePebble())) { key ->
         CreatePebbleScreen(
             resumeDraftId = key.resumeDraftId,
-            // The form DOES reveal the new pebble through the detail entry
-            // (M58 D10) — pop the composer, then open detail on what is left.
-            // On a large screen a pebble may already be open beside Path, so
-            // the new one replaces it rather than stacking over it (#940).
-            onCreated = { pebbleId ->
-                navigator.goBack()
-                navigator.navigateToDetail(PebblesKey.PebbleDetail(pebbleId))
-            },
+            // Pops only. The read page's key carries a moment id, and the
+            // compose-pebble compat wrapper returns a pebble id, so opening the
+            // detail on it would load the wrong row (#1048). Path's resume
+            // refresh shows the new moment.
+            onCreated = { navigator.goBack() },
             onCancel = navigator::goBack,
-            glyphPicker = glyphPicker,
         )
     }
 

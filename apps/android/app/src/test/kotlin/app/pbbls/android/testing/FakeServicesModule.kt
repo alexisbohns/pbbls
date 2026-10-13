@@ -10,9 +10,7 @@ import app.pbbls.android.core.data.GlyphServicing
 import app.pbbls.android.core.data.LogsServicing
 import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.MomentWriteServicing
-import app.pbbls.android.core.data.PathServicing
 import app.pbbls.android.core.data.PathStatsServicing
-import app.pbbls.android.core.data.PebbleDetailServicing
 import app.pbbls.android.core.data.PebbleDraftsServicing
 import app.pbbls.android.core.data.PebbleWriteServicing
 import app.pbbls.android.core.data.ProfileServicing
@@ -58,7 +56,7 @@ import javax.inject.Singleton
  *
  * - [ServiceBindings]: every `…Servicing` seam is bound to its in-memory fake.
  *   Each fake is also provided under its own type, so a test injects
- *   `FakePathService` and arms it directly — no cast, and no second instance.
+ *   `FakeMomentReadService` and arms it directly — no cast, and no second instance.
  * - [SupabaseModule]: the client is a real `SupabaseClient` over a Ktor
  *   [MockEngine], never `AppEnvironment`. The concrete services that still have
  *   no seam (`EmotionPaletteService`, `KarmaNotificationService`, …) are built
@@ -116,9 +114,6 @@ object FakeServicesModule {
     fun fakeSupabase() = FakeSupabaseService()
 
     @Provides @Singleton
-    fun fakePath() = FakePathService()
-
-    @Provides @Singleton
     fun fakeMomentRead() = FakeMomentReadService()
 
     @Provides @Singleton
@@ -144,9 +139,6 @@ object FakeServicesModule {
 
     @Provides @Singleton
     fun fakeComposerMedia() = FakeComposerMedia()
-
-    @Provides @Singleton
-    fun fakePebbleDetail() = FakePebbleDetailService()
 
     @Provides @Singleton
     fun fakeSouls() = FakeSoulsService()
@@ -181,9 +173,6 @@ object FakeServicesModule {
     fun supabase(fake: FakeSupabaseService): SupabaseServicing = fake
 
     @Provides
-    fun path(fake: FakePathService): PathServicing = fake
-
-    @Provides
     fun momentRead(fake: FakeMomentReadService): MomentReadServicing = fake
 
     @Provides
@@ -209,9 +198,6 @@ object FakeServicesModule {
 
     @Provides
     fun composerMedia(fake: FakeComposerMedia): ComposerMedia = fake
-
-    @Provides
-    fun pebbleDetail(fake: FakePebbleDetailService): PebbleDetailServicing = fake
 
     @Provides
     fun souls(fake: FakeSoulsService): SoulsServicing = fake

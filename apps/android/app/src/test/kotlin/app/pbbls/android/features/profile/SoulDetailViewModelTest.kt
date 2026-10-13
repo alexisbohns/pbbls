@@ -2,12 +2,14 @@ package app.pbbls.android.features.profile
 
 import app.pbbls.android.R
 import app.pbbls.android.core.model.Glyph
-import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.MomentDetail
 import app.pbbls.android.core.model.SoulWithGlyph
-import app.pbbls.android.testing.FakePebbleWriteService
+import app.pbbls.android.testing.FakeMomentReadService
+import app.pbbls.android.testing.FakeMomentWriteService
 import app.pbbls.android.testing.FakeReferenceDataService
 import app.pbbls.android.testing.FakeSoulsService
 import app.pbbls.android.testing.MainDispatcherRule
+import app.pbbls.android.testing.UiFixtures
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -17,14 +19,11 @@ import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
-import java.time.OffsetDateTime
 
-/** The soul detail's load, rotation-guard and pebble-delete contract (#849). */
+/** The soul detail's load, rotation-guard and moment-delete contract (#849, #1048). */
 class SoulDetailViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
-
-    private val now: OffsetDateTime = OffsetDateTime.parse("2026-09-19T12:00:00Z")
 
     private fun soul(id: String) =
         SoulWithGlyph(
@@ -34,27 +33,21 @@ class SoulDetailViewModelTest {
             glyph = Glyph(id = "glyph-$id", strokes = emptyList(), viewBox = "0 0 200 200"),
         )
 
-    private fun pebble(id: String) =
-        Pebble(
-            id = id,
-            name = "Pebble $id",
-            happenedAt = now,
-            createdAt = now,
-            intensity = 2,
-            positiveness = 1,
-        )
+    private fun moment(id: String): MomentDetail = UiFixtures.momentDetail(id = id, name = "Moment $id")
 
     private fun viewModel(
         souls: FakeSoulsService = FakeSoulsService(),
-        writes: FakePebbleWriteService = FakePebbleWriteService(),
+        moments: FakeMomentReadService = FakeMomentReadService(),
+        writes: FakeMomentWriteService = FakeMomentWriteService(),
         refs: FakeReferenceDataService = FakeReferenceDataService(),
-    ) = SoulDetailViewModel(souls, writes, refs)
+    ) = SoulDetailViewModel(souls, moments, writes, refs)
 
     @Test
     fun `starts Loading and resolves to Content`() =
         runTest {
-            val service = FakeSoulsService(soul = soul("a"), pebbles = listOf(pebble("p1")))
-            val viewModel = viewModel(souls = service)
+            val service = FakeSoulsService(soul = soul("a"))
+            val fixtures = listOf(moment("m1"), UiFixtures.momentDetail(id = "m2", name = null, pebble = null))
+            val viewModel = viewModel(souls = service, moments = FakeMomentReadService(withSoul = fixtures))
 
             viewModel.start("a")
             assertEquals(SoulDetailUiState.Loading, viewModel.uiState.value)
@@ -62,7 +55,7 @@ class SoulDetailViewModelTest {
 
             val state = viewModel.uiState.value as SoulDetailUiState.Content
             assertEquals("a", state.soul.id)
-            assertEquals(listOf("p1"), state.pebbles.map { it.id })
+            assertEquals(fixtures.map { it.toPathMoment() }, state.moments)
         }
 
     /**
@@ -116,7 +109,7 @@ class SoulDetailViewModelTest {
             assertEquals(SoulDetailUiState.Loading, viewModel.uiState.value)
         }
 
-    // MARK: - Pebble delete
+    // MARK: - Delete
 
     /**
      * The write this ViewModel exists for: the delete ran in
@@ -124,20 +117,21 @@ class SoulDetailViewModelTest {
      * left a pebble on screen the server had already dropped.
      */
     @Test
-    fun `confirmDelete deletes the pebble and reloads`() =
+    fun `confirmDelete deletes the moment and reloads`() =
         runTest {
-            val service = FakeSoulsService(soul = soul("a"), pebbles = listOf(pebble("p1")))
-            val writes = FakePebbleWriteService()
+            val service = FakeSoulsService(soul = soul("a"))
+            val writes = FakeMomentWriteService()
             val refs = FakeReferenceDataService()
-            val viewModel = viewModel(souls = service, writes = writes, refs = refs)
+            val moments = FakeMomentReadService(withSoul = listOf(moment("m1")))
+            val viewModel = viewModel(souls = service, moments = moments, writes = writes, refs = refs)
             viewModel.start("a")
             advanceUntilIdle()
 
-            viewModel.requestDelete(pebble("p1"))
+            viewModel.requestDelete(moment("m1").toPathMoment())
             viewModel.confirmDelete()
             advanceUntilIdle()
 
-            assertEquals(listOf("p1"), writes.deletedPebbleIds)
+            assertEquals(listOf("m1"), writes.deletedMoments)
             assertEquals(1, refs.refreshSoulsCount)
             assertEquals(2, service.loadSoulCount)
             assertNull(viewModel.covers.value.pendingDeletion)
@@ -146,14 +140,14 @@ class SoulDetailViewModelTest {
     @Test
     fun `a failed delete reports and leaves the list alone`() =
         runTest {
-            val service = FakeSoulsService(soul = soul("a"), pebbles = listOf(pebble("p1")))
-            val writes = FakePebbleWriteService()
+            val service = FakeSoulsService(soul = soul("a"))
+            val writes = FakeMomentWriteService()
             val viewModel = viewModel(souls = service, writes = writes)
             viewModel.start("a")
             advanceUntilIdle()
 
             writes.failNext = IOException("offline")
-            viewModel.requestDelete(pebble("p1"))
+            viewModel.requestDelete(moment("m1").toPathMoment())
             viewModel.confirmDelete()
             advanceUntilIdle()
 
@@ -168,8 +162,8 @@ class SoulDetailViewModelTest {
     @Test
     fun `a failed reload keeps the detail`() =
         runTest {
-            val service = FakeSoulsService(soul = soul("a"), pebbles = listOf(pebble("p1")))
-            val viewModel = viewModel(souls = service)
+            val service = FakeSoulsService(soul = soul("a"))
+            val viewModel = viewModel(souls = service, moments = FakeMomentReadService(withSoul = listOf(moment("m1"))))
             viewModel.start("a")
             advanceUntilIdle()
 
@@ -181,7 +175,7 @@ class SoulDetailViewModelTest {
             advanceUntilIdle()
 
             val state = viewModel.uiState.value as SoulDetailUiState.Content
-            assertEquals(listOf("p1"), state.pebbles.map { it.id })
+            assertEquals(listOf("m1"), state.moments.map { it.id })
         }
 
     // MARK: - Returning from the edit form
@@ -194,7 +188,7 @@ class SoulDetailViewModelTest {
     @Test
     fun `returning from the edit form re-reads the soul`() =
         runTest {
-            val service = FakeSoulsService(soul = soul("a"), pebbles = listOf(pebble("p1")))
+            val service = FakeSoulsService(soul = soul("a"))
             val viewModel = viewModel(souls = service)
             viewModel.start("a")
             advanceUntilIdle()

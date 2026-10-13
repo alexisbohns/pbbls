@@ -19,11 +19,11 @@ import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.model.EmotionPalette
-import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.WeekRollEntry
 
 /**
- * One pager page: the focused week's pebble list — the `WeekPathView`
+ * One pager page: the focused week's moment list — the `WeekPathView`
  * analog. The iOS reveal cascade and bottom fade mask are skipped in v1 (both
  * choreograph the create button); the empty state keeps the copy and re-adds
  * the create affordance (C) via [onCreatePebble].
@@ -34,31 +34,31 @@ import app.pbbls.android.core.model.WeekRollEntry
 @Composable
 fun WeekPebbleList(
     entry: WeekRollEntry,
-    paletteFor: (Pebble) -> EmotionPalette?,
-    onPebbleTap: (Pebble) -> Unit = {},
-    onPebbleDelete: (Pebble) -> Unit = {},
+    paletteFor: (PathMoment) -> EmotionPalette?,
+    onPebbleTap: (PathMoment) -> Unit = {},
+    onPebbleDelete: (PathMoment) -> Unit = {},
     onCreatePebble: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
-    if (entry.pebbles.isEmpty()) {
+    if (entry.moments.isEmpty()) {
         EmptyWeek(onCreate = onCreatePebble, modifier = modifier)
     } else {
         LazyColumn(
             modifier = modifier.testTag(JourneyTags.PATH_WEEK_LIST),
             contentPadding = PaddingValues(bottom = 80.dp),
         ) {
-            itemsIndexed(entry.pebbles, key = { _, pebble -> pebble.id }) { index, pebble ->
+            itemsIndexed(entry.moments, key = { _, moment -> moment.id }) { index, moment ->
                 PathPebbleRow(
-                    pebble = pebble,
+                    moment = moment,
                     positionIndex = index,
-                    palette = paletteFor(pebble),
+                    palette = paletteFor(moment),
                     modifier =
                         Modifier
                             .fillMaxWidth()
                             .padding(vertical = 8.dp, horizontal = 24.dp)
                             .testTag(JourneyTags.PATH_PEBBLE_ROW),
-                    onTap = { onPebbleTap(pebble) },
-                    onRequestDelete = { onPebbleDelete(pebble) },
+                    onTap = { onPebbleTap(moment) },
+                    onRequestDelete = { onPebbleDelete(moment) },
                 )
             }
         }

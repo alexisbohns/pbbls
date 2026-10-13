@@ -33,7 +33,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.model.EmotionPalette
-import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.PathMoment
+import app.pbbls.android.core.ui.MomentNameText
 import app.pbbls.android.core.ui.ReferenceStrings
 import app.pbbls.android.core.ui.ReferenceType
 import app.pbbls.android.core.ui.render.PebbleThumbnail
@@ -41,7 +42,9 @@ import app.pbbls.android.features.path.PathRowFormatting
 import java.time.ZoneId
 
 /**
- * Path-specific pebble row — ports iOS `PathPebbleRow.swift`. A tap opens the
+ * Path-specific moment row — ports iOS `PathPebbleRow.swift`. An uncompleted
+ * moment (no pebble) draws the neutral medium stone with no palette, and a
+ * photo-only moment's null name reads "Untitled" (R3). A tap opens the
  * detail sheet ([onTap]); a long-press opens a destructive-delete menu
  * ([onRequestDelete]) — the `combinedClickable` + `contextMenu` analog
  * (sub-project B). Three states by intensity:
@@ -66,7 +69,7 @@ import java.time.ZoneId
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PathPebbleRow(
-    pebble: Pebble,
+    moment: PathMoment,
     positionIndex: Int,
     palette: EmotionPalette?,
     modifier: Modifier = Modifier,
@@ -77,8 +80,10 @@ fun PathPebbleRow(
     val colors = MaterialTheme.colorScheme
     val locale = LocalConfiguration.current.locales[0]
 
-    val isLarge = pebble.intensity >= 3
-    val hasPhoto = pebble.firstSnapPath != null
+    val valence = moment.valence
+    val isLarge = valence.intensity >= 3
+    val firstSnapPath = moment.firstSnapPath
+    val hasPhoto = firstSnapPath != null
     val nameColor =
         when {
             palette == null -> colors.onSurface
@@ -86,9 +91,9 @@ fun PathPebbleRow(
             else -> palette.primary
         }
 
-    val weekdayTime = PathRowFormatting.weekdayTime(pebble.happenedAt, ZoneId.systemDefault(), locale)
+    val weekdayTime = PathRowFormatting.weekdayTime(moment.happenedAt, ZoneId.systemDefault(), locale)
     val metaLine =
-        pebble.emotion?.let { emotion ->
+        moment.pebble?.emotion?.let { emotion ->
             "$weekdayTime · ${ReferenceStrings.referenceName(ReferenceType.EMOTION, emotion.slug, emotion.name)}"
         } ?: weekdayTime
 
@@ -101,13 +106,13 @@ fun PathPebbleRow(
                 Modifier
                     .fillMaxWidth()
                     .height(
-                        PathPebbleRowMetrics.rowHeightDp(pebble.intensity, hasPhoto, positionIndex).dp,
+                        PathPebbleRowMetrics.rowHeightDp(valence.intensity, hasPhoto, positionIndex).dp,
                     ),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             PebbleThumbnail(
-                pebble = pebble,
+                valence = valence,
                 palette = palette,
                 modifier = Modifier.size(if (isLarge) 96.dp else 56.dp),
             )
@@ -115,10 +120,11 @@ fun PathPebbleRow(
                 verticalArrangement = Arrangement.spacedBy(4.dp),
                 modifier = Modifier.weight(1f),
             ) {
-                Text(
-                    text = pebble.name,
+                MomentNameText(
+                    name = moment.name,
                     style = MaterialTheme.typography.labelLarge,
                     color = nameColor,
+                    maxLines = 1,
                 )
                 Text(
                     text = metaLine,
@@ -126,10 +132,10 @@ fun PathPebbleRow(
                     color = nameColor.copy(alpha = 0.5f),
                 )
             }
-            if (pebble.firstSnapPath != null) {
+            if (firstSnapPath != null) {
                 val shape = MaterialTheme.shapes.small
                 PathSnapThumb(
-                    storagePath = pebble.firstSnapPath,
+                    storagePath = firstSnapPath,
                     modifier =
                         Modifier
                             .size(64.dp)

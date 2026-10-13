@@ -80,7 +80,7 @@ private fun WeekRollCell(
     val colors = MaterialTheme.colorScheme
     val tint = if (isFocused) colors.primary else colors.onSurfaceVariant
     val weekNumber = WeekRollBuilder.isoWeekNumber(entry.weekStart)
-    val cellLabel = stringResource(R.string.path_week_cell_a11y, weekNumber, entry.pebbles.size)
+    val cellLabel = stringResource(R.string.path_week_cell_a11y, weekNumber, entry.moments.size)
 
     Column(
         modifier =

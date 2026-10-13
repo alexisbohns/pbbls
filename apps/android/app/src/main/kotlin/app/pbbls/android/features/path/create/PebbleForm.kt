@@ -1,9 +1,7 @@
 package app.pbbls.android.features.path.create
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,7 +11,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -35,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import app.pbbls.android.R
 import app.pbbls.android.core.designsystem.DashedPlaceholder
@@ -43,36 +39,31 @@ import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.Domain
 import app.pbbls.android.core.model.EmotionWithPalette
 import app.pbbls.android.core.model.FormSnap
-import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.PebbleCollection
 import app.pbbls.android.core.model.PebbleDraft
 import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.ValencePolarity
-import app.pbbls.android.core.ui.GlyphPickerSheet
-import app.pbbls.android.core.ui.GlyphPickerSlot
 import app.pbbls.android.core.ui.ReferenceStrings
 import app.pbbls.android.core.ui.ReferenceType
 import app.pbbls.android.core.ui.render.GlyphImage
-import app.pbbls.android.core.ui.render.PebbleStaticRender
 import app.pbbls.android.core.ui.render.ValenceGlyph
 import app.pbbls.android.features.path.create.pickers.EmotionPickerSheet
 import app.pbbls.android.features.path.create.pickers.SoulPickerSheet
 import app.pbbls.android.features.path.create.pickers.ValencePickerSheet
 
 /** Which picker sheet is open — exactly one `ModalBottomSheet` at a time (D5). */
-enum class PickerKind { EMOTION, VALENCE, SOUL, GLYPH }
+enum class PickerKind { EMOTION, VALENCE, SOUL }
 
 /**
  * The shared pebble form (D6) — ports iOS `PebbleFormView`. Pure UI: it takes
  * the draft plus reference lists and the already-resolved [selectedEmotion]
  * (the shell reads the palette service so this stays previewable), and reports
  * every edit through [onDraftChange]. It hosts the four picker sheets and the
- * `When` dialogs, opening exactly one at a time. Reused by C's create screen and
- * D's edit screen — the optional [renderSvg]/[strokeColor] header is D's.
- *
- * @param glyphPicker The glyph picker's body. It is glyph's, so this form
- *   receives it rather than importing it (#914).
+ * `When` dialogs, opening exactly one at a time. Reused by the create screen
+ * (both halves) and the two edit screens (R5): Edit moment shows only the
+ * moment fields, Edit pebble only the pebble fields under its stone [header].
+ * Pebbles carry no glyph since the split (A-11), so there is no glyph row.
  */
 @Composable
 fun PebbleForm(
@@ -82,19 +73,18 @@ fun PebbleForm(
     souls: List<SoulWithGlyph>,
     collections: List<PebbleCollection>,
     selectedEmotion: EmotionWithPalette?,
-    selectedGlyph: Glyph?,
-    onGlyphPicked: (Glyph?) -> Unit,
     saveError: String?,
-    glyphPicker: GlyphPickerSlot,
     modifier: Modifier = Modifier,
-    renderSvg: String? = null,
-    strokeColor: String? = null,
-    renderHeight: Dp = 260.dp,
+    /** Above the fields: Edit pebble's stone. */
+    header: (@Composable () -> Unit)? = null,
+    /** When, name, description and the photo section: Edit moment (R5). */
+    showMomentFields: Boolean = true,
+    /** Mood, souls and the optional section: Edit pebble (R5). */
+    showPebbleFields: Boolean = true,
     formSnap: FormSnap? = null,
     onAddPhoto: () -> Unit = {},
     onRetryPending: () -> Unit = {},
     onRemovePending: () -> Unit = {},
-    isRemovingExistingSnap: Boolean = false,
     onRemoveExistingSnap: () -> Unit = {},
     onAchievementCheck: () -> Unit = {},
 ) {
@@ -109,84 +99,67 @@ fun PebbleForm(
                 .padding(bottom = 32.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        if (renderSvg != null && strokeColor != null) {
-            // Trace at the outline weight so the live preview's glyph matches the
-            // outline (and the saved pebble on the Path / detail), keeping custom
-            // and domain glyphs consistent.
-            PebbleStaticRender(
-                svg = renderSvg,
-                strokeHex = strokeColor,
-                modifier = Modifier.fillMaxWidth().height(renderHeight),
+        header?.invoke()
+        if (showMomentFields) {
+            WhenRow(
+                happenedAt = draft.happenedAt,
+                onChange = { onDraftChange(draft.copy(happenedAt = it)) },
+            )
+            OutlinedTextField(
+                value = draft.name,
+                onValueChange = { onDraftChange(draft.copy(name = it)) },
+                label = { Text(stringResource(R.string.create_name_placeholder)) },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+            OutlinedTextField(
+                value = draft.description,
+                onValueChange = { onDraftChange(draft.copy(description = it)) },
+                label = { Text(stringResource(R.string.create_description_placeholder)) },
+                maxLines = 5,
+                modifier = Modifier.fillMaxWidth(),
             )
         }
-        WhenRow(
-            happenedAt = draft.happenedAt,
-            onChange = { onDraftChange(draft.copy(happenedAt = it)) },
-        )
-        OutlinedTextField(
-            value = draft.name,
-            onValueChange = { onDraftChange(draft.copy(name = it)) },
-            label = { Text(stringResource(R.string.create_name_placeholder)) },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        OutlinedTextField(
-            value = draft.description,
-            onValueChange = { onDraftChange(draft.copy(description = it)) },
-            label = { Text(stringResource(R.string.create_description_placeholder)) },
-            maxLines = 5,
-            modifier = Modifier.fillMaxWidth(),
-        )
-        FormSectionHeader(stringResource(R.string.create_mood_header))
-        EmotionRow(selectedEmotion = selectedEmotion, onTap = { activePicker = PickerKind.EMOTION })
-        DomainRow(
-            domains = domains,
-            selectedId = draft.domainId,
-            onSelect = { onDraftChange(draft.copy(domainId = it)) },
-        )
-        ValenceRow(valence = draft.valence, onTap = { activePicker = PickerKind.VALENCE })
-        FormSectionHeader(stringResource(R.string.create_glyph_header))
-        GlyphRow(
-            glyph = selectedGlyph,
-            onTap = { activePicker = PickerKind.GLYPH },
-            onRemove =
-                if (draft.glyphId != null) {
-                    {
-                        onDraftChange(draft.copy(glyphId = null))
-                        onGlyphPicked(null)
-                    }
-                } else {
-                    null
-                },
-        )
-        FormSectionHeader(stringResource(R.string.create_souls_header))
-        SelectedSoulsRow(
-            soulIds = draft.soulIds,
-            allSouls = souls,
-            onTap = { activePicker = PickerKind.SOUL },
-        )
-        FormSectionHeader(stringResource(R.string.create_optional_header))
-        CollectionRow(
-            collections = collections,
-            selectedId = draft.collectionId,
-            onSelect = { onDraftChange(draft.copy(collectionId = it)) },
-        )
-        // Photo section (M42) — after Optional, before the inline error (iOS order).
-        FormSectionHeader(stringResource(R.string.create_photo_header))
-        when (formSnap) {
-            null -> AddPhotoRow(onClick = onAddPhoto)
-            is FormSnap.Existing ->
-                ExistingSnapRow(
-                    storagePath = formSnap.storagePath,
-                    isRemoving = isRemovingExistingSnap,
-                    onRemove = onRemoveExistingSnap,
-                )
-            is FormSnap.Pending ->
-                AttachedPhotoView(
-                    snap = formSnap.snap,
-                    onRetry = onRetryPending,
-                    onRemove = onRemovePending,
-                )
+        if (showPebbleFields) {
+            FormSectionHeader(stringResource(R.string.create_mood_header))
+            EmotionRow(selectedEmotion = selectedEmotion, onTap = { activePicker = PickerKind.EMOTION })
+            DomainRow(
+                domains = domains,
+                selectedId = draft.domainId,
+                onSelect = { onDraftChange(draft.copy(domainId = it)) },
+            )
+            ValenceRow(valence = draft.valence, onTap = { activePicker = PickerKind.VALENCE })
+            FormSectionHeader(stringResource(R.string.create_souls_header))
+            SelectedSoulsRow(
+                soulIds = draft.soulIds,
+                allSouls = souls,
+                onTap = { activePicker = PickerKind.SOUL },
+            )
+            FormSectionHeader(stringResource(R.string.create_optional_header))
+            CollectionRow(
+                collections = collections,
+                selectedId = draft.collectionId,
+                onSelect = { onDraftChange(draft.copy(collectionId = it)) },
+            )
+        }
+        if (showMomentFields) {
+            // Photo section (M42) — after Optional, before the inline error (iOS order).
+            FormSectionHeader(stringResource(R.string.create_photo_header))
+            when (formSnap) {
+                null -> AddPhotoRow(onClick = onAddPhoto)
+                is FormSnap.Existing ->
+                    ExistingSnapRow(
+                        storagePath = formSnap.storagePath,
+                        isRemoving = false,
+                        onRemove = onRemoveExistingSnap,
+                    )
+                is FormSnap.Pending ->
+                    AttachedPhotoView(
+                        snap = formSnap.snap,
+                        onRetry = onRetryPending,
+                        onRemove = onRemovePending,
+                    )
+            }
         }
         if (saveError != null) {
             Text(
@@ -227,17 +200,6 @@ fun PebbleForm(
                     activePicker = null
                 },
                 onAchievementCheck = onAchievementCheck,
-            )
-        PickerKind.GLYPH ->
-            GlyphPickerSheet(
-                currentGlyphId = draft.glyphId,
-                onDismiss = { activePicker = null },
-                onSelected = {
-                    onDraftChange(draft.copy(glyphId = it.id))
-                    onGlyphPicked(it)
-                    activePicker = null
-                },
-                picker = glyphPicker,
             )
         null -> Unit
     }
@@ -373,78 +335,6 @@ private fun ValenceRow(
         value = value,
         onClick = onTap,
     )
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun GlyphRow(
-    glyph: Glyph?,
-    onTap: () -> Unit,
-    onRemove: (() -> Unit)?,
-) {
-    val colors = MaterialTheme.colorScheme
-    var menuExpanded by remember { mutableStateOf(false) }
-    val label =
-        if (glyph == null) {
-            stringResource(R.string.create_glyph_placeholder)
-        } else {
-            glyph.name ?: stringResource(R.string.create_glyph_untitled)
-        }
-    Box {
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .clip(MaterialTheme.shapes.medium)
-                    .combinedClickable(
-                        onClick = onTap,
-                        onLongClick = { if (onRemove != null) menuExpanded = true },
-                    ).padding(vertical = 12.dp, horizontal = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            if (glyph != null) {
-                GlyphImage(
-                    strokes = glyph.strokes,
-                    viewBox = glyph.viewBox,
-                    strokeColor = colors.onSurfaceVariant,
-                    modifier = Modifier.size(32.dp),
-                )
-            } else {
-                DashedPlaceholder()
-            }
-            Text(label, style = MaterialTheme.typography.bodyLarge, color = colors.onSurface)
-            Spacer(Modifier.weight(1f))
-            Icon(
-                painter = painterResource(R.drawable.ic_chevron_right),
-                contentDescription = null,
-                tint = colors.onSurfaceVariant,
-                modifier = Modifier.size(16.dp),
-            )
-        }
-        DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
-            DropdownMenuItem(
-                text = {
-                    Text(
-                        text = stringResource(R.string.create_glyph_remove),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = colors.error,
-                    )
-                },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_trash),
-                        contentDescription = null,
-                        tint = colors.error,
-                    )
-                },
-                onClick = {
-                    menuExpanded = false
-                    onRemove?.invoke()
-                },
-            )
-        }
-    }
 }
 
 @Composable

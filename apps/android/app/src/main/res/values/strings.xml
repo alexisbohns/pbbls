@@ -347,9 +347,7 @@
     <!-- Glyph section. -->
     <string name="create_glyph_header">Glyph</string>
     <string name="create_glyph_title">Choose a glyph</string>
-    <string name="create_glyph_placeholder">Pick a glyph</string>
     <string name="create_glyph_untitled">Untitled glyph</string>
-    <string name="create_glyph_remove">Remove glyph</string>
     <string name="create_glyph_load_error">Couldn\'t load glyphs.</string>
     <!-- GlyphBanner byline lead-in ("By <name>"; sentence case since #853 dropped the uppercase meta token). -->
     <string name="glyph_banner_by">By</string>
@@ -396,7 +394,6 @@
     <string name="photo_state_saved">Saved</string>
     <string name="photo_retry_a11y">Retry</string>
     <string name="photo_remove_a11y">Remove photo</string>
-    <string name="photo_remove_error">Couldn\'t remove the photo. Please try again.</string>
     <string name="pebble_save_error_photo_uploading">Photo is still uploading.</string>
     <string name="pebble_save_error_photo_failed">Photo upload failed. Retry or remove it.</string>
     <string name="moment_save_error_generic">Couldn\'t save. Please try again.</string>
@@ -408,6 +405,11 @@
     <string name="pebble_error_needs_domain">Pick a part of life first.</string>
     <string name="pebble_error_soul_gone">One of those souls is gone. Remove it and try again.</string>
     <string name="pebble_error_collection_gone">That collection is gone. Pick another one.</string>
+    <string name="edit_moment_needs_content">A moment needs a name or a photo.</string>
+    <string name="edit_moment">Edit moment</string>
+    <string name="more_actions_a11y">More actions</string>
+    <string name="moment_untitled">Untitled</string>
+    <string name="moment_delete_error">Couldn\'t delete</string>
 
     <!-- ==== Glyph carve studio (M43 · Android Glyph Studio &amp; Store) ==== -->
     <string name="carve_title">New glyph</string>

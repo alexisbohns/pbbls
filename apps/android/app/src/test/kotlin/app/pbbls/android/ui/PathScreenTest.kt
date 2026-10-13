@@ -6,12 +6,13 @@ import androidx.compose.ui.test.onNodeWithText
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.testing.AppUiTest
-import app.pbbls.android.testing.FakePathService
+import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.UiFixtures
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.io.IOException
+import java.time.OffsetDateTime
 import javax.inject.Inject
 
 /**
@@ -23,7 +24,7 @@ import javax.inject.Inject
  */
 @HiltAndroidTest
 class PathScreenTest : AppUiTest() {
-    @Inject lateinit var path: FakePathService
+    @Inject lateinit var path: FakeMomentReadService
 
     private fun signedIn() {
         skipOnboarding()
@@ -32,13 +33,23 @@ class PathScreenTest : AppUiTest() {
     }
 
     @Test
-    fun `a loaded timeline shows this week's pebbles`() {
-        path.pebbles = listOf(UiFixtures.pebble(name = "Coffee with Mo"))
+    fun `a loaded timeline shows this week's moments`() {
+        path.path = listOf(UiFixtures.pathMoment(name = "Coffee with Mo", happenedAt = OffsetDateTime.now()))
 
         signedIn()
 
         compose.onNodeWithText("Coffee with Mo").assertIsDisplayed()
         onText(R.string.path_load_error).assertDoesNotExist()
+    }
+
+    /** A photo-only capture has no name and no pebble yet; it is still on the timeline (R3). */
+    @Test
+    fun `an untitled moment reads Untitled`() {
+        path.path = listOf(UiFixtures.pathMoment(name = null, pebble = null, happenedAt = OffsetDateTime.now()))
+
+        signedIn()
+
+        onText(R.string.moment_untitled).assertIsDisplayed()
     }
 
     @Test
@@ -54,7 +65,7 @@ class PathScreenTest : AppUiTest() {
     @Test
     fun `coming back to the app after a failed load recovers the timeline`() {
         path.failNext = IOException("offline")
-        path.pebbles = listOf(UiFixtures.pebble(name = "Coffee with Mo"))
+        path.path = listOf(UiFixtures.pathMoment(name = "Coffee with Mo", happenedAt = OffsetDateTime.now()))
         signedIn()
         onText(R.string.path_load_error).assertIsDisplayed()
 
@@ -62,12 +73,12 @@ class PathScreenTest : AppUiTest() {
 
         onText(R.string.path_load_error).assertDoesNotExist()
         compose.onNodeWithText("Coffee with Mo").assertIsDisplayed()
-        assertEquals(2, path.loadCount)
+        assertEquals(2, path.loadPathCount)
     }
 
     @Test
     fun `a failed refresh keeps the timeline already on screen`() {
-        path.pebbles = listOf(UiFixtures.pebble(name = "Coffee with Mo"))
+        path.path = listOf(UiFixtures.pathMoment(name = "Coffee with Mo", happenedAt = OffsetDateTime.now()))
         signedIn()
 
         path.failNext = IOException("offline")

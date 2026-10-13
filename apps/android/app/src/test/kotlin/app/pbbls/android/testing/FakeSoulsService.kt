@@ -2,7 +2,6 @@ package app.pbbls.android.testing
 
 import app.pbbls.android.core.data.SoulsServicing
 import app.pbbls.android.core.model.Glyph
-import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.core.model.SoulWithGlyph
 import kotlinx.coroutines.CompletableDeferred
 
@@ -16,8 +15,6 @@ class FakeSoulsService(
     var souls: List<SoulWithGlyph> = emptyList(),
     /** What [loadSoul] returns on a successful call. */
     var soul: SoulWithGlyph? = null,
-    /** What [loadPebbles] returns on a successful call. */
-    var pebbles: List<Pebble> = emptyList(),
     /** What [loadGlyph] and [create] hand back. */
     var glyph: Glyph? = null,
 ) : SoulsServicing {
@@ -71,11 +68,6 @@ class FakeSoulsService(
         loadSoulCount += 1
         armed.fire()
         return soul ?: souls.first { it.id == soulId }
-    }
-
-    override suspend fun loadPebbles(soulId: String): List<Pebble> {
-        armed.fire()
-        return pebbles
     }
 
     override suspend fun create(

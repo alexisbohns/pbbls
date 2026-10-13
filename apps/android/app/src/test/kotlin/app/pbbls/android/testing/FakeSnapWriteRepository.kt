@@ -34,11 +34,6 @@ class FakeSnapWriteRepository : SnapWriteRepositing {
         armed.fire()
     }
 
-    override suspend fun deletePebbleMedia(snapId: String): String {
-        deletedSnapIds += snapId
-        return "u/$snapId"
-    }
-
     override suspend fun deleteFiles(
         snapId: String,
         userId: String,

@@ -8,8 +8,6 @@ import app.pbbls.android.core.model.ComposePebbleResponse
 import app.pbbls.android.core.model.PebbleCreatePayload
 import app.pbbls.android.core.model.PebbleDraft
 import app.pbbls.android.core.model.PebbleSnapPayload
-import app.pbbls.android.core.model.PebbleUpdatePayload
-import io.github.jan.supabase.postgrest.postgrest
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.request.header
@@ -20,21 +18,18 @@ import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.json.put
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Outcome of a compose-pebble / compose-pebble-update call. Screens branch on
+ * Outcome of a compose-pebble call. Screens branch on
  * semantics, not exception classes (D2). Mirrors the iOS save() outcomes.
  */
 sealed interface ComposeResult {
@@ -52,7 +47,9 @@ sealed interface ComposeResult {
 }
 
 /**
- * The pebble write seam — see [SupabaseServicing] for why these exist (#848).
+ * The old composers' create seam — see [SupabaseServicing] for why these
+ * exist (#848). Editing and deleting moved to [MomentWriteServicing] (#1048);
+ * create goes with the old composers (Part 7).
  *
  * The parameter defaults live here rather than on the implementation: Kotlin
  * forbids a default on an override, and every caller that passes one argument
@@ -63,14 +60,6 @@ interface PebbleWriteServicing {
         draft: PebbleDraft,
         snaps: List<PebbleSnapPayload>? = null,
     ): ComposeResult
-
-    suspend fun update(
-        pebbleId: String,
-        draft: PebbleDraft,
-        snaps: List<PebbleSnapPayload> = emptyList(),
-    ): ComposeResult
-
-    suspend fun delete(pebbleId: String)
 }
 
 /**
@@ -110,38 +99,6 @@ class PebbleWriteService
             }
         }
 
-        override suspend fun update(
-            pebbleId: String,
-            draft: PebbleDraft,
-            snaps: List<PebbleSnapPayload>,
-        ): ComposeResult {
-            val body = json.encodeToString(UpdateRequest(pebbleId, PebbleUpdatePayload.from(draft, snaps)))
-            val (status, text) = post(FUNCTION_UPDATE, body) ?: return failGeneric()
-            return when {
-                status in 200..299 -> ComposeResult.Success(decodeJson.decodeFromString(text))
-                // Edit soft-success = any status >= 500 advances (iOS parity); the
-                // caller already knows the pebble id.
-                status >= 500 -> {
-                    Log.w(TAG, "$FUNCTION_UPDATE returned $status — advancing (soft-success)")
-                    ComposeResult.SoftSuccess(pebbleId)
-                }
-                else -> ComposeResult.Failure(pebbleSaveErrorMessage(text))
-            }
-        }
-
-        /** Direct RPC (void return). Server sums karma_events and writes the clawback. No flash. */
-        override suspend fun delete(pebbleId: String) {
-            try {
-                supabase.client.postgrest.rpc(
-                    "delete_pebble",
-                    buildJsonObject { put("p_pebble_id", pebbleId) },
-                )
-            } catch (e: Exception) {
-                Log.e(TAG, "delete_pebble failed", e)
-                throw e
-            }
-        }
-
         private fun failGeneric(): ComposeResult = ComposeResult.Failure(R.string.pebble_save_error_generic)
 
         /** POST helper: (status, body) or null when the request could not even be sent. */
@@ -174,17 +131,9 @@ class PebbleWriteService
             val payload: PebbleCreatePayload,
         )
 
-        @Serializable
-        private data class UpdateRequest(
-            @SerialName("pebble_id")
-            val pebbleId: String,
-            val payload: PebbleUpdatePayload,
-        )
-
         companion object {
             private const val TAG = "pebble-write"
             private const val FUNCTION_CREATE = "compose-pebble"
-            private const val FUNCTION_UPDATE = "compose-pebble-update"
 
             /**
              * Extracts pebble_id from an edge-function error body (create soft-success).

@@ -1,61 +1,60 @@
 package app.pbbls.android.features.path
 
-import app.pbbls.android.core.model.EmotionRef
-import app.pbbls.android.core.model.PebbleDetail
-import app.pbbls.android.core.model.Visibility
-import app.pbbls.android.testing.FakePebbleDetailService
+import app.pbbls.android.testing.FakeMomentReadService
 import app.pbbls.android.testing.MainDispatcherRule
+import app.pbbls.android.testing.UiFixtures
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Rule
 import org.junit.Test
 import java.io.IOException
-import java.time.OffsetDateTime
 
-/** The pushed detail entry's load and resume-refresh contract (#849, #852). */
+/** The moment read page's load and resume-refresh contract (#849, #852, #1048). */
 class PebbleDetailViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private fun detail(
-        id: String = "pebble-1",
-        name: String = "A walk",
-    ) = PebbleDetail(
-        id = id,
-        name = name,
-        happenedAt = OffsetDateTime.parse("2026-09-19T12:00:00Z"),
-        intensity = 2,
-        positiveness = 1,
-        visibility = Visibility.SECRET,
-        emotion = EmotionRef(id = "emotion-1", slug = "calm", name = "Calm"),
-    )
-
     @Test
-    fun `loads the pebble`() =
+    fun `loads the moment`() =
         runTest {
-            val service = FakePebbleDetailService(detail())
+            val moment = UiFixtures.momentDetail()
+            val service = FakeMomentReadService(moments = mapOf("moment-1" to moment))
             val viewModel = PebbleDetailViewModel(service)
 
-            viewModel.start("pebble-1")
+            viewModel.start("moment-1")
             assertEquals(PebbleDetailUiState.Loading, viewModel.uiState.value)
             advanceUntilIdle()
 
-            assertEquals(
-                "A walk",
-                (viewModel.uiState.value as PebbleDetailUiState.Content).detail.name,
-            )
+            assertEquals(moment, (viewModel.uiState.value as PebbleDetailUiState.Content).detail)
+        }
+
+    /** A photo-only capture with no pebble yet is a moment the page must open (D3). */
+    @Test
+    fun `loads a moment without a pebble or a name`() =
+        runTest {
+            val bare = UiFixtures.momentDetail(pebble = null, name = null)
+            val service = FakeMomentReadService(moments = mapOf("moment-1" to bare))
+            val viewModel = PebbleDetailViewModel(service)
+
+            viewModel.start("moment-1")
+            advanceUntilIdle()
+
+            val detail = (viewModel.uiState.value as PebbleDetailUiState.Content).detail
+            assertNull(detail.pebble)
+            assertNull(detail.name)
         }
 
     @Test
     fun `a failed load is the error state and retry recovers`() =
         runTest {
-            val service = FakePebbleDetailService(detail())
+            val service = FakeMomentReadService(moments = mapOf("moment-1" to UiFixtures.momentDetail()))
             service.failNext = IOException("offline")
             val viewModel = PebbleDetailViewModel(service)
 
-            viewModel.start("pebble-1")
+            viewModel.start("moment-1")
             advanceUntilIdle()
             assertEquals(PebbleDetailUiState.Error, viewModel.uiState.value)
 
@@ -69,39 +68,39 @@ class PebbleDetailViewModelTest {
     @Test
     fun `starting with the same id does not refetch`() =
         runTest {
-            val service = FakePebbleDetailService(detail())
+            val service = FakeMomentReadService(moments = mapOf("moment-1" to UiFixtures.momentDetail()))
             val viewModel = PebbleDetailViewModel(service)
 
-            viewModel.start("pebble-1")
+            viewModel.start("moment-1")
             advanceUntilIdle()
-            viewModel.start("pebble-1")
+            viewModel.start("moment-1")
             advanceUntilIdle()
 
-            assertEquals(1, service.loadCalls.size)
+            assertEquals(1, service.loadedMomentIds.size)
         }
 
     /**
-     * `EditPebble` is a separate entry with no callback back into this instance
-     * (#852) — an edit saved there has to be picked up on resume.
+     * Edit moment and Edit pebble are separate entries with no callback back
+     * into this instance (#852) — an edit saved there has to be picked up on resume.
      */
     @Test
-    fun `resuming after the first time refetches the same pebble`() =
+    fun `resuming after the first time refetches the same moment`() =
         runTest {
-            val service = FakePebbleDetailService(detail(name = "A walk"))
+            val service = FakeMomentReadService(moments = mapOf("moment-1" to UiFixtures.momentDetail(name = "A walk")))
             val viewModel = PebbleDetailViewModel(service)
-            viewModel.start("pebble-1")
+            viewModel.start("moment-1")
             advanceUntilIdle()
 
             // First resume: `start` already loaded, so this is a no-op.
             viewModel.onResumed()
             advanceUntilIdle()
-            assertEquals(1, service.loadCalls.size)
+            assertEquals(1, service.loadedMomentIds.size)
 
-            service.detail = detail(name = "A longer walk")
+            service.moments = mapOf("moment-1" to UiFixtures.momentDetail(name = "A longer walk"))
             viewModel.onResumed()
             advanceUntilIdle()
 
-            assertEquals(listOf("pebble-1", "pebble-1"), service.loadCalls)
+            assertEquals(listOf("moment-1", "moment-1"), service.loadedMomentIds)
             assertEquals(
                 "A longer walk",
                 (viewModel.uiState.value as PebbleDetailUiState.Content).detail.name,
@@ -109,17 +108,23 @@ class PebbleDetailViewModelTest {
         }
 
     @Test
-    fun `opening a different pebble loads it`() =
+    fun `opening a different moment loads it`() =
         runTest {
-            val service = FakePebbleDetailService(detail(id = "pebble-1"))
+            val service =
+                FakeMomentReadService(
+                    moments =
+                        mapOf(
+                            "moment-1" to UiFixtures.momentDetail(id = "moment-1"),
+                            "moment-2" to UiFixtures.momentDetail(id = "moment-2", name = "Another"),
+                        ),
+                )
             val viewModel = PebbleDetailViewModel(service)
-            viewModel.start("pebble-1")
+            viewModel.start("moment-1")
             advanceUntilIdle()
 
-            service.detail = detail(id = "pebble-2", name = "Another")
-            viewModel.start("pebble-2")
+            viewModel.start("moment-2")
             advanceUntilIdle()
 
-            assertEquals(listOf("pebble-1", "pebble-2"), service.loadCalls)
+            assertEquals(listOf("moment-1", "moment-2"), service.loadedMomentIds)
         }
 }

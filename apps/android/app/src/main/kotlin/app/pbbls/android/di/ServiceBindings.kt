@@ -18,12 +18,8 @@ import app.pbbls.android.core.data.MomentReadService
 import app.pbbls.android.core.data.MomentReadServicing
 import app.pbbls.android.core.data.MomentWriteService
 import app.pbbls.android.core.data.MomentWriteServicing
-import app.pbbls.android.core.data.PathService
-import app.pbbls.android.core.data.PathServicing
 import app.pbbls.android.core.data.PathStatsService
 import app.pbbls.android.core.data.PathStatsServicing
-import app.pbbls.android.core.data.PebbleDetailService
-import app.pbbls.android.core.data.PebbleDetailServicing
 import app.pbbls.android.core.data.PebbleDraftsService
 import app.pbbls.android.core.data.PebbleDraftsServicing
 import app.pbbls.android.core.data.PebbleWriteService
@@ -63,10 +59,6 @@ interface ServiceBindings {
 
     @Binds
     @Singleton
-    fun bindPathServicing(impl: PathService): PathServicing
-
-    @Binds
-    @Singleton
     fun bindMomentReadServicing(impl: MomentReadService): MomentReadServicing
 
     @Binds
@@ -100,10 +92,6 @@ interface ServiceBindings {
     @Binds
     @Singleton
     fun bindComposerMedia(impl: AndroidComposerMedia): ComposerMedia
-
-    @Binds
-    @Singleton
-    fun bindPebbleDetailServicing(impl: PebbleDetailService): PebbleDetailServicing
 
     @Binds
     @Singleton

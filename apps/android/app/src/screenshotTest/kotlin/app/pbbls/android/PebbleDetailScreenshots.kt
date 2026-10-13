@@ -12,21 +12,23 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import app.pbbls.android.core.data.LocalReferenceDataService
 import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.model.DomainRef
 import app.pbbls.android.core.model.EmotionPalette
-import app.pbbls.android.core.model.EmotionRef
 import app.pbbls.android.core.model.Glyph
 import app.pbbls.android.core.model.GlyphStroke
+import app.pbbls.android.core.model.MomentDetail
 import app.pbbls.android.core.model.PebbleCollection
-import app.pbbls.android.core.model.PebbleDetail
-import app.pbbls.android.core.model.SoulRow
+import app.pbbls.android.core.model.SoulRef
+import app.pbbls.android.core.model.SoulWithGlyph
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.Visibility
 import app.pbbls.android.features.path.DeleteConfirmDialog
@@ -39,11 +41,12 @@ import com.android.tools.screenshot.PreviewTest
 import java.time.OffsetDateTime
 
 /**
- * Previews for the pebble detail read surface (#540): the pure [PebbleReadView]
+ * Previews for the moment read surface (#540, #1048): the pure [PebbleReadView]
  * across its variants — full (description + souls + domain + collection), glyph
- * souls, minimal, and the no-domain / no-render fallback — plus the destructive
- * [DeleteConfirmDialog]. Light and dark, driven with fixture [PebbleDetail]s so
- * no services are needed. The stateful `PebbleDetailScreen` (service-backed) is
+ * souls, minimal, the no-domain fallback, and a bare moment with no pebble —
+ * plus the open ⋮ menu and the destructive [DeleteConfirmDialog]. Light and
+ * dark, driven with fixture [MomentDetail]s and a fixed souls cache so no
+ * services are needed. The stateful `PebbleDetailScreen` (service-backed) is
  * deliberately not previewed.
  *
  * The #599 snap-overlay frame is covered separately via [PebbleSnapFrame] with a
@@ -84,117 +87,117 @@ private val peakStrokes: List<GlyphStroke> =
         GlyphStroke(d = "M 40 150 L 100 50 L 160 150", width = 6.0),
     )
 
-private fun soul(
+private fun soulWithGlyph(
     name: String,
     strokes: List<GlyphStroke>,
-): PebbleDetail.SoulWrapper =
-    PebbleDetail.SoulWrapper(
-        SoulRow(
-            id = name,
-            name = name,
-            glyphId = "g-$name",
-            glyph = Glyph(id = "g-$name", strokes = strokes, viewBox = "0 0 200 200"),
-        ),
+): SoulWithGlyph =
+    SoulWithGlyph(
+        id = name,
+        name = name,
+        glyphId = "g-$name",
+        glyph = Glyph(id = "g-$name", strokes = strokes, viewBox = "0 0 200 200"),
     )
+
+/**
+ * The souls cache the read page takes soul glyphs from (A-15): `v_moments_full`
+ * projects souls as `{id, name}` only. Internal so the list-detail renders
+ * provide the same cache.
+ */
+internal val detailPreviewRefs =
+    PreviewReferenceData(
+        souls =
+            listOf(
+                soulWithGlyph("Alex", waveStrokes),
+                soulWithGlyph("Sam", crossStrokes),
+                soulWithGlyph("Wave", waveStrokes),
+                soulWithGlyph("Cross", crossStrokes),
+                soulWithGlyph("Peak", peakStrokes),
+            ),
+    )
+
+private fun soul(name: String): SoulRef = SoulRef(id = name, name = name)
 
 private fun detail(
     name: String,
     description: String?,
-    intensity: Int,
-    positiveness: Int,
-    renderSvg: String?,
-    domains: List<PebbleDetail.DomainWrapper> = emptyList(),
-    souls: List<PebbleDetail.SoulWrapper> = emptyList(),
-    collections: List<PebbleDetail.CollectionWrapper> = emptyList(),
-): PebbleDetail =
-    PebbleDetail(
+    valence: Valence,
+    domains: List<DomainRef> = emptyList(),
+    souls: List<SoulRef> = emptyList(),
+    collections: List<PebbleCollection> = emptyList(),
+): MomentDetail =
+    MomentPreviewFixtures.momentDetail(
         id = name,
         name = name,
         description = description,
         happenedAt = OffsetDateTime.parse("2026-07-08T14:23:00+00:00"),
-        intensity = intensity,
-        positiveness = positiveness,
-        visibility = Visibility.PRIVATE,
-        renderSvg = renderSvg,
-        emotion = EmotionRef(id = "e1", slug = "joyful", name = "Joyful"),
-        pebbleDomains = domains,
-        pebbleSouls = souls,
-        collectionPebbles = collections,
+        pebble =
+            MomentPreviewFixtures.momentPebble(
+                valence = valence,
+                visibility = Visibility.PRIVATE,
+                domains = domains,
+                souls = souls,
+                collections = collections,
+            ),
     )
 
-// Internal so the Path list-detail and sheet renders show this pebble (#940).
-internal val fullDetail: PebbleDetail =
+// Internal so the Path list-detail and sheet renders show this moment (#940).
+internal val fullDetail: MomentDetail =
     detail(
         name = "Morning walk",
         description = "Long loop around the park before work. The light was unreal.",
-        intensity = 2,
-        positiveness = 0,
-        renderSvg = PebbleSvgFixtures.mediumNeutral,
-        domains =
-            listOf(
-                PebbleDetail.DomainWrapper(DomainRef(id = "work", slug = "work", name = "Work")),
-            ),
-        collections =
-            listOf(
-                PebbleDetail.CollectionWrapper(PebbleCollection(id = "Wins", name = "Wins")),
-            ),
-        souls =
-            listOf(
-                soul("Alex", waveStrokes),
-                soul("Sam", crossStrokes),
-            ),
+        valence = Valence.NEUTRAL_MEDIUM,
+        domains = listOf(DomainRef(id = "work", slug = "work", name = "Work")),
+        collections = listOf(PebbleCollection(id = "Wins", name = "Wins")),
+        souls = listOf(soul("Alex"), soul("Sam")),
     )
 
-private val glyphSoulsDetail: PebbleDetail =
+private val glyphSoulsDetail: MomentDetail =
     detail(
         name = "Studio session",
         description = "Three of us sketching glyphs for the new set.",
-        intensity = 3,
-        positiveness = 1,
-        renderSvg = PebbleSvgFixtures.largeHighlight,
-        domains =
-            listOf(
-                PebbleDetail.DomainWrapper(DomainRef(id = "hobbies", slug = "hobbies", name = "Hobbies")),
-            ),
-        souls =
-            listOf(
-                soul("Wave", waveStrokes),
-                soul("Cross", crossStrokes),
-                soul("Peak", peakStrokes),
-            ),
+        valence = Valence.HIGHLIGHT_LARGE,
+        domains = listOf(DomainRef(id = "hobbies", slug = "hobbies", name = "Hobbies")),
+        souls = listOf(soul("Wave"), soul("Cross"), soul("Peak")),
     )
 
-private val minimalDetail: PebbleDetail =
+private val minimalDetail: MomentDetail =
     detail(
         name = "Quiet afternoon",
         description = null,
-        intensity = 1,
-        positiveness = 1,
-        renderSvg = PebbleSvgFixtures.smallHighlight,
-        domains =
-            listOf(
-                PebbleDetail.DomainWrapper(DomainRef(id = "friends", slug = "friends", name = "Friends")),
-            ),
+        valence = Valence.HIGHLIGHT_SMALL,
+        domains = listOf(DomainRef(id = "friends", slug = "friends", name = "Friends")),
     )
 
-private val noDomainDetail: PebbleDetail =
+private val noDomainDetail: MomentDetail =
     detail(
         name = "Rough morning",
         description = "Nothing landed the way I wanted it to.",
-        intensity = 2,
-        positiveness = -1,
-        renderSvg = null,
+        valence = Valence.LOWLIGHT_MEDIUM,
+    )
+
+/** A capture without its pebble yet: no tiles, no souls, no privacy badge, no share (A-8). */
+private val bareMoment: MomentDetail =
+    MomentPreviewFixtures.momentDetail(
+        name = null,
+        description = "Saved from the bus stop, to finish later.",
+        happenedAt = OffsetDateTime.parse("2026-07-08T14:23:00+00:00"),
+        pebble = null,
     )
 
 @Composable
-private fun DetailPreview(detail: PebbleDetail) {
+private fun DetailPreview(
+    detail: MomentDetail,
+    palette: EmotionPalette? = previewPalette,
+) {
     // PebbleReadView draws no background of its own (#940): it sits on its
     // host, which in production is the sheet's container or the pane's surface.
-    PebbleReadView(
-        detail = detail,
-        palette = previewPalette,
-        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface),
-    )
+    CompositionLocalProvider(LocalReferenceDataService provides detailPreviewRefs) {
+        PebbleReadView(
+            detail = detail,
+            palette = palette,
+            modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.surface),
+        )
+    }
 }
 
 @PreviewTest
@@ -262,7 +265,10 @@ fun PebbleDetailNoDomainDark() {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SheetPreview() {
+private fun SheetPreview(
+    detail: MomentDetail = fullDetail,
+    initialMenuOpen: Boolean = false,
+) {
     Surface(
         modifier = Modifier.fillMaxSize().padding(top = 24.dp),
         shape = MaterialTheme.shapes.extraLarge.copy(bottomStart = CornerSize(0), bottomEnd = CornerSize(0)),
@@ -270,13 +276,17 @@ private fun SheetPreview() {
     ) {
         Column {
             BottomSheetDefaults.DragHandle(modifier = Modifier.align(Alignment.CenterHorizontally))
-            PebbleDetailContent(
-                uiState = PebbleDetailUiState.Content(fullDetail),
-                palette = previewPalette,
-                onEdit = {},
-                onShare = null,
-                onRetry = {},
-            )
+            CompositionLocalProvider(LocalReferenceDataService provides detailPreviewRefs) {
+                PebbleDetailContent(
+                    uiState = PebbleDetailUiState.Content(detail),
+                    palette = if (detail.pebble != null) previewPalette else null,
+                    onEditMoment = {},
+                    onEditPebble = {},
+                    onShare = null,
+                    onRetry = {},
+                    initialMenuOpen = initialMenuOpen,
+                )
+            }
         }
     }
 }
@@ -293,6 +303,30 @@ fun PebbleDetailSheetLight() {
 @Composable
 fun PebbleDetailSheetDark() {
     PebblesTheme { SheetPreview() }
+}
+
+@PreviewTest
+@Preview(showBackground = true)
+@PreviewFrench
+@Composable
+fun PebbleDetail_BareMoment() {
+    PebblesTheme { SheetPreview(detail = bareMoment) }
+}
+
+@PreviewTest
+@Preview(showBackground = true, uiMode = UI_MODE_NIGHT_YES)
+@Composable
+fun PebbleDetail_BareMomentDark() {
+    PebblesTheme { SheetPreview(detail = bareMoment) }
+}
+
+/** The ⋮ menu (R7): Edit moment, and Edit pebble because this moment has one. */
+@PreviewTest
+@Preview(showBackground = true)
+@PreviewFrench
+@Composable
+fun PebbleDetail_MenuOpen() {
+    PebblesTheme { SheetPreview(initialMenuOpen = true) }
 }
 
 @PreviewTest

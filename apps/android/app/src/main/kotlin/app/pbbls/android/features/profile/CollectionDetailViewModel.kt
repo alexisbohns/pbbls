@@ -7,10 +7,11 @@ import androidx.lifecycle.viewModelScope
 import app.pbbls.android.R
 import app.pbbls.android.core.common.runCatchingCancellable
 import app.pbbls.android.core.data.CollectionsServicing
-import app.pbbls.android.core.data.PebbleWriteServicing
+import app.pbbls.android.core.data.MomentReadServicing
+import app.pbbls.android.core.data.MomentWriteServicing
 import app.pbbls.android.core.data.ReferenceDataServicing
 import app.pbbls.android.core.model.Collection
-import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.PathMoment
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.NonCancellable
@@ -26,7 +27,7 @@ import javax.inject.Inject
 
 private const val TAG = "collection-detail"
 
-/** One collection and the pebbles in it (#849). */
+/** One collection and the moments whose pebble is in it, newest first (#849, R9). */
 sealed interface CollectionDetailUiState {
     data object Loading : CollectionDetailUiState
 
@@ -36,25 +37,25 @@ sealed interface CollectionDetailUiState {
 
     data class Content(
         val collection: Collection,
-        val pebbles: List<Pebble>,
+        val moments: List<PathMoment>,
         val zone: ZoneId,
     ) : CollectionDetailUiState {
         /**
-         * Pebbles bucketed by calendar month, newest month first.
+         * Moments bucketed by calendar month, newest month first.
          *
-         * A getter on the state rather than a `remember(pebbles)` in the screen:
+         * A getter on the state rather than a `remember(moments)` in the screen:
          * the grouping is a property of this state value, so it is computed once
          * per load instead of once per composition that misses the cache.
          */
-        val groups: List<Pair<YearMonth, List<Pebble>>> by lazy {
-            groupPebblesByMonth(pebbles, zone)
+        val groups: List<Pair<YearMonth, List<PathMoment>>> by lazy {
+            groupPebblesByMonth(moments, zone)
         }
     }
 }
 
 /** The delete dialogs. */
 data class CollectionDetailCovers(
-    val pendingDeletion: Pebble? = null,
+    val pendingDeletion: PathMoment? = null,
     val didDeleteFail: Boolean = false,
 )
 
@@ -74,14 +75,15 @@ class CollectionDetailViewModel
     @Inject
     constructor(
         private val collectionsService: CollectionsServicing,
-        private val writeService: PebbleWriteServicing,
+        private val moments: MomentReadServicing,
+        private val writes: MomentWriteServicing,
         private val refs: ReferenceDataServicing,
     ) : ViewModel() {
         private val zone: ZoneId = ZoneId.systemDefault()
 
         private var collectionId: String? = null
         private var collection: Collection? = null
-        private var pebbles: List<Pebble> = emptyList()
+        private var loadedMoments: List<PathMoment> = emptyList()
         private var hasFailed = false
         private var isLoaded = false
 
@@ -137,11 +139,11 @@ class CollectionDetailViewModel
 
         private suspend fun fetch(id: String) {
             runCatchingCancellable {
-                collectionsService.loadCollection(id) to collectionsService.loadPebbles(id)
+                collectionsService.loadCollection(id) to moments.loadMomentsInCollection(id).map { it.toPathMoment() }
             }.fold(
-                onSuccess = { (loadedCollection, loadedPebbles) ->
+                onSuccess = { (loadedCollection, fetchedMoments) ->
                     collection = loadedCollection
-                    pebbles = loadedPebbles
+                    loadedMoments = fetchedMoments
                     hasFailed = false
                     isLoaded = true
                 },
@@ -166,7 +168,7 @@ class CollectionDetailViewModel
                     else ->
                         CollectionDetailUiState.Content(
                             collection = current,
-                            pebbles = pebbles,
+                            moments = loadedMoments,
                             zone = zone,
                         )
                 }
@@ -174,7 +176,7 @@ class CollectionDetailViewModel
 
         // MARK: - Delete
 
-        fun requestDelete(pebble: Pebble) = _covers.update { it.copy(pendingDeletion = pebble) }
+        fun requestDelete(moment: PathMoment) = _covers.update { it.copy(pendingDeletion = moment) }
 
         fun cancelDelete() = _covers.update { it.copy(pendingDeletion = null) }
 
@@ -186,12 +188,12 @@ class CollectionDetailViewModel
             viewModelScope.launch {
                 withContext(NonCancellable) {
                     runCatchingCancellable {
-                        writeService.delete(target.id)
+                        writes.deleteMoment(target.id)
                         refs.refreshCollections()
                     }.fold(
                         onSuccess = { reload() },
                         onFailure = {
-                            Log.e(TAG, "delete pebble failed", it)
+                            Log.e(TAG, "delete moment failed", it)
                             _covers.update { covers -> covers.copy(didDeleteFail = true) }
                         },
                     )

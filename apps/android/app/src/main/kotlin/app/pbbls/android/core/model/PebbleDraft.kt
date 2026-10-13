@@ -7,8 +7,8 @@ import java.time.OffsetDateTime
  * `PebbleDraft.swift`. An immutable value held in `remember { mutableStateOf }`
  * at the screen shell and mutated by [copy] (D4). Nullable fields mean "not yet
  * picked"; non-nullables carry sensible defaults. NOT `@Serializable` — the
- * wire payloads ([PebbleCreatePayload] / [PebbleUpdatePayload]) are built from
- * it via their `from` factories.
+ * wire payloads ([PebbleCreatePayload], [MomentSavePayload],
+ * [PebbleCompletePayload]) are built from it.
  */
 data class PebbleDraft(
     val happenedAt: OffsetDateTime = OffsetDateTime.now(),
@@ -26,19 +26,28 @@ data class PebbleDraft(
     val isValid: Boolean
         get() = name.trim().isNotEmpty() && emotionId != null && domainId != null && valence != null
 
+    /** The pebble half, for `complete_pebble`. */
+    val answers: PebbleAnswers
+        get() = PebbleAnswers(valence, emotionId, domainId, soulIds, collectionId, visibility)
+
     companion object {
-        fun from(detail: PebbleDetail): PebbleDraft =
-            PebbleDraft(
-                happenedAt = detail.happenedAt,
-                name = detail.name,
-                description = detail.description ?: "",
-                emotionId = detail.emotion.id,
-                domainId = detail.domains.firstOrNull()?.id,
-                valence = detail.valence,
-                soulIds = detail.souls.map { it.id },
-                collectionId = detail.collections.firstOrNull()?.id,
-                glyphId = detail.glyphId,
-                visibility = detail.visibility,
+        /**
+         * Prefill for Edit moment and Edit pebble. A pebble with several
+         * domains or collections keeps the first of each, as before the split.
+         */
+        fun from(moment: MomentDetail): PebbleDraft {
+            val pebble = moment.pebble
+            return PebbleDraft(
+                happenedAt = moment.happenedAt,
+                name = moment.name.orEmpty(),
+                description = moment.description.orEmpty(),
+                emotionId = pebble?.emotion?.id,
+                domainId = pebble?.domains?.firstOrNull()?.id,
+                valence = pebble?.valence,
+                soulIds = pebble?.souls?.map { it.id }.orEmpty(),
+                collectionId = pebble?.collections?.firstOrNull()?.id,
+                visibility = pebble?.visibility ?: Visibility.SECRET,
             )
+        }
     }
 }

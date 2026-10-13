@@ -66,10 +66,11 @@ class PebblesKeysTest {
                 PebblesKey.CreatePebble(resumeDraftId = null),
                 PebblesKey.CreatePebble(resumeDraftId = "draft-1"),
                 PebblesKey.Drafts,
-                PebblesKey.PebbleDetail("pebble-1"),
+                PebblesKey.PebbleDetail(momentId = "m-1"),
                 PebblesKey.GlyphDetail(sampleItem),
                 PebblesKey.GlyphDetail(ownedItem),
-                PebblesKey.EditPebble("pebble-1"),
+                PebblesKey.EditPebble(momentId = "m-1"),
+                PebblesKey.EditMoment(momentId = "m-1"),
                 PebblesKey.Settings,
                 PebblesKey.SoulForm(soulId = null),
                 PebblesKey.SoulForm(soulId = "soul-1"),
@@ -85,6 +86,13 @@ class PebblesKeysTest {
             )
 
         keys.forEach { assertEquals(it, roundTrip(it)) }
+    }
+
+    @Test
+    fun `a back stack saved before the split still decodes`() {
+        val saved = """{"type":"app.pbbls.android.navigation.PebblesKey.PebbleDetail","pebbleId":"m-1"}"""
+        val key = Json.decodeFromString(PebblesKey.serializer(), saved)
+        assertEquals(PebblesKey.PebbleDetail(momentId = "m-1"), key)
     }
 
     @Test
@@ -104,7 +112,8 @@ class PebblesKeysTest {
                 PebblesKey.RecordFlow(null),
                 PebblesKey.CreatePebble(null),
                 PebblesKey.Drafts,
-                PebblesKey.EditPebble("p"),
+                PebblesKey.EditPebble(momentId = "m-1"),
+                PebblesKey.EditMoment(momentId = "m-1"),
                 PebblesKey.Settings,
                 PebblesKey.SoulForm(null),
                 PebblesKey.CollectionForm(null),

@@ -1,7 +1,8 @@
 package app.pbbls.android.features.path
 
-import app.pbbls.android.core.model.Pebble
+import app.pbbls.android.core.model.PathMoment
 import app.pbbls.android.core.model.WeekRollEntry
+import app.pbbls.android.testing.UiFixtures
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
@@ -17,15 +18,7 @@ class WeekRollBuilderTest {
     private fun pebble(
         happenedAt: String,
         name: String = "p",
-    ): Pebble =
-        Pebble(
-            id = name,
-            name = name,
-            happenedAt = OffsetDateTime.parse(happenedAt),
-            createdAt = OffsetDateTime.parse(happenedAt),
-            intensity = 2,
-            positiveness = 0,
-        )
+    ): PathMoment = UiFixtures.pathMoment(id = name, name = name, happenedAt = OffsetDateTime.parse(happenedAt))
 
     private fun weekStarts(entries: List<WeekRollEntry>): List<LocalDate> = entries.map { it.weekStart }
 
@@ -35,7 +28,7 @@ class WeekRollBuilderTest {
     fun `days around new year bucket into the 2025-12-29 monday - week 1 of week-based-year 2026`() {
         val entries =
             WeekRollBuilder.build(
-                pebbles =
+                moments =
                     listOf(
                         pebble("2025-12-29T10:00:00+00:00"),
                         pebble("2026-01-01T10:00:00+00:00"),
@@ -46,7 +39,7 @@ class WeekRollBuilderTest {
             )
 
         assertEquals(listOf(LocalDate.of(2025, 12, 29)), weekStarts(entries))
-        assertEquals(3, entries.single().pebbles.size)
+        assertEquals(3, entries.single().moments.size)
         assertEquals(1, WeekRollBuilder.isoWeekNumber(entries.single().weekStart))
     }
 
@@ -73,14 +66,14 @@ class WeekRollBuilderTest {
         val entries = WeekRollBuilder.build(emptyList(), utc, LocalDate.of(2026, 7, 11))
 
         assertEquals(listOf(LocalDate.of(2026, 7, 6)), weekStarts(entries))
-        assertTrue(entries.single().pebbles.isEmpty())
+        assertTrue(entries.single().moments.isEmpty())
     }
 
     @Test
     fun `weeks between pebbles are not fabricated`() {
         val entries =
             WeekRollBuilder.build(
-                pebbles =
+                moments =
                     listOf(
                         pebble("2026-06-01T10:00:00+00:00"),
                         pebble("2026-06-22T10:00:00+00:00"),
@@ -104,7 +97,7 @@ class WeekRollBuilderTest {
     fun `future weeks appear only when a pebble is dated into them`() {
         val entries =
             WeekRollBuilder.build(
-                pebbles = listOf(pebble("2026-07-20T10:00:00+00:00")),
+                moments = listOf(pebble("2026-07-20T10:00:00+00:00")),
                 zone = utc,
                 today = LocalDate.of(2026, 7, 11),
             )
@@ -122,7 +115,7 @@ class WeekRollBuilderTest {
         val today = LocalDate.of(2026, 7, 11)
         val entries =
             WeekRollBuilder.build(
-                pebbles =
+                moments =
                     listOf(
                         // Past week (June 1)
                         pebble("2026-06-03T10:00:00+00:00", name = "past-later"),
@@ -141,15 +134,15 @@ class WeekRollBuilderTest {
         val byWeek = entries.associateBy { it.weekStart }
         assertEquals(
             listOf("past-earlier", "past-later"),
-            byWeek[LocalDate.of(2026, 6, 1)]?.pebbles?.map { it.name },
+            byWeek[LocalDate.of(2026, 6, 1)]?.moments?.map { it.name },
         )
         assertEquals(
             listOf("current-later", "current-earlier"),
-            byWeek[LocalDate.of(2026, 7, 6)]?.pebbles?.map { it.name },
+            byWeek[LocalDate.of(2026, 7, 6)]?.moments?.map { it.name },
         )
         assertEquals(
             listOf("future-later", "future-earlier"),
-            byWeek[LocalDate.of(2026, 7, 20)]?.pebbles?.map { it.name },
+            byWeek[LocalDate.of(2026, 7, 20)]?.moments?.map { it.name },
         )
     }
 
@@ -158,11 +151,11 @@ class WeekRollBuilderTest {
     @Test
     fun `bucketing follows the supplied zone`() {
         // Sunday 23:30 UTC is already Monday 08:30 in Tokyo — a different week.
-        val pebbles = listOf(pebble("2026-07-12T23:30:00+00:00"))
+        val moments = listOf(pebble("2026-07-12T23:30:00+00:00"))
 
-        val utcEntries = WeekRollBuilder.build(pebbles, utc, LocalDate.of(2026, 7, 12))
+        val utcEntries = WeekRollBuilder.build(moments, utc, LocalDate.of(2026, 7, 12))
         val tokyoEntries =
-            WeekRollBuilder.build(pebbles, ZoneId.of("Asia/Tokyo"), LocalDate.of(2026, 7, 13))
+            WeekRollBuilder.build(moments, ZoneId.of("Asia/Tokyo"), LocalDate.of(2026, 7, 13))
 
         assertEquals(LocalDate.of(2026, 7, 6), utcEntries.first().weekStart)
         assertEquals(LocalDate.of(2026, 7, 13), tokyoEntries.first().weekStart)
@@ -174,7 +167,7 @@ class WeekRollBuilderTest {
     fun `previous and next step entries and return null at the edges`() {
         val entries =
             WeekRollBuilder.build(
-                pebbles =
+                moments =
                     listOf(
                         pebble("2026-06-01T10:00:00+00:00"),
                         pebble("2026-06-22T10:00:00+00:00"),

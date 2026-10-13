@@ -332,9 +332,7 @@
     <!-- Glyph section. -->
     <string name="create_glyph_header">Glyphe</string>
     <string name="create_glyph_title">Choisir un glyphe</string>
-    <string name="create_glyph_placeholder">Choisir un glyphe</string>
     <string name="create_glyph_untitled">Glyphe sans nom</string>
-    <string name="create_glyph_remove">Retirer le glyphe</string>
     <string name="create_glyph_load_error">Impossible de charger les glyphes.</string>
     <!-- Amorce de la signature du GlyphBanner (« PAR <nom> », mis en capitales par le jeton meta). -->
     <string name="glyph_banner_by">Par</string>
@@ -377,7 +375,6 @@
     <string name="photo_state_saved">Enregistrée</string>
     <string name="photo_retry_a11y">Réessayer</string>
     <string name="photo_remove_a11y">Retirer la photo</string>
-    <string name="photo_remove_error">Impossible de retirer la photo. Veuillez réessayer.</string>
     <string name="pebble_save_error_photo_uploading">La photo est encore en cours d\'envoi.</string>
     <string name="pebble_save_error_photo_failed">L\'envoi de la photo a échoué. Réessayez ou retirez-la.</string>
     <string name="moment_save_error_generic">Impossible d\'enregistrer. Réessaie.</string>
@@ -389,6 +386,11 @@
     <string name="pebble_error_needs_domain">Choisis d\'abord un domaine de ta vie.</string>
     <string name="pebble_error_soul_gone">Une de ces âmes n\'existe plus. Retire-la et réessaie.</string>
     <string name="pebble_error_collection_gone">Cette collection n\'existe plus. Choisis-en une autre.</string>
+    <string name="edit_moment_needs_content">Un moment a besoin d\'un nom ou d\'une photo.</string>
+    <string name="edit_moment">Modifier le moment</string>
+    <string name="more_actions_a11y">Plus d\'actions</string>
+    <string name="moment_untitled">Sans titre</string>
+    <string name="moment_delete_error">Impossible de supprimer</string>
 
     <!-- ==== Atelier de glyphes (M43 · Android Glyph Studio &amp; Store) ==== -->
     <string name="carve_title">Nouveau glyphe</string>

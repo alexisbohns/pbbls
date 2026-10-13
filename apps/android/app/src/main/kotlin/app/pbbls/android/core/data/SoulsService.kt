@@ -1,7 +1,6 @@
 package app.pbbls.android.core.data
 
 import app.pbbls.android.core.model.Glyph
-import app.pbbls.android.core.model.Pebble
 import app.pbbls.android.core.model.SoulRow
 import app.pbbls.android.core.model.SoulWithGlyph
 import io.github.jan.supabase.postgrest.from
@@ -24,8 +23,6 @@ interface SoulsServicing {
     suspend fun list(): List<SoulWithGlyph>
 
     suspend fun loadSoul(soulId: String): SoulWithGlyph
-
-    suspend fun loadPebbles(soulId: String): List<Pebble>
 
     suspend fun create(
         name: String,
@@ -78,23 +75,6 @@ class SoulsService
                     filter { eq("id", soulId) }
                 }.decodeSingle<SoulRow>()
                 .toSoulWithGlyph()
-
-        /**
-         * Pebbles tagged with the soul, newest first — mirrors
-         * `SoulDetailView.load()`'s `pebble_souls!inner` embedded filter.
-         */
-        override suspend fun loadPebbles(soulId: String): List<Pebble> =
-            supabase.client
-                .from("pebbles")
-                .select(
-                    Columns.raw(
-                        "id, name, happened_at, created_at, intensity, positiveness, render_svg, " +
-                            "emotion:emotions(id, slug, name), pebble_souls!inner(soul_id)",
-                    ),
-                ) {
-                    filter { eq("pebble_souls.soul_id", soulId) }
-                    order("happened_at", Order.DESCENDING)
-                }.decodeList<Pebble>()
 
         /** Full-form create (name + glyph) — the `SoulInsertPayload` analog with select-back. */
         override suspend fun create(
