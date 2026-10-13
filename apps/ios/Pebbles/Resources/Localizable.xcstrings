@@ -2539,6 +2539,91 @@
         }
       }
     },
+    "Delete moment" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete moment"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer le moment"
+          }
+        }
+      }
+    },
+    "Delete the moment too" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete the moment too"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer aussi le moment"
+          }
+        }
+      }
+    },
+    "Delete the pebble, keep the moment" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete the pebble, keep the moment"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer le galet, garder le moment"
+          }
+        }
+      }
+    },
+    "Delete this moment?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this moment?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer ce moment ?"
+          }
+        }
+      }
+    },
+    "Delete this pebble?" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Delete this pebble?"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer ce galet ?"
+          }
+        }
+      }
+    },
     "Delete your account?" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4782,6 +4867,23 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tu gardes ce galet ?"
+          }
+        }
+      }
+    },
+    "Keeping the moment leaves it on your path as a blank stone. Deleting the moment removes its photo too. This can't be undone." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Keeping the moment leaves it on your path as a blank stone. Deleting the moment removes its photo too. This can't be undone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Garder le moment le laisse sur ton chemin comme une pierre vierge. Supprimer le moment retire aussi sa photo. Cette action est irréversible."
           }
         }
       }
