@@ -74,7 +74,13 @@ struct RecordFlowView: View {
     var body: some View {
         VStack(spacing: 0) {
             if model.step != .success {
-                RecordFlowChrome(step: model.step, onBack: { model.back() }, onClose: handleClose)
+                RecordFlowChrome(
+                    dotCount: RecordStep.counted.count,
+                    dotIndex: model.step.dotIndex,
+                    canGoBack: model.step.previous != nil,
+                    onBack: { model.back() },
+                    onClose: handleClose
+                )
             }
             stepBody
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
