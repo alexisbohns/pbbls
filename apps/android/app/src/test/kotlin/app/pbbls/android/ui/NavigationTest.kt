@@ -7,13 +7,11 @@ import androidx.compose.ui.test.hasAnyAncestor
 import androidx.compose.ui.test.hasScrollAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isSelectable
-import androidx.compose.ui.test.longClick
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
-import androidx.compose.ui.test.performTouchInput
 import app.pbbls.android.R
 import app.pbbls.android.core.common.JourneyTags
 import app.pbbls.android.core.data.PebbleDraftRecord
@@ -121,23 +119,13 @@ class NavigationTest : AppUiTest() {
     }
 
     @Test
-    fun `new pebble opens the record flow`() {
+    fun `new pebble opens the capture flow`() {
         signedIn()
 
         compose.onNodeWithTag(JourneyTags.NEW_PEBBLE).performClick()
 
         onText(R.string.record_photo_title).assertIsDisplayed()
-    }
-
-    @Test
-    fun `long-pressing new pebble opens the all-at-once composer`() {
-        // A moment this week, so the empty week's own "New pebble" button is not on screen too.
-        moments.path = listOf(UiFixtures.pathMoment(happenedAt = OffsetDateTime.now()))
-        signedIn()
-
-        compose.onNodeWithTag(JourneyTags.NEW_PEBBLE).performTouchInput { longClick() }
-
-        onText(R.string.create_new_pebble).assertIsDisplayed()
+        onText(R.string.record_valence_title).assertDoesNotExist()
     }
 
     @Test

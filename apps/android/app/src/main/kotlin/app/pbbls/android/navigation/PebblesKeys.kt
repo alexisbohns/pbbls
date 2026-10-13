@@ -99,6 +99,10 @@ sealed interface PebblesKey : NavKey {
 
     // ---- Modal: full-screen, the bar is covered ----
 
+    /** Capture: a new moment in three steps, saved with `save_moment` (#1048). What New pebble opens. */
+    @Serializable
+    data object Capture : PebblesKey
+
     @Serializable
     data class RecordFlow(
         val resumeDraftId: String? = null,

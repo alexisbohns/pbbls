@@ -3,6 +3,7 @@ package app.pbbls.android.testing
 import android.net.Uri
 import app.pbbls.android.core.data.ProcessedImage
 import app.pbbls.android.features.path.ComposerMedia
+import kotlinx.coroutines.CompletableDeferred
 import java.time.OffsetDateTime
 
 /**
@@ -19,14 +20,23 @@ class FakeComposerMedia : ComposerMedia {
     var prewarmCount = 0
         private set
 
-    override suspend fun captureDate(uri: Uri): OffsetDateTime? =
-        error("the photo path needs a real Uri — cover it under Robolectric (#857)")
-
     /** What [process] returns once armed; unarmed, it throws as above. */
     var processed: ProcessedImage? = null
 
-    override suspend fun process(uri: Uri): ProcessedImage =
-        processed ?: error("the photo path needs a real Uri — cover it under Robolectric (#857)")
+    /** Holds [process] until completed, for "a pick still being read" cases. */
+    var processGate: CompletableDeferred<Unit>? = null
+
+    /** What [captureDate] returns once [processed] is armed: the pick's EXIF date, or none. */
+    var captureDateResult: OffsetDateTime? = null
+
+    override suspend fun captureDate(uri: Uri): OffsetDateTime? =
+        if (processed != null) captureDateResult else error("the photo path needs a real Uri — cover it under Robolectric (#857)")
+
+    override suspend fun process(uri: Uri): ProcessedImage {
+        val armed = processed ?: error("the photo path needs a real Uri — cover it under Robolectric (#857)")
+        processGate?.await()
+        return armed
+    }
 
     override suspend fun prewarmValence() {
         prewarmCount += 1

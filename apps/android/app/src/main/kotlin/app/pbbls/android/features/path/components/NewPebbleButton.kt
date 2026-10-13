@@ -1,8 +1,7 @@
 package app.pbbls.android.features.path.components
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -27,20 +26,13 @@ import app.pbbls.android.R
  * empty-week affordance ([WeekPebbleList]'s `EmptyWeek`), which the FAB does
  * not cover since it is not scoped to a single page.
  *
- * A tap opens the step-by-step record flow; [onLongPress] opens the all-at-once
- * composer instead (M58 D1). Two composers is a cost accepted deliberately and
- * temporarily: the flow is an experiment in interaction model, and the honest
- * way to evaluate it is to be able to fall back on device without a rebuild.
- * Long-press was chosen over a Settings toggle because it adds no chrome, no
- * persisted state and no localized string — it deletes in one line when the
- * experiment resolves.
+ * A tap opens Capture (#1048). The long press to the all-at-once composer
+ * (M58 D1) was retired with it (A-12).
  */
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NewPebbleButton(
     onTap: () -> Unit,
     modifier: Modifier = Modifier,
-    onLongPress: (() -> Unit)? = null,
 ) {
     val colors = MaterialTheme.colorScheme
     Box(
@@ -49,7 +41,7 @@ fun NewPebbleButton(
             .height(52.dp)
             .clip(MaterialTheme.shapes.large)
             .background(colors.surfaceContainerHighest)
-            .combinedClickable(onClick = onTap, onLongClick = onLongPress),
+            .clickable(onClick = onTap),
         contentAlignment = Alignment.Center,
     ) {
         Text(

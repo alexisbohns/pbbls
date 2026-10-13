@@ -26,6 +26,7 @@ import app.pbbls.android.features.path.EditMomentScreen
 import app.pbbls.android.features.path.EditPebbleScreen
 import app.pbbls.android.features.path.PathScreen
 import app.pbbls.android.features.path.PebbleDetailScreen
+import app.pbbls.android.features.path.capture.CaptureFlowScreen
 import app.pbbls.android.features.path.complete.CompleteFlowScreen
 import app.pbbls.android.features.path.create.CreatePebbleScreen
 import app.pbbls.android.features.path.record.RecordFlowScreen
@@ -67,8 +68,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
         PathScreen(
             onOpenDetail = { momentId -> navigator.navigateToDetail(PebblesKey.PebbleDetail(momentId)) },
             onOpenDrafts = { navigator.navigate(PebblesKey.Drafts) },
-            onCreatePebble = { navigator.navigate(PebblesKey.RecordFlow()) },
-            onCreatePebbleLongPress = { navigator.navigate(PebblesKey.CreatePebble()) },
+            onCreatePebble = { navigator.navigate(PebblesKey.Capture) },
             onDeleteConfirmed = { navigator.closeDetail(PebblesKey.PebbleDetail(it)) },
         )
     }
@@ -257,6 +257,19 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
 
     entry<PebblesKey.EditPebble>(metadata = NavTransitions.forKey(PebblesKey.EditPebble(""))) { key ->
         EditPebbleScreen(momentId = key.momentId, onDismiss = navigator::goBack, onSaved = navigator::goBack)
+    }
+
+    entry<PebblesKey.Capture>(metadata = NavTransitions.forKey(PebblesKey.Capture)) {
+        CaptureFlowScreen(
+            onDismiss = navigator::goBack,
+            // Path's resume refresh shows the new blank stone; no detail is opened (A-14).
+            onSaved = navigator::goBack,
+            // Replace Capture with Complete rather than stacking it, so Complete's exit lands on Path.
+            onSavedThenComplete = { momentId ->
+                navigator.goBack()
+                navigator.navigate(PebblesKey.CompletePebble(momentId))
+            },
+        )
     }
 
     entry<PebblesKey.CompletePebble>(metadata = NavTransitions.forKey(PebblesKey.CompletePebble(""))) { key ->

@@ -58,10 +58,10 @@ import kotlin.math.abs
  * [PathViewModel] (#849), so a rotation no longer re-fetches the timeline or
  * loses the focused week.
  *
- * Detail, edit, both composers and drafts are `PebblesEntryProvider` entries
- * now (#852) — [onOpenDetail], [onOpenDrafts], [onCreatePebble] and
- * [onCreatePebbleLongPress] are how this screen reaches them; only the caller
- * (`PebblesEntryProvider`) ever touches a `Navigator`.
+ * Detail, edit, Capture and drafts are `PebblesEntryProvider` entries
+ * now (#852) — [onOpenDetail], [onOpenDrafts] and [onCreatePebble] are how
+ * this screen reaches them; only the caller (`PebblesEntryProvider`) ever
+ * touches a `Navigator`.
  *
  * @param onDeleteConfirmed Called with the deleted moment's id once the user
  *   confirms deleting the moment (not only its pebble), so a detail open
@@ -75,7 +75,6 @@ fun PathScreen(
     onOpenDetail: (String) -> Unit,
     onOpenDrafts: () -> Unit,
     onCreatePebble: () -> Unit,
-    onCreatePebbleLongPress: () -> Unit,
     modifier: Modifier = Modifier,
     onDeleteConfirmed: (momentId: String) -> Unit = {},
     viewModel: PathViewModel = hiltViewModel(),
@@ -152,12 +151,10 @@ fun PathScreen(
             //
             // It floats clear of the bottom bar because the navigation suite lays
             // the Path entry out above it, and on large screens it keeps the window
-            // corner opposite the rail (#855). Tap opens the record flow,
-            // long-press the all-at-once composer (M58 D1).
+            // corner opposite the rail (#855). A tap opens Capture (#1048).
             if (uiState is PathUiState.Content) {
                 NewPebbleFab(
                     onClick = onCreatePebble,
-                    onLongClick = onCreatePebbleLongPress,
                     modifier =
                         Modifier
                             .align(Alignment.BottomEnd)

@@ -37,15 +37,15 @@ class BackTest : AppUiTest() {
         signIn()
     }
 
-    private fun openRecordFlow() {
+    private fun openCapture() {
         compose.onNodeWithTag(JourneyTags.NEW_PEBBLE).performClick()
         onText(R.string.record_photo_title).assertIsDisplayed()
     }
 
     @Test
-    fun `back on a later record step goes to the previous step, not off the cover`() {
+    fun `back on a later capture step goes to the previous step, not off the cover`() {
         onPath()
-        openRecordFlow()
+        openCapture()
         onText(R.string.record_action_skip).performClick()
         onText(R.string.record_when_title).assertIsDisplayed()
 
@@ -55,9 +55,9 @@ class BackTest : AppUiTest() {
     }
 
     @Test
-    fun `back on the first record step with nothing written closes the flow`() {
+    fun `back on the first capture step with nothing written closes the flow`() {
         onPath()
-        openRecordFlow()
+        openCapture()
 
         pressBack()
 
@@ -66,9 +66,9 @@ class BackTest : AppUiTest() {
     }
 
     @Test
-    fun `back on the first record step with a draft asks before closing`() {
+    fun `back on the first capture step with a name typed asks before closing`() {
         onPath()
-        openRecordFlow()
+        openCapture()
         onText(R.string.record_action_skip).performClick()
         onText(R.string.record_action_continue).performClick()
         compose.onNode(hasSetTextAction()).performTextInput("Coffee with Mo")
@@ -78,7 +78,7 @@ class BackTest : AppUiTest() {
 
         pressBack()
 
-        onText(R.string.record_close_title).assertIsDisplayed()
+        onText(R.string.capture_close_title).assertIsDisplayed()
         onText(R.string.record_close_keep_going).performClick()
         onText(R.string.record_photo_title).assertIsDisplayed()
     }
