@@ -21,6 +21,7 @@ import app.pbbls.android.core.model.KnownDraftIds
 import app.pbbls.android.core.model.PebbleCompletePayload
 import app.pbbls.android.core.ui.momentWriteErrorRes
 import app.pbbls.android.features.path.ComposerMedia
+import app.pbbls.android.features.path.PathFocusRequests
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
@@ -76,6 +77,7 @@ class CompleteFlowViewModel
         private val achievements: AchievementsServicing,
         private val supabase: SupabaseServicing,
         private val media: ComposerMedia,
+        private val focusRequests: PathFocusRequests,
     ) : ViewModel() {
         private val effectsOut = UiEffects<CompleteFlowEffect>(viewModelScope)
         val effects: Flow<CompleteFlowEffect> = effectsOut.flow
@@ -189,6 +191,8 @@ class CompleteFlowViewModel
                         .fold(
                             onSuccess = { pebbleId ->
                                 snapshots.clear(id)
+                                // Path shows the moment's week when it is next on screen (R14).
+                                focusRequests.request(id)
                                 val (delta, glyph) =
                                     coroutineScope {
                                         val delta = async { writes.karmaDelta(pebbleId, KarmaReason.PEBBLE_CREATED) }

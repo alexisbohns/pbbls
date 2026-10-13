@@ -49,7 +49,50 @@ class PathViewModelTest {
         stats: FakePathStatsService = FakePathStatsService(),
         drafts: FakePebbleDraftsService = FakePebbleDraftsService(),
         writes: FakeMomentWriteService = FakeMomentWriteService(),
-    ) = PathViewModel(path, stats, drafts, writes)
+        focusRequests: PathFocusRequests = PathFocusRequests(),
+    ) = PathViewModel(path, stats, drafts, writes, focusRequests)
+
+    // MARK: - Focus requests (R14)
+
+    @Test
+    fun `a focus request moves the timeline to that moment's week on the next load`() =
+        runTest {
+            val old = moment("old", happenedAt = now.minusWeeks(3))
+            val focusRequests = PathFocusRequests()
+            val viewModel = viewModel(path = FakeMomentReadService(path = listOf(moment("new"), old)), focusRequests = focusRequests)
+            advanceUntilIdle()
+            val before = viewModel.uiState.value as PathUiState.Content
+            val oldWeek = before.entries.first { entry -> entry.moments.any { it.id == "old" } }.weekStart
+            assertTrue("starts on the current week", before.focusedWeekStart != oldWeek)
+
+            focusRequests.request("OLD")
+            viewModel.onResumed()
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            assertEquals(oldWeek, (viewModel.uiState.value as PathUiState.Content).focusedWeekStart)
+            assertNull("the request is consumed", focusRequests.consume())
+        }
+
+    @Test
+    fun `an unknown focus request keeps the current focus`() =
+        runTest {
+            val focusRequests = PathFocusRequests()
+            val viewModel =
+                viewModel(
+                    path = FakeMomentReadService(path = listOf(moment("new"), moment("old", happenedAt = now.minusWeeks(3)))),
+                    focusRequests = focusRequests,
+                )
+            advanceUntilIdle()
+            val focused = (viewModel.uiState.value as PathUiState.Content).focusedWeekStart
+
+            focusRequests.request("gone")
+            viewModel.onResumed()
+            viewModel.onResumed()
+            advanceUntilIdle()
+
+            assertEquals(focused, (viewModel.uiState.value as PathUiState.Content).focusedWeekStart)
+        }
 
     // MARK: - Returning from a pushed screen
 

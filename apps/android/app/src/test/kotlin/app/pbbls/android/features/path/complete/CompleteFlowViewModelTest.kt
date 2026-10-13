@@ -8,6 +8,7 @@ import app.pbbls.android.core.model.PebbleAnswers
 import app.pbbls.android.core.model.PebbleCompletePayload
 import app.pbbls.android.core.model.Valence
 import app.pbbls.android.core.model.Visibility
+import app.pbbls.android.features.path.PathFocusRequests
 import app.pbbls.android.testing.FakeAchievementsService
 import app.pbbls.android.testing.FakeCompleteSnapshotStore
 import app.pbbls.android.testing.FakeComposerMedia
@@ -44,6 +45,7 @@ class CompleteFlowViewModelTest {
         val snapshots = FakeCompleteSnapshotStore()
         val achievements = FakeAchievementsService()
         val supabase = FakeSupabaseService(session = testSession("user-1"))
+        val focusRequests = PathFocusRequests()
         val viewModel =
             CompleteFlowViewModel(
                 reads = read,
@@ -54,6 +56,7 @@ class CompleteFlowViewModelTest {
                 achievements = achievements,
                 supabase = supabase,
                 media = FakeComposerMedia(),
+                focusRequests = focusRequests,
             )
 
         fun answerEverything() {
@@ -106,6 +109,31 @@ class CompleteFlowViewModelTest {
             h.viewModel.complete()
             advanceUntilIdle()
             assertTrue(h.snapshots.stored.isEmpty())
+        }
+
+    @Test
+    fun `a completion asks the path to show the moment's week`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.viewModel.start("m-1")
+            advanceUntilIdle()
+            h.answerEverything()
+            h.viewModel.complete()
+            advanceUntilIdle()
+            assertEquals("m-1", h.focusRequests.consume())
+        }
+
+    @Test
+    fun `a refused completion asks the path for nothing`() =
+        runTest {
+            val h = Harness(backgroundScope)
+            h.viewModel.start("m-1")
+            advanceUntilIdle()
+            h.answerEverything()
+            h.write.failOnComplete = postgrestException("collection_not_owned", sqlState = "42501", status = HttpStatusCode.Forbidden)
+            h.viewModel.complete()
+            advanceUntilIdle()
+            assertNull(h.focusRequests.consume())
         }
 
     @Test
