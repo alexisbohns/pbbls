@@ -30,8 +30,14 @@ data class Collection(
     val name: String,
     val mode: CollectionMode?,
     val pebbleCount: Int,
-    /** The glyph its pebbles inherit (R11); null when none is set. */
+    /** The glyph its pebbles inherit (R11), as embedded; null when none is set or it is not visible. */
     val glyph: Glyph? = null,
+    /**
+     * The `glyph_id` column itself. Set while [glyph] is null when the glyph is
+     * no longer visible under the glyphs RLS (a revoked entitlement), so an
+     * edit must write this back, never `glyph?.id`.
+     */
+    val glyphId: String? = glyph?.id,
 )
 
 /**
@@ -60,6 +66,7 @@ data class CollectionRow(
             mode = mode,
             pebbleCount = pebbleCount.firstOrNull()?.count ?: 0,
             glyph = glyphs,
+            glyphId = glyphId ?: glyphs?.id,
         )
 
     @Serializable

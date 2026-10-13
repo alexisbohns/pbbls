@@ -86,4 +86,16 @@ class CollectionDecodingTest {
         assertNull(row.glyphId)
         assertNull(row.toCollection().glyph)
     }
+
+    /** The glyph is set but no longer visible to the reader (glyphs RLS): the id survives the null embed. */
+    @Test
+    fun `a set glyph id with a null embed is carried on the collection`() {
+        val collection =
+            json
+                .decodeFromString<CollectionRow>(
+                    """{"id":"c-1","name":"Sea days","mode":null,"glyph_id":"g-1","glyphs":null,"pebble_count":[]}""",
+                ).toCollection()
+        assertNull(collection.glyph)
+        assertEquals("g-1", collection.glyphId)
+    }
 }

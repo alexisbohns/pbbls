@@ -190,7 +190,7 @@ fun CollectionFormScreen(
 
     if (uiState.isPresentingPicker) {
         GlyphPickerSheet(
-            currentGlyphId = uiState.glyph?.id,
+            currentGlyphId = uiState.glyphId,
             onDismiss = viewModel::closePicker,
             onSelected = viewModel::onGlyphPicked,
             picker = glyphPicker,
@@ -263,8 +263,8 @@ internal fun collectionFormCanSave(
     originalMode: CollectionMode?,
     name: String,
     mode: CollectionMode?,
-    originalGlyphId: String? = null,
-    glyphId: String? = null,
+    originalGlyphId: String?,
+    glyphId: String?,
 ): Boolean {
     val trimmed = name.trim()
     if (trimmed.isEmpty()) return false

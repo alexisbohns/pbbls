@@ -41,7 +41,8 @@ class CollectionFormViewModelTest {
         name: String = "Trips",
         mode: CollectionMode? = CollectionMode.STACK,
         glyph: Glyph? = null,
-    ) = Collection(id = id, name = name, mode = mode, pebbleCount = 0, glyph = glyph)
+        glyphId: String? = glyph?.id,
+    ) = Collection(id = id, name = name, mode = mode, pebbleCount = 0, glyph = glyph, glyphId = glyphId)
 
     private fun glyph(id: String) = Glyph(id = id, strokes = listOf(GlyphStroke(d = "M 0 0 L 10 10", width = 6.0)), viewBox = "0 0 200 200")
 
@@ -346,6 +347,71 @@ class CollectionFormViewModelTest {
 
             assertEquals(
                 listOf(FakeCollectionsService.UpdateCall("a", "Trips", CollectionMode.STACK, null)),
+                service.updateCalls,
+            )
+        }
+
+    /**
+     * `glyph_id` can be set while the `glyphs` embed comes back null — the glyph
+     * is no longer visible under the glyphs RLS (a revoked entitlement). The
+     * form must not read the missing embed as "no glyph" and clear the column
+     * on a plain rename (the iOS `glyphTouched` fix, c2f2d547).
+     */
+    @Test
+    fun `a rename keeps a glyph id whose embed did not load`() =
+        runTest {
+            val service = FakeCollectionsService()
+            service.collection = collection("a", glyph = null, glyphId = "g-hidden")
+            val viewModel = viewModel(collections = service)
+            viewModel.start("a")
+            advanceUntilIdle()
+            assertFalse(viewModel.uiState.value.canSave)
+
+            viewModel.onNameChange("Journeys")
+            viewModel.save()
+            advanceUntilIdle()
+
+            assertEquals(
+                listOf(FakeCollectionsService.UpdateCall("a", "Journeys", CollectionMode.STACK, "g-hidden")),
+                service.updateCalls,
+            )
+        }
+
+    @Test
+    fun `removing a glyph whose embed did not load still sends null`() =
+        runTest {
+            val service = FakeCollectionsService()
+            service.collection = collection("a", glyph = null, glyphId = "g-hidden")
+            val viewModel = viewModel(collections = service)
+            viewModel.start("a")
+            advanceUntilIdle()
+
+            viewModel.onGlyphPicked(null)
+            assertTrue(viewModel.uiState.value.canSave)
+            viewModel.save()
+            advanceUntilIdle()
+
+            assertEquals(
+                listOf(FakeCollectionsService.UpdateCall("a", "Trips", CollectionMode.STACK, null)),
+                service.updateCalls,
+            )
+        }
+
+    @Test
+    fun `picking over a glyph whose embed did not load sends the new id`() =
+        runTest {
+            val service = FakeCollectionsService()
+            service.collection = collection("a", glyph = null, glyphId = "g-hidden")
+            val viewModel = viewModel(collections = service)
+            viewModel.start("a")
+            advanceUntilIdle()
+
+            viewModel.onGlyphPicked(glyph("g-2"))
+            viewModel.save()
+            advanceUntilIdle()
+
+            assertEquals(
+                listOf(FakeCollectionsService.UpdateCall("a", "Trips", CollectionMode.STACK, "g-2")),
                 service.updateCalls,
             )
         }

@@ -41,7 +41,14 @@ data class CollectionFormUiState(
     val original: Collection? = null,
     val name: String = "",
     val mode: CollectionMode? = null,
-    /** The glyph its pebbles inherit (R11); null for none. */
+    /**
+     * The `glyph_id` the save writes (R11); null for none. Held apart from
+     * [glyph], as on [SoulFormUiState]: it starts from the column, not the
+     * embed, so a glyph the reader can no longer see is kept until the user
+     * picks or removes one.
+     */
+    val glyphId: String? = null,
+    /** The embedded glyph, for the row's thumbnail; null for none or not visible. */
     val glyph: Glyph? = null,
     val isPresentingPicker: Boolean = false,
     val isSaving: Boolean = false,
@@ -63,8 +70,8 @@ data class CollectionFormUiState(
                     originalMode = original?.mode,
                     name = name,
                     mode = mode,
-                    originalGlyphId = original?.glyph?.id,
-                    glyphId = glyph?.id,
+                    originalGlyphId = original?.glyphId,
+                    glyphId = glyphId,
                 )
 
     @get:StringRes
@@ -151,6 +158,7 @@ class CollectionFormViewModel
                                     original = collection,
                                     name = collection.name,
                                     mode = collection.mode,
+                                    glyphId = collection.glyphId,
                                     glyph = collection.glyph,
                                 )
                         },
@@ -175,7 +183,7 @@ class CollectionFormViewModel
         fun closePicker() = _uiState.update { it.copy(isPresentingPicker = false) }
 
         /** A picked glyph, or null for "Remove glyph". */
-        fun onGlyphPicked(glyph: Glyph?) = _uiState.update { it.copy(glyph = glyph, isPresentingPicker = false) }
+        fun onGlyphPicked(glyph: Glyph?) = _uiState.update { it.copy(glyphId = glyph?.id, glyph = glyph, isPresentingPicker = false) }
 
         fun onDismissRequested() {
             if (_uiState.value.isSaving) return
@@ -199,14 +207,14 @@ class CollectionFormViewModel
             val original = state.original
             runCatchingCancellable {
                 if (original == null) {
-                    collectionsService.create(name = trimmed, mode = state.mode, glyphId = state.glyph?.id)
+                    collectionsService.create(name = trimmed, mode = state.mode, glyphId = state.glyphId)
                     achievements.fireCheck()
                 } else {
                     collectionsService.update(
                         collectionId = original.id,
                         name = trimmed,
                         mode = state.mode,
-                        glyphId = state.glyph?.id,
+                        glyphId = state.glyphId,
                     )
                 }
                 // In the uncancellable section for the reason spelled out in
