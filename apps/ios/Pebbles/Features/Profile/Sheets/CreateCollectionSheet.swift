@@ -12,6 +12,7 @@ struct CreateCollectionSheet: View {
 
     @State private var name: String = ""
     @State private var mode: CollectionMode?
+    @State private var glyph: Glyph?
     @State private var isSaving = false
     @State private var saveError: String?
 
@@ -32,6 +33,7 @@ struct CreateCollectionSheet: View {
                 } header: {
                     Text("Name").pebblesSectionHeader()
                 }
+                CollectionGlyphSection(glyph: $glyph)
                 Section {
                     Picker("Mode", selection: $mode) {
                         Text("None").tag(CollectionMode?.none)
@@ -87,7 +89,8 @@ struct CreateCollectionSheet: View {
             let payload = CollectionInsertPayload(
                 userId: userId,
                 name: trimmedName,
-                mode: mode?.rawValue
+                mode: mode?.rawValue,
+                glyphId: glyph?.id
             )
             try await supabase.client
                 .from("collections")
@@ -112,11 +115,13 @@ struct CollectionInsertPayload: Encodable {
     let userId: UUID
     let name: String
     let mode: String?
+    let glyphId: UUID?
 
     enum CodingKeys: String, CodingKey {
         case userId = "user_id"
         case name
         case mode
+        case glyphId = "glyph_id"
     }
 
     func encode(to encoder: Encoder) throws {
@@ -124,6 +129,7 @@ struct CollectionInsertPayload: Encodable {
         try container.encode(userId, forKey: .userId)
         try container.encode(name, forKey: .name)
         try container.encode(mode, forKey: .mode) // forces JSON null when nil
+        try container.encode(glyphId?.uuidString.lowercased(), forKey: .glyphId) // R11
     }
 }
 
