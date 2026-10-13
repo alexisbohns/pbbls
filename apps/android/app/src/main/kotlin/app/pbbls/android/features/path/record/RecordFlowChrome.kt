@@ -33,18 +33,22 @@ import app.pbbls.android.core.designsystem.rememberReduceMotion
  * button competing with the progress, and "Save as draft" lives in the close
  * confirmation rather than taking permanent residence here (D9). The host
  * applies the safe-drawing insets, so the bar's own resolve to zero.
+ *
+ * Counts any flow (the record flow and Complete): [position] is 1-based
+ * within [total] counted steps.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecordFlowChrome(
-    step: RecordStep,
+    position: Int,
+    total: Int,
+    canGoBack: Boolean,
     onBack: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val canGoBack = step.previous != null
     CenterAlignedTopAppBar(
-        title = { StepProgress(step = step) },
+        title = { StepProgress(position = position, total = total) },
         modifier = modifier,
         navigationIcon = {
             // Kept in the layout at zero alpha rather than removed, so the
@@ -80,11 +84,10 @@ fun RecordFlowChrome(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun StepProgress(
-    step: RecordStep,
+    position: Int,
+    total: Int,
     modifier: Modifier = Modifier,
 ) {
-    val position = (step.dotIndex ?: 0) + 1
-    val total = RecordStep.counted.size
     val announcement = stringResource(R.string.record_step_a11y, position, total)
     val reduceMotion = rememberReduceMotion()
     val progress by animateFloatAsState(

@@ -156,7 +156,9 @@ fun RecordFlowScreen(
     ) {
         if (flow.step != RecordStep.SUCCESS) {
             RecordFlowChrome(
-                step = flow.step,
+                position = (flow.step.dotIndex ?: 0) + 1,
+                total = RecordStep.counted.size,
+                canGoBack = flow.step.previous != null,
                 onBack = { model.back() },
                 onClose = viewModel::onCloseRequested,
             )
