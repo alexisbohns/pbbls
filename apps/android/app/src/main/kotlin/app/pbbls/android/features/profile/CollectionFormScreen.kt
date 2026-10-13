@@ -41,13 +41,17 @@ import app.pbbls.android.core.designsystem.PebblesTheme
 import app.pbbls.android.core.designsystem.PebblesTopBar
 import app.pbbls.android.core.designsystem.PebblesTopBarTextButton
 import app.pbbls.android.core.model.CollectionMode
+import app.pbbls.android.core.ui.GlyphPickerSheet
+import app.pbbls.android.core.ui.GlyphPickerSlot
+import app.pbbls.android.features.profile.components.CollectionGlyphSection
 import app.pbbls.android.features.profile.components.labelRes
 
 /**
  * Create/edit form for a collection — merges iOS `CreateCollectionSheet` +
  * `EditCollectionSheet` (they differ only in initial state and the write call)
  * into one full-screen surface (D5): name field + mode picker (None / Stack /
- * Pack / Track). [collectionId] `null` means create; a non-null id is fetched
+ * Pack / Track) + the glyph its pebbles inherit (R11, written in the same
+ * insert/update as name and mode). [collectionId] `null` means create; a non-null id is fetched
  * by the ViewModel itself (#852), so this screen never receives the
  * row from its caller. Selecting "None" on edit really clears the column — the
  * payload encodes mode as explicit JSON null (see `collectionUpdatePayload`).
@@ -57,6 +61,9 @@ import app.pbbls.android.features.profile.components.labelRes
  * Deviation from iOS: the segmented mode control renders as Pebbles-styled
  * capsule toggles rather than Material's segmented buttons — same reason the
  * app avoids Material color roles everywhere (M38 D6).
+ *
+ * @param glyphPicker The glyph picker's body. It is glyph's, so the entry
+ *   provider fills it, as for [SoulFormScreen].
  */
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -64,6 +71,7 @@ fun CollectionFormScreen(
     collectionId: String?,
     onDismiss: () -> Unit,
     onSaved: () -> Unit,
+    glyphPicker: GlyphPickerSlot,
     modifier: Modifier = Modifier,
     viewModel: CollectionFormViewModel = hiltViewModel(),
 ) {
@@ -164,6 +172,12 @@ fun CollectionFormScreen(
                     ),
             )
 
+            CollectionGlyphSection(
+                glyph = uiState.glyph,
+                onChoose = viewModel::openPicker,
+                onRemove = { viewModel.onGlyphPicked(null) },
+            )
+
             if (uiState.didSaveFail) {
                 Text(
                     text = stringResource(uiState.saveErrorRes),
@@ -172,6 +186,15 @@ fun CollectionFormScreen(
                 )
             }
         }
+    }
+
+    if (uiState.isPresentingPicker) {
+        GlyphPickerSheet(
+            currentGlyphId = uiState.glyph?.id,
+            onDismiss = viewModel::closePicker,
+            onSelected = viewModel::onGlyphPicked,
+            picker = glyphPicker,
+        )
     }
 }
 
@@ -232,16 +255,19 @@ private fun ModeOption(
  * Pure save gate — the `EditCollectionSheet.canSave` port with create folded
  * in: the trimmed name must be non-empty, and in edit mode something must have
  * changed (trimmed name or mode — including clearing the mode to null).
- * Create mode ([originalName] null) needs a non-blank name only.
+ * Create mode ([originalName] null) needs a non-blank name only. Picking or
+ * removing the glyph is a change too (R11).
  */
 internal fun collectionFormCanSave(
     originalName: String?,
     originalMode: CollectionMode?,
     name: String,
     mode: CollectionMode?,
+    originalGlyphId: String? = null,
+    glyphId: String? = null,
 ): Boolean {
     val trimmed = name.trim()
     if (trimmed.isEmpty()) return false
     if (originalName == null) return true
-    return trimmed != originalName || mode != originalMode
+    return trimmed != originalName || mode != originalMode || glyphId != originalGlyphId
 }

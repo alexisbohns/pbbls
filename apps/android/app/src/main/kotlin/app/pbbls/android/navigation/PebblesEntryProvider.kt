@@ -198,6 +198,7 @@ fun EntryProviderScope<NavKey>.pebblesEntries(
             collectionId = key.collectionId,
             onDismiss = navigator::goBack,
             onSaved = navigator::goBack,
+            glyphPicker = glyphPicker,
         )
     }
 

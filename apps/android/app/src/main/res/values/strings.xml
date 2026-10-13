@@ -178,6 +178,8 @@
     <string name="soul_detail_load_error">Couldn\'t load pebbles.</string>
     <string name="soul_edit_title">Edit soul</string>
     <string name="soul_form_glyph_choose">Tap to choose</string>
+    <string name="collection_glyph_footer">Pebbles in this collection carry its glyph.</string>
+    <string name="remove_glyph">Remove glyph</string>
     <string name="soul_save_error">Couldn\'t save the soul. Please try again.</string>
     <string name="soul_form_load_error">Couldn\'t load this soul. Please try again.</string>
 

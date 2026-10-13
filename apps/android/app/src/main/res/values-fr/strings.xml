@@ -167,6 +167,8 @@
     <string name="soul_detail_load_error">Impossible de charger les pebbles.</string>
     <string name="soul_edit_title">Modifier l\'âme</string>
     <string name="soul_form_glyph_choose">Touchez pour choisir</string>
+    <string name="collection_glyph_footer">Les galets de cette collection portent son glyphe.</string>
+    <string name="remove_glyph">Retirer le glyphe</string>
     <string name="soul_save_error">Impossible d\'enregistrer l\'âme. Veuillez réessayer.</string>
     <string name="soul_form_load_error">Impossible de charger cette âme. Veuillez réessayer.</string>
 

@@ -22,11 +22,24 @@ class FakeCollectionsService(
     var loadCollectionCount = 0
         private set
 
-    /** `(name, mode)` of every [create], oldest first. */
-    val createCalls = mutableListOf<Pair<String, CollectionMode?>>()
+    data class CreateCall(
+        val name: String,
+        val mode: CollectionMode?,
+        val glyphId: String?,
+    )
 
-    /** `(collectionId, name, mode)` of every [update], oldest first. */
-    val updateCalls = mutableListOf<Triple<String, String, CollectionMode?>>()
+    data class UpdateCall(
+        val collectionId: String,
+        val name: String,
+        val mode: CollectionMode?,
+        val glyphId: String?,
+    )
+
+    /** Every [create], oldest first. */
+    val createCalls = mutableListOf<CreateCall>()
+
+    /** Every [update], oldest first. */
+    val updateCalls = mutableListOf<UpdateCall>()
 
     /** Every id passed to [delete], oldest first. */
     val deleteCalls = mutableListOf<String>()
@@ -62,8 +75,9 @@ class FakeCollectionsService(
     override suspend fun create(
         name: String,
         mode: CollectionMode?,
+        glyphId: String?,
     ) {
-        createCalls += name to mode
+        createCalls += CreateCall(name, mode, glyphId)
         writeGate?.await()
         armed.fire()
     }
@@ -72,8 +86,9 @@ class FakeCollectionsService(
         collectionId: String,
         name: String,
         mode: CollectionMode?,
+        glyphId: String?,
     ) {
-        updateCalls += Triple(collectionId, name, mode)
+        updateCalls += UpdateCall(collectionId, name, mode, glyphId)
         writeGate?.await()
         armed.fire()
     }

@@ -30,6 +30,8 @@ data class Collection(
     val name: String,
     val mode: CollectionMode?,
     val pebbleCount: Int,
+    /** The glyph its pebbles inherit (R11); null when none is set. */
+    val glyph: Glyph? = null,
 )
 
 /**
@@ -37,13 +39,17 @@ data class Collection(
  * `pebble_count:collection_pebbles(count)` nested aggregate, which PostgREST
  * returns as `[{ "count": N }]`; an absent aggregate (e.g. a single-row detail
  * fetch) decodes to 0 defensively. Note the junction is `collection_pebbles`
- * — the opposite word order from `pebble_souls`.
+ * — the opposite word order from `pebble_souls`. The glyph embeds under the
+ * FK relation name `glyphs`, as on `souls`.
  */
 @Serializable
 data class CollectionRow(
     val id: String,
     val name: String,
     val mode: CollectionMode? = null,
+    @SerialName("glyph_id")
+    val glyphId: String? = null,
+    val glyphs: Glyph? = null,
     @SerialName("pebble_count")
     val pebbleCount: List<CountRow> = emptyList(),
 ) {
@@ -53,6 +59,7 @@ data class CollectionRow(
             name = name,
             mode = mode,
             pebbleCount = pebbleCount.firstOrNull()?.count ?: 0,
+            glyph = glyphs,
         )
 
     @Serializable

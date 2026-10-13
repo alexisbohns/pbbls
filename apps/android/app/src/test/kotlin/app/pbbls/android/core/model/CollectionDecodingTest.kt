@@ -58,4 +58,32 @@ class CollectionDecodingTest {
             )
         assertNull(nullMode.toCollection().mode)
     }
+
+    @Test
+    fun `a collection glyph decodes from the embedded glyphs row`() {
+        val row =
+            json.decodeFromString<CollectionRow>(
+                """
+                {"id":"c-1","name":"Sea days","mode":null,"glyph_id":"g-1",
+                 "glyphs":{"id":"g-1","name":null,"strokes":[{"d":"M 0 0 L 10 10","width":6}],"view_box":"0 0 200 200"},
+                 "pebble_count":[{"count":3}]}
+                """.trimIndent(),
+            )
+        assertEquals("g-1", row.glyphId)
+        val collection = row.toCollection()
+        assertEquals("g-1", collection.glyph?.id)
+        assertEquals("0 0 200 200", collection.glyph?.viewBox)
+        assertEquals(1, collection.glyph?.strokes?.size)
+        assertEquals(3, collection.pebbleCount)
+    }
+
+    @Test
+    fun `a collection without a glyph decodes to a null glyph`() {
+        val row =
+            json.decodeFromString<CollectionRow>(
+                """{"id":"c-1","name":"Sea days","mode":null,"glyph_id":null,"glyphs":null,"pebble_count":[]}""",
+            )
+        assertNull(row.glyphId)
+        assertNull(row.toCollection().glyph)
+    }
 }

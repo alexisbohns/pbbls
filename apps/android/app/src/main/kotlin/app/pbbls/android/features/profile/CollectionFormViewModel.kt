@@ -13,6 +13,7 @@ import app.pbbls.android.core.data.CollectionsServicing
 import app.pbbls.android.core.data.ReferenceDataServicing
 import app.pbbls.android.core.model.Collection
 import app.pbbls.android.core.model.CollectionMode
+import app.pbbls.android.core.model.Glyph
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.flow.Flow
@@ -40,6 +41,9 @@ data class CollectionFormUiState(
     val original: Collection? = null,
     val name: String = "",
     val mode: CollectionMode? = null,
+    /** The glyph its pebbles inherit (R11); null for none. */
+    val glyph: Glyph? = null,
+    val isPresentingPicker: Boolean = false,
     val isSaving: Boolean = false,
     val didSaveFail: Boolean = false,
     /** True while fetching an existing collection by id. Always false for create. */
@@ -59,6 +63,8 @@ data class CollectionFormUiState(
                     originalMode = original?.mode,
                     name = name,
                     mode = mode,
+                    originalGlyphId = original?.glyph?.id,
+                    glyphId = glyph?.id,
                 )
 
     @get:StringRes
@@ -145,6 +151,7 @@ class CollectionFormViewModel
                                     original = collection,
                                     name = collection.name,
                                     mode = collection.mode,
+                                    glyph = collection.glyph,
                                 )
                         },
                         onFailure = {
@@ -162,6 +169,13 @@ class CollectionFormViewModel
         fun onNameChange(value: String) = _uiState.update { it.copy(name = value) }
 
         fun onModeChange(value: CollectionMode?) = _uiState.update { it.copy(mode = value) }
+
+        fun openPicker() = _uiState.update { it.copy(isPresentingPicker = true) }
+
+        fun closePicker() = _uiState.update { it.copy(isPresentingPicker = false) }
+
+        /** A picked glyph, or null for "Remove glyph". */
+        fun onGlyphPicked(glyph: Glyph?) = _uiState.update { it.copy(glyph = glyph, isPresentingPicker = false) }
 
         fun onDismissRequested() {
             if (_uiState.value.isSaving) return
@@ -185,13 +199,14 @@ class CollectionFormViewModel
             val original = state.original
             runCatchingCancellable {
                 if (original == null) {
-                    collectionsService.create(name = trimmed, mode = state.mode)
+                    collectionsService.create(name = trimmed, mode = state.mode, glyphId = state.glyph?.id)
                     achievements.fireCheck()
                 } else {
                     collectionsService.update(
                         collectionId = original.id,
                         name = trimmed,
                         mode = state.mode,
+                        glyphId = state.glyph?.id,
                     )
                 }
                 // In the uncancellable section for the reason spelled out in
